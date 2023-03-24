@@ -16,7 +16,7 @@ export default class SubControllerUtils {
   // private component = undefined as Vue | undefined
   private component = undefined as any | undefined
   private body = undefined as unknown as HTMLElement
-  private _config = { config: null as unknown as ILayer }
+  private _config = { config: null as unknown as ILayer, primaryLayer: null as unknown as IGroup | ITmp | IFrame }
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as IExtendLayerInfo
   private dblTapFlag = false
   private posDiff = { x: 0, y: 0 }
@@ -25,23 +25,24 @@ export default class SubControllerUtils {
 
   private get isControllerShown(): boolean { return this.primaryLayer.active && !store.getters['vivisticker/getControllerHidden'] }
   private get config(): ILayer { return this._config.config }
+  private get primaryLayer(): IGroup | ITmp | IFrame { return this._config.primaryLayer }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
   private get priPrimaryLayerIndex(): number { return this.layerInfo.priPrimaryLayerIndex ?? -1 }
-  private get primaryLayer(): IGroup | IFrame | ITmp {
-    /**
-     * Only the frame inside a group would have the prop of priPrimaryLayerIndex
-     */
-    if (this.priPrimaryLayerIndex !== -1) {
-      return layerUtils.getLayer(this.pageIndex, this.priPrimaryLayerIndex) as IGroup
-    }
-    return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp
-  }
+  // private get primaryLayer(): IGroup | IFrame | ITmp {
+  //   /**
+  //    * Only the frame inside a group would have the prop of priPrimaryLayerIndex
+  //    */
+  //   if (this.priPrimaryLayerIndex !== -1) {
+  //     return layerUtils.getLayer(this.pageIndex, this.priPrimaryLayerIndex) as IGroup
+  //   }
+  //   return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp
+  // }
 
   private get primaryActive(): boolean { return this.primaryLayer.active }
 
-  constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
+  constructor({ _config, body, layerInfo }: { _config: { config: ILayer, primaryLayer: IGroup | ITmp | IFrame }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
     this._config = _config
     this.body = body
     layerInfo && (this.layerInfo = layerInfo)
@@ -101,7 +102,6 @@ export default class SubControllerUtils {
         }, interval)
       }
     }
-
     if (store.getters.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
       groupUtils.deselect()
       groupUtils.select(this.pageIndex, [this.layerIndex])

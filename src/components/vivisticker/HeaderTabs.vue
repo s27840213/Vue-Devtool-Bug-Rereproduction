@@ -28,6 +28,7 @@ div(class="header-bar relative" @pointerdown.stop)
         span Copy
     div(v-if="isInMyDesign && !isInEditor" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
 </template>
+
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'

@@ -6,7 +6,7 @@ div(class="list")
       class="list-title__more body-MD text-gray-2"
       :to="moreLink")
       span {{$t('NN0082')}}
-  div(class="list-content" :style="listContentSytle")
+  div(class="list-content")
     div(v-if="prevIcon"
       class="list-content__lefticon"
       @click="scroll(false)")
@@ -66,6 +66,7 @@ import { IAssetTemplate } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
 import { defineComponent } from 'vue'
@@ -113,9 +114,6 @@ export default defineComponent({
     ...mapGetters({
       mydesignData: 'design/getAllDesigns'
     }),
-    listContentSytle(): Record<string, string> {
-      return { width: this.type === 'theme' ? 'fit-content' : '80vw' }
-    }
   },
   created() {
     switch (this.type) {
@@ -202,7 +200,7 @@ export default defineComponent({
       }
       const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
       if (!paymentUtils.checkProTemplate(template)) return
-      window.open(this.templateUrl(item), '_blank')
+      webViewUtils.openOrGoto(this.templateUrl(item))
     },
     templateImgStyle(match_cover: IAssetTemplate['match_cover']): Record<string, string> {
       const height = this.theme === '3' ? 284
@@ -250,7 +248,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   position: relative;
-  max-width: 80vw;
+  width: 100%;
   &__lefticon,
   &__righticon {
     position: absolute;

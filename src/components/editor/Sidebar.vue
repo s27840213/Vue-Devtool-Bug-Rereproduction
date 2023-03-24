@@ -25,6 +25,7 @@ div(class="sidebar")
       :iconColor="'gray-3'"
       :iconWidth="'30px'")
 </template>
+
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
 import { SidebarPanelType } from '@/store/types'

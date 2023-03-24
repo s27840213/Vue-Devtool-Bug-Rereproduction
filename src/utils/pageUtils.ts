@@ -1,7 +1,9 @@
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICoordinate } from '@/interfaces/frame'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import { ISize } from '@/interfaces/math'
 import { IBleed, IPage, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import { LayerType } from '@/store/types'
@@ -87,7 +89,7 @@ class PageUtils {
     const windowHeight = window.outerHeight
     const topInView = Math.max(rect.top, 0)
     const bottomInView = Math.min(rect.bottom, windowHeight)
-    return (bottomInView - topInView) / windowHeight
+    return (bottomInView - topInView) / rect.height
   }
 
   get addAssetTargetPageIndex(): number {
@@ -126,6 +128,9 @@ class PageUtils {
   editorSize: { width: number, height: number }
   pageSize: { width: number, height: number }
   originPageSize = { width: -1, height: -1 }
+  originEditorSize = { width: -1, height: -1 }
+  pageEventPosOffset = null as unknown as { x: number, y: number }
+  pageCenterPos = { x: 0, y: 0 }
 
   constructor() {
     this.mobileMinScaleRatio = 0
@@ -192,10 +197,13 @@ class PageUtils {
         v: [],
         h: []
       },
+      mobilePysicalSize: {
+        pageCenterPos: { x: 0, y: 0 },
+        pageSize: { width: 0, height: 0 }
+      },
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
-      isAutoResizeNeeded: false,
       contentScaleRatio: 1
     }
     // pageData.snapUtils && delete pageData.snapUtils
@@ -654,16 +662,6 @@ class PageUtils {
     return this.getPage(pageIndex).designId !== ''
   }
 
-  setAutoResizeNeededForPages(pages: IPage[], isAutoResizeNeeded: boolean) {
-    for (const page of pages) {
-      this.setAutoResizeNeededForPage(page, isAutoResizeNeeded)
-    }
-  }
-
-  setAutoResizeNeededForPage(page: IPage, isAutoResizeNeeded: boolean) {
-    page.isAutoResizeNeeded = isAutoResizeNeeded
-  }
-
   /**
    * Returns DPI of target page based on it's px size and physical size.
    * @param page Target page, use current focused page if undefined
@@ -912,6 +910,10 @@ class PageUtils {
         ...((typeof y !== 'undefined') && { y })
       }
     })
+  }
+
+  setMobilePysicalPage(payload: { pageIndex: number, pageSize?: ISize, pageCenterPos?: ICoordinate }) {
+    store.commit('SET_pagePysicalSize', payload)
   }
 }
 

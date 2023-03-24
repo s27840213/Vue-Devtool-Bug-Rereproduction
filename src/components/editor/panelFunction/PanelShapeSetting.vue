@@ -360,10 +360,10 @@ export default defineComponent({
       return colorUtils.globalSelectedColor.colors
     },
     isLine(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+      return shapeUtils.isLine(this.currLayer)
     },
     isBasicShape(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'E'
+      return shapeUtils.isBasicShape(this.currLayer)
     },
     startMarker(): string {
       return this.markerListReady ? (this.currLayer as IShape).markerId?.[0] ?? 'none' : 'none'
@@ -406,11 +406,6 @@ export default defineComponent({
         'getCategories'
       ]
     ),
-    boundValue(value: number, min: number, max: number): string {
-      if (value < min) return min.toString()
-      else if (value > max) return max.toString()
-      return value.toString()
-    },
     groupColor(): string {
       const currLayer = this.currLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {

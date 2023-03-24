@@ -86,6 +86,7 @@ export default defineComponent({
   justify-content: space-around;
   align-items: center;
   position: -webkit-sticky; // For safari < 13
+  max-width: 100%;
   &__colorBlock {
     position: absolute;
     z-index: -1;

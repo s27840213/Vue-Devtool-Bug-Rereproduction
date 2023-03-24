@@ -9,6 +9,7 @@ svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
     :style="iconStyles()")
   use(:xlink:href="`#${iconName}`")
 </template>
+
 <script lang="ts">
 import { defineComponent } from 'vue'
 
@@ -94,7 +95,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .svg-icon {
   width: 100%;
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.4s, color 0.4s;
   fill: currentColor;
   &:focus {
     outline: none;

@@ -120,7 +120,7 @@ function getDeploy(stepName, deployment, subdomain, AWSName = 'TEST', prod = fal
   }
   return deploy
 }
-function allDeploy() {
+function allDeploy(autoDeploy = '') {
   const deploys = [
     { sub: 'dev5', name: 'dev5 Alan' },
     { sub: 'dev4', name: 'dev4 Gary' },
@@ -139,7 +139,13 @@ function allDeploy() {
   ]
   return [
     e2e(),
-    ...deploys.map((dep) => getDeploy(dep.name, dep.sub, dep.sub)),
+    ...deploys.map((dep) => {
+      const de = getDeploy(dep.name, dep.sub, dep.sub)
+      if (dep.sub === autoDeploy) {
+        delete de.step.trigger
+      }
+      return de
+    }),
     pullRequest()
   ]
 }
@@ -210,7 +216,7 @@ const result = {
       // 'feature/?': [{
       //   parallel: versionCheckAndBuild()
       // }, {
-      //   parallel: allDeploy(),
+      //   parallel: allDeploy('devN that need auto deploy'),
       // }],
     },
   },

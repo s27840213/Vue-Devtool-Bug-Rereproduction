@@ -89,7 +89,10 @@ export default defineComponent({
       rawSearchResult: 'searchResult',
       keyword: 'keyword'
     }),
-    ...mapState('fontTag', ['tags', 'showMore']),
+    ...mapState('fontTag', {
+      _tags: 'tags',
+      showMore: 'showMore',
+    }),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage', 'pending']),
     ...mapGetters('user', {
@@ -100,6 +103,11 @@ export default defineComponent({
       currSelectedIndex: 'getCurrSelectedIndex',
       assetFonts: 'user/getAssetFonts'
     }),
+    tags() {
+      return this._tags.map((tag: string) => ({
+        label: tag, value: tag, active: false,
+      }))
+    },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },

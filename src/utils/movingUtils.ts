@@ -236,10 +236,8 @@ export class MovingUtils {
             targetIndex = this.config.styles.zindex - 1
             this.setLastSelectedLayerIndex(this.layerIndex)
             groupUtils.select(this.pageIndex, [targetIndex])
-          } else {
-            if (this.pageIndex === pageUtils.currFocusPageIndex) {
-              groupUtils.select(this.pageIndex, [targetIndex])
-            }
+          } else if (this.pageIndex === pageUtils.currFocusPageIndex) {
+            groupUtils.select(this.pageIndex, [targetIndex])
           }
           if (!this.config.locked) {
             this.isControlling = true
@@ -510,9 +508,7 @@ export class MovingUtils {
 
     if (this.isControllerShown) {
       if (hasActualMove) {
-        if (shortcutUtils.prevLayerId === this.config.id) {
-          shortcutUtils.offsetCount = 0
-        }
+        shortcutUtils.offsetCount = 0
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex === -1) {
           layerUtils.deleteSelectedLayer()
         } else if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {

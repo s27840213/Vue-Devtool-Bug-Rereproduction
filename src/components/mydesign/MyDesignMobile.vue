@@ -1,18 +1,19 @@
 <template lang="pug">
 div(class="my-design-mobile")
-  div(class="my-design-mobile__nav-bar relative")
-    div(class="my-design-mobile__nav-bar__prev pointer"
-        @click="handlePrevPage")
-      svg-icon(iconName="chevron-left" iconColor="gray-1" iconWidth="24px")
-    div(class="my-design-mobile__nav-bar__title" :title="title") {{ title }}
-    div(class="my-design-mobile__nav-bar__menu")
-      div(v-for="button in menuButtons"
-          class="my-design-mobile__nav-bar__menu-button pointer"
-          @click="() => { !button.disabled && button.action() }")
-        svg-icon(:iconName="button.icon"
-                  :iconColor="button.disabled? 'gray-4' : 'gray-2'"
-                  :iconWidth="renderedWidth(button)"
-                  :iconHeight="renderedHeight(button)")
+  div(class="my-design-mobile__nav-bar-wrapper" :style="headerStyles")
+    div(class="my-design-mobile__nav-bar relative")
+      div(class="my-design-mobile__nav-bar__prev pointer"
+          @click="handlePrevPage")
+        svg-icon(iconName="chevron-left" iconColor="gray-1" iconWidth="24px")
+      div(class="my-design-mobile__nav-bar__title" :title="title") {{ title }}
+      div(class="my-design-mobile__nav-bar__menu")
+        div(v-for="button in menuButtons"
+            class="my-design-mobile__nav-bar__menu-button pointer"
+            @click="() => { !button.disabled && button.action() }")
+          svg-icon(:iconName="button.icon"
+                    :iconColor="button.disabled? 'gray-4' : 'gray-2'"
+                    :iconWidth="renderedWidth(button)"
+                    :iconHeight="renderedHeight(button)")
   div(class="my-design-mobile__content relative")
     component(v-if="currLocation !== ''"
               :is="mydesignView"
@@ -25,7 +26,7 @@ div(class="my-design-mobile")
                   iconColor="white"
                   iconWidth="24px")
         div(class="my-design-mobile__message__text") {{ messageItemText(messageQueue[0]) }}
-  div(class="my-design-mobile__tab-bar")
+  div(class="my-design-mobile__tab-bar" :style="footerStyles")
     div(v-for="tabButton in tabButtons"
         class="my-design-mobile__tab-button pointer"
         :class="{active: tabButton.condition(currLocation)}"
@@ -76,18 +77,19 @@ div(class="my-design-mobile")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
 import BottomMenu from '@/components/mydesign/BottomMenu.vue'
 import MobileAllDesignView from '@/components/mydesign/design-views/MobileAllDesignView.vue'
 import MobileFavoriteDesignView from '@/components/mydesign/design-views/MobileFavoriteDesignView.vue'
-import MobileListDesignView from '@/components/mydesign/design-views/MobileListDesignView.vue'
 import MobileFolderDesignView from '@/components/mydesign/design-views/MobileFolderDesignView.vue'
+import MobileListDesignView from '@/components/mydesign/design-views/MobileListDesignView.vue'
 import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTrashDesignView.vue'
-import vClickOutside from 'click-outside-vue3'
+import { IDesign, IFolder, IMobileMessageItem, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import { IDesign, IFolder, IPathedFolder, IMobileMessageItem } from '@/interfaces/design'
 import generalUtils from '@/utils/generalUtils'
+import webViewUtils from '@/utils/picWVUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 interface IMenuButton {
   icon: string,
@@ -166,8 +168,7 @@ export default defineComponent({
   },
   props: {
     view: {
-      type: String,
-      required: true
+      type: String
     }
   },
   async created() {
@@ -221,8 +222,21 @@ export default defineComponent({
       selectedDesigns: 'getSelectedDesigns',
       selectedFolders: 'getSelectedFolders',
       isErrorShowing: 'getIsErrorShowing',
-      bottomMenu: 'getBottomMenu'
+      bottomMenu: 'getBottomMenu',
     }),
+    ...mapGetters({
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
+    }),
+    headerStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${this.userInfo.statusBarHeight}px`
+      }
+    },
+    footerStyles(): {[key: string]: string} {
+      return {
+        paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
+      }
+    },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
     },
@@ -563,14 +577,16 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
 
 .my-design-mobile {
   @include size(100vw, 100vh);
-  &__nav-bar {
-    height: $nav-bar-height;
+  &__nav-bar-wrapper {
     background: #FFFFFF;
     box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.2);
+    z-index: 20;
+  }
+  &__nav-bar {
+    height: $nav-bar-height;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 20;
     &__prev {
       position: absolute;
       left: 16px;
@@ -680,11 +696,23 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
 }
 
 .design-view {
+  @include hover-scrollbar();
   height: 100%;
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  @include no-scrollbar;
+  overflow-y: overlay;
+  // Always show scrollbar in mobile
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    visibility: visible;
+    border: none;
+  }
+  @include firefoxOnly {
+    scrollbar-color: setColor(gray-3) transparent;
+  }
 }
 
 .dim-background {

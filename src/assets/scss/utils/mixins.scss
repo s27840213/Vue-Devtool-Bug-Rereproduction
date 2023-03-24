@@ -227,3 +227,22 @@
     }
   }
 }
+
+@mixin btn-action-mobile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 0.25rem;
+  background-color: setColor(gray-5);
+  color: setColor(gray-1);
+  transition: color 0.2s;
+
+  &:active {
+    color: setColor(blue-1);
+    font-weight: bold;
+    &:deep(.svg-icon)  {
+      color: setColor(blue-1);
+    }
+  }
+}

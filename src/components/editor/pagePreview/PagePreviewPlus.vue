@@ -17,6 +17,7 @@ div(class="page-preview-plus"
   div(v-if="actionType === 'drag'"
     class="page-preview-plus-drag")
 </template>
+
 <script lang="ts">
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'

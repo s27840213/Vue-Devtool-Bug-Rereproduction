@@ -1,6 +1,8 @@
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
+import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
+import { ISize } from '@/interfaces/math'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
@@ -20,6 +22,7 @@ import shadow from '@/store/module/shadow'
 import textStock from '@/store/module/text'
 import user from '@/store/module/user'
 import vivisticker from '@/store/module/vivisticker'
+import webView from '@/store/module/webView'
 import photos from '@/store/photos'
 import text from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
@@ -622,12 +625,22 @@ const mutations: MutationTree<IEditorState> = {
       targetLayer[k] = v
     })
   },
-  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj } }) {
-    const frame = state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex] as IFrame
-    const targetLayer = frame.clips[updateInfo.targetIndex]
-    Object.entries(updateInfo.props).forEach(([k, v]) => {
-      targetLayer[k] = v
-    })
+  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj }, preprimaryLayerIndex: number }) {
+    const { pageIndex, layerIndex, targetIndex, props, preprimaryLayerIndex } = updateInfo
+    let frame
+    if (preprimaryLayerIndex !== -1) {
+      if (state.pages[pageIndex].config.layers[preprimaryLayerIndex].type === LayerType.group) {
+        frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[layerIndex]
+      }
+    } else {
+      frame = state.pages[pageIndex].config.layers[layerIndex]
+    }
+    if (frame && frame.type === LayerType.frame) {
+      const targetLayer = frame.clips[targetIndex]
+      Object.entries(props).forEach(([k, v]) => {
+        targetLayer[k] = v
+      })
+    }
   },
   UPDATE_groupLayerProps(state: IEditorState, updateInfo: { props: { [key: string]: string | number | boolean | number[] } }) {
     Object.entries(updateInfo.props).forEach(([k, v]) => {
@@ -866,6 +879,21 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
+    // check every pages background image
+    for (const page of state.pages) {
+      const bgImg = page.config.backgroundImage
+      if (bgImg.config.previewSrc && bgImg.config.srcObj.assetId === assetId) {
+        delete bgImg.config.previewSrc
+        Object.assign(bgImg.config.srcObj, {
+          type,
+          userId,
+          assetId: uploadUtils.isAdmin ? assetId : assetIndex
+        })
+        return
+      }
+    }
+
+    // check layers image
     const handler = (l: IShape | IText | IImage | IGroup | IFrame | ITmp) => {
       switch (l.type) {
         case LayerType.image:
@@ -1060,6 +1088,15 @@ const mutations: MutationTree<IEditorState> = {
     state.windowSize.width = window.outerWidth
     state.windowSize.height = window.outerHeight
   },
+  SET_pagePysicalSize(state: IEditorState, payload: { pageIndex: number, pageSize: ISize, pageCenterPos: ICoordinate }) {
+    const { pageIndex, pageSize, pageCenterPos } = payload
+    if (pageCenterPos) {
+      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageCenterPos, pageCenterPos)
+    }
+    if (pageSize) {
+      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageSize, pageSize)
+    }
+  },
   ...imgShadowMutations,
   ADD_subLayer
 }
@@ -1088,7 +1125,8 @@ const store = createStore({
     shadow,
     vivisticker,
     fontTag,
-    imgControl
+    imgControl,
+    webView
   }
 })
 export default store

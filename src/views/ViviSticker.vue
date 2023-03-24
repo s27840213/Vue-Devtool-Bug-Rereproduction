@@ -3,7 +3,7 @@ div(class="vivisticker" :style="copyingStyles()")
   div(class="vivisticker__top" :style="topStyles()")
     header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
     div(class="vivisticker__content"
-        @pointerdown.self="outerClick")
+        @click.self="outerClick")
       my-design(v-show="isInMyDesign && !isInEditor")
       vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
@@ -36,8 +36,7 @@ import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
-import { ColorEventType, LayerType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
+import { LayerType } from '@/store/types'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
@@ -261,7 +260,7 @@ export default defineComponent({
     topStyles() {
       return {
         ...this.isDuringCopy ? { background: 'transparent' } : {},
-        gridTemplateRows: this.currActivePanel === 'text' ? '1fr auto' : 'auto 1fr auto'
+        gridTemplateRows: this.currActivePanel === 'text' ? '1fr' : 'auto 1fr'
       }
     },
     handleSwitchTab(panelType: string, props?: IFooterTabProps) {
@@ -288,14 +287,13 @@ export default defineComponent({
     },
     handleOpenColorPicker() {
       editorUtils.setCurrActivePanel('color-picker')
-      colorUtils.setCurrEvent(ColorEventType.background)
     },
     switchMainTab(panelType: string) {
       this.setIsInMyDesign(false)
       this.setIsInSelectionMode(false)
       this.setCurrActiveTab(panelType)
       if (this.currActivePanel === 'color-picker') {
-        vivistickerUtils.setNewBgColor('')
+        vivistickerUtils.setHasNewBgColor(false)
         this.switchTab('none')
       }
     },

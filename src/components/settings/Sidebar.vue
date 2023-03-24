@@ -20,11 +20,12 @@ div(class="sidebar")
               :iconColor="'gray-2'")
             span {{view.label}}
 </template>
+
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 import paymentData from '@/utils/constantData'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],

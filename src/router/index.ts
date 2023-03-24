@@ -4,6 +4,7 @@ import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import CopyTool from '@/views/CopyTool.vue'
@@ -118,6 +119,7 @@ const router = createRouter({
         if (editorBg) {
           store.commit('vivisticker/SET_editorBg', editorBg)
         }
+        webViewUtils.updateLocale(locale)
 
         document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
@@ -137,6 +139,8 @@ router.beforeEach(async (to, from, next) => {
     next()
     return
   }
+  webViewUtils.detectIfInApp()
+  await webViewUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.
   const urlParams = new URLSearchParams(window.location.search)
   const campaign = urlParams.get('campaign')

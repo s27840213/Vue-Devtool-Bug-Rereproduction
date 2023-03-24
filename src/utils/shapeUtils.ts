@@ -1,6 +1,6 @@
 import store from '@/store'
 import { IListServiceContentDataItem } from '@/interfaces/api'
-import { IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { AllLayerTypes, IGroup, ILayer, IShape } from '@/interfaces/layer'
 import { IMarker } from '@/interfaces/shape'
 import AssetUtils from './assetUtils'
 import layerUtils from './layerUtils'
@@ -665,7 +665,7 @@ class ShapeUtils {
 
   setLineWidth(value: number) {
     const { min, max } = mappingUtils.mappingMinMax('lineWidth')
-    const lineWidth = _.floor(parseFloat(generalUtils.boundValue(value, min, max)), 2)
+    const lineWidth = _.floor(generalUtils.boundValue(value, min, max), 2)
     const { getCurrLayer: currLayer } = layerUtils
     const { point, styles, size } = (currLayer as IShape)
 
@@ -687,6 +687,14 @@ class ShapeUtils {
         }
       )
     }
+  }
+
+  isLine(config: AllLayerTypes): boolean {
+    return config.type === 'shape' && config.category === 'D'
+  }
+
+  isBasicShape(config: AllLayerTypes): boolean {
+    return config.type === 'shape' && config.category === 'E'
   }
 }
 

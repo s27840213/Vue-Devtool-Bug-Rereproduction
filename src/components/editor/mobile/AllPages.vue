@@ -18,11 +18,11 @@ div(class="all-pages")
           :iconName="'plus-origin'"
           :iconWidth="'25px'")
 </template>
+
 <script lang="ts">
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import { globalQueue } from '@/utils/queueUtils'
@@ -46,15 +46,10 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      getPages: 'getPages',
+      pages: 'getPages',
       getPagesPerRow: 'page/getPagesPerRow',
       allPageMode: 'mobileEditor/getMobileAllPageMode'
     }),
-    pages(): IPage[] {
-      const pages = this.getPages
-      pageUtils.setAutoResizeNeededForPages(pages, false)
-      return pages
-    },
     btnStyle(): { [index: string]: string } {
       return {
         width: `${this.itemSize}px`,

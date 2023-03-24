@@ -58,9 +58,9 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
             div(v-if="!showAllRecentlyBgColors" class="panel-bg__color-row-more" @click.prevent.stop="handleShowAllRecentlyBgColors(true)") {{$t('NN0082')}}
           div(class="panel-bg__colors")
             div(class="panel-bg__color add-color" @click="handleOpenColorPicker")
-            div(v-if="newBgColor !== ''"
+            div(v-if="hasNewBgColor"
               class="panel-bg__color"
-              :style="colorStyles(newBgColor)")
+              :style="colorStyles(currColor)")
             div(v-for="color in recentlyColors"
               class="panel-bg__color"
               :key="color"
@@ -112,9 +112,7 @@ import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IAsset } from '@/interfaces/module'
-import { ColorEventType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
-import colorUtils from '@/utils/colorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -169,7 +167,8 @@ export default defineComponent({
       shareColor: 'vivisticker/getShareColor',
       allRecentlyColors: 'vivisticker/getRecentlyBgColors',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
-      newBgColor: 'vivisticker/getNewBgColor',
+      hasNewBgColor: 'vivisticker/getHasNewBgColor',
+      currColor: 'color/currColor',
       pending: 'background/pending'
     }),
     itemWidth(): number {
@@ -273,7 +272,6 @@ export default defineComponent({
     }
   },
   mounted() {
-    colorUtils.on(ColorEventType.background, this.handleNewBgColor)
     eventUtils.on(PanelEvent.scrollPanelBackgroundToTop, this.scrollToTop)
 
     generalUtils.panelInit('bg',
@@ -301,7 +299,6 @@ export default defineComponent({
     window.removeEventListener('resize', this.recalculateSize)
   },
   beforeUnmount() {
-    colorUtils.event.off(ColorEventType.background, this.handleNewBgColor)
     eventUtils.off(PanelEvent.scrollPanelBackgroundToTop)
   },
   watch: {
@@ -313,7 +310,7 @@ export default defineComponent({
         if (newVal === 'none') {
           vivistickerUtils.commitNewBgColor()
         }
-        this.setNewBgColor('')
+        this.setHasNewBgColor(false)
       }
     },
     keyword(newVal: string) {
@@ -349,7 +346,7 @@ export default defineComponent({
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor',
       addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor',
-      setNewBgColor: 'vivisticker/SET_newBgColor'
+      setHasNewBgColor: 'vivisticker/SET_hasNewBgColor'
     }),
     scrollToTop() {
       for (const list of this.categoryListArray) {
@@ -487,9 +484,7 @@ export default defineComponent({
     },
     handleOpenColorPicker() {
       this.$emit('openColorPicker')
-    },
-    handleNewBgColor(color: string) {
-      this.setNewBgColor(color)
+      vivistickerUtils.setHasNewBgColor(true)
     },
     handleShowAllRecentlyBgColors(bool: boolean) {
       this.showAllRecentlyBgColors = bool

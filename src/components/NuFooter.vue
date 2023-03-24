@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-footer text-black")
+div(class="nu-footer text-black" :style="rootStyles")
   div(class="nu-footer__wrapper label-lg")
     svg-icon(:iconName="'logo'"
       :iconWidth="'100px'"
@@ -111,6 +111,7 @@ import store from '@/store'
 import designUtils from '@/utils/designUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import themeUtils from '@/utils/themeUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -160,15 +161,21 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters('user', {
-      token: 'getToken',
-      isLogin: 'isLogin'
+    ...mapGetters({
+      token: 'user/getToken',
+      isLogin: 'user/isLogin',
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
     themeList(): Itheme[] {
       return themeUtils.themesMainHidden
     },
     currLocale(): string {
       return this.$i18n.locale
+    },
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
+      }
     }
   },
   methods: {

@@ -11,7 +11,11 @@
     "backgroundImage": {
       "config": {
         "type": "image",
-        "srcObj": { "type": "", "userId": "", "assetId": "" },
+        "srcObj": {
+          "type": "",
+          "userId": "",
+          "assetId": ""
+        },
         "id": "xFu7xx5q",
         "clipPath": "M0,0h0v0h0z",
         "active": false,
@@ -57,8 +61,17 @@
               "floating": {},
               "blur": {}
             },
-            "srcObj": { "type": "", "assetId": "", "userId": "" },
-            "styles": { "imgWidth": 0, "imgHeight": 0, "imgX": 0, "imgY": 0 },
+            "srcObj": {
+              "type": "",
+              "assetId": "",
+              "userId": ""
+            },
+            "styles": {
+              "imgWidth": 0,
+              "imgHeight": 0,
+              "imgX": 0,
+              "imgY": 0
+            },
             "old": {}
           }
         }
@@ -120,8 +133,17 @@
               "floating": {},
               "blur": {}
             },
-            "srcObj": { "type": "", "assetId": "", "userId": "" },
-            "styles": { "imgWidth": 0, "imgHeight": 0, "imgX": 0, "imgY": 0 },
+            "srcObj": {
+              "type": "",
+              "assetId": "",
+              "userId": ""
+            },
+            "styles": {
+              "imgWidth": 0,
+              "imgHeight": 0,
+              "imgX": 0,
+              "imgY": 0
+            },
             "old": {},
             "isTransparent": false
           }
@@ -129,13 +151,27 @@
         "panelPreviewSrc": "https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2302081104321519Yqr7H96/tiny"
       }
     ],
-    "documentColors": ["#ffffff"],
+    "documentColors": [
+      "#ffffff"
+    ],
     "designId": "",
     "id": "DP5xb2jX",
-    "guidelines": { "v": [], "h": [] },
+    "guidelines": {
+      "v": [],
+      "h": []
+    },
     "isEnableBleed": false,
-    "bleeds": { "top": 35, "bottom": 35, "left": 35, "right": 35 },
-    "physicalBleeds": { "top": 35, "bottom": 35, "left": 35, "right": 35 },
-    "isAutoResizeNeeded": false
+    "bleeds": {
+      "top": 35,
+      "bottom": 35,
+      "left": 35,
+      "right": 35
+    },
+    "physicalBleeds": {
+      "top": 35,
+      "bottom": 35,
+      "left": 35,
+      "right": 35
+    }
   }
 ]

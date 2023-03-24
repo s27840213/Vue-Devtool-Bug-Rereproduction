@@ -42,7 +42,7 @@ export default defineComponent({
       default: false
     },
     editorView: {
-      type: HTMLElement,
+      type: null as unknown as PropType<HTMLElement | null>,
       required: true
     },
     isAnyBackgroundImageControl: {
@@ -57,6 +57,12 @@ export default defineComponent({
   },
   mounted() {
     this.minContentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
+    // let card = this.$refs.card as HTMLElement | HTMLElement[]
+    // if (Array.isArray(card)) card = card[0]
+    // const cardRect = card.getBoundingClientRect()
+    // const padding = +card.style.padding.slice(0, -2)
+    // pageUtils.pageEventPosOffset.x = cardRect.x + padding
+    // pageUtils.pageEventPosOffset.y = cardRect.y + padding
   },
   computed: {
     ...mapGetters({
@@ -81,7 +87,7 @@ export default defineComponent({
   watch: {
     pageScaleRatio() {
       if (this.isDetailPage) {
-        generalUtils.scaleFromCenter(this.editorView)
+        generalUtils.scaleFromCenter(this.editorView as HTMLElement)
       } else {
         const card = (this.$refs.card as HTMLElement[])[this.currCardIndex]
         generalUtils.scaleFromCenter(card)

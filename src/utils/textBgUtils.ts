@@ -1,11 +1,23 @@
+import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
+import { IParagraph, IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
-import { IStyle, IText } from '@/interfaces/layer'
-import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
-import LayerUtils from '@/utils/layerUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
+import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
-import _ from 'lodash'
+import textEffectUtils from '@/utils/textEffectUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { Editor } from '@tiptap/vue-3'
+import _, { cloneDeep, isEqual } from 'lodash'
+import generalUtils from './generalUtils'
+import textUtils from './textUtils'
+
+export interface textBgSvg {
+  attrs: Record<string, string | number>
+  content: {
+    tag: string
+    attrs: Record<string, string | number>
+  }[]
+}
 
 // For text effect gooey
 export class Point {
@@ -40,6 +52,263 @@ export class Point {
 }
 function obj2Point(p: { x: number, y: number }) {
   return new Point(p.x, p.y)
+}
+
+class Rect {
+  bodyRect = new DOMRect()
+  vertical = false
+  width = 0
+  height = 0
+  transform = ''
+  rows: {
+    rect: DOMRect
+    spanData: {
+      x: number
+      y: number
+      width: number
+      height: number
+      text: string
+      letterSpacing: number
+    }[]
+  }[] = []
+
+  async waitForRender(div: HTMLElement): Promise<void> {
+    const textId = generalUtils.generateRandomString(12)
+    div.setAttribute('id', textId)
+    return new Promise(resolve => {
+      textUtils.observerCallbackMap[textId] = () => {
+        textUtils.observer.unobserve(div)
+        resolve()
+      }
+      document.body.appendChild(div)
+      textUtils.observer.observe(div)
+    })
+  }
+
+  async init(config: IText) {
+    this.vertical = config.styles.writingMode === 'vertical-lr'
+    const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
+
+    let div = document.createElement('div')
+    div.classList.add('nu-text__body')
+    config.paragraphs.forEach(para => {
+      const p = document.createElement('p')
+      p.classList.add('nu-text__p')
+      const pStyle = tiptapUtils.textStylesRaw(para.styles)
+      Object.assign(p.style, pStyle, { margin: 0 })
+      div.appendChild(p)
+
+      para.spans.forEach(spanData => {
+        if (!spanData.text) {
+          const span = document.createElement('span')
+          span.classList.add('nu-text__span')
+          span.appendChild(document.createElement('br'))
+          p.appendChild(span)
+        } else {
+          [...spanData.text].forEach(t => {
+            const isComposingText = spanData.text.length > 1
+            const fixedWidthStyle = fixedWidth && isComposingText ? {
+              letterSpacing: 0,
+              display: 'inline-block',
+            } : fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, para.styles, config) : {}
+
+            const span = document.createElement('span')
+            span.classList.add('nu-text__span')
+            if (t === ' ') {
+              span.innerHTML = '&nbsp;'
+            } else {
+              span.textContent = t
+            }
+
+            const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
+            spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
+
+            Object.assign(span.style, spanStyleObject, fixedWidthStyle)
+
+            p.appendChild(span)
+          })
+        }
+      })
+    })
+
+    // const safariStyle = platform.name === 'Safari' ? { lineBreak: 'loose' } : {}
+    const safariStyle = generalUtils.safariLike ? { lineBreak: 'normal' } : {}
+    // const safariStyle = platform.name === 'Safari' ? { lineBreak: 'strict' } : {}
+    Object.assign(div.style, safariStyle)
+    div.style.writingMode = config.styles.writingMode
+    let { widthLimit } = config
+    const { scale, height } = config.styles
+    if (this.vertical) {
+      div.style.width = 'max-content'
+      div.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
+    } else {
+      div.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
+      div.style.height = 'max-content'
+    }
+    await this.waitForRender(div)
+
+    // Add width limit to try to fit element height with config height.
+    const heightLimit = height / scale
+    const target = this.vertical ? 'height' : 'width'
+    let resizeTimes = 1
+    while (widthLimit !== -1 && resizeTimes < 100 &&
+      Math.abs(div.clientHeight - heightLimit) > 5 * scale) {
+      resizeTimes++
+      if (div.clientHeight > heightLimit) {
+        widthLimit += scale * resizeTimes
+      } else {
+        widthLimit -= scale * resizeTimes
+      }
+      div = div.cloneNode(true) as HTMLDivElement
+      div.style[target] = `${widthLimit / scale}px`
+      await this.waitForRender(div)
+    }
+
+    this.bodyRect = div.getClientRects()[0]
+    this.width = this.bodyRect.width
+    this.height = this.bodyRect.height
+    this.transform = this.vertical ? 'rotate(90) scale(1,-1)' : ''
+    this.rows = []
+
+    for (const p of div.children) {
+      const fontSize = parseFloat((p as HTMLElement).style.fontSize)
+      const letterSpacingEm = parseFloat((p as HTMLElement).style.letterSpacing)
+      const lineHeight = parseFloat((p as HTMLElement).style.lineHeight)
+      const letterSpacing = fontSize * letterSpacingEm
+      for (const span of p.children) {
+        const cr = span.getClientRects()[0]
+        // If span is fixedWidth, its display will be inline-block
+        // Height of inline-block span will grow with lineHeight
+        // Here calc height and y without inline-block effect
+        // For vertical text, modify width&x instead of height&y
+        const isInlineBolck = (span as HTMLElement).style.display === 'inline-block'
+        let { width, height, y, x } = cr
+        if (isInlineBolck && this.vertical) {
+          width = width / lineHeight * 1.4
+          x = cr.x + (cr.width - width) / 2
+        } else if (isInlineBolck) {
+          height = height / lineHeight * 1.4
+          y = cr.y + (cr.height - height) / 2
+        }
+        this.rows.push({
+          rect: cr,
+          spanData: [{
+            x,
+            y,
+            width,
+            height,
+            text: span.textContent ?? '',
+            letterSpacing
+          }]
+        })
+      }
+    }
+  }
+
+  // Exchange x, y coordinate, used when text vertical.
+  xyExchange() {
+    const { rows, bodyRect } = this
+    Object.assign(bodyRect, {
+      x: bodyRect.y,
+      y: bodyRect.x,
+      width: bodyRect.height,
+      height: bodyRect.width
+    })
+    rows.forEach((row) => {
+      const { rect, spanData } = row
+      Object.assign(rect, {
+        x: rect.y,
+        y: rect.x,
+        width: rect.height,
+        height: rect.width
+      })
+      spanData.forEach(data => {
+        [data.x, data.y, data.height, data.width] = [data.y, data.x, data.width, data.height]
+      })
+    })
+  }
+
+  // Merge Rect if at the same line.
+  mergeLine() {
+    const { rows } = this
+    rows.forEach((row, index) => {
+      const nextIndex = index + 1
+      while (nextIndex < rows.length) {
+        const curr = row.rect
+        const next = rows[nextIndex].rect
+        const currTop = curr.y
+        const currBottom = curr.y + curr.height
+        const nextTop = next.y
+        const nextBottom = next.y + next.height
+        if (((nextTop <= currTop && currTop <= nextBottom &&
+          nextTop <= currBottom && currBottom <= nextBottom) ||
+          (currTop <= nextTop && nextTop <= currBottom &&
+            currTop <= nextBottom && nextBottom <= currBottom))) {
+          curr.y = Math.min(curr.y, next.y)
+          curr.width += next.width
+          curr.height = Math.max(curr.height, next.height)
+          row.spanData = row.spanData.concat(rows[nextIndex].spanData)
+          rows.splice(nextIndex, 1)
+        } else break
+      }
+    })
+  }
+
+  // Expend empty line width as neibor.
+  expandEmptyLine() {
+    const { rows, bodyRect } = this
+    const defaultLine = {
+      rect: { x: bodyRect.x, width: bodyRect.width },
+      spanData: []
+    }
+    rows.forEach((row, index) => {
+      const { rect } = row
+      if (rect.width < 1) {
+        let nextIndex = index + 1
+        while (nextIndex < rows.length && rows[nextIndex].rect.width < 1) nextIndex++
+        const next = rows[nextIndex] ?? defaultLine
+        const prev = rows[index - 1] ?? defaultLine
+        const target = (prev.rect.width < next.rect.width) ? prev : next
+        rect.x = target.rect.x
+        rect.width = target.rect.width
+        row.spanData = []
+      }
+    })
+  }
+
+  // Coordinate initial, use bodyRect as origin.
+  coordinateInit() {
+    const { rows, bodyRect } = this
+    rows.forEach((row) => {
+      const { rect } = row
+      rect.x -= bodyRect.x
+      rect.y -= bodyRect.y
+      row.spanData.forEach((span) => {
+        span.x -= bodyRect.x
+        span.y -= bodyRect.y
+      })
+    })
+  }
+
+  preprocess() {
+    const { vertical } = this
+    if (vertical) this.xyExchange()
+    this.mergeLine()
+    this.expandEmptyLine()
+    this.coordinateInit()
+  }
+
+  get() {
+    const { vertical, width, height, transform, rows } = this
+    return {
+      vertical,
+      width,
+      height,
+      transform,
+      rows,
+      rects: _.map(rows, 'rect')
+    }
+  }
 }
 
 // For text effect gooey
@@ -176,8 +445,7 @@ class Gooey {
       for (let i = 1; i < side.length - 1;) {
         const cps = side[i]
         if (side.length > 3 && cps.bottom.y - cps.top.y < cps.oldHeight * 0.1) {
-          // Vue.delete(side, i)
-          delete side[i]
+          side.splice(i, 1)
           count++
         } else i++
       }
@@ -186,7 +454,7 @@ class Gooey {
   }
 
   // Keep doing merge and delete until nothing to delete.
-  preProcess() {
+  preprocess() {
     do {
       this.merge()
     } while (this.delete())
@@ -307,9 +575,36 @@ class Gooey {
   }
 }
 
+function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
+  let [href, color] = ['', '']
+  switch (textBg.name) {
+    case 'rainbow':
+      href = 'rainbow-circle'
+      color = ['#FFA19B', '#FFC89F', '#F7DE97', '#C5DFAE', '#B5D0F9', '#EDD4F6'][index % 6]
+      break
+    case 'rainbow-dark':
+      href = 'rainbow-circle'
+      color = ['#D0B0B1', '#DCC9BF', '#EBDEBB', '#BECBBC', '#B0BCC5', '#D1CADF'][index % 6]
+      break
+    case 'circle':
+      href = 'rainbow-circle'
+      color = textBg.color
+      break
+    case 'cloud':
+      href = `cloud${index % 4}`
+      color = textBg.color
+      break
+    default: // text-book
+      href = textBg.name
+      color = textBg.color
+      break
+  }
+  return { href, color }
+}
+
 class TextBg {
   private currColorKey = ''
-  effects = {} as Record<string, Record<string, string | number>>
+  effects = {} as Record<string, Record<string, string | number | boolean>>
   constructor() {
     this.effects = this.getDefaultEffects()
   }
@@ -386,7 +681,62 @@ class TextBg {
         bRadius: 15,
         opacity: 100,
         color: 'fontColorL+-40/BC/00'
-      }
+      },
+      // A part of additional default ITextLetterBg setting is in setExtraDefaultAttrs func.
+      rainbow: {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 100,
+        opacity: 100,
+        fixedWidth: true,
+        color: '', // no effect
+      },
+      'rainbow-dark': {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 100,
+        opacity: 100,
+        fixedWidth: true,
+        color: '', // no effect
+      },
+      circle: {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 100,
+        opacity: 100,
+        fixedWidth: true,
+        color: '#EEDFD1',
+      },
+      cloud: {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 180,
+        opacity: 100,
+        fixedWidth: false, //!
+        color: '#D3E2E3',
+      },
+      'text-book': {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 125,
+        opacity: 100,
+        fixedWidth: true,
+        color: '#93BAA6',
+      },
+    }
+  }
+
+  async setExtraDefaultAttrs(name: string) {
+    const defaultAttrs = {
+      rainbow: { lineHeight: 1.78, fontSpacing: 585 },
+      'rainbow-dark': { lineHeight: 1.78, fontSpacing: 585 },
+      circle: { lineHeight: 1.78, fontSpacing: 585 },
+      cloud: { lineHeight: 1.54, fontSpacing: 186 },
+      'text-book': { lineHeight: 1.96, fontSpacing: 665 }
+    } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
+
+    for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
+      await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val)
     }
   }
 
@@ -399,110 +749,32 @@ class TextBg {
     if (!isITextBox(effect)) return {}
   }
 
-  convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> { // to-delete
-    return {}
+  fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle, config: IText) {
+    let [w, h] = ['min-width', 'min-height']
+    if (config.styles.writingMode === 'vertical-lr') [w, h] = [h, w]
+    // If tiptap attr have min-w/h, convertFontStyle() in cssConverter.ts will add some style to tiptap.
+    return {
+      [w]: `${spanStyle.size * 1.333333 * (pStyle.fontSpacing + 1)}px`,
+      display: 'inline-block',
+      letterSpacing: 0,
+      textAlign: 'center',
+    }
   }
 
-  drawSvgBg(config: IText, bodyHtml: Element[]) {
+  async drawSvgBg(config: IText): Promise<textBgSvg | null> {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
-    const vertical = config.styles.writingMode === 'vertical-lr'
-    const rawRects = [] as DOMRectList[]
-    let bodyRect: DOMRect
-    let width, height: number
-    let transform: string
 
-    const body = (_.nth(bodyHtml, -1) as Element).cloneNode(true) as HTMLElement
-    body.style.writingMode = config.styles.writingMode
-    const widthLimit = config.widthLimit
-    if (vertical) {
-      body.style.width = 'max-content'
-      body.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
-    } else {
-      body.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
-      body.style.height = 'max-content'
-    }
-
-    try {
-      document.body.appendChild(body)
-      bodyRect = body.getClientRects()[0]
-      width = bodyRect.width
-      height = bodyRect.height
-      transform = vertical ? 'rotate(90) scale(1,-1)' : ''
-
-      for (const p of body.children) {
-        for (const span of p.children) {
-          rawRects.push(span.getClientRects())
-        }
-      }
-    } finally {
-      document.body.removeChild(body)
-    }
-    const rects = rawRects.reduce((acc, rect) => {
-      if (rect) acc.push(...rect)
-      return acc
-    }, [] as DOMRect[])
-
-    // If is vertical text, exchange its coordinate.
-    if (vertical) {
-      Object.assign(bodyRect, {
-        x: bodyRect.y,
-        y: bodyRect.x,
-        width: bodyRect.height,
-        height: bodyRect.width
-      })
-      rects.forEach((rect: DOMRect) => {
-        Object.assign(rect, {
-          x: rect.y,
-          y: rect.x,
-          width: rect.height,
-          height: rect.width
-        })
-      })
-    }
-    // Merge Rect if at the same line.
-    rects.forEach((rect: DOMRect, index: number) => {
-      const nextIndex = index + 1
-      while (nextIndex < rects.length) {
-        const next = rects[nextIndex]
-        const currTop = rect.y
-        const currBottom = rect.y + rect.height
-        const nextTop = next.y
-        const nextBottom = next.y + next.height
-        if (((nextTop <= currTop && currTop <= nextBottom &&
-          nextTop <= currBottom && currBottom <= nextBottom) ||
-          (currTop <= nextTop && nextTop <= currBottom &&
-            currTop <= nextBottom && nextBottom <= currBottom))) {
-          rect.y = Math.min(rect.y, next.y)
-          rect.width += next.width
-          rect.height = Math.max(rect.height, next.height)
-        } else break
-        // Vue.delete(rects, nextIndex)
-        delete rects[nextIndex]
-      }
-    })
-    // Deal with empty line
-    rects.forEach((rect: DOMRect, index: number) => {
-      if (rect.width < 1) {
-        let nextIndex = index + 1
-        while (nextIndex < rects.length && rects[nextIndex].width < 1) nextIndex++
-        const next = rects[nextIndex] ?? { x: bodyRect.x, width: bodyRect.width }
-        const prev = rects[index - 1] ?? { x: bodyRect.x, width: bodyRect.width }
-        const target = (prev.width < next.width) ? prev : next
-        rect.x = target.x
-        rect.width = target.width
-      }
-    })
-    // Coordinate initial.
-    rects.forEach((rect: DOMRect) => {
-      rect.x = rect.x - bodyRect.x
-      rect.y = rect.y - bodyRect.y
-    })
+    const opacity = textBg.opacity * 0.01
+    const myRect = new Rect()
+    await myRect.init(config)
+    myRect.preprocess()
+    const { vertical, width, height, transform, rects, rows } = myRect.get()
 
     if (isITextGooey(textBg)) {
       const padding = textBg.distance
       const color = textEffectUtils.colorParser(textBg.color, config)
-      const fill = this.rgba(color, textBg.opacity * 0.01)
+      const fill = this.rgba(color, opacity)
 
       // Add padding.
       rects.forEach((rect: DOMRect) => {
@@ -513,7 +785,7 @@ class TextBg {
       })
 
       const cps = new Gooey(textBg, rects)
-      cps.preProcess()
+      cps.preprocess()
       const d = cps.process()
 
       return {
@@ -529,11 +801,10 @@ class TextBg {
       }
     } else if (isITextUnderline(textBg)) {
       const color = textEffectUtils.colorParser(textBg.color, config)
-      const fill = this.rgba(color, textBg.opacity * 0.01)
-      const paths = [] as Record<string, unknown>[]
+      const fill = this.rgba(color, opacity)
+      const paths = [] as textBgSvg['content']
       rects.forEach(rect => {
         const capWidth = rect.height * 0.005 * textBg.height
-        // capWidth = Math.min(capWidth, rect.width / 2)
         const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
         const path = new Path(new Point(rect.x + capWidth, rect.y + yOffset))
 
@@ -573,7 +844,6 @@ class TextBg {
     } else if (isITextBox(textBg)) {
       const pColor = textEffectUtils.colorParser(textBg.pColor, config)
       const bColor = textEffectUtils.colorParser(textBg.bColor, config)
-      const opacity = textBg.opacity * 0.01
       let boxWidth = (width + textBg.bStroke)
       let boxHeight = (height + textBg.bStroke)
       let top = -textBg.bStroke
@@ -605,9 +875,7 @@ class TextBg {
           width: boxWidth + textBg.bStroke,
           height: boxHeight + textBg.bStroke,
           style: `left: ${left}px;
-            top: ${top}px;
-            border-radius: ${boxRadius}px;
-            overflow: hidden`
+            top: ${top}px;`
         },
         content: [{
           tag: 'path',
@@ -618,6 +886,49 @@ class TextBg {
           }
         }]
         // .concat(path.toCircle() as any) // Show control point
+      }
+    } else if (isITextLetterBg(textBg)) {
+      const scale = textBg.size / 100
+      let { xOffset200: xOffset, yOffset200: yOffset } = textBg
+      if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
+
+      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
+      let i = 0
+      rows.forEach((row) => {
+        row.spanData.forEach((span) => {
+          const { x, y, width, height, text } = span
+          if (text !== ' ') {
+            pos.push({
+              ...getLetterBgSetting(textBg, i),
+              // 1. Because all letter svg width = height, so need to -(h-w)/2
+              // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
+              // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
+              x: x - (height - width) / 2 - (!textBg.fixedWidth ? span.letterSpacing / 2 : 0),
+              y,
+              width,
+              height,
+            })
+            i += 1
+          }
+        })
+      })
+
+      return {
+        attrs: { width, height, style: `opacity: ${opacity}` },
+        content: pos.map(p => ({
+          tag: 'use',
+          attrs: {
+            href: `#${p.href}`,
+            transform,
+            width: p.height * scale,
+            height: p.height * scale,
+            // Scale will let width be (scale-1)*p.height times larger than before,
+            // So -(scale-1)*p.height/2 to justify it to center.
+            x: p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100,
+            y: p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100,
+            style: `color: ${p.color}`
+          }
+        }))
       }
     } else return null
   }
@@ -648,6 +959,7 @@ class TextBg {
     }
   }
 
+  // Read/write text effect setting from local storage
   syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
     Object.assign(textBg, { name: textBg.name || effectName })
     if (textBg.name === 'none') return
@@ -673,11 +985,11 @@ class TextBg {
     }
   }
 
-  setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): void {
+  async setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): Promise<void> {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
-    const subLayerIndex = LayerUtils.subLayerIdx
+    const subLayerIndex = layerUtils.subLayerIdx
     const defaultAttrs = this.effects[effect]
 
     for (const idx in layers) {
@@ -686,6 +998,15 @@ class TextBg {
       const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
       if (type === 'text') {
         const textBg = {} as ITextBgEffect
+
+        // Set lineHeight and fontSpacing by call tiptap
+        for (const [key, val] of Object.entries(attrs ?? {})) {
+          if (['lineHeight', 'fontSpacing'].includes(key)) {
+            await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val as number)
+            return
+          }
+        }
+
         if (layerTextBg && layerTextBg.name === effect) { // Adjust effect option.
           Object.assign(textBg, layerTextBg, attrs)
           localStorageUtils.set('textEffectSetting', effect, textBg)
@@ -694,12 +1015,20 @@ class TextBg {
           this.syncShareAttrs(textBg, effect)
           const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
+          await this.setExtraDefaultAttrs(effect)
 
+          // Sync setting between different name effect:
           // Bring original effect color to new effect.
           const oldColor = this.getEffectMainColor(layerTextBg)[1]
           const newColorKey = this.getEffectMainColor(textBg)[0]
-          if (oldColor.startsWith('#')) {
+          if (oldColor.startsWith('#') && !(isITextLetterBg(textBg) || isITextLetterBg(layerTextBg))) {
             Object.assign(textBg, { [newColorKey]: oldColor })
+          }
+          // Sync setting between TextLetterBg: rainbow, rainbow-dark, circle
+          if (isITextLetterBg(textBg) && isITextLetterBg(layerTextBg) && textBg.name !== layerTextBg.name &&
+            ['rainbow', 'rainbow-dark', 'circle'].includes(textBg.name) &&
+            ['rainbow', 'rainbow-dark', 'circle'].includes(layerTextBg.name)) {
+            Object.assign(textBg, layerTextBg, { name: textBg.name, color: textBg.color })
           }
         }
 
@@ -709,6 +1038,50 @@ class TextBg {
           subLayerIndex: +idx,
           styles: { textBg }
         })
+
+        // If fixedWidth setting changed, force split/unsplit span text
+        const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
+        const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+        if (oldFixedWidth !== newFixedWidth) {
+          const paragraphs = cloneDeep(layers[idx].paragraphs as IParagraph[])
+          if (newFixedWidth) { // Split span
+            paragraphs.forEach(p => {
+              p.spans = p.spans.flatMap(span =>
+                [...span.text].map(t => ({ text: t, styles: span.styles }))
+              )
+            })
+          } else { // Merge span
+            paragraphs.forEach(p => {
+              for (let i = 0; i + 1 < p.spans.length;) {
+                const curr = p.spans[i]
+                const next = p.spans[i + 1]
+                if (isEqual(curr.styles, next.styles)) {
+                  curr.text += next.text
+                  p.spans.splice(i + 1, 1)
+                } else { i++ }
+              }
+            })
+          }
+
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs },
+            targetLayer.layers ? +idx : subLayerIndex
+          )
+          tiptapUtils.updateHtml() // Vuex config => tiptap
+
+          // When fixedWith true => false, this can force tiptap merge span that have same attrs.
+          if (document.querySelector('.ProseMirror') && !newFixedWidth) {
+            tiptapUtils.agent((editor: Editor) => {
+              editor.commands.selectAll()
+              editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
+            })
+          }
+        }
+
+        // If user leave LetterBg, reset lineHeight and fontSpacing
+        if (isITextLetterBg(layerTextBg) && !isITextLetterBg(textBg)) {
+          await textUtils.setParagraphProp('lineHeight', 1.4)
+          await textUtils.setParagraphProp('fontSpacing', 0)
+        }
       }
     }
   }
@@ -716,7 +1089,9 @@ class TextBg {
   resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
     this.setTextBg(effectName, this.effects[effectName])
+    this.setExtraDefaultAttrs(effectName)
   }
 }
 
-export default new TextBg()
+const textBgUtils = new TextBg()
+export default textBgUtils

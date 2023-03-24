@@ -22,7 +22,7 @@ interface IViviStickerState {
   fullPageType: string,
   fullPageParams: { [key: string]: any },
   recentlyBgColors: string[],
-  newBgColor: string,
+  hasNewBgColor: boolean,
   isDuringCopy: boolean,
   isInMyDesign: boolean,
   myDesignTab: string,
@@ -67,7 +67,7 @@ const getDefaultState = (): IViviStickerState => ({
   fullPageType: 'none',
   fullPageParams: {},
   recentlyBgColors: [],
-  newBgColor: '',
+  hasNewBgColor: false,
   isDuringCopy: false,
   isInMyDesign: false,
   myDesignTab: 'text',
@@ -141,8 +141,8 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getRecentlyBgColors(state: IViviStickerState): string[] {
     return state.recentlyBgColors
   },
-  getNewBgColor(state: IViviStickerState): string {
-    return state.newBgColor
+  getHasNewBgColor(state: IViviStickerState): boolean {
+    return state.hasNewBgColor
   },
   getIsDuringCopy(state: IViviStickerState): boolean {
     return state.isDuringCopy
@@ -259,8 +259,8 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_recentlyBgColors(state: IViviStickerState, recentlyBgColors: string[]) {
     state.recentlyBgColors = recentlyBgColors
   },
-  SET_newBgColor(state: IViviStickerState, newBgColor: string) {
-    state.newBgColor = newBgColor
+  SET_hasNewBgColor(state: IViviStickerState, hasNewBgColor: boolean) {
+    state.hasNewBgColor = hasNewBgColor
   },
   SET_isDuringCopy(state: IViviStickerState, isDuringCopy: boolean) {
     state.isDuringCopy = isDuringCopy

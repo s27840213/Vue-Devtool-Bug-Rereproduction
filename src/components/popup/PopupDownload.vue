@@ -175,7 +175,8 @@ div(class="popup-download text-left"
           iconColor="white"
           iconWidth="20px")
         span(v-else class="popup-download__btn")
-          svg-icon(v-if="selectedTypeVal === 'pdf_print'" iconName="pro" iconWidth="22px" iconColor="alarm")
+          svg-icon(v-if="selectedTypeVal === 'pdf_print' && !inReviewMode"
+                  iconName="pro" iconWidth="22px" iconColor="alarm")
           span {{$t('NN0010')}}
 </template>
 
@@ -189,6 +190,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
@@ -309,6 +311,9 @@ export default defineComponent({
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
     }),
+    inReviewMode(): boolean {
+      return webViewUtils.inReviewMode
+    },
     selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this
       return typeOptions.find(typeOptions => typeOptions.value === selectedTypeVal) || typeOptions[0]

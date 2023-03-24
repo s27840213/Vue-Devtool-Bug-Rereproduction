@@ -41,22 +41,22 @@ div(:layer-index="`${layerIndex}`"
             :layerIndex="layerIndex"
             :config="(config as IText)"
             :subLayerIndex="-1"
-            @keydown.37.stop
-            @keydown.38.stop
-            @keydown.39.stop
-            @keydown.40.stop
-            @keydown.ctrl.67.exact.stop.self
-            @keydown.meta.67.exact.stop.self
-            @keydown.ctrl.86.exact.stop.self
-            @keydown.meta.86.exact.stop.self
-            @keydown.ctrl.88.exact.stop.self
-            @keydown.meta.88.exact.stop.self
-            @keydown.ctrl.65.exact.stop.self
-            @keydown.meta.65.exact.stop.self
-            @keydown.ctrl.90.exact.stop.self
-            @keydown.meta.90.exact.stop.self
-            @keydown.ctrl.shift.90.exact.stop.self
-            @keydown.meta.shift.90.exact.stop.self
+            @keydown.left.stop
+            @keydown.up.stop
+            @keydown.right.stop
+            @keydown.down.stop
+            @keydown.ctrl.c.exact.stop.self
+            @keydown.meta.c.exact.stop.self
+            @keydown.ctrl.v.exact.stop.self
+            @keydown.meta.v.exact.stop.self
+            @keydown.ctrl.x.exact.stop.self
+            @keydown.meta.x.exact.stop.self
+            @keydown.ctrl.a.exact.stop.self
+            @keydown.meta.a.exact.stop.self
+            @keydown.ctrl.z.exact.stop.self
+            @keydown.meta.z.exact.stop.self
+            @keydown.ctrl.shift.z.exact.stop.self
+            @keydown.meta.shift.z.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
         div(v-if="!$isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
@@ -102,7 +102,7 @@ div(:layer-index="`${layerIndex}`"
               :key="`resizer-text-${index}`"
               :ref="`moveStart-bar_${index}`"
               :style="resizerBarStyles(resizer.styles)")
-        div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalers) : []"
+        div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="`scaler-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
@@ -116,7 +116,7 @@ div(:layer-index="`${layerIndex}`"
             @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine()"
-            :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
+            :style="`transform: scale(${contentScaleRatio})`")
           svg-icon(class="control-point__rotater"
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
@@ -156,7 +156,7 @@ import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
@@ -567,8 +567,9 @@ export default defineComponent({
       const aspectRatio = this.$isTouchDevice() ? 0.24 : 0.16
 
       const isHorizon = width > height
-      const sizeForWidth = this.getLayerWidth() * this.contentScaleRatio - 10
-      const sizeForHeight = this.getLayerHeight() * this.contentScaleRatio - 10
+      const sizeForWidth = this.getLayerWidth() * this.scaleRatio / 100 * this.contentScaleRatio - 10
+      const sizeForHeight = this.getLayerHeight() * this.scaleRatio / 100 * this.contentScaleRatio - 10
+
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: isHorizon && tooSmall ? `${sizeForWidth * scale}px`
@@ -761,11 +762,9 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isControllerShown) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
-          return `${2}px solid ${outlineColor}`
+          return `2px solid ${outlineColor}`
         } else {
-          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
-          return `${2}px solid ${outlineColor}`
+          return `2px solid ${outlineColor}`
         }
       } else {
         return 'none'
@@ -1366,6 +1365,7 @@ export default defineComponent({
           break
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
+      textPropUtils.updateTextPropState('fontSize', true)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // scale from center
       if (altPressed) {
@@ -2255,7 +2255,7 @@ export default defineComponent({
       return this.config.locked
     },
     isLine(): boolean {
-      return this.config.type === 'shape' && this.config.category === 'D'
+      return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     getLayerWidth(): number {
       return this.config.styles.width

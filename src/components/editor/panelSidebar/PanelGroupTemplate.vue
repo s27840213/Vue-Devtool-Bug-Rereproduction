@@ -76,6 +76,18 @@ export default defineComponent({
   methods: {
     handleApplyGroupTemplate() {
       if (!paymentUtils.checkProGroupTemplate(this.groupItem as any, this.groupItem.content_ids[0])) return
+      if (this.isDetailPage && this.$isTouchDevice()) {
+        modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+        )
+        return
+      }
       assetUtils.addGroupTemplate(this.groupItem as any)
         .then(() => {
           editorUtils.setMobileAllPageMode(true)

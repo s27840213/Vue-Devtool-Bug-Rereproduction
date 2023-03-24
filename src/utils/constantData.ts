@@ -1,9 +1,10 @@
-import store from '@/store'
 import i18n from '@/i18n'
-import { TranslateResult } from 'vue-i18n'
 import { Itheme } from '@/interfaces/theme'
-import themeUtils from './themeUtils'
+import store from '@/store'
 import _ from 'lodash'
+import { TranslateResult } from 'vue-i18n'
+import webViewUtils from './picWVUtils'
+import themeUtils from './themeUtils'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -12,14 +13,26 @@ interface BillingInfoInput {
   optional?: boolean
   error?: string
 }
-export interface IEffectOption {
+export interface IEffectOptionSelect {
   key: string
   label: string
-  type: 'range' | 'color' | 'select'
-  min?: number
-  max?: number
-  select?: { key: string, label: string }[]
+  type: 'select'
+  select: { key: string, label: string }[]
 }
+export interface IEffectOptionColor {
+  key: string
+  label: string
+  type: 'color'
+}
+export interface IEffectOptionRange {
+  key: string
+  label: string
+  type: 'range'
+  min: number
+  max: number
+  isPStyle?: boolean
+}
+export type IEffectOption = IEffectOptionSelect | IEffectOptionColor | IEffectOptionRange
 export interface IEffect {
   key: string
   label: string
@@ -38,8 +51,9 @@ class ConstantData {
 
   // For header.vue and mobileMenu.vue
   headerItems(mobile = false) {
+    const host = window.location.host
+    const base = `http${host.startsWith('localhost') ? '' : 's'}://${host}`
     function themeItem(id: number | number[]) {
-      const host = window.location.host
       if (id instanceof Array) {
         let templateName = _.filter(store.getters.getEditThemes, (theme: Itheme) => {
           return id.includes(theme.id)
@@ -47,13 +61,13 @@ class ConstantData {
         templateName = templateName?.split('(')?.[0]
         return {
           label: templateName,
-          url: `http://${host}/templates?themes=${id.join(',')}&sort=recent`
+          url: `${base}/templates?themes=${id.join(',')}&sort=recent`
         }
       } else {
         const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
         return {
           label: template?.title,
-          url: `http://${host}/templates?themes=${id}&sort=recent`
+          url: `${base}/templates?themes=${id}&sort=recent`
         }
       }
     }
@@ -271,13 +285,13 @@ class ConstantData {
       content: templateType[i18n.global.locale as keyof typeof templateType]
     }, {
       name: 'TemplateCenter',
-      url: '/templates',
+      url: `${base}/templates`,
       label: i18n.global.t('NN0145')
     }, {
       label: i18n.global.t('NN0670'),
       content: resource[i18n.global.locale as keyof typeof resource]
     },
-    ...[pricing],
+    ...!webViewUtils.inReviewMode ? [pricing] : [],
     {
       hidden: !this.isLogin,
       name: 'MyDesign',
@@ -319,11 +333,16 @@ class ConstantData {
         pStrokeY: i18n.global.tc('NN0319'),
         pColor: i18n.global.tc('NN0735'),
         height: i18n.global.tc('NN0319'),
-        yOffset: i18n.global.tc('NN0736'),
+        yOffset: i18n.global.tc('NN0736'), // For value 0~100, 0 initial
+        xOffset200: i18n.global.tc('NN0814'), // For value -100~100, 0 initial
+        yOffset200: i18n.global.tc('NN0736'), // For value -100~100, 0 initial
         distanceInverse: i18n.global.tc('NN0737'),
         textStrokeColor: i18n.global.tc('NN0739'),
         shadowStrokeColor: i18n.global.tc('NN0740'),
-        endpoint: i18n.global.tc('NN0738')
+        endpoint: i18n.global.tc('NN0738'),
+        size: i18n.global.tc('NN0815'),
+        lineHeight: i18n.global.tc('NN0110'),
+        fontSpacing: i18n.global.tc('NN0109'),
       }
 
       return array.map((name: string) => {
@@ -338,8 +357,8 @@ class ConstantData {
         }
         switch (name) {
           case 'endpoint':
-            option.type = 'select'
-            option.select = [{
+            option.type = 'select';
+            (option as IEffectOptionSelect).select = [{
               key: 'triangle',
               label: i18n.global.tc('NN0730')
             }, {
@@ -351,18 +370,26 @@ class ConstantData {
             }]
             break
           case 'angle':
-            option.max = 180
-            option.min = -180
+            Object.assign(option, { min: -180, max: 180 })
             break
           case 'bend': // For curve
-            option.max = 100
-            option.min = -100
+          case 'xOffset200':
+          case 'yOffset200':
+            Object.assign(option, { min: -100, max: 100 })
+            break
+          case 'size':
+            Object.assign(option, { min: 50, max: 200 })
+            break
+          case 'lineHeight':
+            Object.assign(option, { min: 0.5, max: 2.5, isPStyle: true })
+            break
+          case 'fontSpacing':
+            Object.assign(option, { min: -200, max: 800, isPStyle: true })
             break
           default:
             /* distance, blur, opacity, spread, stroke,
              * bStroke, pStrokeY, bRadius, height */
-            option.max = 100
-            option.min = 0
+            Object.assign(option, { min: 0, max: 100 })
             break
         }
         return option
@@ -456,6 +483,26 @@ class ConstantData {
         key: 'underline',
         label: i18n.global.tc('NN0727'),
         options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'rainbow',
+        label: i18n.global.tc('NN0816'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'rainbow-dark',
+        label: i18n.global.tc('NN0817'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'circle',
+        label: i18n.global.tc('NN0820'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'cloud',
+        label: i18n.global.tc('NN0818'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'text-book',
+        label: i18n.global.tc('NN0819'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
       }])
     }]
     return categories as IEffectCategory[]
@@ -471,7 +518,7 @@ class ConstantData {
       name: 'security',
       label: i18n.global.tc('NN0166', 1),
       icon: 'lock'
-    }, {
+    }, ...!webViewUtils.inReviewMode ? [{
       name: 'hr'
     }, {
       name: 'payment',
@@ -481,7 +528,7 @@ class ConstantData {
       name: 'billing',
       label: i18n.global.t('NN0614'),
       icon: 'invoice'
-    }]
+    }] : []]
     return list
   }
 

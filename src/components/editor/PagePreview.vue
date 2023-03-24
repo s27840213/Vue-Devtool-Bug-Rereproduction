@@ -4,7 +4,7 @@ div(class="page-preview")
     page-preview-plus(:index="idx" :last="false")
     page-preview-page-wrapper(:index="idx"
       type="full"
-      :config="wrappedPage(page)"
+      :config="page"
       :lazyLoadTarget="'.page-preview'")
     page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
       :index="idx+1" :last="false")
@@ -16,15 +16,16 @@ div(class="page-preview")
       :iconName="'plus-origin'"
       :iconWidth="'25px'")
 </template>
+
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
-import pageUtils from '@/utils/pageUtils'
-import { floor } from 'lodash'
-import stepsUtils from '@/utils/stepsUtils'
 import { IPage } from '@/interfaces/page'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { floor } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -69,9 +70,6 @@ export default defineComponent({
         unit: lastPage.unit
       } : {}), pageUtils.pageNum)
       stepsUtils.record()
-    },
-    wrappedPage(page: IPage) {
-      return { ...page, isAutoResizeNeeded: false }
     }
   }
 })
