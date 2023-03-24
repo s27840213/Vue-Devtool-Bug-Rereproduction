@@ -80,9 +80,9 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
             div(v-if="!showAllRecentlyBgColors" class="panel-bg__color-row-more" @click.prevent.stop="handleShowAllRecentlyBgColors(true)") {{$t('NN0082')}}
           div(class="panel-bg__colors")
             div(class="panel-bg__color add-color" @click="handleOpenColorPicker")
-            div(v-if="newBgColor !== ''"
+            div(v-if="hasNewBgColor"
               class="panel-bg__color"
-              :style="colorStyles(newBgColor)")
+              :style="colorStyles(currColor)")
             div(v-for="color in recentlyColors"
               class="panel-bg__color"
               :key="color"
@@ -206,9 +206,6 @@ export default defineComponent({
   }
   &__list-wrapper {
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
   }
   &__list {
     flex-grow: 1;
