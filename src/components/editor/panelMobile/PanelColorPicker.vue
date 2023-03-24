@@ -20,16 +20,9 @@ export default defineComponent({
   components: {
     ColorPicker
   },
-  props: {
-    currEvent: {
-      type: String,
-      required: true
-    }
-  },
   methods: {
     handleDragUpdate(color: string) {
       window.requestAnimationFrame(() => {
-        colorUtils.event.emit(this.currEvent, color)
         colorUtils.setCurrColor(color)
       })
     }
