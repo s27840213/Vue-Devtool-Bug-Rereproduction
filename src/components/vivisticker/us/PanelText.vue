@@ -62,7 +62,9 @@ export default defineComponent({
       scrollProgressStart: 0,
       scrollProgressToFinish: 0,
       scrollTopStart: 0,
-      destScrollProgress: -1 as -1 | 1, // -1 for full button, 1 for mini button
+      scrollTopPrev: 0,
+      scrollDirPrev: -1 as -1 | 1, // -1 for scroll up, 1 for scroll down
+      destScrollProgress: -1 as -1 | 1, // -1 for expanded button, 1 for minimized button
       btnAniStartTime: null as number | null,
       scrollAniStartTime: null as number | null,
       scrollVelocity: 0,
@@ -91,11 +93,14 @@ export default defineComponent({
       this.scrollProgressStart = this.destScrollProgress
     })
     atMainContent.on(['panup', 'pandown'], (e: AnyTouchEvent) => {
-      this.handleMainContentScroll()
+      this.handleMainContentPan()
     })
     atMainContent.on('panend', (e: AnyTouchEvent) => {
       this.isPan = false
     })
+    elMainContent.onscroll = (e: Event) => {
+      this.handleMainContentScroll()
+    }
     // elMainContent.ontouchstart = (e: TouchEvent) => {
     //   console.log('ontouchstart', e)
     //   e.preventDefault()
@@ -227,6 +232,27 @@ export default defineComponent({
       }
     },
     handleMainContentScroll() {
+      const el = this.elMainContent as HTMLElement
+      const dltScroll = el.scrollTop - this.scrollTopPrev
+      const scrollDir = dltScroll > 0 ? 1 : -1
+
+      // ignore scroll bounce
+      if (el.scrollTop <= 0 || el.scrollTop >= el.scrollHeight - el.clientHeight) return
+
+      // play animation when scroll direction changes during scroll (touch event won't fire during scroll on iOS)
+      if (!this.isPan && scrollDir !== this.scrollDirPrev) {
+        this.scrollTopStart = el.scrollTop
+        this.scrollProgress = 0
+        this.destScrollProgress = scrollDir
+        this.btnAniStartTime = null
+        this.updateBtnStyles()
+        this.playBtnAnimation()
+      }
+
+      this.scrollTopPrev = el.scrollTop
+      this.scrollDirPrev = scrollDir
+    },
+    handleMainContentPan() {
       // unlink scroll with animation when animation is playing
       if (this.btnAniStartTime !== null) return
 
@@ -244,7 +270,7 @@ export default defineComponent({
       if (dispScroll > 0) dispScroll -= thScroll
       if (dispScroll < 0) dispScroll += thScroll
 
-      // check for over scroll (scroll up when button is already mini or scroll down when button is already full)
+      // check for over scroll (scroll down when button is already minimized or scroll up when button is already expanded)
       const newScrollProgress = Math.max(Math.min(dispScroll / destScrollTop, 1), -1)
       if (this.scrollProgressStart === 1 && newScrollProgress > 0) {
         this.scrollProgress = 1
@@ -262,7 +288,6 @@ export default defineComponent({
       // update destination scroll progress
       if (dispScroll > 0 && this.scrollProgressStart === -1) this.destScrollProgress = 1
       else if (dispScroll < 0 && this.scrollProgressStart === 1) this.destScrollProgress = -1
-      // console.log(dispScroll, newScrollProgress, this.scrollRateStart, this.destScrollProgress)
     },
     updateBtnStyles() {
       this.scrollProgressToFinish = this.destScrollProgress - this.scrollProgress
@@ -289,7 +314,7 @@ export default defineComponent({
 
       // get relative progress
       if (!this.btnAniStartTime) this.btnAniStartTime = timestamp
-      const duration = 200
+      const duration = 500
       const runtime = timestamp - this.btnAniStartTime
       const relativeProgress = Math.max(Math.min(runtime / duration, 1), 0)
 
