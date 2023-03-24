@@ -45,6 +45,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   detectIfInApp() {
+    console.log((window as any).webkit)
     if ((window as any).webkit === undefined) {
       this.enterBrowserMode()
     }
