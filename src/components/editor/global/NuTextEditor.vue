@@ -80,12 +80,13 @@ export default defineComponent({
         if (!editor.view.composing) {
           toRecord = true
         }
+        console.log('composing before', editor.view.composing)
         const selectionRanges = editor.view.state.selection.ranges
         if (selectionRanges.length > 0) {
           const to = selectionRanges[0].$to.pos
           editor.commands.setTextSelection({ from: to, to })
         }
-        console.log('composing', editor.view.composing)
+        console.log('composing after', editor.view.composing)
       }
       this.$emit('update', { ...tiptapUtils.toIParagraph(newJSON), toRecord })
       if (!isEqual(newJSON, tiptapUtils.prevJSON)) {
