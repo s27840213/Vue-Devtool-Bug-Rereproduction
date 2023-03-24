@@ -45,7 +45,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   detectIfInApp() {
-    this.enterBrowserMode()
+    this.enterBrowserMode() // vivisticker is always in browser mode
   }
 
   enterBrowserMode() {
