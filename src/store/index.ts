@@ -388,13 +388,13 @@ const mutations: MutationTree<IEditorState> = {
     })]
   },
   ADD_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
-    state.pages = state.pages.slice(0, updateInfo.pos).concat(
+    state.pages.splice(updateInfo.pos, 0,
       {
         config: updateInfo.newPage,
         modules: {
           snapUtils: new SnapUtils(-1)
         }
-      }, state.pages.slice(updateInfo.pos))
+      })
   },
   DELETE_page(state: IEditorState, pageIndex: number) {
     state.pages = state.pages.slice(0, pageIndex).concat(state.pages.slice(pageIndex + 1))
