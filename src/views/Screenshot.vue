@@ -249,7 +249,7 @@ export default defineComponent({
             break
           }
           case 'json': {
-            const page = layerFactary.newTemplate(JSON.parse(decodeURIComponent(id ?? ''))) as IPage
+            const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })
