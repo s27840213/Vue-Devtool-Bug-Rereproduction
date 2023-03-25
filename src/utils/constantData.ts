@@ -527,6 +527,10 @@ class ConstantData {
         key: 'penguin',
         label: i18n.global.tc('NN0821'),
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'planet',
+        label: i18n.global.tc('NN0822'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }])
     }]
     return categories as IEffectCategory[]

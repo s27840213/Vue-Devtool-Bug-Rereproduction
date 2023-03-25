@@ -45,7 +45,7 @@ export interface ITextGooey {
 }
 
 const textLetterBgName = [
-  'rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book', 'penguin'
+  'rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book', 'penguin', 'planet'
 ] as const
 export interface ITextLetterBg {
   name: typeof textLetterBgName[number]
