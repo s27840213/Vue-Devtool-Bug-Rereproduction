@@ -764,6 +764,9 @@ class DesignUtils {
           store.commit('SET_assetIndex', designData.asset_index)
         }
         await uploadUtils.getDesign('design', { designId: assetId, teamId, fetchTarget: designData.url_map['config.json'] }, params)
+        if (!isSelfDesign) {
+          await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+        }
         return
       case 1:
         notify({ group: 'error', text: i18n.global.t('SKT0019') })
