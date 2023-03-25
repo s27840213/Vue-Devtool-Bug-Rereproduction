@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-text" :class="{'in-category': isInCategory}")
+div(class="panel-text" :class="{'in-category': isInCategory, 'in-editor': isInEditor}")
   category-list(v-for="item in categoryListArray"
     v-show="item.show" :ref="item.key" :key="item.key"
     :list="item.content" @loadMore="handleLoadMore")
@@ -74,7 +74,7 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
-        await this.getRecently({ writeBack: true })
+        await this.getRecently({ writeBack: true, key: 'textStock' })
         await this.getContent()
       })
 
@@ -267,6 +267,7 @@ export default defineComponent({
       const btn = this.$refs.btnAddText as HTMLElement
       const txt = this.$refs.txtAddText as HTMLElement
       const icon = this.$refs.iconAddText as HTMLElement
+      if (!btn || !txt || !icon) return
 
       const btnWidth = Math.max(Math.min(this.btnMaxWidth, this.btnMaxWidth * rScrollRate), btn.clientHeight)
       btn.style.maxWidth = btnWidth + 'px'
@@ -367,6 +368,12 @@ export default defineComponent({
   &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;
   }
+  &.in-editor {
+    padding-top: 0;
+  }
+  &.in-editor::v-deep .vue-recycle-scroller__item-wrapper {
+    margin-top: 0;
+  }
   &__header {
     grid-column: 1 / 4;
     line-height: 26px;
@@ -375,8 +382,8 @@ export default defineComponent({
     text-align: left;
   }
   &__text-button-wrapper {
-    position: fixed;
-    inset: auto 40px 81px 40px;
+    position: absolute;
+    inset: auto 40px 24px 40px;
     max-width: 310px;
     display: flex;
     align-items: center;
