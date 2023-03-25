@@ -67,6 +67,9 @@ export default defineComponent({
       isShowSearchBar: false
     }
   },
+  deactivated() {
+    if (!this.keyword) this.isShowSearchBar = false
+  },
   computed: {
     ...mapState('objects', {
       keywordStatic: 'keyword'

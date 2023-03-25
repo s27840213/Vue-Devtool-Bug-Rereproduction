@@ -94,6 +94,7 @@ import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
+import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 import i18n from '@/i18n'
 
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
@@ -139,6 +140,7 @@ export default defineComponent({
     PanelObject,
     PanelBackground,
     PanelText,
+    PanelTextUs,
     PanelFile,
     PanelBrand,
     PanelPage,
@@ -319,6 +321,9 @@ export default defineComponent({
       switch (this.currActivePanel) {
         case 'download': {
           return 'popup-download'
+        }
+        case 'text': {
+          return 'panel-text' + (this.$i18n.locale === 'us' ? '-us' : '')
         }
         // case 'replace': {
         //   return `panel-${this.innerTab}`

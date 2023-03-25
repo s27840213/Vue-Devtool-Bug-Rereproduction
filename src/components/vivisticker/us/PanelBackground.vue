@@ -141,6 +141,9 @@ export default defineComponent({
       isShowSearchBar: false
     }
   },
+  deactivated() {
+    if (!this.keyword) this.isShowSearchBar = false
+  },
   computed: {
     navStyles() {
       return {
