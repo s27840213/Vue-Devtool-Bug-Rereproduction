@@ -175,7 +175,8 @@ export default defineComponent({
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...this.genearlLayerTabs,
         ...this.copyPasteTabs,
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
+        // hide copy-style for vivisticker for now
+        // { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
       ]
     },
     fontTabs(): Array<IFooterTab> {
@@ -195,7 +196,8 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
+        // hide copy-style for vivisticker for now
+        // { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
     multiPhotoTabs(): Array<IFooterTab> {
@@ -277,10 +279,12 @@ export default defineComponent({
       ]
     },
     copyPasteTabs(): Array<IFooterTab> {
-      return this.editorTypeTextLike ? [
-        { icon: 'copy', text: `${this.$t('NN0032')}` },
-        { icon: 'paste', text: `${this.$t('NN0230')}` }
-      ] : []
+      // hide copy and paste for vivisticker for now
+      // return this.editorTypeTextLike ? [
+      //   { icon: 'copy', text: `${this.$t('NN0032')}` },
+      //   { icon: 'paste', text: `${this.$t('NN0230')}` }
+      // ] : []
+      return []
     },
     tabs(): Array<IFooterTab> {
       const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
