@@ -290,6 +290,12 @@ export default Extension.create({
           },
           'min-width': cssBaseAttr('min-width'),
           'min-height': cssBaseAttr('min-height'),
+          backgroundImage: cssBaseAttr('backgroundImage'),
+          backgroundSize: cssBaseAttr('backgroundSize'),
+          backgroundPosition: cssBaseAttr('backgroundPosition'),
+          opacity: cssBaseAttr('opacity'),
+          '-webkit-text-fill-color': cssBaseAttr('-webkit-text-fill-color'),
+          '-webkit-background-clip': cssBaseAttr('-webkit-background-clip'),
         }
       }, {
         types: ['paragraph'],

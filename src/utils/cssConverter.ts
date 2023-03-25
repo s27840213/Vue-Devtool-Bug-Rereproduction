@@ -4,13 +4,18 @@
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 
-interface IStyleMap {
-  [key: string]: string
-}
+const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
+const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
+  'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
+  'min-width', 'min-height', 'backgroundImage', 'backgroundSize', 'backgroundPosition',
+  'opacity', '-webkit-text-fill-color', '-webkit-background-clip'
+] as const
 
-const styleMap = {
-  width: 'width',
-  height: 'height',
+type IStyleMap = Record<typeof fontProps[number], string>
+
+const styleMap = Object.assign({}, ...fontProps.map(prop => // Transfer camelCase to dash-case by default
+  ({ [prop]: prop.replace(/([A-Z])/g, upper => `-${upper.toLowerCase()}`) })
+), { // Overwrite special case
   x: 'translateX',
   y: 'translateY',
   scaleX: 'scaleX',
@@ -18,22 +23,12 @@ const styleMap = {
   font: 'font-family',
   weight: '-webkit-text-stroke-width',
   align: 'text-align',
-  lineHeight: 'line-height',
   fontSpacing: 'letter-spacing',
   size: 'font-size',
-  color: 'color',
-  opacity: 'opacity',
-  writingMode: 'writing-mode',
   decoration: 'text-decoration-line',
   style: 'font-style',
-  caretColor: 'caret-color',
-} as IStyleMap
-
-const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
-const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
-  'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
-  'min-width', 'min-height'
-]
+} as Partial<IStyleMap>
+) as IStyleMap
 
 class CssConveter {
   convertTransformStyle(x: number, y: number, zindex: number, rotate: number, cancel3D = false, contentScaleRatio = 1): { transform: string } {
@@ -104,7 +99,7 @@ class CssConveter {
 
     // convert properties excluding transform properties
     Object.entries(tmp).forEach(([k, v]) => {
-      result[styleMap[k]] = typeof v === 'number' ? `${v}px` : `${v}`
+      result[styleMap[k as keyof IStyleMap]] = typeof v === 'number' ? `${v}px` : `${v}`
     })
 
     return result

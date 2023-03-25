@@ -3,7 +3,7 @@ div(class="text-effect-setting mt-25")
   //- Tabs to choose effect category: shadow, shape and bg.
   div(class="text-effect-setting-tabs")
     span(v-for="category in textEffects"
-        :selected="currTab===category.name"
+        :selected="currCategoryName===category.name"
         @click="switchTab(category.name)") {{category.label}}
   div(class="action-bar")
     template(v-for="effects1d in currCategory.effects2d")
@@ -107,7 +107,8 @@ export default defineComponent({
       selectedTextProps: 'props'
     }),
     currCategoryName(): 'shadow'|'bg'|'shape'|'fill' {
-      return this.currTab
+      return ['shadow', 'bg', 'shape', 'fill'].includes(this.currTab)
+        ? this.currTab : 'shadow'
     },
     currCategory(): IEffectCategory {
       return _.find(this.textEffects, ['name', this.currCategoryName]) as IEffectCategory

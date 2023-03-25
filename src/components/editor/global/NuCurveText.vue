@@ -10,7 +10,7 @@ p(class="nu-curve-text__p" :style="pStyle()")
 </template>
 
 <script lang="ts">
-import { IGroup, ISpan, IText } from '@/interfaces/layer'
+import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -89,7 +89,7 @@ export default defineComponent({
         ...textShadow.duplicatedSpan
       } : {}
     },
-    transParentStyles(): {[key: string]: any} {
+    transParentStyles(): {[key: string]: string} {
       return this.isTransparent ? {
         color: 'rgba(0, 0, 0, 0)',
         '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
@@ -120,7 +120,7 @@ export default defineComponent({
     spans(): ISpan[] {
       return TextShapeUtils.flattenSpans(this.config)
     },
-    pStyle(): any {
+    pStyle(): Record<string, string | number> {
       const { height, width, scale } = this.config.styles
       return {
         margin: 0,
@@ -128,11 +128,11 @@ export default defineComponent({
         width: `${width / scale}px`
       }
     },
-    circleStyle(): any {
+    circleStyle(): Record<string, string> {
       const { minHeight, scaleRatio } = this
       const bend = this.bend()
       const borderWidth = `${1 / (scaleRatio * 0.01)}px`
-      const style = {} as any
+      const style = {} as Record<string, string|number>
       const radius = 1000 / Math.pow(Math.abs(bend), 0.6)
       if (bend >= 0) {
         style.top = `${minHeight / 2}px`
@@ -149,7 +149,7 @@ export default defineComponent({
         width: `${radius * 2}px`
       }
     },
-    curveIconStyle(): any {
+    curveIconStyle(): Record<string, string> {
       const { config: { styles }, scaleRatio } = this
       const size = 13 / (scaleRatio * 0.01)
       return {
@@ -160,7 +160,7 @@ export default defineComponent({
     transforms(): string[] {
       return TextShapeUtils.convertTextShape(this.textWidth, this.bend())
     },
-    styles(styles: any, idx: number) {
+    styles(styles: ISpanStyle, idx: number) {
       const { textHeight, minHeight } = this
       const bend = this.bend()
       const transforms = this.transforms()

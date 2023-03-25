@@ -93,6 +93,7 @@ export default defineComponent({
       },
       textBg: {} as CustomElementConfig | null,
       textFillBg: {} as CustomElementConfig | null,
+      textFillSpanStyle: [] as Record<string, string | number>[]
     }
   },
   created() {
@@ -148,15 +149,19 @@ export default defineComponent({
       handler(newVal) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
         this.drawTextBg()
-        textUtils.untilFontLoaded(newVal).then(() => {
+        textUtils.untilFontLoaded(newVal).then(async () => {
           this.drawTextBg()
+          this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
         })
       }
     },
     'config.styles.width'() { this.drawTextBg() },
     'config.styles.height'() { this.drawTextBg() },
     'config.styles.textBg'() { this.drawTextBg() },
-    'config.styles.textFill'() { this.textFillBg = textFillUtils.drawTextFill(this.config) },
+    async 'config.styles.textFill'() {
+      this.textFillBg = textFillUtils.drawTextFill(this.config)
+      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+    },
   },
   methods: {
     textWrapperStyle(): Record<string, string> {
@@ -190,24 +195,24 @@ export default defineComponent({
       }
     },
     bodyStyles(): Record<string, string|number> {
-      let opacity = this.getOpacity()
+      const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
-      const textFillStyle = textFillUtils.convertTextEffect(this.config.styles)
-      opacity *= textFillStyle.div?.opacity as number ?? 1
       return {
         width: isVertical ? 'auto' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        ...textFillStyle.div,
         opacity,
       }
     },
     spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
       const textBg = this.config.styles.textBg
       const span = p.spans[sIndex]
+      const flattenSpanIndex = _.findIndex(config.paragraphs, p)
+      const textFillStyle = this.textFillSpanStyle[flattenSpanIndex] ?? {}
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
         isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},
+        textFillStyle,
       )
     },
     pStyle(styles: IParagraphStyle) {
@@ -256,7 +261,7 @@ export default defineComponent({
       }
       this.drawTextBg()
     },
-    resizeAfterFontLoaded() {
+    async resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(() => {
@@ -264,6 +269,8 @@ export default defineComponent({
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawTextBg()
+      this.textFillBg = textFillUtils.drawTextFill(this.config)
+      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
     }
   }
 })

@@ -63,7 +63,6 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import SubCtrlUtils from '@/utils/subControllerUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -354,9 +353,7 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const layer = LayerUtils.getCurrConfig as IText
-      const textFillDivStyle = textFillUtils.convertTextEffect(layer.styles).div ?? {}
-      const returnedStyles = Object.assign({}, textFillDivStyle,
+      const returnedStyles = Object.assign({},
         !(this.isCurveText || this.isFlipped) ? {
           width: `${this.config.styles.width / this.config.styles.scale}px`,
           height: `${this.config.styles.height / this.config.styles.scale}px`,
@@ -370,7 +367,6 @@ export default defineComponent({
           left: 0,
           opacity: this.config.contentEditable ? 1 : 0
         })
-      returnedStyles.opacity *= textFillDivStyle.opacity as number ?? 1
       return returnedStyles
     },
     textStyles(styles: any) {

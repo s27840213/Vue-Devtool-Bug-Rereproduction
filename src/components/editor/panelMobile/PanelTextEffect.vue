@@ -100,8 +100,7 @@ export default defineComponent({
     },
     currEffect(): IEffect | null {
       if (!this.currCategory) return null
-      return _.find(this.effectList, ['key',
-        this.currentStyle.name]) as IEffect
+      return _.find(this.effectList, ['key', this.currentStyle.name]) ?? null
     },
     historySize(): number {
       return this.panelHistory.length

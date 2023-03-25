@@ -47,7 +47,7 @@ function obj2Point(p: { x: number, y: number }) {
   return new Point(p.x, p.y)
 }
 
-class Rect {
+export class Rect {
   bodyRect = new DOMRect()
   vertical = false
   width = 0
@@ -284,10 +284,10 @@ class Rect {
     })
   }
 
-  preprocess() {
+  preprocess({ skipMergeLine } = { skipMergeLine: false }) {
     const { vertical } = this
     if (vertical) this.xyExchange()
-    this.mergeLine()
+    if (!skipMergeLine) this.mergeLine()
     this.expandEmptyLine()
     this.coordinateInit()
   }

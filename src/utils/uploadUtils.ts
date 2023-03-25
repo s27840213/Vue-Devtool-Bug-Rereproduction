@@ -1360,6 +1360,7 @@ class UploadUtils {
           align: styles.align,
           textEffect: styles.textEffect,
           textBg: styles.textBg,
+          textFill: styles.textFill,
           textShape: styles.textShape,
           type: styles.type,
           userId: styles.userId

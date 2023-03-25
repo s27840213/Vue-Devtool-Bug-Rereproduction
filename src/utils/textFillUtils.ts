@@ -1,16 +1,19 @@
 import { IAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { ITextFill } from '@/interfaces/format'
-import { AllLayerTypes, IText, ITextStyle } from '@/interfaces/layer'
+import { ITextFill, ITextFillConfig } from '@/interfaces/format'
+import { AllLayerTypes, IText } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
+import { Rect } from './textBgUtils'
+import tiptapUtils from './tiptapUtils'
 
 class TextFill {
   // private currColorKey = ''
   effects = {} as Record<string, Record<string, string | number | boolean>>
+  tempTextFill = [] as Record<string, string | number>[]
   constructor() {
     this.effects = this.getDefaultEffects()
   }
@@ -31,24 +34,52 @@ class TextFill {
     }
   }
 
-  convertTextEffect(styles: ITextStyle): Partial<Record<'div' | 'p' | 'span', Record<string, string | number>>> {
-    const textFill = styles.textFill
-    if (textFill.name === 'none') return {}
+  calcTextFillVar(config: IText) {
+    const textFill = config.styles.textFill as ITextFillConfig
+    const img = store.getters['file/getImages'][0] as IAssetPhoto
+    const layerScale = config.styles.scale
+    const divWidth = config.styles.width / layerScale
+    const divHeight = config.styles.height / layerScale
+    const widthRatio = img.width / divWidth
+    const heightRatio = img.height / divHeight
+    // If true and textFill.size is 100, that mean img width === layer width
+    const scaleByWidth = widthRatio < heightRatio
+    const imgRatio = textFill.size / 100 / (scaleByWidth ? widthRatio : heightRatio)
+    const imgWidth = img.width * imgRatio
+    const imgHeight = img.height * imgRatio
+    return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth }
+  }
+
+  async convertTextEffect(config: IText): Promise<Record<string, string | number>[]> {
+    const { textFill } = config.styles
+    if (textFill.name === 'none') return []
 
     const img = store.getters['file/getImages'][0] as IAssetPhoto
-    const widthRatio = img.width / styles.width
-    const heightRatio = img.height / styles.height
+    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
 
-    return {
-      div: {
-        background: `url("${img.urls.original}")`,
-        backgroundSize: widthRatio < heightRatio ? `${textFill.size}% auto` : `auto ${textFill.size}%`,
-        backgroundPosition: `${textFill.xOffset200 / 2 + 50}% ${textFill.yOffset200 / 2 + 50}%`,
+    const myRect = new Rect()
+    await myRect.init(config)
+    myRect.preprocess({ skipMergeLine: true })
+    const { rects } = myRect.get()
+
+    this.tempTextFill = rects.map((rect) => {
+      const { width: spanWidth, height: spanHeight } = rect
+      const bgSizeBy = textFill.size * (scaleByWidth ? divWidth / spanWidth : divHeight / spanHeight)
+      return {
+        backgroundImage: `url("${img.urls.original}")`,
+        backgroundSize: scaleByWidth ? `${bgSizeBy}% auto` : `auto ${bgSizeBy}%`,
+        backgroundPosition: `
+          ${(rect.x + (imgWidth - divWidth) * (0.5 + textFill.xOffset200 / 200)) * -1}px
+          ${(rect.y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)) * -1}px`,
+        // backgroundRepaet: 'no-repeat',
         opacity: textFill.opacity / 100,
         '-webkit-text-fill-color': 'transparent',
         '-webkit-background-clip': 'text',
-      },
-    }
+      }
+    })
+    tiptapUtils.updateHtml() // Refresh tiptap span style
+
+    return this.tempTextFill
   }
 
   drawTextFill(config: IText): CustomElementConfig | null {
@@ -56,21 +87,17 @@ class TextFill {
     if (textFill.name === 'none') return null
 
     const img = store.getters['file/getImages'][0] as IAssetPhoto
-    const widthRatio = img.width / config.styles.width
-    const heightRatio = img.height / config.styles.height
-    const layerScale = config.styles.scale
-    // If true and textFill.size is 100, that mean img width === layer width
-    const scaleByWidth = widthRatio < heightRatio
-    const imgRatio = textFill.size / 100 / (scaleByWidth ? widthRatio : heightRatio)
+    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
 
     return textFill.focus ? {
       tag: 'img',
       attrs: { src: img.urls.prev },
       style: {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
-        top: `-${(textFill.yOffset200 / 2 + 50) / 100 * (img.height * imgRatio - config.styles.height) / layerScale}px`,
-        left: `-${(textFill.xOffset200 / 2 + 50) / 100 * (img.width * imgRatio - config.styles.width) / layerScale}px`,
-        opacity: textFill.opacity / 200
+        top: `-${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)}px`,
+        left: `-${(imgWidth - divWidth) * (0.5 + textFill.xOffset200 / 200)}px`,
+        opacity: textFill.opacity / 200,
+        // opacity: textFill.opacity / 100,
       }
     } : null
   }
@@ -129,7 +156,6 @@ class TextFill {
         localStorageUtils.set('textEffectSetting', effect, newTextFill)
         // this.syncShareAttrs(textFill, null)
       } else { // Switch to other effect.
-        console.log('eff', effect, defaultAttrs)
         // this.syncShareAttrs(textFill, effect)
         const localAttrs = localStorageUtils.get('textEffectSetting', effect)
         Object.assign(newTextFill, defaultAttrs, localAttrs, attrs, { name: effect })
