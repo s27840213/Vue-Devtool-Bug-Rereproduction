@@ -25,7 +25,7 @@ div(class="panel-text" :class="{'in-category': isInCategory}")
               iconColor="balck-1"
               iconWidth="24px")
             div(class="overline-SM") RECENTLY USED
-          CategoryTextPrev(v-else :item="item" @click="addText(item)")
+          CategoryTextPreview(v-else :item="item" @click="addText(item)")
   div(v-if="!showAllRecently" class="panel-text__text-button-wrapper" ref="btnAddText"
       :style="`font-family: ${localeFont()}`"
       @click="handleAddText")
@@ -36,7 +36,7 @@ div(class="panel-text" :class="{'in-category': isInCategory}")
 
 <script lang="ts">
 import { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryTextPrev from '@/components/vivisticker/us/CategoryTextPrev.vue'
+import CategoryTextPreview from '@/components/vivisticker/us/CategoryTextPreview.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -53,7 +53,7 @@ export default defineComponent({
   name: 'panel-text-us',
   extends: PanelText,
   components: {
-    CategoryTextPrev
+    CategoryTextPreview: CategoryTextPreview
   },
   data() {
     return {
