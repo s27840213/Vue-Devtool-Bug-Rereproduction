@@ -5,15 +5,15 @@ div(class="mobile-panel"
     v-click-outside="vcoConfig()"
     ref="panel")
   div(v-if="!noHeaderTheme" class="mobile-panel__top-section"
-    :class="{'self-padding': noPaddingTheme}")
+    :class="{'self-padding': noPaddingTheme, 'insert-us': insertTheme && isUs }")
     div(class="mobile-panel__drag-bar"
-      :class="{'visible-hidden': panelTitle !== '' || fixSize || extraFixSizeCondition}"
+      :class="{'visible-hidden': (!insertTheme && !isUs && panelTitle !== '') || fixSize || extraFixSizeCondition}"
       @pointerdown="dragPanelStart"
       @touchstart="disableTouchEvent")
         div
     div
       div(class="mobile-panel__btn mobile-panel__left-btn"
-          :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn, 'insert': insertTheme}")
+          :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn, 'insert': insertTheme, 'us': isUs}")
         svg-icon(
           class="click-disabled"
           :iconName="leftBtnName"
@@ -29,7 +29,7 @@ div(class="mobile-panel"
         div(v-if="currActivePanel === 'multiple-select'" class="mobile-panel__layer-num")
           span(class="label-sm text-white") {{selectedLayerNum}}
       div(class="mobile-panel__btn mobile-panel__right-btn"
-          :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn, 'insert': insertTheme}")
+          :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn, 'insert': insertTheme, 'us': isUs}")
         svg-icon(
           class="click-disabled"
           :iconName="rightBtnName"
@@ -189,10 +189,17 @@ export default defineComponent({
       currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       isInCategory: 'vivisticker/getIsInCategory',
+      isShowAllRecently: 'vivisticker/getShowAllRecently',
       isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
+    isUs(): boolean {
+      return this.$i18n.locale === 'us'
+    },
     isTextInCategory(): boolean {
       return this.isInCategory('text')
+    },
+    isTextShowAllRecently(): boolean {
+      return this.isShowAllRecently('text')
     },
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -249,6 +256,9 @@ export default defineComponent({
         }
         case 'copy-style': {
           return `${this.$t('NN0809')}`
+        }
+        case 'text': {
+          return this.isTextShowAllRecently && this.isUs ? `${this.$t('NN0024')}` : ''
         }
         case 'none': {
           return ''
@@ -323,7 +333,7 @@ export default defineComponent({
           return 'popup-download'
         }
         case 'text': {
-          return 'panel-text' + (this.$i18n.locale === 'us' ? '-us' : '')
+          return 'panel-text' + (this.isUs ? '-us' : '')
         }
         // case 'replace': {
         //   return `panel-${this.innerTab}`
@@ -695,6 +705,9 @@ export default defineComponent({
       justify-content: space-between;
       align-items: center;
     }
+    &.insert-us {
+      padding-top: 25px;
+    }
   }
 
   &__btn {
@@ -703,10 +716,22 @@ export default defineComponent({
 
   &__left-btn.insert {
     transform: translate(-2px, -6px);
+    &.us{
+      transform: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   &__right-btn.insert {
     transform: translate(-6px, -4px);
+    &.us{
+      transform: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   &__btn-click-zone {
