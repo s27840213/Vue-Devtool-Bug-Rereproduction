@@ -196,8 +196,8 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        // hide copy-style for vivisticker for now
-        // { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` },
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
     multiPhotoTabs(): Array<IFooterTab> {
@@ -320,7 +320,9 @@ export default defineComponent({
       } else if ((this.showPhotoTabs || targetType === LayerType.image) && !controllerHidden) {
         return this.photoTabs
       } else if (this.showFontTabs) {
-        return [...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
+        const res = [...this.fontTabs]
+        res.splice(this.fontTabs.length - 2, 0, ...this.genearlLayerTabs, ...this.copyPasteTabs)
+        return res
       } else if (this.showShapeSetting) {
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.showGeneralTabs) {
@@ -600,6 +602,12 @@ export default defineComponent({
         }
         case 'paste': {
           shortcutUtils.paste()
+          break
+        }
+        case 'vivisticker_duplicate': {
+          shortcutUtils.copy().then(() => {
+            shortcutUtils.paste()
+          })
           break
         }
         case 'brush': {
