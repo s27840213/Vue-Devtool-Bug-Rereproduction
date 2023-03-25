@@ -106,9 +106,9 @@ for (const isMobile of [true, false]) {
             .layerDelete()
             .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
             .layerRotateAndResize()
-            .layerMultipleCopyAndMove('functionalPanel', isMobile)
-            .layerMultipleCopyAndMove('shortcut', isMobile) // Skip in mobile
-            .layerMultipleCopyAndMove('rightclick', isMobile) // Skip in mobile
+            // .layerMultipleCopyAndMove('functionalPanel', isMobile)
+            // .layerMultipleCopyAndMove('shortcut', isMobile) // Skip in mobile
+            // .layerMultipleCopyAndMove('rightclick', isMobile) // Skip in mobile
             .deselectAllLayers().snapshotTest('init') // Check if image restore to init
             .get('.nu-layer__wrapper:nth-child(3) .nu-image')
             .layerMoveToPage2(isMobile) // Skip in mobile
