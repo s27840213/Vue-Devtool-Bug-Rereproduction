@@ -10,7 +10,8 @@ div(class="nu-group"
     :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
     :config="layer"
-    :isSubLayer="true")
+    :isSubLayer="true"
+    :inPreview="inPreview")
 </template>
 
 <script lang="ts">
@@ -39,6 +40,10 @@ export default defineComponent({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   methods: {
