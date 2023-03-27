@@ -4,6 +4,7 @@ import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText, ITmp
 import { LayerProcessType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import { isEqual } from 'lodash'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import localeUtils from './localeUtils'
 import mouseUtils from './mouseUtils'
@@ -314,6 +315,7 @@ class LayerFactary {
      * 6: font is in wrong format (e.g. contains a comma)
      * 7: span has no font
      * 8: span contains invalid unicode characters (which breaks emoji)
+     * 9: replace textShape and textEffect value {} to {name: none}
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -392,6 +394,10 @@ class LayerFactary {
           })
         }
       }
+    }
+    // 9: replace textShape and textEffect value {} to {name: none}
+    for (const key of ['textShape', 'textEffect'] as const) {
+      if (isEqual(basicConfig.styles[key], {})) basicConfig.styles[key] = { name: 'none' }
     }
     return Object.assign(basicConfig, config)
   }
