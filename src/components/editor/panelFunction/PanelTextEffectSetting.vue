@@ -292,7 +292,7 @@ export default defineComponent({
     }
     &--number {
       box-sizing: border-box;
-      width: 30px;
+      width: 35px;
       height: 25px;
       border: 1px solid setColor(gray-4);;
       border-radius: 3px;
