@@ -138,7 +138,11 @@ class TextPropUtils {
     }
   }
 
-  removeInvalidStyles(paragraphs: IParagraph[], isVertical: boolean, isCompensated?: boolean, pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void) {
+  removeInvalidStyles(
+    paragraphs: IParagraph[], isVertical: boolean, isCompensated?: boolean,
+    pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void,
+    pPostHandler?: (paragraph: IParagraph) => void, spanPostHandler?: (span: ISpan) => void
+  ) {
     const minimumFontSize = this.getMinimumFontSize()
     paragraphs.forEach((p) => {
       pHandler && pHandler(p)
@@ -184,7 +188,9 @@ class TextPropUtils {
         if (span.styles.size < minimumFontSize && !isCompensated) {
           span.styles.size = minimumFontSize
         }
+        spanPostHandler && spanPostHandler(span)
       }
+      pPostHandler && pPostHandler(p)
     })
   }
 

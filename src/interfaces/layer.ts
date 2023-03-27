@@ -55,8 +55,8 @@ export interface ILayer<T extends IStyle = IStyle> {
 
 export interface ITextStyle extends IStyle {
   writingMode: string
-  textShape: ITextShape | Record<string, never>
-  textEffect: ITextEffect | Record<string, never>
+  textShape: ITextShape
+  textEffect: ITextEffect
   textBg: ITextBgEffect
   align: string
 }
