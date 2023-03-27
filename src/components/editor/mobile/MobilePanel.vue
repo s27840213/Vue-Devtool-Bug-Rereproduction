@@ -67,6 +67,7 @@ import PanelBleed from '@/components/editor/panelMobile/PanelBleed.vue'
 import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
 import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
+import PanelDownload from '@/components/editor/panelMobile/PanelDownload.vue'
 import PanelFlip from '@/components/editor/panelMobile/PanelFlip.vue'
 import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
 import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
@@ -154,6 +155,7 @@ export default defineComponent({
     PanelColor,
     PanelAdjust,
     PanelTextEffect,
+    PanelDownload,
     PanelPhotoShadow,
     PanelObjectAdjust,
     PanelBrandList,
@@ -224,7 +226,7 @@ export default defineComponent({
       return [
         'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'multiple-select'].includes(this.currActivePanel)
+        'font-spacing', 'more', 'object-adjust', 'brand-list', 'multiple-select'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
@@ -317,9 +319,6 @@ export default defineComponent({
       const defaultVal = `panel-${this.currActivePanel}`
 
       switch (this.currActivePanel) {
-        case 'download': {
-          return 'popup-download'
-        }
         case 'replace': {
           return `panel-${this.innerTab}`
         }
@@ -347,7 +346,8 @@ export default defineComponent({
         case 'download': {
           return {
             hideContainer: true,
-            pageIndex: pageUtils.currFocusPageIndex
+            pageIndex: pageUtils.currFocusPageIndex,
+            panelHistory: this.panelHistory
           }
         }
         case 'text-effect': {

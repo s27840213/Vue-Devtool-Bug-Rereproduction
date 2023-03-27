@@ -27,10 +27,10 @@
 //   }
 // })
 
-import { createI18n } from 'vue-i18n'
-import us from '@/locales/us.json'
-import tw from '@/locales/tw.json'
 import jp from '@/locales/jp.json'
+import tw from '@/locales/tw.json'
+import us from '@/locales/us.json'
+import { createI18n } from 'vue-i18n'
 
 /**
  * Load locale messages
