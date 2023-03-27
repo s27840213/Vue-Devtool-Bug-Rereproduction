@@ -264,6 +264,9 @@ export default defineComponent({
       }
     },
     showRightBtn(): boolean {
+      if (this.currActivePanel === 'download') {
+        return this.panelHistory.length < 2
+      }
       return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
@@ -409,6 +412,7 @@ export default defineComponent({
         case 'text-effect':
         case 'photo-shadow':
           return { pushHistory, openExtraColorModal }
+        case 'download':
         case 'brand-list':
           return {
             pushHistory,

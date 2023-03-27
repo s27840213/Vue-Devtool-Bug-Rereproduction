@@ -35,7 +35,7 @@ export default defineComponent({
       selectedDetailPage,
       selectedDev = 1,
       ...prevSubmission
-    } = JSON.parse(localStorage.getItem(submission) || '{}')
+    } = JSON.parse(this.$isTouchDevice() ? '{}' : localStorage.getItem(submission) || '{}')
 
     const typeOptions = [
       { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
@@ -74,6 +74,7 @@ export default defineComponent({
       ...prevInfo,
       currentPageIndex,
       polling: false,
+      downloaded: false,
       progress: -1,
       exportId: '',
       functionQueue: [] as Array<() => void>,
@@ -130,6 +131,30 @@ export default defineComponent({
         }
       }
     },
+    selectedBleed: {
+      get(): number {
+        return this.selected.bleed ?? 0
+      },
+      set(curr: 0 | 1 | 2 | false | true) {
+        this.selected.bleed = Number(curr) as 0 | 1
+      }
+    },
+    selectedOmitBg: {
+      get(): number {
+        return this.selected.omitBackground ?? 0
+      },
+      set(curr: 0 | 1 | false | true) {
+        this.selected.omitBackground = Number(curr) as 0 | 1
+      }
+    },
+    selectedOutline: {
+      get(): number {
+        return this.selected.outline ?? 1
+      },
+      set(curr: 0 | 1 | 2 | false | true) {
+        this.selected.outline = Number(curr) as 0 | 1
+      }
+    },
     isButtonDisabled(): boolean {
       const { rangeType, pageRange } = this
       const noPagesSelected = rangeType === 'spec' && pageRange.length === 0
@@ -145,6 +170,46 @@ export default defineComponent({
     selectedDevLabel(): string {
       const { selectedDev, devs } = this
       return devs.find(option => option.value === selectedDev)?.label ?? ''
+    },
+    rangeTypeText(): string {
+      switch (this.rangeType) {
+        case 'all':
+          return `${this.$t('NN0126')}`
+        case 'spec':
+          return `${this.$t('NN0127')} ${this.selectedPageIndexText}`
+        case 'current':
+          return `${this.$t('NN0125')}（${this.$t('NN0134', { num: `${this.currentPageIndex + 1}` })}）`
+        default:
+          return ''
+      }
+    },
+    selectedPageIndexText(): string {
+      const tmp = [...this.pageRange]
+      tmp.sort((a, b) => a - b)
+
+      // covert array of boolean to [[1,2,3], [5,6], [8]]
+      const pageSelectedGroup = tmp.reduce((prev, curr): Array<Array<number>> => {
+        const lastIndex = prev.length - 1
+        if (prev[lastIndex] && prev[lastIndex][prev[lastIndex].length - 1] + 1 === curr) {
+          prev[lastIndex].push(curr)
+        } else {
+          prev.push([curr])
+        }
+        return prev
+      }, [])
+      // covert array of boolean to [[1,2,3], [5,6], [8]]
+      // const pageSelectedGroup = preSelected
+      //   .reduce((prev: Array<number[]>, curr: boolean, idx: number) => {
+      //     const lastIndex = prev.length - 1
+      //     curr ? (prev[lastIndex].push(idx + 1)) : (prev.push([]))
+      //     return prev
+      //   }, [[]] as Array<number[]>)
+
+      const result = pageSelectedGroup
+        .map((group: Array<number>) => group.length > 1 ? `${group[0] + 1}-${group.pop()! + 1}` : group[0] + 1)
+        .join(',')
+
+      return result
     }
   },
   mounted() {
@@ -344,6 +409,7 @@ export default defineComponent({
             } else {
               this.polling = false
               this.progress = 0
+              this.downloaded = true
             }
           }, 1000)
           break
