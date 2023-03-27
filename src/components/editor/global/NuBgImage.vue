@@ -323,11 +323,14 @@ export default defineComponent({
     dblTap(e: PointerEvent) {
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
-          this.setBgImageControl({
-            pageIndex: this.pageIndex,
-            imgControl: true
-          })
-          editorUtils.setCurrActivePanel('crop')
+          if (this.image.config.srcObj.type) {
+            console.warn(this.image.config.srcObj)
+            this.setBgImageControl({
+              pageIndex: this.pageIndex,
+              imgControl: true
+            })
+            editorUtils.setCurrActivePanel('crop')
+          }
         }
       })
     },
