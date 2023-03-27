@@ -483,18 +483,19 @@ export default defineComponent({
     },
     copyAndApplySelectedFormat() {
       if (!this.isFormatApplicable) return
-      const page = generalUtils.deepCopy(this.getPage(pageUtils.currFocusPageIndex))
+      const pageIndex = pageUtils.currFocusPageIndex
+      const page = generalUtils.deepCopy(this.getPage(pageIndex))
       page.designId = ''
       page.id = generalUtils.generateRandomString(8)
       this.addPageToPos({
         newPage: page,
-        pos: pageUtils.currFocusPageIndex + 1
+        pos: pageIndex + 1
       })
       groupUtils.deselect()
-      this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-      this.applySelectedFormat(false, pageUtils.currFocusPageIndex)
+      this.setCurrActivePageIndex(pageIndex + 1)
+      this.applySelectedFormat(false, pageIndex + 1)
       stepsUtils.record()
-      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex) })
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageIndex + 1) })
     },
     submit: throttle(function(this: any) {
       // Use throttle to prevent submit multiple times.
