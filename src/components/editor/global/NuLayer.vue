@@ -5,7 +5,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
       :class="!config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : ''"
       :style="layerStyles(div.noShadow, div.isTransparent)"
       :ref="div.main ? 'body' : ''"
-      :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
+      :id="div.main && !inPreview ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
       :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
       :data-p-index="pageIndex"
       @pointerdown="div.main ? onPointerDown($event) : null"
@@ -21,7 +21,8 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
         nu-clipper(:config="config"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :primaryLayer="primaryLayer"
-            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
+            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio"
+            :inPreview="inPreview")
           component(:is="`nu-${config.type}`"
             class="transition-none"
             :config="config"
@@ -33,7 +34,8 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
             :primaryLayer="primaryLayer"
             :forRender="forRender"
             :isTransparent="div.isTransparent"
-            :noShadow="div.noShadow")
+            :noShadow="div.noShadow"
+            :inPreview="inPreview")
         svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !controllerHidden && !forRender"
           :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-html="frameClipFormatter(config.clipPath)"
@@ -43,7 +45,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
   div(class="nu-layer__line-mover"
     :style="lineMoverStyles()"
     ref="lineMover"
-    :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    :id="inPreview ? '' : `nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`"
     @contextmenu.prevent
     @click.right.stop="onRightClick($event)")
 </template>
@@ -165,6 +167,10 @@ export default defineComponent({
     priPrimaryLayerIndex: {
       default: -1,
       type: Number
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
     /**
      * @Note Vuex Props
