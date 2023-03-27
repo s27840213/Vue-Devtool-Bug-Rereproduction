@@ -88,7 +88,7 @@ for (const isMobile of [true, false]) {
       cy.contains('重置效果').click()
         .togglePanel('調整')
     }
-    it.only(`Other image test${suffix}`, function () {
+    it(`Other image test${suffix}`, function () {
       cy.visit('/editor')
         .disableTransition()
         .importDesign('2flower.json')
