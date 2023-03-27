@@ -47,8 +47,7 @@ export default defineComponent({
     const tags = vivistickerUtils.getMyDesignTags()
     return {
       tags,
-      scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0])),
-      textWidth: 0
+      scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0]))
     }
   },
   components: {
@@ -60,14 +59,11 @@ export default defineComponent({
     const content = this.$refs.content as CCategoryList
     if (!content) return
     content.$el.addEventListener('scroll', this.handleScroll)
-    window.addEventListener('resize', this.handleResize)
-    this.handleResize()
   },
   unmounted() {
     const content = this.$refs.content as CCategoryList
     if (!content) return
     content.$el.removeEventListener('scroll', this.handleScroll)
-    window.removeEventListener('resize', this.handleResize)
   },
   computed: {
     ...mapGetters({
@@ -80,7 +76,9 @@ export default defineComponent({
       myDesignNextPage: 'vivisticker/getMyDesignNextPage'
     }),
     ...mapState({
-      isTablet: 'isTablet'
+      isTablet: 'isTablet',
+      isLandscape: 'isLandscape',
+      windowSize: 'windowSize'
     }),
     list(): IMyDesign[] {
       return this.myDesignFileList(this.myDesignTab) as IMyDesign[]
@@ -89,15 +87,15 @@ export default defineComponent({
       let result = [] as any[]
       switch (this.myDesignTab) {
         case 'text':
-          result = new Array(Math.ceil(this.list.length / this.textColumns))
+          result = new Array(Math.ceil(this.list.length / this.numTextColumns))
             .fill('')
             .map((_, idx) => {
-              const rowItems = this.list.slice(idx * this.textColumns, idx * this.textColumns + this.textColumns)
+              const rowItems = this.list.slice(idx * this.numTextColumns, idx * this.numTextColumns + this.numTextColumns)
               return {
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-text-item',
                 list: rowItems,
-                size: this.isTablet ? (this.textWidth + 30) : (window.outerWidth / 2 - 20),
+                size: this.textItemWidth + this.textItemGap,
                 title: '',
                 moreType: 'text'
               }
@@ -133,20 +131,29 @@ export default defineComponent({
     itemHeight(): number {
       return this.isTablet ? 120 : 80
     },
-    textColumns(): number {
+    numTextColumns(): number {
       return this.isTablet ? 3 : 2
     },
+    textItemGap(): number {
+      return this.isTablet ? 30 : 20
+    },
+    textItemWidth(): number {
+      const { isTablet, isLandscape, windowSize, textItemGap, numTextColumns } = this
+      const containerWidthRatio = isTablet ? isLandscape ? 0.56 : 0.8 : 1
+      const containerPadding = isTablet ? 0 : 48
+      return ((windowSize.width * containerWidthRatio - containerPadding) - textItemGap * (numTextColumns - 1)) / numTextColumns
+    },
     textItemStyles() {
-      return this.isTablet ? {
-        width: `${this.textWidth}px`,
-        height: `${this.textWidth}px`
-      } : {}
+      return {
+        width: `${this.textItemWidth}px`,
+        height: `${this.textItemWidth}px`
+      }
     },
     textItemsStyles() {
-      return this.isTablet ? {
-        gridTemplateColumns: `repeat(${this.textColumns}, 1fr)`,
-        columnGap: '30px'
-      } : {}
+      return {
+        gridTemplateColumns: `repeat(${this.numTextColumns}, ${this.textItemWidth}px)`,
+        columnGap: `${this.textItemGap}px`
+      }
     }
   },
   watch: {
@@ -209,11 +216,6 @@ export default defineComponent({
       const content = this.$refs.content as CCategoryList
       if (!content) return
       content.$el.scrollTop = this.scrollTops[tab]
-    },
-    handleResize() {
-      const gap = 30
-      const isLandscape = window.matchMedia('(orientation: landscape)').matches
-      this.textWidth = (window.outerWidth * (isLandscape ? 0.56 : 0.8) - gap * (this.textColumns - 1)) / this.textColumns
     }
   }
 })
@@ -313,7 +315,8 @@ export default defineComponent({
     &__items {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      column-gap: 12px;
+      column-gap: 20px;
+      justify-content: center;
     }
   }
 

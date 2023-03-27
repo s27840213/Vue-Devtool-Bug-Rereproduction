@@ -2,7 +2,7 @@ import list from '@/apis/list'
 import i18n from '@/i18n'
 import { IListServiceContentData, IListServiceData } from '@/interfaces/api'
 import {
-  IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, isICategory,
+  IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, IPending, isICategory,
   isITag, ITag, ITagExtend
 } from '@/interfaces/module'
 import store from '@/store'
@@ -58,7 +58,12 @@ export default function (this: any) {
     nextCategory: 0,
     nextPage: 0,
     nextSearch: 0,
-    pending: false,
+    pending: {
+      categories: false,
+      content: false,
+      recently: false,
+      favorites: false
+    },
     // host: '',
     // data: '',
     // preview: '',
@@ -85,8 +90,7 @@ export default function (this: any) {
       itemsContent: {},
       tagsContent: {},
       categoriesContent: {},
-      searchTarget: '',
-      pending: false
+      searchTarget: ''
     }
   })
 
@@ -96,7 +100,8 @@ export default function (this: any) {
     getRecently: async ({ commit, state }, { writeBack = true, key, keyword }) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
-      commit('SET_STATE', { pending: true, categories: [], locale }) // Reset categories
+      commit('SET_STATE', { categories: [], locale }) // Reset categories
+      commit('SET_pending', { recently: true })
       try {
         const { data } = await this.api({
           token: store.getters['user/getToken'],
@@ -121,7 +126,10 @@ export default function (this: any) {
             }
             await vivistickerUtils.listAsset(key)
           }
-        } else return data.data
+        } else {
+          commit('SET_pending', { recently: false })
+          return data.data
+        }
       } catch (error) {
         console.error(error)
         captureException(error)
@@ -132,7 +140,8 @@ export default function (this: any) {
     getCategories: async ({ commit, dispatch, state }, writeBack = true) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
-      commit('SET_STATE', { pending: true, locale })
+      commit('SET_STATE', { locale })
+      commit('SET_pending', { categories: true })
       try {
         const isAdmin = store.getters['user/isAdmin']
         const { data } = await this.api({
@@ -180,7 +189,8 @@ export default function (this: any) {
       const { theme } = state
       const { keyword }: { keyword: string } = params
       const locale = params.locale || localeUtils.currLocale()
-      commit('SET_STATE', { pending: true, locale })
+      commit('SET_STATE', { locale })
+      commit('SET_pending', { content: true })
       if (keyword) commit('SET_STATE', { keyword })
       try {
         const isAdmin = store.getters['user/isAdmin']
@@ -192,7 +202,8 @@ export default function (this: any) {
           theme,
           listAll: 1,
           listCategory: 0,
-          cache: needCache
+          cache: needCache,
+          colNum: store.state.isTablet ? 3 : 2
         })
         commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
@@ -205,7 +216,8 @@ export default function (this: any) {
     getThemeContent: async ({ commit }, params = {}) => {
       const { keyword, theme } = params
       const locale = localeUtils.currLocale()
-      commit('SET_STATE', { pending: true, keyword, theme, locale, content: {} })
+      commit('SET_STATE', { keyword, theme, locale, content: {} })
+      commit('SET_pending', { content: true })
       try {
         const { data } = await this.api({
           token: '1',
@@ -231,7 +243,8 @@ export default function (this: any) {
       // If $all:, do category search instead of tag search.
       keyword = keyword.startsWith('$all:') ? keyword.replace('$all:', '')
         : keyword.includes('::') ? keyword : `tag::${keyword}`
-      commit('SET_STATE', { pending: true, keyword, locale })
+      commit('SET_STATE', { keyword, locale })
+      commit('SET_pending', { content: true })
       if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       const isAdmin = store.getters['user/isAdmin']
       try {
@@ -256,8 +269,8 @@ export default function (this: any) {
     // For all and search/category result, it is also used by TemplateCenter.
     getMoreContent: async ({ commit, getters, dispatch, state }) => {
       const { nextParams, hasNextPage } = getters
-      const { pending, keyword } = state
-      if (!hasNextPage || pending) { return }
+      const { keyword } = state
+      if (!hasNextPage || state.pending.content || state.pending.categories) return
       if (!keyword && state.categories.length > 0 && state.nextCategory !== -1) {
         // Get more categories
         dispatch('getCategories')
@@ -268,7 +281,7 @@ export default function (this: any) {
         return
       }
 
-      commit('SET_STATE', { pending: true })
+      commit('SET_pending', { content: true })
       try {
         const { data } = await this.api(nextParams)
         commit('SET_MORE_CONTENT', data.data)
@@ -366,11 +379,12 @@ export default function (this: any) {
     },
 
     getFavoritesItems: async ({ state, commit }) => {
-      const { nextItems, pending } = state.favorites
+      const { pending } = state
+      const { nextItems } = state.favorites
       const itemIds = nextItems.slice(0, 100)
       const itemsContent = cloneDeep(state.favorites.itemsContent)
 
-      if (pending || itemIds.length === 0) return
+      if (pending.favorites || itemIds.length === 0) return
       commit('SET_pending', { favorites: true })
 
       try {
@@ -389,12 +403,11 @@ export default function (this: any) {
     },
 
     getFavoritesCategoriesContent: async ({ state, commit }, target: string[] | ICategoryExtend & { next: number }) => {
-      const { theme } = state
-      const { pending } = state.favorites
+      const { theme, pending } = state
       const locale = localeUtils.currLocale()
       const categoriesContent = cloneDeep(state.favorites.categoriesContent)
 
-      if (pending) return
+      if (pending.favorites) return
       if (Array.isArray(target) && target.length === 0) return
       if (!Array.isArray(target) && target.next === -1) return
       commit('SET_pending', { favorites: true })
@@ -460,13 +473,12 @@ export default function (this: any) {
     },
 
     getFavoritesTagsContent: async ({ state, commit }, keywords: string[]) => {
-      const { theme } = state
-      const { pending } = state.favorites
+      const { theme, pending } = state
       const locale = localeUtils.currLocale()
       const tagsContent = cloneDeep(state.favorites.tagsContent)
       const pageIndex = keywords.length === 1 ? tagsContent[keywords[0]]?.next ?? 0 : 0
 
-      if (pending || keywords.length === 0 || pageIndex === -1) return
+      if (pending.favorites || keywords.length === 0 || pageIndex === -1) return
       commit('SET_pending', { favorites: true })
 
       const params = {
@@ -605,16 +617,9 @@ export default function (this: any) {
           }
         })
     },
-    SET_pending(state: IListModuleState, data: Record<'main' | 'favorites', boolean>) {
+    SET_pending(state: IListModuleState, data: Record<keyof IPending, boolean>) {
       for (const item of Object.entries(data)) {
-        switch (item[0]) {
-          case 'main':
-            state.pending = item[1]
-            break
-          case 'favorites':
-            state.favorites.pending = item[1]
-            break
-        }
+        state.pending[item[0] as keyof IPending] = item[1]
       }
     },
     UPDATE_tag(state: IListModuleState, keyword: string) {
@@ -632,12 +637,12 @@ export default function (this: any) {
       for (const item of Object.entries(obj)) {
         Object.assign(state.favorites, { [item[0]]: item[1] })
       }
-      state.favorites.pending = false
+      state.pending.favorites = false
     },
     SET_RECENTLY(state: IListModuleState, objects: IListServiceData) {
       state.categories = objects.content.concat(state.categories) || []
       if (objects.next_page) state.nextPage = objects.next_page as number
-      state.pending = false
+      state.pending.recently = false
     },
     SET_CATEGORIES(state: IListModuleState, objects: IListServiceData) {
       if (objects.tags) {
@@ -645,7 +650,7 @@ export default function (this: any) {
       }
       state.categories = state.categories.concat(objects.content) || []
       state.nextCategory = objects.next_page as number
-      state.pending = false
+      state.pending.categories = false
       // state.host = objects.host?.endsWith('/') ? objects.host.slice(0, -1) : (objects.host || '')
       // state.data = objects.data
       // state.preview = objects.preview
@@ -692,7 +697,7 @@ export default function (this: any) {
         state.content = result
         state.nextPage = nextPage
       }
-      state.pending = false
+      state.pending.content = false
       // state.host = host.endsWith('/') ? host.slice(0, -1) : host
       // state.data = data
       // state.preview = preview
@@ -718,7 +723,7 @@ export default function (this: any) {
         state.content = result
         state.nextPage = nextPage
       }
-      state.pending = false
+      state.pending.content = false
     }
   }
 
@@ -729,7 +734,7 @@ export default function (this: any) {
         state.searchCategoryInfo.categoryName !== ''
     },
     pending(state) {
-      return { content: state.pending, favorites: state.favorites.pending }
+      return Object.entries(state.pending).some(([key, value]) => value)
     },
     nextParams: (state) => {
       let { nextPage, nextSearch, keyword, theme, locale } = state

@@ -154,7 +154,6 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
     }),
     ...mapGetters({
@@ -169,7 +168,8 @@ export default defineComponent({
       allRecentlyColors: 'vivisticker/getRecentlyBgColors',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       hasNewBgColor: 'vivisticker/getHasNewBgColor',
-      currColor: 'color/currColor'
+      currColor: 'color/currColor',
+      pending: 'background/pending'
     }),
     itemWidth(): number {
       return this.isTablet ? 120 : 80
@@ -531,6 +531,9 @@ export default defineComponent({
   }
   &__list-wrapper {
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   &__list {
     flex-grow: 1;

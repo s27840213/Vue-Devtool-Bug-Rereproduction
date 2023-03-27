@@ -69,7 +69,7 @@ export default defineComponent({
       clickedTabTimer: -1,
       homeTabs: [
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
-        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
+        { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' }
       ] as Array<IFooterTab>
     }
@@ -175,7 +175,8 @@ export default defineComponent({
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...this.genearlLayerTabs,
         ...this.copyPasteTabs,
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
+        // hide copy-style for vivisticker for now
+        // { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
       ]
     },
     fontTabs(): Array<IFooterTab> {
@@ -195,6 +196,7 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
@@ -277,10 +279,12 @@ export default defineComponent({
       ]
     },
     copyPasteTabs(): Array<IFooterTab> {
-      return this.editorTypeTextLike ? [
-        { icon: 'copy', text: `${this.$t('NN0032')}` },
-        { icon: 'paste', text: `${this.$t('NN0230')}` }
-      ] : []
+      // hide copy and paste for vivisticker for now
+      // return this.editorTypeTextLike ? [
+      //   { icon: 'copy', text: `${this.$t('NN0032')}` },
+      //   { icon: 'paste', text: `${this.$t('NN0230')}` }
+      // ] : []
+      return []
     },
     tabs(): Array<IFooterTab> {
       const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
@@ -316,7 +320,9 @@ export default defineComponent({
       } else if ((this.showPhotoTabs || targetType === LayerType.image) && !controllerHidden) {
         return this.photoTabs
       } else if (this.showFontTabs) {
-        return [...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
+        const res = [...this.fontTabs]
+        res.splice(this.fontTabs.length - 2, 0, ...this.genearlLayerTabs, ...this.copyPasteTabs)
+        return res
       } else if (this.showShapeSetting) {
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.showGeneralTabs) {
@@ -596,6 +602,12 @@ export default defineComponent({
         }
         case 'paste': {
           shortcutUtils.paste()
+          break
+        }
+        case 'vivisticker_duplicate': {
+          shortcutUtils.copy().then(() => {
+            shortcutUtils.paste()
+          })
           break
         }
         case 'brush': {

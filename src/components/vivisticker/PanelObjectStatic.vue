@@ -14,13 +14,13 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
   tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
       :tags="tags" theme="dark" @search="handleSearch")
   //- Search result and static main content
-  category-list(v-for="item in categoryListArray"
-                v-show="item.show" :ref="item.key" :key="item.key"
+  category-list(v-for="item in categoryListArray" :class="{invisible: !item.show}"
+                :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="item.loadMore")
     template(#before)
       div(class="panel-static__top-item")
-      tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
-          :tags="tags" theme="dark" @search="handleSearch")
+      tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" :style="{marginTop: 0}"
+        :tags="tags" :scrollLeft="tagScrollLeft" theme="dark" @search="handleSearch" @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
       //- Search result empty msg
       div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
       //- Empty favorites view
@@ -104,7 +104,8 @@ export default defineComponent({
         searchResult: 0,
         favoritesContent: 0,
         favoritesSearchResult: 0
-      }
+      },
+      tagScrollLeft: 0
     }
   },
   computed: {
@@ -119,7 +120,8 @@ export default defineComponent({
       rawCategories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      keyword: 'keyword'
+      keyword: 'keyword',
+      rawPending: 'pending'
     }),
     ...mapGetters('objects', {
       tagsBar: 'tagsBar',
@@ -129,8 +131,7 @@ export default defineComponent({
       favoritesTags: 'favoritesTags',
       rawFavoritesSearchResult: 'favoritesSearchResult',
       checkCategoryFavorite: 'checkCategoryFavorite',
-      checkTagFavorite: 'checkTagFavorite',
-      rawPending: 'pending'
+      checkTagFavorite: 'checkTagFavorite'
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
@@ -139,7 +140,10 @@ export default defineComponent({
       return this.isTabShowAllRecently('object')
     },
     pending(): boolean {
-      return this.showFav ? this.rawPending.favorites : this.rawPending.content
+      if (this.showFav) return this.rawPending.favorites
+      if (this.showAllRecently) return this.rawPending.recently
+      if (this.isInCategory) return this.rawPending.content
+      return this.rawPending.categories || this.rawPending.content
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
@@ -332,22 +336,19 @@ export default defineComponent({
       }
     },
     async handleCategorySearch(keyword: string, locale = '') {
-      if (this.showFav) {
-        this.searchFavorites(keyword)
-        vivistickerUtils.setIsInCategory('object', true)
-      } else {
+      if (this.showFav) this.searchFavorites(keyword)
+      else {
         this.resetSearch()
-        if (keyword) {
-          if (keyword === `${this.$t('NN0024')}`) {
-            vivistickerUtils.setShowAllRecently('object', true)
-          } else {
-            this.getContent({ keyword, locale })
-          }
-          vivistickerUtils.setIsInCategory('object', true)
-        } else {
+        if (!keyword) {
           vivistickerUtils.setShowAllRecently('object', false)
+          return
         }
+
+        const isRecent = keyword === `${this.$t('NN0024')}`
+        if (!isRecent) this.getContent({ keyword, locale })
+        vivistickerUtils.setShowAllRecently('object', isRecent)
       }
+      vivistickerUtils.setIsInCategory('object', true)
     },
     handleLoadMore() {
       this.getMoreContent()
@@ -460,6 +461,11 @@ export default defineComponent({
   }
   .category-list {
     overflow-x: hidden;
+  }
+  .invisible {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
   }
 }
 </style>
