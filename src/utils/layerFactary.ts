@@ -375,12 +375,17 @@ class LayerFactary {
           }
         },
         (span) => {
+          // 8: span contains invalid unicode characters (which breaks emoji)
+          span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
+        },
+        undefined,
+        (span) => {
+          // This needs to be done after removeInvalidStyles's span processing,
+          // because span's font is guaranteed to exist after that.
           // 6: font is in wrong format (e.g. contains a comma)
           if (span.styles.font.includes(',')) {
             span.styles.font = span.styles.font.split(',')[0]
           }
-          // 8: span contains invalid unicode characters (which breaks emoji)
-          span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
         }
       )
       // 4: font size smaller than browser minimum font size setting
