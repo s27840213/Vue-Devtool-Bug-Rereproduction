@@ -200,7 +200,7 @@ export default defineComponent({
     containerStyles(): { [key: string]: string } {
       return {
         gridAutoRows: this.currState === 'setting' ? 'auto' : '1fr',
-        gridTemplateColumns: this.historySize !== 0 || this.polling || this.downloaded ? '1fr' : 'repeat(3, 1fr)',
+        gridTemplateColumns: this.historySize !== 0 || this.polling || this.downloaded ? '1fr' : '1fr 1fr 1fr',
         textAlign: this.currState === 'setting' ? 'left' : 'center'
       }
     },
