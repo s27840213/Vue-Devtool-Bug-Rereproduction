@@ -76,9 +76,9 @@ export function isITextLetterBg(object: ITextBgEffect): object is ITextLetterBg 
 }
 
 export interface ITextFormat {
-  textEffect: ITextEffect | {},
+  textEffect: ITextEffect
   textBg: ITextBgEffect,
-  textShape: ITextShape | {},
+  textShape: ITextShape
   scale: number,
   paragraphStyle: IParagraphStyle,
   spanStyle: ISpanStyle,
