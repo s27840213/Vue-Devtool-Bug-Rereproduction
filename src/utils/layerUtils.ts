@@ -1,6 +1,6 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
-import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ITiptapSelection } from '@/interfaces/text'
 import store from '@/store'
@@ -17,7 +17,6 @@ import pageUtils from './pageUtils'
 import shapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
-import TextUtils from './textUtils'
 import uploadUtils from './uploadUtils'
 
 class LayerUtils {
@@ -162,6 +161,7 @@ class LayerUtils {
      * The action of adding layer will trigger record function; so if we also record delete step, we will record two steps at once.
      */
     if (record) {
+      // groupUtils.reset(false)
       groupUtils.reset()
       stepsUtils.record()
     }
@@ -483,55 +483,6 @@ class LayerUtils {
     }
   }
 
-  initialLayerScale(pageIndex: number, layerIndex: number) {
-    const layer = this.getLayer(pageIndex, layerIndex)
-    if (!layer) return
-    const { styles: { scale }, type: primaryType } = layer
-    const applyLayers = layer.layers ? (layer.layers as ILayer[]) : [layer]
-    const isMultipleLayer = ['tmp', 'group'].includes(primaryType)
-    for (const idx in applyLayers) {
-      const { styles: subStyles, type, paragraphs } = applyLayers[idx] as IText
-      const fixScale = isMultipleLayer ? scale * subStyles.scale : scale
-      const props = {}
-      const styles = {}
-      switch (type) {
-        case 'text':
-          Object.assign(props, { paragraphs: TextUtils.initialParagraphsScale({ scale: fixScale }, paragraphs) })
-          if (isMultipleLayer) {
-            Object.assign(styles, { scale: 1 })
-          }
-          break
-        default:
-          if (isMultipleLayer) {
-            const [newLayer] = groupUtils.mapLayersToPage([applyLayers[idx] as IText], layer as ITmp)
-            Object.assign(styles, newLayer.styles)
-            Object.assign(
-              props,
-              { clipPath: newLayer.clipPath }
-            )
-          }
-      }
-      if (isMultipleLayer) {
-        Object.assign(styles, {
-          x: subStyles.x * scale,
-          y: subStyles.y * scale
-        })
-      }
-      store.commit('UPDATE_specLayerData', {
-        pageIndex,
-        layerIndex,
-        subLayerIndex: +idx,
-        props,
-        styles
-      })
-    }
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles: { scale: 1, initWidth: layer.styles.width }
-    })
-  }
-
   resetLayerWidth(pageIndex: number, layerIndex: number) {
     const layer = this.getLayer(pageIndex, layerIndex)
     store.commit('UPDATE_layerStyles', {
@@ -676,6 +627,51 @@ class LayerUtils {
         })
       }
     }
+  }
+
+  isOfLayerType(layer: ILayer, type: LayerType, subLayerIdx = -1, groupLikeIncluded = false): boolean {
+    // test if current selected layer is of the given type
+    // consider single layer or subLayer in group
+    // if subLayerIdx is not -1, consider the subLayer
+    // if groupLikeIncluded is true, group or tmp layers are also accepted
+    if (layer.type === type) return true
+    if (!['group', 'tmp'].includes(layer.type)) return false
+    if (subLayerIdx !== -1) {
+      return (layer as IGroup).layers[subLayerIdx].type === type
+    } else {
+      return groupLikeIncluded
+    }
+  }
+
+  setAutoResizeNeededForLayersInPages(pages: IPage[], isAutoResizeNeeded: boolean) {
+    for (const page of pages) {
+      this.setAutoResizeNeededForLayersInPage(page, isAutoResizeNeeded)
+    }
+  }
+
+  setAutoResizeNeededForLayersInPage(page: IPage, isAutoResizeNeeded: boolean) {
+    const layers = page.layers
+    for (const layer of layers) {
+      this.setAutoResizeNeededForLayer(layer, isAutoResizeNeeded)
+    }
+  }
+
+  setAutoResizeNeededForLayer(layer: AllLayerTypes, isAutoResizeNeeded: boolean) {
+    switch (layer.type) {
+      case LayerType.text:
+        this.setAutoResizeNeededForTextLayer(layer, isAutoResizeNeeded)
+        break
+      case LayerType.group:
+      case LayerType.tmp:
+        for (const subLayer of layer.layers) {
+          this.setAutoResizeNeededForLayer(subLayer, isAutoResizeNeeded)
+        }
+        break
+    }
+  }
+
+  setAutoResizeNeededForTextLayer(layer: IText, isAutoResizeNeeded: boolean) {
+    layer.isAutoResizeNeeded = isAutoResizeNeeded
   }
 }
 

@@ -175,26 +175,28 @@ div(class="popup-download text-left"
           iconColor="white"
           iconWidth="20px")
         span(v-else class="popup-download__btn")
-          svg-icon(v-if="selectedTypeVal === 'pdf_print'" iconName="pro" iconWidth="22px" iconColor="alarm")
+          svg-icon(v-if="selectedTypeVal === 'pdf_print' && !inReviewMode"
+                  iconName="pro" iconWidth="22px" iconColor="alarm")
           span {{$t('NN0010')}}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
+import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
+import DownloadPageSelection from '@/components/download/DownloadPageSelection.vue'
+import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
 import { IDownloadServiceParams, IOutputType, ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
-import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
-import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
-import DownloadPageSelection from '@/components/download/DownloadPageSelection.vue'
 import GeneralUtils from '@/utils/generalUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import pageUtils from '@/utils/pageUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import { Tooltip } from 'floating-vue'
+import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import webViewUtils from '@/utils/picWVUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { Tooltip } from 'floating-vue'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const submission = `${process.env.VUE_APP_VERSION}::download_submission`
 
@@ -309,6 +311,9 @@ export default defineComponent({
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
     }),
+    inReviewMode(): boolean {
+      return webViewUtils.inReviewMode
+    },
     selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this
       return typeOptions.find(typeOptions => typeOptions.value === selectedTypeVal) || typeOptions[0]

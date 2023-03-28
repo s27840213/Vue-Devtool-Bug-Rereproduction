@@ -1,19 +1,21 @@
 <template lang="pug">
-div(class="menu")
+div(class="menu" :style="rootStyles")
   div(class="menu-top")
-    template(v-for="item in navItems")
-      details(v-if="!item.hidden" :class="{'text-blue-1': currentPage === item.name}")
+    template(v-for="l1 in navItems")
+      details(v-if="!l1.hidden" :class="{'text-blue-1': currentPage === l1.name}")
         summary
-          url(:url="item.url") {{item.label}}
-          svg-icon(v-if="item.content" iconName="chevron-down"
+          url(:url="l1.url") {{l1.label}}
+          svg-icon(v-if="l1.content" iconName="chevron-down"
                   iconColor="gray-1" iconWidth="16px")
-        div(v-if="item.content")
-          details(v-for="it in item.content")
-            summary
-              url(:url="it.url") {{it.label}}
-              svg-icon(v-if="it.content" iconName="chevron-down"
-                iconColor="gray-1" iconWidth="16px")
-            url(v-for="i in it.content" :url="i.url" :newTab="i.newTab") {{i.label}}
+        div(v-if="l1.content")
+          template(v-for="l2 in l1.content")
+            url(v-if="l2.url" :url="l2.url") {{l2.label}}
+            details(v-else-if="l2.content")
+              summary
+                span {{l2.label}}
+                svg-icon(iconName="chevron-down"
+                  iconColor="gray-1" iconWidth="16px")
+              url(v-for="l3 in l2.content" :url="l3.url" :newTab="l3.newTab") {{l3.label}}
   div(class="menu-bottom")
     template(v-if="!isLogin")
       div(class="menu-bottom__link")
@@ -39,11 +41,12 @@ div(class="menu")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
-import constantData from '@/utils/constantData'
+import constantData, { IHeaderL1 } from '@/utils/constantData'
+import webViewUtils from '@/utils/picWVUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -60,19 +63,25 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
-    navItems(): any {
+    navItems(): IHeaderL1[] {
       return constantData.headerItems(true)
     },
     currentPage(): string {
-      const { name, params } = this.$router.currentRoute.value
+      const { name } = this.$router.currentRoute.value
       return (name as string) === 'Settings'
         ? this.$route.params.view as string
         : (name as string) || ''
     },
     currPath(): string {
       return this.$route.path || '/'
+    },
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${50 + this.userInfo.statusBarHeight}px`
+      }
     }
   },
   methods: {
@@ -108,13 +117,14 @@ export default defineComponent({
   a {
     display: block;
     width: 100%;
-    text-decoration: unset;
-    color: inherit;
   }
 }
 
 .menu-top,
 .menu-bottom {
+  summary {
+    outline: none; // For Safari 14.3, which have a summary outline by default.
+  }
   details {
     display: flex;
     flex-direction: column;
@@ -137,10 +147,9 @@ export default defineComponent({
     transform: scaleY(-1);
   }
   summary:focus,
-  summary:focus > svg {
-    // Set color when user click summary
+  details[open] > summary,
+  details[open] > summary > svg {
     color: setColor(blue-hover);
-    outline: none; // For Safari 14.3, which have a summary outline by default.
   }
   span,
   a {

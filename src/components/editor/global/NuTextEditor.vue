@@ -71,12 +71,22 @@ export default defineComponent({
      * If TingAn is avalible, maybe we could discuss and fix the error.
      */
     this.editor = tiptapUtils.editor as any
-    tiptapUtils.on('update', ({ editor }) => {
+    tiptapUtils.on('update', ({ editor }: { editor: Editor }) => {
       let toRecord = false
       const newJSON = editor.getJSON()
       const newText = tiptapUtils.getText(newJSON)
-      if (!editor.view.composing && (tiptapUtils.prevText !== newText)) {
-        toRecord = true
+      const textChanged = tiptapUtils.prevText !== newText
+      if (textChanged) {
+        if (!editor.view.composing) {
+          toRecord = true
+        }
+        requestAnimationFrame(() => {
+          const selectionRanges = editor.view.state.selection.ranges
+          if (selectionRanges.length > 0) {
+            const to = selectionRanges[0].$to.pos
+            editor.commands.setTextSelection({ from: to, to })
+          }
+        })
       }
       this.$emit('update', { ...tiptapUtils.toIParagraph(newJSON), toRecord })
       if (!isEqual(newJSON, tiptapUtils.prevJSON)) {
@@ -109,6 +119,7 @@ export default defineComponent({
           if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
             toRecord = true
           }
+          this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()) })
           this.$emit('compositionend', toRecord)
           tiptapUtils.agent(editor => {
             // setContent will be skipped while composing even when isSetContentRequired is true in NuController/NuSubController.

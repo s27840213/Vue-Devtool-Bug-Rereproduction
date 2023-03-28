@@ -12,8 +12,8 @@ class ThemeUtils {
   get groupType() { return store.state.groupType }
   get getPageSize() { return store.getters.getPageSize }
 
-  getFocusPageSize(pageIndex?: number): { width: number, height: number } {
-    return this.getPageSize(pageIndex || PageUtils.currFocusPageIndex)
+  getFocusPageSize(pageIndex = PageUtils.currFocusPageIndex): { width: number, height: number } {
+    return this.getPageSize(pageIndex === -1 ? PageUtils.middlemostPageIndex : pageIndex)
   }
 
   setTemplateThemes(themes: Itheme[]) {
@@ -36,7 +36,7 @@ class ThemeUtils {
         await store.dispatch('templates/getTagContent', { keyword })
       }, async (keyword: string, locale: string) => {
         await store.dispatch('templates/getContent', { keyword, locale })
-      }, async ({ reset }: {reset: boolean}) => {
+      }, async ({ reset }: { reset: boolean }) => {
         store.dispatch('templates/getRecAndCate', { reset })
       })
   }

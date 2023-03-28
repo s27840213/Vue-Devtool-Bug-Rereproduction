@@ -6,7 +6,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
               :key="`textSvgBg${idx}`"
               :is="elm.tag"
               v-bind="elm.attrs")
-  div(v-for="text, idx in duplicatedText" class="nu-text__body" ref="body"
+  div(v-for="text, idx in duplicatedText" class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBody)")
     nu-curve-text(v-if="isCurveText"
       :config="config"
@@ -23,19 +23,19 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       span(v-for="(span, sIndex) in p.spans"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpan, transParentStyles)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
 <script lang="ts">
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
-import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import { IGroup, ISpan, IText } from '@/interfaces/layer'
+import { isITextLetterBg } from '@/interfaces/format'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
-import textBgUtils from '@/utils/textBgUtils'
+import textBgUtils, { textBgSvg } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
@@ -46,7 +46,6 @@ import { defineComponent, PropType } from 'vue'
 export default defineComponent({
   components: {
     NuCurveText,
-    NuTextEditor
   },
   props: {
     config: {
@@ -80,6 +79,10 @@ export default defineComponent({
     noShadow: {
       default: false,
       type: Boolean
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   data() {
@@ -91,8 +94,7 @@ export default defineComponent({
         height: this.config.styles.height,
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
-      isLoading: true,
-      svgBG: {} as ReturnType<typeof textBgUtils.drawSvgBg>,
+      svgBG: {} as textBgSvg|null,
     }
   },
   created() {
@@ -105,8 +107,8 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
-    spanEffect(): Record<string, unknown> {
-      return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
+    spanEffect() {
+      return textBgUtils.convertTextEffect(this.config.styles)
     },
     isCurveText(): any {
       const { textShape } = this.config.styles
@@ -149,26 +151,16 @@ export default defineComponent({
   watch: {
     'config.paragraphs': {
       handler(newVal) {
-        this.isLoading = false
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
         this.drawSvgBG()
         textUtils.untilFontLoaded(newVal).then(() => {
           this.drawSvgBG()
         })
       }
     },
-    'config.styles': {
-      deep: true,
-      handler() {
-        this.drawSvgBG()
-      }
-    },
-    'config.isAutoResizeNeeded': {
-      handler(newVal) {
-        if (newVal) {
-          this.resizeAfterFontLoaded()
-        }
-      }
-    }
+    'config.styles.width'() { this.drawSvgBG() },
+    'config.styles.height'() { this.drawSvgBG() },
+    'config.styles.textBg'() { this.drawSvgBG() },
   },
   methods: {
     textWrapperStyle(): Record<string, string> {
@@ -181,19 +173,16 @@ export default defineComponent({
       }
     },
     drawSvgBG() {
-      this.$nextTick(() => {
-        this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
+      this.$nextTick(async () => {
+        this.svgBG = await textBgUtils.drawSvgBg(this.config)
       })
-    },
-    isAutoResizeNeeded(): boolean {
-      return this.page.isAutoResizeNeeded
     },
     isLayerAutoResizeNeeded(): boolean {
       return this.config.isAutoResizeNeeded
     },
     getOpacity() {
       const { active, contentEditable } = this.config
-      if (active && !this.isLocked) {
+      if (active && !this.isLocked && !this.inPreview) {
         if (this.isCurveText || this.isFlipped) {
           return contentEditable ? 0.2 : 1
         } else {
@@ -213,10 +202,12 @@ export default defineComponent({
         opacity
       }
     },
-    spanStyle(spans: ISpan[], sIndex: number): Record<string, string> {
-      const span = spans[sIndex]
+    spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
+      const textBg = this.config.styles.textBg
+      const span = p.spans[sIndex]
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
-        sIndex === spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
+        sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
+        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {}
       )
     },
     pStyle(styles: any) {
@@ -231,7 +222,7 @@ export default defineComponent({
       // console.log('resize')
 
       let widthLimit
-      if ((this.isLoading && this.isAutoResizeNeeded()) || this.isLayerAutoResizeNeeded()) {
+      if (this.isLayerAutoResizeNeeded()) {
         widthLimit = await textUtils.autoResize(config, this.initSize)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
       } else {
@@ -270,9 +261,6 @@ export default defineComponent({
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(() => {
           this.resizeCallback()
-          if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-            this.isLoading = false
-          }
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawSvgBG()

@@ -41,22 +41,22 @@ div(:layer-index="`${layerIndex}`"
             :layerIndex="layerIndex"
             :config="(config as IText)"
             :subLayerIndex="-1"
-            @keydown.37.stop
-            @keydown.38.stop
-            @keydown.39.stop
-            @keydown.40.stop
-            @keydown.ctrl.67.exact.stop.self
-            @keydown.meta.67.exact.stop.self
-            @keydown.ctrl.86.exact.stop.self
-            @keydown.meta.86.exact.stop.self
-            @keydown.ctrl.88.exact.stop.self
-            @keydown.meta.88.exact.stop.self
-            @keydown.ctrl.65.exact.stop.self
-            @keydown.meta.65.exact.stop.self
-            @keydown.ctrl.90.exact.stop.self
-            @keydown.meta.90.exact.stop.self
-            @keydown.ctrl.shift.90.exact.stop.self
-            @keydown.meta.shift.90.exact.stop.self
+            @keydown.left.stop
+            @keydown.up.stop
+            @keydown.right.stop
+            @keydown.down.stop
+            @keydown.ctrl.c.exact.stop.self
+            @keydown.meta.c.exact.stop.self
+            @keydown.ctrl.v.exact.stop.self
+            @keydown.meta.v.exact.stop.self
+            @keydown.ctrl.x.exact.stop.self
+            @keydown.meta.x.exact.stop.self
+            @keydown.ctrl.a.exact.stop.self
+            @keydown.meta.a.exact.stop.self
+            @keydown.ctrl.z.exact.stop.self
+            @keydown.meta.z.exact.stop.self
+            @keydown.ctrl.shift.z.exact.stop.self
+            @keydown.meta.shift.z.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
         div(v-if="!$isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
@@ -116,7 +116,7 @@ div(:layer-index="`${layerIndex}`"
             @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine()"
-            :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
+            :style="`transform: scale(${contentScaleRatio})`")
           svg-icon(class="control-point__rotater"
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
@@ -128,7 +128,6 @@ div(:layer-index="`${layerIndex}`"
             :src="require('@/assets/img/svg/move.svg')"
             :style='lineControlPointStyles()'
             @touchstart="disableTouchEvent")
-            //- @pointerdown="moveStart"
         template(v-else)
           div(class="control-point__controller-wrapper"
               ref="rotater")
@@ -143,7 +142,6 @@ div(:layer-index="`${layerIndex}`"
               :src="require('@/assets/img/svg/move.svg')"
               :style='controlPointStyles()'
               @touchstart="disableTouchEvent")
-              //- @pointerdown="moveStart"
     div(v-if="isActive && isLocked() && (scaleRatio >20)"
         class="nu-controller__lock-icon"
         :style="lockIconStyles()"
@@ -158,7 +156,7 @@ import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
@@ -181,7 +179,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import TextPropUtils from '@/utils/textPropUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -281,7 +279,7 @@ export default defineComponent({
   mounted() {
     this.setLastSelectedLayerIndex(this.layerIndex)
     if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
-      TextPropUtils.updateTextPropsState()
+      textPropUtils.updateTextPropsState()
     }
     this.addMovingListener()
   },
@@ -1347,6 +1345,7 @@ export default defineComponent({
           break
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
+      textPropUtils.updateTextPropState('fontSize', true)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // scale from center
       if (altPressed) {
@@ -2238,7 +2237,7 @@ export default defineComponent({
       return this.config.locked
     },
     isLine(): boolean {
-      return this.config.type === 'shape' && this.config.category === 'D'
+      return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     getLayerWidth(): number {
       return this.config.styles.width

@@ -136,15 +136,6 @@ export default defineComponent({
       this.handleIsTransparent()
       this.previewAsLoading()
       const nextImg = new Image()
-      nextImg.onerror = () => {
-        if (srcObj.type === 'pexels') {
-          this.setBgImageSrc({
-            pageIndex: this.pageIndex,
-            srcObj: { ...srcObj, userId: 'jpeg' }
-          })
-          nextImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
-        }
-      }
       nextImg.onload = () => {
         const preImg = new Image()
         preImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
@@ -330,11 +321,14 @@ export default defineComponent({
     dblTap(e: PointerEvent) {
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
-          this.setBgImageControl({
-            pageIndex: this.pageIndex,
-            imgControl: true
-          })
-          editorUtils.setCurrActivePanel('crop')
+          if (this.image.config.srcObj.type) {
+            console.warn(this.image.config.srcObj)
+            this.setBgImageControl({
+              pageIndex: this.pageIndex,
+              imgControl: true
+            })
+            editorUtils.setCurrActivePanel('crop')
+          }
         }
       })
     },
@@ -368,7 +362,7 @@ export default defineComponent({
             this.src = previewSrc
           }
         })
-      } else if (this.image.config.panelPreviewSrc) {
+      } else if (config.panelPreviewSrc) {
         const panelPreviewSrc = this.image.config.panelPreviewSrc
         imageUtils.imgLoadHandler(panelPreviewSrc, () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {

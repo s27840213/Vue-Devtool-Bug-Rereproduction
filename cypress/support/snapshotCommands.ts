@@ -19,6 +19,17 @@ const snapshotStyles = `
     border-radius: 0 !important;
   }
 `
+Cypress.Commands.add('disableTransition', () => {
+  // Disable all animation for more stable snapshot result, https://glebbahmutov.com/blog/css-animations/
+  cy.get('body').invoke('append', Cypress.$(`
+    <style id="my-animation-disabler">
+    *, *:before, *:after {
+      transition-property: none !important;
+      animation: none !important;
+    }
+    </style>
+  `))
+})
 
 // Modified from 'cypress-image-diff-js' command: compareSnapshot
 const compareSnapshotCommand = defaultScreenshotOptions => {

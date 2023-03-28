@@ -11,7 +11,7 @@ const adjustOptions = [{
     { name: 'warm', val: '32' },
   ]
 }, {
-  name: 'preset2',
+  name: 'preset2', // Usually need to retry snapshot
   options: [
     { name: 'brightness', val: '-34' },
     { name: 'contrast', val: '44' },
@@ -96,9 +96,6 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
         cy.togglePanel('裁切')
       } else if (enterCrop === 'dblclick') {
         cy.wrap(subject).dblclick()
-          .isMobile(() => {
-            cy.get('.mobile-panel').waitTransition()
-          })
       } else {
         throw new Error(`Unexpected enterCrop value: '${enterCrop}' in imageCrop command`)
       }
@@ -133,7 +130,7 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
     .realMouseUp()
     .snapshotTest('Crop init')
     .isMobile(() => { cy.togglePanel('裁切') })
-    .notMobile(() => { cy.togglePanel('取消') })
+    .notMobile(() => { cy.togglePanel('完成') })
   return cy.get(subject.selector)
 })
 
@@ -151,7 +148,6 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
         for (const option of shadow.options) {
           if (option.name === 'color') {
             cy.get('div.photo-effect-setting__value-input, .photo-shadow__color').click()
-              .get('.color-panel').waitTransition()
               .get(`.color-btn .color-${option.val}`).eq(0).click()
               .get('.color-panel__btn, .mobile-panel__left-btn').click()
           } else {

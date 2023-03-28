@@ -5,6 +5,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import BrandKit from '@/views/BrandKit.vue'
 import CopyTool from '@/views/CopyTool.vue'
 import Editor from '@/views/Editor.vue'
@@ -234,7 +235,11 @@ const router = createRouter({
       component: {
         render() { return h(resolveComponent('router-view')) }
       },
-      beforeEnter(to, from, next) {
+      async beforeEnter(to, from, next) {
+        if (!webViewUtils.inBrowserMode) {
+          webViewUtils.registerCallbacks('router')
+        }
+        await webViewUtils.getUserInfo()
         if (logUtils.getLog()) {
           logUtils.uploadLog()
         }
@@ -254,6 +259,7 @@ const router = createRouter({
           i18n.global.locale = locale
           localStorage.setItem('locale', locale)
         }
+        webViewUtils.updateLocale(locale)
 
         document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
@@ -273,6 +279,8 @@ router.beforeEach(async (to, from, next) => {
     next()
     return
   }
+  webViewUtils.detectIfInApp()
+  await webViewUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.
   const urlParams = new URLSearchParams(window.location.search)
   const campaign = urlParams.get('campaign')
