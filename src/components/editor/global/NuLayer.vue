@@ -10,7 +10,7 @@ div(class="nu-layer flex-center"
   //- :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
   //- :ref="div.main ? 'body' : ''"
   div(v-for="div in layerDivs"
-      class="full-size pos-left-top"
+      class="full-size pos-left"
       :class="{'preserve3D': !isTouchDevice}"
       :style="layerStyles(div.noShadow, div.isTransparent)"
       @pointerdown="div.main ? onPointerDown($event) : null"
@@ -19,10 +19,10 @@ div(class="nu-layer flex-center"
       @click.right.stop="div.main ? onRightClick($event) : null"
       @dragenter="div.main ? dragEnter($event) : null"
       @dblclick="div.main ? dblClick($event) : null")
-    div(class="full-size flex-center pos-left-top"
+    div(class="full-size pos-left"
         :class="{'nu-layer__scale': applyLayerScale, 'preserve3D': !isTouchDevice}" :ref="div.main ? 'scale' : ''"
         :style="scaleStyles()")
-      div(class="nu-layer__flip full-size flex-center pos-left-top" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
+      div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
           component(:is="`nu-${config.type}`"
             class="transition-none"
             :class="{'preserve3D': !isTouchDevice}"
@@ -1032,9 +1032,8 @@ export default defineComponent({
   justify-content: center;
 }
 
-.pos-left-top {
+.pos-left {
   position: absolute;
-  // top: 0;
   left: 0;
 }
 
