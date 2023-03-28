@@ -4,7 +4,6 @@
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 
-const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
   'min-width', 'min-height', 'backgroundImage', 'backgroundSize', 'backgroundPosition',
@@ -53,8 +52,6 @@ class CssConveter {
         result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `calc(var(--base-stroke) + ${(sourceStyles.size as number) / 32}px)` : 'calc(var(--base-stroke))'
       } else if (prop === 'fontSpacing') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
-      } else if (prop === 'lineHeight') {
-        result[styleMap[prop]] = `${sourceStyles[prop]}`
       } else if (prop === 'font') {
         result[styleMap[prop]] = this.getFontFamily(sourceStyles[prop] as string)
       } else if (prop === 'color') { // For color
@@ -65,7 +62,9 @@ class CssConveter {
         result.display = 'inline-block'
         result['letter-spacing'] = '0'
         result['text-align'] = 'center'
-      } else if (typeof sourceStyles[prop] !== 'undefined') {
+      } else if (['lineHeight', 'opacity'].includes(prop)) { // Use sorce style value directly
+        result[styleMap[prop]] = `${sourceStyles[prop]}`
+      } else { // Defulat: number add px unit, other treat as string
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}px` : `${sourceStyles[prop]}`
       }
     })
@@ -86,33 +85,6 @@ class CssConveter {
       this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, contentScaleRatio))
     return result
   }
-
-  convertAllStyles(sourceStyles: IStyle | ITextStyle): { [key: string]: string } {
-    const result: { [key: string]: string } = {}
-    // create a deep copy to prevent from changing the original state.
-    const tmp = JSON.parse(JSON.stringify(sourceStyles))
-    Object.assign(result, this.convertTransformStyle(tmp.x, tmp.y, tmp.zindex, tmp.rotate))
-    // remove transform properties from tmp to prevent from duplicate key value pair
-    transformProps.forEach(prop => {
-      delete tmp[prop]
-    })
-
-    // convert properties excluding transform properties
-    Object.entries(tmp).forEach(([k, v]) => {
-      result[styleMap[k as keyof IStyleMap]] = typeof v === 'number' ? `${v}px` : `${v}`
-    })
-
-    return result
-  }
-
-  getKeyByValue(object: any, value: string): string {
-    return Object.keys(object).find(key => object[key] === value)!
-  }
-
-  // fontStyleKeyMap(prop: string): string {
-  //   const propInCss = this.getKeyByValue(fontStyleMap, prop)
-  //   return this.getKeyByValue(styleMap, propInCss)
-  // }
 
   convertTextShadow(x: number, y: number, color: string, blur?: number): Partial<CSSStyleDeclaration> {
     return {

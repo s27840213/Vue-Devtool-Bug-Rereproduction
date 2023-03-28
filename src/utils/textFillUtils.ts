@@ -60,16 +60,19 @@ class TextFill {
     const myRect = new Rect()
     await myRect.init(config)
     myRect.preprocess({ skipMergeLine: true })
-    const { rects } = myRect.get()
+    const { rects, vertical } = myRect.get()
 
     this.tempTextFill = rects.map((rect) => {
-      const { width: spanWidth, height: spanHeight } = rect
+      let { width: spanWidth, height: spanHeight } = rect
+      if (vertical) [spanWidth, spanHeight] = [spanHeight, spanWidth]
       const bgSizeBy = textFill.size * (scaleByWidth ? divWidth / spanWidth : divHeight / spanHeight)
       return {
         backgroundImage: `url("${img.urls.original}")`,
         backgroundSize: scaleByWidth ? `${bgSizeBy}% auto` : `auto ${bgSizeBy}%`,
+        // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
+        // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position#regarding_percentages
         backgroundPosition: `
-          ${(rect.x + (imgWidth - divWidth) * (0.5 + textFill.xOffset200 / 200)) * -1}px
+          ${(rect.x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200)) * -1}px
           ${(rect.y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)) * -1}px`,
         // backgroundRepaet: 'no-repeat',
         opacity: textFill.opacity / 100,
@@ -94,8 +97,8 @@ class TextFill {
       attrs: { src: img.urls.prev },
       style: {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
-        top: `-${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)}px`,
-        left: `-${(imgWidth - divWidth) * (0.5 + textFill.xOffset200 / 200)}px`,
+        left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200) * -1}px`,
+        top: `${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200) * -1}px`,
         opacity: textFill.opacity / 200,
         // opacity: textFill.opacity / 100,
       }

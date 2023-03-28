@@ -1,8 +1,8 @@
 <template lang="pug">
 div(class="nu-text" :style="textWrapperStyle()" draggable="false")
   //- NuText BGs.
-  template(v-for="bgConfig in [textFillBg, textBg]")
-    custom-element(v-if="bgConfig && !noShadow" class="nu-text__BG" :config="bgConfig" )
+  template(v-for="bgConfig in [textBg, textFillBg]")
+    custom-element(v-if="bgConfig && !noShadow" class="nu-text__BG" :config="bgConfig")
   div(v-for="text, idx in duplicatedText" class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBody)")
     nu-curve-text(v-if="isCurveText"
