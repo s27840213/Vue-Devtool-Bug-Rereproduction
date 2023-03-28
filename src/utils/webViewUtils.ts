@@ -29,7 +29,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   sendToIOS(messageType: string, message: any) {
     logUtils.setLogAndConsoleLog(messageType, message)
     try {
-      const webkit = (window as any).webkit
+      const webkit = window.webkit
       if (!webkit) return
       const messageHandler = webkit.messageHandlers[messageType]
       if (!messageHandler) {
