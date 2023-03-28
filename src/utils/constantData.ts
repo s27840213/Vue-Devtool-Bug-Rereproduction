@@ -353,9 +353,9 @@ class ConstantData {
         pStrokeY: i18n.global.tc('NN0319'),
         pColor: i18n.global.tc('NN0735'),
         height: i18n.global.tc('NN0319'),
-        yOffset: i18n.global.tc('NN0736'), // For value 0~100, 0 initial
-        xOffset200: i18n.global.tc('NN0814'), // For value -100~100, 0 initial
-        yOffset200: i18n.global.tc('NN0736'), // For value -100~100, 0 initial
+        yOffset: i18n.global.tc('NN0424'), // For value 0~100, 0 initial
+        xOffset200: i18n.global.tc('NN0425'), // For value -100~100, 0 initial
+        yOffset200: i18n.global.tc('NN0424'), // For value -100~100, 0 initial
         distanceInverse: i18n.global.tc('NN0737'),
         textStrokeColor: i18n.global.tc('NN0739'),
         shadowStrokeColor: i18n.global.tc('NN0740'),
