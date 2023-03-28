@@ -138,8 +138,8 @@ class ImageShadowUtils {
 
   getImageMatchedIdentifier(config: IImage) {
     const { styles: { shadow: { effects, currentEffect } } } = config
-    const { radius } = (effects as any)[currentEffect] as IImageMatchedEffect
-    return config.srcObj.type + config.srcObj.assetId + config.srcObj.userId + '-' + radius.toString()
+    const { radius, size } = (effects as any)[currentEffect] as IImageMatchedEffect
+    return config.srcObj.type + config.srcObj.assetId + config.srcObj.userId + '-' + radius.toString() + '-' + size.toString()
   }
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
@@ -456,7 +456,6 @@ class ImageShadowUtils {
   }
 
   drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
-    console.log('start drawing', params.drawCanvasH, params.drawCanvasW)
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { shadow } = config.styles
