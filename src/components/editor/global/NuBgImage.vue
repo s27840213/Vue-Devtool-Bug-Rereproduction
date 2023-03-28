@@ -323,11 +323,14 @@ export default defineComponent({
     dblTap(e: PointerEvent) {
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
-          this.setBgImageControl({
-            pageIndex: this.pageIndex,
-            imgControl: true
-          })
-          editorUtils.setCurrActivePanel('crop')
+          if (this.image.config.srcObj.type) {
+            console.warn(this.image.config.srcObj)
+            this.setBgImageControl({
+              pageIndex: this.pageIndex,
+              imgControl: true
+            })
+            editorUtils.setCurrActivePanel('crop')
+          }
         }
       })
     },
@@ -396,28 +399,6 @@ export default defineComponent({
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
-      //   if (!this.dblTabsFlag && this.isActive) {
-      //   const touchtime = Date.now()
-      //   const interval = 500
-      //   const doubleTap = (e: PointerEvent) => {
-      //     e.preventDefault()
-      //     if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
-      //       /**
-      //        * This is the dbl-click callback block
-      //        */
-      //       if (this.getLayerType === LayerType.image) {
-      //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-      //         setTimeout(() => eventUtils.emit(PanelEvent.switchTab, 'crop'), 0)
-      //       }
-      //       this.dblTabsFlag = true
-      //     }
-      //   }
-      //   this.eventTarget.addEventListener('pointerdown', doubleTap)
-      //   setTimeout(() => {
-      //     this.eventTarget.removeEventListener('pointerdown', doubleTap)
-      //     this.dblTabsFlag = false
-      //   }, interval)
-      // }
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.image.config.previewSrc === undefined) {
