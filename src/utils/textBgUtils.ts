@@ -85,7 +85,7 @@ class Rect {
     })
   }
 
-  async init(config: IText) {
+  async init(config: IText, { splitSpan } = { splitSpan: false }) {
     this.vertical = config.styles.writingMode === 'vertical-lr'
     const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
 
@@ -105,7 +105,7 @@ class Rect {
           span.appendChild(document.createElement('br'))
           p.appendChild(span)
         } else {
-          [...spanData.text].forEach(t => {
+          (splitSpan ? [...spanData.text] : [spanData.text]).forEach(t => {
             const isComposingText = spanData.text.length > 1
             const fixedWidthStyle = fixedWidth && isComposingText ? {
               letterSpacing: 0,
@@ -176,31 +176,32 @@ class Rect {
       const lineHeight = parseFloat((p as HTMLElement).style.lineHeight)
       const letterSpacing = fontSize * letterSpacingEm
       for (const span of p.children) {
-        const cr = span.getClientRects()[0]
-        // If span is fixedWidth, its display will be inline-block
-        // Height of inline-block span will grow with lineHeight
-        // Here calc height and y without inline-block effect
-        // For vertical text, modify width&x instead of height&y
-        const isInlineBolck = (span as HTMLElement).style.display === 'inline-block'
-        let { width, height, y, x } = cr
-        if (isInlineBolck && this.vertical) {
-          width = width / lineHeight * 1.4
-          x = cr.x + (cr.width - width) / 2
-        } else if (isInlineBolck) {
-          height = height / lineHeight * 1.4
-          y = cr.y + (cr.height - height) / 2
+        for (const cr of span.getClientRects()) {
+          // If span is fixedWidth, its display will be inline-block
+          // Height of inline-block span will grow with lineHeight
+          // Here calc height and y without inline-block effect
+          // For vertical text, modify width&x instead of height&y
+          const isInlineBolck = (span as HTMLElement).style.display === 'inline-block'
+          let { width, height, y, x } = cr
+          if (isInlineBolck && this.vertical) {
+            width = width / lineHeight * 1.4
+            x = cr.x + (cr.width - width) / 2
+          } else if (isInlineBolck) {
+            height = height / lineHeight * 1.4
+            y = cr.y + (cr.height - height) / 2
+          }
+          this.rows.push({
+            rect: cr,
+            spanData: [{
+              x,
+              y,
+              width,
+              height,
+              text: span.textContent ?? '',
+              letterSpacing
+            }]
+          })
         }
-        this.rows.push({
-          rect: cr,
-          spanData: [{
-            x,
-            y,
-            width,
-            height,
-            text: span.textContent ?? '',
-            letterSpacing
-          }]
-        })
       }
     }
   }
@@ -594,6 +595,10 @@ function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
       href = `cloud${index % 4}`
       color = textBg.color
       break
+    case 'penguin':
+      href = `penguin${index % 5}`
+      color = textBg.color
+      break
     default: // text-book
       href = textBg.name
       color = textBg.color
@@ -723,6 +728,14 @@ class TextBg {
         fixedWidth: true,
         color: '#93BAA6',
       },
+      penguin: {
+        xOffset200: 0,
+        yOffset200: -1,
+        size: 200,
+        opacity: 100,
+        fixedWidth: true,
+        color: '', // no effect
+      }
     }
   }
 
@@ -732,7 +745,8 @@ class TextBg {
       'rainbow-dark': { lineHeight: 1.78, fontSpacing: 585 },
       circle: { lineHeight: 1.78, fontSpacing: 585 },
       cloud: { lineHeight: 1.54, fontSpacing: 186 },
-      'text-book': { lineHeight: 1.96, fontSpacing: 665 }
+      'text-book': { lineHeight: 1.96, fontSpacing: 665 },
+      penguin: { lineHeight: 1.96, fontSpacing: 800 },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
@@ -767,7 +781,7 @@ class TextBg {
 
     const opacity = textBg.opacity * 0.01
     const myRect = new Rect()
-    await myRect.init(config)
+    await myRect.init(config, { splitSpan: isITextLetterBg(textBg) })
     myRect.preprocess()
     const { vertical, width, height, transform, rects, rows } = myRect.get()
 
@@ -1044,7 +1058,7 @@ class TextBg {
         const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
         if (oldFixedWidth !== newFixedWidth) {
           const paragraphs = cloneDeep(layers[idx].paragraphs as IParagraph[])
-          if (newFixedWidth) { // Split span
+          if (newFixedWidth) { // Split span, another one in tiptapUtils.toIParagraph
             paragraphs.forEach(p => {
               p.spans = p.spans.flatMap(span =>
                 [...span.text].map(t => ({ text: t, styles: span.styles }))
@@ -1067,6 +1081,9 @@ class TextBg {
             targetLayer.layers ? +idx : subLayerIndex
           )
           tiptapUtils.updateHtml() // Vuex config => tiptap
+          textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex,
+            targetLayer.layers ? +idx : subLayerIndex
+          )
 
           // When fixedWith true => false, this can force tiptap merge span that have same attrs.
           if (document.querySelector('.ProseMirror') && !newFixedWidth) {

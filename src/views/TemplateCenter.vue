@@ -621,13 +621,6 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
-html,
-body {
-  overflow: hidden;
-}
-</style>
-
 <style lang="scss" scoped>
 .template-center {
   @include size(100%, 100%);

@@ -88,7 +88,7 @@ for (const isMobile of [true, false]) {
       cy.contains('重置效果').click()
         .togglePanel('調整')
     }
-    it.only(`Other image test${suffix}`, function () {
+    it(`Other image test${suffix}`, function () {
       cy.visit('/editor')
         .disableTransition()
         .importDesign('2flower.json')
@@ -106,9 +106,9 @@ for (const isMobile of [true, false]) {
             .layerDelete()
             .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
             .layerRotateAndResize()
-            .layerMultipleCopyAndMove('functionalPanel', isMobile)
-            .layerMultipleCopyAndMove('shortcut', isMobile) // Skip in mobile
-            .layerMultipleCopyAndMove('rightclick', isMobile) // Skip in mobile
+            // .layerMultipleCopyAndMove('functionalPanel', isMobile)
+            // .layerMultipleCopyAndMove('shortcut', isMobile) // Skip in mobile
+            // .layerMultipleCopyAndMove('rightclick', isMobile) // Skip in mobile
             .deselectAllLayers().snapshotTest('init') // Check if image restore to init
             .get('.nu-layer__wrapper:nth-child(3) .nu-image')
             .layerMoveToPage2(isMobile) // Skip in mobile

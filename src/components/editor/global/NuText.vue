@@ -79,6 +79,10 @@ export default defineComponent({
     noShadow: {
       default: false,
       type: Boolean
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   data() {
@@ -179,7 +183,7 @@ export default defineComponent({
     },
     getOpacity() {
       const { active, contentEditable } = this.config
-      if (active && !this.isLocked) {
+      if (active && !this.isLocked && !this.inPreview) {
         if (this.isCurveText || this.isFlipped) {
           return contentEditable ? 0.2 : 1
         } else {

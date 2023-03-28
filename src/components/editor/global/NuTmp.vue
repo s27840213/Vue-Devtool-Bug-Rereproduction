@@ -13,7 +13,8 @@ div(class="nu-tmp"
     :isSubLayer="true"
     :inTmp="true"
     :primaryScale="config.styles.scale"
-    :primaryLayer="config")
+    :primaryLayer="config"
+    :inPreview="inPreview")
 </template>
 
 <script lang="ts">
@@ -46,6 +47,10 @@ export default defineComponent({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   created() {

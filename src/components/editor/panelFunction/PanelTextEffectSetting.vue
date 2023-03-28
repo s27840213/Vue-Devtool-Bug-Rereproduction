@@ -69,7 +69,6 @@ div(class="text-effect-setting mt-25")
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
-import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
@@ -111,9 +110,9 @@ export default defineComponent({
     currentStyle(): Record<string, string> {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
-        shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
-        bg: styles.textBg as ITextBgEffect,
-        shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
+        shadow: styles.textEffect,
+        bg: styles.textBg,
+        shape: styles.textShape
       }[this.currTab] as Record<string, string>
     },
     settingTextEffect(): boolean {

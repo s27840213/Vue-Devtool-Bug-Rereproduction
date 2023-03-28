@@ -481,8 +481,6 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex } = state.currSelectedInfo
     if (pageIndex === -1 && state.currFocusPageIndex !== index) {
       state.currFocusPageIndex = index === -1 ? state.middlemostPageIndex : index
-    } else {
-      state.currFocusPageIndex = index
     }
   },
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
@@ -792,8 +790,13 @@ const mutations: MutationTree<IEditorState> = {
     const layerNum = layers.length
     const _3dEnabledPageIndex = layerNum > 1 && layerNum <= 50 ? pageIndex : -1
 
-    if (state.currFocusPageIndex !== pageIndex) {
-      state.currFocusPageIndex = pageIndex === -1 ? state.middlemostPageIndex : pageIndex
+    // if (state.currFocusPageIndex !== pageIndex) {
+    //   state.currFocusPageIndex = pageIndex === -1 ? state.middlemostPageIndex : pageIndex
+    // }
+    if (pageIndex === -1) {
+      state.currFocusPageIndex = state.currActivePageIndex === -1 ? state.middlemostPageIndex : state.currActivePageIndex
+    } else {
+      state.currFocusPageIndex = pageIndex
     }
 
     if (_3dEnabledPageIndex !== state._3dEnabledPageIndex) {
