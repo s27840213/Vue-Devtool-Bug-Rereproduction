@@ -8,7 +8,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
     :style="canvasWrapperStyle()")
     canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
   div(v-if="shadowSrc() && !config.isFrameImg"
-    :id="`nu-image-${config.id}__shadow`"
+    :id="inPreview ? '' : `nu-image-${config.id}__shadow`"
     class="shadow__picture"
     :style="imgShadowStyles()")
     img(ref="shadow-img"
@@ -134,6 +134,10 @@ export default defineComponent({
     primaryLayerIndex: {
       type: Number,
       default: -1
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   async created() {
