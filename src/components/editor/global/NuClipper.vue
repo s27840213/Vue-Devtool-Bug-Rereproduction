@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="nu-clipper layer-flip" ref="body"
   :style="styles"
-  :id="config.type === 'frame' ? `nu-clipper-${layerIndex}` : ''")
+  :id="config.type === 'frame' && !inPreview ? `nu-clipper-${layerIndex}` : ''")
   slot
 </template>
 
@@ -43,6 +43,10 @@ export default defineComponent({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   data() {
