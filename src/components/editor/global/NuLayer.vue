@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-layer"
+div(class="nu-layer flex-center"
     :class="[inAllPagesMode ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
     :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :data-p-index="pageIndex"
@@ -19,16 +19,13 @@ div(class="nu-layer"
       @click.right.stop="div.main ? onRightClick($event) : null"
       @dragenter="div.main ? dragEnter($event) : null"
       @dblclick="div.main ? dblClick($event) : null")
-    div(class="layer-translate posAbs"
-        :style="translateStyles()")
-      div(class="layer-scale posAbs" :ref="div.main ? 'scale' : ''"
-          :style="scaleStyles()")
-        nu-clipper(:config="config"
-            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-            :primaryLayer="primaryLayer"
-            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
+    div(class="full-size flex-center"
+        :class="{'nu-layer__scale': applyLayerScale, 'preserve3D': !isTouchDevice}" :ref="div.main ? 'scale' : ''"
+        :style="scaleStyles()")
+      div(class="nu-layer__flip full-size flex-center" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
           component(:is="`nu-${config.type}`"
             class="transition-none"
+            :class="{'preserve3D': !isTouchDevice}"
             :config="config"
             :imgControl="imgControl"
             :contentScaleRatio="contentScaleRatio"
@@ -39,29 +36,11 @@ div(class="nu-layer"
             :forRender="forRender"
             :isTransparent="div.isTransparent"
             :noShadow="div.noShadow")
-//- // -            //- v-bind="$attrs")
-    //- div(class="full-size"
-    //-     :class="{'nu-layer__scale': applyLayerScale, 'preserve3D': !isTouchDevice}" :ref="div.main ? 'scale' : ''"
-    //-     :style="scaleStyles()")
-    //-   div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
-    //-       component(:is="`nu-${config.type}`"
-    //-         class="transition-none"
-    //-         :class="{'preserve3D': !isTouchDevice}"
-    //-         :config="config"
-    //-         :imgControl="imgControl"
-    //-         :contentScaleRatio="contentScaleRatio"
-    //-         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-    //-         :page="page"
-    //-         :scaleRatio="scaleRatio"
-    //-         :primaryLayer="primaryLayer"
-    //-         :forRender="forRender"
-    //-         :isTransparent="div.isTransparent"
-    //-         :noShadow="div.noShadow")
-    //-       svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
-    //-         class="clip-contour full-size"
-    //-         :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
-    //-         g(v-html="frameClipFormatter(config.clipPath)"
-    //-           :style="frameClipStyles")
+          svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
+            class="clip-contour full-size"
+            :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+            g(v-html="frameClipFormatter(config.clipPath)"
+              :style="frameClipStyles")
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
   div(v-if="isLine" class="nu-layer__line-mover"
@@ -1045,6 +1024,12 @@ export default defineComponent({
   position: absolute;
   top: 0;
   left: 0;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .spiner {
