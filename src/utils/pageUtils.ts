@@ -360,6 +360,9 @@ class PageUtils {
 
   setBackgroundImageControlDefault(): void {
     store.commit('SET_allBackgroundImageControl', false)
+    if (generalUtils.isTouchDevice()) {
+      editorUtils.setShowMobilePanel(false)
+    }
   }
 
   updateBackgroundImagePos(pageIndex: number, imgX: number, imgY: number): void {
