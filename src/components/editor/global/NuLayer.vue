@@ -19,8 +19,8 @@ div(class="nu-layer flex-center"
       @click.right.stop="div.main ? onRightClick($event) : null"
       @dragenter="div.main ? dragEnter($event) : null"
       @dblclick="div.main ? dblClick($event) : null")
-    div(class="full-size pos-left"
-        :class="{'nu-layer__scale': applyLayerScale, 'preserve3D': !isTouchDevice}" :ref="div.main ? 'scale' : ''"
+    div(class="nu-layer__scale full-size pos-left"
+        :class="{'preserve3D': !isTouchDevice}" :ref="div.main ? 'scale' : ''"
         :style="scaleStyles()")
       div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
           component(:is="`nu-${config.type}`"
@@ -309,11 +309,11 @@ export default defineComponent({
     inAllPagesMode(): boolean {
       return this.mobilePagePreview || this.showPcPagePreivew
     },
-    applyLayerScale(): boolean {
-      const isImg = this.config.type === 'image'
-      const isUnscalableShape = this.config.type === 'shape' && ['D', 'E'].includes(this.config.category)
-      return !isImg && !isUnscalableShape
-    },
+    // applyLayerScale(): boolean {
+    //   const isImg = this.config.type === 'image'
+    //   const isUnscalableShape = this.config.type === 'shape' && ['D', 'E'].includes(this.config.category)
+    //   return !isImg && !isUnscalableShape
+    // },
     lazyloadSize(): { height: number, width: number } {
       const { config, contentScaleRatio } = this
       switch (config.type) {
@@ -990,6 +990,7 @@ export default defineComponent({
   }
   &__scale {
     transform-origin: top left;
+    transform-origin: 0 0;
   }
   &__flip {
     transition: transform 0.2s linear;
