@@ -27,6 +27,8 @@ import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
 
+export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template'
+
 /**
  * shown prop indicates if the user-setting-config is shown in the setting page
  */
@@ -1053,6 +1055,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     } else {
       return editorType
     }
+  }
+
+  openPayment(target: IViviStickerProFeatures) {
+    store.commit('vivisticker/SET_fullPageConfig', { type: 'payment', params: { target } })
+  }
+
+  checkPro(item: { plan: number }, target: IViviStickerProFeatures) {
+    const isPro = false
+    if (item.plan === 1 && !isPro) {
+      this.openPayment(target)
+      return false
+    }
+    return true
   }
 }
 

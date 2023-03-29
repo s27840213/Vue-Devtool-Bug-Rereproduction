@@ -4,19 +4,24 @@ transition(name="panel-up")
     template(v-if="fullPageType === 'iOS16Video'")
       div(class="full-page__video")
         video(autoplay playsinline muted loop :src="videoSource" :poster="thumbnail")
-      div(v-if="showCloseButton"
-          class="full-page__close"
-          @click.prevent.stop="handleClose")
-        svg-icon(iconName="vivisticker_close"
-                iconColor="white"
-                iconWidth="24px")
+    payment(v-if="fullPageType === 'payment'" :target="fullPageParams.target")
+    div(v-if="showCloseButton"
+      class="full-page__close"
+      @click.prevent.stop="handleClose")
+      svg-icon(iconName="vivisticker_close"
+              iconColor="white"
+              iconWidth="24px")
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import Payment from './Payment.vue'
 
 export default defineComponent({
+  components: {
+    Payment
+  },
   data() {
     return {
       showCloseButton: false
@@ -61,6 +66,9 @@ export default defineComponent({
           } else {
             this.showCloseButton = true
           }
+          break
+        default:
+          this.showCloseButton = true
       }
     },
     handleClose() {
