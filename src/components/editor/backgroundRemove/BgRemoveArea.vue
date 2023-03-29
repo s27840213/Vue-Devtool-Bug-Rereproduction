@@ -15,7 +15,7 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-teleport(v-if="useMobileEditor" to=".mobile-panel")
+teleport(v-if="useMobileEditor" to=".header-bar")
   div(class="magnify-area" :style="magnifyAreaStyle")
     canvas(class="magnify-area__canvas"  ref="magnify")
     div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
@@ -72,7 +72,8 @@ export default defineComponent({
       isProcessingStepsQueue: false,
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
       brushSteps: [],
-      magnifyUtils: null as unknown as MagnifyUtils
+      magnifyUtils: null as unknown as MagnifyUtils,
+      showMagnifyAtRight: false
     }
   },
   created() {
@@ -176,11 +177,11 @@ export default defineComponent({
     },
     magnifyAreaStyle(): { [index: string]: string } {
       return !this.$isTouchDevice() ? {
-        top: '10px',
+        bottom: '10px',
         left: '80px'
       } : {
-        top: '-70px',
-        left: '20px',
+        bottom: '-70px',
+        ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
         visibility: this.showBrush ? 'visible' : 'hidden'
       }
     }
@@ -325,7 +326,8 @@ export default defineComponent({
     drawLine(e: MouseEvent, ctx: CanvasRenderingContext2D) {
       ctx.beginPath()
       ctx.moveTo(this.initPos.x, this.initPos.y)
-      const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
+      const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root)
+      this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
       ctx.lineTo(x, y)
       ctx.stroke()
       Object.assign(this.initPos, {
