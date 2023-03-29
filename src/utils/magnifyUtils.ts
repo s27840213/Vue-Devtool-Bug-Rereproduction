@@ -7,7 +7,6 @@ class MagnifyUtils {
   private targetEl: HTMLElement;
   private magnifyContext: CanvasRenderingContext2D;
   private posInMagnifierCanvas = { x: 0, y: 0 };
-  private distPoint = { x: 0, y: 0 };
   private raf: number | undefined;
   SCALE_RATIO = 0.4
   MAGNIFY_RADIUS =30

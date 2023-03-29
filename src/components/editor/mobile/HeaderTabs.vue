@@ -280,6 +280,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .header-bar {
   @include size(100%);
+  position: relative;
   background-color: setColor(nav);
   display: flex;
   align-items: center;
