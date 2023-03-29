@@ -117,6 +117,8 @@ export default defineComponent({
   a {
     display: block;
     width: 100%;
+    text-decoration: unset;
+    color: inherit;
   }
 }
 
