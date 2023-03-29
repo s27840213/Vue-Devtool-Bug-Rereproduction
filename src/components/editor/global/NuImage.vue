@@ -2,7 +2,7 @@
 div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
   :class="{ 'nu-image__shadow-container': shadowSrc || showCanvas}"
   :id="`nu-image-${config.id}`"
-  :style="containerStyles()"
+  :style="containerStyles"
   draggable="false")
   div(v-if="showCanvas"
     class="shadow__canvas-wrapper"
@@ -334,6 +334,9 @@ export default defineComponent({
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
+    ...mapState('mobileEditor', {
+      inAllPagesMode: 'mobileAllPageMode',
+    }),
     finalSrc(): string {
       if (this.$route.name === 'Preview') {
         return imageUtils.appendCompQueryForVivipic(this.src)
@@ -399,6 +402,21 @@ export default defineComponent({
         }
       })()
       return isCurrShadowEffectApplied && isHandling
+    },
+    containerStyles(): any {
+      const { width, height } = this.scaledConfig()
+      const styles = {
+        ...(this.isAdjustImage() && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+      }
+      return this.showCanvas ? {
+        ...styles,
+        width: `${width}px`,
+        height: `${height}px`
+      } : {
+        ...styles
+        // Fix the safari rendering bug, add the following code can fix it...
+        // transform: 'translate(0,0)'
+      }
     },
     getImgDimension(): number | string {
       const { srcObj } = this.config
@@ -956,16 +974,6 @@ export default defineComponent({
         imgHeight: imgHeight * this.contentScaleRatio,
         imgX: imgX * this.contentScaleRatio,
         imgY: imgY * this.contentScaleRatio
-      }
-    },
-    containerStyles() {
-      const { width, height } = this.scaledConfig()
-      return this.showCanvas ? {
-        width: `${width}px`,
-        height: `${height}px`
-      } : {
-        // Fix the safari rendering bug, add the following code can fix it...
-        // transform: 'translate(0,0)'
       }
     },
     cssFilterElms() {

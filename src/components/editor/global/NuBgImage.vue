@@ -232,7 +232,7 @@ export default defineComponent({
       const { styles } = this.image.config
       const entries = Object
         .entries(styles.adjust || {})
-        .filter(([key, val]) => typeof val === 'number' && val !== 0)
+        .filter(([, val]) => typeof val === 'number' && val !== 0)
       return entries.length > 1 || (entries.length === 1 && entries[0][0] !== 'halation')
     },
     adjustImgStyles(): { [key: string]: string | number } {
