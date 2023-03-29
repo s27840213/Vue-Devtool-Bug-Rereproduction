@@ -282,7 +282,7 @@ export default defineComponent({
     ...mapState('shadow', ['processId', 'handleId', 'uploadId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('mobileEditor', {
-      inAllPagesMode: 'mobileAllPageMode',
+      mobilePagePreview: 'mobileAllPageMode'
     }),
     ...mapState('imgControl', {
       imgCtrlConfig: 'image'
@@ -303,8 +303,12 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isHandleShadow: 'shadow/isHandling',
       renderForPDF: 'user/getRenderForPDF',
-      useMobileEditor: 'getUseMobileEditor'
+      useMobileEditor: 'getUseMobileEditor',
+      showPcPagePreivew: 'page/getIsShowPagePreview'
     }),
+    inAllPagesMode(): boolean {
+      return this.mobilePagePreview || this.showPcPagePreivew
+    },
     applyLayerScale(): boolean {
       const isImg = this.config.type === 'image'
       const isUnscalableShape = this.config.type === 'shape' && ['D', 'E'].includes(this.config.category)
