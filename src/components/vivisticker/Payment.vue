@@ -193,7 +193,7 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     width: inherit;
-    max-height: 45vh;
+    height: 45vh;
     &__img {
       width: 100%;
       object-fit: cover;
