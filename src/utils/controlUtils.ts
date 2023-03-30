@@ -41,8 +41,8 @@ class Controller {
 
   getRectCenter(rect: DOMRect): ICoordinate {
     return {
-      x: rect.left + rect.width / 2 - window.pageXOffset,
-      y: rect.top + rect.height / 2 - window.pageYOffset
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
     }
   }
 
