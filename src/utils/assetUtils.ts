@@ -456,7 +456,7 @@ class AssetUtils {
 
   addText(json: any, attrs: IAssetProps = {}) {
     json = generalUtils.deepCopy(json)
-    const { pageIndex, styles = {} } = attrs
+    const { pageIndex, has_frame, styles = {} } = attrs
     const { x, y } = styles
     const { width, height, scale } = json.styles
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
@@ -475,7 +475,8 @@ class AssetUtils {
         width: textWidth,
         height: textHeight,
         scale: scale * rescaleFactor
-      }
+      },
+      has_frame
     }
 
     Object.assign(

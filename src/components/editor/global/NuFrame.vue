@@ -22,7 +22,7 @@ div(class="nu-frame"
 
 <script lang="ts">
 import { IListServiceContentDataItem } from '@/interfaces/api'
-import { IFrame, IImage, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IShape } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import AssetUtils from '@/utils/assetUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -60,6 +60,10 @@ export default defineComponent({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    primaryLayer: {
+      default: undefined,
+      type: Object as PropType<IGroup>
     }
   },
   async created() {
@@ -171,11 +175,20 @@ export default defineComponent({
          */
         if (!this.config.initFromMydesign) {
           window.requestAnimationFrame(() => {
-            frameUtils.iosPhotoSelect({
-              pageIndex: this.pageIndex,
-              layerIndex: this.layerIndex,
-              subLayerIdx: 0
-            }, (this.config as IFrame).clips[0])
+            if (this.primaryLayer) {
+              frameUtils.iosPhotoSelect({
+                pageIndex: this.pageIndex,
+                priPrimaryLayerIndex: this.layerIndex,
+                layerIndex: this.subLayerIndex,
+                subLayerIdx: 0,
+              }, (this.config as IFrame).clips[0])
+            } else {
+              frameUtils.iosPhotoSelect({
+                pageIndex: this.pageIndex,
+                layerIndex: this.layerIndex,
+                subLayerIdx: 0,
+              }, (this.config as IFrame).clips[0])
+            }
           })
         } else {
           delete this.config.initFromMydesign

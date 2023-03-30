@@ -278,19 +278,6 @@ export default defineComponent({
   },
   mounted() {
     this.setLastSelectedLayerIndex(this.layerIndex)
-
-    /**
-     * If the frame contain only one clip, auto popping the photo-selector
-     */
-    // if (this.config.type === LayerType.frame && (this.config as IFrame).clips.length === 1 && this.config.clips[0].srcObj.type === 'frame') {
-    //   if (!this.config.initFromMydesign) {
-    //     window.requestAnimationFrame(() => {
-    //       this.iosPhotoSelect(0)
-    //     })
-    //   } else {
-    //     delete this.config.initFromMydesign
-    //   }
-    // }
     if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
       textPropUtils.updateTextPropsState()
     }
