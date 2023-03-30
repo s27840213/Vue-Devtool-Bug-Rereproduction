@@ -33,9 +33,9 @@ div(class="payment")
     div(class="payment__btn-subscribe" @touchend="handleBtnSubscribeClick")
       span Try free & Subscribe
     div(class="payment__footer")
-      span(v-for="(footerLink, idx) in footerLinks" @touchend="footerLink.action")
+      template(v-for="(footerLink, idx) in footerLinks")
         span(v-if="idx > 0" class="payment__footer__splitter")
-        span {{ footerLink.title }}
+        span(@touchend="footerLink.action") {{ footerLink.title }}
 </template>
 
 <script lang="ts">
@@ -150,6 +150,14 @@ export default defineComponent({
   font-family: 'Poppins';
   &__carousel-item {
     display: flex;
+    justify-content: center;
+    width: inherit;
+    max-height: 45vh;
+    &__img {
+      width: 100%;
+      object-fit: cover;
+      object-position: bottom;
+    }
     &__title {
       position: absolute;
       bottom: -18px;
@@ -278,8 +286,8 @@ export default defineComponent({
     font-size: 10px;
     line-height: 15px;
     color: setColor(black-5);
+    column-gap: 10px;
     &__splitter {
-      margin: 0 10px;
       @include size(0px, 12px);
       border: 1px solid #474747;
       border-radius: 1px;

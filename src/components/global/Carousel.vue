@@ -68,6 +68,13 @@ export default defineComponent({
     this.stop()
     this.$emit('change', 0)
   },
+  watch: {
+    itemWidth() {
+      this.stop()
+      this.moveTo(this.current, false)
+      this.play()
+    }
+  },
   computed: {
     offset() {
       return -this.current * this.itemWidth
@@ -127,14 +134,14 @@ export default defineComponent({
     position: relative;
     width: v-bind("itemWidth+'px'");
     &__wrapper {
-      width: v-bind("`${itemWidth * items.length}px`");
+      width: v-bind("`${itemWidth*items.length}px`");
       display: flex;
       transform: v-bind("`translateX(${offset}px)`");
       transition: v-bind("`transform ${duration}ms cubic-bezier(.4,0,.2,1)`");
     }
     &__item {
       position: relative;
-      width: v-bind("`${itemWidth}px`");
+      width: v-bind("itemWidth+'px'");
     }
   }
 </style>
