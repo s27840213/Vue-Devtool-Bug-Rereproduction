@@ -15,10 +15,13 @@ div(class="settings-security")
     //-   span {{$t('NN0315')}}
     //-   div(class="settings-security__button") {{$t('NN0316')}}
     //- div(class="settings-security__divider")
-    //- div(class="settings-security__title") {{$tc('NN0317',1)}}
-    //- div(class="settings-security__item")
-    //-   span {{$t('NN0318')}}
-    //-   div(class="settings-security__button") {{$tc('NN0317',2)}}
+    div(v-if="!isAdmin")
+      div(class="settings-security__title") {{$tc('NN0317',1)}}
+      div(class="settings-security__item")
+        span {{$t('NN0318')}}
+        div(class="settings-security__button"
+            @click="deleteAccount()") {{$tc('NN0317',2)}}
+      div(class="settings-security__divider")
   spinner(v-if="isLoading")
   div(v-if="showVerifyPopup"
     class="settings-security__popup-verify popup-window")
@@ -30,6 +33,7 @@ div(class="settings-security")
 <script lang="ts">
 import PopupVerify from '@/components/popup/PopupVerify.vue'
 import localeUtils from '@/utils/localeUtils'
+import popupUtils from '@/utils/popupUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -48,7 +52,8 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       account: 'user/getAccount',
-      upassUpdate: 'user/getUpassUpdate'
+      upassUpdate: 'user/getUpassUpdate',
+      isAdmin: 'user/isAdmin',
     }),
     lastUpdateText(): string {
       if (this.upassUpdate === '0000-00-00 00:00:00') {
@@ -66,12 +71,15 @@ export default defineComponent({
     this.showUpdatePassword = this.upassUpdate.length > 0
   },
   methods: {
+    deleteAccount() {
+      popupUtils.openPopup('delete-account')
+    },
     onChangeClicked() {
       this.showVerifyPopup = true
     },
     closePopup() {
       this.showVerifyPopup = false
-    }
+    },
   }
 })
 </script>

@@ -60,7 +60,13 @@ const i18n = createI18n({
     jp
   },
   globalInjection: true,
-  legacy: true
+  legacy: true,
+  postTranslation: (str: unknown) => {
+    return (str as string)
+      .replace(/<blue>/g, '<span class="text-blue-1">')
+      .replace(/<red>/g, '<span class="text-red">')
+      .replace(/(<\/blue>|<\/red>)/g, '</span>')
+  },
 })
 
 export default i18n
