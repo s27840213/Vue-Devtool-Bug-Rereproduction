@@ -11,6 +11,7 @@ div(class="popup bg-white")
 
 <script lang="ts">
 import PopupAlign from '@/components/popup/PopupAlign.vue'
+import PopupDeleteAccount from '@/components/popup/PopupDeleteAccount.vue'
 import PopupFile from '@/components/popup/PopupFile.vue'
 import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupGuideline from '@/components/popup/PopupGuideline.vue'
@@ -48,7 +49,8 @@ export default defineComponent({
     PopupPageScale,
     PopupSubmit,
     PopupPayment,
-    PopupIcon
+    PopupIcon,
+    PopupDeleteAccount,
   },
   directives: {
     clickOutside: vClickOutside.directive
