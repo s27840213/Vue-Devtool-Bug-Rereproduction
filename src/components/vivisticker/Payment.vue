@@ -20,18 +20,18 @@ div(class="payment" v-touch @swipe="handleSwipe" @swipeup="isPanelUp = true" @sw
         :class="{ 'payment__content__indicator__item--active': idx === idxCurrImg }")
     div(class="payment__content__plans")
       div(v-for="btnPlan in btnPlans" class="payment__btn-plan"
-        :class="{selected: btnPlan.key === btnSelected}"
+        :class="{selected: btnPlan.key === planSelected}"
         @touchend="handleBtnPlanClick(btnPlan.key)")
-        svg-icon(v-if="btnPlan.key === btnSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
+        svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
         div(v-else class="payment__btn-plan__radio")
         div(class="payment__btn-plan__content")
           div(class="payment__btn-plan__content__title")
             div(class="payment__btn-plan__content__title__main") {{ btnPlan.title }}
             div(class="payment__btn-plan__content__title__sub") {{ btnPlan.subTitle }}
           div(class="payment__btn-plan__content__price") {{ btnPlan.price }}
-            div(v-if="btnPlan.key === btnSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
+            div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
     div(class="payment__btn-subscribe" @touchend="handleBtnSubscribeClick")
-      span Try free & Subscribe
+      span {{ txtBtnSubscribe }}
     div(class="payment__footer")
       template(v-for="(footerLink, idx) in footerLinks")
         span(v-if="idx > 0" class="payment__footer__splitter")
@@ -90,7 +90,7 @@ export default defineComponent({
   data() {
     return {
       idxCurrImg: 0,
-      btnSelected: 'yearly',
+      planSelected: 'yearly',
       isPanelUp: false,
       carouselItems: [
         {
@@ -159,13 +159,16 @@ export default defineComponent({
     ...mapState({
       windowSize: 'windowSize'
     }),
+    txtBtnSubscribe() {
+      return this.planSelected === 'yearly' ? 'Try free & Subscribe' : 'Subscribe'
+    },
   },
   methods: {
     handleImageChange(index: number) {
       this.idxCurrImg = index
     },
     handleBtnPlanClick(key: string) {
-      this.btnSelected = key
+      this.planSelected = key
     },
     handleBtnSubscribeClick() {
       console.log('handleBtnSubscribeClick')
