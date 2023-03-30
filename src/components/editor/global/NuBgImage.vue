@@ -114,6 +114,13 @@ export default defineComponent({
       } else {
         this.setBgImgConfig(undefined)
       }
+    },
+    isBlurImg(val) {
+      const { imgWidth, imgHeight } = this.image.config.styles
+      const src = imageUtils.getSrc(this.image.config, val ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
+      imageUtils.imgLoadHandler(src, () => {
+        this.src = src
+      })
     }
   },
   async created() {
@@ -125,7 +132,8 @@ export default defineComponent({
       const editorImg = this.getEditorViewImages
       if (!editorImg(assetId)) {
         await this.updateImages({ assetSet: new Set<string>([assetId]) })
-        const src = imageUtils.getSrc(this.image.config)
+        const { imgWidth, imgHeight } = this.image.config.styles
+        const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
         imageUtils.imgLoadHandler(src, () => {
           this.src = src
         })
@@ -145,7 +153,8 @@ export default defineComponent({
       if (this.isAdjustImage) {
         this.handleIsTransparent()
       }
-      this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.getImgDimension))
+      const { imgWidth, imgHeight } = this.image.config.styles
+      this.src = imageUtils.getSrc(this.image.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
     }
   },
   components: { NuAdjustImage },
@@ -284,6 +293,9 @@ export default defineComponent({
         return `url(#${this.filterId})`
       }
       return ''
+    },
+    isBlurImg(): boolean {
+      return this.image.config.styles.adjust?.blur
     }
   },
   methods: {
@@ -309,7 +321,8 @@ export default defineComponent({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.getImgDimension))
+            const { imgWidth, imgHeight } = this.image.config.styles
+            const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension))
             imageUtils.imgLoadHandler(src, () => {
               this.src = src
             })
@@ -370,7 +383,8 @@ export default defineComponent({
           }
         })
       }
-      const src = imageUtils.getSrc(this.image.config)
+      const { imgWidth, imgHeight } = this.image.config.styles
+      const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
       return new Promise<void>((resolve, reject) => {
         imageUtils.imgLoadHandler(src, () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
@@ -396,6 +410,7 @@ export default defineComponent({
       editorUtils.setInBgSettingMode(true)
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
+      if (this.isBlurImg) return
       if (this.image.config.previewSrc === undefined) {
         const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
         const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)

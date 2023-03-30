@@ -320,6 +320,13 @@ export default defineComponent({
         }
       },
       deep: true
+    },
+    isBlurImg(val) {
+      const { imgWidth, imgHeight } = this.config.styles
+      const src = imageUtils.getSrc(this.config, val ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
+      imageUtils.imgLoadHandler(src, () => {
+        this.src = src
+      })
     }
   },
   components: { NuAdjustImage },
@@ -447,6 +454,9 @@ export default defineComponent({
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
       return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
+    isBlurImg(): boolean {
+      return this.config.styles.adjust?.blur
+    }
   },
   methods: {
     ...mapActions('file', ['updateImages']),
@@ -481,7 +491,8 @@ export default defineComponent({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
+            const { imgWidth, imgHeight } = this.config.styles
+            this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension))
           })
         } catch (error) {
           if (this.src.indexOf('data:image/png;base64') !== 0) {
@@ -557,8 +568,8 @@ export default defineComponent({
         }
       })
 
-      const currSize = this.getImgDimension
-      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, currSize))
+      const { imgWidth, imgHeight } = this.config.styles
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension))
       return new Promise<void>((resolve, reject) => {
         imageUtils.imgLoadHandler(src, () => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
@@ -584,21 +595,21 @@ export default defineComponent({
       })
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
-      const currSize = this.getImgDimension
+      if (this.isBlurImg) return
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
-        const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, currSize))
+        const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
         const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
         imageUtils.imgLoadHandler(currUrl, async () => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             this.src = currUrl
             if (newVal > oldVal) {
-              await this.preLoadImg('next', currSize)
-              this.preLoadImg('pre', currSize)
+              await this.preLoadImg('next', this.getImgDimension)
+              this.preLoadImg('pre', this.getImgDimension)
             } else {
-              await this.preLoadImg('pre', currSize)
-              this.preLoadImg('next', currSize)
+              await this.preLoadImg('pre', this.getImgDimension)
+              this.preLoadImg('next', this.getImgDimension)
             }
           }
         })
@@ -646,7 +657,8 @@ export default defineComponent({
         if (this.isAdjustImage()) {
           this.handleIsTransparent()
         }
-        this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
+        const { imgWidth, imgHeight } = this.config.styles
+        this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension))
       }
     },
     handleShadowInit() {
