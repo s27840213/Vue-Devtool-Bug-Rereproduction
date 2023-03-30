@@ -475,13 +475,15 @@ export default defineComponent({
       setImgConfig: 'imgControl/SET_CONFIG',
       setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
-    checkLimit(dimension: number, limit = RESIZER_SHOWN_MIN) {
-      return dimension * this.scaleRatio * this.contentScaleRatio < limit
+    getDefaultSizeLimit(): number {
+      return (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
     },
-    checkLimits(limit = RESIZER_SHOWN_MIN): { tooShort: boolean, tooNarrow: boolean } {
+    checkLimits(limit?: number): { tooShort: boolean, tooNarrow: boolean } {
+      limit = limit ?? this.getDefaultSizeLimit()
+      const totalScaleRatio = this.scaleRatio * this.contentScaleRatio
       return {
-        tooShort: this.checkLimit(this.getLayerHeight(), limit),
-        tooNarrow: this.checkLimit(this.getLayerWidth(), limit)
+        tooShort: this.getLayerHeight() * totalScaleRatio < limit,
+        tooNarrow: this.getLayerWidth() * totalScaleRatio < limit
       }
     },
     addMovingListener() {
@@ -626,13 +628,11 @@ export default defineComponent({
       return resizers
     },
     getScaler(scalers: any) {
-      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
+      const { tooShort, tooNarrow } = this.checkLimits()
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
     getCornerRotaters(scalers: any) {
-      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
+      const { tooShort, tooNarrow } = this.checkLimits()
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
     lineEnds(scalers: any, point: number[]) {
@@ -1190,14 +1190,20 @@ export default defineComponent({
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
       this.initTranslate = this.getLayerPos()
-      const angleInRad = this.getLayerRotate() * Math.PI / 180
-      const vect = MouseUtils.getMouseRelPoint(event, this.center)
+      const { tooShort, tooNarrow } = this.checkLimits()
+      if (tooShort || tooNarrow) {
+        this.control.xSign = 1
+        this.control.ySign = 1
+      } else {
+        const angleInRad = this.getLayerRotate() * Math.PI / 180
+        const vect = MouseUtils.getMouseRelPoint(event, this.center)
 
-      // Get client point as no rotation
-      const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
+        // Get client point as no rotation
+        const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
 
-      this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
-      this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
+        this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
+        this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
+      }
 
       if (this.config.category === 'E') {
         this.initCorRadPercentage = ControlUtils.getCorRadPercentage(this.config.vSize, this.config.size, this.config.shapeType)
