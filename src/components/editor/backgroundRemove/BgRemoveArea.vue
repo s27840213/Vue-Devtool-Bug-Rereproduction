@@ -93,7 +93,7 @@ export default defineComponent({
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
-      this.initMagnifyCanvas()
+      this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
     }
 
@@ -214,7 +214,7 @@ export default defineComponent({
         this.setRestoreInitState(false)
         this.setModifiedFlag(false)
         this.pushStep()
-        this.magnifyUtils.reset()
+        this.$isTouchDevice() && this.magnifyUtils.reset()
         this.currCanvasImageElement = undefined as unknown as HTMLImageElement
       }
     },
