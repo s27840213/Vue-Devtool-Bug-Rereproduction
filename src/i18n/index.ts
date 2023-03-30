@@ -61,11 +61,13 @@ const i18n = createI18n({
   },
   globalInjection: true,
   legacy: true,
-  postTranslation: (str: unknown) => {
-    return (str as string)
-      .replace(/<blue>/g, '<span class="text-blue-1">')
-      .replace(/<red>/g, '<span class="text-red">')
-      .replace(/(<\/blue>|<\/red>)/g, '</span>')
+  postTranslation: (translated: unknown) => {
+    if (typeof translated === 'string') {
+      return translated
+        .replace(/<blue>/g, '<span class="text-blue-1">')
+        .replace(/<red>/g, '<span class="text-red">')
+        .replace(/(<\/blue>|<\/red>)/g, '</span>')
+    } else return translated
   },
 })
 
