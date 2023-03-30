@@ -62,6 +62,8 @@ export class Rect {
       height: number
       text: string
       letterSpacing: number
+      pIndex: number
+      sIndex: number
     }[]
   }[] = []
 
@@ -163,12 +165,14 @@ export class Rect {
     this.transform = this.vertical ? 'rotate(90) scale(1,-1)' : ''
     this.rows = []
 
-    for (const p of div.children) {
+    for (let pIndex = 0; pIndex < div.children.length; pIndex++) {
+      const p = div.children[pIndex]
       const fontSize = parseFloat((p as HTMLElement).style.fontSize)
       const letterSpacingEm = parseFloat((p as HTMLElement).style.letterSpacing)
       const lineHeight = parseFloat((p as HTMLElement).style.lineHeight)
       const letterSpacing = fontSize * letterSpacingEm
-      for (const span of p.children) {
+      for (let sIndex = 0; sIndex < p.children.length; sIndex++) {
+        const span = p.children[sIndex]
         for (const cr of span.getClientRects()) {
           // If span is fixedWidth, its display will be inline-block
           // Height of inline-block span will grow with lineHeight
@@ -191,7 +195,9 @@ export class Rect {
               width,
               height,
               text: span.textContent ?? '',
-              letterSpacing
+              letterSpacing,
+              pIndex,
+              sIndex,
             }]
           })
         }

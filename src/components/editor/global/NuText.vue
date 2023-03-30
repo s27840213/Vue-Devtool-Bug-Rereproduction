@@ -20,7 +20,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       span(v-for="(span, sIndex) in p.spans"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpan, transParentStyles)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, pIndex, config), text.extraSpan, transParentStyles)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
@@ -29,7 +29,7 @@ import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import { CustomElementConfig } from '@/interfaces/editor'
 import { isITextLetterBg } from '@/interfaces/format'
-import { IGroup, IParagraph, IParagraphStyle, IText } from '@/interfaces/layer'
+import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
@@ -93,7 +93,7 @@ export default defineComponent({
       },
       textBg: {} as CustomElementConfig | null,
       textFillBg: {} as CustomElementConfig | null,
-      textFillSpanStyle: [] as Record<string, string | number>[]
+      textFillSpanStyle: [] as Record<string, string | number>[][]
     }
   },
   created() {
@@ -145,18 +145,22 @@ export default defineComponent({
     }
   },
   watch: {
-    'config.paragraphs': {
-      handler(newVal) {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
+    'config.paragraphs'(newVal) {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
+      this.drawTextBg()
+      textUtils.untilFontLoaded(newVal).then(async () => {
         this.drawTextBg()
-        textUtils.untilFontLoaded(newVal).then(async () => {
-          this.drawTextBg()
-          this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
-        })
-      }
+        this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+      })
     },
-    'config.styles.width'() { this.drawTextBg() },
-    'config.styles.height'() { this.drawTextBg() },
+    async 'config.styles.width'() {
+      this.drawTextBg()
+      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+    },
+    async 'config.styles.height'() {
+      this.drawTextBg()
+      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+    },
     'config.styles.textBg'() { this.drawTextBg() },
     async 'config.styles.textFill'() {
       this.textFillBg = textFillUtils.drawTextFill(this.config)
@@ -204,11 +208,11 @@ export default defineComponent({
         opacity,
       }
     },
-    spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
+    spanStyle(sIndex: number, pIndex: number, config: IText): Record<string, string> {
       const textBg = this.config.styles.textBg
+      const p = config.paragraphs[pIndex]
       const span = p.spans[sIndex]
-      const flattenSpanIndex = _.findIndex(config.paragraphs, p)
-      const textFillStyle = this.textFillSpanStyle[flattenSpanIndex] ?? {}
+      const textFillStyle = this.textFillSpanStyle[pIndex]?.[sIndex] ?? {}
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
         isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},

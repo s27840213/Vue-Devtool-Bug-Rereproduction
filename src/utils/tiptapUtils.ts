@@ -156,7 +156,7 @@ class TiptapUtils {
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
-          pObj.content = spans.map((s, index) => {
+          pObj.content = spans.map((s, sIndex) => {
             const config = layerUtils.getCurrLayer as IText
             return {
               type: 'text',
@@ -164,8 +164,8 @@ class TiptapUtils {
               marks: [{
                 type: 'textStyle',
                 attrs: Object.assign(this.makeSpanStyle(s.styles),
-                  fixedWidth ? { randomId: `${index}`, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {},
-                  textFillUtils.tempTextFill[pIndex] ?? {},
+                  fixedWidth ? { randomId: `${sIndex}`, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {},
+                  textFillUtils.tempTextFill[pIndex]?.[sIndex] ?? {},
                 )
               }]
             }

@@ -13,7 +13,7 @@ import tiptapUtils from './tiptapUtils'
 class TextFill {
   // private currColorKey = ''
   effects = {} as Record<string, Record<string, string | number | boolean>>
-  tempTextFill = [] as Record<string, string | number>[]
+  tempTextFill = [] as Record<string, string | number>[][]
   constructor() {
     this.effects = this.getDefaultEffects()
   }
@@ -50,9 +50,13 @@ class TextFill {
     return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth }
   }
 
-  async convertTextEffect(config: IText): Promise<Record<string, string | number>[]> {
+  async convertTextEffect(config: IText): Promise<Record<string, string | number>[][]> {
     const { textFill } = config.styles
-    if (textFill.name === 'none') return []
+    if (textFill.name === 'none') {
+      this.tempTextFill = []
+      tiptapUtils.updateHtml()
+      return []
+    }
 
     const img = store.getters['file/getImages'][0] as IAssetPhoto
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
@@ -60,9 +64,17 @@ class TextFill {
     const myRect = new Rect()
     await myRect.init(config)
     myRect.preprocess({ skipMergeLine: true })
-    const { rects, vertical } = myRect.get()
+    const { vertical, rows } = myRect.get()
+    const div = [] as DOMRect[][][]
+    for (const row of rows) {
+      const { pIndex, sIndex } = row.spanData[0]
+      while (div.length - 1 < pIndex) div.push([])
+      while (div[pIndex].length - 1 < sIndex) div[pIndex].push([])
+      div[pIndex][sIndex].push(row.rect)
+    }
 
-    this.tempTextFill = rects.map((rect) => {
+    this.tempTextFill = div.map(p => p.map(span => {
+      const rect = span[0]
       let { width: spanWidth, height: spanHeight } = rect
       if (vertical) [spanWidth, spanHeight] = [spanHeight, spanWidth]
       const bgSizeBy = textFill.size * (scaleByWidth ? divWidth / spanWidth : divHeight / spanHeight)
@@ -79,9 +91,8 @@ class TextFill {
         '-webkit-text-fill-color': 'transparent',
         '-webkit-background-clip': 'text',
       }
-    })
+    }))
     tiptapUtils.updateHtml() // Refresh tiptap span style
-
     return this.tempTextFill
   }
 
