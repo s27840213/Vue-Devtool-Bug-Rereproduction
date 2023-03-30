@@ -21,13 +21,13 @@ div(class="payment" v-touch @swipe="handleSwipe" @swipeup="isPanelUp = true" @sw
     div(class="payment__content__plans")
       div(v-for="btnPlan in btnPlans" class="payment__btn-plan"
         :class="{selected: btnPlan.key === planSelected}"
-        @touchend="handleBtnPlanClick(btnPlan.key)")
+        @tap="handleBtnPlanClick(btnPlan.key)")
         svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
         div(v-else class="payment__btn-plan__radio")
         div(class="payment__btn-plan__content")
           div(class="payment__btn-plan__content__title")
             div(class="payment__btn-plan__content__title__main") {{ btnPlan.title }}
-            div(class="payment__btn-plan__content__title__sub") {{ btnPlan.subTitle }}
+            div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub") {{ btnPlan.subTitle }}
           div(class="payment__btn-plan__content__price") {{ btnPlan.price }}
             div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
     div(class="payment__btn-subscribe" @touchend="handleBtnSubscribeClick")
@@ -35,8 +35,8 @@ div(class="payment" v-touch @swipe="handleSwipe" @swipeup="isPanelUp = true" @sw
     div(class="payment__footer")
       template(v-for="(footerLink, idx) in footerLinks")
         span(v-if="idx > 0" class="payment__footer__splitter")
-        span(@touchend="footerLink.action") {{ footerLink.title }}
-  div(class="payment__panel" @touchend="isPanelUp = true" v-click-outside="() => isPanelUp = false")
+        span(@tap="footerLink.action") {{ footerLink.title }}
+  div(class="payment__panel" @touchend.stop="isPanelUp = true" v-click-outside="() => isPanelUp = false")
     div(class="payment__panel__chevron" @touchend.stop="isPanelUp = !isPanelUp")
       svg-icon(iconName="chevron-up" iconWidth="14px" iconColor="white")
     div(class="payment__panel__title") What’s included
@@ -171,7 +171,7 @@ export default defineComponent({
       this.planSelected = key
     },
     handleBtnSubscribeClick() {
-      console.log('handleBtnSubscribeClick')
+      console.log('handleBtnSubscribeClick', this.planSelected)
     },
     handleRestorePurchaseClick() {
       console.log('handleRestorePurchaseClick')
@@ -236,6 +236,8 @@ export default defineComponent({
     }
   }
   &__btn-plan {
+    box-sizing: border-box;
+    height: 60px;
     display: grid;
     grid-template-columns: 20px 1fr;
     align-items: center;
@@ -268,9 +270,10 @@ export default defineComponent({
         text-align: left;
         text-transform: capitalize;
         &__main {
+          height: 18px;
           font-weight: 600;
           font-size: 14px;
-          line-height: 21px;
+          line-height: 19px;
         }
         &__sub {
           font-weight: 500;
@@ -337,6 +340,8 @@ export default defineComponent({
     flex-direction: column;
     position: absolute;
     bottom: 0px;
+    box-sizing: border-box;
+    width: 100%;
     height: 57%;
     padding: 16px 24px 0px 24px;
     color: white;
