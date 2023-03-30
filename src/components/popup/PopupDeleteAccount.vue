@@ -16,6 +16,7 @@ div(class="popup-window")
       nubtn(theme="secondary" size="sm-full" @click="closePopup") {{$t('NN0203')}}
       nubtn(theme="danger" size="sm-full" @click="deleteAccount"
             :status="allowDelete ? 'default' : 'disabled'") {{$t('NN0317')}}
+  spinner(v-if="loading")
 </template>
 
 <script lang="ts">
@@ -31,6 +32,7 @@ export default defineComponent({
   emits: ['close'],
   data() {
     return {
+      loading: false,
       userInput: '',
     }
   },
@@ -41,6 +43,7 @@ export default defineComponent({
   },
   methods: {
     async deleteAccount() {
+      this.loading = true
       await user.deleteAccount()
       window.location.href = '/'
     },
