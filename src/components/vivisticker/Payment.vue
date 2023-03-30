@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="payment")
+div(class="payment" v-touch @swipe="handleSwipe" @swipeup="isPanelUp = true" @swipedown="isPanelUp = false")
   carousel(
     :items="carouselItems"
     :itemWidth="windowSize.width"
@@ -36,11 +36,29 @@ div(class="payment")
       template(v-for="(footerLink, idx) in footerLinks")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(@touchend="footerLink.action") {{ footerLink.title }}
+  div(class="payment__panel" @touchend="isPanelUp = true" v-click-outside="() => isPanelUp = false")
+    div(class="payment__panel__chevron" @touchend.stop="isPanelUp = !isPanelUp")
+      svg-icon(iconName="chevron-up" iconWidth="14px" iconColor="white")
+    div(class="payment__panel__title") What’s included
+    div(class="payment__panel__comparison")
+      div(class="payment__panel__comparison__title first-column") Features
+      div(class="payment__panel__comparison__title") FREE
+      div(class="payment__panel__comparison__title") PRO
+      template(v-for="comparison in comparisons")
+        div(class="payment__panel__comparison__item  first-column") {{ comparison.feature }}
+        div(class="payment__panel__comparison__item")
+          svg-icon(v-if="comparison.free" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
+          template(v-else) -
+        div(class="payment__panel__comparison__item")
+          svg-icon(v-if="comparison.pro" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
+          template(v-else) -
 </template>
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
 import { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
+import { AnyTouchEvent } from 'any-touch'
+import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapState } from 'vuex'
 
@@ -50,9 +68,18 @@ interface CarouselItem {
   img: string
 }
 
+interface IComparison {
+  feature: string,
+  free: boolean,
+  pro: boolean
+}
+
 export default defineComponent({
   components: {
     Carousel
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   props: {
     target: {
@@ -62,6 +89,9 @@ export default defineComponent({
   },
   data() {
     return {
+      idxCurrImg: 0,
+      btnSelected: 'yearly',
+      isPanelUp: false,
       carouselItems: [
         {
           key: 'object',
@@ -79,8 +109,6 @@ export default defineComponent({
           img: require('@/assets/img/png/pricing/tw/vivisticker_pro-text.png')
         }
       ] as CarouselItem[],
-      idxCurrImg: 0,
-      btnSelected: 'yearly',
       btnPlans: [
         {
           key: 'monthly',
@@ -117,7 +145,14 @@ export default defineComponent({
             window.open('https://vivisticker.com/tw/隱私權聲明/', '_blank')
           }
         }
-      ]
+      ],
+      comparisons: [
+        { feature: 'Free stickers, texts, and background', free: true, pro: true },
+        { feature: 'Advanced text effects', free: false, pro: true },
+        { feature: 'Premium frames', free: false, pro: true },
+        { feature: 'Exclusive stickers & texts', free: false, pro: true },
+        { feature: 'Exclusive stickers & texts', free: false, pro: true }
+      ] as IComparison[]
     }
   },
   computed: {
@@ -138,6 +173,9 @@ export default defineComponent({
     handleRestorePurchaseClick() {
       console.log('handleRestorePurchaseClick')
     },
+    handleSwipe(e: AnyTouchEvent) {
+      e.stopPropagation()
+    }
   }
 })
 </script>
@@ -266,9 +304,7 @@ export default defineComponent({
     padding: 4px 16px;
     background: white;
     border-radius: 10px;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 140%;
+    @include text-H6;
     display: flex;
     align-items: center;
     text-align: center;
@@ -291,6 +327,71 @@ export default defineComponent({
       @include size(0px, 12px);
       border: 1px solid #474747;
       border-radius: 1px;
+    }
+  }
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    bottom: 0px;
+    height: 57%;
+    padding: 16px 24px 0px 24px;
+    color: white;
+    background-color: setColor(black-3);
+    border-radius: 10px 10px 0px 0px;
+    transform: v-bind("isPanelUp ? 'none' : 'translateY(calc(100% - 48px))'");
+    transition: transform 300ms ease-in-out;
+    &__chevron {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      padding: 6px 22px;
+      transform: translate(-50%, -50%);
+      background-color: setColor(black-3);
+      border-radius: 100px;
+      >svg {
+        transform: v-bind("isPanelUp ? 'rotate(180deg)' : 'none'");
+      }
+    }
+    &__title {
+      width: 100%;
+      height: v-bind("isPanelUp ? '0' : '20px'");
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 170%;
+      letter-spacing: 0.8px;
+      text-transform: capitalize;
+      overflow: hidden;
+      transition: height 200ms ease-in-out;
+    }
+    &__comparison {
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr;
+      grid-template-rows: min-content;
+      padding-top: 11px;
+      &__title {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 16px;
+        @include text-H6;
+      }
+      &__item {
+        border-top: 1px solid #474747;
+        padding: 20px 0 16px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        @include body-SM;
+      }
+    }
+    .first-column {
+      text-align: left;
+      justify-content: left;
     }
   }
 }
