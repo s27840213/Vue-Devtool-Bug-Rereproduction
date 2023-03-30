@@ -1057,11 +1057,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  openPayment(target: IViviStickerProFeatures) {
+  openPayment(target?: IViviStickerProFeatures) {
     store.commit('vivisticker/SET_fullPageConfig', { type: 'payment', params: { target } })
   }
 
-  checkPro(item: { plan: number }, target: IViviStickerProFeatures) {
+  checkPro(item: { plan: number }, target?: IViviStickerProFeatures) {
     const isPro = false
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)

@@ -7,7 +7,7 @@ div(class="panel-vvstk-more")
           @click.prevent.stop="handleOptionAction(option.action)")
         div(class="panel-vvstk-more__option-icon")
           svg-icon(:iconName="option.icon"
-                    :iconWidth="option.icon === 'settings' ? '20px' : '24px'"
+                    :iconWidth="option.icon === 'settings' ? '20px' : option.icon === 'pro' ? '18px' : '24px'"
                     iconColor="gray-2")
         div(class="panel-vvstk-more__option-title") {{ option.text }}
     div(class="horizontal-rule")
@@ -105,6 +105,11 @@ export default defineComponent({
         text: `${this.$t('NN0146')}`,
         icon: 'vivisticker_play-circle',
         action: this.handleShowTutorial
+      },
+      {
+        text: 'Vivisticker Pro',
+        icon: 'pro',
+        action: vivistickerUtils.openPayment
       }, {
         text: `${this.$t('NN0174')}`,
         icon: 'vivisticker_global',
