@@ -2,8 +2,9 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { LayerProcessType, LayerType } from '@/store/types'
-import GeneralUtils from '@/utils/generalUtils'
+import generalUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import { isEqual } from 'lodash'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import localeUtils from './localeUtils'
 import mouseUtils from './mouseUtils'
@@ -21,7 +22,7 @@ class LayerFactary {
       srcObj: {
         ...config.srcObj
       },
-      id: config.id || GeneralUtils.generateRandomString(8),
+      id: config.id || generalUtils.generateRandomString(8),
       clipPath: config.clipPath ?? `M0,0h${width}v${height}h${-width}z`,
       active: false,
       shown: false,
@@ -98,7 +99,7 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { designId, clips, decoration, decorationTop, styles, locked, blendLayers: _blendLayers } = GeneralUtils.deepCopy(config) as IFrame
+    const { designId, clips, decoration, decorationTop, styles, locked, blendLayers: _blendLayers } = generalUtils.deepCopy(config) as IFrame
     let { width, height, initWidth, initHeight } = styles
     initWidth = initWidth || width
     initHeight = initHeight || height
@@ -129,7 +130,7 @@ class LayerFactary {
       clips[0].styles.initHeight = styles.initHeight
       clips[0].styles.initWidth = styles.initWidth
       clips[0] = this.newImage(clips[0])
-      // clips[0] = this.newImage(Object.assign(GeneralUtils.deepCopy(clips[0])))
+      // clips[0] = this.newImage(Object.assign(generalUtils.deepCopy(clips[0])))
       clips[0].isFrameImg = true
     } else {
       // New image-frame no image info need to be resored
@@ -161,18 +162,20 @@ class LayerFactary {
     }
     const blendLayers = _blendLayers ? (_blendLayers as Array<unknown>)
       .map((l: any) => {
-        l.styles = {}
-        l.styles.width = width / styles.scale
-        l.styles.height = height / styles.scale
-        l.styles.initWidth = width / styles.scale
-        l.styles.initHeight = height / styles.scale
-        l.vSize = [l.styles.width, l.styles.height]
+        const newStyles = {} as any
+        newStyles.width = width / styles.scale
+        newStyles.height = height / styles.scale
+        newStyles.initWidth = width / styles.scale
+        newStyles.initHeight = height / styles.scale
+        newStyles.blendMode = l.blendMode
+        l.styles = newStyles
+        l.vSize = [newStyles.width, newStyles.height]
         return this.newShape(l)
       }) : undefined
 
     const frame = {
       type: 'frame',
-      id: config.id || GeneralUtils.generateRandomString(8),
+      id: config.id || generalUtils.generateRandomString(8),
       active: false,
       shown: false,
       locked: locked ?? false,
@@ -232,7 +235,7 @@ class LayerFactary {
   newText(config: Partial<IText>): IText {
     const basicConfig = {
       type: 'text',
-      id: config.id || GeneralUtils.generateRandomString(8),
+      id: config.id || generalUtils.generateRandomString(8),
       widthLimit: -1,
       isTyping: false,
       active: false,
@@ -295,7 +298,8 @@ class LayerFactary {
         from: 0,
         to: 0
       },
-      isAutoResizeNeeded: false
+      isAutoResizeNeeded: false,
+      isCompensated: true
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
@@ -306,18 +310,34 @@ class LayerFactary {
      * 1: empty span
      * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
      * 3: span style that has only font but no type
+     * 4: font size smaller than browser minimum font size setting
+     * 5: span has no text and is the only span in the paragraph
+     * 6: font is in wrong format (e.g. contains a comma)
+     * 7: span has no font
+     * 8: span contains invalid unicode characters (which breaks emoji)
+     * 9: replace textShape and textEffect value {} to {name: none}
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
       // some paragraphs contain empty spans.
       for (let pidx = 0; pidx < paragraphs.length; pidx++) {
-        if (paragraphs[pidx].spans.length === 0) {
+        const spans = paragraphs[pidx].spans
+        if (spans.length === 0) {
           paragraphs.splice(pidx, 1)
           pidx--
-        } else if (paragraphs[pidx].spans.length > 1) {
-          for (let sidx = 0; sidx < paragraphs[pidx].spans.length; sidx++) {
-            if (!paragraphs[pidx].spans[sidx].text && paragraphs[pidx].spans.length > 1) {
-              paragraphs[pidx].spans.splice(sidx, 1)
+        } else if (spans.length === 1) {
+          const span = spans[0]
+          // 5: span has no text and is the only span in the paragraph
+          if (span.text === undefined) {
+            paragraphs.splice(pidx, 1)
+            pidx--
+          }
+        } else {
+          for (let sidx = 0; sidx < spans.length; sidx++) {
+            const span = spans[sidx]
+            // 1: empty span
+            if (!span.text && spans.length > 1) {
+              spans.splice(sidx, 1)
               sidx--
             }
           }
@@ -325,22 +345,29 @@ class LayerFactary {
       }
       const isVertical = basicConfig.styles.writingMode.includes('vertical')
       const defaultFont = (Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale())) ? STANDARD_TEXT_FONT[localeUtils.currLocale()] : STANDARD_TEXT_FONT.tw
-      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical,
+      // 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
+      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, config.isCompensated,
         (paragraph) => {
           if (paragraph.spans.length > 0) {
             const firstSpanStyles = paragraph.spans[0].styles
             if (firstSpanStyles.font) {
+              // 3: span style that has only font but no type
               paragraph.styles.font = firstSpanStyles.font
               paragraph.styles.type = firstSpanStyles.type ?? 'public'
               paragraph.styles.userId = firstSpanStyles.userId ?? ''
               paragraph.styles.assetId = firstSpanStyles.assetId ?? ''
               paragraph.styles.fontUrl = firstSpanStyles.fontUrl ?? ''
             } else {
+              // 7: span has no font
               paragraph.styles.font = defaultFont
               paragraph.styles.type = 'public'
               paragraph.styles.userId = ''
               paragraph.styles.assetId = ''
               paragraph.styles.fontUrl = ''
+            }
+            // 6: font is in wrong format (e.g. contains a comma)
+            if (paragraph.styles.font.includes(',')) {
+              paragraph.styles.font = paragraph.styles.font.split(',')[0]
             }
             if ((paragraph.spans.length > 1 || paragraph.spans[0].text !== '') && paragraph.spanStyle) {
               delete paragraph.spanStyle
@@ -348,9 +375,34 @@ class LayerFactary {
           }
         },
         (span) => {
+          // 8: span contains invalid unicode characters (which breaks emoji)
           span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
+        },
+        undefined,
+        (span) => {
+          // This needs to be done after removeInvalidStyles's span processing,
+          // because span's font is guaranteed to exist after that.
+          // 6: font is in wrong format (e.g. contains a comma)
+          if (span.styles.font.includes(',')) {
+            span.styles.font = span.styles.font.split(',')[0]
+          }
         }
       )
+      // 4: font size smaller than browser minimum font size setting
+      if (config.isCompensated) {
+        const baseFontSize = textPropUtils.getBaseFontSizeOfParagraphs(config.paragraphs)
+        const compensation = textPropUtils.getScaleCompensation(baseFontSize)
+        if (compensation.needCompensation) {
+          basicConfig.styles.scale *= compensation.scale
+          config.paragraphs = textPropUtils.propAppliedParagraphs(config.paragraphs, 'size', 0, (size) => {
+            return size / compensation.scale
+          })
+        }
+      }
+    }
+    // 9: replace textShape and textEffect value {} to {name: none}
+    for (const key of ['textShape', 'textEffect'] as const) {
+      if (isEqual(basicConfig.styles[key], {})) basicConfig.styles[key] = { name: 'none' }
     }
     return Object.assign(basicConfig, config)
   }
@@ -358,7 +410,7 @@ class LayerFactary {
   newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IFrame>): IGroup {
     const group: IGroup = {
       type: 'group',
-      id: config.id || GeneralUtils.generateRandomString(8),
+      id: config.id || generalUtils.generateRandomString(8),
       active: false,
       shown: false,
       locked: config.locked ?? false,
@@ -407,7 +459,7 @@ class LayerFactary {
   newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup | IFrame>) {
     const tmp: ITmp = {
       type: 'tmp',
-      id: GeneralUtils.generateRandomString(8),
+      id: generalUtils.generateRandomString(8),
       active: true,
       shown: false,
       locked: false,
@@ -439,10 +491,10 @@ class LayerFactary {
 
   newShape(config?: any): IShape {
     config = config || {}
-    const { styles = {} } = GeneralUtils.deepCopy(config)
+    const { styles = {} } = generalUtils.deepCopy(config)
     const basicConfig = {
       type: 'shape',
-      id: GeneralUtils.generateRandomString(8),
+      id: generalUtils.generateRandomString(8),
       active: false,
       shown: false,
       path: '',
@@ -478,7 +530,7 @@ class LayerFactary {
         opacity: styles.opacity ?? 100,
         horizontalFlip: styles.horizontalFlip || false,
         verticalFlip: styles.verticalFlip || false,
-        blendMode: config.blendMode || ''
+        blendMode: styles.blendMode || ''
       }
     }
     if (config.category === 'A' && styles.scale && styles.initWidth && styles.initHeight) {
@@ -486,7 +538,7 @@ class LayerFactary {
       basicConfig.styles.height = styles.initHeight * styles.scale
     }
     delete config.styles
-    delete config.blendMode
+    // delete config.blendMode
     return Object.assign(basicConfig, config)
   }
 
@@ -527,7 +579,7 @@ class LayerFactary {
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     const bgImgConfig = config.backgroundImage.config
-    bgImgConfig.id = GeneralUtils.generateRandomString(8)
+    bgImgConfig.id = generalUtils.generateRandomString(8)
     if (bgImgConfig.srcObj.type) {
       if (!bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
         config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }

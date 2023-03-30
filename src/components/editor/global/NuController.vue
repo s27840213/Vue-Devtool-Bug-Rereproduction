@@ -41,22 +41,22 @@ div(:layer-index="`${layerIndex}`"
             :layerIndex="layerIndex"
             :config="(config as IText)"
             :subLayerIndex="-1"
-            @keydown.37.stop
-            @keydown.38.stop
-            @keydown.39.stop
-            @keydown.40.stop
-            @keydown.ctrl.67.exact.stop.self
-            @keydown.meta.67.exact.stop.self
-            @keydown.ctrl.86.exact.stop.self
-            @keydown.meta.86.exact.stop.self
-            @keydown.ctrl.88.exact.stop.self
-            @keydown.meta.88.exact.stop.self
-            @keydown.ctrl.65.exact.stop.self
-            @keydown.meta.65.exact.stop.self
-            @keydown.ctrl.90.exact.stop.self
-            @keydown.meta.90.exact.stop.self
-            @keydown.ctrl.shift.90.exact.stop.self
-            @keydown.meta.shift.90.exact.stop.self
+            @keydown.left.stop
+            @keydown.up.stop
+            @keydown.right.stop
+            @keydown.down.stop
+            @keydown.ctrl.c.exact.stop.self
+            @keydown.meta.c.exact.stop.self
+            @keydown.ctrl.v.exact.stop.self
+            @keydown.meta.v.exact.stop.self
+            @keydown.ctrl.x.exact.stop.self
+            @keydown.meta.x.exact.stop.self
+            @keydown.ctrl.a.exact.stop.self
+            @keydown.meta.a.exact.stop.self
+            @keydown.ctrl.z.exact.stop.self
+            @keydown.meta.z.exact.stop.self
+            @keydown.ctrl.shift.z.exact.stop.self
+            @keydown.meta.shift.z.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
         div(v-if="!$isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
@@ -116,7 +116,7 @@ div(:layer-index="`${layerIndex}`"
             @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine()"
-            :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
+            :style="`transform: scale(${contentScaleRatio})`")
           svg-icon(class="control-point__rotater"
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
@@ -156,7 +156,7 @@ import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
@@ -471,6 +471,15 @@ export default defineComponent({
       setImgConfig: 'imgControl/SET_CONFIG',
       setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
+    checkLimit(dimension: number, limit = RESIZER_SHOWN_MIN) {
+      return dimension * this.scaleRatio * this.contentScaleRatio < limit
+    },
+    checkLimits(limit = RESIZER_SHOWN_MIN): { tooShort: boolean, tooNarrow: boolean } {
+      return {
+        tooShort: this.checkLimit(this.getLayerHeight(), limit),
+        tooNarrow: this.checkLimit(this.getLayerWidth(), limit)
+      }
+    },
     addMovingListener() {
       const body = (this.$refs.body as HTMLElement[])[0]
       const lineMover = this.$refs.lineMover as HTMLElement
@@ -528,16 +537,15 @@ export default defineComponent({
       const scalerOffset = this.$isTouchDevice() ? 36 : 20
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${(this.getLayerWidth() - scalerOffset) * this.scaleRatio * 0.01}px` : `${width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
-        height: !isHorizon ? `${(this.getLayerHeight() - scalerOffset) * this.scaleRatio * 0.01}px` : `${height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        width: isHorizon ? `${(this.getLayerWidth() - scalerOffset) * this.contentScaleRatio * this.scaleRatio * 0.01}px` : `${width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        height: !isHorizon ? `${(this.getLayerHeight() - scalerOffset) * this.contentScaleRatio * this.scaleRatio * 0.01}px` : `${height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
         opacity: 0
       }
       return Object.assign(resizerStyle, HW)
     },
     resizerStyles(resizer: IResizer, isTouchArea = false) {
       const resizerStyle = { ...resizer }
-      const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
+      const { tooShort, tooNarrow } = this.checkLimits()
       const tooSmall = this.getLayerType === 'text'
         ? (this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort) : false
       const width = parseFloat(resizerStyle.width.replace('px', ''))
@@ -560,8 +568,7 @@ export default defineComponent({
     },
     getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
       let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
-      const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
+      const { tooShort, tooNarrow } = this.checkLimits()
       switch (this.getLayerType) {
         case 'image':
           resizers = this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
@@ -612,14 +619,12 @@ export default defineComponent({
     },
     getScaler(scalers: any) {
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+      const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
     getCornerRotaters(scalers: any) {
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+      const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
     lineEnds(scalers: any, point: number[]) {
@@ -1661,8 +1666,7 @@ export default defineComponent({
       }
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+      const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
       if (tooShort || tooNarrow) {
         index = 2
       }
@@ -1829,8 +1833,7 @@ export default defineComponent({
       if (typeof index === 'number') {
         if (type === 'cornerRotaters') {
           const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-          const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
-          const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+          const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
           if (tooShort || tooNarrow) {
             index = 2
           }
@@ -2237,7 +2240,7 @@ export default defineComponent({
       return this.config.locked
     },
     isLine(): boolean {
-      return this.config.type === 'shape' && this.config.category === 'D'
+      return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     getLayerWidth(): number {
       return this.config.styles.width

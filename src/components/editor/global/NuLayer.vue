@@ -5,7 +5,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
       :class="!config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : ''"
       :style="layerStyles(div.noShadow, div.isTransparent)"
       :ref="div.main ? 'body' : ''"
-      :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
+      :id="div.main && !inPreview ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
       :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
       :data-p-index="pageIndex"
       @pointerdown="div.main ? onPointerDown($event) : null"
@@ -21,7 +21,8 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
         nu-clipper(:config="config"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :primaryLayer="primaryLayer"
-            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
+            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio"
+            :inPreview="inPreview")
           component(:is="`nu-${config.type}`"
             class="transition-none"
             :config="config"
@@ -33,7 +34,8 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
             :primaryLayer="primaryLayer"
             :forRender="forRender"
             :isTransparent="div.isTransparent"
-            :noShadow="div.noShadow")
+            :noShadow="div.noShadow"
+            :inPreview="inPreview")
             //- v-bind="$attrs")
         svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
           :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
@@ -44,7 +46,9 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
   div(class="nu-layer__line-mover"
     :style="lineMoverStyles()"
     ref="lineMover"
-    :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`")
+    :id="inPreview ? '' : `nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    @contextmenu.prevent
+    @click.right.stop="onRightClick($event)")
 </template>
 
 <script lang="ts">
@@ -52,7 +56,7 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
@@ -70,6 +74,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
 import textBgUtils from '@/utils/textBgUtils'
@@ -157,6 +162,10 @@ export default defineComponent({
       type: Boolean
     },
     handleUnrender: {
+      default: false,
+      type: Boolean
+    },
+    inPreview: {
       default: false,
       type: Boolean
     }
@@ -341,7 +350,7 @@ export default defineComponent({
       return this.config.type
     },
     isLine(): boolean {
-      return this.config.type === 'shape' && this.config.category === 'D'
+      return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     frameClipStyles(): any {
       return {
@@ -442,7 +451,8 @@ export default defineComponent({
         case LayerType.shape: {
           Object.assign(
             styles,
-            { 'mix-blend-mode': this.config.styles.blendMode }
+            { 'mix-blend-mode': this.config.styles.blendMode },
+            shapeUtils.isLine(this.config as AllLayerTypes) ? { pointerEvents: 'none' } : {}
           )
         }
       }

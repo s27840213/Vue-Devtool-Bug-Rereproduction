@@ -1,6 +1,6 @@
 import designApis from '@/apis/design'
 import i18n from '@/i18n'
-import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
+import { IAssetDesignParams, IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import router from '@/router'
 import store from '@/store'
@@ -749,29 +749,37 @@ class DesignUtils {
   }
 
   async fetchDesign(teamId: string, assetId: string, params?: { [index: string]: any }) {
-    const designData = await store.dispatch('design/fetchDesign', { teamId, assetId })
-    if (designData.url_map['config.json'] === undefined) {
-      if (this.teamId === teamId) { // cannot find self-owning design
+    const designData = await store.dispatch('design/fetchDesign', { teamId, assetId }) as IAssetDesignParams
+    const isSelfDesign = teamId === this.teamId
+    const status = designData.status
+    switch (status) {
+      case 0:
+        if (isSelfDesign) {
+          store.commit('SET_folderInfo', {
+            isRoot: designData.is_root,
+            parentFolder: designData.parent_folder,
+            path: designData.path
+          })
+          store.commit('SET_pagesName', designData.name)
+          store.commit('SET_assetIndex', designData.asset_index)
+        }
+        await uploadUtils.getDesign('design', { designId: assetId, teamId, fetchTarget: designData.url_map['config.json'] }, params)
+        if (!isSelfDesign) {
+          await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+        }
+        return
+      case 1:
         notify({ group: 'error', text: i18n.global.t('SKT0019') })
-      } else { // have no access to the design
+        break
+      case 2:
         notify({ group: 'error', text: i18n.global.t('SHR0020') })
-      }
-      store.commit('SET_assetId', '')
-      store.commit('file/SET_setLayersDone')
-      await router.replace({ query: Object.assign({}) })
-      await themeUtils.refreshTemplateState()
-      return
+        break
     }
-    if (this.teamId === teamId) {
-      store.commit('SET_folderInfo', {
-        isRoot: designData.is_root,
-        parentFolder: designData.parent_folder,
-        path: designData.path
-      })
-      store.commit('SET_pagesName', designData.name)
-      store.commit('SET_assetIndex', designData.asset_index)
-    }
-    await uploadUtils.getDesign('design', { designId: assetId, teamId, fetchTarget: designData.url_map['config.json'] }, params)
+    // reset editor state if design is not successfully fetched
+    store.commit('SET_assetId', '')
+    store.commit('file/SET_setLayersDone')
+    await router.replace({ query: Object.assign({}) })
+    await themeUtils.refreshTemplateState()
   }
 
   fetchDesigns(fetcher: () => Promise<void>, clear = true) {
@@ -896,7 +904,7 @@ class DesignUtils {
     if (assetIndex === -1) {
       const teamId = designApis.getTeamId()
       const assetId = store.getters.getAssetId
-      const designData = await store.dispatch('design/fetchDesign', { teamId, assetId })
+      const designData = await store.dispatch('design/fetchDesign', { teamId, assetId }) as IAssetDesignParams
       assetIndex = designData.asset_index
       store.commit('SET_assetIndex', assetIndex)
     }

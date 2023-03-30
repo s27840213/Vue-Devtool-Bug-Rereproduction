@@ -18,7 +18,7 @@ import GroupUtils from './groupUtils'
 import gtmUtils from './gtmUtils'
 import ImageUtils from './imageUtils'
 import LayerFactary from './layerFactary'
-import LayerUtils from './layerUtils'
+import layerUtils from './layerUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
 import resizeUtils from './resizeUtils'
@@ -168,7 +168,8 @@ class AssetUtils {
     const targetPageIndex = attrs?.pageIndex ?? pageUtils.addAssetTargetPageIndex
     const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(generalUtils.deepCopy(json))
-    pageUtils.setAutoResizeNeededForPage(json, true)
+    // pageUtils.setAutoResizeNeededForPage(json, true)
+    layerUtils.setAutoResizeNeededForLayersInPage(json, true)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     pageUtils.updateSpecPage(targetPageIndex, newLayer)
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
@@ -212,7 +213,7 @@ class AssetUtils {
 
     for (let i = 0; i < pageNum; i++) {
       json = await this.updateBackground(generalUtils.deepCopy(json))
-      pageUtils.setAutoResizeNeededForPage(json, true)
+      layerUtils.setAutoResizeNeededForLayersInPage(json, true)
       const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
       pageUtils.updateSpecPage(i, newLayer)
       if (width && height) {
@@ -253,9 +254,9 @@ class AssetUtils {
         ...styles
       }
     }
-    const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
+    const index = layerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)
+    layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targetPageIndex)
     GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
@@ -293,9 +294,9 @@ class AssetUtils {
         ...styles
       }
     }
-    const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
+    const index = layerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)
+    layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targetPageIndex)
     GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
@@ -335,9 +336,9 @@ class AssetUtils {
         ...styles
       }
     }
-    const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
+    const index = layerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)
+    layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)
     ZindexUtils.reassignZindex(targetPageIndex)
     GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
@@ -365,9 +366,9 @@ class AssetUtils {
       },
       ...json
     }
-    const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
+    const index = layerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newFrame(config)], index)
+    layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newFrame(config)], index)
     ZindexUtils.reassignZindex(targetPageIndex)
     GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
@@ -490,7 +491,7 @@ class AssetUtils {
     const newLayer = config.type === 'group'
       ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
-    LayerUtils.addLayers(targetPageIndex, [newLayer])
+    layerUtils.addLayers(targetPageIndex, [newLayer])
   }
 
   addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
@@ -519,7 +520,7 @@ class AssetUtils {
         }
 
         TextUtils.resetTextField(textLayer, targetPageIndex, field)
-        LayerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: !generalUtils.isTouchDevice() }))])
+        layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: !generalUtils.isTouchDevice(), isCompensated: true }))])
         editorUtils.setCloseMobilePanelFlag(true)
       })
       .catch((error) => {
@@ -618,9 +619,9 @@ class AssetUtils {
         ...newStyles
       }
     }
-    const index = LayerUtils.getObjectInsertionLayerIndex(this.getPage(targetPageIndex).layers, config) + 1
+    const index = layerUtils.getObjectInsertionLayerIndex(this.getPage(targetPageIndex).layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newImage(config)], index)
+    layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newImage(config)], index)
     ZindexUtils.reassignZindex(targetPageIndex)
     GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
@@ -651,7 +652,7 @@ class AssetUtils {
         )
         return Promise.all(updatePromise)
       })
-      .then(jsonDataList => {
+      .then((jsonDataList: IPage[]) => {
         // 單頁: 取代, 多頁: 空白取代/加入後面
         const currFocusPage: IPage = this.getPage(pageUtils.currFocusPageIndex)
         let targetIndex = pageUtils.currFocusPageIndex
@@ -674,7 +675,8 @@ class AssetUtils {
           } as IBleed
         }
 
-        pageUtils.setAutoResizeNeededForPages(jsonDataList, true)
+        // pageUtils.setAutoResizeNeededForPages(jsonDataList, true)
+        layerUtils.setAutoResizeNeededForLayersInPages(jsonDataList, true)
         pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         nextTick(() => {
           pageUtils.scrollIntoPage(targetIndex)

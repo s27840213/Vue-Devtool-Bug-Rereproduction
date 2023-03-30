@@ -4,7 +4,7 @@ div(class="page-preview")
     page-preview-plus(:index="idx" :last="false")
     page-preview-page-wrapper(:index="idx"
       type="full"
-      :config="wrappedPage(page)"
+      :config="page"
       :lazyLoadTarget="'.page-preview'")
     page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
       :index="idx+1" :last="false")
@@ -70,9 +70,6 @@ export default defineComponent({
         unit: lastPage.unit
       } : {}), pageUtils.pageNum)
       stepsUtils.record()
-    },
-    wrappedPage(page: IPage) {
-      return { ...page, isAutoResizeNeeded: false }
     }
   }
 })

@@ -75,21 +75,20 @@ for (const isMobile of [true, false]) {
       })
     }
 
+    function beforeCopyFormat() {
+      cy.togglePanel('調整')
+        .get('input[type="range"][name="brightness"]').eq(-1)
+        .invoke('val', 50).trigger('input')
+        .get('input[type="range"][name="contrast"]').eq(-1)
+        .invoke('val', 50).trigger('input')
+        .togglePanel('調整')
+    }
+    function afterCopyFormat() {
+      cy.togglePanel('調整')
+      cy.contains('重置效果').click()
+        .togglePanel('調整')
+    }
     it(`Other image test${suffix}`, function () {
-      function beforeCopyFormat() {
-        cy.togglePanel('調整')
-          .get('input[type="range"][name="brightness"]').eq(-1)
-          .invoke('val', 50).trigger('input')
-          .get('input[type="range"][name="contrast"]').eq(-1)
-          .invoke('val', 50).trigger('input')
-          .togglePanel('調整')
-      }
-      function afterCopyFormat() {
-        cy.togglePanel('調整')
-        cy.contains('重置效果').click()
-          .togglePanel('調整')
-      }
-
       cy.visit('/editor')
         .disableTransition()
         .importDesign('2flower.json')
@@ -106,15 +105,13 @@ for (const isMobile of [true, false]) {
             .layerLock()
             .layerDelete()
             .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
-            .rotateAndResize()
+            .layerRotateAndResize()
+            // .layerMultipleCopyAndMove('functionalPanel', isMobile)
+            // .layerMultipleCopyAndMove('shortcut', isMobile) // Skip in mobile
+            // .layerMultipleCopyAndMove('rightclick', isMobile) // Skip in mobile
             .deselectAllLayers().snapshotTest('init') // Check if image restore to init
             .get('.nu-layer__wrapper:nth-child(3) .nu-image')
-            .then((subject: JQuery<HTMLElement>) => {
-              // TODO: Implement layer copy format in mobile
-              if (isMobile) return cy.wrap(subject)
-              return cy.wrap(subject)
-                .layerMoveToPage2()
-            })
+            .layerMoveToPage2(isMobile) // Skip in mobile
         })
     })
   })

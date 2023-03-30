@@ -105,9 +105,9 @@ import frameUtils from '@/utils/frameUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
-import _ from 'lodash'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -171,11 +171,12 @@ export default defineComponent({
       isDraggingPanel: false,
       currSubColorEvent: '',
       innerTabIndex: 0,
-      fitPage: _.throttle(() => {
-        this.$nextTick(() => {
-          pageUtils.fitPage()
-        })
-      }, 100, { trailing: false }),
+      // No fit page in mobile now
+      // fitPage: _.throttle(() => {
+      //   this.$nextTick(() => {
+      //     pageUtils.fitPage()
+      //   })
+      // }, 100, { trailing: false }),
       resizeObserver: null as unknown as ResizeObserver
     }
   },
@@ -193,7 +194,8 @@ export default defineComponent({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
-      hasCopiedFormat: 'getHasCopiedFormat'
+      hasCopiedFormat: 'getHasCopiedFormat',
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -272,17 +274,17 @@ export default defineComponent({
       return ['crop', 'color', 'copy-style', 'multiple-select', 'remove-bg'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
-      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file'].includes(this.currActivePanel)
+      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? 'initial' : this.panelDragHeight + 'px',
+            ? '100%' : this.panelDragHeight + 'px',
         },
         // Prevent MobilePanel collapse
-        isSidebarPanel ? { height: '100%' } : {}
+        isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {}
       )
     },
     innerTab(): string {
@@ -379,6 +381,11 @@ export default defineComponent({
             maxheight: this.panelParentHeight()
           }
         }
+        case 'more': {
+          return {
+            panelHistory: this.panelHistory
+          }
+        }
         default: {
           return {}
         }
@@ -395,6 +402,7 @@ export default defineComponent({
       }
       switch (this.currActivePanel) {
         case 'color':
+        case 'more':
           return { pushHistory }
         case 'background':
           return { openExtraColorModal }
@@ -540,15 +548,13 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.panelDragHeight = 0
     this.resizeObserver = new ResizeObserver(() => {
       this.$emit('panelHeight', this.currPanelHeight())
+      // No fit page in mobile now
       // Prevent fitPage when full size panel open, ex: SidebarPanel
-      this.$nextTick(() => {
-        if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
-          this.fitPage()
-        }
-      })
+      // if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
+      //   this.fitPage()
+      // }
     })
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
@@ -589,13 +595,13 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(false)
     },
     initPanelHeight() {
-      return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
+      return ((this.$el.parentElement as HTMLElement).clientHeight - this.userInfo.statusBarHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
     currPanelHeight() {
       return (this.$refs.panel as HTMLElement).clientHeight
     },
     panelParentHeight() {
-      return (this.$el.parentElement as HTMLElement).clientHeight
+      return (this.$el.parentElement as HTMLElement).clientHeight - this.userInfo.statusBarHeight
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
@@ -618,8 +624,10 @@ export default defineComponent({
         this.closeMobilePanel()
       } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
         this.panelDragHeight = panelParentHeight
+        this.$emit('panelHeight', this.panelDragHeight + 30) // 30 = 15 padding * 2
       } else {
         this.panelDragHeight = panelParentHeight * 0.5
+        this.$emit('panelHeight', this.panelDragHeight + 30)
       }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)

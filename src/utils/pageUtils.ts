@@ -87,7 +87,7 @@ class PageUtils {
     const windowHeight = window.innerHeight
     const topInView = Math.max(rect.top, 0)
     const bottomInView = Math.min(rect.bottom, windowHeight)
-    return (bottomInView - topInView) / windowHeight
+    return (bottomInView - topInView) / rect.height
   }
 
   get addAssetTargetPageIndex(): number {
@@ -203,7 +203,6 @@ class PageUtils {
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
-      isAutoResizeNeeded: false,
       contentScaleRatio: 1
     }
     // pageData.snapUtils && delete pageData.snapUtils
@@ -363,6 +362,9 @@ class PageUtils {
 
   setBackgroundImageControlDefault(): void {
     store.commit('SET_allBackgroundImageControl', false)
+    if (generalUtils.isTouchDevice()) {
+      editorUtils.setShowMobilePanel(false)
+    }
   }
 
   updateBackgroundImagePos(pageIndex: number, imgX: number, imgY: number): void {
@@ -662,16 +664,6 @@ class PageUtils {
 
   hasDesignId(pageIndex: number) {
     return this.getPage(pageIndex).designId !== ''
-  }
-
-  setAutoResizeNeededForPages(pages: IPage[], isAutoResizeNeeded: boolean) {
-    for (const page of pages) {
-      this.setAutoResizeNeededForPage(page, isAutoResizeNeeded)
-    }
-  }
-
-  setAutoResizeNeededForPage(page: IPage, isAutoResizeNeeded: boolean) {
-    page.isAutoResizeNeeded = isAutoResizeNeeded
   }
 
   /**

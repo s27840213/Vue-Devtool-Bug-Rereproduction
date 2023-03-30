@@ -138,7 +138,11 @@ class TextPropUtils {
     }
   }
 
-  removeInvalidStyles(paragraphs: IParagraph[], isVertical: boolean, pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void) {
+  removeInvalidStyles(
+    paragraphs: IParagraph[], isVertical: boolean, isCompensated?: boolean,
+    pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void,
+    pPostHandler?: (paragraph: IParagraph) => void, spanPostHandler?: (span: ISpan) => void
+  ) {
     const minimumFontSize = this.getMinimumFontSize()
     paragraphs.forEach((p) => {
       pHandler && pHandler(p)
@@ -153,7 +157,7 @@ class TextPropUtils {
         if (typeof pStyle.size === 'string') {
           pStyle.size = parseFloat(pStyle.size)
         }
-        if (pStyle.size < minimumFontSize) {
+        if (pStyle.size < minimumFontSize && !isCompensated) {
           pStyle.size = minimumFontSize
         }
         p.spanStyle = tiptapUtils.textStyles(pStyle)
@@ -162,7 +166,7 @@ class TextPropUtils {
       if (typeof paragraphStyles.size === 'string') {
         paragraphStyles.size = parseFloat(paragraphStyles.size)
       }
-      if (paragraphStyles.size < minimumFontSize) {
+      if (paragraphStyles.size < minimumFontSize && !isCompensated) {
         paragraphStyles.size = minimumFontSize
       }
       for (const span of p.spans) {
@@ -181,10 +185,12 @@ class TextPropUtils {
         if (typeof span.styles.size === 'string') {
           span.styles.size = parseFloat(span.styles.size)
         }
-        if (span.styles.size < minimumFontSize) {
+        if (span.styles.size < minimumFontSize && !isCompensated) {
           span.styles.size = minimumFontSize
         }
+        spanPostHandler && spanPostHandler(span)
       }
+      pPostHandler && pPostHandler(p)
     })
   }
 
@@ -1029,9 +1035,9 @@ class TextPropUtils {
     return baseFontSize
   }
 
-  getBaseFontSizeOfLayer(layer: IText): number {
+  getBaseFontSizeOfParagraphs(paragraphs: IParagraph[]): number {
     let baseFontSize = Number.MAX_SAFE_INTEGER
-    for (const paragraph of layer.paragraphs) {
+    for (const paragraph of paragraphs) {
       for (const span of paragraph.spans) {
         if (span.styles.size < baseFontSize) {
           baseFontSize = span.styles.size
@@ -1041,17 +1047,12 @@ class TextPropUtils {
     return baseFontSize
   }
 
-  propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number, modifier?: (propValue: number) => number) {
-    const primaryLayer = (layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IGroup | IText | ITmp)
-    let targetLayer: IText
-    if (subLayerIndex === -1 && primaryLayer.type === 'text') {
-      targetLayer = primaryLayer
-    } else if ((primaryLayer.type === 'group' || primaryLayer.type === 'tmp') && primaryLayer.layers[subLayerIndex].type === 'text') {
-      targetLayer = primaryLayer.layers[subLayerIndex] as IText
-    } else {
-      return
-    }
-    const paragraphs = generalUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
+  getBaseFontSizeOfLayer(layer: IText): number {
+    return this.getBaseFontSizeOfParagraphs(layer.paragraphs)
+  }
+
+  propAppliedParagraphs(paragraphs: IParagraph[], prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number, modifier?: (propValue: number) => number): IParagraph[] {
+    paragraphs = generalUtils.deepCopy(paragraphs) as IParagraph[]
     paragraphs.forEach(p => {
       if (modifier) {
         Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = modifier((p.styles[prop] as number)))
@@ -1066,6 +1067,20 @@ class TextPropUtils {
         }
       })
     })
+    return paragraphs
+  }
+
+  propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number, modifier?: (propValue: number) => number) {
+    const primaryLayer = (layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IGroup | IText | ITmp)
+    let targetLayer: IText
+    if (subLayerIndex === -1 && primaryLayer.type === 'text') {
+      targetLayer = primaryLayer
+    } else if ((primaryLayer.type === 'group' || primaryLayer.type === 'tmp') && primaryLayer.layers[subLayerIndex].type === 'text') {
+      targetLayer = primaryLayer.layers[subLayerIndex] as IText
+    } else {
+      return
+    }
+    const paragraphs = this.propAppliedParagraphs(targetLayer.paragraphs, prop, payload, modifier)
     layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs }, subLayerIndex)
   }
 
@@ -1358,7 +1373,7 @@ class TextPropUtils {
     document.body.appendChild(element)
     const res = parseInt(getComputedStyle(element).fontSize.replace('px', ''))
     document.body.removeChild(element)
-    return res * 3 / 4
+    return res / 1.333333
   }
 
   getScaleCompensation(size: number): { scale: number, size: number, needCompensation: boolean } {

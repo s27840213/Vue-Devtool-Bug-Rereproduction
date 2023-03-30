@@ -1,13 +1,11 @@
+import { isITextLetterBg } from '@/interfaces/format'
 import {
-  IGroup, ILayer, IParagraph, IParagraphStyle, ISpan,
-  ISpanStyle, IText, ITmp
+  IGroup, IParagraph, IText, ITmp
 } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { IFont, ISelection } from '@/interfaces/text'
+import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
-import { checkAndConvertToHex } from '@/utils/colorUtils'
-import ControlUtils from '@/utils/controlUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import _ from 'lodash'
@@ -61,7 +59,7 @@ class TextUtils {
       while (divsToDelete.length) {
         const div = divsToDelete.pop()
         if (!div) break
-        document.body.removeChild(div)
+        if (document.body.contains(div)) document.body.removeChild(div)
       }
     }, 5000)
   }
@@ -303,21 +301,15 @@ class TextUtils {
         const span = document.createElement('span')
         span.textContent = spanData.text
 
-        const spanStyleObject = {}
-        tiptapUtils.textStyles(spanData.styles)
-          .split(';')
-          .forEach(s => {
-            Object.assign(spanStyleObject, {
-              [s.split(':')[0].trim()]: s.split(': ')[1].trim()
-            })
-          })
-        const textBgSpanEffect = textBgUtils.convertTextSpanEffect(content.styles.textBg)
-        const additionalStyle = Object.assign({}, spanStyleObject, textBgSpanEffect as Record<string, string>,
-          index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
-        )
-        Object.assign(span.style, additionalStyle)
+        const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
+        const fixedWidth = isITextLetterBg(content.styles.textBg) && content.styles.textBg.fixedWidth
+        const additionalStyle = {
+          ...index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
+          ...fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, pData.styles, content) : {}
+        }
+        Object.assign(span.style, spanStyleObject, additionalStyle)
         // Set CSS var to span
-        for (const [key, value] of Object.entries(additionalStyle)) {
+        for (const [key, value] of Object.entries(spanStyleObject)) {
           if (key.startsWith('--')) {
             span.style.setProperty(key, value)
           }
@@ -807,33 +799,36 @@ class TextUtils {
     }
   }
 
-  setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
-    if (GeneralUtils.isValidFloat(_value.toString())) {
-      _value = GeneralUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max)
+  async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
+    return new Promise<void>((resolve) => {
+      if (GeneralUtils.isValidFloat(_value.toString())) {
+        _value = GeneralUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max)
 
-      let preprocessedValue: number
-      switch (prop) {
-        case 'lineHeight':
-          preprocessedValue = _.toNumber((_value).toFixed(2))
-          break
-        case 'fontSpacing':
-          preprocessedValue = _value / 1000
-      }
-      const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = LayerUtils
-      window.requestAnimationFrame(() => {
-        if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
-          (currLayer as IGroup | ITmp).layers
-            .forEach((l, idx) => {
-              l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, preprocessedValue)
-              l.type === 'text' && this.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
-            })
-          TextPropUtils.updateTextPropsState({ [prop]: _value })
-        } else {
-          tiptapUtils.applyParagraphStyle(prop, preprocessedValue, false)
-          TextPropUtils.updateTextPropsState({ [prop]: _value })
+        let preprocessedValue: number
+        switch (prop) {
+          case 'lineHeight':
+            preprocessedValue = _.toNumber((_value).toFixed(2))
+            break
+          case 'fontSpacing':
+            preprocessedValue = _value / 1000
         }
-      })
-    }
+        const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = LayerUtils
+        window.requestAnimationFrame(() => {
+          if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
+            (currLayer as IGroup | ITmp).layers
+              .forEach((l, idx) => {
+                l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, preprocessedValue)
+                l.type === 'text' && this.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
+              })
+            TextPropUtils.updateTextPropsState({ [prop]: _value })
+          } else {
+            tiptapUtils.applyParagraphStyle(prop, preprocessedValue, false)
+            TextPropUtils.updateTextPropsState({ [prop]: _value })
+          }
+          resolve()
+        })
+      }
+    })
   }
 
   async untilFontLoadedForPage(page: IPage, toSetFlag = false): Promise<void> {

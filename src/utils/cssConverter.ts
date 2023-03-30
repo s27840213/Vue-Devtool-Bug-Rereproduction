@@ -27,34 +27,12 @@ const styleMap = {
   decoration: 'text-decoration-line',
   style: 'font-style',
   caretColor: 'caret-color',
-  // below are not css valid properties, only for tiptap to record
-  type: 'font-type',
-  assetId: 'asset-id',
-  userId: 'user-id',
-  fontUrl: 'font-url'
 } as IStyleMap
-
-// const fontStyleMap = {
-//   'font-family': 'fontFamily',
-//   'font-weight': 'fontWeight',
-//   'font-align': 'fontAlign',
-//   'line-height': 'lineHeight',
-//   'font-spacing': 'fontSpacing',
-//   'font-size': 'fontSize',
-//   'writing-mode': 'writingMode',
-//   'font-style': 'fontStyle',
-//   'text-decoration-line': 'decoration',
-//   'text-decoration-thickness': 'decoration',
-//   'text-decoration-style': 'decoration',
-//   'text-decoration-color': 'decoration',
-//   'letter-spacing': 'letterSpacing',
-//   color: 'color'
-// } as IStyleMap
 
 const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
 const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
-  'type', 'assetId', 'userId', 'fontUrl'
+  'min-width', 'min-height'
 ]
 
 class CssConveter {
@@ -72,8 +50,10 @@ class CssConveter {
   convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle | { [key: string]: string | number }): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
+      if (sourceStyles[prop] === undefined) return
+
       if (prop === 'size') {
-        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 4 / 3}px`
+        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 1.333333}px`
       } else if (prop === 'weight') {
         result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `calc(var(--base-stroke) + ${(sourceStyles.size as number) / 32}px)` : 'calc(var(--base-stroke))'
       } else if (prop === 'fontSpacing') {
@@ -88,6 +68,11 @@ class CssConveter {
       } else if (prop === 'color') { // For color
         result[styleMap[prop]] = `${sourceStyles[prop]}`
         result['text-decoration-color'] = `${sourceStyles[prop]}`
+      } else if (['min-width', 'min-height'].includes(prop)) { // For fixedWidth LetterBg
+        result[prop] = `${sourceStyles[prop]}`
+        result.display = 'inline-block'
+        result['letter-spacing'] = '0'
+        result['text-align'] = 'center'
       } else if (typeof sourceStyles[prop] !== 'undefined') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}px` : `${sourceStyles[prop]}`
       }

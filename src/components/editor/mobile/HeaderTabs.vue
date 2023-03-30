@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="header-bar" @pointerdown.stop)
+div(class="header-bar" :style="rootStyles" @pointerdown.stop)
   div(class="header-bar__left")
     div(class="header-bar__feature-icon mr-20"
         @pointerdown="backBtnAction()")
@@ -36,6 +36,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -94,8 +95,14 @@ export default defineComponent({
       inBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      hasBleed: 'getHasBleed'
+      hasBleed: 'getHasBleed',
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${this.userInfo.statusBarHeight + 8}px`
+      }
+    },
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
