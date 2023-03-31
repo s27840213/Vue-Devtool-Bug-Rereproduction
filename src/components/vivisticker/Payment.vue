@@ -45,6 +45,7 @@ div(class="payment" v-touch @swipe="handleSwipe" @swipeup="isPanelUp = true" @sw
       div(class="payment__panel__comparison__title") {{ $t('STK0044') }}
       div(class="payment__panel__comparison__title") PRO
       template(v-for="comparison in comparisons")
+        div(class="payment__panel__comparison__splitter")
         div(class="payment__panel__comparison__item  first-column") {{ comparison.feature }}
         div(class="payment__panel__comparison__item")
           svg-icon(v-if="comparison.free" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
@@ -339,13 +340,11 @@ export default defineComponent({
     }
   }
   &__panel {
-    display: flex;
-    flex-direction: column;
     position: absolute;
     bottom: 0px;
     box-sizing: border-box;
     width: 100%;
-    height: 57%;
+    // min-height: 57%;
     padding: 16px 24px 0px 24px;
     color: white;
     background-color: setColor(black-3);
@@ -366,7 +365,7 @@ export default defineComponent({
     }
     &__title {
       width: 100%;
-      height: v-bind("isPanelUp ? '0' : '20px'");
+      height: v-bind("isPanelUp ? 0 : '20px'");
       display: flex;
       align-items: center;
       justify-content: center;
@@ -380,9 +379,14 @@ export default defineComponent({
     }
     &__comparison {
       display: grid;
-      grid-template-columns: 3fr 1fr 1fr;
+      grid-template-columns: 1fr 80px 80px;
       grid-template-rows: min-content;
+      column-gap: 8px;
       padding-top: 11px;
+      &__splitter{
+          border-top: 1px solid #474747;
+          grid-column: 1 / 5;
+      }
       &__title {
         height: 40px;
         display: flex;
@@ -392,7 +396,6 @@ export default defineComponent({
         @include text-H6;
       }
       &__item {
-        border-top: 1px solid #474747;
         padding: 20px 0 16px 0;
         display: flex;
         align-items: center;
