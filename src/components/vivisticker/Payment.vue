@@ -57,7 +57,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
-import { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
+import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { defineComponent, PropType } from 'vue'
 import { mapState } from 'vuex'
@@ -87,7 +87,7 @@ export default defineComponent({
   data() {
     return {
       idxCurrImg: 0,
-      planSelected: 'yearly',
+      planSelected: 'annually',
       isPanelUp: false,
       isPanelTransitioning: false,
       carouselItems: [
@@ -116,7 +116,7 @@ export default defineComponent({
           tag: ''
         },
         {
-          key: 'yearly',
+          key: 'annually',
           title: this.$t('NN0515'),
           subTitle: this.$t('STK0048', { day: 3 }),
           price: '$26.90',
@@ -169,7 +169,7 @@ export default defineComponent({
       windowSize: 'windowSize'
     }),
     txtBtnSubscribe() {
-      return this.planSelected === 'yearly' ? this.$t('STK0046') : this.$t('STK0047')
+      return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
     },
   },
   methods: {
@@ -180,10 +180,10 @@ export default defineComponent({
       this.planSelected = key
     },
     handleBtnSubscribeClick() {
-      console.log('handleBtnSubscribeClick', this.planSelected)
+      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: this.planSelected })
     },
     handleRestorePurchaseClick() {
-      console.log('handleRestorePurchaseClick')
+      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'checkState' })
     },
     handleSwipe(e: AnyTouchEvent) {
       e.stopPropagation()
