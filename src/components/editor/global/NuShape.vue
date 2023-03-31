@@ -12,12 +12,12 @@ div(class="nu-shape" :style="styles()")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
-import layerUtils from '@/utils/layerUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import { IPage } from '@/interfaces/page'
+import layerUtils from '@/utils/layerUtils'
+import shapeUtils from '@/utils/shapeUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
 import { useRoute } from 'vue-router'
 
 const FILTER_X = '$fx'
@@ -298,12 +298,14 @@ export default defineComponent({
         return {
           width: `${(this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])}px`,
           height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`,
-          ...(this.config.wkf && useRoute().path === '/preview' && { '-webkit-filter': 'opacity(1)' })
+          ...(this.config.wkf && useRoute().path === '/preview' && { '-webkit-filter': 'opacity(1)' }),
+          ...(shapeUtils.isLine(this.config) ? { pointerEvents: 'none' } : {})
         }
       } else {
         return {
           width: '0px',
-          height: '0px'
+          height: '0px',
+          ...(shapeUtils.isLine(this.config) ? { pointerEvents: 'none' } : {})
         }
       }
     },

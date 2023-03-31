@@ -10,6 +10,13 @@ import pageUtils from './pageUtils'
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get isSuperUser() { return (store.state as any).user.role === 0 }
+  get browserInfo() {
+    return store.getters['user/getBrowserInfo'] as IBrowserInfo
+  }
+
+  get safariLike() {
+    return this.browserInfo.name === 'Safari' || this.browserInfo.os.family === 'iOS'
+  }
 
   isJsonString(str: string) {
     try {
@@ -121,10 +128,8 @@ class GeneralUtils {
     return value.match(/[+-]?\d+(\.\d+)?/)
   }
 
-  boundValue(value: number, min: number, max: number): string {
-    if (value < min) return min.toString()
-    else if (value > max) return max.toString()
-    return value.toString()
+  boundValue(value: number, min: number, max: number): number {
+    return Math.max(Math.min(value, max), min)
   }
 
   copyText(text: string) {

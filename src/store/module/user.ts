@@ -20,7 +20,7 @@ export interface IBrowserInfo {
   name: string,
   version: string,
   os: {
-    family?: string,
+    family?: string
     version?: string
   }
 }

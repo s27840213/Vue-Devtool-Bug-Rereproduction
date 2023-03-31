@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="header-bar" @pointerdown.stop)
+div(class="header-bar" :style="rootStyles" @pointerdown.stop)
   div(class="header-bar__left")
     div(class="header-bar__feature-icon mr-20"
         @pointerdown="backBtnAction()")
@@ -8,16 +8,16 @@ div(class="header-bar" @pointerdown.stop)
         :iconColor="'white'"
         :iconWidth="'22px'")
     div(class="header-bar__feature-icon mr-15"
-        :class="{'click-disabled': isInFirstStep || isCropping}"
+        :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping}"
         @pointerdown="undo()")
       svg-icon(:iconName="'undo'"
-        :iconColor="(!isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
+        :iconColor="(inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping ? 'gray-2' :'white' "
         :iconWidth="'22px'")
     div(class="header-bar__feature-icon"
-        :class="{'click-disabled': isInLastStep || isCropping}"
+        :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping}"
         @pointerdown="redo()")
       svg-icon(:iconName="'redo'"
-        :iconColor="(!isInLastStep && !isCropping) ? 'white' : 'gray-2'"
+        :iconColor="(inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping ? 'gray-2' : 'white'"
         :iconWidth="'22px'")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs")
@@ -36,6 +36,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -90,12 +91,18 @@ export default defineComponent({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inBgRemoveFirstStep: 'bgRemove/inFirstStep',
+      inBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      hasBleed: 'getHasBleed'
+      hasBleed: 'getHasBleed',
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${this.userInfo.statusBarHeight + 8}px`
+      }
+    },
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
@@ -280,6 +287,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .header-bar {
   @include size(100%);
+  position: relative;
   background-color: setColor(nav);
   display: flex;
   align-items: center;

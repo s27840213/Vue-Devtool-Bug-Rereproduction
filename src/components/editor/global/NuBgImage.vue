@@ -132,15 +132,6 @@ export default defineComponent({
       this.handleIsTransparent()
       this.previewAsLoading()
       const nextImg = new Image()
-      nextImg.onerror = () => {
-        if (srcObj.type === 'pexels') {
-          this.setBgImageSrc({
-            pageIndex: this.pageIndex,
-            srcObj: { ...srcObj, userId: 'jpeg' }
-          })
-          nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
-        }
-      }
       nextImg.onload = () => {
         const preImg = new Image()
         preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
@@ -332,11 +323,13 @@ export default defineComponent({
     dblTap(e: PointerEvent) {
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
-          this.setBgImageControl({
-            pageIndex: this.pageIndex,
-            imgControl: true
-          })
-          editorUtils.setCurrActivePanel('crop')
+          if (this.image.config.srcObj.type) {
+            this.setBgImageControl({
+              pageIndex: this.pageIndex,
+              imgControl: true
+            })
+            editorUtils.setCurrActivePanel('crop')
+          }
         }
       })
     },
@@ -373,7 +366,7 @@ export default defineComponent({
             this.src = previewSrc
           }
         })
-      } else if (this.image.config.panelPreviewSrc) {
+      } else if (config.panelPreviewSrc) {
         const panelPreviewSrc = this.image.config.panelPreviewSrc
         ImageUtils.imgLoadHandler(panelPreviewSrc, () => {
           if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
@@ -405,28 +398,6 @@ export default defineComponent({
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
-      //   if (!this.dblTabsFlag && this.isActive) {
-      //   const touchtime = Date.now()
-      //   const interval = 500
-      //   const doubleTap = (e: PointerEvent) => {
-      //     e.preventDefault()
-      //     if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
-      //       /**
-      //        * This is the dbl-click callback block
-      //        */
-      //       if (this.getLayerType === LayerType.image) {
-      //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-      //         setTimeout(() => eventUtils.emit(PanelEvent.switchTab, 'crop'), 0)
-      //       }
-      //       this.dblTabsFlag = true
-      //     }
-      //   }
-      //   this.eventTarget.addEventListener('pointerdown', doubleTap)
-      //   setTimeout(() => {
-      //     this.eventTarget.removeEventListener('pointerdown', doubleTap)
-      //     this.dblTabsFlag = false
-      //   }, interval)
-      // }
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.image.config.previewSrc === undefined) {

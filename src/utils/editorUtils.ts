@@ -77,30 +77,32 @@ class EditorUtils {
 
   handleContentScaleCalc(page: IPage | IBgRemoveInfo) {
     const { hasBleed } = pageUtils
-    const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
-    if (!this.mobileSize.height || !this.mobileSize.width) {
+    let { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
+    const aspectRatio = width / height
+
+    if (pageUtils.inBgRemoveMode) {
+      width = 1600
+      height = width / aspectRatio
+    }
+
+    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
+
+    if (!this.mobileSize.height || this.mobileSize.width) {
       const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
         this.setMobilePhysicalData({
           size: {
             width: mobileEditor.clientWidth,
-            height: mobileEditor.clientHeight
+            height: mobileEditor.clientHeight - mobilePanelHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
           }
         })
       }
     }
     const PAGE_SIZE_W = (this.mobileSize.width || Number.MAX_SAFE_INTEGER) * 0.926
     const PAGE_SIZE_H = (this.mobileSize.height || Number.MAX_SAFE_INTEGER) * 0.926
+
     if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
-      if (width >= height) {
-        return PAGE_SIZE_W / width
-      } else {
-        const scale = PAGE_SIZE_H / height
-        if (width * scale > PAGE_SIZE_W) {
-          return PAGE_SIZE_W / width
-        }
-        return scale
-      }
+      return Math.max(Math.min(PAGE_SIZE_W / width, PAGE_SIZE_H / height), 0.1)
     } else {
       return 1
     }

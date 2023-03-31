@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="bottom-menu")
+div(class="bottom-menu" :style="rootStyles")
   div(class="bottom-menu__wrapper relative")
     div(v-if="isPrevButtonNeeded" class="bottom-menu__prev pointer"
         @click.stop="handlePrevMenu")
@@ -27,7 +27,9 @@ div(class="bottom-menu")
                 :placeholder="$t('NN0691')"
                 v-model="editableName"
                 @change="handleNewFolder"
-                @keyup="checkNameLength")
+                @keyup="checkNameLength"
+                @focus="isInputFocused = true"
+                @blur="isInputFocused = false")
           div(v-if="editableName.length" class="new-folder__icon" @click.stop="handleClearNewFolderName")
             svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
         div(v-if="isShowHint" class="menu__hint in-new-folder") {{ $t('NN0226') }}
@@ -54,7 +56,9 @@ div(class="bottom-menu")
               input(ref="name"
                     v-model="editableName"
                     @change="handleNameEditEnd"
-                    @keyup="checkNameEnter")
+                    @keyup="checkNameEnter"
+                    @focus="isInputFocused = true"
+                    @blur="isInputFocused = false")
             div(v-else class="menu__editable-name__text")
               span(:title="designBuffer.name") {{ designBuffer.name }}
             div(v-if="!isNameEditing" class="menu__editable-name__icon"
@@ -82,7 +86,9 @@ div(class="bottom-menu")
               input(ref="name"
                     v-model="editableName"
                     @change="handleNameEditEnd"
-                    @keyup="checkNameEnter")
+                    @keyup="checkNameEnter"
+                    @focus="isInputFocused = true"
+                    @blur="isInputFocused = false")
             div(v-else class="menu__editable-name__text")
               span(:title="folderBuffer.folder.name") {{ folderBuffer.folder.name }}
             div(v-if="!isNameEditing" class="menu__editable-name__icon"
@@ -133,6 +139,7 @@ div(class="bottom-menu")
 import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
 import { IDesign, IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -175,7 +182,8 @@ export default defineComponent({
       isNameEditing: false,
       editableName: '',
       messageTimer: -1,
-      isShowHint: false
+      isShowHint: false,
+      isInputFocused: false
     }
   },
   directives: {
@@ -228,6 +236,14 @@ export default defineComponent({
       folderBuffer: 'getMobileFolderBuffer',
       pathBuffer: 'getMobilePathBuffer'
     }),
+    ...mapGetters({
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
+    }),
+    rootStyles(): {[key: string]: string} {
+      return this.isInputFocused ? {} : {
+        paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
+      }
+    },
     designMenuItems(): any[] {
       switch (this.currLocation) {
         case 'a':

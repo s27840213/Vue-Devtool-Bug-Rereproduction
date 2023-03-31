@@ -1,19 +1,43 @@
+import { isITextLetterBg } from '@/interfaces/format'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import cssConveter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import NuTextStyle from '@/utils/nuTextStyle'
-import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import TextStyle from '@tiptap/extension-text-style'
-import { Editor, EditorEvents, FocusPosition } from '@tiptap/vue-3'
+import { Editor, EditorEvents, FocusPosition, JSONContent } from '@tiptap/vue-3'
 import { EventEmitter } from 'events'
 import shortcutUtils from './shortcutUtils'
+import textBgUtils from './textBgUtils'
+import textUtils from './textUtils'
+
+interface ITiptapJson extends JSONContent {
+  type: 'doc'
+  content: {
+    type: 'paragraph'
+    attrs: Record<'align' | 'assetId' | 'color' | 'decoration' | 'font' |
+      'fontUrl' | 'style' | 'type' | 'userId' | 'weight', string>
+    & Record<'fontSpacing' | 'lineHeight' | 'size', number>
+    & Record<'spanStyle', boolean>
+    content?: {
+      type: 'text'
+      text: string
+      marks?: {
+        type: 'textStyle'
+        attrs: Record<'assetId' | 'color' | 'decoration' | 'font' | 'fontUrl' |
+          'randomId' | 'style' | 'type' | 'userId' | 'weight' | 'width', string>
+        & Record<'size', number>
+        & Record<'pre', string>
+      }[]
+    }[]
+  }[]
+}
 
 class TiptapUtils {
   event: any
@@ -111,8 +135,7 @@ class TiptapUtils {
     return Object.entries(this.textStylesRaw(styles)).map(([k, v]) => `${k}: ${v}`).join('; ')
   }
 
-  toJSON(paragraphs: IParagraph[]): any {
-    // console.log(generalUtils.deepCopy(paragraphs))
+  toJSON(paragraphs: IParagraph[]): ITiptapJson {
     return {
       type: 'doc',
       content: paragraphs.map(p => {
@@ -120,6 +143,10 @@ class TiptapUtils {
           type: 'paragraph'
         } as { [key: string]: any }
         const attrs = this.makeParagraphStyle(p.styles) as any
+        const textBg = textEffectUtils.getCurrentLayer().styles.textBg
+        const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+
+        // If p is empty, no span exist, so need to store span style in p.spanStyle
         if (p.spanStyle) {
           attrs.spanStyle = true
           const sStyles = this.generateSpanStyle(p.spanStyle as string)
@@ -128,21 +155,22 @@ class TiptapUtils {
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
-          pObj.content = spans.map(s => {
-            const layerStyles = textEffectUtils.getCurrentLayer().styles
-            const textBg = textBgUtils.convertTextSpanEffect(layerStyles.textBg)
+          pObj.content = spans.map((s, index) => {
+            const config = layerUtils.getCurrLayer as IText
             return {
               type: 'text',
               text: s.text,
               marks: [{
                 type: 'textStyle',
-                attrs: Object.assign(this.makeSpanStyle(s.styles), textBg)
+                attrs: Object.assign(this.makeSpanStyle(s.styles),
+                  fixedWidth ? { randomId: `${index}`, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {}
+                )
               }]
             }
           })
         }
         return pObj
-      })
+      }) as ITiptapJson['content']
     }
   }
 
@@ -227,16 +255,45 @@ class TiptapUtils {
     return result
   }
 
-  toIParagraph(tiptapJSON: any): { paragraphs: IParagraph[], isSetContentRequired: boolean } {
+  toIParagraph(_tiptapJSON: JSONContent): { paragraphs: IParagraph[], isSetContentRequired: boolean } {
+    const tiptapJSON = _tiptapJSON as ITiptapJson
     if (!this.editor) return { paragraphs: [], isSetContentRequired: false }
+
     let isSetContentRequired = false
+
+    // If fixedWidth, all span should split into one text per span
+    const fixedWidth = _tiptapJSON.content?.some(p => {
+      return p.content?.some(span => span.marks?.[0].attrs?.['min-width'] !== undefined ||
+        span.marks?.[0].attrs?.['min-height'] !== undefined)
+    })
+    if (fixedWidth) {
+      tiptapJSON.content.forEach(p => {
+        p.content && p.content.forEach(s => {
+          // Check if some text need to be split here.
+          if (s.text.length > 1) isSetContentRequired = true
+
+          // Check if letter spacing changed
+          if (!s.marks || s.marks.length === 0) return
+          const width = parseFloat(s.marks[0].attrs.width)
+          if (width !== s.marks[0].attrs.size * 1.333333 * (p.attrs.fontSpacing + 1)) {
+            isSetContentRequired = true
+          }
+        })
+      })
+    }
+
     const defaultStyle = this.editor.storage.nuTextStyle.spanStyle as string
     const result: IParagraph[] = []
     for (const paragraph of tiptapJSON.content) {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
       let largestSize = 0
       const spans: ISpan[] = []
-      for (const span of paragraph.content ?? []) {
+      const pContent = fixedWidth && paragraph.content && !this.editor.view.composing
+        // Split span for fixedWidth, another one in textBgUtils.setTextBg
+        ? paragraph.content.flatMap(span => [...span.text]
+          .map(t => Object.assign({}, span, { text: t })))
+        : paragraph.content
+      for (const span of pContent ?? []) {
         if (span.marks && span.marks.length > 0) {
           const sStyles = this.makeSpanStyle(span.marks[0].attrs)
           if (sStyles.size > largestSize) largestSize = sStyles.size
@@ -359,7 +416,7 @@ class TiptapUtils {
     return lines.join('\n')
   }
 
-  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: { [key: string]: any } = {}) {
+  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: { [key: string]: any } = {}, toFocus = true) {
     const item = { [key]: value }
     Object.assign(item, otherUpdates)
     const { subLayerIdx, getCurrLayer } = layerUtils
@@ -374,13 +431,19 @@ class TiptapUtils {
             Object.assign(attr, otherUpdates)
             editor.storage.nuTextStyle.spanStyle = this.textStyles(attr)
             editor.chain().setMark('textStyle', attr).run()
-            setTimeout(() => {
-              editor.commands.focus()
-            }, 10)
+            if (toFocus) {
+              setTimeout(() => {
+                editor.commands.focus()
+              }, 10)
+            }
           } else {
             editor.chain().updateAttributes('textStyle', item).updateAttributes('paragraph', item).run()
             setTimeout(() => {
-              editor.chain().focus().selectPrevious().run()
+              if (toFocus) {
+                editor.chain().focus().selectPrevious().run()
+              } else {
+                editor.chain().selectPrevious().run()
+              }
             }, 10)
           }
         }
@@ -391,23 +454,30 @@ class TiptapUtils {
     })
   }
 
-  spanStyleHandler(updateKey: string, updateValue: string | boolean | number) {
+  spanStyleHandler(updateKey: string, updateValue: string | boolean | number, toFocus = true) {
     const item = { [updateKey]: updateValue }
     const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = layerUtils
 
     switch (currLayer.type) {
       case 'text':
-        this.applySpanStyle(updateKey, updateValue)
+        this.applySpanStyle(updateKey, updateValue, undefined, {}, toFocus)
         break
       case 'tmp':
       case 'group':
-        if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
+        if (subLayerIdx === -1 || !currLayer.layers[subLayerIdx].contentEditable) {
           textPropUtils.applyPropsToAll('span,paragraph', item, layerIndex, subLayerIdx)
           if (subLayerIdx !== -1) {
             this.updateHtml()
+            textUtils.updateTextLayerSizeByShape(layerUtils.pageIndex, layerIndex, subLayerIdx)
+          } else {
+            for (const [i, subLayer] of currLayer.layers.entries()) {
+              if (subLayer.type !== 'text') continue
+              textUtils.updateTextLayerSizeByShape(layerUtils.pageIndex, layerIndex, i)
+            }
           }
+          textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex)
         } else {
-          this.applySpanStyle(updateKey, updateValue)
+          this.applySpanStyle(updateKey, updateValue, undefined, {}, toFocus)
         }
     }
     textPropUtils.updateTextPropsState(item)

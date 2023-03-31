@@ -1,8 +1,13 @@
+import { isITextLetterBg, ITextBgEffect } from '@/interfaces/format'
 import { IGroup, IText } from '@/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import { Extension } from '@tiptap/core'
+import { Editor as CoreEditor } from '@tiptap/core/dist/packages/core/src/'
 import { Editor } from '@tiptap/vue-3'
+import { filter, find, minBy } from 'lodash'
+import { TextSelection } from 'prosemirror-state'
 import { nextTick } from 'vue'
+import { GapCursor } from './GapCursor'
 import layerUtils from './layerUtils'
 import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
@@ -16,6 +21,74 @@ declare module '@tiptap/core' {
       sync: () => ReturnType,
       insertPlainText: (text: string) => ReturnType
     }
+  }
+}
+
+function findCursor(direct: 'up' | 'down' | 'right' | 'left', currCursor: number, dom: HTMLElement): number | null {
+  if (['right', 'left'].includes(direct)) return null
+
+  // Collect position, line number, index for each span
+  const spanData = [] as Record<'line' | 'index' | 'x', number>[]
+  let line = 0
+  let index = 1
+  for (const p of dom.children) {
+    for (let i = 0; i < p.children.length; i++) {
+      const span = p.children[i]
+      const rect = span.getClientRects()[0]
+      const prev = p.children[i - 1]?.getClientRects()[0]
+      if (i === 0 && rect.width) {
+        spanData.push({ line, index, x: rect.x })
+        index++
+      }
+      if (prev && prev.y < rect.y) line++
+      spanData.push({ line, index, x: rect.x + rect.width })
+      index++
+    }
+    line++
+    index++
+  }
+
+  const curr = find(spanData, ['index', currCursor])
+  if (!curr) return null
+  // Special case, goto head/end
+  if (curr.line === 0 && direct === 'up') return 1
+  if (curr.line === line - 1 && direct === 'down') return spanData[spanData.length - 1].index
+  // Find the closest next/prev line cursor position
+  const targetLine = curr.line + (direct === 'up' ? -1 : 1)
+  const candidates = filter(spanData, ['line', targetLine])
+  // To keep ArrowUp/Down result back and forth, add xOffect to fix the result
+  const xOffect = direct === 'up' ? 1 : -1
+  const newCursor = minBy(candidates, (c) => Math.abs(c.x - (curr.x + xOffect)))?.index ?? null
+  return newCursor
+}
+
+// Modify from node_modules/prosemirror-gapcursor/dist/index.js
+function arrow(axis: 'vert' | 'horiz', dir: 1 | -1) {
+  const dirStr = axis === 'vert' ? (dir > 0 ? 'down' : 'up') : (dir > 0 ? 'right' : 'left')
+  return function ({ editor }: { editor: CoreEditor }) {
+    const state = editor.view.state
+    const dispatch = editor.view.dispatch
+    const view = editor.view
+
+    const textBg = layerUtils.getCurrLayer.styles.textBg as ITextBgEffect
+    const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+    if (fixedWidth) {
+      const nextCursor = findCursor(dirStr, editor.state.selection.anchor, view.dom)
+      nextCursor && editor.chain().focus().setTextSelection(nextCursor).run()
+      if (nextCursor) return true
+    }
+
+    const sel = state.selection
+    let $start = dir > 0 ? sel.$to : sel.$from; let mustMove = sel.empty
+    if (sel instanceof TextSelection) {
+      if (!view.endOfTextblock(dirStr) || $start.depth === 0) { return false }
+      mustMove = false
+      $start = state.doc.resolve(dir > 0 ? $start.after() : $start.before())
+    }
+    const $found = GapCursor.findGapCursorFrom($start, dir, mustMove)
+    if (!$found) { return false }
+    if (dispatch) { dispatch(state.tr.setSelection(new GapCursor($found as any))) }
+    return true
   }
 }
 
@@ -41,7 +114,6 @@ export default Extension.create({
         )
       }
     }
-    // console.log(this.storage.spanStyle)
     if (textPropUtils.pageIndex >= 0 && textPropUtils.layerIndex >= 0) {
       textPropUtils.updateTextPropsState()
     }
@@ -49,7 +121,6 @@ export default Extension.create({
     if (selectionRanges.length > 0) {
       const from = selectionRanges[0].$from.pos
       const to = selectionRanges[0].$to.pos
-      // console.log(from, to)
       this.storage.from = from
       this.storage.to = to
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
@@ -192,6 +263,36 @@ export default Extension.create({
                 style: 'white-space: pre'
               }
             }
+          },
+          randomId: {
+            default: undefined,
+            parseHTML: element => {
+              return element.getAttribute('random-id')
+            },
+            renderHTML: attributes => {
+              if (!attributes.randomId) return {}
+              return {
+                randomId: attributes.randomId
+              }
+            }
+          },
+          'min-width': {
+            default: undefined,
+            parseHTML: element => {
+              const spanStyle = element.style
+              const width = spanStyle.getPropertyValue('min-width')
+              return width
+            },
+            renderHTML: () => ({})
+          },
+          'min-height': {
+            default: undefined,
+            parseHTML: element => {
+              const spanStyle = element.style
+              const height = spanStyle.getPropertyValue('min-height')
+              return height
+            },
+            renderHTML: () => ({})
           }
         }
       }, {
@@ -386,7 +487,6 @@ export default Extension.create({
         })
         return true
       },
-
       // Russian keyboard layouts
       'Mod-я': ({ editor }) => {
         return editor.commands.keyboardShortcut('Mod-z')
@@ -412,7 +512,13 @@ export default Extension.create({
       'Mod-=': () => {
         shortcutUtils.zoomIn()
         return true
-      }
+      },
+      'Mod-s': () => {
+        shortcutUtils.save()
+        return true
+      },
+      ArrowUp: arrow('vert', -1),
+      ArrowDown: arrow('vert', 1),
     }
   },
   addCommands() {
@@ -420,7 +526,6 @@ export default Extension.create({
       selectPrevious: () => ({ commands }) => {
         const from = this.storage.from ?? 0
         const to = this.storage.to ?? 0
-        // console.log(from, to)
         return commands.setTextSelection({ from, to })
       },
       sync: () => ({ chain }) => {

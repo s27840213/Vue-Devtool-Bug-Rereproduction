@@ -3,6 +3,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
   div(class="footer-tabs__content"
       :style="containerStyles")
     div(class="footer-tabs__container bg-nav"
+        :style="innerContainerStyles"
         ref="container")
       template(v-for="(tab, index) in homeTabs")
         div(v-if="!tab.hidden" :key="tab.icon"
@@ -19,12 +20,14 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
     transition(name="panel-up")
       div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs  bg-gray-6")
         div(class="footer-tabs__unfold"
+            :style="innerContainerStyles"
             @click="handleTabAction(mainMenu)")
           svg-icon(class="click-disabled"
             :iconName="mainMenu.icon"
             :iconWidth="'26px'"
             :style="textIconStyle")
         div(class="footer-tabs__container"
+            :style="innerContainerStyles"
             @scroll.passive="updateContainerOverflow" ref="container")
           template(v-for="(tab, index) in settingTabs")
             div(v-if="!tab.hidden" :key="tab.icon"
@@ -47,7 +50,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
 import { IFooterTab } from '@/interfaces/editor'
-import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -62,6 +65,8 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
+import webViewUtils from '@/utils/picWVUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -122,7 +127,8 @@ export default defineComponent({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
-      hasCopiedFormat: 'getHasCopiedFormat'
+      hasCopiedFormat: 'getHasCopiedFormat',
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
@@ -230,8 +236,8 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
-        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
+        ...!webViewUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame }] : []
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -241,6 +247,7 @@ export default defineComponent({
       const replace = showReplace ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }] : []
       return [
         ...replace,
+        ...(frame.clips.length === 1 ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -270,7 +277,7 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
@@ -392,19 +399,18 @@ export default defineComponent({
         return this.photoTabs
       } else if (this.showFontTabs) {
         return [...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
-      } else if (this.showFrameTabs) {
-        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
-          return this.photoTabs
-        }
-        return this.frameTabs
       } else if (this.showShapeSetting) {
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
       } else if (this.isGroupOrTmp) {
         return this.genearlLayerTabs
+      } else if (this.showFrameTabs) {
+        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
+          return this.photoTabs
+        }
+        return this.frameTabs
       }
-
       return []
     },
     globalSelectedColor(): string {
@@ -530,14 +536,19 @@ export default defineComponent({
         //   black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
       }
     },
+    innerContainerStyles(): { [index: string]: string } {
+      return {
+        paddingBottom: `${this.userInfo.homeIndicatorHeight + 8}px`
+      }
+    },
     currLayer(): ILayer {
       return layerUtils.getCurrLayer
     },
     isLine(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+      return shapeUtils.isLine(this.currLayer as AllLayerTypes)
     },
     isBasicShape(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'E'
+      return shapeUtils.isBasicShape(this.currLayer as AllLayerTypes)
     },
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
@@ -681,7 +692,7 @@ export default defineComponent({
         }
         case 'trash': {
           groupUtils.deselect()
-          const tmpIndex = pageUtils.currActivePageIndex
+          const tmpIndex = pageUtils.currFocusPageIndex
           this._setCurrActivePageIndex(pageUtils.isLastPage ? tmpIndex - 1 : tmpIndex)
           editorUtils.setCurrCardIndex(pageUtils.currActivePageIndex)
           pageUtils.deletePage(tmpIndex)
@@ -751,7 +762,7 @@ export default defineComponent({
           shortcutUtils.paste()
           break
         }
-        case 'copy-style': {
+        case 'brush': {
           if (this.hasCopiedFormat) {
             formatUtils.clearCopiedFormat()
           } else {
@@ -787,12 +798,12 @@ export default defineComponent({
         this.$emit('switchTab', tab.panelType, tab.props)
       }
 
-      if (['copy', 'paste'].includes(tab.icon)) {
+      if (['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page'].includes(tab.icon)) {
         this.clickedTab = tab.icon
         notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
         this.clickedTabTimer = window.setTimeout(() => {
           this.clickedTab = ''
-        }, 800)
+        }, 400)
       }
     },
     targetIs(type: string): boolean {

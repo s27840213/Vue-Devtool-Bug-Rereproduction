@@ -27,6 +27,7 @@ import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
 import unsplash from '@/store/module/unsplash'
 import user from '@/store/module/user'
+import webView from '@/store/module/webView'
 import photos from '@/store/photos'
 import text from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
@@ -388,13 +389,13 @@ const mutations: MutationTree<IEditorState> = {
     })]
   },
   ADD_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
-    state.pages = state.pages.slice(0, updateInfo.pos).concat(
+    state.pages.splice(updateInfo.pos, 0,
       {
         config: updateInfo.newPage,
         modules: {
           snapUtils: new SnapUtils(-1)
         }
-      }, state.pages.slice(updateInfo.pos))
+      })
   },
   DELETE_page(state: IEditorState, pageIndex: number) {
     state.pages = state.pages.slice(0, pageIndex).concat(state.pages.slice(pageIndex + 1))
@@ -629,12 +630,22 @@ const mutations: MutationTree<IEditorState> = {
       targetLayer[k] = v
     })
   },
-  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj } }) {
-    const frame = state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex] as IFrame
-    const targetLayer = frame.clips[updateInfo.targetIndex]
-    Object.entries(updateInfo.props).forEach(([k, v]) => {
-      targetLayer[k] = v
-    })
+  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj }, preprimaryLayerIndex: number }) {
+    const { pageIndex, layerIndex, targetIndex, props, preprimaryLayerIndex } = updateInfo
+    let frame
+    if (preprimaryLayerIndex !== -1) {
+      if (state.pages[pageIndex].config.layers[preprimaryLayerIndex].type === LayerType.group) {
+        frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[layerIndex]
+      }
+    } else {
+      frame = state.pages[pageIndex].config.layers[layerIndex]
+    }
+    if (frame && frame.type === LayerType.frame) {
+      const targetLayer = frame.clips[targetIndex]
+      Object.entries(props).forEach(([k, v]) => {
+        targetLayer[k] = v
+      })
+    }
   },
   UPDATE_groupLayerProps(state: IEditorState, updateInfo: { props: { [key: string]: string | number | boolean | number[] } }) {
     Object.entries(updateInfo.props).forEach(([k, v]) => {
@@ -784,8 +795,13 @@ const mutations: MutationTree<IEditorState> = {
     const layerNum = layers.length
     const _3dEnabledPageIndex = layerNum > 1 && layerNum <= 50 ? pageIndex : -1
 
-    if (state.currFocusPageIndex !== pageIndex) {
-      state.currFocusPageIndex = pageIndex === -1 ? state.middlemostPageIndex : pageIndex
+    // if (state.currFocusPageIndex !== pageIndex) {
+    //   state.currFocusPageIndex = pageIndex === -1 ? state.middlemostPageIndex : pageIndex
+    // }
+    if (pageIndex === -1) {
+      state.currFocusPageIndex = state.currActivePageIndex === -1 ? state.middlemostPageIndex : state.currActivePageIndex
+    } else {
+      state.currFocusPageIndex = pageIndex
     }
 
     if (_3dEnabledPageIndex !== state._3dEnabledPageIndex) {
@@ -871,6 +887,21 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
+    // check every pages background image
+    for (const page of state.pages) {
+      const bgImg = page.config.backgroundImage
+      if (bgImg.config.previewSrc && bgImg.config.srcObj.assetId === assetId) {
+        delete bgImg.config.previewSrc
+        Object.assign(bgImg.config.srcObj, {
+          type,
+          userId,
+          assetId: uploadUtils.isAdmin ? assetId : assetIndex
+        })
+        return
+      }
+    }
+
+    // check layers image
     const handler = (l: IShape | IText | IImage | IGroup | IFrame | ITmp) => {
       switch (l.type) {
         case LayerType.image:
@@ -978,9 +1009,14 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].config.layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
   },
-  UPDATE_frameBlendLayer(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIdx: number, shape: IShape }) {
-    const { pageIndex, layerIndex, subLayerIdx, shape } = data
-    const frame = state.pages[pageIndex].config.layers[layerIndex] as IFrame
+  UPDATE_frameBlendLayer(state: IEditorState, data: { preprimaryLayerIndex?: number, pageIndex: number, layerIndex: number, subLayerIdx: number, shape: IShape }) {
+    const { pageIndex, preprimaryLayerIndex = -1, layerIndex, subLayerIdx, shape } = data
+    let frame
+    if (preprimaryLayerIndex !== -1) {
+      frame = state.pages[pageIndex].config.layers[layerIndex] as IFrame
+    } else {
+      frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[layerIndex] as IFrame
+    }
     if (frame.type === LayerType.frame) {
       if (subLayerIdx === -1) {
         frame.blendLayers!.push(shape)
@@ -1097,7 +1133,8 @@ const store = createStore({
     payment,
     shadow,
     fontTag,
-    imgControl
+    imgControl,
+    webView
   }
 })
 export default store

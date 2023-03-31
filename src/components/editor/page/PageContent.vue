@@ -36,7 +36,8 @@ div(class="overflow-container"
           :config="layer"
           :contentScaleRatio="contentScaleRatio"
           :forceRender="forceRender"
-          :lazyLoadTarget="lazyLoadTarget")
+          :lazyLoadTarget="lazyLoadTarget"
+          :inPreview="inPreview")
       div(v-if="isShowBleed" class="bleed-line" :style="bleedLineStyles")
       div(v-if="userId === 'backendRendering' && backendRenderParams.isTrim" class="trim")
         div(class="trim__tl" :style="trimStyles.tl")
@@ -64,7 +65,6 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
-import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
@@ -101,6 +101,10 @@ export default defineComponent({
     lazyLoadTarget: {
       type: String,
       default: '.editor-view'
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   data() {
@@ -237,10 +241,6 @@ export default defineComponent({
       this.loadLayerImg()
       // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
     }
-    if (this.config.isAutoResizeNeeded) {
-      this.handleFontLoading()
-      // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
-    }
   },
   watch: {
     setLayersDone(newVal: boolean) {
@@ -251,12 +251,6 @@ export default defineComponent({
         // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
       }
     },
-    'config.isAutoResizeNeeded'(newVal) {
-      if (newVal) {
-        this.handleFontLoading()
-        // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
-      }
-    }
   },
   methods: {
     ...mapMutations({
@@ -351,18 +345,6 @@ export default defineComponent({
         notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
     },
-    async handleFontLoading() {
-      if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-        textUtils.untilFontLoadedForPage(this.config, true).then(() => {
-          setTimeout(() => {
-            this.updatePageProps({
-              pageIndex: this.pageIndex,
-              props: { isAutoResizeNeeded: false }
-            })
-          }, 200) // for the delay between font loading and dom rendering
-        })
-      }
-    }
   }
 })
 </script>
@@ -370,7 +352,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .overflow-container {
   position: relative;
-  overflow: hidden;
+  overflow: clip; // Clip can prevent any scroll, include programing scroll.
   transform-origin: 0 0;
 }
 

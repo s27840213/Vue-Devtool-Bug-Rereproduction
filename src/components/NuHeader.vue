@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-header")
+div(class="nu-header" :style="rootStyles")
   div(class="nu-header__container")
     div
       router-link(to="/"
@@ -11,18 +11,18 @@ div(class="nu-header")
           style="height: 50px;")
     transition(name="fade" mode="out-in")
       div(v-if="!noNavigation" class="body-2 full-height" key="navigation")
-        template(v-for="item in navItems")
-          div(v-if="!item.hidden" class="nu-header__container-link"
-              :class="{'text-blue-1': currentPage === item.name}")
-            url(:url="item.url") {{item.label}}
-            svg-icon(v-if="item.content" iconName="chevron-down"
+        template(v-for="l1 in navItems")
+          div(v-if="!l1.hidden" class="nu-header__container-link"
+              :class="{'text-blue-1': currentPage === l1.name}")
+            url(:url="l1.url") {{l1.label}}
+            svg-icon(v-if="l1.content" iconName="chevron-down"
                     iconColor="gray-1" iconWidth="16px")
-            div(v-if="item.singleLayer" class="nu-header__container-link__single-layer")
-              url(v-for="it in item.content" :url="it.url") {{it.label}}
-            div(v-else-if="item.content" class="nu-header__container-link__more")
-              div(v-for="it in item.content" class="nu-header__container-link__more-col")
-                url(:url="it.url") {{it.label}}
-                url(v-for="i in it.content" :url="i.url" :newTab="i.newTab") {{i.label}}
+            div(v-if="l1.singleLayer" class="nu-header__container-link__single-layer")
+              url(v-for="l2 in l1.content" :url="l2.url") {{l2.label}}
+            div(v-else-if="l1.content" class="nu-header__container-link__more")
+              div(v-for="l2 in l1.content" class="nu-header__container-link__more-col")
+                url(:url="l2.url") {{l2.label}}
+                url(v-for="l3 in l2.content" :url="l3.url" :newTab="l3.newTab") {{l3.label}}
       div(v-else class="body-2" key="no-navigation")
     div(class="body-2")
       search-bar(v-if="!noSearchbar"
@@ -90,15 +90,17 @@ div(class="nu-header")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import store from '@/store'
-import vClickOutside from 'click-outside-vue3'
-import SearchBar from '@/components/SearchBar.vue'
-import PopupAccount from '@/components/popup/PopupAccount.vue'
 import Avatar from '@/components/Avatar.vue'
-import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import Url from '@/components/global/Url.vue'
-import constantData from '@/utils/constantData'
+import MobileMenu from '@/components/homepage/MobileMenu.vue'
+import PopupAccount from '@/components/popup/PopupAccount.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import store from '@/store'
+import constantData, { IHeaderL1 } from '@/utils/constantData'
+import webViewUtils from '@/utils/picWVUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -128,7 +130,10 @@ export default defineComponent({
     }
   },
   computed: {
-    navItems(): any {
+    ...mapGetters({
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
+    }),
+    navItems(): IHeaderL1[] {
       return constantData.headerItems()
     },
     currentPage(): string {
@@ -136,6 +141,11 @@ export default defineComponent({
     },
     isLogin(): boolean {
       return store.getters['user/isLogin']
+    },
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${this.userInfo.statusBarHeight}px`
+      }
     }
   },
   methods: {
@@ -177,7 +187,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .nu-header {
-  height: $header-height;
   background-size: cover;
   // background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   background: white;
@@ -210,7 +219,7 @@ export default defineComponent({
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 100%;
+    height: $header-height;
     @media screen and (max-width: 768px) {
       display: none;
     }
@@ -251,7 +260,7 @@ export default defineComponent({
     box-sizing: border-box;
     padding: 16px 24px;
     width: 100%;
-    height: 100%;
+    height: $header-height;
     svg + svg {
       margin-left: 20px;
     }

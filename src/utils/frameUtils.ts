@@ -1,17 +1,17 @@
-import LayerUtils from './layerUtils'
-import ImageUtils from './imageUtils'
-import store from '@/store'
-import { SrcObj } from '@/interfaces/gallery'
-import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
-import layerFactary from './layerFactary'
-import generalUtils from './generalUtils'
-import { IAdjustJsonProps } from '@/interfaces/adjust'
-import zindexUtils from './zindexUtils'
-import { ILayerInfo } from '@/store/types'
-import stepsUtils from './stepsUtils'
-import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import i18n from '@/i18n'
+import { IAdjustJsonProps } from '@/interfaces/adjust'
+import { SrcObj } from '@/interfaces/gallery'
+import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
+import store from '@/store'
+import { ILayerInfo } from '@/store/types'
 import { notify } from '@kyvg/vue3-notification'
+import generalUtils from './generalUtils'
+import ImageUtils from './imageUtils'
+import layerFactary from './layerFactary'
+import LayerUtils from './layerUtils'
+import stepsUtils from './stepsUtils'
+import zindexUtils from './zindexUtils'
 
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
@@ -178,12 +178,13 @@ class FrameUtils {
     })
   }
 
-  updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | SrcObj }) {
+  updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | SrcObj }, preprimaryLayerIndex = -1) {
     if (targetIndex === -1) return
     store.commit('UPDATE_frameLayerProps', {
       pageIndex,
       layerIndex,
       targetIndex,
+      preprimaryLayerIndex,
       props
     })
   }

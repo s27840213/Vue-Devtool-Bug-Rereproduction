@@ -87,7 +87,7 @@ class PageUtils {
     const windowHeight = window.innerHeight
     const topInView = Math.max(rect.top, 0)
     const bottomInView = Math.min(rect.bottom, windowHeight)
-    return (bottomInView - topInView) / windowHeight
+    return (bottomInView - topInView) / rect.height
   }
 
   get addAssetTargetPageIndex(): number {
@@ -208,7 +208,6 @@ class PageUtils {
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
-      isAutoResizeNeeded: false,
       contentScaleRatio: 1
     }
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
@@ -367,6 +366,9 @@ class PageUtils {
 
   setBackgroundImageControlDefault(): void {
     store.commit('SET_allBackgroundImageControl', false)
+    if (generalUtils.isTouchDevice()) {
+      editorUtils.setShowMobilePanel(false)
+    }
   }
 
   updateBackgroundImagePos(pageIndex: number, imgX: number, imgY: number): void {
@@ -537,11 +539,10 @@ class PageUtils {
     // Target size can be pass by param or get according to situation.
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
     const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight ?? 0
-
     if (!editorViewBox) return
     let { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
-      (this.inBgRemoveMode ? this.autoRemoveResult
+      (this.inBgRemoveMode ? { width: 1600, height: this.autoRemoveResult.height * (1600 / this.autoRemoveResult.width) }
         : (this.hasBleed ? this.currFocusPageSizeWithBleeds : this.currFocusPageSize))
 
     const RESIZE_MULTIPLIER = this.isMobile ? 1 : 0.8
@@ -667,16 +668,6 @@ class PageUtils {
 
   hasDesignId(pageIndex: number) {
     return this.getPage(pageIndex).designId !== ''
-  }
-
-  setAutoResizeNeededForPages(pages: IPage[], isAutoResizeNeeded: boolean) {
-    for (const page of pages) {
-      this.setAutoResizeNeededForPage(page, isAutoResizeNeeded)
-    }
-  }
-
-  setAutoResizeNeededForPage(page: IPage, isAutoResizeNeeded: boolean) {
-    page.isAutoResizeNeeded = isAutoResizeNeeded
   }
 
   /**
