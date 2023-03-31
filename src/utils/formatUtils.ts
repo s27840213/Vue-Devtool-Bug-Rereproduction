@@ -1,4 +1,4 @@
-import { IFormat, IImageFormat, ITextFormat } from '@/interfaces/format'
+import { IFormat, IImageFormat, ITextFormat, ITextShape } from '@/interfaces/format'
 import { IGroup, IImage, ILayer, IParagraph, IText } from '@/interfaces/layer'
 import store from '@/store'
 import frameUtils from './frameUtils'
@@ -17,7 +17,7 @@ class FormatUtils {
     text: ['text']
   }
 
-  isCurveText(textShape: any): boolean {
+  isCurveText(textShape: ITextShape): boolean {
     return textShape.name === 'curve'
   }
 
@@ -34,14 +34,15 @@ class FormatUtils {
       paragraphStyle: generalUtils.deepCopy(lastParagraph.styles),
       spanStyle: generalUtils.deepCopy(lastSpan.styles),
       scale: text.styles.scale,
-      textEffect: generalUtils.deepCopy((text as any).styles.textEffect),
-      textBg: generalUtils.deepCopy((text as any).styles.textBg),
-      textShape: generalUtils.deepCopy((text as any).styles.textShape),
-      writingMode: (text as any).styles.writingMode
+      textEffect: generalUtils.deepCopy(text.styles.textEffect),
+      textBg: generalUtils.deepCopy(text.styles.textBg),
+      textShape: generalUtils.deepCopy(text.styles.textShape),
+      textFill: generalUtils.deepCopy(text.styles.textFill),
+      writingMode: text.styles.writingMode
     }
   }
 
-  extractImageFormat(image: any): IImageFormat {
+  extractImageFormat(image: IImage): IImageFormat {
     return generalUtils.deepCopy(image.styles.adjust)
   }
 

@@ -5,10 +5,10 @@ import { AllLayerTypes, IText } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
+import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
-import { Rect } from './textBgUtils'
-import tiptapUtils from './tiptapUtils'
 
 class TextFill {
   // private currColorKey = ''
@@ -67,6 +67,7 @@ class TextFill {
     const { vertical, rows } = myRect.get()
     const div = [] as DOMRect[][][]
     for (const row of rows) {
+      if (row.spanData.length === 0) continue
       const { pIndex, sIndex } = row.spanData[0]
       while (div.length - 1 < pIndex) div.push([])
       while (div[pIndex].length - 1 < sIndex) div[pIndex].push([])
@@ -181,6 +182,12 @@ class TextFill {
         subLayerIndex: +idx,
         styles: { textFill: newTextFill }
       })
+
+      // If fixedWidth setting changed, force split/unsplit span text
+      const oldFixedWidth = oldTextFill.name === 'fill-img'
+      const newFixedWidth = newTextFill.name === 'fill-img'
+      textBgUtils.splitOrMergeSpan(oldFixedWidth, newFixedWidth, layer,
+        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
     }
   }
 

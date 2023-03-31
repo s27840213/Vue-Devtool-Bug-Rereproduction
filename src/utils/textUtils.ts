@@ -1,4 +1,3 @@
-import { isITextLetterBg } from '@/interfaces/format'
 import {
   IGroup, IParagraph, IText, ITmp
 } from '@/interfaces/layer'
@@ -293,7 +292,7 @@ class TextUtils {
 
   genTextDiv(_content: IText, widthLimit = -1): HTMLDivElement {
     const body = document.createElement('div')
-    const content = GeneralUtils.deepCopy(_content) as IText
+    const content = GeneralUtils.deepCopy(_content)
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
       let fontSize = 0
@@ -302,10 +301,9 @@ class TextUtils {
         span.textContent = spanData.text
 
         const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
-        const fixedWidth = isITextLetterBg(content.styles.textBg) && content.styles.textBg.fixedWidth
         const additionalStyle = {
           ...index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-          ...fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, pData.styles, content) : {}
+          ...textBgUtils.fixedWidthStyle(spanData.styles, pData.styles, content)
         }
         Object.assign(span.style, spanStyleObject, additionalStyle)
         // Set CSS var to span
@@ -582,6 +580,7 @@ class TextUtils {
     return { x, y }
   }
 
+  // TODO: In addStandardText call resetTextField, textLayer is Partial<IText>, need more type check here.
   resetTextField(textLayer: IText, pageIndex: number, field?: string) {
     const page = LayerUtils.getPage(pageIndex) as IPage
     /**

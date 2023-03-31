@@ -1,4 +1,3 @@
-import { isITextLetterBg } from '@/interfaces/format'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import cssConveter from '@/utils/cssConverter'
@@ -144,8 +143,7 @@ class TiptapUtils {
           type: 'paragraph'
         } as { [key: string]: any }
         const attrs = this.makeParagraphStyle(p.styles) as any
-        const textBg = textEffectUtils.getCurrentLayer().styles.textBg
-        const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+        const fixedWidth = textBgUtils.isFixedWidth(textEffectUtils.getCurrentLayer().styles)
 
         // If p is empty, no span exist, so need to store span style in p.spanStyle
         if (p.spanStyle) {

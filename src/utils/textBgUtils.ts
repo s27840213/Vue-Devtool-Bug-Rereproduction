@@ -1,6 +1,6 @@
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBg, ITextGooey, ITextLetterBg } from '@/interfaces/format'
-import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText } from '@/interfaces/layer'
+import { isITextBox, isITextFillConfig, isITextGooey, isITextLetterBg, isITextUnderline, ITextBg, ITextGooey, ITextLetterBg } from '@/interfaces/format'
+import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -82,7 +82,7 @@ export class Rect {
 
   async init(config: IText, { splitSpan } = { splitSpan: false }) {
     this.vertical = config.styles.writingMode === 'vertical-lr'
-    const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
+    const fixedWidth = textBgUtils.isFixedWidth(config.styles)
 
     let div = document.createElement('div')
     div.classList.add('nu-text__body')
@@ -775,7 +775,15 @@ class TextBg {
     return {}
   }
 
+  isFixedWidth(styles: ITextStyle) {
+    const { textBg, textFill } = styles
+    return (isITextLetterBg(textBg) && textBg.fixedWidth) ||
+      (isITextFillConfig(textFill) && textFill.fixedWidth)
+  }
+
   fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle, config: IText) {
+    if (!this.isFixedWidth(config.styles)) return null
+
     let [w, h] = ['min-width', 'min-height']
     if (config.styles.writingMode === 'vertical-lr') [w, h] = [h, w]
     // If tiptap attr have min-w/h, convertFontStyle() in cssConverter.ts will add some style to tiptap.
@@ -1076,49 +1084,51 @@ class TextBg {
       // If fixedWidth setting changed, force split/unsplit span text
       const oldFixedWidth = isITextLetterBg(oldTextBg) && oldTextBg.fixedWidth
       const newFixedWidth = isITextLetterBg(newTextBg) && newTextBg.fixedWidth
-      if (oldFixedWidth !== newFixedWidth) {
-        const paragraphs = cloneDeep(layer.paragraphs)
-        if (newFixedWidth) { // Split span, another one in tiptapUtils.toIParagraph
-          paragraphs.forEach(p => {
-            p.spans = p.spans.flatMap(span =>
-              [...span.text].map(t => ({ text: t, styles: span.styles }))
-            )
-          })
-        } else { // Merge span
-          paragraphs.forEach(p => {
-            for (let i = 0; i + 1 < p.spans.length;) {
-              const curr = p.spans[i]
-              const next = p.spans[i + 1]
-              if (isEqual(curr.styles, next.styles)) {
-                curr.text += next.text
-                p.spans.splice(i + 1, 1)
-              } else { i++ }
-            }
-          })
-        }
-
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs },
-          targetLayer.layers ? +idx : subLayerIndex
-        )
-        tiptapUtils.updateHtml() // Vuex config => tiptap
-        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex,
-          targetLayer.layers ? +idx : subLayerIndex
-        )
-
-        // When fixedWith true => false, this can force tiptap merge span that have same attrs.
-        if (document.querySelector('.ProseMirror') && !newFixedWidth) {
-          tiptapUtils.agent((editor: Editor) => {
-            editor.commands.selectAll()
-            editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
-          })
-        }
-      }
+      this.splitOrMergeSpan(oldFixedWidth, newFixedWidth, layer,
+        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
 
       // If user leave LetterBg, reset lineHeight and fontSpacing
       if (isITextLetterBg(oldTextBg) && !isITextLetterBg(newTextBg)) {
         await textUtils.setParagraphProp('lineHeight', 1.4)
         await textUtils.setParagraphProp('fontSpacing', 0)
       }
+    }
+  }
+
+  splitOrMergeSpan(oldFixedWidth: boolean, newFixedWidth: boolean, layer: IText,
+    pageIndex: number, layerIndex: number, subLayerIndex: number) {
+    if (oldFixedWidth === newFixedWidth) return
+
+    const paragraphs = cloneDeep(layer.paragraphs)
+    if (newFixedWidth) { // Split span, another one in tiptapUtils.toIParagraph
+      paragraphs.forEach(p => {
+        p.spans = p.spans.flatMap(span =>
+          [...span.text].map(t => ({ text: t, styles: span.styles }))
+        )
+      })
+    } else { // Merge span
+      paragraphs.forEach(p => {
+        for (let i = 0; i + 1 < p.spans.length;) {
+          const curr = p.spans[i]
+          const next = p.spans[i + 1]
+          if (isEqual(curr.styles, next.styles)) {
+            curr.text += next.text
+            p.spans.splice(i + 1, 1)
+          } else { i++ }
+        }
+      })
+    }
+
+    layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs }, subLayerIndex)
+    tiptapUtils.updateHtml() // Vuex config => tiptap
+    textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
+
+    // When fixedWith true => false, this can force tiptap merge span that have same attrs.
+    if (document.querySelector('.ProseMirror') && !newFixedWidth) {
+      tiptapUtils.agent((editor: Editor) => {
+        editor.commands.selectAll()
+        editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
+      })
     }
   }
 

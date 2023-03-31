@@ -28,7 +28,6 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
 import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextLetterBg } from '@/interfaces/format'
 import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
@@ -213,13 +212,12 @@ export default defineComponent({
       }
     },
     spanStyle(sIndex: number, pIndex: number, config: IText): Record<string, string> {
-      const textBg = this.config.styles.textBg
       const p = config.paragraphs[pIndex]
       const span = p.spans[sIndex]
       const textFillStyle = this.textFillSpanStyle[pIndex]?.[sIndex] ?? {}
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},
+        textBgUtils.fixedWidthStyle(span.styles, p.styles, config),
         textFillStyle,
       )
     },

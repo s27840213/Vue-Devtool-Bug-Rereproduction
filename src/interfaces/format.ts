@@ -82,6 +82,7 @@ export interface ITextFillConfig {
   size: number
   opacity: number
   focus: boolean
+  fixedWidth: true
 }
 
 export type ITextFill = ITextFillConfig | { name: 'none' }
@@ -94,7 +95,8 @@ export interface ITextFormat {
   textEffect: ITextEffect
   textBg: ITextBg
   textShape: ITextShape
-  scale: number,
+  textFill: ITextFill
+  scale: number
   paragraphStyle: IParagraphStyle,
   spanStyle: ISpanStyle,
   writingMode: string
