@@ -1001,9 +1001,14 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].config.layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
   },
-  UPDATE_frameBlendLayer(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIdx: number, shape: IShape }) {
-    const { pageIndex, layerIndex, subLayerIdx, shape } = data
-    const frame = state.pages[pageIndex].config.layers[layerIndex] as IFrame
+  UPDATE_frameBlendLayer(state: IEditorState, data: { preprimaryLayerIndex?: number, pageIndex: number, layerIndex: number, subLayerIdx: number, shape: IShape }) {
+    const { pageIndex, preprimaryLayerIndex = -1, layerIndex, subLayerIdx, shape } = data
+    let frame
+    if (preprimaryLayerIndex !== -1) {
+      frame = state.pages[pageIndex].config.layers[layerIndex] as IFrame
+    } else {
+      frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[layerIndex] as IFrame
+    }
     if (frame.type === LayerType.frame) {
       if (subLayerIdx === -1) {
         frame.blendLayers!.push(shape)
