@@ -318,6 +318,9 @@ export default defineComponent({
     >span {
       width: 100%;
     }
+    &:active {
+      opacity: 0.8;
+    }
   }
   &__footer {
     margin: 20px auto 0 auto;
