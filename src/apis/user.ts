@@ -32,14 +32,6 @@ export default {
       password
     }
   }),
-  deleteAccount(): AxiosPromise {
-    return axios('/delete-account', {
-      method: 'POST',
-      data: {
-        token: this.getToken(),
-      }
-    })
-  },
   /**
    *
    * @param token

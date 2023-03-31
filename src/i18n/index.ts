@@ -27,10 +27,10 @@
 //   }
 // })
 
-import jp from '@/locales/jp.json'
-import tw from '@/locales/tw.json'
-import us from '@/locales/us.json'
 import { createI18n } from 'vue-i18n'
+import us from '@/locales/us.json'
+import tw from '@/locales/tw.json'
+import jp from '@/locales/jp.json'
 
 /**
  * Load locale messages
@@ -60,15 +60,7 @@ const i18n = createI18n({
     jp
   },
   globalInjection: true,
-  legacy: true,
-  postTranslation: (translated: unknown) => {
-    if (typeof translated === 'string') {
-      return translated
-        .replace(/<blue>/g, '<span class="text-blue-1">')
-        .replace(/<red>/g, '<span class="text-red">')
-        .replace(/(<\/blue>|<\/red>)/g, '</span>')
-    } else return translated
-  },
+  legacy: true
 })
 
 export default i18n

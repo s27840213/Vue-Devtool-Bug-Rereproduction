@@ -8,7 +8,6 @@ import LayerFactary from '@/utils/layerFactary'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import AssetUtils from './assetUtils'
-import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
 import groupUtils from './groupUtils'
 import zindexUtils from './zindexUtils'
@@ -53,14 +52,12 @@ class MouseUtils {
     return { x, y }
   }
 
-  getMousePosInTarget(e: MouseEvent | TouchEvent | PointerEvent, target: HTMLElement): { x: number, y: number, xPercentage: number, yPercentage: number } {
+  getMousePosInPage(e: MouseEvent | TouchEvent | PointerEvent, pageIndex: number): { x: number, y: number } {
+    const target = store.getters['bgRemove/getInBgRemoveMode'] ? document.getElementsByClassName('bg-remove-area')[0] as HTMLElement : document.getElementsByClassName(`nu-page-${pageIndex}`)[0] as HTMLElement
     const mouseRelPos = this.getMouseRelPoint(e, target)
     return {
-      x: mouseRelPos.x / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio / 100),
-      y: mouseRelPos.y / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio / 100),
-      xPercentage: mouseRelPos.x / target.clientWidth,
-      yPercentage: mouseRelPos.y / target.clientHeight,
-
+      x: mouseRelPos.x / (store.getters.getPageScaleRatio / 100),
+      y: mouseRelPos.y / (store.getters.getPageScaleRatio / 100)
     }
   }
 
