@@ -324,6 +324,7 @@ export default defineComponent({
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
+            console.warn(this.image.config.srcObj)
             this.setBgImageControl({
               pageIndex: this.pageIndex,
               imgControl: true
