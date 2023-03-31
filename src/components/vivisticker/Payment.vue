@@ -39,10 +39,10 @@ div(class="payment" v-touch @swipe="handleSwipe" @swipeup="isPanelUp = true" @sw
   div(class="payment__panel" @touchend.stop="isPanelUp = true" v-click-outside="() => isPanelUp = false")
     div(class="payment__panel__chevron" @touchend.stop="isPanelUp = !isPanelUp")
       svg-icon(iconName="chevron-up" iconWidth="14px" iconColor="white")
-    div(class="payment__panel__title") What’s included
+    div(class="payment__panel__title") {{ $t('STK0042') }}
     div(class="payment__panel__comparison")
-      div(class="payment__panel__comparison__title first-column") Features
-      div(class="payment__panel__comparison__title") FREE
+      div(class="payment__panel__comparison__title first-column") {{ $t('STK0043') }}
+      div(class="payment__panel__comparison__title") {{ $t('STK0044') }}
       div(class="payment__panel__comparison__title") PRO
       template(v-for="comparison in comparisons")
         div(class="payment__panel__comparison__item  first-column") {{ comparison.feature }}
@@ -84,7 +84,7 @@ export default defineComponent({
   props: {
     target: {
       type: String as PropType<IViviStickerProFeatures>,
-      default: 'object'
+      default: 'frame'
     }
   },
   data() {
@@ -94,19 +94,19 @@ export default defineComponent({
       isPanelUp: false,
       carouselItems: [
         {
-          key: 'object',
-          title: 'Premium stickers & background',
-          img: require('@/assets/img/png/pricing/vivisticker_pro-object.png')
-        },
-        {
           key: 'frame',
-          title: 'Frame your photos to any shape',
+          title: this.$t('STK0049'),
           img: require('@/assets/img/png/pricing/vivisticker_frame.png')
         },
         {
           key: 'text',
-          title: 'Stylish texts & advanced text effects',
+          title: this.$t('STK0050'),
           img: require('@/assets/img/png/pricing/tw/vivisticker_pro-text.png')
+        },
+        {
+          key: 'object',
+          title: this.$t('STK0051'),
+          img: require('@/assets/img/png/pricing/vivisticker_pro-object.png')
         }
       ] as CarouselItem[],
       btnPlans: [
@@ -120,7 +120,7 @@ export default defineComponent({
         {
           key: 'yearly',
           title: this.$t('NN0515'),
-          subTitle: this.$t('NN0517', { day: 3 }),
+          subTitle: this.$t('STK0048', { day: 3 }),
           price: '$26.90',
           tag: '$2.24 / Mo'
         }
@@ -128,30 +128,30 @@ export default defineComponent({
       footerLinks: [
         {
           key: 'restorePurchase',
-          title: 'Restore Purchase',
+          title: this.$t('STK0045'),
           action: this.handleRestorePurchaseClick
         },
         {
           key: 'termsOfService',
-          title: 'Terms of Service',
+          title: this.$t('NN0160'),
           action: () => {
-            window.open('https://vivisticker.com/tw/使用協議/', '_blank')
+            window.open(this.$t('STK0053'), '_blank')
           }
         },
         {
           key: 'privacyPolicy',
-          title: 'Privacy Policy',
+          title: this.$t('NN0161'),
           action: () => {
-            window.open('https://vivisticker.com/tw/隱私權聲明/', '_blank')
+            window.open(this.$t('STK0052'), '_blank')
           }
         }
       ],
       comparisons: [
-        { feature: 'Free stickers, texts, and background', free: true, pro: true },
-        { feature: 'Advanced text effects', free: false, pro: true },
-        { feature: 'Premium frames', free: false, pro: true },
-        { feature: 'Exclusive stickers & texts', free: false, pro: true },
-        { feature: 'Exclusive stickers & texts', free: false, pro: true }
+        { feature: this.$t('STK0037'), free: true, pro: true },
+        { feature: this.$t('STK0038'), free: false, pro: true },
+        { feature: this.$t('STK0039'), free: false, pro: true },
+        { feature: this.$t('STK0040'), free: false, pro: true },
+        { feature: this.$t('STK0041'), free: false, pro: true }
       ] as IComparison[]
     }
   },
@@ -160,7 +160,7 @@ export default defineComponent({
       windowSize: 'windowSize'
     }),
     txtBtnSubscribe() {
-      return this.planSelected === 'yearly' ? 'Try free & Subscribe' : 'Subscribe'
+      return this.planSelected === 'yearly' ? this.$t('STK0046') : this.$t('STK0047')
     },
   },
   methods: {
