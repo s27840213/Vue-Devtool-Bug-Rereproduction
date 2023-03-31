@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="payment" v-touch @swipe="handleSwipe" @swipeup="isPanelUp = true" @swipedown="isPanelUp = false")
+div(class="payment" v-touch @swipe="handleSwipe")
   carousel(
     :items="carouselItems"
     :itemWidth="windowSize.width"
@@ -36,8 +36,8 @@ div(class="payment" v-touch @swipe="handleSwipe" @swipeup="isPanelUp = true" @sw
       template(v-for="(footerLink, idx) in footerLinks")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(@tap="footerLink.action") {{ footerLink.title }}
-  div(class="payment__panel" @touchend.stop="isPanelUp = true" v-click-outside="() => isPanelUp = false")
-    div(class="payment__panel__chevron" @touchend.stop="isPanelUp = !isPanelUp")
+  div(class="payment__panel")
+    div(class="payment__panel__chevron" @tap="isPanelUp = !isPanelUp" @swipeup="isPanelUp = true" @swipedown="isPanelUp = false")
       svg-icon(iconName="chevron-up" iconWidth="14px" iconColor="white")
     div(class="payment__panel__title") {{ $t('STK0042') }}
     div(class="payment__panel__comparison")
@@ -59,7 +59,6 @@ div(class="payment" v-touch @swipe="handleSwipe" @swipeup="isPanelUp = true" @sw
 import Carousel from '@/components/global/Carousel.vue'
 import { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
-import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapState } from 'vuex'
 
@@ -78,9 +77,6 @@ interface IComparison {
 export default defineComponent({
   components: {
     Carousel
-  },
-  directives: {
-    clickOutside: vClickOutside.directive
   },
   props: {
     target: {
