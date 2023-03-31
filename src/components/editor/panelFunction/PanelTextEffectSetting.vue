@@ -117,10 +117,10 @@ export default defineComponent({
       const { styles } = textEffectUtils.getCurrentLayer()
       if (!this.currCategory || !styles) return { name: 'none' }
       return {
-        shadow: Object.assign({ name: 'none' }, styles.textEffect),
+        shadow: styles.textEffect,
         bg: styles.textBg,
-        shape: Object.assign({ name: 'none' }, styles.textShape),
-        fill: Object.assign({ name: 'none' }, styles.textFill),
+        shape: styles.textShape,
+        fill: styles.textFill,
       }[this.currCategoryName] as Record<string, string>
     },
     settingTextEffect(): boolean {
@@ -282,7 +282,6 @@ export default defineComponent({
     width: 100%;
     padding: 10px;
     background: #fff;
-    box-shadow: 0 0 4px rgba(0,0,0,.25);
   }
   &-options__field {
     display: grid;
@@ -300,7 +299,7 @@ export default defineComponent({
     }
     &--number {
       box-sizing: border-box;
-      width: 30px;
+      width: 35px;
       height: 25px;
       border: 1px solid setColor(gray-4);;
       border-radius: 3px;

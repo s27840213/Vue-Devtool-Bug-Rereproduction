@@ -45,7 +45,7 @@ export interface ITextGooey {
 }
 
 const textLetterBgName = [
-  'rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book', 'penguin'
+  'rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book', 'penguin', 'planet'
 ] as const
 export interface ITextLetterBg {
   name: typeof textLetterBgName[number]
@@ -91,9 +91,9 @@ export function isITextFillConfig(object: ITextFill): object is ITextFillConfig 
 }
 
 export interface ITextFormat {
-  textEffect: ITextEffect | {},
-  textBg: ITextBg,
-  textShape: ITextShape | {},
+  textEffect: ITextEffect
+  textBg: ITextBg
+  textShape: ITextShape
   scale: number,
   paragraphStyle: IParagraphStyle,
   spanStyle: ISpanStyle,
