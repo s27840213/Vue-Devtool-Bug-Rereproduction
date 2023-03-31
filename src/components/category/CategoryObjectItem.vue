@@ -88,6 +88,7 @@ export default defineComponent({
       })
     },
     handleEditObject() {
+      if (this.item.plan === 1 && !vivistickerUtils.checkPro({ plan: 1 }, 'object')) return
       if (this.item.type === 7) {
         vivistickerUtils.startEditing('objectGroup', {
           plan: this.item.plan,
