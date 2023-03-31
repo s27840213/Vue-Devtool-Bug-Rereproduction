@@ -36,7 +36,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
       template(v-for="(footerLink, idx) in footerLinks")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(@tap="footerLink.action") {{ footerLink.title }}
-  div(class="payment__panel")
+  div(class="payment__panel" :class="{close: !isPanelUp}")
     div(class="payment__panel__chevron" @tap="isPanelUp = !isPanelUp" @swipeup="isPanelUp = true" @swipedown="isPanelUp = false")
       svg-icon(iconName="chevron-up" iconWidth="14px" iconColor="white")
     div(class="payment__panel__title") {{ $t('STK0042') }}
@@ -338,15 +338,20 @@ export default defineComponent({
   &__panel {
     position: absolute;
     bottom: 0px;
+    left: 0px;
+    right: 0px;
     box-sizing: border-box;
-    width: 100%;
     // min-height: 57%;
     padding: 16px 24px 0px 24px;
     color: white;
     background-color: setColor(black-3);
     border-radius: 10px 10px 0px 0px;
-    transform: v-bind("isPanelUp ? 'none' : 'translateY(calc(100% - 48px))'");
-    transition: transform 300ms ease-in-out;
+    transition: all 300ms ease-in-out;
+    &.close {
+      left: 24px;
+      right: 24px;
+      transform: translateY(calc(100% - 48px));
+    }
     &__chevron {
       position: absolute;
       top: 0;
