@@ -209,6 +209,9 @@ export default defineComponent({
   }
   &__list-wrapper {
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   &__list {
     flex-grow: 1;
