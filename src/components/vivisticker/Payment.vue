@@ -36,8 +36,8 @@ div(class="payment" v-touch @swipe="handleSwipe")
       template(v-for="(footerLink, idx) in footerLinks")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(@tap="footerLink.action") {{ footerLink.title }}
-  div(class="payment__panel" :class="{close: !isPanelUp}")
-    div(class="payment__panel__chevron" @tap="isPanelUp = !isPanelUp" @swipeup="isPanelUp = true" @swipedown="isPanelUp = false")
+  div(class="payment__panel" :class="{close: !isPanelUp}" ref="panel")
+    div(class="payment__panel__chevron" @tap="togglePanel()" @swipeup="togglePanel(true)" @swipedown="togglePanel(false)")
       svg-icon(iconName="chevron-up" iconWidth="14px" iconColor="white")
     div(class="payment__panel__title") {{ $t('STK0042') }}
     div(class="payment__panel__comparison")
@@ -89,6 +89,7 @@ export default defineComponent({
       idxCurrImg: 0,
       planSelected: 'yearly',
       isPanelUp: false,
+      isPanelTransitioning: false,
       carouselItems: [
         {
           key: 'frame',
@@ -152,6 +153,17 @@ export default defineComponent({
       ] as IComparison[]
     }
   },
+  mounted() {
+    const elPanel = this.$refs.panel as HTMLElement
+    elPanel.ontransitionstart = (e: Event) => {
+      const elTarget = e.target as HTMLElement
+      if (elTarget === elPanel) this.isPanelTransitioning = true
+    }
+    elPanel.ontransitionend = (e: Event) => {
+      const elTarget = e.target as HTMLElement
+      if (elTarget === elPanel) this.isPanelTransitioning = false
+    }
+  },
   computed: {
     ...mapState({
       windowSize: 'windowSize'
@@ -175,6 +187,14 @@ export default defineComponent({
     },
     handleSwipe(e: AnyTouchEvent) {
       e.stopPropagation()
+    },
+    togglePanel(up?: boolean) {
+      if (this.isPanelTransitioning) return
+      if (up !== undefined) {
+        this.isPanelUp = up
+        return
+      }
+      this.isPanelUp = !this.isPanelUp
     }
   }
 })
