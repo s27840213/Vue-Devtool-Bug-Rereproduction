@@ -21,7 +21,7 @@ div(class="nu-frame"
 
 <script lang="ts">
 import { IListServiceContentDataItem } from '@/interfaces/api'
-import { IFrame, IImage, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IShape, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import AssetUtils from '@/utils/assetUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -58,6 +58,10 @@ export default defineComponent({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    primaryLayer: {
+      default: undefined,
+      type: Object as PropType<IGroup | ITmp>
     }
   },
   async created() {
@@ -70,14 +74,12 @@ export default defineComponent({
       } as IListServiceContentDataItem
 
       const json = (await AssetUtils.get(asset)).jsonData as IFrame
-      // this.config.styles.initWidth = json.width as number
-      // this.config.styles.initHeight = json.height as number
       layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
         initWidth: json.width as number,
         initHeight: json.height as number
-      })
+      }, this.subLayerIndex)
 
-      config.clips.forEach((img, idx) => {
+      config.clips.forEach((_, idx) => {
         if (json.clips[idx]) {
           if (this.subLayerIndex !== -1) {
             frameUtils.updateFrameLayerProps(this.pageIndex, this.subLayerIndex, idx, { clipPath: json.clips[idx].clipPath }, this.layerIndex)
@@ -98,8 +100,7 @@ export default defineComponent({
             }
           })
         Object.assign(newDecor, json.decoration)
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: newDecor })
-        // layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration })
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: newDecor }, this.subLayerIndex)
       }
       if (config.decorationTop && json.decorationTop) {
         json.decorationTop.color = [...config.decorationTop.color]
@@ -113,13 +114,11 @@ export default defineComponent({
             }
           })
         Object.assign(newDecorTop, json.decorationTop)
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: newDecorTop })
-        // layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop })
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: newDecorTop }, this.subLayerIndex)
       }
       if (json.blendLayers) {
         if (!this.config.blendLayers) {
-          // this.config.blendLayers = []
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { blendLayers: [] })
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { blendLayers: [] }, this.subLayerIndex)
         }
         json.blendLayers.forEach((l, i) => {
           if (!this.config.blendLayers![i]) {
@@ -130,32 +129,48 @@ export default defineComponent({
               initHeight: this.config.styles.height / this.config.styles.scale,
               vSize: [this.config.styles.width / this.config.styles.scale, this.config.styles.height / this.config.styles.scale]
             }
-            // this.config.blendLayers!.push(layerFactary.newShape({ styles }))
-            this.updateFrameBlendLayer({
-              pageIndex: this.pageIndex,
-              layerIndex: this.layerIndex,
-              subLayerIdx: -1,
-              shape: layerFactary.newShape({ styles })
-            })
+            if (this.primaryLayer) {
+              this.updateFrameBlendLayer({
+                pageIndex: this.pageIndex,
+                preprimaryLayerIndex: this.layerIndex,
+                layerIndex: this.subLayerIndex,
+                subLayerIdx: -1,
+                shape: layerFactary.newShape({ styles })
+              })
+            } else {
+              this.updateFrameBlendLayer({
+                pageIndex: this.pageIndex,
+                layerIndex: this.layerIndex,
+                subLayerIdx: -1,
+                shape: layerFactary.newShape({ styles })
+              })
+            }
           }
           l.color = this.config.blendLayers![i].color
-          // this.config.blendLayers![i].styles.blendMode = (json.blendLayers as IShape[])[i].blendMode
-          // Object.assign(this.config.blendLayers![i], (json.blendLayers as IShape[])[i])
           const styles = {
             ...this.config.blendLayers![i].styles,
             blendMode: (json.blendLayers as IShape[])[i].blendMode
           }
           const blendLayer = (json.blendLayers as IShape[])[i]
           blendLayer.styles = styles
-          this.updateFrameBlendLayer({
-            pageIndex: this.pageIndex,
-            layerIndex: this.layerIndex,
-            subLayerIdx: i,
-            shape: blendLayer
-          })
+          if (this.primaryLayer) {
+            this.updateFrameBlendLayer({
+              pageIndex: this.pageIndex,
+              preprimaryLayerIndex: this.layerIndex,
+              layerIndex: this.subLayerIndex,
+              subLayerIdx: i,
+              shape: blendLayer
+            })
+          } else {
+            this.updateFrameBlendLayer({
+              pageIndex: this.pageIndex,
+              layerIndex: this.layerIndex,
+              subLayerIdx: i,
+              shape: blendLayer
+            })
+          }
         })
       }
-      // config.needFetch = false
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false })
     }
   },
