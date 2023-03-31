@@ -187,7 +187,7 @@ export default defineComponent({
   @include size(100%, 100%);
   display: grid;
   grid-template-rows: auto auto;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
   &__nav {
     height: 56px;
