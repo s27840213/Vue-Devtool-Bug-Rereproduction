@@ -131,6 +131,7 @@ export default defineComponent({
               initHeight: this.config.styles.height / this.config.styles.scale,
               vSize: [this.config.styles.width / this.config.styles.scale, this.config.styles.height / this.config.styles.scale]
             }
+            // If the frame is in-grouped-frame
             if (this.primaryLayer) {
               this.updateFrameBlendLayer({
                 pageIndex: this.pageIndex,
