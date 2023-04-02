@@ -8,7 +8,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
     :style="canvasWrapperStyle()")
     canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
   div(v-if="shadowSrc() && !config.isFrameImg"
-    :id="`nu-image-${config.id}__shadow`"
+    :id="inPreview ? '' : `nu-image-${config.id}__shadow`"
     class="shadow__picture"
     :style="imgShadowStyles()")
     img(ref="shadow-img"
@@ -134,6 +134,10 @@ export default defineComponent({
     primaryLayerIndex: {
       type: Number,
       default: -1
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   async created() {
@@ -276,9 +280,9 @@ export default defineComponent({
             groupUtils.select(this.pageIndex, [targetIdx])
             if (isSubLayer) {
               const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
-              if (this.primaryLayerType() === LayerType.group) {
+              if (this.primaryLayer?.type === LayerType.group) {
                 layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
-              } else if (this.primaryLayerType() === LayerType.frame) {
+              } else if (this.primaryLayer?.type === LayerType.frame) {
                 frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
               }
             }
@@ -519,7 +523,7 @@ export default defineComponent({
       if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1 && this.config.srcObj.type !== 'frame') {
         const newW = this.config.styles.imgHeight * physicalRatio
         const offsetW = this.config.styles.imgWidth - newW
-        if (this.primaryLayerType() === 'frame') {
+        if (this.primaryLayer?.type === 'frame') {
           frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
             imgWidth: newW,
             imgX: this.config.styles.imgX + offsetW / 2
@@ -647,7 +651,7 @@ export default defineComponent({
       })
     },
     handleIsTransparent() {
-      if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
+      if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayer?.type ?? '')) return
       const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
       const src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       ImageUtils.imgLoadHandler(src,
@@ -987,7 +991,7 @@ export default defineComponent({
       return layerInfo
     },
     isInFrame(): boolean {
-      return this.primaryLayerType() === 'frame'
+      return this.primaryLayer?.type === 'frame'
     },
     scaledConfig(): { [index: string]: string | number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
@@ -1150,10 +1154,6 @@ export default defineComponent({
     },
     scale(): number {
       return this.config.styles.scale
-    },
-    primaryLayerType(): string {
-      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-      return primaryLayer.type
     },
     inProcess(): boolean {
       return this.config.inProcess

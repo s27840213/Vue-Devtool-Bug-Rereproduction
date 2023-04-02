@@ -1,10 +1,11 @@
 <template lang="pug">
 button(class="btn"
     :class="`btn-${squared ? 'squared-' : ''}${buttonType}`"
+    :style="btnStyles"
     :disabled="disabled" ref="btn")
   svg-icon(v-if="hasIcon"
     class="btn__icon"
-    :style="`margin-right: ${iconMargin}px`"
+    :style="flexDir === 'row' ? `margin-right: ${iconMargin}px` : `margin-bottom: ${iconMargin}px`"
     :iconName="iconName"
     :iconColor="iconColor"
     :iconWidth="iconWidth")
@@ -13,7 +14,7 @@ button(class="btn"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   emits: [],
@@ -52,6 +53,10 @@ export default defineComponent({
     squared: {
       type: Boolean,
       default: false
+    },
+    flexDir: {
+      type: String as PropType<'row'|'column'>,
+      default: 'row'
     }
   },
   mounted() {
@@ -66,6 +71,12 @@ export default defineComponent({
     buttonType(): string {
       const size = this.type.split('-')[1]
       return this.disabled ? `inactive-${size}` : this.type
+    },
+    btnStyles(): {[index: string]: string} {
+      return {
+        display: this.flexDir === 'row' ? 'initial' : 'flex',
+        'flex-direction': this.flexDir
+      }
     }
   }
 })

@@ -416,20 +416,21 @@ export default defineComponent({
       // this.fixSize(false)
       this.isValidate = true
     },
-    applySelectedFormat(record = true) {
+    applySelectedFormat(record = true, currPageIndex = -1) {
       if (!this.isFormatApplicable) return
       const format = this.getSelectedFormat()
       if (!format) return
       if (this.groupType !== 1) {
         // resize page with px size
         const { width, height } = this.pageSizes.px
+        currPageIndex = currPageIndex === -1 ? this.currFocusPageIndex : currPageIndex
         this.resizePage({
           width,
           height,
           physicalWidth: format.width,
           physicalHeight: format.height,
           unit: format.unit
-        })
+        }, currPageIndex)
       } else {
         // resize電商詳情頁時 其他頁面要依width做resize
         const { pagesLength, getPageSize } = this
@@ -482,18 +483,19 @@ export default defineComponent({
     },
     copyAndApplySelectedFormat() {
       if (!this.isFormatApplicable) return
-      const page = generalUtils.deepCopy(this.getPage(pageUtils.currFocusPageIndex))
+      const pageIndex = pageUtils.currFocusPageIndex
+      const page = generalUtils.deepCopy(this.getPage(pageIndex))
       page.designId = ''
       page.id = generalUtils.generateRandomString(8)
       this.addPageToPos({
         newPage: page,
-        pos: pageUtils.currFocusPageIndex + 1
+        pos: pageIndex + 1
       })
       groupUtils.deselect()
-      this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-      this.applySelectedFormat(false)
+      this.setCurrActivePageIndex(pageIndex + 1)
+      this.applySelectedFormat(false, pageIndex + 1)
       stepsUtils.record()
-      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex) })
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageIndex + 1) })
     },
     submit: throttle(function(this: any) {
       // Use throttle to prevent submit multiple times.
@@ -506,8 +508,8 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(false) // For mobile
       this.$emit('close') // For PC
     }, 2000, { trailing: false }),
-    resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
-      resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
+    resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}, pageIndex = pageUtils.currFocusPageIndex) {
+      resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), format)
     },
     handleInputBlur(target: string) {
       this.isValidate = true

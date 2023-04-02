@@ -161,15 +161,11 @@ export default defineComponent({
       return [
         { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        // { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs
-        // ...this.genearlLayerTabs,
-        // { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
       ]
     },
     photoTabs(): Array<IFooterTab> {
-      return [
+      const tabs = [
         { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
@@ -178,6 +174,18 @@ export default defineComponent({
         // hide copy-style for vivisticker for now
         // { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
       ]
+      if (layerUtils.getCurrLayer.type === LayerType.frame) {
+        tabs.unshift({
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          hidden: this.globalSelectedColor === 'none',
+          props: {
+            currColorEvent: ColorEventType.shape
+          }
+        })
+      }
+      return tabs
     },
     fontTabs(): Array<IFooterTab> {
       return [
@@ -240,10 +248,19 @@ export default defineComponent({
       ]
     },
     frameTabs(): Array<IFooterTab> {
-      const currLayer = layerUtils.getCurrLayer
-      if (currLayer.type !== 'frame') return []
-      const showAdjust = currLayer.clips.some(i => !['frame', 'svg'].includes(i.srcObj.type))
+      const targetLayer = layerUtils.getCurrConfig as IFrame
+      if (targetLayer.type !== 'frame') return []
+      const showAdjust = targetLayer.clips.some(i => !['frame', 'svg'].includes(i.srcObj.type))
       return [
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          hidden: this.globalSelectedColor === 'none',
+          props: {
+            currColorEvent: ColorEventType.shape
+          }
+        },
         ...showAdjust ? [{ icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage }] : [],
         ...this.copyPasteTabs
       ]
@@ -257,14 +274,6 @@ export default defineComponent({
       return [{ icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace' }] as Array<IFooterTab>
     },
     genearlLayerTabs(): Array<IFooterTab> {
-      // return [
-      //   { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 },
-      //   { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-      //   { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', disabled: this.currSelectedInfo.types.has(LayerType.frame) },
-      //   { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-      //   { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true },
-      //   { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
-      // ]
       return [
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ]
@@ -325,6 +334,8 @@ export default defineComponent({
         return res
       } else if (this.showShapeSetting) {
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
+      } else if (this.showInGroupFrame) {
+        return [...this.frameTabs, ...this.genearlLayerTabs]
       } else if (this.showGeneralTabs) {
         return [...this.genearlLayerTabs]
       } else if (!this.isInEditor) {
@@ -431,6 +442,11 @@ export default defineComponent({
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.selectedLayerNum !== 0 && this.editorType === 'object' && layerUtils.getCurrLayer.type === LayerType.frame &&
         (layerUtils.subLayerIdx === -1 || this.controllerHidden)
+    },
+    showInGroupFrame(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+        this.selectedLayerNum !== 0 && layerUtils.getCurrLayer.type === LayerType.group && layerUtils.getCurrConfig.type === LayerType.frame &&
+        (layerUtils.subLayerIdx !== -1 || this.controllerHidden)
     },
     showShapeSetting(): boolean {
       const { getCurrConfig } = layerUtils

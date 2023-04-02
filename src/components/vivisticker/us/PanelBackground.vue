@@ -187,7 +187,7 @@ export default defineComponent({
   @include size(100%, 100%);
   display: grid;
   grid-template-rows: auto auto;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
   &__nav {
     height: 56px;
@@ -209,6 +209,9 @@ export default defineComponent({
   }
   &__list-wrapper {
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   &__list {
     flex-grow: 1;
