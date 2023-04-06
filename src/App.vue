@@ -86,7 +86,7 @@ export default defineComponent({
     }
 
     const hasShownBrowserWarning = localStorage.getItem('hasShownBrowserWarning')
-    if (!['Microsoft Edge', 'Chrome'].includes(this.browserInfo.name) && hasShownBrowserWarning !== '1') {
+    if (!this.$isTouchDevice() && !['Microsoft Edge', 'Chrome'].includes(this.browserInfo.name) && hasShownBrowserWarning !== '1') {
       this.$router.replace({ name: 'BrowserWarning' })
       localStorage.setItem('hasShownBrowserWarning', '1')
       return
