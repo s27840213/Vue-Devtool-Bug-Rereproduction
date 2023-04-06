@@ -61,21 +61,6 @@ const MYDESIGN_TAGS = [{
   tab: 'object'
 }] as IMyDesignTag[]
 
-const DOCUMENT_URLS = {
-  jp: {
-    privacyPolicy: 'https://blog.vivipic.com/jp/jp-privacy-policy/',
-    termOfUse: 'https://blog.vivipic.com/jp/jp-terms-of-use/'
-  },
-  us: {
-    privacyPolicy: 'https://blog.vivipic.com/us/us-privacy-policy/',
-    termOfUse: 'https://blog.vivipic.com/us/us-terms-of-use/'
-  },
-  tw: {
-    privacyPolicy: 'https://blog.vivipic.com/tw/tw-privacy-policy/ ',
-    termOfUse: 'https://blog.vivipic.com/tw/tw-agreement/'
-  }
-} as { [key: string]: { [key: string]: string } }
-
 class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
   isAnyIOSImgOnError = false
@@ -186,10 +171,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       res[tag.tab] = -1
     }
     return res
-  }
-
-  getDocumentUrl(locale: string, key: string): string {
-    return DOCUMENT_URLS[locale][key]
   }
 
   setDefaultLocale() {

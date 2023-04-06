@@ -28,14 +28,6 @@ div(class="panel-vvstk-more")
                     iconWidth="24px"
                     iconColor="gray-2")
         div(class="panel-vvstk-more__option-title") {{ option.text }}
-    template(v-if="lastHistory === 'subscribe'")
-      div(class="horizontal-rule")
-      div(class="panel-vvstk-more__option version")
-        i18n-t(class="panel-vvstk-more__option-title version" tag="span" keypath="STK0029")
-          template(#privacyPolicy)
-            span(class="panel-vvstk-more__option-link" @click="handleOpenUrl('privacyPolicy')") {{ $t('STK0030') }}
-          template(#termOfUse)
-            span(class="panel-vvstk-more__option-link" @click="handleOpenUrl('termOfUse')") {{ $t('STK0031') }}
 </template>
 
 <script lang="ts">
@@ -50,21 +42,6 @@ type OptionConfig = {
   action?: () => void
   selected?: () => boolean
 }
-
-const PRICES = {
-  tw: {
-    monthly: '140',
-    annually: '799'
-  },
-  us: {
-    monthly: '4.99',
-    annually: '26.90'
-  },
-  jp: {
-    monthly: '600',
-    annually: '3590'
-  }
-} as {[key: string]: { monthly: string, annually: string }}
 
 export default defineComponent({
   data() {
@@ -128,20 +105,15 @@ export default defineComponent({
           icon: 'pro',
           action: vivistickerUtils.openPayment
         }
-        // {
-        //   text: `${this.$t('STK0025')}`,
-        //   icon: 'vivisticker_global',
-        //   action: () => { this.handleList('subscribe') }
-        // }
       ] : [], ...this.debugMode ? [
         {
           text: 'domain 選單',
           icon: 'vivisticker_global',
           action: () => { this.handleList('domain') }
-          // }, {
-          //   text: `${this.$t('STK0025')}`,
-          //   icon: 'vivisticker_global',
-          //   action: () => { this.handleList('subscribe') }
+        }, {
+          text: 'Vivisticker Pro',
+          icon: 'pro',
+          action: vivistickerUtils.openPayment
         }, {
           text: 'App 事件測試',
           icon: 'vivisticker_global',
@@ -207,22 +179,6 @@ export default defineComponent({
         action: () => { this.sendTestEvent(c) }
       }))
     },
-    subscribeOptions(): OptionConfig[] {
-      const locale = this.$i18n.locale
-      return [{
-        text: `${this.$t('STK0026')} - ${this.localizedPrice(PRICES[locale].monthly, locale)}`,
-        icon: 'vivisticker_global',
-        action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'monthly' }) }
-      }, {
-        text: `${this.$t('STK0027')} - ${this.localizedPrice(PRICES[locale].annually, locale)}`,
-        icon: 'vivisticker_global',
-        action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'annually' }) }
-      }, {
-        text: `${this.$t('STK0028')}`,
-        icon: 'vivisticker_global',
-        action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'checkState' }) }
-      }]
-    },
     options(): OptionConfig[] {
       switch (this.lastHistory) {
         case 'locale':
@@ -231,8 +187,6 @@ export default defineComponent({
           return this.domainOptions
         case 'event-test':
           return this.eventOptions
-        case 'subscribe':
-          return this.subscribeOptions
         default:
           return []
       }
@@ -297,10 +251,6 @@ export default defineComponent({
       }
       window.open(url, '_blank')
     },
-    handleOpenUrl(key: string) {
-      const locale = this.$i18n.locale
-      window.open(vivistickerUtils.getDocumentUrl(locale, key), '_blank')
-    },
     handleUpdateLocale(locale: string) {
       if (locale === this.$i18n.locale) return
       vivistickerUtils.updateLocale(locale).then(() => {
@@ -328,18 +278,6 @@ export default defineComponent({
     },
     sendTestEvent(option: string) {
       vivistickerUtils.sendToIOS('EVENT_TEST', { option })
-    },
-    localizedPrice(price: string, locale: string): string {
-      switch (locale) {
-        case 'tw':
-          return `${price}元`
-        case 'us':
-          return `$${price}`
-        case 'jp':
-          return `¥${price}円(税込)`
-        default:
-          return price
-      }
     }
   }
 })
