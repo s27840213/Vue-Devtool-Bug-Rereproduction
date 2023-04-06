@@ -543,7 +543,12 @@ class AssetUtils {
       }
 
       TextUtils.resetTextField(textLayer, targetPageIndex, field)
-      layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true, isCompensated: true }))])
+      layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, {
+        editing: false,
+        contentEditable: true,
+        isCompensated: true,
+        inAutoRescaleMode: true
+      }))])
       editorUtils.setCloseMobilePanelFlag(true)
       setTimeout(() => {
         tiptapUtils.agent(editor => editor.commands.selectAll())

@@ -118,12 +118,11 @@ class GroupUtils {
         if (l.type === 'text') {
           const { width, height, writingMode } = l.styles
           LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
-            widthLimit: (writingMode as string).includes('vertical') ? height : width,
-            isTyping: false
-          })
-          LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
+            widthLimit: writingMode.includes('vertical') ? height : width,
+            isTyping: false,
             shown: false,
-            moved: false
+            moved: false,
+            inAutoRescaleMode: false // turn off auto rescale mode when forming a group
           })
         }
       })
@@ -266,9 +265,15 @@ class GroupUtils {
       if (currSelectedLayers.length === 1) {
         // const { pageIndex, index: layerIndex } = this.currSelectedInfo
         const { pageIndex, layerIndex, subLayerIdx } = LayerUtils
-        if (currSelectedLayers[0].type === 'text' && textUtils.isEmptyText(currSelectedLayers[0])) {
-          store.commit('DELETE_selectedLayer')
-          store.commit('SET_lastSelectedLayerIndex', -1)
+        if (currSelectedLayers[0].type === LayerType.text) {
+          if (textUtils.isEmptyText(currSelectedLayers[0])) {
+            store.commit('DELETE_selectedLayer')
+            store.commit('SET_lastSelectedLayerIndex', -1)
+          }
+          LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+            active: false,
+            inAutoRescaleMode: false
+          })
         } else {
           LayerUtils.updateLayerProps(pageIndex, layerIndex, { active: false })
           ImageUtils.setImgControlDefault()
@@ -287,6 +292,11 @@ class GroupUtils {
             if (l.type === LayerType.image) {
               LayerUtils.updateLayerStyles(this.pageIndex, LayerUtils.layerIndex, {
                 scale: l.styles.scale * tmpLayer.styles.scale
+              }, i)
+            }
+            if (l.type === LayerType.text) {
+              LayerUtils.updateLayerProps(this.pageIndex, LayerUtils.layerIndex, {
+                inAutoRescaleMode: false
               }, i)
             }
             LayerUtils.updateLayerProps(this.pageIndex, LayerUtils.layerIndex, {

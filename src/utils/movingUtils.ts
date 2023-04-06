@@ -1,5 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import { nextTick } from 'vue'
@@ -534,6 +534,19 @@ export class MovingUtils {
         } else {
           if (!(this.config as IImage).isHoveringFrame) {
             stepsUtils.asyncRecord()
+          }
+          // turn off text layer's auto rescale mode after moving
+          switch (this.getLayerType) {
+            case 'text':
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { inAutoRescaleMode: false })
+              break
+            case 'tmp':
+              for (const [subLayerIdx, subLayer] of (this.config as ITmp).layers.entries()) {
+                if (subLayer.type === 'text') {
+                  layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { inAutoRescaleMode: false }, subLayerIdx)
+                }
+              }
+              break
           }
         }
       } else {
