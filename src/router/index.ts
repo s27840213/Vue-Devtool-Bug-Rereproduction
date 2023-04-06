@@ -13,6 +13,7 @@ import Home from '@/views/Home.vue'
 import Login from '@/views/Login/Login.vue'
 import SignUp from '@/views/Login/SignUp.vue'
 import MobileWarning from '@/views/MobileWarning.vue'
+import BrowserWarning from '@/views/BrowserWarning.vue'
 import MyDesign from '@/views/MyDesign.vue'
 import NubtnList from '@/views/NubtnList.vue'
 import Preview from '@/views/Preview.vue'
@@ -183,6 +184,11 @@ const routes: Array<RouteRecordRaw> = [
     path: 'mobilewarning',
     name: 'MobileWarning',
     component: MobileWarning
+  },
+  {
+    path: 'browserwarning',
+    name: 'BrowserWarning',
+    component: BrowserWarning
   },
   {
     path: 'brandkit',

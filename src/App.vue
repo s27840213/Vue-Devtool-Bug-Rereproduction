@@ -84,6 +84,14 @@ export default defineComponent({
     if (!webViewUtils.inBrowserMode) {
       webViewUtils.registerCallbacks('main')
     }
+
+    const hasShownBrowserWarning = localStorage.getItem('hasShownBrowserWarning')
+    if (!['Microsoft Edge', 'Chrome'].includes(this.browserInfo.name) && hasShownBrowserWarning !== '1') {
+      this.$router.replace({ name: 'BrowserWarning' })
+      localStorage.setItem('hasShownBrowserWarning', '1')
+      return
+    }
+
     this.$router.isReady().then(() => { webViewUtils.sendAppLoaded() })
   },
   beforeMount() {
@@ -102,7 +110,8 @@ export default defineComponent({
       isModalOpen: 'modal/getModalOpen',
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: webViewUtils.appendModuleName('getUserInfo'),
+      browserInfo: 'user/getBrowserInfo'
     }),
     currLocale(): string {
       return localeUtils.currLocale()
