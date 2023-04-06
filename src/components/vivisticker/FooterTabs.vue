@@ -271,7 +271,18 @@ export default defineComponent({
         currLayer.clips.some(i => i.active && i.srcObj.type === 'frame')
     },
     emptyFrameTabs(): Array<IFooterTab> {
-      return [{ icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace' }] as Array<IFooterTab>
+      return [
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          hidden: this.globalSelectedColor === 'none',
+          props: {
+            currColorEvent: ColorEventType.shape
+          }
+        },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace' }
+      ] as Array<IFooterTab>
     },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
