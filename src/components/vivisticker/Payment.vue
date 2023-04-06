@@ -60,7 +60,7 @@ import Carousel from '@/components/global/Carousel.vue'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { defineComponent, PropType } from 'vue'
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 interface CarouselItem {
   key: IViviStickerProFeatures
@@ -173,6 +173,9 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapMutations({
+      setFullPageConfig: 'vivisticker/SET_fullPageConfig'
+    }),
     handleImageChange(index: number) {
       this.idxCurrImg = index
     },
@@ -195,7 +198,10 @@ export default defineComponent({
         return
       }
       this.isPanelUp = !this.isPanelUp
-    }
+    },
+    handleShowWelcome() {
+      this.setFullPageConfig({ type: 'welcome' })
+    },
   }
 })
 </script>
