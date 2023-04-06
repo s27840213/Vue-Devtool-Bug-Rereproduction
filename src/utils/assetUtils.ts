@@ -610,6 +610,7 @@ class AssetUtils {
 
     const config = {
       ...(isPreview && { previewSrc: url }),
+      ...(categoryType === 14 || categoryType === 15) && { categoryType },
       srcObj,
       panelPreviewSrc,
       styles: {
@@ -798,7 +799,7 @@ class AssetUtils {
           break
         }
         case 15: {
-          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1))
+          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1), {}, 15)
           break
         }
         default:
