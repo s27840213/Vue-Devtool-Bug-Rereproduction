@@ -35,7 +35,8 @@ interface IViviStickerState {
   editingAssetInfo: { [key: string]: any },
   selectedDesigns: { [key: string]: IMyDesign },
   modalInfo: { [key: string]: any },
-  prices: IPrices
+  prices: IPrices,
+  expireDate: string
 }
 
 const EDITOR_BGS = [
@@ -84,7 +85,8 @@ const getDefaultState = (): IViviStickerState => ({
   prices: {
     monthly: NaN,
     annually: NaN,
-  }
+  },
+  expireDate: ''
 })
 
 const state = getDefaultState()
@@ -302,6 +304,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_prices(state: IViviStickerState, prices) {
     state.prices = prices
+  },
+  SET_expireDate(state: IViviStickerState, expireDate) {
+    state.expireDate = expireDate
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {

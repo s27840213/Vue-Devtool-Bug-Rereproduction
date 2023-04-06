@@ -1054,7 +1054,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, monthly: boolean, annually: boolean }) {
-    const { monthly, annually } = data
+    const { monthly, annually, expire_date } = data
+    store.commit('vivisticker/SET_expireDate', expire_date)
     store.commit('vivisticker/SET_prices', { monthly, annually })
   }
 
