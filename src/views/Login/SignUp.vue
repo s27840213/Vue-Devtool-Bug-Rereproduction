@@ -339,7 +339,7 @@ export default defineComponent({
           gtmUtils.signUp(gtmTitle)
         }
         store.dispatch('user/loginSetup', { data: data })
-        this.$router.push({ path: this.redirect || redirect || '/' })
+        this.$router.push(this.redirect || redirect || '/')
       } else {
         console.log(`${loginType} login failed`)
         notify({ group: 'error', text: data.msg })
@@ -449,7 +449,7 @@ export default defineComponent({
         fbPixelUtils.fbq('track', 'CompleteRegistration')
         gtmUtils.signUp('Vivipic')
         await store.dispatch('user/login', { token: data.token })
-        this.$router.push({ path: this.redirect || '/' })
+        this.$router.push(this.redirect || '/')
         this.currentPageIndex = 0
       } else {
         this.vcode = ''

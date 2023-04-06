@@ -62,7 +62,6 @@ import popupUtils from '@/utils/popupUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import SubCtrlUtils from '@/utils/subControllerUtils'
-import TextEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -237,13 +236,10 @@ export default defineComponent({
     styles(): any {
       const { isFrameImg } = this.config
       const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
-      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
 
       return {
         ...this.sizeStyle(),
         transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
-        ...textEffectStyles,
-        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     isCurveText(): boolean {

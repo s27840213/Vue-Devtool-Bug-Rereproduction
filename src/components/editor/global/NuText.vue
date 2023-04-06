@@ -7,7 +7,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
               :is="elm.tag"
               v-bind="elm.attrs")
   div(v-for="text, idx in duplicatedText" class="nu-text__body"
-      :style="Object.assign(bodyStyles(), text.extraBody)")
+      :style="Object.assign(bodyStyles(), text.extraBodyStyle)")
     nu-curve-text(v-if="isCurveText"
       :config="config"
       :layerIndex="layerIndex"
@@ -23,7 +23,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       span(v-for="(span, sIndex) in p.spans"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpan, transParentStyles)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpanStyle, transParentStyles)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
@@ -121,7 +121,7 @@ export default defineComponent({
       return this.config.locked
     },
     // Use duplicated of text to do some text effect, define their difference css here.
-    duplicatedText(): (Record<string, Record<string, string> | never>)[] {
+    duplicatedText(): (Partial<Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>>)[] {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
         top: '0px',
@@ -129,14 +129,13 @@ export default defineComponent({
         height: '100%',
         opacity: 1
       }
-      const textShadow = textEffectUtils.convertTextEffect(this.config)
-      const duplicatedTextShadow = (textShadow.duplicatedBody || textShadow.duplicatedSpan) as Record<string, string>
-      const textShadowCss = {
-        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody as Record<string, string>),
-        extraSpan: textShadow.duplicatedSpan as Record<string, string>
-      }
+      const duplicatedTexts = textEffectUtils.convertTextEffect(this.config).duplicatedTexts as
+        Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>[] | undefined
       return [
-        ...(duplicatedTextShadow ? [textShadowCss] : []),
+        ...duplicatedTexts ? duplicatedTexts.map(d => {
+          d.extraBodyStyle = Object.assign({}, duplicatedBodyBasicCss, d.extraBodyStyle) // Set extra body default style
+          return d
+        }) : [],
         {} // Original text, don't have extra css
       ]
     },
@@ -206,9 +205,11 @@ export default defineComponent({
     spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
       const textBg = this.config.styles.textBg
       const span = p.spans[sIndex]
+      const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {}
+        textEffectStyles,
+        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},
       )
     },
     pStyle(styles: any) {

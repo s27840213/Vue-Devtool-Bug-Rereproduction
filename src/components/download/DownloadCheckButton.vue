@@ -59,14 +59,17 @@ export default defineComponent({
       type: String,
       required: true
     },
-    value: String
+    value: [Number, String]
   },
   data () {
     return { checked: this.defaultChecked ? 'checked' : '' }
   },
   watch: {
-    defaultChecked (checked) {
-      this.checked = checked
+    defaultChecked: {
+      handler (checked) {
+        this.checked = checked
+      },
+      deep: true
     }
   },
   methods: {
