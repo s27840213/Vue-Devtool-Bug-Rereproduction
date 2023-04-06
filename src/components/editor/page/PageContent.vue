@@ -37,7 +37,8 @@ div(class="overflow-container"
           :config="layer"
           :contentScaleRatio="contentScaleRatio"
           :forceRender="forceRender"
-          :lazyLoadTarget="lazyLoadTarget")
+          :lazyLoadTarget="lazyLoadTarget"
+          :inPreview="inPreview")
       div(v-if="isShowBleed" class="bleed-line" :style="bleedLineStyles")
       div(v-if="userId === 'backendRendering' && backendRenderParams.isTrim" class="trim")
         div(class="trim__tl" :style="trimStyles.tl")
@@ -103,6 +104,10 @@ export default defineComponent({
     lazyLoadTarget: {
       type: String,
       default: '.editor-view'
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   data() {

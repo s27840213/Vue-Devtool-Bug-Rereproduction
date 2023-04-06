@@ -203,14 +203,14 @@ export default defineComponent({
     }
   },
   mounted() {
-    if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
+    eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
+    if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending || this.$options.name === 'panel-text-us') return
     generalUtils.panelInit('text',
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
         await this.getRecAndCate({ reset, key: 'textStock' })
       })
-    eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelTextToTop)

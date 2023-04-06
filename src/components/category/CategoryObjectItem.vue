@@ -23,6 +23,7 @@ import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default defineComponent({
@@ -45,7 +46,7 @@ export default defineComponent({
   },
   computed: {
     showEditor(): boolean {
-      return !this.isHideEditor && ![8, 16].includes(this.item.type)
+      return !this.isHideEditor && ![8, 16].includes(this.item.type) && !this.item.has_frame
     }
   },
   methods: {
@@ -56,8 +57,9 @@ export default defineComponent({
       setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
     }),
     addSvg() {
+      console.log(generalUtils.deepCopy(this.item))
       // if (this.item.plan === 1 && !vivistickerUtils.checkPro({ plan: 1 }, 'object')) return
-      if (this.item.type === 8) {
+      if (this.item.type === 8 || this.item.has_frame) {
         this.handleEditObject()
         return
       }
@@ -88,11 +90,12 @@ export default defineComponent({
     },
     handleEditObject() {
       // if (this.item.plan === 1 && !vivistickerUtils.checkPro({ plan: 1 }, 'object')) return
-      if (this.item.type === 7) {
+      if (this.item.type === 7 || this.item.has_frame) {
         vivistickerUtils.startEditing('objectGroup', {
           plan: this.item.plan,
-          assetId: this.item.id
-        }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg' }, 'objects'), vivistickerUtils.getAssetCallback(this.item))
+          assetId: this.item.id,
+          isFrame: this.item.has_frame,
+        }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects'), vivistickerUtils.getAssetCallback(this.item))
       } else {
         vivistickerUtils.startEditing('object', {
           plan: this.item.plan,

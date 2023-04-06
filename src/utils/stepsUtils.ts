@@ -5,7 +5,7 @@ import { IStep } from '@/interfaces/steps'
 import store from '@/store'
 import { FunctionPanelType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
-import GroupUtils from '@/utils/groupUtils'
+import GroupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import { nextTick, reactive } from 'vue'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
@@ -13,6 +13,7 @@ import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
 import shapeUtils from './shapeUtils'
 import TextPropUtils from './textPropUtils'
+import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
 import vivistickerUtils from './vivistickerUtils'
 import workerUtils from './workerUtils'
@@ -153,7 +154,8 @@ class StepsUtils {
     return layer
   }
 
-  async fillLoadingSize(layer: IText): Promise<IText> {
+  async fillLoadingSize(layer: IText, inGroupOrTmp = false): Promise<IText> {
+    if (textShapeUtils.isCurvedText(layer.styles)) return layer
     const dimension = layer.styles.writingMode.includes('vertical') ? layer.styles.height : layer.styles.width
     const initSize = {
       width: layer.styles.width,
@@ -161,10 +163,20 @@ class StepsUtils {
       widthLimit: layer.widthLimit === -1 ? -1 : dimension
     }
     layer.widthLimit = await textUtils.autoResize(layer, initSize)
+    const textHW = await textUtils.getTextHWAsync(layer, layer.widthLimit)
+    if (!inGroupOrTmp && layer.widthLimit === -1) {
+      if (layer.styles.writingMode.includes('vertical')) {
+        layer.styles.y = layer.styles.y - (textHW.height - layer.styles.height) / 2
+      } else {
+        layer.styles.x = layer.styles.x - (textHW.width - layer.styles.width) / 2
+      }
+    }
+    layer.styles.width = textHW.width
+    layer.styles.height = textHW.height
     return layer
   }
 
-  async fillDataForLayer(layer: ILayer): Promise<any> {
+  async fillDataForLayer(layer: ILayer, inGroupOrTmp = false): Promise<any> {
     let typedLayer
     const newLayers = []
     switch (layer.type) {
@@ -173,14 +185,18 @@ class StepsUtils {
         return await this.refetchForShape(typedLayer)
       case 'text':
         typedLayer = layer as IText
-        return await this.fillLoadingSize(typedLayer)
+        return await this.fillLoadingSize(typedLayer, inGroupOrTmp)
       case 'tmp':
       case 'group':
         typedLayer = layer as IGroup
         for (const subLayer of typedLayer.layers) {
-          newLayers.push(await this.fillDataForLayer(subLayer))
+          newLayers.push(await this.fillDataForLayer(subLayer, true))
         }
         typedLayer.layers = newLayers
+        // eslint-disable-next-line no-case-declarations
+        const { width, height } = calcTmpProps(typedLayer.layers, typedLayer.styles.scale)
+        typedLayer.styles.width = width
+        typedLayer.styles.height = height
         return typedLayer
       case 'frame':
         typedLayer = layer as any

@@ -134,7 +134,7 @@ class ShortcutUtils {
   // }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
 
-  copy() {
+  async copy() {
     const { index, layers, pageIndex } = layerUtils.currSelectedInfo
     this.prevPasteTargetPageIndex = -1
     if (index >= 0 && !layerUtils.getSelectedLayer().locked) {
@@ -143,7 +143,7 @@ class ShortcutUtils {
         this.offsetCount = 0
         this.prevLayerId = layer.id
       }
-      navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(layer)))
+      await navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(layer)))
       this.copySourcePageIndex = pageIndex
       // store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)))
     } else {

@@ -44,6 +44,25 @@ export interface IEffectCategory {
   effects2d: IEffect[][]
 }
 
+type IHeaderL3 = {
+  label: string
+  url: string
+  newTab?: boolean
+}
+type IHeaderL2 = {
+  label: string
+  content?: IHeaderL3[]
+  url?: string
+}
+export type IHeaderL1 = {
+  singleLayer?: boolean
+  hidden?: boolean
+  name?: string
+  label: string
+  url?: string
+  content?: IHeaderL2[]
+}
+
 class ConstantData {
   get isLogin(): boolean {
     return store.getters['user/isLogin']
@@ -169,7 +188,8 @@ class ConstantData {
           newTab: true
         }]
       }]
-    }
+    }[i18n.global.locale] as IHeaderL2[]
+
     const resource = {
       tw: [{
         label: i18n.global.t('NN0671'),
@@ -262,7 +282,7 @@ class ConstantData {
           url: 'https://blog.vivipic.com/jp/category/digital-marketing-jp/'
         }]
       }]
-    }
+    }[i18n.global.locale] as IHeaderL2[]
 
     const pricing = i18n.global.locale === 'tw' ? {
       singleLayer: true,
@@ -282,14 +302,14 @@ class ConstantData {
 
     const list = [{
       label: i18n.global.t('NN0666'),
-      content: templateType[i18n.global.locale as keyof typeof templateType]
+      content: templateType
     }, {
       name: 'TemplateCenter',
       url: `${base}/templates`,
       label: i18n.global.t('NN0145')
     }, {
       label: i18n.global.t('NN0670'),
-      content: resource[i18n.global.locale as keyof typeof resource]
+      content: resource
     },
     ...!webViewUtils.inReviewMode ? [pricing] : [],
     {
@@ -302,7 +322,7 @@ class ConstantData {
       name: 'BrandKit',
       url: '/brandkit',
       label: i18n.global.t('NN0007')
-    }]
+    }] as IHeaderL1[]
     themeUtils.checkThemeState()
     if (mobile) return _.filter(list, (it) => it.name !== 'BrandKit')
     else return list
@@ -333,9 +353,9 @@ class ConstantData {
         pStrokeY: i18n.global.tc('NN0319'),
         pColor: i18n.global.tc('NN0735'),
         height: i18n.global.tc('NN0319'),
-        yOffset: i18n.global.tc('NN0736'), // For value 0~100, 0 initial
-        xOffset200: i18n.global.tc('NN0814'), // For value -100~100, 0 initial
-        yOffset200: i18n.global.tc('NN0736'), // For value -100~100, 0 initial
+        yOffset: i18n.global.tc('NN0424'), // For value 0~100, 0 initial
+        xOffset200: i18n.global.tc('NN0425'), // For value -100~100, 0 initial
+        yOffset200: i18n.global.tc('NN0424'), // For value -100~100, 0 initial
         distanceInverse: i18n.global.tc('NN0737'),
         textStrokeColor: i18n.global.tc('NN0739'),
         shadowStrokeColor: i18n.global.tc('NN0740'),
@@ -503,6 +523,14 @@ class ConstantData {
         key: 'text-book',
         label: i18n.global.tc('NN0819'),
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'penguin',
+        label: i18n.global.tc('NN0821'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'planet',
+        label: i18n.global.tc('NN0822'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }])
     }]
     return categories as IEffectCategory[]

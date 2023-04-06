@@ -456,7 +456,7 @@ class AssetUtils {
 
   addText(json: any, attrs: IAssetProps = {}) {
     json = generalUtils.deepCopy(json)
-    const { pageIndex, styles = {} } = attrs
+    const { pageIndex, has_frame, styles = {} } = attrs
     const { x, y } = styles
     const { width, height, scale } = json.styles
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
@@ -475,7 +475,8 @@ class AssetUtils {
         width: textWidth,
         height: textHeight,
         scale: scale * rescaleFactor
-      }
+      },
+      has_frame
     }
 
     Object.assign(
@@ -634,6 +635,7 @@ class AssetUtils {
 
     const config = {
       ...(isPreview && { previewSrc: url }),
+      ...(categoryType === 14 || categoryType === 15) && { categoryType },
       srcObj,
       panelPreviewSrc,
       styles: {
@@ -829,7 +831,7 @@ class AssetUtils {
           break
         }
         case 15: {
-          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1))
+          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1), {}, 15)
           key = 'objects'
           break
         }

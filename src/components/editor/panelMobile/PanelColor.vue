@@ -254,7 +254,8 @@ export default defineComponent({
       }
     },
     handleFrameColorUpdate(newColor: string) {
-      const { decoration, decorationTop } = layerUtils.getCurrConfig as IFrame
+      const { getCurrConfig: targetLayer, getCurrLayer: currLayer } = layerUtils
+      const { decoration, decorationTop } = (targetLayer.type === 'image' ? currLayer : targetLayer) as IFrame
       let color = [] as Array<string>
       let key = ''
       if (decoration && decorationTop && decoration.color.length && decorationTop.color.length) {
@@ -268,15 +269,30 @@ export default defineComponent({
           color[this.currSelectedColorIndex - decoration.color.length] = newColor
         }
       } else {
-        decoration && decoration.color.length && (key = 'decorationColors') && (color = [...decoration.color])
-        decorationTop && decorationTop.color.length && (key = 'decorationTopColors') && (color = [...decorationTop.color])
+        if (decoration && decoration.color.length) {
+          key = 'decorationColors'
+          color = [...decoration.color]
+        }
+        if (decorationTop && decorationTop.color.length) {
+          key = 'decorationTopColors'
+          color = [...decorationTop.color]
+        }
         color[this.currSelectedColorIndex] = newColor
       }
-      frameUtils.updateFrameDecorColor({
-        pageIndex: layerUtils.pageIndex,
-        layerIndex: layerUtils.layerIndex,
-        subLayerIdx: layerUtils.subLayerIdx
-      }, { [key]: color })
+      if (targetLayer.type === 'frame' || targetLayer.type === 'group') {
+        frameUtils.updateFrameDecorColor({
+          pageIndex: layerUtils.pageIndex,
+          layerIndex: layerUtils.layerIndex,
+          subLayerIdx: layerUtils.subLayerIdx
+        }, { [key]: color })
+      } else if (targetLayer.type === 'image') {
+        // as the clip is selected
+        frameUtils.updateFrameDecorColor({
+          pageIndex: layerUtils.pageIndex,
+          layerIndex: layerUtils.layerIndex,
+          subLayerIdx: -1
+        }, { [key]: color })
+      }
     },
     recordChange() {
       stepsUtils.record()

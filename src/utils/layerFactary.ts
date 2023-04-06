@@ -4,6 +4,7 @@ import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText, ITmp
 import { LayerProcessType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import { isEqual } from 'lodash'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import localeUtils from './localeUtils'
 import mouseUtils from './mouseUtils'
@@ -34,6 +35,7 @@ class LayerFactary {
       isClipper: true,
       dragging: false,
       designId: '',
+      categoryType: config.categoryType,
       styles: {
         x: 0,
         y: 0,
@@ -312,6 +314,9 @@ class LayerFactary {
      * 4: font size smaller than browser minimum font size setting
      * 5: span has no text and is the only span in the paragraph
      * 6: font is in wrong format (e.g. contains a comma)
+     * 7: span has no font
+     * 8: span contains invalid unicode characters (which breaks emoji)
+     * 9: replace textShape and textEffect value {} to {name: none}
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -323,6 +328,7 @@ class LayerFactary {
           pidx--
         } else if (spans.length === 1) {
           const span = spans[0]
+          // 5: span has no text and is the only span in the paragraph
           if (span.text === undefined) {
             paragraphs.splice(pidx, 1)
             pidx--
@@ -330,6 +336,7 @@ class LayerFactary {
         } else {
           for (let sidx = 0; sidx < spans.length; sidx++) {
             const span = spans[sidx]
+            // 1: empty span
             if (!span.text && spans.length > 1) {
               spans.splice(sidx, 1)
               sidx--
@@ -339,23 +346,27 @@ class LayerFactary {
       }
       const isVertical = basicConfig.styles.writingMode.includes('vertical')
       const defaultFont = (Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale())) ? STANDARD_TEXT_FONT[localeUtils.currLocale()] : STANDARD_TEXT_FONT.tw
+      // 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
       textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, config.isCompensated,
         (paragraph) => {
           if (paragraph.spans.length > 0) {
             const firstSpanStyles = paragraph.spans[0].styles
             if (firstSpanStyles.font) {
+              // 3: span style that has only font but no type
               paragraph.styles.font = firstSpanStyles.font
               paragraph.styles.type = firstSpanStyles.type ?? 'public'
               paragraph.styles.userId = firstSpanStyles.userId ?? ''
               paragraph.styles.assetId = firstSpanStyles.assetId ?? ''
               paragraph.styles.fontUrl = firstSpanStyles.fontUrl ?? ''
             } else {
+              // 7: span has no font
               paragraph.styles.font = defaultFont
               paragraph.styles.type = 'public'
               paragraph.styles.userId = ''
               paragraph.styles.assetId = ''
               paragraph.styles.fontUrl = ''
             }
+            // 6: font is in wrong format (e.g. contains a comma)
             if (paragraph.styles.font.includes(',')) {
               paragraph.styles.font = paragraph.styles.font.split(',')[0]
             }
@@ -365,12 +376,20 @@ class LayerFactary {
           }
         },
         (span) => {
+          // 8: span contains invalid unicode characters (which breaks emoji)
+          span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
+        },
+        undefined,
+        (span) => {
+          // This needs to be done after removeInvalidStyles's span processing,
+          // because span's font is guaranteed to exist after that.
+          // 6: font is in wrong format (e.g. contains a comma)
           if (span.styles.font.includes(',')) {
             span.styles.font = span.styles.font.split(',')[0]
           }
-          span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
         }
       )
+      // 4: font size smaller than browser minimum font size setting
       if (config.isCompensated) {
         const baseFontSize = textPropUtils.getBaseFontSizeOfParagraphs(config.paragraphs)
         const compensation = textPropUtils.getScaleCompensation(baseFontSize)
@@ -381,6 +400,10 @@ class LayerFactary {
           })
         }
       }
+    }
+    // 9: replace textShape and textEffect value {} to {name: none}
+    for (const key of ['textShape', 'textEffect'] as const) {
+      if (isEqual(basicConfig.styles[key], {})) basicConfig.styles[key] = { name: 'none' }
     }
     return Object.assign(basicConfig, config)
   }
@@ -397,6 +420,7 @@ class LayerFactary {
       dragging: false,
       designId: config.designId,
       db: config.db,
+      has_frame: config.has_frame,
       styles: {
         x: config.styles.x,
         y: config.styles.y,

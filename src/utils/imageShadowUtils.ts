@@ -10,7 +10,7 @@ import layerUtils from './layerUtils'
 import logUtils from './logUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
-import { imageDataAChannel, imageDataRGBA } from './stackblur'
+import { imageDataAChannel, imageDataRGBA_Async } from './stackblur'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedEffect | IFloatingEffect
 
@@ -124,6 +124,22 @@ class ImageShadowUtils {
 
   setUploadProcess(val: boolean) {
     this._inUploadProcess = val
+  }
+
+  private handlerId = ''
+  private imageDataCache = {
+    data: null as unknown as ImageData,
+    identifier: ''
+  }
+
+  getHandlerId(): string {
+    return this?.handlerId || ''
+  }
+
+  getImageMatchedIdentifier(config: IImage) {
+    const { styles: { shadow: { effects, currentEffect } } } = config
+    const { radius, size } = (effects as any)[currentEffect] as IImageMatchedEffect
+    return config.srcObj.type + config.srcObj.assetId + config.srcObj.userId + '-' + radius.toString() + '-' + size.toString()
   }
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
@@ -341,15 +357,17 @@ class ImageShadowUtils {
     const { timeout = DRAWING_TIMEOUT } = params
     if (timeout) {
       clearTimeout(this._draw)
+      const handlerId = generalUtils.generateRandomString(6)
+      this.handlerId = handlerId
       this._draw = window.setTimeout(() => {
-        this.imageMathcedHandler(canvas_s, img, config, params)
+        this.imageMathcedHandler(canvas_s, img, config, params, handlerId)
       }, timeout)
     } else {
       this.imageMathcedHandler(canvas_s, img, config, params)
     }
   }
 
-  imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+  async imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams, handlerId?: string) {
     logUtils.setLog('canvas drawing: drawImageMatchedShadow start:')
     const canvas = canvas_s[0] || undefined
     setMark('imageMatched', 0)
@@ -397,7 +415,20 @@ class ImageShadowUtils {
     ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
     const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     setMark('imageMatched', 1)
-    const bluredData = imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1)
+    // const bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.ceil(radius * 1.5))
+    let bluredData
+    if (this.imageDataCache.identifier === this.getImageMatchedIdentifier(config)) {
+      bluredData = this.imageDataCache.data
+    } else {
+      bluredData = await imageDataRGBA_Async(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.ceil(radius * 1.5), handlerId)
+      if (bluredData) {
+        this.imageDataCache.identifier = this.getImageMatchedIdentifier(config)
+        this.imageDataCache.data = bluredData
+      } else {
+        return
+      }
+    }
+    // const bluredData = imageDataRGBA(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1)
     setMark('imageMatched', 2)
     const xFactor = layerWidth / _imgWidth
     const yFactor = layerHeight / _imgHeight
@@ -425,7 +456,6 @@ class ImageShadowUtils {
   }
 
   drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
-    console.log('start drawing', params.drawCanvasH, params.drawCanvasW)
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { shadow } = config.styles
@@ -492,13 +522,13 @@ class ImageShadowUtils {
       this.setIsProcess(layerInfo, true)
     }
 
-    console.log(1)
     setMark('shadow', 1)
     const isStaticShadow = !shadow.isTransparent
     const spreadF = isStaticShadow ? fieldRange.frame.spread.weighting : Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)
     const _imageData = new ImageData(this.dilate(spread * spreadF), canvasT.width, canvasT.height)
     ctxT.putImageData(_imageData, 0, 0)
     setMark('shadow', 2)
+    console.log(canvasMaxSize.width, canvasMaxSize.height)
 
     ctxMax.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
     const imageData = ctxMax.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
@@ -515,7 +545,6 @@ class ImageShadowUtils {
     ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
 
     setMark('shadow', 3)
-    console.log(2)
 
     ctxT.globalCompositeOperation = 'source-in'
     ctxT.globalAlpha = opacity * 0.01
@@ -523,7 +552,6 @@ class ImageShadowUtils {
     ctxT.fillRect(0, 0, canvasT.width, canvasT.height)
     ctxT.globalAlpha = 1
     ctxT.globalCompositeOperation = 'source-over'
-    console.log(3)
 
     canvas_s.forEach(c => {
       const ctx = c.getContext('2d') as CanvasRenderingContext2D
@@ -534,7 +562,6 @@ class ImageShadowUtils {
       timeout && this.setIsProcess(layerInfo, false)
     }
     this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-    console.log(4)
     const stime = Date.now()
     cb && cb()
     setMark('shadow', 4)

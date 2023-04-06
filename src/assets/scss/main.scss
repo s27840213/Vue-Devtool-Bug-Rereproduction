@@ -14,7 +14,7 @@ body {
     margin: 0;
     padding: 0;
     touch-action: manipulation;
-    overflow: hidden; // vivisticker only
+    overflow: clip;
     -webkit-user-select: none; // vivisticker only
     user-select: none; // vivisticker only
     -webkit-touch-callout: none; // vivisticker only
