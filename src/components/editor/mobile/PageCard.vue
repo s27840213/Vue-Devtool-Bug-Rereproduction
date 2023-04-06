@@ -96,12 +96,12 @@ export default defineComponent({
     },
     hasBleed() {
       this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
-    },
-    showMobilePanel() {
-      window.setTimeout(() => {
-        this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
-      }, 500)
     }
+    // showMobilePanel() {
+    //   window.setTimeout(() => {
+    //     this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
+    //   }, 500)
+    // }
   }
 })
 </script>
