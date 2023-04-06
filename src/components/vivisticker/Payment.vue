@@ -186,7 +186,7 @@ export default defineComponent({
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option: this.planSelected })
     },
     handleRestorePurchaseClick() {
-      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'checkState' })
+      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'restore' })
     },
     handleSwipe(e: AnyTouchEvent) {
       e.stopPropagation()

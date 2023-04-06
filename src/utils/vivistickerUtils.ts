@@ -109,7 +109,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'deleteAssetDone',
     'getAssetResult',
     'uploadImageURL',
-    'informWebResult'
+    'informWebResult',
+    'subscribeInfo',
+    'subscribeResult'
   ]
 
   SCREENSHOT_CALLBACKS = [
@@ -1068,6 +1070,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       return false
     }
     return true
+  }
+
+  subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, monthly: boolean, annually: boolean }) {
+    const { monthly, annually } = data
+    store.commit('vivisticker/SET_prices', { monthly, annually })
+  }
+
+  subscribeResult(data: { status: 'subscribed' | 'failed', expire_date: string }) {
+    const { status, expire_date } = data
+    if (status === 'subscribed') {
+      store.commit('vivisticker/SET_expireDate', expire_date)
+      store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
+    }
   }
 }
 
