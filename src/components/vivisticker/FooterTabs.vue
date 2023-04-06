@@ -658,24 +658,26 @@ export default defineComponent({
           const { pageIndex, layerIndex, subLayerIdx = 0 } = layerUtils
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
-              const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
-                .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], imageUtils.getSrc({
+              if (images.length) {
+                const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                  .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], imageUtils.getSrc({
+                    type: 'ios',
+                    assetId: images[0],
+                    userId: ''
+                  }))
+                frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
+                  imgWidth,
+                  imgHeight,
+                  imgX,
+                  imgY
+                })
+                frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
                   type: 'ios',
                   assetId: images[0],
                   userId: ''
-                }))
-              frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
-                imgWidth,
-                imgHeight,
-                imgX,
-                imgY
-              })
-              frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
-                type: 'ios',
-                assetId: images[0],
-                userId: ''
-              })
-              stepsUtils.record()
+                })
+                stepsUtils.record()
+              }
               this.$emit('switchTab', 'none')
             })
           break
