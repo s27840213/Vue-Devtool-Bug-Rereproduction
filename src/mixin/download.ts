@@ -26,7 +26,7 @@ export default defineComponent({
       type: Boolean
     }
   },
-  emits: ['close', 'inprogress'],
+  emits: ['close', 'inprogress', 'update:panelHistory'],
   data() {
     const {
       selectedTypeVal,
@@ -75,6 +75,7 @@ export default defineComponent({
       currentPageIndex,
       polling: false,
       downloaded: false,
+      canceled: false,
       progress: -1,
       exportId: '',
       functionQueue: [] as Array<() => void>,
@@ -232,6 +233,10 @@ export default defineComponent({
     ...mapMutations({
       addExportId: 'ADD_exportIds'
     }),
+    cancelDownload() {
+      this.$emit('close')
+      this.canceled = true
+    },
     handleUploadJSON(id: string) {
       /**
        * @Todo check the upload design function
@@ -299,6 +304,9 @@ export default defineComponent({
       if (downloadMode !== 'default') {
         if (this.selectedTypeVal === 'pdf_print' && !paymentUtils.checkPro({ plan: 1 }, 'export-pdf-print')) return
       }
+
+      this.$emit('update:panelHistory', 'polling')
+
       this.polling = true
       this.exportId ? this.handleDownload(useDev, downloadMode) : (this.functionQueue = [() => this.handleDownload(useDev, downloadMode)])
     },
@@ -377,7 +385,9 @@ export default defineComponent({
         case 0:
           this.progress = 100
           setTimeout(() => {
-            DownloadUtil.downloadByUrl(url)
+            if (!this.canceled) {
+              DownloadUtil.downloadByUrl(url)
+            }
             const { rangeType } = this
 
             switch (rangeType) {
@@ -410,6 +420,7 @@ export default defineComponent({
               this.polling = false
               this.progress = 0
               this.downloaded = true
+              this.$emit('update:panelHistory', 'downloaded')
             }
           }, 1000)
           break

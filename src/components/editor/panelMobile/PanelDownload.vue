@@ -7,6 +7,8 @@ div(class="panel-download" :style="containerStyles")
       div(class="panel-download__progress-value body-SM" :style="{ width: `${progress}%`}")
     span(class="body-SM text-blue-1 py-10") {{$t('NN0824')}}
     span(class="body-SM text-gray-3 py-10") {{$t('NN0825')}}
+    btn(class="full-width body-3 rounded" @click="cancelDownload")
+      span {{$t('NN0203')}}
   div(v-else-if="downloaded" class="full-width full-width flex items-center flex-column")
     animation(class="animation-downloaded" path="/lottie/downloaded.json" :loop="false")
     span(class="body-SM text-blue-1 py-10") {{$t('NN0826')}}
@@ -101,7 +103,9 @@ div(class="panel-download" :style="containerStyles")
           :iconName="option === selected.scale ? 'radio-checked' : 'radio'"
           :iconWidth="'16px'")
         div(class="flex flex-between p-5 full-width")
-          div(class="body-XS text-left") {{ `${option} ${$t('NN0123')}`}}
+          div(class="body-S text-left") {{ `${option} ${$t('NN0123')}`}}
+          div
+            span(class="text-gray-4 body-XS") {{ `${Math.round(currPageSize.width * option)}x${Math.round(currPageSize.height * option)}` }}
   template(v-else-if="currState === 'colorMode'")
     div(class="flex flex-column")
       div(v-for="option in colorFormats[selectedTypeVal]" class="flex items-center full-width"
@@ -125,7 +129,7 @@ div(class="panel-download" :style="containerStyles")
           :iconColor="pageRange.includes(idx-1) ? 'blue-1' : 'light-gray'"
           :iconName="pageRange.includes(idx-1) ? 'checkbox-checked' : 'checkbox'"
           :iconWidth="'16px'")
-        span {{ $t('NN0134', { num:`${idx}` }) }}
+        span {{ `${$t('NN0134', { num:`${idx}` })}${currFocusPageIndex === (idx-1) ? `(${$t('NN0125')})` :''}` }}
   template(v-else)
     div(v-for="(btn,index) in btnInfo"
         :key="`panel-download-${index}`"
@@ -153,13 +157,10 @@ import Checkbox from '@/components/global/Checkbox.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
 import ToggleBtn from '@/components/global/ToggleBtn.vue'
-import { ITypeOption } from '@/interfaces/download'
+import { ITypeOption, PanelDownloadState } from '@/interfaces/download'
 import downloadMixin from '@/mixin/download'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
-
-type PanelDownloadState = 'setting' | 'type' | 'size' | 'selectPage' | 'colorMode'
-
 export default defineComponent({
   components: {
     Animation,
@@ -195,7 +196,9 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      pagesLength: 'getPagesLength'
+      pagesLength: 'getPagesLength',
+      currFocusPageIndex: 'getCurrFocusPageIndex',
+      getPageSize: 'getPageSize'
     }),
     containerStyles(): { [key: string]: string } {
       return {
@@ -212,6 +215,9 @@ export default defineComponent({
     },
     noPageRange(): boolean {
       return this.pageRange.length === 0
+    },
+    currPageSize(): {width: number, height: number} {
+      return this.getPageSize(this.currFocusPageIndex) as {width: number, height: number}
     }
   },
   methods: {

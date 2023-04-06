@@ -8,8 +8,8 @@ div(class="mobile-panel"
     :class="{'self-padding': noPaddingTheme}")
     div(class="mobile-panel__drag-bar"
       :class="{'visible-hidden': panelTitle !== ''}"
-      @pointerdown="dragPanelStart"
-      @touchstart="disableTouchEvent")
+      @pointerdown.stop="dragPanelStart"
+      @touchstart.stop="disableTouchEvent")
         div
     div
       div(class="mobile-panel__btn mobile-panel__left-btn"
@@ -20,8 +20,8 @@ div(class="mobile-panel"
           :iconColor="'white'"
           :iconWidth="'20px'")
         div(class="mobile-panel__btn-click-zone"
-          @pointerdown="leftButtonAction"
-          @touchstart="disableTouchEvent")
+          @pointerdown.stop="leftButtonAction"
+          @touchstart.stop="disableTouchEvent")
       div(class="mobile-panel__title")
         span(class="mobile-panel__title-text body-1 mr-10"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
@@ -35,8 +35,8 @@ div(class="mobile-panel"
           :iconColor="'white'"
           :iconWidth="'20px'")
         div(class="mobile-panel__btn-click-zone"
-          @pointerdown="rightButtonAction"
-          @touchstart="disableTouchEvent")
+          @pointerdown.stop="rightButtonAction"
+          @touchstart.stop="disableTouchEvent")
   div(class="mobile-panel__bottom-section")
     tabs(v-if="innerTabs.label" theme="light"
       :tabs="innerTabs.label" v-model="innerTabIndex")
@@ -91,8 +91,6 @@ import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
-import { defineComponent, PropType } from 'vue'
-
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -109,6 +107,7 @@ import pageUtils from '@/utils/pageUtils'
 import webViewUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -125,7 +124,11 @@ export default defineComponent({
     currPage: {
       type: Object as PropType<IPage>,
       required: true
-    }
+    },
+    footerTabsHeight: {
+      default: 0,
+      type: Number
+    },
   },
   emits: ['panelHeight', 'switchTab'],
   directives: {
@@ -199,6 +202,12 @@ export default defineComponent({
       hasCopiedFormat: 'getHasCopiedFormat',
       userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
+    historySize(): number {
+      return this.panelHistory.length
+    },
+    currHistory(): string {
+      return this.panelHistory[this.historySize - 1]
+    },
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
     },
@@ -227,6 +236,9 @@ export default defineComponent({
         'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'more', 'object-adjust', 'brand-list', 'multiple-select'].includes(this.currActivePanel)
+    },
+    hideFooter(): boolean {
+      return ['download'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
@@ -265,11 +277,12 @@ export default defineComponent({
     },
     showRightBtn(): boolean {
       if (this.currActivePanel === 'download') {
-        return this.panelHistory.length < 2
+        return (this.historySize < 2) && !['polling', 'downloaded'].includes(this.currHistory)
       }
       return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
+      if (this.currActivePanel === 'download' && ['polling', 'downloaded', 'setting'].includes(this.currHistory)) return false
       return this.bgRemoveMode || (this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel))
     },
     hideDynamicComp(): boolean {
@@ -280,7 +293,7 @@ export default defineComponent({
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
-      return Object.assign(
+      return Object.assign({ bottom: this.hideFooter ? -1 * this.footerTabsHeight + 'px' : '0', zIndex: '100' },
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
@@ -418,6 +431,9 @@ export default defineComponent({
             pushHistory,
             back: () => {
               this.panelHistory.pop()
+            },
+            'update:panelHistory': (val: string) => {
+              this.panelHistory = [val]
             }
           }
         default:
@@ -428,7 +444,9 @@ export default defineComponent({
       return this.bgRemoveMode ? 'close-circle' : 'back-circle'
     },
     rightBtnName(): string {
-      if (this.bgRemoveMode || (this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
+      if (this.currActivePanel === 'download') {
+        return 'close-circle'
+      } else if (this.bgRemoveMode || (this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
         return 'check-mobile-circle'
       } else {
         return 'close-circle'
@@ -665,7 +683,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .mobile-panel {
   position: absolute;
-  bottom: 0;
   width: 100%;
   box-sizing: border-box;
   z-index: setZindex(mobile-panel);
