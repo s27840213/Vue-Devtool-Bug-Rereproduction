@@ -83,6 +83,13 @@ export default defineComponent({
         icon: 'vivisticker_play-circle',
         action: this.handleShowTutorial
       },
+      ...this.inReviewMode ? [
+        {
+          text: 'Vivisticker Pro',
+          icon: 'pro',
+          action: vivistickerUtils.openPayment
+        }
+      ] : [],
       {
         text: `${this.$t('NN0174')}`,
         icon: 'vivisticker_global',
@@ -99,13 +106,8 @@ export default defineComponent({
         text: `${this.$t('NN0742')}`,
         icon: 'vivisticker_mail',
         action: this.handleOpenInfo
-      }, ...this.inReviewMode ? [
-        {
-          text: 'Vivisticker Pro',
-          icon: 'pro',
-          action: vivistickerUtils.openPayment
-        }
-      ] : [], ...this.debugMode ? [
+      },
+      ...this.debugMode ? [
         {
           text: 'domain 選單',
           icon: 'vivisticker_global',
