@@ -676,6 +676,7 @@ export default defineComponent({
                 userId: ''
               })
               stepsUtils.record()
+              this.$emit('switchTab', 'none')
             })
           break
         }
