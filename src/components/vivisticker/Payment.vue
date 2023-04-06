@@ -423,11 +423,14 @@ export default defineComponent({
     color: white;
     background-color: setColor(black-3);
     border-radius: 10px 10px 0px 0px;
-    transition: all 300ms ease-in-out;
+    transition-property: transform, left, right;
+    transition-duration: 300ms;
+    transition-timing-function: ease-in-out;
     &.close {
       left: 24px;
       right: 24px;
-      transform: translateY(calc(100% - 48px));
+      bottom: -32px;
+      transform: translateY(calc(100% - 80px));
     }
     &__chevron {
       position: absolute;
@@ -453,7 +456,7 @@ export default defineComponent({
       letter-spacing: 0.8px;
       text-transform: capitalize;
       overflow: hidden;
-      transition: height 200ms ease-in-out;
+      // transition: height 300ms ease-in-out;
     }
     &__comparison {
       display: grid;
