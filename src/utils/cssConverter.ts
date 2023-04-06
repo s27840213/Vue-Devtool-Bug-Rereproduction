@@ -7,7 +7,7 @@ import store from '@/store'
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
   'min-width', 'min-height', 'backgroundImage', 'backgroundSize', 'backgroundPosition',
-  'opacity', 'webkitTextFillColor', '-webkit-background-clip', 'filter', '--base-stroke',
+  'opacity', 'webkitTextFillColor', 'webkitBackgroundClip', 'filter', '--base-stroke',
   'webkitTextStrokeColor', 'textShadow',
 ] as const
 

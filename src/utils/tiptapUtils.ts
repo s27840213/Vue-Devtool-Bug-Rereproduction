@@ -31,8 +31,8 @@ interface ITiptapJson extends JSONContent {
       marks?: {
         type: 'textStyle'
         attrs: Record<'assetId' | 'color' | 'decoration' | 'font' | 'fontUrl' |
-          'randomId' | 'style' | 'type' | 'userId' | 'weight' | 'width', string>
-        & Record<'size', number>
+          'style' | 'type' | 'userId' | 'weight' | 'width', string>
+        & Record<'size' | 'spanIndex', number>
         & Record<'pre', string>
       }[]
     }[]
@@ -143,7 +143,6 @@ class TiptapUtils {
           type: 'paragraph'
         } as { [key: string]: any }
         const attrs = this.makeParagraphStyle(p.styles) as any
-        const fixedWidth = textBgUtils.isFixedWidth(textEffectUtils.getCurrentLayer().styles)
 
         // If p is empty, no span exist, so need to store span style in p.spanStyle
         if (p.spanStyle) {
@@ -155,6 +154,7 @@ class TiptapUtils {
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
           const config = layerUtils.getCurrLayer as IText
+          const splitedSpan = textBgUtils.isSplitedSpan(config.styles)
           const textEffectStyles = textEffectUtils.convertTextEffect(config)
           pObj.content = spans.map((s, sIndex) => {
             return {
@@ -164,7 +164,7 @@ class TiptapUtils {
                 type: 'textStyle',
                 attrs: Object.assign(this.makeSpanStyle(s.styles),
                   textEffectStyles,
-                  fixedWidth ? { randomId: `${sIndex}`, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {},
+                  splitedSpan ? { spanIndex: sIndex, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {},
                   textFillUtils.tempTextFill[pIndex]?.[sIndex] ?? {},
                 )
               }]
@@ -264,11 +264,10 @@ class TiptapUtils {
     let isSetContentRequired = false
 
     // If fixedWidth, all span should split into one text per span
-    const fixedWidth = _tiptapJSON.content?.some(p => {
-      return p.content?.some(span => span.marks?.[0].attrs?.['min-width'] !== undefined ||
-        span.marks?.[0].attrs?.['min-height'] !== undefined)
+    const splitedSpan = tiptapJSON.content?.some(p => {
+      return p.content?.some(span => ![-1, undefined].includes(span.marks?.[0].attrs?.spanIndex))
     })
-    if (fixedWidth) {
+    if (splitedSpan) {
       tiptapJSON.content.forEach(p => {
         p.content && p.content.forEach(s => {
           // Check if some text need to be split here.
@@ -290,7 +289,7 @@ class TiptapUtils {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
       let largestSize = 0
       const spans: ISpan[] = []
-      const pContent = fixedWidth && paragraph.content && !this.editor.view.composing
+      const pContent = splitedSpan && paragraph.content && !this.editor.view.composing
         // Split span for fixedWidth, another one in textBgUtils.setTextBg
         ? paragraph.content.flatMap(span => [...span.text]
           .map(t => Object.assign({}, span, { text: t })))

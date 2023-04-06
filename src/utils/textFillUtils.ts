@@ -76,8 +76,11 @@ class TextFill {
 
     this.tempTextFill = div.map(p => p.map(span => {
       const rect = span[0]
-      let { width: spanWidth, height: spanHeight } = rect
-      if (vertical) [spanWidth, spanHeight] = [spanHeight, spanWidth]
+      let { width: spanWidth, height: spanHeight, x, y } = rect
+      if (vertical) {
+        [spanWidth, spanHeight] = [spanHeight, spanWidth];
+        [x, y] = [y, x]
+      }
       const bgSizeBy = textFill.size * (scaleByWidth ? divWidth / spanWidth : divHeight / spanHeight)
       return {
         backgroundImage: `url("${img.urls.original}")`,
@@ -85,12 +88,11 @@ class TextFill {
         // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
         // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position#regarding_percentages
         backgroundPosition: `
-          ${(rect.x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200)) * -1}px
-          ${(rect.y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)) * -1}px`,
-        // backgroundRepaet: 'no-repeat',
+          ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200)) * -1}px
+          ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)) * -1}px`,
         opacity: textFill.opacity / 100,
-        '-webkit-text-fill-color': 'transparent',
-        '-webkit-background-clip': 'text',
+        webkitTextFillColor: 'transparent',
+        webkitBackgroundClip: 'text',
       }
     }))
     tiptapUtils.updateHtml() // Refresh tiptap span style

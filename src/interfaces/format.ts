@@ -82,7 +82,6 @@ export interface ITextFillConfig {
   size: number
   opacity: number
   focus: boolean
-  fixedWidth: true
 }
 
 export type ITextFill = ITextFillConfig | { name: 'none' }

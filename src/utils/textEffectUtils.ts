@@ -322,18 +322,18 @@ class Controller {
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
-
       const layer = layers[idx]
       if (layer.type !== 'text') continue
+
       const paragraphs = layer.paragraphs
-      const oldTextEffect = layer.styles.textBg
+      const oldTextEffect = layer.styles.textEffect
       const newTextEffect = {} as ITextEffect
 
-      if (oldTextEffect && oldTextEffect.name === effect) {
+      if (oldTextEffect && oldTextEffect.name === effect) { // Adjust effect option.
         Object.assign(newTextEffect, oldTextEffect, attrs)
         localStorageUtils.set('textEffectSetting', effect, newTextEffect)
         // this.syncShareAttrs(textEffect, null)
-      } else {
+      } else { // Switch to other effect.
         // this.syncShareAttrs(textEffect, effect)
         let localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
         localAttrs = _.omit(localAttrs, ['color']) as ITextEffect

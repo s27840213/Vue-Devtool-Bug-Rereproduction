@@ -82,7 +82,6 @@ export class Rect {
 
   async init(config: IText, { splitSpan } = { splitSpan: false }) {
     this.vertical = config.styles.writingMode === 'vertical-lr'
-    const fixedWidth = textBgUtils.isFixedWidth(config.styles)
 
     let div = document.createElement('div')
     div.classList.add('nu-text__body')
@@ -100,12 +99,13 @@ export class Rect {
           span.appendChild(document.createElement('br'))
           p.appendChild(span)
         } else {
+          const splitedSpan = textBgUtils.isSplitedSpan(config.styles);
           (splitSpan ? [...spanData.text] : [spanData.text]).forEach(t => {
             const isComposingText = spanData.text.length > 1
-            const fixedWidthStyle = fixedWidth && isComposingText ? {
+            const fixedWidthStyle = splitedSpan && isComposingText ? {
               letterSpacing: 0,
               display: 'inline-block',
-            } : fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, para.styles, config) : {}
+            } : splitedSpan ? textBgUtils.fixedWidthStyle(spanData.styles, para.styles, config) : {}
 
             const span = document.createElement('span')
             span.classList.add('nu-text__span')
@@ -775,10 +775,15 @@ class TextBg {
     return {}
   }
 
-  isFixedWidth(styles: ITextStyle) {
+  isSplitedSpan(styles: ITextStyle) {
     const { textBg, textFill } = styles
     return (isITextLetterBg(textBg) && textBg.fixedWidth) ||
-      (isITextFillConfig(textFill) && textFill.fixedWidth)
+      (isITextFillConfig(textFill))
+  }
+
+  isFixedWidth(styles: ITextStyle) {
+    const { textBg } = styles
+    return isITextLetterBg(textBg) && textBg.fixedWidth
   }
 
   fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle, config: IText) {
@@ -1127,7 +1132,7 @@ class TextBg {
     if (document.querySelector('.ProseMirror') && !newFixedWidth) {
       tiptapUtils.agent((editor: Editor) => {
         editor.commands.selectAll()
-        editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
+        editor.chain().updateAttributes('textStyle', { spanIndex: -1 }).run()
       })
     }
   }

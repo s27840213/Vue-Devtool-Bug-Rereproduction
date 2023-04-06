@@ -276,15 +276,15 @@ export default Extension.create({
               }
             }
           },
-          randomId: {
+          spanIndex: {
             default: undefined,
             parseHTML: element => {
               return element.getAttribute('random-id')
             },
             renderHTML: attributes => {
-              if (!attributes.randomId) return {}
+              if (!attributes.spanIndex) return {}
               return {
-                randomId: attributes.randomId
+                spanIndex: attributes.spanIndex
               }
             }
           },
@@ -293,7 +293,7 @@ export default Extension.create({
           backgroundImage: cssBaseAttr('backgroundImage'),
           backgroundSize: cssBaseAttr('backgroundSize'),
           backgroundPosition: cssBaseAttr('backgroundPosition'),
-          '-webkit-background-clip': cssBaseAttr('-webkit-background-clip'),
+          webkitBackgroundClip: cssBaseAttr('-webkit-background-clip'),
           opacity: cssBaseAttr('opacity'),
           filter: cssBaseAttr('filter'),
           '--base-stroke': cssBaseAttr('--base-stroke'),
