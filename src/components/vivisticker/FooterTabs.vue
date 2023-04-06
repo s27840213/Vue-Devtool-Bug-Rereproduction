@@ -414,12 +414,12 @@ export default defineComponent({
       const layer = layerUtils.getCurrLayer
       const subLayerIdx = layerUtils.subLayerIdx
       if (subLayerIdx === -1) {
-        return layer.type === LayerType.image && (layer as IImage).srcObj.type === 'svg'
+        return layer.type === LayerType.image && [14, 15].includes((layer as IImage).categoryType ?? -1)
       } else {
         const layers = (layer as IGroup).layers
         if (!layers) return false
         const subLayer = layers[subLayerIdx]
-        return subLayer.type === LayerType.image && (subLayer as IImage).srcObj.type === 'svg'
+        return subLayer.type === LayerType.image && [14, 15].includes((subLayer as IImage).categoryType ?? -1)
       }
     },
     showPhotoTabs(): boolean {
