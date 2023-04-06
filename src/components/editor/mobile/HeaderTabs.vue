@@ -98,11 +98,13 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       hasBleed: 'getHasBleed',
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: webViewUtils.appendModuleName('getUserInfo'),
     }),
     rootStyles(): {[key: string]: string} {
+      const basePadding = webViewUtils.inBrowserMode ? 10.7 : 8
       return {
-        paddingTop: `${this.userInfo.statusBarHeight + 8}px`
+        paddingTop: `${this.userInfo.statusBarHeight + basePadding}px`,
+        paddingBottom: `${basePadding}px`,
       }
     },
     isCropping(): boolean {
@@ -305,7 +307,8 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding-left: 16px;
+  padding-right: 16px;
   box-sizing: border-box;
   z-index: setZindex("header");
   -webkit-touch-callout: none;
