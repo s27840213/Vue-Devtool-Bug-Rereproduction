@@ -56,7 +56,7 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
@@ -77,7 +77,6 @@ import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
-import TextEffectUtils from '@/utils/textEffectUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { AnyTouchEvent } from '@any-touch/shared'
 import { notify } from '@kyvg/vue3-notification'
@@ -428,18 +427,6 @@ export default defineComponent({
       )
       switch (this.config.type) {
         case LayerType.text: {
-          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
-          Object.assign(
-            styles,
-            textEffectStyles,
-            {
-              willChange: this.useMobileEditor ? '' : ('text-shadow' + (this.isDragging ? ', transform' : '')),
-              '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
-            }
-          )
-          if (noShadow) {
-            styles.textShadow = 'none'
-          }
           if (isTransparent) {
             styles['-webkit-filter'] = 'opacity(1)'
           }

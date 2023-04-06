@@ -61,7 +61,7 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
           pageUtils.fillPage()
         }
       }
-    } else if (!url && (!from.name || ['Login'].includes(String(from.name)))) {
+    } else {
       // refresh /editor page
       store.commit('file/SET_setLayersDone')
     }

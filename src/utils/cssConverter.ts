@@ -7,13 +7,14 @@ import store from '@/store'
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
   'min-width', 'min-height', 'backgroundImage', 'backgroundSize', 'backgroundPosition',
-  'opacity', '-webkit-text-fill-color', '-webkit-background-clip'
+  'opacity', 'webkitTextFillColor', '-webkit-background-clip', 'filter', '--base-stroke',
+  'webkitTextStrokeColor', 'textShadow',
 ] as const
 
 type IStyleMap = Record<typeof fontProps[number], string>
 
 const styleMap = Object.assign({}, ...fontProps.map(prop => // Transfer camelCase to dash-case by default
-  ({ [prop]: prop.replace(/([A-Z])/g, upper => `-${upper.toLowerCase()}`) })
+  ({ [prop]: prop.replace(/([A-Z]|webkit)/g, upper => `-${upper.toLowerCase()}`) })
 ), { // Overwrite special case
   x: 'translateX',
   y: 'translateY',
@@ -84,19 +85,6 @@ class CssConveter {
       { opacity: `${sourceStyles.opacity / 100}` },
       this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, contentScaleRatio))
     return result
-  }
-
-  convertTextShadow(x: number, y: number, color: string, blur?: number): Partial<CSSStyleDeclaration> {
-    return {
-      textShadow: `${color} ${x}px ${y}px ${blur || 0}px`
-    }
-  }
-
-  convertTextStorke(width: number, color: string, fill: string): Partial<CSSStyleDeclaration> {
-    return {
-      webkitTextStroke: `${width}px ${color}`,
-      webkitTextFillColor: fill
-    }
   }
 }
 

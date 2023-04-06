@@ -2,11 +2,11 @@ import { ITextEffect } from '@/interfaces/format'
 import { AllLayerTypes, IParagraph, IText } from '@/interfaces/layer'
 import store from '@/store'
 import { lab2rgb, rgb2lab } from '@/utils/colorUtils'
-import CssConverter from '@/utils/cssConverter'
 import LayerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import _ from 'lodash'
+import tiptapUtils from './tiptapUtils'
 
 class Controller {
   private shadowScale = 0.2
@@ -154,7 +154,7 @@ class Controller {
   }
 
   funky3d(distance: number, distanceInverse: number, angle: number, color: string) {
-    const shadow = []
+    const shadow = [] as string[]
     for (let d = -distanceInverse * 0.06; d < distance * 1.5; d += 0.5) {
       const { x, y } = mathUtils.getRotatedPoint(-angle, { x: 0, y: 0 }, { x: 0, y: d })
       shadow.push(`${color} ${x}px ${y}px`)
@@ -181,78 +181,94 @@ class Controller {
 
     switch (name) {
       case 'shadow':
-        return CssConverter.convertTextShadow(
-          effectShadowOffset * Math.cos(angle * Math.PI / 180),
-          effectShadowOffset * Math.sin(angle * Math.PI / 180),
-          colorWithOpacity,
-          effectBlur
-        )
+        return {
+          '--base-stroke': '0px',
+          filter: `drop-shadow(
+            ${colorWithOpacity} 
+            ${effectShadowOffset * Math.cos(angle * Math.PI / 180)}px
+            ${effectShadowOffset * Math.sin(angle * Math.PI / 180)}px
+            ${effectBlur / 2}px)`
+        }
       case 'lift':
-        return CssConverter.convertTextShadow(
-          0,
-          0.3 * unit,
-          this.convertColor2rgba('#000000', Math.max(0.05, effectSpread)),
-          (0.3 * unit) + effectSpreadBlur
-        )
+        return {
+          '--base-stroke': '0px',
+          filter: `drop-shadow(
+            ${this.convertColor2rgba('#000000', Math.max(0.05, effectSpread))} 
+            ${0}px
+            ${0.3 * unit}px
+            ${((0.3 * unit) + effectSpreadBlur) / 2}px)`
+        }
       case 'hollow':
-        return CssConverter.convertTextStorke(
-          effectStroke * strokeWidth,
-          this.convertColor2rgba(color, 1),
-          'transparent'
-        )
+        return {
+          '--base-stroke': `${effectStroke * strokeWidth}px`,
+          webkitTextStrokeColor: this.convertColor2rgba(color, 1),
+          webkitTextFillColor: 'transparent'
+        }
       case 'splice': {
         const strokeColor = this.colorParser('fontColor', config)
         return {
-          ...CssConverter.convertTextShadow(
-            effectShadowOffset * Math.cos(angle * Math.PI / 180),
-            effectShadowOffset * Math.sin(angle * Math.PI / 180),
-            this.convertColor2rgba(color, 1),
-            effectBlur
-          ),
-          ...CssConverter.convertTextStorke(
-            effectStroke * strokeWidth,
-            this.convertColor2rgba(strokeColor, 1),
-            'transparent'
-          )
+          '--base-stroke': `${effectStroke * strokeWidth}px`,
+          webkitTextStrokeColor: `${this.convertColor2rgba(strokeColor, 1)}`,
+          webkitTextFillColor: 'transparent',
+          duplicatedTexts: [{
+            extraBodyStyle: {
+              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180)}px`,
+              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180)}px`,
+            },
+            extraSpanStyle: {
+              color,
+              'text-decoration-color': color,
+              webkitTextStroke: 'initial',
+              webkitTextFillColor: 'initial',
+            },
+          }]
         }
       }
       case 'echo':
         return {
-          textShadow: [0.5, 0.2]
-            .map((opacity, i) =>
-              CssConverter.convertTextShadow(
-                effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1),
-                effectShadowOffset * Math.sin(angle * Math.PI / 180) * (i + 1),
-                this.convertColor2rgba(color, opacity),
-                effectBlur
-              ).textShadow
-            )
-            .join(',')
+          '--base-stroke': '0px',
+          duplicatedTexts: [0.5, 0.2].map((opacity, i) => ({
+            extraBodyStyle: {
+              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1)}px`,
+              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) * (i + 1)}px`,
+            },
+            extraSpanStyle: {
+              opacity,
+              color,
+              'text-decoration-color': color,
+            },
+          })),
         }
       case 'funky3d':
-        return this.funky3d(
-          distance,
-          effect.distanceInverse,
-          effect.angle,
-          colorWithOpacity
-        )
+        return {
+          '--base-stroke': '0px',
+          ...this.funky3d(
+            distance,
+            effect.distanceInverse,
+            effect.angle,
+            colorWithOpacity
+          )
+        }
       case 'bold3d': {
         const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2, y: 0 })
         return {
-          webkitTextStroke: `1px ${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
-          duplicatedBody: {
-            top: `${y}px`,
-            left: `${x}px`,
-            webkitTextStroke: `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`
-          },
-          duplicatedSpan: {
-            color: colorWithOpacity,
-            'text-decoration-color': colorWithOpacity // Have to be dash-case, because camelcase cannot overwrite dash-case created from cssConverter.convertFontStyle.
-          }
+          '--base-stroke': '1px',
+          webkitTextStrokeColor: `${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
+          duplicatedTexts: [{
+            extraBodyStyle: {
+              left: `${x}px`,
+              top: `${y}px`,
+            },
+            extraSpanStyle: {
+              color: colorWithOpacity,
+              'text-decoration-color': colorWithOpacity, // Have to be dash-case, because camelcase cannot overwrite dash-case created from cssConverter.convertFontStyle.
+              webkitTextStrokeColor: `${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`,
+            },
+          }]
         }
       }
       default:
-        return { textShadow: 'none' }
+        return { textShadow: 'none', '--base-stroke': '0px' }
     }
   }
 
@@ -336,6 +352,7 @@ class Controller {
         subLayerIndex: +idx,
         styles: { textEffect: newTextEffect }
       })
+      tiptapUtils.updateHtml()
     }
   }
 

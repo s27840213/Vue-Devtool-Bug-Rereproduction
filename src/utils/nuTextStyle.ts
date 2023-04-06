@@ -293,9 +293,13 @@ export default Extension.create({
           backgroundImage: cssBaseAttr('backgroundImage'),
           backgroundSize: cssBaseAttr('backgroundSize'),
           backgroundPosition: cssBaseAttr('backgroundPosition'),
-          opacity: cssBaseAttr('opacity'),
-          '-webkit-text-fill-color': cssBaseAttr('-webkit-text-fill-color'),
           '-webkit-background-clip': cssBaseAttr('-webkit-background-clip'),
+          opacity: cssBaseAttr('opacity'),
+          filter: cssBaseAttr('filter'),
+          '--base-stroke': cssBaseAttr('--base-stroke'),
+          webkitTextFillColor: cssBaseAttr('-webkit-text-fill-color'),
+          webkitTextStrokeColor: cssBaseAttr('-webkit-text-stroke-color'),
+          textShadow: cssBaseAttr('text-shadow'),
         }
       }, {
         types: ['paragraph'],

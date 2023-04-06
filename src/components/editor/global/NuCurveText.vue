@@ -166,11 +166,13 @@ export default defineComponent({
       const transforms = this.transforms()
       const baseline = `${(minHeight - textHeight[idx]) / 2}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
+      const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
       return Object.assign(
         fontStyles,
         { textIndent: fontStyles['letter-spacing'] || 'initial' },
         { transform: transforms[idx] || 'none' },
-        bend >= 0 ? { top: baseline } : { bottom: baseline }
+        bend >= 0 ? { top: baseline } : { bottom: baseline },
+        textEffectStyles,
       )
     },
     async computeDimensions(spans: ISpan[]) {

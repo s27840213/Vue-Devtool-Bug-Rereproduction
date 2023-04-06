@@ -177,7 +177,6 @@ import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import TextEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
@@ -357,7 +356,6 @@ export default defineComponent({
       }
     },
     contentStyles(): any {
-      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
@@ -371,8 +369,6 @@ export default defineComponent({
          * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
          */
         // touchAction: this.isActive ? 'none' : 'initial',
-        ...textEffectStyles,
-        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     isImgControl(): boolean {
