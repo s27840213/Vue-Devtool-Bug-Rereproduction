@@ -7,7 +7,7 @@ div(class="category-object-item" v-touch)
   template(v-else)
     img(class="category-object-item__img" draggable="false" @tap="clickObject" v-press="addSvg"
       :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-    pro-item(v-if="item.plan")
+    //- pro-item(v-if="item.plan")
     div(v-if="showEditor" class="category-object-item__icon" @click.stop.prevent="handleEditObject")
       svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
     div(v-if="item.type === 16" class="category-object-item__icon" @click.stop.prevent="openGiphyMore")
@@ -19,7 +19,6 @@ import ProItem from '@/components/payment/ProItem.vue'
 import { IGif } from '@/interfaces/giphy'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapMutations } from 'vuex'
-// import paymentUtils from '@/utils/paymentUtils'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import doubleTapUtils from '@/utils/doubleTapUtils'
@@ -57,7 +56,7 @@ export default defineComponent({
       setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
     }),
     addSvg() {
-      if (this.item.plan === 1 && !vivistickerUtils.checkPro({ plan: 1 }, 'object')) return
+      // if (this.item.plan === 1 && !vivistickerUtils.checkPro({ plan: 1 }, 'object')) return
       if (this.item.type === 8) {
         this.handleEditObject()
         return
@@ -88,7 +87,7 @@ export default defineComponent({
       })
     },
     handleEditObject() {
-      if (this.item.plan === 1 && !vivistickerUtils.checkPro({ plan: 1 }, 'object')) return
+      // if (this.item.plan === 1 && !vivistickerUtils.checkPro({ plan: 1 }, 'object')) return
       if (this.item.type === 7) {
         vivistickerUtils.startEditing('objectGroup', {
           plan: this.item.plan,

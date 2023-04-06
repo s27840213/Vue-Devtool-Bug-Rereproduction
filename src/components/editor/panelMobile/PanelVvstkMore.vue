@@ -107,10 +107,6 @@ export default defineComponent({
         action: this.handleShowTutorial
       },
       {
-        text: 'Vivisticker Pro',
-        icon: 'pro',
-        action: vivistickerUtils.openPayment
-      }, {
         text: `${this.$t('NN0174')}`,
         icon: 'vivisticker_global',
         action: () => { this.handleList('locale') }
@@ -128,19 +124,24 @@ export default defineComponent({
         action: this.handleOpenInfo
       }, ...this.inReviewMode ? [
         {
-          text: `${this.$t('STK0025')}`,
-          icon: 'vivisticker_global',
-          action: () => { this.handleList('subscribe') }
+          text: 'Vivisticker Pro',
+          icon: 'pro',
+          action: vivistickerUtils.openPayment
         }
+        // {
+        //   text: `${this.$t('STK0025')}`,
+        //   icon: 'vivisticker_global',
+        //   action: () => { this.handleList('subscribe') }
+        // }
       ] : [], ...this.debugMode ? [
         {
           text: 'domain 選單',
           icon: 'vivisticker_global',
           action: () => { this.handleList('domain') }
-        // }, {
-        //   text: `${this.$t('STK0025')}`,
-        //   icon: 'vivisticker_global',
-        //   action: () => { this.handleList('subscribe') }
+          // }, {
+          //   text: `${this.$t('STK0025')}`,
+          //   icon: 'vivisticker_global',
+          //   action: () => { this.handleList('subscribe') }
         }, {
           text: 'App 事件測試',
           icon: 'vivisticker_global',
