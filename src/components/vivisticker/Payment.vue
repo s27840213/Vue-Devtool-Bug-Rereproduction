@@ -11,6 +11,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
         img(class="payment__carousel-item__img"
             draggable="false"
             :src="item.img")
+        div(class="payment__carousel-item__overlay")
         div(class="payment__carousel-item__title text-white") {{ item.title }}
   div(class="payment__content")
     div(class="payment__content__indicator")
@@ -115,7 +116,7 @@ export default defineComponent({
         {
           key: 'text',
           title: this.$t('STK0050'),
-          img: require('@/assets/img/png/pricing/tw/vivisticker_pro-text.png')
+          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-text.png`)
         },
         {
           key: 'object',
@@ -166,7 +167,9 @@ export default defineComponent({
   },
   computed: {
     ...mapState({
-      windowSize: 'windowSize'
+      windowSize: 'windowSize',
+      isTablet: 'isTablet',
+      isLandscape: 'isLandscape',
     }),
     txtBtnSubscribe() {
       return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
@@ -209,6 +212,9 @@ export default defineComponent({
           tag: this.localizedTag
         }
       ]
+    },
+    padding() {
+      return this.isTablet ? '2.8%' : '24px'
     }
   },
   methods: {
@@ -267,17 +273,26 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     width: inherit;
-    height: 45vh;
+    height: 75vw;
+    max-height: v-bind("isLandscape ? '50vh' : 'unset'");
     &__img {
       width: 100%;
       object-fit: cover;
-      object-position: bottom;
+      object-position: center;
+    }
+    &__overlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: calc(100% + 1px); // prevent subpixel problem
+      background: linear-gradient(0deg, rgba(setColor(black-1),1) 0%, rgba(setColor(black-1),0) 50%);
     }
     &__title {
       position: absolute;
       bottom: -18px;
       width: calc(100% - 48px);
-      margin: 0px 24px;
+      margin: 0px v-bind(padding);
       text-align: left;
       font-weight: 600;
       font-size: 18px;
@@ -285,7 +300,7 @@ export default defineComponent({
     }
   }
   &__content {
-    margin: 0px 24px;
+    margin: 0px v-bind(padding);
     &__indicator {
       margin: 42px auto 0 auto;
       display: flex;
@@ -419,7 +434,7 @@ export default defineComponent({
     right: 0px;
     box-sizing: border-box;
     // min-height: 57%;
-    padding: 16px 24px 0px 24px;
+    padding: 16px v-bind(padding) 0px v-bind(padding);
     color: white;
     background-color: setColor(black-3);
     border-radius: 10px 10px 0px 0px;
@@ -427,8 +442,8 @@ export default defineComponent({
     transition-duration: 300ms;
     transition-timing-function: ease-in-out;
     &.close {
-      left: 24px;
-      right: 24px;
+      left: v-bind(padding);
+      right: v-bind(padding);
       bottom: -32px;
       transform: translateY(calc(100% - 80px));
     }
