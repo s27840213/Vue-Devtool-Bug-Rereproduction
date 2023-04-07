@@ -7,7 +7,7 @@ div(class="panel-vvstk-more")
           @click.prevent.stop="handleOptionAction(option.action)")
         div(class="panel-vvstk-more__option-icon")
           svg-icon(:iconName="option.icon"
-                    :iconWidth="option.icon === 'settings' ? '20px' : option.icon === 'pro' ? '18px' : '24px'"
+                    :iconWidth="iconWidth(option.icon)"
                     iconColor="gray-2")
         div(class="panel-vvstk-more__option-title") {{ option.text }}
     div(class="horizontal-rule")
@@ -280,6 +280,16 @@ export default defineComponent({
     },
     sendTestEvent(option: string) {
       vivistickerUtils.sendToIOS('EVENT_TEST', { option })
+    },
+    iconWidth(icon: string): string {
+      switch (icon) {
+        case 'settings':
+          return '20px'
+        case 'pro':
+          return '18px'
+        default:
+          return '24px'
+      }
     }
   }
 })

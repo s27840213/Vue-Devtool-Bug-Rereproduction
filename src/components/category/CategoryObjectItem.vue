@@ -58,7 +58,7 @@ export default defineComponent({
     }),
     addSvg() {
       console.log(generalUtils.deepCopy(this.item))
-      // if (this.item.plan === 1 && !vivistickerUtils.checkPro({ plan: 1 }, 'object')) return
+      // if (!vivistickerUtils.checkPro({ plan }, 'object')) return
       if (this.item.type === 8 || this.item.has_frame) {
         this.handleEditObject()
         return
@@ -89,7 +89,7 @@ export default defineComponent({
       })
     },
     handleEditObject() {
-      // if (this.item.plan === 1 && !vivistickerUtils.checkPro({ plan: 1 }, 'object')) return
+      // if (!vivistickerUtils.checkPro({ plan }, 'object')) return
       if (this.item.type === 7 || this.item.has_frame) {
         vivistickerUtils.startEditing('objectGroup', {
           plan: this.item.plan,
