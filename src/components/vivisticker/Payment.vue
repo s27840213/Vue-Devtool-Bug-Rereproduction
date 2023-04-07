@@ -8,7 +8,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
     @change="handleImageChange")
     template(v-slot="{ item }")
       div(class="payment__carousel-item")
-        img(class="payment__carousel-item__img"
+        img(class="payment__carousel-item__img" :class="{contain: isLandscape && item.key === 'frame'}"
             draggable="false"
             :src="item.img")
         div(class="payment__carousel-item__overlay")
@@ -279,6 +279,9 @@ export default defineComponent({
       width: 100%;
       object-fit: cover;
       object-position: center;
+      &.contain {
+        object-fit: contain;
+      }
     }
     &__overlay {
       position: absolute;
