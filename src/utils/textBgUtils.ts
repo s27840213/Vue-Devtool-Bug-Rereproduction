@@ -99,13 +99,13 @@ export class Rect {
           span.appendChild(document.createElement('br'))
           p.appendChild(span)
         } else {
-          const splitedSpan = textBgUtils.isSplitedSpan(config.styles);
+          const fixedWidth = textBgUtils.isFixedWidth(config.styles);
           (splitSpan ? [...spanData.text] : [spanData.text]).forEach(t => {
             const isComposingText = spanData.text.length > 1
-            const fixedWidthStyle = splitedSpan && isComposingText ? {
+            const fixedWidthStyle = fixedWidth && isComposingText ? {
               letterSpacing: 0,
               display: 'inline-block',
-            } : splitedSpan ? textBgUtils.fixedWidthStyle(spanData.styles, para.styles, config) : {}
+            } : fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, para.styles, config) : {}
 
             const span = document.createElement('span')
             span.classList.add('nu-text__span')

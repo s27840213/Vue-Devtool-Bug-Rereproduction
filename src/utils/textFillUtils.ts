@@ -74,6 +74,7 @@ class TextFill {
       div[pIndex][sIndex].push(row.rect)
     }
 
+    const spanExpandRatio = 1
     this.tempTextFill = div.map(p => p.map(span => {
       const rect = span[0]
       let { width: spanWidth, height: spanHeight, x, y } = rect
@@ -90,9 +91,15 @@ class TextFill {
         backgroundPosition: `
           ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200)) * -1}px
           ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)) * -1}px`,
+        backgroundOrigin: 'content-box',
         opacity: textFill.opacity / 100,
         webkitTextFillColor: 'transparent',
         webkitBackgroundClip: 'text',
+        position: 'absolute',
+        padding: `${spanHeight * spanExpandRatio}px ${spanWidth * spanExpandRatio}px`,
+        top: `${y - spanHeight * spanExpandRatio}px`,
+        left: `${x - spanWidth * spanExpandRatio}px`,
+        lineHeight: 'initial',
       }
     }))
     tiptapUtils.updateHtml() // Refresh tiptap span style

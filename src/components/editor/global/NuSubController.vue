@@ -40,6 +40,7 @@ div(class="nu-sub-controller")
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import i18n from '@/i18n'
+import { isITextFillConfig } from '@/interfaces/format'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -349,21 +350,13 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const returnedStyles = Object.assign({},
-        !(this.isCurveText || this.isFlipped) ? {
-          width: `${this.config.styles.width / this.config.styles.scale}px`,
-          height: `${this.config.styles.height / this.config.styles.scale}px`,
-          userSelect: this.config.contentEditable ? 'text' : 'none',
-          opacity: 1
-        } : {
-          width: `${this.config.styles.width / this.config.styles.scale}px`,
-          height: `${this.config.styles.height / this.config.styles.scale}px`,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          opacity: this.config.contentEditable ? 1 : 0
-        })
-      return returnedStyles
+      const isTextFill = isITextFillConfig(this.config.styles.textFill)
+      const opacity = (this.isCurveText || this.isFlipped || isTextFill) && !this.config.contentEditable ? 0 : 1
+      return {
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`,
+        opacity,
+      }
     },
     textStyles(styles: any) {
       const textStyles = CssConveter.convertFontStyle(styles)

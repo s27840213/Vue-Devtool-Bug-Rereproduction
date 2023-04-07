@@ -154,6 +154,7 @@ import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
+import { isITextFillConfig } from '@/interfaces/format'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
@@ -645,21 +646,13 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const returnedStyles = Object.assign({},
-        !(this.isCurveText || this.isFlipped) ? {
-          width: '100%',
-          height: '100%',
-          userSelect: this.contentEditable ? 'text' : 'none',
-          opacity: 1
-        } : {
-          width: 'auto',
-          height: 'auto',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          opacity: this.contentEditable ? 1 : 0
-        })
-      return returnedStyles
+      const isTextFill = isITextFillConfig(this.config.styles.textFill)
+      const opacity = (this.isCurveText || this.isFlipped || isTextFill) && !this.contentEditable ? 0 : 1
+      return {
+        width: '100%',
+        height: '100%',
+        opacity,
+      }
     },
     groupControllerStyle() {
       return {

@@ -28,6 +28,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
 import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import { CustomElementConfig } from '@/interfaces/editor'
+import { isITextFillConfig } from '@/interfaces/format'
 import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
@@ -190,8 +191,9 @@ export default defineComponent({
     },
     getOpacity() {
       const { active, contentEditable } = this.config
+      const isTextFill = isITextFillConfig(this.config.styles.textFill)
       if (active && !this.isLocked && !this.inPreview) {
-        if (this.isCurveText || this.isFlipped) {
+        if (this.isCurveText || this.isFlipped || isTextFill) {
           return contentEditable ? 0.2 : 1
         } else {
           return 0
@@ -268,16 +270,16 @@ export default defineComponent({
       }
       this.drawTextBg()
     },
-    async resizeAfterFontLoaded() {
+    resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
-        setTimeout(() => {
+        setTimeout(async () => {
           this.resizeCallback()
+          this.drawTextBg()
+          this.textFillBg = textFillUtils.drawTextFill(this.config)
+          this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
         }, 100) // for the delay between font loading and dom rendering
       })
-      this.drawTextBg()
-      this.textFillBg = textFillUtils.drawTextFill(this.config)
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
     }
   }
 })

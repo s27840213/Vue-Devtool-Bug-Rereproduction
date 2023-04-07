@@ -14,7 +14,6 @@ import { Editor, EditorEvents, FocusPosition, JSONContent } from '@tiptap/vue-3'
 import { EventEmitter } from 'events'
 import shortcutUtils from './shortcutUtils'
 import textBgUtils from './textBgUtils'
-import textFillUtils from './textFillUtils'
 import textUtils from './textUtils'
 
 interface ITiptapJson extends JSONContent {
@@ -138,7 +137,7 @@ class TiptapUtils {
   toJSON(paragraphs: IParagraph[]): ITiptapJson {
     return {
       type: 'doc',
-      content: paragraphs.map((p, pIndex) => {
+      content: paragraphs.map(p => {
         const pObj = {
           type: 'paragraph'
         } as { [key: string]: any }
@@ -165,7 +164,6 @@ class TiptapUtils {
                 attrs: Object.assign(this.makeSpanStyle(s.styles),
                   textEffectStyles,
                   splitedSpan ? { spanIndex: sIndex, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {},
-                  textFillUtils.tempTextFill[pIndex]?.[sIndex] ?? {},
                 )
               }]
             }
