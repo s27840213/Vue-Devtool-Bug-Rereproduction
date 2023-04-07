@@ -408,10 +408,12 @@ class AssetUtils {
       ver,
       panelPreviewSrc
     })
+
     store.commit('SET_backgroundImage', {
       pageIndex: targetPageIndex,
       config
     })
+
     store.commit('SET_backgroundImagePos', {
       pageIndex: targetPageIndex,
       imagePos: {
