@@ -324,7 +324,7 @@ export default defineComponent({
     },
     isBlurImg(val) {
       const { imgWidth, imgHeight } = this.config.styles
-      const src = imageUtils.getSrc(this.config, val ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
+      const src = imageUtils.getSrc(this.config, val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       imageUtils.imgLoadHandler(src, () => {
         this.src = src
       })
@@ -498,7 +498,7 @@ export default defineComponent({
         try {
           updater().then(() => {
             const { imgWidth, imgHeight } = this.config.styles
-            this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension))
+            this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
           })
         } catch (error) {
           if (this.src.indexOf('data:image/png;base64') !== 0) {
@@ -575,7 +575,7 @@ export default defineComponent({
       })
 
       const { imgWidth, imgHeight } = this.config.styles
-      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension))
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       return new Promise<void>((resolve, reject) => {
         imageUtils.imgLoadHandler(src, () => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
@@ -664,7 +664,7 @@ export default defineComponent({
           this.handleIsTransparent()
         }
         const { imgWidth, imgHeight } = this.config.styles
-        this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension))
+        this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       }
       this.initialized = true
     },

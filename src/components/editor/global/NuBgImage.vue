@@ -117,7 +117,7 @@ export default defineComponent({
     },
     isBlurImg(val) {
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.getSrc(this.image.config, val ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
+      const src = imageUtils.getSrc(this.image.config, val ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       imageUtils.imgLoadHandler(src, () => {
         this.src = src
       })
@@ -133,7 +133,7 @@ export default defineComponent({
       if (!editorImg(assetId)) {
         await this.updateImages({ assetSet: new Set<string>([assetId]) })
         const { imgWidth, imgHeight } = this.image.config.styles
-        const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
+        const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
         imageUtils.imgLoadHandler(src, () => {
           this.src = src
         })
@@ -154,7 +154,7 @@ export default defineComponent({
         this.handleIsTransparent()
       }
       const { imgWidth, imgHeight } = this.image.config.styles
-      this.src = imageUtils.getSrc(this.image.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
+      this.src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
     }
   },
   components: { NuAdjustImage },
@@ -295,7 +295,7 @@ export default defineComponent({
       return ''
     },
     isBlurImg(): boolean {
-      return this.image.config.styles.adjust?.blur
+      return !!this.image.config.styles.adjust?.blur
     }
   },
   methods: {
@@ -384,7 +384,7 @@ export default defineComponent({
         })
       }
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension)
+      const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       return new Promise<void>((resolve, reject) => {
         imageUtils.imgLoadHandler(src, () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
