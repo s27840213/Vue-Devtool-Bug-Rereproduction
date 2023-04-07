@@ -293,16 +293,17 @@ export default defineComponent({
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
-      return Object.assign({ bottom: this.hideFooter ? -1 * this.footerTabsHeight + 'px' : '0', zIndex: '100' },
+      return Object.assign({ bottom: this.hideFooter ? -1 * this.footerTabsHeight + 'px' : '0' },
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? '100%' : this.panelDragHeight + 'px',
+          ...(this.hideFooter && { zIndex: '100' })
         },
         // Prevent MobilePanel collapse
-        isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {}
+        isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
       )
     },
     innerTab(): string {
