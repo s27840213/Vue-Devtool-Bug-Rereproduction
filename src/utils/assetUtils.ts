@@ -408,10 +408,12 @@ class AssetUtils {
       ver,
       panelPreviewSrc
     })
+
     store.commit('SET_backgroundImage', {
       pageIndex: targetPageIndex,
       config
     })
+
     store.commit('SET_backgroundImagePos', {
       pageIndex: targetPageIndex,
       imagePos: {
@@ -520,7 +522,11 @@ class AssetUtils {
         }
 
         TextUtils.resetTextField(textLayer, targetPageIndex, field)
-        layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: !generalUtils.isTouchDevice(), isCompensated: true }))])
+        layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, {
+          editing: false,
+          contentEditable: !generalUtils.isTouchDevice(),
+          isCompensated: true,
+        }))])
         editorUtils.setCloseMobilePanelFlag(true)
       })
       .catch((error) => {
@@ -610,6 +616,7 @@ class AssetUtils {
 
     const config = {
       ...(isPreview && { previewSrc: url }),
+      ...(categoryType === 14 || categoryType === 15) && { categoryType },
       srcObj,
       panelPreviewSrc,
       styles: {
@@ -798,7 +805,7 @@ class AssetUtils {
           break
         }
         case 15: {
-          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1))
+          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1), {}, 15)
           break
         }
         default:

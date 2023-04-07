@@ -89,6 +89,7 @@ export default defineComponent({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      currActivePanel: 'mobileEditor/getCurrActivePanel',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
@@ -96,11 +97,13 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       hasBleed: 'getHasBleed',
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: webViewUtils.appendModuleName('getUserInfo'),
     }),
     rootStyles(): {[key: string]: string} {
+      const basePadding = webViewUtils.inBrowserMode ? 10.7 : 8
       return {
-        paddingTop: `${this.userInfo.statusBarHeight + 8}px`
+        paddingTop: `${this.userInfo.statusBarHeight + basePadding}px`,
+        paddingBottom: `${basePadding}px`,
       }
     },
     isCropping(): boolean {
@@ -122,6 +125,8 @@ export default defineComponent({
     rightTabs(): IIcon[] {
       if (this.inBgRemoveMode) {
         return []
+      } else if (this.isShowDownloadPanel) {
+        return [{ icon: 'home' }]
       } else if (this.selectedLayerNum > 0) {
         return this.layerTabs
       } else if (this.inBgSettingMode) {
@@ -167,6 +172,9 @@ export default defineComponent({
       const { layers, types } = this.currSelectedInfo
       const frameLayer = layers[0] as IFrame
       return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
+    },
+    isShowDownloadPanel(): boolean {
+      return this.currActivePanel === 'download'
     }
   },
   methods: {
@@ -207,6 +215,8 @@ export default defineComponent({
     backBtnAction() {
       if (this.inAllPagesMode) {
         this.$emit('showAllPages')
+      } else if (this.isShowDownloadPanel) {
+        this.$emit('switchTab', 'none')
       } else {
         this.goHome()
       }
@@ -223,6 +233,10 @@ export default defineComponent({
           } else {
             notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
+          break
+        }
+        case 'home': {
+          this.goHome()
           break
         }
         case 'more': {
@@ -291,7 +305,8 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding-left: 16px;
+  padding-right: 16px;
   box-sizing: border-box;
   z-index: setZindex("header");
   -webkit-touch-callout: none;

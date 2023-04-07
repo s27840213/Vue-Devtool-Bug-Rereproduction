@@ -1,7 +1,7 @@
 <template lang="pug">
-div(class="mobile-slider")
+div(class="mobile-slider" :style="containerStyles")
   div
-    span(class="mobile-slider__name text-gray-3 body-2 no-wrap") {{title}}
+    span(class="mobile-slider__name text-gray-1 body-MD no-wrap") {{title}}
     input(class="mobile-slider__text body-2 text-gray-2"
       type="number"
       v-model.number="propsVal"
@@ -75,6 +75,10 @@ export default defineComponent({
     propKey: {
       type: String,
       default: ''
+    },
+    enableDefaultPadding: {
+      type: Boolean,
+      default: true
     }
   },
   computed: {
@@ -92,6 +96,11 @@ export default defineComponent({
         // If a value is rounded and not changed compared to previous value after rounded,
         // the value in this component will not be synced with the rounded value (since not change happens).
         this.$forceUpdate()
+      }
+    },
+    containerStyles() {
+      return {
+        padding: this.enableDefaultPadding ? '0.375rem 0.625rem' : 'none'
       }
     }
   },
@@ -114,7 +123,6 @@ export default defineComponent({
   grid-template-rows: auto auto;
   grid-template-columns: 1fr;
   row-gap: 10px;
-  padding: 0.375rem 0.625rem;
   box-sizing: border-box;
 
   > div:nth-child(1) {
