@@ -19,7 +19,6 @@ import ProItem from '@/components/payment/ProItem.vue'
 import { IGif } from '@/interfaces/giphy'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapMutations } from 'vuex'
-// import paymentUtils from '@/utils/paymentUtils'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import doubleTapUtils from '@/utils/doubleTapUtils'
@@ -59,7 +58,7 @@ export default defineComponent({
     }),
     addSvg() {
       console.log(generalUtils.deepCopy(this.item))
-      // if (!paymentUtils.checkPro(this.item, 'pro-object')) return
+      // if (!vivistickerUtils.checkPro({ plan }, 'object')) return
       if (this.item.type === 8 || this.item.has_frame) {
         this.handleEditObject()
         return
@@ -90,6 +89,7 @@ export default defineComponent({
       })
     },
     handleEditObject() {
+      // if (!vivistickerUtils.checkPro({ plan }, 'object')) return
       if (this.item.type === 7 || this.item.has_frame) {
         vivistickerUtils.startEditing('objectGroup', {
           plan: this.item.plan,

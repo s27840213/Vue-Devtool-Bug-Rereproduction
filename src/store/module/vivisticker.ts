@@ -1,5 +1,5 @@
 import { IAsset } from '@/interfaces/module'
-import { IMyDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IMyDesign, IUserInfo, IUserSettings, IPrices } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
@@ -35,6 +35,8 @@ interface IViviStickerState {
   editingAssetInfo: { [key: string]: any },
   selectedDesigns: { [key: string]: IMyDesign },
   modalInfo: { [key: string]: any },
+  prices: IPrices,
+  expireDate: string
 }
 
 const EDITOR_BGS = [
@@ -79,7 +81,19 @@ const getDefaultState = (): IViviStickerState => ({
   editingDesignId: '',
   editingAssetInfo: {},
   selectedDesigns: {},
-  modalInfo: {}
+  modalInfo: {},
+  prices: {
+    currency: '',
+    monthly: {
+      value: NaN,
+      text: ''
+    },
+    annually: {
+      value: NaN,
+      text: ''
+    },
+  },
+  expireDate: ''
 })
 
 const state = getDefaultState()
@@ -294,6 +308,12 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_modalInfo(state: IViviStickerState, modalInfo) {
     state.modalInfo = modalInfo
+  },
+  SET_prices(state: IViviStickerState, prices) {
+    state.prices = prices
+  },
+  SET_expireDate(state: IViviStickerState, expireDate) {
+    state.expireDate = expireDate
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {

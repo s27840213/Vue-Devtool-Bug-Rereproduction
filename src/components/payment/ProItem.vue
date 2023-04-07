@@ -20,6 +20,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .pro {
+  width: 24px;
+  height: 24px;
   position: absolute;
   top: -1px; // (2px - 3px). The img contains spaces (3px in top and bottom, so to compensate the space, the top should be reduced by 3px)
   left: 2px;

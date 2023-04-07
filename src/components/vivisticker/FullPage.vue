@@ -4,19 +4,30 @@ transition(name="panel-up")
     template(v-if="fullPageType === 'iOS16Video'")
       div(class="full-page__video")
         video(autoplay playsinline muted loop :src="videoSource" :poster="thumbnail")
-      div(v-if="showCloseButton"
-          class="full-page__close"
-          @click.prevent.stop="handleClose")
-        svg-icon(iconName="vivisticker_close"
-                iconColor="white"
-                iconWidth="24px")
+    payment(v-if="fullPageType === 'payment'" :target="fullPageParams.target")
+    template(v-if="fullPageType === 'welcome'")
+      div(class="full-page__welcome")
+        img(:src="require(`@/assets/img/png/pricing/${$i18n.locale}/vivisticker_welcome.png`)")
+        div(class="full-page__welcome__text body-MD text-white") {{ $t('STK0054') }}
+        div(class="full-page__welcome__btn-start" @click.prevent.stop="handleClose")
+          span {{ $t('STK0055') }}
+    div(v-if="showCloseButton"
+      class="full-page__close"
+      @click.prevent.stop="handleClose")
+      svg-icon(iconName="vivisticker_close"
+              iconColor="white"
+              iconWidth="24px")
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import Payment from './Payment.vue'
 
 export default defineComponent({
+  components: {
+    Payment
+  },
   data() {
     return {
       showCloseButton: false
@@ -61,6 +72,9 @@ export default defineComponent({
           } else {
             this.showCloseButton = true
           }
+          break
+        default:
+          this.showCloseButton = true
       }
     },
     handleClose() {
@@ -98,6 +112,40 @@ export default defineComponent({
       width: 100%;
       height: 100%;
       object-fit: contain;
+    }
+  }
+  &__welcome {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    >img {
+      position: relative;
+      top: 10%;
+      width: 100%;
+      max-height: 50%;
+      object-fit: contain;
+    }
+    &__text {
+      position: relative;
+      top: 15%;
+      margin: 0 24px;
+    }
+    &__btn-start {
+      margin: 0 auto;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 38px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      padding: 4px 16px;
+      background: #FFFFFF;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 24px;
     }
   }
 }
