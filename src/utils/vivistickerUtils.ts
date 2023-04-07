@@ -185,6 +185,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     store.commit('vivisticker/SET_currActiveTab', tab)
   }
 
+  filterLog(messageType: string, message: any) {
+    switch (messageType) {
+      case 'SET_STATE':
+        return message.key === 'tempDesign'
+    }
+    return false
+  }
+
   sendToIOS(messageType: string, message: any) {
     if (messageType === 'SCREENSHOT' && !this.hasCopied && this.checkOSVersion('16.0')) {
       this.hasCopied = true

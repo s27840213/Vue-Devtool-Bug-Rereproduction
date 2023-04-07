@@ -174,7 +174,7 @@ export default defineComponent({
           }
         })
       }
-      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false })
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
       vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     }
   },
@@ -203,7 +203,7 @@ export default defineComponent({
             }
           })
         } else {
-          delete this.config.initFromMydesign
+          layerUtils.deleteLayerProps(this.pageIndex, this.layerIndex, ['initFromMydesign'], this.subLayerIndex)
         }
       }
     }
@@ -218,38 +218,38 @@ export default defineComponent({
         } as IListServiceContentDataItem
         AssetUtils.get(asset).then((res) => {
           const json = res.jsonData as IFrame
-          // eslint-disable-next-line vue/no-mutating-props
-          this.config.clips = generalUtils.deepCopy(this.config.clips)
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips: generalUtils.deepCopy(this.config.clips) }, this.subLayerIndex)
           if (this.config.decoration && json.decoration) {
             json.decoration.color = [...this.config.decoration.color] as [string]
-            // eslint-disable-next-line vue/no-mutating-props
-            this.config.decoration = layerFactary.newShape({
-              ...json.decoration,
-              vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
-              styles: {
-                width: this.config.styles.initWidth,
-                height: this.config.styles.initHeight,
-                initWidth: this.config.styles.initWidth,
-                initHeight: this.config.styles.initHeight
-              }
-            })
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              decoration: layerFactary.newShape({
+                ...json.decoration,
+                vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
+                styles: {
+                  width: this.config.styles.initWidth,
+                  height: this.config.styles.initHeight,
+                  initWidth: this.config.styles.initWidth,
+                  initHeight: this.config.styles.initHeight
+                }
+              })
+            }, this.subLayerIndex)
           }
           if (this.config.decorationTop && json.decorationTop) {
             json.decorationTop.color = [...this.config.decorationTop.color] as [string]
-            // eslint-disable-next-line vue/no-mutating-props
-            this.config.decorationTop = layerFactary.newShape({
-              ...json.decorationTop,
-              vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
-              styles: {
-                width: this.config.styles.initWidth,
-                height: this.config.styles.initHeight,
-                initWidth: this.config.styles.initWidth,
-                initHeight: this.config.styles.initHeight
-              }
-            })
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              decorationTop: layerFactary.newShape({
+                ...json.decorationTop,
+                vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
+                styles: {
+                  width: this.config.styles.initWidth,
+                  height: this.config.styles.initHeight,
+                  initWidth: this.config.styles.initWidth,
+                  initHeight: this.config.styles.initHeight
+                }
+              })
+            }, this.subLayerIndex)
           }
-          // eslint-disable-next-line vue/no-mutating-props
-          this.config.needFetch = false
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
         })
       }
     },

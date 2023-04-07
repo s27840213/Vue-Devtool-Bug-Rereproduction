@@ -107,7 +107,8 @@ export interface IText extends ILayer<ITextStyle> {
   contentEditable: boolean
   selection: ITiptapSelection,
   isAutoResizeNeeded: boolean,
-  isCompensated?: boolean
+  isCompensated?: boolean,
+  inAutoRescaleMode: boolean,
 }
 
 export interface IShape extends ILayer<IStyle> {

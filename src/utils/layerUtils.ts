@@ -247,6 +247,18 @@ class LayerUtils {
     }
   }
 
+  deleteLayerProps(pageIndex: number, layerIndex: number, propKeys: string[], subLayerIdx = -1) {
+    if (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') {
+      store.commit('DELETE_layerProps', {
+        pageIndex,
+        layerIndex,
+        propKeys
+      })
+    } else {
+      this.deleteSubLayerProps(pageIndex, layerIndex, subLayerIdx, propKeys)
+    }
+  }
+
   updateAllGroupStyles(styles: { [key: string]: string | number | boolean }) {
     store.commit('UPDATE_groupLayerStyles', {
       styles
@@ -275,6 +287,16 @@ class LayerUtils {
       layerIndex,
       targetIndex,
       props
+    })
+  }
+
+  deleteSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, propKeys: string[]) {
+    if (targetIndex === -1) return
+    store.commit('DELETE_subLayerProps', {
+      pageIndex,
+      layerIndex,
+      targetIndex,
+      propKeys
     })
   }
 
