@@ -230,7 +230,7 @@ Cypress.Commands.add('layerMoveToPage2', { prevSubject: 'element' }, (subject, i
     .realMouseDown({ scrollBehavior: false })
     .realMouseMove(-100, -600, { position: 'center', scrollBehavior: false })
     .realMouseUp()
-    .get('.nu-page-content-1').children().should('have.length', 1)
+    .get('.nu-page-content-1 > .layers-wrapper').children().should('have.length', 0)
     .get('.page-title .svg-trash').eq(-1).click()
     .get('.editor-view__canvas').children().should('have.length', 2)
   return cy.wrap(subject)

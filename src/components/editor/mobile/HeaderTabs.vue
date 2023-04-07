@@ -7,18 +7,19 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
         :iconName="'chevron-left'"
         :iconColor="'white'"
         :iconWidth="'22px'")
-    div(class="header-bar__feature-icon mr-15"
-        :class="{'click-disabled': isInFirstStep || isCropping}"
-        @pointerdown="undo()")
-      svg-icon(:iconName="'undo'"
-        :iconColor="(!isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
-        :iconWidth="'22px'")
-    div(class="header-bar__feature-icon"
-        :class="{'click-disabled': isInLastStep || isCropping}"
-        @pointerdown="redo()")
-      svg-icon(:iconName="'redo'"
-        :iconColor="(!isInLastStep && !isCropping) ? 'white' : 'gray-2'"
-        :iconWidth="'22px'")
+    template(v-if="!isShowDownloadPanel")
+      div(class="header-bar__feature-icon mr-15"
+          :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping}"
+          @pointerdown="undo()")
+        svg-icon(:iconName="'undo'"
+          :iconColor="(inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping ? 'gray-2' :'white' "
+          :iconWidth="'22px'")
+      div(class="header-bar__feature-icon"
+          :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping}"
+          @pointerdown="redo()")
+        svg-icon(:iconName="'redo'"
+          :iconColor="(inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping ? 'gray-2' : 'white'"
+          :iconWidth="'22px'")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs")
       div(v-if="!tab.isHidden" class="header-bar__feature-icon" :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
@@ -89,18 +90,21 @@ export default defineComponent({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      currActivePanel: 'mobileEditor/getCurrActivePanel',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inBgRemoveFirstStep: 'bgRemove/inFirstStep',
+      inBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       hasBleed: 'getHasBleed',
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: webViewUtils.appendModuleName('getUserInfo'),
     }),
     rootStyles(): {[key: string]: string} {
+      const basePadding = webViewUtils.inBrowserMode ? 10.7 : 8
       return {
-        paddingTop: `${this.userInfo.statusBarHeight + 8}px`
+        paddingTop: `${this.userInfo.statusBarHeight + basePadding}px`,
+        paddingBottom: `${basePadding}px`,
       }
     },
     isCropping(): boolean {
@@ -122,6 +126,8 @@ export default defineComponent({
     rightTabs(): IIcon[] {
       if (this.inBgRemoveMode) {
         return []
+      } else if (this.isShowDownloadPanel) {
+        return [{ icon: 'home' }]
       } else if (this.selectedLayerNum > 0) {
         return this.layerTabs
       } else if (this.inBgSettingMode) {
@@ -167,6 +173,9 @@ export default defineComponent({
       const { layers, types } = this.currSelectedInfo
       const frameLayer = layers[0] as IFrame
       return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
+    },
+    isShowDownloadPanel(): boolean {
+      return this.currActivePanel === 'download'
     }
   },
   methods: {
@@ -207,6 +216,8 @@ export default defineComponent({
     backBtnAction() {
       if (this.inAllPagesMode) {
         this.$emit('showAllPages')
+      } else if (this.isShowDownloadPanel) {
+        this.$emit('switchTab', 'none')
       } else {
         this.goHome()
       }
@@ -223,6 +234,10 @@ export default defineComponent({
           } else {
             notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
+          break
+        }
+        case 'home': {
+          this.goHome()
           break
         }
         case 'more': {
@@ -287,11 +302,13 @@ export default defineComponent({
 <style lang="scss" scoped>
 .header-bar {
   @include size(100%);
+  position: relative;
   background-color: setColor(nav);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding-left: 16px;
+  padding-right: 16px;
   box-sizing: border-box;
   z-index: setZindex("header");
   -webkit-touch-callout: none;

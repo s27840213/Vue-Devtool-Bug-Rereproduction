@@ -35,6 +35,7 @@ class LayerFactary {
       isClipper: true,
       dragging: false,
       designId: '',
+      categoryType: config.categoryType,
       styles: {
         x: 0,
         y: 0,
