@@ -589,6 +589,7 @@ export default defineComponent({
         width: this.pageState.config.width,
         height: this.pageState.config.height,
         physicalWidth: this.pageState.config.physicalWidth,
+        backgroundColor: this.pageState.config.backgroundColor,
         physicalHeight: this.pageState.config.physicalHeight,
         isEnableBleed: this.pageState.config.isEnableBleed,
         bleeds: this.pageState.config.bleeds,

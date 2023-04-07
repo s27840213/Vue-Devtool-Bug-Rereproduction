@@ -116,9 +116,7 @@ class GroupUtils {
           const { width, height, writingMode } = l.styles
           LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
             widthLimit: (writingMode as string).includes('vertical') ? height : width,
-            isTyping: false
-          })
-          LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
+            isTyping: false,
             shown: false,
             moved: false
           })

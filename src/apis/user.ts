@@ -24,14 +24,25 @@ export default {
       ...attrs
     }
   }),
-  login: (token: string, account: string, password: string): AxiosPromise => axios('/login', {
-    method: 'POST',
-    data: {
-      token,
-      account,
-      password
-    }
-  }),
+  login(token: string, account: string, password: string): AxiosPromise {
+    return axios('/login', {
+      method: 'POST',
+      data: {
+        token,
+        account,
+        password,
+        locale: this.getLocale()
+      }
+    })
+  },
+  deleteAccount(): AxiosPromise {
+    return axios('/delete-account', {
+      method: 'POST',
+      data: {
+        token: this.getToken(),
+      }
+    })
+  },
   /**
    *
    * @param token

@@ -1,13 +1,13 @@
 <template lang="pug">
 span(v-if="!url")
   slot
-a(v-else-if="url.startsWith('http')" :active="active||undefined"
+a(v-else-if="url.startsWith('http')" :style="styles"
   :href="url" :target="newTab ? '_blank' : '_self'"
   @click="setActive(true)"
   v-click-outside="() => setActive(false)")
   slot
 //- Router-link switch page too fast, so active may not change link color
-router-link(v-else :to="url" :active="active||undefined"
+router-link(v-else :to="url" :style="styles"
   @click="setActive(true)"
   v-click-outside="() => setActive(false)")
   slot
@@ -31,6 +31,13 @@ export default defineComponent({
       default: false
     }
   },
+  computed: {
+    styles(): Record<string, string> {
+      return this.active ? {
+        color: '#2DB3FF' // hover-blue
+      } : {}
+    },
+  },
   data() {
     return {
       active: false
@@ -39,7 +46,7 @@ export default defineComponent({
   methods: {
     setActive(bool: boolean) {
       this.active = bool
-    }
+    },
   },
 })
 </script>
@@ -49,8 +56,5 @@ a {
   color: inherit;
   text-decoration: unset;
   cursor: pointer;
-  &[active] {
-    color: setColor(blue-hover);
-  }
 }
 </style>

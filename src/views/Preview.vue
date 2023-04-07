@@ -32,7 +32,8 @@ export default defineComponent({
       const subdomain = host.match(/(.+).vivipic.com/)
       const urlParams = new URLSearchParams(window.location.search)
 
-      if (host === 'test.vivipic.com' || urlParams.has('hideHostLabel')) return ''
+      if (['test.vivipic.com', 'vivipic.com'].includes(host) ||
+        urlParams.has('hideHostLabel')) return ''
       else if (host === 'localhost:8080') return 'local'
       else if (subdomain) return subdomain[1]
       else return host
