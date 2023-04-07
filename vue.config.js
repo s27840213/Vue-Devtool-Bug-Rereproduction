@@ -49,7 +49,6 @@ module.exports = defineConfig({
     transpileDependencies: true,
     chainWebpack: (config) => {
         // config.cache(true)
-
         /**
          * use esbuild-loader to replace babel-loader
          */
@@ -231,14 +230,12 @@ module.exports = defineConfig({
                 }])
         }
 
-        if (process.env.NODE_ENV === 'production') {
-            if (process.env.npm_config_report) {
-                config
-                    .plugin('webpack-bundle-analyzer')
-                    .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
-                    .end()
-                config.plugins.delete('prefetch')
-            }
+        if (process.env.NODE_ENV === 'development') {
+            config
+                .plugin('webpack-bundle-analyzer')
+                .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
+                .end()
+            config.plugins.delete('prefetch')
             config
                 .plugin('speed-measure-webpack-plugin')
                 .use(SpeedMeasurePlugin)
