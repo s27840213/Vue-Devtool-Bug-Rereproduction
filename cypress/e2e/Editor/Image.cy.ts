@@ -22,10 +22,13 @@ for (const isMobile of [true, false]) {
       cy.visit('/editor')
         .disableTransition()
         .importDesign('flower.json')
-        .get('.nu-layer .nu-image img').and(($img: JQuery<HTMLImageElement>) => {
-          // "naturalWidth" and "naturalHeight" are set when the image loads
-          expect($img[0].naturalWidth).to.be.greaterThan(0)
-        }).snapshotTest('init')
+        // .get('.nu-layer .nu-image img').and(($img: JQuery<HTMLImageElement>) => {
+        //   // "naturalWidth" and "naturalHeight" are set when the image loads
+        //   expect($img[0].naturalWidth).to.be.greaterThan(0)
+        // })
+        // Wait for nu-image auto adjust img resolution
+        .get('.nu-layer .nu-image').invoke('attr', 'cy-ready').should('eq', 'true')
+        .snapshotTest('init')
         .get('.nu-image')
         .imageAdjust()
         .layerFlip()
@@ -92,11 +95,13 @@ for (const isMobile of [true, false]) {
       cy.visit('/editor')
         .disableTransition()
         .importDesign('2flower.json')
-        .get('.nu-layer .nu-image img').and(($img: JQuery<HTMLImageElement>) => {
-          // "naturalWidth" and "naturalHeight" are set when the image loads
-          expect($img[0].naturalWidth).to.be.greaterThan(0)
-          expect($img[1].naturalWidth).to.be.greaterThan(0)
-        })
+        // .get('.nu-layer .nu-image img').and(($img: JQuery<HTMLImageElement>) => {
+        //   // "naturalWidth" and "naturalHeight" are set when the image loads
+        //   expect($img[0].naturalWidth).to.be.greaterThan(0)
+        //   expect($img[1].naturalWidth).to.be.greaterThan(0)
+        // })
+        // Wait for nu-image auto adjust img resolution
+        .get('.nu-layer .nu-image').invoke('attr', 'cy-ready').should('eq', 'true')
         .snapshotTest('init')
         .get('.nu-layer__wrapper:nth-child(2) .nu-image').then((flowerBack) => {
           cy.get('.nu-layer__wrapper:nth-child(3) .nu-image')

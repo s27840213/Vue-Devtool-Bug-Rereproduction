@@ -2,6 +2,7 @@
 div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
   :id="`nu-image-${config.id}`"
   :style="containerStyles()"
+  :cy-ready="cyReady"
   draggable="false")
   div(v-if="showCanvas"
     class="shadow__canvas-wrapper"
@@ -202,7 +203,8 @@ export default defineComponent({
         drawCanvasW: 0,
         drawCanvasH: 0,
         MAXSIZE: 0
-      }
+      },
+      initialized: false,
       // canvas: undefined as HTMLCanvasElement | undefined
     }
   },
@@ -328,6 +330,11 @@ export default defineComponent({
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
+    cyReady(): boolean {
+      // Uploading image, wait for polling
+      if (this.src.startsWith('data:image') || !this.initialized) return false
+      return true
+    },
     finalSrc(): string {
       if (this.$route.name === 'Preview') {
         return ImageUtils.appendCompQueryForVivipic(this.src)
@@ -583,6 +590,7 @@ export default defineComponent({
         }
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
       }
+      this.initialized = true
     },
     handleShadowInit() {
       if (this.forRender) return
