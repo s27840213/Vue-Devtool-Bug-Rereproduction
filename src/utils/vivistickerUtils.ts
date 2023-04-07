@@ -1054,15 +1054,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, monthly: boolean, annually: boolean }) {
+    console.log(data)
+    this.appToast(data.status === 'subscribed' ? 'restored' : 'failed')
     const { monthly, annually, expire_date } = data
-    store.commit('vivisticker/SET_expireDate', expire_date)
-    store.commit('vivisticker/SET_prices', { monthly, annually })
+    // store.commit('vivisticker/SET_expireDate', expire_date)
+    // store.commit('vivisticker/SET_prices', { monthly, annually })
   }
 
   subscribeResult(data: { status: 'subscribed' | 'failed', expire_date: string }) {
+    console.log(data)
     const { status, expire_date } = data
     if (status === 'subscribed') {
-      store.commit('vivisticker/SET_expireDate', expire_date)
+      // store.commit('vivisticker/SET_expireDate', expire_date)
       store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
     }
   }
