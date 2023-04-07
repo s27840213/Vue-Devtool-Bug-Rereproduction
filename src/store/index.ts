@@ -617,12 +617,32 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
+  DELETE_layerProps(state: IEditorState, updateInfo: {
+    pageIndex: number, layerIndex: number, propKeys: string[]
+  }) {
+    /**
+     * This Mutation is used to delete the layer's properties excluding styles
+     */
+    updateInfo.propKeys.forEach(propKey => {
+      if (state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex]) {
+        delete state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex][propKey]
+      }
+    })
+  },
   UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph | SrcObj } }) {
     const groupLayer = state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex] as IGroup
     if (!groupLayer || !groupLayer.layers) return
     const targetLayer = groupLayer.layers[updateInfo.targetIndex]
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       targetLayer[k] = v
+    })
+  },
+  DELETE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, propKeys: string[] }) {
+    const groupLayer = state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex] as IGroup
+    if (!groupLayer || !groupLayer.layers) return
+    const targetLayer = groupLayer.layers[updateInfo.targetIndex]
+    updateInfo.propKeys.forEach(propKey => {
+      delete targetLayer[propKey]
     })
   },
   UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj }, preprimaryLayerIndex: number }) {
