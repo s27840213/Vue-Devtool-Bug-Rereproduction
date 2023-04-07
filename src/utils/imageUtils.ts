@@ -89,7 +89,7 @@ class ImageUtils {
 
     switch (type) {
       case 'public': {
-        if ((size as string).includes('ext')) {
+        if (typeof size === 'string' && (size as string).includes('ext')) {
           return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
         } else {
           const query = forBgRemove ? '' : '?origin=true'

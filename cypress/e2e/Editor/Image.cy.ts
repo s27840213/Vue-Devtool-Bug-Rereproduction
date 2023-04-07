@@ -103,8 +103,8 @@ for (const isMobile of [true, false]) {
         // Wait for nu-image auto adjust img resolution
         .get('.nu-layer .nu-image').invoke('attr', 'cy-ready').should('eq', 'true')
         .snapshotTest('init')
-        .get('.nu-layer__wrapper:nth-child(2) .nu-image').then((flowerBack) => {
-          cy.get('.nu-layer__wrapper:nth-child(3) .nu-image')
+        .get('.nu-layer:nth-child(1) .nu-image').then((flowerBack) => {
+          cy.get('.nu-layer:nth-child(2) .nu-image')
             .layerOrder(flowerBack)
             .layerCopy()
             .layerLock()
@@ -115,7 +115,7 @@ for (const isMobile of [true, false]) {
             // .layerMultipleCopyAndMove('shortcut', isMobile) // Skip in mobile
             // .layerMultipleCopyAndMove('rightclick', isMobile) // Skip in mobile
             .deselectAllLayers().snapshotTest('init') // Check if image restore to init
-            .get('.nu-layer__wrapper:nth-child(3) .nu-image')
+            .get('.nu-layer:nth-child(2) .nu-image')
             .layerMoveToPage2(isMobile) // Skip in mobile
         })
     })

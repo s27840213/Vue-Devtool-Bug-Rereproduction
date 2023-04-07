@@ -166,10 +166,9 @@ export default defineComponent({
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
-        opacity: `${this.config.styles.opacity * 0.01}`,
-        // transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode
+        writingMode: this.config.styles.writingMode,
+        ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
       }
     },
     drawSvgBG() {
@@ -275,7 +274,8 @@ export default defineComponent({
 .nu-text {
   width: 100%;
   height: 100%;
-  position: relative;
+  position: absolute;
+  left: 0;
   &__BG {
     position: absolute;
     left: 0;

@@ -39,7 +39,21 @@ class CssConveter {
   }
 
   convertFlipStyle(horizontalFlip: boolean, verticalFlip: boolean): { transform: string } {
-    return { transform: `scale(${horizontalFlip ? -1 : 1}, ${verticalFlip ? -1 : 1})` }
+    if (horizontalFlip && verticalFlip) {
+      return {
+        transform: 'scaleX(-1) scaleY(-1)'
+      }
+    } else if (horizontalFlip) {
+      return {
+        transform: 'scaleX(-1)'
+      }
+    } else if (verticalFlip) {
+      return {
+        transform: 'scaleY(-1)'
+      }
+    } else {
+      return { transform: '' }
+    }
   }
 
   convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle | { [key: string]: string | number }): { [key: string]: string } {
@@ -78,12 +92,12 @@ class CssConveter {
 
   convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, contentScaleRatio = 1): { [key: string]: string } {
     const result: { [key: string]: string } = {}
-
-    Object.assign(result,
-      { width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width * contentScaleRatio}px` : 'initial' },
-      { height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height * contentScaleRatio}px` : 'initial' },
-      { opacity: `${sourceStyles.opacity / 100}` },
-      this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, contentScaleRatio))
+    Object.assign(result, {
+      width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width * contentScaleRatio}px` : 'initial',
+      height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height * contentScaleRatio}px` : 'initial',
+      ...(sourceStyles.opacity !== 100 && { opacity: `${sourceStyles.opacity / 100}` }),
+      ...this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, contentScaleRatio)
+    })
     return result
   }
 }
