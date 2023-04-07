@@ -154,14 +154,11 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
             cy.get(`input[type="range"][name="${option.name}"]`).eq(-1)
               .invoke('val', option.val).trigger('input')
           }
-<<<<<<< HEAD
-=======
           // Some shadow option modify will goto loading state, wait for it.
           if (shadow.name === 'imageMatched' && ['radius', 'size'].includes(option.name)) {
             cy.get('.nu-layer .nu-layer__inProcess').should('exist')
             cy.get('.nu-layer .nu-layer__inProcess').should('not.exist')
           }
->>>>>>> eaa9fdfc98a9878395d495cef7fb88d3961199fb
         }
         cy.wait(30).snapshotTest(`Shadow ${shadow.name} preset`, { toggleMobilePanel: '陰影' })
       }
