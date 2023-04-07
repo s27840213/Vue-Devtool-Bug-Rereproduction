@@ -85,13 +85,6 @@ export default defineComponent({
       webViewUtils.registerCallbacks('main')
     }
 
-    const hasShownBrowserWarning = localStorage.getItem('hasShownBrowserWarning')
-    if (!this.$isTouchDevice() && !['Microsoft Edge', 'Chrome'].includes(this.browserInfo.name) && hasShownBrowserWarning !== '1') {
-      this.$router.replace({ name: 'BrowserWarning' })
-      localStorage.setItem('hasShownBrowserWarning', '1')
-      return
-    }
-
     this.$router.isReady().then(() => { webViewUtils.sendAppLoaded() })
   },
   beforeMount() {

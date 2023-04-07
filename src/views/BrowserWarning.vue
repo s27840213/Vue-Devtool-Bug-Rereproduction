@@ -41,7 +41,8 @@ export default defineComponent({
   },
   methods: {
     goHome() {
-      this.$router.replace({ name: 'Home' })
+      this.$router.replace({ name: 'Editor' })
+      localStorage.setItem('hasShownBrowserWarning', '1')
     }
   }
 })
@@ -61,11 +62,17 @@ export default defineComponent({
   }
 
   &__text {
-    width: 460px;
+    max-width: 460px;
+    box-sizing: border-box;
+    padding: 0px 12px;
   }
   &__link {
     display: flex;
     gap: 48px;
+
+    @media (max-width: 640px) {
+      gap: 24px;
+    }
 
     > a {
       color: setColor(blue-1);

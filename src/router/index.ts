@@ -7,13 +7,13 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import webViewUtils from '@/utils/picWVUtils'
 import BrandKit from '@/views/BrandKit.vue'
+import BrowserWarning from '@/views/BrowserWarning.vue'
 import CopyTool from '@/views/CopyTool.vue'
 import Editor from '@/views/Editor.vue'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login/Login.vue'
 import SignUp from '@/views/Login/SignUp.vue'
 import MobileWarning from '@/views/MobileWarning.vue'
-import BrowserWarning from '@/views/BrowserWarning.vue'
 import MyDesign from '@/views/MyDesign.vue'
 import NubtnList from '@/views/NubtnList.vue'
 import Preview from '@/views/Preview.vue'
@@ -22,7 +22,7 @@ import Settings from '@/views/Settings.vue'
 import SvgIconView from '@/views/SvgIconView.vue'
 import TemplateCenter from '@/views/TemplateCenter.vue'
 import { h, resolveComponent } from 'vue'
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import { editorRouteHandler } from './handler'
 
 const MOBILE_ROUTES = [
@@ -349,6 +349,7 @@ router.beforeEach(async (to, from, next) => {
         store.commit('text/UPDATE_DEFAULT_FONT', { font })
       })
   }
+
   if (!MOBILE_ROUTES.includes(String(to.name) ?? '') && (to.name === 'Editor' || !localStorage.getItem('not-mobile'))) {
     let isMobile = false
     const userAgent = navigator.userAgent || navigator.vendor
@@ -389,10 +390,16 @@ router.beforeEach(async (to, from, next) => {
         return
       }
     } else {
+      if (to.name === 'Editor') {
+        const hasShownBrowserWarning = localStorage.getItem('hasShownBrowserWarning')
+        if (!['Microsoft Edge', 'Chrome'].includes(store.getters['user/getBrowserInfo'].name) && hasShownBrowserWarning !== '1') {
+          next({ name: 'BrowserWarning' })
+          return
+        }
+      }
       logUtils.setLog('=> as non-mobile')
     }
   }
-
   next()
 })
 
