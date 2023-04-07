@@ -467,17 +467,6 @@ export default defineComponent({
       setImgConfig: 'imgControl/SET_CONFIG',
       setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
-    getDefaultSizeLimit(): number {
-      return (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-    },
-    checkLimits(limit?: number): { tooShort: boolean, tooNarrow: boolean } {
-      limit = limit ?? this.getDefaultSizeLimit()
-      const totalScaleRatio = this.scaleRatio * this.contentScaleRatio
-      return {
-        tooShort: this.getLayerHeight() * totalScaleRatio < limit,
-        tooNarrow: this.getLayerWidth() * totalScaleRatio < limit
-      }
-    },
     addMovingListener() {
       const body = (this.$refs.body as HTMLElement[])[0]
       const lineMover = this.$refs.lineMover as HTMLElement
@@ -535,15 +524,16 @@ export default defineComponent({
       const scalerOffset = this.$isTouchDevice() ? 36 : 20
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${(this.getLayerWidth() - scalerOffset) * this.contentScaleRatio * this.scaleRatio * 0.01}px` : `${width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
-        height: !isHorizon ? `${(this.getLayerHeight() - scalerOffset) * this.contentScaleRatio * this.scaleRatio * 0.01}px` : `${height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        width: isHorizon ? `${(this.getLayerWidth() - scalerOffset) * this.scaleRatio * 0.01}px` : `${width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        height: !isHorizon ? `${(this.getLayerHeight() - scalerOffset) * this.scaleRatio * 0.01}px` : `${height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
         opacity: 0
       }
       return Object.assign(resizerStyle, HW)
     },
     resizerStyles(resizer: IResizer, isTouchArea = false) {
       const resizerStyle = { ...resizer }
-      const { tooShort, tooNarrow } = this.checkLimits()
+      const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
+      const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooSmall = this.getLayerType === 'text'
         ? (this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort) : false
       const width = parseFloat(resizerStyle.width.replace('px', ''))
@@ -566,7 +556,8 @@ export default defineComponent({
     },
     getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
       let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
-      const { tooShort, tooNarrow } = this.checkLimits()
+      const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
+      const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
         case 'image':
           resizers = this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
@@ -616,11 +607,15 @@ export default defineComponent({
       return resizers
     },
     getScaler(scalers: any) {
-      const { tooShort, tooNarrow } = this.checkLimits()
+      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
+      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
     getCornerRotaters(scalers: any) {
-      const { tooShort, tooNarrow } = this.checkLimits()
+      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
+      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
     lineEnds(scalers: any, point: number[]) {
@@ -1179,20 +1174,14 @@ export default defineComponent({
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
       this.initTranslate = this.getLayerPos()
-      const { tooShort, tooNarrow } = this.checkLimits()
-      if (tooShort || tooNarrow) {
-        this.control.xSign = 1
-        this.control.ySign = 1
-      } else {
-        const angleInRad = this.getLayerRotate() * Math.PI / 180
-        const vect = MouseUtils.getMouseRelPoint(event, this.center)
+      const angleInRad = this.getLayerRotate() * Math.PI / 180
+      const vect = MouseUtils.getMouseRelPoint(event, this.center)
 
-        // Get client point as no rotation
-        const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
+      // Get client point as no rotation
+      const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
 
-        this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
-        this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
-      }
+      this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
+      this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
 
       if (this.config.category === 'E') {
         this.initCorRadPercentage = ControlUtils.getCorRadPercentage(this.config.vSize, this.config.size, this.config.shapeType)
@@ -1668,7 +1657,8 @@ export default defineComponent({
       }
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
+      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
+      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
       if (tooShort || tooNarrow) {
         index = 2
       }
@@ -1835,7 +1825,8 @@ export default defineComponent({
       if (typeof index === 'number') {
         if (type === 'cornerRotaters') {
           const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-          const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
+          const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
+          const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
           if (tooShort || tooNarrow) {
             index = 2
           }

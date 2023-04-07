@@ -68,8 +68,7 @@ export default defineComponent({
     ...mapGetters({
       groupType: 'getGroupType',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
-      hasBleed: 'getHasBleed',
-      showMobilePanel: 'mobileEditor/getShowMobilePanel'
+      hasBleed: 'getHasBleed'
     }),
     cardStyle(): { [index: string]: string | number } {
       return {

@@ -64,20 +64,17 @@ class EditorUtils {
       height = width / aspectRatio
     }
 
-    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
-
     if (!this.mobileHeight || this.mobileWidth) {
       const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
         this.setMobileHW({
           width: mobileEditor.clientWidth,
-          height: mobileEditor.clientHeight - mobilePanelHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
+          height: mobileEditor.clientHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
         })
       }
     }
     const PAGE_SIZE_W = (this.mobileWidth || Number.MAX_SAFE_INTEGER) * 0.926
     const PAGE_SIZE_H = (this.mobileHeight || Number.MAX_SAFE_INTEGER) * 0.926
-
     if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
       if (width >= height) {
         return PAGE_SIZE_W / width

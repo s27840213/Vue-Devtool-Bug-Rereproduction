@@ -398,10 +398,11 @@ export default defineComponent({
     },
     moveEnd(event: PointerEvent) {
       this.isMoving = false
+      console.log('move end')
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-      // pageUtils.setBackgroundImageControlDefault()
+      pageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
       pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
@@ -519,7 +520,7 @@ export default defineComponent({
         return
       }
       this.isControlling = false
-      // pageUtils.setBackgroundImageControlDefault()
+      pageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
       pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
