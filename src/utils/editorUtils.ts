@@ -55,6 +55,7 @@ class EditorUtils {
   }
 
   handleContentScaleCalc(page: IPage | IBgRemoveInfo) {
+    console.trace()
     const { hasBleed } = pageUtils
     let { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
     const aspectRatio = width / height
