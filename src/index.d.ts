@@ -5,11 +5,7 @@ declare global {
   interface Window {
     TPDirect: TPDirect
     webkit?: {
-      messageHandlers: {
-        [key: string]: {
-          postMessage: (message: any) => void
-        }
-      }
+      messageHandlers: { [key: string]: any }
     }
   }
   interface Performance {

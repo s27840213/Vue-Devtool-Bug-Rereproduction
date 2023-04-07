@@ -8,16 +8,16 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
         :iconColor="'white'"
         :iconWidth="'22px'")
     div(class="header-bar__feature-icon mr-15"
-        :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping}"
+        :class="{'click-disabled': isInFirstStep || isCropping}"
         @pointerdown="undo()")
       svg-icon(:iconName="'undo'"
-        :iconColor="(inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping ? 'gray-2' :'white' "
+        :iconColor="(!isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
         :iconWidth="'22px'")
     div(class="header-bar__feature-icon"
-        :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping}"
+        :class="{'click-disabled': isInLastStep || isCropping}"
         @pointerdown="redo()")
       svg-icon(:iconName="'redo'"
-        :iconColor="(inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping ? 'gray-2' : 'white'"
+        :iconColor="(!isInLastStep && !isCropping) ? 'white' : 'gray-2'"
         :iconWidth="'22px'")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs")
@@ -91,8 +91,8 @@ export default defineComponent({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      inBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      inBgRemoveLastStep: 'bgRemove/inLastStep',
+      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
+      InBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       hasBleed: 'getHasBleed',
@@ -287,7 +287,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .header-bar {
   @include size(100%);
-  position: relative;
   background-color: setColor(nav);
   display: flex;
   align-items: center;

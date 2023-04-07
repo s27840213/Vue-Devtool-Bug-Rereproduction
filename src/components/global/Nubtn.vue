@@ -1,6 +1,5 @@
 <template lang="pug">
 div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice()?'mobile':'desktop'}`"
-    :style="{flexDirection: flexDir}"
     v-hint="hint"
     @click="click")
   svg-icon(v-if="theme.includes('icon')"
@@ -47,10 +46,6 @@ export default defineComponent({
     hint: {
       type: String,
       default: ''
-    },
-    flexDir: {
-      type: String as PropType<'row'|'column'>,
-      default: 'row'
     }
   },
   data() {

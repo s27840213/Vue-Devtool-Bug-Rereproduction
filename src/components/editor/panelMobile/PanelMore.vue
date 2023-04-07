@@ -28,7 +28,7 @@ div(class="panel-more")
       div(class="panel-more__item"
           @click="onDomainListClicked()")
           span(class="body-2 pointer") domain 選單
-    div(class="panel-more__item"
+    div(v-if="isAdmin" class="panel-more__item"
         @click="toggleDebugTool")
       span Toggle admin tool
     div(class="body-2 panel-more__item" @pointerdown.prevent="handleDebugMode")
@@ -80,6 +80,7 @@ export default defineComponent({
     ...mapGetters({
       pagesLength: 'getPagesLength',
       hasBleed: 'getHasBleed',
+      isAdmin: 'user/isAdmin'
     }),
     historySize(): number {
       return this.panelHistory.length
