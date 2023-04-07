@@ -12,6 +12,11 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
 
   abstract appendModuleName(identifier: string): string
 
+  filterLog(messageType: string, message: any): boolean {
+    // implementation classes can filter out logs for certain messageType with certain messages
+    return false
+  }
+
   registerCallbacks(type: string) {
     for (const callbackName of this.CALLBACK_MAPS[type]) {
       (window as any)[callbackName] = (this as any)[callbackName].bind(this)
@@ -27,7 +32,9 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   }
 
   sendToIOS(messageType: string, message: any) {
-    logUtils.setLogAndConsoleLog(messageType, message)
+    if (!this.filterLog(messageType, message)) {
+      logUtils.setLogAndConsoleLog(messageType, message)
+    }
     try {
       const webkit = window.webkit
       if (!webkit) return
