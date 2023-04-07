@@ -83,8 +83,15 @@ const getDefaultState = (): IViviStickerState => ({
   selectedDesigns: {},
   modalInfo: {},
   prices: {
-    monthly: NaN,
-    annually: NaN,
+    currency: '',
+    monthly: {
+      value: NaN,
+      text: ''
+    },
+    annually: {
+      value: NaN,
+      text: ''
+    },
   },
   expireDate: ''
 })
