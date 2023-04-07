@@ -543,7 +543,12 @@ class AssetUtils {
       }
 
       TextUtils.resetTextField(textLayer, targetPageIndex, field)
-      layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true, isCompensated: true }))])
+      layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, {
+        editing: false,
+        contentEditable: true,
+        isCompensated: true,
+        inAutoRescaleMode: true
+      }))])
       editorUtils.setCloseMobilePanelFlag(true)
       setTimeout(() => {
         tiptapUtils.agent(editor => editor.commands.selectAll())
@@ -635,6 +640,7 @@ class AssetUtils {
 
     const config = {
       ...(isPreview && { previewSrc: url }),
+      ...(categoryType === 14 || categoryType === 15) && { categoryType },
       srcObj,
       panelPreviewSrc,
       styles: {
@@ -830,7 +836,7 @@ class AssetUtils {
           break
         }
         case 15: {
-          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1))
+          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1), {}, 15)
           key = 'objects'
           break
         }

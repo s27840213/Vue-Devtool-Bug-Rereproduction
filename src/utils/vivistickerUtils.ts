@@ -27,6 +27,8 @@ import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
 
+export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template'
+
 /**
  * shown prop indicates if the user-setting-config is shown in the setting page
  */
@@ -58,21 +60,6 @@ const MYDESIGN_TAGS = [{
   name: 'NN0003',
   tab: 'object'
 }] as IMyDesignTag[]
-
-const DOCUMENT_URLS = {
-  jp: {
-    privacyPolicy: 'https://blog.vivipic.com/jp/jp-privacy-policy/',
-    termOfUse: 'https://blog.vivipic.com/jp/jp-terms-of-use/'
-  },
-  us: {
-    privacyPolicy: 'https://blog.vivipic.com/us/us-privacy-policy/',
-    termOfUse: 'https://blog.vivipic.com/us/us-terms-of-use/'
-  },
-  tw: {
-    privacyPolicy: 'https://blog.vivipic.com/tw/tw-privacy-policy/ ',
-    termOfUse: 'https://blog.vivipic.com/tw/tw-agreement/'
-  }
-} as { [key: string]: { [key: string]: string } }
 
 class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
@@ -107,7 +94,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'deleteAssetDone',
     'getAssetResult',
     'uploadImageURL',
-    'informWebResult'
+    'informWebResult',
+    'subscribeInfo',
+    'subscribeResult'
   ]
 
   SCREENSHOT_CALLBACKS = [
@@ -184,10 +173,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return res
   }
 
-  getDocumentUrl(locale: string, key: string): string {
-    return DOCUMENT_URLS[locale][key]
-  }
-
   setDefaultLocale() {
     let locale = localStorage.getItem('locale')
     if (locale === '' || !locale) {
@@ -198,6 +183,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   setCurrActiveTab(tab: string) {
     store.commit('vivisticker/SET_currActiveTab', tab)
+  }
+
+  filterLog(messageType: string, message: any) {
+    switch (messageType) {
+      case 'SET_STATE':
+        return message.key === 'tempDesign'
+    }
+    return false
   }
 
   sendToIOS(messageType: string, message: any) {
@@ -1052,6 +1045,35 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       return 'object'
     } else {
       return editorType
+    }
+  }
+
+  openPayment(target?: IViviStickerProFeatures) {
+    store.commit('vivisticker/SET_fullPageConfig', { type: 'payment', params: { target } })
+  }
+
+  checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
+    const isPro = false
+    if (item.plan === 1 && !isPro) {
+      this.openPayment(target)
+      return false
+    }
+    return true
+  }
+
+  subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, monthly: boolean, annually: boolean }) {
+    console.log(data)
+    const { monthly, annually, expire_date } = data
+    // store.commit('vivisticker/SET_expireDate', expire_date)
+    // store.commit('vivisticker/SET_prices', { monthly, annually })
+  }
+
+  subscribeResult(data: { status: 'subscribed' | 'failed', expire_date: string }) {
+    console.log(data)
+    const { status, expire_date } = data
+    if (status === 'subscribed') {
+      // store.commit('vivisticker/SET_expireDate', expire_date)
+      store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
     }
   }
 }

@@ -2006,13 +2006,13 @@ export default defineComponent({
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-        this.textSizeRefresh(this.config as IText, false, false)
+        this.textSizeRefresh(this.config as IText, false, false, this.config.inAutoRescaleMode)
       }
       if (toRecord) {
         this.waitFontLoadingAndRecord()
       }
     },
-    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean) {
+    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean, forceFull = false) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const getSize = () => isVertical ? this.getLayerHeight() : this.getLayerWidth()
       const oldCenter = mathUtils.getCenter(text.styles)
@@ -2021,6 +2021,7 @@ export default defineComponent({
       let textHW = TextUtils.getTextHW(text, widthLimit)
       let layerX = this.getLayerPos().x
       let layerY = this.getLayerPos().y
+      let scale = this.config.styles.scale
 
       if (widthLimit === -1) {
         const pageSize = (pageUtils.getPage(this.pageIndex) as IPage)[isVertical ? 'height' : 'width']
@@ -2032,15 +2033,39 @@ export default defineComponent({
 
         if (reachLeftLimit && reachRightLimit) {
           if (composing) this.widthLimitSetDuringComposition = true
-          textHW = TextUtils.getTextHW(text, pageSize)
-          layerPos = 0
-          widthLimit = pageSize
+          if (this.config.inAutoRescaleMode) {
+            textHW = TextUtils.getTextHW(text, -1)
+            layerPos = 0
+            const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
+            const rescale = pageSize / newTmpTextSize
+            scale = scale * rescale
+            textHW = {
+              width: isVertical ? textHW.width * rescale : pageSize,
+              height: isVertical ? pageSize : textHW.height * rescale
+            }
+          } else {
+            textHW = TextUtils.getTextHW(text, pageSize)
+            layerPos = 0
+            widthLimit = pageSize
+          }
         } else if (reachLeftLimit || reachRightLimit) {
           if (composing) this.widthLimitSetDuringComposition = true
           widthLimit = getSize()
           textHW = TextUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
+
+        if (forceFull) {
+          layerPos = 0
+          const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
+          const rescale = pageSize / newTmpTextSize
+          scale = scale * rescale
+          textHW = {
+            width: isVertical ? textHW.width * rescale : pageSize,
+            height: isVertical ? pageSize : textHW.height * rescale
+          }
+        }
+
         layerX = isVertical ? layerX : layerPos
         layerY = isVertical ? layerPos : layerY
       } else {
@@ -2071,7 +2096,7 @@ export default defineComponent({
 
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
 
-      if (keepCenter) {
+      if (keepCenter || this.config.inAutoRescaleMode) {
         const newCenter = mathUtils.getCenter({
           width: textHW.width,
           height: textHW.height,
@@ -2085,14 +2110,16 @@ export default defineComponent({
           width: textHW.width,
           height: textHW.height,
           x: layerX + offset.x,
-          y: layerY + offset.y
+          y: layerY + offset.y,
+          scale
         })
       } else {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
           width: textHW.width,
           height: textHW.height,
           x: layerX,
-          y: layerY
+          y: layerY,
+          scale
         })
       }
     },
@@ -2124,84 +2151,8 @@ export default defineComponent({
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
     },
-    clickSubController(targetIndex: number, type: string, selectionMode: boolean) {
-      if (!this.isControllerShown) {
-        // moveStart will handle the following:
-        // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true })
-        return
-      }
-      if (selectionMode) return
-      let updateSubLayerProps = null as any
-      let layers = null as any
-      switch (this.getLayerType) {
-        case 'group':
-          updateSubLayerProps = LayerUtils.updateSubLayerProps
-          layers = (LayerUtils.getCurrLayer as IGroup).layers
-          break
-        case 'frame':
-          updateSubLayerProps = FrameUtils.updateFrameLayerProps
-          layers = (LayerUtils.getCurrLayer as IFrame).clips
-      }
-
-      if (!this.isHandleShadow) {
-        for (let idx = 0; idx < layers.length; idx++) {
-          if (idx !== targetIndex) {
-            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
-          }
-          if (this.currSubSelectedInfo.type === 'image') {
-            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
-          }
-        }
-        if ((this.config.type === LayerType.frame && !(this.config as IFrame).clips[targetIndex].active) ||
-          (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
-          updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
-          if (this.config.type === LayerType.frame && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame' && !this.controllerHidden && !this.isPointerDownFromSubController) {
-            this.iosPhotoSelect(targetIndex)
-          }
-        }
-        LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
-      }
-    },
     pointerDownSubController() {
       this.isPointerDownFromSubController = true
-    },
-    iosPhotoSelect(subLayerIdx: number) {
-      return FrameUtils.iosPhotoSelect({
-        pageIndex: this.pageIndex,
-        layerIndex: this.layerIndex,
-        subLayerIdx
-      }, (this.config as IFrame).clips[subLayerIdx])
-    },
-    dblSubController(e: MouseEvent, targetIndex: number) {
-      e.stopPropagation()
-      if (this.isHandleShadow) {
-        return
-      }
-
-      let updateSubLayerProps = null as any
-      let target = undefined as ILayer | undefined
-      switch (this.getLayerType) {
-        case LayerType.group:
-          target = (this.config as IGroup).layers[targetIndex]
-          updateSubLayerProps = LayerUtils.updateSubLayerProps
-          if (!target.active) {
-            return
-          }
-          break
-        case LayerType.frame:
-          target = (this.config as IFrame).clips[targetIndex]
-          updateSubLayerProps = FrameUtils.updateFrameLayerProps
-          if (!target.active || (target as IImage).srcObj.type === 'frame') {
-            return
-          }
-          break
-        case LayerType.image:
-        default:
-          return
-      }
-      if (target.type === LayerType.image && !target.inProcess) {
-        updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
-      }
     },
     frameLayerMapper(_config: any) {
       const config = generalUtils.deepCopy(_config)

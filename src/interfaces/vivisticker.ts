@@ -37,3 +37,12 @@ export interface IMyDesignTag {
 export interface IIosImgData {
   images: Array<string>
 }
+export interface IPrice {
+  value: number,
+  text: string
+}
+export interface IPrices {
+  currency: string,
+  monthly: IPrice,
+  annually: IPrice
+}

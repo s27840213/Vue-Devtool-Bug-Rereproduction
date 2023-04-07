@@ -107,7 +107,8 @@ export interface IText extends ILayer<ITextStyle> {
   contentEditable: boolean
   selection: ITiptapSelection,
   isAutoResizeNeeded: boolean,
-  isCompensated?: boolean
+  isCompensated?: boolean,
+  inAutoRescaleMode: boolean,
 }
 
 export interface IShape extends ILayer<IStyle> {
@@ -153,7 +154,8 @@ export interface IImage extends ILayer<IImageStyle> {
   isUploading?: boolean,
   parentLayerStyles?: IStyle
   isHoveringFrame?: boolean,
-  panelPreviewSrc?: string
+  panelPreviewSrc?: string,
+  categoryType?: number
 }
 
 export interface IFrameStyle extends IStyle {

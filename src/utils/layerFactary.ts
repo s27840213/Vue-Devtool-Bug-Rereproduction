@@ -35,6 +35,7 @@ class LayerFactary {
       isClipper: true,
       dragging: false,
       designId: '',
+      categoryType: config.categoryType,
       styles: {
         x: 0,
         y: 0,
@@ -299,7 +300,8 @@ class LayerFactary {
         to: 0
       },
       isAutoResizeNeeded: false,
-      isCompensated: true
+      isCompensated: true,
+      inAutoRescaleMode: false,
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles

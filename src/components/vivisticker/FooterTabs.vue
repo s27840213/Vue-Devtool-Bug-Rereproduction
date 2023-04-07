@@ -271,7 +271,18 @@ export default defineComponent({
         currLayer.clips.some(i => i.active && i.srcObj.type === 'frame')
     },
     emptyFrameTabs(): Array<IFooterTab> {
-      return [{ icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace' }] as Array<IFooterTab>
+      return [
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          hidden: this.globalSelectedColor === 'none',
+          props: {
+            currColorEvent: ColorEventType.shape
+          }
+        },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace' }
+      ] as Array<IFooterTab>
     },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
@@ -403,12 +414,12 @@ export default defineComponent({
       const layer = layerUtils.getCurrLayer
       const subLayerIdx = layerUtils.subLayerIdx
       if (subLayerIdx === -1) {
-        return layer.type === LayerType.image && (layer as IImage).srcObj.type === 'svg'
+        return layer.type === LayerType.image && [14, 15].includes((layer as IImage).categoryType ?? -1)
       } else {
         const layers = (layer as IGroup).layers
         if (!layers) return false
         const subLayer = layers[subLayerIdx]
-        return subLayer.type === LayerType.image && (subLayer as IImage).srcObj.type === 'svg'
+        return subLayer.type === LayerType.image && [14, 15].includes((subLayer as IImage).categoryType ?? -1)
       }
     },
     showPhotoTabs(): boolean {
@@ -647,24 +658,27 @@ export default defineComponent({
           const { pageIndex, layerIndex, subLayerIdx = 0 } = layerUtils
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
-              const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
-                .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], imageUtils.getSrc({
+              if (images.length) {
+                const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                  .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], imageUtils.getSrc({
+                    type: 'ios',
+                    assetId: images[0],
+                    userId: ''
+                  }))
+                frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
+                  imgWidth,
+                  imgHeight,
+                  imgX,
+                  imgY
+                })
+                frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
                   type: 'ios',
                   assetId: images[0],
                   userId: ''
-                }))
-              frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
-                imgWidth,
-                imgHeight,
-                imgX,
-                imgY
-              })
-              frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
-                type: 'ios',
-                assetId: images[0],
-                userId: ''
-              })
-              stepsUtils.record()
+                })
+                stepsUtils.record()
+              }
+              this.$emit('switchTab', 'none')
             })
           break
         }
