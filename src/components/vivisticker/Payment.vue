@@ -438,14 +438,15 @@ export default defineComponent({
     color: white;
     background-color: setColor(black-3);
     border-radius: 10px 10px 0px 0px;
-    transition-property: transform, left, right;
+    transition-property: transform, left, right, padding;
     transition-duration: 300ms;
     transition-timing-function: ease-in-out;
     &.close {
+      padding: 16px 0 0 0;
       left: v-bind(padding);
       right: v-bind(padding);
-      bottom: -32px;
-      transform: translateY(calc(100% - 80px));
+      bottom: -20px;
+      transform: translateY(calc(100% - 68px));
     }
     &__chevron {
       position: absolute;
