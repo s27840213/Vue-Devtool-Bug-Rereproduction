@@ -52,7 +52,7 @@ export default defineComponent({
   },
   data() {
     return {
-      controlPoints: ControlUtils.getControlPoints(4, 25),
+      controlPoints: ControlUtils.getControlPoints(4, 25, 100 / this.$store.getters.getPageScaleRatio),
       isControlling: false,
       initialPos: { x: 0, y: 0 } as null | ICoordinate,
       initImgPos: { x: 0, y: 0 },
@@ -104,7 +104,8 @@ export default defineComponent({
       return this.config.styles.imgHeight
     },
     getPageScale(): number {
-      return this.config.styles.scale
+      return 1
+      // return this.config.styles.scale
     },
     getPageRotate(): number {
       return 0
@@ -401,7 +402,7 @@ export default defineComponent({
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-      // pageUtils.setBackgroundImageControlDefault()
+      pageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
       pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
@@ -422,8 +423,7 @@ export default defineComponent({
       }
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
-
-      Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
+      Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
       const angleInRad = this.getPageRotate * Math.PI / 180
       const vect = MouseUtils.getMouseRelPoint(event, this.center)
       const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
@@ -442,7 +442,6 @@ export default defineComponent({
       event.preventDefault()
       let width = this.getImgWidth
       let height = this.getImgHeight
-
       const angleInRad = this.getPageRotate * Math.PI / 180
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
@@ -467,6 +466,7 @@ export default defineComponent({
         width: width - initWidth,
         height: height - initHeight
       }
+
       const imgPos = {
         x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.x : this.initImgPos.x,
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.y : this.initImgPos.y
@@ -510,8 +510,6 @@ export default defineComponent({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      // pageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
-      // pageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
       this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y, imgWidth: width, imgHeight: height })
     },
     scaleEnd(e: PointerEvent) {
@@ -519,7 +517,7 @@ export default defineComponent({
         return
       }
       this.isControlling = false
-      // pageUtils.setBackgroundImageControlDefault()
+      pageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
       pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
@@ -551,6 +549,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.nu-background-controller {
+  position: absolute;
+  top:0;
+}
 .controller-point {
   pointer-events: auto;
   position: absolute;

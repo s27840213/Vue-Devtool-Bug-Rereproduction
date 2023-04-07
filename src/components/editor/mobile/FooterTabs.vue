@@ -247,7 +247,6 @@ export default defineComponent({
       const replace = showReplace ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }] : []
       return [
         ...replace,
-        ...(frame.clips.length === 1 ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -667,6 +666,7 @@ export default defineComponent({
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
             isEnableBleed: currPage.isEnableBleed,
+            backgroundColor: currPage.backgroundColor,
             unit: currPage.unit
           }), pageUtils.currFocusPageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
@@ -800,10 +800,13 @@ export default defineComponent({
 
       if (['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page'].includes(tab.icon)) {
         this.clickedTab = tab.icon
-        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
         this.clickedTabTimer = window.setTimeout(() => {
           this.clickedTab = ''
         }, 400)
+      }
+
+      if (['copy', 'paste'].includes(tab.icon)) {
+        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
       }
     },
     targetIs(type: string): boolean {

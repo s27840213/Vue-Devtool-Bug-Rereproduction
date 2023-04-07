@@ -48,21 +48,34 @@ function resolve (dir) {
 module.exports = defineConfig({
     transpileDependencies: true,
     chainWebpack: (config) => {
-        // config.resolve.alias.set('vue', '@vue/compat')
+        // config.cache(true)
+        /**
+         * use esbuild-loader to replace babel-loader
+         */
+        const rule = config.module.rule('js')
+        // 清理自带的 babel-loader
+        rule.uses.clear()
+        const tsRule = config.module.rule('ts')
+        // 清理自带的 babel-loader
+        tsRule.uses.clear()
+        // 添加 esbuild-loader
 
-        // config.module
-        //     .rule('vue')
-        //     .use('vue-loader')
-        //     .tap(options => {
-        //         return {
-        //             ...options,
-        //             compilerOptions: {
-        //                 compatConfig: {
-        //                     MODE: 2
-        //                 }
-        //             }
-        //         }
-        //     })
+        config.module
+        .rule('js')
+        .test(/\.(js|jsx|ts|tsx)$/)
+        .exclude.add(/node_modules/)
+        .end()
+        .use('esbuild-loader')
+        .loader('esbuild-loader')
+        .options({
+          loader: 'tsx',
+          target: 'es2015'
+        })
+        .end()
+
+        /**
+         * use esbuild-loader to replace babel-loader
+         */
 
         // To prevent safari use cached app.js, https://github.com/vuejs/vue-cli/issues/1132#issuecomment-409916879
         if (process.env.NODE_ENV === 'development') {
@@ -150,6 +163,9 @@ module.exports = defineConfig({
 
         config.module
             .rule('vue')
+            .test(/\.(vue)$/)
+            .exclude.add(/node_modules/)
+            .end()
             .use('vue-loader')
             .loader('vue-loader')
             .tap(options => {
@@ -214,20 +230,18 @@ module.exports = defineConfig({
                 }])
         }
 
-        // if (process.env.NODE_ENV === 'production') {
-        if (process.env.npm_config_report) {
+        if (process.env.NODE_ENV === 'development') {
             config
                 .plugin('webpack-bundle-analyzer')
                 .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
                 .end()
             config.plugins.delete('prefetch')
+            config
+                .plugin('speed-measure-webpack-plugin')
+                .use(SpeedMeasurePlugin)
+                .end()
         }
-        // }
 
-        config
-            .plugin('speed-measure-webpack-plugin')
-            .use(SpeedMeasurePlugin)
-            .end()
         // .use(SpeedMeasurePlugin, [{
         //     outputFormat: 'humanVerbose',
         //     loaderTopFiles: 5

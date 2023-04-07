@@ -102,7 +102,15 @@ class EditorUtils {
     const PAGE_SIZE_H = (this.mobileSize.height || Number.MAX_SAFE_INTEGER) * 0.926
 
     if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
-      return Math.max(Math.min(PAGE_SIZE_W / width, PAGE_SIZE_H / height), 0.1)
+      if (width >= height) {
+        return PAGE_SIZE_W / width
+      } else {
+        const scale = PAGE_SIZE_H / height
+        if (width * scale > PAGE_SIZE_W) {
+          return PAGE_SIZE_W / width
+        }
+        return scale
+      }
     } else {
       return 1
     }

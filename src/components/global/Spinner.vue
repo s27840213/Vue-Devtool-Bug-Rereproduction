@@ -2,7 +2,7 @@
 div(class="spinner popup-window")
   div
     img(:src="require('@/assets/img/gif/rocket-loading.gif')")
-    span {{textContent}}...
+    span {{loadingText}}...
 </template>
 
 <script lang="ts">
@@ -15,9 +15,13 @@ export default defineComponent({
   props: {
     textContent: {
       type: String,
-      default: `${i18n.global.t('NN0454')}`
     }
-  }
+  },
+  computed: {
+    loadingText() {
+      return this.textContent || i18n.global.t('NN0454')
+    }
+  },
 })
 </script>
 
