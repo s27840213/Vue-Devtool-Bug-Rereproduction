@@ -154,6 +154,11 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
             cy.get(`input[type="range"][name="${option.name}"]`).eq(-1)
               .invoke('val', option.val).trigger('input')
           }
+          // Some shadow option modify will goto loading state, wait for it.
+          if (shadow.name === 'imageMatched' && ['radius', 'size'].includes(option.name)) {
+            cy.get('.nu-layer .nu-layer__inProcess').should('exist')
+            cy.get('.nu-layer .nu-layer__inProcess').should('not.exist')
+          }
         }
         cy.wait(30).snapshotTest(`Shadow ${shadow.name} preset`, { toggleMobilePanel: '陰影' })
       }
@@ -213,11 +218,10 @@ Cypress.Commands.add('imageManuallyBgRemove', { prevSubject: 'element' }, (subje
     .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
     .get('.panel-background-remove input[type="range"]')
     .invoke('val', 300).trigger('input')
-    .get('canvas.bg-remove-area').realClick({ x: 300, y: 300 })
+    .get('canvas.bg-remove-area').realClick({ x: 225, y: 225 })
     .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
-    // .togglePanel('保留')
-    // .get('canvas.bg-remove-area').realClick({ x: 300, y: 450 })
-    // .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
     .togglePanel('完成')
+    // Wait for image polling
+    .get(subject.selector).invoke('attr', 'cy-ready').should('eq', 'true')
   return cy.wrap(subject)
 })

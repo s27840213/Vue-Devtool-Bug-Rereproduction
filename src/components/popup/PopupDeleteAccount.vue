@@ -96,6 +96,7 @@ export default defineComponent({
 @include layout-mobile { // Setting page mobile RWD
   .popup-del-acc {
     width: auto;
+    max-width: 70%;
   }
 }
 </style>

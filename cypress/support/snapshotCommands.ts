@@ -87,7 +87,8 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
   // TODO: Investigation why compareSnapshot fail and other image that not take snapshot still appear in report
   // This will happend if using on('fail') to force image mismatch test pass when 'cy open' mode
 
-  const threshold = Cypress.browser.isHeadless ? 0.01 : 1
+  const generateBaseline = Cypress.env('generateBaseline') === true
+  const threshold = Cypress.browser.isHeadless && !generateBaseline ? 0.01 : 1
   const logName = `${Cypress.currentTest.title}/${testName}`
   let imageName = `${Cypress.currentTest.title}/${testName}`
   // For BG Remove test, use original test title to verify
@@ -108,7 +109,8 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
         css.setAttribute('class', 'cy-visual-test-style')
         css.textContent = snapshotStyles
         document.body.appendChild(css)
-      }).get(`#nu-page_${pageIndex}`)
+      }).then(() => { if (generateBaseline) cy.wait(5000) }) // Wait 10s for generate baseline
+        .get(`#nu-page_${pageIndex}`)
         .myCompareSnapshot(imageName, logName, threshold, { limit: 3, delay: 1000 })
         // Remove special css
         .get('style.cy-visual-test-style', { log: false })

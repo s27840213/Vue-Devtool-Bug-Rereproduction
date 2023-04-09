@@ -6,6 +6,11 @@
     height: 100%;
 }
 
+.full-size {
+    width: 100%;
+    height: 100%;
+}
+
 .flex {
     display: flex
 }
@@ -216,4 +221,8 @@ $spacer: 5;
 .visible-hidden {
     pointer-events: none;
     visibility: hidden;
+}
+
+.preserve3D {
+    transform-style: preserve-3d;
 }

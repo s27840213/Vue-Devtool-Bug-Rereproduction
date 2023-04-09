@@ -387,7 +387,7 @@ export default defineComponent({
           gtmUtils.signUp(gtmTitle)
         }
         store.dispatch('user/loginSetup', { data: data })
-        this.$router.push({ path: this.redirect || redirect || '/' })
+        this.$router.push(this.redirect || redirect || '/')
       } else {
         console.log(`${loginType} login failed`)
         notify({ group: 'error', text: data.msg })
@@ -415,7 +415,7 @@ export default defineComponent({
       }
       const data = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
       if (data.flag === 0) {
-        this.$router.push({ path: this.redirect || '/' })
+        this.$router.push(this.redirect || '/')
       } else {
         this.password = ''
         this.passwordErrorMessage = data.msg || this.$t('NN0242')
