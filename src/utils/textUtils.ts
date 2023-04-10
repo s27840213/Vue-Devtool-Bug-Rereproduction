@@ -483,7 +483,7 @@ class TextUtils {
     }
   }
 
-  updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
+  updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, handleAutoRescale = false) {
     const targetLayer = LayerUtils.getLayer(pageIndex, layerIndex)
     if (subLayerIndex === -1) { // single text layer
       const config = targetLayer as IText
@@ -491,19 +491,48 @@ class TextUtils {
         LayerUtils.updateLayerStyles(pageIndex, layerIndex, textShapeUtils.getCurveTextProps(config))
       } else {
         const widthLimit = config.widthLimit
-        const textHW = this.getTextHW(config, widthLimit)
+        let textHW = this.getTextHW(config, widthLimit)
+        const isVertical = config.styles.writingMode.includes('vertical')
+        const pageSize = (pageUtils.getPage(pageIndex) as IPage)[isVertical ? 'height' : 'width']
+        const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
+        let needAutoRescale = false
+        if (handleAutoRescale) {
+          needAutoRescale = widthLimit === -1 && config.inAutoRescaleMode && config.styles.rotate === 0 && newTmpTextSize >= pageSize
+        }
         let x = config.styles.x
         let y = config.styles.y
-        if (config.widthLimit === -1) {
-          // TODO: consider rotation
-          if (config.styles.writingMode.includes('vertical')) {
-            y = config.styles.y - (textHW.height - config.styles.height) / 2
-          } else {
-            x = config.styles.x - (textHW.width - config.styles.width) / 2
+        if (needAutoRescale) {
+          const rescale = pageSize / newTmpTextSize
+          const scale = config.styles.scale * rescale
+          textHW = {
+            width: isVertical ? textHW.width * rescale : pageSize,
+            height: isVertical ? pageSize : textHW.height * rescale
+          }
+          x = isVertical ? x : 0
+          y = isVertical ? 0 : y
+          const oldCenter = mathUtils.getCenter(config.styles)
+          const newCenter = mathUtils.getCenter({
+            width: textHW.width,
+            height: textHW.height,
+            x,
+            y
+          })
+
+          const offset = { x: oldCenter.x - newCenter.x, y: oldCenter.y - newCenter.y }
+          x += offset.x
+          y += offset.y
+          LayerUtils.updateLayerStyles(pageIndex, layerIndex, { scale })
+        } else {
+          if (config.widthLimit === -1) {
+            // TODO: consider rotation
+            if (isVertical) {
+              y = config.styles.y - (textHW.height - config.styles.height) / 2
+            } else {
+              x = config.styles.x - (textHW.width - config.styles.width) / 2
+            }
           }
         }
         LayerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        LayerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit })
       }
     } else { // sub text layer in a group
       const group = targetLayer as IGroup

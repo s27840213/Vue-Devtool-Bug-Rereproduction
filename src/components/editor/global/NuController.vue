@@ -1963,7 +1963,7 @@ export default defineComponent({
       TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
         const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
         if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
-        TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+        TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx, true)
       })
     },
     waitFontLoadingAndResize() {
@@ -1973,7 +1973,7 @@ export default defineComponent({
         setTimeout(() => {
           const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
-          TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+          TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx, true)
         }, 100)
       })
     },
