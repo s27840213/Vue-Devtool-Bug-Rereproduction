@@ -424,6 +424,9 @@ export default defineComponent({
     },
     getLayerType(): string {
       return this.config.type
+    },
+    needAutoRescale(): boolean {
+      return this.config.inAutoRescaleMode && this.getLayerRotate() === 0
     }
   },
   watch: {
@@ -2006,7 +2009,7 @@ export default defineComponent({
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-        this.textSizeRefresh(this.config as IText, false, false, this.config.inAutoRescaleMode)
+        this.textSizeRefresh(this.config as IText, false, false, this.needAutoRescale)
       }
       if (toRecord) {
         this.waitFontLoadingAndRecord()
@@ -2032,8 +2035,8 @@ export default defineComponent({
         const reachRightLimit = layerPos + currTextSize >= pageSize
 
         if (reachLeftLimit && reachRightLimit) {
-          if (composing) this.widthLimitSetDuringComposition = true
-          if (this.config.inAutoRescaleMode) {
+          if (composing) this.widthLimitSetDuringComposition = true // this will trigger forceFull
+          if (this.needAutoRescale) {
             textHW = TextUtils.getTextHW(text, -1)
             layerPos = 0
             const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
@@ -2049,10 +2052,27 @@ export default defineComponent({
             widthLimit = pageSize
           }
         } else if (reachLeftLimit || reachRightLimit) {
-          if (composing) this.widthLimitSetDuringComposition = true
-          widthLimit = getSize()
-          textHW = TextUtils.getTextHW(text, widthLimit)
-          layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
+          if (this.needAutoRescale) {
+            // if (composing) this.widthLimitSetDuringComposition = true // if only one side is reached, don't trigger forceFull
+            textHW = TextUtils.getTextHW(text, -1)
+            const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
+            if (newTmpTextSize >= pageSize) {
+              layerPos = 0
+              const rescale = pageSize / newTmpTextSize
+              scale = scale * rescale
+              textHW = {
+                width: isVertical ? textHW.width * rescale : pageSize,
+                height: isVertical ? pageSize : textHW.height * rescale
+              }
+            } else {
+              layerPos = (pageSize - newTmpTextSize) / 2
+            }
+          } else {
+            if (composing) this.widthLimitSetDuringComposition = true
+            widthLimit = getSize()
+            textHW = TextUtils.getTextHW(text, widthLimit)
+            layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
+          }
         }
 
         if (forceFull) {
@@ -2096,7 +2116,7 @@ export default defineComponent({
 
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
 
-      if (keepCenter || this.config.inAutoRescaleMode) {
+      if (keepCenter || this.needAutoRescale) {
         const newCenter = mathUtils.getCenter({
           width: textHW.width,
           height: textHW.height,

@@ -495,6 +495,7 @@ class TextUtils {
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
+          // TODO: consider rotation
           if (config.styles.writingMode.includes('vertical')) {
             y = config.styles.y - (textHW.height - config.styles.height) / 2
           } else {

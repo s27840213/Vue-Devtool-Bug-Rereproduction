@@ -237,6 +237,7 @@ export default defineComponent({
       }
       const textHW = await textUtils.getTextHWAsync(config, widthLimit)
       if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
+        // TODO: consider rotation
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
