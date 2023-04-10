@@ -76,6 +76,7 @@ class TextFill {
       }
       const bgSizeBy = textFill.size * (scaleByWidth ? divWidth / spanWidth : divHeight / spanHeight)
       return {
+        // About span BG
         backgroundImage: `url("${img.urls.original}")`,
         backgroundSize: scaleByWidth ? `${bgSizeBy}% auto` : `auto ${bgSizeBy}%`,
         // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
@@ -88,6 +89,7 @@ class TextFill {
         opacity: textFill.opacity / 100,
         webkitTextFillColor: 'transparent',
         webkitBackgroundClip: 'text',
+        // About span position
         position: 'absolute',
         padding: `${spanHeight * spanExpandRatio}px ${spanWidth * spanExpandRatio}px`,
         ...isTextShapeFocus ? {
@@ -116,7 +118,7 @@ class TextFill {
 
     return textFill.focus ? {
       tag: 'img',
-      attrs: { src: img.urls.prev },
+      attrs: { src: img.urls.original },
       style: {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
         left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200) * -1}px`,

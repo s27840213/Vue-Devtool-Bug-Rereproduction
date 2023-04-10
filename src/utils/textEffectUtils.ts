@@ -242,12 +242,14 @@ class Controller {
       case 'funky3d':
         return {
           '--base-stroke': '0px',
-          ...this.funky3d(
-            distance,
-            effect.distanceInverse,
-            effect.angle,
-            colorWithOpacity
-          )
+          duplicatedTexts: [{
+            extraBodyStyle: this.funky3d(
+              distance,
+              effect.distanceInverse,
+              effect.angle,
+              colorWithOpacity
+            ),
+          }]
         }
       case 'bold3d': {
         const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2, y: 0 })
