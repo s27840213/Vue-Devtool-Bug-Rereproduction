@@ -7,19 +7,13 @@ import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
 
 class TextFill {
-  // private currColorKey = ''
   effects = {} as Record<string, Record<string, string | number | boolean>>
-  tempTextFill = [] as Record<string, string | number>[][]
   constructor() {
     this.effects = this.getDefaultEffects()
   }
-
-  // rgba = (color: string, opacity: number) =>
-  //   textEffectUtils.convertColor2rgba(color, opacity)
 
   getDefaultEffects() {
     return {
@@ -52,11 +46,7 @@ class TextFill {
 
   async convertTextEffect(config: IText): Promise<Record<string, string | number>[][]> {
     const { textFill } = config.styles
-    if (textFill.name === 'none') {
-      this.tempTextFill = []
-      tiptapUtils.updateHtml()
-      return []
-    }
+    if (textFill.name === 'none') return []
 
     const img = store.getters['file/getImages'][0] as IAssetPhoto
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
@@ -75,7 +65,9 @@ class TextFill {
     }
 
     const spanExpandRatio = 1
-    this.tempTextFill = div.map(p => p.map(span => {
+    const isTextShape = config.styles.textShape.name !== 'none'
+    const isTextShapeFocus = isTextShape && textFill.focus
+    return div.map(p => p.map(span => {
       const rect = span[0]
       let { width: spanWidth, height: spanHeight, x, y } = rect
       if (vertical) {
@@ -92,18 +84,27 @@ class TextFill {
           ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200)) * -1}px
           ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)) * -1}px`,
         backgroundOrigin: 'content-box',
+        backgroundRepeat: 'no-repeat',
         opacity: textFill.opacity / 100,
         webkitTextFillColor: 'transparent',
         webkitBackgroundClip: 'text',
         position: 'absolute',
         padding: `${spanHeight * spanExpandRatio}px ${spanWidth * spanExpandRatio}px`,
-        top: `${y - spanHeight * spanExpandRatio}px`,
-        left: `${x - spanWidth * spanExpandRatio}px`,
-        lineHeight: 'initial',
+        ...isTextShapeFocus ? {
+          top: `${y - spanHeight * spanExpandRatio}px`,
+          left: `${x - spanWidth * spanExpandRatio}px`,
+          transform: 'none',
+          lineHeight: 'initial',
+        } : isTextShape ? {
+          top: `${-spanHeight * spanExpandRatio}px`,
+          lineHeight: 'initial', // ?
+        } : {
+          top: `${y - spanHeight * spanExpandRatio}px`,
+          left: `${x - spanWidth * spanExpandRatio}px`,
+          lineHeight: 'normal',
+        }
       }
     }))
-    tiptapUtils.updateHtml() // Refresh tiptap span style
-    return this.tempTextFill
   }
 
   drawTextFill(config: IText): CustomElementConfig | null {
@@ -125,19 +126,6 @@ class TextFill {
       }
     } : null
   }
-
-  // setColorKey(key: string) {
-  //   this.currColorKey = key
-  // }
-
-  // setColor(color: string) {
-  //   const effectName = textEffectUtils.getCurrentLayer().styles.textFill.name
-  //   this.setTextFill(effectName, { [this.currColorKey]: color })
-  // }
-
-  // get currColor(): string {
-  //   return (textEffectUtils.getCurrentLayer().styles.textFill as Record<string, string>)[this.currColorKey]
-  // }
 
   // Read/write text effect setting from local storage
   syncShareAttrs(textFill: ITextFill, effectName: string | null) {
