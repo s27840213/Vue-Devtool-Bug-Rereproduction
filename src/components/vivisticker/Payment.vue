@@ -1,8 +1,8 @@
 <template lang="pug">
-div(class="payment" v-touch @swipe="handleSwipe")
+div(class="payment" :class="{wide: isTablet && isLandscape}" v-touch @swipe="handleSwipe")
   carousel(
     :items="carouselItems"
-    :itemWidth="windowSize.width"
+    :itemWidth="containerWidth"
     :initIndex="carouselItems.findIndex(item => item.key === target)"
     enableSwipe
     @change="handleImageChange")
@@ -195,9 +195,18 @@ export default defineComponent({
         }
       ]
     },
+    containerWidth() {
+      return this.isTablet && this.isLandscape ? round(this.windowSize.width * 0.44) : this.windowSize.width
+    },
+    containerPadding() {
+      return (this.windowSize.width - this.containerWidth) / 2
+    },
     padding() {
-      return this.isTablet ? '2.8%' : '24px'
-    }
+      return this.isTablet ? `${this.containerWidth * 0.028}px` : '24px'
+    },
+    panelPadding() {
+      return `${this.containerPadding + (this.isTablet ? this.containerWidth * 0.028 : 24)}px`
+    },
   },
   methods: {
     ...mapMutations({
@@ -239,6 +248,11 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   font-family: 'Poppins';
+  overflow-x: hidden;
+  &.wide {
+    width: v-bind(containerWidth); // prevent subpixel problem
+    margin: 0 auto;
+  }
   &__carousel-item {
     display: flex;
     justify-content: center;
@@ -403,8 +417,8 @@ export default defineComponent({
   &__panel {
     position: absolute;
     bottom: 0px;
-    left: 0px;
-    right: 0px;
+    left: v-bind("containerPadding + 'px'");
+    right: v-bind("containerPadding + 'px'");
     box-sizing: border-box;
     // min-height: 57%;
     padding: 16px v-bind(padding) 0px v-bind(padding);
@@ -416,8 +430,8 @@ export default defineComponent({
     transition-timing-function: ease-in-out;
     &.close {
       padding: 16px 0 0 0;
-      left: v-bind(padding);
-      right: v-bind(padding);
+      left: v-bind(panelPadding);
+      right: v-bind(panelPadding);
       bottom: -20px;
       transform: translateY(calc(100% - 68px));
     }
