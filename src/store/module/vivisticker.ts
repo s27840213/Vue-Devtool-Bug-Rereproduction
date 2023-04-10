@@ -1,5 +1,6 @@
+import i18n from '@/i18n'
 import { IAsset } from '@/interfaces/module'
-import { IMyDesign, IUserInfo, IUserSettings, IPrices } from '@/interfaces/vivisticker'
+import { IMyDesign, IPayment, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
@@ -35,14 +36,49 @@ interface IViviStickerState {
   editingAssetInfo: { [key: string]: any },
   selectedDesigns: { [key: string]: IMyDesign },
   modalInfo: { [key: string]: any },
-  prices: IPrices,
-  expireDate: string
+  payment: IPayment
 }
 
 const EDITOR_BGS = [
   '#2E2E2E',
   '#F4F5F7'
 ]
+
+const DEFAULT_PRICES = {
+  tw: {
+    currency: 'TWD',
+    monthly: {
+      value: 140,
+      text: '140元'
+    },
+    annually: {
+      value: 799,
+      text: '799元'
+    }
+  },
+  us: {
+    currency: 'USD',
+    monthly: {
+      value: 4.99,
+      text: '$4.99'
+    },
+    annually: {
+      value: 26.90,
+      text: '$26.90'
+    }
+  },
+  jp: {
+    currency: 'JPY',
+    monthly: {
+      value: 600,
+      text: '¥600円(税込)'
+    },
+    annually: {
+      value: 3590,
+      text: '¥3590円(税込)'
+    }
+  }
+} as {[key: string]: IPrices}
 
 const getDefaultState = (): IViviStickerState => ({
   userInfo: vivistickerUtils.getDefaultUserInfo(),
@@ -82,18 +118,21 @@ const getDefaultState = (): IViviStickerState => ({
   editingAssetInfo: {},
   selectedDesigns: {},
   modalInfo: {},
-  prices: {
-    currency: '',
-    monthly: {
-      value: NaN,
-      text: ''
-    },
-    annually: {
-      value: NaN,
-      text: ''
-    },
-  },
-  expireDate: ''
+  payment: {
+    subscribed: false,
+    expireDate: '',
+    prices: {
+      currency: '',
+      monthly: {
+        value: NaN,
+        text: ''
+      },
+      annually: {
+        value: NaN,
+        text: ''
+      },
+    }
+  }
 })
 
 const state = getDefaultState()
@@ -200,6 +239,10 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getModalInfo(state: IViviStickerState): { [key: string]: string } {
     return state.modalInfo
+  },
+  getPrices(state: IViviStickerState): IPrices {
+    if (state.isStandaloneMode) return DEFAULT_PRICES[i18n.global.locale] ?? DEFAULT_PRICES.us
+    return state.payment.prices
   }
 }
 
@@ -310,10 +353,10 @@ const mutations: MutationTree<IViviStickerState> = {
     state.modalInfo = modalInfo
   },
   SET_prices(state: IViviStickerState, prices) {
-    state.prices = prices
+    state.payment.prices = prices
   },
   SET_expireDate(state: IViviStickerState, expireDate) {
-    state.expireDate = expireDate
+    state.payment.expireDate = expireDate
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {

@@ -58,11 +58,12 @@ div(class="payment" v-touch @swipe="handleSwipe")
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
+import { IPrices } from '@/interfaces/vivisticker'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
-import { mapMutations, mapState } from 'vuex'
+import { PropType, defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface CarouselItem {
   key: IViviStickerProFeatures
@@ -75,21 +76,6 @@ interface IComparison {
   free: boolean,
   pro: boolean
 }
-
-const PRICES = {
-  tw: {
-    monthly: 140,
-    annually: 799
-  },
-  us: {
-    monthly: 4.99,
-    annually: 26.90
-  },
-  jp: {
-    monthly: 600,
-    annually: 3590
-  }
-} as {[key: string]: { monthly: number, annually: number }}
 
 export default defineComponent({
   components: {
@@ -171,28 +157,24 @@ export default defineComponent({
       isTablet: 'isTablet',
       isLandscape: 'isLandscape',
     }),
+    ...mapGetters({
+      prices: 'vivisticker/getPrices',
+    }),
     txtBtnSubscribe() {
       return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
     },
-    localizedPrice(): {monthly: string, annually: string} {
-      const locale = this.$i18n.locale
-      return {
-        monthly: this.localizePrice(PRICES[locale].monthly, locale),
-        annually: this.localizePrice(PRICES[locale].annually, locale)
-      }
-    },
     localizedTag(): string {
-      const locale = this.$i18n.locale
-      const price = round(PRICES[locale].annually / 12, locale === 'us' ? 2 : 0)
-      switch (locale) {
-        case 'tw':
+      if (!this.prices) return ''
+      const prices = this.prices as IPrices
+      const currency = prices.currency
+      const price = round(prices.annually.value / 12, currency === 'TWD' || currency === 'JPY' ? 0 : 2)
+      switch (currency) {
+        case 'TWD':
           return `${price}元 / 月`
-        case 'us':
-          return `$${price} / Mo`
-        case 'jp':
+        case 'JPY':
           return `¥${price}円 / 月額`
         default:
-          return price.toString()
+          return `$${price} / Mo`
       }
     },
     btnPlans() {
@@ -201,14 +183,14 @@ export default defineComponent({
           key: 'monthly',
           title: this.$t('NN0514'),
           subTitle: '',
-          price: this.localizedPrice.monthly,
+          price: this.prices.monthly.text,
           tag: ''
         },
         {
           key: 'annually',
           title: this.$t('NN0515'),
           subTitle: this.$t('STK0048', { day: 3 }),
-          price: this.localizedPrice.annually,
+          price: this.prices.annually.text,
           tag: this.localizedTag
         }
       ]
@@ -246,19 +228,7 @@ export default defineComponent({
     },
     handleShowWelcome() {
       this.setFullPageConfig({ type: 'welcome' })
-    },
-    localizePrice(price: number, locale: string): string {
-      switch (locale) {
-        case 'tw':
-          return `${price}元`
-        case 'us':
-          return `$${price}`
-        case 'jp':
-          return `¥${price}円(税込)`
-        default:
-          return price.toString()
-      }
-    },
+    }
   }
 })
 </script>

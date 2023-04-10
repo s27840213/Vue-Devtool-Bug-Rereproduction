@@ -46,3 +46,9 @@ export interface IPrices {
   monthly: IPrice,
   annually: IPrice
 }
+
+export interface IPayment {
+  subscribed: boolean,
+  expireDate: string,
+  prices: IPrices
+}

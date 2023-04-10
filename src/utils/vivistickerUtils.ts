@@ -82,7 +82,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   ROUTER_CALLBACKS = [
     'loginResult',
     'getStateResult',
-    'setStateDone'
+    'setStateDone',
+    'subscribeInfo'
   ]
 
   VVSTK_CALLBACKS = [
@@ -95,7 +96,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getAssetResult',
     'uploadImageURL',
     'informWebResult',
-    'subscribeInfo',
     'subscribeResult'
   ]
 
@@ -1061,18 +1061,38 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return true
   }
 
-  subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, monthly: boolean, annually: boolean }) {
-    console.log(data)
-    const { monthly, annually, expire_date } = data
-    // store.commit('vivisticker/SET_expireDate', expire_date)
-    // store.commit('vivisticker/SET_prices', { monthly, annually })
+  subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, priceCurrency: string, monthly: {priceValue: string, priceText: string}, annually: {priceValue: string, priceText: string} }) {
+    console.log('subscribeInfo', data)
+    const { monthly, annually, priceCurrency, expire_date } = data
+    const currencyFormaters = {
+      TWD: (value: string) => `${value}元`,
+      USD: (value: string) => `$${value}`,
+      JPY: (value: string) => `¥${value}円(税込)`
+    } as {[key: string]: (value: string) => string}
+    if (Object.keys(currencyFormaters).includes(priceCurrency)) {
+      monthly.priceText = currencyFormaters[priceCurrency](monthly.priceValue)
+      annually.priceText = currencyFormaters[priceCurrency](annually.priceValue)
+    }
+
+    store.commit('vivisticker/SET_expireDate', expire_date)
+    store.commit('vivisticker/SET_prices', {
+      currency: priceCurrency,
+      monthly: {
+        value: parseFloat(monthly.priceValue),
+        text: monthly.priceText
+      },
+      annually: {
+        value: parseFloat(annually.priceValue),
+        text: annually.priceText
+      }
+    })
   }
 
   subscribeResult(data: { status: 'subscribed' | 'failed', expire_date: string }) {
-    console.log(data)
+    console.log('subscribeResult', data)
     const { status, expire_date } = data
     if (status === 'subscribed') {
-      // store.commit('vivisticker/SET_expireDate', expire_date)
+      store.commit('vivisticker/SET_expireDate', expire_date)
       store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
     }
   }
