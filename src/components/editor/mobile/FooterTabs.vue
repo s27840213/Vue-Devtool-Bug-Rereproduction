@@ -247,6 +247,7 @@ export default defineComponent({
       const replace = showReplace ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }] : []
       return [
         ...replace,
+        ...(frame.clips.length === 1 ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
