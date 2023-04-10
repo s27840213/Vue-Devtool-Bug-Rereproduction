@@ -562,8 +562,10 @@ export default defineComponent({
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
       let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
-      if (!isImgType && this.compensationRatio() !== 1 && scaleX !== 1 && scaleY !== 1) {
-        transform += `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
+      if (!isImgType) {
+        transform += this.compensationRatio() !== 1 ? `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})` : ''
+        transform += scaleX !== 1 ? `scaleX(${scaleX})` : ''
+        transform += scaleY !== 1 ? `scaleY(${scaleY})` : ''
       }
       const hasActualScale = transform !== 'scale(1)'
       const styles = {
