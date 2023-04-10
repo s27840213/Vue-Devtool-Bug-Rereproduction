@@ -200,7 +200,8 @@ export default defineComponent({
       currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       hasCopiedFormat: 'getHasCopiedFormat',
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: webViewUtils.appendModuleName('getUserInfo'),
+      inBrowserMode: 'webView/getInBrowserMode'
     }),
     historySize(): number {
       return this.panelHistory.length
@@ -300,7 +301,8 @@ export default defineComponent({
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? '100%' : this.panelDragHeight + 'px',
-          ...(this.hideFooter && { zIndex: '100' })
+          ...(this.hideFooter && { zIndex: '100' }),
+          ...((!this.inBrowserMode && this.hideFooter) && { paddingBottom: '48px' })
         },
         // Prevent MobilePanel collapse
         isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
