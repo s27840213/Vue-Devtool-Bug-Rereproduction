@@ -274,6 +274,9 @@ export default defineComponent({
     toggleDebugMode() {
       this.debugMode = !this.debugMode
       vivistickerUtils.setState('debugMode', { value: this.debugMode })
+      if (this.debugMode) {
+        vivistickerUtils.recordDebugModeEntrance()
+      }
     },
     switchDomain(domain: string) {
       vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain })

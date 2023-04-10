@@ -10,7 +10,7 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import CopyTool from '@/views/CopyTool.vue'
 import NubtnList from '@/views/NubtnList.vue'
 import { h, resolveComponent } from 'vue'
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import ViviSticker from '../views/ViviSticker.vue'
@@ -104,6 +104,7 @@ const router = createRouter({
           vivistickerUtils.enterStandaloneMode()
           vivistickerUtils.setDefaultLocale()
         }
+        vivistickerUtils.fetchDebugModeEntrance()
         const userInfo = await vivistickerUtils.getUserInfo()
         if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
           logUtils.uploadLog().then(() => {
