@@ -302,7 +302,7 @@ export default defineComponent({
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? '100%' : this.panelDragHeight + 'px',
           ...(this.hideFooter && { zIndex: '100' }),
-          ...(!this.inBrowserMode && { paddingBottom: '48px' })
+          ...((!this.inBrowserMode && this.hideFooter) && { paddingBottom: '48px' })
         },
         // Prevent MobilePanel collapse
         isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
