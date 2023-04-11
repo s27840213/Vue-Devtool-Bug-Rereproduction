@@ -36,7 +36,6 @@ const webpack = require('webpack')
 // const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const PrerenderSPAPlugin = require('prerender-spa-plugin-next')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
@@ -246,29 +245,6 @@ module.exports = defineConfig({
         //     outputFormat: 'humanVerbose',
         //     loaderTopFiles: 5
         // }])
-    },
-
-    configureWebpack: {
-        // 优化
-        optimization: {
-            minimizer: [
-                new UglifyJsPlugin({
-                    uglifyOptions: {
-                        output: { // 删除注释
-                            comments: false
-                        },
-                        // 生产环境自动删除console
-                        compress: {
-                            // drop_debugger: true, // 清除 debugger 语句
-                            // drop_console: true, // 清除console语句
-                            // pure_funcs: ['console.log']
-                        }
-                    },
-                    sourceMap: false,
-                    parallel: true
-                })
-            ]
-        }
     },
 
     css: {
