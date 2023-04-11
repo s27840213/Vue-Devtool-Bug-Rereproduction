@@ -138,8 +138,8 @@ export default defineComponent({
     },
     pageStyles(): { [index: string]: string } {
       return {
-        width: `${this.config.width * this.contentScaleRatio + this.margin.right}px`,
-        height: `${this.config.height * this.contentScaleRatio + this.margin.bottom}px`,
+        width: `${this.config.width * this.contentScaleRatio * this.scaleRatio * 0.01 + this.margin.right}px`,
+        height: `${this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01 + this.margin.bottom}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
     },

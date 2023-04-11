@@ -380,7 +380,7 @@ export class MovingUtils {
         // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
         if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
           window.requestAnimationFrame(() => {
-            this.pageMovingHandler(e)
+            // this.pageMovingHandler(e)
           })
         }
       } else {
@@ -436,12 +436,19 @@ export class MovingUtils {
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
-    const { originPageSize, getCurrPage: currPage } = pageUtils
+    const { originPageSize, getCurrPage: page } = pageUtils
+    const contentScaleRatio = store.state.contentScaleRatio
+    const pageScaleRatio = store.state.pageScaleRatio * 0.01
+    console.log(pageScaleRatio)
+    const EDGE_WIDTH = {
+      x: (editorUtils.mobileSize.width - page.width * contentScaleRatio) * 0.5,
+      y: (editorUtils.mobileSize.height - page.height * contentScaleRatio) * 0.5
+    }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
 
     const newPageSize = {
-      w: this.scaleRatio * currPage.width * 0.01,
-      h: this.scaleRatio * currPage.height * 0.01
+      w: this.scaleRatio * page.width * 0.01,
+      h: this.scaleRatio * page.height * 0.01
     }
     const base = {
       x: -(newPageSize.w - originPageSize.width) * 0.5,
@@ -452,35 +459,43 @@ export class MovingUtils {
       y: (newPageSize.h - originPageSize.height) * 0.5
     }
     const diff = {
-      x: Math.abs(currPage.x + offsetPos.x - base.x),
-      y: Math.abs(currPage.y + offsetPos.y - base.y)
+      x: Math.abs(page.x + offsetPos.x - base.x),
+      y: Math.abs(page.y + offsetPos.y - base.y)
     }
-    const isReachRightEdge = currPage.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
-    const isReachLeftEdge = currPage.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
-    const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
-    const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
+    const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
+    console.log(page.x, page.width * contentScaleRatio * pageScaleRatio - editorUtils.mobileSize.width - EDGE_WIDTH.x, EDGE_WIDTH.x)
+    const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
+    const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0
+    const isReachBottomEdge = page.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
 
     if (isReachRightEdge || isReachLeftEdge) {
       pageUtils.updatePagePos(this.pageIndex, {
-        x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0
+        x: isReachRightEdge ? editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x : EDGE_WIDTH.x
       })
     } else {
       pageUtils.updatePagePos(this.pageIndex, {
-        x: offsetPos.x + currPage.x
+        x: offsetPos.x + page.x
       })
     }
 
     if (isReachTopEdge || isReachBottomEdge) {
       pageUtils.updatePagePos(this.pageIndex, {
-        y: isReachTopEdge ? -(originPageSize.height - newPageSize.h) * 0.5 : (originPageSize.height - newPageSize.h) * 0.5
+        y: isReachTopEdge ? EDGE_WIDTH.y : (originPageSize.height - newPageSize.h) * 0.5
       })
     } else {
       pageUtils.updatePagePos(this.pageIndex, {
-        y: offsetPos.y + currPage.y
+        y: offsetPos.y + page.y
       })
     }
-    this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
-    this.initialPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
+
+    if (!isReachLeftEdge && !isReachRightEdge) {
+      this.initialPos.x += offsetPos.x
+    }
+    if (!isReachBottomEdge && !isReachTopEdge) {
+      this.initialPos.y += offsetPos.y
+    }
+    // this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
+    // this.initialPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {

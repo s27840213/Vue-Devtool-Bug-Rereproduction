@@ -401,32 +401,32 @@ export default defineComponent({
       }, 0)
     },
     handleWheel(e: WheelEvent) {
-      if ((e.metaKey || e.ctrlKey) && !this.handleWheelTransition) {
-        if (!store.state.isPageScaling) {
-          store.commit('SET_isPageScaling', true)
-        }
-        clearTimeout(this.hanleWheelTimer)
-        this.hanleWheelTimer = window.setTimeout(() => {
-          store.commit('SET_isPageScaling', false)
-          if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
-            const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
-            page.style.transition = '0.3s linear'
-            this.handleWheelTransition = true
-            this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
-            setTimeout(() => {
-              page.style.transition = ''
-              this.handleWheelTransition = false
-            }, 500)
-            pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
-          }
-        }, 500)
-        const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
-        const newScaleRatio = Math.min(Math.max(Math.round(ratio), 10), 500)
-        if (newScaleRatio >= pageUtils.mobileMinScaleRatio || e.deltaY < 0) {
-          e.preventDefault()
-          this.setPageScaleRatio(newScaleRatio)
-        }
-      }
+      // if ((e.metaKey || e.ctrlKey) && !this.handleWheelTransition) {
+      //   if (!store.state.isPageScaling) {
+      //     store.commit('SET_isPageScaling', true)
+      //   }
+      //   clearTimeout(this.hanleWheelTimer)
+      //   this.hanleWheelTimer = window.setTimeout(() => {
+      //     store.commit('SET_isPageScaling', false)
+      //     if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
+      //       const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
+      //       page.style.transition = '0.3s linear'
+      //       this.handleWheelTransition = true
+      //       this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
+      //       setTimeout(() => {
+      //         page.style.transition = ''
+      //         this.handleWheelTransition = false
+      //       }, 500)
+      //       // pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
+      //     }
+      //   }, 500)
+      //   const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
+      //   const newScaleRatio = Math.min(Math.max(Math.round(ratio), 10), 500)
+      //   if (newScaleRatio >= pageUtils.mobileMinScaleRatio || e.deltaY < 0) {
+      //     e.preventDefault()
+      //     this.setPageScaleRatio(newScaleRatio)
+      //   }
+      // }
     },
     pinchHandler(e: AnyTouchEvent) {
       const { getCurrPage: page, scaleRatio } = pageUtils
@@ -444,18 +444,17 @@ export default defineComponent({
         }
         case 'move': {
           this.isPinching = true
-          const pinchScaleRatio = Math.min((e.scale + 1) / 2 * 100, MAX_SCALE_RATIO)
-          console.log('move', pinchScaleRatio)
-          const sizeDiff = {
-            // width: pageUtils.getCurrPage.width * (newScaleRatio * 0.01) - this.initPageSize.width,
-            // height: pageUtils.getCurrPage.height * (newScaleRatio * 0.01) - this.initPageSize.height
-            width: (pinchScaleRatio * 0.01 - 1) * this.initPageSize.width,
-            height: (pinchScaleRatio * 0.01 - 1) * this.initPageSize.height
+          // const pinchScaleRatio = Math.min((e.scale + 1) / 2 * 100, MAX_SCALE_RATIO)
+          const pinchScaleRatio = e.scale * this.tmpScaleRatio
+          if (!store.state.isPageScaling) {
+            store.commit('SET_isPageScaling', true)
           }
+          store.commit('SET_pageScaleRatio', pinchScaleRatio)
           break
         }
         case 'end': {
           this.isPinching = false
+          store.commit('SET_isPageScaling', false)
           console.log('end')
         }
       }

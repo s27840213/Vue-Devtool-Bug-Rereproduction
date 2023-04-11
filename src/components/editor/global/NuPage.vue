@@ -353,8 +353,10 @@ export default defineComponent({
     },
     scaleContainerStyles(): { [index: string]: string } {
       return {
-        width: `${this.config.width * this.contentScaleRatio}px`,
-        height: `${this.config.height * this.contentScaleRatio}px`,
+        // width: `${this.config.width * this.contentScaleRatio}px`,
+        // height: `${this.config.height * this.contentScaleRatio}px`,
+        width: `${this.config.width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        height: `${this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
         ...(!generalUtils.isTouchDevice() && { transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})` }),
         willChange: this.isScaling ? 'transform' : ''
       }
@@ -407,7 +409,9 @@ export default defineComponent({
       let margin = ''
       let position = 'relative'
       if (generalUtils.isTouchDevice()) {
-        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px) scale(${this.$store.state.pinchScaleRatio * 0.01})`
+        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
+        transform += this.$store.state.pinchScaleRatio !== 100 ? `scale(${this.$store.state.pinchScaleRatio * 0.01})` : ''
+        // transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px) scale(${this.$store.state.pinchScaleRatio * 0.01})`
         position = 'absolute'
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
