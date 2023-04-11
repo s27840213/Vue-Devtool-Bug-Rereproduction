@@ -3,9 +3,10 @@ import {
   IGroup, IParagraph, IText, ITmp
 } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { ISelection } from '@/interfaces/text'
+import { IAutoRescalePreParams, ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
+import { LayerType } from '@/store/types'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import _ from 'lodash'
@@ -481,6 +482,54 @@ class TextUtils {
     } else {
       this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, false, noPush)
     }
+  }
+
+  getAutoRescalePreParams(config?: IText): IAutoRescalePreParams {
+    const { pageIndex, layerIndex } = LayerUtils
+    config = config ?? LayerUtils.getLayer(pageIndex, layerIndex) as IText
+    return { center: mathUtils.getCenter(config.styles) }
+  }
+
+  handleAutoRescale(preParams: IAutoRescalePreParams, { forceFull = false, onlyCentralize = false } = {}, config?: IText) {
+    const { pageIndex, layerIndex } = LayerUtils
+    config = config ?? LayerUtils.getLayer(pageIndex, layerIndex) as IText
+    if (config.type !== LayerType.text) return
+    if (config.widthLimit !== -1 || config.styles.rotate !== 0 || !config.inAutoRescaleMode) return
+    let textHW = this.getTextHW(config, config.widthLimit)
+    const isVertical = config.styles.writingMode.includes('vertical')
+    const pageSize = (pageUtils.getPage(pageIndex) as IPage)[isVertical ? 'height' : 'width']
+    const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
+    const { center: oldCenter } = preParams
+    let x = config.styles.x
+    let y = config.styles.y
+    let scale = config.styles.scale
+    if (!onlyCentralize && (newTmpTextSize >= pageSize || forceFull)) {
+      const rescale = pageSize / newTmpTextSize
+      scale = config.styles.scale * rescale
+      textHW = {
+        width: isVertical ? textHW.width * rescale : pageSize,
+        height: isVertical ? pageSize : textHW.height * rescale
+      }
+      x = isVertical ? x : 0
+      y = isVertical ? 0 : y
+    }
+    const newCenter = mathUtils.getCenter({
+      width: textHW.width,
+      height: textHW.height,
+      x,
+      y
+    })
+
+    const offset = { x: oldCenter.x - newCenter.x, y: oldCenter.y - newCenter.y }
+    x += offset.x
+    y += offset.y
+    LayerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height, scale })
+  }
+
+  handleAutoRescaleAfter(func: () => void, { forceFull = false, onlyCentralize = false } = {}) {
+    const preParams = this.getAutoRescalePreParams()
+    func()
+    this.handleAutoRescale(preParams, { forceFull, onlyCentralize })
   }
 
   updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, handleAutoRescale = false) {

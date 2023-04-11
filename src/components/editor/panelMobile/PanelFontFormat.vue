@@ -23,6 +23,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
@@ -100,7 +101,9 @@ export default defineComponent({
     onPropertyClick(iconName: string) {
       if (iconName === 'font-vertical') {
         if (this.hasCurveText) return
-        textPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
+        textUtils.handleAutoRescaleAfter(() => {
+          textPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
+        }, { onlyCentralize: true })
       } else {
         switch (iconName) {
           case 'bold':
