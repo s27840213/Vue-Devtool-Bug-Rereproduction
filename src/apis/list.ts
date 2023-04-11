@@ -110,7 +110,7 @@ class ListService {
 
   // For other usage
   addDesign(id: string, type: string, params: IListServiceParams = {}) {
-    if (vivistickerUtils.everEntersDebugMode) return new Promise<{ flag: number }>(resolve => resolve({ flag: 0 }))
+    if (vivistickerUtils.addDesignDisabled()) return new Promise<{ flag: number }>(resolve => resolve({ flag: 0 }))
     const data = {
       token: '1',
       type,
@@ -142,7 +142,7 @@ class ListService {
 
   addRecentlyUsedColor(color: string) {
     vivistickerUtils.addAsset('color', { id: color })
-    if (vivistickerUtils.everEntersDebugMode) return
+    if (vivistickerUtils.addDesignDisabled()) return
     axios.request<IListServiceResponse>({
       url: '/add-design',
       method: 'POST',

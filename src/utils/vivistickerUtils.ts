@@ -182,6 +182,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.STANDALONE_USER_INFO.locale = locale
   }
 
+  addDesignDisabled() {
+    return this.everEntersDebugMode || window.location.hostname !== 'sticker.vivipic.com'
+  }
+
   setCurrActiveTab(tab: string) {
     store.commit('vivisticker/SET_currActiveTab', tab)
   }
