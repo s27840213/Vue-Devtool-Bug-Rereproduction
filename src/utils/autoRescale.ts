@@ -9,13 +9,10 @@ import textUtils from './textUtils'
 export default class AutoRescale {
   pageIndex: number
   layerIndex: number
-  scale: number
 
   constructor(pageIndex = layerUtils.pageIndex, layerIndex = layerUtils.layerIndex) {
-    const config = layerUtils.getLayer(pageIndex, layerIndex)
     this.pageIndex = pageIndex
     this.layerIndex = layerIndex
-    this.scale = config?.styles?.scale ?? 1
   }
 
   getAutoRescaleResult(
@@ -35,6 +32,7 @@ export default class AutoRescale {
     const page = pageUtils.getPage(this.pageIndex) as IPage
     const pageSize = page[isVertical ? 'height' : 'width']
     const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
+    const initScale = config.initScale
     const oldCenter = mathUtils.getCenter({
       x: 0,
       y: 0,
@@ -45,13 +43,13 @@ export default class AutoRescale {
     if (!onlyCentralize && (newTmpTextSize >= pageSize || forceFull)) {
       let rescale = pageSize / newTmpTextSize
       scale = config.styles.scale * rescale
-      if (scale > 1) {
-        rescale = 1 / config.styles.scale
-        scale = 1
+      if (scale > initScale) {
+        rescale = initScale / config.styles.scale
+        scale = initScale
       }
       textHW = {
-        width: isVertical ? textHW.width * rescale : pageSize,
-        height: isVertical ? pageSize : textHW.height * rescale
+        width: textHW.width * rescale,
+        height: textHW.height * rescale
       }
       x = isVertical ? x : 0
       y = isVertical ? 0 : y
