@@ -139,7 +139,6 @@ const actions: ActionTree<IDesignState, unknown> = {
   },
   async fetchDesigns({ commit, getters }, { path }) {
     const { getSortByField, getSortByDescending } = getters
-    console.log(getSortByField, getSortByDescending)
     try {
       const { data } = await designApis.getDesigns(designApis.getToken(), path, 0, getSortByField, getSortByDescending)
       commit('SET_designsPageIndex', data.next_page)
