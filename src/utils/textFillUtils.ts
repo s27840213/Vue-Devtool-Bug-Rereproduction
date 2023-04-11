@@ -184,10 +184,10 @@ class TextFill {
         styles: { textFill: newTextFill }
       })
 
-      // If fixedWidth setting changed, force split/unsplit span text
-      const oldFixedWidth = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: oldTextFill })
-      const newFixedWidth = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: newTextFill })
-      textBgUtils.splitOrMergeSpan(oldFixedWidth, newFixedWidth, layer,
+      // If SplitedSpan setting changed, force split/unsplit span text
+      const oldSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: oldTextFill })
+      const newSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: newTextFill })
+      textBgUtils.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
         pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
     }
   }

@@ -152,7 +152,7 @@ class TiptapUtils {
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
-          const config = layerUtils.getCurrLayer as IText
+          const config = textEffectUtils.getCurrentLayer()
           const splitedSpan = textBgUtils.isSplitedSpan(config.styles)
           const textEffectStyles = textEffectUtils.convertTextEffect(config)
           pObj.content = spans.map((s, sIndex) => {

@@ -1086,10 +1086,10 @@ class TextBg {
         styles: { textBg: newTextBg }
       })
 
-      // If fixedWidth setting changed, force split/unsplit span text
-      const oldFixedWidth = this.isSplitedSpan({ ...layer.styles, textBg: oldTextBg })
-      const newFixedWidth = this.isSplitedSpan({ ...layer.styles, textBg: newTextBg })
-      this.splitOrMergeSpan(oldFixedWidth, newFixedWidth, layer,
+      // If SplitedSpan setting changed, force split/unsplit span text
+      const oldSplitedSpan = this.isSplitedSpan({ ...layer.styles, textBg: oldTextBg })
+      const newSplitedSpan = this.isSplitedSpan({ ...layer.styles, textBg: newTextBg })
+      await this.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
         pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
 
       // If user leave LetterBg, reset lineHeight and fontSpacing
@@ -1100,12 +1100,12 @@ class TextBg {
     }
   }
 
-  splitOrMergeSpan(oldFixedWidth: boolean, newFixedWidth: boolean, layer: IText,
+  async splitOrMergeSpan(oldSplitedSpan: boolean, newSplitedSpan: boolean, layer: IText,
     pageIndex: number, layerIndex: number, subLayerIndex: number) {
-    if (oldFixedWidth === newFixedWidth) return
+    if (oldSplitedSpan === newSplitedSpan) return
 
     const paragraphs = cloneDeep(layer.paragraphs)
-    if (newFixedWidth) { // Split span, another one in tiptapUtils.toIParagraph
+    if (newSplitedSpan) { // Split span, another one in tiptapUtils.toIParagraph
       paragraphs.forEach(p => {
         p.spans = p.spans.flatMap(span =>
           [...span.text].map(t => ({ text: t, styles: span.styles }))
@@ -1126,10 +1126,14 @@ class TextBg {
 
     layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs }, subLayerIndex)
     tiptapUtils.updateHtml() // Vuex config => tiptap
+    // Update widthLimit for widthLimit !== -1 layers
+    const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
+    layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, subLayerIndex)
+    // Update width for tiptap layer
     textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
 
     // When fixedWith true => false, this can force tiptap merge span that have same attrs.
-    if (document.querySelector('.ProseMirror') && !newFixedWidth) {
+    if (document.querySelector('.ProseMirror') && !newSplitedSpan) {
       tiptapUtils.agent((editor: Editor) => {
         editor.commands.selectAll()
         editor.chain().updateAttributes('textStyle', { spanIndex: -1 }).run()
