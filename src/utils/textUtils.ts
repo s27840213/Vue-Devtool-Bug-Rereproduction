@@ -1,5 +1,6 @@
 import { isITextLetterBg } from '@/interfaces/format'
 import {
+  AllLayerTypes,
   IGroup, IParagraph, IText, ITmp
 } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -20,6 +21,7 @@ import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
 import textShapeUtils from './textShapeUtils'
 import tiptapUtils from './tiptapUtils'
+import { LayerType } from '@/store/types'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -498,6 +500,15 @@ class TextUtils {
 
   handleAutoRescale(pageIndex?: number, layerIndex?: number, options?: { forceFull?: boolean, onlyCentralize?: boolean }) {
     AutoRescale.handleAutoRescale(pageIndex, layerIndex, options)
+  }
+
+  turnOffAutoRescaleMode() {
+    const { getCurrLayer: config, pageIndex, layerIndex } = LayerUtils
+    if (config.type === LayerType.text && config.inAutoRescaleMode) {
+      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+        inAutoRescaleMode: false
+      })
+    }
   }
 
   updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
