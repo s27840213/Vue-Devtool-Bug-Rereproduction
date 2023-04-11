@@ -484,15 +484,13 @@ class TextUtils {
     }
   }
 
-  getAutoRescalePreParams(config?: IText): IAutoRescalePreParams {
-    const { pageIndex, layerIndex } = LayerUtils
-    config = config ?? LayerUtils.getLayer(pageIndex, layerIndex) as IText
+  getAutoRescalePreParams(pageIndex = LayerUtils.pageIndex, layerIndex = LayerUtils.layerIndex): IAutoRescalePreParams {
+    const config = LayerUtils.getLayer(pageIndex, layerIndex) as IText
     return { center: mathUtils.getCenter(config.styles) }
   }
 
-  handleAutoRescale(preParams: IAutoRescalePreParams, { forceFull = false, onlyCentralize = false } = {}, config?: IText) {
-    const { pageIndex, layerIndex } = LayerUtils
-    config = config ?? LayerUtils.getLayer(pageIndex, layerIndex) as IText
+  handleAutoRescale(preParams: IAutoRescalePreParams, { forceFull = false, onlyCentralize = false } = {}, pageIndex = LayerUtils.pageIndex, layerIndex = LayerUtils.layerIndex) {
+    const config = LayerUtils.getLayer(pageIndex, layerIndex) as IText
     if (config.type !== LayerType.text) return
     if (config.widthLimit !== -1 || config.styles.rotate !== 0 || !config.inAutoRescaleMode) return
     let textHW = this.getTextHW(config, config.widthLimit)
