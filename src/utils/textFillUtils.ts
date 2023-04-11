@@ -67,6 +67,7 @@ class TextFill {
     const spanExpandRatio = 1
     const isTextShape = config.styles.textShape.name !== 'none'
     const isTextShapeFocus = isTextShape && textFill.focus
+    const isFixedWidth = textBgUtils.isFixedWidth(config.styles)
     return div.map(p => p.map(span => {
       const rect = span[0]
       let { width: spanWidth, height: spanHeight, x, y } = rect
@@ -88,6 +89,7 @@ class TextFill {
         backgroundRepeat: 'no-repeat',
         opacity: textFill.opacity / 100,
         webkitTextFillColor: 'transparent',
+        webkitTextStrokeColor: 'transparent',
         webkitBackgroundClip: 'text',
         // About span position
         position: 'absolute',
@@ -99,11 +101,11 @@ class TextFill {
           lineHeight: 'initial',
         } : isTextShape ? {
           top: `${-spanHeight * spanExpandRatio}px`,
-          lineHeight: 'initial', // ?
+          lineHeight: 'initial',
         } : {
           top: `${y - spanHeight * spanExpandRatio}px`,
           left: `${x - spanWidth * spanExpandRatio}px`,
-          lineHeight: 'normal',
+          ...!isFixedWidth ? { lineHeight: 'initial' } : {},
         }
       }
     }))
@@ -183,8 +185,8 @@ class TextFill {
       })
 
       // If fixedWidth setting changed, force split/unsplit span text
-      const oldFixedWidth = oldTextFill.name === 'fill-img'
-      const newFixedWidth = newTextFill.name === 'fill-img'
+      const oldFixedWidth = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: oldTextFill })
+      const newFixedWidth = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: newTextFill })
       textBgUtils.splitOrMergeSpan(oldFixedWidth, newFixedWidth, layer,
         pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
     }

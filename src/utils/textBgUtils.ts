@@ -1087,8 +1087,8 @@ class TextBg {
       })
 
       // If fixedWidth setting changed, force split/unsplit span text
-      const oldFixedWidth = isITextLetterBg(oldTextBg) && oldTextBg.fixedWidth
-      const newFixedWidth = isITextLetterBg(newTextBg) && newTextBg.fixedWidth
+      const oldFixedWidth = this.isSplitedSpan({ ...layer.styles, textBg: oldTextBg })
+      const newFixedWidth = this.isSplitedSpan({ ...layer.styles, textBg: newTextBg })
       this.splitOrMergeSpan(oldFixedWidth, newFixedWidth, layer,
         pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
 

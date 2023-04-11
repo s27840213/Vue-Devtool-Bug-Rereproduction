@@ -206,7 +206,7 @@ export default defineComponent({
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
-        width: isVertical ? 'auto' : '',
+        width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
         opacity,
