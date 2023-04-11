@@ -219,9 +219,9 @@ export default defineComponent({
       const textFillStyle = this.textFillSpanStyle[pIndex]?.[sIndex] ?? {}
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
+        textFillStyle,
         textEffectStyles,
         textBgUtils.fixedWidthStyle(span.styles, p.styles, config),
-        textFillStyle,
       )
     },
     pStyle(styles: IParagraphStyle) {

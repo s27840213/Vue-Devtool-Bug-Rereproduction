@@ -183,8 +183,8 @@ export default defineComponent({
         { textIndent: fontStyles['letter-spacing'] || 'initial' },
         { transform: transforms[sIndex] || 'none' },
         bend >= 0 ? { top: baseline } : { bottom: baseline },
-        textEffectStyles,
         textFillStyle,
+        textEffectStyles,
       )
     },
     async computeDimensions(spans: ISpan[]) {
