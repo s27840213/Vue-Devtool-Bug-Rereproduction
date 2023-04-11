@@ -31,7 +31,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub") {{ btnPlan.subTitle }}
           div(class="payment__btn-plan__content__price") {{ btnPlan.price }}
             div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
-    div(class="payment__btn-subscribe" @touchend="handleBtnSubscribeClick")
+    div(class="payment__btn-subscribe" :class="{pending}" @touchend="handleBtnSubscribeClick")
       span {{ txtBtnSubscribe }}
     div(class="payment__footer")
       template(v-for="(footerLink, idx) in footerLinks")
@@ -159,6 +159,7 @@ export default defineComponent({
     }),
     ...mapGetters({
       prices: 'vivisticker/getPrices',
+      pending: 'vivisticker/getIsPaymentPending',
     }),
     txtBtnSubscribe() {
       return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
@@ -210,7 +211,8 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setFullPageConfig: 'vivisticker/SET_fullPageConfig'
+      setFullPageConfig: 'vivisticker/SET_fullPageConfig',
+      setPaymentPending: 'vivisticker/SET_paymentPending'
     }),
     handleImageChange(index: number) {
       this.idxCurrImg = index
@@ -219,9 +221,13 @@ export default defineComponent({
       this.planSelected = key
     },
     handleBtnSubscribeClick() {
+      if (this.pending) return
+      this.setPaymentPending({ purchase: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option: this.planSelected })
     },
     handleRestorePurchaseClick() {
+      if (this.pending) return
+      this.setPaymentPending({ restore: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'restore' })
     },
     handleSwipe(e: AnyTouchEvent) {
@@ -392,6 +398,10 @@ export default defineComponent({
     color: setColor(black-3);
     >span {
       width: 100%;
+    }
+    &.pending {
+      pointer-events: none;
+      opacity: 0.3;
     }
     &:active {
       opacity: 0.8;

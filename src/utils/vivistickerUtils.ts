@@ -1095,6 +1095,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       store.commit('vivisticker/SET_expireDate', expire_date)
       store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
     }
+    store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
   }
 }
 

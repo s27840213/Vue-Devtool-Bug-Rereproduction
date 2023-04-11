@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
 import { IAsset } from '@/interfaces/module'
-import { IMyDesign, IPayment, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IMyDesign, IPayment, IPaymentPending, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
@@ -131,6 +131,10 @@ const getDefaultState = (): IViviStickerState => ({
         value: NaN,
         text: ''
       },
+    },
+    pending: {
+      purchase: false,
+      restore: false
     }
   }
 })
@@ -243,7 +247,10 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getPrices(state: IViviStickerState): IPrices {
     if (state.isStandaloneMode) return DEFAULT_PRICES[i18n.global.locale] ?? DEFAULT_PRICES.us
     return state.payment.prices
-  }
+  },
+  getIsPaymentPending(state) {
+    return Object.entries(state.payment.pending).some(([key, value]) => value)
+  },
 }
 
 const actions: ActionTree<IViviStickerState, unknown> = {
@@ -357,6 +364,11 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_expireDate(state: IViviStickerState, expireDate) {
     state.payment.expireDate = expireDate
+  },
+  SET_paymentPending(state: IViviStickerState, data: Record<keyof IPaymentPending, boolean>) {
+    for (const item of Object.entries(data)) {
+      state.payment.pending[item[0] as keyof IPaymentPending] = item[1]
+    }
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {

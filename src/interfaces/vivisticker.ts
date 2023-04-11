@@ -47,8 +47,14 @@ export interface IPrices {
   annually: IPrice
 }
 
+export interface IPaymentPending {
+  purchase: boolean,
+  restore: boolean
+}
+
 export interface IPayment {
   subscribed: boolean,
   expireDate: string,
-  prices: IPrices
+  prices: IPrices,
+  pending: IPaymentPending
 }

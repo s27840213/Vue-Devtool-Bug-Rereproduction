@@ -5,12 +5,7 @@ transition(name="panel-up")
       div(class="full-page__video")
         video(autoplay playsinline muted loop :src="videoSource" :poster="thumbnail")
     payment(v-if="fullPageType === 'payment'" :target="fullPageParams.target")
-    template(v-if="fullPageType === 'welcome'")
-      div(class="full-page__welcome")
-        img(:src="require(`@/assets/img/png/pricing/${$i18n.locale}/vivisticker_welcome.png`)")
-        div(class="full-page__welcome__text body-MD text-white") {{ $t('STK0054') }}
-        div(class="full-page__welcome__btn-start" @click.prevent.stop="handleClose")
-          span {{ $t('STK0055') }}
+    welcome(v-if="fullPageType === 'welcome'")
     div(v-if="showCloseButton"
       class="full-page__close"
       @click.prevent.stop="handleClose")
@@ -23,10 +18,12 @@ transition(name="panel-up")
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import Payment from './Payment.vue'
+import Welcome from './Welcome.vue'
 
 export default defineComponent({
   components: {
-    Payment
+    Payment,
+    Welcome
   },
   data() {
     return {
