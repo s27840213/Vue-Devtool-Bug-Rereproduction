@@ -43,8 +43,12 @@ export default class AutoRescale {
     })
     let scale = config.styles.scale
     if (!onlyCentralize && (newTmpTextSize >= pageSize || forceFull)) {
-      const rescale = pageSize / newTmpTextSize
+      let rescale = pageSize / newTmpTextSize
       scale = config.styles.scale * rescale
+      if (scale > 1) {
+        rescale = 1 / config.styles.scale
+        scale = 1
+      }
       textHW = {
         width: isVertical ? textHW.width * rescale : pageSize,
         height: isVertical ? pageSize : textHW.height * rescale
