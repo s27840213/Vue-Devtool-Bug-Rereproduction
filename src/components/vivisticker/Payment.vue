@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="payment" :class="{wide: isTablet && isLandscape}" v-touch @swipe="handleSwipe")
+div(class="payment" v-touch @swipe="handleSwipe")
   carousel(
     :items="carouselItems"
     :itemWidth="containerWidth"
@@ -196,7 +196,7 @@ export default defineComponent({
       ]
     },
     containerWidth() {
-      return this.isTablet && this.isLandscape ? round(this.windowSize.width * 0.44) : this.windowSize.width
+      return this.isTablet && this.isLandscape ? round(this.windowSize.width * 0.44) : this.windowSize.width // round to prevent subpixel problem
     },
     containerPadding() {
       return (this.windowSize.width - this.containerWidth) / 2
@@ -245,20 +245,19 @@ export default defineComponent({
 <style lang="scss" scoped>
 .payment {
   @include size(100%);
+  @include no-scrollbar;
   display: flex;
   flex-direction: column;
   font-family: 'Poppins';
   overflow-x: hidden;
-  &.wide {
-    width: v-bind(containerWidth); // prevent subpixel problem
-    margin: 0 auto;
-  }
+  width: v-bind("containerWidth + 'px'");
+  margin: 0 auto;
   &__carousel-item {
     display: flex;
     justify-content: center;
     width: inherit;
-    height: 75vw;
-    max-height: v-bind("isLandscape ? '50vh' : 'unset'");
+    height: v-bind("containerWidth * 0.75 + 'px'");
+    // max-height: calc(100vh - 414px);
     &__img {
       width: 100%;
       object-fit: cover;
@@ -287,7 +286,7 @@ export default defineComponent({
     }
   }
   &__content {
-    margin: 0px v-bind(padding);
+    margin: 0px v-bind(padding) 84px v-bind(padding);
     &__indicator {
       margin: 42px auto 0 auto;
       display: flex;
