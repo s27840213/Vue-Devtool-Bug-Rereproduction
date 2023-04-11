@@ -1066,7 +1066,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const { monthly, annually, priceCurrency, expire_date } = data
     const currencyFormaters = {
       TWD: (value: string) => `${value}元`,
-      USD: (value: string) => `$${value}`,
+      USD: (value: string) => `$${(+value).toFixed(2)}`,
       JPY: (value: string) => `¥${value}円(税込)`
     } as {[key: string]: (value: string) => string}
     if (Object.keys(currencyFormaters).includes(priceCurrency)) {
