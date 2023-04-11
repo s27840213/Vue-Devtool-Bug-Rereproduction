@@ -1150,6 +1150,11 @@ export default defineComponent({
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
+
+      if (this.config.type === LayerType.text && this.config.inAutoRescaleMode) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { inAutoRescaleMode: false })
+      }
+
       let width = this.getLayerWidth()
       let height = this.getLayerHeight()
       const initWidth = this.initSize.width
