@@ -31,7 +31,6 @@ import layerUtils from '@/utils/layerUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
@@ -320,6 +319,7 @@ export default defineComponent({
           const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
           TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+          TextUtils.handleAutoRescale(undefined, pageIndex, layerIndex)
         })
         TextPropUtils.updateTextPropsState({
           font: this.item.id,
