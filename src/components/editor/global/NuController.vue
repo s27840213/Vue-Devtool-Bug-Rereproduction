@@ -1626,7 +1626,7 @@ export default defineComponent({
       const oldCenter = mathUtils.getCenter(text.styles)
       const needAutoRescale = this.needAutoRescale && textChanged
 
-      let widthLimit = this.getLayerRotate() ? getSize() : this.config.widthLimit
+      let widthLimit = this.needAutoRescale ? -1 : (this.getLayerRotate() ? getSize() : this.config.widthLimit)
       let textHW = TextUtils.getTextHW(text, widthLimit)
       let layerX = this.getLayerPos().x
       let layerY = this.getLayerPos().y
@@ -1647,16 +1647,10 @@ export default defineComponent({
           //   layerPos = 0
           //   widthLimit = pageSize
           // }
-          if (textChanged) {
-            if (composing) this.widthLimitSetDuringComposition = true
-            textHW = TextUtils.getTextHW(text, pageSize)
-            layerPos = 0
-            widthLimit = pageSize
-          }
-          // if (composing) this.widthLimitSetDuringComposition = true
-          // textHW = TextUtils.getTextHW(text, pageSize)
-          // layerPos = 0
-          // widthLimit = pageSize
+          if (composing) this.widthLimitSetDuringComposition = true
+          textHW = TextUtils.getTextHW(text, pageSize)
+          layerPos = 0
+          widthLimit = pageSize
         } else if (reachLeftLimit || reachRightLimit) {
           // don't delete below, it's disabled temporarily only
           // if (!this.needAutoRescale) {
@@ -1665,16 +1659,10 @@ export default defineComponent({
           //   textHW = TextUtils.getTextHW(text, widthLimit)
           //   layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
           // }
-          if (textChanged) {
-            if (composing) this.widthLimitSetDuringComposition = true
-            widthLimit = getSize()
-            textHW = TextUtils.getTextHW(text, widthLimit)
-            layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
-          }
-          // if (composing) this.widthLimitSetDuringComposition = true
-          // widthLimit = getSize()
-          // textHW = TextUtils.getTextHW(text, widthLimit)
-          // layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
+          if (composing) this.widthLimitSetDuringComposition = true
+          widthLimit = getSize()
+          textHW = TextUtils.getTextHW(text, widthLimit)
+          layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
 
         layerX = isVertical ? layerX : layerPos
