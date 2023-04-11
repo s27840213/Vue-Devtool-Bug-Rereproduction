@@ -75,7 +75,6 @@
     "tiny-emitter": "^2.1.0",
     "tinycolor": "^0.0.1",
     "tiptap-commands": "^1.17.1",
-    "uglifyjs-webpack-plugin": "^2.2.0",
     "uuid": "^8.3.2",
     "vconsole": "^3.14.6",
     "vite-plugin-optimize-persist": "^0.1.2",
