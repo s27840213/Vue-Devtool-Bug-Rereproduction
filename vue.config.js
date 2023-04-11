@@ -61,17 +61,17 @@ module.exports = defineConfig({
         // 添加 esbuild-loader
 
         config.module
-        .rule('js')
-        .test(/\.(js|jsx|ts|tsx)$/)
-        .exclude.add(/node_modules/)
-        .end()
-        .use('esbuild-loader')
-        .loader('esbuild-loader')
-        .options({
-          loader: 'tsx',
-          target: 'es2015'
-        })
-        .end()
+            .rule('js')
+            .test(/\.(js|jsx|ts|tsx)$/)
+            .exclude.add(/node_modules/)
+            .end()
+            .use('esbuild-loader')
+            .loader('esbuild-loader')
+            .options({
+                loader: 'tsx',
+                target: 'es2015'
+            })
+            .end()
 
         /**
          * use esbuild-loader to replace babel-loader
@@ -267,8 +267,7 @@ module.exports = defineConfig({
                     sourceMap: false,
                     parallel: true
                 })
-            ],
-            minimize: false
+            ]
         }
     },
 
