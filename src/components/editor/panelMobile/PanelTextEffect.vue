@@ -71,8 +71,9 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import textUtils from '@/utils/textUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapState } from 'vuex'
 
 export default defineComponent({
@@ -176,6 +177,7 @@ export default defineComponent({
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
             textPropUtils.updateTextPropsState()
           }
+          textUtils.handleAutoRescale(undefined, undefined, { forceFull: true })
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName, Object.assign({}, effect))
