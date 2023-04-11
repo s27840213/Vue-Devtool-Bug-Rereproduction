@@ -122,7 +122,8 @@ export default defineComponent({
       initPinchPos: null as ICoordinate | null,
       tmpPinchScaleRatio: 100,
       handlePinchTimer: -1,
-      isPinching: false
+      isPinching: false,
+      isHandlingEdgeReach: false
     }
   },
   created() {
@@ -190,7 +191,6 @@ export default defineComponent({
         }
       })
       editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
-      console.log(editorUtils.mobileSize, editorUtils.mobileCenterPos, editorUtils.mobileTopLeftPos)
 
       // const editorView = this.$refs.editorView as HTMLElement
       // const rect = editorView.getBoundingClientRect()
@@ -428,15 +428,37 @@ export default defineComponent({
       //   }
       // }
     },
+    EDGE_WIDTH(): {x : number, y: number} {
+      return {
+        x: (editorUtils.mobileSize.width - pageUtils.getCurrPage.width * this.$store.state.contentScaleRatio) * 0.5,
+        y: (editorUtils.mobileSize.height - pageUtils.getCurrPage.height * this.$store.state.contentScaleRatio) * 0.5
+      }
+    },
+    pageEdgeLimitHandler(page: IPage) {
+      const contentScaleRatio = this.$store.state.contentScaleRatio
+      const pageScaleRatio = this.pageScaleRatio * 0.01
+      const EDGE_WIDTH = this.EDGE_WIDTH()
+      const isReachLeftEdge = page.x >= EDGE_WIDTH.x
+      const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x
+      const isReachTopEdge = page.y >= EDGE_WIDTH.y
+      const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
+
+      return {
+        isReachLeftEdge,
+        isReachRightEdge,
+        isReachTopEdge,
+        isReachBottomEdge
+      }
+    },
     pinchHandler(e: AnyTouchEvent) {
       const { getCurrPage: page, scaleRatio } = pageUtils
+      const contentScaleRatio = this.$store.state.contentScaleRatio
+      const pageScaleRatio = this.pageScaleRatio * 0.01
       switch (e.phase) {
         case 'start': {
           console.log('start')
           this.initPagePos.x = page.x
           this.initPagePos.y = page.y
-          // this.initPageSize.width = page.width * (scaleRatio * 0.01)
-          // this.initPageSize.height = page.height * (scaleRatio * 0.01)
           this.tmpScaleRatio = scaleRatio
           this.isScaling = true
           store.commit('SET_isPageScaling', true)
@@ -454,6 +476,46 @@ export default defineComponent({
         }
         case 'end': {
           this.isPinching = false
+          const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(page)
+          if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
+            this.isHandlingEdgeReach = true
+            const pageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+            pageEl.style.transition = 'transform .4s, webkit-transform .4s'
+            pageEl.style.transformOrigin = 'center'
+
+            const pos = { x: page.x, y: page.y }
+            const EDGE_WIDTH = this.EDGE_WIDTH()
+            if (pageScaleRatio < 1 || (isReachLeftEdge && isReachRightEdge) || (isReachTopEdge && isReachBottomEdge)) {
+              pos.x = EDGE_WIDTH.x
+              pos.y = EDGE_WIDTH.y
+              pageUtils.setScaleRatio(100)
+              console.warn(1)
+            } else {
+              if (isReachLeftEdge) {
+                console.warn(2)
+                pos.x = EDGE_WIDTH.x
+              }
+              if (isReachRightEdge) {
+                console.warn(3)
+                pos.x = editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x
+              }
+              if (isReachTopEdge) {
+                console.warn(4)
+                pos.y = EDGE_WIDTH.y
+              }
+              if (isReachBottomEdge) {
+                console.warn(5)
+                pos.y = editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
+              }
+            }
+            pageUtils.updatePagePos(layerUtils.pageIndex, pos)
+
+            setTimeout(() => {
+              this.isHandlingEdgeReach = false
+              pageEl.style.transition = ''
+              pageEl.style.transformOrigin = ''
+            }, 500)
+          }
           store.commit('SET_isPageScaling', false)
           console.log('end')
         }

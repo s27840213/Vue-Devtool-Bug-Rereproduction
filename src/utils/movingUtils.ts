@@ -439,7 +439,6 @@ export class MovingUtils {
     const { originPageSize, getCurrPage: page } = pageUtils
     const contentScaleRatio = store.state.contentScaleRatio
     const pageScaleRatio = store.state.pageScaleRatio * 0.01
-    console.log(pageScaleRatio)
     const EDGE_WIDTH = {
       x: (editorUtils.mobileSize.width - page.width * contentScaleRatio) * 0.5,
       y: (editorUtils.mobileSize.height - page.height * contentScaleRatio) * 0.5
@@ -462,11 +461,10 @@ export class MovingUtils {
       x: Math.abs(page.x + offsetPos.x - base.x),
       y: Math.abs(page.y + offsetPos.y - base.y)
     }
-    const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
-    console.log(page.x, page.width * contentScaleRatio * pageScaleRatio - editorUtils.mobileSize.width - EDGE_WIDTH.x, EDGE_WIDTH.x)
     const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
+    const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
     const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0
-    const isReachBottomEdge = page.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
+    const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y && offsetPos.y < 0
 
     if (isReachRightEdge || isReachLeftEdge) {
       pageUtils.updatePagePos(this.pageIndex, {
@@ -480,7 +478,7 @@ export class MovingUtils {
 
     if (isReachTopEdge || isReachBottomEdge) {
       pageUtils.updatePagePos(this.pageIndex, {
-        y: isReachTopEdge ? EDGE_WIDTH.y : (originPageSize.height - newPageSize.h) * 0.5
+        y: isReachBottomEdge ? editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y : EDGE_WIDTH.y
       })
     } else {
       pageUtils.updatePagePos(this.pageIndex, {
