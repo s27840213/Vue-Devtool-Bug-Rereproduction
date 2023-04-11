@@ -10,7 +10,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -88,7 +88,7 @@ export default defineComponent({
           }
         })
       }
-      this.$emit('update', { ...tiptapUtils.toIParagraph(newJSON), toRecord })
+      this.$emit('update', { ...tiptapUtils.toIParagraph(newJSON), toRecord, textChanged })
       if (!isEqual(newJSON, tiptapUtils.prevJSON)) {
         this.updateLayerProps({ isEdited: true })
         if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
@@ -109,6 +109,7 @@ export default defineComponent({
       if (editorDiv) {
         editorDiv.addEventListener('compositionend', () => {
           let toRecord = false
+          let textChanged = false
           const pages = stepsUtils.getPrevPages()
           let currLayerInPrevStep = pages[this.pageIndex].layers[this.layerIndex]
           if (currLayerInPrevStep.type === 'group') {
@@ -118,9 +119,10 @@ export default defineComponent({
           }
           if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
             toRecord = true
+            textChanged = true
           }
           this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()) })
-          this.$emit('compositionend', toRecord)
+          this.$emit('compositionend', toRecord, textChanged)
           tiptapUtils.agent(editor => {
             // setContent will be skipped while composing even when isSetContentRequired is true in NuController/NuSubController.
             // So do it here. (the JSON created by toJSON(.) is probably different from editor.getJSON(.))
