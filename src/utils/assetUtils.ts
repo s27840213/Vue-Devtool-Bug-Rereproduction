@@ -491,8 +491,11 @@ class AssetUtils {
 
     if (config.type === 'text') {
       Object.assign(config, {
-        widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
+        // widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
+        widthLimit: -1, // for autoRescaleMode
         isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
+        inAutoRescaleMode: true,
+        initScale: config.styles.scale,
         // contentEditable: true
       })
       newLayer = LayerFactary.newText(config)
