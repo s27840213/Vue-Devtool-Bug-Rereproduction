@@ -3,13 +3,13 @@ import {
   IGroup, IParagraph, IText, ITmp
 } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { IAutoRescalePreParams, ISelection } from '@/interfaces/text'
+import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
-import { LayerType } from '@/store/types'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import _ from 'lodash'
+import AutoRescale from './autoRescale'
 import cssConverter from './cssConverter'
 import GeneralUtils from './generalUtils'
 import LayerUtils from './layerUtils'
@@ -484,53 +484,23 @@ class TextUtils {
     }
   }
 
-  getAutoRescalePreParams(pageIndex = LayerUtils.pageIndex, layerIndex = LayerUtils.layerIndex): IAutoRescalePreParams {
-    const config = LayerUtils.getLayer(pageIndex, layerIndex) as IText
-    return { center: mathUtils.getCenter(config.styles) }
+  getAutoRescaleResult(
+    config: IText,
+    textHW: { width: number, height: number },
+    x: number,
+    y: number,
+    pageIndex?: number,
+    layerIndex?: number,
+    options?: { forceFull?: boolean, onlyCentralize?: boolean }
+  ): ReturnType<AutoRescale['getAutoRescaleResult']> {
+    return AutoRescale.getAutoRescaleResult(pageIndex, layerIndex, config, textHW, x, y, options)
   }
 
-  handleAutoRescale(preParams: IAutoRescalePreParams, { forceFull = false, onlyCentralize = false } = {}, pageIndex = LayerUtils.pageIndex, layerIndex = LayerUtils.layerIndex) {
-    const config = LayerUtils.getLayer(pageIndex, layerIndex) as IText
-    if (config.type !== LayerType.text) return
-    if (config.widthLimit !== -1 || config.styles.rotate !== 0 || !config.inAutoRescaleMode) return
-    let textHW = this.getTextHW(config, config.widthLimit)
-    const isVertical = config.styles.writingMode.includes('vertical')
-    const pageSize = (pageUtils.getPage(pageIndex) as IPage)[isVertical ? 'height' : 'width']
-    const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
-    const { center: oldCenter } = preParams
-    let x = config.styles.x
-    let y = config.styles.y
-    let scale = config.styles.scale
-    if (!onlyCentralize && (newTmpTextSize >= pageSize || forceFull)) {
-      const rescale = pageSize / newTmpTextSize
-      scale = config.styles.scale * rescale
-      textHW = {
-        width: isVertical ? textHW.width * rescale : pageSize,
-        height: isVertical ? pageSize : textHW.height * rescale
-      }
-      x = isVertical ? x : 0
-      y = isVertical ? 0 : y
-    }
-    const newCenter = mathUtils.getCenter({
-      width: textHW.width,
-      height: textHW.height,
-      x,
-      y
-    })
-
-    const offset = { x: oldCenter.x - newCenter.x, y: oldCenter.y - newCenter.y }
-    x += offset.x
-    y += offset.y
-    LayerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height, scale })
+  handleAutoRescale(pageIndex?: number, layerIndex?: number, options?: { forceFull?: boolean, onlyCentralize?: boolean }) {
+    AutoRescale.handleAutoRescale(pageIndex, layerIndex, options)
   }
 
-  handleAutoRescaleAfter(func: () => void, { forceFull = false, onlyCentralize = false } = {}) {
-    const preParams = this.getAutoRescalePreParams()
-    func()
-    this.handleAutoRescale(preParams, { forceFull, onlyCentralize })
-  }
-
-  updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, handleAutoRescale = false) {
+  updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
     const targetLayer = LayerUtils.getLayer(pageIndex, layerIndex)
     if (subLayerIndex === -1) { // single text layer
       const config = targetLayer as IText
@@ -538,45 +508,16 @@ class TextUtils {
         LayerUtils.updateLayerStyles(pageIndex, layerIndex, textShapeUtils.getCurveTextProps(config))
       } else {
         const widthLimit = config.widthLimit
-        let textHW = this.getTextHW(config, widthLimit)
+        const textHW = this.getTextHW(config, widthLimit)
         const isVertical = config.styles.writingMode.includes('vertical')
-        const pageSize = (pageUtils.getPage(pageIndex) as IPage)[isVertical ? 'height' : 'width']
-        const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
-        let needAutoRescale = false
-        if (handleAutoRescale) {
-          needAutoRescale = widthLimit === -1 && config.inAutoRescaleMode && config.styles.rotate === 0 && newTmpTextSize >= pageSize
-        }
         let x = config.styles.x
         let y = config.styles.y
-        if (needAutoRescale) {
-          const rescale = pageSize / newTmpTextSize
-          const scale = config.styles.scale * rescale
-          textHW = {
-            width: isVertical ? textHW.width * rescale : pageSize,
-            height: isVertical ? pageSize : textHW.height * rescale
-          }
-          x = isVertical ? x : 0
-          y = isVertical ? 0 : y
-          const oldCenter = mathUtils.getCenter(config.styles)
-          const newCenter = mathUtils.getCenter({
-            width: textHW.width,
-            height: textHW.height,
-            x,
-            y
-          })
-
-          const offset = { x: oldCenter.x - newCenter.x, y: oldCenter.y - newCenter.y }
-          x += offset.x
-          y += offset.y
-          LayerUtils.updateLayerStyles(pageIndex, layerIndex, { scale })
-        } else {
-          if (config.widthLimit === -1) {
-            // TODO: consider rotation
-            if (isVertical) {
-              y = config.styles.y - (textHW.height - config.styles.height) / 2
-            } else {
-              x = config.styles.x - (textHW.width - config.styles.width) / 2
-            }
+        if (config.widthLimit === -1) {
+          // TODO: consider rotation
+          if (isVertical) {
+            y = config.styles.y - (textHW.height - config.styles.height) / 2
+          } else {
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
           }
         }
         LayerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })

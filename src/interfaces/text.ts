@@ -30,7 +30,3 @@ export interface ICurveTextPostParams {
   oldSize: { width: number, height: number },
   newSize: { width: number, height: number }
 }
-
-export interface IAutoRescalePreParams {
-  center: { x: number, y: number }
-}
