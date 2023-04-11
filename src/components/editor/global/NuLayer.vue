@@ -540,7 +540,7 @@ export default defineComponent({
       return pageUtils.scaleRatio / 100
     },
     compensationRatio(): number {
-      return Math.max(1, this.pageScaleRatio())
+      return !this.useMobileEditor ? 1 : Math.max(1, this.pageScaleRatio())
     },
     translateStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles
