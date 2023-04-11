@@ -1686,7 +1686,7 @@ export default defineComponent({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
 
       if (needAutoRescale) {
-        const { textHW: newTextHW, x: newX, y: newY, scale } = TextUtils.getAutoRescaleResult(text, textHW, layerX, layerY, { forceFull }, this.pageIndex, this.layerIndex)
+        const { textHW: newTextHW, x: newX, y: newY, scale } = TextUtils.getAutoRescaleResult(text, textHW, layerX, layerY, { forceFull }, this.pageIndex)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
           width: newTextHW.width,
           height: newTextHW.height,
