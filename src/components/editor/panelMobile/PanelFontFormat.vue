@@ -102,7 +102,7 @@ export default defineComponent({
       if (iconName === 'font-vertical') {
         if (this.hasCurveText) return
         textPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
-        textUtils.handleAutoRescale(undefined, undefined, { onlyCentralize: true })
+        textUtils.handleAutoRescale({ onlyCentralize: true })
       } else {
         switch (iconName) {
           case 'bold':

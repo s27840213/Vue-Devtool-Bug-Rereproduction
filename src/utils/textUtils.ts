@@ -491,15 +491,15 @@ class TextUtils {
     textHW: { width: number, height: number },
     x: number,
     y: number,
+    options?: { forceFull?: boolean, onlyCentralize?: boolean },
     pageIndex?: number,
-    layerIndex?: number,
-    options?: { forceFull?: boolean, onlyCentralize?: boolean }
+    layerIndex?: number
   ): ReturnType<AutoRescale['getAutoRescaleResult']> {
-    return AutoRescale.getAutoRescaleResult(pageIndex, layerIndex, config, textHW, x, y, options)
+    return AutoRescale.getAutoRescaleResult(config, textHW, x, y, options, pageIndex, layerIndex)
   }
 
-  handleAutoRescale(pageIndex?: number, layerIndex?: number, options?: { forceFull?: boolean, onlyCentralize?: boolean }) {
-    AutoRescale.handleAutoRescale(pageIndex, layerIndex, options)
+  handleAutoRescale(options?: { forceFull?: boolean, onlyCentralize?: boolean }, pageIndex?: number, layerIndex?: number) {
+    AutoRescale.handleAutoRescale(options, pageIndex, layerIndex)
   }
 
   turnOffAutoRescaleMode() {

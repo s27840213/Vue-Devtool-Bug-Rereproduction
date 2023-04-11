@@ -19,7 +19,7 @@ export default class AutoRescale {
   }
 
   getAutoRescaleResult(
-    { forceFull = false, onlyCentralize = false } = {},
+    { forceFull = true, onlyCentralize = false } = {},
     config: IText,
     textHW: { width: number, height: number },
     x: number,
@@ -84,12 +84,12 @@ export default class AutoRescale {
   }
 
   static getAutoRescaleResult(
-    pageIndex = layerUtils.pageIndex, layerIndex = layerUtils.layerIndex,
     config: IText,
     textHW: { width: number, height: number },
     x: number,
     y: number,
-    options?: { forceFull?: boolean, onlyCentralize?: boolean }
+    options?: { forceFull?: boolean, onlyCentralize?: boolean },
+    pageIndex = layerUtils.pageIndex, layerIndex = layerUtils.layerIndex
   ): {
     textHW: { width: number, height: number },
     x: number,
@@ -105,7 +105,7 @@ export default class AutoRescale {
     )
   }
 
-  static handleAutoRescale(pageIndex = layerUtils.pageIndex, layerIndex = layerUtils.layerIndex, options?: { forceFull?: boolean, onlyCentralize?: boolean }) {
+  static handleAutoRescale(options?: { forceFull?: boolean, onlyCentralize?: boolean }, pageIndex = layerUtils.pageIndex, layerIndex = layerUtils.layerIndex) {
     (new AutoRescale(pageIndex, layerIndex)).handleAutoRescale(options)
   }
 }
