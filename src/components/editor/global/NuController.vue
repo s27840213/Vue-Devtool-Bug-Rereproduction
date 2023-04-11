@@ -1587,7 +1587,7 @@ export default defineComponent({
       return textShape && textShape.name === 'curve'
     },
     calcSize(config: IText, composing: boolean, keepCenter = false, textChanged = false) {
-      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing, keepCenter, false, textChanged)
+      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing, keepCenter, textChanged)
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean, keepCenter?: boolean, textChanged?: boolean }) {
       const config = generalUtils.deepCopy(this.config)
@@ -1614,13 +1614,13 @@ export default defineComponent({
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-        this.textSizeRefresh(this.config as IText, false, false, this.needAutoRescale, textChanged)
+        this.textSizeRefresh(this.config as IText, false, false, textChanged)
       }
       if (toRecord) {
         this.waitFontLoadingAndRecord(textChanged)
       }
     },
-    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean, forceFull = false, textChanged = false) {
+    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean, textChanged = false) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const getSize = () => isVertical ? this.getLayerHeight() : this.getLayerWidth()
       const oldCenter = mathUtils.getCenter(text.styles)
@@ -1641,18 +1641,27 @@ export default defineComponent({
 
         if (reachLeftLimit && reachRightLimit) {
           if (composing) this.widthLimitSetDuringComposition = true // this will trigger forceFull
-          if (!this.needAutoRescale) {
-            textHW = TextUtils.getTextHW(text, pageSize)
-            layerPos = 0
-            widthLimit = pageSize
-          }
+          // don't delete below, it's disabled temporarily only
+          // if (!this.needAutoRescale) {
+          //   textHW = TextUtils.getTextHW(text, pageSize)
+          //   layerPos = 0
+          //   widthLimit = pageSize
+          // }
+          textHW = TextUtils.getTextHW(text, pageSize)
+          layerPos = 0
+          widthLimit = pageSize
         } else if (reachLeftLimit || reachRightLimit) {
-          if (!this.needAutoRescale) {
-            if (composing) this.widthLimitSetDuringComposition = true // don't trigger forceFull when in auto rescale mode
-            widthLimit = getSize()
-            textHW = TextUtils.getTextHW(text, widthLimit)
-            layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
-          }
+          // don't delete below, it's disabled temporarily only
+          // if (!this.needAutoRescale) {
+          //   if (composing) this.widthLimitSetDuringComposition = true // don't trigger forceFull when in auto rescale mode
+          //   widthLimit = getSize()
+          //   textHW = TextUtils.getTextHW(text, widthLimit)
+          //   layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
+          // }
+          if (composing) this.widthLimitSetDuringComposition = true // don't trigger forceFull when in auto rescale mode
+          widthLimit = getSize()
+          textHW = TextUtils.getTextHW(text, widthLimit)
+          layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
 
         layerX = isVertical ? layerX : layerPos
@@ -1686,7 +1695,7 @@ export default defineComponent({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
 
       if (needAutoRescale) {
-        const { textHW: newTextHW, x: newX, y: newY, scale } = TextUtils.getAutoRescaleResult(text, textHW, layerX, layerY, { forceFull }, this.pageIndex)
+        const { textHW: newTextHW, x: newX, y: newY, scale } = TextUtils.getAutoRescaleResult(text, textHW, layerX, layerY, undefined, this.pageIndex)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
           width: newTextHW.width,
           height: newTextHW.height,

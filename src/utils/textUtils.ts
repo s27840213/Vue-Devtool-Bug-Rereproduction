@@ -490,7 +490,7 @@ class TextUtils {
     textHW: { width: number, height: number },
     x: number,
     y: number,
-    { forceFull = true, onlyCentralize = false } = {},
+    { forceFull = true, onlyCentralize = true } = {},
     pageIndex = LayerUtils.pageIndex
   ): {
     textHW: { width: number, height: number },
@@ -642,7 +642,7 @@ class TextUtils {
     this.fixGroupYCoordinates(pageIndex, layerIndex)
   }
 
-  getAddPosition(width: number, height: number, pageIndex?: number) {
+  getAddPosition(width: number, height: number, pageIndex?: number): { x: number, y: number, center: boolean } {
     const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const page = LayerUtils.getPage(targePageIndex)
     const x = (page.width - width) / 2
@@ -654,11 +654,11 @@ class TextUtils {
         const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
         const specy = currLayer.styles.y + currLayer.styles.height
         if ((specy + height) < page.height) {
-          return { x: specx, y: specy }
+          return { x: specx, y: specy, center: false }
         }
       }
     }
-    return { x, y }
+    return { x, y, center: true }
   }
 
   resetTextField(textLayer: IText, pageIndex: number, field?: string) {

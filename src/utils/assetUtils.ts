@@ -479,12 +479,21 @@ class AssetUtils {
       has_frame
     }
 
-    Object.assign(
-      config.styles,
-      typeof y === 'undefined' || typeof x === 'undefined'
-        ? TextUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
-        : { x, y }
-    )
+    let isCenter = false
+
+    if (typeof y === 'undefined' || typeof x === 'undefined') {
+      const { x: newX, y: newY, center } = TextUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
+      Object.assign(
+        config.styles,
+        { x: newX, y: newY }
+      )
+      isCenter = center
+    } else {
+      Object.assign(
+        config.styles,
+        { x, y }
+      )
+    }
 
     let newLayer = null
     let isText = false
@@ -494,7 +503,7 @@ class AssetUtils {
         // widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
         widthLimit: -1, // for autoRescaleMode
         isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
-        inAutoRescaleMode: true,
+        inAutoRescaleMode: isCenter,
         initScale: config.styles.scale,
         // contentEditable: true
       })
