@@ -573,6 +573,8 @@ export default defineComponent({
     }
   },
   mounted() {
+    this.panelDragHeight = this.currActivePanel === 'none'
+      ? 0 : this.initPanelHeight()
     this.resizeObserver = new ResizeObserver(() => {
       this.$emit('panelHeight', this.currPanelHeight())
       // No fit page in mobile now
