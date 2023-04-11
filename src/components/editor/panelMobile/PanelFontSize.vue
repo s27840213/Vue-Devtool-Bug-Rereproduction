@@ -18,7 +18,6 @@ import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import generalUtils from '@/utils/generalUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import textUtils from '@/utils/textUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
@@ -54,7 +53,6 @@ export default defineComponent({
       set(value: number): void {
         value = generalUtils.boundValue(value, this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         textPropUtils.fontSizeHandler(value, false)
-        textUtils.turnOffAutoRescaleMode()
       }
     }
   },
