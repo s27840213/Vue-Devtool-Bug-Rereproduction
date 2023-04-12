@@ -15,9 +15,7 @@ div(class="panel-font-size")
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
-import { IGroup, ILayer } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
-import layerUtils from '@/utils/layerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import _ from 'lodash'
