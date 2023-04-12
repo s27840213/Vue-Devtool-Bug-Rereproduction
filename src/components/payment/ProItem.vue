@@ -1,5 +1,5 @@
 <template lang="pug">
-img(v-if="!inReviewMode" class="pro" loading="lazy"
+img(class="pro" loading="lazy"
     :src="require('@/assets/img/svg/pricing/vivisticker_pro.svg')" )
 </template>
 

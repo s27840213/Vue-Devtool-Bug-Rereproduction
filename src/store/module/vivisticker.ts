@@ -119,7 +119,7 @@ const getDefaultState = (): IViviStickerState => ({
   selectedDesigns: {},
   modalInfo: {},
   payment: {
-    subscribed: false,
+    isSubscribed: false,
     expireDate: '',
     prices: {
       currency: '',
@@ -251,6 +251,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getIsPaymentPending(state) {
     return Object.entries(state.payment.pending).some(([key, value]) => value)
   },
+  getIsSubscribed(state: IViviStickerState): boolean {
+    return state.payment.isSubscribed
+  }
 }
 
 const actions: ActionTree<IViviStickerState, unknown> = {
@@ -369,6 +372,9 @@ const mutations: MutationTree<IViviStickerState> = {
     for (const item of Object.entries(data)) {
       state.payment.pending[item[0] as keyof IPaymentPending] = item[1]
     }
+  },
+  SET_isSubscribed(state: IViviStickerState, isSubscribed) {
+    state.payment.isSubscribed = isSubscribed
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {

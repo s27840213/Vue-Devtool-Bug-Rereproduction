@@ -1053,7 +1053,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
-    const isPro = false
+    const isPro = store.getters['vivisticker/getIsSubscribed']
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)
       return false
@@ -1096,9 +1096,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.appToast('subscribeResult: ' + data.status)
     const { status, expire_date } = data
     if (status === 'subscribed') {
-      store.commit('vivisticker/SET_expireDate', expire_date)
+      store.commit('vivisticker/SET_isSubscribed', true)
       store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
     }
+    if (expire_date !== undefined) store.commit('vivisticker/SET_expireDate', expire_date)
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
   }
 }

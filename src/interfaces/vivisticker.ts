@@ -53,7 +53,7 @@ export interface IPaymentPending {
 }
 
 export interface IPayment {
-  subscribed: boolean,
+  isSubscribed: boolean,
   expireDate: string,
   prices: IPrices,
   pending: IPaymentPending
