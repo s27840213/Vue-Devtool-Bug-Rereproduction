@@ -66,7 +66,7 @@ export default defineComponent({
   &__description {
     @include body-MD;
     color: setColor(gray-2);
-    width: 647px;
+    width: min(647px, 90vw);
     text-align: left;
     margin-bottom: 4px;
   }
