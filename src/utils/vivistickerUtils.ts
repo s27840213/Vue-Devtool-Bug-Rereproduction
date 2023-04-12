@@ -1063,7 +1063,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, priceCurrency: string, monthly: {priceValue: string, priceText: string}, annually: {priceValue: string, priceText: string} }) {
     console.log('subscribeInfo', data)
-    const { monthly, annually, priceCurrency, expire_date } = data
+    this.appToast('subscribeInfo: ' + data.status)
+    const { status, monthly, annually, priceCurrency, expire_date } = data
     const currencyFormaters = {
       TWD: (value: string) => `${value}元`,
       USD: (value: string) => `$${(+value).toFixed(2)}`,
@@ -1074,6 +1075,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       annually.priceText = currencyFormaters[priceCurrency](annually.priceValue)
     }
 
+    store.commit('vivisticker/SET_isSubscribed', status === 'subscribed')
     store.commit('vivisticker/SET_expireDate', expire_date)
     store.commit('vivisticker/SET_prices', {
       currency: priceCurrency,
@@ -1089,7 +1091,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   subscribeResult(data: { status: 'subscribed' | 'failed', expire_date: string }) {
+    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if already got one
     console.log('subscribeResult', data)
+    this.appToast('subscribeResult: ' + data.status)
     const { status, expire_date } = data
     if (status === 'subscribed') {
       store.commit('vivisticker/SET_expireDate', expire_date)

@@ -32,7 +32,8 @@ div(class="payment" v-touch @swipe="handleSwipe")
           div(class="payment__btn-plan__content__price") {{ btnPlan.price }}
             div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
     div(class="payment__btn-subscribe" :class="{pending}" @touchend="handleBtnSubscribeClick")
-      span {{ txtBtnSubscribe }}
+      svg-icon(v-if="pending" class="spiner" iconName="spiner" iconWidth="20px" iconColor="white")
+      div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
     div(class="payment__footer")
       template(v-for="(footerLink, idx) in footerLinks")
         span(v-if="idx > 0" class="payment__footer__splitter")
@@ -224,11 +225,13 @@ export default defineComponent({
       if (this.pending) return
       this.setPaymentPending({ purchase: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option: this.planSelected })
+      this.timeout()
     },
     handleRestorePurchaseClick() {
       if (this.pending) return
       this.setPaymentPending({ restore: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'restore' })
+      this.timeout()
     },
     handleSwipe(e: AnyTouchEvent) {
       e.stopPropagation()
@@ -243,6 +246,11 @@ export default defineComponent({
     },
     handleShowWelcome() {
       this.setFullPageConfig({ type: 'welcome' })
+    },
+    timeout(delay = 30000) {
+      setTimeout(() => {
+        vivistickerUtils.subscribeResult({ status: 'failed', expire_date: '' })
+      }, delay)
     }
   }
 })
@@ -386,6 +394,7 @@ export default defineComponent({
     }
   }
   &__btn-subscribe {
+    position: relative;
     width: fit-content;
     margin: 20px auto 0 auto;
     padding: 4px 16px;
@@ -396,15 +405,25 @@ export default defineComponent({
     align-items: center;
     text-align: center;
     color: setColor(black-3);
-    >span {
+    &__text {
       width: 100%;
     }
     &.pending {
       pointer-events: none;
-      opacity: 0.3;
+      background-color: rgba(white, 0.5);
+      .payment__btn-subscribe__text {
+        visibility: hidden;
+      }
     }
     &:active {
       opacity: 0.8;
+    }
+    .spiner {
+      animation: rotation 0.5s infinite linear;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
   }
   &__footer {
@@ -500,6 +519,16 @@ export default defineComponent({
       text-align: left;
       justify-content: left;
     }
+  }
+}
+
+@keyframes rotation {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 </style>
