@@ -537,7 +537,7 @@ class AssetUtils {
 
   addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}, categoryType = -1) {
     store.commit('SET_mobileSidebarPanelOpen', false)
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, panelPreviewSrc } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, panelPreviewSrc, previewSrc } = attrs
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
 
     let newStyles = {
@@ -615,6 +615,7 @@ class AssetUtils {
     const y = imageLayers.length === 0 ? (this.pageSize.height / 2 - newStyles.height / 2) : (imageLayers[imageLayers.length - 1].styles.y + 20)
 
     const config = {
+      ...(previewSrc && { previewSrc }),
       ...(isPreview && { previewSrc: url }),
       ...(categoryType === 14 || categoryType === 15) && { categoryType },
       srcObj,
