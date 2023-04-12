@@ -225,7 +225,6 @@ export default defineComponent({
       if (this.pending) return
       this.setPaymentPending({ purchase: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option: this.planSelected })
-      this.timeout()
     },
     handleRestorePurchaseClick() {
       if (this.pending) return
