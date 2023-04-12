@@ -45,7 +45,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -262,6 +262,11 @@ export default defineComponent({
   height: 100%;
   position: absolute;
   left: 0;
+  top: 0;
+  font-feature-settings: 'liga' 0;
+  -webkit-font-feature-settings: 'liga' 0;
+  -webkit-font-smoothing: subpixel-antialiased; // for textUtils.getTextHW
+  text-rendering: geometricPrecision; // for textUtils.getTextHW
   &__BG {
     position: absolute;
     left: 0;
