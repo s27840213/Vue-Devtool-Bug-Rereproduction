@@ -7,21 +7,19 @@ div(class="nu-layer flex-center"
     :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
     ref="body")
   //- class="nu-layer"
-  //- :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
-  //- :ref="div.main ? 'body' : ''"
-  div(v-for="(div, index) in layerDivs"
-      :key="index"
-      class="full-size pos-left"
+  //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+  //- ref="body"
+  div(class="full-size pos-left"
       :class="{'preserve3D': !isTouchDevice}"
-      :style="layerStyles(div.noShadow, div.isTransparent)"
-      @pointerdown="div.main ? onPointerDown($event) : null"
-      @pointerup="div.main ? onPointerUp($event) : null"
+      :style="layerStyles()"
+      @pointerdown="onPointerDown($event)"
+      @pointerup="onPointerUp($event)"
       @contextmenu.prevent
-      @click.right.stop="div.main ? onRightClick($event) : null"
-      @dragenter="div.main ? dragEnter($event) : null"
-      @dblclick="div.main ? dblClick($event) : null")
+      @click.right.stop="onRightClick($event)"
+      @dragenter="dragEnter($event)"
+      @dblclick="dblClick($event)")
     div(class="nu-layer__scale full-size pos-left"
-        :class="{'preserve3D': !isTouchDevice}" :ref="div.main ? 'scale' : ''"
+        :class="{'preserve3D': !isTouchDevice}" ref="scale"
         :style="scaleStyles()")
       div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
           component(:is="`nu-${config.type}`"
@@ -34,9 +32,7 @@ div(class="nu-layer flex-center"
             :page="page"
             :scaleRatio="scaleRatio"
             :primaryLayer="primaryLayer"
-            :forRender="forRender"
-            :isTransparent="div.isTransparent"
-            :noShadow="div.noShadow")
+            :forRender="forRender")
           svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
             class="clip-contour full-size"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
@@ -425,16 +421,6 @@ export default defineComponent({
       }
       return ''
     },
-    layerDivs() {
-      if (this.$router.currentRoute.value.name === 'Preview' && this.renderForPDF && this.config.type === 'text') {
-        return [
-          { noShadow: false, isTransparent: true },
-          { noShadow: true, isTransparent: false, main: true }
-        ]
-      } else {
-        return [{ noShadow: false, isTransparent: false, main: true }]
-      }
-    },
     isOk2HandleFrameMouseEnter(): boolean {
       if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return false
@@ -467,13 +453,8 @@ export default defineComponent({
     frameClipFormatter(clippath: string) {
       return frameUtils.frameClipFormatter(clippath)
     },
-    layerStyles(noShadow: boolean, isTransparent: boolean): any {
+    layerStyles(): any {
       switch (this.config.type) {
-        case LayerType.text: {
-          return {
-            ...(isTransparent && { '-webkit-filter': 'opacity(1)' }),
-          }
-        }
         case LayerType.shape: {
           return {
             'mix-blend-mode': this.config.styles.blendMode,

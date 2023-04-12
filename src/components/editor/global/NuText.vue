@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="nu-text" :style="textWrapperStyle()" draggable="false")
   //- Svg BG for text effex gooey.
-  svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+  svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
     component(v-for="(elm, idx) in svgBG.content"
               :key="`textSvgBg${idx}`"
               :is="elm.tag"
@@ -17,8 +17,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :page="page"
       :subLayerIndex="subLayerIndex"
       :primaryLayer="primaryLayer"
-      :isDuplicated="idx !== duplicatedText.length-1"
-      :isTransparent="isTransparent")
+      :isDuplicated="idx !== duplicatedText.length-1")
     p(v-else
       v-for="(p, pIndex) in config.paragraphs"
       :key="`p${pIndex}`"
@@ -28,7 +27,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
         :key="`span${sIndex}`"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpanStyle, transParentStyles)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpanStyle)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
@@ -76,14 +75,6 @@ export default defineComponent({
     primaryLayer: {
       type: Object,
       default: () => { return undefined }
-    },
-    isTransparent: {
-      default: false,
-      type: Boolean
-    },
-    noShadow: {
-      default: false,
-      type: Boolean
     },
     inPreview: {
       default: false,
@@ -143,13 +134,6 @@ export default defineComponent({
         }) : [],
         {} // Original text, don't have extra css
       ]
-    },
-    transParentStyles(): {[key: string]: any} {
-      return this.isTransparent ? {
-        color: 'rgba(0, 0, 0, 0)',
-        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
-        'text-decoration-color': 'rgba(0, 0, 0, 0)'
-      } : {}
     }
   },
   watch: {
