@@ -15,22 +15,18 @@ div(class="panel-font-format")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import textShapeUtils from '@/utils/textShapeUtils'
 import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import { mapState } from 'vuex'
-import mappingUtils from '@/utils/mappingUtils'
-import textPropUtils from '@/utils/textPropUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import { defineComponent } from 'vue'
+import { mapState } from 'vuex'
 export default defineComponent({
   emits: [],
-  components: {
-    MobileSlider
-  },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     hasCurveText(): boolean {

@@ -27,6 +27,7 @@ div(class="popup-updateDesign")
           select(class="popup-updateDesign__select"
             v-model="objectInfo.locale")
             option(v-for="locale in localeOptions"
+              :key="locale"
               :value="locale") {{locale}}
         div(class="popup-updateDesign__line") tags_tw
         div
@@ -55,13 +56,13 @@ div(class="popup-updateDesign")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapGetters } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
 import designApis from '@/apis/design-info'
-import GeneralUtils from '@/utils/generalUtils'
 import store from '@/store'
+import GeneralUtils from '@/utils/generalUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

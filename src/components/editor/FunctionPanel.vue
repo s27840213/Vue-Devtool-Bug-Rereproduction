@@ -46,13 +46,11 @@ div(class="function-panel"
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import PanelBackgroundSetting from '@/components/editor/panelFunction/PanelBackgroundSetting.vue'
 import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
-import PanelColorPicker from '@/components/editor/panelFunction/PanelColorPicker.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
 import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
 import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
 import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetting.vue'
-import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
@@ -73,7 +71,6 @@ export default defineComponent({
   components: {
     PanelGeneral,
     PanelTextSetting,
-    PanelColorPicker,
     PanelBackgroundSetting,
     PanelPhotoSetting,
     PanelPageSetting,
@@ -82,7 +79,6 @@ export default defineComponent({
     PanelTextEffectSetting,
     DownloadBtn,
     PanelBgRemove,
-    PanelPhotoShadow,
     PanelImgCtrl
   },
   emits: ['toggleColorPanel'],

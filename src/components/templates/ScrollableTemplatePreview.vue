@@ -6,7 +6,8 @@ div(ref="box"
       class="scrollable-template-preview__images"
       :style="scrollStyles()")
     img(v-for="imageUrl in imageUrls"
-        :src="imageUrl")
+      :key="imageUrl"
+      :src="imageUrl")
   div(class="scrollable-template-preview__bar"
       :style="barStyles()")
     div(class="scrollable-template-preview__bar-progress"
@@ -14,10 +15,10 @@ div(ref="box"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import templateCenterUtils from '@/utils/templateCenterUtils'
 import { IContentTemplate } from '@/interfaces/template'
 import mouseUtils from '@/utils/mouseUtils'
+import templateCenterUtils from '@/utils/templateCenterUtils'
+import { defineComponent } from 'vue'
 
 const SCROLL_MARGIN_HALF = 5
 const SCROLL_MARGIN = SCROLL_MARGIN_HALF * 2

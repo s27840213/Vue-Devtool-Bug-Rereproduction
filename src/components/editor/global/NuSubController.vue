@@ -17,22 +17,22 @@ div(class="nu-sub-controller")
               :config="(config as IText)"
               :primaryLayer="primaryLayer"
               :subLayerIndex="layerIndex"
-              @keydown.37.stop
-              @keydown.38.stop
-              @keydown.39.stop
-              @keydown.40.stop
-              @keydown.ctrl.67.exact.stop.self
-              @keydown.meta.67.exact.stop.self
-              @keydown.ctrl.86.exact.stop.self
-              @keydown.meta.86.exact.stop.self
-              @keydown.ctrl.88.exact.stop.self
-              @keydown.meta.88.exact.stop.self
-              @keydown.ctrl.65.exact.stop.self
-              @keydown.meta.65.exact.stop.self
-              @keydown.ctrl.90.exact.stop.self
-              @keydown.meta.90.exact.stop.self
-              @keydown.ctrl.shift.90.exact.stop.self
-              @keydown.meta.shift.90.exact.stop.self
+              @keydown.arrow-left.stop
+              @keydown.arrow-up.stop
+              @keydown.arrow-right.stop
+              @keydown.arrow-down.stop
+              @keydown.ctrl.c.exact.stop.self
+              @keydown.meta.c.exact.stop.self
+              @keydown.ctrl.v.exact.stop.self
+              @keydown.meta.v.exact.stop.self
+              @keydown.ctrl.x.exact.stop.self
+              @keydown.meta.x.exact.stop.self
+              @keydown.ctrl.a.exact.stop.self
+              @keydown.meta.a.exact.stop.self
+              @keydown.ctrl.z.exact.stop.self
+              @keydown.meta.z.exact.stop.self
+              @keydown.ctrl.shift.z.exact.stop.self
+              @keydown.meta.shift.z.exact.stop.self
               @update="handleTextChange"
               @compositionend="handleTextCompositionEnd")
 </template>
@@ -67,7 +67,7 @@ import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
 import SvgPath from 'svgpath'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({

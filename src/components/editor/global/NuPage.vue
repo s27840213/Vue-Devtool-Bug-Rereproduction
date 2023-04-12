@@ -20,29 +20,29 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
         svg-icon(class="pointer btn-line-template mr-15"
           :pageIndex="pageIndex"
           :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="openLineTemplatePopup()"
+          @click="openLineTemplatePopup()"
           v-hint="$t('NN0138')"
         )
         //- svg-icon(class="pointer mr-5"
         //-   :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-        //-   @click.native="")
+        //-   @click="")
         //- svg-icon(class="pointer mr-15"
         //-   :iconName="'caret-down'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-        //-   @click.native="")
+        //-   @click="")
         svg-icon(class="pointer mr-10"
           :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="addPage()"
+          @click="addPage()"
           v-hint="$t('NN0139')"
         )
         svg-icon(class="pointer"
           :class="[{'mr-10': getPageCount > 1}]"
           :iconName="'duplicate-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="duplicatePage()"
+          @click="duplicatePage()"
           v-hint="$t('NN0140')"
         )
         svg-icon(class="pointer"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="deletePage()"
+          @click="deletePage()"
           v-hint="$t('NN0141')"
         )
     div(v-if="isDetailPage && !$isTouchDevice()" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
@@ -51,24 +51,24 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
           span {{pageIndex + 1}}
         //- svg-icon(class="pointer mt-10"
         //-   :iconName="'caret-up'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-        //-   @click.native="")
+        //-   @click="")
         //- svg-icon(class="pointer mt-10"
         //-   :iconName="'caret-down'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-        //-   @click.native="")
+        //-   @click="")
         svg-icon(class="pointer mt-15"
           :iconName="'add-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-          @click.native="addPage()")
+          @click="addPage()")
         svg-icon(class="pointer mt-10"
           :iconName="'duplicate-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-          @click.native="duplicatePage()")
+          @click="duplicatePage()")
         svg-icon(class="pointer mt-10"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-          @click.native="deletePage()")
+          @click="deletePage()")
     template(v-if="!isOutOfBound || hasEditingText")
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
           :style="wrapperStyles"
-          @keydown.self="handleSpecialCharacter"
+          @keydown.exact.self="handleSpecialCharacter"
           @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
           @keydown.ctrl.c.exact.self.prevent.stop="ShortcutUtils.copy()"
           @keydown.meta.c.exact.self.prevent.stop="ShortcutUtils.copy()"
@@ -158,7 +158,6 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
 </template>
 
 <script lang="ts">
-import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
@@ -190,7 +189,6 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    NuBackgroundController,
     PageContent,
     DimBackground,
     SnapLineArea,

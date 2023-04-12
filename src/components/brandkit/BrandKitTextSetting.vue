@@ -29,6 +29,7 @@ div(class="brand-kit-text-setting relative")
                     @update="handleValueUpdate")
     div(class="action-bar flex-evenly brand-kit-text-setting__config__style")
       svg-icon(v-for="(icon, index) in fontIcons"
+        :key="`${icon}-${index}`"
         class="feature-button pointer"
         :class="{active: styleHit(icon)}"
         :id="`icon-${icon}`"

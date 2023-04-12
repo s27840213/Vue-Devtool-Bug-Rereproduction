@@ -1,6 +1,6 @@
 <template lang="pug">
 transition-group(class="brand-kit-tab-logo" name="logo-list" tag="div")
-  template(v-for="logo in renderedLogos")
+  template(v-for="logo in renderedLogos" :key="logo")
     div(v-if="logo === 'add'"
       class="brand-kit-tab-logo__item add pointer relative"
       key="add"
@@ -57,13 +57,13 @@ transition-group(class="brand-kit-tab-logo" name="logo-list" tag="div")
 </template>
 
 <script lang="ts">
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import brandkitUtils from '@/utils/brandkitUtils'
-import vClickOutside from 'click-outside-vue3'
-import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
-import uploadUtils from '@/utils/uploadUtils'
 
 export default defineComponent({
   emits: ['deleteItem'],

@@ -3,10 +3,11 @@ div(class="text-effect-setting mt-25")
   //- Tabs to choose effect category: shadow, shape and bg.
   div(class="text-effect-setting-tabs")
     span(v-for="category in textEffects"
-        :selected="currTab===category.name"
-        @click="switchTab(category.name)") {{category.label}}
+      :key="category.name"
+      :selected="currTab===category.name"
+      @click="switchTab(category.name)") {{category.label}}
   div(class="action-bar")
-    template(v-for="effects1d in currCategory.effects2d")
+    template(v-for="effects1d in currCategory.effects2d" :key="effects1d.name")
       //- To choose effect, ex: hollow, splice or echo.
       div(class="text-effect-setting__effects mb-10")
         svg-icon(v-for="effect in effects1d"
@@ -29,6 +30,7 @@ div(class="text-effect-setting mt-25")
           div(v-if="option.type === 'select'"
               class="text-effect-setting-options__field--select")
             svg-icon(v-for="sel in option.select"
+              :key="`${option.key}-${sel.key}`"
               :iconName="`${option.key}-${sel.key}`"
               iconWidth="24px"
               :class="{'selected': currentStyle.endpoint === sel.key }"
@@ -66,7 +68,6 @@ div(class="text-effect-setting mt-25")
 </template>
 
 <script lang="ts">
-import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
 import { ColorEventType } from '@/store/types'
@@ -85,7 +86,6 @@ import { mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    ColorPicker,
     ColorBtn
   },
   emits: ['toggleColorPanel'],

@@ -5,7 +5,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
     div(class="footer-tabs__container bg-nav"
         :style="innerContainerStyles"
         ref="container")
-      template(v-for="(tab, index) in homeTabs")
+      template(v-for="(tab) in homeTabs")
         div(v-if="!tab.hidden" :key="tab.icon"
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
@@ -29,7 +29,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
         div(class="footer-tabs__container"
             :style="innerContainerStyles"
             @scroll.passive="updateContainerOverflow" ref="container")
-          template(v-for="(tab, index) in settingTabs")
+          template(v-for="(tab) in settingTabs")
             div(v-if="!tab.hidden" :key="tab.icon"
                 class="footer-tabs__item"
                 :class="{'click-disabled': (tab.disabled || isLocked || (tab.icon !== 'remove-bg' && inBgRemoveMode))}"

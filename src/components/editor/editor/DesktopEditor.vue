@@ -27,7 +27,7 @@ div(class="desktop-editor")
                 @click="switchApp")
               div(class="flex flex-column")
                 select(class="locale-select" v-model="inputLocale")
-                  option(v-for="locale in localeOptions" :value="locale") {{locale}}
+                  option(v-for="locale in localeOptions" :key="locale" :value="locale") {{locale}}
               div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
                 span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
           editor-view(:currPage="currPage" :isSidebarPanelOpen="isSidebarPanelOpen")

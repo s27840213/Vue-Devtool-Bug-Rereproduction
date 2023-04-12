@@ -5,9 +5,11 @@ div(class="hashtag-row")
     div(class="hashtag-row__tags__tag"
         :class="{'selected': selected.length === 0}"
         @click="handleSelectAll") {{ $t('NN0324') }}
-    div(v-for="tag in list.list" class="hashtag-row__tags__tag"
-        :class="{'selected': checkSelection(tag)}"
-        @click="handleSelect(tag)") {{ tag.name }}
+    div(v-for="tag in list.list"
+      :key="tag.id"
+      class="hashtag-row__tags__tag"
+      :class="{'selected': checkSelection(tag)}"
+      @click="handleSelect(tag)") {{ tag.name }}
 </template>
 
 <script lang="ts">

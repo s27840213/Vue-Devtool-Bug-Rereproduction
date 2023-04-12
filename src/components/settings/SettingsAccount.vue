@@ -35,7 +35,7 @@ div(class="settings-account")
       span {{ accountErrorMessage }}
     div(class="settings-account__label my-10") {{$t('NN0174')}}
     select(class="locale-select" v-model="inputLocale")
-      option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
+      option(v-for="locale in localeOptions" :key="locale.name" :value="locale.name") {{locale.name}}
     div(class="settings-account__subscribe mt-40 mb-10")
       div(class="settings-account__subscribe__wrapper"
         @click="onSubscribeClicked()")

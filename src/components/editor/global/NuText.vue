@@ -6,7 +6,9 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
               :key="`textSvgBg${idx}`"
               :is="elm.tag"
               v-bind="elm.attrs")
-  div(v-for="text, idx in duplicatedText" class="nu-text__body"
+  div(v-for="text, idx in duplicatedText"
+      :key="`text${idx}`"
+      class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBodyStyle)")
     nu-curve-text(v-if="isCurveText"
       :config="config"
@@ -18,9 +20,12 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :isDuplicated="idx !== duplicatedText.length-1"
       :isTransparent="isTransparent")
     p(v-else
-      v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+      v-for="(p, pIndex) in config.paragraphs"
+      :key="`p${pIndex}`"
+      class="nu-text__p"
       :style="pStyle(p.styles)")
       span(v-for="(span, sIndex) in p.spans"
+        :key="`span${sIndex}`"
         class="nu-text__span"
         :data-sindex="sIndex"
         :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpanStyle, transParentStyles)") {{ span.text }}

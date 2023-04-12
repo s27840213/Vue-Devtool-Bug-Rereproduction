@@ -3,7 +3,8 @@ select(class="select" :value="modelValue" autofocus required
       @input="input")
   option(v-if="ph" value="" disabled hidden selected) {{ph}}
   option(v-for="op in options"
-        :value="typeof op === 'string' ? op : op.value") {{typeof op === 'string' ? op : op.label}}
+    :key="typeof op === 'string' ? op : op.value"
+    :value="typeof op === 'string' ? op : op.value") {{typeof op === 'string' ? op : op.label}}
 </template>
 
 <script lang="ts">
@@ -37,7 +38,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.select {
+【.select {
   @include body-SM;
   height: 40px;
   padding: 6px 10px;

@@ -2,7 +2,9 @@
 div(class="brand-kit-tab" :class="`${theme}-theme`" :style="gridStyles()")
   div(class="brand-kit-tab__header"
     :class="`${theme}-theme`")
-    div(v-for="tab in tabs" class="brand-kit-tab__tab-block pointer"
+    div(v-for="tab in tabs"
+      :key="tab"
+      class="brand-kit-tab__tab-block pointer"
       :class="[{selected: checkSelected(tab)}, `${theme}-theme`]"
       @click="handleSelectTab(tab)")
       div(class="brand-kit-tab__tab-name"
@@ -29,22 +31,22 @@ div(class="brand-kit-tab" :class="`${theme}-theme`" :style="gridStyles()")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import brandkitUtils from '@/utils/brandkitUtils'
-import BrandKitTabLogo from '@/components/brandkit/tabs/BrandKitTabLogo.vue'
-import BrandKitTabText from '@/components/brandkit/tabs/BrandKitTabText.vue'
-import BrandKitTabColor from '@/components/brandkit/tabs/BrandKitTabColor.vue'
-import BrandKitTabLogoSidebar from '@/components/brandkit/tabs/BrandKitTabLogoSidebar.vue'
-import BrandKitTabTextSidebar from '@/components/brandkit/tabs/BrandKitTabTextSidebar.vue'
-import BrandKitTabColorSidebar from '@/components/brandkit/tabs/BrandKitTabColorSidebar.vue'
-import BrandKitTabLogoMobile from '@/components/brandkit/mobile-tabs/BrandKitTabLogo.vue'
-import BrandKitTabTextMobile from '@/components/brandkit/mobile-tabs/BrandKitTabText.vue'
 import BrandKitTabColorMobile from '@/components/brandkit/mobile-tabs/BrandKitTabColor.vue'
-import BrandKitTabLogoSidebarMobile from '@/components/brandkit/mobile-tabs/BrandKitTabLogoSidebar.vue'
-import BrandKitTabTextSidebarMobile from '@/components/brandkit/mobile-tabs/BrandKitTabTextSidebar.vue'
 import BrandKitTabColorSidebarMobile from '@/components/brandkit/mobile-tabs/BrandKitTabColorSidebar.vue'
-import { mapGetters, mapMutations } from 'vuex'
+import BrandKitTabLogoMobile from '@/components/brandkit/mobile-tabs/BrandKitTabLogo.vue'
+import BrandKitTabLogoSidebarMobile from '@/components/brandkit/mobile-tabs/BrandKitTabLogoSidebar.vue'
+import BrandKitTabTextMobile from '@/components/brandkit/mobile-tabs/BrandKitTabText.vue'
+import BrandKitTabTextSidebarMobile from '@/components/brandkit/mobile-tabs/BrandKitTabTextSidebar.vue'
+import BrandKitTabColor from '@/components/brandkit/tabs/BrandKitTabColor.vue'
+import BrandKitTabColorSidebar from '@/components/brandkit/tabs/BrandKitTabColorSidebar.vue'
+import BrandKitTabLogo from '@/components/brandkit/tabs/BrandKitTabLogo.vue'
+import BrandKitTabLogoSidebar from '@/components/brandkit/tabs/BrandKitTabLogoSidebar.vue'
+import BrandKitTabText from '@/components/brandkit/tabs/BrandKitTabText.vue'
+import BrandKitTabTextSidebar from '@/components/brandkit/tabs/BrandKitTabTextSidebar.vue'
 import { IDeletingItem } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   props: {

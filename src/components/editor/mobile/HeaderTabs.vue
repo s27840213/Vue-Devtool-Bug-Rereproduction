@@ -21,7 +21,7 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
           :iconColor="(inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping ? 'gray-2' : 'white'"
           :iconWidth="'22px'")
   div(class="header-bar__right")
-    div(v-for="tab in rightTabs")
+    div(v-for="(tab, index) in rightTabs" :key="`${tab.icon}-${index}`")
       div(v-if="!tab.isHidden" class="header-bar__feature-icon" :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
         @pointerdown="handleIconAction(tab.icon)")
         svg-icon(

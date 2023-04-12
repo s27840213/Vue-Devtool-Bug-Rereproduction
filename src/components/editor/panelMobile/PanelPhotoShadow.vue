@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="panel-shadow")
   div(class="flex-between photo-shadow__options mb-10")
-    div(v-for="icon in shadowOptions")
+    div(v-for="icon in shadowOptions" :key="icon")
       svg-icon(
         :key="`shadow-${icon}`"
         :iconName="`mobile-photo-shadow-${icon}`"

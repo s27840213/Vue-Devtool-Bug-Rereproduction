@@ -49,7 +49,6 @@ div(class="panel-background-remove")
 </template>
 
 <script lang="ts">
-import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import { defineComponent } from 'vue'
@@ -62,9 +61,6 @@ export default defineComponent({
       minBrushSize: 1,
       maxBrushSize: 300
     }
-  },
-  components: {
-    PopupAdjust
   },
   computed: {
     ...mapGetters({

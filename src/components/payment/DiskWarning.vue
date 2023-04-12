@@ -15,14 +15,16 @@ div(v-if="!cur.hidden && !isAdmin" class="warning")
     div(class="caption-LG") {{cur.title}}
     div(class="warning-large-desc") {{cur.large.desc}}
     div(class="warning-large-btn")
-      btn(v-for="btn in cur.large.buttons" :type="btn.type || 'light-mid'"
-          :disabled="btn.disabled" @click="btn.func()") {{btn.label}}
+      btn(v-for="btn in cur.large.buttons"
+        :key="btn.label"
+        :type="btn.type || 'light-mid'"
+        :disabled="btn.disabled" @click="btn.func()") {{btn.label}}
 </template>
 
 <script lang="ts">
+import paymentUtils from '@/utils/paymentUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import paymentUtils from '@/utils/paymentUtils'
 
 type IWarningPreset = {
   hidden: true
