@@ -489,17 +489,15 @@ export default defineComponent({
           }
 
           const sizeDiff = {
-            width: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (editorUtils.mobileSize.width * contentScaleRatio),
-            height: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (editorUtils.mobileSize.height * contentScaleRatio)
+            width: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.width * contentScaleRatio),
+            height: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.height * contentScaleRatio)
           }
-          console.log(page.mobilePhysicalSize)
-          console.log(e.x, e.y)
           console.log(translationRatio.x, translationRatio.y)
 
-          // pageUtils.updatePagePos(0, {
-          //   x: this.initPagePos.x - sizeDiff.width * translationRatio.x,
-          //   y: this.initPagePos.y - sizeDiff.height * translationRatio.y
-          // })
+          pageUtils.updatePagePos(0, {
+            x: this.initPagePos.x - sizeDiff.width * translationRatio.x,
+            y: this.initPagePos.y - sizeDiff.height * translationRatio.y
+          })
 
           break
         }
@@ -509,8 +507,8 @@ export default defineComponent({
           if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
             this.isHandlingEdgeReach = true
             const pageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-            pageEl.style.transition = 'transform .4s, webkit-transform .4s'
-            pageEl.style.transformOrigin = 'center'
+            // pageEl.style.transition = 'width 2s, height 2s'
+            pageEl.style.transition = 'transform .4s, webkit-transform .4s, width .4s, height .4s'
 
             const pos = { x: page.x, y: page.y }
             const EDGE_WIDTH = this.EDGE_WIDTH()
