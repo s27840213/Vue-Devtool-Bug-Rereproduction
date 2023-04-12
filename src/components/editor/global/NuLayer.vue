@@ -561,11 +561,12 @@ export default defineComponent({
       const { scale, scaleX, scaleY } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
-      let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
+      let transform = ''
+      // let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
       if (!isImgType && this.compensationRatio() !== 1 && scaleX !== 1 && scaleY !== 1) {
         transform += `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
       }
-      const hasActualScale = transform !== 'scale(1)'
+      const hasActualScale = !!transform && transform !== 'scale(1)'
       const styles = {
         ...(pageUtils._3dEnabledPageIndex === this.pageIndex && { transformStyle: type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d' })
       } as Record<string, string>

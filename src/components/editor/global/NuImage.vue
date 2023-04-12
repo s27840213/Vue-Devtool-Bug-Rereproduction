@@ -987,12 +987,12 @@ export default defineComponent({
     scaledConfig(): { [index: string]: string | number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
       return {
-        width: width * this.contentScaleRatio,
-        height: height * this.contentScaleRatio,
-        imgWidth: imgWidth * this.contentScaleRatio,
-        imgHeight: imgHeight * this.contentScaleRatio,
-        imgX: imgX * this.contentScaleRatio,
-        imgY: imgY * this.contentScaleRatio
+        width: width * this.contentScaleRatio * this.scaleRatio * 0.01,
+        height: height * this.contentScaleRatio * this.scaleRatio * 0.01,
+        imgWidth: imgWidth * this.contentScaleRatio * this.scaleRatio * 0.01,
+        imgHeight: imgHeight * this.contentScaleRatio * this.scaleRatio * 0.01,
+        imgX: imgX * this.contentScaleRatio * this.scaleRatio * 0.01,
+        imgY: imgY * this.contentScaleRatio * this.scaleRatio * 0.01
       }
     },
     cssFilterElms() {

@@ -253,11 +253,12 @@ export default defineComponent({
       if (shadow && shadow.srcObj?.type) {
         const { imgWidth, imgHeight, imgX, imgY } = shadow.styles
         const { horizontalFlip, verticalFlip, scale } = this.config.styles
-        const x = (horizontalFlip ? -imgX : imgX) * scale * this.contentScaleRatio
-        const y = (verticalFlip ? -imgY : imgY) * scale * this.contentScaleRatio
+        const _f = scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01
+        const x = (horizontalFlip ? -imgX : imgX) * _f
+        const y = (verticalFlip ? -imgY : imgY) * _f
         return {
-          width: (imgWidth * scale * this.contentScaleRatio).toString() + 'px',
-          height: (imgHeight * scale * this.contentScaleRatio).toString() + 'px',
+          width: (imgWidth * _f).toString() + 'px',
+          height: (imgHeight * _f).toString() + 'px',
           transform: `translate(${x}px, ${y}px)`
         }
       }
@@ -269,9 +270,9 @@ export default defineComponent({
     styles(): Record<string, string> {
       if (!this.isFrameImg) {
         return {
-          width: `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,
-          height: `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio}px`,
-          // For controll pointer-events from parent, please don't add any pointer-events: initial to layer component.
+          width: `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`,
+          height: `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`,
+          // For controll pointer-events from parent, please don't add any pointer-events: initial to layer component.this.contentScaleRatio * this.$store.state.pageScaleRatio *
           ...(this.contentScaleRatio !== 1 && { transform: `scale(${1 / this.contentScaleRatio})` }),
         }
       }

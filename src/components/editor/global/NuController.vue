@@ -1214,7 +1214,7 @@ export default defineComponent({
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 1 / this.contentScaleRatio : undefined)
+      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 1 / this.contentScaleRatio * 100 / this.$store.getters.getPageScaleRatio : undefined)
       const [dx, dy] = [diff.offsetX, diff.offsetY]
 
       /**
