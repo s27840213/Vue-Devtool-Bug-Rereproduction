@@ -459,19 +459,48 @@ export default defineComponent({
           console.log('start')
           this.initPagePos.x = page.x
           this.initPagePos.y = page.y
+          this.initPinchPos = {
+            x: e.x,
+            y: e.y
+          }
           this.tmpScaleRatio = scaleRatio
           this.isScaling = true
           store.commit('SET_isPageScaling', true)
           break
         }
         case 'move': {
+          if (!this.initPinchPos) {
+            this.initPinchPos = {
+              x: e.x,
+              y: e.y
+            }
+          }
           this.isPinching = true
           // const pinchScaleRatio = Math.min((e.scale + 1) / 2 * 100, MAX_SCALE_RATIO)
-          const pinchScaleRatio = e.scale * this.tmpScaleRatio
+          const newScaleRatio = e.scale * this.tmpScaleRatio
           if (!store.state.isPageScaling) {
             store.commit('SET_isPageScaling', true)
           }
-          store.commit('SET_pageScaleRatio', pinchScaleRatio)
+          store.commit('SET_pageScaleRatio', newScaleRatio)
+
+          const translationRatio = {
+            x: (this.initPinchPos.x - page.mobilePhysicalSize.pageCenterPos.x) / (page.mobilePhysicalSize.originSize.width) + 0.5,
+            y: (this.initPinchPos.y - page.mobilePhysicalSize.pageCenterPos.y) / (page.mobilePhysicalSize.originSize.height) + 0.5
+          }
+
+          const sizeDiff = {
+            width: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (editorUtils.mobileSize.width * contentScaleRatio),
+            height: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (editorUtils.mobileSize.height * contentScaleRatio)
+          }
+          console.log(page.mobilePhysicalSize)
+          console.log(e.x, e.y)
+          console.log(translationRatio.x, translationRatio.y)
+
+          // pageUtils.updatePagePos(0, {
+          //   x: this.initPagePos.x - sizeDiff.width * translationRatio.x,
+          //   y: this.initPagePos.y - sizeDiff.height * translationRatio.y
+          // })
+
           break
         }
         case 'end': {

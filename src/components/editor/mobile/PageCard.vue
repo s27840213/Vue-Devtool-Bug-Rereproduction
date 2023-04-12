@@ -1,5 +1,6 @@
 <template lang="pug">
 div(class="page-card"
+    :id="`page-card_${pageIndex}`"
     :style="cardStyle"
     ref="card")
   nu-page(

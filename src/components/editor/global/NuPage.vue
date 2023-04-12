@@ -256,6 +256,13 @@ export default defineComponent({
   },
   emits: ['stepChange'],
   mounted() {
+    const page = this.$refs.page as HTMLElement
+    const rect = page.getBoundingClientRect()
+    this.$store.commit('SET_pagePhysicalSize', {
+      pageIndex: this.pageIndex,
+      originSize: { width: rect.width, height: rect.height },
+      pageCenterPos: { x: rect.left + rect.width * 0.5, y: rect.top + rect.height * 0.5 }
+    })
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
