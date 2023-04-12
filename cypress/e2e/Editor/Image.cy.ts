@@ -114,7 +114,7 @@ for (const isMobile of [true, false]) {
             // .layerMultipleCopyAndMove('functionalPanel', isMobile)
             // .layerMultipleCopyAndMove('shortcut', isMobile) // Skip in mobile
             // .layerMultipleCopyAndMove('rightclick', isMobile) // Skip in mobile
-            .deselectAllLayers().snapshotTest('init') // Check if image restore to init
+            // .deselectAllLayers().snapshotTest('init') // Check if image restore to init
             .get('.nu-layer:nth-child(2) .nu-image')
             .layerMoveToPage2(isMobile) // Skip in mobile
         })

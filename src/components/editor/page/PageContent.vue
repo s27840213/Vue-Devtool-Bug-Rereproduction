@@ -21,7 +21,7 @@ div(class="overflow-container"
             :page="config"
             :color="config.backgroundColor"
             :key="config.backgroundImage.config.id"
-            @mousedown.native.left="pageClickHandler()"
+            @mousedown.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
             :padding="contentStyles.margin")
         div(class="layers-wrapper" :class="{'preserve3D': !isTouchDevice}")
@@ -51,7 +51,6 @@ div(class="overflow-container"
 
 <script lang="ts">
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -75,8 +74,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    NuBgImage,
-    LazyLoad
+    NuBgImage
   },
   props: {
     snapUtils: Object,

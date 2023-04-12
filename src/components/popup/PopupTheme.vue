@@ -9,8 +9,10 @@ div(class="popup-theme text-left"
     div(class="caption-LG body-2 mb-5") {{ $t('NN0321') }}
     checkbox(v-model="all"
             class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{$t('NN0324')}}
-    checkbox(v-for="theme in themes" v-model="selected[theme.id]"
-            class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{theme.title}}
+    checkbox(v-for="theme in themes"
+      :key="theme.id"
+      v-model="selected[theme.id]"
+      class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{theme.title}}
   div(class="popup-theme-buttons")
     btn(class="popup-theme-buttons__btn popup-theme-buttons__btn--cancel rounded"
       type="primary-sm"
@@ -22,14 +24,14 @@ div(class="popup-theme text-left"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
 import Checkbox from '@/components/global/Checkbox.vue'
 import { Itheme } from '@/interfaces/theme'
-import themeUtils from '@/utils/themeUtils'
-import { mapValues } from 'lodash'
 import pageUtils from '@/utils/pageUtils'
+import themeUtils from '@/utils/themeUtils'
+import vClickOutside from 'click-outside-vue3'
+import { mapValues } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {

@@ -59,13 +59,14 @@ div(:layer-index="`${layerIndex}`"
             @keydown.meta.shift.z.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
-        div(v-if="!$isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-            class="control-point__corner-rotate scaler"
-            :ref="`corner-rotate-${index}`"
-            :key="`corner-rotate-${index}`"
-            :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-            @pointerdown.stop="rotateStart($event, index)"
-            @touchstart="disableTouchEvent")
+        template(v-if="!$isTouchDevice()" )
+          div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+              class="control-point__corner-rotate scaler"
+              :ref="`corner-rotate-${index}`"
+              :key="`corner-rotate-${index}`"
+              :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+              @pointerdown.stop="rotateStart($event, index)"
+              @touchstart="disableTouchEvent")
         div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
             class="control-point"
             :key="index"
@@ -74,6 +75,7 @@ div(:layer-index="`${layerIndex}`"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
         div(v-for="(resizer, index) in getResizer(controlPoints)"
+            :key="index"
             class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-${index}`"
@@ -84,17 +86,19 @@ div(:layer-index="`${layerIndex}`"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="$isTouchDevice()" v-for="(resizer, index) in getResizer(controlPoints, false, true)"
-            class="control-point__resize-bar-wrapper")
-          div(class="control-point resizer"
-              :key="`resizer-touch-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
-              @touchstart="disableTouchEvent")
-          div(class="control-point resizer"
-              :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
-              @touchstart="disableTouchEvent")
+        template(v-if="$isTouchDevice()" )
+          div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
+              :key="index"
+              class="control-point__resize-bar-wrapper")
+            div(class="control-point resizer"
+                :key="`resizer-touch-${index}`"
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
+                @touchstart="disableTouchEvent")
+            div(class="control-point resizer"
+                :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
+                @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice()"
             class="control-point__resize-bar-wrapper")
           div(v-for="(resizer, index) in getResizer(controlPoints, true)"
@@ -108,12 +112,13 @@ div(:layer-index="`${layerIndex}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
             @pointerdown.prevent.stop="!$isTouchDevice() ? scaleStart($event) : null"
             @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="$isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
-            class="control-point scaler"
-            :key="`scaler-touch-${index}`"
-            :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-            @pointerdown.prevent.stop="scaleStart"
-            @touchstart="disableTouchEvent")
+        template(v-if="$isTouchDevice()" )
+          div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
+              class="control-point scaler"
+              :key="`scaler-touch-${index}`"
+              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="scaleStart"
+              @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine()"
             :style="`transform: scale(${contentScaleRatio})`")
@@ -151,7 +156,6 @@ div(:layer-index="`${layerIndex}`"
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
@@ -184,7 +188,7 @@ import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -222,8 +226,7 @@ export default defineComponent({
   },
   emits: ['isDragging', 'setFocus'],
   components: {
-    NuTextEditor,
-    LazyLoad
+    NuTextEditor
   },
   created() {
     this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
@@ -467,6 +470,17 @@ export default defineComponent({
       setImgConfig: 'imgControl/SET_CONFIG',
       setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
+    getDefaultSizeLimit(): number {
+      return (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+    },
+    checkLimits(limit?: number): { tooShort: boolean, tooNarrow: boolean } {
+      limit = limit ?? this.getDefaultSizeLimit()
+      const totalScaleRatio = this.scaleRatio * this.contentScaleRatio
+      return {
+        tooShort: this.getLayerHeight() * totalScaleRatio < limit,
+        tooNarrow: this.getLayerWidth() * totalScaleRatio < limit
+      }
+    },
     addMovingListener() {
       const body = (this.$refs.body as HTMLElement[])[0]
       const lineMover = this.$refs.lineMover as HTMLElement
@@ -524,16 +538,15 @@ export default defineComponent({
       const scalerOffset = this.$isTouchDevice() ? 36 : 20
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${(this.getLayerWidth() - scalerOffset) * this.scaleRatio * 0.01}px` : `${width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
-        height: !isHorizon ? `${(this.getLayerHeight() - scalerOffset) * this.scaleRatio * 0.01}px` : `${height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        width: isHorizon ? `${(this.getLayerWidth() - scalerOffset) * this.contentScaleRatio * this.scaleRatio * 0.01}px` : `${width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        height: !isHorizon ? `${(this.getLayerHeight() - scalerOffset) * this.contentScaleRatio * this.scaleRatio * 0.01}px` : `${height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
         opacity: 0
       }
       return Object.assign(resizerStyle, HW)
     },
     resizerStyles(resizer: IResizer, isTouchArea = false) {
       const resizerStyle = { ...resizer }
-      const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
+      const { tooShort, tooNarrow } = this.checkLimits()
       const tooSmall = this.getLayerType === 'text'
         ? (this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort) : false
       const width = parseFloat(resizerStyle.width.replace('px', ''))
@@ -556,8 +569,7 @@ export default defineComponent({
     },
     getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
       let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
-      const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
+      const { tooShort, tooNarrow } = this.checkLimits()
       switch (this.getLayerType) {
         case 'image':
           resizers = this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
@@ -607,15 +619,11 @@ export default defineComponent({
       return resizers
     },
     getScaler(scalers: any) {
-      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+      const { tooShort, tooNarrow } = this.checkLimits()
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
     getCornerRotaters(scalers: any) {
-      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+      const { tooShort, tooNarrow } = this.checkLimits()
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
     lineEnds(scalers: any, point: number[]) {
@@ -1174,14 +1182,20 @@ export default defineComponent({
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
       this.initTranslate = this.getLayerPos()
-      const angleInRad = this.getLayerRotate() * Math.PI / 180
-      const vect = MouseUtils.getMouseRelPoint(event, this.center)
+      const { tooShort, tooNarrow } = this.checkLimits()
+      if (tooShort || tooNarrow) {
+        this.control.xSign = 1
+        this.control.ySign = 1
+      } else {
+        const angleInRad = this.getLayerRotate() * Math.PI / 180
+        const vect = MouseUtils.getMouseRelPoint(event, this.center)
 
-      // Get client point as no rotation
-      const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
+        // Get client point as no rotation
+        const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
 
-      this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
-      this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
+        this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
+        this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
+      }
 
       if (this.config.category === 'E') {
         this.initCorRadPercentage = ControlUtils.getCorRadPercentage(this.config.vSize, this.config.size, this.config.shapeType)
@@ -1657,8 +1671,7 @@ export default defineComponent({
       }
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
-      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+      const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
       if (tooShort || tooNarrow) {
         index = 2
       }
@@ -1825,8 +1838,7 @@ export default defineComponent({
       if (typeof index === 'number') {
         if (type === 'cornerRotaters') {
           const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-          const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
-          const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+          const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
           if (tooShort || tooNarrow) {
             index = 2
           }

@@ -366,6 +366,9 @@ class PageUtils {
 
   setBackgroundImageControlDefault(): void {
     store.commit('SET_allBackgroundImageControl', false)
+    if (generalUtils.isTouchDevice()) {
+      editorUtils.setShowMobilePanel(false)
+    }
   }
 
   updateBackgroundImagePos(pageIndex: number, imgX: number, imgY: number): void {
@@ -536,11 +539,10 @@ class PageUtils {
     // Target size can be pass by param or get according to situation.
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
     const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight ?? 0
-
     if (!editorViewBox) return
     let { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
-      (this.inBgRemoveMode ? this.autoRemoveResult
+      (this.inBgRemoveMode ? { width: 1600, height: this.autoRemoveResult.height * (1600 / this.autoRemoveResult.width) }
         : (this.hasBleed ? this.currFocusPageSizeWithBleeds : this.currFocusPageSize))
 
     const RESIZE_MULTIPLIER = this.isMobile ? 1 : 0.8

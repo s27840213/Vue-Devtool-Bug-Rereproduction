@@ -13,12 +13,13 @@ div(class="nu-img-controller")
         :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
         @pointerdown.prevent.stop="$isTouchDevice() ? null : scaleStart($event)"
         @touchstart="$isTouchDevice() ? null : disableTouchEvent($event)")
-    div(v-if="$isTouchDevice()" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
-        class="controller-point"
-        :key="`scaler-touch-${index}`"
-        :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
-        @pointerdown.prevent.stop="scaleStart"
-        @touchstart="disableTouchEvent")
+    template(v-if="$isTouchDevice()" )
+      div(v-for="(scaler, index) in controlPoints.scalerTouchAreas"
+          class="controller-point"
+          :key="`scaler-touch-${index}`"
+          :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
+          @pointerdown.prevent.stop="scaleStart"
+          @touchstart="disableTouchEvent")
 </template>
 
 <script lang="ts">
@@ -34,7 +35,7 @@ import LayerUtils from '@/utils/layerUtils'
 import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({

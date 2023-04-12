@@ -33,7 +33,7 @@ div(class="folder-design-view")
           span {{$t('NN0226')}}
   div(class="folder-design-view__toolbar")
     div(class="folder-design-view__path")
-      template(v-for="(parent, index) in shownParents")
+      template(v-for="(parent, index) in shownParents" :key="parent")
         span(class="folder-design-view__path__node"
             :style="nodeStyles(false)"
             @click="goToParent(index + 1)") {{ parent + ' ' }}
@@ -95,6 +95,7 @@ div(class="folder-design-view")
             class="folder-design-view__sort-by__menu"
             @click.stop)
           div(v-for="sortMenuItem in sortMenuItems"
+              :key="sortMenuItem.text"
               @click="handleSortByClick(sortMenuItem.payload)")
             div(class="sort-menu-icon")
               svg-icon(:iconName="sortMenuItem.icon"

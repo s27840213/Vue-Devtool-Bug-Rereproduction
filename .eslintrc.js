@@ -7,6 +7,8 @@ function offInCommand (value) {
 
 module.exports = {
   root: true,
+  parser: 'vue-eslint-parser',
+
   plugins: [
     'cypress',
     'unused-imports'
@@ -18,6 +20,7 @@ module.exports = {
 
   extends: [
     'plugin:vue/vue3-essential',
+    'plugin:vue-pug/vue3-recommended',
     '@vue/standard',
     '@vue/typescript/recommended',
     'plugin:cypress/recommended',
@@ -48,9 +51,5 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': offInCommand('warn'),
     // Require explicit function return type
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-
-    // 'import/no-dynamic-require': 'off',
-    // 'global-require': 0,
-    // 'no-shadow': 'off',
   }
 }

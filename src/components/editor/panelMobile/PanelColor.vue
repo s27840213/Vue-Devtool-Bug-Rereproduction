@@ -5,8 +5,9 @@ div(class="panel-color px-5")
     div(class="panel-color__shape-colors" :style="colorsStyle"
         @scroll.passive="updateColorsOverflow" ref="colors")
       color-btn(v-for="(color, index) in getDocumentColors"
-                :color="color" :focus="index === currSelectedColorIndex"
-                @click="selectColor(index)")
+        :key="color"
+        :color="color" :focus="index === currSelectedColorIndex"
+        @click="selectColor(index)")
     div(class="panel-color__hr")
   //- There is no row-gap in MobilePanel while active PanelColor.
   //- Instead, control gap by PanelColor itself.
@@ -28,27 +29,26 @@ div(class="panel-color px-5")
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import { IFrame, IImage, IShape } from '@/interfaces/layer'
-import { ColorEventType } from '@/store/types'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IImage, IShape } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType } from '@/store/types'
 import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import layerUtils from '@/utils/layerUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
-import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
-import textBgUtils from '@/utils/textBgUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import textBgUtils from '@/utils/textBgUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import { cloneDeep } from 'lodash'
-import { IPage } from '@/interfaces/page'
+import { PropType, defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   data() {
@@ -72,7 +72,6 @@ export default defineComponent({
   },
   emits: ['pushHistory'],
   components: {
-    MobileSlider,
     ColorPicker,
     ColorSlips,
     ColorBtn

@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="brand-kit-tab-text")
   transition-group(class="brand-kit-tab-text__font-column" name="font-list" tag="div")
-    template(v-for="font in renderedFonts")
+    template(v-for="font in renderedFonts" :key="font.id || font")
       div(v-if="font === 'add'"
         class="brand-kit-tab-text__font-column__item add pointer"
         key="add")
@@ -48,15 +48,15 @@ div(class="brand-kit-tab-text")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
-import { notify } from '@kyvg/vue3-notification'
-import BrandKitTextSetting from '@/components/brandkit/BrandKitTextSetting.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import brandkitUtils from '@/utils/brandkitUtils'
+import BrandKitTextSetting from '@/components/brandkit/BrandKitTextSetting.vue'
 import { IBrand, IBrandFont, IBrandTextStyleSetting } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
 import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
 interface IUrledFont extends IBrandFont {
   namePrevUrl?: string,

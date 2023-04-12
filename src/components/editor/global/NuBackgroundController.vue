@@ -402,9 +402,9 @@ export default defineComponent({
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-      pageUtils.setBackgroundImageControlDefault()
-      stepsUtils.record()
-      pageUtils.startBackgroundImageControl(this.pageIndex)
+      // pageUtils.setBackgroundImageControlDefault()
+      // stepsUtils.record()
+      // pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
 
       eventUtils.removePointerEvent('pointermove', this.moving)

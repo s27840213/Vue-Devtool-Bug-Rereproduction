@@ -97,6 +97,7 @@ Cypress.Commands.add('layerDelete', { prevSubject: 'element' }, (subject) => {
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
         .snapshotTest('Delete before')
         .get('.svg-trash').click()
+        .wait(5000)
         .snapshotTest('Delete after')
     })
   return cy.wrap(subject)

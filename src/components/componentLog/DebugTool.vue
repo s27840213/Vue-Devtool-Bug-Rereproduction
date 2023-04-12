@@ -7,16 +7,18 @@ div(class="fps")
                 :is="elm.tag"
                 v-bind="elm.attrs")
     div(class="fps-graph__valleys")
-      div(v-for="valley in valleys" :style="{color: valley.color}") {{valley.text}}
+      div(v-for="valley in valleys"
+        :key="valley.text"
+        :style="{color: valley.color}") {{valley.text}}
   div(class="fps__value" @click="showGraph")
     span FPS: {{fps}}
     span(v-if="jsHeapSize !== -1") JS-Heap: {{jsHeapSize}}MB
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import { Path, Point } from '@/utils/textBgUtils'
 import { filter, range } from 'lodash'
+import { defineComponent } from 'vue'
 
 class Valley {
   min: number

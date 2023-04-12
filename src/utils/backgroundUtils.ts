@@ -135,7 +135,8 @@ class BackgroundUtils {
         assetUtils.addImage(src, ratio, {
           pageIndex: layerUtils.pageIndex,
           ...detachedBackgroundImage.config.srcObj,
-          styles: detachedBackgroundImage.config.styles
+          styles: detachedBackgroundImage.config.styles,
+          previewSrc: detachedBackgroundImage.config.previewSrc
         })
         this.setBgImage({
           pageIndex: pageUtils.currFocusPageIndex,

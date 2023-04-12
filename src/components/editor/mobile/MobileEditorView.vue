@@ -33,7 +33,6 @@ div(class="editor-view" v-touch
 
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import EditorHeader from '@/components/editor/EditorHeader.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
 import PageNumber from '@/components/editor/PageNumber.vue'
 import { ICoordinate } from '@/interfaces/frame'
@@ -64,7 +63,6 @@ const MAX_SCALE_RATIO = 2.5
 export default defineComponent({
   emits: [],
   components: {
-    EditorHeader,
     BgRemoveArea,
     PageNumber,
     PageCard

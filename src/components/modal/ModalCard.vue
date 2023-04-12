@@ -5,8 +5,9 @@ div(class="modal-card")
   div(class="modal-card__content body-SM text-gray-2 mb-30")
     template(v-if="!pending")
       span(v-for="text in modalInfo.content"
-      @keydown.ctrl.67.exact.stop
-      @keydown.meta.67.exact.stop) {{text}}
+      :key="text"
+      @keydown.ctrl.c.exact.stop
+      @keydown.meta.c.exact.stop) {{text}}
     svg-icon(v-if="pending"
       :iconName="'loading'"
       :iconColor="'gray-2'"
@@ -28,10 +29,10 @@ div(class="modal-card")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import { IModalInfo } from '@/interfaces/modal'
-import { mapGetters } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

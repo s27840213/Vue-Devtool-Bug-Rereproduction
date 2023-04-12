@@ -7,7 +7,8 @@ div(class="my-design-mobile")
         svg-icon(iconName="chevron-left" iconColor="gray-1" iconWidth="24px")
       div(class="my-design-mobile__nav-bar__title" :title="title") {{ title }}
       div(class="my-design-mobile__nav-bar__menu")
-        div(v-for="button in menuButtons"
+        div(v-for="(button,index) in menuButtons"
+            :key="index"
             class="my-design-mobile__nav-bar__menu-button pointer"
             @click="() => { !button.disabled && button.action() }")
           svg-icon(:iconName="button.icon"
@@ -27,7 +28,8 @@ div(class="my-design-mobile")
                   iconWidth="24px")
         div(class="my-design-mobile__message__text") {{ messageItemText(messageQueue[0]) }}
   div(class="my-design-mobile__tab-bar" :style="footerStyles")
-    div(v-for="tabButton in tabButtons"
+    div(v-for="(tabButton,index) in tabButtons"
+        :key="`${tabButton.text}-${index}`"
         class="my-design-mobile__tab-button pointer"
         :class="{active: tabButton.condition(currLocation)}"
         @click="handleGoTo(tabButton.tab)")

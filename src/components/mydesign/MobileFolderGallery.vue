@@ -11,14 +11,15 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="mobile-folder-galler
               iconColor="gray-2")
   div(v-if="isExpanded" class="mobile-folder-gallery__folders")
     mobile-folder-item(v-for="(folder, index) in allFolders"
-                :path="path"
-                :config="folder"
-                :index="index"
-                @goto="handleGotoFolder(folder.id)"
-                :isSelected="checkFolderSelected(folder.id)"
-                :isAnySelected="isAnySelected"
-                @select="selectFolder(folder)"
-                @deselect="deselectFolder(folder)")
+      :key="folder.id"
+      :path="path"
+      :config="folder"
+      :index="index"
+      @goto="handleGotoFolder(folder.id)"
+      :isSelected="checkFolderSelected(folder.id)"
+      :isAnySelected="isAnySelected"
+      @select="selectFolder(folder)"
+      @deselect="deselectFolder(folder)")
   div(v-if="isExpanded && isFoldersLoading" class="mobile-folder-gallery__loading")
     svg-icon(iconName="loading"
               iconWidth="32px"
@@ -26,11 +27,11 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="mobile-folder-galler
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import MobileFolderItem from '@/components/mydesign/MobileFolderItem.vue'
 import { IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import MobileFolderItem from '@/components/mydesign/MobileFolderItem.vue'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],

@@ -7,20 +7,19 @@ div(class="nu-layer flex-center"
     :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
     ref="body")
   //- class="nu-layer"
-  //- :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
-  //- :ref="div.main ? 'body' : ''"
-  div(v-for="div in layerDivs"
-      class="full-size pos-left"
+  //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+  //- ref="body"
+  div(class="full-size pos-left"
       :class="{'preserve3D': !isTouchDevice}"
-      :style="layerStyles(div.noShadow, div.isTransparent)"
-      @pointerdown="div.main ? onPointerDown($event) : null"
-      @pointerup="div.main ? onPointerUp($event) : null"
+      :style="layerStyles()"
+      @pointerdown="onPointerDown($event)"
+      @pointerup="onPointerUp($event)"
       @contextmenu.prevent
-      @click.right.stop="div.main ? onRightClick($event) : null"
-      @dragenter="div.main ? dragEnter($event) : null"
-      @dblclick="div.main ? dblClick($event) : null")
+      @click.right.stop="onRightClick($event)"
+      @dragenter="dragEnter($event)"
+      @dblclick="dblClick($event)")
     div(class="nu-layer__scale full-size pos-left"
-        :class="{'preserve3D': !isTouchDevice}" :ref="div.main ? 'scale' : ''"
+        :class="{'preserve3D': !isTouchDevice}" ref="scale"
         :style="scaleStyles()")
       div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
           component(:is="`nu-${config.type}`"
@@ -33,9 +32,7 @@ div(class="nu-layer flex-center"
             :page="page"
             :scaleRatio="scaleRatio"
             :primaryLayer="primaryLayer"
-            :forRender="forRender"
-            :isTransparent="div.isTransparent"
-            :noShadow="div.noShadow")
+            :forRender="forRender")
           svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
             class="clip-contour full-size"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
@@ -56,7 +53,7 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
@@ -78,8 +75,6 @@ import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
-import textBgUtils from '@/utils/textBgUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { AnyTouchEvent } from '@any-touch/shared'
 import { notify } from '@kyvg/vue3-notification'
@@ -426,16 +421,6 @@ export default defineComponent({
       }
       return ''
     },
-    layerDivs() {
-      if (this.$router.currentRoute.value.name === 'Preview' && this.renderForPDF && this.config.type === 'text') {
-        return [
-          { noShadow: false, isTransparent: true },
-          { noShadow: true, isTransparent: false, main: true }
-        ]
-      } else {
-        return [{ noShadow: false, isTransparent: false, main: true }]
-      }
-    },
     isOk2HandleFrameMouseEnter(): boolean {
       if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return false
@@ -468,22 +453,8 @@ export default defineComponent({
     frameClipFormatter(clippath: string) {
       return frameUtils.frameClipFormatter(clippath)
     },
-    layerStyles(noShadow: boolean, isTransparent: boolean): any {
+    layerStyles(): any {
       switch (this.config.type) {
-        case LayerType.text: {
-          const textEffectStyles = textEffectUtils.convertTextEffect(this.config as IText)
-          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
-          if (noShadow) {
-            textEffectStyles.textShadow = 'none'
-          }
-          return {
-            willChange: this.useMobileEditor ? '' : ('text-shadow' + (this.isDragging ? ', transform' : '')),
-            '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`,
-            ...(isTransparent && { '-webkit-filter': 'opacity(1)' }),
-            ...textEffectStyles,
-            ...textBgStyles,
-          }
-        }
         case LayerType.shape: {
           return {
             'mix-blend-mode': this.config.styles.blendMode,
@@ -540,7 +511,7 @@ export default defineComponent({
       return pageUtils.scaleRatio / 100
     },
     compensationRatio(): number {
-      return Math.max(1, this.pageScaleRatio())
+      return !this.useMobileEditor ? 1 : Math.max(1, this.pageScaleRatio())
     },
     translateStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles
@@ -563,8 +534,10 @@ export default defineComponent({
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
       let transform = ''
       // let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
-      if (!isImgType && this.compensationRatio() !== 1 && scaleX !== 1 && scaleY !== 1) {
-        transform += `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
+      if (!isImgType) {
+        transform += this.compensationRatio() !== 1 ? `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})` : ''
+        transform += scaleX !== 1 ? `scaleX(${scaleX})` : ''
+        transform += scaleY !== 1 ? `scaleY(${scaleY})` : ''
       }
       const hasActualScale = !!transform && transform !== 'scale(1)'
       const styles = {
