@@ -61,7 +61,6 @@ export default defineComponent({
     },
     setParagraphProp(prop: 'lineHeight' | 'fontSpacing', value: number) {
       textUtils.setParagraphProp(prop, value)
-      textUtils.handleAutoRescale()
     }
   }
 })

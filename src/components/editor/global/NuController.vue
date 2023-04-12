@@ -1556,19 +1556,17 @@ export default defineComponent({
       const { e } = attrs as { e: DragEvent }
       e && this.onDrop(e)
     },
-    waitFontLoadingAndRecord(textChanged = false) {
+    waitFontLoadingAndRecord() {
       const pageId = this.page.id
       const layerId = this.config.id
       TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
         const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
         if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
         TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
-        if (textChanged) {
-          TextUtils.handleAutoRescale()
-        }
+        TextUtils.handleAutoRescale()
       })
     },
-    waitFontLoadingAndResize(textChanged = false) {
+    waitFontLoadingAndResize() {
       const pageId = this.page.id
       const layerId = this.config.id
       TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
@@ -1576,9 +1574,7 @@ export default defineComponent({
           const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
           TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
-          if (textChanged) {
-            TextUtils.handleAutoRescale()
-          }
+          TextUtils.handleAutoRescale()
         }, 100)
       })
     },
@@ -1586,18 +1582,18 @@ export default defineComponent({
       const { textShape } = config.styles
       return textShape && textShape.name === 'curve'
     },
-    calcSize(config: IText, composing: boolean, keepCenter = false, textChanged = false) {
-      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing, keepCenter, textChanged)
+    calcSize(config: IText, composing: boolean, keepCenter = false) {
+      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing, keepCenter)
     },
-    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean, keepCenter?: boolean, textChanged?: boolean }) {
+    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean, keepCenter?: boolean }) {
       const config = generalUtils.deepCopy(this.config)
       config.paragraphs = payload.paragraphs
-      this.calcSize(config as IText, !!tiptapUtils.editor?.view?.composing, payload.keepCenter, payload.textChanged)
+      this.calcSize(config as IText, !!tiptapUtils.editor?.view?.composing, payload.keepCenter)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       if (payload.toRecord) {
-        this.waitFontLoadingAndRecord(payload.textChanged)
+        this.waitFontLoadingAndRecord()
       } else {
-        this.waitFontLoadingAndResize(payload.textChanged)
+        this.waitFontLoadingAndResize()
       }
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         // if composing starts from empty line, isSetContentRequired will be true in the first typing.
@@ -1610,21 +1606,20 @@ export default defineComponent({
         })
       }
     },
-    handleTextCompositionEnd(toRecord: boolean, textChanged: boolean) {
+    handleTextCompositionEnd(toRecord: boolean) {
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-        this.textSizeRefresh(this.config as IText, false, false, textChanged)
+        this.textSizeRefresh(this.config as IText, false, false)
       }
       if (toRecord) {
-        this.waitFontLoadingAndRecord(textChanged)
+        this.waitFontLoadingAndRecord()
       }
     },
-    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean, textChanged = false) {
+    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const getSize = () => isVertical ? this.getLayerHeight() : this.getLayerWidth()
       const oldCenter = mathUtils.getCenter(text.styles)
-      const needAutoRescale = this.needAutoRescale && textChanged
 
       let widthLimit = this.needAutoRescale ? -1 : (this.getLayerRotate() ? getSize() : this.config.widthLimit)
       let textHW = TextUtils.getTextHW(text, widthLimit)
@@ -1641,7 +1636,7 @@ export default defineComponent({
 
         if (reachLeftLimit && reachRightLimit) {
           // don't delete below, it's disabled temporarily only
-          // if (composing) this.widthLimitSetDuringComposition = true // this will trigger forceFull
+          // if (composing) this.widthLimitSetDuringComposition = true
           // if (!this.needAutoRescale) {
           //   textHW = TextUtils.getTextHW(text, pageSize)
           //   layerPos = 0
@@ -1653,8 +1648,8 @@ export default defineComponent({
           widthLimit = pageSize
         } else if (reachLeftLimit || reachRightLimit) {
           // don't delete below, it's disabled temporarily only
+          // if (composing) this.widthLimitSetDuringComposition = true
           // if (!this.needAutoRescale) {
-          //   if (composing) this.widthLimitSetDuringComposition = true // don't trigger forceFull when in auto rescale mode
           //   widthLimit = getSize()
           //   textHW = TextUtils.getTextHW(text, widthLimit)
           //   layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
@@ -1695,7 +1690,7 @@ export default defineComponent({
 
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
 
-      if (needAutoRescale) {
+      if (this.needAutoRescale) {
         const { textHW: newTextHW, x: newX, y: newY, scale } = TextUtils.getAutoRescaleResult(text, textHW, layerX, layerY, undefined, this.pageIndex)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
           width: newTextHW.width,

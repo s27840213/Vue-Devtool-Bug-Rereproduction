@@ -177,7 +177,6 @@ export default defineComponent({
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
             textPropUtils.updateTextPropsState()
           }
-          textUtils.handleAutoRescale()
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName, Object.assign({}, effect))
