@@ -7,6 +7,8 @@ function offInCommand (value) {
 
 module.exports = {
   root: true,
+  parser: 'vue-eslint-parser',
+
   plugins: [
     'cypress',
     'unused-imports'
@@ -18,6 +20,7 @@ module.exports = {
 
   extends: [
     'plugin:vue/vue3-essential',
+    'plugin:vue-pug/vue3-recommended',
     '@vue/standard',
     '@vue/typescript/recommended',
     'plugin:cypress/recommended',

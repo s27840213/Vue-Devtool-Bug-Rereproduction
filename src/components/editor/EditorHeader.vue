@@ -8,7 +8,7 @@ div(class="editor-header" ref="header"
       template(#logIn)
         a(:href="`/login?redirect=${path}`") {{$tc('NN0168',1)}}
   template(v-else)
-    router-link(to="/mydesign" class="body-3 pointer hover-effect a-reset") {{$t('NN0080')}}
+    router-link(to="/mydesign" class="body-3 pointer hover-effect a-reset no-wrap") {{$t('NN0080')}}
     span(class="body-3 pointer") {{`${!isRoot ? '/...': ''}`}}
     router-link(v-if="parentFolder.name && parentFolder.path"
       :to="`/mydesign/${parentFolder.path}`"
@@ -29,17 +29,17 @@ div(class="editor-header" ref="header"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapGetters } from 'vuex'
+import store from '@/store'
+import GeneralUtils from '@/utils/generalUtils'
+import networkUtils from '@/utils/networkUtils'
+import pageUtils from '@/utils/pageUtils'
+import rulerUtils from '@/utils/rulerUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import store from '@/store'
-import pageUtils from '@/utils/pageUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import rulerUtils from '@/utils/rulerUtils'
-import networkUtils from '@/utils/networkUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

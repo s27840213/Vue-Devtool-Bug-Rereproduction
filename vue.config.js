@@ -229,17 +229,17 @@ module.exports = defineConfig({
                 }])
         }
 
-        if (process.env.NODE_ENV === 'development') {
-            config
-                .plugin('webpack-bundle-analyzer')
-                .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
-                .end()
-            config.plugins.delete('prefetch')
-            config
-                .plugin('speed-measure-webpack-plugin')
-                .use(SpeedMeasurePlugin)
-                .end()
-        }
+        // if (process.env.NODE_ENV === 'development') {
+        //     config
+        //         .plugin('webpack-bundle-analyzer')
+        //         .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
+        //         .end()
+        //     config.plugins.delete('prefetch')
+        //     config
+        //         .plugin('speed-measure-webpack-plugin')
+        //         .use(SpeedMeasurePlugin)
+        //         .end()
+        // }
 
         // .use(SpeedMeasurePlugin, [{
         //     outputFormat: 'humanVerbose',
