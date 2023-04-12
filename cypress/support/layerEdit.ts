@@ -104,6 +104,9 @@ Cypress.Commands.add('layerDelete', { prevSubject: 'element' }, (subject) => {
 })
 
 Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subjectFront, subjectBack, before, after) => {
+  // cy.wrap(subjectBack).click('topLeft')
+  //   .then(before)
+  //   .then(after)
   cy.wrap(subjectFront).click()
     .then(before)
     .snapshotTest('Copy format before')
