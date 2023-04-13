@@ -6,7 +6,7 @@ p(class="nu-curve-text__p" :style="pStyle()")
     class="nu-curve-text__span"
     :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
     :key="sIndex",
-    :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan)") {{ span.text }}
+    :style="Object.assign(styles(span.styles, sIndex), extraSpanStyle)") {{ span.text }}
 </template>
 
 <script lang="ts">
@@ -37,10 +37,9 @@ export default defineComponent({
     subLayerIndex: {
       type: Number
     },
-    isDuplicated: {
-      type: Boolean,
-      default: false
-    }
+    extraSpanStyle: {
+      type: Object as PropType<Record<string, string>>,
+    },
   },
   data () {
     return {
@@ -70,12 +69,6 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    duplicatedSpan(): Record<string, string> {
-      const textShadow = textEffectUtils.convertTextEffect(this.config)
-      return this.isDuplicated ? {
-        ...textShadow.duplicatedSpan
-      } : {}
-    }
   },
   watch: {
     'config.paragraphs': {

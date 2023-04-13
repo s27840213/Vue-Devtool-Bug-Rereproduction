@@ -35,6 +35,7 @@ div(:layer-index="`${layerIndex}`"
         @click.right.stop="onRightClick")
         div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
+            class="text__body"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
             :page="page"
@@ -1771,15 +1772,15 @@ export default defineComponent({
     overflow-wrap: break-word;
   }
   &__wrapper {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
   }
   &__body {
-    width: 100%;
-    height: auto;
+    outline: none;
+    padding: 0;
+    position: relative;
   }
   &__content {
     text-align: left;

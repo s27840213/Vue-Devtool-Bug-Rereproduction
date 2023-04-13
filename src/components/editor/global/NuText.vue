@@ -17,7 +17,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :page="page"
       :subLayerIndex="subLayerIndex"
       :primaryLayer="primaryLayer"
-      :isDuplicated="idx !== duplicatedText.length-1")
+      :extraSpanStyle="text.extraSpanStyle")
     p(v-else
       v-for="(p, pIndex) in config.paragraphs"
       :key="`p${pIndex}`"
@@ -262,6 +262,11 @@ export default defineComponent({
   height: 100%;
   position: absolute;
   left: 0;
+  top: 0;
+  font-feature-settings: 'liga' 0;
+  -webkit-font-feature-settings: 'liga' 0;
+  -webkit-font-smoothing: subpixel-antialiased; // for textUtils.getTextHW
+  text-rendering: geometricPrecision; // for textUtils.getTextHW
   &__BG {
     position: absolute;
     left: 0;
