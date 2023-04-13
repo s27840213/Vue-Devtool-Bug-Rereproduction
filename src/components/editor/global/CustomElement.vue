@@ -1,6 +1,7 @@
 <template lang="pug">
 component(:is="config.tag" v-bind="config.attrs" :style="config.style")
-  custom-element(v-for="subConfig in config.content" :config="subConfig")
+  custom-element(v-for="(subConfig, idx) in config.content"
+                :config="subConfig" :key="idx")
   slot
 </template>
 
