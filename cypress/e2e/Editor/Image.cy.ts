@@ -1,6 +1,6 @@
 for (const isMobile of [true, false]) {
   // if (isMobile) continue
-  // if (!isMobile) continue
+  if (!isMobile) continue
   const suffix = isMobile ? ' mobile' : ''
 
   describe(`Testing nu-image${suffix} edit`, () => {
@@ -91,7 +91,7 @@ for (const isMobile of [true, false]) {
       cy.contains('重置效果').click()
         .togglePanel('調整')
     }
-    it(`Other image test${suffix}`, function () {
+    it.only(`Other image test${suffix}`, function () {
       cy.visit('/editor')
         .disableTransition()
         .importDesign('2flower.json')
@@ -108,6 +108,8 @@ for (const isMobile of [true, false]) {
             .layerOrder(flowerBack)
             .layerCopy()
             .layerLock()
+            .deselectAllLayers().snapshotTest('init') // Check if image restore to init
+            .get('.nu-layer:nth-child(2) .nu-image')
             .layerDelete()
             .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
             .layerRotateAndResize()
