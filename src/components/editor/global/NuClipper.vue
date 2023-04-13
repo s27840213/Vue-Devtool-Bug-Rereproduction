@@ -29,16 +29,9 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    subLayerIndex: {
-      type: Number
-    },
     primaryLayer: {
       type: Object as PropType<IGroup | IFrame | ITmp>,
       default: undefined
-    },
-    imgControl: {
-      type: Boolean,
-      required: true
     },
     contentScaleRatio: {
       default: 1,

@@ -45,8 +45,6 @@ div(class="panel-remove-bg")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import store from '@/store'
-import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -75,14 +73,6 @@ export default defineComponent({
       isProcessing: 'bgRemove/getIsProcessing',
       _brushSize: 'bgRemove/getBrushSize'
     }),
-    brushSize: {
-      get: () => {
-        return store.getters['bgRemove/getBrushSize']
-      },
-      set(val: number): void {
-        this.setBrushSize(val)
-      }
-    }
   },
   methods: {
     ...mapMutations({
@@ -97,12 +87,6 @@ export default defineComponent({
     restoreInitState() {
       this.setRestoreInitState(true)
     },
-    save() {
-      bgRemoveUtils.save()
-    },
-    cancel() {
-      bgRemoveUtils.cancel()
-    }
   }
 })
 </script>

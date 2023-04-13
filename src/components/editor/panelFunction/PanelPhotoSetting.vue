@@ -174,9 +174,6 @@ export default defineComponent({
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
     },
-    selectedLayersNum(): number {
-      return this.currSelectedInfo.layers.length
-    }
   },
   methods: {
     ...mapMutations({

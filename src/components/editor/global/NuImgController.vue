@@ -25,17 +25,16 @@ div(class="nu-img-controller")
 <script lang="ts">
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IImage, IImageStyle } from '@/interfaces/layer'
+import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
-import FrameUtils from '@/utils/frameUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import LayerUtils from '@/utils/layerUtils'
 import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -80,11 +79,9 @@ export default defineComponent({
       isControlling: false,
       initialPos: { x: 0, y: 0 },
       initImgPos: { imgX: 0, imgY: 0 },
-      initImgControllerPos: { x: 0, y: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
-      control: { xSign: 1, ySign: 1, isHorizon: false },
-      isSnappedInVertical: false
+      control: { xSign: 1, ySign: 1 },
     }
   },
   mounted() {
@@ -134,15 +131,6 @@ export default defineComponent({
     pointerEvents(): string {
       return this.forRender ? 'none' : 'initial'
     },
-    getControlPoints(): any {
-      return this.config.controlPoints
-    },
-    isActive(): boolean {
-      return this.config.active
-    },
-    isShown(): boolean {
-      return this.config.shown
-    },
     getImgX(): number {
       return this.config.styles.imgX
     },
@@ -154,17 +142,6 @@ export default defineComponent({
     },
     getImgHeight(): number {
       return this.config.styles.imgHeight
-    },
-    scaledConfig(): { [index: string]: string | number } {
-      const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
-      return {
-        width: width * this.contentScaleRatio,
-        height: height * this.contentScaleRatio,
-        imgWidth: imgWidth * this.contentScaleRatio,
-        imgHeight: imgHeight * this.contentScaleRatio,
-        imgX: imgX * this.contentScaleRatio,
-        imgY: imgY * this.contentScaleRatio
-      }
     },
     primaryLayerType(): string {
       return this.primaryLayer.type
@@ -185,14 +162,6 @@ export default defineComponent({
         return this.getLayerRotate * Math.PI / 180
       }
     },
-    primaryScale(): number {
-      const currLayer = LayerUtils.getCurrLayer
-      if (this.primaryLayerIndex !== -1 && ['group', 'frame'].includes(currLayer.type)) {
-        return LayerUtils.getCurrLayer.styles.scale
-      } else {
-        return 1
-      }
-    }
   },
   methods: {
     ...mapMutations({
@@ -256,32 +225,6 @@ export default defineComponent({
       // }
 
       return imgControllerPos
-    },
-    updateLayerProps(prop: { [key: string]: string | boolean | number }) {
-      if (this.primaryLayerIndex !== -1) {
-        switch (LayerUtils.getCurrLayer.type) {
-          case 'frame':
-            FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
-            break
-          case 'group':
-            LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
-        }
-      } else {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, prop)
-      }
-    },
-    updateLayerStyles(prop: { [key: string]: number }) {
-      if (this.primaryLayerIndex !== -1) {
-        switch (LayerUtils.getCurrLayer.type) {
-          case 'frame':
-            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
-            break
-          case 'group':
-            LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
-        }
-      } else {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, prop)
-      }
     },
     moveStart(event: MouseEvent | PointerEvent) {
       this.isControlling = true

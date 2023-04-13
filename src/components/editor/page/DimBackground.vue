@@ -73,9 +73,6 @@ export default defineComponent({
       type: Object as PropType<IPage>,
       required: true
     },
-    isAnyBackgroundImageControl: {
-      type: Boolean,
-    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -94,9 +91,6 @@ export default defineComponent({
     layerIndex(): number {
       return this.layerInfo.subLayerIdx !== -1 ? this.layerInfo.subLayerIdx : this.layerInfo.layerIndex
     },
-    primaryLayerIndex(): number {
-      return this.layerInfo.subLayerIdx !== -1 ? this.layerInfo.layerIndex : -1
-    },
     backgroundControlStyles() {
       const backgroundImage = this.image
       let imgX = backgroundImage.styles.imgX
@@ -112,27 +106,9 @@ export default defineComponent({
         top: `${imgY * this.contentScaleRatio}px`
       }
     },
-    backgroundControlWindowStyles() {
-      const backgroundImage = this.image
-      return {
-        width: `${backgroundImage.styles.imgWidth * this.contentScaleRatio}px`,
-        height: `${backgroundImage.styles.imgHeight * this.contentScaleRatio}px`,
-        left: `${backgroundImage.styles.imgX * this.contentScaleRatio}px`,
-        top: `${backgroundImage.styles.imgY * this.contentScaleRatio}px`
-      }
-    },
     backgroundFlipStyles() {
       const { horizontalFlip, verticalFlip } = this.image.styles
       return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
-    },
-    backgroundContorlClipStyles() {
-      const { imgX: posX, imgY: posY } = this.image.styles
-      const pageWidth = pageUtils.currFocusPage.width
-      const pageHeight = pageUtils.currFocusPage.height
-      return {
-        clipPath: `path('M${-posX * this.contentScaleRatio},${-posY * this.contentScaleRatio}h${pageWidth * this.contentScaleRatio}v${pageHeight * this.contentScaleRatio}h${-pageWidth * this.contentScaleRatio}z`,
-        'pointer-events': 'none'
-      }
     },
     getHalation(): ReturnType<typeof imageAdjustUtil.getHalation> {
       const { styles: { adjust } } = this.config.backgroundImage.config as IImage

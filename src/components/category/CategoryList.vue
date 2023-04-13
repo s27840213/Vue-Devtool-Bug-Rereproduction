@@ -25,13 +25,6 @@ const component = defineComponent({
       type: Array as PropType<any[]>,
       default: () => []
     },
-    rowSize: {
-      type: Number,
-      default: 3
-    },
-    rowHeight: {
-      type: Number
-    }
   },
   components: {
     ObserverSentinel

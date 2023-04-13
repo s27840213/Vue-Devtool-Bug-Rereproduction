@@ -209,9 +209,6 @@ export default defineComponent({
     currHistory(): string {
       return this.panelHistory[this.historySize - 1]
     },
-    backgroundImgControl(): boolean {
-      return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
-    },
     backgroundLocked(): boolean {
       const { locked } = pageUtils.currFocusPage.backgroundImage.config
       return locked

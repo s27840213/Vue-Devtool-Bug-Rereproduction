@@ -250,9 +250,6 @@ export default defineComponent({
     recordChange() {
       this.$nextTick(() => stepsUtils.record())
     },
-    switchTab(tabIndex: number) {
-      this.tabIndex = tabIndex
-    },
     openColorPicker() { // @openColorPicker will only be trigger in mobile.
       this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
     },

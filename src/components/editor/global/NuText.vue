@@ -45,7 +45,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   components: {
@@ -103,9 +103,6 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
-    spanEffect() {
-      return textBgUtils.convertTextEffect(this.config.styles)
-    },
     isCurveText(): any {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'

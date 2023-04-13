@@ -18,7 +18,6 @@ export default defineComponent({
       type: Array as PropType<number[]>,
       required: true
     },
-    value: String
   },
   emits: ['update'],
   data() {

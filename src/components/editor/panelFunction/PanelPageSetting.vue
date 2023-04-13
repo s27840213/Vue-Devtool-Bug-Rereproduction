@@ -242,7 +242,6 @@ export default defineComponent({
   },
   data() {
     return {
-      isLocked: true,
       isPanelOpen: false,
       isGetGroup: false,
       isGetTemplate: false,
@@ -382,9 +381,6 @@ export default defineComponent({
     ...mapActions('layouts', [
       'getRecently'
     ]),
-    toggleLock() {
-      this.isLocked = !this.isLocked
-    },
     setSuggestionPanel(opened: boolean) {
       this.isPanelOpen = opened
     },

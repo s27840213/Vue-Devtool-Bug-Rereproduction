@@ -156,20 +156,16 @@ div(:layer-index="`${layerIndex}`"
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
-import DragUtils from '@/utils/dragUtils'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
-import GroupUtils from '@/utils/groupUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
 import ImageUtils from '@/utils/imageUtils'
 import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
@@ -179,16 +175,13 @@ import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import { notify } from '@kyvg/vue3-notification'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -236,8 +229,6 @@ export default defineComponent({
     return {
       MappingUtils,
       FrameUtils,
-      ShortcutUtils,
-      dragUtils: new DragUtils(this.config.id),
       controlPoints: (this.$isTouchDevice()
         ? ControlUtils.getControlPoints(6, 25)
         : ControlUtils.getControlPoints(4, 25)) as ICP,
@@ -259,21 +250,12 @@ export default defineComponent({
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
-      isComposing: false,
-      isSnapping: false,
-      subControlerIndexs: [],
-      hasChangeTextContent: false,
-      movingByControlPoint: false,
       widthLimitSetDuringComposition: false,
       isMoved: false,
-      isDoingGestureAction: false,
-      dblTabsFlag: false,
-      isPointerDownFromSubController: false,
       initCornerRotate: -1,
       cornerRotaters: undefined as ReturnType<typeof ControlUtils.getControlPoints>['cornerRotaters'] | undefined,
       cornerRotaterbaffles: undefined as ReturnType<typeof ControlUtils.getControlPoints>['cornerRotaters'] | undefined,
       eventTarget: null as unknown as HTMLElement,
-      isHandleMovingHandler: false,
       movingUtils: null as unknown as MovingUtils,
       moveStart: null as any
     }
@@ -626,19 +608,6 @@ export default defineComponent({
       const { tooShort, tooNarrow } = this.checkLimits()
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
-    lineEnds(scalers: any, point: number[]) {
-      const quadrant = shapeUtils.getLineQuadrant(point)
-      if (quadrant % 2 === 0) {
-        return [scalers[0], scalers[2]]
-      } else {
-        return [scalers[1], scalers[3]]
-      }
-    },
-    textScaleStyle() {
-      return {
-        transform: `scaleX(${this.getLayerScale()}) scaleY(${this.getLayerScale()})`
-      }
-    },
     textWrapperStyle() {
       return {
         width: `${this.getLayerWidth() / this.getLayerScale()}px`,
@@ -666,50 +635,8 @@ export default defineComponent({
         opacity: this.contentEditable ? 1 : 0
       }
     },
-    groupControllerStyle() {
-      return {
-        width: `${this.config.styles.width / this.getLayerScale()}px`,
-        height: `${this.config.styles.height / this.getLayerScale()}px`,
-        position: 'absolute',
-        transform: `scaleX(${this.getLayerScale()}) scaleY(${this.getLayerScale()})`
-      }
-    },
-    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      if (this.isLine() || this.$isTouchDevice()) return
-      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-        shown
-      })
-    },
     primaryLayerZindex() {
       return (this.config as ILayer).styles.zindex
-    },
-    zindex(type: string) {
-      const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
-      const isGroup = (this.getLayerType === 'group') && this.currSelectedInfo.index === this.layerIndex
-      let offset = 0
-      let zindex
-      if (this.isMoving && LayerUtils.layerIndex !== this.layerIndex) {
-        /** The offset is used for frame enter/leave detection */
-        offset += LayerUtils.getCurrLayer.styles.zindex + 1
-      }
-      if (type === 'control-point') {
-        zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
-      } else if (isGroup && (this.config as IGroup).layers.some(l => l.type === LayerType.image && l.imgControl)) {
-        zindex = (this.layerIndex + 1) * 1000
-      } else if (isFrame) {
-        zindex = (this.layerIndex + 1) * 1000
-      } else if (this.getLayerType === LayerType.frame && this.isMoving) {
-        zindex = (this.layerIndex + 1) * 1000
-      } else if (this.getLayerType === 'tmp') {
-        /**
-         * @Todo - find the reason why this been set to certain value istead of 0
-         * set to 0 will make the layer below the empty area of tmp layer selectable
-         */
-        return 0
-      } else if (this.getLayerType === 'text' && this.isActive) {
-        zindex = (this.layerIndex + 1) * 99
-      }
-      return (zindex ?? (this.config.styles.zindex)) + offset
     },
     lineControlPointStyles() {
       const { angle } = shapeUtils.lineDimension(this.config.point)
@@ -721,13 +648,6 @@ export default defineComponent({
     controlPointStyles() {
       return {
         transform: `rotate(${-this.config.styles.rotate}deg)`
-      }
-    },
-    subControllerStyles(isImgControl: boolean) {
-      return isImgControl ? {
-        transform: `translate(-50%, -50%) translateZ(1000px) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`
-      } : {
-        transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`
       }
     },
     outlineStyles() {
@@ -756,417 +676,6 @@ export default defineComponent({
     hintStyles() {
       return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${this.contentScaleRatio})`
     },
-    // moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
-    //   const currLayerIndex = LayerUtils.layerIndex
-    //   if (currLayerIndex !== this.layerIndex) {
-    //     const layer = LayerUtils.getLayer(this.pageIndex, currLayerIndex)
-    //     if (layer.type === 'image' && layer.imgControl) {
-    //       LayerUtils.updateLayerProps(this.pageIndex, currLayerIndex, { imgControl: false })
-    //     } else if (layer.type === 'group') {
-    //       (layer as IGroup).layers
-    //         .forEach((l, i) => {
-    //           if (l.type === 'image' && l.imgControl) {
-    //             LayerUtils.updateLayerProps(this.pageIndex, currLayerIndex, { imgControl: false }, i)
-    //           }
-    //         })
-    //     }
-    //   }
-    //   if (this.isBgImgCtrl) {
-    //     this.setBgConfig(undefined)
-    //   }
-
-    //   const eventType = eventUtils.getEventType(event)
-    //   /**
-    //    * used for frame layer for entering detection
-    //    * This is used for moving image to replace frame element
-    //    */
-    //   this.eventTarget = (event.target as HTMLElement)
-    //   this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
-
-    //   if (this.$isTouchDevice()) {
-    //     if (!this.dblTabsFlag && this.isActive) {
-    //       const touchtime = Date.now()
-    //       const interval = 500
-    //       const doubleTap = (e: PointerEvent) => {
-    //         e.preventDefault()
-    //         if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
-    //           /**
-    //            * This is the dbl-click callback block
-    //            */
-    //           if (this.getLayerType === LayerType.image) {
-    //             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-    //             eventUtils.emit(PanelEvent.switchTab, 'crop')
-    //           }
-    //           this.dblTabsFlag = true
-    //         }
-    //       }
-    //       this.eventTarget.addEventListener('pointerdown', doubleTap)
-    //       setTimeout(() => {
-    //         this.eventTarget.removeEventListener('pointerdown', doubleTap)
-    //         this.dblTabsFlag = false
-    //       }, interval)
-    //     }
-    //   }
-    //   if (eventType === 'pointer') {
-    //     const pointerEvent = event as PointerEvent
-    //     if (pointerEvent.button !== 0) return
-    //   } else if (eventType === 'mouse') {
-    //     const mouseEvent = event as MouseEvent
-    //     if (mouseEvent.button !== 0) return
-    //   }
-    //   if (eventUtils.checkIsMultiTouch(event)) {
-    //     return
-    //   }
-    //   if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
-    //     eventUtils.emit(PanelEvent.showPhotoShadow, '')
-    //   }
-    //   /**
-    //    * @Note - in Mobile version, we can't select the layer directly, we should make it active first
-    //    * The exception is that we are in multi-selection mode
-    //    */
-    //   if (this.$isTouchDevice() && !this.isActive && !this.isLocked() && !this.inMultiSelectionMode) {
-    //     this.eventTarget.addEventListener('touchstart', this.disableTouchEvent)
-    //     this.initialPos = MouseUtils.getMouseAbsPoint(event)
-    //     eventUtils.addPointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.addPointerEvent('pointermove', this.moving)
-    //     return
-    //   }
-
-    //   this.movingByControlPoint = false
-    //   // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
-    //   const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
-    //   const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
-    //   const { inMultiSelectionMode } = this
-    //   if (!this.isLocked()) {
-    //     event.stopPropagation()
-    //   }
-    //   formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
-    //   formatUtils.clearCopiedFormat()
-    //   this.initTranslate = this.getLayerPos()
-
-    //   if (inCopyMode) {
-    //     ShortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config as ILayer<IStyle>)
-    //   }
-
-    //   switch (this.getLayerType) {
-    //     case 'text': {
-    //       const targetClassList = (event.target as HTMLElement).classList
-    //       const isMoveBar = targetClassList.contains('control-point__move-bar')
-    //       const isMover = targetClassList.contains('control-point__mover')
-
-    //       // if the text layer is already active and contentEditable
-    //       if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar && !isMover) {
-    //         return
-    //       } else if (!this.isActive) {
-    //         let targetIndex = this.layerIndex
-    //         if (!inSelectionMode && !inMultiSelectionMode) {
-    //           GroupUtils.deselect()
-    //           targetIndex = this.config.styles.zindex - 1
-    //           this.setLastSelectedLayerIndex(this.layerIndex)
-    //           GroupUtils.select(this.pageIndex, [targetIndex])
-    //         } else {
-    //           if (this.pageIndex === pageUtils.currFocusPageIndex) {
-    //             GroupUtils.select(this.pageIndex, [targetIndex])
-    //           }
-    //         }
-    //         if (!this.config.locked) {
-    //           this.isControlling = true
-    //           this.initialPos = MouseUtils.getMouseAbsPoint(event)
-    //           eventUtils.addPointerEvent('pointerup', this.moveEnd)
-    //           eventUtils.addPointerEvent('pointermove', this.moving)
-    //         }
-    //         return
-    //       }
-
-    //       /**
-    //        * The cotentEditable updated timing will be move to the moveEnd instead of moveStart
-    //        * bcz if we set it to true when moveStart and we want to move the layer instead of editing the text, it will still make the mobile keyboard show up
-    //        */
-
-    //       if (isMover || isMoveBar) {
-    //         this.movingByControlPoint = true
-    //       } else {
-    //         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
-    //       }
-
-    //       break
-    //     }
-    //   }
-
-    //   /**
-    //    * @Note InMultiSelection mode should still can move the layer
-    //    */
-    //   if (!this.config.locked && !inSelectionMode) {
-    //     this.initialPos = MouseUtils.getMouseAbsPoint(event)
-    //     eventUtils.addPointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.addPointerEvent('pointermove', this.moving)
-    //   }
-    //   if (this.config.type !== 'tmp') {
-    //     let targetIndex = this.layerIndex
-    //     if (this.isActive && this.currSelectedInfo.layers.length === 1) {
-    //       if (inSelectionMode) {
-    //         GroupUtils.deselect()
-    //         targetIndex = this.config.styles.zindex - 1
-    //         this.setLastSelectedLayerIndex(this.layerIndex)
-    //       }
-    //     } else if (!this.isActive) {
-    //       // already have selected layer
-    //       if (this.currSelectedInfo.index >= 0) {
-    //         // Did not press shift/cmd/ctrl key -> deselect selected layers first
-    //         if (!inSelectionMode && !inMultiSelectionMode) {
-    //           GroupUtils.deselect()
-    //           targetIndex = this.config.styles.zindex - 1
-    //           this.setLastSelectedLayerIndex(this.layerIndex)
-    //           GroupUtils.select(this.pageIndex, [targetIndex])
-    //         } else {
-    //           // this if statement is used to prevent select the layer in another page
-    //           if (this.pageIndex === pageUtils.currFocusPageIndex && !this.config.locked) {
-    //             if (!LayerUtils.getCurrLayer.locked) {
-    //               GroupUtils.select(this.pageIndex, [targetIndex])
-    //             }
-    //           }
-    //         }
-    //       } else {
-    //         targetIndex = this.config.styles.zindex - 1
-    //         this.setLastSelectedLayerIndex(this.layerIndex)
-    //         GroupUtils.select(this.pageIndex, [targetIndex])
-    //       }
-    //     }
-    //   }
-    // },
-    // moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    //   // console.log('moving in controller')
-    //   const posDiff = {
-    //     x: Math.abs(MouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
-    //     y: Math.abs(MouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
-    //   }
-    //   switch (this.config.type) {
-    //     case LayerType.group:
-    //       if ((this.config as IGroup).layers.some(l => l.active && l.type === LayerType.text && l.contentEditable && l.isTyping)) {
-    //         return
-    //       }
-    //   }
-
-    //   if (this.$isTouchDevice() && !this.isLocked()) {
-    //     if (!this.isActive) {
-    //       if (posDiff.x > 1 || posDiff.y > 1) {
-    //         this.isDoingGestureAction = true
-    //         return
-    //       }
-    //     } else {
-    //       if (posDiff.x < 1 && posDiff.y < 1) {
-    //         return
-    //       }
-    //     }
-    //   }
-
-    //   this.isControlling = true
-    //   if (!this.isDragging()) {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-    //       dragging: true
-    //     })
-    //     this.$emit('isDragging', this.layerIndex)
-    //   }
-    //   if (this.isImgControl) {
-    //     eventUtils.removePointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.removePointerEvent('pointermove', this.moving)
-    //     return
-    //   }
-    //   if (this.isActive) {
-    //     if (generalUtils.getEventType(e) !== 'touch') {
-    //       e.preventDefault()
-    //     }
-    //     this.setCursorStyle('move')
-    //     if (!this.isHandleMovingHandler) {
-    //       window.requestAnimationFrame(() => {
-    //         this.movingHandler(e)
-    //         this.isHandleMovingHandler = false
-    //       })
-    //       this.isHandleMovingHandler = true
-    //     }
-    //     const posDiff = {
-    //       x: Math.abs(this.getLayerPos().x - this.initTranslate.x),
-    //       y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
-    //     }
-    //     if (posDiff.x !== 0 || posDiff.y !== 0) {
-    //       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: true })
-    //       this.setMoving(true)
-    //       if (this.getLayerType === 'text' && this.config.contentEditable) {
-    //         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-    //       }
-    //     }
-    //   }
-    // },
-    // movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    //   if (!this.config.moved) {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
-    //   }
-    //   const offsetPos = MouseUtils.getMouseRelPoint(e, this.initialPos)
-    //   const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
-    //   GroupUtils.movingTmp(
-    //     this.pageIndex,
-    //     {
-    //       x: moveOffset.offsetX,
-    //       y: moveOffset.offsetY
-    //     }
-    //   )
-    //   // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-    //   // this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
-    //   // this.$emit('getClosestSnaplines')
-    //   const totalOffset = {
-    //     x: offsetPos.x,
-    //     y: offsetPos.y
-    //     // x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
-    //     // y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
-    //   }
-    //   this.initialPos.x += totalOffset.x
-    //   this.initialPos.y += totalOffset.y
-    // },
-    // imgHandler(offset: ICoordinate) {
-    //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
-    // },
-    // moveEnd(e: MouseEvent | TouchEvent) {
-    //   if (!this.isDoingGestureAction && !this.isActive) {
-    //     this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
-    //     GroupUtils.deselect()
-    //     const targetIndex = this.config.styles.zindex - 1
-    //     this.setLastSelectedLayerIndex(this.layerIndex)
-    //     GroupUtils.select(this.pageIndex, [targetIndex])
-    //     eventUtils.removePointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.removePointerEvent('pointermove', this.moving)
-    //     this.isMoved = false
-    //     this.isControlling = false
-    //     this.setCursorStyle('')
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-    //       dragging: false
-    //     })
-    //     this.isDoingGestureAction = false
-    //     // this.snapUtils.event.emit('clearSnapLines')
-    //     return
-    //   }
-
-    //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
-    //   this.setMoving(false)
-
-    //   if (this.isActive) {
-    //     // if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked()) {
-    //     //   // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
-    //     //   //   GroupUtils.deselect()
-    //     //   //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
-    //     //   // }
-    //     // }
-    //     const posDiff = {
-    //       x: Math.abs(this.getLayerPos().x - this.initTranslate.x),
-    //       y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
-    //     }
-    //     const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
-    //     if (hasActualMove) {
-    //       if (this.getLayerType === 'text') {
-    //         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-    //       }
-    //       this.isMoved = true
-    //       // dragging to another page
-    //       if (LayerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
-    //         const layerNum = this.currSelectedInfo.layers.length
-    //         if (layerNum > 1) {
-    //           GroupUtils.group()
-    //         }
-
-    //         const layerTmp = generalUtils.deepCopy(LayerUtils.getCurrLayer)
-
-    //         const { top, left } = (this.$refs.body as HTMLElement).getBoundingClientRect()
-    //         const targetPageRect = (document.querySelector(`.nu-page-${this.currHoveredPageIndex}`) as HTMLLIElement)?.getBoundingClientRect()
-    //         const newX = (left - targetPageRect.left) * (100 / this.scaleRatio)
-    //         const newY = (top - targetPageRect.top) * (100 / this.scaleRatio)
-
-    //         layerTmp.styles.x = newX
-    //         layerTmp.styles.y = newY
-    //         LayerUtils.deleteSelectedLayer(false)
-    //         LayerUtils.addLayers(this.currHoveredPageIndex, [layerTmp])
-    //         if (layerNum > 1) {
-    //           GroupUtils.ungroup()
-    //         }
-    //         // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
-    //       } else {
-    //         if (!(this.config as IImage).isHoveringFrame) {
-    //           // StepsUtils.record()
-    //           StepsUtils.asyncRecord()
-    //         }
-    //       }
-    //     } else {
-    //       if (this.getLayerType === 'text') {
-    //         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-    //         if (this.movingByControlPoint) {
-    //           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-    //         }
-    //         if (this.config.contentEditable) {
-    //           tiptapUtils.focus({ scrollIntoView: false })
-    //           if (!this.config.isEdited) {
-    //             setTimeout(() => {
-    //               tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
-    //             }, 100) // wait for default behavior to set cursor position, then select (otherwise selection will be overwritten)
-    //           }
-    //         }
-    //       }
-    //       this.isMoved = false
-    //       if (this.inMultiSelectionMode) {
-    //         if (this.config.type !== 'tmp') {
-    //           let targetIndex = this.layerIndex
-    //           if (this.isActive && this.currSelectedInfo.layers.length === 1) {
-    //             GroupUtils.deselect()
-    //             targetIndex = this.config.styles.zindex - 1
-    //             this.setLastSelectedLayerIndex(this.layerIndex)
-    //           } else if (!this.isActive) {
-    //             // already have selected layer
-    //             if (this.currSelectedInfo.index >= 0) {
-    //               // this if statement is used to prevent select the layer in another page
-    //               if (this.pageIndex === pageUtils.currFocusPageIndex) {
-    //                 GroupUtils.select(this.pageIndex, [targetIndex])
-    //               }
-    //             } else {
-    //               targetIndex = this.config.styles.zindex - 1
-    //               this.setLastSelectedLayerIndex(this.layerIndex)
-    //               GroupUtils.select(this.pageIndex, [targetIndex])
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-
-    //     if (this.$isTouchDevice() && !this.isPointerDownFromSubController && !hasActualMove) {
-    //       /**
-    //        * This function is used for mobile-control, as one of the sub-controller is active
-    //        * tap at the primary-controller should set the sub-controller to non-active
-    //        */
-    //       if (this.config.type === LayerType.group) {
-    //         const primary = this.config as IGroup
-    //         for (let i = 0; i < (this.config as IGroup).layers.length; i++) {
-    //           if (primary.layers[i].active) {
-    //             if (primary.layers[i].type === LayerType.text) {
-    //               LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false }, i)
-    //             }
-    //             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: false }, i)
-    //           }
-    //         }
-    //       }
-    //     }
-    //     this.isPointerDownFromSubController = false
-    //     this.isControlling = false
-    //     this.setCursorStyle('')
-    //     eventUtils.removePointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.removePointerEvent('pointermove', this.moving)
-    //   }
-
-    //   if (this.isDragging()) {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-    //       dragging: false
-    //     })
-    //     this.$emit('isDragging', -1)
-    //   }
-
-    //   this.isDoingGestureAction = false
-    //   // this.snapUtils.event.emit('clearSnapLines')
-    // },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
         return
@@ -1884,73 +1393,6 @@ export default defineComponent({
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
     },
-    dragEnter(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.addEventListener('dragleave', this.dragLeave)
-      body.addEventListener('drop', this.onDrop)
-      if (this.getLayerType === 'image') {
-        const shadow = (this.config as IImage).styles.shadow
-        const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
-        const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj?.type && shadow.srcObj?.type !== 'upload'
-        const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
-        if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
-          this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
-        } else {
-          notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-          body.removeEventListener('dragleave', this.dragLeave)
-          body.removeEventListener('drop', this.onDrop)
-        }
-      }
-    },
-    dragLeave(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.removeEventListener('dragleave', this.dragLeave)
-      body.removeEventListener('drop', this.onDrop)
-      if (this.getLayerType === 'image') {
-        this.dragUtils.onImageDragLeave(e, this.pageIndex)
-      }
-    },
-    onDrop(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.removeEventListener('dragleave', this.dragLeave)
-      body.removeEventListener('drop', this.onDrop)
-
-      const dt = e.dataTransfer
-      if (e.dataTransfer?.getData('data')) {
-        if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
-          this.dragUtils.itemOnDrop(e, this.pageIndex)
-        } else if (this.getLayerType === 'image') {
-          if (this.isHandleShadow) {
-            const replacedImg = new Image()
-            replacedImg.crossOrigin = 'anonynous'
-            replacedImg.onload = () => {
-              const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
-              const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
-              imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
-            }
-            const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
-            const src = ImageUtils.getSrc(this.config, size)
-            replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-            // return
-          } else {
-            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
-          }
-        }
-        // GroupUtils.deselect()
-        // this.setLastSelectedLayerIndex(this.layerIndex)
-        // GroupUtils.select(this.pageIndex, [this.layerIndex])
-      } else if (dt && dt.files.length !== 0) {
-        const files = dt.files
-        this.setCurrSidebarPanel(SidebarPanelType.file)
-        uploadUtils.uploadAsset('image', files, {
-          addToPage: true
-        })
-      }
-    },
-    onSubDrop(attrs: unknown = {}) {
-      const { e } = attrs as { e: DragEvent }
-      e && this.onDrop(e)
-    },
     waitFontLoadingAndRecord() {
       const pageId = this.page.id
       const layerId = this.config.id
@@ -2078,21 +1520,6 @@ export default defineComponent({
     curveTextSizeRefresh(text: IText) {
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))
     },
-    onDblClick() {
-      if (this.getLayerType !== 'image' || this.isLocked()) return
-      if (this.currSelectedInfo.index < 0) {
-        GroupUtils.select(this.pageIndex, [this.layerIndex])
-      }
-      switch (this.getLayerType) {
-        case LayerType.image: {
-          const { shadow } = (this.config as IImage).styles
-          const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
-          if (!(this.isHandleShadow && needRedrawShadow)) {
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-          }
-        }
-      }
-    },
     onRightClick(event: MouseEvent) {
       if (this.$isTouchDevice()) {
         // in touch device, right click will be triggered by long click
@@ -2102,95 +1529,6 @@ export default defineComponent({
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
-    },
-    // onPress() {
-    //   // 'long-press' when contentEditable has default behaviors on iOS.
-    //   // To avoid breaking such behaviors, don't run handler in such state.
-    //   if (this.contentEditable) {
-    //     return
-    //   }
-    //   if (!this.isActive) {
-    //     GroupUtils.deselect()
-    //     GroupUtils.select(this.pageIndex, [this.layerIndex])
-    //   }
-    //   if (this.getLayerType === 'text') {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { shown: false, contentEditable: false, isTyping: false })
-    //   }
-
-    //   eventUtils.removePointerEvent('pointermove', this.moving)
-    //   eventUtils.removePointerEvent('pointerup', this.moveEnd)
-    //   editorUtils.setInMultiSelectionMode(true)
-    // },
-    clickSubController(targetIndex: number, type: string, selectionMode: boolean) {
-      if (!this.isActive) {
-        // moveStart will handle the following:
-        // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true })
-        return
-      }
-      if (selectionMode) return
-      let updateSubLayerProps = null as any
-      let layers = null as any
-      switch (this.getLayerType) {
-        case 'group':
-          updateSubLayerProps = LayerUtils.updateSubLayerProps
-          layers = (LayerUtils.getCurrLayer as IGroup).layers
-          break
-        case 'frame':
-          updateSubLayerProps = FrameUtils.updateFrameLayerProps
-          layers = (LayerUtils.getCurrLayer as IFrame).clips
-      }
-
-      if (!this.isHandleShadow) {
-        if (this.currSubSelectedInfo.index !== -1) {
-          for (let idx = 0; idx < layers.length; idx++) {
-            if (idx !== targetIndex) {
-              updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
-            }
-            if (this.currSubSelectedInfo.type === 'image') {
-              updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
-            }
-          }
-        }
-        if ((this.config.type === LayerType.frame && !(this.config as IFrame).clips[targetIndex].active) ||
-          (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
-          updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
-        }
-        LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
-      }
-    },
-    pointerDownSubController() {
-      this.isPointerDownFromSubController = true
-    },
-    dblSubController(e: MouseEvent, targetIndex: number) {
-      e.stopPropagation()
-      if (this.isHandleShadow) {
-        return
-      }
-
-      let updateSubLayerProps = null as any
-      let target = undefined as ILayer | undefined
-      switch (this.getLayerType) {
-        case LayerType.group:
-          target = (this.config as IGroup).layers[targetIndex]
-          updateSubLayerProps = LayerUtils.updateSubLayerProps
-          if (!target.active) {
-            return
-          }
-          break
-        case LayerType.frame:
-          target = (this.config as IFrame).clips[targetIndex]
-          updateSubLayerProps = FrameUtils.updateFrameLayerProps
-          if (!target.active || (target as IImage).srcObj.type === 'frame') {
-            return
-          }
-          break
-        case LayerType.image:
-        default:
-          return
-      }
-      if (target.type === LayerType.image && !target.inProcess) {
-        updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
-      }
     },
     frameLayerMapper(_config: any) {
       const config = generalUtils.deepCopy(_config)
@@ -2232,11 +1570,6 @@ export default defineComponent({
         x: this.config.styles.x,
         y: this.config.styles.y
       }
-    },
-    getLayers(): Array<ILayer> {
-      const type = this.getLayerType
-      return (type === 'group' || type === 'tmp')
-        ? this.config.layers : (type === 'frame' ? this.config.clips : [])
     },
     isShown(): boolean {
       return this.config.shown

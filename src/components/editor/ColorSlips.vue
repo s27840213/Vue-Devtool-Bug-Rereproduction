@@ -184,9 +184,6 @@ export default defineComponent({
     isColorPanelHandling(): boolean {
       return this.isBrandkitAvailable && (this.currPanel !== SidebarPanelType.brand || this.selectedTab !== 'color')
     },
-    isText(): boolean {
-      return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
-    },
     bgStyle(): Record<string, string> {
       return this.mode === 'FunctionPanel' ? {
         background: '#2C2F43'// gray-1-5

@@ -202,6 +202,8 @@ export default defineComponent({
     defaultTextColor(): string {
       return this.isDarkTheme ? 'text-white' : 'text-gray-3'
     },
+    // Call by PanelSize and PopupSize.vue
+    // eslint-disable-next-line vue/no-unused-properties
     isFormatApplicable(): boolean {
       return this.selectedFormatKey === 'custom' ? this.isCustomValid : (this.selectedFormatKey !== '')
     },
@@ -306,13 +308,6 @@ export default defineComponent({
     toggleLock() {
       this.isLocked = !this.isLocked
       if (this.isLocked) this.aspectRatio = this.pageWidth * this.pageHeight <= 0 ? 1 : this.pageWidth / this.pageHeight
-    },
-    makeFormatString(format: ILayout) {
-      if (format.id !== '') {
-        return `${format.title} ${format.description}`
-      } else {
-        return `${format.width} x ${format.height}`
-      }
     },
     makeFormatTitle(format: ILayout) {
       if (format.id !== '') {

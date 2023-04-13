@@ -65,9 +65,6 @@ export default defineComponent({
     }
   },
   computed: {
-    squaredPaddingClass(): string {
-      return this.squared ? `btn-squared-${this.type.split('-')[1]}` : ''
-    },
     buttonType(): string {
       const size = this.type.split('-')[1]
       return this.disabled ? `inactive-${size}` : this.type

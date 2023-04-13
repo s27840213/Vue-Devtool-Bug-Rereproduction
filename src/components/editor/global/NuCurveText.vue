@@ -11,7 +11,6 @@ p(class="nu-curve-text__p" :style="pStyle()")
 
 <script lang="ts">
 import { IGroup, ISpan, IText } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
@@ -35,16 +34,8 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    page: {
-      type: Object as PropType<IPage>,
-      required: true
-    },
     subLayerIndex: {
       type: Number
-    },
-    primaryLayer: {
-      type: Object,
-      default: () => { return undefined }
     },
     isDuplicated: {
       type: Boolean,
