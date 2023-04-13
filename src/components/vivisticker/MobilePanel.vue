@@ -8,8 +8,8 @@ div(class="mobile-panel"
     :class="{'self-padding': noPaddingTheme, 'insert-us': insertTheme && isUs }")
     div(class="mobile-panel__drag-bar"
       :class="{'visible-hidden': (!insertTheme && !isUs && panelTitle !== '') || fixSize || extraFixSizeCondition}"
-      @pointerdown="dragPanelStart"
-      @touchstart="disableTouchEvent")
+      @pointerdown.stop="dragPanelStart"
+      @touchstart.stop="disableTouchEvent")
         div
     div
       div(class="mobile-panel__btn mobile-panel__left-btn"
@@ -21,8 +21,8 @@ div(class="mobile-panel"
           :iconWidth="insertTheme ? '32px' : '20px'")
         div(class="mobile-panel__btn-click-zone"
           :class="{'insert-left': insertTheme}"
-          @pointerdown="leftButtonAction"
-          @touchstart="disableTouchEvent")
+          @pointerdown.stop="leftButtonAction"
+          @touchstart.stop="disableTouchEvent")
       div(class="mobile-panel__title")
         span(class="mobile-panel__title-text body-1 mr-10"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
@@ -37,8 +37,8 @@ div(class="mobile-panel"
           :iconWidth="insertTheme ? '24px' : '20px'")
         div(class="mobile-panel__btn-click-zone"
           :class="{'insert-right': insertTheme}"
-          @pointerdown="rightButtonAction"
-          @touchstart="disableTouchEvent")
+          @pointerdown.stop="rightButtonAction"
+          @touchstart.stop="disableTouchEvent")
     tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
         :tabs="innerTabs.label" v-model="innerTabIndex")
   div(class="mobile-panel__bottom-section")
@@ -563,7 +563,8 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.panelDragHeight = 0
+    this.panelDragHeight = this.currActivePanel === 'none'
+      ? 0 : this.initPanelHeight()
   },
   methods: {
     ...mapMutations({
