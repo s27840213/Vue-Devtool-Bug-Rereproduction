@@ -17,7 +17,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :page="page"
       :subLayerIndex="subLayerIndex"
       :primaryLayer="primaryLayer"
-      :isDuplicated="idx !== duplicatedText.length-1")
+      :extraSpanStyle="text.extraSpanStyle")
     p(v-else
       v-for="(p, pIndex) in config.paragraphs"
       :key="`p${pIndex}`"
@@ -45,7 +45,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   components: {
