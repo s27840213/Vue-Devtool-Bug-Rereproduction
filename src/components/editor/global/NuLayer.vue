@@ -535,9 +535,10 @@ export default defineComponent({
       let transform = ''
       // let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
       if (!isImgType) {
-        transform += this.compensationRatio() !== 1 ? `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})` : ''
-        transform += scaleX !== 1 ? `scaleX(${scaleX})` : ''
-        transform += scaleY !== 1 ? `scaleY(${scaleY})` : ''
+        // transform += this.compensationRatio() !== 1 ? `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})` : ''
+        // transform += scaleX !== 1 ? `scaleX(${scaleX})` : ''
+        // transform += scaleY !== 1 ? `scaleY(${scaleY})` : ''
+        transform += `scale(${scale}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
       }
       const hasActualScale = !!transform && transform !== 'scale(1)'
       const styles = {
@@ -548,8 +549,8 @@ export default defineComponent({
           styles.width = `${this.config.styles.width / this.config.styles.scale}px`
           styles.height = `${this.config.styles.height / this.config.styles.scale}px`
         } else {
-          styles.width = `${this.config.styles.initWidth}px`
-          styles.height = `${this.config.styles.initHeight}px`
+          styles.width = `${this.config.styles.initWidth * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
+          styles.height = `${this.config.styles.initHeight * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
         }
         styles.transform = transform
       }
