@@ -2,7 +2,6 @@
 div(class="ruler-vr"
     :style="rulerRootStyles")
   div(class="ruler-vr__body"
-    ref="rulerBody"
     :style="rulerBodyStyles")
     div(v-for="(i ,index) in scaleCount" :key="index" class="ruler-vr__block ruler-vr__block--int")
       span(class="ruler-vr__number") {{(i-1)*scale}}

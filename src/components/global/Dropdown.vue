@@ -61,6 +61,8 @@ export default defineComponent({
       this.showDropdown = true
       this.$emit('open', event)
     },
+    // Used by DownloadPageSelection.handleSubmit
+    // eslint-disable-next-line vue/no-unused-properties
     handleClose (event: Event) {
       this.showDropdown = false
       this.$emit('close', event)

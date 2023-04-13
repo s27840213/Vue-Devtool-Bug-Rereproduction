@@ -114,7 +114,7 @@ import { ceil, floor, round } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default defineComponent({
+const component = defineComponent({
   props: {
     isDarkTheme: {
       type: Boolean,
@@ -468,6 +468,9 @@ export default defineComponent({
     }
   }
 })
+
+export default component
+export type CPageSizeSelector = InstanceType<typeof component>
 </script>
 
 <style lang="scss" scoped>

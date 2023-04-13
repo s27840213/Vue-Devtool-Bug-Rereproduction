@@ -15,7 +15,6 @@ div(class="editor-view bg-gray-5"
       //- @mousedown.left.self="outerClick($event)")
       template(v-if="!inBgRemoveMode")
         nu-page(v-for="(page,index) in pagesState"
-                :ref="`page-${index}`"
                 :key="`page-${page.config.id}`"
                 :pageIndex="index"
                 :overflowContainer="editorView"

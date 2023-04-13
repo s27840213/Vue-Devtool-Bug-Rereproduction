@@ -15,7 +15,7 @@ div(class="mobile-editor")
     transition(name="panel-up"
               @before-enter="beforeEnter"
               @after-leave="afterLeave")
-      mobile-panel(v-show="showMobilePanel" ref="mobilePanel"
+      mobile-panel(v-show="showMobilePanel"
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
@@ -128,7 +128,7 @@ export default defineComponent({
 
     this.setUserState({ enableAdminView: false })
 
-    this.footerTabsHeight = (this.$refs.footerTabs as any).$el.clientHeight
+    this.footerTabsHeight = (this.$refs.footerTabs as {$el: HTMLElement}).$el.clientHeight
   },
   computed: {
     ...mapState('mobileEditor', {

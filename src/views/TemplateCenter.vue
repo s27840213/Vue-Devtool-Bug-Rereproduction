@@ -386,7 +386,7 @@ export default defineComponent({
       } : {}
     },
     handleScroll() {
-      const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
+      const searchbar = (this.$refs.searchbar as {$el: HTMLElement}).$el as HTMLElement
       this.snapToTop = searchbar.getBoundingClientRect().top <= HEADER_HEIGHT
       this.searchbarTop = searchbar.getBoundingClientRect().top
       const mobileSearch = this.$refs.mobileSearch as HTMLElement | undefined

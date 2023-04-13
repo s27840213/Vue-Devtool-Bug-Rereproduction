@@ -2,7 +2,7 @@
 button(class="btn"
     :class="`btn-${squared ? 'squared-' : ''}${buttonType}`"
     :style="btnStyles"
-    :disabled="disabled" ref="btn")
+    :disabled="disabled")
   svg-icon(v-if="hasIcon"
     class="btn__icon"
     :style="flexDir === 'row' ? `margin-right: ${iconMargin}px` : `margin-bottom: ${iconMargin}px`"
