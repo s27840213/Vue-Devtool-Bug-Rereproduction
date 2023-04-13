@@ -3,8 +3,10 @@ div(class="tags" v-click-outside="clickOutsideHandler")
   template(v-if="!$isTouchDevice()")
     div(class="tags__flex-container"
         :style="containerStyle")
-      div(:class="`tags__tag-wrapper ${theme}`" v-for="tag in tags"
-        @click="onClick( tag.value )")
+      div(v-for="tag in tags"
+          :key="tag.label"
+          :class="`tags__tag-wrapper ${theme}`"
+          @click="onClick( tag.value )")
         div(class="tags__tag") {{ tag.label }}
     div(v-if="!showMore" class="tags__more-wrapper")
       div(class="tags__tag-wrapper"
@@ -14,6 +16,7 @@ div(class="tags" v-click-outside="clickOutsideHandler")
     div(class="tags__container-mobile" ref="container")
       div(class="tags__flex-container-mobile")
         div(v-for="tag in tags" :active="tag.active || undefined"
+          :key="tag.label"
           :class="`tags__tag-wrapper ${theme}`"
           @click="onClick(tag.value)")
           div(class="tags__tag") {{ tag.label }}

@@ -53,7 +53,7 @@ div(class="page-size-selector")
           iconWidth="16px"
           :iconColor="selectedFormatKey === 'custom' ? 'black' : 'gray-3'")
         div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-white")
-          div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-black" @click="selectUnit($event, unit)")
+          div(v-for="(unit) in unitOptions" :key="unit" class="page-size-selector__body__custom__unit__option__item text-black" @click="selectUnit($event, unit)")
             span(class="body-XS text-black") {{unit}}
       div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
         class="page-size-selector__body__custom__err body-XS text-red") {{errMsg}}
@@ -65,7 +65,9 @@ div(class="page-size-selector")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
       div(v-if="isLayoutReady && recentlyUsed.length > 0" class="page-size-selector__body-row first-row")
         span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
-      div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row item pointer"
+      div(v-for="(format, index) in recentlyUsed"
+          :key="format.id"
+          class="page-size-selector__body-row item pointer"
           @click="selectFormat(`recent-${index}`)")
         radio-btn(class="page-size-selector__body-row__radio"
                   :isSelected="selectedFormatKey === `recent-${index}`",
@@ -82,7 +84,9 @@ div(class="page-size-selector")
             :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatTitle(format) }}
       div(v-if="isLayoutReady && formatList.length > 0" class="page-size-selector__body-row first-row")
         span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
-      div(v-for="(format, index) in formatList" class="page-size-selector__body-row item pointer"
+      div(v-for="(format, index) in formatList"
+          :key="format.id"
+          class="page-size-selector__body-row item pointer"
           @click="selectFormat(`preset-${index}`)")
         radio-btn(class="page-size-selector__body-row__radio"
                   :isSelected="selectedFormatKey === `preset-${index}`",
@@ -100,15 +104,15 @@ div(class="page-size-selector")
 </template>
 
 <script lang="ts">
-import vClickOutside from 'click-outside-vue3'
-import { defineComponent } from 'vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { ILayout } from '@/interfaces/layout'
 import { IListServiceContentData } from '@/interfaces/api'
-import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
+import { ILayout } from '@/interfaces/layout'
 import pageUtils from '@/utils/pageUtils'
+import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
+import vClickOutside from 'click-outside-vue3'
 import { ceil, floor, round } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   props: {

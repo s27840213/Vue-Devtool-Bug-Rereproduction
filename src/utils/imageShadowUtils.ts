@@ -232,15 +232,6 @@ class ImageShadowUtils {
       return
     }
 
-    if (params.layerInfo) {
-      const { pageIndex, layerIndex, subLayerIdx } = params.layerInfo
-      const pageId = layerUtils.getPage(pageIndex).id
-      const layer = layerUtils.getLayer(pageIndex, layerIndex)
-      const layerId = layer.id as string
-      const subLayerId = (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') ? layerId : (layer as IGroup).layers[subLayerIdx as number].id
-      // this.setHandleId({ pageId, layerId, subLayerId })
-    }
-
     const { timeout = DRAWING_TIMEOUT } = params
     if (timeout) {
       clearTimeout(this._draw)
@@ -310,8 +301,8 @@ class ImageShadowUtils {
 
     ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
     ctxT.globalCompositeOperation = 'source-in'
-    ctxT.globalAlpha = opacity * 0.01
-    ctxT.fillStyle = effects.color
+    // ctxT.globalAlpha = opacity * 0.01
+    ctxT.fillStyle = effects.color + percentToHex(opacity)
     ctxT.fillRect(0, 0, canvasT.width, canvasT.height)
     ctxT.globalAlpha = 1
     ctxT.globalCompositeOperation = 'source-over'
@@ -343,15 +334,6 @@ class ImageShadowUtils {
         this.setIsProcess(params.layerInfo, false)
       }
       return
-    }
-
-    if (params.layerInfo) {
-      const { pageIndex, layerIndex, subLayerIdx } = params.layerInfo
-      const pageId = layerUtils.getPage(pageIndex).id
-      const layer = layerUtils.getLayer(pageIndex, layerIndex)
-      const layerId = layer.id as string
-      const subLayerId = (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') ? layerId : (layer as IGroup).layers[subLayerIdx as number].id
-      // this.setHandleId({ pageId, layerId, subLayerId })
     }
 
     const { timeout = DRAWING_TIMEOUT } = params
@@ -547,8 +529,8 @@ class ImageShadowUtils {
     setMark('shadow', 3)
 
     ctxT.globalCompositeOperation = 'source-in'
-    ctxT.globalAlpha = opacity * 0.01
-    ctxT.fillStyle = currentEffect === ShadowEffectType.frame ? effects.frameColor || effects.color : effects.color
+    // ctxT.globalAlpha = opacity * 0.01
+    ctxT.fillStyle = (currentEffect === ShadowEffectType.frame ? effects.frameColor || effects.color : effects.color) + percentToHex(opacity)
     ctxT.fillRect(0, 0, canvasT.width, canvasT.height)
     ctxT.globalAlpha = 1
     ctxT.globalCompositeOperation = 'source-over'
@@ -981,3 +963,15 @@ export const fieldRange = {
 } as any
 
 export default new ImageShadowUtils()
+
+function percentToHex(p: number) {
+  /**
+   * source:
+   * https://gist.github.com/lopspower/03fb1cc0ac9f32ef38f4?permalink_comment_id=4503706#gistcomment-4503706
+   */
+  if (p === 50) return '80'
+  else if (p === 90) return 'E6'
+  else {
+    return `0${Math.round((255 / 100) * p).toString(16)}`.slice(-2).toUpperCase()
+  }
+}

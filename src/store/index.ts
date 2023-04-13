@@ -35,7 +35,7 @@ import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
-import { createStore, GetterTree, MutationTree } from 'vuex'
+import { GetterTree, MutationTree, createStore } from 'vuex'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
@@ -498,12 +498,15 @@ const mutations: MutationTree<IEditorState> = {
     // state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
     const { pageIndex, config } = updateInfo
     Object.assign(state.pages[pageIndex].config.backgroundImage.config, config)
+    state.pages[pageIndex].config.backgroundColor = '#ffffff'
     // state.pages[pageIndex].backgroundColor = '#ffffff'
   },
   SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '', panelPreviewSrc: '' }) {
-    Object.assign(state.pages[updateInfo.pageIndex].config.backgroundImage.config.srcObj, updateInfo.srcObj)
-    updateInfo.previewSrc && (state.pages[updateInfo.pageIndex].config.backgroundImage.config.previewSrc = updateInfo.previewSrc)
-    updateInfo.panelPreviewSrc && (state.pages[updateInfo.pageIndex].config.backgroundImage.config.panelPreviewSrc = updateInfo.panelPreviewSrc)
+    const { pageIndex, srcObj, previewSrc, panelPreviewSrc } = updateInfo
+    Object.assign(state.pages[pageIndex].config.backgroundImage.config.srcObj, srcObj)
+    previewSrc && (state.pages[pageIndex].config.backgroundImage.config.previewSrc = previewSrc)
+    panelPreviewSrc && (state.pages[pageIndex].config.backgroundImage.config.panelPreviewSrc = panelPreviewSrc)
+    state.pages[pageIndex].config.backgroundColor = '#ffffff'
     // state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
   },
   SET_backgroundImagePos(state: IEditorState, updateInfo: { pageIndex: number, imagePos: { x: number, y: number } }) {

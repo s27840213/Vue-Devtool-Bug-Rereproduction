@@ -8,7 +8,7 @@ div(class="panel-page")
       style="padding: 5px 0;"
       @click="addPage(currFocusPageIndex+1)") {{$t('NN0139')}}
   div(class="panel-page-items")
-    template(v-for="(page, idx) in getPages")
+    template(v-for="(page, idx) in getPages" :key="idx")
       div(class="panel-page__plus")
         panel-page-plus(:index="idx" :last="false"
           :class="{'pt-10': idx === 0}")
@@ -55,6 +55,7 @@ export default defineComponent({
           height: refPage.height,
           physicalWidth: refPage.physicalWidth,
           physicalHeight: refPage.physicalHeight,
+          backgroundColor: refPage.backgroundColor,
           isEnableBleed: refPage.isEnableBleed,
           bleeds: refPage.bleeds,
           physicalBleeds: refPage.physicalBleeds,

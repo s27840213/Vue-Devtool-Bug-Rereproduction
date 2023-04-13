@@ -1,31 +1,29 @@
 <template lang="pug">
 div(class="mobile-trash-design-view")
   mobile-folder-gallery(:path="[]"
-                        :allFolders="allFolders"
-                        :selectedNum="selectedNum")
+    :allFolders="allFolders"
+    :selectedNum="selectedNum")
   div(v-if="isFolderDesignDivisionNeeded" class="mobile-trash-design-view__hr")
   mobile-design-gallery(:noNewDesign="true"
-                        :noHeader="true"
-                        :allDesigns="allDesigns"
-                        :selectedNum="selectedNum"
-                        :limitFunctions="true"
-                        @loadMore="handleLoadMore")
+    :noHeader="true"
+    :allDesigns="allDesigns"
+    :selectedNum="selectedNum"
+    :limitFunctions="true"
+    @loadMore="handleLoadMore")
   div(class="scroll-space")
 </template>
 
 <script lang="ts">
+import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
+import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
 import designUtils from '@/utils/designUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapActions } from 'vuex'
-import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
-import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
-import DiskWarning from '@/components/payment/DiskWarning.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
     MobileFolderGallery,
-    MobileDesignGallery,
-    DiskWarning
+    MobileDesignGallery
   },
   mounted() {
     designUtils.fetchDesigns(this.fetchTrashDesigns)

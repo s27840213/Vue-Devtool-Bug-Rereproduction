@@ -4,13 +4,18 @@
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 
-interface IStyleMap {
-  [key: string]: string
-}
+const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
+  'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
+  'min-width', 'min-height', 'backgroundImage', 'backgroundSize', 'backgroundPosition',
+  'opacity', 'webkitTextFillColor', '-webkit-background-clip', 'filter', '--base-stroke',
+  'webkitTextStrokeColor', 'textShadow',
+] as const
 
-const styleMap = {
-  width: 'width',
-  height: 'height',
+type IStyleMap = Record<typeof fontProps[number], string>
+
+const styleMap = Object.assign({}, ...fontProps.map(prop => // Transfer camelCase to dash-case by default
+  ({ [prop]: prop.replace(/([A-Z]|webkit)/g, upper => `-${upper.toLowerCase()}`) })
+), { // Overwrite special case
   x: 'translateX',
   y: 'translateY',
   scaleX: 'scaleX',
@@ -18,22 +23,12 @@ const styleMap = {
   font: 'font-family',
   weight: '-webkit-text-stroke-width',
   align: 'text-align',
-  lineHeight: 'line-height',
   fontSpacing: 'letter-spacing',
   size: 'font-size',
-  color: 'color',
-  opacity: 'opacity',
-  writingMode: 'writing-mode',
   decoration: 'text-decoration-line',
   style: 'font-style',
-  caretColor: 'caret-color',
-} as IStyleMap
-
-const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
-const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
-  'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
-  'min-width', 'min-height'
-]
+} as Partial<IStyleMap>
+) as IStyleMap
 
 class CssConveter {
   convertTransformStyle(x: number, y: number, zindex: number, rotate: number, cancel3D = false, contentScaleRatio = 1): { transform: string } {
@@ -44,7 +39,21 @@ class CssConveter {
   }
 
   convertFlipStyle(horizontalFlip: boolean, verticalFlip: boolean): { transform: string } {
-    return { transform: `scale(${horizontalFlip ? -1 : 1}, ${verticalFlip ? -1 : 1})` }
+    if (horizontalFlip && verticalFlip) {
+      return {
+        transform: 'scaleX(-1) scaleY(-1)'
+      }
+    } else if (horizontalFlip) {
+      return {
+        transform: 'scaleX(-1)'
+      }
+    } else if (verticalFlip) {
+      return {
+        transform: 'scaleY(-1)'
+      }
+    } else {
+      return { transform: '' }
+    }
   }
 
   convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle | { [key: string]: string | number }): { [key: string]: string } {
@@ -58,11 +67,6 @@ class CssConveter {
         result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `calc(var(--base-stroke) + ${(sourceStyles.size as number) / 32}px)` : 'calc(var(--base-stroke))'
       } else if (prop === 'fontSpacing') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
-      } else if (prop === 'lineHeight') {
-        result[styleMap[prop]] = `${sourceStyles[prop]}`
-      } else if (['boxDecorationBreak'].includes(prop)) { // For -webkit CSS
-        result[styleMap[prop]] = `${sourceStyles[prop]}`
-        result[`-webkit-${styleMap[prop]}`] = `${sourceStyles[prop]}`
       } else if (prop === 'font') {
         result[styleMap[prop]] = this.getFontFamily(sourceStyles[prop] as string)
       } else if (prop === 'color') { // For color
@@ -73,7 +77,9 @@ class CssConveter {
         result.display = 'inline-block'
         result['letter-spacing'] = '0'
         result['text-align'] = 'center'
-      } else if (typeof sourceStyles[prop] !== 'undefined') {
+      } else if (['lineHeight', 'opacity'].includes(prop)) { // Use sorce style value directly
+        result[styleMap[prop]] = `${sourceStyles[prop]}`
+      } else { // Defulat: number add px unit, other treat as string
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}px` : `${sourceStyles[prop]}`
       }
     })
@@ -86,53 +92,13 @@ class CssConveter {
 
   convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, contentScaleRatio = 1): { [key: string]: string } {
     const result: { [key: string]: string } = {}
-
-    Object.assign(result,
-      { width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width * contentScaleRatio}px` : 'initial' },
-      { height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height * contentScaleRatio}px` : 'initial' },
-      { opacity: `${sourceStyles.opacity / 100}` },
-      this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, contentScaleRatio))
-    return result
-  }
-
-  convertAllStyles(sourceStyles: IStyle | ITextStyle): { [key: string]: string } {
-    const result: { [key: string]: string } = {}
-    // create a deep copy to prevent from changing the original state.
-    const tmp = JSON.parse(JSON.stringify(sourceStyles))
-    Object.assign(result, this.convertTransformStyle(tmp.x, tmp.y, tmp.zindex, tmp.rotate))
-    // remove transform properties from tmp to prevent from duplicate key value pair
-    transformProps.forEach(prop => {
-      delete tmp[prop]
+    Object.assign(result, {
+      width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width * contentScaleRatio}px` : 'initial',
+      height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height * contentScaleRatio}px` : 'initial',
+      ...(sourceStyles.opacity !== 100 && { opacity: `${sourceStyles.opacity / 100}` }),
+      ...this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, contentScaleRatio)
     })
-
-    // convert properties excluding transform properties
-    Object.entries(tmp).forEach(([k, v]) => {
-      result[styleMap[k]] = typeof v === 'number' ? `${v}px` : `${v}`
-    })
-
     return result
-  }
-
-  getKeyByValue(object: any, value: string): string {
-    return Object.keys(object).find(key => object[key] === value)!
-  }
-
-  // fontStyleKeyMap(prop: string): string {
-  //   const propInCss = this.getKeyByValue(fontStyleMap, prop)
-  //   return this.getKeyByValue(styleMap, propInCss)
-  // }
-
-  convertTextShadow(x: number, y: number, color: string, blur?: number): Partial<CSSStyleDeclaration> {
-    return {
-      textShadow: `${color} ${x}px ${y}px ${blur || 0}px`
-    }
-  }
-
-  convertTextStorke(width: number, color: string, fill: string): Partial<CSSStyleDeclaration> {
-    return {
-      webkitTextStroke: `${width}px ${color}`,
-      webkitTextFillColor: fill
-    }
   }
 }
 

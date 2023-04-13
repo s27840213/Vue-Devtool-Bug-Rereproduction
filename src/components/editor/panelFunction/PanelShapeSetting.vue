@@ -19,15 +19,15 @@ div(class="shape-setting")
                     @update="handleLineDashEdgeUpdate"
                     itemMinWidth="70",
                     buttonHeight="20")
-        template(class="pointer" v-slot:g0i0)
-          svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
-        template(class="pointer" v-slot:g0i1)
-          svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
-        template(class="pointer" v-slot:g1i0)
-          svg-icon(iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+        template(v-slot:g0i0)
+          svg-icon(iconName="no-dash pointer" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+        template(v-slot:g0i1)
+          svg-icon(iconName="dash-1 pointer" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+        template(v-slot:g1i0)
+          svg-icon(iconName="butt pointer" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
           div(class="shape-setting__value-selector__button-text") {{$t('NN0084')}}
-        template(class="pointer" v-slot:g1i1)
-          svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+        template(v-slot:g1i1)
+          svg-icon(iconName="round pointer" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
           div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
     div(class="vertical-rule bg-gray-4")
     div(class="shape-setting__line-action-wrapper pointer feature-button"
@@ -46,8 +46,9 @@ div(class="shape-setting")
                     @update="handleStartMarkerUpdate"
                     itemMinWidth="76",
                     buttonHeight="37")
-        template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
-          marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
+        template(v-for="markerslot in makeSlots(markerIds)" :key="markerslot.name" v-slot:[markerslot.name])
+          marker-icon(class="pointer"
+            iconWidth="25px" iconColor="#474A57" iconHeight="12px"
             :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
             :svg="markerContentMap[markerslot.marker].svg"
             :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
@@ -79,8 +80,9 @@ div(class="shape-setting")
                     @update="handleEndMarkerUpdate"
                     itemMinWidth="76",
                     buttonHeight="37")
-        template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
-          marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
+        template(v-for="markerslot in makeSlots(markerIds)" :key="markerslot.name" v-slot:[markerslot.name])
+          marker-icon(class="pointer"
+            iconWidth="25px" iconColor="#474A57" iconHeight="12px"
             :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
             :svg="markerContentMap[markerslot.marker].svg"
             :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
@@ -120,11 +122,11 @@ div(class="shape-setting")
                     @update="handleBasicShapeFilledUpdate"
                     itemMinWidth="64",
                     buttonHeight="26")
-          template(class="pointer" v-slot:g0i0)
-            svg-icon(iconName="non-filled" iconWidth="17px" iconColor="gray-2")
+          template(v-slot:g0i0)
+            svg-icon(iconName="non-filled pointer" iconWidth="17px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") {{$t('NN0088')}}
-          template(class="pointer" v-slot:g0i1)
-            svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
+          template(v-slot:g0i1)
+            svg-icon(iconName="filled pointer" iconWidth="17px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") {{$t('NN0087')}}
     label-with-range(:value="corRadPercentage" :min="0" :max="100"
                     @update="handleBasicShapeCorRadPercentUpdate"
@@ -143,8 +145,9 @@ div(class="shape-setting")
                 :active="showColorSlips"
                 @click="selectColor(0)")
       color-btn(v-else v-for="(color, index) in getDocumentColors" :color="color"
-                :active="showColorSlips && index === currSelectedColorIndex"
-                @click="selectColor(index)")
+        :key="`${color}-${index}`"
+        :active="showColorSlips && index === currSelectedColorIndex"
+        @click="selectColor(index)")
   //- 管理介面
   div(class="shape-setting__info")
     div(v-if="showAdminTool && isObjectElement")
@@ -170,6 +173,7 @@ div(class="shape-setting")
           select(class="shape-setting__info__select"
             v-model="svgInfo.locale")
             option(v-for="locale in localeOptions"
+              :key="locale"
               :value="locale") {{locale}}
         div(class="shape-setting__info__line") tags_tw
         div
@@ -200,12 +204,10 @@ div(class="shape-setting")
 
 <script lang="ts">
 import designApis from '@/apis/design-info'
-import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
-import SearchBar from '@/components/SearchBar.vue'
 import { IListServiceContentData } from '@/interfaces/api'
 import { AllLayerTypes, IFrame, IShape } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -232,8 +234,6 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default defineComponent({
   name: 'PanelShapeSetting',
   components: {
-    SearchBar,
-    ColorPicker,
     GeneralValueSelector,
     MarkerIcon,
     LabelWithRange,

@@ -2,8 +2,9 @@
 div(class="brand-kit-tab-text" :style="minHeightStyles()")
   div(class="brand-kit-tab-text__styles")
     div(v-for="type in Object.keys(MAPPING)"
-      class="brand-kit-tab-text__setting pointer"
-      @click="handleAddText(type)")
+        :key="type"
+        class="brand-kit-tab-text__setting pointer"
+        @click="handleAddText(type)")
       span(class="brand-kit-tab-text__title" :class="type" :style="getFontStyles(type)") {{ MAPPING[type] }}
       br
       span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName(type)} / ${getFontSize(type)}px` }}

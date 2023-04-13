@@ -33,7 +33,6 @@ div(class="editor-view" v-touch
 
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import EditorHeader from '@/components/editor/EditorHeader.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
 import PageNumber from '@/components/editor/PageNumber.vue'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
@@ -61,7 +60,6 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    EditorHeader,
     BgRemoveArea,
     PageNumber,
     PageCard

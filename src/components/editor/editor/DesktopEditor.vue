@@ -27,7 +27,7 @@ div(class="desktop-editor")
                 @click="switchApp")
               div(class="flex flex-column")
                 select(class="locale-select" v-model="inputLocale")
-                  option(v-for="locale in localeOptions" :value="locale") {{locale}}
+                  option(v-for="locale in localeOptions" :key="locale" :value="locale") {{locale}}
               div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
                 span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
           editor-view(:currPage="currPage" :isSidebarPanelOpen="isSidebarPanelOpen")
@@ -73,7 +73,7 @@ import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -302,6 +302,7 @@ export default defineComponent({
     height: 100%;
     display: grid;
     grid-template-columns: 1fr;
+    border-left: 1px solid setColor(gray-4,0.2);
     &__color-panel {
       height: 50%;
       position: absolute;

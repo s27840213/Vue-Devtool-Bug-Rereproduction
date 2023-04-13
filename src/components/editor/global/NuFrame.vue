@@ -1,6 +1,6 @@
 <template lang="pug">
-div(class="nu-frame"
-    :style="styles()")
+div(:class="{ 'nu-frame__custom': !isFrameImg }"
+    :style="styles")
   div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
     img(class="shadow__img"
       draggable="false"
@@ -22,7 +22,7 @@ div(class="nu-frame"
 
 <script lang="ts">
 import { IListServiceContentDataItem } from '@/interfaces/api'
-import { IFrame, IGroup, IImage, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IShape, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import AssetUtils from '@/utils/assetUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -63,7 +63,7 @@ export default defineComponent({
     },
     primaryLayer: {
       default: undefined,
-      type: Object as PropType<IGroup>
+      type: Object as PropType<IGroup | ITmp>
     }
   },
   async created() {
@@ -131,7 +131,6 @@ export default defineComponent({
               initHeight: this.config.styles.height / this.config.styles.scale,
               vSize: [this.config.styles.width / this.config.styles.scale, this.config.styles.height / this.config.styles.scale]
             }
-            // If the frame is in-grouped-frame
             if (this.primaryLayer) {
               this.updateFrameBlendLayer({
                 pageIndex: this.pageIndex,
@@ -304,23 +303,26 @@ export default defineComponent({
         }
       }
       return {}
+    },
+    isFrameImg(): boolean {
+      return this.config.clips.length === 1 && !!this.config.clips[0].isFrameImg
+    },
+    styles(): Record<string, string> {
+      if (!this.isFrameImg) {
+        return {
+          width: `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,
+          height: `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio}px`,
+          // For controll pointer-events from parent, please don't add any pointer-events: initial to layer component.
+          ...(this.contentScaleRatio !== 1 && { transform: `scale(${1 / this.contentScaleRatio})` }),
+        }
+      }
+      return {}
     }
   },
   methods: {
     ...mapMutations({
       updateFrameBlendLayer: 'UPDATE_frameBlendLayer'
     }),
-    styles(): Record<string, string> {
-      const isFrameImg = this.config.clips.length === 1 && this.config.clips[0].isFrameImg
-      return {
-        width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,
-        height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio}px`,
-        // For controll pointer-events from parent, please don't add any pointer-events: initial to layer component.
-        ...ImageUtils.isImgControl(this.pageIndex) ? { pointerEvents: 'none' } : {},
-        transform: isFrameImg ? '' : `scale(${1 / this.contentScaleRatio})`,
-        transformOrigin: isFrameImg ? '' : 'top left'
-      }
-    },
     shadowSrc() {
       const shadow = this.config.styles.shadow
       if (shadow && shadow.srcObj && shadow.srcObj.type) {
@@ -348,6 +350,11 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   transform-style: flat;
+
+  &__custom {
+    pointer-events: none;
+    transform-origin: top left;
+  }
 }
 .shadow {
   &__wrapper {

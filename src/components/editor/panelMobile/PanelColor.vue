@@ -5,8 +5,9 @@ div(class="panel-color px-5")
     div(class="panel-color__shape-colors" :style="colorsStyle"
         @scroll.passive="updateColorsOverflow" ref="colors")
       color-btn(v-for="(color, index) in getDocumentColors"
-                :color="color" :focus="index === currSelectedColorIndex"
-                @click="selectColor(index)")
+        :key="color"
+        :color="color" :focus="index === currSelectedColorIndex"
+        @click="selectColor(index)")
     div(class="panel-color__hr")
   //- There is no row-gap in MobilePanel while active PanelColor.
   //- Instead, control gap by PanelColor itself.
@@ -30,7 +31,6 @@ div(class="panel-color px-5")
 <script lang="ts">
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IImage, IShape } from '@/interfaces/layer'
@@ -47,7 +47,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { cloneDeep } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -72,7 +72,6 @@ export default defineComponent({
   },
   emits: ['pushHistory'],
   components: {
-    MobileSlider,
     ColorPicker,
     ColorSlips,
     ColorBtn

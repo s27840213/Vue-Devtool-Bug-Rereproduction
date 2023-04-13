@@ -3,7 +3,8 @@ div(class="block" :style="blockStyle")
   div(class="block-text" :style="blockTextStyle")
     div(class="block-text__title")
       span(v-html="content.title")
-      img(v-for="cb in content.colorBlock.filter((i)=>!i.ref)"
+      img(v-for="(cb, index) in content.colorBlock.filter((i)=>!i.ref)"
+        :key="`${cb.name}-${index}`"
         class="block__colorBlock"
         :src="require('@/assets/img/svg/color-block/' + cb.name)"
         :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
@@ -18,7 +19,8 @@ div(class="block" :style="blockStyle")
       :lottieName="content.img.name.replace('.json', '')"
       :width="content.img.width * rwdModifier"
       :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
-    img(v-for="cb in content.colorBlock.filter((i)=>i.ref)"
+    img(v-for="(cb, index) in content.colorBlock.filter((i)=>i.ref)"
+      :key="`${cb.name}-${index}`"
       class="block__colorBlock"
       :src="require('@/assets/img/svg/color-block/' + cb.name)"
       :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")

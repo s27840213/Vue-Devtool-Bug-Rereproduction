@@ -26,6 +26,7 @@ div(class="home")
           type="template" :theme="theme" :key="theme")
     div(class="home-block")
       ta-block(v-for="item in blocklist"
+        :key="item.id"
         :content="item")
     nu-footer(:isHome="true")
 </template>

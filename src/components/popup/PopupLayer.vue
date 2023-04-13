@@ -2,7 +2,7 @@
 div(class=" popup-layer bg-gray-6"
     @click.stop="closePopup")
   //- for page and layer
-  template(v-for="option in [...updateOptions, ...layerOptions]")
+  template(v-for="option in [...updateOptions, ...layerOptions]" :key="option.text")
     template(v-if="option.condition")
       div(class="popup-layer__item"
           :class="{disabled: isFontLoading}"

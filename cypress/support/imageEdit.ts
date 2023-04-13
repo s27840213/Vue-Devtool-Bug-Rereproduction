@@ -220,9 +220,8 @@ Cypress.Commands.add('imageManuallyBgRemove', { prevSubject: 'element' }, (subje
     .invoke('val', 300).trigger('input')
     .get('canvas.bg-remove-area').realClick({ x: 225, y: 225 })
     .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
-    // .togglePanel('保留')
-    // .get('canvas.bg-remove-area').realClick({ x: 300, y: 450 })
-    // .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
     .togglePanel('完成')
+    // Wait for image polling
+    .get(subject.selector).invoke('attr', 'cy-ready').should('eq', 'true')
   return cy.wrap(subject)
 })

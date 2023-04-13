@@ -143,6 +143,7 @@ export default defineComponent({
           height: refPage.height,
           physicalWidth: refPage.physicalWidth,
           physicalHeight: refPage.physicalHeight,
+          backgroundColor: refPage.backgroundColor,
           isEnableBleed: refPage.isEnableBleed,
           bleeds: refPage.bleeds,
           physicalBleeds: refPage.physicalBleeds,

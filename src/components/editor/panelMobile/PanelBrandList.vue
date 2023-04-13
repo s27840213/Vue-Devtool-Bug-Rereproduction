@@ -4,6 +4,7 @@ div(class="panel-brand-list" :class="{'new-brand': lastHistory === 'new-brand'}"
     div(class="panel-brand-list__brands-wrapper")
       div(class="panel-brand-list__brands")
         div(v-for="brand in brands"
+            :key="brand.id"
             class="panel-brand-list__brand-item"
             :class="{selected: checkSelected(brand)}"
             @click="handleSetCurrentBrand(brand)")

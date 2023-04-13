@@ -9,7 +9,7 @@ div(class="general-value-selector")
           :style="{'min-width': `${itemMinWidth}px`}")
           div(class="general-value-selector__value flex-evenly" @click="setValue(index, i)" :style="{'height': `${buttonHeight}px`}")
             slot(:name="'g' + index + 'i' + index2") {{ 'g' + index + 'i' + index2 }}
-        div(class="horizontal-rule bg-gray-4" v-if="notLastSubArray(index)" :style="{'width': `${Number(itemMinWidth) * 2 / 3}px`}")
+        div(v-if="notLastSubArray(index)" :key="index" class="horizontal-rule bg-gray-4" :style="{'width': `${Number(itemMinWidth) * 2 / 3}px`}")
 </template>
 
 <script lang="ts">

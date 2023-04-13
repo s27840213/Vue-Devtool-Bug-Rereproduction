@@ -57,10 +57,7 @@ div(class="text-setting" ref='body'
 </template>
 
 <script lang="ts">
-import ColorPicker from '@/components/ColorPicker.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import ValueSelector from '@/components/ValueSelector.vue'
 import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -83,9 +80,6 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    SearchBar,
-    ColorPicker,
-    ValueSelector,
     FontSizeSelector
   },
   directives: {

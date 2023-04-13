@@ -3,6 +3,7 @@ div(class="panel-text-effect")
   //- To choose effect category: shadow, shape and bg.
   div(v-if="state === 'categories'" class="panel-text-effect__categories flex-evenly")
     div(v-for="category in textEffects"
+        :key="category.name"
         class="panel-text-effect__category pointer")
       svg-icon(:iconName="`text-${category.name}-none`"
               iconWidth="60px"
@@ -27,11 +28,13 @@ div(class="panel-text-effect")
       class="w-full panel-text-effect__form")
     span(class="panel-text-effect__name") {{currEffect.label}}
     div(v-for="option in currEffect.options"
+        :key="option.key"
         class="panel-text-effect__field")
       //- Option type select
       div(v-if="option.type === 'select'"
           class="panel-text-effect__select")
         div(v-for="sel in option.select"
+            :key="sel.key"
             :class="{'selected': currentStyle.endpoint === sel.key }"
             @click="handleSelectInput(option.key, sel.key)")
           svg-icon(:iconName="`${option.key}-${sel.key}`"

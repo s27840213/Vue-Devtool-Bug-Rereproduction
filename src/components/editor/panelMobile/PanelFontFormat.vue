@@ -15,7 +15,6 @@ div(class="panel-font-format")
 </template>
 
 <script lang="ts">
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -30,9 +29,6 @@ import { mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
-  components: {
-    MobileSlider
-  },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     hasCurveText(): boolean {

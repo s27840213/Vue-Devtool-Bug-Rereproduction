@@ -1,13 +1,14 @@
 <template lang="pug">
 div(class="toggle" :style="outsideStyle")
   div(v-for="op, idx in options" class="toggle-text"
-      :style="textStyle(idx)" @click="setValue(idx)") {{op.label}}
+    :key="op.label"
+    :style="textStyle(idx)" @click="setValue(idx)") {{op.label}}
   div(class="toggle-inside" :style="insideStyle")
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from 'vue'
 import _ from 'lodash'
+import { PropType, defineComponent } from 'vue'
 /**
  * Usage1: Text slide toggle
  * options: [{

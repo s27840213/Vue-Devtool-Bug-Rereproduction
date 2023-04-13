@@ -1,10 +1,11 @@
 <template lang="pug">
 div(class="brand-kit-tab-text")
   div(v-for="type in Object.keys(MAPPING)"
-    class="brand-kit-tab-text__setting pointer"
-    draggable="true"
-    @dragstart="standardTextDrag($event, type)"
-    @click="handleAddText(type)")
+      :key="type"
+      class="brand-kit-tab-text__setting pointer"
+      draggable="true"
+      @dragstart="standardTextDrag($event, type)"
+      @click="handleAddText(type)")
     span(class="brand-kit-tab-text__title" :class="type" :style="getFontStyles(type)") {{ MAPPING[type] }}
     br
     span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName(type)} / ${getFontSize(type)}px` }}

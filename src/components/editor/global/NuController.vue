@@ -59,13 +59,14 @@ div(:layer-index="`${layerIndex}`"
             @keydown.meta.shift.z.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
-        div(v-if="!$isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-            class="control-point__corner-rotate scaler"
-            :ref="`corner-rotate-${index}`"
-            :key="`corner-rotate-${index}`"
-            :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-            @pointerdown.stop="rotateStart($event, index)"
-            @touchstart="disableTouchEvent")
+        template(v-if="!$isTouchDevice()" )
+          div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+              class="control-point__corner-rotate scaler"
+              :ref="`corner-rotate-${index}`"
+              :key="`corner-rotate-${index}`"
+              :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+              @pointerdown.stop="rotateStart($event, index)"
+              @touchstart="disableTouchEvent")
         div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
             class="control-point"
             :key="index"
@@ -74,6 +75,7 @@ div(:layer-index="`${layerIndex}`"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
         div(v-for="(resizer, index) in getResizer(controlPoints)"
+            :key="index"
             class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-${index}`"
@@ -84,17 +86,19 @@ div(:layer-index="`${layerIndex}`"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="$isTouchDevice()" v-for="(resizer, index) in getResizer(controlPoints, false, true)"
-            class="control-point__resize-bar-wrapper")
-          div(class="control-point resizer"
-              :key="`resizer-touch-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
-              @touchstart="disableTouchEvent")
-          div(class="control-point resizer"
-              :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
-              @touchstart="disableTouchEvent")
+        template(v-if="$isTouchDevice()" )
+          div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
+              :key="index"
+              class="control-point__resize-bar-wrapper")
+            div(class="control-point resizer"
+                :key="`resizer-touch-${index}`"
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
+                @touchstart="disableTouchEvent")
+            div(class="control-point resizer"
+                :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
+                @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice()"
             class="control-point__resize-bar-wrapper")
           div(v-for="(resizer, index) in getResizer(controlPoints, true)"
@@ -108,12 +112,13 @@ div(:layer-index="`${layerIndex}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
             @pointerdown.prevent.stop="!$isTouchDevice() ? scaleStart($event) : null"
             @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="$isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
-            class="control-point scaler"
-            :key="`scaler-touch-${index}`"
-            :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-            @pointerdown.prevent.stop="scaleStart"
-            @touchstart="disableTouchEvent")
+        template(v-if="$isTouchDevice()" )
+          div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
+              class="control-point scaler"
+              :key="`scaler-touch-${index}`"
+              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="scaleStart"
+              @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine()"
             :style="`transform: scale(${contentScaleRatio})`")
@@ -151,7 +156,6 @@ div(:layer-index="`${layerIndex}`"
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
@@ -178,14 +182,13 @@ import shapeUtils from '@/utils/shapeUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
-import TextEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -223,8 +226,7 @@ export default defineComponent({
   },
   emits: ['isDragging', 'setFocus'],
   components: {
-    NuTextEditor,
-    LazyLoad
+    NuTextEditor
   },
   created() {
     this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
@@ -362,7 +364,6 @@ export default defineComponent({
       }
     },
     contentStyles(): any {
-      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
       const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       const pointerEvents = this.getPointerEvents
       return {
@@ -376,10 +377,8 @@ export default defineComponent({
          * So, if we want to control the layer, we need to set it to none.
          * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
          */
-        // touchAction: this.isControllerShown ? 'none' : 'initial',
-        ...textEffectStyles,
+        // touchAction: this.isActive ? 'none' : 'initial',
         ...textBgStyles,
-        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     isImgControl(): boolean {

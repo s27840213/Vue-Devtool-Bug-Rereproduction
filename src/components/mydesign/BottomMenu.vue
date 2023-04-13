@@ -15,6 +15,7 @@ div(class="bottom-menu" :style="rootStyles")
         div(class="menu__hr")
         div(class="multi-menu__actions")
           div(v-for="multiMenuItem in multiMenuItems"
+              :key="multiMenuItem.text"
               class="multi-menu__action"
               @click.stop="multiMenuItem.action")
             svg-icon(:iconName="multiMenuItem.icon" iconWidth="24px" iconColor="gray-2")
@@ -38,6 +39,7 @@ div(class="bottom-menu" :style="rootStyles")
             @click.stop="handleNewFolder") {{ $t('NN0190') }}
       div(v-if="bottomMenu === 'sort-menu'" class="sort-menu menu")
         div(v-for="sortMenuItem in sortMenuItems"
+            :key="sortMenuItem.text"
             class="menu__item pointer"
             :class="{selected: checkSortSelected(sortMenuItem.payload)}"
             @click.stop="handleSortByClick(sortMenuItem.payload)")
@@ -70,6 +72,7 @@ div(class="bottom-menu" :style="rootStyles")
         div(v-else style="margin-top: 20px;")
         template(v-if="!isNameEditing")
           div(v-for="designMenuItem in designMenuItems"
+              :key="designMenuItem.text"
               class="menu__item"
               @click.stop="handleDesignMenuAction(designMenuItem.icon)")
             div(class="menu__item-icon")
@@ -103,6 +106,7 @@ div(class="bottom-menu" :style="rootStyles")
         div(v-else style="margin-top: 20px;")
         template(v-if="!isNameEditing")
           div(v-for="folderMenuItem in folderMenuItems"
+              :key="folderMenuItem.text"
               class="menu__item"
               @click.stop="handleFolderMenuAction(folderMenuItem.icon)")
             div(class="menu__item-icon")
@@ -116,9 +120,10 @@ div(class="bottom-menu" :style="rootStyles")
         div(class="move-folder__folders"
             @click.stop.prevent="clearMoveToFolderSelectInfo")
           mobile-structure-folder(v-for="folder in realFolders"
-                          :folder="folder"
-                          :parents="[]"
-                          :level="0")
+            :key="folder.id"
+            :folder="folder"
+            :parents="[]"
+            :level="0")
         div(class="move-folder__hr"
             @click.stop.prevent="clearMoveToFolderSelectInfo")
         div(class="move-folder__footer")

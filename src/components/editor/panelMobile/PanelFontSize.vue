@@ -13,7 +13,6 @@ div(class="panel-font-size")
 </template>
 
 <script lang="ts">
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import generalUtils from '@/utils/generalUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -26,7 +25,6 @@ import { mapGetters, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    MobileSlider,
     FontSizeSelector
   },
   data() {
