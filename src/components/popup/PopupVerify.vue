@@ -109,12 +109,12 @@ div(class="popup-verify"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
 import userApis from '@/apis/user'
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   props: {
@@ -216,15 +216,6 @@ export default defineComponent({
         return false
       }
     },
-    newPassValid(): boolean {
-      if (!this.isConfirmClicked) {
-        return true
-      } else if (this.newPass.length > 0) {
-        return true
-      } else {
-        return false
-      }
-    }
   },
   methods: {
     ...mapGetters({

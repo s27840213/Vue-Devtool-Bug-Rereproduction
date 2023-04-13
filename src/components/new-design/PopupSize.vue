@@ -17,17 +17,15 @@ div(class="popup-size"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapState } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
-import RadioBtn from '@/components/global/RadioBtn.vue'
+import PageSizeSelector, { CPageSizeSelector } from '@/components/new-design/PageSizeSelector.vue'
 import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'
-import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    RadioBtn,
     PageSizeSelector
   },
   directives: {
@@ -55,7 +53,7 @@ export default defineComponent({
     },
     onConfirmClicked() {
       this.isConfirmClicked = true
-      if (!(this.$refs.pageSizeSelector as any).isFormatApplicable) return // TODO: disable submit button
+      if (!(this.$refs.pageSizeSelector as CPageSizeSelector).isFormatApplicable) return // TODO: disable submit button
       const path = this.$route.name === 'MyDesign' ? this.currLocation.split('/').slice(1).join(',') : undefined
       const foldername = this.$route.name === 'MyDesign' ? designUtils.search(this.folders, designUtils.makePath(this.currLocation))?.name : undefined
       designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, this.selectedFormat.unit, undefined, path, foldername)

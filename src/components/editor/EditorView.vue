@@ -15,7 +15,6 @@ div(class="editor-view bg-gray-5"
       //- @mousedown.left.self="outerClick($event)")
       template(v-if="!inBgRemoveMode")
         nu-page(v-for="(page,index) in pagesState"
-                :ref="`page-${index}`"
                 :key="`page-${page.config.id}`"
                 :pageIndex="index"
                 :overflowContainer="editorView"
@@ -54,12 +53,10 @@ div(class="editor-view bg-gray-5"
 
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import EditorHeader from '@/components/editor/EditorHeader.vue'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import i18n from '@/i18n'
-import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import app from '@/main'
 import ControlUtils from '@/utils/controlUtils'
@@ -88,7 +85,6 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    EditorHeader,
     RulerHr,
     RulerVr,
     BgRemoveArea,
@@ -99,18 +95,14 @@ export default defineComponent({
       isSelecting: false,
       isShowGuidelineV: false,
       isShowGuidelineH: false,
-      initialAbsPos: { x: 0, y: 0 },
       initialRelPos: { x: 0, y: 0 },
       currentAbsPos: { x: 0, y: 0 },
       currentRelPos: { x: 0, y: 0 },
       editorView: null as unknown as HTMLElement,
       editorViewCanvas: null as unknown as HTMLElement,
       guidelinesArea: null as unknown as HTMLElement,
-      pageIndex: -1,
       backgroundControllingPageIndex: -1,
-      pageUtils,
       canvasRect: null as unknown as DOMRect,
-      RulerUtils,
       rulerVPos: 0,
       rulerHPos: 0,
       lastMappedVPos: 0,
@@ -125,6 +117,8 @@ export default defineComponent({
     app.mixin({
       data() {
         return {
+          // Access by self.timeStart
+          // eslint-disable-next-line vue/no-unused-properties
           timeStart: 0
         }
       },
@@ -325,10 +319,6 @@ export default defineComponent({
     pageNum(): number {
       return this.pages.length
     },
-    isTyping(): boolean {
-      return (this.currSelectedInfo.layers as Array<IGroup | IShape | IText | IFrame | IImage>)
-        .some(l => l.type === 'text' && l.isTyping)
-    },
     isDragging(): boolean {
       return RulerUtils.isDragging
     },
@@ -394,7 +384,7 @@ export default defineComponent({
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
-      this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+      this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
       eventUtils.addPointerEvent('pointermove', this.selecting)
       eventUtils.addPointerEvent('pointerup', this.selectEnd)
@@ -485,18 +475,6 @@ export default defineComponent({
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
       }
     },
-    mapSelectionRectToPage(selectionData: DOMRect): { x: number, y: number, width: number, height: number } {
-      const targetPageIndex = pageUtils.currFocusPageIndex
-
-      const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
-
-      return {
-        x: (selectionData.left - pageRect.left) / (pageUtils.scaleRatio / 100),
-        y: (selectionData.top - pageRect.top) / (pageUtils.scaleRatio / 100),
-        width: (selectionData.right - selectionData.left) / (pageUtils.scaleRatio / 100),
-        height: (selectionData.bottom - selectionData.top) / (pageUtils.scaleRatio / 100)
-      }
-    },
     renderSelectionArea(initPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {
       const minX = Math.min(initPoint.x, endPoint.x)
       const maxX = Math.max(initPoint.x, endPoint.x)
@@ -506,12 +484,6 @@ export default defineComponent({
       selectionArea.style.transform = `translate(${Math.round(minX)}px,${Math.round(minY)}px)`
       selectionArea.style.width = `${Math.round((maxX - minX))}px`
       selectionArea.style.height = `${Math.round((maxY - minY))}px`
-    },
-    addSelectedLayer(layerIndexs: Array<number>) {
-      this.addLayer({
-        pageIndex: this.pageIndex,
-        layerIndexs: [...layerIndexs]
-      })
     },
     detectBlur(event: Event) {
       // The reason why I used setTimeout event here is to make the callback function being executed after the activeElement has been changed
@@ -713,12 +685,6 @@ export default defineComponent({
           StepsUtils.record()
         }
       }
-    },
-    setTranslateOfPos(event: MouseEvent, type: string) {
-      const target = (type === 'v' ? this.$refs.guidelinePosV : this.$refs.guidelinePosH) as HTMLElement
-      const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
-      const pos = MouseUtils.getMouseRelPoint(event, guideline)
-      target.style.transform = type === 'v' ? `translate(0px,${pos.y}px)` : `translate(${pos.x}px,0px)`
     },
     openGuidelinePopup(event: MouseEvent) {
       popupUtils.openPopup('guideline', { event })

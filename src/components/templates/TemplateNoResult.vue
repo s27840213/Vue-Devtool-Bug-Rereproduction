@@ -9,6 +9,7 @@ div(class="template-no-result")
 </template>
 
 <script lang="ts">
+import webViewUtils from '@/utils/picWVUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -41,7 +42,7 @@ export default defineComponent({
       this.openUrl()
     },
     openUrl() {
-      window.open(this.$t('NN0791'), '_blank')
+      webViewUtils.openOrGoto(this.$t('NN0791'))
     }
   }
 })
@@ -65,7 +66,7 @@ export default defineComponent({
   &__description {
     @include body-MD;
     color: setColor(gray-2);
-    width: 647px;
+    width: min(647px, 90vw);
     text-align: left;
     margin-bottom: 4px;
   }

@@ -5,13 +5,9 @@ div(class="color-picker")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import SearchBar from '@/components/SearchBar.vue'
 
 export default defineComponent({
-  emits: [],
-  components: {
-    SearchBar
-  }
+  emits: []
 })
 </script>
 

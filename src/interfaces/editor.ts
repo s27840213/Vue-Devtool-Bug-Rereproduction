@@ -19,7 +19,7 @@ export interface IFooterTabProps {
 
 export interface IFooterTab {
   icon: string,
-  text: string,
+  text?: string,
   panelType?: string,
   hidden?: boolean,
   disabled?: boolean,

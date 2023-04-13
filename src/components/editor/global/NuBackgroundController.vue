@@ -52,14 +52,13 @@ export default defineComponent({
   },
   data() {
     return {
-      controlPoints: ControlUtils.getControlPoints(4, 25),
+      controlPoints: ControlUtils.getControlPoints(4, 25, 100 / this.$store.getters.getPageScaleRatio),
       isControlling: false,
       initialPos: { x: 0, y: 0 } as null | ICoordinate,
       initImgPos: { x: 0, y: 0 },
-      initImgControllerPos: { x: 0, y: 0 },
       initImgSize: { width: this.config.styles.imgWidth, height: this.config.styles.imgHeight },
       center: { x: 0, y: 0 },
-      control: { xSign: 1, ySign: 1, isHorizon: false },
+      control: { xSign: 1, ySign: 1 },
       initPinchPos: null as null | { x: number, y: number },
       isPinching: false,
       isMoving: false
@@ -83,12 +82,6 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    isActive(): boolean {
-      return this.config.active
-    },
-    isShown(): boolean {
-      return this.config.shown
-    },
     getImgX(): number {
       // return this.page.backgroundImage.posX
       return this.config.styles.imgX
@@ -104,25 +97,13 @@ export default defineComponent({
       return this.config.styles.imgHeight
     },
     getPageScale(): number {
-      return this.config.styles.scale
+      return 1
+      // return this.config.styles.scale
     },
     getPageRotate(): number {
       return 0
     },
-    getImgController(): ICoordinate {
-      return this.config.styles.imgController
-    },
-    dimBgStyles(): Record<string, string> {
-      return {
-        width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
-        height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`
-      }
-    },
     styles(): Record<string, string> {
-      // preserve in case the background image is needed to be rotatable in the future
-      // const zindex = (this.pageIndex + 1) * 100
-      // const pos = this.imgControllerPosHandler()
-      // transform: `translate(${pos.x}px, ${pos.y}px) rotate(${this.config.styles.rotate}deg)`
       return {
         width: `${this.config.styles.imgWidth * this.getPageScale * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
@@ -137,46 +118,6 @@ export default defineComponent({
     ...mapMutations({
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
-    imgControllerPosHandler(): ICoordinate {
-      const angleInRad = this.getPageRotate * Math.PI / 180
-      const rectCenter = {
-        x: this.pageSize.width * 0.5,
-        y: this.pageSize.height * 0.5
-      }
-      const pageVect = {
-        x: -rectCenter.x,
-        y: -rectCenter.y
-      }
-      /**
-       * Anchor denotes the top-left fix point of the elements
-       */
-      const scale = this.getPageScale
-      const PageAnchor = ControlUtils.getNoRotationPos(pageVect, rectCenter, -angleInRad)
-      const imgAnchor = {
-        x: Math.cos(angleInRad) * this.getImgX * scale - Math.sin(angleInRad) * this.getImgY * scale + PageAnchor.x,
-        y: Math.sin(angleInRad) * this.getImgX * scale + Math.cos(angleInRad) * this.getImgY * scale + PageAnchor.y
-      }
-      const [w, h] = [this.config.styles.imgWidth * scale, this.config.styles.imgHeight * scale]
-      const center = {
-        x: imgAnchor.x + (w * Math.cos(angleInRad) - h * Math.sin(angleInRad)) * 0.5,
-        y: imgAnchor.y + (w * Math.sin(angleInRad) + h * Math.cos(angleInRad)) * 0.5
-      }
-      const vect = {
-        x: imgAnchor.x - center.x,
-        y: imgAnchor.y - center.y
-      }
-      const imgControllerPos = ControlUtils.getNoRotationPos(vect, center, angleInRad)
-      return imgControllerPos
-    },
-    controllerStyles() {
-      return {
-        transform: `translate(${-this.page.backgroundImage.posX * this.contentScaleRatio}px, ${-this.page.backgroundImage.posY * this.contentScaleRatio}px)`,
-        width: `${this.pageSize.width * this.contentScaleRatio}px`,
-        height: `${this.pageSize.height * this.contentScaleRatio}px`,
-        outline: `${3 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`,
-        'pointer-events': 'none'
-      }
-    },
     pinchHandler(event: AnyTouchEvent) {
       switch (event.phase) {
         case 'start': {
@@ -233,7 +174,6 @@ export default defineComponent({
           console.warn('end', this.initialPos)
           this.isPinching = false
           if (!this.isMoving) {
-            this.initImgControllerPos = this.getImgController
             Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
             eventUtils.addPointerEvent('pointermove', this.moving)
             eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -344,7 +284,6 @@ export default defineComponent({
       }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
-      this.initImgControllerPos = this.getImgController
       Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
 
       eventUtils.addPointerEvent('pointermove', this.moving)
@@ -363,7 +302,6 @@ export default defineComponent({
        */
       if (this.initialPos === null) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        this.initImgControllerPos = this.getImgController
         Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
       }
       event.preventDefault()
@@ -402,8 +340,8 @@ export default defineComponent({
         return
       }
       // pageUtils.setBackgroundImageControlDefault()
-      stepsUtils.record()
-      pageUtils.startBackgroundImageControl(this.pageIndex)
+      // stepsUtils.record()
+      // pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
 
       eventUtils.removePointerEvent('pointermove', this.moving)
@@ -415,15 +353,13 @@ export default defineComponent({
       }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
-      this.initImgControllerPos = this.getImgController
       this.initImgSize = {
         width: this.getImgWidth,
         height: this.getImgHeight
       }
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
-
-      Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
+      Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
       const angleInRad = this.getPageRotate * Math.PI / 180
       const vect = MouseUtils.getMouseRelPoint(event, this.center)
       const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
@@ -442,7 +378,6 @@ export default defineComponent({
       event.preventDefault()
       let width = this.getImgWidth
       let height = this.getImgHeight
-
       const angleInRad = this.getPageRotate * Math.PI / 180
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
@@ -467,6 +402,7 @@ export default defineComponent({
         width: width - initWidth,
         height: height - initHeight
       }
+
       const imgPos = {
         x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.x : this.initImgPos.x,
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.y : this.initImgPos.y
@@ -510,8 +446,6 @@ export default defineComponent({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      // pageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
-      // pageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
       this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y, imgWidth: width, imgHeight: height })
     },
     scaleEnd(e: PointerEvent) {
@@ -519,7 +453,7 @@ export default defineComponent({
         return
       }
       this.isControlling = false
-      // pageUtils.setBackgroundImageControlDefault()
+      pageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
       pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
@@ -540,17 +474,15 @@ export default defineComponent({
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
     },
-    disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice()) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.nu-background-controller {
+  position: absolute;
+  top:0;
+}
 .controller-point {
   pointer-events: auto;
   position: absolute;

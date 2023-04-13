@@ -33,13 +33,13 @@ div(class="trash-design-view")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
+import DesignGallery from '@/components/mydesign/DesignGallery.vue'
+import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import { IQueueItem } from '@/interfaces/design'
 import designUtils, { DESIGN_MENU_EVENTS, FOLDER_MENU_EVENTS, IDesignMenuEvents, IFolderMenuEvents } from '@/utils/designUtils'
-import FolderGallery from '@/components/mydesign/FolderGallery.vue'
-import DesignGallery from '@/components/mydesign/DesignGallery.vue'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: ['clearSelection', 'moveItem', ...DESIGN_MENU_EVENTS(), ...FOLDER_MENU_EVENTS()],
@@ -75,9 +75,6 @@ export default defineComponent({
       allDesigns: 'getAllDesigns',
       allFolders: 'getAllFolders'
     }),
-    menuItemSlots(): {name: string, icon: string, text: string}[] {
-      return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
-    },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
     }

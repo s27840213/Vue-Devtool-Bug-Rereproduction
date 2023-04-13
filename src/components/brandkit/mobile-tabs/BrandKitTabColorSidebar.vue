@@ -5,21 +5,22 @@ div(v-else class="brand-kit-tab-color" :style="minHeightStyles()")
   div(class="brand-kit-tab-color__palettes")
     div(v-if="isPalettesLoading" class="loading")
       svg-icon(iconName="loading"
-              iconWidth="24px"
-              iconColor="gray-3")
+        iconWidth="24px"
+        iconColor="gray-3")
     template(v-else)
       brand-kit-color-palette-sidebar-mobile(v-for="colorPalette in colorPalettes"
-                                      :colorPalette="colorPalette"
-                                      :settingmode="settingmode")
+        :key="colorPalette.id"
+        :colorPalette="colorPalette"
+        :settingmode="settingmode")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
 import BrandKitColorPaletteSidebarMobile from '@/components/brandkit/BrandKitColorPaletteSidebarMobile.vue'
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
-import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

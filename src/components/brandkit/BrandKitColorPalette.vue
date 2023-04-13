@@ -16,7 +16,7 @@ div(class="brand-kit-color-palette")
           @click="handleDeletePalette(colorPalette)")
         svg-icon(iconName="trash" iconWidth="16px" iconColor="gray-2")
   transition-group(class="brand-kit-color-palette__colors" name="color-list" tag="div")
-    template(v-for="(color, index) in colors")
+    template(v-for="(color) in colors" :key="color")
       div(v-if="color === 'add'"
         class="brand-kit-color-palette__colors__color-wrapper pointer"
         key="default"
@@ -43,12 +43,12 @@ div(class="brand-kit-color-palette")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import brandkitUtils from '@/utils/brandkitUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
-import vClickOutside from 'click-outside-vue3'
 import { IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
+import vClickOutside from 'click-outside-vue3'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   data() {

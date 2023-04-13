@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="overflow-container"
     :style="pageStyles")
-  div(:style="stylesWith3DPreserve")
+  div(class="full-size" :style="stylesWith3DPreserve")
     div(v-if="imgLoaded"
-        :class="['page-content']"
-        :style="pageStyles"
+        :class="['full-size', 'page-content']"
+        :style="pageContentStyles"
         ref="page-content"
         @drop.prevent="onDrop"
         @dragover.prevent
@@ -14,30 +14,31 @@ div(class="overflow-container"
         @dblclick="pageDblClickHandler()"
         @tap="tapPageContent")
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
-      div(class="content" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
+      div(class="content full-size" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
         nu-bg-image(
             :image="config.backgroundImage"
             :pageIndex="pageIndex"
             :page="config"
             :color="config.backgroundColor"
             :key="config.backgroundImage.config.id"
-            @mousedown.native.left="pageClickHandler()"
+            @mousedown.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
             :padding="contentStyles.margin")
-        nu-layer(
-          v-for="(layer,index) in config.layers"
-          :key="layer.id"
-          :dataIndex="`${index}`"
-          :dataPindex="`${pageIndex}`"
-          :snapUtils="snapUtils"
-          :layerIndex="index"
-          :pageIndex="pageIndex"
-          :page="config"
-          :config="layer"
-          :contentScaleRatio="contentScaleRatio"
-          :forceRender="forceRender"
-          :lazyLoadTarget="lazyLoadTarget"
-          :inPreview="inPreview")
+        div(class="layers-wrapper" :class="{'preserve3D': !isTouchDevice}")
+          nu-layer(
+            v-for="(layer,index) in config.layers"
+            :key="layer.id"
+            :dataIndex="`${index}`"
+            :dataPindex="`${pageIndex}`"
+            :snapUtils="snapUtils"
+            :layerIndex="index"
+            :pageIndex="pageIndex"
+            :page="config"
+            :config="layer"
+            :contentScaleRatio="contentScaleRatio"
+            :forceRender="forceRender"
+            :lazyLoadTarget="lazyLoadTarget"
+            :inPreview="inPreview")
       div(v-if="isShowBleed" class="bleed-line" :style="bleedLineStyles")
       div(v-if="userId === 'backendRendering' && backendRenderParams.isTrim" class="trim")
         div(class="trim__tl" :style="trimStyles.tl")
@@ -50,14 +51,13 @@ div(class="overflow-container"
 
 <script lang="ts">
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
-import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { SidebarPanelType } from '@/store/types'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import DragUtils from '@/utils/dragUtils'
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -73,8 +73,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    NuBgImage,
-    LazyLoad
+    NuBgImage
   },
   props: {
     snapUtils: Object,
@@ -85,10 +84,6 @@ export default defineComponent({
     pageIndex: {
       type: Number,
       required: true
-    },
-    handleSequentially: {
-      type: Boolean,
-      default: false
     },
     contentScaleRatio: {
       default: 1,
@@ -138,28 +133,20 @@ export default defineComponent({
       return {
         width: `${this.config.width * this.contentScaleRatio + this.margin.right}px`,
         height: `${this.config.height * this.contentScaleRatio + this.margin.bottom}px`,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
-        // ...(this.userId === 'backendRendering' && { paddingBottom: 8 + 'px' })
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
+      }
+    },
+    pageContentStyles(): { [index: string]: string } {
+      return {
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
     },
     stylesWith3DPreserve(): { [index: string]: string } {
       return {
-        width: `${this.config.width * this.contentScaleRatio}px`,
-        height: `${this.config.height * this.contentScaleRatio}px`,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+        // width: `${this.config.width * this.contentScaleRatio}px`,
+        // height: `${this.config.height * this.contentScaleRatio}px`,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
-    },
-    layerFilter(): any {
-      const filterResult = this.config.layers.filter((layer: ILayer) => {
-        // return layer.type !== LayerType.shape
-        // return layer.type !== LayerType.text
-        return layer
-      })
-
-      return filterResult
-    },
-    hasSelectedLayer(): boolean {
-      return this.currSelectedInfo.layers.length > 0
     },
     isShowBleed() {
       if (this.userId === 'backendRendering') return false
@@ -168,8 +155,8 @@ export default defineComponent({
     contentStyles() {
       if (!this.config.isEnableBleed) {
         return {
-          width: this.config.width * this.contentScaleRatio + 'px',
-          height: this.config.height * this.contentScaleRatio + 'px',
+          // width: this.config.width * this.contentScaleRatio + 'px',
+          // height: this.config.height * this.contentScaleRatio + 'px',
           padding: [
             '0px',
             this.margin.right + 'px',
@@ -234,12 +221,14 @@ export default defineComponent({
     margin() {
       // additional margin for backend render
       return (this.userId === 'backendRendering' ? this.backendRenderParams.margin : { bottom: 0, right: 0 })
+    },
+    isTouchDevice(): boolean {
+      return generalUtils.isTouchDevice()
     }
   },
   mounted() {
     if (this.setLayersDone) {
       this.loadLayerImg()
-      // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
     }
   },
   watch: {
@@ -248,7 +237,6 @@ export default defineComponent({
       // so trigger loadLayerImg when uploadUtils call SET_pages.
       if (newVal) {
         this.loadLayerImg()
-        // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
       }
     },
   },
@@ -382,6 +370,13 @@ export default defineComponent({
   top: 0px;
   box-sizing: border-box;
   border: 1px solid white
+}
+
+.layers-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .trim {

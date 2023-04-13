@@ -2,26 +2,22 @@
 mobile-design-empty(v-if="isEmpty && !isDesignsLoading")
 div(v-else class="mobile-all-design-view")
   mobile-design-gallery(:noHeader="true"
-                        :allDesigns="allDesigns"
-                        :selectedNum="selectedNum"
-                        @loadMore="handleLoadMore")
+    :allDesigns="allDesigns"
+    :selectedNum="selectedNum"
+    @loadMore="handleLoadMore")
   div(class="scroll-space")
 </template>
 
 <script lang="ts">
+import MobileDesignEmpty from '@/components/mydesign/MobileDesignEmpty.vue'
+import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
 import designUtils from '@/utils/designUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapActions } from 'vuex'
-import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
-import DiskWarning from '@/components/payment/DiskWarning.vue'
-import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
-import MobileDesignEmpty from '@/components/mydesign/MobileDesignEmpty.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
     MobileDesignGallery,
-    DiskWarning,
-    BtnNewDesign,
     MobileDesignEmpty
   },
   mounted() {

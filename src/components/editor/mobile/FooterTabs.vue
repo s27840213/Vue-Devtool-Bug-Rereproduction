@@ -5,7 +5,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
     div(class="footer-tabs__container bg-nav"
         :style="innerContainerStyles"
         ref="container")
-      template(v-for="(tab, index) in homeTabs")
+      template(v-for="(tab) in homeTabs")
         div(v-if="!tab.hidden" :key="tab.icon"
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
@@ -29,7 +29,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
         div(class="footer-tabs__container"
             :style="innerContainerStyles"
             @scroll.passive="updateContainerOverflow" ref="container")
-          template(v-for="(tab, index) in settingTabs")
+          template(v-for="(tab) in settingTabs")
             div(v-if="!tab.hidden" :key="tab.icon"
                 class="footer-tabs__item"
                 :class="{'click-disabled': (tab.disabled || isLocked || (tab.icon !== 'remove-bg' && inBgRemoveMode))}"
@@ -91,7 +91,7 @@ export default defineComponent({
   },
   emits: ['switchTab', 'showAllPages'],
   data() {
-    const mainMenu = { icon: 'unfold', text: `${this.$t('STK0006')}` }
+    const mainMenu = { icon: 'unfold' }
 
     return {
       mainMenu,
@@ -132,9 +132,6 @@ export default defineComponent({
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
-    },
-    hasSelectedLayer(): boolean {
-      return this.currSelectedInfo.layers.length > 0
     },
     isSettingTabsOpen(): boolean {
       return this.settingTabs.length > 0 || this.inBgRemoveMode
@@ -458,14 +455,6 @@ export default defineComponent({
       const layer = layerUtils.getCurrLayer
       return layer.type === LayerType.frame && (layer as IFrame).clips[0].srcObj.assetId !== ''
     },
-    isFrameImg(): boolean {
-      return layerUtils.getCurrLayer.type === LayerType.frame && ((layerUtils.getCurrConfig as IImage).isFrameImg ?? false)
-    },
-    isSubLayerFrameImage(): boolean {
-      const { index } = this.currSubSelectedInfo
-      const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
-      return type === 'frame' && clips[0].srcObj.assetId
-    },
     showPhotoTabs(): boolean {
       return (!this.isFontsPanelOpened &&
         this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive || this.inBgRemoveMode
@@ -490,10 +479,6 @@ export default defineComponent({
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.targetIs('text') && this.singleTargetType()
     },
-    showGeneralTabs(): boolean {
-      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.selectedLayerNum !== 0
-    },
     showShapeSetting(): boolean {
       const stateCondition = !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked
       const typeConditon = (this.targetIs('shape') && this.singleTargetType())
@@ -501,19 +486,6 @@ export default defineComponent({
     },
     showFrameTabs(): boolean {
       return this.targetIs('frame') && this.singleTargetType() && !(layerUtils.getCurrLayer as IFrame).clips.some(c => c.active)
-    },
-    layerType(): { [key: string]: string } {
-      const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
-      return {
-        currLayerType: currLayer.type,
-        targetLayerType: (() => {
-          if (subLayerIdx !== -1) {
-            return currLayer.type === LayerType.group
-              ? (currLayer as IGroup).layers[subLayerIdx].type : LayerType.image
-          }
-          return currLayer.type
-        })()
-      }
     },
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable
@@ -667,6 +639,7 @@ export default defineComponent({
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
             isEnableBleed: currPage.isEnableBleed,
+            backgroundColor: currPage.backgroundColor,
             unit: currPage.unit
           }), pageUtils.currFocusPageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
@@ -800,10 +773,13 @@ export default defineComponent({
 
       if (['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page'].includes(tab.icon)) {
         this.clickedTab = tab.icon
-        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
         this.clickedTabTimer = window.setTimeout(() => {
           this.clickedTab = ''
         }, 400)
+      }
+
+      if (['copy', 'paste'].includes(tab.icon)) {
+        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
       }
     },
     targetIs(type: string): boolean {

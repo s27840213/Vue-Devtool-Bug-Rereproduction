@@ -1,24 +1,22 @@
 <template lang="pug">
 div(class="mobile-favorite-design-view")
   mobile-design-gallery(:noNewDesign="true"
-                        :noHeader="true"
-                        :allDesigns="allDesigns"
-                        :selectedNum="selectedNum"
-                        @loadMore="handleLoadMore")
+    :noHeader="true"
+    :allDesigns="allDesigns"
+    :selectedNum="selectedNum"
+    @loadMore="handleLoadMore")
   div(class="scroll-space")
 </template>
 
 <script lang="ts">
+import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
 import designUtils from '@/utils/designUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapActions } from 'vuex'
-import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
-import DiskWarning from '@/components/payment/DiskWarning.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
-    MobileDesignGallery,
-    DiskWarning
+    MobileDesignGallery
   },
   mounted() {
     designUtils.fetchDesigns(this.fetchFavoriteDesigns)

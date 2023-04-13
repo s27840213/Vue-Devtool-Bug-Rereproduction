@@ -64,22 +64,27 @@ class EditorUtils {
       height = width / aspectRatio
     }
 
-    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
-
     if (!this.mobileHeight || this.mobileWidth) {
       const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
         this.setMobileHW({
           width: mobileEditor.clientWidth,
-          height: mobileEditor.clientHeight - mobilePanelHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
+          height: mobileEditor.clientHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
         })
       }
     }
     const PAGE_SIZE_W = (this.mobileWidth || Number.MAX_SAFE_INTEGER) * 0.926
     const PAGE_SIZE_H = (this.mobileHeight || Number.MAX_SAFE_INTEGER) * 0.926
-
     if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
-      return Math.max(Math.min(PAGE_SIZE_W / width, PAGE_SIZE_H / height), 0.1)
+      if (width >= height) {
+        return PAGE_SIZE_W / width
+      } else {
+        const scale = PAGE_SIZE_H / height
+        if (width * scale > PAGE_SIZE_W) {
+          return PAGE_SIZE_W / width
+        }
+        return scale
+      }
     } else {
       return 1
     }

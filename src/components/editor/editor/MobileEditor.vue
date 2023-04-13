@@ -15,21 +15,18 @@ div(class="mobile-editor")
     transition(name="panel-up"
               @before-enter="beforeEnter"
               @after-leave="afterLeave")
-      mobile-panel(v-show="showMobilePanel" ref="mobilePanel"
+      mobile-panel(v-show="showMobilePanel"
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
-        @panelHeight="setPanelHeight")
-    //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
-    //-   :currActivePanel="'color'"
-    //-   :currColorEvent="ColorEventType.background"
-    //-   :isExtraPanel="true"
-    //-   @switchTab="switchTab")
+        @panelHeight="setPanelHeight"
+        :footerTabsHeight="footerTabsHeight")
   footer-tabs(class="mobile-editor__bottom"
     @switchTab="switchTab"
     :currTab="currActivePanel"
     :inAllPagesMode="inAllPagesMode"
-    @showAllPages="showAllPages")
+    @showAllPages="showAllPages"
+    ref="footerTabs")
 </template>
 
 <script lang="ts">
@@ -39,10 +36,7 @@ import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import { IFooterTabProps } from '@/interfaces/editor'
-import { IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import store from '@/store'
-import { ColorEventType, FunctionPanelType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -66,14 +60,11 @@ export default defineComponent({
   },
   data() {
     return {
-      FunctionPanelType,
-      isColorPanelOpen: false,
       isConfigPanelOpen: false,
-      isLoading: false,
       currColorEvent: '',
-      ColorEventType,
       showMobilePanelAfterTransitoin: false,
-      marginBottom: 0
+      marginBottom: 0,
+      footerTabsHeight: 0
     }
   },
   props: {
@@ -136,6 +127,8 @@ export default defineComponent({
     brandkitUtils.fetchBrands(this.fetchBrands)
 
     this.setUserState({ enableAdminView: false })
+
+    this.footerTabsHeight = (this.$refs.footerTabs as {$el: HTMLElement}).$el.clientHeight
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -160,49 +153,9 @@ export default defineComponent({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel'
     }),
-    inPagePanel(): boolean {
-      return SidebarPanelType.page === this.currPanel
-    },
     contentStyle(): Record<string, string> {
       return { transform: `translateY(-${this.marginBottom}px)` }
     },
-    scaleRatioEditorPos(): { [index: string]: string } {
-      return this.inPagePanel ? {
-        right: '2rem'
-      } : {
-        left: '50%',
-        transform: 'translateX(-50%)'
-      }
-    },
-    isLogin(): boolean {
-      return store.getters['user/isLogin']
-    },
-    isLocked(): boolean {
-      return layerUtils.getSelectedLayer().locked
-    },
-    groupTypes(): Set<string> {
-      const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer) => {
-        return layer.type
-      })
-      return new Set(types)
-    },
-    isGroup(): boolean {
-      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
-    },
-    hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
-    },
-    subLayerType(): string {
-      return this.currSubSelectedInfo.type
-    },
-    showTextSetting(): boolean {
-      return this.isGroup ? (
-        this.hasSubSelectedLayer ? (
-          this.subLayerType === 'text' && !this.isLocked
-        ) : (this.groupTypes.has('text') && !this.isLocked)
-      ) : (this.currSelectedInfo.types.has('text'))
-    }
   },
   watch: {
     closeMobilePanelFlag(newVal) {

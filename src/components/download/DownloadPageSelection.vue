@@ -8,7 +8,8 @@ div(class="download-page-selection")
       div(class="download-page-selection__options py-10 px-15 flex")
         div(class="mb-10 pointer" @click.self="handleCancel") {{$t('NN0130')}}
         checkbox(v-for="(status, idx) in preSelected"
-                class="mb-10" v-model="preSelected[idx]")
+            :key="idx"
+            class="mb-10" v-model="preSelected[idx]")
           span {{ $t('NN0134', { num:`${idx + 1}` }) }}
         div
           btn(class="full-width body-3 rounded"
@@ -16,9 +17,9 @@ div(class="download-page-selection")
 </template>
 
 <script lang="ts">
+import Checkbox from '@/components/global/Checkbox.vue'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
-import Checkbox from '@/components/global/Checkbox.vue'
 
 export default defineComponent({
   emits: ['confirm'],

@@ -36,15 +36,19 @@ div(class="color-panel"
           svg-icon(iconName="loading"
                   iconWidth="20px"
                   iconColor="white")
-        div(v-else v-for="palette in currentPalettes"
-            class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left mb-5")
-            span {{getDisplayedPaletteName(palette)}}
-          div
-            color-btn(v-for="color in palette.colors" :color="color.color"
-                      :active="color.color === selectedColor"
-                      @click="handleColorEvent(color.color)")
+        template(v-else)
+          div(v-for="palette in currentPalettes"
+              :key="palette.id"
+              class="color-panel__colors"
+              :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+            div(class="text-left mb-5")
+              span {{getDisplayedPaletteName(palette)}}
+            div
+              color-btn(v-for="color in palette.colors"
+                :key="color.id"
+                :color="color.color"
+                :active="color.color === selectedColor"
+                @click="handleColorEvent(color.color)")
       //- Document colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
@@ -179,9 +183,6 @@ export default defineComponent({
     },
     isColorPanelHandling(): boolean {
       return this.isBrandkitAvailable && (this.currPanel !== SidebarPanelType.brand || this.selectedTab !== 'color')
-    },
-    isText(): boolean {
-      return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
     },
     bgStyle(): Record<string, string> {
       return this.mode === 'FunctionPanel' ? {

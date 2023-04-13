@@ -1,9 +1,11 @@
 <template lang="pug">
 div(class="nu-text" :style="textWrapperStyle()" draggable="false")
   //- NuText BGs.
-  template(v-for="bgConfig in [textBg, textFillBg]")
-    custom-element(v-if="bgConfig && !noShadow" class="nu-text__BG" :config="bgConfig")
-  div(v-for="text, idx in duplicatedText" class="nu-text__body"
+  template(v-for="(bgConfig, idx) in [textBg, textFillBg]")
+    custom-element(v-if="bgConfig" class="nu-text__BG" :config="bgConfig" :key="`textSvgBg${idx}`")
+  div(v-for="text, idx in duplicatedText"
+      :key="`text${idx}`"
+      class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBodyStyle)")
     nu-curve-text(v-if="isCurveText"
       :config="config"
@@ -12,15 +14,17 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :page="page"
       :subLayerIndex="subLayerIndex"
       :primaryLayer="primaryLayer"
-      :isDuplicated="idx !== duplicatedText.length-1"
-      :isTransparent="isTransparent")
+      :extraSpanStyle="text.extraSpanStyle")
     p(v-else
-      v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+      v-for="(p, pIndex) in config.paragraphs"
+      :key="`p${pIndex}`"
+      class="nu-text__p"
       :style="pStyle(p.styles)")
       span(v-for="(span, sIndex) in p.spans"
+        :key="`span${sIndex}`"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(sIndex, pIndex, config), text.extraSpanStyle, transParentStyles)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, pIndex, config), text.extraSpanStyle)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
@@ -72,14 +76,6 @@ export default defineComponent({
     primaryLayer: {
       type: Object,
       default: () => { return undefined }
-    },
-    isTransparent: {
-      default: false,
-      type: Boolean
-    },
-    noShadow: {
-      default: false,
-      type: Boolean
     },
     inPreview: {
       default: false,
@@ -138,13 +134,6 @@ export default defineComponent({
         }) : [],
         {} // Original text, don't have extra css
       ]
-    },
-    transParentStyles(): {[key: string]: string} {
-      return this.isTransparent ? {
-        color: 'rgba(0, 0, 0, 0)',
-        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
-        'text-decoration-color': 'rgba(0, 0, 0, 0)'
-      } : {}
     }
   },
   watch: {
@@ -175,10 +164,9 @@ export default defineComponent({
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
-        opacity: `${this.config.styles.opacity * 0.01}`,
-        // transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode
+        writingMode: this.config.styles.writingMode,
+        ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
       }
     },
     drawTextBg() {
@@ -289,7 +277,13 @@ export default defineComponent({
 .nu-text {
   width: 100%;
   height: 100%;
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-feature-settings: 'liga' 0;
+  -webkit-font-feature-settings: 'liga' 0;
+  -webkit-font-smoothing: subpixel-antialiased; // for textUtils.getTextHW
+  text-rendering: geometricPrecision; // for textUtils.getTextHW
   &__BG {
     position: absolute;
     left: 0;

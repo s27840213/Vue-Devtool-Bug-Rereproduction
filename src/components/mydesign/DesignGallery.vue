@@ -27,7 +27,7 @@ div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
                 @select="selectDesign(design)"
                 @deselect="deselectDesign(design)"
                 @metaSelect="metaSelectDesign(index)")
-      template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
+      template(v-for="menuItemSlot in menuItemSlots" :key="menuItemSlot.name" v-slot:[menuItemSlot.name])
         div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, design)")
           div(class="design-menu-item__icon")
             svg-icon(:iconName="menuItemSlot.icon"
@@ -48,12 +48,12 @@ div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
 </template>
 
 <script lang="ts">
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import DesignItem from '@/components/mydesign/DesignItem.vue'
 import { IDesign } from '@/interfaces/design'
 import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import DesignItem from '@/components/mydesign/DesignItem.vue'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
 export default defineComponent({
   components: {

@@ -2,7 +2,7 @@
 div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
   div(class="action-bar")
     div(class="flex-between photo-effect-setting__options mb-10")
-      svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
+      svg-icon(v-for="(icon) in shadowOption.slice(0, 3)"
         :key="`shadow-${icon}`"
         :iconName="`photo-shadow-${icon}`"
         @click="onEffectClick(icon)"
@@ -39,7 +39,7 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
         div(class="photo-effect-setting__reset")
           button(@click="reset()") {{ $t('NN0754') }}
     div(class="flex-between photo-effect-setting__options mb-10")
-      svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
+      svg-icon(v-for="(icon) in shadowOption.slice(3)"
         :key="`shadow-${icon}`"
         :iconName="`photo-shadow-${icon}`"
         @click="onEffectClick(icon)"
@@ -79,9 +79,8 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
 </template>
 
 <script lang="ts">
-import ColorPicker from '@/components/ColorPicker.vue'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 import { ColorEventType, FunctionPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -92,9 +91,6 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
-  components: {
-    ColorPicker
-  },
   emits: ['toggleColorPanel'],
   data() {
     return {
@@ -153,9 +149,6 @@ export default defineComponent({
     ...mapActions('shadow', {
       addShadowImg: 'ADD_SHADOW_IMG'
     }),
-    optionStyle(idx: number) {
-      return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }
-    },
     handleColorModal() {
       editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.photoShadow)
@@ -184,31 +177,12 @@ export default defineComponent({
       const { name, value } = event.target as HTMLInputElement
       imageShadowPanelUtils.handleEffectUpdate(name, value)
     },
-    handleColorUpdate(color: string): void {
-      const { currentEffect } = this
-      imageShadowUtils.setEffect(currentEffect, { color })
-    },
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
     reset(effect?: ShadowEffectType) {
       imageShadowPanelUtils.reset(effect || this.currentEffect)
     },
-    setIsUploading(pageId: string, layerId: string, subLayerId: string, isUploading: boolean) {
-      const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-      layerUtils.updateLayerProps(pageIndex, layerIndex, {
-        isUploading
-      }, subLayerIdx)
-    },
-    setUploadingData(layerIdentifier: ILayerIdentifier, id: string) {
-      const { pageId, layerId, subLayerId } = layerIdentifier
-      const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId || '')
-      imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, {
-        type: 'upload',
-        assetId: id,
-        userId: ''
-      })
-    }
   }
 })
 </script>

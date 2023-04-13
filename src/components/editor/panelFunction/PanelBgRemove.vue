@@ -3,14 +3,12 @@ div(class="panel-background-remove")
   div(class="panel-background-remove__grid mb-5")
     btn( class="full-width"
       :type="clearMode ? 'gray-active-mid' :'gray-mid'"
-      ref="btn"
       :hasIcon="true"
       :iconName="'clear'"
       :iconMargin="8"
       @click="setClearMode(true)") {{ $t('NN0385') }}
     btn(class="full-width"
       :type="clearMode ? 'gray-mid' :'gray-active-mid'"
-      ref="btn"
       :hasIcon="true"
       :iconName="'preserve'"
       :iconMargin="8"
@@ -36,20 +34,16 @@ div(class="panel-background-remove")
       span(class="label-mid") {{$t('NN0388')}}
     btn(class="btn-recover full-width"
       type="gray-mid"
-      ref="btn"
       @click="restoreInitState()") {{$t('NN0389')}}
     btn( class="full-width"
       type="gray-mid"
-      ref="btn"
       @click="cancel()") {{ $t('NN0203') }}
     btn( class="full-width"
       type="primary-mid"
-      ref="btn"
       @click="save()") {{ $tc('NN0133',1) }}
 </template>
 
 <script lang="ts">
-import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import { defineComponent } from 'vue'
@@ -62,9 +56,6 @@ export default defineComponent({
       minBrushSize: 1,
       maxBrushSize: 300
     }
-  },
-  components: {
-    PopupAdjust
   },
   computed: {
     ...mapGetters({

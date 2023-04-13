@@ -21,8 +21,6 @@ div(class="all-pages")
 
 <script lang="ts">
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
-import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import { globalQueue } from '@/utils/queueUtils'
@@ -40,9 +38,7 @@ export default defineComponent({
     }
   },
   components: {
-    PagePreviewPageWrapper,
-    ObserverSentinel,
-    PagePreviewPlus
+    PagePreviewPageWrapper
   },
   computed: {
     ...mapGetters({

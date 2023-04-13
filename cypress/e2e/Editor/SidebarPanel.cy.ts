@@ -44,12 +44,12 @@ const _sidebarData = [{
   testCategory: ''
 }] as ISidebarData[]
 
-function sidebarData (): ISidebarData[]
-function sidebarData (condition:
-  'has.search'|'has.category'|'is.template'|'is.photo'|'is.object'|'is.bg'|'is.text'|'is.file'
+function sidebarData(): ISidebarData[]
+function sidebarData(condition:
+  'has.search' | 'has.category' | 'is.template' | 'is.photo' | 'is.object' | 'is.bg' | 'is.text' | 'is.file'
 ): ISidebarData[]
-function sidebarData (condition: 'template'|'photo'|'object'|'bg'|'text'|'file'): ISidebarData
-function sidebarData (condition?: string): ISidebarData[] | ISidebarData {
+function sidebarData(condition: 'template' | 'photo' | 'object' | 'bg' | 'text' | 'file'): ISidebarData
+function sidebarData(condition?: string): ISidebarData[] | ISidebarData {
   switch (condition) {
     case 'has.search':
       return _sidebarData.filter((side) => side.panelName !== 'file')

@@ -89,17 +89,17 @@ class ImageUtils {
 
     switch (type) {
       case 'public': {
-        if ((size as string).includes('ext')) {
+        if (typeof size === 'string' && (size as string).includes('ext')) {
           return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
         } else {
           const query = forBgRemove ? '' : '?origin=true'
-          return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`
+          return this.appendRandomQuery(`https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`)
         }
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
         const query = forBgRemove ? '' : '&origin=true'
-        return editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
+        return this.appendRandomQuery(editorImg(assetId) ? editorImg(assetId)[size as string] + query : '')
       }
       case 'logo-public':
         if ((size as string).includes('ext')) {
@@ -582,9 +582,9 @@ class ImageUtils {
 
   appendRandomQuery(src: string) {
     if (src.includes('?')) {
-      return `${src}&ver=${generalUtils.generateRandomString(6)}`
+      return `${src}&rand_ver=${generalUtils.generateRandomString(6)}`
     } else {
-      return `${src}?ver=${generalUtils.generateRandomString(6)}`
+      return `${src}?rand_ver=${generalUtils.generateRandomString(6)}`
     }
   }
 

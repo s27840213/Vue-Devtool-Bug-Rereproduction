@@ -3,7 +3,6 @@ div(class="page-card"
     :style="cardStyle"
     ref="card")
   nu-page(
-    :ref="`page-${pageIndex}`"
     :pageIndex="pageIndex"
     :overflowContainer="editorView"
     :pageState="config"
@@ -68,8 +67,7 @@ export default defineComponent({
     ...mapGetters({
       groupType: 'getGroupType',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
-      hasBleed: 'getHasBleed',
-      showMobilePanel: 'mobileEditor/getShowMobilePanel'
+      hasBleed: 'getHasBleed'
     }),
     cardStyle(): { [index: string]: string | number } {
       return {
@@ -96,11 +94,6 @@ export default defineComponent({
     },
     hasBleed() {
       this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
-    },
-    showMobilePanel() {
-      window.setTimeout(() => {
-        this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
-      }, 500)
     }
   }
 })

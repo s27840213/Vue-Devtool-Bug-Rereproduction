@@ -9,7 +9,7 @@ div(class="component-log-item"
     div(class="component-log-item__parent")
       span(class="text-white") from: {{log.parent}}
   div(v-if="allOpened || showDetail" class="component-log-item__detail-info flex flex-column pl-15")
-    template(v-for="(value, index) in Object.entries(log.propsData)")
+    template(v-for="(value, index) in Object.entries(log.propsData)" :key="`${value}-${index}`")
       div(v-if="value[1] !== undefined"
           class="ml-10")
         span(class="text-bold text-gray-3") {{`${value[0]}: `}}

@@ -18,7 +18,6 @@ import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  emits: [],
   directives: {
     clickOutside: vClickOutside.directive
   },

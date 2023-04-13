@@ -11,12 +11,13 @@ div(class="btnList" :style="BGstyle")
       input(type="text" v-model="btnIcon")
   div(class="btnList-table")
     span
-    span(v-for="btn in btns") {{btn.theme}} ({{btn.size}})
-    template(v-for="status in statuses")
+    span(v-for="btn in btns" :key="btn.theme") {{btn.theme}} ({{btn.size}})
+    template(v-for="status in statuses" :key="status")
       span {{status}}
       nubtn(v-for="btn in btns"
-            :theme="btn.theme" :size="`${btn.size}${full?'-full':''}`"
-            :status="status" :icon="btnIcon" :hint="btnText") {{btnText}}
+        :key="btn.theme"
+        :theme="btn.theme" :size="`${btn.size}${full?'-full':''}`"
+        :status="status" :icon="btnIcon" :hint="btnText") {{btnText}}
   hr(style="width: 50%")
   div(class="btnList-options")
     div 邏輯測試區塊
