@@ -429,13 +429,8 @@ export default defineComponent({
         ...(pageUtils._3dEnabledPageIndex === this.pageIndex && { transformStyle: type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d' })
       } as Record<string, string>
       if (hasActualScale) {
-        if (this.config.type === LayerType.text) {
-          styles.width = `${this.config.styles.width / this.config.styles.scale}px`
-          styles.height = `${this.config.styles.height / this.config.styles.scale}px`
-        } else {
-          styles.width = `${this.config.styles.initWidth}px`
-          styles.height = `${this.config.styles.initHeight}px`
-        }
+        styles.width = `${this.config.styles.width / this.config.styles.scale}px`
+        styles.height = `${this.config.styles.height / this.config.styles.scale}px`
         styles.transform = transform
       }
       return styles
