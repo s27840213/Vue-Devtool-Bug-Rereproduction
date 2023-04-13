@@ -2,7 +2,7 @@
 div(class="footer-tabs" ref="tabs")
   div(class="footer-tabs__container" :class="{main: !isInEditor}" :style="containerStyles"
       @scroll.passive="updateContainerOverflow" ref="container")
-    template(v-for="(tab, index) in tabs")
+    template(v-for="tab in tabs" :key="tab.icon")
       div(v-if="!tab.hidden" :key="tab.icon"
           class="footer-tabs__item"
           :class="{'click-disabled': (tab.disabled || isLocked)}"

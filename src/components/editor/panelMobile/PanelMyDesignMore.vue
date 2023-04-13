@@ -103,7 +103,7 @@ export default defineComponent({
     display: flex;
     gap: 16px;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     &:not(.version):active {
       background: setColor(black-6);
     }

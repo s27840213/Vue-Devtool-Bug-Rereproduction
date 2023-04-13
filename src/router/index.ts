@@ -7,8 +7,6 @@ import logUtils from '@/utils/logUtils'
 import webViewUtils from '@/utils/picWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import BrandKit from '@/views/BrandKit.vue'
-import BrowserWarning from '@/views/BrowserWarning.vue'
 import CopyTool from '@/views/CopyTool.vue'
 import NubtnList from '@/views/NubtnList.vue'
 import { h, resolveComponent } from 'vue'
@@ -16,7 +14,6 @@ import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import ViviSticker from '../views/ViviSticker.vue'
-import { editorRouteHandler } from './handler'
 
 declare let window: CustomWindow
 

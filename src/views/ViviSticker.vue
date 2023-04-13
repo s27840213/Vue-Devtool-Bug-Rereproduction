@@ -19,8 +19,10 @@ div(class="vivisticker" :style="copyingStyles()")
     :inAllPagesMode="false")
   transition(name="slide-left")
     component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
-  tutorial(v-if="showTutorial")
-  full-page(v-if="fullPageType !== 'none'" class="vivisticker__full-page")
+  transition(name="panel-up")
+    tutorial(v-if="showTutorial")
+  transition(name="panel-up")
+    full-page(v-if="fullPageType !== 'none'" class="vivisticker__full-page")
 </template>
 
 <script lang="ts">

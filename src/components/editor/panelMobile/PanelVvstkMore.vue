@@ -3,6 +3,7 @@ div(class="panel-vvstk-more")
   template(v-if="inInitialState")
     div(class="panel-vvstk-more__options")
       div(v-for="option in mainOptions"
+          :key="option.text"
           class="panel-vvstk-more__option"
           @click.prevent.stop="handleOptionAction(option.action)")
         div(class="panel-vvstk-more__option-icon")
@@ -20,6 +21,7 @@ div(class="panel-vvstk-more")
   template(v-else)
     div(class="panel-vvstk-more__options")
       div(v-for="option in options"
+          :key="option.text"
           class="panel-vvstk-more__option"
           :class="{selected: handleOptionSelected(option.selected)}"
           @click.prevent.stop="handleOptionAction(option.action)")
@@ -311,7 +313,7 @@ export default defineComponent({
     display: flex;
     gap: 16px;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     &:not(.version):active {
       background: setColor(black-6);
     }

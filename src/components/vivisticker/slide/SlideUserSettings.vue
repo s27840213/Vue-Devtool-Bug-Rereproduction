@@ -8,7 +8,7 @@ div(class="slide-user-settings")
                 iconColor="white")
     div(class="slide-user-settings__header__title") {{ $t('NN0649') }}
   div(class="slide-user-settings__list")
-    div(v-for="key in userSettingKeys" class="slide-user-settings__setting")
+    div(v-for="key in userSettingKeys" class="slide-user-settings__setting" :key="key")
       div(class="slide-user-settings__setting__description") {{ getDescription(key) }}
       div(class="slide-user-settings__setting__checkbox"
           :class="{checked: getChecked(key)}"

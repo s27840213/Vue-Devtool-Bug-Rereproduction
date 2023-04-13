@@ -105,7 +105,6 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
-import ColorPicker from '@/components/ColorPicker.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Tabs from '@/components/Tabs.vue'
@@ -126,7 +125,6 @@ export default defineComponent({
   components: {
     SearchBar,
     MobileSlider,
-    ColorPicker,
     CategoryList,
     CategoryListRows,
     CategoryBackgroundItem,

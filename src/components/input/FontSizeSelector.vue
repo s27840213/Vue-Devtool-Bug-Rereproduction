@@ -20,7 +20,6 @@ div(class="font-size-selector relative")
 </template>
 
 <script lang="ts">
-import ValueSelector from '@/components/ValueSelector.vue'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -36,9 +35,6 @@ import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
-  components: {
-    ValueSelector
-  },
   data() {
     return {
       openValueSelector: false,
