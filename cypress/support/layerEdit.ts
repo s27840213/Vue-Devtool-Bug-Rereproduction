@@ -114,9 +114,10 @@ Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subjectFron
     .wrap(subjectBack).click('topLeft')
     .snapshotTest('Copy format after')
     // Restore layer to original state
-    .then(after)
-    .get('.panel-group, .footer-tabs').find('.svg-brush').click({ force: true })
-    .wrap(subjectFront).click('topLeft')
+    // .then(after)
+    // .get('.panel-group, .footer-tabs').find('.svg-brush').click({ force: true })
+    // .wrap(subjectFront).click('topLeft')
+    .get('.svg-undo').click()
   return cy.wrap(subjectFront)
 })
 

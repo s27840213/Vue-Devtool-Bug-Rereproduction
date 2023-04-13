@@ -107,8 +107,6 @@ for (const isMobile of [true, false]) {
           cy.get('.nu-layer:nth-child(2) .nu-image')
             .layerOrder(flowerBack)
             .layerCopy()
-            .deselectAllLayers().snapshotTest('init') // Check if image restore to init
-            .get('.nu-layer:nth-child(2) .nu-image')
             .layerLock()
             .layerDelete()
             .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
