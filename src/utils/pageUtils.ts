@@ -1,6 +1,5 @@
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { ICoordinate } from '@/interfaces/frame'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
@@ -153,11 +152,9 @@ class PageUtils {
     // set physical size to px size if not exist
     if (pageData.width) {
       pageData.physicalWidth ||= pageData.width
-      pageData.shownSize.width = pageData.width
     }
     if (pageData.height) {
       pageData.physicalHeight ||= pageData.height
-      pageData.shownSize.height = pageData.height
     }
     pageData.unit ||= 'px'
 
@@ -201,7 +198,6 @@ class PageUtils {
         h: []
       },
       mobilePhysicalSize: {
-        pageCenterPos: { x: 0, y: 0 },
         originSize: { width: 0, height: 0 },
       },
       shownSize: { width: 1080, height: 1080 },
@@ -920,7 +916,7 @@ class PageUtils {
     })
   }
 
-  setMobilePhysicalPage(payload: { pageIndex: number, originSize?: ISize, pageCenterPos?: ICoordinate, shownSize?: ISize }) {
+  setMobilePhysicalPage(payload: { pageIndex: number, originSize?: ISize }) {
     store.commit('SET_pagePhysicalSize', payload)
   }
 

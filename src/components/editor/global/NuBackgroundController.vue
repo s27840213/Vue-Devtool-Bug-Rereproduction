@@ -20,6 +20,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import { ISize } from '@/interfaces/math'
 import { IPage } from '@/interfaces/page'
 import ControlUtils from '@/utils/controlUtils'
+import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import MathUtils from '@/utils/mathUtils'
@@ -71,8 +72,7 @@ export default defineComponent({
       const rect = page.getBoundingClientRect()
       pageUtils.setMobilePhysicalPage({
         pageIndex: this.pageIndex,
-        originSize: { width: rect.width, height: rect.height },
-        pageCenterPos: { x: rect.left + rect.width * 0.5, y: rect.top + rect.height * 0.5 }
+        originSize: { width: rect.width, height: rect.height }
       })
     }
   },
@@ -166,6 +166,7 @@ export default defineComponent({
         x: imgAnchor.x - center.x,
         y: imgAnchor.y - center.y
       }
+
       const imgControllerPos = ControlUtils.getNoRotationPos(vect, center, angleInRad)
       return imgControllerPos
     },
@@ -196,15 +197,15 @@ export default defineComponent({
         }
         case 'move': {
           this.isPinching = true
-          const { contentScaleRatio, mobilePhysicalSize: { pageCenterPos, originSize } } = this.page
+          const { contentScaleRatio, mobilePhysicalSize: { originSize } } = this.page
           const { styles } = this.config
           const _sizeRatio = contentScaleRatio
           if (!this.initPinchPos) {
             this.initPinchPos = { x: event.x, y: event.y }
           }
           const posInConfig = {
-            x: (event.x - pageCenterPos.x + originSize.width * 0.5) / _sizeRatio - styles.imgX,
-            y: (event.y - pageCenterPos.y + originSize.height * 0.5) / _sizeRatio - styles.imgY
+            x: (event.x - editorUtils.mobileCenterPos.x + originSize.width * 0.5) / _sizeRatio - styles.imgX,
+            y: (event.y - editorUtils.mobileCenterPos.y + originSize.height * 0.5) / _sizeRatio - styles.imgY
           }
           const translationRatio = {
             x: -posInConfig.x / styles.imgWidth,

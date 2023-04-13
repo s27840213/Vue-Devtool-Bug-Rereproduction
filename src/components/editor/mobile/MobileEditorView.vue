@@ -482,8 +482,8 @@ export default defineComponent({
           store.commit('SET_pageScaleRatio', newScaleRatio)
 
           const translationRatio = {
-            x: (this.initPinchPos.x - page.mobilePhysicalSize.pageCenterPos.x) / (page.mobilePhysicalSize.originSize.width) + 0.5,
-            y: (this.initPinchPos.y - page.mobilePhysicalSize.pageCenterPos.y) / (page.mobilePhysicalSize.originSize.height) + 0.5
+            x: (this.initPinchPos.x - editorUtils.mobileCenterPos.x) / (page.width * contentScaleRatio) + 0.5,
+            y: (this.initPinchPos.y - editorUtils.mobileCenterPos.y) / (page.height * contentScaleRatio) + 0.5
           }
 
           const sizeDiff = {
@@ -491,8 +491,9 @@ export default defineComponent({
             height: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.height * contentScaleRatio)
           }
           console.log(translationRatio.x, translationRatio.y)
+          // console.log('page.mobilePhysicalSize.originSize.width', page.mobilePhysicalSize.originSize.width)
 
-          pageUtils.updatePagePos(0, {
+          pageUtils.updatePagePos(layerUtils.pageIndex, {
             x: this.initPagePos.x - sizeDiff.width * translationRatio.x,
             y: this.initPagePos.y - sizeDiff.height * translationRatio.y
           })

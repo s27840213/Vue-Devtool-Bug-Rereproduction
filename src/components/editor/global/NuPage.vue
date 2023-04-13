@@ -256,10 +256,9 @@ export default defineComponent({
   mounted() {
     const page = this.$refs.page as HTMLElement
     const rect = page.getBoundingClientRect()
-    this.$store.commit('SET_pagePhysicalSize', {
+    pageUtils.setMobilePhysicalPage({
       pageIndex: this.pageIndex,
-      originSize: { width: rect.width, height: rect.height },
-      pageCenterPos: { x: rect.left + rect.width * 0.5, y: rect.top + rect.height * 0.5 }
+      originSize: { width: rect.width, height: rect.height }
     })
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {

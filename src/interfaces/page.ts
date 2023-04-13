@@ -1,6 +1,5 @@
 import { IFrame, IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import SnapUtils from '@/utils/snapUtils'
-import { ICoordinate } from './frame'
 import { ISize } from './math'
 
 export interface IBackgroundImage {
@@ -30,10 +29,8 @@ export interface IPageSizeWithBleeds extends IPageSize {
 export interface IPage extends IPageSizeWithBleeds {
   [index: string]: unknown,
   mobilePhysicalSize: {
-    pageCenterPos: ICoordinate,
     originSize: ISize,
   },
-  shownSize: ISize
   id: string,
   x: number,
   y: number,

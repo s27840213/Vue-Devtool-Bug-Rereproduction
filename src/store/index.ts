@@ -40,7 +40,7 @@ import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
-import { GetterTree, MutationTree, createStore } from 'vuex'
+import { createStore, GetterTree, MutationTree } from 'vuex'
 import brandkit from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
@@ -1082,16 +1082,8 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, contentScaleRatio } = payload
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
-  UPDATE_pageShownSize(state: IEditorState, payload: { pageIndex: number, shownSize: { width: number, height: number } }) {
-    const { pageIndex, shownSize } = payload
-    state.pages[pageIndex].config.shownSize.width = shownSize.width
-    state.pages[pageIndex].config.shownSize.height = shownSize.height
-  },
   SET_pagePhysicalSize(state: IEditorState, payload: { pageIndex: number, originSize?: ISize, pageCenterPos?: ICoordinate }) {
     const { pageIndex, originSize, pageCenterPos } = payload
-    if (pageCenterPos) {
-      Object.assign(state.pages[pageIndex].config.mobilePhysicalSize.pageCenterPos, pageCenterPos)
-    }
     if (originSize) {
       Object.assign(state.pages[pageIndex].config.mobilePhysicalSize.originSize, originSize)
     }

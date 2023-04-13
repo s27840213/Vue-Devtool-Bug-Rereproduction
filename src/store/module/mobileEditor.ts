@@ -8,7 +8,9 @@ export interface IMobileEditorState {
   currActivePanel: string,
   currActiveSubPanel: string,
   inBgSettingMode: boolean,
-  showMobilePanel: boolean
+  showMobilePanel: boolean,
+  // pageCenterPos: used to indicate the center pos of the page (editor)
+  pageCenterPos: { x: number, y: number }
 }
 
 const getDefaultState = (): IMobileEditorState => ({
@@ -19,7 +21,8 @@ const getDefaultState = (): IMobileEditorState => ({
   currActivePanel: 'none',
   currActiveSubPanel: 'none',
   inBgSettingMode: false,
-  showMobilePanel: false
+  showMobilePanel: false,
+  pageCenterPos: { x: -1, y: -1 }
 })
 
 const state = getDefaultState()
@@ -78,6 +81,10 @@ const mutations: MutationTree<IMobileEditorState> = {
   },
   SET_showMobilePanel(state: IMobileEditorState, bool: boolean) {
     state.showMobilePanel = bool
+  },
+  SET_pageCenterPos(state: IMobileEditorState, pos: { x: number, y: number }) {
+    state.pageCenterPos.x = pos.x
+    state.pageCenterPos.y = pos.y
   },
   INIT_STATE(state: IMobileEditorState) {
     state.closeMobilePanelFlag = false
