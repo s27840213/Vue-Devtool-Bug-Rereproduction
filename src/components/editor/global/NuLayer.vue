@@ -277,7 +277,8 @@ export default defineComponent({
     ...mapState('shadow', ['processId', 'handleId', 'uploadId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('mobileEditor', {
-      mobilePagePreview: 'mobileAllPageMode'
+      mobilePagePreview: 'mobileAllPageMode',
+      isPinchingEditor: 'isPinchingEditor'
     }),
     ...mapState('imgControl', {
       imgCtrlConfig: 'image'
@@ -611,6 +612,7 @@ export default defineComponent({
       // }
     },
     onPointerDown(e: PointerEvent) {
+      if (this.isPinchingEditor) return
       const target = e.target as HTMLElement
       /**
        * Prevent double clicking of img will propagate and set the img-ctrl to default immediately.
@@ -629,6 +631,7 @@ export default defineComponent({
     },
     dblClick(e: MouseEvent) {
       e.stopPropagation()
+      if (this.isPinchingEditor) return
       const isSubLayer = this.subLayerIndex !== -1
       if (isSubLayer) {
         if (!this.primaryLayer || this.isHandleShadow) return

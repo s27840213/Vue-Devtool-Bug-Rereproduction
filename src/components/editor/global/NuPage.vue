@@ -1,6 +1,6 @@
 <template lang="pug">
 div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
-  div(class="nu-page"
+  div(class="nu-page full-size"
       :id="`nu-page_${pageIndex}`"
       :style="pageStyles"
       ref="page")
@@ -412,17 +412,20 @@ export default defineComponent({
       let transform = ''
       let margin = ''
       let position = 'relative'
+      let transformOrigin = ''
       if (generalUtils.isTouchDevice()) {
-        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
-        transform += this.$store.state.pinchScaleRatio !== 100 ? `scale(${this.$store.state.pinchScaleRatio * 0.01})` : ''
-        // transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px) scale(${this.$store.state.pinchScaleRatio * 0.01})`
+        const { pinchScale, isPinchingEditor } = this.$store.state.mobileEditor
         position = 'absolute'
+        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
+        transform += isPinchingEditor && pinchScale !== 1 ? `scale(${pinchScale})` : ''
+        transformOrigin = '0 0'
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
       }
       return {
         position,
         transform,
+        transformOrigin,
         margin,
         ...this.sizeStyles
       }

@@ -116,6 +116,7 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
+    if ((store.state as any).mobileEditor.isPinchingEditor) return
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
     this.initPageTranslate.x = pageUtils.getCurrPage.x

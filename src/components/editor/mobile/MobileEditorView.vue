@@ -120,7 +120,6 @@ export default defineComponent({
       initPinchPos: null as ICoordinate | null,
       tmpPinchScaleRatio: 100,
       handlePinchTimer: -1,
-      isPinching: false,
       isHandlingEdgeReach: false
     }
   },
@@ -252,7 +251,8 @@ export default defineComponent({
   computed: {
     ...mapState({
       mobileAllPageMode: 'mobileEditor/mobileAllPageMode',
-      isGettingDesign: 'isGettingDesign'
+      isGettingDesign: 'isGettingDesign',
+      isPinchingEditor: 'mobileEditor/isPinchingEditor'
     }),
     ...mapGetters({
       groupId: 'getGroupId',
@@ -432,12 +432,13 @@ export default defineComponent({
         y: (editorUtils.mobileSize.height - pageUtils.getCurrPage.height * this.$store.state.contentScaleRatio) * 0.5
       }
     },
-    pageEdgeLimitHandler(page: IPage) {
+    pageEdgeLimitHandler(page: IPage, pageScaleRatio: number) {
       const contentScaleRatio = this.$store.state.contentScaleRatio
-      const pageScaleRatio = this.pageScaleRatio * 0.01
+      // const pageScaleRatio = this.pageScaleRatio * 0.01
       const EDGE_WIDTH = this.EDGE_WIDTH()
       const isReachLeftEdge = page.x >= EDGE_WIDTH.x
       const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x
+      console.log('isReachRightEdge', page.x, editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x)
       const isReachTopEdge = page.y >= EDGE_WIDTH.y
       const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
 
@@ -473,13 +474,15 @@ export default defineComponent({
               y: e.y
             }
           }
-          this.isPinching = true
+          if (!this.isPinchingEditor) {
+            this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
+          }
           // const pinchScaleRatio = Math.min((e.scale + 1) / 2 * 100, MAX_SCALE_RATIO)
           const newScaleRatio = e.scale * this.tmpScaleRatio
           if (!store.state.isPageScaling) {
             store.commit('SET_isPageScaling', true)
           }
-          store.commit('SET_pageScaleRatio', newScaleRatio)
+          store.commit('mobileEditor/UPDATE_pinchScale', e.scale)
 
           const translationRatio = {
             x: (this.initPinchPos.x - editorUtils.mobileCenterPos.x) / (page.width * contentScaleRatio) + 0.5,
@@ -490,8 +493,7 @@ export default defineComponent({
             width: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.width * contentScaleRatio),
             height: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.height * contentScaleRatio)
           }
-          console.log(translationRatio.x, translationRatio.y)
-          // console.log('page.mobilePhysicalSize.originSize.width', page.mobilePhysicalSize.originSize.width)
+          // console.log(translationRatio.x, translationRatio.y)
 
           pageUtils.updatePagePos(layerUtils.pageIndex, {
             x: this.initPagePos.x - sizeDiff.width * translationRatio.x,
@@ -501,20 +503,24 @@ export default defineComponent({
           break
         }
         case 'end': {
-          this.isPinching = false
-          const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(page)
+          this.initPinchPos = null
+          const newScaleRatio = this.$store.state.mobileEditor.pinchScale * this.tmpScaleRatio
+          const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(page, newScaleRatio * 0.01)
           if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
             this.isHandlingEdgeReach = true
             const pageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-            // pageEl.style.transition = 'width 2s, height 2s'
-            pageEl.style.transition = 'transform .4s, webkit-transform .4s, width .4s, height .4s'
+            pageEl.style.transition = 'transform .2s, webkit-transform .2s, width .2s, height .2s'
 
             const pos = { x: page.x, y: page.y }
             const EDGE_WIDTH = this.EDGE_WIDTH()
-            if (pageScaleRatio < 1 || (isReachLeftEdge && isReachRightEdge) || (isReachTopEdge && isReachBottomEdge)) {
+            if (newScaleRatio < 100 || (isReachLeftEdge && isReachRightEdge) || (isReachTopEdge && isReachBottomEdge)) {
               pos.x = EDGE_WIDTH.x
               pos.y = EDGE_WIDTH.y
-              pageUtils.setScaleRatio(100)
+              this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
+              this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
+              setTimeout(() => {
+                this.$store.commit('SET_pageScaleRatio', 100)
+              }, 0)
               console.warn(1)
             } else {
               if (isReachLeftEdge) {
@@ -523,7 +529,7 @@ export default defineComponent({
               }
               if (isReachRightEdge) {
                 console.warn(3)
-                pos.x = editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x
+                pos.x = editorUtils.mobileSize.width - page.width * contentScaleRatio * newScaleRatio * 0.01 - EDGE_WIDTH.x
               }
               if (isReachTopEdge) {
                 console.warn(4)
@@ -531,8 +537,13 @@ export default defineComponent({
               }
               if (isReachBottomEdge) {
                 console.warn(5)
-                pos.y = editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
+                pos.y = editorUtils.mobileSize.height - page.height * contentScaleRatio * newScaleRatio * 0.01 - EDGE_WIDTH.y
               }
+              setTimeout(() => {
+                this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
+                this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
+                this.$store.commit('SET_pageScaleRatio', newScaleRatio)
+              }, 200)
             }
             pageUtils.updatePagePos(layerUtils.pageIndex, pos)
 
@@ -540,7 +551,12 @@ export default defineComponent({
               this.isHandlingEdgeReach = false
               pageEl.style.transition = ''
               pageEl.style.transformOrigin = ''
-            }, 500)
+            }, 200)
+          } else {
+            this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
+            this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
+            // console.log('this.$store.state.mobileEditor.pinchScale * this.tmpScaleRatio)', this.$store.state.mobileEditor.pinchScale * this.tmpScaleRatio, this.tmpScaleRatio, this.tmpScaleRatio)
+            this.$store.commit('SET_pageScaleRatio', newScaleRatio)
           }
           store.commit('SET_isPageScaling', false)
           console.log('end')
@@ -708,7 +724,7 @@ export default defineComponent({
       }
     },
     handleSwipe(dir: string) {
-      if (this.isPinching) return
+      if (this.isPinchingEditor) return
       if (dir === 'up') {
         this.swipeUpHandler()
       } else if (dir === 'down') {

@@ -188,7 +188,7 @@ import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -297,6 +297,9 @@ export default defineComponent({
   computed: {
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId']),
+    ...mapState({
+      isPinchingEditor: 'mobileEditor/isPinchingEditor'
+    }),
     ...mapState(['currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
@@ -1168,7 +1171,7 @@ export default defineComponent({
     //   // this.snapUtils.event.emit('clearSnapLines')
     // },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (eventUtils.checkIsMultiTouch(event) || this.isPinchingEditor) {
         return
       }
 
@@ -1666,7 +1669,7 @@ export default defineComponent({
       this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent | PointerEvent, index = -1) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (eventUtils.checkIsMultiTouch(event) || this.isPinchingEditor) {
         return
       }
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
