@@ -124,8 +124,6 @@ export default defineComponent({
       isMouseOver: false,
       isMenuOpen: false,
       contentWidth: 0,
-      asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
-      isHandlingAsyncTask: false
     }
   },
   directives: {

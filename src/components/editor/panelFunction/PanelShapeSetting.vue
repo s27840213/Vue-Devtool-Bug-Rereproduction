@@ -251,14 +251,9 @@ export default defineComponent({
   },
   data() {
     return {
-      fieldRange: {
-        lineWidth: { min: 1, max: 100 }
-      },
       corRadEvent: PopupSliderEventType.cornerRadius,
       currSelectedColorIndex: 0,
-      openSliderBar: '',
       openValueSelector: '',
-      openColorPicker: false,
       markerIds: ['none'],
       dashAndEdge: [1, 3],
       markerContentMap: ({
@@ -276,7 +271,6 @@ export default defineComponent({
       isGetSvgInfo: false,
       svgInfo: {
         key_id: '' as string,
-        author: '' as string,
         edit_time: '' as string,
         tags_tw: '' as string,
         tags_us: '' as string,
@@ -386,7 +380,6 @@ export default defineComponent({
       this.isGetSvgInfo = false
       this.svgInfo = {
         key_id: '',
-        author: '',
         edit_time: '',
         tags_tw: '',
         tags_us: '',
@@ -422,12 +415,6 @@ export default defineComponent({
         return isGroupSameColor ? origin : 'multi'
       }
       return ''
-    },
-    handleColorModalOn(e: MouseEvent) {
-      this.openColorPicker = true
-    },
-    handleColorModalOff(e: MouseEvent) {
-      this.openColorPicker = false
     },
     handleColorUpdate(color: string) {
       this.setColor(color)
@@ -623,9 +610,6 @@ export default defineComponent({
     },
     makeSlots(markerIds: string[]): { marker: string, name: string }[] {
       return this.markerIds.map((id, index) => ({ marker: id, name: `g0i${index}` }))
-    },
-    getMarkerContent(markerId: string) {
-      return this.markerContentMap[markerId] ?? this.markerContentMap.none
     },
     initilizeRecord() {
       if (this.currSelectedColorIndex < 0) {

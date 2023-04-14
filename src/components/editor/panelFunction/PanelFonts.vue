@@ -42,11 +42,8 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import FontTag from '@/components/global/Tags.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import FileUtils from '@/utils/fileUtils'
 import generalUtils from '@/utils/generalUtils'
-import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
-import uploadUtils from '@/utils/uploadUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -69,7 +66,6 @@ export default defineComponent({
   emits: ['closeFontsPanel'],
   data() {
     return {
-      FileUtils
     }
   },
   mounted() {
@@ -195,12 +191,6 @@ export default defineComponent({
       'getMoreCategory',
       'resetSearch'
     ]),
-    ...mapMutations('fontTag', {
-      setShowMore: 'SET_SHOW_MORE'
-    }),
-    mappingIcons(type: string) {
-      return MappingUtils.mappingIconSet(type)
-    },
     closeFontsPanel() {
       this.resetContent()
       this.$emit('closeFontsPanel')
@@ -216,9 +206,6 @@ export default defineComponent({
         this.setShowMore(false)
         this.getTagContent({ keyword })
       }
-    },
-    uploadFont() {
-      uploadUtils.chooseAssets('font')
     },
     capitalize(str: string): string {
       return generalUtils.capitalize(str)

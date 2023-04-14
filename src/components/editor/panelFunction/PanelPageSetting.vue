@@ -25,7 +25,7 @@ div(class="page-setting")
           svg-icon(class="page-setting__suggestion-panel__body__close"
                   iconName="close" iconWidth="19px" iconColor="white")
         keep-alive
-          page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
+          page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)")
   div(v-if="hasBleed" class="page-setting__bleed")
     div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
       span(class="text-gray-2 label-mid") {{$t('NN0780')}}
@@ -242,7 +242,6 @@ export default defineComponent({
   },
   data() {
     return {
-      isLocked: true,
       isPanelOpen: false,
       isGetGroup: false,
       isGetTemplate: false,
@@ -382,9 +381,6 @@ export default defineComponent({
     ...mapActions('layouts', [
       'getRecently'
     ]),
-    toggleLock() {
-      this.isLocked = !this.isLocked
-    },
     setSuggestionPanel(opened: boolean) {
       this.isPanelOpen = opened
     },

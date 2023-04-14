@@ -142,9 +142,6 @@ export default defineComponent({
     isFrame(): boolean {
       return layerUtils.getCurrConfig.type === LayerType.frame
     },
-    isText(): boolean {
-      return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
-    },
     bgStyle(): Record<string, string> {
       return this.mode === 'FunctionPanel' ? {
         background: '#2C2F43'// gray-1-5

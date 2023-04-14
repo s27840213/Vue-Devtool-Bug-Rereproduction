@@ -1085,9 +1085,6 @@ export default defineComponent({
       }
       return layerInfo
     },
-    isInFrame(): boolean {
-      return this.primaryLayer?.type === 'frame'
-    },
     scaledConfig(): { [index: string]: string | number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
       return {
@@ -1130,16 +1127,6 @@ export default defineComponent({
         transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
-    imgWrapperstyle() {
-      const { height, width } = this.scaledConfig()
-      let clipPath = ''
-      if (!this.imgControl && !this.isBgImgControl) {
-        clipPath = `path('M0,0h${width}v${height}h${-width}z`
-      }
-      return {
-        clipPath
-      }
-    },
     imgStyles() {
       let { imgX, imgY, imgHeight, imgWidth } = this.scaledConfig()
       if (this.isBgImgControl) {
@@ -1179,9 +1166,6 @@ export default defineComponent({
     hasHalation(): boolean {
       return this.config.styles.adjust?.halation
     },
-    srcObj() {
-      return (this.config as IImage).srcObj
-    },
     adjustImgStyles() {
       let styles = this.config.styles
       if (this.isBgImgControl) {
@@ -1203,17 +1187,8 @@ export default defineComponent({
     shadow(): IShadowProps {
       return (this.config as IImage).styles.shadow
     },
-    shadowEffects(): IShadowEffects {
-      return this.shadow().effects
-    },
     currentShadowEffect(): ShadowEffectType {
       return this.shadow().currentEffect
-    },
-    scale(): number {
-      return this.config.styles.scale
-    },
-    inProcess(): boolean {
-      return this.config.inProcess
     },
     // uploadingImagePreviewSrc(): string {
     //   return this.config.previewSrc

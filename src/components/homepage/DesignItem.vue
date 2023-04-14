@@ -34,8 +34,6 @@ export default defineComponent({
   },
   data() {
     return {
-      isMouseOver: false,
-      isNameMouseOver: false,
       imgWidth: 10,
       imgHeight: 10,
       previewCheckReady: false,

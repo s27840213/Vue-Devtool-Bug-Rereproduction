@@ -2,7 +2,7 @@
 button(class="btn"
     :class="`btn-${squared ? 'squared-' : ''}${buttonType}`"
     :style="btnStyles"
-    :disabled="disabled" ref="btn")
+    :disabled="disabled")
   svg-icon(v-if="hasIcon"
     class="btn__icon"
     :style="flexDir === 'row' ? `margin-right: ${iconMargin}px` : `margin-bottom: ${iconMargin}px`"
@@ -65,9 +65,6 @@ export default defineComponent({
     }
   },
   computed: {
-    squaredPaddingClass(): string {
-      return this.squared ? `btn-squared-${this.type.split('-')[1]}` : ''
-    },
     buttonType(): string {
       const size = this.type.split('-')[1]
       return this.disabled ? `inactive-${size}` : this.type

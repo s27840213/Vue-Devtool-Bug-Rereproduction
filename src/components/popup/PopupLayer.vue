@@ -145,9 +145,6 @@ export default defineComponent({
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },
-    hasMultipleSelectedLayer(): boolean {
-      return this.currSelectedInfo.layers.length > 1
-    },
     layerNum(): number {
       return this.currSelectedInfo.pageIndex === -1 ? 0 : this._layerNum(this.currSelectedInfo.pageIndex)
     },
@@ -254,9 +251,6 @@ export default defineComponent({
       set_popupComponent: 'SET_popupComponent',
       _setBgImgSrc: 'SET_backgroundImageSrc'
     }),
-    mappingIcons(type: string): string[] {
-      return MappingUtils.mappingIconSet(type)
-    },
     mappingIconAction(icon: string) {
       return MappingUtils.mappingIconAction(icon)
     },

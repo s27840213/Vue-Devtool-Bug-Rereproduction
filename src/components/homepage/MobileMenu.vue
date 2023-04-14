@@ -58,7 +58,6 @@ export default defineComponent({
     return {
       settingsItems: constantData.settingsItems()
         .filter((it: { name: string }) => { return it.name !== 'hr' }),
-      optionSelected: 0
     }
   },
   computed: {

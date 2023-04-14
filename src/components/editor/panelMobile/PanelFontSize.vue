@@ -28,14 +28,8 @@ export default defineComponent({
   },
   data() {
     return {
-      openValueSelector: false,
       fieldRange: {
         fontSize: { min: 1, max: 144 },
-        lineHeight: { min: 0.5, max: 2.5 },
-        fontSpacing: { min: -200, max: 800 },
-        // fontSpacing: { min: -2, max: 8 },
-        // lineHeight: { min: 0, max: 300 },
-        opacity: { min: 0, max: 100 }
       }
     }
   },

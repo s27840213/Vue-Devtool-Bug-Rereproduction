@@ -39,32 +39,24 @@ div(class="nu-sub-controller")
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import i18n from '@/i18n'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import ControlUtils from '@/utils/controlUtils'
-import DragUtils from '@/utils/dragUtils'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
-import MappingUtils from '@/utils/mappingUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { notify } from '@kyvg/vue3-notification'
 import SvgPath from 'svgpath'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -99,10 +91,6 @@ export default defineComponent({
       type: String,
       required: true
     },
-    isMoved: {
-      type: Boolean,
-      required: true
-    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -115,13 +103,10 @@ export default defineComponent({
   components: {
     NuTextEditor
   },
-  emits: ['pointerDownSubController', 'clickSubController', 'dblSubController', 'onSubDrop'],
+  emits: ['clickSubController'],
   data() {
     return {
-      MappingUtils,
-      FrameUtils,
       subLayerCtrlUtils: null as unknown as SubCtrlUtils,
-      ShortcutUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isComposing: false,
@@ -133,13 +118,7 @@ export default defineComponent({
         srcObj: { type: string, assetId: string | number, userId: string },
         panelPreviewSrc: ''
       },
-      dragUtils: new DragUtils(this.primaryLayer.id, this.config.id),
       isPrimaryActive: false,
-      dblTapFlag: false,
-      initTranslate: {
-        x: -1,
-        y: -1
-      }
     }
   },
   async mounted() {
@@ -332,19 +311,6 @@ export default defineComponent({
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
-    frameClipStyles() {
-      return {
-        fill: '#00000000',
-        stroke: this.isControllerShown ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
-        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / this.primaryLayer.styles.scale * (100 / this.scaleRatio)}px`
-      }
-    },
-    textScaleStyle() {
-      return {
-        position: 'absolute',
-        transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`
-      }
-    },
     textWrapperStyle() {
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
@@ -369,20 +335,6 @@ export default defineComponent({
         top: 0,
         left: 0,
         opacity: this.config.contentEditable ? 1 : 0
-      }
-    },
-    groupControllerStyle() {
-      return {
-        width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`,
-        position: 'absolute',
-        transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`
-      }
-    },
-    disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice()) {
-        e.preventDefault()
-        e.stopPropagation()
       }
     },
     onPointerdown(e: PointerEvent) {
@@ -503,164 +455,6 @@ export default defineComponent({
 
       colorUtils.event.emit('closeColorPanel', false)
       this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
-    },
-    onDblClick(e: MouseEvent) {
-      if (this.type === 'tmp') {
-        return
-      }
-      this.$emit('dblSubController', e, this.layerIndex)
-    },
-    onDragEnter(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.addEventListener('drop', this.onDrop)
-      switch (this.type) {
-        case 'frame':
-          if (this.config.type === 'image') {
-            this.onFrameDragEnter(e)
-            body.addEventListener('dragleave', this.onFrameDragLeave)
-          }
-          return
-        case 'group':
-          if (this.config.type === 'image') {
-            const shadow = (this.config as IImage).styles.shadow
-            const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
-            const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
-            const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
-            if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.subLayerId !== this.config.id && !shadowEffectNeedRedraw))) {
-              this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
-              body.addEventListener('dragleave', this.onDragLeave)
-            } else {
-              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-              body.removeEventListener('drop', this.onDrop)
-            }
-          }
-      }
-    },
-    onDragLeave(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.removeEventListener('drop', this.onDrop)
-      switch (this.type) {
-        case 'frame':
-          if (this.config.type === 'image') {
-            this.onFrameDragLeave(e)
-            body.removeEventListener('dragleave', this.onFrameDragLeave)
-          }
-          return
-        case 'group':
-          // if (this.config.type === 'image' && !this.isUploadImgShadow) {
-          if (this.config.type === 'image') {
-            this.dragUtils.onImageDragLeave(e, this.pageIndex)
-            body.removeEventListener('dragleave', this.onDragLeave)
-          }
-      }
-    },
-    onDrop(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.removeEventListener('drop', this.onDrop)
-      e.stopPropagation()
-      if (e.dataTransfer?.getData('data') && !this.currDraggedPhoto.srcObj.type) {
-        this.dragUtils.itemOnDrop(e, this.pageIndex)
-      }
-
-      if (!this.currDraggedPhoto.srcObj.type) {
-        // Propagated to NuController.vue onDrop()
-      } else {
-        switch (this.type) {
-          case 'frame':
-            if (this.config.type === 'image') {
-              body.removeEventListener('dragleave', this.onFrameDragLeave)
-              this.onFrameDrop(e)
-            }
-            return
-          case 'group':
-            if (this.config.type === 'image') {
-              if (!this.isHandleShadow) {
-                groupUtils.deselect()
-                groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
-                layerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-                eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
-              } else {
-                const replacedImg = new Image()
-                replacedImg.crossOrigin = 'anonynous'
-                replacedImg.onload = () => {
-                  const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
-                  const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
-                  imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
-                }
-                const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
-                replacedImg.src = imageUtils.getSrc(this.config, size)
-              }
-              body.removeEventListener('dragleave', this.onDragLeave)
-            }
-        }
-      }
-    },
-    onFrameDragEnter(e: DragEvent) {
-      const { primaryLayer } = this
-      if (!primaryLayer.locked) {
-        e.stopPropagation()
-        if (this.isDraggedPanelPhoto() && !this.currDraggedPhoto.isPreview) {
-          const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
-          const clip = clips[this.layerIndex]
-
-          Object.assign(this.imgBuff, {
-            srcObj: {
-              ...clips[this.layerIndex].srcObj
-            },
-            panelPreviewSrc: clips[this.layerIndex].panelPreviewSrc,
-            styles: {
-              imgX: clip.styles.imgX,
-              imgY: clip.styles.imgY,
-              imgWidth: clip.styles.imgWidth,
-              imgHeight: clip.styles.imgHeight,
-              adjust: clip.styles.adjust
-            }
-          })
-          FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
-          FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { panelPreviewSrc: this.currDraggedPhoto.panelPreviewSrc })
-
-          Object.assign(clip.srcObj, this.currDraggedPhoto.srcObj)
-          const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
-            .clipperHandler(this.currDraggedPhoto, clip.clipPath, clip.styles).styles
-
-          FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-            imgWidth,
-            imgHeight,
-            imgX,
-            imgY
-          })
-        }
-      }
-    },
-    onFrameDragLeave(e: DragEvent) {
-      e.stopPropagation()
-      const primaryLayer = this.primaryLayer as IFrame
-      if (this.isDraggedPanelPhoto() && !primaryLayer.locked) {
-        FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.srcObj)
-        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.styles)
-        FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { panelPreviewSrc: this.imgBuff.panelPreviewSrc })
-      }
-    },
-    onFrameDrop(e: DragEvent) {
-      e.stopPropagation()
-      StepsUtils.record()
-      this.setCurrDraggedPhoto({
-        srcObj: {
-          type: '',
-          assetId: '',
-          userId: ''
-        }
-      })
-      if (this.primaryLayer.locked) {
-        this.$emit('onSubDrop', { e })
-      }
-    },
-    undo() {
-      ShortcutUtils.undo().then(() => {
-        layerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true })
-        layerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
-        setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
-      })
     },
     onFrameMouseEnter(e: MouseEvent) {
       if (this.config.type !== LayerType.image || this.type !== LayerType.frame) {

@@ -180,6 +180,7 @@ div(class="popup-download text-left"
           span {{$t('NN0010')}}
 </template>
 
+<!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
 import DownloadPageSelection from '@/components/download/DownloadPageSelection.vue'
