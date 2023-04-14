@@ -17,7 +17,7 @@ const versionCheckAndBuild = (prerender = true) => ([
       name: '"Start build with node module cache"',
       size: '2x',
       caches: ['node'],
-      image: 'cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1',
+      image: 'cypress/browsers:node-18.15.0-chrome-111.0.5563.146-1-ff-111.0.1-edge-111.0.1661.62-1',
       script: [
         'yarn install',
         `yarn build${prerender ? ':prerender' : ''}`
@@ -37,7 +37,7 @@ const e2e = () => ({
   step: {
     name: '"Run E2E Tests"',
     size: '2x',
-    image: 'cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1',
+    image: 'cypress/browsers:node-18.15.0-chrome-111.0.5563.146-1-ff-111.0.1-edge-111.0.1661.62-1',
     script: [
       'npx cypress install',
       'yarn serve & npx wait-on http://localhost:8080',
