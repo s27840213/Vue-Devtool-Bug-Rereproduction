@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-layer flex-center"
-    :class="[inAllPagesMode ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
+    :class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
     :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :data-p-index="pageIndex"
     :style="layerWrapperStyles"
@@ -794,6 +794,7 @@ export default defineComponent({
     justify-content: center;
     width: 0;
     height: 0;
+    pointer-events: initial;
   }
   &__BG {
     position: absolute;
