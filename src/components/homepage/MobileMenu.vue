@@ -1,21 +1,21 @@
 <template lang="pug">
 div(class="menu" :style="rootStyles")
   div(class="menu-top")
-    template(v-for="l1 in navItems")
+    template(v-for="l1 in navItems" :key="l1.name")
       details(v-if="!l1.hidden" :class="{'text-blue-1': currentPage === l1.name}")
         summary
           url(:url="l1.url") {{l1.label}}
           svg-icon(v-if="l1.content" iconName="chevron-down"
                   iconColor="gray-1" iconWidth="16px")
         div(v-if="l1.content")
-          template(v-for="l2 in l1.content")
+          template(v-for="l2 in l1.content" :key="l2.name")
             url(v-if="l2.url" :url="l2.url") {{l2.label}}
             details(v-else-if="l2.content")
               summary
                 span {{l2.label}}
                 svg-icon(iconName="chevron-down"
                   iconColor="gray-1" iconWidth="16px")
-              url(v-for="l3 in l2.content" :url="l3.url" :newTab="l3.newTab") {{l3.label}}
+              url(v-for="l3 in l2.content" :key="l3.label" :url="l3.url" :newTab="l3.newTab") {{l3.label}}
   div(class="menu-bottom")
     template(v-if="!isLogin")
       div(class="menu-bottom__link")
@@ -33,7 +33,7 @@ div(class="menu" :style="rootStyles")
             span {{$tc('NN0649')}}
             svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="16px")
           div(@click="close()")
-            url(v-for="item in settingsItems" :url="`/settings/${item.name}`"
+            url(v-for="item in settingsItems" :key="item.name" :url="`/settings/${item.name}`"
                 :class="{'text-blue-1': currentPage === item.name}") {{item.label}}
       div(class="menu-bottom__link"
         @click="onLogoutClicked()")
@@ -58,7 +58,6 @@ export default defineComponent({
     return {
       settingsItems: constantData.settingsItems()
         .filter((it: { name: string }) => { return it.name !== 'hr' }),
-      optionSelected: 0
     }
   },
   computed: {

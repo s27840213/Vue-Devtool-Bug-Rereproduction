@@ -3,7 +3,6 @@ div(class="page-card"
     :style="cardStyle"
     ref="card")
   nu-page(
-    :ref="`page-${pageIndex}`"
     :pageIndex="pageIndex"
     :overflowContainer="editorView"
     :pageState="config"

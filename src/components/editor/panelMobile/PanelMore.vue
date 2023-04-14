@@ -34,15 +34,15 @@ div(class="panel-more")
     div(class="body-2 panel-more__item" @pointerdown.prevent="handleDebugMode")
       span(class="text-gray-3") Version: {{buildNumber}}{{appVersion}}{{domain}}
   template(v-if="lastHistory === 'domain-list'")
-    div(v-for="domain in domainList" class="panel-more__item"
+    div(v-for="domain in domainList"
+        :key="domain.key"
+        class="panel-more__item"
         :class="{ selected: handleDomainSelected(domain.selected) }"
         @click="switchDomain(domain.key)")
-        span(class="body-2 pointer") {{domain.title}}
+      span(class="body-2 pointer") {{domain.title}}
 </template>
 
 <script lang="ts">
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import webViewUtils from '@/utils/picWVUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
@@ -51,9 +51,6 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
-  components: {
-    MobileSlider
-  },
   emits: ['close', 'pushHistory'],
   props: {
     panelHistory: {
@@ -90,9 +87,6 @@ export default defineComponent({
     },
     lastHistory(): string {
       return this.panelHistory[this.historySize - 1]
-    },
-    opacity(): number {
-      return layerUtils.getCurrOpacity
     },
     pagesName(): string {
       return pageUtils.pagesName
@@ -143,9 +137,6 @@ export default defineComponent({
     }),
     handleDomainSelected(selected: () => boolean): boolean {
       return selected()
-    },
-    updateLayerOpacity(val: number) {
-      layerUtils.updateLayerOpacity(val)
     },
     newDesign() {
       const path = `${window.location.origin}${window.location.pathname}`

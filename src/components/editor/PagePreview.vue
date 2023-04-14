@@ -31,7 +31,6 @@ export default defineComponent({
   data() {
     return {
       screenWidth: 0,
-      renderCount: 0
     }
   },
   components: {

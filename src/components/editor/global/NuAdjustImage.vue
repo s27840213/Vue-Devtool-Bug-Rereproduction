@@ -18,18 +18,13 @@ svg(:viewBox="svgViewBox"
   image(:xlink:href="src"
     v-bind="style"
     :filter="imageFilter")
-//- component(v-for="(elm, idx) in cssFilterElms"
-//-   :key="`cssFilter${idx}`"
-//-   :is="elm.tag"
-//-   v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
 import { IImage } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
@@ -40,14 +35,6 @@ export default defineComponent({
     },
     styles: {
       type: Object,
-      required: true
-    },
-    contentScaleRatio: {
-      default: 1,
-      type: Number
-    },
-    page: {
-      type: Object as PropType<IPage>,
       required: true
     },
   },
@@ -67,19 +54,6 @@ export default defineComponent({
       const { adjust } = this.styles
       return ImageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, { styles: this.styles } as IImage)
     },
-    cssFilterElms(): any[] {
-      const { styles: { adjust, width, imgX, imgY, height } } = this
-      // @s.TODO: only for halation now
-      if (Number.isNaN(adjust.halation) || !adjust.halation) {
-        return []
-      }
-      const position = {
-        width: width / 2,
-        x: Math.abs(imgX) + width / 2,
-        y: Math.abs(imgY) + height / 2
-      }
-      return ImageAdjustUtil.getHalation(adjust.halation, position)
-    },
     filterId(): string {
       const randomId = GeneralUtils.generateRandomString(5)
       return `filter__${randomId}`
@@ -93,10 +67,8 @@ export default defineComponent({
     style(): { [key: string]: string } {
       const { svgImageWidth, svgImageHeight } = this
       if (svgImageWidth >= svgImageHeight) {
-        // return { width: `${svgImageWidth * this.contentScaleRatio}px` }
         return { width: `${svgImageWidth}px` }
       }
-      // return { height: `${svgImageHeight * this.contentScaleRatio}px` }
       return { height: `${svgImageHeight}px` }
     }
   }

@@ -44,10 +44,11 @@ div(class="sp")
   div(v-if="showBillingInfo" class="sp-info")
     span(class="text-blue-1 body-MD") {{$t('NN0601')}}
     //- switch(input.label)
-    template(v-for="input in billingInfoInput")
+    template(v-for="input in billingInfoInput" :key="input.key")
       //- case country
-      options(v-if="input.label === 'country'" :options="countryData"
-              :value="userCountryInfo" @input="setUserCountryInfo")
+      options(v-if="input.label === 'country'"
+        :options="countryData"
+        :value="userCountryInfo" @input="setUserCountryInfo")
       //- case state & zip
       div(v-else-if="input.label === 'state & zip'" class="sp-info__half")
         span
@@ -72,16 +73,16 @@ div(class="sp")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import Options from '@/components/global/Options.vue'
+import CardInfo from '@/components/payment/CardInfo.vue'
+import PaymentField from '@/components/payment/PaymentField.vue'
+import paymentData from '@/utils/constantData'
+import paymentUtils from '@/utils/paymentUtils'
 import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import vClickOutside from 'click-outside-vue3'
-import Options from '@/components/global/Options.vue'
-import PaymentField from '@/components/payment/PaymentField.vue'
-import CardInfo from '@/components/payment/CardInfo.vue'
-import paymentUtils from '@/utils/paymentUtils'
-import paymentData from '@/utils/constantData'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',

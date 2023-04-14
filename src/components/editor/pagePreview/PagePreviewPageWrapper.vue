@@ -41,7 +41,7 @@ lazy-load(
       div(v-if="isMenuOpen && currFocusPageIndex === index"
         class="menu"
         v-click-outside="closeMenu")
-        template(v-for="menuItem in menuItems")
+        template(v-for="menuItem in menuItems" :key="menuItem.text")
           div(class="menu-item"
             @click="handleMenuAction(menuItem.icon)")
             div(class="menu-item-icon")
@@ -124,8 +124,6 @@ export default defineComponent({
       isMouseOver: false,
       isMenuOpen: false,
       contentWidth: 0,
-      asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
-      isHandlingAsyncTask: false
     }
   },
   directives: {

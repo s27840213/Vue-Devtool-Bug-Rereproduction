@@ -7,7 +7,6 @@ div(class="photo-setting")
         class="full-width"
         :class="[activeBtn(btn) ? 'active' : '']"
         type="gray-mid"
-        ref="btn"
         :disabled="disableBtn(btn)"
         :key="btn.name"
         v-hint="disableBtn(btn) ? btn.hint : ''"
@@ -15,7 +14,6 @@ div(class="photo-setting")
     btn(v-if="isImage && !isFrame && !inReviewMode"
       class="full-width"
       type="gray-mid"
-      ref="btn"
       :disabled="isHandleShadow || show === 'panel-photo-shadow'"
       @click="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
   component(:is="show || 'div'"
@@ -174,9 +172,6 @@ export default defineComponent({
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
     },
-    selectedLayersNum(): number {
-      return this.currSelectedInfo.layers.length
-    }
   },
   methods: {
     ...mapMutations({

@@ -12,21 +12,22 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
       span {{$tc('NN0253', 2)}}
   div(v-if="isExpanded" class="folder-gallery__folders")
     folder-item(v-for="(folder, index) in allFolders"
-                :path="path"
-                :config="folder"
-                :index="index"
-                @goto="handleGotoFolder(folder.id)"
-                :undraggable="limitFunctions"
-                :undroppable="limitFunctions"
-                :nameIneditable="limitFunctions"
-                :isSelected="checkFolderSelected(folder.id)"
-                :isAnySelected="isAnySelected"
-                :menuItemNum="menuItemSlots.length"
-                @moveItem="handleMoveItem"
-                @select="selectFolder(folder)"
-                @deselect="deselectFolder(folder)"
-                @metaSelectFolder="metaSelectFolder(index)")
-      template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
+        :key="folder.id"
+        :path="path"
+        :config="folder"
+        :index="index"
+        @goto="handleGotoFolder(folder.id)"
+        :undraggable="limitFunctions"
+        :undroppable="limitFunctions"
+        :nameIneditable="limitFunctions"
+        :isSelected="checkFolderSelected(folder.id)"
+        :isAnySelected="isAnySelected"
+        :menuItemNum="menuItemSlots.length"
+        @moveItem="handleMoveItem"
+        @select="selectFolder(folder)"
+        @deselect="deselectFolder(folder)"
+        @metaSelectFolder="metaSelectFolder(index)")
+      template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name] :key="menuItemSlot.name")
         div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, folder)")
           div(class="folder-menu-item__icon")
             svg-icon(:iconName="menuItemSlot.icon"
@@ -45,11 +46,11 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import FolderItem from '@/components/mydesign/FolderItem.vue'
 import { IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils, { FOLDER_MENU_EVENTS, IFolderMenuEvents } from '@/utils/designUtils'
-import FolderItem from '@/components/mydesign/FolderItem.vue'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   components: {

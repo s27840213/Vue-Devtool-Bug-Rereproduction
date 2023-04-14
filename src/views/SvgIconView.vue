@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="svg-icon-view bg-nav")
-  div(class="svg-icon-view__icon pointer" v-for="icon in icons" @click="copyText(icon)")
+  div(class="svg-icon-view__icon pointer" v-for="icon in icons" :key="icon" @click="copyText(icon)")
     svg-icon(class="pointer"
       :iconName="icon"
       :iconWidth="'30px'"
@@ -9,10 +9,10 @@ div(class="svg-icon-view bg-nav")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
 import generalUtils from '@/utils/generalUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],

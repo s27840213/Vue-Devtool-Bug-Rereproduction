@@ -8,16 +8,14 @@ div(class="mobile-list-design-view")
 </template>
 
 <script lang="ts">
+import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
 import designUtils from '@/utils/designUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapActions } from 'vuex'
-import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
-import DiskWarning from '@/components/payment/DiskWarning.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
-    MobileFolderGallery,
-    DiskWarning
+    MobileFolderGallery
   },
   data() {
     return {

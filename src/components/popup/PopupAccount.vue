@@ -9,7 +9,7 @@ div(class="popup-account text-left"
       div {{showUname}}
       div(class="text-gray-3 body-3") {{showAccount}}
   div(class="popup-account__hr")
-  template(v-for="view in settingsItems")
+  template(v-for="view in settingsItems" :key="view.name")
     div(v-if="view.name === 'hr'" class="popup-account__hr")
     div(v-else class="popup-account__option" @click="closePopup")
       router-link(:to="`/settings/${view.name}`"
@@ -30,11 +30,11 @@ div(class="popup-account text-left"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import vClickOutside from 'click-outside-vue3'
-import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 import paymentData from '@/utils/constantData'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   directives: {

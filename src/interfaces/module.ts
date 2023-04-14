@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IImage, IStyle, IShape, IText, ITmp, IGroup, ILayer } from '@/interfaces/layer'
+import { IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { IMarker } from '@/interfaces/shape'
 
 export interface IAsset {
@@ -18,7 +18,7 @@ export interface IAsset {
     original: string
     json: string
   }
-  signed_url?: {[key: string]: string},
+  signed_url?: { [key: string]: string },
   content_ids?: IListServiceContentDataItem[]
   match_cover?: {
     height: number
@@ -135,6 +135,7 @@ export interface IAssetProps {
   width?: number,
   height?: number,
   panelPreviewSrc?: string,
+  previewSrc?: string,
   imgSrcSize?: {
     width: number,
     height: number
