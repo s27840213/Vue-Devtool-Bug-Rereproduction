@@ -45,7 +45,7 @@ class TextFill {
   }
 
   async convertTextEffect(config: IText): Promise<Record<string, string | number>[][]> {
-    const { textFill } = config.styles
+    const { textFill, textShape } = config.styles
     if (textFill.name === 'none') return []
 
     const img = store.getters['file/getImages'][0] as IAssetPhoto
@@ -56,9 +56,12 @@ class TextFill {
     myRect.preprocess({ skipMergeLine: true })
     const { vertical, rows } = myRect.get()
     const div = [] as DOMRect[][][]
-    for (const row of rows) {
+    for (const [index, row] of rows.entries()) {
       if (row.spanData.length === 0) continue
-      const { pIndex, sIndex } = row.spanData[0]
+      let { pIndex, sIndex } = row.spanData[0]
+      // TextShape only have one line, fix its p/sIndex
+      if (textShape.name !== 'none') [pIndex, sIndex] = [0, index]
+
       while (div.length - 1 < pIndex) div.push([])
       while (div[pIndex].length - 1 < sIndex) div[pIndex].push([])
       div[pIndex][sIndex].push(row.rect)
@@ -90,6 +93,7 @@ class TextFill {
         opacity: textFill.opacity / 100,
         webkitTextFillColor: 'transparent',
         webkitTextStrokeColor: 'transparent',
+        textDecorationColor: 'transparent',
         webkitBackgroundClip: 'text',
         // About span position
         position: 'absolute',

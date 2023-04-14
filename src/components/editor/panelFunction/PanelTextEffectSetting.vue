@@ -67,6 +67,7 @@ div(class="text-effect-setting mt-25")
               @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
+<!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'

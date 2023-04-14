@@ -6,7 +6,7 @@ p(class="nu-curve-text__p" :style="pStyle()")
     class="nu-curve-text__span"
     :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
     :key="sIndex",
-    :style="Object.assign(spanStyle(span.styles, sIndex), extraSpanStyle, transParentStyles)") {{ span.text }}
+    :style="Object.assign(spanStyle(span.styles, sIndex), extraSpanStyle)") {{ span.text }}
 </template>
 
 <script lang="ts">
