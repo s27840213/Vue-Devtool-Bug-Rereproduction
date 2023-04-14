@@ -65,6 +65,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
   isAnyIOSImgOnError = false
   hasCopied = false
+  everEntersDebugMode = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
@@ -179,6 +180,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       locale = localeUtils.getBrowserLang()
     }
     this.STANDALONE_USER_INFO.locale = locale
+  }
+
+  addDesignDisabled() {
+    return this.everEntersDebugMode || window.location.hostname !== 'sticker.vivipic.com'
   }
 
   setCurrActiveTab(tab: string) {
@@ -1046,6 +1051,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     } else {
       return editorType
     }
+  }
+
+  async fetchDebugModeEntrance() {
+    this.everEntersDebugMode = (await this.getState('everEntersDebugMode'))?.value ?? false
+    if (!this.everEntersDebugMode && ((await this.getState('debugMode'))?.value ?? false)) {
+      await this.recordDebugModeEntrance()
+    }
+  }
+
+  async recordDebugModeEntrance() {
+    this.everEntersDebugMode = true
+    await this.setState('everEntersDebugMode', { value: this.everEntersDebugMode })
   }
 
   openPayment(target?: IViviStickerProFeatures) {

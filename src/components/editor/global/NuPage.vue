@@ -68,7 +68,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
           :style="wrapperStyles"
-          @keydown.self="handleSpecialCharacter"
+          @keydown.exact.self="handleSpecialCharacter"
           @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
           @keydown.ctrl.c.exact.self.prevent.stop="ShortcutUtils.copy()"
           @keydown.meta.c.exact.self.prevent.stop="ShortcutUtils.copy()"
@@ -158,7 +158,6 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
 </template>
 
 <script lang="ts">
-import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
@@ -190,7 +189,6 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    NuBackgroundController,
     PageContent,
     DimBackground,
     SnapLineArea,
@@ -589,6 +587,7 @@ export default defineComponent({
         width: this.pageState.config.width,
         height: this.pageState.config.height,
         physicalWidth: this.pageState.config.physicalWidth,
+        backgroundColor: this.pageState.config.backgroundColor,
         physicalHeight: this.pageState.config.physicalHeight,
         isEnableBleed: this.pageState.config.isEnableBleed,
         bleeds: this.pageState.config.bleeds,

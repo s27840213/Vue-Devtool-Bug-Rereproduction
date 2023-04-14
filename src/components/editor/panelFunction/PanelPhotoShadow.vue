@@ -2,7 +2,7 @@
 div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
   div(class="action-bar")
     div(class="flex-between photo-effect-setting__options mb-10")
-      svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
+      svg-icon(v-for="(icon) in shadowOption.slice(0, 3)"
         :key="`shadow-${icon}`"
         :iconName="`photo-shadow-${icon}`"
         @click="onEffectClick(icon)"
@@ -39,7 +39,7 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
         div(class="photo-effect-setting__reset")
           button(@click="reset()") {{ $t('NN0754') }}
     div(class="flex-between photo-effect-setting__options mb-10")
-      svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
+      svg-icon(v-for="(icon) in shadowOption.slice(3)"
         :key="`shadow-${icon}`"
         :iconName="`photo-shadow-${icon}`"
         @click="onEffectClick(icon)"
@@ -79,7 +79,6 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
 </template>
 
 <script lang="ts">
-import ColorPicker from '@/components/ColorPicker.vue'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { ColorEventType, FunctionPanelType } from '@/store/types'
@@ -92,9 +91,6 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
-  components: {
-    ColorPicker
-  },
   emits: ['toggleColorPanel'],
   data() {
     return {

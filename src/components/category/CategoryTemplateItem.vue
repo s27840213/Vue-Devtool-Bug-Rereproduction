@@ -15,7 +15,6 @@ div(class="category-template-item" :style="itemStyle")
 </template>
 
 <script lang="ts">
-import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -35,7 +34,6 @@ import { mapGetters } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    ImageCarousel,
     ProItem
   },
   props: {

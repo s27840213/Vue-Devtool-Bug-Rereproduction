@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="mobile-slider")
+div(class="mobile-slider" :style="containerStyles")
   div
     span(class="mobile-slider__name no-wrap" :class="theme === 'dark' ? 'text-gray-2' : 'text-white'") {{title}}
     div(class="mobile-slider__text")
@@ -82,6 +82,10 @@ export default defineComponent({
     theme: {
       type: String,
       default: 'dark'
+    },
+    enableDefaultPadding: {
+      type: Boolean,
+      default: true
     }
   },
   computed: {
@@ -99,6 +103,11 @@ export default defineComponent({
         // If a value is rounded and not changed compared to previous value after rounded,
         // the value in this component will not be synced with the rounded value (since not change happens).
         this.$forceUpdate()
+      }
+    },
+    containerStyles() {
+      return {
+        padding: this.enableDefaultPadding ? '0 8px 20px 8px' : 'none'
       }
     }
   },
@@ -127,7 +136,6 @@ export default defineComponent({
   grid-template-rows: auto auto;
   grid-template-columns: 1fr;
   row-gap: 20px;
-  padding: 0 8px 20px 8px;
   box-sizing: border-box;
   overflow-y: hidden;
 

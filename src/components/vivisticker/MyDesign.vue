@@ -2,6 +2,7 @@
 div(class="my-design")
   div(class="my-design__tags")
     div(v-for="tag in tags" class="my-design__tag"
+        :key="tag.tab"
         :class="{ selected: checkTagSelected(tag) }"
         @click.prevent.stop="selectTag(tag)")
       span(class="my-design__tag-name") {{ $tc(tag.name, 2) }}
@@ -246,7 +247,7 @@ export default defineComponent({
   &__tags {
     display: flex;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     gap: 10px;
   }
 

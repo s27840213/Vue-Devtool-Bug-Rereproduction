@@ -40,3 +40,5 @@ export interface IDownloadServiceResponse {
   msg?: string
   progress?: number
 }
+
+export type PanelDownloadState = 'setting' | 'type' | 'size' | 'selectPage' | 'colorMode' | 'downloaded' | 'polling'

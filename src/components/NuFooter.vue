@@ -44,6 +44,7 @@ div(class="nu-footer text-black" :style="rootStyles")
         div(class="nu-footer__feature-items"
           :class="featureExpand[2] ? 'expand' : ''")
           div(v-for="theme in themeList"
+            :key="theme.id"
             class="pointer"
             @click="newDesign(theme)") {{theme.title}}
       div(class="nu-footer__feature-region")
@@ -63,7 +64,7 @@ div(class="nu-footer text-black" :style="rootStyles")
   div(class="nu-footer__bottom")
     div(class="nu-footer__bottom-left")
       select(class="locale-select" v-model="inputLocale")
-        option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
+        option(v-for="locale in localeOptions" :key="locale.code" :value="locale.name") {{locale.name}}
     div(class="nu-footer__bottom-center")
       span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
     div(class="nu-footer__bottom-right")
@@ -80,7 +81,7 @@ div(class="nu-footer text-black" :style="rootStyles")
           iconName="email-black"
           :iconWidth="'25px'")
     div(class="nu-footer__bottom-info")
-      span(v-for="index in 5") {{$t(`NN07${13+index}`)}}
+      span(v-for="index in 5" :key="index") {{$t(`NN07${13+index}`)}}
   div(class="nu-footer__bottom-mobile")
     div(class="nu-footer__bottom-mobile-icons")
       a(:href="facebookPage")
@@ -97,12 +98,12 @@ div(class="nu-footer text-black" :style="rootStyles")
           :iconWidth="'25px'")
     div(class="nu-footer__bottom-mobile-locale")
       select(class="locale-select" v-model="inputLocale")
-        option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
+        option(v-for="locale in localeOptions" :key="locale.code" :value="locale.name") {{locale.name}}
     div(class="nu-footer__bottom-mobile-copyright"
       :style="{ 'margin-bottom': isHome ? '70px' : 0 }")
       span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
       div(class="nu-footer__bottom-mobile-info")
-        span(v-for="index in 5") {{$t(`NN07${13+index}`)}}
+        span(v-for="index in 5" :key="index") {{$t(`NN07${13+index}`)}}
 </template>
 
 <script lang="ts">

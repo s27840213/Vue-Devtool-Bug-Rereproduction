@@ -25,7 +25,9 @@ div(class="field")
         span {{priceToday}}
   div(v-if="!isChange" class="field-invoice")
     div(class="text-H4 mb-25") {{$t('NN0554')}}
-    div(v-for="inv in invoiceInput" class="field-invoice__input")
+    div(v-for="inv in invoiceInput"
+        :key="inv.key"
+        class="field-invoice__input")
       input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
       span(v-if="biv[inv.key]" class="text-red") {{inv.error}}
   btn(class="btn-LG mt-30 rounded" type="primary-lg"

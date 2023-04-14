@@ -6,8 +6,9 @@ div(class="pricing")
       span(class="text-H2 mb-20" v-html="$t('NN0505')")
       span(class="body-LG text-gray-2") {{$t('NN0506')}}
       img(v-for="cb in colorBlock" class="pricing-top__cb"
-          :src="require('@/assets/img/svg/color-block/' + cb.name)"
-          :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
+        :key="cb.name"
+        :src="require('@/assets/img/svg/color-block/' + cb.name)"
+        :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
     div(class="pricing-plan")
       div(class="pricing-plan-left")
         div(class="pricing-plan-left-top")
@@ -17,7 +18,7 @@ div(class="pricing")
           span {{$t('NN0509')}}
           hr
         div(class="pricing-plan-left-bottom")
-          div(v-for="item in ['NN0510', 'NN0511', 'NN0512', 'NN0513', 'NN0769']")
+          div(v-for="item in ['NN0510', 'NN0511', 'NN0512', 'NN0513', 'NN0769']" :key="item")
             svg-icon(iconName="item-check" iconWidth="20px")
             span {{$t(item)}}
       div(class="pricing-plan-right")
@@ -36,12 +37,12 @@ div(class="pricing")
           span(class="btn-LG") {{buyLabel}}
     span(class="pricing-currency") {{$t('NN0519')}}
     div(class="pricing-compare")
-      div(v-for="item in compareTable")
+      div(v-for="(item,idx) in compareTable" :key="idx")
         svg-icon(v-if="item === true" iconName="feature-true")
         span(v-else) {{item}}
     div(class="pricing-faq")
       span(class="text-H2 mb-20") {{$t('NN0533')}}
-      details(v-for="item in faqs")
+      details(v-for="item in faqs" :key="item.Q")
         summary {{item.Q}}
           svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
         i18n-t(v-if="item.isPath" :keypath="item.A" tag="p" class="body-MD text-gray-2 mt-20")

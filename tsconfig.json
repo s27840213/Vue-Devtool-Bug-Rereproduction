@@ -17,7 +17,6 @@
     "baseUrl": ".",
     "types": [
       "webpack-env",
-      // "@vueuse/gesture",
       "resize-observer-browser",
       "tpdirect"
     ],
@@ -50,9 +49,4 @@
   "exclude": [
     "node_modules"
   ]
-  // "references": [
-  //   {
-  //     "path": "./tsconfig.node.json"
-  //   }
-  // ]
 }

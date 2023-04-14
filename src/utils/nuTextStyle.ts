@@ -134,6 +134,17 @@ export default Extension.create({
     }
   },
   addGlobalAttributes() {
+    function cssBaseAttr(name: string) {
+      return {
+        default: undefined,
+        parseHTML: (element: HTMLElement) => {
+          const spanStyle = element.style
+          const css = spanStyle.getPropertyValue(name)
+          return css
+        },
+        renderHTML: () => ({})
+      }
+    }
     return [
       {
         types: ['textStyle'],
@@ -276,24 +287,13 @@ export default Extension.create({
               }
             }
           },
-          'min-width': {
-            default: undefined,
-            parseHTML: element => {
-              const spanStyle = element.style
-              const width = spanStyle.getPropertyValue('min-width')
-              return width
-            },
-            renderHTML: () => ({})
-          },
-          'min-height': {
-            default: undefined,
-            parseHTML: element => {
-              const spanStyle = element.style
-              const height = spanStyle.getPropertyValue('min-height')
-              return height
-            },
-            renderHTML: () => ({})
-          }
+          'min-width': cssBaseAttr('min-width'),
+          'min-height': cssBaseAttr('min-height'),
+          filter: cssBaseAttr('filter'),
+          '--base-stroke': cssBaseAttr('--base-stroke'),
+          webkitTextFillColor: cssBaseAttr('-webkit-text-fill-color'),
+          webkitTextStrokeColor: cssBaseAttr('-webkit-text-stroke-color'),
+          textShadow: cssBaseAttr('text-shadow'),
         }
       }, {
         types: ['paragraph'],

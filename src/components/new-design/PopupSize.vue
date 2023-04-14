@@ -17,17 +17,15 @@ div(class="popup-size"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapState } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
-import RadioBtn from '@/components/global/RadioBtn.vue'
+import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'
-import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    RadioBtn,
     PageSizeSelector
   },
   directives: {

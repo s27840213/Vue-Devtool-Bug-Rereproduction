@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="popup-page bg-gray-6"
     @click.stop="closePopup")
-  template(v-for="option in updateOptions")
+  template(v-for="option in updateOptions" :key="option.text")
     template(v-if="option.condition")
       div(class="popup-page__item"
           :class="{disabled: isFontLoading}"
@@ -48,7 +48,7 @@ import MappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({

@@ -54,7 +54,6 @@ div(class="editor-view bg-gray-5"
 
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import EditorHeader from '@/components/editor/EditorHeader.vue'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
@@ -82,13 +81,12 @@ import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
   components: {
-    EditorHeader,
     RulerHr,
     RulerVr,
     BgRemoveArea,

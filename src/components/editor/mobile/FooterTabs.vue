@@ -5,7 +5,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
     div(class="footer-tabs__container bg-nav"
         :style="innerContainerStyles"
         ref="container")
-      template(v-for="(tab, index) in homeTabs")
+      template(v-for="(tab) in homeTabs")
         div(v-if="!tab.hidden" :key="tab.icon"
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
@@ -29,7 +29,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
         div(class="footer-tabs__container"
             :style="innerContainerStyles"
             @scroll.passive="updateContainerOverflow" ref="container")
-          template(v-for="(tab, index) in settingTabs")
+          template(v-for="(tab) in settingTabs")
             div(v-if="!tab.hidden" :key="tab.icon"
                 class="footer-tabs__item"
                 :class="{'click-disabled': (tab.disabled || isLocked || (tab.icon !== 'remove-bg' && inBgRemoveMode))}"
@@ -667,6 +667,7 @@ export default defineComponent({
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
             isEnableBleed: currPage.isEnableBleed,
+            backgroundColor: currPage.backgroundColor,
             unit: currPage.unit
           }), pageUtils.currFocusPageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
@@ -800,10 +801,13 @@ export default defineComponent({
 
       if (['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page'].includes(tab.icon)) {
         this.clickedTab = tab.icon
-        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
         this.clickedTabTimer = window.setTimeout(() => {
           this.clickedTab = ''
         }, 400)
+      }
+
+      if (['copy', 'paste'].includes(tab.icon)) {
+        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
       }
     },
     targetIs(type: string): boolean {

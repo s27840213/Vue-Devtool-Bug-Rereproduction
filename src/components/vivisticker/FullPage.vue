@@ -1,22 +1,21 @@
 <template lang="pug">
-transition(name="panel-up")
-  div(ref="main" class="full-page relative")
-    template(v-if="fullPageType === 'iOS16Video'")
-      div(class="full-page__video")
-        video(autoplay playsinline muted loop :src="videoSource" :poster="thumbnail")
-    payment(v-if="fullPageType === 'payment'" :target="fullPageParams.target")
-    template(v-if="fullPageType === 'welcome'")
-      div(class="full-page__welcome")
-        img(:src="require(`@/assets/img/png/pricing/${$i18n.locale}/vivisticker_welcome.png`)")
-        div(class="full-page__welcome__text body-MD text-white") {{ $t('STK0054') }}
-        div(class="full-page__welcome__btn-start" @click.prevent.stop="handleClose")
-          span {{ $t('STK0055') }}
-    div(v-if="showCloseButton"
-      class="full-page__close"
-      @click.prevent.stop="handleClose")
-      svg-icon(iconName="vivisticker_close"
-              iconColor="white"
-              iconWidth="24px")
+div(ref="main" class="full-page relative")
+  template(v-if="fullPageType === 'iOS16Video'")
+    div(class="full-page__video")
+      video(autoplay playsinline muted loop :src="videoSource" :poster="thumbnail")
+  payment(v-if="fullPageType === 'payment'" :target="fullPageParams.target")
+  template(v-if="fullPageType === 'welcome'")
+    div(class="full-page__welcome")
+      img(:src="require(`@/assets/img/png/pricing/${$i18n.locale}/vivisticker_welcome.png`)")
+      div(class="full-page__welcome__text body-MD text-white") {{ $t('STK0054') }}
+      div(class="full-page__welcome__btn-start" @click.prevent.stop="handleClose")
+        span {{ $t('STK0055') }}
+  div(v-if="showCloseButton"
+    class="full-page__close"
+    @click.prevent.stop="handleClose")
+    svg-icon(iconName="vivisticker_close"
+            iconColor="white"
+            iconWidth="24px")
 </template>
 
 <script lang="ts">

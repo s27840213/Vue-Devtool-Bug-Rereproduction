@@ -8,7 +8,7 @@ div(class="editor-header" ref="header"
       template(#logIn)
         a(:href="`/login?redirect=${path}`") {{$tc('NN0168',1)}}
   template(v-else)
-    router-link(to="/mydesign" class="body-3 pointer hover-effect a-reset") {{$t('NN0080')}}
+    router-link(to="/mydesign" class="body-3 pointer hover-effect a-reset no-wrap") {{$t('NN0080')}}
     span(class="body-3 pointer") {{`${!isRoot ? '/...': ''}`}}
     router-link(v-if="parentFolder.name && parentFolder.path"
       :to="`/mydesign/${parentFolder.path}`"

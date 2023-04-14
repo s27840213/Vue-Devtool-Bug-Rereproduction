@@ -45,7 +45,6 @@ div(class="panel-remove-bg")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import { defineComponent } from 'vue'
@@ -60,7 +59,6 @@ export default defineComponent({
     }
   },
   components: {
-    PopupAdjust,
     MobileSlider
   },
   computed: {

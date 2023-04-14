@@ -15,7 +15,6 @@ div(class="category-object-item" v-touch)
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
 import { IGif } from '@/interfaces/giphy'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapMutations } from 'vuex'
@@ -28,9 +27,6 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default defineComponent({
   emits: ['dbclick4in1', 'click4in1', 'dbclick'],
-  components: {
-    ProItem
-  },
   props: {
     src: {
       type: String

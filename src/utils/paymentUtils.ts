@@ -88,7 +88,7 @@ class PaymentUtils {
   }
 
   contactUs() { // This function must be excuted during click event, or it will be treated as open a popup window.
-    window.open(this.contactUsUrl(), '_blank')
+    webViewUtils.openOrGoto(this.contactUsUrl())
   }
 
   errorHandler(msg?: string, initView = 'brandkit' as IPaymentView) {

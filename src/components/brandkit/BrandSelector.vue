@@ -29,6 +29,7 @@ div(class="brand-selector relative"
       v-click-outside="() => { isBrandListOpen = false }"
       class="brand-selector__brand-list")
       div(v-for="brand in brands"
+        :key="brand.id"
         class="feature-button brand-selector__brand-list__item pointer relative"
         :class="{'active': checkSelected(brand), 'disabled': checkTemp(brand)}"
         @mouseenter="handleMouseEnter(brand)"

@@ -10,7 +10,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {

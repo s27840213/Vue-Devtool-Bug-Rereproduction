@@ -85,6 +85,7 @@ export default defineComponent({
     if (!webViewUtils.inBrowserMode) {
       webViewUtils.registerCallbacks('main')
     }
+
     this.$router.isReady().then(() => { webViewUtils.sendAppLoaded() })
   },
   beforeMount() {
@@ -104,7 +105,8 @@ export default defineComponent({
       modalInfo: 'modal/getModalInfo',
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: webViewUtils.appendModuleName('getUserInfo'),
+      browserInfo: 'user/getBrowserInfo'
     }),
     currLocale(): string {
       return localeUtils.currLocale()

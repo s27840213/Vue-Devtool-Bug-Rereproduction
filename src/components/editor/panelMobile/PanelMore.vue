@@ -28,20 +28,21 @@ div(class="panel-more")
       div(class="panel-more__item"
           @click="onDomainListClicked()")
           span(class="body-2 pointer") domain 選單
-    div(class="panel-more__item"
+    div(v-if="isAdmin" class="panel-more__item"
         @click="toggleDebugTool")
       span Toggle admin tool
     div(class="body-2 panel-more__item" @pointerdown.prevent="handleDebugMode")
       span(class="text-gray-3") Version: {{buildNumber}}{{appVersion}}{{domain}}
   template(v-if="lastHistory === 'domain-list'")
-    div(v-for="domain in domainList" class="panel-more__item"
+    div(v-for="domain in domainList"
+        :key="domain.key"
+        class="panel-more__item"
         :class="{ selected: handleDomainSelected(domain.selected) }"
         @click="switchDomain(domain.key)")
-        span(class="body-2 pointer") {{domain.title}}
+      span(class="body-2 pointer") {{domain.title}}
 </template>
 
 <script lang="ts">
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import webViewUtils from '@/utils/picWVUtils'
@@ -51,9 +52,6 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
-  components: {
-    MobileSlider
-  },
   emits: ['close', 'pushHistory'],
   props: {
     panelHistory: {
@@ -80,6 +78,7 @@ export default defineComponent({
     ...mapGetters({
       pagesLength: 'getPagesLength',
       hasBleed: 'getHasBleed',
+      isAdmin: 'user/isAdmin'
     }),
     historySize(): number {
       return this.panelHistory.length

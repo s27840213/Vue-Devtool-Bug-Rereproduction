@@ -56,20 +56,23 @@ div(ref="body"
     div(class="template-center__filter non-tab-show"
         :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0', 'pointer-events': isShowOptions ? 'initial' : 'none'}")
       hashtag-category-row(v-for="hashtag in hashtags"
-                          :list="hashtag"
-                          :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
-                          @select="handleHashtagSelect")
+        :key="hashtag.title"
+        :list="hashtag"
+        :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
+        @select="handleHashtagSelect")
   div(class="template-center__content")
     div(class="template-center__filter non-mobile-show")
       hashtag-category-row(v-for="hashtag in hashtags"
-                          :list="hashtag"
-                          :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
-                          @select="handleHashtagSelect")
+        :key="hashtag.title"
+        :list="hashtag"
+        :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
+        @select="handleHashtagSelect")
     div(class="template-center__hr non-mobile-show")
     div(class="template-center__sorter non-mobile-show")
       div(class="template-center__sorter__left")
         div(class="template-center__sorter__title") {{$t('NN0191')}}:
         div(v-for="sortingCriterium in sortingCriteria"
+            :key="sortingCriterium.key"
             class="template-center__sorter__sort pointer"
             :class="{'selected': selectedSorting === sortingCriterium.key}"
             @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
@@ -103,15 +106,17 @@ div(ref="body"
       div(class="template-center__multi__content")
         div(class="template-center__multi__gallery")
           div(v-for="content in contentIds" class="template-center__multi__gallery-item"
-              :style="`background-image: url(${getPrevUrl(content)})`"
-              @click="handleTemplateClick(content)")
+            :key="content.id"
+            :style="`background-image: url(${getPrevUrl(content)})`"
+            @click="handleTemplateClick(content)")
   transition(name="fade-slide")
     div(v-if="modal === 'mobile-pages'" class="template-center__mobile-multi")
       div(class="template-center__mobile-multi__content")
         div(class="template-center__mobile-multi__gallery")
           div(v-for="content in contentIds" class="template-center__mobile-multi__gallery-item"
-              :style="`background-image: url(${getPrevUrl(content, 2)})`"
-              @click="handleTemplateClick(content)")
+            :key="content.id"
+            :style="`background-image: url(${getPrevUrl(content, 2)})`"
+            @click="handleTemplateClick(content)")
           div(class="template-center__scroll-space")
   div(v-if="modal === 'mobile-pages'", class="template-center__mobile-multi__close"
       @click="() => { modal = '' }")
@@ -135,6 +140,7 @@ div(ref="body"
           span {{$t('NN0228')}}：
         div(class="template-center__multi__themes")
           div(v-for="theme in matchedThemes" class="template-center__multi__themes__row"
+              :key="theme.id"
               :class="checkSelected(theme) ? 'selected' : ''"
               @click="handleThemeSelect(theme)")
             div(class="template-center__multi__themes__title")

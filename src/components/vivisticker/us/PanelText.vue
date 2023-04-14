@@ -17,7 +17,11 @@ div(class="panel-text" :class="{'in-category': isInCategory, 'in-editor': isInEd
           div(class="panel-text__item" :style="itemStyles")
     template(v-slot:category-text-item="{ list }")
       div(class="panel-text__items" :style="itemsStyles")
-        div(class="panel-text__card" :class="{recent: item.id === 'recent'}" v-for="item in list" :style="itemStyles()")
+        div(v-for="item in list"
+            class="panel-text__card"
+            :class="{recent: item.id === 'recent'}"
+            :key="item.id"
+            :style="itemStyles()")
           div(v-if="item.id === 'recent'" class="panel-text__card__recent"
                 @click="handleCategorySearch($t('NN0024'))")
             svg-icon(class="pointer"

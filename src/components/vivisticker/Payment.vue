@@ -21,6 +21,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
         :class="{ 'payment__content__indicator__item--active': idx === idxCurrImg }")
     div(class="payment__content__plans")
       div(v-for="btnPlan in btnPlans" class="payment__btn-plan"
+        :key="btnPlan.key"
         :class="{selected: btnPlan.key === planSelected}"
         @tap="handleBtnPlanClick(btnPlan.key)")
         svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
@@ -34,7 +35,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
     div(class="payment__btn-subscribe" @touchend="handleBtnSubscribeClick")
       span {{ txtBtnSubscribe }}
     div(class="payment__footer")
-      template(v-for="(footerLink, idx) in footerLinks")
+      template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(@tap="footerLink.action") {{ footerLink.title }}
   div(class="payment__panel" :class="{close: !isPanelUp}" ref="panel")
@@ -45,7 +46,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
       div(class="payment__panel__comparison__title first-column") {{ $t('STK0043') }}
       div(class="payment__panel__comparison__title") {{ $t('STK0044') }}
       div(class="payment__panel__comparison__title") PRO
-      template(v-for="comparison in comparisons")
+      template(v-for="comparison in comparisons" :key="comparison.feature")
         div(class="payment__panel__comparison__splitter")
         div(class="payment__panel__comparison__item  first-column") {{ comparison.feature }}
         div(class="payment__panel__comparison__item")

@@ -20,7 +20,8 @@ div(class="mobile-editor")
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
-        @panelHeight="setPanelHeight")
+        @panelHeight="setPanelHeight"
+        :footerTabsHeight="footerTabsHeight")
     //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
     //-   :currActivePanel="'color'"
     //-   :currColorEvent="ColorEventType.background"
@@ -30,7 +31,8 @@ div(class="mobile-editor")
     @switchTab="switchTab"
     :currTab="currActivePanel"
     :inAllPagesMode="inAllPagesMode"
-    @showAllPages="showAllPages")
+    @showAllPages="showAllPages"
+    ref="footerTabs")
 </template>
 
 <script lang="ts">
@@ -52,7 +54,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { find } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -74,7 +76,8 @@ export default defineComponent({
       currColorEvent: '',
       ColorEventType,
       showMobilePanelAfterTransitoin: false,
-      marginBottom: 0
+      marginBottom: 0,
+      footerTabsHeight: 0
     }
   },
   props: {
@@ -137,6 +140,8 @@ export default defineComponent({
     brandkitUtils.fetchBrands(this.fetchBrands)
 
     this.setUserState({ enableAdminView: false })
+
+    this.footerTabsHeight = (this.$refs.footerTabs as any).$el.clientHeight
   },
   computed: {
     ...mapState('mobileEditor', {

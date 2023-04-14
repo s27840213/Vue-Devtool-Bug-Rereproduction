@@ -59,13 +59,14 @@ div(:layer-index="`${layerIndex}`"
             @keydown.meta.shift.z.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
-        div(v-if="!$isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-            class="control-point__corner-rotate scaler"
-            :ref="`corner-rotate-${index}`"
-            :key="`corner-rotate-${index}`"
-            :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-            @pointerdown.stop="rotateStart($event, index)"
-            @touchstart="disableTouchEvent")
+        template(v-if="!$isTouchDevice()" )
+          div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+              class="control-point__corner-rotate scaler"
+              :ref="`corner-rotate-${index}`"
+              :key="`corner-rotate-${index}`"
+              :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+              @pointerdown.stop="rotateStart($event, index)"
+              @touchstart="disableTouchEvent")
         div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
             class="control-point"
             :key="index"
@@ -74,6 +75,7 @@ div(:layer-index="`${layerIndex}`"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
         div(v-for="(resizer, index) in getResizer(controlPoints)"
+            :key="index"
             class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-${index}`"
@@ -84,17 +86,19 @@ div(:layer-index="`${layerIndex}`"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="$isTouchDevice()" v-for="(resizer, index) in getResizer(controlPoints, false, true)"
-            class="control-point__resize-bar-wrapper")
-          div(class="control-point resizer"
-              :key="`resizer-touch-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
-              @touchstart="disableTouchEvent")
-          div(class="control-point resizer"
-              :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
-              @touchstart="disableTouchEvent")
+        template(v-if="$isTouchDevice()" )
+          div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
+              :key="index"
+              class="control-point__resize-bar-wrapper")
+            div(class="control-point resizer"
+                :key="`resizer-touch-${index}`"
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
+                @touchstart="disableTouchEvent")
+            div(class="control-point resizer"
+                :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
+                @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice()"
             class="control-point__resize-bar-wrapper")
           div(v-for="(resizer, index) in getResizer(controlPoints, true)"
@@ -108,12 +112,13 @@ div(:layer-index="`${layerIndex}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
             @pointerdown.prevent.stop="!$isTouchDevice() ? scaleStart($event) : null"
             @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="$isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
-            class="control-point scaler"
-            :key="`scaler-touch-${index}`"
-            :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-            @pointerdown.prevent.stop="scaleStart"
-            @touchstart="disableTouchEvent")
+        template(v-if="$isTouchDevice()" )
+          div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
+              class="control-point scaler"
+              :key="`scaler-touch-${index}`"
+              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="scaleStart"
+              @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine()"
             :style="`transform: scale(${contentScaleRatio})`")
@@ -151,7 +156,6 @@ div(:layer-index="`${layerIndex}`"
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
@@ -178,14 +182,13 @@ import shapeUtils from '@/utils/shapeUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
-import TextEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -223,8 +226,7 @@ export default defineComponent({
   },
   emits: ['isDragging', 'setFocus'],
   components: {
-    NuTextEditor,
-    LazyLoad
+    NuTextEditor
   },
   created() {
     this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
@@ -362,7 +364,6 @@ export default defineComponent({
       }
     },
     contentStyles(): any {
-      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
       const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       const pointerEvents = this.getPointerEvents
       return {
@@ -376,10 +377,8 @@ export default defineComponent({
          * So, if we want to control the layer, we need to set it to none.
          * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
          */
-        // touchAction: this.isControllerShown ? 'none' : 'initial',
-        ...textEffectStyles,
+        // touchAction: this.isActive ? 'none' : 'initial',
         ...textBgStyles,
-        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     isImgControl(): boolean {
@@ -424,6 +423,9 @@ export default defineComponent({
     },
     getLayerType(): string {
       return this.config.type
+    },
+    needAutoRescale(): boolean {
+      return this.config.inAutoRescaleMode && this.getLayerRotate() === 0
     }
   },
   watch: {
@@ -765,416 +767,6 @@ export default defineComponent({
     hintStyles() {
       return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${this.contentScaleRatio})`
     },
-    // moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
-    //   const currLayerIndex = LayerUtils.layerIndex
-    //   if (currLayerIndex !== this.layerIndex) {
-    //     const layer = LayerUtils.getLayer(this.pageIndex, currLayerIndex)
-    //     if (layer.type === 'image' && layer.imgControl) {
-    //       LayerUtils.updateLayerProps(this.pageIndex, currLayerIndex, { imgControl: false })
-    //     } else if (layer.type === 'group') {
-    //       (layer as IGroup).layers
-    //         .forEach((l, i) => {
-    //           if (l.type === 'image' && l.imgControl) {
-    //             LayerUtils.updateLayerProps(this.pageIndex, currLayerIndex, { imgControl: false }, i)
-    //           }
-    //         })
-    //     }
-    //   }
-    //   if (this.isBgImgCtrl) {
-    //     this.setBgConfig(undefined)
-    //   }
-
-    //   const eventType = eventUtils.getEventType(event)
-    //   /**
-    //    * used for frame layer for entering detection
-    //    * This is used for moving image to replace frame element
-    //    */
-    //   this.eventTarget = (event.target as HTMLElement)
-    //   this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
-
-    //   if (this.$isTouchDevice()) {
-    //     if (!this.dblTabsFlag && this.isActive) {
-    //       const touchtime = Date.now()
-    //       const interval = 500
-    //       const doubleTap = (e: PointerEvent) => {
-    //         e.preventDefault()
-    //         if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
-    //           /**
-    //            * This is the dbl-click callback block
-    //            */
-    //           if (this.getLayerType === LayerType.image) {
-    //             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-    //             eventUtils.emit(PanelEvent.switchTab, 'crop')
-    //           }
-    //           this.dblTabsFlag = true
-    //         }
-    //       }
-    //       this.eventTarget.addEventListener('pointerdown', doubleTap)
-    //       setTimeout(() => {
-    //         this.eventTarget.removeEventListener('pointerdown', doubleTap)
-    //         this.dblTabsFlag = false
-    //       }, interval)
-    //     }
-    //   }
-    //   if (eventType === 'pointer') {
-    //     const pointerEvent = event as PointerEvent
-    //     if (pointerEvent.button !== 0) return
-    //   } else if (eventType === 'mouse') {
-    //     const mouseEvent = event as MouseEvent
-    //     if (mouseEvent.button !== 0) return
-    //   }
-    //   if (eventUtils.checkIsMultiTouch(event)) {
-    //     return
-    //   }
-    //   if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
-    //     eventUtils.emit(PanelEvent.showPhotoShadow, '')
-    //   }
-    //   /**
-    //    * @Note - in Mobile version, we can't select the layer directly, we should make it active first
-    //    * The exception is that we are in multi-selection mode
-    //    */
-    //   if (this.$isTouchDevice() && !this.isActive && !this.isLocked() && !this.inMultiSelectionMode) {
-    //     this.eventTarget.addEventListener('touchstart', this.disableTouchEvent)
-    //     this.initialPos = MouseUtils.getMouseAbsPoint(event)
-    //     eventUtils.addPointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.addPointerEvent('pointermove', this.moving)
-    //     return
-    //   }
-
-    //   this.movingByControlPoint = false
-    //   // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
-    //   const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
-    //   const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
-    //   const { inMultiSelectionMode } = this
-    //   if (!this.isLocked()) {
-    //     event.stopPropagation()
-    //   }
-    //   formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
-    //   this.initTranslate = this.getLayerPos()
-
-    //   if (inCopyMode) {
-    //     ShortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config as ILayer<IStyle>)
-    //   }
-
-    //   switch (this.getLayerType) {
-    //     case 'text': {
-    //       const targetClassList = (event.target as HTMLElement).classList
-    //       const isMoveBar = targetClassList.contains('control-point__move-bar')
-    //       const isMover = targetClassList.contains('control-point__mover')
-
-    //       // if the text layer is already active and contentEditable
-    //       if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar && !isMover) {
-    //         return
-    //       } else if (!this.isActive) {
-    //         let targetIndex = this.layerIndex
-    //         if (!inSelectionMode && !inMultiSelectionMode) {
-    //           GroupUtils.deselect()
-    //           targetIndex = this.config.styles.zindex - 1
-    //           this.setLastSelectedLayerIndex(this.layerIndex)
-    //           GroupUtils.select(this.pageIndex, [targetIndex])
-    //         } else {
-    //           if (this.pageIndex === pageUtils.currFocusPageIndex) {
-    //             GroupUtils.select(this.pageIndex, [targetIndex])
-    //           }
-    //         }
-    //         if (!this.config.locked) {
-    //           this.isControlling = true
-    //           this.initialPos = MouseUtils.getMouseAbsPoint(event)
-    //           eventUtils.addPointerEvent('pointerup', this.moveEnd)
-    //           eventUtils.addPointerEvent('pointermove', this.moving)
-    //         }
-    //         return
-    //       }
-
-    //       /**
-    //        * The cotentEditable updated timing will be move to the moveEnd instead of moveStart
-    //        * bcz if we set it to true when moveStart and we want to move the layer instead of editing the text, it will still make the mobile keyboard show up
-    //        */
-
-    //       if (isMover || isMoveBar) {
-    //         this.movingByControlPoint = true
-    //       } else {
-    //         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
-    //       }
-
-    //       break
-    //     }
-    //   }
-
-    //   /**
-    //    * @Note InMultiSelection mode should still can move the layer
-    //    */
-    //   if (!this.config.locked && !inSelectionMode) {
-    //     this.initialPos = MouseUtils.getMouseAbsPoint(event)
-    //     eventUtils.addPointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.addPointerEvent('pointermove', this.moving)
-    //   }
-    //   if (this.config.type !== 'tmp') {
-    //     let targetIndex = this.layerIndex
-    //     if (this.isActive && this.currSelectedInfo.layers.length === 1) {
-    //       if (inSelectionMode) {
-    //         GroupUtils.deselect()
-    //         targetIndex = this.config.styles.zindex - 1
-    //         this.setLastSelectedLayerIndex(this.layerIndex)
-    //       }
-    //     } else if (!this.isActive) {
-    //       // already have selected layer
-    //       if (this.currSelectedInfo.index >= 0) {
-    //         // Did not press shift/cmd/ctrl key -> deselect selected layers first
-    //         if (!inSelectionMode && !inMultiSelectionMode) {
-    //           GroupUtils.deselect()
-    //           targetIndex = this.config.styles.zindex - 1
-    //           this.setLastSelectedLayerIndex(this.layerIndex)
-    //           GroupUtils.select(this.pageIndex, [targetIndex])
-    //         } else {
-    //           // this if statement is used to prevent select the layer in another page
-    //           if (this.pageIndex === pageUtils.currFocusPageIndex && !this.config.locked) {
-    //             if (!LayerUtils.getCurrLayer.locked) {
-    //               GroupUtils.select(this.pageIndex, [targetIndex])
-    //             }
-    //           }
-    //         }
-    //       } else {
-    //         targetIndex = this.config.styles.zindex - 1
-    //         this.setLastSelectedLayerIndex(this.layerIndex)
-    //         GroupUtils.select(this.pageIndex, [targetIndex])
-    //       }
-    //     }
-    //   }
-    // },
-    // moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    //   // console.log('moving in controller')
-    //   const posDiff = {
-    //     x: Math.abs(MouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
-    //     y: Math.abs(MouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
-    //   }
-    //   switch (this.config.type) {
-    //     case LayerType.group:
-    //       if ((this.config as IGroup).layers.some(l => l.active && l.type === LayerType.text && l.contentEditable && l.isTyping)) {
-    //         return
-    //       }
-    //   }
-
-    //   if (this.$isTouchDevice() && !this.isLocked()) {
-    //     if (!this.isActive) {
-    //       if (posDiff.x > 1 || posDiff.y > 1) {
-    //         this.isDoingGestureAction = true
-    //         return
-    //       }
-    //     } else {
-    //       if (posDiff.x < 1 && posDiff.y < 1) {
-    //         return
-    //       }
-    //     }
-    //   }
-
-    //   this.isControlling = true
-    //   if (!this.isDragging()) {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-    //       dragging: true
-    //     })
-    //     this.$emit('isDragging', this.layerIndex)
-    //   }
-    //   if (this.isImgControl) {
-    //     eventUtils.removePointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.removePointerEvent('pointermove', this.moving)
-    //     return
-    //   }
-    //   if (this.isActive) {
-    //     if (generalUtils.getEventType(e) !== 'touch') {
-    //       e.preventDefault()
-    //     }
-    //     this.setCursorStyle('move')
-    //     if (!this.isHandleMovingHandler) {
-    //       window.requestAnimationFrame(() => {
-    //         this.movingHandler(e)
-    //         this.isHandleMovingHandler = false
-    //       })
-    //       this.isHandleMovingHandler = true
-    //     }
-    //     const posDiff = {
-    //       x: Math.abs(this.getLayerPos().x - this.initTranslate.x),
-    //       y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
-    //     }
-    //     if (posDiff.x !== 0 || posDiff.y !== 0) {
-    //       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: true })
-    //       this.setMoving(true)
-    //       if (this.getLayerType === 'text' && this.config.contentEditable) {
-    //         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-    //       }
-    //     }
-    //   }
-    // },
-    // movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    //   if (!this.config.moved) {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
-    //   }
-    //   const offsetPos = MouseUtils.getMouseRelPoint(e, this.initialPos)
-    //   const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
-    //   GroupUtils.movingTmp(
-    //     this.pageIndex,
-    //     {
-    //       x: moveOffset.offsetX,
-    //       y: moveOffset.offsetY
-    //     }
-    //   )
-    //   // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-    //   // this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
-    //   // this.$emit('getClosestSnaplines')
-    //   const totalOffset = {
-    //     x: offsetPos.x,
-    //     y: offsetPos.y
-    //     // x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
-    //     // y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
-    //   }
-    //   this.initialPos.x += totalOffset.x
-    //   this.initialPos.y += totalOffset.y
-    // },
-    // imgHandler(offset: ICoordinate) {
-    //   ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
-    // },
-    // moveEnd(e: MouseEvent | TouchEvent) {
-    //   if (!this.isDoingGestureAction && !this.isActive) {
-    //     this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
-    //     GroupUtils.deselect()
-    //     const targetIndex = this.config.styles.zindex - 1
-    //     this.setLastSelectedLayerIndex(this.layerIndex)
-    //     GroupUtils.select(this.pageIndex, [targetIndex])
-    //     eventUtils.removePointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.removePointerEvent('pointermove', this.moving)
-    //     this.isMoved = false
-    //     this.isControlling = false
-    //     this.setCursorStyle('')
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-    //       dragging: false
-    //     })
-    //     this.isDoingGestureAction = false
-    //     // this.snapUtils.event.emit('clearSnapLines')
-    //     return
-    //   }
-
-    //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
-    //   this.setMoving(false)
-
-    //   if (this.isActive) {
-    //     // if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked()) {
-    //     //   // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
-    //     //   //   GroupUtils.deselect()
-    //     //   //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
-    //     //   // }
-    //     // }
-    //     const posDiff = {
-    //       x: Math.abs(this.getLayerPos().x - this.initTranslate.x),
-    //       y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
-    //     }
-    //     const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
-    //     if (hasActualMove) {
-    //       if (this.getLayerType === 'text') {
-    //         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-    //       }
-    //       this.isMoved = true
-    //       // dragging to another page
-    //       if (LayerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
-    //         const layerNum = this.currSelectedInfo.layers.length
-    //         if (layerNum > 1) {
-    //           GroupUtils.group()
-    //         }
-
-    //         const layerTmp = generalUtils.deepCopy(LayerUtils.getCurrLayer)
-
-    //         const { top, left } = (this.$refs.body as HTMLElement).getBoundingClientRect()
-    //         const targetPageRect = (document.querySelector(`.nu-page-${this.currHoveredPageIndex}`) as HTMLLIElement)?.getBoundingClientRect()
-    //         const newX = (left - targetPageRect.left) * (100 / this.scaleRatio)
-    //         const newY = (top - targetPageRect.top) * (100 / this.scaleRatio)
-
-    //         layerTmp.styles.x = newX
-    //         layerTmp.styles.y = newY
-    //         LayerUtils.deleteSelectedLayer(false)
-    //         LayerUtils.addLayers(this.currHoveredPageIndex, [layerTmp])
-    //         if (layerNum > 1) {
-    //           GroupUtils.ungroup()
-    //         }
-    //         // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
-    //       } else {
-    //         if (!(this.config as IImage).isHoveringFrame) {
-    //           // StepsUtils.record()
-    //           StepsUtils.asyncRecord()
-    //         }
-    //       }
-    //     } else {
-    //       if (this.getLayerType === 'text') {
-    //         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-    //         if (this.movingByControlPoint) {
-    //           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-    //         }
-    //         if (this.config.contentEditable) {
-    //           tiptapUtils.focus({ scrollIntoView: false })
-    //           if (!this.config.isEdited) {
-    //             setTimeout(() => {
-    //               tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
-    //             }, 100) // wait for default behavior to set cursor position, then select (otherwise selection will be overwritten)
-    //           }
-    //         }
-    //       }
-    //       this.isMoved = false
-    //       if (this.inMultiSelectionMode) {
-    //         if (this.config.type !== 'tmp') {
-    //           let targetIndex = this.layerIndex
-    //           if (this.isActive && this.currSelectedInfo.layers.length === 1) {
-    //             GroupUtils.deselect()
-    //             targetIndex = this.config.styles.zindex - 1
-    //             this.setLastSelectedLayerIndex(this.layerIndex)
-    //           } else if (!this.isActive) {
-    //             // already have selected layer
-    //             if (this.currSelectedInfo.index >= 0) {
-    //               // this if statement is used to prevent select the layer in another page
-    //               if (this.pageIndex === pageUtils.currFocusPageIndex) {
-    //                 GroupUtils.select(this.pageIndex, [targetIndex])
-    //               }
-    //             } else {
-    //               targetIndex = this.config.styles.zindex - 1
-    //               this.setLastSelectedLayerIndex(this.layerIndex)
-    //               GroupUtils.select(this.pageIndex, [targetIndex])
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-
-    //     if (this.$isTouchDevice() && !this.isPointerDownFromSubController && !hasActualMove) {
-    //       /**
-    //        * This function is used for mobile-control, as one of the sub-controller is active
-    //        * tap at the primary-controller should set the sub-controller to non-active
-    //        */
-    //       if (this.config.type === LayerType.group) {
-    //         const primary = this.config as IGroup
-    //         for (let i = 0; i < (this.config as IGroup).layers.length; i++) {
-    //           if (primary.layers[i].active) {
-    //             if (primary.layers[i].type === LayerType.text) {
-    //               LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false }, i)
-    //             }
-    //             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: false }, i)
-    //           }
-    //         }
-    //       }
-    //     }
-    //     this.isPointerDownFromSubController = false
-    //     this.isControlling = false
-    //     this.setCursorStyle('')
-    //     eventUtils.removePointerEvent('pointerup', this.moveEnd)
-    //     eventUtils.removePointerEvent('pointermove', this.moving)
-    //   }
-
-    //   if (this.isDragging()) {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-    //       dragging: false
-    //     })
-    //     this.$emit('isDragging', -1)
-    //   }
-
-    //   this.isDoingGestureAction = false
-    //   // this.snapUtils.event.emit('clearSnapLines')
-    // },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
         return
@@ -1227,6 +819,10 @@ export default defineComponent({
 
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
+
+      if (this.config.type === LayerType.text && this.config.inAutoRescaleMode) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { inAutoRescaleMode: false })
       }
 
       let width = this.getLayerWidth()
@@ -1553,6 +1149,11 @@ export default defineComponent({
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
+
+      if (this.config.type === LayerType.text && this.config.inAutoRescaleMode) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { inAutoRescaleMode: false })
+      }
+
       let width = this.getLayerWidth()
       let height = this.getLayerHeight()
       const initWidth = this.initSize.width
@@ -1961,6 +1562,7 @@ export default defineComponent({
         const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
         if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
         TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+        TextUtils.handleAutoRescale()
       })
     },
     waitFontLoadingAndResize() {
@@ -1971,6 +1573,7 @@ export default defineComponent({
           const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
           TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+          TextUtils.handleAutoRescale()
         }, 100)
       })
     },
@@ -2006,22 +1609,21 @@ export default defineComponent({
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-        this.textSizeRefresh(this.config as IText, false, false, this.config.inAutoRescaleMode)
+        this.textSizeRefresh(this.config as IText, false, false)
       }
       if (toRecord) {
         this.waitFontLoadingAndRecord()
       }
     },
-    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean, forceFull = false) {
+    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const getSize = () => isVertical ? this.getLayerHeight() : this.getLayerWidth()
       const oldCenter = mathUtils.getCenter(text.styles)
 
-      let widthLimit = this.getLayerRotate() ? getSize() : this.config.widthLimit
+      let widthLimit = this.needAutoRescale ? -1 : (this.getLayerRotate() ? getSize() : this.config.widthLimit)
       let textHW = TextUtils.getTextHW(text, widthLimit)
       let layerX = this.getLayerPos().x
       let layerY = this.getLayerPos().y
-      let scale = this.config.styles.scale
 
       if (widthLimit === -1) {
         const pageSize = (pageUtils.getPage(this.pageIndex) as IPage)[isVertical ? 'height' : 'width']
@@ -2032,38 +1634,29 @@ export default defineComponent({
         const reachRightLimit = layerPos + currTextSize >= pageSize
 
         if (reachLeftLimit && reachRightLimit) {
+          // don't delete below, it's disabled temporarily only
+          // if (composing) this.widthLimitSetDuringComposition = true
+          // if (!this.needAutoRescale) {
+          //   textHW = TextUtils.getTextHW(text, pageSize)
+          //   layerPos = 0
+          //   widthLimit = pageSize
+          // }
           if (composing) this.widthLimitSetDuringComposition = true
-          if (this.config.inAutoRescaleMode) {
-            textHW = TextUtils.getTextHW(text, -1)
-            layerPos = 0
-            const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
-            const rescale = pageSize / newTmpTextSize
-            scale = scale * rescale
-            textHW = {
-              width: isVertical ? textHW.width * rescale : pageSize,
-              height: isVertical ? pageSize : textHW.height * rescale
-            }
-          } else {
-            textHW = TextUtils.getTextHW(text, pageSize)
-            layerPos = 0
-            widthLimit = pageSize
-          }
+          textHW = TextUtils.getTextHW(text, pageSize)
+          layerPos = 0
+          widthLimit = pageSize
         } else if (reachLeftLimit || reachRightLimit) {
+          // don't delete below, it's disabled temporarily only
+          // if (composing) this.widthLimitSetDuringComposition = true
+          // if (!this.needAutoRescale) {
+          //   widthLimit = getSize()
+          //   textHW = TextUtils.getTextHW(text, widthLimit)
+          //   layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
+          // }
           if (composing) this.widthLimitSetDuringComposition = true
           widthLimit = getSize()
           textHW = TextUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
-        }
-
-        if (forceFull) {
-          layerPos = 0
-          const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
-          const rescale = pageSize / newTmpTextSize
-          scale = scale * rescale
-          textHW = {
-            width: isVertical ? textHW.width * rescale : pageSize,
-            height: isVertical ? pageSize : textHW.height * rescale
-          }
         }
 
         layerX = isVertical ? layerX : layerPos
@@ -2096,7 +1689,16 @@ export default defineComponent({
 
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
 
-      if (keepCenter || this.config.inAutoRescaleMode) {
+      if (this.needAutoRescale) {
+        const { textHW: newTextHW, x: newX, y: newY, scale } = TextUtils.getAutoRescaleResult(text, textHW, layerX, layerY, undefined, this.pageIndex)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          width: newTextHW.width,
+          height: newTextHW.height,
+          x: newX,
+          y: newY,
+          scale
+        })
+      } else if (keepCenter) {
         const newCenter = mathUtils.getCenter({
           width: textHW.width,
           height: textHW.height,
@@ -2111,7 +1713,6 @@ export default defineComponent({
           height: textHW.height,
           x: layerX + offset.x,
           y: layerY + offset.y,
-          scale
         })
       } else {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
@@ -2119,7 +1720,6 @@ export default defineComponent({
           height: textHW.height,
           x: layerX,
           y: layerY,
-          scale
         })
       }
     },

@@ -109,6 +109,7 @@ export interface IText extends ILayer<ITextStyle> {
   isAutoResizeNeeded: boolean,
   isCompensated?: boolean,
   inAutoRescaleMode: boolean,
+  initScale: number,
 }
 
 export interface IShape extends ILayer<IStyle> {
