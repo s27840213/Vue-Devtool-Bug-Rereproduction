@@ -138,6 +138,8 @@ export default defineComponent({
         })
       return result
     },
+    // extends: PanelText
+    // eslint-disable-next-line vue/no-unused-properties
     mainContent(): ICategoryItem[] {
       if (this.showAllRecently) {
         return this.listRecently
@@ -167,6 +169,8 @@ export default defineComponent({
     }
   },
   methods: {
+    // extends: PanelText
+    // eslint-disable-next-line vue/no-unused-properties
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
       const recentItem = {
         id: 'recent',

@@ -69,7 +69,6 @@ export default defineComponent({
   data() {
     return {
       currColorEvent: '',
-      defaultWindowHeight: window.outerHeight,
       headerOffset: 0,
       isKeyboardAnimation: 0
     }
@@ -263,13 +262,6 @@ export default defineComponent({
       return {
         ...this.isDuringCopy ? { background: 'transparent' } : {},
         gridTemplateRows: this.currActivePanel === 'text' ? '1fr' : 'auto 1fr'
-      }
-    },
-    handleSwitchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.isInEditor) {
-        this.switchTab(panelType, props)
-      } else {
-        this.switchMainTab(panelType)
       }
     },
     switchTab(panelType: string, props?: IFooterTabProps) {

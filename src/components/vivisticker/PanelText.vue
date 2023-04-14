@@ -60,7 +60,6 @@ import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import VueI18n from 'vue-i18n'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -106,18 +105,6 @@ export default defineComponent({
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
-    },
-    listDefaultText(): { type: string, text: VueI18n.TranslateResult }[] {
-      return [{
-        type: 'Heading',
-        text: this.$t('NN0011')
-      }, {
-        type: 'Subheading',
-        text: this.$t('NN0012')
-      }, {
-        type: 'Body',
-        text: this.$t('NN0013')
-      }]
     },
     listCategories(): ICategoryItem[] {
       const titleHeight = 46

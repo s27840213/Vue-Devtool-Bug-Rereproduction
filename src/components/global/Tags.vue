@@ -26,7 +26,7 @@ div(class="tags" v-click-outside="clickOutsideHandler")
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 
-interface ITag {
+export interface ITag {
   label: string,
   value: string,
   active: boolean

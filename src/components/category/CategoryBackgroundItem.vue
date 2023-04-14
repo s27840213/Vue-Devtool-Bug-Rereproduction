@@ -28,10 +28,6 @@ export default defineComponent({
       type: Object as PropType<IAsset>,
       required: true
     },
-    locked: {
-      type: Boolean,
-      required: true
-    }
   },
   data() {
     return {

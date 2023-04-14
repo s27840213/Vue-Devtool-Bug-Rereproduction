@@ -42,7 +42,6 @@ import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
 import ControlUtils from '@/utils/controlUtils'
 import FrameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -111,14 +110,12 @@ export default defineComponent({
       isControlling: false,
       isComposing: false,
       layerSizeBuff: -1,
-      posDiff: { x: 0, y: 0 },
       parentId: '',
       imgBuff: {} as {
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
         panelPreviewSrc: ''
       },
-      isPrimaryActive: false,
     }
   },
   async mounted() {
@@ -449,12 +446,6 @@ export default defineComponent({
       layerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
       TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
       TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
-    },
-    onClickEvent(e: MouseEvent) {
-      if (!this.isPrimaryActive) return
-
-      colorUtils.event.emit('closeColorPanel', false)
-      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     onFrameMouseEnter(e: MouseEvent) {
       if (this.config.type !== LayerType.image || this.type !== LayerType.frame) {

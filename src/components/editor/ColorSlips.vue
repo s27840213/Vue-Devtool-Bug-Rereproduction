@@ -59,7 +59,7 @@ div(class="color-panel"
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import { IPage } from '@/interfaces/page'
-import { ColorEventType, LayerType } from '@/store/types'
+import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -136,12 +136,6 @@ export default defineComponent({
       currPanel: 'getCurrSidebarPanelType',
       getBackgroundColor: 'getBackgroundColor'
     }),
-    isShape(): boolean {
-      return layerUtils.getCurrConfig.type === LayerType.shape
-    },
-    isFrame(): boolean {
-      return layerUtils.getCurrConfig.type === LayerType.frame
-    },
     bgStyle(): Record<string, string> {
       return this.mode === 'FunctionPanel' ? {
         background: '#2C2F43'// gray-1-5
@@ -187,11 +181,6 @@ export default defineComponent({
       initRecentlyColors: 'color/initRecentlyColors',
       addRecentlyColors: 'color/addRecentlyColors'
     }),
-    colorStyles(color: string) {
-      return {
-        backgroundColor: color
-      }
-    },
     handleColorEvent(color: string) {
       if (this.mode === 'PanelBG') {
         this.$emit('selectColor', color)

@@ -135,6 +135,8 @@ export default defineComponent({
       default: false,
       type: Boolean
     },
+    // Used by this.$props.priPrimaryLayerIndex in mounted
+    // eslint-disable-next-line vue/no-unused-properties
     priPrimaryLayerIndex: {
       default: -1,
       type: Number

@@ -114,7 +114,6 @@ import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
@@ -132,7 +131,6 @@ export default defineComponent({
   },
   data() {
     return {
-      openColorPicker: false,
       scrollTop: {
         mainContent: 0,
         searchResult: 0
@@ -360,11 +358,6 @@ export default defineComponent({
         backgroundColor: this.getColorOverlappingWhite(color)
       }
     },
-    progressStyles() {
-      return {
-        '--progress': `${this.opacity}%`
-      }
-    },
     colorTabWrapperStyles() {
       return {
         height: `${this.colorAreaHeight}px`
@@ -444,9 +437,6 @@ export default defineComponent({
     },
     handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
-    },
-    recordChange() {
-      this.$nextTick(() => stepsUtils.record())
     },
     handleShareImage(item: IAsset) {
       this.setShareItem(item)

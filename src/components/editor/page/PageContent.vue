@@ -62,7 +62,6 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
-import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -286,11 +285,6 @@ export default defineComponent({
         notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
     },
-    async handleFontLoading() {
-      textUtils.untilFontLoadedForPage(this.config, true).then(() => {
-        console.log('all font loaded')
-      })
-    }
   }
 })
 </script>
