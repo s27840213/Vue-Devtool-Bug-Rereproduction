@@ -1,4 +1,5 @@
 import { CustomElementConfig } from '@/interfaces/editor'
+import { ICoordinate } from '@/interfaces/frame'
 import { IStyle, ITextStyle } from '@/interfaces/layer'
 import { IBounding } from '@/interfaces/math'
 import store from '@/store'
@@ -205,15 +206,31 @@ class MathUtils {
     return object.rotate(angle, center)
   }
 
+  makePolygon(polygon: Flatten.Polygon | IPolygonConfig): Flatten.Polygon {
+    polygon = (polygon instanceof Flatten.Polygon) ? polygon : this.generatePolygon(polygon)
+    return polygon
+  }
+
+  makePoint(point: Flatten.Point | ICoordinate): Flatten.Point {
+    // tenary operator has a bug about type inference, so if-else clause is used here.
+    if (point instanceof Flatten.Point) {
+      return point
+    } else {
+      return Flatten.point(point.x, point.y)
+    }
+  }
+
   getIntersectArea(polygon1: Flatten.Polygon, polygon2: Flatten.Polygon): number {
     const { intersect } = Flatten.BooleanOperations
     return intersect(polygon1, polygon2).area()
   }
 
   calculateIfIntersect(polygon1: Flatten.Polygon | IPolygonConfig, polygon2: Flatten.Polygon | IPolygonConfig): boolean {
-    polygon1 = (polygon1 instanceof Flatten.Polygon) ? polygon1 : this.generatePolygon(polygon1)
-    polygon2 = (polygon2 instanceof Flatten.Polygon) ? polygon2 : this.generatePolygon(polygon2)
-    return this.getIntersectArea(polygon1, polygon2) > 0
+    return this.getIntersectArea(this.makePolygon(polygon1), this.makePolygon(polygon2)) > 0
+  }
+
+  calculateIfContains(polygon: Flatten.Polygon | IPolygonConfig, point: Flatten.Point | ICoordinate): boolean {
+    return this.makePolygon(polygon).contains(this.makePoint(point))
   }
 
   // Normal Distribution Between 0 and 1
