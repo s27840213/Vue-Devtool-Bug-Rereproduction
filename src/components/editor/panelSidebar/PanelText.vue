@@ -76,12 +76,13 @@ div(class="panel-text")
 </template>
 
 <script lang="ts">
+import listApi from '@/apis/list'
+import SearchBar from '@/components/SearchBar.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import Url from '@/components/global/Url.vue'
-import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import AssetUtils from '@/utils/assetUtils'
@@ -275,6 +276,19 @@ export default defineComponent({
       this.getMoreContent()
     },
     async handleAddText(config: { type: string, text: string }) {
+      let key = ''
+      switch (config.type) {
+        case 'Heading':
+          key = 'title'
+          break
+        case 'Subheading':
+          key = 'subtitle'
+          break
+        case 'Body':
+          key = 'body'
+          break
+      }
+      listApi.addDesign(`add_${key}`, 'text')
       await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, this.$i18n.locale, undefined, undefined, this.getSpanStyles(config.type.toLowerCase()))
     },
     handleOpenSettings() {
