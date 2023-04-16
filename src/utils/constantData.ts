@@ -63,6 +63,16 @@ export type IHeaderL1 = {
   content?: IHeaderL2[]
 }
 
+export enum DeviceType {
+  iPhone,
+  iPad,
+  AndroidPhone,
+  AndroidTablet,
+  Mac,
+  Win,
+  Other
+}
+
 class ConstantData {
   get isLogin(): boolean {
     return store.getters['user/isLogin']

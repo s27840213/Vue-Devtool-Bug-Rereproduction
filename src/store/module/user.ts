@@ -1,7 +1,9 @@
 /* eslint-disable camelcase */
 import userApis from '@/apis/user'
 import i18n from '@/i18n'
-import { IGroupDesignInputParams, IUserAssetsData, IUserFontContentData } from '@/interfaces/api'
+import { IGroupDesignInputParams, ILoginResponse, IUserAssetsData, IUserFontContentData } from '@/interfaces/api'
+import { DeviceType } from '@/utils/constantData'
+import generalUtils from '@/utils/generalUtils'
 // import apiUtils from '@/utils/apiUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
@@ -246,6 +248,19 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getBrowserInfo(state) {
     return state.browserInfo
+  },
+  getDevice(state) {
+    const family = state.browserInfo.os.family
+    switch (family) {
+      case 'OS X':
+        return DeviceType.Mac
+      case 'iOS':
+        return generalUtils.isTablet() ? DeviceType.iPad : DeviceType.iPhone
+      case 'Android':
+        return generalUtils.isTablet() ? DeviceType.AndroidTablet : DeviceType.AndroidPhone
+      default:
+        return family?.includes('Windows') ? DeviceType.Win : DeviceType.Other
+    }
   }
 }
 
@@ -370,9 +385,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  async loginSetup({ commit, dispatch }, { data }) {
+  async loginSetup({ commit, dispatch, getters }, { data }: { data: ILoginResponse }) {
     if (data.flag === 0) {
-      const newToken = data.data.token as string // token may be refreshed
+      const newToken = data.data.token // token may be refreshed
+      const complete = data.data.complete
       const uname = data.data.user_name
       const shortName = uname.substring(0, 1).toUpperCase()
       const guestViewGuide = localStorage.guest_view_guide
@@ -387,8 +403,13 @@ const actions: ActionTree<IUserModule, unknown> = {
         userApis.updateUserViewGuide(newToken, userViewGuide)
       }
 
+      if (!complete) {
+        // TODO: call /update-user with country, device, app
+        console.log('device =', getters.getDevice, DeviceType[getters.getDevice])
+        console.log('app =', getters['webView/getInBrowserMode'] ? 0 : 1)
+      }
+
       commit('SET_STATE', {
-        downloadUrl: data.data.download_url,
         uname: uname,
         shortName: shortName,
         userId: data.data.user_id,
