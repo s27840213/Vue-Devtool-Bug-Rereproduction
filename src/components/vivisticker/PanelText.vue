@@ -49,6 +49,7 @@ div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
+import listApi from '@/apis/list'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
@@ -265,6 +266,7 @@ export default defineComponent({
       this.getMoreContent()
     },
     async addStandardText() {
+      listApi.addDesign('add_text', 'text')
       let recentFont
       if (vivistickerUtils.checkVersion('1.5')) {
         recentFont = await vivistickerUtils.getState('recentFont')
