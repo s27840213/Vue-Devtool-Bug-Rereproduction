@@ -1557,7 +1557,7 @@ export default defineComponent({
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
-      const _f = (this.$isTouchDevice() ? 1 / this.contentScaleRatio : 1 / (this.scaleRatio * 0.01))
+      const _f = (this.$isTouchDevice() ? 1 / this.contentScaleRatio : 1) / (this.scaleRatio * 0.01)
       const [dx, dy] = [diff.x * _f, diff.y * _f]
 
       const offsetMultiplier = altPressed ? 2 : 1

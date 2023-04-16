@@ -452,7 +452,7 @@ export default defineComponent({
     pinchHandler(e: AnyTouchEvent) {
       const { getCurrPage: page, scaleRatio } = pageUtils
       const contentScaleRatio = this.$store.state.contentScaleRatio
-      const pageScaleRatio = this.pageScaleRatio * 0.01
+      const evtScale = ((e.scale - 1) * 0.5 + 1)
       switch (e.phase) {
         case 'start': {
           console.log('start')
@@ -477,12 +477,11 @@ export default defineComponent({
           if (!this.isPinchingEditor) {
             this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
           }
-          // const pinchScaleRatio = Math.min((e.scale + 1) / 2 * 100, MAX_SCALE_RATIO)
-          const newScaleRatio = e.scale * this.tmpScaleRatio
+          const newScaleRatio = evtScale * this.tmpScaleRatio
           if (!store.state.isPageScaling) {
             store.commit('SET_isPageScaling', true)
           }
-          store.commit('mobileEditor/UPDATE_pinchScale', e.scale)
+          store.commit('mobileEditor/UPDATE_pinchScale', evtScale)
 
           const translationRatio = {
             x: (this.initPinchPos.x - editorUtils.mobileCenterPos.x) / (page.width * contentScaleRatio) + 0.5,
@@ -493,7 +492,6 @@ export default defineComponent({
             width: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.width * contentScaleRatio),
             height: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.height * contentScaleRatio)
           }
-          // console.log(translationRatio.x, translationRatio.y)
 
           pageUtils.updatePagePos(layerUtils.pageIndex, {
             x: this.initPagePos.x - sizeDiff.width * translationRatio.x,

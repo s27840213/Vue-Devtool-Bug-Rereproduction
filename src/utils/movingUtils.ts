@@ -381,7 +381,7 @@ export class MovingUtils {
         // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
         if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
           window.requestAnimationFrame(() => {
-            // this.pageMovingHandler(e)
+            this.pageMovingHandler(e)
           })
         }
       } else {
