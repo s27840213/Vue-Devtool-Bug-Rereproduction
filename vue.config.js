@@ -62,7 +62,6 @@ module.exports = defineConfig({
         config.module
             .rule('js')
             .test(/\.(js|jsx|ts|tsx)$/)
-            .end()
             .use('esbuild-loader')
             .loader('esbuild-loader')
             .options({
