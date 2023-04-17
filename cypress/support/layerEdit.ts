@@ -97,16 +97,12 @@ Cypress.Commands.add('layerDelete', { prevSubject: 'element' }, (subject) => {
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
         .snapshotTest('Delete before')
         .get('.svg-trash').click()
-        .wait(5000)
         .snapshotTest('Delete after')
     })
   return cy.wrap(subject)
 })
 
 Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subjectFront, subjectBack, before, after) => {
-  // cy.wrap(subjectBack).click('topLeft')
-  //   .then(before)
-  //   .then(after)
   cy.wrap(subjectFront).click()
     .then(before)
     .snapshotTest('Copy format before')
@@ -117,7 +113,6 @@ Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subjectFron
     .then(after)
     .get('.panel-group, .footer-tabs').find('.svg-brush').click({ force: true })
     .wrap(subjectFront).click('topLeft')
-  // .get('.svg-undo').click()
   return cy.wrap(subjectFront)
 })
 
