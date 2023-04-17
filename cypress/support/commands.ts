@@ -90,6 +90,7 @@ Cypress.Commands.add('deselectAllLayers', () => {
     .get('.pages-wrapper', silent)
     .eq(0, silent)
     .type('{ctrl+D}', silent)
+    .type('{ctrl+D}', silent)
     .get('.page-control', silent)
     .children(silent).should('have.length', 0)
 })

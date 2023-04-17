@@ -18,6 +18,13 @@ const snapshotStyles = `
   [cy-test-no-radius] {
     border-radius: 0 !important;
   }
+  /* Hide controller and page border */
+  .nu-page .page-highlighter {
+    outline: none;
+  }
+  .page-control {
+    display: none;
+  }
 `
 Cypress.Commands.add('disableTransition', () => {
   // Disable all animation for more stable snapshot result, https://glebbahmutov.com/blog/css-animations/
