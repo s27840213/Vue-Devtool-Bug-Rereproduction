@@ -1,5 +1,5 @@
 for (const isMobile of [true, false]) {
-  if (isMobile) continue
+  // if (isMobile) continue
   // if (!isMobile) continue
   const suffix = isMobile ? ' mobile' : ''
 
@@ -59,7 +59,7 @@ for (const isMobile of [true, false]) {
           .layerAlign()
           .imageSetAsBg()
       })
-      it.only('Manually BG remove', function () {
+      it('Manually BG remove', function () {
         cy.visit('/editor')
           .disableTransition()
           .importDesign('flower.json')
