@@ -198,6 +198,10 @@ class GeneralUtils {
     return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
   }
 
+  isTablet(): boolean {
+    return /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(navigator.userAgent.toLowerCase())
+  }
+
   getListRowItemSize(): number {
     return !this.isTouchDevice() ? 145
       : window.innerWidth >= 600

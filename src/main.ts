@@ -65,6 +65,7 @@ declare module '@vue/runtime-core' {
   }
 }
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
+app.config.globalProperties.$isTablet = () => generalUtils.isTablet()
 app.config.globalProperties.$eventBus = eventBus
 
 const tooltipUtils = new TooltipUtils()

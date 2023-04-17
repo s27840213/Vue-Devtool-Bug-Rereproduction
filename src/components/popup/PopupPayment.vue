@@ -39,7 +39,7 @@ div(class="popup-window")
               span(v-if="switchPaidDate") {{$t('NN0552', {date: switchPaidDate})}}
               span(v-else) {{$t('NN0553')}}
               span {{`$${switchPrice}`}}
-          //- case cancel1 or brandkit or bgrm or proTemplate
+          //- case cancel1 or pro-features
           template(v-if="showFeature")
             div(v-for="can in cancel1" :key="can" class="payment-left-content-cancel")
               svg-icon(iconName="pro" iconWidth="24px")
@@ -191,6 +191,10 @@ export default defineComponent({
           return [this.$tc('NN0653'), 'cb.jpg']
         case 'pro-object':
           return [this.$tc('NN0658'), 'pro-object.jpg']
+        case 'pro-text':
+          return [this.$tc('NN0843'), 'pro-text.jpg']
+        case 'pro-bg':
+          return [this.$tc('NN0845'), 'pro-bg.jpg']
         case 'bgrm':
         default:
           return [this.$tc('NN0652'), 'remover.jpg']
@@ -205,6 +209,8 @@ export default defineComponent({
         case 'bgrm':
         case 'pro-template':
         case 'pro-object':
+        case 'pro-text':
+        case 'pro-bg':
           [this.description, this.img] = this.getAd(name)
           this.title = this.$tc('NN0507', 2)
           this.buttons = [{

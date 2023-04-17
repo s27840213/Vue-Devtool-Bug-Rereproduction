@@ -689,11 +689,11 @@ class ShapeUtils {
     }
   }
 
-  isLine(config: AllLayerTypes): boolean {
+  isLine(config: AllLayerTypes): config is IShape {
     return config.type === 'shape' && config.category === 'D'
   }
 
-  isBasicShape(config: AllLayerTypes): boolean {
+  isBasicShape(config: AllLayerTypes): config is IShape {
     return config.type === 'shape' && config.category === 'E'
   }
 }

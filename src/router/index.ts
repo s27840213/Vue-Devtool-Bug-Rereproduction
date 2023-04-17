@@ -372,7 +372,7 @@ router.beforeEach(async (to, from, next) => {
     if (isMobile) {
       logUtils.setLog('=> as mobile')
       if (to.name === 'Editor') {
-        const isTablet = /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(navigator.userAgent.toLowerCase())
+        const isTablet = generalUtils.isTablet()
         if (isTablet) {
           logUtils.setLog('=> as tablet')
           if (!localStorage.getItem('not-mobile')) {

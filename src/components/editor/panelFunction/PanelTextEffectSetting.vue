@@ -10,15 +10,17 @@ div(class="text-effect-setting mt-25")
     template(v-for="effects1d in currCategory.effects2d" :key="effects1d.name")
       //- To choose effect, ex: hollow, splice or echo.
       div(class="text-effect-setting__effects mb-10")
-        svg-icon(v-for="effect in effects1d"
-          :key="`${currCategory.name}-${effect.key}`"
-          :iconName="effectIcon(currCategory, effect)"
-          @click="onEffectClick(effect.key)"
-          class="text-effect-setting__effect pointer"
-          :class="{'selected': currentStyle.name === effect.key }"
-          iconWidth="60px"
-          iconColor="white"
-          v-hint="effect.label")
+        div(v-for="effect in effects1d"
+            :key="`${currCategory.name}-${effect.key}`"
+            class="text-effect-setting__effect pointer"
+            @click="onEffectClick(effect)")
+          svg-icon(
+            :iconName="effectIcon(currCategory, effect)"
+            :class="{'selected': currentStyle.name === effect.key }"
+            iconWidth="56px"
+            iconColor="white"
+            v-hint="effect.label")
+          pro-item(v-if="effect.plan" theme="roundedRect")
       //- Effect option UI.
       div(v-if="getOptions(effects1d) && getOptions(effects1d)?.length !== 0"
           class="text-effect-setting-options")
@@ -69,12 +71,14 @@ div(class="text-effect-setting mt-25")
 
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -86,7 +90,8 @@ import { mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    ColorBtn
+    ColorBtn,
+    ProItem,
   },
   emits: ['toggleColorPanel'],
   data() {
@@ -180,8 +185,9 @@ export default defineComponent({
           break
       }
     },
-    async onEffectClick(effectName: string): Promise<void> {
-      await this.setEffect({ effectName })
+    async onEffectClick(effect: IEffect): Promise<void> {
+      if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      await this.setEffect({ effectName: effect.key })
       this.recordChange()
     },
     resetTextEffect() {
@@ -251,10 +257,17 @@ export default defineComponent({
     width: 212px;
   }
   &__effect {
+    position: relative;
     box-sizing: border-box;
     margin-top: 10px;
     border-radius: 3px;
     border: 2px solid transparent;
+    width: 60px;
+    height: 60px;
+    .pro {
+      left: 1px;
+      top: -4px;
+    }
     &:not(.selected):hover {
       border-color: setColor(blue-1, 0.5);
     }

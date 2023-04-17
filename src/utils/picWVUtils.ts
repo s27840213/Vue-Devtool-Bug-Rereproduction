@@ -1,4 +1,5 @@
-import { ILoginResult, IUserInfo } from '@/interfaces/webView'
+import { ILoginResult } from '@/interfaces/api'
+import { IUserInfo } from '@/interfaces/webView'
 import store from '@/store'
 import { WebViewUtils } from '@/utils/webViewUtils'
 import generalUtils from './generalUtils'
