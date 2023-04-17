@@ -419,7 +419,7 @@ export default defineComponent({
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
       const styles = {
-        ...!this.inAllPagesMode ? { transform: 'translateZ(0)' } : {},
+        ...(this.isAdjustImage() && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
