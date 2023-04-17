@@ -1,25 +1,32 @@
 <template lang="pug">
-img(class="pointer"
-  ref="img"
-  :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
-  draggable="false"
-  @click="addBackground"
-  @click.right.prevent="openUpdateDesignPopup()"
-  @error="handleNotFound")
+div(class="panel-bg__item")
+  img(class="panel-bg__img"
+    ref="img"
+    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
+    draggable="false"
+    @click="addBackground"
+    @click.right.prevent="openUpdateDesignPopup()"
+    @error="handleNotFound")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
+import { IListServiceContentDataItem } from '@/interfaces/api'
 import store from '@/store'
-import { mapGetters } from 'vuex'
-import { notify } from '@kyvg/vue3-notification'
 import AssetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
-import { IListServiceContentDataItem } from '@/interfaces/api'
+import paymentUtils from '@/utils/paymentUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
+  components: {
+    ProItem
+  },
   props: {
     src: {
       type: String
@@ -49,6 +56,7 @@ export default defineComponent({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
+      if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-bg')) return
       if (this.locked) {
         return notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
@@ -77,4 +85,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.panel-bg {
+  &__item {
+    position: relative;
+    cursor: pointer;
+  }
+  &__img {
+    width: min(calc((100vw - 10px - 48px) / 2), 145px);
+    height: min(calc((100vw - 10px - 48px) / 2), 145px);
+    margin: 0 auto;
+    object-fit: cover;
+    vertical-align: middle;
+  }
+}
 </style>

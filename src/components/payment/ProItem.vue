@@ -1,16 +1,30 @@
 <template lang="pug">
-img(v-if="!inReviewMode" class="pro" loading="lazy"
-    :src="require('@/assets/img/svg/pricing/pro.svg')" )
+img(v-if="!inReviewMode" :class="`pro ${theme}`" loading="lazy"
+    :src="require(`@/assets/img/svg/pricing/${iconFileName}`)" )
 </template>
 
 <script lang="ts">
 import webViewUtils from '@/utils/picWVUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   emits: [],
   name: 'ProItem',
+  props: {
+    theme: {
+      type: String as PropType<'default' | 'roundedRect'>,
+      default: 'default',
+    }
+  },
   computed: {
+    iconFileName() {
+      switch (this.theme) {
+        case 'roundedRect':
+          return 'pro-rounded-rect.svg'
+        default:
+          return 'pro.svg'
+      }
+    },
     inReviewMode(): boolean {
       return webViewUtils.inReviewMode
     },
@@ -21,7 +35,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .pro {
   position: absolute;
-  top: 4px;
-  left: 4px;
+  .default {
+    top: 4px;
+    left: 4px;
+  }
 }
 </style>
