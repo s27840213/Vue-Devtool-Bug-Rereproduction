@@ -986,13 +986,14 @@ export default defineComponent({
     },
     scaledConfig(): { [index: string]: string | number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
+      const _f = this.contentScaleRatio * (this.primaryLayer?.type === 'frame' ? 1 : this.scaleRatio * 0.01)
       return {
-        width: width * this.contentScaleRatio * this.scaleRatio * 0.01,
-        height: height * this.contentScaleRatio * this.scaleRatio * 0.01,
-        imgWidth: imgWidth * this.contentScaleRatio * this.scaleRatio * 0.01,
-        imgHeight: imgHeight * this.contentScaleRatio * this.scaleRatio * 0.01,
-        imgX: imgX * this.contentScaleRatio * this.scaleRatio * 0.01,
-        imgY: imgY * this.contentScaleRatio * this.scaleRatio * 0.01
+        width: width * _f,
+        height: height * _f,
+        imgWidth: imgWidth * _f,
+        imgHeight: imgHeight * _f,
+        imgX: imgX * _f,
+        imgY: imgY * _f
       }
     },
     cssFilterElms() {
