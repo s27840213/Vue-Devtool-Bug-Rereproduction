@@ -207,9 +207,6 @@ export default defineComponent({
         target: '.btn-opacity'
       })
     },
-    openAdjustPopup() {
-      if (this.backgroundLocked) return this.handleLockedNotify()
-    },
     handleShow(name: string) {
       if (this.backgroundLocked) return this.handleLockedNotify()
       this.show = this.show.includes(name) ? '' : name

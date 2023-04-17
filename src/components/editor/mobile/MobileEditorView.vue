@@ -33,10 +33,9 @@ div(class="editor-view" v-touch
 
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import EditorHeader from '@/components/editor/EditorHeader.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
 import PageNumber from '@/components/editor/PageNumber.vue'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { ILayer } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import backgroundUtils from '@/utils/backgroundUtils'
@@ -54,27 +53,17 @@ import StepsUtils from '@/utils/stepsUtils'
 import SwipeDetector from '@/utils/SwipeDetector'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
   components: {
-    EditorHeader,
     BgRemoveArea,
     PageNumber,
     PageCard
   },
   props: {
-    isConfigPanelOpen: {
-      type: Boolean,
-      required: true
-    },
-    inAllPagesMode: {
-      type: Boolean,
-      required: true
-    },
     currActivePanel: {
       default: 'none',
       type: String
@@ -91,16 +80,9 @@ export default defineComponent({
   },
   data() {
     return {
-      initialAbsPos: { x: 0, y: 0 },
-      initialRelPos: { x: 0, y: 0 },
-      currentAbsPos: { x: 0, y: 0 },
-      currentRelPos: { x: 0, y: 0 },
       editorView: null as unknown as HTMLElement,
       editorCanvas: null as unknown as HTMLElement,
-      pageIndex: -1,
       backgroundControllingPageIndex: -1,
-      pageUtils,
-      from: -1,
       scrollHeight: 0,
       tmpScaleRatio: 0,
       mounted: false,
@@ -108,11 +90,8 @@ export default defineComponent({
       cardWidth: 0,
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
-      isScaling: false,
       hanleWheelTimer: -1,
       handleWheelTransition: false,
-      oriX: 0,
-      oriPageSize: 0,
       swipeDetector: null as unknown as SwipeDetector
     }
   },
@@ -166,8 +145,8 @@ export default defineComponent({
 
     if (this.$isTouchDevice()) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
-      pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
-      pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
+      pageUtils.originPageSize.width = pageUtils.getPages[0].width * pageUtils.mobileMinScaleRatio * 0.01
+      pageUtils.originPageSize.height = pageUtils.getPages[0].height * pageUtils.mobileMinScaleRatio * 0.01
     }
 
     this.$nextTick(() => {
@@ -245,16 +224,6 @@ export default defineComponent({
     },
     pageNum(): number {
       return this.pages.length
-    },
-    isTyping(): boolean {
-      return (this.currSelectedInfo.layers as Array<IGroup | IShape | IText | IFrame | IImage>)
-        .some(l => l.type === 'text' && l.isTyping)
-    },
-    currFocusPage(): IPage {
-      return this.pageUtils.currFocusPage
-    },
-    minScaleRatio(): number {
-      return pageUtils.mobileMinScaleRatio
     },
     isDetailPage(): boolean {
       return this.groupType === 1
@@ -379,87 +348,6 @@ export default defineComponent({
           this.setPageScaleRatio(newScaleRatio)
         }
       }
-    },
-    pinchHandler(event: AnyTouchEvent) {
-      if (this.isBgImgCtrl) {
-        switch (event.phase) {
-          case 'start': {
-            console.log('start')
-            break
-          }
-          case 'move': {
-            console.log('move')
-            break
-          }
-          case 'end': {
-            console.log('end')
-          }
-        }
-      }
-
-      // switch (event.phase) {
-      //   /**
-      //    * @Note the very first event won't fire start phase, it's very strange and need to pay attention
-      //    */
-      //   case 'start': {
-      //     this.oriX = pageUtils.getCurrPage.x
-      //     this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
-      //     this.tmpScaleRatio = pageUtils.scaleRatio
-      //     this.isScaling = true
-      //     store.commit('SET_isPageScaling', true)
-      //     break
-      //   }
-      //   case 'move': {
-      //     if (!this.isScaling) {
-      //       this.isScaling = true
-      //       store.commit('SET_isPageScaling', true)
-      //     }
-      //     window.requestAnimationFrame(() => {
-      //       const limitMultiplier = 4
-      //       if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
-      //         pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
-      //         return
-      //       }
-      //       const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
-      //       if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
-      //         pageUtils.setScaleRatio(newScaleRatio)
-
-      //         const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
-      //         pageUtils.updatePagePos(0, {
-      //           x: this.oriX - baseX
-      //         })
-      //       }
-      //       clearTimeout(this.hanleWheelTimer)
-      //       this.hanleWheelTimer = setTimeout(() => {
-      //         if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
-      //           const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-      //           page.style.transition = '0.2s linear'
-      //           this.handleWheelTransition = true
-      //           pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
-      //           this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
-      //           setTimeout(() => {
-      //             page.style.transition = ''
-      //             this.handleWheelTransition = false
-      //           }, 500)
-      //         }
-      //       }, 500)
-      //     })
-      //     break
-      //   }
-
-      //   case 'end': {
-      //     this.isScaling = false
-      //     store.commit('SET_isPageScaling', false)
-      //     break
-      //   }
-      // }
-
-      // this.$nextTick(() => {
-      //   // here is a workaround to fix the problem of selecting layer after pinching
-      //   if (layerUtils.currSelectedInfo.layers.length > 0) {
-      //     GroupUtils.deselect()
-      //   }
-      // })
     },
     swipeUpHandler() {
       if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {

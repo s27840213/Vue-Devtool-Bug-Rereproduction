@@ -30,7 +30,6 @@ export default defineComponent({
   },
   data() {
     return {
-      currentValue: NaN
     }
   },
   computed: {

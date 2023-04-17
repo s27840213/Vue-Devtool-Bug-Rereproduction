@@ -2,32 +2,28 @@
 mobile-design-empty(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading") {{$t('NN0239')}}
 div(v-else class="mobile-folder-design-view")
   mobile-folder-gallery(:path="path"
-                        :allFolders="allFolders"
-                        :selectedNum="0")
+    :allFolders="allFolders"
+    :selectedNum="0")
   div(v-if="isFolderDesignDivisionNeeded" class="mobile-folder-design-view__hr")
   mobile-design-gallery(:folderLength="allFolders.length"
-                        :allDesigns="allDesigns"
-                        :selectedNum="selectedNum"
-                        @loadMore="handleLoadMore")
+    :allDesigns="allDesigns"
+    :selectedNum="selectedNum"
+    @loadMore="handleLoadMore")
   div(class="scroll-space")
 </template>
 
 <script lang="ts">
+import MobileDesignEmpty from '@/components/mydesign/MobileDesignEmpty.vue'
+import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
+import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
 import designUtils from '@/utils/designUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapActions } from 'vuex'
-import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
-import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
-import DiskWarning from '@/components/payment/DiskWarning.vue'
-import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
-import MobileDesignEmpty from '@/components/mydesign/MobileDesignEmpty.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
     MobileFolderGallery,
     MobileDesignGallery,
-    DiskWarning,
-    BtnNewDesign,
     MobileDesignEmpty
   },
   mounted() {
@@ -61,10 +57,6 @@ export default defineComponent({
     }),
     path(): string[] {
       return designUtils.makePath(this.currLocation)
-    },
-    parents(): string[] {
-      const path = this.path
-      return path.slice(0, path.length - 1)
     },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length

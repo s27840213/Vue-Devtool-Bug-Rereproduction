@@ -8,16 +8,17 @@ div(v-else class="brand-kit-tab-color")
             iconColor="gray-3")
   template(v-else)
     brand-kit-color-palette-sidebar(v-for="colorPalette in colorPalettes"
-                                    :colorPalette="colorPalette")
+      :key="colorPalette.id"
+      :colorPalette="colorPalette")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
 import BrandKitColorPaletteSidebar from '@/components/brandkit/BrandKitColorPaletteSidebar.vue'
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
-import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

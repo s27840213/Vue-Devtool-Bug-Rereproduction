@@ -21,7 +21,7 @@ div(class="overflow-container"
             :page="config"
             :color="config.backgroundColor"
             :key="config.backgroundImage.config.id"
-            @mousedown.native.left="pageClickHandler()"
+            @mousedown.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
             :padding="contentStyles.margin")
         div(class="layers-wrapper" :class="{'preserve3D': !isTouchDevice}")
@@ -51,9 +51,7 @@ div(class="overflow-container"
 
 <script lang="ts">
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
-import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { SidebarPanelType } from '@/store/types'
 import doubleTapUtils from '@/utils/doubleTapUtils'
@@ -75,8 +73,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    NuBgImage,
-    LazyLoad
+    NuBgImage
   },
   props: {
     snapUtils: Object,
@@ -87,10 +84,6 @@ export default defineComponent({
     pageIndex: {
       type: Number,
       required: true
-    },
-    handleSequentially: {
-      type: Boolean,
-      default: false
     },
     contentScaleRatio: {
       default: 1,
@@ -154,16 +147,6 @@ export default defineComponent({
         // height: `${this.config.height * this.contentScaleRatio}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
-    },
-    layerFilter(): any {
-      const filterResult = this.config.layers.filter((layer: ILayer) => {
-        return layer
-      })
-
-      return filterResult
-    },
-    hasSelectedLayer(): boolean {
-      return this.currSelectedInfo.layers.length > 0
     },
     isShowBleed() {
       if (this.userId === 'backendRendering') return false
@@ -246,7 +229,6 @@ export default defineComponent({
   mounted() {
     if (this.setLayersDone) {
       this.loadLayerImg()
-      // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
     }
   },
   watch: {
@@ -255,7 +237,6 @@ export default defineComponent({
       // so trigger loadLayerImg when uploadUtils call SET_pages.
       if (newVal) {
         this.loadLayerImg()
-        // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
       }
     },
   },

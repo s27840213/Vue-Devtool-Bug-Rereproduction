@@ -32,7 +32,7 @@
 /* eslint-disable indent */
 
 const path = require('path')
-const webpack = require('webpack')
+// const webpack = require('webpack')
 // const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const PrerenderSPAPlugin = require('prerender-spa-plugin-next')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer

@@ -76,7 +76,7 @@ div(class="panel-download" :style="containerStyles")
       hr(class="full-width")
       btn(class="full-width body-3 rounded"
         :disabled="isButtonDisabled"
-        @click.native="handleSubmit()")
+        @click="handleSubmit()")
         div(class="flex items-center")
           svg-icon(v-if="selectedTypeVal === 'pdf_print' && !inReviewMode"
             class="mr-5"
@@ -84,7 +84,9 @@ div(class="panel-download" :style="containerStyles")
           span {{$t('NN0010')}}
   template(v-else-if="currState === 'type'")
     div(class="flex flex-column")
-      div(v-for="option in typeOptions" class="flex items-center full-width" @click="handleSelectFileType(option)")
+      div(v-for="option in typeOptions"
+          :key="option.value"
+          class="flex items-center full-width" @click="handleSelectFileType(option)")
         svg-icon(
           class="mr-10"
           :iconColor="option.value === selectedType.value ? 'blue-1' : 'light-gray'"
@@ -95,7 +97,9 @@ div(class="panel-download" :style="containerStyles")
           div(class="body-XS text-gray-3 text-left") {{ option.desc }}
   template(v-else-if="currState === 'size'")
     div(class="flex flex-column")
-      div(v-for="option in scaleOptions" class="flex items-center full-width"
+      div(v-for="option in scaleOptions"
+          :key="option"
+          class="flex items-center full-width"
           @click="handleUpdate('scale', option)")
         svg-icon(
           class="mr-10"
@@ -108,7 +112,9 @@ div(class="panel-download" :style="containerStyles")
             span(class="text-gray-4 body-XS") {{ `${Math.round(currPageSize.width * option)}x${Math.round(currPageSize.height * option)}` }}
   template(v-else-if="currState === 'colorMode'")
     div(class="flex flex-column")
-      div(v-for="option in colorFormats[selectedTypeVal]" class="flex items-center full-width"
+      div(v-for="option in colorFormats[selectedTypeVal]"
+          :key="option.value"
+          class="flex items-center full-width"
           @click="handleColorModeSelect(option)")
         svg-icon(
           class="mr-10"
@@ -123,6 +129,7 @@ div(class="panel-download" :style="containerStyles")
         div(class="text-H6") {{$t('NN0124')}}
         div(@click="handleDeselectAll") {{$t('NN0130')}}
       div(v-for="idx in pagesLength"
+          :key="idx"
           class="flex items-center"
           @click="handlePageRageSelect(idx-1)")
         svg-icon(class="mr-10"
@@ -144,22 +151,17 @@ div(class="panel-download" :style="containerStyles")
       span(class="body-XXS text-gray-2") {{btn.text}}
 </template>
 
+<!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
-import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
-import DownloadPageSelection from '@/components/download/DownloadPageSelection.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
 import MobilePropsToggle from '@/components/editor/mobile/MobilePropsToggle.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import MobileTypeSelector from '@/components/editor/mobile/MobileTypeSelector.vue'
 import Btn from '@/components/global/Btn.vue'
-import Checkbox from '@/components/global/Checkbox.vue'
-import ColorBtn from '@/components/global/ColorBtn.vue'
-import SlideToggle from '@/components/global/SlideToggle.vue'
-import ToggleBtn from '@/components/global/ToggleBtn.vue'
 import { ITypeOption, PanelDownloadState } from '@/interfaces/download'
 import downloadMixin from '@/mixin/download'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 export default defineComponent({
   components: {
@@ -167,13 +169,7 @@ export default defineComponent({
     MobileSlider,
     MobileTypeSelector,
     MobilePropsToggle,
-    ColorBtn,
-    DownloadCheckButton,
-    DownloadPageSelection,
-    SlideToggle,
     DownloadTypeOption,
-    Checkbox,
-    ToggleBtn,
     Btn
   },
   props: {

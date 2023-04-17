@@ -1,9 +1,11 @@
 <template lang="pug">
 div(class="template-waterfall__wrapper")
   div(class="template-waterfall")
-    div(v-for="waterfallTemplate in waterfallTemplates"
+    div(v-for="(waterfallTemplate,idx) in waterfallTemplates"
+        :key="idx"
         class="template-waterfall__column")
       div(v-for="template in waterfallTemplate"
+          :key="template.id"
           class="template-waterfall__column__template"
           :style="templateStyles(template.aspect_ratio)"
           @click="handleClickWaterfall(template)"
@@ -28,13 +30,13 @@ div(class="template-waterfall__wrapper")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import { mapGetters } from 'vuex'
+import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import { ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   props: {

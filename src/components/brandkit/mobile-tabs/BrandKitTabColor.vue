@@ -3,7 +3,7 @@ div(class="brand-kit-tab-color")
   brand-kit-add-btn(:text="`${$t('NN0404')}`"
                     @click="handleCreatePalette")
   transition-group(class="brand-kit-tab-color__palettes" name="list" tag="div")
-    template(v-for="colorPalette in renderedColorPalettes")
+    template(v-for="colorPalette in renderedColorPalettes" :key="colorPalette.id || colorPalette")
       div(v-if="colorPalette === 'loading'"
           class="no-trans"
           key="loading")
@@ -19,12 +19,12 @@ div(class="brand-kit-tab-color")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
-import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import BrandKitColorPalette from '@/components/brandkit/BrandKitColorPalette.vue'
 import { IBrand, IBrandColorPalette, IDeletingItem } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: ['deleteItem'],

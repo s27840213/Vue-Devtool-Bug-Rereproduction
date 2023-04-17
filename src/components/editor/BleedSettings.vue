@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="bleed-settings")
-  div(v-for="bleed in bleedsToShow" class='bleed-settings__item')
+  div(v-for="bleed in bleedsToShow" :key="bleed.label" class='bleed-settings__item')
     div(class='bleed-settings__item__label')
       span(class="body-XS text-gray-2") {{bleed.label}}
     div(v-if="!$isTouchDevice()" class='bleed-settings__item__input')
@@ -57,7 +57,7 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import { floor, isEqual, round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({

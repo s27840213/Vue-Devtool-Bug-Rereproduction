@@ -67,7 +67,6 @@ div(class="popup-file")
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import fileUtils from '@/utils/fileUtils'
-import gtmUtils from '@/utils/gtmUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import rulerUtils from '@/utils/rulerUtils'
@@ -84,7 +83,6 @@ export default defineComponent({
   },
   data() {
     return {
-      showPreference: false
     }
   },
   computed: {
@@ -101,12 +99,6 @@ export default defineComponent({
       groupType: 'getGroupType',
       hasBleed: 'getHasBleed'
     }),
-    pageSize(): { w: number, h: number } {
-      return {
-        w: pageUtils.currFocusPage.width,
-        h: pageUtils.currFocusPage.height
-      }
-    },
     showGuideline(): boolean {
       return rulerUtils.showGuideline
     },
@@ -139,9 +131,6 @@ export default defineComponent({
       rulerUtils.clearGuidelines()
       stepsUtils.record()
     },
-    showPrefSetting() {
-      this.showPreference = true
-    },
     togglerRuler() {
       localStorage.setItem('showRuler', `${!rulerUtils.showRuler}`)
       rulerUtils.setShowRuler(!rulerUtils.showRuler)
@@ -173,16 +162,6 @@ export default defineComponent({
     },
     toogleAdminView() {
       this.setUserState({ enableAdminView: !this.enableAdminView })
-    },
-    testSubscribe() {
-      // fbPixelUtils.subscribe(false)
-    },
-    testTrial() {
-      // fbPixelUtils.startTrail()
-    },
-    testSignup() {
-      gtmUtils.signUp('Vivipic')
-      // fbPixelUtils.signUp()
     },
     addTwentyPage() {
       console.log('add twenty page')

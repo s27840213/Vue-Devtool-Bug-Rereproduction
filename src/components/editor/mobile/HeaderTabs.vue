@@ -21,7 +21,7 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
           :iconColor="(inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping ? 'gray-2' : 'white'"
           :iconWidth="'22px'")
   div(class="header-bar__right")
-    div(v-for="tab in rightTabs")
+    div(v-for="(tab, index) in rightTabs" :key="`${tab.icon}-${index}`")
       div(v-if="!tab.isHidden" class="header-bar__feature-icon" :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
         @pointerdown="handleIconAction(tab.icon)")
         svg-icon(
@@ -32,7 +32,6 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
 
 <script lang="ts">
 import i18n from '@/i18n'
-import { IFrame, IGroup } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -82,7 +81,6 @@ export default defineComponent({
         { icon: 'download', isPanelIcon: true },
         { icon: 'more', isPanelIcon: true }
       ] as IIcon[],
-      stepsUtils
     }
   },
   computed: {
@@ -145,35 +143,6 @@ export default defineComponent({
     isLocked(): boolean {
       return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getSelectedLayer().locked
     },
-    isGroup(): boolean {
-      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
-    },
-    showPhotoTabs(): boolean {
-      return !this.inBgRemoveMode && !this.isLocked &&
-        this.targetIs('image') && this.singleTargetType()
-    },
-    showFontTabs(): boolean {
-      return !this.inBgRemoveMode && !this.isLocked &&
-        this.targetIs('text') && this.singleTargetType()
-    },
-    groupTypes(): Set<string> {
-      const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer) => {
-        return layer.type
-      })
-      return new Set(types)
-    },
-    hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
-    },
-    subLayerType(): string {
-      return this.currSubSelectedInfo.type
-    },
-    isFrameImage(): boolean {
-      const { layers, types } = this.currSelectedInfo
-      const frameLayer = layers[0] as IFrame
-      return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
-    },
     isShowDownloadPanel(): boolean {
       return this.currActivePanel === 'download'
     }
@@ -184,31 +153,6 @@ export default defineComponent({
         return this.inAllPagesMode ? 'blue-1' : 'white'
       }
       return (this.isLocked && tab.icon !== 'lock') ? 'gray-2' : this.currTab === tab.icon ? 'blue-1' : 'white'
-    },
-    targetIs(type: string): boolean {
-      if (this.isGroup) {
-        if (this.hasSubSelectedLayer) {
-          return this.subLayerType === type
-        } else {
-          return this.groupTypes.has(type)
-        }
-      } else {
-        if (this.currSelectedInfo.types.has('frame') && type === 'image') {
-          return this.isFrameImage
-        }
-        return this.currSelectedInfo.types.has(type)
-      }
-    },
-    singleTargetType(): boolean {
-      if (this.isGroup) {
-        if (this.hasSubSelectedLayer) {
-          return true
-        } else {
-          return this.groupTypes.size === 1
-        }
-      } else {
-        return this.currSelectedInfo.types.size === 1
-      }
     },
     goHome() {
       this.$router.push({ name: 'Home' })

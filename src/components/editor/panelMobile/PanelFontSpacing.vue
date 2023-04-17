@@ -19,11 +19,10 @@ div(class="panel-spacing")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import layerUtils from '@/utils/layerUtils'
-import { mapState } from 'vuex'
 import textUtils from '@/utils/textUtils'
+import { defineComponent } from 'vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -33,18 +32,13 @@ export default defineComponent({
   data() {
     return {
       fieldRange: {
-        fontSize: { min: 6, max: 800 },
         lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
-        opacity: { min: 0, max: 100 }
       }
     }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
-    opacity(): number {
-      return layerUtils.getCurrOpacity
-    },
     lineHeight(): number {
       return this.props.lineHeight === '--' ? this.props.lineHeight : parseFloat(this.props.lineHeight)
     },
