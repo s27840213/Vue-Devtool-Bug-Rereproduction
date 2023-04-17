@@ -68,7 +68,6 @@ export default defineComponent({
       renderTimer: -1,
       unrenderEventId: '',
       renderEventId: '',
-      loadedFlag: false
     }
   },
   mounted() {
@@ -177,11 +176,6 @@ export default defineComponent({
     handleIntersecting(entry: Array<IntersectionObserverEntry>) {
       this.$emit('intersecting', entry)
     },
-    consoleLog(str: string) {
-      // if (this.pageIndex === 3) {
-      //   console.log(str)
-      // }
-    }
   },
   unmounted() {
     this.intersectionObserver && this.intersectionObserver.disconnect()

@@ -30,14 +30,10 @@ div(class="editor-header" ref="header"
 
 <script lang="ts">
 import store from '@/store'
-import GeneralUtils from '@/utils/generalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
-import StepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -45,8 +41,6 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      ShortcutUtils,
-      StepsUtils,
       designUploadStatus: 'success'
     }
   },
@@ -71,9 +65,6 @@ export default defineComponent({
     },
     isRoot(): boolean {
       return this.$route.query.path ? (this.$route.query.path as string).split(',').length === 1 : this.folderInfo.isRoot
-    },
-    currLocale(): string {
-      return this.$i18n.locale
     },
     pagesName(): string {
       return pageUtils.pagesName
@@ -107,15 +98,6 @@ export default defineComponent({
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
     },
-    copyText(text: string) {
-      if (text.length === 0) {
-        return
-      }
-      GeneralUtils.copyText(text)
-        .then(() => {
-          notify({ group: 'copy', text: `${text} 已複製` })
-        })
-    }
   }
 })
 </script>

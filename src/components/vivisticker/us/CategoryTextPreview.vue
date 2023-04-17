@@ -17,10 +17,6 @@ export default defineComponent({
     item: {
       type: Object as PropType<any>,
       required: true
-    },
-    itemWidth: {
-      type: Number,
-      default: NaN
     }
   },
   data() {

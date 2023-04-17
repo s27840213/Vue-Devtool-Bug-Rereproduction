@@ -151,6 +151,8 @@ export default defineComponent({
         ...(this.isInCategory && { gridTemplateColumns: 'auto' })
       }
     },
+    // extends: PanelBackground
+    // eslint-disable-next-line vue/no-unused-properties
     listCategories(): ICategoryItem[] {
       const titleHeight = 46
       const gap = this.isTablet ? 20 : 14

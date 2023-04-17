@@ -36,10 +36,6 @@ export default defineComponent({
       default: window.outerHeight * 0.9,
       type: Number
     },
-    settingmode: {
-      default: false,
-      type: Boolean
-    }
   },
   created() {
     textUtils.loadDefaultFonts(brandkitUtils.extractFonts(this.textStyleSetting))

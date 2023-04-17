@@ -94,6 +94,8 @@ export default defineComponent({
     hideCategoryIconList(): boolean {
       return !this.isInCategory || this.showFav
     },
+    // extends: PanelObjectGifs.vue
+    // eslint-disable-next-line vue/no-unused-properties
     listRecently(): ICategoryItem[] {
       const { rawCategories } = this
       const list = (rawCategories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
@@ -132,6 +134,8 @@ export default defineComponent({
       await PanelObjectGifs.methods?.handleSearch.call(this, keyword)
       this.$emit('search')
     },
+    // extends: PanelObjectGifs.vue
+    // eslint-disable-next-line vue/no-unused-properties
     processListCategory(list: IListServiceContentData[]): ICategoryItem[] {
       return list
         .filter(category => category.list.length > 0 && !category.is_recent)
@@ -144,6 +148,8 @@ export default defineComponent({
           isFavorite: category.id === -1 ? undefined : this.checkCategoryFavorite(category.id)
         }))
     },
+    // extends: PanelObjectGifs.vue
+    // eslint-disable-next-line vue/no-unused-properties
     processListResult(list = [] as IListServiceContentDataItem[]): ICategoryItem[] {
       const gap = this.isTablet ? 20 : 24
       return new Array(Math.ceil(list.length / 4))

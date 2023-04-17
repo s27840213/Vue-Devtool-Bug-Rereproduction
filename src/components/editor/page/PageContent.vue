@@ -51,7 +51,6 @@ div(class="overflow-container"
 <script lang="ts">
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import i18n from '@/i18n'
-import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { SidebarPanelType } from '@/store/types'
 import doubleTapUtils from '@/utils/doubleTapUtils'
@@ -63,7 +62,6 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
-import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -84,10 +82,6 @@ export default defineComponent({
     pageIndex: {
       type: Number,
       required: true
-    },
-    handleSequentially: {
-      type: Boolean,
-      default: false
     },
     noBg: {
       type: Boolean,
@@ -152,16 +146,6 @@ export default defineComponent({
         // height: `${this.config.height * this.contentScaleRatio}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
-    },
-    layerFilter(): any {
-      const filterResult = this.config.layers.filter((layer: ILayer) => {
-        return layer
-      })
-
-      return filterResult
-    },
-    hasSelectedLayer(): boolean {
-      return this.currSelectedInfo.layers.length > 0
     },
     isShowBleed() {
       if (this.userId === 'backendRendering') return false
@@ -301,11 +285,6 @@ export default defineComponent({
         notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
     },
-    async handleFontLoading() {
-      textUtils.untilFontLoadedForPage(this.config, true).then(() => {
-        console.log('all font loaded')
-      })
-    }
   }
 })
 </script>

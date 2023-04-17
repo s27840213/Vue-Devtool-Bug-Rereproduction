@@ -13,13 +13,12 @@ div(class="nu-shape" :style="styles")
 
 <script lang="ts">
 import { IFrame, IGroup, IShape } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
 
 const FILTER_X = '$fx'
@@ -65,24 +64,12 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    page: {
-      type: Object as PropType<IPage>,
-      required: true
-    },
     layerIndex: {
       type: Number,
       required: true
     },
     subLayerIndex: {
       type: Number
-    },
-    contentScaleRatio: {
-      default: 1,
-      type: Number
-    },
-    primaryLayer: {
-      type: Object,
-      default: () => { return undefined }
     },
     primaryLayerIndex: {
       type: Number,

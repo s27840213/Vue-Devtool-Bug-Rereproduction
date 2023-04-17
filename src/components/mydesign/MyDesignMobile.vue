@@ -114,12 +114,10 @@ export default defineComponent({
   data() {
     return {
       messageQueue: [] as IMobileMessageItem[],
-      messageTimer: -1,
       isShowMessage: false,
       pathedFolderBuffer: undefined as IPathedFolder | undefined,
       designBuffer: undefined as IDesign | undefined,
       confirmMessage: '',
-      errorMessageTimer: -1,
       menuStack: [] as string[],
       tabButtons: [
         {

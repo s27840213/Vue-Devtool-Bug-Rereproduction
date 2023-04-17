@@ -44,11 +44,10 @@ import GeneralUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
-import MappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -93,12 +92,6 @@ export default defineComponent({
       _setBackgroundImage: 'SET_backgroundImage',
       _setBackgroundColor: 'SET_backgroundColor'
     }),
-    mappingIcons(type: string): string[] {
-      return MappingUtils.mappingIconSet(type)
-    },
-    mappingIconAction(icon: string) {
-      return MappingUtils.mappingIconAction(icon)
-    },
     shortcutMenu() {
       return [
         {

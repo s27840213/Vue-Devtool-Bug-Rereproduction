@@ -27,9 +27,6 @@ export default defineComponent({
       type: String,
       required: true
     },
-    isFavorite: {
-      type: Boolean
-    },
     columnGap: {
       type: Number,
       default: 10

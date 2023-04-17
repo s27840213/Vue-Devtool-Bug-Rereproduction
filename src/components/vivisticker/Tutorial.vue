@@ -70,12 +70,6 @@ export default defineComponent({
     }
   },
   computed: {
-    title(): string {
-      return this.stepConfigs[this.step].title
-    },
-    description(): string {
-      return this.stepConfigs[this.step].description
-    },
     videoSource(): string {
       return this.stepConfigs[this.step].video
     }

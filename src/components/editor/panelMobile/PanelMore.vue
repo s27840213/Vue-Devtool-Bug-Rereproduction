@@ -43,7 +43,6 @@ div(class="panel-more")
 </template>
 
 <script lang="ts">
-import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import webViewUtils from '@/utils/picWVUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
@@ -88,9 +87,6 @@ export default defineComponent({
     },
     lastHistory(): string {
       return this.panelHistory[this.historySize - 1]
-    },
-    opacity(): number {
-      return layerUtils.getCurrOpacity
     },
     pagesName(): string {
       return pageUtils.pagesName
@@ -141,9 +137,6 @@ export default defineComponent({
     }),
     handleDomainSelected(selected: () => boolean): boolean {
       return selected()
-    },
-    updateLayerOpacity(val: number) {
-      layerUtils.updateLayerOpacity(val)
     },
     newDesign() {
       const path = `${window.location.origin}${window.location.pathname}`

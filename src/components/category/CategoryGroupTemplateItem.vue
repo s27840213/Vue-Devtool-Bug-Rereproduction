@@ -34,9 +34,6 @@ export default defineComponent({
     ProItem
   },
   props: {
-    src: {
-      type: String
-    },
     item: {
       type: Object,
       required: true

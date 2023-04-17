@@ -30,7 +30,6 @@ export default defineComponent({
   },
   data () {
     return {
-      active: false,
       currentStep: this.startIndex,
       targetPosition: {
         x: 0,

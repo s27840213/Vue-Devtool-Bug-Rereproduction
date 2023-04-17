@@ -26,7 +26,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import textPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vClickOutside from 'click-outside-vue3'
 import _ from 'lodash'
@@ -37,15 +37,8 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      openValueSelector: false,
-      fontSelectValue,
       fieldRange: {
         fontSize: { min: 1, max: 9999 },
-        lineHeight: { min: 0.5, max: 2.5 },
-        fontSpacing: { min: -200, max: 800 },
-        // fontSpacing: { min: -2, max: 8 },
-        // lineHeight: { min: 0, max: 300 },
-        opacity: { min: 0, max: 100 }
       },
       iconSize: this.$isTouchDevice() ? '24px' : '14px',
       numberStyles: {
@@ -76,18 +69,6 @@ export default defineComponent({
     },
   },
   methods: {
-    handleValueModal() {
-      if (this.$isTouchDevice()) return
-      this.openValueSelector = !this.openValueSelector
-      if (this.openValueSelector) {
-        const input = this.$refs['input-fontSize'] as HTMLInputElement
-        input.focus()
-        input.select()
-      }
-    },
-    handleValueUpdate(value: number) {
-      textPropUtils.fontSizeHandler(value)
-    },
     setSize(e: Event) {
       const { value } = e.target as HTMLInputElement
       if (generalUtils.isValidFloat(value)) {

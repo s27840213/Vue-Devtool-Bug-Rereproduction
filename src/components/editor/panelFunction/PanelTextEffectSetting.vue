@@ -59,7 +59,7 @@ div(class="text-effect-setting mt-25")
           //- Option type color
           color-btn(v-if="option.type === 'color'" size="25px"
             :color="colorParser(currentStyle[option.key])"
-            :active="option.key === colorTarget.key && settingTextEffect"
+            :active="option.key === colorTarget && settingTextEffect"
             @click="handleColorModal(currCategory.name, option.key)")
         div(class="text-effect-setting-options__field")
           span
@@ -91,13 +91,9 @@ export default defineComponent({
   emits: ['toggleColorPanel'],
   data() {
     return {
-      openColorPicker: false,
       currTab: localStorageUtils.get('textEffectSetting', 'tab') as 'shadow'|'bg'|'shape',
       textEffects: constantData.textEffects(),
-      colorTarget: {
-        category: '',
-        key: ''
-      }
+      colorTarget: ''
     }
   },
   computed: {
@@ -136,7 +132,7 @@ export default defineComponent({
     handleColorModal(category: 'shadow'|'bg'|'shape', key: string) {
       const currColor = this.colorParser(this.currentStyle[key])
 
-      this.colorTarget = { category, key }
+      this.colorTarget = key
       editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(currColor)
@@ -218,8 +214,7 @@ export default defineComponent({
       }
     },
     handleColorUpdate(color: string): void {
-      const key = this.colorTarget.key
-      this.setEffect({ effect: { [key]: color } })
+      this.setEffect({ effect: { [this.colorTarget]: color } })
     },
     colorParser(color: string) {
       return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
