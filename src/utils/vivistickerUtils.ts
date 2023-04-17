@@ -687,7 +687,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('setState')
   }
 
-  async getState(key: string): Promise<any> {
+  async getState(key: string): Promise<{ [key: string]: any } | undefined> {
     if (this.isStandaloneMode) return
     return await this.callIOSAsAPI('GET_STATE', { key }, 'getState')
   }
@@ -711,7 +711,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       y,
       bgColor: store.getters['vivisticker/getEditorBg'] // for older app
     }, 'copy-editor')
-    return data?.flag ?? '0'
+    return (data?.flag as string) ?? '0'
   }
 
   copyDone(data: { flag: string }) {
@@ -1092,6 +1092,22 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       // store.commit('vivisticker/SET_expireDate', expire_date)
       store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
     }
+  }
+
+  async fetchLoadedFonts(): Promise<void> {
+    const loadedFonts = (await this.getState('loadedFonts'))?.value ?? []
+    store.commit('vivisticker/SET_loadedFonts', loadedFonts)
+  }
+
+  async recordLoadedFont(face: string): Promise<void> {
+    store.commit('vivisticker/UPDATE_addLoadedFont', face)
+    const loadedFonts = store.getters['vivisticker/getLoadedFonts']
+    await this.setState('loadedFonts', { value: loadedFonts })
+  }
+
+  async checkFontLoaded(face: string): Promise<boolean> {
+    const loadedFonts = store.getters['vivisticker/getLoadedFonts']
+    return loadedFonts.includes(face)
   }
 }
 

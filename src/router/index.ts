@@ -104,7 +104,8 @@ const router = createRouter({
           vivistickerUtils.enterStandaloneMode()
           vivistickerUtils.setDefaultLocale()
         }
-        vivistickerUtils.fetchDebugModeEntrance()
+        await vivistickerUtils.fetchDebugModeEntrance()
+        await vivistickerUtils.fetchLoadedFonts()
         const userInfo = await vivistickerUtils.getUserInfo()
         if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
           logUtils.uploadLog().then(() => {
