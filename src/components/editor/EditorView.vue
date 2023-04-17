@@ -67,19 +67,21 @@ import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
+import mathUtils from '@/utils/mathUtils'
 import modalUtils from '@/utils/modalUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import RulerUtils from '@/utils/rulerUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -300,7 +302,8 @@ export default defineComponent({
       enableComponentLog: 'getEnalbleComponentLog',
       pagesLength: 'getPagesLength',
       isImgCtrl: 'imgControl/isImgCtrl',
-      showPagePanel: 'page/getShowPagePanel'
+      showPagePanel: 'page/getShowPagePanel',
+      scaleRatio: 'getPageScaleRatio',
     }),
     pages(): Array<IPage> {
       return (this.pagesState as Array<IPageState>).map(p => p.config)
@@ -460,14 +463,41 @@ export default defineComponent({
       })
     },
     handleSelectionData(selectionData: DOMRect) {
-      const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
+      const page = (this.pagesState as IPageState[])[pageUtils.currFocusPageIndex].config
+      const layers = page.layers
+
+      const pageEle = document.querySelector(`.nu-page-content-${pageUtils.currFocusPageIndex}`) as HTMLElement
+      const pageData = pageEle.getBoundingClientRect()
+      const selectionPolygonConfig = selectionData.toJSON()
+      selectionPolygonConfig.x = (selectionPolygonConfig.x - pageData.x) / this.scaleRatio * 100
+      selectionPolygonConfig.y = (selectionPolygonConfig.y - pageData.y) / this.scaleRatio * 100
+      selectionPolygonConfig.width = selectionPolygonConfig.width / this.scaleRatio * 100
+      selectionPolygonConfig.height = selectionPolygonConfig.height / this.scaleRatio * 100
+
       const layerIndexs: number[] = []
       if (layers.length > 0) {
-        layers.forEach((layer) => {
-          const layerData = layer.getBoundingClientRect()
-          if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
-          (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
-            layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
+        layers.forEach((layer, index) => {
+          let layerPolygonConfig
+          if (shapeUtils.isLine(layer)) {
+            const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(layer.point ?? [], layer.styles, true, layer.size?.[0])
+            layerPolygonConfig = {
+              x,
+              y,
+              width,
+              height,
+              rotate
+            }
+          } else {
+            layerPolygonConfig = {
+              x: layer.styles.x,
+              y: layer.styles.y,
+              width: layer.styles.width,
+              height: layer.styles.height,
+              rotate: layer.styles.rotate
+            }
+          }
+          if (mathUtils.calculateIfIntersect(selectionPolygonConfig, layerPolygonConfig)) {
+            layerIndexs.push(index)
           }
         })
       }

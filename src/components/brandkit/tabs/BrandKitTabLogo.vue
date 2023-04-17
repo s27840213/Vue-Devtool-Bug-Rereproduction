@@ -6,9 +6,7 @@ transition-group(class="brand-kit-tab-logo" name="logo-list" tag="div")
       key="add"
       @click="handleUploadLogo")
       span(class="primary") {{ $t('NN0411') }}
-      i18n-t(class="secondary" keypath="NN0412" tag="span")
-        template(#newline)
-          br
+      span(class="secondary" v-html="$t('NN0412')")
       svg-icon(class="hover"
               iconName="plus-origin"
               iconWidth="16px"

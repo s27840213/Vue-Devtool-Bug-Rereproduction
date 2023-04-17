@@ -5,9 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "cyrun": "npx cypress run --browser chrome",
+    "cyrun": "npx cypress run --browser chromium --env preserveOriginalScreenshot=true",
     "cyopen": "npx cypress open --e2e -b chrome",
-    "cyupdate": "npx cypress run --browser chrome --env generateBaseline=true",
+    "cyupdate": "npx cypress run --browser chromium --env generateBaseline=true",
     "lint": "vue-cli-service lint",
     "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts",
     "build:prerender": "vue-cli-service build --PRERENDER=1",

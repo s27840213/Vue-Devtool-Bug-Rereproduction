@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-layer flex-center"
-    :class="[inAllPagesMode ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
+    :class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
     :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :data-p-index="pageIndex"
     :style="layerWrapperStyles"
@@ -66,7 +66,6 @@ import groupUtils from '@/utils/groupUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
-import mathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -382,22 +381,18 @@ export default defineComponent({
     },
     lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
-      // const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
-      const { width: lineW, height: lineH, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
-      const { width, height } = this.config.styles
-      const lineLength = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
-      const x = width * 0.5 - lineLength * 0.5
-      const y = height * 0.5 - Math.abs(lineH * mathUtils.cos(rotate) * 0.5)
+      const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const { x: layerX, y: layerY } = this.config.styles
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
-      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * this.contentScaleRatio}px, ${(page.isEnableBleed ? y + bleeds.top : y) * this.contentScaleRatio}px)`
+      let transform = `translate(${((page.isEnableBleed ? x + bleeds.left : x) - layerX) * this.contentScaleRatio}px, ${((page.isEnableBleed ? y + bleeds.top : y) - layerY) * this.contentScaleRatio}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
       return {
         transform,
-        width: `${lineW * this.contentScaleRatio}px`,
-        height: `${lineH * this.contentScaleRatio}px`
+        width: `${width * this.contentScaleRatio}px`,
+        height: `${height * this.contentScaleRatio}px`
       }
     },
     outlineStyles() {
@@ -429,13 +424,8 @@ export default defineComponent({
         ...(pageUtils._3dEnabledPageIndex === this.pageIndex && { transformStyle: type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d' })
       } as Record<string, string>
       if (hasActualScale) {
-        if (this.config.type === LayerType.text) {
-          styles.width = `${this.config.styles.width / this.config.styles.scale}px`
-          styles.height = `${this.config.styles.height / this.config.styles.scale}px`
-        } else {
-          styles.width = `${this.config.styles.initWidth}px`
-          styles.height = `${this.config.styles.initHeight}px`
-        }
+        styles.width = `${this.config.styles.width / this.config.styles.scale}px`
+        styles.height = `${this.config.styles.height / this.config.styles.scale}px`
         styles.transform = transform
       }
       return styles
@@ -804,6 +794,7 @@ export default defineComponent({
     justify-content: center;
     width: 0;
     height: 0;
+    pointer-events: initial;
   }
   &__BG {
     position: absolute;
