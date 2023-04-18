@@ -23,7 +23,6 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      MappingUtils
     }
   },
   computed: {
@@ -35,9 +34,6 @@ export default defineComponent({
     }
   },
   methods: {
-    mappingIcons(type: string): string[] {
-      return MappingUtils.mappingIconSet(type)
-    },
     flipData() {
       const icons = ['flip-h', 'flip-v']
       const texts = [`${this.$t('NN0053')}`, `${this.$t('NN0054')}`]

@@ -1,3 +1,4 @@
+/* eslint-disable vue/no-unused-properties */
 import { IDownloadServiceParams, IOutputType, ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
 import generalUtils from '@/utils/generalUtils'
@@ -86,7 +87,7 @@ export default defineComponent({
           { value: 0, label: 'RGB' },
           { value: 1, label: 'CMYK' }
         ]
-      } as {[key: string]: { value: number, label: string }[]},
+      } as { [key: string]: { value: number, label: string }[] },
       detailPageDownloadOptions: [
         { value: 'whole', label: this.$t('NN0347') as string },
         { value: 'splice', label: this.$t('NN0348') as string }

@@ -47,7 +47,6 @@ div(class="mobile-design-item" :data-index="config.asset_index")
 
 <script lang="ts">
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -60,8 +59,7 @@ import { mapGetters, mapMutations } from 'vuex'
 
 const component = defineComponent({
   components: {
-    ImageCarousel,
-    ObserverSentinel
+    ImageCarousel
   },
   props: {
     config: {
@@ -80,14 +78,6 @@ const component = defineComponent({
       type: Boolean,
       required: true
     },
-    isMultiSelected: {
-      type: Boolean,
-      required: true
-    },
-    index: {
-      type: Number,
-      required: true
-    }
   },
   emits: ['select', 'deselect'],
   data() {
@@ -294,11 +284,15 @@ const component = defineComponent({
         this.checkImageSize(this.startCarousel)
       }
     },
+    // Call by MobileDesignGallery
+    // eslint-disable-next-line vue/no-unused-properties
     handleEnterView() {
       this.isInView = true
       this.showCarousel = false
       this.checkImageSize(this.startCarousel)
     },
+    // Call by MobileDesignGallery
+    // eslint-disable-next-line vue/no-unused-properties
     handleLeaveView() {
       this.isInView = false
     }

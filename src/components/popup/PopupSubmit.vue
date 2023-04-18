@@ -9,19 +9,17 @@ div(class="popup-submit bg-white")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters } from 'vuex'
-import uploadUtils from '@/utils/uploadUtils'
 import layerUtils from '@/utils/layerUtils'
 import modalUtils from '@/utils/modalUtils'
 import popupUtils from '@/utils/popupUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
   data() {
     return {
-      MappingUtils,
       id: ''
     }
   },

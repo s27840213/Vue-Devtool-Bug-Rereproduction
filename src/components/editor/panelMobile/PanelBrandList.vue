@@ -4,6 +4,7 @@ div(class="panel-brand-list" :class="{'new-brand': lastHistory === 'new-brand'}"
     div(class="panel-brand-list__brands-wrapper")
       div(class="panel-brand-list__brands")
         div(v-for="brand in brands"
+            :key="brand.id"
             class="panel-brand-list__brand-item"
             :class="{selected: checkSelected(brand)}"
             @click="handleSetCurrentBrand(brand)")
@@ -40,14 +41,13 @@ div(class="panel-brand-list" :class="{'new-brand': lastHistory === 'new-brand'}"
 import { IBrand } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import editorUtils from '@/utils/editorUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   data() {
     return {
       editableName: '',
-      brandBuffer: undefined as undefined | IBrand,
       isDestroyed: false
     }
   },

@@ -5,22 +5,23 @@ div(class="brand-kit-color-palette")
       span(:title="paletteName") {{ paletteName }}
   div(class="brand-kit-color-palette__colors")
     color-btn(v-for="color in colorPalette.colors" :color="color.color"
+      :key="color.id"
       :style="backgroundColorStyles"
       @click="handleSetColor(color.color)")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrandColorPalette } from '@/interfaces/brandkit'
-import { mapMutations } from 'vuex'
-import layerUtils from '@/utils/layerUtils'
 import { IGroup, IShape } from '@/interfaces/layer'
+import brandkitUtils from '@/utils/brandkitUtils'
+import colorUtils from '@/utils/colorUtils'
+import layerUtils from '@/utils/layerUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import colorUtils from '@/utils/colorUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],

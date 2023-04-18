@@ -29,9 +29,12 @@ div(class="sidebar")
             iconColor="white"
             iconWidth="20px")
         div(class="nav-item__text")  {{$t('NN0188')}}
-      sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="[ROOT]"
-                    @moveItem="handleMoveItem"
-                    @showHint="handleShowHint")
+      sidebar-folder(v-for="folder in realFolders"
+        :key="folder.id"
+        :folder="folder" :level="0"
+        :parents="[ROOT]"
+        @moveItem="handleMoveItem"
+        @showHint="handleShowHint")
       div(class="nav-item" :class="{'bg-blue-1': (currLocation === 't')}"
           :style="draggedOverStyles('t')"
           @dragenter="handleDragEnter('t')"

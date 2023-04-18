@@ -37,9 +37,11 @@ section
     div(v-else
         :class="`nav-folder-${level}__text`"
         style="pointer-events: none") {{ folder.name }}
-  sidebar-folder(v-for="subFolder in checkExpand(realFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
-                @moveItem="handleMoveItem"
-                @showHint="handleShowHint")
+  sidebar-folder(v-for="subFolder in checkExpand(realFolders)"
+    :key="subFolder.id"
+    :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
+    @moveItem="handleMoveItem"
+    @showHint="handleShowHint")
   div(class="dragged-folder" :style="draggedFolderStyles()")
     div(class="nav-folder-0")
       svg-icon(iconName="folder"
@@ -54,7 +56,7 @@ section
 import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({

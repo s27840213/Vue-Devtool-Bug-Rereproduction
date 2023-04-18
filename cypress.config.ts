@@ -28,7 +28,7 @@ export default defineConfig({
         const width = String(config.viewportWidth) || '1280'
         const height = String(config.viewportHeight) || '720'
 
-        if (browser.name === 'chrome') {
+        if (['chrome', 'chromium'].includes(browser.name)) {
           launchOptions.args.push('--window-size='.concat(width, ',').concat(height))
           launchOptions.args.push('--force-device-scale-factor=1')
           launchOptions.args.push('--force-color-profile=srgb')

@@ -18,8 +18,9 @@ section
           iconWidth="24px"
           :style="expandIconStyles()")
   mobile-structure-folder(v-for="subFolder in checkExpand(realFolders)"
-                  :folder="subFolder" :level="level+1"
-                  :parents="[...parents, folder.id]")
+    :key="subFolder.id"
+    :folder="subFolder" :level="level+1"
+    :parents="[...parents, folder.id]")
 </template>
 
 <script lang="ts">

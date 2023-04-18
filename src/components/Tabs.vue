@@ -1,6 +1,7 @@
 <template lang="pug">
 div(class="tabs" :style="tabsStyle")
   div(v-for="(tab,index) in tabs"
+      :key="tab"
       class="tabs__item"
       :style="tabStyle(index)"
       @click="switchTab(index)")

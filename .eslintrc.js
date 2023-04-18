@@ -7,6 +7,8 @@ function offInCommand (value) {
 
 module.exports = {
   root: true,
+  parser: 'vue-eslint-parser',
+
   plugins: [
     'cypress',
     'unused-imports'
@@ -18,6 +20,7 @@ module.exports = {
 
   extends: [
     'plugin:vue/vue3-essential',
+    'plugin:vue-pug/vue3-recommended',
     '@vue/standard',
     '@vue/typescript/recommended',
     'plugin:cypress/recommended',
@@ -49,8 +52,13 @@ module.exports = {
     // Require explicit function return type
     '@typescript-eslint/explicit-module-boundary-types': 'off',
 
-    // 'import/no-dynamic-require': 'off',
-    // 'global-require': 0,
-    // 'no-shadow': 'off',
+    'vue/no-unused-properties': [
+      'error',
+      {
+        groups: ['props', 'data', 'computed', 'methods'],
+        deepData: true,
+        ignorePublicMembers: false,
+      },
+    ],
   }
 }

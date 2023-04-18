@@ -27,7 +27,7 @@ div(class="desktop-editor")
                 @click="switchApp")
               div(class="flex flex-column")
                 select(class="locale-select" v-model="inputLocale")
-                  option(v-for="locale in localeOptions" :value="locale") {{locale}}
+                  option(v-for="locale in localeOptions" :key="locale" :value="locale") {{locale}}
               div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
                 span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
           editor-view(:currPage="currPage" :isSidebarPanelOpen="isSidebarPanelOpen")
@@ -65,7 +65,6 @@ import i18n from '@/i18n'
 import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
-import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -95,7 +94,6 @@ export default defineComponent({
   emits: ['setIsLoading'],
   data() {
     return {
-      FunctionPanelType,
       isSidebarPanelOpen: true,
       inputLocale: i18n.global.locale,
       stkMode: /app=1/.test(window.location.href),
@@ -165,12 +163,6 @@ export default defineComponent({
     showColorSlips(): boolean {
       return editorUtils.showColorSlips
     },
-    isShape(): boolean {
-      return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
-    },
-    inPagePanel(): boolean {
-      return SidebarPanelType.page === this.currPanel
-    },
     contentPanelStyles(): { [index: string]: string } {
       return this.showColorSlips ? {
         'grid-template-rows': '1fr 1fr'
@@ -178,14 +170,8 @@ export default defineComponent({
         'grid-template-rows': '1fr'
       }
     },
-    isLogin(): boolean {
-      return store.getters['user/isLogin']
-    },
     getAdminModeText(): string {
       return this.adminMode ? '' : '-disable'
-    },
-    path(): string {
-      return this.$route.path
     },
     templateText(): string {
       if (this.groupId.length > 0 && this.groupType === 1) {
@@ -241,14 +227,8 @@ export default defineComponent({
       this.stkMode ? url.searchParams.append('app', '1') : url.searchParams.delete('app')
       window.location.href = url.toString()
     },
-    setPanelType(type: number) {
-      this.setCurrFunctionPanel(type)
-    },
     toggleSidebarPanel(bool: boolean) {
       this.isSidebarPanelOpen = bool
-    },
-    confirmLeave() {
-      return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
     copyText(text: string) {
       generalUtils.copyText(text)
@@ -302,6 +282,7 @@ export default defineComponent({
     height: 100%;
     display: grid;
     grid-template-columns: 1fr;
+    border-left: 1px solid setColor(gray-4,0.2);
     &__color-panel {
       height: 50%;
       position: absolute;

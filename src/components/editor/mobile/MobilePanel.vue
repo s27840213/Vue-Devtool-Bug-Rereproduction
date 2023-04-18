@@ -209,9 +209,6 @@ export default defineComponent({
     currHistory(): string {
       return this.panelHistory[this.historySize - 1]
     },
-    backgroundImgControl(): boolean {
-      return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
-    },
     backgroundLocked(): boolean {
       const { locked } = pageUtils.currFocusPage.backgroundImage.config
       return locked
@@ -302,7 +299,7 @@ export default defineComponent({
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? '100%' : this.panelDragHeight + 'px',
           ...(this.hideFooter && { zIndex: '100' }),
-          ...((!this.inBrowserMode && this.hideFooter) && { paddingBottom: '48px' })
+          ...(this.hideFooter && { paddingBottom: `${this.userInfo.homeIndicatorHeight}px` })
         },
         // Prevent MobilePanel collapse
         isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
@@ -573,6 +570,8 @@ export default defineComponent({
     }
   },
   mounted() {
+    this.panelDragHeight = this.currActivePanel === 'none'
+      ? 0 : this.initPanelHeight()
     this.resizeObserver = new ResizeObserver(() => {
       this.$emit('panelHeight', this.currPanelHeight())
       // No fit page in mobile now

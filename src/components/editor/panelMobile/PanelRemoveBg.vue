@@ -3,7 +3,6 @@ div(class="panel-remove-bg")
   div(class="panel-remove-bg__btns")
     btn(class="full-width"
       :type="clearMode ? 'gray-active-sm' :'gray-sm'"
-      ref="btn"
       :hasIcon="true"
       :iconName="'clear'"
       :iconMargin="4"
@@ -11,7 +10,6 @@ div(class="panel-remove-bg")
       @click="setClearMode(true)") {{ $t('NN0385') }}
     btn(class="full-width"
       :type="clearMode ? 'gray-sm' :'gray-active-sm'"
-      ref="btn"
       :hasIcon="true"
       :iconName="'preserve'"
       :iconMargin="4"
@@ -19,7 +17,6 @@ div(class="panel-remove-bg")
       @click="setClearMode(false)") {{ $t('NN0386') }}
     btn(class="btn-recover full-width"
       type="gray-sm"
-      ref="btn"
       :hasIcon="true"
       :iconName="'reset'"
       :iconMargin="4"
@@ -45,9 +42,6 @@ div(class="panel-remove-bg")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import PopupAdjust from '@/components/popup/PopupAdjust.vue'
-import store from '@/store'
-import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -60,7 +54,6 @@ export default defineComponent({
     }
   },
   components: {
-    PopupAdjust,
     MobileSlider
   },
   computed: {
@@ -77,14 +70,6 @@ export default defineComponent({
       isProcessing: 'bgRemove/getIsProcessing',
       _brushSize: 'bgRemove/getBrushSize'
     }),
-    brushSize: {
-      get: () => {
-        return store.getters['bgRemove/getBrushSize']
-      },
-      set(val: number): void {
-        this.setBrushSize(val)
-      }
-    }
   },
   methods: {
     ...mapMutations({
@@ -99,12 +84,6 @@ export default defineComponent({
     restoreInitState() {
       this.setRestoreInitState(true)
     },
-    save() {
-      bgRemoveUtils.save()
-    },
-    cancel() {
-      bgRemoveUtils.cancel()
-    }
   }
 })
 </script>

@@ -50,22 +50,12 @@ export default defineComponent({
       type: Boolean,
       required: true
     },
-    index: {
-      type: Number,
-      required: true
-    }
   },
   emits: ['select', 'deselect', 'goto'],
   computed: {
     ...mapGetters('design', {
       selectedDesigns: 'getSelectedDesigns'
     }),
-    selectedNum(): number {
-      return Object.keys(this.selectedDesigns).length
-    },
-    isMultiSelected(): boolean {
-      return this.selectedNum > 1
-    },
     isTempFolder(): boolean {
       return this.config.id.endsWith('_new')
     }

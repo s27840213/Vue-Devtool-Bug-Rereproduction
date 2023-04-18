@@ -309,6 +309,7 @@ export default defineComponent({
     isValidHex (hex) {
       return tinycolor(hex).isValid()
     },
+    // eslint-disable-next-line vue/no-unused-properties
     simpleCheckForValidColor (data) {
       const keysToCheck = ['r', 'g', 'b', 'a', 'h', 's', 'l', 'v']
       let checked = 0
@@ -328,9 +329,11 @@ export default defineComponent({
         return data
       }
     },
+    // eslint-disable-next-line vue/no-unused-properties
     paletteUpperCase (palette) {
       return palette.map(c => c.toUpperCase())
     },
+    // eslint-disable-next-line vue/no-unused-properties
     isTransparent (color) {
       return tinycolor(color).getAlpha() === 0
     },

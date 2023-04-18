@@ -6,12 +6,11 @@ p(class="nu-curve-text__p" :style="pStyle()")
     class="nu-curve-text__span"
     :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
     :key="sIndex",
-    :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan, transParentStyles)") {{ span.text }}
+    :style="Object.assign(styles(span.styles, sIndex), extraSpanStyle)") {{ span.text }}
 </template>
 
 <script lang="ts">
 import { IGroup, ISpan, IText } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
@@ -35,25 +34,12 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    page: {
-      type: Object as PropType<IPage>,
-      required: true
-    },
     subLayerIndex: {
       type: Number
     },
-    primaryLayer: {
-      type: Object,
-      default: () => { return undefined }
+    extraSpanStyle: {
+      type: Object as PropType<Record<string, string>>,
     },
-    isDuplicated: {
-      type: Boolean,
-      default: false
-    },
-    isTransparent: {
-      default: false,
-      type: Boolean
-    }
   },
   data () {
     return {
@@ -83,19 +69,6 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    duplicatedSpan(): Record<string, string> {
-      const textShadow = textEffectUtils.convertTextEffect(this.config)
-      return this.isDuplicated ? {
-        ...textShadow.duplicatedSpan
-      } : {}
-    },
-    transParentStyles(): {[key: string]: any} {
-      return this.isTransparent ? {
-        color: 'rgba(0, 0, 0, 0)',
-        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
-        'text-decoration-color': 'rgba(0, 0, 0, 0)'
-      } : {}
-    }
   },
   watch: {
     'config.paragraphs': {

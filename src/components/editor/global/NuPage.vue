@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/use-v-on-exact -->
 <template lang="pug">
 div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
   div(class="nu-page"
@@ -20,29 +21,29 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
         svg-icon(class="pointer btn-line-template mr-15"
           :pageIndex="pageIndex"
           :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="openLineTemplatePopup()"
+          @click="openLineTemplatePopup()"
           v-hint="$t('NN0138')"
         )
         //- svg-icon(class="pointer mr-5"
         //-   :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-        //-   @click.native="")
+        //-   @click="")
         //- svg-icon(class="pointer mr-15"
         //-   :iconName="'caret-down'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-        //-   @click.native="")
+        //-   @click="")
         svg-icon(class="pointer mr-10"
           :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="addPage()"
+          @click="addPage()"
           v-hint="$t('NN0139')"
         )
         svg-icon(class="pointer"
           :class="[{'mr-10': getPageCount > 1}]"
           :iconName="'duplicate-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="duplicatePage()"
+          @click="duplicatePage()"
           v-hint="$t('NN0140')"
         )
         svg-icon(class="pointer"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-          @click.native="deletePage()"
+          @click="deletePage()"
           v-hint="$t('NN0141')"
         )
     div(v-if="isDetailPage && !$isTouchDevice()" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
@@ -51,19 +52,19 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
           span {{pageIndex + 1}}
         //- svg-icon(class="pointer mt-10"
         //-   :iconName="'caret-up'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-        //-   @click.native="")
+        //-   @click="")
         //- svg-icon(class="pointer mt-10"
         //-   :iconName="'caret-down'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-        //-   @click.native="")
+        //-   @click="")
         svg-icon(class="pointer mt-15"
           :iconName="'add-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-          @click.native="addPage()")
+          @click="addPage()")
         svg-icon(class="pointer mt-10"
           :iconName="'duplicate-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-          @click.native="duplicatePage()")
+          @click="duplicatePage()")
         svg-icon(class="pointer mt-10"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-          @click.native="deletePage()")
+          @click="deletePage()")
     template(v-if="!isOutOfBound || hasEditingText")
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
@@ -158,21 +159,18 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
 </template>
 
 <script lang="ts">
-import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IText } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
-import cssConverter from '@/utils/cssConverter'
 import eventUtils from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -190,7 +188,6 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    NuBackgroundController,
     PageContent,
     DimBackground,
     SnapLineArea,
@@ -201,27 +198,15 @@ export default defineComponent({
   },
   data() {
     return {
-      initialAbsPos: { x: 0, y: 0 },
-      initialRelPos: { x: 0, y: 0 },
+      initialRelPos: { /* x: 0, */y: 0 },
       currentAbsPos: { x: 0, y: 0 },
-      currentRelPos: { x: 0, y: 0 },
+      currentRelPos: { /* x: 0, */y: 0 },
       isShownScrollBar: false,
-      tmpYDiff: 0,
-      tmpToTop: false,
       initialPageHeight: 0,
       isShownResizerHint: false,
       isResizingPage: false,
       pageIsHover: false,
-      ImageUtils,
-      layerUtils,
       ShortcutUtils,
-      // for test used
-      coordinate: null as unknown as HTMLElement,
-      coordinateWidth: 0,
-      coordinateHeight: 0,
-      // snapUtils: new SnapUtils(this.pageIndex),
-      generalUtils,
-      pageUtils,
       currDraggingIndex: -1
     }
   },
@@ -232,10 +217,6 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
-      required: true
-    },
-    isAnyBackgroundImageControl: {
-      type: Boolean,
       required: true
     },
     overflowContainer: {
@@ -386,9 +367,6 @@ export default defineComponent({
     isAnyLayerActive(): boolean {
       return this.currSelectedIndex !== -1
     },
-    guidelines(): { [index: string]: Array<number> } {
-      return (this.config as IPage).guidelines
-    },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
     },
@@ -436,17 +414,6 @@ export default defineComponent({
         }
       }
       return false
-    },
-    getHalation(): unknown[] {
-      const { styles: { adjust } } = this.config.backgroundImage.config as IImage
-      const { width, height } = this.config
-      const { posX, posY } = this.config.backgroundImage
-      const position = {
-        width: width / 2 * this.contentScaleRatio,
-        x: (-posX + width / 2) * this.contentScaleRatio,
-        y: (-posY + height / 2) * this.contentScaleRatio
-      }
-      return imageAdjustUtil.getHalation(adjust.halation, position)
     },
     selectedLayerCount(): number {
       return this.currSelectedInfo.layers.length
@@ -502,20 +469,6 @@ export default defineComponent({
         ShortcutUtils.zoomIn()
       }
     },
-    snapLineStyles(dir: string, pos: number, isGuideline?: string) {
-      pos = pos * (this.scaleRatio / 100)
-      return dir === 'v' ? {
-        height: '100%',
-        width: '1px',
-        transform: `translate(${pos}px,0)`,
-        'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
-      } : {
-        width: '100%',
-        height: '1px',
-        transform: `translate(0,${pos}px)`,
-        'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
-      }
-    },
     bleedLineAreaStyles() {
       if (!this.config.isEnableBleed) {
         return {
@@ -532,12 +485,6 @@ export default defineComponent({
         left: this.config.bleeds.left * scaleRatio + 'px',
         right: this.config.bleeds.right * scaleRatio + 'px'
       }
-    },
-    addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
-      this.ADD_newLayers({
-        pageIndex: pageIndex,
-        layers: [layer]
-      })
     },
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
@@ -634,26 +581,6 @@ export default defineComponent({
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
     },
-    backgroundControlStyles() {
-      const backgroundImage = this.config.backgroundImage
-      return {
-        width: `${backgroundImage.config.styles.imgWidth * this.contentScaleRatio}px`,
-        height: `${backgroundImage.config.styles.imgHeight * this.contentScaleRatio}px`,
-        left: `${backgroundImage.posX * this.contentScaleRatio}px`,
-        top: `${backgroundImage.posY * this.contentScaleRatio}px`
-      }
-    },
-    backgroundContorlClipStyles() {
-      const { posX, posY } = this.config.backgroundImage
-      return {
-        clipPath: `path('M${-posX * this.contentScaleRatio},${-posY * this.contentScaleRatio}h${this.config.width * this.contentScaleRatio}v${this.config.height * this.contentScaleRatio}h${-this.config.width * this.contentScaleRatio}z`,
-        'pointer-events': 'none'
-      }
-    },
-    backgroundFlipStyles() {
-      const { horizontalFlip, verticalFlip } = this.config.backgroundImage.config.styles
-      return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
-    },
     openLineTemplatePopup() {
       popupUtils.openPopup('line-template', {
         target: `.btn-line-template[pageIndex="${this.pageIndex}"]`,
@@ -671,7 +598,7 @@ export default defineComponent({
       this.initialPageHeight = this.pageState.config.height
       this.isResizingPage = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
-      this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+      this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       eventUtils.addPointerEvent('pointermove', this.pageResizing)
       if (this.overflowContainer) {
         this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
@@ -697,7 +624,7 @@ export default defineComponent({
         })
       } else {
         this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
-        this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+        this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
         this.initialPageHeight = this.pageState.config.height
       }
       this.isShownScrollBar = isShownScrollbar

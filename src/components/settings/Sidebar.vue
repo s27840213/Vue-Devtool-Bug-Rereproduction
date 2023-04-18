@@ -9,7 +9,7 @@ div(class="sidebar")
         div(class="profile-text body-4")
           div {{showUname}}
           div(class="text-gray-3") {{showAccount}}
-      template(v-for="view in settingsItems")
+      template(v-for="view in settingsItems" :key="view.name")
         hr(v-if="view.name === 'hr'")
         div(v-else class="nav-container__option"
             :class="{'selected': subPath === view.name}")

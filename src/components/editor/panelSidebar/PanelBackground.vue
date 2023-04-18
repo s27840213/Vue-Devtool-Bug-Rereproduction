@@ -28,7 +28,7 @@ div(class="panel-bg")
         :title="title"
         @action="handleCategorySearch")
         template(v-slot:preview="{ item }")
-          category-background-item(class="panel-bg__item"
+          category-background-item(
             :item="item"
             :locked="currentPageBackgroundLocked")
     template(v-slot:category-background-item="{ list, title }")
@@ -36,7 +36,6 @@ div(class="panel-bg")
         div(v-if="title"
           class="panel-bg__header") {{ title }}
         category-background-item(v-for="item in list"
-          class="panel-bg__item"
           :key="item.id"
           :item="item"
           :locked="currentPageBackgroundLocked")
@@ -250,9 +249,6 @@ export default defineComponent({
     recordChange() {
       this.$nextTick(() => stepsUtils.record())
     },
-    switchTab(tabIndex: number) {
-      this.tabIndex = tabIndex
-    },
     openColorPicker() { // @openColorPicker will only be trigger in mobile.
       this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
     },
@@ -292,13 +288,6 @@ export default defineComponent({
     .panel &:deep(.color-panel__scroll) { // push scroll only in desktop
       @include push-scrollbar10;
     }
-  }
-  &__item {
-    width: min(calc((100vw - 10px - 48px) / 2), 145px);
-    height: min(calc((100vw - 10px - 48px) / 2), 145px);
-    margin: 0 auto;
-    object-fit: cover;
-    vertical-align: middle;
   }
   &__items {
     display: grid;

@@ -3,6 +3,7 @@ div(class="panel-object-adjust")
   template(v-if="isLine")
     div(class="panel-object-adjust__options")
       div(v-for="(option,index) in lineOptions"
+          :key="option"
           class="panel-object-adjust__option"
           :class="currMode === index ? 'bg-blue-1' : 'bg-gray-5'")
         svg-icon(
@@ -39,7 +40,7 @@ div(class="panel-object-adjust")
           svg-icon(class="mr-5" iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
           div(class="shape-setting__value-selector__button-text body-2") {{$t('NN0085')}}
       div(v-if="currMode === 2" class="panel-object-adjust__markers")
-          template(v-for="markerslot in makeSlots")
+          template(v-for="markerslot in makeSlots" :key="markerslot.marker")
             div(class="panel-object-adjust__option bg-gray-5"
                 :class="{'outline-blue-1': startMarker === markerslot.marker}"
                 @pointerup="handleStartMarkerUpdate(markerslot.marker)")
@@ -50,7 +51,7 @@ div(class="panel-object-adjust")
                 :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
                 :trimOffset="markerContentMap[markerslot.marker].trimOffset")
       div(v-if="currMode === 3" class="panel-object-adjust__markers")
-        template(v-for="markerslot in makeSlots")
+        template(v-for="markerslot in makeSlots" :key="markerslot.marker")
           div(class="panel-object-adjust__option bg-gray-5"
               :class="{'outline-blue-1': endMarker === markerslot.marker}"
               @pointerup="handleEndMarkerUpdate(markerslot.marker)")
@@ -64,6 +65,7 @@ div(class="panel-object-adjust")
   template(v-if="isBasicShape")
     div(class="panel-object-adjust__options")
       div(v-for="(option,index) in ['line-width', 'non-filled']"
+          :key="option"
           class="panel-object-adjust__option"
           :class="currMode === index ? 'bg-blue-1' : 'bg-gray-5'"
           @pointerdown="switchMode(index)")
@@ -122,7 +124,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({

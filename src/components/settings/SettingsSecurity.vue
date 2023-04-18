@@ -32,7 +32,6 @@ div(class="settings-security")
 
 <script lang="ts">
 import PopupVerify from '@/components/popup/PopupVerify.vue'
-import localeUtils from '@/utils/localeUtils'
 import popupUtils from '@/utils/popupUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -63,9 +62,6 @@ export default defineComponent({
       const s = new Date(this.upassUpdate)
       return this.$t('NN0312', { year: s.getFullYear(), month: s.getMonth() + 1, date: s.getDate() }) as string
     },
-    currLocale(): string {
-      return localeUtils.currLocale()
-    }
   },
   mounted() {
     this.showUpdatePassword = this.upassUpdate.length > 0
