@@ -391,7 +391,9 @@ export default defineComponent({
   }
   &__text-button-wrapper {
     position: absolute;
-    inset: auto 40px 24px 40px;
+    right: 40px;
+    left: 40px;
+    bottom: 24px;
     max-width: 310px;
     display: flex;
     align-items: center;
