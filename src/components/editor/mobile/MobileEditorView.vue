@@ -484,14 +484,19 @@ export default defineComponent({
           store.commit('mobileEditor/UPDATE_pinchScale', evtScale)
 
           const translationRatio = {
-            x: (this.initPinchPos.x - editorUtils.mobileCenterPos.x) / (page.width * contentScaleRatio) + 0.5,
-            y: (this.initPinchPos.y - editorUtils.mobileCenterPos.y) / (page.height * contentScaleRatio) + 0.5
+            x: ((this.initPinchPos.x - editorUtils.mobileCenterPos.x) / (page.width * contentScaleRatio) + 0.5) / (this.tmpScaleRatio * 0.01) + (-this.initPagePos.x / (page.width * this.tmpScaleRatio * 0.01 * contentScaleRatio)),
+            y: ((this.initPinchPos.y - editorUtils.mobileCenterPos.y) / (page.height * contentScaleRatio) + 0.5) / (this.tmpScaleRatio * 0.01) + (-this.initPagePos.y / (page.height * this.tmpScaleRatio * 0.01 * contentScaleRatio))
           }
 
           const sizeDiff = {
             width: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.width * contentScaleRatio),
             height: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.height * contentScaleRatio)
           }
+          // console.log(((this.initPinchPos.x - editorUtils.mobileCenterPos.x) / page.mobilePhysicalSize.originSize.width + 0.5) / (this.tmpScaleRatio * 0.01), ((this.initPinchPos.y - editorUtils.mobileCenterPos.y) / page.mobilePhysicalSize.originSize.height + 0.5) / (this.tmpScaleRatio * 0.01))
+          // console.log(-this.initPagePos.x / (this.tmpScaleRatio * 0.01 * contentScaleRatio * page.width), (-page.y / (this.tmpScaleRatio * 0.01 * contentScaleRatio * page.height)))
+          // console.log(page.height * contentScaleRatio)
+          // console.log(translationRatio.x, translationRatio.y)
+          // console.log(this.tmpScaleRatio)
 
           pageUtils.updatePagePos(layerUtils.pageIndex, {
             x: this.initPagePos.x - sizeDiff.width * translationRatio.x,
@@ -504,10 +509,35 @@ export default defineComponent({
           this.initPinchPos = null
           const newScaleRatio = this.$store.state.mobileEditor.pinchScale * this.tmpScaleRatio
           const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(page, newScaleRatio * 0.01)
-          if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
+          if (this.tmpScaleRatio * evtScale > 500) {
+            this.isHandlingEdgeReach = true
+            const currX = page.x
+            const currY = page.y
+            const currScale = this.tmpScaleRatio * evtScale
+            const ratioAt500 = 1 - (currScale - 500) / (currScale - this.tmpScaleRatio)
+            const xAt500 = (currX - this.initPagePos.x) * ratioAt500 + this.initPagePos.x
+            const yAt500 = (currY - this.initPagePos.y) * ratioAt500 + this.initPagePos.y
+            pageUtils.updatePagePos(layerUtils.pageIndex, {
+              x: xAt500,
+              y: yAt500
+            })
+
+            const pageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+            pageEl.style.transition = 'transform .2s, webkit-transform .2s'
+            this.$store.commit('mobileEditor/UPDATE_pinchScale', 500 / this.tmpScaleRatio)
+
+            setTimeout(() => {
+              this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
+              this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
+              this.$store.commit('SET_pageScaleRatio', 500)
+              this.isHandlingEdgeReach = false
+              pageEl.style.transition = ''
+              pageEl.style.transformOrigin = ''
+            }, 200)
+          } else if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
             this.isHandlingEdgeReach = true
             const pageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-            pageEl.style.transition = 'transform .2s, webkit-transform .2s, width .2s, height .2s'
+            pageEl.style.transition = 'transform .2s, webkit-transform .2s'
 
             const pos = { x: page.x, y: page.y }
             const EDGE_WIDTH = this.EDGE_WIDTH()
