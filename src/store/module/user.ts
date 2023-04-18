@@ -7,6 +7,7 @@ import generalUtils from '@/utils/generalUtils'
 // import apiUtils from '@/utils/apiUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import themeUtils from '@/utils/themeUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -385,7 +386,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  async loginSetup({ commit, dispatch, getters }, { data }: { data: ILoginResponse }) {
+  async loginSetup({ commit, dispatch }, { data }: { data: ILoginResponse }) {
     if (data.flag === 0) {
       const newToken = data.data.token // token may be refreshed
       const complete = data.data.complete
@@ -401,12 +402,6 @@ const actions: ActionTree<IUserModule, unknown> = {
         userViewGuide = +guestViewGuide
         localStorage.removeItem('guest_view_guide')
         userApis.updateUserViewGuide(newToken, userViewGuide)
-      }
-
-      if (!complete) {
-        // TODO: call /update-user with country, device, app
-        console.log('device =', getters.getDevice, DeviceType[getters.getDevice])
-        console.log('app =', getters['webView/getInBrowserMode'] ? 0 : 1)
       }
 
       commit('SET_STATE', {
@@ -433,6 +428,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       commit('SET_TOKEN', newToken)
       dispatch('payment/getBillingInfo', {}, { root: true })
       dispatch('getAllAssets', { token: newToken })
+
+      if (complete === 0) {
+        picWVUtils.sendStatistics()
+      }
     } else {
       console.log('login failed')
       commit('SET_TOKEN', '')
@@ -458,9 +457,9 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  async updateUser({ commit }, { token, account, upass, uname, locale, subscribe }) {
+  async updateUser({ commit }, { token, account, upass, uname, locale, subscribe, country, device, app }) {
     try {
-      const { data } = await userApis.updateUser(token, account, upass, uname, locale, subscribe)
+      const { data } = await userApis.updateUser(token, account, upass, uname, locale, subscribe, country, device, app)
       return Promise.resolve(data)
     } catch (error) {
       console.log(error)
