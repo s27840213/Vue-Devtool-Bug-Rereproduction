@@ -1095,19 +1095,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async fetchLoadedFonts(): Promise<void> {
-    const loadedFonts = (await this.getState('loadedFonts'))?.value ?? []
+    const loadedFonts = (await this.getState('loadedFonts')) ?? {}
     store.commit('vivisticker/SET_loadedFonts', loadedFonts)
   }
 
   async recordLoadedFont(face: string): Promise<void> {
     store.commit('vivisticker/UPDATE_addLoadedFont', face)
-    const loadedFonts = store.getters['vivisticker/getLoadedFonts']
-    await this.setState('loadedFonts', { value: loadedFonts })
+    const loadedFonts = store.getters['vivisticker/getLoadedFonts'] as { [key: string]: true }
+    await this.setState('loadedFonts', { ...loadedFonts })
   }
 
   async checkFontLoaded(face: string): Promise<boolean> {
-    const loadedFonts = store.getters['vivisticker/getLoadedFonts']
-    return loadedFonts.includes(face)
+    const loadedFonts = store.getters['vivisticker/getLoadedFonts'] as { [key: string]: true }
+    return loadedFonts[face] ?? false
   }
 }
 

@@ -37,7 +37,7 @@ interface IViviStickerState {
   modalInfo: { [key: string]: any },
   prices: IPrices,
   expireDate: string,
-  loadedFonts: string[]
+  loadedFonts: { [key: string]: true }
 }
 
 const EDITOR_BGS = [
@@ -95,7 +95,7 @@ const getDefaultState = (): IViviStickerState => ({
     },
   },
   expireDate: '',
-  loadedFonts: []
+  loadedFonts: {}
 })
 
 const state = getDefaultState()
@@ -203,7 +203,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getModalInfo(state: IViviStickerState): { [key: string]: string } {
     return state.modalInfo
   },
-  getLoadedFonts(state: IViviStickerState): string[] {
+  getLoadedFonts(state: IViviStickerState): { [key: string]: true } {
     return state.loadedFonts
   }
 }
@@ -320,7 +320,7 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_expireDate(state: IViviStickerState, expireDate: string) {
     state.expireDate = expireDate
   },
-  SET_loadedFonts(state: IViviStickerState, loadedFonts: string[]) {
+  SET_loadedFonts(state: IViviStickerState, loadedFonts: { [key: string]: true }) {
     state.loadedFonts = loadedFonts
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
@@ -393,7 +393,7 @@ const mutations: MutationTree<IViviStickerState> = {
     state.selectedDesigns = {}
   },
   UPDATE_addLoadedFont(state: IViviStickerState, font: string) {
-    state.loadedFonts.push(font)
+    state.loadedFonts[font] = true
   }
 }
 
