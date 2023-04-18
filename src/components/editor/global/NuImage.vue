@@ -88,7 +88,7 @@ import unitUtils from '@/utils/unitUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -446,7 +446,8 @@ export default defineComponent({
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
       const styles = {
-        ...(this.isAdjustImage() && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        // in vivisticker the following code would lead the non-fluent UX
+        // ...(this.isAdjustImage() && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
