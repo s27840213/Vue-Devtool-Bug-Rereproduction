@@ -7,6 +7,7 @@ import generalUtils from '@/utils/generalUtils'
 // import apiUtils from '@/utils/apiUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import themeUtils from '@/utils/themeUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -403,12 +404,6 @@ const actions: ActionTree<IUserModule, unknown> = {
         userApis.updateUserViewGuide(newToken, userViewGuide)
       }
 
-      if (!complete) {
-        // TODO: call /update-user with country, device, app
-        console.log('device =', getters.getDevice, DeviceType[getters.getDevice])
-        console.log('app =', getters['webView/getInBrowserMode'] ? 0 : 1)
-      }
-
       commit('SET_STATE', {
         uname: uname,
         shortName: shortName,
@@ -433,6 +428,16 @@ const actions: ActionTree<IUserModule, unknown> = {
       commit('SET_TOKEN', newToken)
       dispatch('payment/getBillingInfo', {}, { root: true })
       dispatch('getAllAssets', { token: newToken })
+
+      if (!complete) {
+        const data = {
+          token: getters.getToken,
+          device: getters.getDevice,
+          app: picWVUtils.inBrowserMode ? 0 : 1,
+          country: picWVUtils.getUserInfoFromStore().country
+        }
+        dispatch('updateUser', data)
+      }
     } else {
       console.log('login failed')
       commit('SET_TOKEN', '')
@@ -458,9 +463,9 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  async updateUser({ commit }, { token, account, upass, uname, locale, subscribe }) {
+  async updateUser({ commit }, { token, account, upass, uname, locale, subscribe, country, device, app }) {
     try {
-      const { data } = await userApis.updateUser(token, account, upass, uname, locale, subscribe)
+      const { data } = await userApis.updateUser(token, account, upass, uname, locale, subscribe, country, device, app)
       return Promise.resolve(data)
     } catch (error) {
       console.log(error)
