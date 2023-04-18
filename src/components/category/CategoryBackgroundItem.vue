@@ -78,6 +78,7 @@ export default defineComponent({
     vertical-align: middle;
     -webkit-touch-callout: none;
     user-select: none;
+  }
   &__share {
     position: absolute;
     @include size(24px);
