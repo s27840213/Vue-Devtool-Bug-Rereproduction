@@ -475,12 +475,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const executor = () => {
       nextTick(() => {
         this.preCopyEditor()
-        setTimeout(() => {
-          this.sendCopyEditor().then((flag) => {
-            this.postCopyEditor()
-            callback && callback(flag)
-          })
-        }, 500) // wait for soft keyboard to close
+        nextTick(() => {
+          setTimeout(() => {
+            this.sendCopyEditor().then((flag) => {
+              this.postCopyEditor()
+              callback && callback(flag)
+            })
+          }, 500) // wait for soft keyboard to close
+        }) // wait for HeaderTabs to update height
       })
     }
     if (store.getters['text/getIsFontLoading']) {
