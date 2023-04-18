@@ -1,16 +1,18 @@
 <template lang="pug">
 div(class="category-background-item")
-  img(class="pointer"
+  img(class="category-background-item__image pointer"
     :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'smal', item.ver)"
     draggable="false"
     v-press="handleShare"
     @click="addBackground"
     @error="handleNotFound")
+  pro-item(v-if="item.plan")
   div(class="category-background-item__share" @click.stop.prevent="handleShare")
     svg-icon(iconName="share" iconColor="white" iconWidth="16px")
 </template>
 
 <script lang="ts">
+import ProItem from '@/components/payment/ProItem.vue'
 import { IAsset } from '@/interfaces/module'
 import AssetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -19,6 +21,9 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
+  components: {
+    ProItem
+  },
   emits: ['share'],
   props: {
     src: {
@@ -49,10 +54,12 @@ export default defineComponent({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
+      if (!vivistickerUtils.checkPro(this.item, 'object')) return
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
       AssetUtils.addAssetToRecentlyUsed(this.item, 'background')
     },
     handleShare() {
+      if (!vivistickerUtils.checkPro(this.item, 'object')) return
       this.$emit('share', this.item)
     }
   }
@@ -62,7 +69,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .category-background-item {
   position: relative;
-  & > img {
+  &__image {
     width: 100%;
     height: 100%;
     object-fit: cover;

@@ -5,9 +5,11 @@ div(class="category-text-item"
   img(class="category-text-item__img"
     :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
     @error="handleNotFound")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
+import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -15,6 +17,9 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
+  components: {
+    ProItem
+  },
   emits: [],
   props: {
     src: {
@@ -54,6 +59,7 @@ export default defineComponent({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addText() {
+      if (!vivistickerUtils.checkPro(this.item, 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(this.item).then(() => {
           textPropUtils.updateTextPropsState()
