@@ -49,7 +49,7 @@ div(class="panel-text")
         :title="title"
         @action="handleCategorySearch")
         template(v-slot:preview="{ item }")
-          category-text-item(class="panel-text__item"
+          category-text-item(
             :item="item")
     template(v-slot:category-text-item="{ list, title }")
       div(class="panel-text__items"
@@ -58,7 +58,6 @@ div(class="panel-text")
           :style="{gridColumn: `1 / ${amountInRow+1}`}"
           class="panel-text__header") {{ title }}
         category-text-item(v-for="item in list"
-          class="panel-text__item"
           :key="item.id"
           :item="item")
     template(#after)
@@ -375,13 +374,6 @@ export default defineComponent({
     top: 50%;
     right: 0;
     transform: translateY(-50%);
-  }
-  &__item {
-    width: 80px;
-    height: 80px;
-    margin: 0 5px;
-    object-fit: contain;
-    vertical-align: middle;
   }
   &__items {
     display: grid;

@@ -297,6 +297,7 @@ export default defineComponent({
           willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
           pointerEvents,
           clipPath,
+          'mix-blend-mode': this.config.styles.blendMode,
           ...this.transformStyle
         }
       )
@@ -386,7 +387,7 @@ export default defineComponent({
       switch (this.config.type) {
         case LayerType.shape: {
           return {
-            'mix-blend-mode': this.config.styles.blendMode,
+            // 'mix-blend-mode': this.config.styles.blendMode,
             ...shapeUtils.isLine(this.config as AllLayerTypes) ? { pointerEvents: 'none' } : {}
           }
         }

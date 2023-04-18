@@ -198,7 +198,7 @@ div(style="position: relative;")
 
 <script lang="ts">
 import userApis from '@/apis/user'
-import { ILoginResult } from '@/interfaces/webView'
+import { ILoginResult } from '@/interfaces/api'
 import store from '@/store'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 import gtmUtils from '@/utils/gtmUtils'

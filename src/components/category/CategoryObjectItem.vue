@@ -53,6 +53,7 @@ export default defineComponent({
       setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
     }),
     addSvg() {
+      // if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
       console.log(generalUtils.deepCopy(this.item))
       // if (!vivistickerUtils.checkPro({ plan }, 'object')) return
       if (this.item.type === 8 || this.item.has_frame) {
