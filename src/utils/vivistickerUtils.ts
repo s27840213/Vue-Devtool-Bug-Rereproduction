@@ -735,10 +735,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async fetchDesign(): Promise<ITempDesign | undefined> {
-    const designData = await this.getState('tempDesign')
-    let design = designData?.design
-    if (design && design !== 'none') {
-      design = JSON.parse(design)
+    const designData = (await this.getState('tempDesign')) as { design: string } | undefined
+    const designString = designData?.design
+    let design
+    if (designString && designString !== 'none') {
+      design = JSON.parse(designString) as ITempDesign
+      design.pages = pageUtils.newPages(design.pages)
     } else {
       design = undefined
     }
@@ -753,7 +755,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       assetInfo
     } = tempDesign
     this.startEditing(editorType, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
-      store.commit('SET_pages', pageUtils.newPages(pages))
+      this.setPages(pages)
     }), () => {
       if (editorType === 'object') {
         groupUtils.select(0, [0])
@@ -781,7 +783,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         if (callback) {
           callback(pages)
         }
-        store.commit('SET_pages', pages)
+        this.setPages(pages)
       }), () => {
         if (type === 'object') {
           groupUtils.select(0, [0])
@@ -803,6 +805,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const flag = await this.genThumbnail(id)
     if (flag === '1') return
     await this.saveDesignJson(id)
+  }
+
+  setPages(pages: IPage[]) {
+    layerUtils.setAutoResizeNeededForLayersInPages(pages, true)
+    store.commit('SET_pages', pages)
   }
 
   async genThumbnail(id: string): Promise<string> {
