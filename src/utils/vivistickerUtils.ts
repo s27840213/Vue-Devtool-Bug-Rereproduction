@@ -199,22 +199,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   sendToIOS(messageType: string, message: any) {
-    if (messageType === 'SCREENSHOT' && !this.hasCopied && this.checkOSVersion('16.0')) {
-      this.hasCopied = true
-      this.setState('hasCopied', { data: this.hasCopied })
-      modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
-        msg: i18n.global.t('STK0035').toString(),
-        action: () => {
-          store.commit('vivisticker/SET_fullPageConfig', {
-            type: 'iOS16Video',
-            params: { fromModal: true }
-          })
-          modalUtils.clearModalInfo()
-        }
-      }, undefined, {
-        noClose: true,
-        noCloseIcon: true
-      })
+    if (messageType === 'SCREENSHOT' && message.action !== 'editorCopy') {
+      this.handleIos16Video()
     }
     super.sendToIOS(messageType, message)
   }
@@ -1117,6 +1103,26 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async checkFontLoaded(face: string): Promise<boolean> {
     const loadedFonts = store.getters['vivisticker/getLoadedFonts'] as { [key: string]: true }
     return loadedFonts[face] ?? false
+  }
+
+  handleIos16Video() {
+    if (!this.hasCopied && this.checkOSVersion('16.0')) {
+      this.hasCopied = true
+      this.setState('hasCopied', { data: this.hasCopied })
+      modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
+        msg: i18n.global.t('STK0035').toString(),
+        action: () => {
+          store.commit('vivisticker/SET_fullPageConfig', {
+            type: 'iOS16Video',
+            params: { fromModal: true }
+          })
+          modalUtils.clearModalInfo()
+        }
+      }, undefined, {
+        noClose: true,
+        noCloseIcon: true
+      })
+    }
   }
 }
 
