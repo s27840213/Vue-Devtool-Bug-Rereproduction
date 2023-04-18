@@ -386,7 +386,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  async loginSetup({ commit, dispatch, getters }, { data }: { data: ILoginResponse }) {
+  async loginSetup({ commit, dispatch }, { data }: { data: ILoginResponse }) {
     if (data.flag === 0) {
       const newToken = data.data.token // token may be refreshed
       const complete = data.data.complete
@@ -429,14 +429,8 @@ const actions: ActionTree<IUserModule, unknown> = {
       dispatch('payment/getBillingInfo', {}, { root: true })
       dispatch('getAllAssets', { token: newToken })
 
-      if (!complete) {
-        const data = {
-          token: getters.getToken,
-          device: getters.getDevice,
-          app: picWVUtils.inBrowserMode ? 0 : 1,
-          country: picWVUtils.getUserInfoFromStore().country
-        }
-        dispatch('updateUser', data)
+      if (complete === 0) {
+        picWVUtils.sendStatistics()
       }
     } else {
       console.log('login failed')
