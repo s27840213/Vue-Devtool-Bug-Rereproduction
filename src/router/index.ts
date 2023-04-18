@@ -48,6 +48,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        vivistickerUtils.hideController()
         next()
       } catch (error) {
         console.log(error)
