@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/use-v-on-exact -->
 <template lang="pug">
 div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
   div(class="nu-page"
@@ -68,7 +69,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
           :style="wrapperStyles"
-          @keydown.exact.self="handleSpecialCharacter"
+          @keydown.self="handleSpecialCharacter"
           @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
           @keydown.ctrl.c.exact.self.prevent.stop="ShortcutUtils.copy()"
           @keydown.meta.c.exact.self.prevent.stop="ShortcutUtils.copy()"
