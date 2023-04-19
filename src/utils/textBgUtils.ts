@@ -1073,9 +1073,10 @@ class TextBg {
           const paragraphs = cloneDeep(layers[idx].paragraphs as IParagraph[])
           if (newFixedWidth) { // Split span, another one in tiptapUtils.toIParagraph
             paragraphs.forEach(p => {
-              p.spans = p.spans.flatMap(span =>
+              const newSpans = p.spans.flatMap(span =>
                 [...span.text].map(t => ({ text: t, styles: span.styles }))
               )
+              p.spans = newSpans.length !== 0 ? newSpans : p.spans
             })
           } else { // Merge span
             paragraphs.forEach(p => {
