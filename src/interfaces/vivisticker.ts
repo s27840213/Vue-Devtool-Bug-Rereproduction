@@ -53,8 +53,33 @@ export interface IPaymentPending {
 }
 
 export interface IPayment {
-  isSubscribed: boolean,
-  expireDate: string,
+  subscribe: boolean,
   prices: IPrices,
   pending: IPaymentPending
+}
+
+export interface ISubscribeResult {
+  uuid: string,
+  subscribe: '1' | '0',
+  plan_id: 'monthly' | 'annually',
+  next_plan_id?: 'monthly' | 'annually',
+  next_billing_time?: string,
+  stop_subscribe: '1' | '0',
+  retry: '1' | '0',
+  expire_intent: '0' | '1' | '2',
+  reason?: string,
+  msg?: string
+}
+
+export interface ISubscribeInfo extends ISubscribeResult {
+  complete: '1' | '0',
+  priceCurrency: string,
+  monthly: {
+    priceValue: string,
+    priceText: string
+  },
+  annually: {
+    priceValue: string,
+    priceText: string
+  }
 }

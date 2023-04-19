@@ -4,7 +4,7 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IIosImgData, IMyDesign, IMyDesignTag, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import { nextTick } from 'vue'
@@ -1077,11 +1077,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return true
   }
 
-  subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, priceCurrency: string, monthly: {priceValue: string, priceText: string}, annually: {priceValue: string, priceText: string} }) {
+  subscribeInfo(data: ISubscribeInfo) {
     console.log('subscribeInfo', data)
     if (this.isPaymentDisabled) return
-    this.appToast('subscribeInfo: ' + data.status)
-    const { status, monthly, annually, priceCurrency, expire_date } = data
+    const { subscribe, monthly, annually, priceCurrency } = data
     const currencyFormaters = {
       TWD: (value: string) => `${value}元`,
       USD: (value: string) => `$${(+value).toFixed(2)}`,
@@ -1092,33 +1091,38 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       annually.priceText = currencyFormaters[priceCurrency](annually.priceValue)
     }
 
-    store.commit('vivisticker/SET_isSubscribed', status === 'subscribed')
-    store.commit('vivisticker/SET_expireDate', expire_date)
-    store.commit('vivisticker/SET_prices', {
-      currency: priceCurrency,
-      monthly: {
-        value: parseFloat(monthly.priceValue),
-        text: monthly.priceText
-      },
-      annually: {
-        value: parseFloat(annually.priceValue),
-        text: annually.priceText
+    store.commit('vivisticker/UPDATE_payment', {
+      subscribe: subscribe === '1',
+      prices: {
+        currency: priceCurrency,
+        monthly: {
+          value: parseFloat(monthly.priceValue),
+          text: monthly.priceText
+        },
+        annually: {
+          value: parseFloat(annually.priceValue),
+          text: annually.priceText
+        }
       }
     })
   }
 
-  subscribeResult(data: { status: 'subscribed' | 'failed', expire_date: string }) {
-    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if already got one
+  subscribeResult(data: ISubscribeResult) {
+    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if is timeout
     console.log('subscribeResult', data)
     if (this.isPaymentDisabled) return
-    this.appToast('subscribeResult: ' + data.status)
-    const { status, expire_date } = data
-    if (status === 'subscribed') {
-      store.commit('vivisticker/SET_isSubscribed', true)
-      store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
+    if (data.reason) {
+      store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
+      return
     }
-    if (expire_date !== undefined) store.commit('vivisticker/SET_expireDate', expire_date)
+    const { subscribe, reason } = data
+    if (!reason) {
+      store.commit('vivisticker/UPDATE_payment', {
+        subscribe: subscribe === '1',
+      })
+    }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
+    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
   }
 
   async fetchLoadedFonts(): Promise<void> {

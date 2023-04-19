@@ -120,8 +120,7 @@ const getDefaultState = (): IViviStickerState => ({
   selectedDesigns: {},
   modalInfo: {},
   payment: {
-    isSubscribed: false,
-    expireDate: '',
+    subscribe: false,
     prices: {
       currency: '',
       monthly: {
@@ -257,7 +256,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
     return Object.entries(state.payment.pending).some(([key, value]) => value)
   },
   getIsSubscribed(state: IViviStickerState): boolean {
-    return state.payment.isSubscribed
+    return state.payment.subscribe
   }
 }
 
@@ -367,19 +366,15 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_modalInfo(state: IViviStickerState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
   },
-  SET_prices(state: IViviStickerState, prices: IPrices) {
-    state.payment.prices = prices
-  },
-  SET_expireDate(state: IViviStickerState, expireDate: string) {
-    state.payment.expireDate = expireDate
+  UPDATE_payment(state: IViviStickerState, data: Partial<IPayment>) {
+    Object.entries(data).forEach(([key, value]) => {
+      (state.payment as any)[key] = value
+    })
   },
   SET_paymentPending(state: IViviStickerState, data: Record<keyof IPaymentPending, boolean>) {
     for (const item of Object.entries(data)) {
       state.payment.pending[item[0] as keyof IPaymentPending] = item[1]
     }
-  },
-  SET_isSubscribed(state: IViviStickerState, isSubscribed) {
-    state.payment.isSubscribed = isSubscribed
   },
   SET_loadedFonts(state: IViviStickerState, loadedFonts: { [key: string]: true }) {
     state.loadedFonts = loadedFonts

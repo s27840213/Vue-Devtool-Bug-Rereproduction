@@ -231,7 +231,7 @@ export default defineComponent({
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
       if (timeout) {
         setTimeout(() => {
-          vivistickerUtils.subscribeResult({ status: 'failed', expire_date: '' })
+          this.setPaymentPending({ purchase: false, restore: false })
         }, timeout)
       }
     },
