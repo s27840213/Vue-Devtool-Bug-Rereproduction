@@ -3,21 +3,24 @@ div(class="text-effect-setting mt-25")
   //- Tabs to choose effect category: shadow, shape and bg.
   div(class="text-effect-setting-tabs")
     span(v-for="category in textEffects"
-        :selected="currTab===category.name"
-        @click="switchTab(category.name)") {{category.label}}
+      :key="category.name"
+      :selected="currTab===category.name"
+      @click="switchTab(category.name)") {{category.label}}
   div(class="action-bar")
-    template(v-for="effects1d in currCategory.effects2d")
+    template(v-for="effects1d in currCategory.effects2d" :key="effects1d.name")
       //- To choose effect, ex: hollow, splice or echo.
       div(class="text-effect-setting__effects mb-10")
-        svg-icon(v-for="effect in effects1d"
-          :key="`${currCategory.name}-${effect.key}`"
-          :iconName="effectIcon(currCategory, effect)"
-          @click="onEffectClick(effect.key)"
-          class="text-effect-setting__effect pointer"
-          :class="{'selected': currentStyle.name === effect.key }"
-          iconWidth="60px"
-          iconColor="white"
-          v-hint="effect.label")
+        div(v-for="effect in effects1d"
+            :key="`${currCategory.name}-${effect.key}`"
+            class="text-effect-setting__effect pointer"
+            @click="onEffectClick(effect)")
+          svg-icon(
+            :iconName="effectIcon(currCategory, effect)"
+            :class="{'selected': currentStyle.name === effect.key }"
+            iconWidth="56px"
+            iconColor="white"
+            v-hint="effect.label")
+          pro-item(v-if="effect.plan" theme="roundedRect")
       //- Effect option UI.
       div(v-if="getOptions(effects1d) && getOptions(effects1d)?.length !== 0"
           class="text-effect-setting-options")
@@ -29,6 +32,7 @@ div(class="text-effect-setting mt-25")
           div(v-if="option.type === 'select'"
               class="text-effect-setting-options__field--select")
             svg-icon(v-for="sel in option.select"
+              :key="`${option.key}-${sel.key}`"
               :iconName="`${option.key}-${sel.key}`"
               iconWidth="24px"
               :class="{'selected': currentStyle.endpoint === sel.key }"
@@ -57,7 +61,7 @@ div(class="text-effect-setting mt-25")
           //- Option type color
           color-btn(v-if="option.type === 'color'" size="25px"
             :color="colorParser(currentStyle[option.key])"
-            :active="option.key === colorTarget.key && settingTextEffect"
+            :active="option.key === colorTarget && settingTextEffect"
             @click="handleColorModal(currCategory.name, option.key)")
         div(class="text-effect-setting-options__field")
           span
@@ -66,14 +70,15 @@ div(class="text-effect-setting mt-25")
 </template>
 
 <script lang="ts">
-import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -85,19 +90,15 @@ import { mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    ColorPicker,
-    ColorBtn
+    ColorBtn,
+    ProItem,
   },
   emits: ['toggleColorPanel'],
   data() {
     return {
-      openColorPicker: false,
       currTab: localStorageUtils.get('textEffectSetting', 'tab') as 'shadow'|'bg'|'shape',
       textEffects: constantData.textEffects(),
-      colorTarget: {
-        category: '',
-        key: ''
-      }
+      colorTarget: ''
     }
   },
   computed: {
@@ -136,7 +137,7 @@ export default defineComponent({
     handleColorModal(category: 'shadow'|'bg'|'shape', key: string) {
       const currColor = this.colorParser(this.currentStyle[key])
 
-      this.colorTarget = { category, key }
+      this.colorTarget = key
       editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(currColor)
@@ -184,8 +185,9 @@ export default defineComponent({
           break
       }
     },
-    async onEffectClick(effectName: string): Promise<void> {
-      await this.setEffect({ effectName })
+    async onEffectClick(effect: IEffect): Promise<void> {
+      if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      await this.setEffect({ effectName: effect.key })
       this.recordChange()
     },
     resetTextEffect() {
@@ -218,8 +220,7 @@ export default defineComponent({
       }
     },
     handleColorUpdate(color: string): void {
-      const key = this.colorTarget.key
-      this.setEffect({ effect: { [key]: color } })
+      this.setEffect({ effect: { [this.colorTarget]: color } })
     },
     colorParser(color: string) {
       return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
@@ -256,10 +257,17 @@ export default defineComponent({
     width: 212px;
   }
   &__effect {
+    position: relative;
     box-sizing: border-box;
     margin-top: 10px;
     border-radius: 3px;
     border: 2px solid transparent;
+    width: 60px;
+    height: 60px;
+    .pro {
+      left: 1px;
+      top: -4px;
+    }
     &:not(.selected):hover {
       border-color: setColor(blue-1, 0.5);
     }

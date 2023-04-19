@@ -1,14 +1,15 @@
 <template lang="pug">
-div(class="category-background-item")
-  img(class="category-background-item__image pointer"
-    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'smal', item.ver)"
-    draggable="false"
+div(class="panel-bg__item"
     v-press="handleShare"
-    @click="addBackground"
+    @click="addBackground")
+  img(class="panel-bg__img"
+    ref="img"
+    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
+    draggable="false"
     @error="handleNotFound")
-  pro-item(v-if="item.plan")
-  div(class="category-background-item__share" @click.stop.prevent="handleShare")
+  div(class="panel-bg__share" @click.stop.prevent="handleShare")
     svg-icon(iconName="share" iconColor="white" iconWidth="16px")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
@@ -21,10 +22,10 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
+  emits: ['share'],
   components: {
     ProItem
   },
-  emits: ['share'],
   props: {
     src: {
       type: String
@@ -33,10 +34,6 @@ export default defineComponent({
       type: Object as PropType<IAsset>,
       required: true
     },
-    locked: {
-      type: Boolean,
-      required: true
-    }
   },
   data() {
     return {
@@ -67,11 +64,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.category-background-item {
-  position: relative;
-  &__image {
+.panel-bg {
+  &__item {
+    position: relative;
+    cursor: pointer;
+  }
+  &__img {
+    // width: min(calc((100vw - 10px - 48px) / 2), 145px);
+    // height: min(calc((100vw - 10px - 48px) / 2), 145px);
     width: 100%;
     height: 100%;
+    // margin: 0 auto;
     object-fit: cover;
     vertical-align: middle;
     -webkit-touch-callout: none;

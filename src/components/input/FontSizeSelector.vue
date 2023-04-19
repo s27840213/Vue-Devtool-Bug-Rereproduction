@@ -1,28 +1,32 @@
 <template lang="pug">
 div(class="font-size-selector relative")
-  div(class="font-size-selector__number")
+  div(class="font-size-selector__number"
+      :style="numberStyles")
     div(class="pointer"
+      :style="numberButtonStyles"
       @pointerdown="fontSizeStepping(-1)"
       @contextmenu.prevent)
-      svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
-    button(class="font-size-selector__range-input-button")
-      input(class="text-gray-2 center record-selection" type="text" ref="input-fontSize"
+      svg-icon(iconName="minus-small" :iconWidth="iconSize" iconColor="gray-2")
+    button(class="font-size-selector__range-input-button"
+          :style="inputButtonStyles")
+      input(class="body-2 text-gray-2 center record-selection" type="number" ref="input-fontSize"
+            :class="{ mobile: $isTouchDevice() }"
             @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
     div(class="pointer"
+      :style="numberButtonStyles"
       @pointerdown="fontSizeStepping(1)"
       @contextmenu.prevent)
-      svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
+      svg-icon(iconName="plus-small" :iconWidth="iconSize" iconColor="gray-2")
 </template>
 
 <script lang="ts">
-import ValueSelector from '@/components/ValueSelector.vue'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import textPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vClickOutside from 'click-outside-vue3'
 import _ from 'lodash'
@@ -31,20 +35,21 @@ import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
-  components: {
-    ValueSelector
-  },
   data() {
     return {
-      openValueSelector: false,
-      fontSelectValue,
       fieldRange: {
         fontSize: { min: 1, max: 9999 },
-        lineHeight: { min: 0.5, max: 2.5 },
-        fontSpacing: { min: -200, max: 800 },
-        // fontSpacing: { min: -2, max: 8 },
-        // lineHeight: { min: 0, max: 300 },
-        opacity: { min: 0, max: 100 }
+      },
+      iconSize: this.$isTouchDevice() ? '24px' : '14px',
+      numberStyles: {
+        height: this.$isTouchDevice() ? '40px' : '31px',
+        width: this.$isTouchDevice() ? '132px' : 'initial',
+      },
+      numberButtonStyles: {
+        width: this.$isTouchDevice() ? '36px' : '40px',
+      },
+      inputButtonStyles: {
+        width: this.$isTouchDevice() ? '58px' : 'fit-content',
       }
     }
   },
@@ -64,18 +69,6 @@ export default defineComponent({
     },
   },
   methods: {
-    handleValueModal() {
-      if (this.$isTouchDevice()) return
-      this.openValueSelector = !this.openValueSelector
-      if (this.openValueSelector) {
-        const input = this.$refs['input-fontSize'] as HTMLInputElement
-        input.focus()
-        input.select()
-      }
-    },
-    handleValueUpdate(value: number) {
-      textPropUtils.fontSizeHandler(value)
-    },
     setSize(e: Event) {
       const { value } = e.target as HTMLInputElement
       if (generalUtils.isValidFloat(value)) {
@@ -125,10 +118,9 @@ export default defineComponent({
   &__number {
     border: 1px solid setColor(gray-4);
     border-radius: 3px;
-    width: 132px;
-    height: 40px;
     display: flex;
     align-items: center;
+
     > div {
       height: 100%;
       display: flex;
@@ -138,31 +130,31 @@ export default defineComponent({
       color: setColor(gray-2);
 
       &:nth-child(1) {
-        width: 36px;
         border-right: 1px solid setColor(gray-4);
       }
 
       &:nth-child(3) {
-        width: 36px;
         border-left: 1px solid setColor(gray-4);
       }
     }
   }
 
   &__range-input-button {
-    width: 58px;
     & > input {
       padding: 0;
-      @include body-MD;
       text-align: center;
+      &.mobile {
+        @include body-MD;
+      }
     }
   }
 
   &__value-selector {
     position: absolute;
     z-index: 9;
-    transform: translate(45%);
+    transform: translateX(-50%);
     top: 75%;
+    left: 50%;
   }
 }
 </style>

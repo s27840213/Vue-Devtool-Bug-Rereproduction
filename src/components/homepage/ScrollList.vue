@@ -35,6 +35,7 @@ div(class="list")
               @click="slotProps.openPopup")
             span(class="body-XS text-gray-1") {{$t('NN0023')}}
         div(v-for="item in themeData"
+          :key="item.id"
           class="list-content-items__theme-item")
           router-link(:to="themeRouteInfo(item)")
             img(class="list-content-items__theme-item-preset"
@@ -46,11 +47,13 @@ div(class="list")
       //- type mydesign
       template(v-else-if="type === 'mydesign'")
         design-item(v-for="item in mydesignData"
+          :key="item.id"
           class="list-content-items__mydesign-item"
           :config="item")
       //- type template
       template(v-else-if="type === 'template'")
         div(v-for="item in templateData" class="list-content-items__template-item"
+            :key="item.id"
             @click="clickTemplate(item)")
           img(loading="lazy"
             :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"

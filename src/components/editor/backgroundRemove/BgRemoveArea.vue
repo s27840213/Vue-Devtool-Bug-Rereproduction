@@ -63,7 +63,6 @@ export default defineComponent({
         height: '16px',
         transform: 'translate(0,0)'
       },
-      isMouseDown: false,
       initImgSrc: '',
       imgSrc: '',
       blurPx: 1,
@@ -71,7 +70,6 @@ export default defineComponent({
       stepsQueue: [] as Array<Promise<unknown>>,
       isProcessingStepsQueue: false,
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
-      brushSteps: [],
       magnifyUtils: null as unknown as MagnifyUtils,
       showMagnifyAtRight: false
     }

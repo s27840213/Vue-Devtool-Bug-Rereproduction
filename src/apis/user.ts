@@ -24,14 +24,17 @@ export default {
       ...attrs
     }
   }),
-  login: (token: string, account: string, password: string): AxiosPromise => axios('/login', {
-    method: 'POST',
-    data: {
-      token,
-      account,
-      password
-    }
-  }),
+  login(token: string, account: string, password: string): AxiosPromise {
+    return axios('/login', {
+      method: 'POST',
+      data: {
+        token,
+        account,
+        password,
+        locale: this.getLocale()
+      }
+    })
+  },
   deleteAccount(): AxiosPromise {
     return axios('/delete-account', {
       method: 'POST',
@@ -108,7 +111,7 @@ export default {
       campaign: localStorage.getItem('campaign') || undefined
     }
   }),
-  updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number): AxiosPromise => axios('/update-user', {
+  updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number, country: string, device: number, app: number): AxiosPromise => axios('/update-user', {
     method: 'POST',
     data: {
       token,
@@ -116,7 +119,10 @@ export default {
       upass,
       uname,
       locale,
-      subscribe
+      subscribe,
+      country,
+      device,
+      app,
     }
   }),
   fbLogin: (code: string, redirect_uri: string, locale: string): AxiosPromise => axios('/fb-login', {

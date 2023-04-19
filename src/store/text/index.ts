@@ -4,6 +4,7 @@ import router from '@/router'
 import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
@@ -241,14 +242,19 @@ const actions: ActionTree<ITextState, unknown> = {
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
   let cssUrl
   let response
-  const isInPrevew = router.currentRoute.value.name === 'Preview'
+  const routeName = router.currentRoute.value.name
+  const isInPrevew = routeName === 'Preview' || routeName === 'Screenshot'
+  const isFonLoaded = await vivistickerUtils.checkFontLoaded(face)
   switch (type) {
     case 'public':
       cssUrl = addPlatform(`https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`)
-      if (isInPrevew) return cssUrl
+      if (isInPrevew || isFonLoaded) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
-        if (response.ok) return cssUrl
+        if (response.ok) {
+          await vivistickerUtils.recordLoadedFont(face)
+          return cssUrl
+        }
         throw Error(response.status.toString())
       } catch (error) {
         if (error instanceof Error && error.message === '404') {
@@ -259,10 +265,13 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       return ''
     case 'admin':
       cssUrl = addPlatform(`https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`)
-      if (isInPrevew) return cssUrl
+      if (isInPrevew || isFonLoaded) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
-        if (response.ok) return cssUrl
+        if (response.ok) {
+          await vivistickerUtils.recordLoadedFont(face)
+          return cssUrl
+        }
         throw Error(response.status.toString())
       } catch (error) {
         if (error instanceof Error && error.message === '404') {

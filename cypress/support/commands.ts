@@ -90,6 +90,7 @@ Cypress.Commands.add('deselectAllLayers', () => {
     .get('.pages-wrapper', silent)
     .eq(0, silent)
     .type('{ctrl+D}', silent)
+    .type('{ctrl+D}', silent)
     .get('.page-control', silent)
     .children(silent).should('have.length', 0)
 })
@@ -209,7 +210,7 @@ function addAsset(panel: ISidebarData, category: string | number, itemIndex: num
         cy.get('@target').click().invoke('attr', 'src').then((targetSrc) => {
           targetSrc = targetSrc.match(/https:\/\/images.unsplash.com\/photo-[\d]+-[\w]+/)[0]
 
-          cy.get('#nu-page_0 .nu-layer .nu-image img.nu-image__picture')
+          cy.get('#nu-page_0 .nu-layer .nu-image img.nu-image__img')
             .invoke('attr', 'src').should('contain', targetSrc)
         })
         break
@@ -229,7 +230,7 @@ function addAsset(panel: ISidebarData, category: string | number, itemIndex: num
           .children().eq(0).children().eq(0).children().eq(0).children().eq(0).children().should('have.length', 1)
           .then((nuLayer) => {
             if (nuLayer.hasClass('nu-image')) {
-              cy.wrap(nuLayer).find('img.nu-image__picture')
+              cy.wrap(nuLayer).find('img.nu-image__img')
                 .invoke('attr', 'src').should('contain', targetSrc)
             } else if (nuLayer.hasClass('nu-frame')) {
               cy.wait('@fetchConfig').its('response.body').then((body) => {
@@ -293,7 +294,7 @@ function addAsset(panel: ISidebarData, category: string | number, itemIndex: num
         cy.get('@target').click().invoke('attr', 'src').then((targetSrc) => {
           targetSrc = targetSrc.match(/https:\/\/asset.vivipic.com\/[\w]+\/asset\/image\/[\w]+\//)[0]
 
-          cy.get('#nu-page_0 .nu-layer .nu-image img.nu-image__picture')
+          cy.get('#nu-page_0 .nu-layer .nu-image img.nu-image__img')
             .invoke('attr', 'src').should('contain', targetSrc)
         })
         break

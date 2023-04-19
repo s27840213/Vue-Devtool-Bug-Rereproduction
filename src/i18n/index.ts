@@ -67,6 +67,7 @@ const i18n = createI18n({
         .replace(/<blue>/g, '<span class="text-blue-1">')
         .replace(/<red>/g, '<span class="text-red">')
         .replace(/(<\/blue>|<\/red>)/g, '</span>')
+        .replace(/<newline>/g, '<br/ > ')
     } else return translated
   },
 })

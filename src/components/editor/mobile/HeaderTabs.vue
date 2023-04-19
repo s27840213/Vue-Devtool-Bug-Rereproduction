@@ -7,20 +7,21 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
         :iconName="'chevron-left'"
         :iconColor="'white'"
         :iconWidth="'22px'")
-    div(class="header-bar__feature-icon mr-15"
-        :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping}"
-        @pointerdown="undo()")
-      svg-icon(:iconName="'undo'"
-        :iconColor="(inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping ? 'gray-2' :'white' "
-        :iconWidth="'22px'")
-    div(class="header-bar__feature-icon"
-        :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping}"
-        @pointerdown="redo()")
-      svg-icon(:iconName="'redo'"
-        :iconColor="(inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping ? 'gray-2' : 'white'"
-        :iconWidth="'22px'")
+    template(v-if="!isShowDownloadPanel")
+      div(class="header-bar__feature-icon mr-15"
+          :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping}"
+          @pointerdown="undo()")
+        svg-icon(:iconName="'undo'"
+          :iconColor="(inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping ? 'gray-2' :'white' "
+          :iconWidth="'22px'")
+      div(class="header-bar__feature-icon"
+          :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping}"
+          @pointerdown="redo()")
+        svg-icon(:iconName="'redo'"
+          :iconColor="(inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping ? 'gray-2' : 'white'"
+          :iconWidth="'22px'")
   div(class="header-bar__right")
-    div(v-for="tab in rightTabs")
+    div(v-for="(tab, index) in rightTabs" :key="`${tab.icon}-${index}`")
       div(v-if="!tab.isHidden" class="header-bar__feature-icon" :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
         @pointerdown="handleIconAction(tab.icon)")
         svg-icon(
@@ -31,7 +32,6 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
 
 <script lang="ts">
 import i18n from '@/i18n'
-import { IFrame, IGroup } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -81,7 +81,6 @@ export default defineComponent({
         { icon: 'download', isPanelIcon: true },
         { icon: 'more', isPanelIcon: true }
       ] as IIcon[],
-      stepsUtils
     }
   },
   computed: {
@@ -89,6 +88,7 @@ export default defineComponent({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      currActivePanel: 'mobileEditor/getCurrActivePanel',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inBgRemoveFirstStep: 'bgRemove/inFirstStep',
@@ -96,11 +96,13 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       hasBleed: 'getHasBleed',
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: webViewUtils.appendModuleName('getUserInfo'),
     }),
     rootStyles(): {[key: string]: string} {
+      const basePadding = webViewUtils.inBrowserMode ? 10.7 : 8
       return {
-        paddingTop: `${this.userInfo.statusBarHeight + 8}px`
+        paddingTop: `${this.userInfo.statusBarHeight + basePadding}px`,
+        paddingBottom: `${basePadding}px`,
       }
     },
     isCropping(): boolean {
@@ -122,6 +124,8 @@ export default defineComponent({
     rightTabs(): IIcon[] {
       if (this.inBgRemoveMode) {
         return []
+      } else if (this.isShowDownloadPanel) {
+        return [{ icon: 'home' }]
       } else if (this.selectedLayerNum > 0) {
         return this.layerTabs
       } else if (this.inBgSettingMode) {
@@ -139,34 +143,8 @@ export default defineComponent({
     isLocked(): boolean {
       return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getSelectedLayer().locked
     },
-    isGroup(): boolean {
-      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
-    },
-    showPhotoTabs(): boolean {
-      return !this.inBgRemoveMode && !this.isLocked &&
-        this.targetIs('image') && this.singleTargetType()
-    },
-    showFontTabs(): boolean {
-      return !this.inBgRemoveMode && !this.isLocked &&
-        this.targetIs('text') && this.singleTargetType()
-    },
-    groupTypes(): Set<string> {
-      const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer) => {
-        return layer.type
-      })
-      return new Set(types)
-    },
-    hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
-    },
-    subLayerType(): string {
-      return this.currSubSelectedInfo.type
-    },
-    isFrameImage(): boolean {
-      const { layers, types } = this.currSelectedInfo
-      const frameLayer = layers[0] as IFrame
-      return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
+    isShowDownloadPanel(): boolean {
+      return this.currActivePanel === 'download'
     }
   },
   methods: {
@@ -176,37 +154,14 @@ export default defineComponent({
       }
       return (this.isLocked && tab.icon !== 'lock') ? 'gray-2' : this.currTab === tab.icon ? 'blue-1' : 'white'
     },
-    targetIs(type: string): boolean {
-      if (this.isGroup) {
-        if (this.hasSubSelectedLayer) {
-          return this.subLayerType === type
-        } else {
-          return this.groupTypes.has(type)
-        }
-      } else {
-        if (this.currSelectedInfo.types.has('frame') && type === 'image') {
-          return this.isFrameImage
-        }
-        return this.currSelectedInfo.types.has(type)
-      }
-    },
-    singleTargetType(): boolean {
-      if (this.isGroup) {
-        if (this.hasSubSelectedLayer) {
-          return true
-        } else {
-          return this.groupTypes.size === 1
-        }
-      } else {
-        return this.currSelectedInfo.types.size === 1
-      }
-    },
     goHome() {
       this.$router.push({ name: 'Home' })
     },
     backBtnAction() {
       if (this.inAllPagesMode) {
         this.$emit('showAllPages')
+      } else if (this.isShowDownloadPanel) {
+        this.$emit('switchTab', 'none')
       } else {
         this.goHome()
       }
@@ -223,6 +178,10 @@ export default defineComponent({
           } else {
             notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
+          break
+        }
+        case 'home': {
+          this.goHome()
           break
         }
         case 'more': {
@@ -292,7 +251,8 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding-left: 16px;
+  padding-right: 16px;
   box-sizing: border-box;
   z-index: setZindex("header");
   -webkit-touch-callout: none;

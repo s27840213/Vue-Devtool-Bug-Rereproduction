@@ -25,7 +25,7 @@ div(class="page-setting")
           svg-icon(class="page-setting__suggestion-panel__body__close"
                   iconName="close" iconWidth="19px" iconColor="white")
         keep-alive
-          page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
+          page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)")
   div(v-if="hasBleed" class="page-setting__bleed")
     div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
       span(class="text-gray-2 label-mid") {{$t('NN0780')}}
@@ -52,6 +52,7 @@ div(class="page-setting")
           @click="copyText(groupId)") {{groupId}}
       div(class="pt-5 text-red body-2") {{groupErrorMsg}}
       div(v-for="id in unsetThemeTemplate"
+        :key="id"
         class="pt-5 text-red body-2"
         @click="copyText(id)") {{id}}
       div(v-if="isGetGroup")
@@ -68,7 +69,8 @@ div(class="page-setting")
             class="pr-10 cover-option body-4")
             span theme
             span 封面頁碼
-          div(v-for="(item, idx) in dbGroupThemes"
+          div(v-for="(item) in dbGroupThemes"
+            :key="item.id"
             class="pt-5 pr-10 cover-option")
             span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
             span 第{{item.coverIndex+1}}頁
@@ -79,12 +81,13 @@ div(class="page-setting")
           div(class="pr-10 cover-option body-4")
             span theme
             span 封面頁碼
-          div(v-for="(item, idx) in groupInfo.groupThemes"
-            class="pt-5 pr-10 cover-option")
+          div(v-for="(item) in groupInfo.groupThemes"
+              :key="item.id"
+              class="pt-5 pr-10 cover-option")
             span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
             select(class="template-information__cover-select text-center"
               v-model="item.coverIndex")
-              option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
+              option(v-for="option in item.options" :key="option.key_id" :value="option.index") 第{{option.index+1}}頁
         div(class="pt-10")
           btn(:type="'primary-sm'" class="rounded my-5"
             style="padding: 8px 0; margin: 0 auto; width: 70%;"
@@ -128,7 +131,7 @@ div(class="page-setting")
             span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
         div(v-if="showDbTemplate"
           class="square-wrapper wrong")
-          template(v-for="(item, idx) in themeList")
+          template(v-for="(item) in themeList" :key="item.id")
             div(v-if="dbTemplateThemes[item.id]"
               class="pt-5 theme-option")
               span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
@@ -138,7 +141,8 @@ div(class="page-setting")
           class="pt-10 template-information__line")
           span(class="body-1 ") 修正版
         div(class="square-wrapper")
-          div(v-for="(item, idx) in themeList"
+          div(v-for="(item) in themeList"
+            :key="item.id"
             class="pt-5 theme-option")
             input(type="checkbox"
               class="theme-option__check"
@@ -149,7 +153,7 @@ div(class="page-setting")
         div(class="template-information__line pt-10")
           span(class="body-1") 語系
           select(class="template-information__select" v-model="templateInfo.locale")
-            option(v-for="locale in localeOptions" :value="locale") {{locale}}
+            option(v-for="locale in localeOptions" :key="locale" :value="locale") {{locale}}
         div(class="pt-10") tags_tw
         div
           property-bar
@@ -182,6 +186,7 @@ div(class="page-setting")
           span(class="text-blue-1") {{templateInfo.grandparent_locale}}
         div(class="bg-blue")
           div(v-for="(item) in templateInfo.grandchildren_id"
+            :key="item.childrenId"
             class="border-bottom py-5")
             div(class="child-item")
               span(class="body-1") 子
@@ -189,6 +194,7 @@ div(class="page-setting")
                 @click="copyText(item.childrenId)") {{item.childrenId}}
               span {{item.childrenLocale}}
             div(v-for="(item2) in item.grandchildren"
+              :key="item2.key_id"
               class="child-item")
               span 孫
               span(class="body-2"
@@ -216,8 +222,6 @@ div(class="page-setting")
 import designApis from '@/apis/design-info'
 import BleedSettings from '@/components/editor/BleedSettings.vue'
 import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
-import RadioBtn from '@/components/global/RadioBtn.vue'
-import SearchBar from '@/components/SearchBar.vue'
 import { IPage } from '@/interfaces/page'
 import { ICoverTheme, Itheme, IThemeTemplate } from '@/interfaces/theme'
 import GeneralUtils from '@/utils/generalUtils'
@@ -233,14 +237,11 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    SearchBar,
-    RadioBtn,
     PageSizeSelector,
     BleedSettings
   },
   data() {
     return {
-      isLocked: true,
       isPanelOpen: false,
       isGetGroup: false,
       isGetTemplate: false,
@@ -380,9 +381,6 @@ export default defineComponent({
     ...mapActions('layouts', [
       'getRecently'
     ]),
-    toggleLock() {
-      this.isLocked = !this.isLocked
-    },
     setSuggestionPanel(opened: boolean) {
       this.isPanelOpen = opened
     },

@@ -110,12 +110,6 @@ export default defineComponent({
     toggleContent() {
       this.showContent = !this.showContent
     },
-    disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice()) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-    },
     toggleSize(bool: boolean) {
       this.isLargeSize = bool
     },

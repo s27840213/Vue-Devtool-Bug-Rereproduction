@@ -70,9 +70,7 @@ div(style="position: relative;")
       div(class="text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0181')}}?
       div
-        i18n-t(keypath="NN0282" tag="span")
-          template(#newline)
-            br
+        span(v-html="$t('NN0282')")
       div
         property-bar(class="mt-5"
           :class="{'input-invalid': !mailValid || emailResponseError}")
@@ -84,10 +82,7 @@ div(style="position: relative;")
           class="invalid-message")
           span {{ mailErrorMessage }}
       div(class="pb-10")
-        i18n-t(keypath="NN0395" tag="span"
-          class="forgot-hint")
-          template(#newline)
-            br
+        span(class="forgot-hint" v-html="$t('NN0395')")
       div(class="flex"
         :class="hideBackButton ? 'pt-20' : ''"
         style="justify-content: center;")
@@ -203,7 +198,7 @@ div(style="position: relative;")
 
 <script lang="ts">
 import userApis from '@/apis/user'
-import { ILoginResult } from '@/interfaces/webView'
+import { ILoginResult } from '@/interfaces/api'
 import store from '@/store'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 import gtmUtils from '@/utils/gtmUtils'
@@ -387,7 +382,7 @@ export default defineComponent({
           gtmUtils.signUp(gtmTitle)
         }
         store.dispatch('user/loginSetup', { data: data })
-        this.$router.push({ path: this.redirect || redirect || '/' })
+        this.$router.push(this.redirect || redirect || '/')
       } else {
         console.log(`${loginType} login failed`)
         notify({ group: 'error', text: data.msg })
@@ -415,7 +410,7 @@ export default defineComponent({
       }
       const data = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
       if (data.flag === 0) {
-        this.$router.push({ path: this.redirect || '/' })
+        this.$router.push(this.redirect || '/')
       } else {
         this.password = ''
         this.passwordErrorMessage = data.msg || this.$t('NN0242')

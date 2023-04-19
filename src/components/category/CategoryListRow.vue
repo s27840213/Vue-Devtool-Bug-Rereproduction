@@ -57,7 +57,7 @@ export default defineComponent({
     display: grid;
     column-gap: 10px;
     grid-template-columns: auto;
-    justify-content: start;
+    justify-content: flex-start;
     grid-auto-flow: column;
     scroll-behavior: smooth;
     text-align: left;

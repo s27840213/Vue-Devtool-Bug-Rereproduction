@@ -26,6 +26,7 @@ div(class="home")
           type="template" :theme="theme" :key="theme")
     div(class="home-block")
       ta-block(v-for="item in blocklist"
+        :key="item.title"
         :content="item")
     nu-footer(:isHome="true")
 </template>
@@ -140,9 +141,6 @@ export default defineComponent({
     openSizePopup() {
       this.showSizePopup = true
     },
-    closeSizePopup() {
-      this.showSizePopup = false
-    }
   }
 })
 </script>

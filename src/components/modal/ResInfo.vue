@@ -32,14 +32,13 @@ div(class="res-info")
             @mousedown.prevent)
             span {{ info.userName }}
             span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
-          template(v-else
-            class="px-5")
-            span {{ ' ' + info.userName }}
-            span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
+          template(v-else)
+            span(class="px-5") {{ ' ' + info.userName }}
+            span(class="px-5") {{info.authorCompany ? ', ' + info.authorCompany : ''}}
   div(v-if="info.tags && info.tags.length"
     class="res-info__tags")
     span(class="pr-5") {{$t('NN0366')}}:
-    template(v-for="tag, idx in info.tags")
+    template(v-for="tag, idx in info.tags" :key="tag")
       span(v-if="idx !== 0") {{' '}}
       span(class="res-info__link __tag"
         @click="onTagClicked(tag)") {{ tag }}
@@ -67,7 +66,7 @@ div(class="res-info")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { mapMutations, mapActions } from 'vuex'
+import { mapActions, mapMutations } from 'vuex'
 
 const moduleName = 'unsplash'
 

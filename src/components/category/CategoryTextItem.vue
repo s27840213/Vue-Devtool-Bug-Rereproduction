@@ -1,8 +1,8 @@
 <template lang="pug">
-div(class="category-text-item"
+div(class="panel-text__item"
     :style="itemStyle"
     @click="addText")
-  img(class="category-text-item__img"
+  img(class="panel-text__img"
     :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
     @error="handleNotFound")
   pro-item(v-if="item.plan")
@@ -11,16 +11,18 @@ div(class="category-text-item"
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
+import DragUtils from '@/utils/dragUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
+  emits: [],
   components: {
     ProItem
   },
-  emits: [],
   props: {
     src: {
       type: String
@@ -76,12 +78,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.category-text-item {
-  -webkit-touch-callout: none;
-  user-select: none;
+.panel-text {
+  &__item {
+    position: relative;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
   &__img {
+    // width: 80px;
+    // height: 80px;
     width: 100%;
     height: 100%;
+    // margin: 0 5px;
     object-fit: contain;
     vertical-align: middle;
     -webkit-touch-callout: none;

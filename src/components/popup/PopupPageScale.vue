@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="popup-page-scale bg-gray-6"
     @click.stop="closePopup")
-  template(v-for="option in percentOptions")
+  template(v-for="option in percentOptions" :key="option")
     div(class="popup-page-scale__item"
         @click="setPageScaleRatio(option)")
       span(class="body-2") {{`${option}%`}}
@@ -15,10 +15,10 @@ div(class="popup-page-scale bg-gray-6"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import popupUtils from '@/utils/popupUtils'
-import { mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import { defineComponent } from 'vue'
+import { mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],

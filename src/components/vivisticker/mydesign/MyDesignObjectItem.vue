@@ -17,7 +17,6 @@ div(v-else class="my-design-object-item")
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
 import { IPage } from '@/interfaces/page'
 import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
@@ -27,9 +26,6 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
-  components: {
-    ProItem
-  },
   props: {
     item: {
       type: Object as PropType<IMyDesign>,

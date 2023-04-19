@@ -18,15 +18,11 @@ div(class="vvstk-editor" :style="copyingStyles()" @pointerdown="selectStart")
 <script lang="ts">
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
-import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
+import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { ISnapline } from '@/interfaces/snap'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import frameUtils from '@/utils/frameUtils'
-import generalUtils from '@/utils/generalUtils'
-import groupUtils from '@/utils/groupUtils'
-import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -46,12 +42,6 @@ export default defineComponent({
   data() {
     return {
       pageIndex: 0,
-      closestSnaplines: {
-        v: [] as Array<number>,
-        h: [] as Array<number>
-      },
-      imageUtils,
-      pageSize: 0,
       marginTop: 44
     }
   },
@@ -95,49 +85,8 @@ export default defineComponent({
     currLayer(): ILayer {
       return layerUtils.getCurrLayer
     },
-    getCurrLayer(): ILayer {
-      return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
-    },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
-    },
-    getCurrSubSelectedLayerShown(): IImage | undefined {
-      const layer = this.getCurrLayer
-      if (layer.type === 'group') {
-        const subLayer = generalUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
-        const scale = subLayer.styles.scale
-        subLayer.styles.scale = 1
-        subLayer.styles.x *= layer.styles.scale
-        subLayer.styles.y *= layer.styles.scale
-        const mappedLayer = groupUtils
-          .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
-        mappedLayer.styles.scale = scale
-        return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
-      } else if (layer.type === 'frame') {
-        if (frameUtils.isImageFrame(layer as IFrame)) {
-          const image = generalUtils.deepCopy((layer as IFrame).clips[0]) as IImage
-          image.styles.x = layer.styles.x
-          image.styles.y = layer.styles.y
-          image.styles.scale = 1
-          // image.styles.imgWidth *= layer.styles.scale
-          // image.styles.imgHeight *= layer.styles.scale
-          return Object.assign(image, { forRender: true })
-        }
-        const primaryLayer = this.getCurrLayer as IFrame
-        const image = generalUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
-        image.styles.x *= primaryLayer.styles.scale
-        image.styles.y *= primaryLayer.styles.scale
-        if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
-          const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
-          const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
-          const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
-          image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
-          image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
-        }
-        Object.assign(image, { forRender: true })
-        return groupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
-      }
-      return undefined
     },
     selectedLayerCount(): number {
       return this.currSelectedInfo.layers.length
@@ -172,15 +121,6 @@ export default defineComponent({
     },
     copyingStyles() {
       return this.isDuringCopy ? { background: 'transparent' } : {}
-    },
-    getClosestSnaplines() {
-      this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
-      this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
-    },
-    clearSnap(): void {
-      this.snapUtils.clear()
-      this.closestSnaplines.v = []
-      this.closestSnaplines.h = []
     },
     selectStart(e: PointerEvent) {
       if (e.pointerType === 'mouse' && e.button !== 0) return

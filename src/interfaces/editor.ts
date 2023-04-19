@@ -1,4 +1,4 @@
-import { IFrame, IGroup, IImage, IShape, IText, ITmp } from './layer'
+import { IFrame, IGroup, IImage, IShape, IText } from './layer'
 
 export interface ICurrSelectedInfo {
   pageIndex: number,
@@ -19,7 +19,7 @@ export interface IFooterTabProps {
 
 export interface IFooterTab {
   icon: string,
-  text: string,
+  text?: string,
   panelType?: string,
   hidden?: boolean,
   disabled?: boolean,

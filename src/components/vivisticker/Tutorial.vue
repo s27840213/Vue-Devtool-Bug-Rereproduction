@@ -1,35 +1,36 @@
 <template lang="pug">
-transition(name="panel-up")
-  div(ref="main" class="tutorial relative" v-touch
-      @swipeleft="handleSwipeLeft"
-      @swiperight="handleSwipeRight")
-    div(class="tutorial__video")
-      video(autoplay playsinline muted :src="videoSource" @ended="handleEnded" @canplay="handleVideoLoaded")
-    div(class="tutorial__content")
-      div(class="tutorial__content__container")
-        div(v-for="(stepConfig, index) in stepConfigs"
-            class="tutorial__content__step"
-            :style="transformStyles()")
-          div(class="tutorial__content__title") {{ stepConfig.title }}
-          div(class="tutorial__content__description") {{ stepConfig.description }}
-          div(class="tutorial__content__button-container")
-            div(class="tutorial__content__button"
-                @click.prevent.stop="handleNextStep")
-              span {{ buttonText(index) }}
-              div(class="tutorial__content__button-icon")
-                svg-icon(iconName="chevron-right"
-                          iconColor="black-3"
-                          iconWidth="32px")
-      div(class="tutorial__content__indicators")
-        div(v-for="(stepConfig, index) in stepConfigs"
-            class="tutorial__content__indicator"
-            :class="{current: index === step}"
-            @click.prevent.stop="step = index")
-    div(class="tutorial__close"
-        @click.prevent.stop="handleClose")
-      svg-icon(iconName="vivisticker_close"
-              iconColor="white"
-              iconWidth="24px")
+div(ref="main" class="tutorial relative" v-touch
+    @swipeleft="handleSwipeLeft"
+    @swiperight="handleSwipeRight")
+  div(class="tutorial__video")
+    video(autoplay playsinline muted :src="videoSource" @ended="handleEnded" @canplay="handleVideoLoaded")
+  div(class="tutorial__content")
+    div(class="tutorial__content__container")
+      div(v-for="(stepConfig, index) in stepConfigs"
+          class="tutorial__content__step"
+          :key="stepConfig.title"
+          :style="transformStyles()")
+        div(class="tutorial__content__title") {{ stepConfig.title }}
+        div(class="tutorial__content__description") {{ stepConfig.description }}
+        div(class="tutorial__content__button-container")
+          div(class="tutorial__content__button"
+              @click.prevent.stop="handleNextStep")
+            span {{ buttonText(index) }}
+            div(class="tutorial__content__button-icon")
+              svg-icon(iconName="chevron-right"
+                        iconColor="black-3"
+                        iconWidth="32px")
+    div(class="tutorial__content__indicators")
+      div(v-for="(stepConfig, index) in stepConfigs"
+          class="tutorial__content__indicator"
+          :class="{current: index === step}"
+          :key="stepConfig.title"
+          @click.prevent.stop="step = index")
+  div(class="tutorial__close"
+      @click.prevent.stop="handleClose")
+    svg-icon(iconName="vivisticker_close"
+            iconColor="white"
+            iconWidth="24px")
 </template>
 
 <script lang="ts">
@@ -69,12 +70,6 @@ export default defineComponent({
     }
   },
   computed: {
-    title(): string {
-      return this.stepConfigs[this.step].title
-    },
-    description(): string {
-      return this.stepConfigs[this.step].description
-    },
     videoSource(): string {
       return this.stepConfigs[this.step].video
     }

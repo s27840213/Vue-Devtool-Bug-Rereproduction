@@ -16,7 +16,6 @@ div(class="my-design-text-item"
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
 import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -25,9 +24,6 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
-  components: {
-    ProItem
-  },
   props: {
     item: {
       type: Object as PropType<IMyDesign>,

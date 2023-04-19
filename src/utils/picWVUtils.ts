@@ -1,4 +1,5 @@
-import { ILoginResult, IUserInfo } from '@/interfaces/webView'
+import { ILoginResult } from '@/interfaces/api'
+import { IUserInfo } from '@/interfaces/webView'
 import store from '@/store'
 import { WebViewUtils } from '@/utils/webViewUtils'
 import generalUtils from './generalUtils'
@@ -10,6 +11,7 @@ const WHITE_STATUS_BAR_ROUTES = [
 
 class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
+  toSendStatistics: { token: string, device: number } | undefined = undefined
   STANDALONE_USER_INFO: IUserInfo = {
     hostId: '',
     appVer: '100.0',
@@ -85,10 +87,21 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   async getUserInfo(): Promise<IUserInfo> {
     if (this.inBrowserMode) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('APP_LAUNCH', this.getEmptyMessage(), 'launch')
+    const userInfo = this.getUserInfoFromStore()
     const appCaps = await fetch(`https://template.vivipic.com/static/appCaps.json?ver=${generalUtils.generateRandomString(6)}`)
     const jsonCaps = await appCaps.json() as { review_ver: string }
     store.commit('webView/UPDATE_detectIfInReviewMode', jsonCaps.review_ver)
-    return this.getUserInfoFromStore()
+    if (this.toSendStatistics !== undefined) {
+      if (userInfo.country) { // if App version is too old to have country information, don't send update-user
+        store.dispatch('user/updateUser', {
+          ...this.toSendStatistics,
+          app: 1,
+          country: userInfo.country.toLowerCase()
+        })
+      }
+      this.toSendStatistics = undefined
+    }
+    return userInfo
   }
 
   launchResult(info: IUserInfo) {
@@ -147,6 +160,25 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   switchDomain(domain: string): void {
     if (this.inBrowserMode) return
     this.sendToIOS('SWITCH_DOMAIN', { domain })
+  }
+
+  async sendStatistics() {
+    const data = {
+      token: store.getters['user/getToken'] as string,
+      device: store.getters['user/getDevice'] as number,
+    }
+    if (this.inBrowserMode) {
+      const response = await fetch(`https://api.ipregistry.co/?key=${process.env.VUE_APP_IPREGISTRY_API_KEY}&fields=location.country.code`)
+      const json = await response.json() as { location: { country: { code: string } } }
+      const country = json.location.country.code.toLowerCase()
+      store.dispatch('user/updateUser', {
+        ...data,
+        app: 0,
+        country
+      })
+    } else {
+      this.toSendStatistics = data
+    }
   }
 }
 

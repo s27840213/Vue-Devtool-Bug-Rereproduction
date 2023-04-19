@@ -1,13 +1,15 @@
 <template lang="pug">
 div(class="nu-text" :style="textWrapperStyle()" draggable="false")
   //- Svg BG for text effex gooey.
-  svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+  svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
     component(v-for="(elm, idx) in svgBG.content"
               :key="`textSvgBg${idx}`"
               :is="elm.tag"
               v-bind="elm.attrs")
-  div(v-for="text, idx in duplicatedText" class="nu-text__body"
-      :style="Object.assign(bodyStyles(), text.extraBody)")
+  div(v-for="text, idx in duplicatedText"
+      :key="`text${idx}`"
+      class="nu-text__body"
+      :style="Object.assign(bodyStyles(), text.extraBodyStyle)")
     nu-curve-text(v-if="isCurveText"
       :config="config"
       :layerIndex="layerIndex"
@@ -15,15 +17,17 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :page="page"
       :subLayerIndex="subLayerIndex"
       :primaryLayer="primaryLayer"
-      :isDuplicated="idx !== duplicatedText.length-1"
-      :isTransparent="isTransparent")
+      :extraSpanStyle="text.extraSpanStyle")
     p(v-else
-      v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+      v-for="(p, pIndex) in config.paragraphs"
+      :key="`p${pIndex}`"
+      class="nu-text__p"
       :style="pStyle(p.styles)")
       span(v-for="(span, sIndex) in p.spans"
+        :key="`span${sIndex}`"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpan, transParentStyles)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpanStyle)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
@@ -42,7 +46,7 @@ import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
@@ -74,14 +78,6 @@ export default defineComponent({
       type: Object,
       default: () => { return undefined }
     },
-    isTransparent: {
-      default: false,
-      type: Boolean
-    },
-    noShadow: {
-      default: false,
-      type: Boolean
-    },
     inPreview: {
       default: false,
       type: Boolean
@@ -112,9 +108,6 @@ export default defineComponent({
     ...mapGetters({
       isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
-    spanEffect() {
-      return textBgUtils.convertTextEffect(this.config.styles)
-    },
     isCurveText(): any {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
@@ -126,7 +119,7 @@ export default defineComponent({
       return this.config.locked
     },
     // Use duplicated of text to do some text effect, define their difference css here.
-    duplicatedText(): (Record<string, Record<string, string> | never>)[] {
+    duplicatedText(): (Partial<Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>>)[] {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
         top: '0px',
@@ -134,23 +127,15 @@ export default defineComponent({
         height: '100%',
         opacity: 1
       }
-      const textShadow = textEffectUtils.convertTextEffect(this.config)
-      const duplicatedTextShadow = (textShadow.duplicatedBody || textShadow.duplicatedSpan) as Record<string, string>
-      const textShadowCss = {
-        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody as Record<string, string>),
-        extraSpan: textShadow.duplicatedSpan as Record<string, string>
-      }
+      const duplicatedTexts = textEffectUtils.convertTextEffect(this.config).duplicatedTexts as
+        Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>[] | undefined
       return [
-        ...(duplicatedTextShadow ? [textShadowCss] : []),
+        ...duplicatedTexts ? duplicatedTexts.map(d => {
+          d.extraBodyStyle = Object.assign({}, duplicatedBodyBasicCss, d.extraBodyStyle) // Set extra body default style
+          return d
+        }) : [],
         {} // Original text, don't have extra css
       ]
-    },
-    transParentStyles(): {[key: string]: any} {
-      return this.isTransparent ? {
-        color: 'rgba(0, 0, 0, 0)',
-        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
-        'text-decoration-color': 'rgba(0, 0, 0, 0)'
-      } : {}
     }
   },
   watch: {
@@ -172,15 +157,17 @@ export default defineComponent({
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
-        opacity: `${this.config.styles.opacity * 0.01}`,
-        // transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode
+        writingMode: this.config.styles.writingMode,
+        ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
       }
     },
-    drawSvgBG() {
-      this.$nextTick(async () => {
-        this.svgBG = await textBgUtils.drawSvgBg(this.config)
+    drawSvgBG(): Promise<void> {
+      return new Promise(resolve => {
+        this.$nextTick(async () => {
+          this.svgBG = await textBgUtils.drawSvgBg(this.config)
+          resolve()
+        })
       })
     },
     isLayerAutoResizeNeeded(): boolean {
@@ -212,9 +199,11 @@ export default defineComponent({
     spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
       const textBg = this.config.styles.textBg
       const span = p.spans[sIndex]
+      const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {}
+        textEffectStyles,
+        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},
       )
     },
     pStyle(styles: any) {
@@ -237,6 +226,7 @@ export default defineComponent({
       }
       const textHW = await textUtils.getTextHWAsync(config, widthLimit)
       if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
+        // TODO: consider rotation
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
@@ -261,13 +251,13 @@ export default defineComponent({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      this.drawSvgBG()
+      await this.drawSvgBG()
     },
     resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
-        setTimeout(() => {
-          this.resizeCallback()
+        setTimeout(async () => {
+          await this.resizeCallback()
           if (this.$route.name === 'Screenshot') {
             vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           }
@@ -283,7 +273,13 @@ export default defineComponent({
 .nu-text {
   width: 100%;
   height: 100%;
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-feature-settings: 'liga' 0;
+  -webkit-font-feature-settings: 'liga' 0;
+  -webkit-font-smoothing: subpixel-antialiased; // for textUtils.getTextHW
+  text-rendering: geometricPrecision; // for textUtils.getTextHW
   &__BG {
     position: absolute;
     left: 0;

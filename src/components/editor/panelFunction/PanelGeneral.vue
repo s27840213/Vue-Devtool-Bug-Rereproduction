@@ -53,7 +53,6 @@ div(class="panel-group mb-10")
 import { IFrame, IGroup } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import formatUtils from '@/utils/formatUtils'
-import GroupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -66,7 +65,6 @@ export default defineComponent({
   data() {
     return {
       ShortcutUtils,
-      GroupUtils
     }
   },
   computed: {
@@ -120,12 +118,6 @@ export default defineComponent({
     layerNum(): number {
       return this.currSelectedInfo.layers.length
     },
-    hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
-    },
-    subLayerType(): string {
-      return this.currSubSelectedInfo.type
-    },
     subActiveLayerIndex(): number {
       return layerUtils.subLayerIdx
     },
@@ -141,12 +133,6 @@ export default defineComponent({
         return (currLayer as IGroup).layers[this.subActiveLayerIndex].type
       }
       return ''
-    },
-    primaryLayerIndex(): number {
-      if (layerUtils.getCurrLayer.type === 'group') {
-        return layerUtils.layerIndex
-      }
-      return -1
     },
     opacity(): number {
       return layerUtils.getCurrOpacity
@@ -169,9 +155,6 @@ export default defineComponent({
     }
   },
   methods: {
-    mappingIcons(type: string): string[] {
-      return MappingUtils.mappingIconSet(type)
-    },
     iconAction(icon: string) {
       if (this.isLocked && icon !== 'lock') return
       MappingUtils.mappingIconAction(icon)

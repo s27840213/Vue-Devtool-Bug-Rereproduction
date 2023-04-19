@@ -45,7 +45,10 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
           iconWidth="16px"
           :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'gray-2'")
         div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-white")
-          div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" :style="unitOptionStyles" @click="selectUnit($event, unit)")
+          div(v-for="(unit) in unitOptions"
+              :key="unit"
+              class="page-size-selector__body__custom__unit__option__item text-gray-2"
+              :style="unitOptionStyles" @click="selectUnit($event, unit)")
             span(class="body-XS text-gray-1") {{unit}}
       div(v-if="selectedFormat === 'custom' && isValidate && !isCustomValid"
         class="page-size-selector__body__custom__err body-XS text-red text-left") {{errMsg}}
@@ -57,7 +60,9 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
           :class="defaultTextColor") {{$t('NN0024')}}
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
-      div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row pointer"
+      div(v-for="(format, index) in recentlyUsed"
+          :key="format.id"
+          class="page-size-selector__body-row pointer"
           @click="selectFormat(`recent-${index}`)")
         radio-btn(class="page-size-selector__body__radio"
                   :isSelected="selectedFormat === `recent-${index}`",
@@ -72,7 +77,9 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
             :class="defaultTextColor") {{$t('NN0025')}}
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
-      div(v-for="(format, index) in formatList" class="page-size-selector__body-row typical-row pointer"
+      div(v-for="(format, index) in formatList"
+          :key="format.id"
+          class="page-size-selector__body-row typical-row pointer"
           @click="selectFormat(`preset-${index}`)")
         radio-btn(class="page-size-selector__body__radio"
                   :isSelected="selectedFormat === `preset-${index}`",
@@ -98,7 +105,6 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
 import listApi from '@/apis/list'
 import Checkbox from '@/components/global/Checkbox.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
-import SearchBar from '@/components/SearchBar.vue'
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import editorUtils from '@/utils/editorUtils'
@@ -127,7 +133,6 @@ export default defineComponent({
     clickOutside: vClickOutside.directive
   },
   components: {
-    SearchBar,
     RadioBtn,
     Checkbox
   },

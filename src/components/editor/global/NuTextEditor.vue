@@ -4,13 +4,12 @@ editor-content(:editor="(editor as Editor)")
 
 <script lang="ts">
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -23,10 +22,6 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
-      required: true
-    },
-    page: {
-      type: Object as PropType<IPage>,
       required: true
     },
     layerIndex: {

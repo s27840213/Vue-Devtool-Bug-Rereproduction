@@ -31,7 +31,6 @@ import layerUtils from '@/utils/layerUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
@@ -67,38 +66,6 @@ export default defineComponent({
     },
     getPreview2(): string {
       return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-sample')
-    },
-    getCurrLayerInfo(): {
-      layer: IText,
-      layerIndex: number,
-      primaryLayerIndex?: number
-      pageIndex: number
-      // eslint-disable-next-line indent
-    } {
-      const { getCurrLayer: currLayer, layerIndex } = layerUtils
-      switch (currLayer.type) {
-        case 'group': {
-          const activeIdx = currLayer.layers
-            .findIndex(l => l.type === 'text' && l.active)
-          if (activeIdx !== -1) {
-            return {
-              layer: currLayer.layers[activeIdx] as IText,
-              layerIndex: activeIdx,
-              primaryLayerIndex: layerIndex,
-              pageIndex: layerUtils.pageIndex
-            }
-          } else throw new Error('Wrong subLayer state')
-        }
-        case 'text':
-          return {
-            layer: currLayer as IText,
-            layerIndex,
-            primaryLayerIndex: undefined,
-            pageIndex: layerUtils.pageIndex
-          }
-        default:
-          throw new Error('Wrong layer type as Font Item applied')
-      }
     },
     itemFontType(): string {
       return this.item.src || this.item.fontType

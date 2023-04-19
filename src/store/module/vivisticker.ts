@@ -36,7 +36,8 @@ interface IViviStickerState {
   editingAssetInfo: { [key: string]: any },
   selectedDesigns: { [key: string]: IMyDesign },
   modalInfo: { [key: string]: any },
-  payment: IPayment
+  payment: IPayment,
+  loadedFonts: { [key: string]: true }
 }
 
 const EDITOR_BGS = [
@@ -136,7 +137,8 @@ const getDefaultState = (): IViviStickerState => ({
       purchase: false,
       restore: false
     }
-  }
+  },
+  loadedFonts: {}
 })
 
 const state = getDefaultState()
@@ -243,6 +245,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getModalInfo(state: IViviStickerState): { [key: string]: string } {
     return state.modalInfo
+  },
+  getLoadedFonts(state: IViviStickerState): { [key: string]: true } {
+    return state.loadedFonts
   },
   getPrices(state: IViviStickerState): IPrices {
     if (state.isStandaloneMode) return DEFAULT_PRICES[i18n.global.locale] ?? DEFAULT_PRICES.us
@@ -353,19 +358,19 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_myDesignBuffer(state: IViviStickerState, myDesignBuffer: IMyDesign | undefined) {
     state.myDesignBuffer = myDesignBuffer
   },
-  SET_editingDesignId(state: IViviStickerState, editingDesignId) {
+  SET_editingDesignId(state: IViviStickerState, editingDesignId: string) {
     state.editingDesignId = editingDesignId
   },
-  SET_editingAssetInfo(state: IViviStickerState, editingAssetInfo) {
+  SET_editingAssetInfo(state: IViviStickerState, editingAssetInfo: { [key: string]: any }) {
     state.editingAssetInfo = editingAssetInfo
   },
-  SET_modalInfo(state: IViviStickerState, modalInfo) {
+  SET_modalInfo(state: IViviStickerState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
   },
-  SET_prices(state: IViviStickerState, prices) {
+  SET_prices(state: IViviStickerState, prices: IPrices) {
     state.payment.prices = prices
   },
-  SET_expireDate(state: IViviStickerState, expireDate) {
+  SET_expireDate(state: IViviStickerState, expireDate: string) {
     state.payment.expireDate = expireDate
   },
   SET_paymentPending(state: IViviStickerState, data: Record<keyof IPaymentPending, boolean>) {
@@ -375,6 +380,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_isSubscribed(state: IViviStickerState, isSubscribed) {
     state.payment.isSubscribed = isSubscribed
+  },
+  SET_loadedFonts(state: IViviStickerState, loadedFonts: { [key: string]: true }) {
+    state.loadedFonts = loadedFonts
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {
@@ -444,6 +452,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   UPDATE_clearSelectedDesigns(state: IViviStickerState) {
     state.selectedDesigns = {}
+  },
+  UPDATE_addLoadedFont(state: IViviStickerState, font: string) {
+    state.loadedFonts[font] = true
   }
 }
 

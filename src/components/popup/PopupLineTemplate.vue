@@ -36,7 +36,6 @@ div(class="popup-line-template bg-white")
 </template>
 
 <script lang="ts">
-import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
 import { LineTemplatesType } from '@/store/types'
 import MappingUtils from '@/utils/mappingUtils'
@@ -53,7 +52,6 @@ export default defineComponent({
     const lineTemplate2 = tmp.slice(8)
     const fbCover = rulerUtils.fbCover
     return {
-      MappingUtils,
       lineTemplate1,
       lineTemplate2,
       LineTemplatesType,
@@ -70,9 +68,6 @@ export default defineComponent({
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
-    layerNum(): number {
-      return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
-    },
     isFbCover(): boolean {
       const { width, height } = this.currPage
       return width === 1230 && height === 693
@@ -84,9 +79,6 @@ export default defineComponent({
     }
   },
   methods: {
-    mappingIcons(type: string): string[] {
-      return MappingUtils.mappingIconSet(type)
-    },
     addLineTemplate(index: number, type: LineTemplatesType) {
       rulerUtils.addLineTemplate(index, type)
       popupUtils.closePopup()

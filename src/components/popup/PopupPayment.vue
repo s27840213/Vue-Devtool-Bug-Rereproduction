@@ -17,7 +17,9 @@ div(class="popup-window")
           //- case step1 or switch1
           template(v-if="['step1', 'switch1', 'step1-coupon'].includes(view)")
             coupon-input(v-if="view === 'step1-coupon'" class="payment-left-content-coupon")
-            div(v-for="p in periodInput" :isSelected="p.value === userPeriod"
+            div(v-for="p in periodInput"
+                :key="p.label"
+                :isSelected="p.value === userPeriod"
                 class="payment-left-content-period" @click="setPeriod(p.value)")
               svg-icon(iconWidth="20px"
                       :iconName="p.value === userPeriod ? 'radio-checked' : 'radio'"
@@ -37,14 +39,14 @@ div(class="popup-window")
               span(v-if="switchPaidDate") {{$t('NN0552', {date: switchPaidDate})}}
               span(v-else) {{$t('NN0553')}}
               span {{`$${switchPrice}`}}
-          //- case cancel1 or brandkit or bgrm or proTemplate
+          //- case cancel1 or pro-features
           template(v-if="showFeature")
-            div(v-for="can in cancel1" class="payment-left-content-cancel")
+            div(v-for="can in cancel1" :key="can" class="payment-left-content-cancel")
               svg-icon(iconName="pro" iconWidth="24px")
               span {{can}}
           //- case cancel2
           template(v-if="view === 'cancel2'")
-            div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
+            div(v-for="can, idx in cancel2" :key="can" class="payment-left-content-cancel")
               radio-btn(:isSelected="reasonIndex === String(idx)"
                         :formatKey="String(idx)" circleColor="gray-4"
                         @select="selectCancelReason(String(idx))")
@@ -52,9 +54,11 @@ div(class="popup-window")
             input(class="payment-left-content-cancel__other"
                   v-model="otherReason" :placeholder="$t('NN0584')")
         div(class="payment-left-button")
-          btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
-              :disabled="button.disabled ? button.disabled() : false"
-              @click="button.func()") {{button.label}}
+          btn(v-for="button in buttons"
+            :key="button.label"
+            :type="button.type || 'primary-lg'"
+            :disabled="button.disabled ? button.disabled() : false"
+            @click="button.func()") {{button.label}}
       div(class="payment-right")
         img(class="payment-right-bg" loading="lazy"
             :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
@@ -187,6 +191,10 @@ export default defineComponent({
           return [this.$tc('NN0653'), 'cb.jpg']
         case 'pro-object':
           return [this.$tc('NN0658'), 'pro-object.jpg']
+        case 'pro-text':
+          return [this.$tc('NN0843'), 'pro-text.jpg']
+        case 'pro-bg':
+          return [this.$tc('NN0845'), 'pro-bg.jpg']
         case 'bgrm':
         default:
           return [this.$tc('NN0652'), 'remover.jpg']
@@ -201,6 +209,8 @@ export default defineComponent({
         case 'bgrm':
         case 'pro-template':
         case 'pro-object':
+        case 'pro-text':
+        case 'pro-bg':
           [this.description, this.img] = this.getAd(name)
           this.title = this.$tc('NN0507', 2)
           this.buttons = [{

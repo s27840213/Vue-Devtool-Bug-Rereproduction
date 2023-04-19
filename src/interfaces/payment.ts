@@ -15,13 +15,13 @@ export interface IDataBillingInfoList {
   price_bundle_original: number
   price_bundle_discount: number
   bundle_period: number
-  currency : string
+  currency: string
 }
 
 export interface IDataBillingInfoCommon {
   price: number
   currency: string
-  pay_type : 0 | 1 | 2
+  pay_type: 0 | 1 | 2
   brand: 'AMEX' | 'DinersClub' | 'Discover' | 'JCB' | 'MasterCard' | 'UnionPay' | 'VISA' | 'Unknown'
   last4: string
   valid_thru: string
@@ -54,14 +54,14 @@ export interface IDataBillingInfoStatus extends IDataBillingInfoCommon {
 }
 
 export interface IDataBillingInfoHistory extends IDataBillingInfoCommon {
-  order_id : string
-  period : number
-  title : string
-  receipt : string
-  create_time : string
-  success : 0 | 1
-  signed_url : string
-  coupon_content : string
+  order_id: string
+  period: number
+  title: string
+  receipt: string
+  create_time: string
+  success: 0 | 1
+  signed_url: string
+  coupon_content: string
 }
 
 // for API billing-info
@@ -165,7 +165,7 @@ export interface IBillingHistory {
 
 // Union type with string array value, https://github.com/microsoft/TypeScript/issues/28046#issuecomment-962656602
 export const _IPaymentWarningView = [
-  'brandkit', 'bgrm', 'pro-template', 'pro-object', 'page-resize', 'export-pdf-print'
+  'brandkit', 'bgrm', 'pro-template', 'pro-object', 'pro-text', 'pro-bg', 'page-resize', 'export-pdf-print'
 ] as const
 export type IPaymentWarningView = typeof _IPaymentWarningView[number]
 
@@ -175,4 +175,4 @@ export const _IPaymentPayingView = [
 ] as const
 export type IPaymentPayingView = typeof _IPaymentPayingView[number]
 
-export type IPaymentView = IPaymentWarningView|IPaymentPayingView
+export type IPaymentView = IPaymentWarningView | IPaymentPayingView

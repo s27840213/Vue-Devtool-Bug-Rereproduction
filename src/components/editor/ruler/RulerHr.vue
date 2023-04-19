@@ -2,11 +2,10 @@
 div(class="ruler-hr"
     :style="rulerRootStyles")
   div(class="ruler-hr__body"
-    ref="rulerBody"
     :style="rulerBodyStyles")
-    div(v-for="i in scaleCount" class="ruler-hr__block ruler-hr__block--int")
+    div(v-for="(i, index) in scaleCount" class="ruler-hr__block ruler-hr__block--int" :key="index")
       span(class="ruler-hr__number") {{(i-1)*scale}}
-      div(v-for="i in 5" class="ruler-hr__line")
+      div(v-for="(i, index) in 5" :key="index" class="ruler-hr__line")
     div(v-if="scaleCount" class="ruler-hr__block ruler-hr__block--float")
       span(class="ruler-hr__number") {{scaleCount * scale}}
 </template>

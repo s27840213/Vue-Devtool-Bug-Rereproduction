@@ -2,11 +2,10 @@
 div(class="ruler-vr"
     :style="rulerRootStyles")
   div(class="ruler-vr__body"
-    ref="rulerBody"
     :style="rulerBodyStyles")
-    div(v-for="i in scaleCount" class="ruler-vr__block ruler-vr__block--int")
+    div(v-for="(i ,index) in scaleCount" :key="index" class="ruler-vr__block ruler-vr__block--int")
       span(class="ruler-vr__number") {{(i-1)*scale}}
-      div(v-for="i in 5" class="ruler-vr__line")
+      div(v-for="(i, index) in 5" :key="index" class="ruler-vr__line")
     div(v-if="scaleCount" class="ruler-vr__block ruler-vr__block--float")
       span(class="ruler-vr__number") {{scaleCount * scale}}
 </template>
@@ -15,8 +14,8 @@ div(class="ruler-vr"
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
-import { defineComponent } from 'vue'
 import unitUtils from '@/utils/unitUtils'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({

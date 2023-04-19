@@ -9,7 +9,7 @@ div(class="bill")
     span {{$t('NN0616')}}
     span {{$t('NN0617')}}
     span {{$t('NN0618')}}
-    template(v-for="his, idx in historys")
+    template(v-for="his, idx in historys" :key="his.id")
       div {{his.date}}
       div(class="bill-table-description")
         span {{his.description}}
@@ -40,7 +40,7 @@ div(class="bill")
         span {{'Descriptions'}}
         span {{'Date'}}
         span {{'Price'}}
-        template(v-for="item in curInvoice.items")
+        template(v-for="item in curInvoice.items" :key="item.id")
           span {{item.description}}
           span {{item.date}}
           span {{item.price}}
@@ -53,9 +53,9 @@ div(class="bill")
 </template>
 
 <script lang="ts">
+import * as type from '@/interfaces/payment'
 import { defineComponent } from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
-import * as type from '@/interfaces/payment'
 // import ObserverSentinel from '@/components/ObserverSentinel.vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

@@ -202,6 +202,10 @@ class GeneralUtils {
     return /macintosh/i.test(navigator.userAgent.toLowerCase()) && navigator.maxTouchPoints > 0
   }
 
+  isTablet(): boolean {
+    return /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(navigator.userAgent.toLowerCase())
+  }
+
   getListRowItemSize(): number {
     return !this.isTouchDevice() ? 145
       : window.outerWidth >= 600

@@ -23,6 +23,8 @@ export default defineComponent({
     desc: String,
     value: [String, Number],
     max: Number,
+    // TODO
+    // eslint-disable-next-line vue/no-unused-properties
     min: Number,
     arrowOffset: {
       type: Number,

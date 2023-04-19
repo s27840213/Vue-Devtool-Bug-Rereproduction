@@ -2,6 +2,7 @@
 div(class="header-bar relative" @pointerdown.stop)
   div(class="header-bar__left" :class="{ editor: isInEditor }")
     div(v-for="tab in leftTabs"
+        :key="tab.icon"
         :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
         :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
         @click.prevent.stop="handleTabAction(tab.action)")
@@ -13,6 +14,7 @@ div(class="header-bar relative" @pointerdown.stop)
     span(v-if="centerTitle") {{ centerTitle }}
   div(class="header-bar__right")
     div(v-for="tab in rightTabs"
+        :key="tab.icon"
         :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
         :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
         @click.prevent.stop="handleTabAction(tab.action)")
@@ -298,11 +300,13 @@ export default defineComponent({
           if (flag === '1') {
             modalUtils.setModalInfo(
               `${this.$t('STK0017')}`,
-              [`${this.$t('STK0018')}`.replace('{newline}', '<br/>')],
+              [`${this.$t('STK0018')}`],
               {
                 msg: `${this.$t('STK0019')}`
               }
             )
+          } else {
+            vivistickerUtils.handleIos16Video()
           }
         })
       } else {

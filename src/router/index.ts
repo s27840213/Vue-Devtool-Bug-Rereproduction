@@ -10,7 +10,7 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import CopyTool from '@/views/CopyTool.vue'
 import NubtnList from '@/views/NubtnList.vue'
 import { h, resolveComponent } from 'vue'
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import ViviSticker from '../views/ViviSticker.vue'
@@ -48,6 +48,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        vivistickerUtils.hideController()
         next()
       } catch (error) {
         console.log(error)
@@ -104,6 +105,8 @@ const router = createRouter({
           vivistickerUtils.enterStandaloneMode()
           vivistickerUtils.setDefaultLocale()
         }
+        await vivistickerUtils.fetchDebugModeEntrance()
+        await vivistickerUtils.fetchLoadedFonts()
         const userInfo = await vivistickerUtils.getUserInfo()
         if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
           logUtils.uploadLog().then(() => {
@@ -187,7 +190,6 @@ router.beforeEach(async (to, from, next) => {
 
     uploadUtils.setLoginOutput({ upload_log_map: json.ul_log_map })
   }
-
   next()
 })
 

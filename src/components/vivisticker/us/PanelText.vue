@@ -17,7 +17,11 @@ div(class="panel-text" :class="{'in-category': isInCategory, 'in-editor': isInEd
           div(class="panel-text__item" :style="itemStyles")
     template(v-slot:category-text-item="{ list }")
       div(class="panel-text__items" :style="itemsStyles")
-        div(class="panel-text__card" :class="{recent: item.id === 'recent'}" v-for="item in list" :style="itemStyles()")
+        div(v-for="item in list"
+            class="panel-text__card"
+            :class="{recent: item.id === 'recent'}"
+            :key="item.id"
+            :style="itemStyles()")
           div(v-if="item.id === 'recent'" class="panel-text__card__recent"
                 @click="handleCategorySearch($t('NN0024'))")
             svg-icon(class="pointer"
@@ -134,6 +138,8 @@ export default defineComponent({
         })
       return result
     },
+    // extends: PanelText
+    // eslint-disable-next-line vue/no-unused-properties
     mainContent(): ICategoryItem[] {
       if (this.showAllRecently) {
         return this.listRecently
@@ -163,6 +169,8 @@ export default defineComponent({
     }
   },
   methods: {
+    // extends: PanelText
+    // eslint-disable-next-line vue/no-unused-properties
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
       const recentItem = {
         id: 'recent',
@@ -383,7 +391,9 @@ export default defineComponent({
   }
   &__text-button-wrapper {
     position: absolute;
-    inset: auto 40px 24px 40px;
+    right: 40px;
+    left: 40px;
+    bottom: 24px;
     max-width: 310px;
     display: flex;
     align-items: center;

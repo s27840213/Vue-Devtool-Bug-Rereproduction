@@ -15,7 +15,6 @@ div(class="panel-font-format")
 </template>
 
 <script lang="ts">
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -23,15 +22,13 @@ import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
-  components: {
-    MobileSlider
-  },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     hasCurveText(): boolean {
@@ -101,6 +98,9 @@ export default defineComponent({
       if (iconName === 'font-vertical') {
         if (this.hasCurveText) return
         textPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
+        // don't delete below, it's disabled temporarily only
+        // textUtils.handleAutoRescale({ onlyCentralize: true })
+        textUtils.handleAutoRescale()
       } else {
         switch (iconName) {
           case 'bold':

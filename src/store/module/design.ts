@@ -1,10 +1,10 @@
+import designApis from '@/apis/design'
+import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
+import router from '@/router'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
-import designApis from '@/apis/design'
-import { GetterTree, MutationTree, ActionTree } from 'vuex'
-import router from '@/router'
-import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 interface IDesignState {
   currLocation: string,

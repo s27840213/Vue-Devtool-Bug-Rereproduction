@@ -1,9 +1,6 @@
 <template lang="pug">
 div(class="function-panel"
   :style="functionPanelStyles")
-  //- span {{pageUtils._3dEnabledPageIndex}},
-  //- span {{pageUtils.currFocusPageIndex}},
-  //- span {{pageUtils._3dEnabledPageIndex === pageUtils.currFocusPageIndex}}
   div(class="function-panel__topbar")
     svg-icon(:class="{'pointer': !isInFirstStep}"
       :iconName="'undo'"
@@ -50,7 +47,6 @@ import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
 import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
 import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
 import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetting.vue'
-import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
@@ -59,9 +55,7 @@ import { IFrame, IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -72,7 +66,6 @@ export default defineComponent({
   components: {
     PanelGeneral,
     PanelTextSetting,
-    PanelColorPicker,
     PanelBackgroundSetting,
     PanelPhotoSetting,
     PanelPageSetting,
@@ -81,14 +74,12 @@ export default defineComponent({
     PanelTextEffectSetting,
     DownloadBtn,
     PanelBgRemove,
-    PanelPhotoShadow,
     PanelImgCtrl
   },
   emits: ['toggleColorPanel'],
   data() {
     return {
       isFontsPanelOpened: false,
-      pageUtils
     }
   },
   props: {
@@ -120,9 +111,6 @@ export default defineComponent({
         'pointer-events': this.isShowPagePreview ? 'none' : 'auto'
       }
       return result
-    },
-    isHandleShadow(): boolean {
-      return this.isProcessImgShadow || this.isUploadImgShadow
     },
     selectedLayerNum(): number {
       return this.currSelectedInfo.layers.length
@@ -158,11 +146,6 @@ export default defineComponent({
       const frameLayer = layers[0] as IFrame
       return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
     },
-    isSubLayerFrameImage(): boolean {
-      const { index } = this.currSubSelectedInfo
-      const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
-      return type === 'frame' && clips[0].srcObj.assetId
-    },
     showBgRemove(): boolean {
       return this.inBgRemoveMode
     },
@@ -196,22 +179,6 @@ export default defineComponent({
       const haveColorTarget = colorUtils.globalSelectedColor.color !== 'none'
       return stateCondition && typeConditon && haveColorTarget && !this.isImgCtrl
     },
-    isSuperUser(): boolean {
-      return generalUtils.isSuperUser
-    },
-    layerType(): { [key: string]: string } {
-      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
-      return {
-        currLayerType: currLayer.type,
-        targetLayerType: (() => {
-          if (subLayerIdx !== -1) {
-            return currLayer.type === LayerType.group
-              ? currLayer.layers[subLayerIdx].type : LayerType.image
-          }
-          return currLayer.type
-        })()
-      }
-    }
   },
   watch: {
     selectedLayerNum(newVal, oldVal) {

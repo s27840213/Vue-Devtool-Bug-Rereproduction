@@ -20,7 +20,6 @@ div(class="page-preview")
 <script lang="ts">
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
-import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { floor } from 'lodash'
@@ -32,7 +31,6 @@ export default defineComponent({
   data() {
     return {
       screenWidth: 0,
-      renderCount: 0
     }
   },
   components: {
@@ -64,6 +62,7 @@ export default defineComponent({
         height: lastPage.height,
         physicalWidth: lastPage.physicalWidth,
         physicalHeight: lastPage.physicalHeight,
+        backgroundColor: lastPage.backgroundColor,
         isEnableBleed: lastPage.isEnableBleed,
         bleeds: lastPage.bleeds,
         physicalBleeds: lastPage.physicalBleeds,
