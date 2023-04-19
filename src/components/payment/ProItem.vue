@@ -1,5 +1,5 @@
 <template lang="pug">
-img(v-if="!inReviewMode" :class="`pro ${theme}`" loading="lazy"
+img(:class="`pro ${theme}`" loading="lazy"
     :src="require(`@/assets/img/svg/pricing/${iconFileName}`)" )
 </template>
 
