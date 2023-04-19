@@ -199,6 +199,7 @@ class PageUtils {
       },
       mobilePhysicalSize: {
         originSize: { width: 0, height: 0 },
+        initPos: { x: 0, y: 0 }
       },
       shownSize: { width: 1080, height: 1080 },
       isEnableBleed: false,
@@ -916,12 +917,15 @@ class PageUtils {
     })
   }
 
-  setMobilePhysicalPage(payload: { pageIndex: number, originSize?: ISize }) {
-    store.commit('SET_pagePhysicalSize', payload)
+  updatePageInitPos(pageIndex: number, initPos: { x?: number, y?: number }) {
+    store.commit('UPDATE_pageInitPos', {
+      pageIndex,
+      initPos
+    })
   }
 
-  updatePageShownSize(pageIndex: number, shownSize: ISize) {
-    store.commit('UPDATE_pageShownSize', { pageIndex, shownSize })
+  setMobilePhysicalPage(payload: { pageIndex: number, originSize?: ISize }) {
+    store.commit('SET_pagePhysicalSize', payload)
   }
 }
 

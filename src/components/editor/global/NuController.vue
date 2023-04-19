@@ -297,8 +297,8 @@ export default defineComponent({
   computed: {
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId']),
-    ...mapState({
-      isPinchingEditor: 'mobileEditor/isPinchingEditor'
+    ...mapState('mobileEditor', {
+      isPinchingEditor: 'isPinchingEditor'
     }),
     ...mapState(['currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),

@@ -29,9 +29,7 @@ export class Page implements IPage {
     v: Array<number>
     h: Array<number>
   }
-  mobilePhysicalSize: { pageCenterPos: ICoordinate; originSize: ISize }
-
-  shownSize: ISize
+  mobilePhysicalSize: { originSize: ISize, initPos: ICoordinate }
 
   isEnableBleed: boolean
   bleeds: {
@@ -52,7 +50,7 @@ export class Page implements IPage {
 
   constructor() {
     this.mobilePhysicalSize = {
-      pageCenterPos: { x: 0, y: 0 },
+      initPos: { x: 0, y: 0 },
       originSize: { width: 0, height: 0 },
     }
     this.shownSize = { width: 0, height: 0 }
