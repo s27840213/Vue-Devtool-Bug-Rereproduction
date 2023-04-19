@@ -132,6 +132,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return store.getters['vivisticker/getUserSettings']
   }
 
+  get isPaymentDisabled(): boolean {
+    return !this.checkVersion('1.25')
+  }
+
   getUserInfoFromStore(): IUserInfo {
     return store.getters['vivisticker/getUserInfo']
   }
@@ -1075,6 +1079,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, priceCurrency: string, monthly: {priceValue: string, priceText: string}, annually: {priceValue: string, priceText: string} }) {
     console.log('subscribeInfo', data)
+    if (this.isPaymentDisabled) return
     this.appToast('subscribeInfo: ' + data.status)
     const { status, monthly, annually, priceCurrency, expire_date } = data
     const currencyFormaters = {
@@ -1105,6 +1110,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   subscribeResult(data: { status: 'subscribed' | 'failed', expire_date: string }) {
     if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if already got one
     console.log('subscribeResult', data)
+    if (this.isPaymentDisabled) return
     this.appToast('subscribeResult: ' + data.status)
     const { status, expire_date } = data
     if (status === 'subscribed') {

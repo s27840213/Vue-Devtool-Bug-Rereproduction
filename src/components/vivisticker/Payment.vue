@@ -32,7 +32,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub") {{ btnPlan.subTitle }}
           div(class="payment__btn-plan__content__price") {{ btnPlan.price }}
             div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
-    div(class="payment__btn-subscribe" :class="{pending}" @touchend="handleBtnSubscribeClick")
+    div(class="payment__btn-subscribe" :class="{pending}" @touchend="handleSubscribe(planSelected)")
       svg-icon(v-if="pending" class="spiner" iconName="spiner" iconWidth="20px" iconColor="white")
       div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
     div(class="payment__footer")
@@ -61,6 +61,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
 import { IPrices } from '@/interfaces/vivisticker'
+import modalUtils from '@/utils/modalUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
@@ -116,21 +117,17 @@ export default defineComponent({
         {
           key: 'restorePurchase',
           title: this.$t('STK0045'),
-          action: this.handleRestorePurchaseClick
+          action: () => this.handleSubscribe('restore', 30000)
         },
         {
           key: 'termsOfService',
           title: this.$t('NN0160'),
-          action: () => {
-            window.open(this.$t('STK0053'), '_blank')
-          }
+          action: () => window.open(this.$t('STK0053'), '_blank')
         },
         {
           key: 'privacyPolicy',
           title: this.$t('NN0161'),
-          action: () => {
-            window.open(this.$t('STK0052'), '_blank')
-          }
+          action: () => window.open(this.$t('STK0052'), '_blank')
         }
       ],
       comparisons: [
@@ -162,6 +159,8 @@ export default defineComponent({
     ...mapGetters({
       prices: 'vivisticker/getPrices',
       pending: 'vivisticker/getIsPaymentPending',
+      userInfo: 'vivisticker/getUserInfo',
+      modalInfo: 'vivisticker/getModalInfo'
     }),
     txtBtnSubscribe() {
       return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
@@ -222,16 +221,19 @@ export default defineComponent({
     handleBtnPlanClick(key: string) {
       this.planSelected = key
     },
-    handleBtnSubscribeClick() {
+    handleSubscribe(option: string, timeout?: number) {
+      if (vivistickerUtils.isPaymentDisabled) {
+        this.showUpdateModal()
+        return
+      }
       if (this.pending) return
-      this.setPaymentPending({ purchase: true })
-      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: this.planSelected })
-    },
-    handleRestorePurchaseClick() {
-      if (this.pending) return
-      this.setPaymentPending({ restore: true })
-      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'restore' })
-      this.timeout()
+      this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
+      vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
+      if (timeout) {
+        setTimeout(() => {
+          vivistickerUtils.subscribeResult({ status: 'failed', expire_date: '' })
+        }, timeout)
+      }
     },
     handleSwipe(e: AnyTouchEvent) {
       e.stopPropagation()
@@ -244,15 +246,55 @@ export default defineComponent({
       }
       this.isPanelUp = !this.isPanelUp
     },
-    // TODO
-    // eslint-disable-next-line vue/no-unused-properties
-    handleShowWelcome() {
-      this.setFullPageConfig({ type: 'welcome' })
-    },
-    timeout(delay = 30000) {
-      setTimeout(() => {
-        vivistickerUtils.subscribeResult({ status: 'failed', expire_date: '' })
-      }, delay)
+    showUpdateModal() {
+      let locale = this.userInfo.locale
+      if (!['us', 'tw', 'jp'].includes(locale)) {
+        locale = 'us'
+      }
+      const prefix = 'exp_' + locale + '_'
+      const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
+        ([k, v]) => {
+          if (k.startsWith(prefix)) k = k.replace(prefix, '')
+          return [k, v as string]
+        })
+      )
+      const options = {
+        imgSrc: modalInfo.img_url,
+        noClose: false,
+        noCloseIcon: false,
+        backdropStyle: {
+          backgroundColor: 'rgba(24,25,31,0.3)'
+        },
+        cardStyle: {
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255,255,255,0.9)'
+        }
+      }
+      modalUtils.setModalInfo(
+        modalInfo.title,
+        modalInfo.msg,
+        {
+          msg: modalInfo.btn_txt,
+          class: 'btn-black-mid',
+          style: {
+            color: '#F8F8F8'
+          },
+          action: () => {
+            const url = modalInfo.btn_url
+            if (url) { window.open(url, '_blank') }
+          }
+        },
+        {
+          msg: modalInfo.btn2_txt || '',
+          class: 'btn-light-mid',
+          style: {
+            border: 'none',
+            color: '#474A57',
+            backgroundColor: '#D3D3D3'
+          }
+        },
+        options
+      )
     }
   }
 })
