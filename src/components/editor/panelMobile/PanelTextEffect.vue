@@ -77,7 +77,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapState } from 'vuex'
 
 export default defineComponent({
@@ -197,6 +197,7 @@ export default defineComponent({
       this.recordChange()
     },
     async onEffectClick(effectName: string): Promise<void> {
+      // TODO: check pro
       if (effectName !== this.currentStyle.name) {
         await this.setEffect({ effectName })
         this.recordChange()
