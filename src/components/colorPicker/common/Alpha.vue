@@ -23,7 +23,6 @@ export default defineComponent({
   name: 'Alpha',
   props: {
     value: Object,
-    onChange: Function
   },
   components: {
     checkboard

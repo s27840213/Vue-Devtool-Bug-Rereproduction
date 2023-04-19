@@ -15,13 +15,11 @@ div(ref="body"
   nu-header(class="non-tab-show" :noSearchbar="true" v-header-border="'.template-center'")
   div(class="template-center__search-container")
     div(class="template-center__search__title non-mobile-show")
-      span(v-html="$t('NN0486', { newline: '<br>' })")
+      span(v-html="$t('NN0486')")
     div(class="template-center__search__title non-tab-show")
-      span(v-html="$t('NN0487', { newline: '<br>' })")
+      span(v-html="$t('NN0487')")
     div(class="template-center__search__text non-mobile-show")
-      i18n-t(keypath="NN0488" tag="span")
-        template(#newline)
-          br
+      span(v-html="$t('NN0488')")
     search-bar(ref="searchbar"
               class="template-center__search__searchbar non-mobile-show"
               :style="searchbarStyles()"
@@ -386,7 +384,7 @@ export default defineComponent({
       } : {}
     },
     handleScroll() {
-      const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
+      const searchbar = (this.$refs.searchbar as {$el: HTMLElement}).$el as HTMLElement
       this.snapToTop = searchbar.getBoundingClientRect().top <= HEADER_HEIGHT
       this.searchbarTop = searchbar.getBoundingClientRect().top
       const mobileSearch = this.$refs.mobileSearch as HTMLElement | undefined

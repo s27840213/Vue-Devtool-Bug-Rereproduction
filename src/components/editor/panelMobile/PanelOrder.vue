@@ -13,7 +13,6 @@ div(class="panel-order bg-white")
 </template>
 
 <script lang="ts">
-import { ICurrSelectedInfo } from '@/interfaces/editor'
 import MappingUtils from '@/utils/mappingUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -22,21 +21,14 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      MappingUtils
     }
   },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
-    layerNum(): number {
-      return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
-    }
   },
   methods: {
-    mappingIcons(type: string): string[] {
-      return MappingUtils.mappingIconSet(type)
-    },
     orderDatas() {
       const orderSet = [
         {

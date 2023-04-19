@@ -68,7 +68,7 @@ import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import popupUtils from '@/utils/popupUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
+import TextPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -88,18 +88,6 @@ export default defineComponent({
   emits: ['openFontsPanel', 'toggleColorPanel'],
   data() {
     return {
-      openColorPicker: false,
-      openValueSelector: false,
-      openSliderBar: 'center',
-      fieldRange: {
-        fontSize: { min: 6, max: 800 },
-        lineHeight: { min: 0.5, max: 2.5 },
-        fontSpacing: { min: -200, max: 800 },
-        // fontSpacing: { min: -2, max: 8 },
-        // lineHeight: { min: 0, max: 300 },
-        opacity: { min: 0, max: 100 }
-      },
-      fontSelectValue: fontSelectValue,
       isOpenFontPanel: false,
       hintMap: {
         bold: `${this.$t('NN0101')}`,
@@ -152,44 +140,6 @@ export default defineComponent({
       currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex',
     }),
-    isGroup(): boolean {
-      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
-    },
-    scale(): number {
-      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
-      if (currLayer && currLayer.layers) {
-        if (subLayerIdx === -1) {
-          const scaleSet = (currLayer as IGroup).layers.reduce((p: Set<number>, c: ILayer) => {
-            if (c.type === 'text') { p.add(c.styles.scale) }
-            return p
-          }, new Set())
-          if (scaleSet.size === 1) {
-            const [scale] = scaleSet
-            return scale * currLayer.styles.scale
-          }
-          return NaN
-        } else {
-          return currLayer.styles.scale * (currLayer as IGroup).layers[subLayerIdx].styles.scale
-        }
-      }
-      return currLayer.styles.scale
-    },
-    fontSize(): number | string {
-      if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
-        return '--'
-      }
-      return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
-    },
-    step(): number {
-      // const config = LayerUtils.getCurrConfig
-      // return 1 / config.styles.scale
-      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
-      let scale = currLayer.styles.scale
-      if (subLayerIdx !== -1) {
-        scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
-      }
-      return 1 / scale
-    },
     hasCurveText(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
       if (subLayerIdx !== -1) {
@@ -277,22 +227,6 @@ export default defineComponent({
       if (color === this.props.color) return
       const hex = checkAndConvertToHex(color)
       tiptapUtils.spanStyleHandler('color', hex)
-    },
-    handleValueModal() {
-      this.openValueSelector = !this.openValueSelector
-      if (this.openValueSelector) {
-        const input = this.$refs['input-fontSize'] as HTMLInputElement
-        input.focus()
-        input.select()
-      }
-    },
-    handleSliderModal(modalName = '') {
-      this.openSliderBar = modalName
-      if (modalName === 'lineHeight' || modalName === 'fontSpacing' || modalName === 'opacity') {
-        const input = this.$refs[`input-${modalName}`] as HTMLInputElement
-        input.focus()
-        input.select()
-      }
     },
     iconIsActived(iconName: string): boolean {
       switch (iconName) {

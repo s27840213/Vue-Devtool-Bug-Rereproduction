@@ -49,7 +49,7 @@ div(class="panel-text")
         :title="title"
         @action="handleCategorySearch")
         template(v-slot:preview="{ item }")
-          category-text-item(class="panel-text__item"
+          category-text-item(
             :item="item")
     template(v-slot:category-text-item="{ list, title }")
       div(class="panel-text__items"
@@ -58,7 +58,6 @@ div(class="panel-text")
           :style="{gridColumn: `1 / ${amountInRow+1}`}"
           class="panel-text__header") {{ title }}
         category-text-item(v-for="item in list"
-          class="panel-text__item"
           :key="item.id"
           :item="item")
     template(#after)
@@ -76,12 +75,13 @@ div(class="panel-text")
 </template>
 
 <script lang="ts">
+import listApi from '@/apis/list'
+import SearchBar from '@/components/SearchBar.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import Url from '@/components/global/Url.vue'
-import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import AssetUtils from '@/utils/assetUtils'
@@ -275,6 +275,19 @@ export default defineComponent({
       this.getMoreContent()
     },
     async handleAddText(config: { type: string, text: string }) {
+      let key = ''
+      switch (config.type) {
+        case 'Heading':
+          key = 'title'
+          break
+        case 'Subheading':
+          key = 'subtitle'
+          break
+        case 'Body':
+          key = 'body'
+          break
+      }
+      listApi.addDesign(`add_${key}`, 'text')
       await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, this.$i18n.locale, undefined, undefined, this.getSpanStyles(config.type.toLowerCase()))
     },
     handleOpenSettings() {
@@ -361,13 +374,6 @@ export default defineComponent({
     top: 50%;
     right: 0;
     transform: translateY(-50%);
-  }
-  &__item {
-    width: 80px;
-    height: 80px;
-    margin: 0 5px;
-    object-fit: contain;
-    vertical-align: middle;
   }
   &__items {
     display: grid;

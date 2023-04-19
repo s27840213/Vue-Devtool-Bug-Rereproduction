@@ -82,7 +82,6 @@ export default defineComponent({
     return {
       isDraggedOver: false,
       isMessageShowing: false,
-      isTop: true,
       deleteBuffer: undefined as IDeletingItem | undefined,
       uploadHint: {
         logo: {

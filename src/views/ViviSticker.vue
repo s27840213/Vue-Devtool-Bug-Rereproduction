@@ -38,7 +38,6 @@ import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
-import { LayerType } from '@/store/types'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
@@ -69,7 +68,6 @@ export default defineComponent({
   data() {
     return {
       currColorEvent: '',
-      defaultWindowHeight: window.outerHeight,
       headerOffset: 0,
       isKeyboardAnimation: 0
     }
@@ -210,16 +208,6 @@ export default defineComponent({
       isSlideShown: 'vivisticker/getIsSlideShown',
       modalInfo: 'vivisticker/getModalInfo'
     }),
-    contentEditable(): boolean {
-      if (this.currSubSelectedInfo.index >= 0) {
-        if (this.currSelectedInfo.layers[0]?.type === LayerType.group) {
-          return this.currSelectedInfo.layers[0]?.layers[this.currSubSelectedInfo.index]?.contentEditable
-        } else {
-          return false
-        }
-      }
-      return this.currSelectedInfo.layers[0]?.contentEditable
-    },
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
     }
@@ -251,8 +239,8 @@ export default defineComponent({
     }),
     headerStyles() {
       return {
-        transform: `translateY(${this.contentEditable ? this.headerOffset : 0}px)`,
-        ...(this.isKeyboardAnimation && { height: '0px', marginBottom: '44px' }),
+        transform: `translateY(${this.headerOffset}px)`,
+        ...((!this.isDuringCopy && this.isKeyboardAnimation) && { height: '0px', marginBottom: '44px' }),
         ...(!this.isKeyboardAnimation && { transition: 'height 0.2s cubic-bezier(0.380, 0.700, 0.125, 1.000), margin-bottom 0.2s cubic-bezier(0.380, 0.700, 0.125, 1.000)' })
       }
     },
@@ -263,13 +251,6 @@ export default defineComponent({
       return {
         ...this.isDuringCopy ? { background: 'transparent' } : {},
         gridTemplateRows: this.currActivePanel === 'text' ? '1fr' : 'auto 1fr'
-      }
-    },
-    handleSwitchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.isInEditor) {
-        this.switchTab(panelType, props)
-      } else {
-        this.switchMainTab(panelType)
       }
     },
     switchTab(panelType: string, props?: IFooterTabProps) {

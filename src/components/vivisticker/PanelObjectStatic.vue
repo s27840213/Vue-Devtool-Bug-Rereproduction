@@ -70,7 +70,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
-import Tags from '@/components/global/Tags.vue'
+import Tags, { ITag } from '@/components/global/Tags.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
@@ -250,7 +250,7 @@ export default defineComponent({
         })}`
       } else return ''
     },
-    tags(): string[] {
+    tags(): ITag[] {
       return this.showAllRecently ? []
         : this.showFav ? this.favoritesTagsBar : this.tagsBar
     },
@@ -316,6 +316,8 @@ export default defineComponent({
       'searchMoreFavorites',
       'searchTagInFavoritesCategory'
     ]),
+    // Used by PanelObject.vue
+    // eslint-disable-next-line vue/no-unused-properties
     scrollToTop() {
       for (const list of this.categoryListArray) {
         if (list.show) {

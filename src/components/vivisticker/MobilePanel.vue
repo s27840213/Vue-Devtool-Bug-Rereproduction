@@ -95,7 +95,6 @@ import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
-import i18n from '@/i18n'
 
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
@@ -178,7 +177,6 @@ export default defineComponent({
       showExtraColorPanel: false,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
-      currSubColorEvent: '',
       innerTabIndex: 0
     }
   },
@@ -200,13 +198,6 @@ export default defineComponent({
     },
     isTextShowAllRecently(): boolean {
       return this.isShowAllRecently('text')
-    },
-    backgroundImgControl(): boolean {
-      return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
-    },
-    backgroundLocked(): boolean {
-      const { locked } = pageUtils.currFocusPage.backgroundImage.config
-      return locked
     },
     selectedLayerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
@@ -298,9 +289,6 @@ export default defineComponent({
         isSidebarPanel ? { height: '100%' } : {},
         this.isDuringCopy ? { padding: '0' } : {}
       )
-    },
-    innerTab(): string {
-      return this.innerTabs.key[this.innerTabIndex]
     },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
@@ -645,9 +633,6 @@ export default defineComponent({
         e.preventDefault()
         e.stopPropagation()
       }
-    },
-    handleLockedNotify() {
-      this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActiveSubPanel === panelType) {

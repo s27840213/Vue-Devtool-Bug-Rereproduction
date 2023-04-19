@@ -27,7 +27,6 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      popupUtils
     }
   },
   computed: {

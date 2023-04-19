@@ -107,10 +107,6 @@ export default defineComponent({
       type: Boolean,
       required: true
     },
-    index: {
-      type: Number,
-      required: true
-    }
   },
   directives: {
     clickOutside: vClickOutside.directive

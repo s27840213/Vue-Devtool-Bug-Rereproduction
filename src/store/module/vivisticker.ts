@@ -1,5 +1,5 @@
 import { IAsset } from '@/interfaces/module'
-import { IMyDesign, IUserInfo, IUserSettings, IPrices } from '@/interfaces/vivisticker'
+import { IMyDesign, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
@@ -36,7 +36,8 @@ interface IViviStickerState {
   selectedDesigns: { [key: string]: IMyDesign },
   modalInfo: { [key: string]: any },
   prices: IPrices,
-  expireDate: string
+  expireDate: string,
+  loadedFonts: { [key: string]: true }
 }
 
 const EDITOR_BGS = [
@@ -93,7 +94,8 @@ const getDefaultState = (): IViviStickerState => ({
       text: ''
     },
   },
-  expireDate: ''
+  expireDate: '',
+  loadedFonts: {}
 })
 
 const state = getDefaultState()
@@ -200,6 +202,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getModalInfo(state: IViviStickerState): { [key: string]: string } {
     return state.modalInfo
+  },
+  getLoadedFonts(state: IViviStickerState): { [key: string]: true } {
+    return state.loadedFonts
   }
 }
 
@@ -300,20 +305,23 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_myDesignBuffer(state: IViviStickerState, myDesignBuffer: IMyDesign | undefined) {
     state.myDesignBuffer = myDesignBuffer
   },
-  SET_editingDesignId(state: IViviStickerState, editingDesignId) {
+  SET_editingDesignId(state: IViviStickerState, editingDesignId: string) {
     state.editingDesignId = editingDesignId
   },
-  SET_editingAssetInfo(state: IViviStickerState, editingAssetInfo) {
+  SET_editingAssetInfo(state: IViviStickerState, editingAssetInfo: { [key: string]: any }) {
     state.editingAssetInfo = editingAssetInfo
   },
-  SET_modalInfo(state: IViviStickerState, modalInfo) {
+  SET_modalInfo(state: IViviStickerState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
   },
-  SET_prices(state: IViviStickerState, prices) {
+  SET_prices(state: IViviStickerState, prices: IPrices) {
     state.prices = prices
   },
-  SET_expireDate(state: IViviStickerState, expireDate) {
+  SET_expireDate(state: IViviStickerState, expireDate: string) {
     state.expireDate = expireDate
+  },
+  SET_loadedFonts(state: IViviStickerState, loadedFonts: { [key: string]: true }) {
+    state.loadedFonts = loadedFonts
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {
@@ -383,6 +391,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   UPDATE_clearSelectedDesigns(state: IViviStickerState) {
     state.selectedDesigns = {}
+  },
+  UPDATE_addLoadedFont(state: IViviStickerState, font: string) {
+    state.loadedFonts[font] = true
   }
 }
 

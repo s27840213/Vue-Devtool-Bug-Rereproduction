@@ -150,9 +150,10 @@ export interface IListServiceContentDataItem {
   user_id?: string
   asset_index?: number
   asset_id?: string
-  src?: string,
-  unit?: string,
+  src?: string
+  unit?: string
   valid?: number
+  plan?: number
 }
 
 export interface ICategoryItem {
@@ -465,4 +466,28 @@ export interface IFbTrackingData {
   phone?: string,
   custom_data?: string,
   subscription_id?: string
+}
+
+export interface ILoginResult {
+  user_name: string,
+  user_id: string,
+  token: string,
+  account: string,
+  upass_update: number,
+  locale: 'tw' | 'us' | 'jp',
+  subscribe: string,
+  role: number,
+  roleRaw: number,
+  upload_map: object,
+  upload_log_map: object,
+  avatar: object,
+  view_guide: number,
+  email: string,
+  new_user: number,
+  complete: number,
+}
+
+export interface ILoginResponse {
+  flag: number,
+  data: ILoginResult
 }

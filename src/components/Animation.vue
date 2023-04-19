@@ -61,13 +61,12 @@ export default defineComponent({
   data() {
     return {
       rendererSettings: {
-        scaleMode: 'centerCrop',
-        clearCanvas: true,
-        progressiveLoad: false,
-        hideOnTransparent: true
+        scaleMode: 'centerCrop', // eslint-disable-line vue/no-unused-properties
+        clearCanvas: true, // eslint-disable-line vue/no-unused-properties
+        progressiveLoad: false, // eslint-disable-line vue/no-unused-properties
+        hideOnTransparent: true // eslint-disable-line vue/no-unused-properties
       },
       anim: null as unknown as AnimationItem,
-      test: 'remover.mp4'
     }
   },
   computed: {

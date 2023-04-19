@@ -27,7 +27,6 @@ div(class="sidebar")
 </template>
 
 <script lang="ts">
-import { SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import pageUtils from '@/utils/pageUtils'
 import { defineComponent } from 'vue'
@@ -43,7 +42,6 @@ export default defineComponent({
   emits: ['toggleSidebarPanel'],
   data() {
     return {
-      SidebarPanelType
     }
   },
   computed: {
@@ -87,11 +85,6 @@ export default defineComponent({
           this._setIsShowPagePreview(false)
           pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
         }
-      }
-    },
-    goToPage(pageName: string) {
-      if (!this.inBgRemoveMode) {
-        this.$router.push({ name: pageName })
       }
     },
     toggleSidebarPanel() {

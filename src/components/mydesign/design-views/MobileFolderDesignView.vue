@@ -58,10 +58,6 @@ export default defineComponent({
     path(): string[] {
       return designUtils.makePath(this.currLocation)
     },
-    parents(): string[] {
-      const path = this.path
-      return path.slice(0, path.length - 1)
-    },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
     },

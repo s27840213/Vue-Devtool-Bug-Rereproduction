@@ -54,7 +54,6 @@ import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
 import webViewUtils from './utils/picWVUtils'
-import popupUtils from './utils/popupUtils'
 
 export default defineComponent({
   emits: [],
@@ -70,8 +69,6 @@ export default defineComponent({
   data() {
     return {
       coordinate: null as unknown as HTMLElement,
-      coordinateWidth: 0,
-      coordinateHeight: 0
     }
   },
   mounted() {
@@ -138,28 +135,10 @@ export default defineComponent({
         }
       }
     },
-    coordinateHandler(e: MouseEvent) {
-      this.coordinateWidth = e.clientX
-      this.coordinateHeight = e.clientY
-      this.coordinate.style.width = `${this.coordinateWidth}px`
-      this.coordinate.style.height = `${this.coordinateHeight}px`
-    },
-    closeDropdown(type: string) {
-      popupUtils.closePopup()
-    },
     setCurrSelectedResInfo() {
       this.$nextTick(() => {
         this._setCurrSelectedResInfo({})
       })
-    },
-    vcoConfig(type: string) {
-      return {
-        handler: () => {
-          this.closeDropdown(type)
-        },
-        events: ['dblclick', 'click', 'contextmenu']
-        // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
-      }
     },
     notificationStyles() {
       return {

@@ -9,18 +9,17 @@ div(class="panel")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
-import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
-import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
-import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
-import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
+import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
-import { mapGetters, mapState } from 'vuex'
-import { SidebarPanelType } from '@/store/types'
+import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
+import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
+import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import { IPage } from '@/interfaces/page'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 // import { CartType } from '@/store/types'
 
 export default defineComponent({
@@ -47,7 +46,6 @@ export default defineComponent({
   },
   data() {
     return {
-      SidebarPanelType,
       panelComponents: [
         'panel-template',
         'panel-photo',
@@ -64,7 +62,6 @@ export default defineComponent({
         'panel-page-setting',
         'panel-photo-setting'
       ],
-      isActive: true
     }
   },
   computed: {
@@ -79,9 +76,6 @@ export default defineComponent({
     })
   },
   methods: {
-    togglePanel() {
-      this.isActive = !this.isActive
-    },
     panelStyles() {
       return {
         width: this.isMobile ? 'calc(100vw - 75px)' : (this.showPagePanel ? '200px' : '320px')

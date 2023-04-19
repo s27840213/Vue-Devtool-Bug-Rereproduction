@@ -65,7 +65,6 @@ import i18n from '@/i18n'
 import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
-import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -73,7 +72,7 @@ import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -95,7 +94,6 @@ export default defineComponent({
   emits: ['setIsLoading'],
   data() {
     return {
-      FunctionPanelType,
       isSidebarPanelOpen: true,
       inputLocale: i18n.global.locale,
       stkMode: /app=1/.test(window.location.href),
@@ -165,12 +163,6 @@ export default defineComponent({
     showColorSlips(): boolean {
       return editorUtils.showColorSlips
     },
-    isShape(): boolean {
-      return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
-    },
-    inPagePanel(): boolean {
-      return SidebarPanelType.page === this.currPanel
-    },
     contentPanelStyles(): { [index: string]: string } {
       return this.showColorSlips ? {
         'grid-template-rows': '1fr 1fr'
@@ -178,14 +170,8 @@ export default defineComponent({
         'grid-template-rows': '1fr'
       }
     },
-    isLogin(): boolean {
-      return store.getters['user/isLogin']
-    },
     getAdminModeText(): string {
       return this.adminMode ? '' : '-disable'
-    },
-    path(): string {
-      return this.$route.path
     },
     templateText(): string {
       if (this.groupId.length > 0 && this.groupType === 1) {
@@ -241,14 +227,8 @@ export default defineComponent({
       this.stkMode ? url.searchParams.append('app', '1') : url.searchParams.delete('app')
       window.location.href = url.toString()
     },
-    setPanelType(type: number) {
-      this.setCurrFunctionPanel(type)
-    },
     toggleSidebarPanel(bool: boolean) {
       this.isSidebarPanelOpen = bool
-    },
-    confirmLeave() {
-      return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
     copyText(text: string) {
       generalUtils.copyText(text)

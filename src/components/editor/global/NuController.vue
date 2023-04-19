@@ -35,6 +35,7 @@ div(:layer-index="`${layerIndex}`"
         @click.right.stop="onRightClick")
         div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
+            class="text__body"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
             :page="page"
@@ -156,20 +157,16 @@ div(:layer-index="`${layerIndex}`"
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
-import DragUtils from '@/utils/dragUtils'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
-import GroupUtils from '@/utils/groupUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
 import ImageUtils from '@/utils/imageUtils'
 import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
@@ -179,15 +176,12 @@ import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -236,8 +230,6 @@ export default defineComponent({
     return {
       MappingUtils,
       FrameUtils,
-      ShortcutUtils,
-      dragUtils: new DragUtils(this.config.id),
       controlPoints: (this.$isTouchDevice()
         ? ControlUtils.getControlPoints(6, 25)
         : ControlUtils.getControlPoints(4, 25)) as ICP,
@@ -259,21 +251,12 @@ export default defineComponent({
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, isHorizon: false },
       scale: { scaleX: 1, scaleY: 1 },
-      isComposing: false,
-      isSnapping: false,
-      subControlerIndexs: [],
-      hasChangeTextContent: false,
-      movingByControlPoint: false,
       widthLimitSetDuringComposition: false,
       isMoved: false,
-      isDoingGestureAction: false,
-      dblTabsFlag: false,
-      isPointerDownFromSubController: false,
       initCornerRotate: -1,
       cornerRotaters: undefined as ReturnType<typeof ControlUtils.getControlPoints>['cornerRotaters'] | undefined,
       cornerRotaterbaffles: undefined as ReturnType<typeof ControlUtils.getControlPoints>['cornerRotaters'] | undefined,
       eventTarget: null as unknown as HTMLElement,
-      isHandleMovingHandler: false,
       movingUtils: null as unknown as MovingUtils,
       moveStart: null as any
     }
@@ -637,19 +620,6 @@ export default defineComponent({
       const { tooShort, tooNarrow } = this.checkLimits()
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
-    lineEnds(scalers: any, point: number[]) {
-      const quadrant = shapeUtils.getLineQuadrant(point)
-      if (quadrant % 2 === 0) {
-        return [scalers[0], scalers[2]]
-      } else {
-        return [scalers[1], scalers[3]]
-      }
-    },
-    textScaleStyle() {
-      return {
-        transform: `scaleX(${this.getLayerScale()}) scaleY(${this.getLayerScale()})`
-      }
-    },
     textWrapperStyle() {
       return {
         width: `${this.getLayerWidth() / this.getLayerScale()}px`,
@@ -677,50 +647,8 @@ export default defineComponent({
         opacity: this.contentEditable ? 1 : 0
       }
     },
-    groupControllerStyle() {
-      return {
-        width: `${this.config.styles.width / this.getLayerScale()}px`,
-        height: `${this.config.styles.height / this.getLayerScale()}px`,
-        position: 'absolute',
-        transform: `scaleX(${this.getLayerScale()}) scaleY(${this.getLayerScale()})`
-      }
-    },
-    toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      if (this.isLine() || this.$isTouchDevice()) return
-      LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-        shown
-      })
-    },
     primaryLayerZindex() {
       return (this.config as ILayer).styles.zindex
-    },
-    zindex(type: string) {
-      const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
-      const isGroup = (this.getLayerType === 'group') && this.currSelectedInfo.index === this.layerIndex
-      let offset = 0
-      let zindex
-      if (this.isMoving && LayerUtils.layerIndex !== this.layerIndex) {
-        /** The offset is used for frame enter/leave detection */
-        offset += LayerUtils.getCurrLayer.styles.zindex + 1
-      }
-      if (type === 'control-point') {
-        zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
-      } else if (isGroup && (this.config as IGroup).layers.some(l => l.type === LayerType.image && l.imgControl)) {
-        zindex = (this.layerIndex + 1) * 1000
-      } else if (isFrame) {
-        zindex = (this.layerIndex + 1) * 1000
-      } else if (this.getLayerType === LayerType.frame && this.isMoving) {
-        zindex = (this.layerIndex + 1) * 1000
-      } else if (this.getLayerType === 'tmp') {
-        /**
-         * @Todo - find the reason why this been set to certain value istead of 0
-         * set to 0 will make the layer below the empty area of tmp layer selectable
-         */
-        return 0
-      } else if (this.getLayerType === 'text' && this.isControllerShown) {
-        zindex = (this.layerIndex + 1) * 99
-      }
-      return (zindex ?? (this.config.styles.zindex)) + offset
     },
     lineControlPointStyles() {
       const { angle } = shapeUtils.lineDimension(this.config.point)
@@ -732,13 +660,6 @@ export default defineComponent({
     controlPointStyles() {
       return {
         transform: `rotate(${-this.config.styles.rotate}deg)`
-      }
-    },
-    subControllerStyles(isImgControl: boolean) {
-      return isImgControl ? {
-        transform: `translate(-50%, -50%) translateZ(1000px) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`
-      } : {
-        transform: `translate(-50%, -50%) scale(${this.config.styles.scale}) scaleX(${this.config.styles.scaleX}) scaleY(${this.config.styles.scaleY})`
       }
     },
     outlineStyles() {
@@ -1004,8 +925,8 @@ export default defineComponent({
 
       const { angle, yDiff, xDiff } = shapeUtils.lineDimension(this.config.point)
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
-      const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX - 35, y: mouseActualPos.offsetY }
+      const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y, 1)
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35, y: mouseActualPos.offsetY + 35 }
       this.hintAngle = ((angle / Math.PI * 180 + (1 - markerIndex) * 180) + 360) % 360
       this.hintLength = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))
 
@@ -1036,7 +957,7 @@ export default defineComponent({
       const { newPoint, lineLength, lineAngle } = this.snapUtils.calLineAngleSnap(markerIndex, copiedPoint, event.shiftKey)
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
-      const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y, 1)
       this.hintTranslation = { x: mouseActualPos.offsetX - 35, y: mouseActualPos.offsetY + 35 }
       this.hintLength = lineLength
       this.hintAngle = lineAngle
@@ -1491,70 +1412,6 @@ export default defineComponent({
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
     },
-    dragEnter(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.addEventListener('dragleave', this.dragLeave)
-      body.addEventListener('drop', this.onDrop)
-      if (this.getLayerType === 'image') {
-        const shadow = (this.config as IImage).styles.shadow
-        const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
-        const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj?.type && shadow.srcObj?.type !== 'upload'
-        const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
-        if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
-          this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
-        } else {
-          notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-          body.removeEventListener('dragleave', this.dragLeave)
-          body.removeEventListener('drop', this.onDrop)
-        }
-      }
-    },
-    dragLeave(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.removeEventListener('dragleave', this.dragLeave)
-      body.removeEventListener('drop', this.onDrop)
-      if (this.getLayerType === 'image') {
-        this.dragUtils.onImageDragLeave(e, this.pageIndex)
-      }
-    },
-    onDrop(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.removeEventListener('dragleave', this.dragLeave)
-      body.removeEventListener('drop', this.onDrop)
-
-      const dt = e.dataTransfer
-      if (e.dataTransfer?.getData('data')) {
-        if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
-          this.dragUtils.itemOnDrop(e, this.pageIndex)
-        } else if (this.getLayerType === 'image') {
-          if (this.isHandleShadow) {
-            const replacedImg = new Image()
-            replacedImg.crossOrigin = 'anonynous'
-            replacedImg.onload = () => {
-              const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
-              const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
-              imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
-            }
-            const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
-            const src = ImageUtils.getSrc(this.config, size)
-            replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-            // return
-          } else {
-            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
-          }
-        }
-      } else if (dt && dt.files.length !== 0) {
-        const files = dt.files
-        this.setCurrSidebarPanel(SidebarPanelType.file)
-        uploadUtils.uploadAsset('image', files, {
-          addToPage: true
-        })
-      }
-    },
-    onSubDrop(attrs: unknown = {}) {
-      const { e } = attrs as { e: DragEvent }
-      e && this.onDrop(e)
-    },
     waitFontLoadingAndRecord() {
       const pageId = this.page.id
       const layerId = this.config.id
@@ -1726,21 +1583,6 @@ export default defineComponent({
     curveTextSizeRefresh(text: IText) {
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))
     },
-    onDblClick() {
-      if (this.getLayerType !== 'image' || this.isLocked()) return
-      if (this.currSelectedInfo.index < 0) {
-        GroupUtils.select(this.pageIndex, [this.layerIndex])
-      }
-      switch (this.getLayerType) {
-        case LayerType.image: {
-          const { shadow } = (this.config as IImage).styles
-          const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
-          if (!(this.isHandleShadow && needRedrawShadow)) {
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-          }
-        }
-      }
-    },
     onRightClick(event: MouseEvent) {
       if (this.$isTouchDevice()) {
         // in touch device, right click will be triggered by long click
@@ -1750,9 +1592,6 @@ export default defineComponent({
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
-    },
-    pointerDownSubController() {
-      this.isPointerDownFromSubController = true
     },
     frameLayerMapper(_config: any) {
       const config = generalUtils.deepCopy(_config)
@@ -1995,15 +1834,15 @@ export default defineComponent({
     overflow-wrap: break-word;
   }
   &__wrapper {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
   }
   &__body {
-    width: 100%;
-    height: auto;
+    outline: none;
+    padding: 0;
+    position: relative;
   }
   &__content {
     text-align: left;

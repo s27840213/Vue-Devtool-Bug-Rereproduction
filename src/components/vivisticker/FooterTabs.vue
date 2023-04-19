@@ -52,10 +52,6 @@ export default defineComponent({
       default: 'none',
       type: String
     },
-    inAllPagesMode: {
-      type: Boolean,
-      default: false
-    }
   },
   data() {
     // const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
@@ -96,9 +92,6 @@ export default defineComponent({
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
-    },
-    hasSelectedLayer(): boolean {
-      return this.currSelectedInfo.layers.length > 0
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type
@@ -402,14 +395,6 @@ export default defineComponent({
       const layer = layerUtils.getCurrLayer
       return layer.type === LayerType.frame && (layer as IFrame).clips[0].srcObj.assetId !== ''
     },
-    isFrameImg(): boolean {
-      return layerUtils.getCurrLayer.type === LayerType.frame && ((layerUtils.getCurrConfig as IImage).isFrameImg ?? false)
-    },
-    isSubLayerFrameImage(): boolean {
-      const { index } = this.currSubSelectedInfo
-      const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
-      return type === 'frame' && clips[0].srcObj.assetId
-    },
     isSvgImage(): boolean {
       const layer = layerUtils.getCurrLayer
       const subLayerIdx = layerUtils.subLayerIdx
@@ -444,11 +429,6 @@ export default defineComponent({
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.selectedLayerNum !== 0
     },
-    showSingleFrameTabs(): boolean {
-      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.selectedLayerNum !== 0 && layerUtils.getCurrLayer.type === LayerType.frame &&
-        (layerUtils.getCurrLayer as IFrame).clips.length === 1
-    },
     showFrame(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.selectedLayerNum !== 0 && this.editorType === 'object' && layerUtils.getCurrLayer.type === LayerType.frame &&
@@ -465,19 +445,6 @@ export default defineComponent({
       const typeConditon = (this.targetIs('shape') && this.singleTargetType()) ||
         (getCurrConfig.type === LayerType.frame && (getCurrConfig as IFrame).clips.length !== 1)
       return stateCondition && typeConditon
-    },
-    layerType(): { [key: string]: string } {
-      const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
-      return {
-        currLayerType: currLayer.type,
-        targetLayerType: (() => {
-          if (subLayerIdx !== -1) {
-            return currLayer.type === LayerType.group
-              ? (currLayer as IGroup).layers[subLayerIdx].type : LayerType.image
-          }
-          return currLayer.type
-        })()
-      }
     },
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable

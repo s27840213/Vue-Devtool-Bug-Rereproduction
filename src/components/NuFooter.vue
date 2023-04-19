@@ -180,9 +180,6 @@ export default defineComponent({
     }
   },
   methods: {
-    goToPage(page: string) {
-      window.location.href = page
-    },
     newDesign(item: Itheme) {
       designUtils.newDesignWithLoginRedirect(item.width, item.height, 'px', item.id)
     },

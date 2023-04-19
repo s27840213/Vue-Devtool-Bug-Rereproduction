@@ -245,6 +245,8 @@ export default defineComponent({
       }
       this.isPanelUp = !this.isPanelUp
     },
+    // TODO
+    // eslint-disable-next-line vue/no-unused-properties
     handleShowWelcome() {
       this.setFullPageConfig({ type: 'welcome' })
     },

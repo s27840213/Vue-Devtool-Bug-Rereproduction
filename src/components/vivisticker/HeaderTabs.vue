@@ -300,11 +300,13 @@ export default defineComponent({
           if (flag === '1') {
             modalUtils.setModalInfo(
               `${this.$t('STK0017')}`,
-              [`${this.$t('STK0018')}`.replace('{newline}', '<br/>')],
+              [`${this.$t('STK0018')}`],
               {
                 msg: `${this.$t('STK0019')}`
               }
             )
+          } else {
+            vivistickerUtils.handleIos16Video()
           }
         })
       } else {

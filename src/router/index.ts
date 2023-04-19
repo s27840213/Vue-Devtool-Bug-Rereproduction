@@ -48,6 +48,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        vivistickerUtils.hideController()
         next()
       } catch (error) {
         console.log(error)
@@ -104,7 +105,8 @@ const router = createRouter({
           vivistickerUtils.enterStandaloneMode()
           vivistickerUtils.setDefaultLocale()
         }
-        vivistickerUtils.fetchDebugModeEntrance()
+        await vivistickerUtils.fetchDebugModeEntrance()
+        await vivistickerUtils.fetchLoadedFonts()
         const userInfo = await vivistickerUtils.getUserInfo()
         if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
           logUtils.uploadLog().then(() => {

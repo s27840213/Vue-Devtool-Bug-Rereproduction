@@ -1,16 +1,19 @@
 <template lang="pug">
-div(class="category-background-item")
-  img(class="pointer"
-    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'smal', item.ver)"
-    draggable="false"
+div(class="panel-bg__item"
     v-press="handleShare"
-    @click="addBackground"
+    @click="addBackground")
+  img(class="panel-bg__img"
+    ref="img"
+    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
+    draggable="false"
     @error="handleNotFound")
-  div(class="category-background-item__share" @click.stop.prevent="handleShare")
+  div(class="panel-bg__share" @click.stop.prevent="handleShare")
     svg-icon(iconName="share" iconColor="white" iconWidth="16px")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
+import ProItem from '@/components/payment/ProItem.vue'
 import { IAsset } from '@/interfaces/module'
 import AssetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -20,6 +23,9 @@ import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: ['share'],
+  components: {
+    ProItem
+  },
   props: {
     src: {
       type: String
@@ -28,10 +34,6 @@ export default defineComponent({
       type: Object as PropType<IAsset>,
       required: true
     },
-    locked: {
-      type: Boolean,
-      required: true
-    }
   },
   data() {
     return {
@@ -49,6 +51,7 @@ export default defineComponent({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
+      // if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-bg')) return
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
       AssetUtils.addAssetToRecentlyUsed(this.item, 'background')
     },
@@ -60,11 +63,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.category-background-item {
-  position: relative;
-  & > img {
+.panel-bg {
+  &__item {
+    position: relative;
+    cursor: pointer;
+  }
+  &__img {
+    // width: min(calc((100vw - 10px - 48px) / 2), 145px);
+    // height: min(calc((100vw - 10px - 48px) / 2), 145px);
     width: 100%;
     height: 100%;
+    // margin: 0 auto;
     object-fit: cover;
     vertical-align: middle;
     -webkit-touch-callout: none;

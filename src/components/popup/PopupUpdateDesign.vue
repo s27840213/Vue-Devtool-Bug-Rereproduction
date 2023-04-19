@@ -74,7 +74,6 @@ export default defineComponent({
       imgRandQuery: '',
       objectInfo: {
         key_id: '' as string,
-        author: '' as string,
         edit_time: '' as string,
         tags_tw: '' as string,
         tags_us: '' as string,

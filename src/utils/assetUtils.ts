@@ -510,6 +510,13 @@ class AssetUtils {
         // contentEditable: true
       })
       newLayer = LayerFactary.newText(config)
+      const { x, y, width, height } = newLayer.styles
+      const textHW = TextUtils.getTextHW(newLayer, -1)
+      Object.assign(newLayer.styles, {
+        ...textHW,
+        x: x + (width - textHW.width) / 2,
+        y: y + (height - textHW.height) / 2,
+      })
       isText = true
     } else if (config.type === 'group') {
       for (const subLayer of config.layers) {

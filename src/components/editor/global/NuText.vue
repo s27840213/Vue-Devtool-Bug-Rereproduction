@@ -17,7 +17,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :page="page"
       :subLayerIndex="subLayerIndex"
       :primaryLayer="primaryLayer"
-      :isDuplicated="idx !== duplicatedText.length-1")
+      :extraSpanStyle="text.extraSpanStyle")
     p(v-else
       v-for="(p, pIndex) in config.paragraphs"
       :key="`p${pIndex}`"
@@ -108,9 +108,6 @@ export default defineComponent({
     ...mapGetters({
       isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
-    spanEffect() {
-      return textBgUtils.convertTextEffect(this.config.styles)
-    },
     isCurveText(): any {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
@@ -165,9 +162,12 @@ export default defineComponent({
         ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
       }
     },
-    drawSvgBG() {
-      this.$nextTick(async () => {
-        this.svgBG = await textBgUtils.drawSvgBg(this.config)
+    drawSvgBG(): Promise<void> {
+      return new Promise(resolve => {
+        this.$nextTick(async () => {
+          this.svgBG = await textBgUtils.drawSvgBg(this.config)
+          resolve()
+        })
       })
     },
     isLayerAutoResizeNeeded(): boolean {
@@ -251,13 +251,13 @@ export default defineComponent({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      this.drawSvgBG()
+      await this.drawSvgBG()
     },
     resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
-        setTimeout(() => {
-          this.resizeCallback()
+        setTimeout(async () => {
+          await this.resizeCallback()
           if (this.$route.name === 'Screenshot') {
             vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           }
@@ -275,6 +275,11 @@ export default defineComponent({
   height: 100%;
   position: absolute;
   left: 0;
+  top: 0;
+  font-feature-settings: 'liga' 0;
+  -webkit-font-feature-settings: 'liga' 0;
+  -webkit-font-smoothing: subpixel-antialiased; // for textUtils.getTextHW
+  text-rendering: geometricPrecision; // for textUtils.getTextHW
   &__BG {
     position: absolute;
     left: 0;

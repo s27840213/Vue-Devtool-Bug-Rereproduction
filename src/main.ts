@@ -1,5 +1,4 @@
 import App from '@/App.vue'
-import NuClipper from '@/components/editor/global/NuClipper.vue'
 import NuController from '@/components/editor/global/NuController.vue'
 import NuFrame from '@/components/editor/global/NuFrame.vue'
 import NuGroup from '@/components/editor/global/NuGroup.vue'
@@ -66,6 +65,7 @@ declare module '@vue/runtime-core' {
   }
 }
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
+app.config.globalProperties.$isTablet = () => generalUtils.isTablet()
 app.config.globalProperties.$eventBus = eventBus
 
 const tooltipUtils = new TooltipUtils()
@@ -100,7 +100,6 @@ app.component('nu-layer', NuLayer)
 app.component('nu-text', NuText)
 app.component('nu-group', NuGroup)
 app.component('nu-tmp', NuTmp)
-app.component('nu-clipper', NuClipper)
 app.component('nu-controller', NuController)
 app.component('nu-sub-controller', NuSubController)
 app.component('nu-shape', NuShape)
