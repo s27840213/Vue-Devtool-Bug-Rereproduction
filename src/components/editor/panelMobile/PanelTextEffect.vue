@@ -16,7 +16,7 @@ div(class="panel-text-effect")
     div(v-for="effect in effectList"
         :key="`${currCategory.name}-${effect.key}`"
         :class="{ 'selected': currEffect.key === effect.key }"
-        @click="onEffectClick(effect.key)")
+        @click="onEffectClick(effect)")
       svg-icon(:iconName="effectIcon(currCategory, effect)"
               class="panel-text-effect__effects--icon"
               iconWidth="48px" iconColor="gray-5")
@@ -76,6 +76,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapState } from 'vuex'
@@ -196,12 +197,12 @@ export default defineComponent({
       target.resetCurrTextEffect()
       this.recordChange()
     },
-    async onEffectClick(effectName: string): Promise<void> {
-      // TODO: check pro
-      if (effectName !== this.currentStyle.name) {
-        await this.setEffect({ effectName })
+    async onEffectClick(effect: IEffect): Promise<void> {
+      if (!vivistickerUtils.checkPro(effect, 'text')) return
+      if (effect.key !== this.currentStyle.name) {
+        await this.setEffect({ effectName: effect.key })
         this.recordChange()
-      } else if (effectName !== 'none') {
+      } else if (effect.key !== 'none') {
         this.pushHistory(this.currCategory.name)
       }
     },
