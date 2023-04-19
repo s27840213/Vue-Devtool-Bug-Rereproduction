@@ -133,7 +133,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get isPaymentDisabled(): boolean {
-    return !this.checkVersion('1.25')
+    return !this.checkVersion('1.26')
   }
 
   getUserInfoFromStore(): IUserInfo {
