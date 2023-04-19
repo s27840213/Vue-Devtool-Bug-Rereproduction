@@ -16,7 +16,7 @@ div(class="panel-text-effect")
     div(v-for="effect in effectList"
         :key="`${currCategory.name}-${effect.key}`"
         :class="{ 'selected': currEffect.key === effect.key }"
-        @click="onEffectClick(effect.key)")
+        @click="onEffectClick(effect)")
       svg-icon(:iconName="effectIcon(currCategory, effect)"
               class="panel-text-effect__effects--icon"
               iconWidth="48px" iconColor="gray-5")
@@ -71,6 +71,7 @@ import i18n from '@/i18n'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
+import paymentUtils from '@/utils/paymentUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -196,11 +197,12 @@ export default defineComponent({
       target.resetCurrTextEffect()
       this.recordChange()
     },
-    async onEffectClick(effectName: string): Promise<void> {
-      if (effectName !== this.currentStyle.name) {
-        await this.setEffect({ effectName })
+    async onEffectClick(effect: IEffect): Promise<void> {
+      if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      if (effect.key !== this.currentStyle.name) {
+        await this.setEffect({ effectName: effect.key })
         this.recordChange()
-      } else if (effectName !== 'none') {
+      } else if (effect.key !== 'none') {
         this.pushHistory(this.currCategory.name)
       }
     },
