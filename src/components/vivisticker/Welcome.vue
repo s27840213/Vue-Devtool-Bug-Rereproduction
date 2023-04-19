@@ -9,12 +9,8 @@ div(v-show="imgLoaded" class="welcome")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapMutations } from 'vuex'
-import Payment from './Payment.vue'
 
 export default defineComponent({
-  components: {
-    Payment
-  },
   data() {
     return {
       imgLoaded: false

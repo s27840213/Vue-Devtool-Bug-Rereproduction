@@ -4,7 +4,6 @@ img(:class="`pro ${theme}`" loading="lazy"
 </template>
 
 <script lang="ts">
-import webViewUtils from '@/utils/picWVUtils'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
@@ -24,10 +23,7 @@ export default defineComponent({
         default:
           return 'vivisticker_pro.svg'
       }
-    },
-    inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
-    },
+    }
   },
 })
 </script>
