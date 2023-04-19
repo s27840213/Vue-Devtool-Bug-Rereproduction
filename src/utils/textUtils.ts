@@ -913,7 +913,10 @@ class TextUtils {
       })(),
       ...fontList.slice(1).map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem))
     ]) // wait until the css files of fonts are loaded
-    const allCharacters = paragraph.spans.flatMap(s => s.text.split(''))
+    const allCharacters = paragraph.spans.flatMap(s => {
+      console.log(this.tokenizeString(s.text))
+      return s.text.split('')
+    })
     await Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
   }
 
@@ -1000,6 +1003,12 @@ class TextUtils {
       console.log(error)
       finalCallBack(true)
     })
+  }
+
+  tokenizeString(str: string): string[] {
+    // eslint-disable-next-line no-misleading-character-class
+    const tokenPattern = /([\s\S]*?(\p{Emoji}(?:\p{Emoji_Modifier}(?:\u{FE0F}\u{20E3}|\u{E0020}-\u{E007E}+\u{E007F})?|\u{FE0F}\u{20E3}|\u{E0020}-\u{E007E}+\u{E007F})?(?:\u{200D}\p{Emoji}(?:\p{Emoji_Modifier}(?:\u{FE0F}\u{20E3}|\u{E0020}-\u{E007E}+\u{E007F})?|\u{FE0F}\u{20E3}|\u{E0020}-\u{E007E}+\u{E007F})?)*)|[\u{1f900}-\u{1f9ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{0030}-\u{0039}\u{FE0F}\u{20E3}\u{E0020}-\u{E007E}+\u{E007F}]|[\d]|.)/gu
+    return str.match(tokenPattern) ?? []
   }
 }
 
