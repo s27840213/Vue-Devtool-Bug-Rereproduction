@@ -14,10 +14,14 @@ export interface IUserInfoV1_26 extends IUserInfoV1_0 {
   country: string,
 }
 
-export type IUserInfo = IUserInfoV1_0 | IUserInfoV1_26
+export type IUserInfo = IUserInfoV1_0 & Partial<IUserInfoV1_26>
+
+export function isV1_0(userInfo: IUserInfo): userInfo is IUserInfoV1_0 {
+  return userInfo.device === undefined
+}
 
 export function isV1_26(userInfo: IUserInfo): userInfo is IUserInfoV1_26 {
-  return (userInfo as any).device !== undefined
+  return userInfo.device !== undefined
 }
 
 export interface IUserSettings {
