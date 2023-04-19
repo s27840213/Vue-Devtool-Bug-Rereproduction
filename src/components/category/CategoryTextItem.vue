@@ -1,14 +1,14 @@
 <template lang="pug">
-div(class="panel-text__item")
-  img(class="panel-text__img"
-    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+div(class="panel-text__item"
     draggable="true"
-    :style="itemStyle"
     @dragstart="dragStart($event)"
     @click="addText"
-    @click.right.prevent="openUpdateDesignPopup()"
+    @click.right.prevent="openUpdateDesignPopup()")
+  img(class="panel-text__img"
+    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+    :style="itemStyle"
     @error="handleNotFound")
-  pro-item(v-if="item.plan")
+  pro-item(v-if="item.plan" draggable="false")
 </template>
 
 <script lang="ts">

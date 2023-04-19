@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="category-object-item"
+    draggable="true"
     @click="addSvg"
     @click.right.prevent="openUpdateDesignPopup()"
     @dragstart="dragStart($event)")
   img(class="category-object-item__img"
-    draggable="true"
     :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
   svg-icon(v-if="!$isTouchDevice() && (item.info || (item.tags && item.tags.length > 0))"
     class="category-object-item__more"
@@ -12,7 +12,7 @@ div(class="category-object-item"
     :iconName="'more_vertical'"
     :iconColor="'gray-2'"
     :iconWidth="'20px'")
-  pro-item(v-if="item.plan")
+  pro-item(v-if="item.plan" draggable="false")
 </template>
 
 <script lang="ts">
