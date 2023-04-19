@@ -8,6 +8,7 @@ import router from '@/router'
 import store from '@/store'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import Graphemer from 'graphemer'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
 import GeneralUtils from './generalUtils'
@@ -31,6 +32,7 @@ class TextUtils {
   trashDivs: HTMLDivElement[] = []
   toRecordId: string
   toSetFlagId: string
+  splitter: Graphemer = new Graphemer()
   fieldRange: {
     fontSize: { min: number, max: number }
     lineHeight: { min: number, max: number }
@@ -913,17 +915,19 @@ class TextUtils {
       })(),
       ...fontList.slice(1).map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem))
     ]) // wait until the css files of fonts are loaded
-    const allCharacters = paragraph.spans.flatMap(s => {
-      console.log(this.tokenizeString(s.text))
-      return s.text.split('')
-    })
+    const allCharacters = paragraph.spans.flatMap(s => this.tokenizeString(s.text))
     await Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
   }
 
   async untilFontLoadedForChar(char: string, fontList: string[]): Promise<void> {
-    for (const font of fontList) {
-      const fontFileList = await window.document.fonts.load(`14px ${font}`, char)
-      if (fontFileList.length !== 0) return
+    try {
+      for (const font of fontList) {
+        const fontFileList = await window.document.fonts.load(`14px ${font}`, char)
+        if (fontFileList.length !== 0) return
+      }
+    } catch (error) {
+      console.error(error)
+      throw error
     }
   }
 
@@ -1006,9 +1010,7 @@ class TextUtils {
   }
 
   tokenizeString(str: string): string[] {
-    // eslint-disable-next-line no-misleading-character-class
-    const tokenPattern = /([\s\S]*?(\p{Emoji}(?:\p{Emoji_Modifier}(?:\u{FE0F}\u{20E3}|\u{E0020}-\u{E007E}+\u{E007F})?|\u{FE0F}\u{20E3}|\u{E0020}-\u{E007E}+\u{E007F})?(?:\u{200D}\p{Emoji}(?:\p{Emoji_Modifier}(?:\u{FE0F}\u{20E3}|\u{E0020}-\u{E007E}+\u{E007F})?|\u{FE0F}\u{20E3}|\u{E0020}-\u{E007E}+\u{E007F})?)*)|[\u{1f900}-\u{1f9ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{0030}-\u{0039}\u{FE0F}\u{20E3}\u{E0020}-\u{E007E}+\u{E007F}]|[\d]|.)/gu
-    return str.match(tokenPattern) ?? []
+    return this.splitter.splitGraphemes(str)
   }
 }
 
