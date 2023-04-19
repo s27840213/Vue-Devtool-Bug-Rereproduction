@@ -4,7 +4,6 @@ img(v-if="!inReviewMode" :class="`pro ${theme}`" loading="lazy"
 </template>
 
 <script lang="ts">
-import webViewUtils from '@/utils/picWVUtils'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
@@ -26,7 +25,8 @@ export default defineComponent({
       }
     },
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      // return webViewUtils.inReviewMode
+      return true // Vivisticker hide all pro-items
     },
   },
 })

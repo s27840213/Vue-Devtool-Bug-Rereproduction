@@ -10,10 +10,7 @@ div(class="panel-text__item"
 
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
-import store from '@/store'
 import AssetUtils from '@/utils/assetUtils'
-import DragUtils from '@/utils/dragUtils'
-import paymentUtils from '@/utils/paymentUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
