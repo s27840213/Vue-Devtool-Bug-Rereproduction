@@ -345,8 +345,8 @@ export default defineComponent({
     lazyloadSize(): unknown {
       if (this.$isTouchDevice()) {
         return {
-          minHeight: this.config.height * this.contentScaleRatio,
-          maxHeight: this.config.height * this.contentScaleRatio
+          minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100),
+          maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)
         }
       } else {
         return {
