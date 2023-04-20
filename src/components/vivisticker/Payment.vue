@@ -2,7 +2,7 @@
 div(class="payment" v-touch @swipe="handleSwipe")
   carousel(
     :items="carouselItems"
-    :itemWidth="windowSize.width"
+    :itemWidth="containerWidth"
     :initIndex="carouselItems.findIndex(item => item.key === target)"
     enableSwipe
     @change="handleImageChange")
@@ -32,8 +32,9 @@ div(class="payment" v-touch @swipe="handleSwipe")
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub") {{ btnPlan.subTitle }}
           div(class="payment__btn-plan__content__price") {{ btnPlan.price }}
             div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
-    div(class="payment__btn-subscribe" @touchend="handleBtnSubscribeClick")
-      span {{ txtBtnSubscribe }}
+    div(class="payment__btn-subscribe" :class="{pending}" @touchend="handleSubscribe(planSelected)")
+      svg-icon(v-if="pending" class="spiner" iconName="spiner" iconWidth="20px" iconColor="white")
+      div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
     div(class="payment__footer")
       template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
         span(v-if="idx > 0" class="payment__footer__splitter")
@@ -59,11 +60,13 @@ div(class="payment" v-touch @swipe="handleSwipe")
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
+import { IPrices } from '@/interfaces/vivisticker'
+import modalUtils from '@/utils/modalUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
-import { mapMutations, mapState } from 'vuex'
+import { PropType, defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface CarouselItem {
   key: IViviStickerProFeatures
@@ -76,21 +79,6 @@ interface IComparison {
   free: boolean,
   pro: boolean
 }
-
-const PRICES = {
-  tw: {
-    monthly: 140,
-    annually: 799
-  },
-  us: {
-    monthly: 4.99,
-    annually: 26.90
-  },
-  jp: {
-    monthly: 600,
-    annually: 3590
-  }
-} as {[key: string]: { monthly: number, annually: number }}
 
 export default defineComponent({
   components: {
@@ -129,21 +117,17 @@ export default defineComponent({
         {
           key: 'restorePurchase',
           title: this.$t('STK0045'),
-          action: this.handleRestorePurchaseClick
+          action: () => this.handleSubscribe('restore', 30000)
         },
         {
           key: 'termsOfService',
           title: this.$t('NN0160'),
-          action: () => {
-            window.open(this.$t('STK0053'), '_blank')
-          }
+          action: () => window.open(this.$t('STK0053'), '_blank')
         },
         {
           key: 'privacyPolicy',
           title: this.$t('NN0161'),
-          action: () => {
-            window.open(this.$t('STK0052'), '_blank')
-          }
+          action: () => window.open(this.$t('STK0052'), '_blank')
         }
       ],
       comparisons: [
@@ -172,28 +156,27 @@ export default defineComponent({
       isTablet: 'isTablet',
       isLandscape: 'isLandscape',
     }),
+    ...mapGetters({
+      prices: 'vivisticker/getPrices',
+      pending: 'vivisticker/getIsPaymentPending',
+      userInfo: 'vivisticker/getUserInfo',
+      modalInfo: 'vivisticker/getModalInfo'
+    }),
     txtBtnSubscribe() {
       return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
     },
-    localizedPrice(): {monthly: string, annually: string} {
-      const locale = this.$i18n.locale
-      return {
-        monthly: this.localizePrice(PRICES[locale].monthly, locale),
-        annually: this.localizePrice(PRICES[locale].annually, locale)
-      }
-    },
     localizedTag(): string {
-      const locale = this.$i18n.locale
-      const price = round(PRICES[locale].annually / 12, locale === 'us' ? 2 : 0)
-      switch (locale) {
-        case 'tw':
+      if (!this.prices) return ''
+      const prices = this.prices as IPrices
+      const currency = prices.currency
+      const price = round(prices.annually.value / 12, currency === 'TWD' || currency === 'JPY' ? 0 : 2)
+      switch (currency) {
+        case 'TWD':
           return `${price}元 / 月`
-        case 'us':
-          return `$${price} / Mo`
-        case 'jp':
+        case 'JPY':
           return `¥${price}円 / 月額`
         default:
-          return price.toString()
+          return `$${price} / Mo`
       }
     },
     btnPlans() {
@@ -202,25 +185,35 @@ export default defineComponent({
           key: 'monthly',
           title: this.$t('NN0514'),
           subTitle: '',
-          price: this.localizedPrice.monthly,
+          price: this.prices.monthly.text,
           tag: ''
         },
         {
           key: 'annually',
           title: this.$t('NN0515'),
           subTitle: this.$t('STK0048', { day: 3 }),
-          price: this.localizedPrice.annually,
+          price: this.prices.annually.text,
           tag: this.localizedTag
         }
       ]
     },
+    containerWidth() {
+      return this.isTablet && this.isLandscape ? round(this.windowSize.width * 0.44) : this.windowSize.width // round to prevent subpixel problem
+    },
+    containerPadding() {
+      return (this.windowSize.width - this.containerWidth) / 2
+    },
     padding() {
-      return this.isTablet ? '2.8%' : '24px'
-    }
+      return this.isTablet ? `${this.containerWidth * 0.028}px` : '24px'
+    },
+    panelPadding() {
+      return `${this.containerPadding + (this.isTablet ? this.containerWidth * 0.028 : 24)}px`
+    },
   },
   methods: {
     ...mapMutations({
-      setFullPageConfig: 'vivisticker/SET_fullPageConfig'
+      setFullPageConfig: 'vivisticker/SET_fullPageConfig',
+      setPaymentPending: 'vivisticker/SET_paymentPending'
     }),
     handleImageChange(index: number) {
       this.idxCurrImg = index
@@ -228,11 +221,19 @@ export default defineComponent({
     handleBtnPlanClick(key: string) {
       this.planSelected = key
     },
-    handleBtnSubscribeClick() {
-      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: this.planSelected })
-    },
-    handleRestorePurchaseClick() {
-      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'restore' })
+    handleSubscribe(option: string, timeout?: number) {
+      if (vivistickerUtils.isPaymentDisabled) {
+        this.showUpdateModal()
+        return
+      }
+      if (this.pending) return
+      this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
+      vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
+      if (timeout) {
+        setTimeout(() => {
+          this.setPaymentPending({ purchase: false, restore: false })
+        }, timeout)
+      }
     },
     handleSwipe(e: AnyTouchEvent) {
       e.stopPropagation()
@@ -245,23 +246,56 @@ export default defineComponent({
       }
       this.isPanelUp = !this.isPanelUp
     },
-    // TODO
-    // eslint-disable-next-line vue/no-unused-properties
-    handleShowWelcome() {
-      this.setFullPageConfig({ type: 'welcome' })
-    },
-    localizePrice(price: number, locale: string): string {
-      switch (locale) {
-        case 'tw':
-          return `${price}元`
-        case 'us':
-          return `$${price}`
-        case 'jp':
-          return `¥${price}円(税込)`
-        default:
-          return price.toString()
+    showUpdateModal() {
+      let locale = this.userInfo.locale
+      if (!['us', 'tw', 'jp'].includes(locale)) {
+        locale = 'us'
       }
-    },
+      const prefix = 'exp_' + locale + '_'
+      const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
+        ([k, v]) => {
+          if (k.startsWith(prefix)) k = k.replace(prefix, '')
+          return [k, v as string]
+        })
+      )
+      const options = {
+        imgSrc: modalInfo.img_url,
+        noClose: false,
+        noCloseIcon: false,
+        backdropStyle: {
+          backgroundColor: 'rgba(24,25,31,0.3)'
+        },
+        cardStyle: {
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255,255,255,0.9)'
+        }
+      }
+      modalUtils.setModalInfo(
+        modalInfo.title,
+        modalInfo.msg,
+        {
+          msg: modalInfo.btn_txt,
+          class: 'btn-black-mid',
+          style: {
+            color: '#F8F8F8'
+          },
+          action: () => {
+            const url = modalInfo.btn_url
+            if (url) { window.open(url, '_blank') }
+          }
+        },
+        {
+          msg: modalInfo.btn2_txt || '',
+          class: 'btn-light-mid',
+          style: {
+            border: 'none',
+            color: '#474A57',
+            backgroundColor: '#D3D3D3'
+          }
+        },
+        options
+      )
+    }
   }
 })
 </script>
@@ -269,15 +303,19 @@ export default defineComponent({
 <style lang="scss" scoped>
 .payment {
   @include size(100%);
+  @include no-scrollbar;
   display: flex;
   flex-direction: column;
   font-family: 'Poppins';
+  overflow-x: hidden;
+  width: v-bind("containerWidth + 'px'");
+  margin: 0 auto;
   &__carousel-item {
     display: flex;
     justify-content: center;
     width: inherit;
-    height: 75vw;
-    max-height: v-bind("isLandscape ? '50vh' : 'unset'");
+    height: v-bind("containerWidth * 0.75 + 'px'");
+    // max-height: calc(100vh - 414px);
     &__img {
       width: 100%;
       object-fit: cover;
@@ -306,7 +344,7 @@ export default defineComponent({
     }
   }
   &__content {
-    margin: 0px v-bind(padding);
+    margin: 0px v-bind(padding) 84px v-bind(padding);
     &__indicator {
       margin: 42px auto 0 auto;
       display: flex;
@@ -400,6 +438,7 @@ export default defineComponent({
     }
   }
   &__btn-subscribe {
+    position: relative;
     width: fit-content;
     margin: 20px auto 0 auto;
     padding: 4px 16px;
@@ -410,11 +449,25 @@ export default defineComponent({
     align-items: center;
     text-align: center;
     color: setColor(black-3);
-    >span {
+    &__text {
       width: 100%;
+    }
+    &.pending {
+      pointer-events: none;
+      background-color: rgba(white, 0.5);
+      .payment__btn-subscribe__text {
+        visibility: hidden;
+      }
     }
     &:active {
       opacity: 0.8;
+    }
+    .spiner {
+      animation: rotation 0.5s infinite linear;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
   }
   &__footer {
@@ -436,8 +489,8 @@ export default defineComponent({
   &__panel {
     position: absolute;
     bottom: 0px;
-    left: 0px;
-    right: 0px;
+    left: v-bind("containerPadding + 'px'");
+    right: v-bind("containerPadding + 'px'");
     box-sizing: border-box;
     // min-height: 57%;
     padding: 16px v-bind(padding) 0px v-bind(padding);
@@ -449,8 +502,8 @@ export default defineComponent({
     transition-timing-function: ease-in-out;
     &.close {
       padding: 16px 0 0 0;
-      left: v-bind(padding);
-      right: v-bind(padding);
+      left: v-bind(panelPadding);
+      right: v-bind(panelPadding);
       bottom: -20px;
       transform: translateY(calc(100% - 68px));
     }
@@ -510,6 +563,16 @@ export default defineComponent({
       text-align: left;
       justify-content: left;
     }
+  }
+}
+
+@keyframes rotation {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 </style>
