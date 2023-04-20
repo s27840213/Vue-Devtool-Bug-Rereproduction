@@ -7,32 +7,40 @@ import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import { AnyTouchEvent } from 'any-touch'
 import AssetUtils from './assetUtils'
 import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
 import groupUtils from './groupUtils'
 import zindexUtils from './zindexUtils'
 class MouseUtils {
-  private getEventType(e: MouseEvent | TouchEvent | PointerEvent) {
+  private getEventType(e: MouseEvent | TouchEvent | PointerEvent | AnyTouchEvent) {
     if (e.type.includes('pointer')) {
       return 'pointer'
     } else if (e.type.includes('mouse')) {
       return 'mouse'
     } else if (e.type.includes('touch')) {
       return 'touch'
+    } else if (e.type.includes('pinch')) {
+      return 'pinch'
     } else {
       // default
       return 'mouse'
     }
   }
 
-  getMouseAbsPoint(e: MouseEvent | TouchEvent | PointerEvent) {
+  getMouseAbsPoint(e: MouseEvent | TouchEvent | PointerEvent | AnyTouchEvent) {
     const type = this.getEventType(e)
-    const x = type === 'pointer' ? (e as PointerEvent).clientX : type === 'mouse' ? (e as MouseEvent).clientX : (e as TouchEvent).touches[0].clientX
-    const y = type === 'pointer' ? (e as PointerEvent).clientY : type === 'mouse' ? (e as MouseEvent).clientY : (e as TouchEvent).touches[0].clientY
-    return {
-      x,
-      y
+    if (type === 'pinch') {
+      const { x, y } = e as AnyTouchEvent
+      return { x, y }
+    } else {
+      const x = type === 'pointer' ? (e as PointerEvent).clientX : type === 'mouse' ? (e as MouseEvent).clientX : (e as TouchEvent).touches[0].clientX
+      const y = type === 'pointer' ? (e as PointerEvent).clientY : type === 'mouse' ? (e as MouseEvent).clientY : (e as TouchEvent).touches[0].clientY
+      return {
+        x,
+        y
+      }
     }
   }
 

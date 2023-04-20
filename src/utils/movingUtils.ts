@@ -16,6 +16,13 @@ import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
 import tiptapUtils from './tiptapUtils'
 
+const initPageTranslate = { x: 0, y: 0 }
+
+export function setInitPageTranslate() {
+  initPageTranslate.x = pageUtils.getCurrPage.x
+  initPageTranslate.y = pageUtils.getCurrPage.y
+}
+
 export class MovingUtils {
   isControlling = false
   private component = undefined as any | undefined
@@ -25,7 +32,7 @@ export class MovingUtils {
   private _config = { config: null as unknown as ILayer }
   private initialPos = { x: 0, y: 0 }
   private initTranslate = { x: 0, y: 0 }
-  private initPageTranslate = { x: 0, y: 0 }
+  // private initPageTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
   private isDoingGestureAction = false
   private isHandleMovingHandler = false
@@ -72,10 +79,13 @@ export class MovingUtils {
     return false
   }
 
+  private randId = ''
+
   constructor({ _config, snapUtils, component, body, layerInfo }: { _config: { config: ILayer }, snapUtils: unknown, component?: any, body: HTMLElement, layerInfo?: ILayerInfo }) {
     this._config = _config
     this.snapUtils = snapUtils
     this.body = body
+    this.randId = generalUtils.generateRandomString(4)
     component && (this.component = component)
     layerInfo && (this.layerInfo = layerInfo)
   }
@@ -97,9 +107,12 @@ export class MovingUtils {
   }
 
   pageMoveStart(e: PointerEvent) {
-    this.initPageTranslate.x = pageUtils.getCurrPage.x
-    this.initPageTranslate.y = pageUtils.getCurrPage.y
+    console.warn('page move start')
+    // this.initPageTranslate.x = pageUtils.getCurrPage.x
+    // this.initPageTranslate.y = pageUtils.getCurrPage.y
+    setInitPageTranslate()
     this.initialPos = mouseUtils.getMouseAbsPoint(e)
+    console.log('initialPos', this.initialPos)
     this._moving = this.pageMoving.bind(this)
     this._moveEnd = this.pageMoveEnd.bind(this)
     eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -107,10 +120,12 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
+    console.log('page moving', this.randId)
     this.pageMovingHandler(e)
   }
 
   pageMoveEnd(e: PointerEvent) {
+    console.log('page move end')
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
   }
@@ -119,8 +134,8 @@ export class MovingUtils {
     if ((store.state as any).mobileEditor.isPinchingEditor) return
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
-    this.initPageTranslate.x = pageUtils.getCurrPage.x
-    this.initPageTranslate.y = pageUtils.getCurrPage.y
+    initPageTranslate.x = pageUtils.getCurrPage.x
+    initPageTranslate.y = pageUtils.getCurrPage.y
     const currLayerIndex = layerUtils.layerIndex
 
     formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
@@ -436,7 +451,12 @@ export class MovingUtils {
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
+    console.log(store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio)
+    if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
+      (this._moveEnd as any)(e)
+      return
+    }
+
     const { originPageSize, getCurrPage: page } = pageUtils
     const contentScaleRatio = store.state.contentScaleRatio
     const pageScaleRatio = store.state.pageScaleRatio * 0.01
@@ -515,8 +535,8 @@ export class MovingUtils {
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }
     const pagePosDiff = {
-      x: Math.abs(pageUtils.getCurrPage.x - this.initPageTranslate.x),
-      y: Math.abs(pageUtils.getCurrPage.y - this.initPageTranslate.y)
+      x: Math.abs(pageUtils.getCurrPage.x - initPageTranslate.x),
+      y: Math.abs(pageUtils.getCurrPage.y - initPageTranslate.y)
     }
     const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0

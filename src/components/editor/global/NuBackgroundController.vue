@@ -57,7 +57,6 @@ export default defineComponent({
       isControlling: false,
       initialPos: { x: 0, y: 0 } as null | ICoordinate,
       initImgPos: { x: 0, y: 0 },
-      initImgControllerPos: { x: 0, y: 0 },
       initImgSize: { width: this.config.styles.imgWidth, height: this.config.styles.imgHeight },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, isHorizon: false },
@@ -110,9 +109,6 @@ export default defineComponent({
     getPageRotate(): number {
       return 0
     },
-    getImgController(): ICoordinate {
-      return this.config.styles.imgController
-    },
     dimBgStyles(): Record<string, string> {
       return {
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
@@ -120,10 +116,6 @@ export default defineComponent({
       }
     },
     styles(): Record<string, string> {
-      // preserve in case the background image is needed to be rotatable in the future
-      // const zindex = (this.pageIndex + 1) * 100
-      // const pos = this.imgControllerPosHandler()
-      // transform: `translate(${pos.x}px, ${pos.y}px) rotate(${this.config.styles.rotate}deg)`
       return {
         width: `${this.config.styles.imgWidth * this.getPageScale * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
@@ -182,7 +174,6 @@ export default defineComponent({
     pinchHandler(event: AnyTouchEvent) {
       switch (event.phase) {
         case 'start': {
-          console.warn('start')
           this.isPinching = true
           this.initImgPos = {
             x: this.config.styles.imgX,
@@ -232,10 +223,8 @@ export default defineComponent({
           break
         }
         case 'end': {
-          console.warn('end', this.initialPos)
           this.isPinching = false
           if (!this.isMoving) {
-            this.initImgControllerPos = this.getImgController
             Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
             eventUtils.addPointerEvent('pointermove', this.moving)
             eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -346,7 +335,6 @@ export default defineComponent({
       }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
-      this.initImgControllerPos = this.getImgController
       Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
 
       eventUtils.addPointerEvent('pointermove', this.moving)
@@ -365,7 +353,6 @@ export default defineComponent({
        */
       if (this.initialPos === null) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        this.initImgControllerPos = this.getImgController
         Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
       }
       event.preventDefault()
@@ -417,7 +404,6 @@ export default defineComponent({
       }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
-      this.initImgControllerPos = this.getImgController
       this.initImgSize = {
         width: this.getImgWidth,
         height: this.getImgHeight
