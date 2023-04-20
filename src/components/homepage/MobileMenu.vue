@@ -44,7 +44,7 @@ div(class="menu" :style="rootStyles")
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import constantData, { IHeaderL1 } from '@/utils/constantData'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -63,7 +63,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       isLogin: 'user/isLogin',
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
     navItems(): IHeaderL1[] {
       return constantData.headerItems(true)

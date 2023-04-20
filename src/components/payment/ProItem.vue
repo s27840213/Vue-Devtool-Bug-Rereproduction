@@ -4,7 +4,7 @@ img(v-if="!inReviewMode" :class="`pro ${theme}`" loading="lazy"
 </template>
 
 <script lang="ts">
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
@@ -26,7 +26,7 @@ export default defineComponent({
       }
     },
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      return picWVUtils.inReviewMode
     },
   },
 })

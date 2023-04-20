@@ -204,7 +204,7 @@ import fbPixelUtils from '@/utils/fbPixelUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
 import loginUtils from '@/utils/loginUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 
@@ -280,7 +280,7 @@ export default defineComponent({
   },
   computed: {
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      return picWVUtils.inReviewMode
     },
     mailValid(): boolean {
       if (!this.isLoginClicked) {
@@ -378,10 +378,10 @@ export default defineComponent({
     handleLoginResult(data: { data: ILoginResult, flag: number, msg?: string }, gtmTitle: 'Facebook' | 'Google' | 'Vivipic', loginType: string, redirect?: string) {
       if (data.flag === 0) {
         if (data.data.new_user) {
-          if (webViewUtils.inBrowserMode) {
+          if (picWVUtils.inBrowserMode) {
             fbPixelUtils.fbq('track', 'CompleteRegistration')
           } else {
-            webViewUtils.sendAdEvent('register')
+            picWVUtils.sendAdEvent('register')
           }
           gtmUtils.signUp(gtmTitle)
         }
@@ -560,21 +560,21 @@ export default defineComponent({
       this.isLoading = false
     },
     async onFacebookClicked() {
-      if (webViewUtils.inBrowserMode) {
+      if (picWVUtils.inBrowserMode) {
         loginUtils.onFacebookClicked(this.redirect)
       } else {
         this.isLoading = true
-        const data = await webViewUtils.login('Facebook', this.$i18n.locale)
+        const data = await picWVUtils.login('Facebook', this.$i18n.locale)
         this.isLoading = false
         this.handleLoginResult(data, 'Facebook', 'fb')
       }
     },
     async onGoogleClicked() {
-      if (webViewUtils.inBrowserMode) {
+      if (picWVUtils.inBrowserMode) {
         loginUtils.onGoogleClicked(this.redirect)
       } else {
         this.isLoading = true
-        const data = await webViewUtils.login('Google', this.$i18n.locale)
+        const data = await picWVUtils.login('Google', this.$i18n.locale)
         this.isLoading = false
         this.handleLoginResult(data, 'Google', 'google')
       }

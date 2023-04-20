@@ -6,7 +6,7 @@ import tracking from '@/apis/tracking'
 import { IFbTrackingData } from '@/interfaces/api'
 import store from '@/store'
 import generalUtils from './generalUtils'
-import webViewUtils from './picWVUtils'
+import picWVUtils from './picWVUtils'
 
 class FbPixelUtils {
   get userId(): string { return store.getters['user/getUserId'] }
@@ -63,12 +63,12 @@ class FbPixelUtils {
     const eventId = generalUtils.generateRandomString(8)
     // month : 8.99 usd (269 TWD), year: 79.99 usd (2388 TWD)
     const price = isYearlyPlany ? 79.99 : 8.99
-    if (webViewUtils.inBrowserMode) {
+    if (picWVUtils.inBrowserMode) {
       this.fbq('track', 'Subscribe', { subscription_id: this.userId, value: 0, currency: 'USD', predicted_ltv: 0 }, {
         eventID: eventId
       })
     } else {
-      webViewUtils.sendAdEvent('subscribe', { subscription_id: this.userId, value: 0, currency: 'USD', predicted_ltv: 0 })
+      picWVUtils.sendAdEvent('subscribe', { subscription_id: this.userId, value: 0, currency: 'USD', predicted_ltv: 0 })
     }
   }
 }
