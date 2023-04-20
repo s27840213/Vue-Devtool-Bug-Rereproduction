@@ -335,7 +335,11 @@ export default defineComponent({
     handleLoginResult(data: { data: ILoginResult, flag: number, msg?: string }, gtmTitle: 'Facebook' | 'Google' | 'Vivipic', loginType: string, redirect?: string) {
       if (data.flag === 0) {
         if (data.data.new_user) {
-          fbPixelUtils.fbq('track', 'CompleteRegistration')
+          if (webViewUtils.inBrowserMode) {
+            fbPixelUtils.fbq('track', 'CompleteRegistration')
+          } else {
+            webViewUtils.sendAdEvent('register')
+          }
           gtmUtils.signUp(gtmTitle)
         }
         store.dispatch('user/loginSetup', { data: data })
@@ -446,7 +450,11 @@ export default defineComponent({
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       if (data.flag === 0) {
-        fbPixelUtils.fbq('track', 'CompleteRegistration')
+        if (webViewUtils.inBrowserMode) {
+          fbPixelUtils.fbq('track', 'CompleteRegistration')
+        } else {
+          webViewUtils.sendAdEvent('register')
+        }
         gtmUtils.signUp('Vivipic')
         await store.dispatch('user/login', { token: data.token })
         this.$router.push(this.redirect || '/')

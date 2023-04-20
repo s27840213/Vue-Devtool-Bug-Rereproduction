@@ -13,6 +13,7 @@ import frameUtils from './frameUtils'
 import layerFactary from './layerFactary'
 import logUtils from './logUtils'
 import pageUtils from './pageUtils'
+import webViewUtils from './picWVUtils'
 import ShapeUtils from './shapeUtils'
 import TextPropUtils from './textPropUtils'
 import TextUtils from './textUtils'
@@ -397,6 +398,7 @@ class ShortcutUtils {
   async save() {
     if (TextUtils.isFontLoading) return
     await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    webViewUtils.ratingRequest('save_file')
     logUtils.uploadLog()
   }
 

@@ -174,6 +174,16 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
       this.toSendStatistics = true
     }
   }
+
+  sendAdEvent(eventName: string, param: { [key: string]: any } = {}) {
+    if (this.inBrowserMode) return
+    this.sendToIOS('SEND_AD_EVENT', { eventName, param })
+  }
+
+  ratingRequest(type: string) {
+    if (this.inBrowserMode) return
+    this.sendToIOS('RATING_REQUEST', { type })
+  }
 }
 
 export default new VivipicWebViewUtils()
