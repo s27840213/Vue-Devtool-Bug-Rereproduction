@@ -1082,7 +1082,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     console.log('subscribeInfo', data)
     store.commit('vivisticker/SET_uuid', data.uuid)
     if (data.complete === '0') {
-      this.registerUser()
+      this.registerSticker()
     }
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
@@ -1130,17 +1130,17 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
   }
 
-  async registerUser() {
+  async registerSticker() {
     const userInfo = this.getUserInfoFromStore()
     if (!isV1_26(userInfo)) return
-    await userApis.registerUser(
+    await userApis.registerSticker(
       userInfo.hostId,
       store.getters['vivisticker/getUuid'],
       parseInt(userInfo.device),
       userInfo.country.toLocaleLowerCase(),
       1
     )
-    await this.setState('complete', { value: '1' })
+    // await this.setState('complete', { value: '1' })
   }
 
   async fetchLoadedFonts(): Promise<void> {
