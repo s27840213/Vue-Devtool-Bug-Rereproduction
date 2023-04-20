@@ -1031,7 +1031,7 @@ class TextBg {
     }
   }
 
-  async setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): Promise<void> {
+  async setTextBg(effect: string, attrs?: Record<string, unknown>): Promise<void> {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]

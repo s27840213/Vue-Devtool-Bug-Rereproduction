@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { IAdjustJsonProps } from './adjust'
-import { IParagraphStyle, ISpanStyle } from './layer'
+import { IAdjustJsonProps } from '@/interfaces/adjust'
+import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
+import { IParagraphStyle, ISpanStyle } from '@/interfaces/layer'
 
 export interface ITextEffect {
   name: string
@@ -77,6 +78,7 @@ export function isITextLetterBg(object: ITextBg): object is ITextLetterBg {
 
 export interface ITextFillConfig {
   name: 'fill-img'
+  img: IAssetPhoto | IPhotoItem | null
   xOffset200: number
   yOffset200: number
   size: number
@@ -87,7 +89,7 @@ export interface ITextFillConfig {
 export type ITextFill = ITextFillConfig | { name: 'none' }
 
 export function isITextFillConfig(object: ITextFill): object is ITextFillConfig {
-  return object && object.name && ['fill-img'].includes(object.name)
+  return object && object.name && object.name !== 'none'
 }
 
 export interface ITextFormat {

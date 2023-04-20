@@ -16,8 +16,8 @@ div(class="text-effect-setting mt-25")
             :class="{'selected': currentStyle.name === effect.key }"
             @click="onEffectClick(effect)")
           svg-icon(
-            :iconName="effectIcon(currCategory, effect)"
-            iconWidth="56px"
+            :iconName="effectIcon(currCategory, effect).name"
+            :iconWidth="effectIcon(currCategory, effect).size"
             iconColor="white"
             v-hint="effect.label")
           pro-item(v-if="effect.plan" theme="roundedRect")
@@ -141,9 +141,24 @@ export default defineComponent({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
-    effectIcon(category: IEffectCategory, effect: IEffect): string {
-      const postfix = effect.key === 'text-book' ? `-${i18n.global.locale}` : ''
-      return `text-${category.name}-${effect.key}${postfix}`
+    effectIcon(category: IEffectCategory, effect: IEffect) {
+      switch (effect.key) {
+        case 'text-book':
+          return {
+            name: `text-${category.name}-${effect.key}-${i18n.global.locale}`,
+            size: '56px',
+          }
+        case 'custom-fill-img':
+          return {
+            name: 'add-image',
+            size: '24px',
+          }
+        default:
+          return {
+            name: `text-${category.name}-${effect.key}`,
+            size: '56px',
+          }
+      }
     },
     handleColorModal(category: 'shadow'|'bg'|'shape'|'fill', key: string) {
       const currColor = this.colorParser(this.currentStyle[key])
@@ -176,7 +191,7 @@ export default defineComponent({
     },
     async setEffect(options:{
       effectName?: string,
-      effect?: Record<string, string|number|boolean>
+      effect?: Record<string, unknown>
     }) {
       let { effectName, effect } = options
       const { textShape } = textEffectUtils.getCurrentLayer().styles
@@ -208,11 +223,13 @@ export default defineComponent({
     },
     async onEffectClick(effect: IEffect): Promise<void> {
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
-      popupUtils.openPopup('replace', undefined, {
-        selectImg: (img: IAssetPhoto|IPhotoItem) => {
-          console.log('img', img)
-        }
-      })
+      if (effect.key === 'custom-fill-img') {
+        popupUtils.openPopup('replace', undefined, {
+          selectImg: (img: IAssetPhoto|IPhotoItem) => {
+            this.setEffect({ effect: { img } })
+          }
+        })
+      }
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
     },
@@ -230,7 +247,7 @@ export default defineComponent({
       this.setEffect({ effect: newVal })
     },
     async setEffectFocus(focus: boolean) {
-      if (['curve', 'fill-img'].includes(this.currentStyle.name)) {
+      if (this.currentStyle.name === 'curve' || this.currentStyle.name.includes('fill-img')) {
         await this.setEffect({ effect: { focus } })
         if (!focus) this.recordChange()
       }
@@ -274,12 +291,16 @@ export default defineComponent({
   }
   &__effect {
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     box-sizing: border-box;
     margin-top: 10px;
     border-radius: 3px;
     border: 2px solid transparent;
     width: 60px;
     height: 60px;
+    background-color: white;
     .pro {
       left: 1px;
       top: -4px;

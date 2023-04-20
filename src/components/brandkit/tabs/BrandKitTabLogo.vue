@@ -10,7 +10,7 @@ image-list(:images="renderedLogos"
 </template>
 
 <script lang="ts">
-import ImageList, { spItem } from '@/components/image-gallery/ImageList.vue'
+import ImageList, { IImageListItem, spItem } from '@/components/image-gallery/ImageList.vue'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -18,13 +18,7 @@ import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
-interface IRenderedLogos {
-  type: '' | 'add' | 'loading' | 'sentinel'
-  key: string
-  label: string
-  src: string
-  uploading: boolean
-  menuopen: boolean
+interface IRenderedLogos extends IImageListItem {
   logo?: IBrandLogo
 }
 

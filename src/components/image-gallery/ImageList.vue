@@ -55,7 +55,7 @@ import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 
-interface IImageItem {
+export interface IImageListItem {
   type: '' | 'add' | 'loading' | 'sentinel'
   key: string
   label: string
@@ -90,7 +90,7 @@ export default defineComponent({
   },
   props: {
     images: {
-      type: Array as PropType<IImageItem[]>,
+      type: Array as PropType<IImageListItem[]>,
       required: true,
     },
     showMore: {

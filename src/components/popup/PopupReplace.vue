@@ -6,12 +6,12 @@ div(class="popup-window")
     image-list(:images="data.images"
       :showMore="false"
       @addImage="handleUploadLogo"
-      @clickImage="selectImg"
+      @clickImage="clickImg"
       @loadMore="data.loadmore")
 </template>
 
 <script lang="ts">
-import ImageList, { spItem } from '@/components/image-gallery/ImageList.vue'
+import ImageList, { IImageListItem, spItem } from '@/components/image-gallery/ImageList.vue'
 import Tabs from '@/components/Tabs.vue'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import imageUtils from '@/utils/imageUtils'
@@ -21,6 +21,10 @@ import uploadUtils from '@/utils/uploadUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapState } from 'vuex'
+
+interface IPopupReplaceItem extends IImageListItem {
+  img?: IAssetPhoto | IPhotoItem
+}
 
 export default defineComponent({
   components: {
@@ -50,7 +54,7 @@ export default defineComponent({
       _unsplashImages: 'content',
       unsplashLoading: 'pending',
     }),
-    myfileImages() {
+    myfileImages(): IPopupReplaceItem[] {
       return [
         spItem('add'),
         ...(this._myfileImages as IAssetPhoto[]).map(img => ({
@@ -60,11 +64,12 @@ export default defineComponent({
           src: img.urls.tiny,
           uploading: false,
           menuopen: false,
+          img,
         })),
         this.myfileLoading ? spItem('loading') : spItem('sentinel')
       ]
     },
-    unsplashImages() {
+    unsplashImages(): IPopupReplaceItem[] {
       const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
       const tinySize = sizeMap.find(e => e.key === 'tiny')?.size || 320
       return [
@@ -79,6 +84,7 @@ export default defineComponent({
             src: imageUtils.getSrc(data, tinySize),
             uploading: false,
             menuopen: false,
+            img,
           }
         }),
         this.unsplashLoading ? spItem('loading') : spItem('sentinel')
@@ -112,6 +118,11 @@ export default defineComponent({
       } else if (uploadUtils.isLogin) {
         uploadUtils.chooseAssets('image')
       }
+    },
+    clickImg(item: IPopupReplaceItem) {
+      if (!item.img) return
+      this.selectImg(item.img)
+      this.closePopup()
     },
     closePopup() {
       popupUtils.closePopup()

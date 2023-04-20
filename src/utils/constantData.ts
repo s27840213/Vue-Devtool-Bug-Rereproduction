@@ -13,6 +13,11 @@ interface BillingInfoInput {
   optional?: boolean
   error?: string
 }
+export interface IEffectOptionImg {
+  key: string
+  label: string
+  type: 'img'
+}
 export interface IEffectOptionSelect {
   key: string
   label: string
@@ -32,7 +37,7 @@ export interface IEffectOptionRange {
   max: number
   isPStyle?: boolean
 }
-export type IEffectOption = IEffectOptionSelect | IEffectOptionColor | IEffectOptionRange
+export type IEffectOption = IEffectOptionImg | IEffectOptionSelect | IEffectOptionColor | IEffectOptionRange
 export interface IEffect {
   key: string
   label: string
@@ -375,6 +380,7 @@ class ConstantData {
         size: i18n.global.tc('NN0815'),
         lineHeight: i18n.global.tc('NN0110'),
         fontSpacing: i18n.global.tc('NN0109'),
+        img: i18n.global.tc('NN0002', 2)
       }
 
       return array.map((name: string) => {
@@ -387,6 +393,7 @@ class ConstantData {
         if (name.toLocaleLowerCase().endsWith('color')) {
           option.type = 'color'
         }
+        if (name === 'img') option.type = 'img'
         switch (name) {
           case 'endpoint':
             option.type = 'select';
@@ -561,9 +568,14 @@ class ConstantData {
         label: i18n.global.t('NN0111'),
         options: [],
       }, {
+        key: 'custom-fill-img',
+        label: 'fill-img',
+        plan: 1,
+        options: toOptions(['img', 'xOffset200', 'yOffset200', 'size', 'opacity'], 'fill-img')
+      }, {
         key: 'fill-img',
         label: 'fill-img',
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity'], 'fill-img')
+        options: toOptions(['img', 'xOffset200', 'yOffset200', 'size', 'opacity'], 'fill-img')
       }])
     }]
     return categories

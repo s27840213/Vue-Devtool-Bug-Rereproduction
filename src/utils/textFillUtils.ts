@@ -1,36 +1,48 @@
-import { IAssetPhoto } from '@/interfaces/api'
+import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
 import { ITextFill, ITextFillConfig } from '@/interfaces/format'
 import { AllLayerTypes, IText } from '@/interfaces/layer'
 import store from '@/store'
+import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import _ from 'lodash'
+import { omit } from 'lodash'
 
 class TextFill {
-  effects = {} as Record<string, Record<string, string | number | boolean>>
+  effects = {} as Record<string, Record<string, unknown>>
   constructor() {
     this.effects = this.getDefaultEffects()
   }
 
   getDefaultEffects() {
+    const defaultOptions = {
+      xOffset200: 0,
+      yOffset200: 0,
+      size: 100,
+      opacity: 100,
+      focus: false,
+    } as const
     return {
       none: {},
+      'custom-fill-img': {
+        img: null,
+        ...defaultOptions
+      },
       'fill-img': {
-        xOffset200: 0,
-        yOffset200: 0,
-        size: 100,
-        opacity: 100,
-        focus: false,
+        img: null,
+        ...defaultOptions
       }
     }
   }
 
   calcTextFillVar(config: IText) {
     const textFill = config.styles.textFill as ITextFillConfig
-    const img = store.getters['file/getImages'][0] as IAssetPhoto
+    const img = textFill.img as IAssetPhoto | IPhotoItem
+    const imgSrc = isIAssetPhoto(img)
+      ? img.urls.original
+      : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 1000)
     const layerScale = config.styles.scale
     const divWidth = config.styles.width / layerScale
     const divHeight = config.styles.height / layerScale
@@ -41,15 +53,14 @@ class TextFill {
     const imgRatio = textFill.size / 100 / (scaleByWidth ? widthRatio : heightRatio)
     const imgWidth = img.width * imgRatio
     const imgHeight = img.height * imgRatio
-    return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth }
+    return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc }
   }
 
   async convertTextEffect(config: IText): Promise<Record<string, string | number>[][]> {
     const { textFill, textShape } = config.styles
-    if (textFill.name === 'none') return []
+    if (textFill.name === 'none' || !textFill.img) return []
 
-    const img = store.getters['file/getImages'][0] as IAssetPhoto
-    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
+    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
 
     const myRect = new Rect()
     await myRect.init(config)
@@ -81,7 +92,7 @@ class TextFill {
       const bgSizeBy = textFill.size * (scaleByWidth ? divWidth / spanWidth : divHeight / spanHeight)
       return {
         // About span BG
-        backgroundImage: `url("${img.urls.original}")`,
+        backgroundImage: `url("${imgSrc}")`,
         backgroundSize: scaleByWidth ? `${bgSizeBy}% auto` : `auto ${bgSizeBy}%`,
         // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
         // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position#regarding_percentages
@@ -117,14 +128,13 @@ class TextFill {
 
   drawTextFill(config: IText): CustomElementConfig | null {
     const textFill = config.styles.textFill
-    if (textFill.name === 'none') return null
+    if (textFill.name === 'none' || !textFill.img || !textFill.focus) return null
 
-    const img = store.getters['file/getImages'][0] as IAssetPhoto
-    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
+    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
 
-    return textFill.focus ? {
+    return {
       tag: 'img',
-      attrs: { src: img.urls.original },
+      attrs: { src: imgSrc },
       style: {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
         left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200) * -1}px`,
@@ -132,7 +142,7 @@ class TextFill {
         opacity: textFill.opacity / 200,
         // opacity: textFill.opacity / 100,
       }
-    } : null
+    }
   }
 
   // Read/write text effect setting from local storage
@@ -151,12 +161,12 @@ class TextFill {
     } else {
       let effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
       Object.assign(effect, newEffect)
-      effect = _.omit(effect, ['color', 'pColor', 'bColor'])
+      effect = omit(effect, ['color', 'pColor', 'bColor'])
       localStorageUtils.set('textEffectSetting', effectName, effect)
     }
   }
 
-  setTextFill(effect: string, attrs?: Record<string, string | number | boolean>) {
+  setTextFill(effect: string, attrs?: Record<string, unknown>) {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
@@ -198,7 +208,7 @@ class TextFill {
 
   async resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textFill.name
-    this.setTextFill(effectName, this.effects[effectName])
+    this.setTextFill(effectName, omit(this.effects[effectName], 'img'))
   }
 }
 
