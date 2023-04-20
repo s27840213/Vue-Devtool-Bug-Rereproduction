@@ -1133,14 +1133,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async registerSticker() {
     const userInfo = this.getUserInfoFromStore()
     if (!isV1_26(userInfo)) return
-    await userApis.registerSticker(
+    const response = await userApis.registerSticker(
       userInfo.hostId,
       store.getters['vivisticker/getUuid'],
       parseInt(userInfo.device),
       userInfo.country.toLocaleLowerCase(),
       1
     )
-    // await this.setState('complete', { value: '1' })
+    if (response.data.flag === 0) {
+      await this.setState('complete', { value: '1' })
+    }
   }
 
   async fetchLoadedFonts(): Promise<void> {
