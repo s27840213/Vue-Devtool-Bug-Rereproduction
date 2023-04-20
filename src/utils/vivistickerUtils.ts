@@ -1,10 +1,11 @@
 import listApis from '@/apis/list'
+import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IIosImgData, IMyDesign, IMyDesignTag, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IIosImgData, IMyDesign, IMyDesignTag, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import { nextTick } from 'vue'
@@ -1079,13 +1080,17 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   subscribeInfo(data: ISubscribeInfo) {
     console.log('subscribeInfo', data)
+    store.commit('vivisticker/SET_uuid', data.uuid)
+    if (data.complete === '0') {
+      this.registerUser()
+    }
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
     const currencyFormaters = {
       TWD: (value: string) => `${value}元`,
       USD: (value: string) => `$${(+value).toFixed(2)}`,
       JPY: (value: string) => `¥${value}円(税込)`
-    } as {[key: string]: (value: string) => string}
+    } as { [key: string]: (value: string) => string }
     if (Object.keys(currencyFormaters).includes(priceCurrency)) {
       monthly.priceText = currencyFormaters[priceCurrency](monthly.priceValue)
       annually.priceText = currencyFormaters[priceCurrency](annually.priceValue)
@@ -1123,6 +1128,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
     if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
+  }
+
+  async registerUser() {
+    const userInfo = this.getUserInfoFromStore()
+    if (!isV1_26(userInfo)) return
+    await userApis.registerUser(
+      userInfo.hostId,
+      store.getters['vivisticker/getUuid'],
+      parseInt(userInfo.device),
+      userInfo.country.toLocaleLowerCase(),
+      1
+    )
+    await this.setState('complete', { value: '1' })
   }
 
   async fetchLoadedFonts(): Promise<void> {

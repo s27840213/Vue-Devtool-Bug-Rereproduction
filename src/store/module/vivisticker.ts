@@ -37,6 +37,7 @@ interface IViviStickerState {
   selectedDesigns: { [key: string]: IMyDesign },
   modalInfo: { [key: string]: any },
   payment: IPayment,
+  uuid: string,
   loadedFonts: { [key: string]: true }
 }
 
@@ -79,7 +80,7 @@ const DEFAULT_PRICES = {
       text: '¥3590円(税込)'
     }
   }
-} as {[key: string]: IPrices}
+} as { [key: string]: IPrices }
 
 const getDefaultState = (): IViviStickerState => ({
   userInfo: vivistickerUtils.getDefaultUserInfo(),
@@ -137,6 +138,7 @@ const getDefaultState = (): IViviStickerState => ({
       restore: false
     }
   },
+  uuid: '',
   loadedFonts: {}
 })
 
@@ -257,6 +259,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsSubscribed(state: IViviStickerState): boolean {
     return state.payment.subscribe
+  },
+  getUuid(state: IViviStickerState): string {
+    return state.uuid
   }
 }
 
@@ -375,6 +380,9 @@ const mutations: MutationTree<IViviStickerState> = {
     for (const item of Object.entries(data)) {
       state.payment.pending[item[0] as keyof IPaymentPending] = item[1]
     }
+  },
+  SET_uuid(state: IViviStickerState, uuid: string) {
+    state.uuid = uuid
   },
   SET_loadedFonts(state: IViviStickerState, loadedFonts: { [key: string]: true }) {
     state.loadedFonts = loadedFonts
