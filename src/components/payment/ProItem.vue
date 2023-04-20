@@ -24,10 +24,10 @@ export default defineComponent({
           return 'vivisticker_pro.svg'
       }
     },
-    inReviewMode(): boolean {
-      // return webViewUtils.inReviewMode
-      return true // Vivisticker hide all pro-items
-    },
+    // inReviewMode(): boolean {
+    //   // return webViewUtils.inReviewMode
+    //   return true // Vivisticker hide all pro-items
+    // },
   },
 })
 </script>
