@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="tabs" :style="tabsStyle")
+div(:class="`tabs ${theme}`")
   div(v-for="(tab,index) in tabs"
       :key="tab"
       class="tabs__item"
@@ -10,7 +10,7 @@ div(class="tabs" :style="tabsStyle")
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   props: {
@@ -55,13 +55,6 @@ export default defineComponent({
           }
       }
     },
-    tabsStyle() {
-      const type = this.theme.split('-')[1]
-      return type === 'rect' ? {
-      } : {
-        marginBottom: '24px'
-      }
-    }
   },
   methods: {
     tabStyle(tabIndex: number) {
@@ -103,6 +96,9 @@ export default defineComponent({
     box-sizing: border-box;
     text-align: center;
     transition: all 0.2s;
+  }
+  &.light, &.dark {
+    margin-bottom: 24px
   }
 }
 </style>

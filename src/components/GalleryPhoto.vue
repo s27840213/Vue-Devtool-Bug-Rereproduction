@@ -109,7 +109,8 @@ export default defineComponent({
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
       const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
-      return imageUtils.appendRandomQuery(imageUtils.getSrc(data, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] || 150))
+      const tinySize = sizeMap.find(e => e.key === 'tiny')?.size || 320
+      return imageUtils.appendRandomQuery(imageUtils.getSrc(data, tinySize))
     },
     fullSrc(): string {
       const { inFilePanel, inLogoPanel, photo, vendor } = this

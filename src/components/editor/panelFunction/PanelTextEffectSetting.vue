@@ -74,12 +74,14 @@ div(class="text-effect-setting mt-25")
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
+import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -206,6 +208,11 @@ export default defineComponent({
     },
     async onEffectClick(effect: IEffect): Promise<void> {
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      popupUtils.openPopup('replace', undefined, {
+        selectImg: (img: IAssetPhoto|IPhotoItem) => {
+          console.log('img', img)
+        }
+      })
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
     },

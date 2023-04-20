@@ -21,6 +21,7 @@ import PopupOrder from '@/components/popup/PopupOrder.vue'
 import PopupPage from '@/components/popup/PopupPage.vue'
 import PopupPageScale from '@/components/popup/PopupPageScale.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
+import PopupReplace from '@/components/popup/PopupReplace.vue'
 import PopupSlider from '@/components/popup/PopupSlider.vue'
 import PopupSubmit from '@/components/popup/PopupSubmit.vue'
 import { IPage } from '@/interfaces/page'
@@ -49,6 +50,7 @@ export default defineComponent({
     PopupSubmit,
     PopupPayment,
     PopupDeleteAccount,
+    PopupReplace,
   },
   directives: {
     clickOutside: vClickOutside.directive

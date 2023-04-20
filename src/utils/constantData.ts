@@ -40,7 +40,7 @@ export interface IEffect {
   options: IEffectOption[]
 }
 export interface IEffectCategory {
-  name: 'shadow' | 'bg' | 'shape'
+  name: 'shadow' | 'bg' | 'shape' | 'fill'
   label: string
   effects2d: IEffect[][]
 }
@@ -554,7 +554,7 @@ class ConstantData {
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }])
     }, {
-      name: 'fill',
+      name: 'fill' as const,
       label: '文字填滿',
       effects2d: arrTo2darr([{
         key: 'none',
