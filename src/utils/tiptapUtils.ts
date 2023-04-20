@@ -303,10 +303,7 @@ class TiptapUtils {
             sStyles.pre = undefined
             isSetContentRequired = true
           }
-          if (span.text.includes('\ufe0e') || span.text.includes('\ufe0f')) {
-            isSetContentRequired = true
-          }
-          spans.push({ text: span.text.replace(/[\ufe0e\ufe0f]/g, ''), styles: sStyles })
+          spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
           let sStyles: ISpanStyle
@@ -320,7 +317,7 @@ class TiptapUtils {
             sStyles.pre = undefined
             isSetContentRequired = true
           }
-          spans.push({ text: span.text.replace(/[\ufe0e\ufe0f]/g, ''), styles: sStyles })
+          spans.push({ text: span.text, styles: sStyles })
         }
       }
       if (spans.length === 0) {
