@@ -1142,7 +1142,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     )
     if (response.data.flag === 0) {
       await this.setState('complete', { value: '1' })
+      this.sendAdEvent('register', {})
     }
+  }
+
+  sendAdEvent(eventName: string, param: { [key: string]: any }) {
+    this.sendToIOS('SEND_AD_EVENT', { eventName, param })
   }
 
   async fetchLoadedFonts(): Promise<void> {
