@@ -412,7 +412,9 @@ input {
     }
   }
   &-content {
+    @include no-scrollbar;
     height: 100%;
+    overflow-y: auto;
     input {
       &:focus {
         border-color: setColor(blue-1);
@@ -504,14 +506,12 @@ input {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px 25px;
-  &-bg {
-    position: absolute;
-  }
+  overflow: hidden;
+  position: relative;
   &-temp {
-    max-width: 100%;
-    max-height: 100%;
-    z-index: 1;
+    position: absolute;
+    max-width: calc(100% - 80px);
+    max-height: calc(100% - 50px);
   }
 }
 

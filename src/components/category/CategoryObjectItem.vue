@@ -1,10 +1,11 @@
 <template lang="pug">
 div(class="category-object-item"
+    draggable="true"
     @click="addSvg"
     @click.right.prevent="openUpdateDesignPopup()"
     @dragstart="dragStart($event)")
   img(class="category-object-item__img"
-    draggable="true"
+    ref="img"
     :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
   svg-icon(v-if="!$isTouchDevice() && (item.info || (item.tags && item.tags.length > 0))"
     class="category-object-item__more"
@@ -12,7 +13,7 @@ div(class="category-object-item"
     :iconName="'more_vertical'"
     :iconColor="'gray-2'"
     :iconWidth="'20px'")
-  pro-item(v-if="item.plan")
+  pro-item(v-if="item.plan" draggable="false")
 </template>
 
 <script lang="ts">
@@ -41,7 +42,7 @@ export default defineComponent({
   computed: {
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
-    }),
+    })
   },
   methods: {
     ...mapMutations({
@@ -49,12 +50,16 @@ export default defineComponent({
     }),
     dragStart(e: DragEvent) {
       if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
-      const type = assetUtils.getLayerType(this.item.type)
-      new DragUtils().itemDragStart(e, type || '', {
-        ...this.item
-      }, {
-        resizeRatio: RESIZE_RATIO_SVG
-      })
+      const img = this.$refs.img as HTMLImageElement
+      if (img) {
+        const type = assetUtils.getLayerType(this.item.type)
+        new DragUtils().itemDragStart(e, type || '', {
+          ...this.item
+        }, img.src, {
+          resizeRatio: RESIZE_RATIO_SVG,
+          aspectRatio: img.naturalWidth / img.naturalHeight
+        })
+      }
     },
     addSvg() {
       if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return

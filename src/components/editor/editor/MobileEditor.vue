@@ -15,7 +15,7 @@ div(class="mobile-editor")
     transition(name="panel-up"
               @before-enter="beforeEnter"
               @after-leave="afterLeave")
-      mobile-panel(v-show="showMobilePanel"
+      mobile-panel(v-show="showMobilePanel" ref="mobilePanel"
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
@@ -45,7 +45,8 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { find } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+// import VConsole from 'vconsole'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -64,7 +65,8 @@ export default defineComponent({
       currColorEvent: '',
       showMobilePanelAfterTransitoin: false,
       marginBottom: 0,
-      footerTabsHeight: 0
+      footerTabsHeight: 0,
+      // vConsole: null as any
     }
   },
   props: {
@@ -78,6 +80,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.switchTab)
+    // this.vConsole && this.vConsole.destroy()
   },
   mounted() {
     if (this.$isTouchDevice()) {
@@ -119,16 +122,15 @@ export default defineComponent({
       lastTouchEnd = now
     }, false)
 
-    if (process.env.NODE_ENV === 'development') {
-      // const vconsole = new Vconsole()
-      // vconsole.setSwitchPosition(10, 80)
-    }
-
     brandkitUtils.fetchBrands(this.fetchBrands)
 
     this.setUserState({ enableAdminView: false })
 
-    this.footerTabsHeight = (this.$refs.footerTabs as {$el: HTMLElement}).$el.clientHeight
+    this.footerTabsHeight = (this.$refs.footerTabs as any).$el.clientHeight
+
+    // console.log('v console update')
+    // this.vConsole = new VConsole({ theme: 'dark' })
+    // this.vConsole.setSwitchPosition(25, 80)
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -155,7 +157,7 @@ export default defineComponent({
     }),
     contentStyle(): Record<string, string> {
       return { transform: `translateY(-${this.marginBottom}px)` }
-    },
+    }
   },
   watch: {
     closeMobilePanelFlag(newVal) {

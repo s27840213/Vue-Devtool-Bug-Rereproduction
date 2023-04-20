@@ -171,12 +171,14 @@ export default defineComponent({
           brandId: imageUtils.getBrandId(src, type)
         }
 
-        new DragUtils().itemDragStart(e, 'image', { type: 'image', srcObj }, {
+        const imgEl = this.$refs.img as HTMLImageElement
+        new DragUtils().itemDragStart(e, 'image', { type: 'image', srcObj }, this.previewSrc, {
           width: photoWidth,
           height: photoHeight,
           offsetX: 10,
           offsetY: 15,
-          panelPreviewSrc: this.panelPreviewSrc
+          panelPreviewSrc: this.panelPreviewSrc,
+          aspectRatio: imgEl.naturalWidth / imgEl.naturalHeight
         })
 
         const previewSize = imageUtils.getSignificantDimension(this.photo.preview.width, this.photo.preview.height)

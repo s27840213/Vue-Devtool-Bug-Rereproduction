@@ -169,9 +169,12 @@ export default defineComponent({
         ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
       }
     },
-    drawTextBg() {
-      this.$nextTick(async () => {
-        this.textBg = await textBgUtils.drawTextBg(this.config)
+    drawTextBg(): Promise<void> {
+      return new Promise(resolve => {
+        this.$nextTick(async () => {
+          this.textBg = await textBgUtils.drawTextBg(this.config)
+          resolve()
+        })
       })
     },
     isLayerAutoResizeNeeded(): boolean {
@@ -256,18 +259,18 @@ export default defineComponent({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      this.drawTextBg()
+      await this.drawTextBg()
     },
-    resizeAfterFontLoaded() {
+    async resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(async () => {
-          this.resizeCallback()
-          this.drawTextBg()
-          this.textFillBg = textFillUtils.drawTextFill(this.config)
-          this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+          await this.resizeCallback()
         }, 100) // for the delay between font loading and dom rendering
       })
+      this.drawTextBg()
+      this.textFillBg = textFillUtils.drawTextFill(this.config)
+      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
     }
   }
 })

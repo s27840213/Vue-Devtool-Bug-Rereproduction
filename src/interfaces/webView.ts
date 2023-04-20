@@ -5,5 +5,6 @@ export interface IUserInfo {
   locale: string,
   isFirstOpen: boolean,
   statusBarHeight: number,
-  homeIndicatorHeight: number
+  homeIndicatorHeight: number,
+  country?: string
 }

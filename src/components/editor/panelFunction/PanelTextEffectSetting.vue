@@ -13,10 +13,10 @@ div(class="text-effect-setting mt-25")
         div(v-for="effect in effects1d"
             :key="`${currCategoryName}-${effect.key}`"
             class="text-effect-setting__effect pointer"
+            :class="{'selected': currentStyle.name === effect.key }"
             @click="onEffectClick(effect)")
           svg-icon(
             :iconName="effectIcon(currCategory, effect)"
-            :class="{'selected': currentStyle.name === effect.key }"
             iconWidth="56px"
             iconColor="white"
             v-hint="effect.label")
