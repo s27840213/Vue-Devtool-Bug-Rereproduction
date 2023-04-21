@@ -22,7 +22,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
     div(class="payment__content__plans")
       div(v-for="btnPlan in btnPlans" class="payment__btn-plan"
         :key="btnPlan.key"
-        :class="{selected: btnPlan.key === planSelected}"
+        :class="{selected: btnPlan.key === planSelected, disabled: pending}"
         @tap="handleBtnPlanClick(btnPlan.key)")
         svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
         div(v-else class="payment__btn-plan__radio")
@@ -33,9 +33,9 @@ div(class="payment" v-touch @swipe="handleSwipe")
           div(class="payment__btn-plan__content__price") {{ btnPlan.price }}
             div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
     div(class="payment__btn-subscribe" :class="{pending}" @touchend="handleSubscribe(planSelected)")
-      svg-icon(v-if="pending" class="spiner" iconName="spiner" iconWidth="20px" iconColor="white")
+      svg-icon(v-if="pending" class="spiner" iconName="spiner" iconWidth="20px")
       div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
-    div(class="payment__footer")
+    div(class="payment__footer" :class="{disabled: pending}")
       template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(@tap="footerLink.action") {{ footerLink.title }}
@@ -377,10 +377,24 @@ export default defineComponent({
     column-gap: 16px;
     padding: 12px 24px 12px 16px;
     color: setColor(black-5);
+    &.disabled {
+      pointer-events: none;
+      color: setColor(black-3);
+      .payment__btn-plan__radio {
+        color: setColor(light-bg);
+        border-color: setColor(black-3);
+      }
+    }
     &.selected {
       background: white;
       border-radius: 10px;
       color: setColor(black-3);
+      &.disabled {
+        background: setColor(black-4);
+        .payment__btn-plan__content__title, .payment__btn-plan__content__title__sub {
+          color: setColor(black-2);
+        }
+      }
     }
     &__radio {
       @include size(20px);
@@ -454,7 +468,6 @@ export default defineComponent({
     }
     &.pending {
       pointer-events: none;
-      background-color: rgba(white, 0.5);
       .payment__btn-subscribe__text {
         visibility: hidden;
       }
@@ -463,6 +476,7 @@ export default defineComponent({
       opacity: 0.8;
     }
     .spiner {
+      color: #D9D9D9;
       animation: rotation 0.5s infinite linear;
       position: absolute;
       left: 50%;
@@ -480,6 +494,9 @@ export default defineComponent({
     line-height: 15px;
     color: setColor(black-5);
     column-gap: 10px;
+    &.disabled {
+      color: setColor(black-3);
+    }
     &__splitter {
       @include size(0px, 12px);
       border: 1px solid #474747;
