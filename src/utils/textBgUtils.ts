@@ -105,8 +105,11 @@ class Rect {
           span.appendChild(document.createElement('br'))
           p.appendChild(span)
         } else {
-          (splitSpan ? [...spanData.text] : [spanData.text]).forEach(t => {
-            const isComposingText = spanData.text.length > 1
+          const textArray = splitSpan
+            ? textUtils.splitter.splitGraphemes(spanData.text)
+            : [spanData.text]
+          textArray.forEach(t => {
+            const isComposingText = textUtils.splitter.countGraphemes(spanData.text) > 1
             const fixedWidthStyle = fixedWidth && isComposingText ? {
               letterSpacing: 0,
               display: 'inline-block',
@@ -1074,7 +1077,8 @@ class TextBg {
           if (newFixedWidth) { // Split span, another one in tiptapUtils.toIParagraph
             paragraphs.forEach(p => {
               const newSpans = p.spans.flatMap(span =>
-                [...span.text].map(t => ({ text: t, styles: span.styles }))
+                textUtils.splitter.splitGraphemes(span.text)
+                  .map(t => ({ text: t, styles: span.styles }))
               )
               p.spans = newSpans.length !== 0 ? newSpans : p.spans
             })
