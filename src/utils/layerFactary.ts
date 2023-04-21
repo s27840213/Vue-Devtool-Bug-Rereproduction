@@ -315,8 +315,7 @@ class LayerFactary {
      * 5: span has no text and is the only span in the paragraph
      * 6: font is in wrong format (e.g. contains a comma)
      * 7: span has no font
-     * 8: span contains invalid unicode characters (which breaks emoji)
-     * 9: replace textShape and textEffect value {} to {name: none}
+     * 8: replace textShape and textEffect value {} to {name: none}
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -375,10 +374,7 @@ class LayerFactary {
             }
           }
         },
-        (span) => {
-          // 8: span contains invalid unicode characters (which breaks emoji)
-          span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
-        },
+        undefined,
         undefined,
         (span) => {
           // This needs to be done after removeInvalidStyles's span processing,
@@ -401,7 +397,7 @@ class LayerFactary {
         }
       }
     }
-    // 9: replace textShape and textEffect value {} to {name: none}
+    // 8: replace textShape and textEffect value {} to {name: none}
     for (const key of ['textShape', 'textEffect'] as const) {
       if (isEqual(basicConfig.styles[key], {})) basicConfig.styles[key] = { name: 'none' }
     }

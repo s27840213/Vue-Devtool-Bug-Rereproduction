@@ -45,7 +45,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -157,9 +157,12 @@ export default defineComponent({
         ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
       }
     },
-    drawSvgBG() {
-      this.$nextTick(async () => {
-        this.svgBG = await textBgUtils.drawSvgBg(this.config)
+    drawSvgBG(): Promise<void> {
+      return new Promise(resolve => {
+        this.$nextTick(async () => {
+          this.svgBG = await textBgUtils.drawSvgBg(this.config)
+          resolve()
+        })
       })
     },
     isLayerAutoResizeNeeded(): boolean {
@@ -241,13 +244,13 @@ export default defineComponent({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      this.drawSvgBG()
+      await this.drawSvgBG()
     },
     resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
-        setTimeout(() => {
-          this.resizeCallback()
+        setTimeout(async () => {
+          await this.resizeCallback()
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawSvgBG()

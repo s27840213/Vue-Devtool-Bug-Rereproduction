@@ -1,14 +1,14 @@
 <template lang="pug">
 div(class="category-template-item" :style="itemStyle")
   div(class="relative pointer"
+      draggable="true"
       @click="addTemplate"
       @dragstart="dragStart($event)")
     img(class="category-template-item__img"
-      draggable="true"
       :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
       :style="previewStyle"
       @error="handleNotFound")
-    pro-item(v-if="item.plan")
+    pro-item(v-if="item.plan" draggable="false")
   div(v-if="showId"
     class="category-template-item__id"
     @click="copyId") {{ item.id }}

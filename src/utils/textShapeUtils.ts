@@ -6,7 +6,7 @@ import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import TextUtils from '@/utils/textUtils'
+import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 
 class Controller {
@@ -85,7 +85,7 @@ class Controller {
     }
     if (shape === 'none') {
       const { bend } = styleTextShape as any
-      const textHW = TextUtils.getTextHW(layer, -1)
+      const textHW = textUtils.getTextHW(layer, -1)
       Object.assign(styles, {
         ...textHW,
         x: x + ((width - textHW.width) / 2),
@@ -144,10 +144,10 @@ class Controller {
             styles,
             props
           })
-          TextUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, +idx, styles.height, heightOri)
+          textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, +idx, styles.height, heightOri)
         }
       }
-      TextUtils.fixGroupCoordinates(pageIndex, layerIndex)
+      textUtils.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
       const heightOri = layers[subLayerIndex].styles.height
       const { styles, props } = this.getTextShapeStyles(
@@ -163,8 +163,8 @@ class Controller {
         styles,
         props
       })
-      TextUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, styles.height, heightOri)
-      TextUtils.fixGroupCoordinates(pageIndex, layerIndex)
+      textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, styles.height, heightOri)
+      textUtils.fixGroupCoordinates(pageIndex, layerIndex)
     }
   }
 
@@ -191,7 +191,7 @@ class Controller {
     return config.paragraphs.flatMap(
       p =>
         p.spans.flatMap(
-          span => [...span.text]
+          span => textUtils.splitter.splitGraphemes(span.text)
             .map(t => ({ text: t, styles: { ...p.styles, ...span.styles } }))
         )
     )
@@ -286,7 +286,7 @@ class Controller {
 
   calcArea(transforms: string[], minHeight: number, scale: number, config: IText): { areaWidth: number, areaHeight: number } {
     if (transforms.length < 2) {
-      const textHW = TextUtils.getTextHW(config, -1)
+      const textHW = textUtils.getTextHW(config, -1)
       return {
         areaWidth: textHW.width,
         areaHeight: textHW.height
@@ -297,7 +297,7 @@ class Controller {
 
   async calcAreaAsync(transforms: string[], minHeight: number, scale: number, config: IText): Promise<{ areaWidth: number; areaHeight: number }> {
     if (transforms.length < 2) {
-      const textHW = await TextUtils.getTextHWAsync(config, -1)
+      const textHW = await textUtils.getTextHWAsync(config, -1)
       return {
         areaWidth: textHW.width,
         areaHeight: textHW.height

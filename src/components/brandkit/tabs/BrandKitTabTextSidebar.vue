@@ -96,7 +96,7 @@ export default defineComponent({
       assetUtils.addStandardText(type, this.MAPPING[type], this.$i18n.locale, undefined, undefined, this.getSpanStyles(type))
     },
     standardTextDrag(e: DragEvent, type: string) {
-      new DragUtils().itemDragStart(e, 'standardText', {
+      new DragUtils().textItemDragStart(e, 'standardText', {
         textType: type,
         text: this.MAPPING[type],
         locale: this.$i18n.locale,

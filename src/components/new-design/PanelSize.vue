@@ -41,7 +41,7 @@ import PageSizeSelector, { CPageSizeSelector } from '@/components/new-design/Pag
 import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'
 import eventUtils from '@/utils/eventUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
@@ -74,7 +74,7 @@ export default defineComponent({
       'folders'
     ]),
     ...mapGetters({
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
     panelStyle(): { [index: string]: string } {
       return Object.assign(

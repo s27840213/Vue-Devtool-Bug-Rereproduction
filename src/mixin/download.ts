@@ -5,7 +5,7 @@ import generalUtils from '@/utils/generalUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
@@ -117,7 +117,7 @@ export default defineComponent({
       isAdmin: 'isAdmin'
     }),
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      return picWVUtils.inReviewMode
     },
     selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this

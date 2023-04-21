@@ -241,7 +241,7 @@ export default defineComponent({
     absContainerStyle(): { [index: string]: string | number } {
       const transformDuration = !this.showMobilePanel ? 0.3 : 0
       return {
-        transform: this.isDetailPage ? 'initial' : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
+        transform: this.isDetailPage || this.inBgRemoveMode ? 'initial' : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
         transition: `transform ${transformDuration}s`
       }
     }

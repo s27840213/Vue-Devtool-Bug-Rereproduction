@@ -461,7 +461,7 @@ export default defineComponent({
       return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     isBlurImg(): boolean {
-      return this.config.styles.adjust?.blur
+      return !!this.config.styles.adjust?.blur
     }
   },
   methods: {

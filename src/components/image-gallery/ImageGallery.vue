@@ -23,7 +23,6 @@ import { IPhotoItem } from '@/interfaces/api'
 import { GalleryImage } from '@/interfaces/gallery'
 import GalleryUtils from '@/utils/galleryUtils'
 import { defineComponent, PropType } from 'vue'
-import { mapState } from 'vuex'
 
 const component = defineComponent({
   props: {
@@ -54,7 +53,6 @@ const component = defineComponent({
   },
   emits: ['loadMore'],
   computed: {
-    ...mapState('file', ['regenerateGalleryFlag']),
     margin(): number {
       return this.galleryUtils.margin
     }
@@ -67,15 +65,11 @@ const component = defineComponent({
     }
   },
   watch: {
-    // For panel file
-    regenerateGalleryFlag(newVal: boolean) {
-      if (newVal) {
+    myfile: {
+      deep: true,
+      handler: function() {
         this.myfileUpdate()
-        this.galleryUtils.setRegenerateGalleryFlag(false)
-      }
-    },
-    myfile() {
-      this.myfileUpdate()
+      },
     },
     images(newImages: GalleryImage[]) { // For panel unsplash and pexel
       this.nextIndex = newImages.length
