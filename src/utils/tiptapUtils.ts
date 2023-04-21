@@ -292,7 +292,7 @@ class TiptapUtils {
       const spans: ISpan[] = []
       const pContent = fixedWidth && paragraph.content && !this.editor.view.composing
         // Split span for fixedWidth, another one in textBgUtils.setTextBg
-        ? paragraph.content.flatMap(span => [...span.text]
+        ? paragraph.content.flatMap(span => textUtils.splitter.splitGraphemes(span.text)
           .map(t => Object.assign({}, span, { text: t })))
         : paragraph.content
       for (const span of pContent ?? []) {
