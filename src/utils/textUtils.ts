@@ -1,13 +1,15 @@
 import { isITextLetterBg } from '@/interfaces/format'
 import {
+  AllLayerTypes,
   IGroup, IParagraph, IText, ITmp
 } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
-import { calcTmpProps } from '@/utils/groupUtils'
-import TextPropUtils from '@/utils/textPropUtils'
+import { LayerType } from '@/store/types'
+import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import Graphemer from 'graphemer'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
@@ -819,13 +821,13 @@ class TextUtils {
           if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
             (currLayer as IGroup | ITmp).layers
               .forEach((l, idx) => {
-                l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, preprocessedValue)
+                l.type === 'text' && textPropUtils.propAppliedAllText(layerIndex, idx, prop, preprocessedValue)
                 l.type === 'text' && this.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
               })
-            TextPropUtils.updateTextPropsState({ [prop]: _value })
+            textPropUtils.updateTextPropsState({ [prop]: _value })
           } else {
             tiptapUtils.applyParagraphStyle(prop, preprocessedValue, false)
-            TextPropUtils.updateTextPropsState({ [prop]: _value })
+            textPropUtils.updateTextPropsState({ [prop]: _value })
           }
           resolve()
         })
@@ -1007,6 +1009,43 @@ class TextUtils {
       console.log(error)
       finalCallBack(true)
     })
+  }
+
+  resetScaleForLayer(layer: AllLayerTypes): AllLayerTypes[] {
+    let scale = 1
+    const layers = []
+    switch (layer.type) {
+      case LayerType.text:
+        if (layer.styles.scale > 1) {
+          scale = layer.styles.scale
+          layer.styles.scale = 1
+          layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
+            return size * scale
+          })
+        }
+        return [layer]
+      case LayerType.group:
+        for (const l of layer.layers) {
+          if (l.type === LayerType.image) {
+            l.styles.scale = l.styles.scale * layer.styles.scale
+          }
+          l.parentLayerStyles = undefined
+        }
+        for (const l of groupUtils.mapLayersToPage(layer.layers, layer)) {
+          layers.push(...this.resetScaleForLayer(l))
+        }
+        return layers
+    }
+    return [layer]
+  }
+
+  resetScale(page: IPage): IPage {
+    const newLayers = []
+    for (const layer of page.layers) {
+      newLayers.push(...this.resetScaleForLayer(layer))
+    }
+    page.layers = newLayers
+    return page
   }
 }
 
