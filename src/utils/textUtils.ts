@@ -915,7 +915,7 @@ class TextUtils {
       })(),
       ...fontList.slice(1).map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem))
     ]) // wait until the css files of fonts are loaded
-    const allCharacters = paragraph.spans.flatMap(s => this.tokenizeString(s.text))
+    const allCharacters = paragraph.spans.flatMap(s => this.splitter.splitGraphemes(s.text))
     await Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
   }
 
@@ -1007,10 +1007,6 @@ class TextUtils {
       console.log(error)
       finalCallBack(true)
     })
-  }
-
-  tokenizeString(str: string): string[] {
-    return this.splitter.splitGraphemes(str)
   }
 }
 
