@@ -347,41 +347,41 @@ class LayerFactary {
       const defaultFont = (Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale())) ? STANDARD_TEXT_FONT[localeUtils.currLocale()] : STANDARD_TEXT_FONT.tw
       // 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
       textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, config.isCompensated,
-        (paragraph) => {
-          if (paragraph.spans.length > 0) {
-            const firstSpanStyles = paragraph.spans[0].styles
-            if (firstSpanStyles.font) {
-              // 3: span style that has only font but no type
-              paragraph.styles.font = firstSpanStyles.font
-              paragraph.styles.type = firstSpanStyles.type ?? 'public'
-              paragraph.styles.userId = firstSpanStyles.userId ?? ''
-              paragraph.styles.assetId = firstSpanStyles.assetId ?? ''
-              paragraph.styles.fontUrl = firstSpanStyles.fontUrl ?? ''
-            } else {
-              // 7: span has no font
-              paragraph.styles.font = defaultFont
-              paragraph.styles.type = 'public'
-              paragraph.styles.userId = ''
-              paragraph.styles.assetId = ''
-              paragraph.styles.fontUrl = ''
+        {
+          pHandler: (paragraph) => {
+            if (paragraph.spans.length > 0) {
+              const firstSpanStyles = paragraph.spans[0].styles
+              if (firstSpanStyles.font) {
+                // 3: span style that has only font but no type
+                paragraph.styles.font = firstSpanStyles.font
+                paragraph.styles.type = firstSpanStyles.type ?? 'public'
+                paragraph.styles.userId = firstSpanStyles.userId ?? ''
+                paragraph.styles.assetId = firstSpanStyles.assetId ?? ''
+                paragraph.styles.fontUrl = firstSpanStyles.fontUrl ?? ''
+              } else {
+                // 7: span has no font
+                paragraph.styles.font = defaultFont
+                paragraph.styles.type = 'public'
+                paragraph.styles.userId = ''
+                paragraph.styles.assetId = ''
+                paragraph.styles.fontUrl = ''
+              }
+              // 6: font is in wrong format (e.g. contains a comma)
+              if (paragraph.styles.font.includes(',')) {
+                paragraph.styles.font = paragraph.styles.font.split(',')[0]
+              }
+              if ((paragraph.spans.length > 1 || paragraph.spans[0].text !== '') && paragraph.spanStyle) {
+                delete paragraph.spanStyle
+              }
             }
+          },
+          spanPostHandler: (span) => {
+            // This needs to be done after removeInvalidStyles's span processing,
+            // because span's font is guaranteed to exist after that.
             // 6: font is in wrong format (e.g. contains a comma)
-            if (paragraph.styles.font.includes(',')) {
-              paragraph.styles.font = paragraph.styles.font.split(',')[0]
+            if (span.styles.font.includes(',')) {
+              span.styles.font = span.styles.font.split(',')[0]
             }
-            if ((paragraph.spans.length > 1 || paragraph.spans[0].text !== '') && paragraph.spanStyle) {
-              delete paragraph.spanStyle
-            }
-          }
-        },
-        undefined,
-        undefined,
-        (span) => {
-          // This needs to be done after removeInvalidStyles's span processing,
-          // because span's font is guaranteed to exist after that.
-          // 6: font is in wrong format (e.g. contains a comma)
-          if (span.styles.font.includes(',')) {
-            span.styles.font = span.styles.font.split(',')[0]
           }
         }
       )

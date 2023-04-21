@@ -124,7 +124,7 @@ class TextPropUtils {
         const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
         if (targetIsVertical) {
           const paragraphs = generalUtils.deepCopy(config.paragraphs)
-          this.removeInvalidStyles(paragraphs, targetIsVertical)
+          this.removeInvalidStyles(paragraphs, targetIsVertical, config.isCompensated)
           paragraphHandler(paragraphs)
         }
         handler({ writingMode: targetWritingMode })
@@ -139,9 +139,12 @@ class TextPropUtils {
   }
 
   removeInvalidStyles(
-    paragraphs: IParagraph[], isVertical: boolean, isCompensated?: boolean,
-    pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void,
-    pPostHandler?: (paragraph: IParagraph) => void, spanPostHandler?: (span: ISpan) => void
+    paragraphs: IParagraph[], isVertical: boolean, isCompensated?: boolean, {
+      pHandler, spanHandler, pPostHandler, spanPostHandler
+    }: {
+      pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void,
+      pPostHandler?: (paragraph: IParagraph) => void, spanPostHandler?: (span: ISpan) => void
+    } = {}
   ) {
     const minimumFontSize = this.getMinimumFontSize()
     paragraphs.forEach((p) => {
