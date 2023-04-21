@@ -113,10 +113,6 @@ export default defineComponent({
           icon: 'vivisticker_global',
           action: () => { this.handleList('domain') }
         }, {
-          text: 'Vivisticker Pro',
-          icon: 'pro',
-          action: vivistickerUtils.openPayment
-        }, {
           text: 'App 事件測試',
           icon: 'vivisticker_global',
           action: () => { this.handleList('event-test') }
