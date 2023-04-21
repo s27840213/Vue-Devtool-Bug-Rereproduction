@@ -5,7 +5,7 @@ import {
   LogoRowData,
   RowData
 } from '@/interfaces/gallery'
-import store from '@/store'
+import { cloneDeep } from 'lodash'
 
 export default class GalleryUtils {
   minHeight = 100
@@ -26,10 +26,6 @@ export default class GalleryUtils {
         height: this.minHeight
       }
     }
-  }
-
-  setRegenerateGalleryFlag(bool: boolean): void {
-    store.commit('file/SET_REGENERATE_GALLERY_FLAG', bool)
   }
 
   createRows(images: GalleryImage[]): RowData[] {
@@ -73,6 +69,7 @@ export default class GalleryUtils {
   }
 
   generate(images: GalleryImage[]): Array<GalleryImage[]> {
+    images = cloneDeep(images) // Prevent modify original variable
     this.resizeToMinHeight(images)
     return this
       .createRows(images)
@@ -89,6 +86,7 @@ export default class GalleryUtils {
   }
 
   generateForLogo(logos: IBrandLogo[]): Array<IBrandLogo[]> {
+    logos = cloneDeep(logos) // Prevent modify original variable
     this.resizeToMinHeight(logos)
     return this
       .createRowsForLogos(logos)

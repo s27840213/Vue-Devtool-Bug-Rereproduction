@@ -295,7 +295,7 @@ class TiptapUtils {
       const spans: ISpan[] = []
       const pContent = fixedWidth && paragraph.content && !this.editor.view.composing
         // Split span for fixedWidth, another one in textBgUtils.setTextBg
-        ? paragraph.content.flatMap(span => [...span.text]
+        ? paragraph.content.flatMap(span => textUtils.splitter.splitGraphemes(span.text)
           .map(t => Object.assign({}, span, { text: t })))
         : paragraph.content
       for (const span of pContent ?? []) {
@@ -306,10 +306,7 @@ class TiptapUtils {
             sStyles.pre = undefined
             isSetContentRequired = true
           }
-          if (span.text.includes('\ufe0e') || span.text.includes('\ufe0f')) {
-            isSetContentRequired = true
-          }
-          spans.push({ text: span.text.replace(/[\ufe0e\ufe0f]/g, ''), styles: sStyles })
+          spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
           let sStyles: ISpanStyle
@@ -323,7 +320,7 @@ class TiptapUtils {
             sStyles.pre = undefined
             isSetContentRequired = true
           }
-          spans.push({ text: span.text.replace(/[\ufe0e\ufe0f]/g, ''), styles: sStyles })
+          spans.push({ text: span.text, styles: sStyles })
         }
       }
       if (spans.length === 0) {

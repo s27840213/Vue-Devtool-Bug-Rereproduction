@@ -11,7 +11,7 @@ const WHITE_STATUS_BAR_ROUTES = [
 
 class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
-  toSendStatistics: { token: string, device: number } | undefined = undefined
+  toSendStatistics = false
   STANDALONE_USER_INFO: IUserInfo = {
     hostId: '',
     appVer: '100.0',
@@ -91,16 +91,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     const appCaps = await fetch(`https://template.vivipic.com/static/appCaps.json?ver=${generalUtils.generateRandomString(6)}`)
     const jsonCaps = await appCaps.json() as { review_ver: string }
     store.commit('webView/UPDATE_detectIfInReviewMode', jsonCaps.review_ver)
-    if (this.toSendStatistics !== undefined) {
-      if (userInfo.country) { // if App version is too old to have country information, don't send update-user
-        store.dispatch('user/updateUser', {
-          ...this.toSendStatistics,
-          app: 1,
-          country: userInfo.country.toLowerCase()
-        })
-      }
-      this.toSendStatistics = undefined
-    }
+    this.sendStatistics(true, userInfo.country)
     return userInfo
   }
 
@@ -162,23 +153,34 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     this.sendToIOS('SWITCH_DOMAIN', { domain })
   }
 
-  async sendStatistics() {
-    const data = {
-      token: store.getters['user/getToken'] as string,
-      device: store.getters['user/getDevice'] as number,
-    }
-    if (this.inBrowserMode) {
-      const response = await fetch(`https://api.ipregistry.co/?key=${process.env.VUE_APP_IPREGISTRY_API_KEY}&fields=location.country.code`)
-      const json = await response.json() as { location: { country: { code: string } } }
-      const country = json.location.country.code.toLowerCase()
-      store.dispatch('user/updateUser', {
+  async sendStatistics(countryReady = false, country?: string): Promise<void> {
+    if (this.inBrowserMode || countryReady) {
+      const data = {
+        token: store.getters['user/getToken'] as string,
+        device: store.getters['user/getDevice'] as number,
+      }
+      await store.dispatch('user/updateUser', {
         ...data,
         app: 0,
         country
-      })
+        // If inBrowserMode, country = undefined,
+        // otherwise country will be provided in arguments when called from getUserInfo
+        // (if app doesn't provide it (in older versions), it will be undefined)
+      }) // If country is not provided, back-end will use the information provided by CloudFlare.
+      this.toSendStatistics = false
     } else {
-      this.toSendStatistics = data
+      this.toSendStatistics = true
     }
+  }
+
+  sendAdEvent(eventName: string, param: { [key: string]: any } = {}) {
+    if (this.inBrowserMode) return
+    this.sendToIOS('SEND_AD_EVENT', { eventName, param })
+  }
+
+  ratingRequest(type: string) {
+    if (this.inBrowserMode) return
+    this.sendToIOS('RATING_REQUEST', { type })
   }
 }
 

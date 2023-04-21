@@ -20,50 +20,77 @@ class DragUtils {
    * @param payload The core data of dragItem, e.g. srcObj for image, designId for svg.
    * @param attrs offsetX/offsetY for dragImg's offset, width/height for dropped layer size
    */
-  itemDragStart(e: DragEvent, type: string, payload: Partial<IImage | IShape>, attrs: { [key: string]: string | number } = {}) {
-    let { offsetX = 10, offsetY = 15, width, height, panelPreviewSrc = '' } = attrs
-    const scaleRatio = store.getters.getPageScaleRatio
-    const { width: rowWidth, height: rowHeight, x, y } = (e.target as Element).getBoundingClientRect()
-
-    const iconImg = new Image()
-    iconImg.src = (e.target as HTMLImageElement).src
-    let { width: iconWidth, height: iconHeight } = iconImg
-    iconWidth > iconHeight ? ((iconHeight *= rowWidth / iconWidth) && (iconWidth = rowWidth))
-      : ((iconWidth *= rowHeight / iconHeight) && (iconHeight = rowHeight))
+  itemDragStart(evt: DragEvent, type: string, config: Partial<IImage | IShape>, imgSrc: string, attrs?: { offsetX?: number, offsetY?: number, width?: number, height?: number, resizeRatio?: number, panelPreviewSrc?: string, aspectRatio?: number }) {
+    const { width: rectW, height: rectH, x, y } = (evt.target as Element).getBoundingClientRect()
+    const { offsetX = 10, offsetY = 15, panelPreviewSrc = '', resizeRatio = 0.5, aspectRatio = rectW / rectH } = attrs || {}
+    const iconWidth = aspectRatio > 1 ? rectW : (rectH * aspectRatio)
+    const iconHeight = iconWidth / aspectRatio
+    let { width, height } = attrs || {}
 
     if (typeof width === 'undefined' || typeof height === 'undefined') {
       const currentPage = store.getters.getPage(layerUtils.pageIndex)
       const pageAspectRatio = currentPage.width / currentPage.height
-      const aspectRatio = iconWidth / iconHeight
-      const resizeRatio = attrs.resizeRatio && typeof attrs.resizeRatio === 'number' ? attrs.resizeRatio : 0.5
       width = aspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * aspectRatio
       height = aspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / aspectRatio : currentPage.height * resizeRatio
     }
-
     const data = {
       type,
       styles: {
-        x: (e.clientX - x) * (scaleRatio / 100),
-        y: (e.clientY - y) * (scaleRatio / 100),
+        x: (evt.clientX - x) * (store.getters.getPageScaleRatio / 100),
+        y: (evt.clientY - y) * (store.getters.getPageScaleRatio / 100),
         width,
         height
       },
       panelPreviewSrc,
-      ...payload
+      ...config
     }
-    const dataTransfer = e.dataTransfer as DataTransfer
+    const dataTransfer = evt.dataTransfer as DataTransfer
     dataTransfer.dropEffect = 'move'
     dataTransfer.effectAllowed = 'move'
     dataTransfer.setData('data', JSON.stringify(data))
 
     const dragImage = new Image()
-    dragImage.src = iconImg.src
+    dragImage.src = imgSrc
     dragImage.setAttribute('style',
       'width: 100%;' +
       'height: 100%;' +
       'position: absolute;' +
       `transform: translate(${offsetX}px, ${offsetY}px);`
     )
+    const wrapper = document.createElement('div')
+    wrapper.appendChild(dragImage)
+    wrapper.setAttribute('style',
+      `width: ${Math.floor(iconWidth)}px;` +
+      `height: ${Math.floor(iconHeight)}px;` +
+      'position: absolute;'
+    )
+    document.body.appendChild(wrapper)
+    /**
+     * Notice the xOffset/yOffset of this function can only work as the value is inside the size range.
+     * e.g. the value of (-50,-50) won't work and (50,50) will only work for the image which size is bigger than (50, 50)
+     */
+    dataTransfer.setDragImage(wrapper, 0, 0)
+    setTimeout(() => {
+      document.body.removeChild(wrapper)
+    }, 0)
+  }
+
+  textItemDragStart(evt: DragEvent, type: string, payload: Partial<IImage | IShape>, attrs?: { offsetX: number, offsetY: number }) {
+    const { offsetX = 10, offsetY = 15 } = attrs || {}
+    const scaleRatio = store.getters.getPageScaleRatio
+    const { x, y } = (evt.target as Element).getBoundingClientRect()
+    const data = {
+      type,
+      styles: {
+        x: (evt.clientX - x) * (scaleRatio / 100),
+        y: (evt.clientY - y) * (scaleRatio / 100),
+      },
+      ...payload
+    }
+    const dataTransfer = evt.dataTransfer as DataTransfer
+    dataTransfer.dropEffect = 'move'
+    dataTransfer.effectAllowed = 'move'
+    dataTransfer.setData('data', JSON.stringify(data))
 
     const wrapper = document.createElement('div')
     /**
@@ -71,13 +98,12 @@ class DragUtils {
      * use the span beneth it as a preview
      * update at 2022/1/24: the only non-image dragged-item is the standard text.
      */
-    const previewIsImg = (e.target as HTMLElement).tagName === 'IMG'
-    wrapper.appendChild(previewIsImg ? dragImage : (() => {
-      let div: Node | null = e.target as Node
+    wrapper.appendChild((() => {
+      let div: Node | null = evt.target as Node
       while (div && div.nodeName !== 'BUTTON') {
         div = div.firstChild
       }
-      !div && (div = e.target as Node)
+      !div && (div = evt.target as Node)
       const span = div.lastChild?.cloneNode(true) as HTMLElement
       span.classList.add(`btn-text-${payload.type?.toLocaleLowerCase()}`)
       span.setAttribute('style',
@@ -89,11 +115,7 @@ class DragUtils {
       return span
     })())
     wrapper.setAttribute('style',
-      (previewIsImg ? `width: ${Math.floor(iconWidth)}px;` : '') +
-      (previewIsImg ? `height: ${Math.floor(iconHeight)}px;` : '') +
-      'position: absolute;' +
-      // If the padding is not set, there would be a problem to the dragImg
-      (!previewIsImg ? `padding: ${1}px;` : '')
+      'position: absolute;' + 'padding: 1px;'
     )
     document.body.appendChild(wrapper)
     /**
@@ -122,14 +144,13 @@ class DragUtils {
         x: (e.clientX - targetPos.x) * (100 / store.state.pageScaleRatio),
         y: (e.clientY - targetPos.y) * (100 / store.state.pageScaleRatio)
       }
-
       if (data.type === 'standardText') {
         const { textType, text, locale, spanStyles } = data
         assetUtils.addStandardText(textType, text, locale, pageIndex, { styles }, spanStyles)
       } else {
         if (data.type === 6) {
           const addTemplate = data.groupChildId ? (resize?: any) => assetUtils.addGroupTemplate(data, data.groupChildId, resize)
-           : (resize?: any) => assetUtils.addAsset(data, { styles, pageIndex, ...resize })
+            : (resize?: any) => assetUtils.addAsset(data, { styles, pageIndex, ...resize })
           const pageSize = data.groupChildId ? pageUtils.currFocusPageSize : pageUtils.getPageSize(pageIndex)
           const newPageIndex = data.groupChildId ? data.content_ids.findIndex((content: any) => content.id === data.groupChildId) : 0
           const { height, width, unit } = data.content_ids[newPageIndex]

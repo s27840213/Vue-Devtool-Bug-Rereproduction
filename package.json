@@ -52,6 +52,7 @@
     "eslint-plugin-vue-pug": "^0.6.0",
     "floating-vue": "^2.0.0-beta.20",
     "fontfaceobserver": "^2.1.0",
+    "graphemer": "^1.4.0",
     "html2pdf.js": "^0.10.1",
     "lottie-vuejs": "^0.4.0",
     "lottie-web": "^5.1.9",

@@ -226,7 +226,7 @@ import { IPage } from '@/interfaces/page'
 import { ICoverTheme, Itheme, IThemeTemplate } from '@/interfaces/theme'
 import GeneralUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { PRECISION } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -350,7 +350,7 @@ export default defineComponent({
       showAdminTool: 'user/showAdminTool'
     }),
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      return picWVUtils.inReviewMode
     },
     sizeToShow(): {width: number, height: number, unit: string} {
       const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize

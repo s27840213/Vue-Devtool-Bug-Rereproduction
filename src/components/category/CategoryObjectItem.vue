@@ -7,7 +7,7 @@ div(class="category-object-item" v-touch)
   template(v-else)
     img(class="category-object-item__img" draggable="false" @tap="clickObject" v-press="addSvg"
       :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-    pro-item(v-if="item.plan")
+    pro-item(v-if="item.plan" draggable="false")
     div(v-if="showEditor" class="category-object-item__icon" @click.stop.prevent="handleEditObject")
       svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
     div(v-if="item.type === 16" class="category-object-item__icon" @click.stop.prevent="openGiphyMore")

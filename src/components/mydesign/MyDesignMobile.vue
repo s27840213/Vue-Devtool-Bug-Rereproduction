@@ -88,7 +88,7 @@ import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTras
 import { IDesign, IFolder, IMobileMessageItem, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -225,7 +225,7 @@ export default defineComponent({
       bottomMenu: 'getBottomMenu',
     }),
     ...mapGetters({
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
     headerStyles(): {[key: string]: string} {
       return {

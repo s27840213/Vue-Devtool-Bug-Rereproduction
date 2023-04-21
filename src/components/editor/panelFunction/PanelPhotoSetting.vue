@@ -37,7 +37,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -143,7 +143,7 @@ export default defineComponent({
       return types.has('image') && layers.length === 1
     },
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      return picWVUtils.inReviewMode
     },
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]
