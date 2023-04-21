@@ -171,7 +171,7 @@ class AssetUtils {
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
     let newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    if (store.getters['user/getUserId'] === 'backendRendering') {
+    if (store.getters['user/getUserId'] === 'backendRendering' && store.getters['user/getUnitScale']) {
       newPage = textUtils.resetScale(newPage)
     }
     pageUtils.updateSpecPage(targetPageIndex, newPage)
