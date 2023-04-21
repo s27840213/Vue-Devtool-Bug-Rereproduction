@@ -5,6 +5,8 @@
   "javascript.format.insertSpaceAfterSemicolonInForStatements": true,
   "javascript.format.semicolons": "remove",
   "typescript.format.semicolons": "remove",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.quoteStyle": "single",
   "editor.tabSize": 2,
 
   // Format file when save file

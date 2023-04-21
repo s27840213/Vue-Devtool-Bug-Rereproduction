@@ -10,6 +10,7 @@ import store from '@/store'
 import { LayerType } from '@/store/types'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import Graphemer from 'graphemer'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
 import GeneralUtils from './generalUtils'
@@ -33,6 +34,7 @@ class TextUtils {
   trashDivs: HTMLDivElement[] = []
   toRecordId: string
   toSetFlagId: string
+  splitter: Graphemer = new Graphemer()
   fieldRange: {
     fontSize: { min: number, max: number }
     lineHeight: { min: number, max: number }
@@ -992,14 +994,19 @@ class TextUtils {
       })(),
       ...fontList.slice(1).map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem))
     ]) // wait until the css files of fonts are loaded
-    const allCharacters = paragraph.spans.flatMap(s => s.text.split(''))
+    const allCharacters = paragraph.spans.flatMap(s => this.splitter.splitGraphemes(s.text))
     await Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
   }
 
   async untilFontLoadedForChar(char: string, fontList: string[]): Promise<void> {
-    for (const font of fontList) {
-      const fontFileList = await window.document.fonts.load(`14px ${font}`, char)
-      if (fontFileList.length !== 0) return
+    try {
+      for (const font of fontList) {
+        const fontFileList = await window.document.fonts.load(`14px ${font}`, char)
+        if (fontFileList.length !== 0) return
+      }
+    } catch (error) {
+      console.error(error)
+      throw error
     }
   }
 

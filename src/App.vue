@@ -53,7 +53,7 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
-import webViewUtils from './utils/picWVUtils'
+import picWVUtils from './utils/picWVUtils'
 
 export default defineComponent({
   emits: [],
@@ -79,11 +79,11 @@ export default defineComponent({
       window.dispatchEvent(new Event('render-event'))
     }
 
-    if (!webViewUtils.inBrowserMode) {
-      webViewUtils.registerCallbacks('main')
+    if (!picWVUtils.inBrowserMode) {
+      picWVUtils.registerCallbacks('main')
     }
 
-    this.$router.isReady().then(() => { webViewUtils.sendAppLoaded() })
+    this.$router.isReady().then(() => { picWVUtils.sendAppLoaded() })
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
@@ -102,7 +102,7 @@ export default defineComponent({
       modalInfo: 'modal/getModalInfo',
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
-      userInfo: webViewUtils.appendModuleName('getUserInfo'),
+      userInfo: picWVUtils.appendModuleName('getUserInfo'),
       browserInfo: 'user/getBrowserInfo'
     }),
     currLocale(): string {

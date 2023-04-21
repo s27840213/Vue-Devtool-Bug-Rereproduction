@@ -1,5 +1,17 @@
 import { defineConfig } from 'cypress'
 
+/**
+ * To run test in local computer, please specific download chromium version
+ * Current version: 109.0.5414.74
+ * Download from:
+ * Mac(arm) v109.0.5414.0: https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Mac_Arm/1070135/
+ * Mac(x64): https://chromium.cypress.io/mac/beta/109.0.5414.74
+ * Win(x64): https://chromium.cypress.io/win64/beta/109.0.5414.74
+ *
+ * If you are Mac user, you need to trun off some security setting and put app in Application folder:
+ * https://blog.ntmy.com.tw/fix-app-damaged-cant-be-opened-trash-error-mac/
+ */
+
 export default defineConfig({
   projectId: 'dg4gqg',
   viewportWidth: 1400,

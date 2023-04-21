@@ -165,7 +165,7 @@ import hashtag from '@/store/module/hashtag'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
 import vClickOutside from 'click-outside-vue3'
@@ -619,7 +619,7 @@ export default defineComponent({
       return this.selectedTheme?.id === theme.id
     },
     openTemplate(url: string) {
-      webViewUtils.openOrGoto(url)
+      picWVUtils.openOrGoto(url)
     }
   }
 })
