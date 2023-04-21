@@ -88,7 +88,7 @@ export default defineComponent({
       {
         text: 'Vivisticker Pro',
         icon: 'pro',
-        action: vivistickerUtils.openPayment
+        action: () => { vivistickerUtils.openPayment() }
       },
       {
         text: `${this.$t('NN0174')}`,

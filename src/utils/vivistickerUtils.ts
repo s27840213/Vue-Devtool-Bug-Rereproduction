@@ -1066,6 +1066,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   openPayment(target?: IViviStickerProFeatures) {
+    if (this.isPaymentDisabled) {
+      this.showUpdateModal()
+      return
+    }
     store.commit('vivisticker/SET_fullPageConfig', { type: 'payment', params: { target } })
   }
 
@@ -1184,6 +1188,57 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         noCloseIcon: true
       })
     }
+  }
+
+  showUpdateModal() {
+    let locale = this.getUserInfoFromStore().locale
+    if (!['us', 'tw', 'jp'].includes(locale)) {
+      locale = 'us'
+    }
+    const prefix = 'exp_' + locale + '_'
+    const modalInfo = Object.fromEntries(Object.entries(store.getters['vivisticker/getModalInfo']).map(
+      ([k, v]) => {
+        if (k.startsWith(prefix)) k = k.replace(prefix, '')
+        return [k, v as string]
+      })
+    )
+    const options = {
+      imgSrc: modalInfo.img_url,
+      noClose: false,
+      noCloseIcon: false,
+      backdropStyle: {
+        backgroundColor: 'rgba(24,25,31,0.3)'
+      },
+      cardStyle: {
+        backdropFilter: 'blur(10px)',
+        backgroundColor: 'rgba(255,255,255,0.9)'
+      }
+    }
+    modalUtils.setModalInfo(
+      modalInfo.title,
+      modalInfo.msg,
+      {
+        msg: modalInfo.btn_txt,
+        class: 'btn-black-mid',
+        style: {
+          color: '#F8F8F8'
+        },
+        action: () => {
+          const url = modalInfo.btn_url
+          if (url) { window.open(url, '_blank') }
+        }
+      },
+      {
+        msg: modalInfo.btn2_txt || '',
+        class: 'btn-light-mid',
+        style: {
+          border: 'none',
+          color: '#474A57',
+          backgroundColor: '#D3D3D3'
+        }
+      },
+      options
+    )
   }
 }
 

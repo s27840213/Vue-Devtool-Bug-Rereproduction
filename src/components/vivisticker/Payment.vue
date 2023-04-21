@@ -61,7 +61,6 @@ div(class="payment" v-touch @swipe="handleSwipe")
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
 import { IPrices } from '@/interfaces/vivisticker'
-import modalUtils from '@/utils/modalUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
@@ -159,8 +158,6 @@ export default defineComponent({
     ...mapGetters({
       prices: 'vivisticker/getPrices',
       pending: 'vivisticker/getIsPaymentPending',
-      userInfo: 'vivisticker/getUserInfo',
-      modalInfo: 'vivisticker/getModalInfo'
     }),
     txtBtnSubscribe() {
       return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
@@ -212,7 +209,6 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setFullPageConfig: 'vivisticker/SET_fullPageConfig',
       setPaymentPending: 'vivisticker/SET_paymentPending'
     }),
     handleImageChange(index: number) {
@@ -222,10 +218,6 @@ export default defineComponent({
       this.planSelected = key
     },
     handleSubscribe(option: string, timeout?: number) {
-      if (vivistickerUtils.isPaymentDisabled) {
-        this.showUpdateModal()
-        return
-      }
       if (this.pending) return
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
@@ -246,56 +238,6 @@ export default defineComponent({
       }
       this.isPanelUp = !this.isPanelUp
     },
-    showUpdateModal() {
-      let locale = this.userInfo.locale
-      if (!['us', 'tw', 'jp'].includes(locale)) {
-        locale = 'us'
-      }
-      const prefix = 'exp_' + locale + '_'
-      const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
-        ([k, v]) => {
-          if (k.startsWith(prefix)) k = k.replace(prefix, '')
-          return [k, v as string]
-        })
-      )
-      const options = {
-        imgSrc: modalInfo.img_url,
-        noClose: false,
-        noCloseIcon: false,
-        backdropStyle: {
-          backgroundColor: 'rgba(24,25,31,0.3)'
-        },
-        cardStyle: {
-          backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(255,255,255,0.9)'
-        }
-      }
-      modalUtils.setModalInfo(
-        modalInfo.title,
-        modalInfo.msg,
-        {
-          msg: modalInfo.btn_txt,
-          class: 'btn-black-mid',
-          style: {
-            color: '#F8F8F8'
-          },
-          action: () => {
-            const url = modalInfo.btn_url
-            if (url) { window.open(url, '_blank') }
-          }
-        },
-        {
-          msg: modalInfo.btn2_txt || '',
-          class: 'btn-light-mid',
-          style: {
-            border: 'none',
-            color: '#474A57',
-            backgroundColor: '#D3D3D3'
-          }
-        },
-        options
-      )
-    }
   }
 })
 </script>
