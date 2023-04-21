@@ -491,25 +491,21 @@ export class MovingUtils {
     const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0
     const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y && offsetPos.y < 0
 
+    let x = -1
+    let y = -1
     if (isReachRightEdge || isReachLeftEdge) {
-      pageUtils.updatePagePos(this.pageIndex, {
-        x: isReachRightEdge ? editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x : EDGE_WIDTH.x
-      })
+      x = isReachRightEdge ? editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x : EDGE_WIDTH.x
     } else {
-      pageUtils.updatePagePos(this.pageIndex, {
-        x: offsetPos.x + page.x
-      })
+      x = offsetPos.x + page.x
     }
 
     if (isReachTopEdge || isReachBottomEdge) {
-      pageUtils.updatePagePos(this.pageIndex, {
-        y: isReachBottomEdge ? editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y : EDGE_WIDTH.y
-      })
+      y = isReachBottomEdge ? editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y : EDGE_WIDTH.y
     } else {
-      pageUtils.updatePagePos(this.pageIndex, {
-        y: offsetPos.y + page.y
-      })
+      y = offsetPos.y + page.y
     }
+    console.log('page moving', x, y)
+    pageUtils.updatePagePos(this.pageIndex, { x, y })
 
     if (!isReachLeftEdge && !isReachRightEdge) {
       this.initialPos.x += offsetPos.x

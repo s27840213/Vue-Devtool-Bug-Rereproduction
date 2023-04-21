@@ -364,6 +364,7 @@ export default defineComponent({
       }
     },
     selectStart(e: PointerEvent) {
+      if (!e.isPrimary) return
       e.stopPropagation()
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
@@ -468,7 +469,8 @@ export default defineComponent({
         const evtScale = ((e.scale - 1) * 0.5 + 1)
         switch (e.phase) {
           case 'start': {
-            console.log('start')
+            console.warn('pinching start')
+            this.movingUtils.removeListener()
             this.initPagePos.x = page.x
             this.initPagePos.y = page.y
             this.initPinchPos = {
@@ -477,11 +479,14 @@ export default defineComponent({
             }
             this.tmpScaleRatio = scaleRatio
             store.commit('SET_isPageScaling', true)
+            this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
             break
           }
           case 'move': {
             const newScaleRatio = evtScale * this.tmpScaleRatio
             if (!this.isPinchingEditor) {
+              console.warn('pinching start')
+              this.movingUtils.removeListener()
               this.initPagePos.x = page.x
               this.initPagePos.y = page.y
               this.initPinchPos = {
@@ -519,11 +524,12 @@ export default defineComponent({
             }
             // console.log(this.tmpScaleRatio)
 
+            console.warn(this.initPagePos.x, this.initPagePos.y, page.x, page.y)
             pageUtils.updatePagePos(layerUtils.pageIndex, {
               x: this.initPagePos.x - sizeDiff.width * translationRatio.x + movingTraslate.x,
               y: this.initPagePos.y - sizeDiff.height * translationRatio.y + movingTraslate.y
             })
-
+            console.log(this.initPagePos.x - sizeDiff.width * translationRatio.x + movingTraslate.x, this.initPagePos.y - sizeDiff.height * translationRatio.y + movingTraslate.y)
             break
           }
           case 'end': {
