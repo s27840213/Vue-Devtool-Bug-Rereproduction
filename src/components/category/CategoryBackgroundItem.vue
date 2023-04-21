@@ -1,13 +1,13 @@
 <template lang="pug">
-div(class="panel-bg__item")
+div(class="panel-bg__item"
+    @click="addBackground"
+    @click.right.prevent="openUpdateDesignPopup()")
   img(class="panel-bg__img"
     ref="img"
     :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
     draggable="false"
-    @click="addBackground"
-    @click.right.prevent="openUpdateDesignPopup()"
     @error="handleNotFound")
-  pro-item(v-if="item.plan")
+  pro-item(v-if="item.plan" draggable="false")
 </template>
 
 <script lang="ts">

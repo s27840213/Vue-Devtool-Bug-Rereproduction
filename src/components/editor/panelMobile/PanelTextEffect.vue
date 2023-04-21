@@ -16,10 +16,11 @@ div(class="panel-text-effect")
     div(v-for="effect in effectList"
         :key="`${currCategory.name}-${effect.key}`"
         :class="{ 'selected': currEffect.key === effect.key }"
-        @click="onEffectClick(effect.key)")
+        @click="onEffectClick(effect)")
       svg-icon(:iconName="effectIcon(currCategory, effect)"
               class="panel-text-effect__effects--icon"
-              iconWidth="100%" iconColor="gray-5")
+              iconWidth="48px" iconColor="gray-5")
+      pro-item(v-if="effect.plan" theme="roundedRect")
       div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
           class="panel-text-effect__effects--more")
         svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
@@ -65,23 +66,26 @@ div(class="panel-text-effect")
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
+import paymentUtils from '@/utils/paymentUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapState } from 'vuex'
 
 export default defineComponent({
   components: {
     MobileSlider,
-    ColorBtn
+    ColorBtn,
+    ProItem,
   },
   props: {
     panelHistory: {
@@ -193,11 +197,12 @@ export default defineComponent({
       target.resetCurrTextEffect()
       this.recordChange()
     },
-    async onEffectClick(effectName: string): Promise<void> {
-      if (effectName !== this.currentStyle.name) {
-        await this.setEffect({ effectName })
+    async onEffectClick(effect: IEffect): Promise<void> {
+      if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      if (effect.key !== this.currentStyle.name) {
+        await this.setEffect({ effectName: effect.key })
         this.recordChange()
-      } else if (effectName !== 'none') {
+      } else if (effect.key !== 'none') {
         this.pushHistory(this.currCategory.name)
       }
     },
@@ -254,13 +259,20 @@ export default defineComponent({
     > div {
       display: flex;
       position: relative;
-      margin: 2px auto 16px auto;
       width: 56px;
       height: 56px;
+      box-sizing: border-box;
+      margin: 0px auto 16px auto;
+      padding: 2px;
+      background-color: setColor(gray-5);
       border-radius: 5px;
+      border: 2px solid transparent;
       &.selected {
-        margin-top: 0;
         border: 2px solid setColor(blue-1);
+      }
+      > .pro {
+        left: -1px;
+        top: -6px;
       }
     }
     &--more {
@@ -268,8 +280,11 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       position: absolute;
-      width: 100%;
-      height: 100%;
+      top: 0px;
+      left: 0px;
+      width: 52px;
+      height: 52px;
+      border-radius: 3px;
       background: rgba(71, 74, 87, 0.6);
       backdrop-filter: blur(2px);
     }
@@ -303,7 +318,7 @@ export default defineComponent({
       color: setColor(gray-2);
       background-color: setColor(gray-5);
       &.selected {
-        border: 2px solid setColor(blue-1);;
+        border-color: setColor(blue-1);;
       }
       > svg {
         margin-right: 8px;

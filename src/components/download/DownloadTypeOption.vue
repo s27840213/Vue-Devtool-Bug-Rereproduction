@@ -8,7 +8,7 @@ div(class="download-type-option__name")
 </template>
 
 <script lang="ts">
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -24,7 +24,7 @@ export default defineComponent({
   },
   computed: {
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      return picWVUtils.inReviewMode
     },
   },
 })

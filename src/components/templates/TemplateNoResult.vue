@@ -9,7 +9,7 @@ div(class="template-no-result")
 </template>
 
 <script lang="ts">
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -42,7 +42,7 @@ export default defineComponent({
       this.openUrl()
     },
     openUrl() {
-      webViewUtils.openOrGoto(this.$t('NN0791'))
+      picWVUtils.openOrGoto(this.$t('NN0791'))
     }
   }
 })

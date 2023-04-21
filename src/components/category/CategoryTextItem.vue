@@ -1,14 +1,15 @@
 <template lang="pug">
-div(class="panel-text__item")
-  img(class="panel-text__img"
-    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+div(class="panel-text__item"
     draggable="true"
-    :style="itemStyle"
     @dragstart="dragStart($event)"
     @click="addText"
-    @click.right.prevent="openUpdateDesignPopup()"
+    @click.right.prevent="openUpdateDesignPopup()")
+  img(class="panel-text__img"
+    ref="img"
+    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+    :style="itemStyle"
     @error="handleNotFound")
-  pro-item(v-if="item.plan")
+  pro-item(v-if="item.plan" draggable="false")
 </template>
 
 <script lang="ts">
@@ -54,7 +55,7 @@ export default defineComponent({
         objectFit: 'contain',
         width: `${width}px`
       }
-    }
+    },
   },
   methods: {
     handleNotFound(event: Event) {
@@ -62,9 +63,10 @@ export default defineComponent({
     },
     dragStart(e: DragEvent) {
       if (!paymentUtils.checkPro(this.item, 'pro-text')) return
+      const img = this.$refs.img as HTMLImageElement
       new DragUtils().itemDragStart(e, 'group', {
         ...this.item
-      })
+      }, img.src, { aspectRatio: img.naturalWidth / img.naturalHeight })
     },
     addText() {
       if (!paymentUtils.checkPro(this.item, 'pro-text')) return
