@@ -101,11 +101,16 @@ class TextFill {
           ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)) * -1}px`,
         backgroundOrigin: 'content-box',
         backgroundRepeat: 'no-repeat',
+        webkitBackgroundClip: 'text',
+        // To fix a Safari bug that the element border of BG text clip will appear abnormally,
+        // make border of element to be transparent.
+        maskImage: `url(${require('@/assets/img/png/text-fill-mask-image.png')})`,
+        maskSize: '100% 100%',
+        // About span color
         opacity: textFill.opacity / 100,
         webkitTextFillColor: 'transparent',
         webkitTextStrokeColor: 'transparent',
         textDecorationColor: 'transparent',
-        webkitBackgroundClip: 'text',
         // About span position
         position: 'absolute',
         padding: `${spanHeight * spanExpandRatio}px ${spanWidth * spanExpandRatio}px`,

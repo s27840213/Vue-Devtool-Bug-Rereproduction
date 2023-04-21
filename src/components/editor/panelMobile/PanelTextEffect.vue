@@ -17,9 +17,9 @@ div(class="panel-text-effect")
         :key="`${currCategoryName}-${effect.key}`"
         :class="{ 'selected': currEffect.key === effect.key }"
         @click="onEffectClick(effect)")
-      svg-icon(:iconName="effectIcon(currCategory, effect)"
-              class="panel-text-effect__effects--icon"
-              iconWidth="48px" iconColor="gray-5")
+      svg-icon(:iconName="effectIcon(currCategory, effect).name"
+              :iconWidth="effectIcon(currCategory, effect).size"
+              class="panel-text-effect__effects--icon" iconColor="gray-5")
       pro-item(v-if="effect.plan" theme="roundedRect")
       div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
           class="panel-text-effect__effects--more")
@@ -45,13 +45,12 @@ div(class="panel-text-effect")
       mobile-slider(v-if="option.type === 'range'"
         :borderTouchArea="true"
         :title="option.label"
-        :name="option.key"
         :value="getInputValue(currentStyle, option)"
         :max="option.max ?? 100"
         :min="option.min ?? 0"
         :step="option.key === 'lineHeight' ? 0.01 : 1"
         :autoRecord="false"
-        @update="(e)=>handleRangeInput(e, option)"
+        @update="(val)=>handleRangeInput(val, option)"
         @pointerdown="setEffectFocus(true)"
         @pointerup="setEffectFocus(false)")
       //- Option type color
@@ -137,6 +136,13 @@ export default defineComponent({
     },
     async onEffectClick(effect: IEffect): Promise<void> {
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      // if (effect.key === 'custom-fill-img') {
+      //   popupUtils.openPopup('replace', undefined, {
+      //     selectImg: (img: IAssetPhoto|IPhotoItem) => {
+      //       this.setEffect({ effect: { img } })
+      //     }
+      //   })
+      // }
       if (effect.key !== this.currentStyle.name) {
         await this.setEffect({ effectName: effect.key })
         this.recordChange()
@@ -178,6 +184,8 @@ export default defineComponent({
     column-gap: 16px;
     > div {
       display: flex;
+      justify-content: center;
+      align-items: center;
       position: relative;
       width: 56px;
       height: 56px;

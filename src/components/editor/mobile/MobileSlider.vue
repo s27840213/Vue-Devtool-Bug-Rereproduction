@@ -37,6 +37,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: ['pointerdown', 'update'],
   data() {
     return {
     }
@@ -69,13 +70,6 @@ export default defineComponent({
       default: 1,
       type: Number
     },
-    /**
-     * @param key - use to identify the target we want to update
-     */
-    propKey: {
-      type: String,
-      default: ''
-    },
     enableDefaultPadding: {
       type: Boolean,
       default: true
@@ -91,11 +85,7 @@ export default defineComponent({
         return this.value
       },
       set(val: number): void {
-        if (this.propKey !== '') {
-          this.$emit(`update:${this.propKey}`, val)
-        } else {
-          this.$emit('update', val, this.name)
-        }
+        this.$emit('update', val, this.name)
         // The below line is necessary for value that would be rounded.
         // If a value is rounded and not changed compared to previous value after rounded,
         // the value in this component will not be synced with the rounded value (since not change happens).

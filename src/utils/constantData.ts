@@ -380,7 +380,7 @@ class ConstantData {
         size: i18n.global.tc('NN0815'),
         lineHeight: i18n.global.tc('NN0110'),
         fontSpacing: i18n.global.tc('NN0109'),
-        img: i18n.global.tc('NN0002', 2)
+        img: 'Image'
       }
 
       return array.map((name: string) => {
