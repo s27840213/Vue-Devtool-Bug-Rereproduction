@@ -99,6 +99,11 @@ export class MovingUtils {
     }
   }
 
+  updateProps({ _config, body }: { _config: { config: ILayer }, body: HTMLElement }) {
+    this._config = _config
+    this.body = body
+  }
+
   disableTouchEvent(e: TouchEvent) {
     if (this.isTouchDevice) {
       e.preventDefault()
@@ -112,7 +117,6 @@ export class MovingUtils {
     // this.initPageTranslate.y = pageUtils.getCurrPage.y
     setInitPageTranslate()
     this.initialPos = mouseUtils.getMouseAbsPoint(e)
-    console.log('initialPos', this.initialPos)
     this._moving = this.pageMoving.bind(this)
     this._moveEnd = this.pageMoveEnd.bind(this)
     eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -120,14 +124,15 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
-    console.log('page moving', this.randId)
-    this.pageMovingHandler(e)
+    window.requestAnimationFrame(() => {
+      console.log('page moving', this.randId)
+      this.pageMovingHandler(e)
+    })
   }
 
   pageMoveEnd(e: PointerEvent) {
     console.log('page move end')
-    eventUtils.removePointerEvent('pointerup', this._moveEnd)
-    eventUtils.removePointerEvent('pointermove', this._moving)
+    this.removeListener()
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
@@ -451,9 +456,8 @@ export class MovingUtils {
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    console.log(store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio)
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
-      (this._moveEnd as any)(e)
+      this.removeListener()
       return
     }
 
@@ -522,8 +526,7 @@ export class MovingUtils {
       return
     }
     this.isControlling = false
-    eventUtils.removePointerEvent('pointerup', this._moveEnd)
-    eventUtils.removePointerEvent('pointermove', this._moving)
+    this.removeListener()
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
 

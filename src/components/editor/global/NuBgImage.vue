@@ -51,7 +51,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -221,11 +221,12 @@ export default defineComponent({
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
       const x = image.posX - (aspectRatio < 1 ? offset : offset * aspectRatio)
       const y = image.posY - (aspectRatio > 1 ? offset : offset / aspectRatio)
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       return {
-        width: width * this.contentScaleRatio,
-        height: height * this.contentScaleRatio,
-        x: x * this.contentScaleRatio,
-        y: y * this.contentScaleRatio
+        width: width * _f,
+        height: height * _f,
+        x: x * _f,
+        y: y * _f
       }
     },
     mainStyles(): any {

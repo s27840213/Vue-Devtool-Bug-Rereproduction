@@ -119,7 +119,8 @@ export default defineComponent({
       initPinchPos: null as ICoordinate | null,
       tmpPinchScaleRatio: 100,
       handlePinchTimer: -1,
-      isHandlingEdgeReach: false
+      isHandlingEdgeReach: false,
+      movingUtils: null as unknown as MovingUtils
     }
   },
   created() {
@@ -225,6 +226,12 @@ export default defineComponent({
     })
 
     this.editorViewResizeObserver.observe(this.editorView as HTMLElement)
+
+    this.movingUtils = new MovingUtils({
+      _config: { config: {} as ILayer },
+      snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+      body: this.$refs.editorView as HTMLElement
+    })
   },
   beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
@@ -362,19 +369,25 @@ export default defineComponent({
         formatUtils.clearCopiedFormat()
       }
       if (ControlUtils.isClickOnController(e)) {
-        const movingUtils = new MovingUtils({
+        // const movingUtils = new MovingUtils({
+        //   _config: { config: layerUtils.getCurrLayer },
+        //   snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+        //   body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+        // })
+        this.movingUtils.removeListener()
+        this.movingUtils.updateProps({
           _config: { config: layerUtils.getCurrLayer },
-          snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
           body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
         })
-        movingUtils.moveStart(e)
+        this.movingUtils.moveStart(e)
       } else if (layerUtils.layerIndex === -1) {
-        const movingUtils = new MovingUtils({
-          _config: { config: {} as ILayer },
-          snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-          body: this.$refs.editorView as HTMLElement
-        })
-        movingUtils.pageMoveStart(e)
+        // const movingUtils = new MovingUtils({
+        //   _config: { config: {} as ILayer },
+        //   snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+        //   body: this.$refs.editorView as HTMLElement
+        // })
+        this.movingUtils.removeListener()
+        this.movingUtils.pageMoveStart(e)
       }
     },
     scrollUpdate() {
@@ -594,13 +607,8 @@ export default defineComponent({
               this.$store.commit('SET_pageScaleRatio', newScaleRatio)
             }
             store.commit('SET_isPageScaling', false)
-            const movingUtils = new MovingUtils({
-              _config: { config: {} as ILayer },
-              snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-              body: this.$refs.editorView as HTMLElement
-            })
-            movingUtils.pageMoveStart(e as any)
-            console.log('end')
+            this.movingUtils.pageMoveStart(e as any)
+            console.warn('pinching end')
           }
         }
       })
