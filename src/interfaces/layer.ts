@@ -107,7 +107,7 @@ export interface IText extends ILayer<ITextStyle> {
   contentEditable: boolean
   selection: ITiptapSelection,
   isAutoResizeNeeded: boolean,
-  isCompensated?: boolean
+  isCompensated?: boolean,
   isDraggingCursor: boolean,
 }
 
