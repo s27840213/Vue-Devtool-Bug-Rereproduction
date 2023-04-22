@@ -110,6 +110,7 @@ export interface IText extends ILayer<ITextStyle> {
   isCompensated?: boolean,
   inAutoRescaleMode: boolean,
   initScale: number,
+  isDraggingCursor: boolean,
 }
 
 export interface IShape extends ILayer<IStyle> {
