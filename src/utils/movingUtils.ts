@@ -32,6 +32,7 @@ export class MovingUtils {
   private body = undefined as unknown as HTMLElement
   private _moving = null as unknown
   private _moveEnd = null as unknown
+  private _cursorDragEnd = null as unknown
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
 
   private isTouchDevice = generalUtils.isTouchDevice()
@@ -226,6 +227,9 @@ export class MovingUtils {
 
         // if the text layer is already active and contentEditable
         if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar && !isMover) {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isDraggingCursor: true })
+          this._cursorDragEnd = this.onCursorDragEnd.bind(this)
+          eventUtils.addPointerEvent('pointerup', this._cursorDragEnd)
           return
         } else if (!this.isActive) {
           let targetIndex = this.layerIndex
@@ -612,9 +616,15 @@ export class MovingUtils {
     this.snapUtils.event.emit('clearSnapLines')
   }
 
+  onCursorDragEnd(e: MouseEvent | TouchEvent) {
+    layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isDraggingCursor: false })
+    eventUtils.removePointerEvent('pointerup', this._cursorDragEnd)
+  }
+
   removeListener() {
     this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
+    eventUtils.removePointerEvent('pointerup', this._cursorDragEnd)
   }
 }

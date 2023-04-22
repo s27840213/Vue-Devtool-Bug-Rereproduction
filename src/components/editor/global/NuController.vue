@@ -391,6 +391,9 @@ export default defineComponent({
     contentEditable(): boolean {
       return this.config.contentEditable
     },
+    isDraggingCursor(): boolean {
+      return this.config.isDraggingCursor
+    },
     isMoving(): boolean {
       return this.config.moving
     },
@@ -617,7 +620,7 @@ export default defineComponent({
         transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
-        ...(this.contentEditable ? { zIndex: 100 } : {})
+        ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
     textBodyStyle() {

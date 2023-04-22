@@ -108,6 +108,7 @@ export interface IText extends ILayer<ITextStyle> {
   selection: ITiptapSelection,
   isAutoResizeNeeded: boolean,
   isCompensated?: boolean
+  isDraggingCursor: boolean,
 }
 
 export interface IShape extends ILayer<IStyle> {
