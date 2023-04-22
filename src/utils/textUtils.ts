@@ -497,11 +497,8 @@ class TextUtils {
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
-          if (config.styles.writingMode.includes('vertical')) {
-            y = config.styles.y - (textHW.height - config.styles.height) / 2
-          } else {
-            x = config.styles.x - (textHW.width - config.styles.width) / 2
-          }
+          x = config.styles.x - (textHW.width - config.styles.width) / 2
+          y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
         LayerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit })
