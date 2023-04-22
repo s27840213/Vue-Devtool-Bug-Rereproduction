@@ -109,6 +109,7 @@ export interface IText extends ILayer<ITextStyle> {
   isAutoResizeNeeded: boolean,
   isCompensated?: boolean,
   isDraggingCursor: boolean,
+  isFlipping: boolean,
 }
 
 export interface IShape extends ILayer<IStyle> {

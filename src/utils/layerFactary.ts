@@ -302,6 +302,7 @@ class LayerFactary {
       isAutoResizeNeeded: false,
       isCompensated: true,
       isDraggingCursor: false,
+      isFlipping: false,
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles

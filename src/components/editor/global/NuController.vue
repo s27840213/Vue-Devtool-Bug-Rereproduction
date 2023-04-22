@@ -383,6 +383,9 @@ export default defineComponent({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
+    isFlipping(): boolean {
+      return this.config.isFlipping
+    },
     // isTextEditing(): boolean {
     //   // return !this.isControlling && this.contentEditable
     //   // @Test
@@ -630,7 +633,7 @@ export default defineComponent({
         userSelect: this.contentEditable ? 'text' : 'none',
         opacity: 1
       }
-      return !(this.isCurveText || this.isFlipped) ? textstyles : {
+      return !(this.isCurveText || this.isFlipped || this.isFlipping) ? textstyles : {
         width: 'auto',
         height: 'auto',
         position: 'absolute',

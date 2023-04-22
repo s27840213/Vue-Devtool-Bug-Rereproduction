@@ -110,6 +110,9 @@ export default defineComponent({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
+    isFlipping(): boolean {
+      return this.config.isFlipping
+    },
     isLocked(): boolean {
       return this.config.locked
     },
@@ -171,7 +174,7 @@ export default defineComponent({
     getOpacity() {
       const { active, contentEditable } = this.config
       if (active && !this.isLocked && !this.inPreview) {
-        if (this.isCurveText || this.isFlipped) {
+        if (this.isCurveText || this.isFlipped || this.isFlipping) {
           return contentEditable ? 0.2 : 1
         } else {
           return 0
