@@ -251,6 +251,9 @@ export default defineComponent({
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(async () => {
           await this.resizeCallback()
+          if (!this.isCurveText) {
+            generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
+          }
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawSvgBG()

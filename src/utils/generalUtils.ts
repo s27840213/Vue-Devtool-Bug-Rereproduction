@@ -1,3 +1,4 @@
+import { IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import router from '@/router'
 import store from '@/store'
@@ -8,6 +9,9 @@ import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 
 class GeneralUtils {
+  flags: { [key: string]: boolean }[] = []
+  flagsCallback: (() => void) | undefined = undefined
+
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get isSuperUser() { return (store.state as any).user.role === 0 }
   get browserInfo() {
@@ -418,6 +422,60 @@ class GeneralUtils {
       }
     }
     return true
+  }
+
+  resetFlags() {
+    this.flags = []
+  }
+
+  initializeFlags(layerType: string, pages?: IPage[], callback?: () => void) {
+    pages = pages ?? store.getters.getPages as IPage[]
+    const pageNum = pages.length
+    const layerIndexes = this.getlayerIndexes(pages, layerType)
+    this.resetFlags()
+    for (let i = 0; i < pageNum; i++) {
+      const pageArray = {} as { [key: string]: boolean }
+      for (let j = 0; j < layerIndexes[i].length; j++) {
+        pageArray[layerIndexes[i][j]] = false
+      }
+      this.flags.push(pageArray)
+    }
+    this.flagsCallback = callback
+    if (this.flags.every(pageFlags => Object.keys(pageFlags).length === 0)) {
+      this.flagsCallback && this.flagsCallback()
+      this.resetFlags()
+    }
+  }
+
+  setDoneFlag(pageIndex: number, layerIndex: number, subLayerIndex?: number) {
+    const key = `${layerIndex},${subLayerIndex ?? -1}`
+    if (!this.flags[pageIndex] || this.flags[pageIndex][key] === undefined) return
+    this.flags[pageIndex][key] = true
+    if (this.flags.every(pageFlags => Object.values(pageFlags).every(flag => flag))) {
+      this.flagsCallback && this.flagsCallback()
+      this.resetFlags()
+    }
+  }
+
+  getlayerIndexes(pages: IPage[], layerType: string): string[][] {
+    const textLayerIndexes = []
+    for (const page of pages) {
+      const indexes = []
+      for (const [index, layer] of page.layers.entries()) {
+        if (layer.type === layerType) {
+          indexes.push(`${index},-1`)
+        }
+        if (layer.type === 'group') {
+          for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
+            if (subLayer.type === layerType) {
+              indexes.push(`${index},${subIndex}`)
+            }
+          }
+        }
+      }
+      textLayerIndexes.push(indexes)
+    }
+    return textLayerIndexes
   }
 }
 

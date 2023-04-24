@@ -720,13 +720,13 @@ class TextUtils {
 
   async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
-    const { widthLimit, otherDimension } = await this.autoResizeCore(config, initSize)
+    const { widthLimit, otherDimension, loops } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
     const firstPText = config.paragraphs[0].spans.map(span => span.text).join('')
     if (router.currentRoute.value.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
-      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText}`)
+      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText} loops: ${loops}`)
     }
     if (limitDiff / initSize.widthLimit > 0.20) {
       return initSize.widthLimit
@@ -737,7 +737,8 @@ class TextUtils {
 
   async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<{
     widthLimit: number,
-    otherDimension: number
+    otherDimension: number,
+    loops: number
   }> {
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const scale = config.styles.scale
@@ -764,19 +765,21 @@ class TextUtils {
         if (minDiffWidLimit !== -1) {
           return {
             widthLimit: minDiffWidLimit,
-            otherDimension: minDiffDimension
+            otherDimension: minDiffDimension,
+            loops: Math.abs(direction)
           }
         } else {
           return {
             widthLimit: initSize.widthLimit,
-            otherDimension: originDimension
+            otherDimension: originDimension,
+            loops: Math.abs(direction)
           }
         }
       }
       prevDiff = currDiff
       if (autoDimension - originDimension > 5 * scale) {
         if (direction < 0) break
-        if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
+        if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
         widthLimit += scale
         direction += 1
         autoSize = await this.getTextHWAsync(config, widthLimit)
@@ -784,7 +787,7 @@ class TextUtils {
       }
       if (originDimension - autoDimension > 5 * scale) {
         if (direction > 0) break
-        if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
+        if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
         widthLimit -= scale
         direction -= 1
         autoSize = await this.getTextHWAsync(config, widthLimit)
@@ -794,7 +797,8 @@ class TextUtils {
     }
     return {
       widthLimit,
-      otherDimension: autoDimension
+      otherDimension: autoDimension,
+      loops: Math.abs(direction)
     }
   }
 
