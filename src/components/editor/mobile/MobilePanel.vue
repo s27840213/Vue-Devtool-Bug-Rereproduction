@@ -618,8 +618,12 @@ export default defineComponent({
     closeMobilePanel() {
       editorUtils.setShowMobilePanel(false)
     },
+    haederbarHeight () {
+      return document.querySelector('.mobile-editor .header-bar')?.clientHeight ?? 0
+    },
     initPanelHeight() {
-      return ((this.$el.parentElement as HTMLElement).clientHeight - this.userInfo.statusBarHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
+      if (this.halfSizeInInitState) return this.panelParentHeight() * 0.5
+      else return this.panelParentHeight() - (this.haederbarHeight() + 30)
     },
     currPanelHeight() {
       return (this.$refs.panel as HTMLElement).clientHeight
@@ -647,7 +651,7 @@ export default defineComponent({
       if (this.panelDragHeight < panelParentHeight * 0.25) {
         this.closeMobilePanel()
       } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
-        this.panelDragHeight = panelParentHeight
+        this.panelDragHeight = panelParentHeight - (this.haederbarHeight() + 30)
         this.$emit('panelHeight', this.panelDragHeight + 30) // 30 = 15 padding * 2
       } else {
         this.panelDragHeight = panelParentHeight * 0.5
@@ -689,7 +693,7 @@ export default defineComponent({
   box-sizing: border-box;
   z-index: setZindex(mobile-panel);
   border-radius: 10px 10px 0 0;
-  box-shadow: 0px -2px 5px setColor(gray-4, 0.5);
+  box-shadow: 0px -2px 5px rgba(60, 60, 60, 0.1);
 
   display: grid;
   grid-template-columns: 1fr;
