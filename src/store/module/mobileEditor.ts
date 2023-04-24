@@ -51,6 +51,9 @@ const getters: GetterTree<IMobileEditorState, unknown> = {
   },
   getShowMobilePanel(state: IMobileEditorState): boolean {
     return state.showMobilePanel
+  },
+  getIsPinchingEditor(state: IMobileEditorState): boolean {
+    return state.isPinchingEditor
   }
 }
 

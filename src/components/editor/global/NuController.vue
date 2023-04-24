@@ -1,5 +1,6 @@
 <template lang="pug">
 div(:layer-index="`${layerIndex}`"
+    :style="controllerRootStyles"
     class="nu-controller"
     ref="self")
   div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
@@ -188,7 +189,7 @@ import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -315,6 +316,13 @@ export default defineComponent({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor'
     }),
+    controllerRootStyles(): Record<string, number> {
+      if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
+        return { opacity: 0 }
+      } else {
+        return {}
+      }
+    },
     subLayer(): any {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
@@ -2281,6 +2289,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .nu-controller {
+  transition: opacity .2s;
   pointer-events: initial;
   &__line-hint {
     position: absolute;

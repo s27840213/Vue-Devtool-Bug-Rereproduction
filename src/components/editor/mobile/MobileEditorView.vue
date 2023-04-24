@@ -370,11 +370,6 @@ export default defineComponent({
         formatUtils.clearCopiedFormat()
       }
       if (ControlUtils.isClickOnController(e)) {
-        // const movingUtils = new MovingUtils({
-        //   _config: { config: layerUtils.getCurrLayer },
-        //   snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-        //   body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
-        // })
         this.movingUtils.removeListener()
         this.movingUtils.updateProps({
           _config: { config: layerUtils.getCurrLayer },
@@ -382,11 +377,6 @@ export default defineComponent({
         })
         this.movingUtils.moveStart(e)
       } else if (layerUtils.layerIndex === -1) {
-        // const movingUtils = new MovingUtils({
-        //   _config: { config: {} as ILayer },
-        //   snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-        //   body: this.$refs.editorView as HTMLElement
-        // })
         this.movingUtils.removeListener()
         this.movingUtils.pageMoveStart(e)
       }
@@ -524,12 +514,12 @@ export default defineComponent({
             }
             // console.log(this.tmpScaleRatio)
 
-            console.warn(this.initPagePos.x, this.initPagePos.y, page.x, page.y)
+            // console.warn(this.initPagePos.x, this.initPagePos.y, page.x, page.y)
             pageUtils.updatePagePos(layerUtils.pageIndex, {
               x: this.initPagePos.x - sizeDiff.width * translationRatio.x + movingTraslate.x,
               y: this.initPagePos.y - sizeDiff.height * translationRatio.y + movingTraslate.y
             })
-            console.log(this.initPagePos.x - sizeDiff.width * translationRatio.x + movingTraslate.x, this.initPagePos.y - sizeDiff.height * translationRatio.y + movingTraslate.y)
+            // console.log(this.initPagePos.x - sizeDiff.width * translationRatio.x + movingTraslate.x, this.initPagePos.y - sizeDiff.height * translationRatio.y + movingTraslate.y)
             break
           }
           case 'end': {
@@ -576,22 +566,17 @@ export default defineComponent({
                 setTimeout(() => {
                   this.$store.commit('SET_pageScaleRatio', 100)
                 }, 0)
-                console.warn(1)
               } else {
                 if (isReachLeftEdge) {
-                  console.warn(2)
                   pos.x = EDGE_WIDTH.x
                 }
                 if (isReachRightEdge) {
-                  console.warn(3)
                   pos.x = editorUtils.mobileSize.width - page.width * contentScaleRatio * newScaleRatio * 0.01 - EDGE_WIDTH.x
                 }
                 if (isReachTopEdge) {
-                  console.warn(4)
                   pos.y = EDGE_WIDTH.y
                 }
                 if (isReachBottomEdge) {
-                  console.warn(5)
                   pos.y = editorUtils.mobileSize.height - page.height * contentScaleRatio * newScaleRatio * 0.01 - EDGE_WIDTH.y
                 }
                 setTimeout(() => {
@@ -612,9 +597,10 @@ export default defineComponent({
               this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
               this.$store.commit('SET_pageScaleRatio', newScaleRatio)
             }
+
             store.commit('SET_isPageScaling', false)
-            this.movingUtils.pageMoveStart(e as any)
             console.warn('pinching end')
+            // this.movingUtils.pageMoveStart(e as any)
           }
         }
       })

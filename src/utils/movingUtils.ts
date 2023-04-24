@@ -116,6 +116,7 @@ export class MovingUtils {
     // this.initPageTranslate.x = pageUtils.getCurrPage.x
     // this.initPageTranslate.y = pageUtils.getCurrPage.y
     setInitPageTranslate()
+    this.removeListener()
     this.initialPos = mouseUtils.getMouseAbsPoint(e)
     this._moving = this.pageMoving.bind(this)
     this._moveEnd = this.pageMoveEnd.bind(this)
@@ -125,7 +126,7 @@ export class MovingUtils {
 
   pageMoving(e: PointerEvent) {
     window.requestAnimationFrame(() => {
-      console.log('page moving', this.randId)
+      // console.log('page moving', this.randId)
       this.pageMovingHandler(e)
     })
   }
@@ -136,7 +137,7 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
-    if ((store.state as any).mobileEditor.isPinchingEditor) return
+    if (store.getters['mobileEditor/getIsPinchingEditor']) return
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
     initPageTranslate.x = pageUtils.getCurrPage.x
@@ -178,28 +179,29 @@ export class MovingUtils {
     if (this.isTouchDevice && !this.config.locked) {
       this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
-      if (!this.dblTabsFlag && this.isActive) {
-        const touchtime = Date.now()
-        const interval = 500
-        const doubleTap = (e: PointerEvent) => {
-          e.preventDefault()
-          if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
-            /**
-             * This is the dbl-click callback block
-             */
-            if (this.getLayerType === LayerType.image) {
-              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-              eventUtils.emit(PanelEvent.switchTab, 'crop')
-            }
-            this.dblTabsFlag = true
-          }
-        }
-        this.eventTarget.addEventListener('pointerdown', doubleTap)
-        setTimeout(() => {
-          this.eventTarget.removeEventListener('pointerdown', doubleTap)
-          this.dblTabsFlag = false
-        }, interval)
-      }
+      // if (!this.dblTabsFlag && this.isActive) {
+      //   const touchtime = Date.now()
+      //   const interval = 500
+      //   const doubleTap = (e: PointerEvent) => {
+      //     e.preventDefault()
+      //     if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
+      //       /**
+      //        * This is the dbl-click callback block
+      //        */
+      //       if (this.getLayerType === LayerType.image) {
+      //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+      //         eventUtils.emit(PanelEvent.switchTab, 'crop')
+      //         console.log(1231312)
+      //       }
+      //       this.dblTabsFlag = true
+      //     }
+      //   }
+      //   this.eventTarget.addEventListener('pointerdown', doubleTap)
+      //   setTimeout(() => {
+      //     this.eventTarget.removeEventListener('pointerdown', doubleTap)
+      //     this.dblTabsFlag = false
+      //   }, interval)
+      // }
     }
     if (eventType === 'pointer') {
       const pointerEvent = event as PointerEvent
@@ -330,7 +332,7 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (eventUtils.checkIsMultiTouch(e)) {
+    if (eventUtils.checkIsMultiTouch(e) || store.getters['mobileEditor/getIsPinchingEditor']) {
       return
     }
     this.isControlling = true
@@ -513,8 +515,6 @@ export class MovingUtils {
     if (!isReachBottomEdge && !isReachTopEdge) {
       this.initialPos.y += offsetPos.y
     }
-    // this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
-    // this.initialPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {

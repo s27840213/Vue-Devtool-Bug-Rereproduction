@@ -1,13 +1,13 @@
+import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import { GetterTree, MutationTree } from 'vuex'
 import { IEditorState, ILayerInfo, LayerType } from '../types'
-import generalUtils from '@/utils/generalUtils'
-import layerUtils from '@/utils/layerUtils'
-import groupUtils from '@/utils/groupUtils'
-import { ICalculatedGroupStyle } from '@/interfaces/group'
-import frameUtils from '@/utils/frameUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import pageUtils from '@/utils/pageUtils'
 
 const SET_CONFIG = 'SET_CONFIG' as const
 const SET_BG_CONFIG = 'SET_BG_CONFIG' as const

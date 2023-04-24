@@ -13,6 +13,7 @@ div(class="nu-layer flex-center"
       :class="{'preserve3D': !isTouchDevice}"
       :style="layerStyles()"
       @pointerdown="onPointerDown($event)"
+      @tap="dblTap"
       @pointerup="onPointerUp($event)"
       @contextmenu.prevent
       @click.right.stop="onRightClick($event)"
@@ -58,9 +59,10 @@ import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 import DragUtils from '@/utils/dragUtils'
 import editorUtils from '@/utils/editorUtils'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -610,6 +612,16 @@ export default defineComponent({
       // if (this.isImgCtrl && this.imgCtrlConfig.id !== this.config.id) {
       //   imageUtils.setImgControlDefault()
       // }
+    },
+    dblTap(e: PointerEvent) {
+      doubleTapUtils.click(e, {
+        doubleClickCallback: () => {
+          if (this.getLayerType === LayerType.image) {
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+            eventUtils.emit(PanelEvent.switchTab, 'crop')
+          }
+        }
+      })
     },
     onPointerDown(e: PointerEvent) {
       if (this.isPinchingEditor) return
