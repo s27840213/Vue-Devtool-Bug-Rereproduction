@@ -71,14 +71,14 @@ import i18n from '@/i18n'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
-import paymentUtils from '@/utils/paymentUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapState } from 'vuex'
 
 export default defineComponent({
@@ -198,7 +198,7 @@ export default defineComponent({
       this.recordChange()
     },
     async onEffectClick(effect: IEffect): Promise<void> {
-      if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      if (!vivistickerUtils.checkPro(effect, 'text')) return
       if (effect.key !== this.currentStyle.name) {
         await this.setEffect({ effectName: effect.key })
         this.recordChange()

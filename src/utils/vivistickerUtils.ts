@@ -1,10 +1,11 @@
 import listApis from '@/apis/list'
+import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IIosImgData, IMyDesign, IMyDesignTag, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import { nextTick } from 'vue'
@@ -83,7 +84,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   ROUTER_CALLBACKS = [
     'loginResult',
     'getStateResult',
-    'setStateDone'
+    'setStateDone',
+    'subscribeInfo'
   ]
 
   VVSTK_CALLBACKS = [
@@ -96,7 +98,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getAssetResult',
     'uploadImageURL',
     'informWebResult',
-    'subscribeInfo',
     'subscribeResult'
   ]
 
@@ -130,6 +131,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   get userSettings(): IUserSettings {
     return store.getters['vivisticker/getUserSettings']
+  }
+
+  get isPaymentDisabled(): boolean {
+    return !this.checkVersion('1.26')
   }
 
   getUserInfoFromStore(): IUserInfo {
@@ -1061,11 +1066,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   openPayment(target?: IViviStickerProFeatures) {
+    if (this.isPaymentDisabled) {
+      this.showUpdateModal()
+      return
+    }
     store.commit('vivisticker/SET_fullPageConfig', { type: 'payment', params: { target } })
   }
 
   checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
-    const isPro = false
+    const isPro = store.getters['vivisticker/getIsSubscribed']
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)
       return false
@@ -1073,20 +1082,76 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return true
   }
 
-  subscribeInfo(data: { status: 'subscribed' | 'failed', expire_date: string, monthly: boolean, annually: boolean }) {
-    console.log(data)
-    const { monthly, annually, expire_date } = data
-    // store.commit('vivisticker/SET_expireDate', expire_date)
-    // store.commit('vivisticker/SET_prices', { monthly, annually })
+  subscribeInfo(data: ISubscribeInfo) {
+    console.log('subscribeInfo', data)
+    store.commit('vivisticker/SET_uuid', data.uuid)
+    if (data.complete === '0') {
+      this.registerSticker()
+    }
+    if (this.isPaymentDisabled) return
+    const { subscribe, monthly, annually, priceCurrency } = data
+    const currencyFormaters = {
+      TWD: (value: string) => `${value}元`,
+      USD: (value: string) => `$${(+value).toFixed(2)}`,
+      JPY: (value: string) => `¥${value}円(税込)`
+    } as { [key: string]: (value: string) => string }
+    if (Object.keys(currencyFormaters).includes(priceCurrency)) {
+      monthly.priceText = currencyFormaters[priceCurrency](monthly.priceValue)
+      annually.priceText = currencyFormaters[priceCurrency](annually.priceValue)
+    }
+
+    store.commit('vivisticker/UPDATE_payment', {
+      subscribe: subscribe === '1',
+      prices: {
+        currency: priceCurrency,
+        monthly: {
+          value: parseFloat(monthly.priceValue),
+          text: monthly.priceText
+        },
+        annually: {
+          value: parseFloat(annually.priceValue),
+          text: annually.priceText
+        }
+      }
+    })
   }
 
-  subscribeResult(data: { status: 'subscribed' | 'failed', expire_date: string }) {
-    console.log(data)
-    const { status, expire_date } = data
-    if (status === 'subscribed') {
-      // store.commit('vivisticker/SET_expireDate', expire_date)
-      store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
+  subscribeResult(data: ISubscribeResult) {
+    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if is timeout
+    console.log('subscribeResult', data)
+    if (this.isPaymentDisabled) return
+    if (data.reason) {
+      store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
+      return
     }
+    const { subscribe, reason } = data
+    if (!reason) {
+      store.commit('vivisticker/UPDATE_payment', {
+        subscribe: subscribe === '1',
+      })
+    }
+    store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
+    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
+  }
+
+  async registerSticker() {
+    const userInfo = this.getUserInfoFromStore()
+    if (!isV1_26(userInfo)) return
+    const response = await userApis.registerSticker(
+      userInfo.hostId,
+      store.getters['vivisticker/getUuid'],
+      parseInt(userInfo.device),
+      userInfo.country.toLocaleLowerCase(),
+      1
+    )
+    if (response.data.flag === 0) {
+      await this.setState('complete', { value: '1' })
+      this.sendAdEvent('register', {})
+    }
+  }
+
+  sendAdEvent(eventName: string, param: { [key: string]: any }) {
+    this.sendToIOS('SEND_AD_EVENT', { eventName, param })
   }
 
   async fetchLoadedFonts(): Promise<void> {
@@ -1123,6 +1188,57 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         noCloseIcon: true
       })
     }
+  }
+
+  showUpdateModal() {
+    let locale = this.getUserInfoFromStore().locale
+    if (!['us', 'tw', 'jp'].includes(locale)) {
+      locale = 'us'
+    }
+    const prefix = 'exp_' + locale + '_'
+    const modalInfo = Object.fromEntries(Object.entries(store.getters['vivisticker/getModalInfo']).map(
+      ([k, v]) => {
+        if (k.startsWith(prefix)) k = k.replace(prefix, '')
+        return [k, v as string]
+      })
+    )
+    const options = {
+      imgSrc: modalInfo.img_url,
+      noClose: false,
+      noCloseIcon: false,
+      backdropStyle: {
+        backgroundColor: 'rgba(24,25,31,0.3)'
+      },
+      cardStyle: {
+        backdropFilter: 'blur(10px)',
+        backgroundColor: 'rgba(255,255,255,0.9)'
+      }
+    }
+    modalUtils.setModalInfo(
+      modalInfo.title,
+      modalInfo.msg,
+      {
+        msg: modalInfo.btn_txt,
+        class: 'btn-black-mid',
+        style: {
+          color: '#F8F8F8'
+        },
+        action: () => {
+          const url = modalInfo.btn_url
+          if (url) { window.open(url, '_blank') }
+        }
+      },
+      {
+        msg: modalInfo.btn2_txt || '',
+        class: 'btn-light-mid',
+        style: {
+          border: 'none',
+          color: '#474A57',
+          backgroundColor: '#D3D3D3'
+        }
+      },
+      options
+    )
   }
 }
 

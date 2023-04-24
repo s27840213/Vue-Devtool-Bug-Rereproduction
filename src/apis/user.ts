@@ -125,6 +125,16 @@ export default {
       app,
     }
   }),
+  registerSticker: (host_id: string, uuid: string, device: number, country: string, app: number): AxiosPromise => axios('/register-sticker', {
+    method: 'POST',
+    data: {
+      host_id,
+      uuid,
+      device,
+      country,
+      app
+    }
+  }),
   fbLogin: (code: string, redirect_uri: string, locale: string): AxiosPromise => axios('/fb-login', {
     method: 'POST',
     data: {
