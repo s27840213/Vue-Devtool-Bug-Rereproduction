@@ -39,9 +39,9 @@ div(class="payment" v-touch @swipe="handleSwipe")
       template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(@tap="footerLink.action") {{ footerLink.title }}
-  div(class="payment__panel" :class="{close: !isPanelUp}" ref="panel")
+  div(class="payment__panel" :class="{close: !isPanelUp, disabled: pending}" ref="panel")
     div(class="payment__panel__chevron" @tap="togglePanel()" @swipeup="togglePanel(true)" @swipedown="togglePanel(false)")
-      svg-icon(iconName="chevron-up" iconWidth="14px" iconColor="white")
+      svg-icon(iconName="chevron-up" iconWidth="14px")
     div(class="payment__panel__title") {{ $t('STK0042') }}
     div(class="payment__panel__comparison")
       div(class="payment__panel__comparison__title first-column") {{ $t('STK0043') }}
@@ -438,6 +438,7 @@ export default defineComponent({
     column-gap: 10px;
     &.disabled {
       color: setColor(black-3);
+      pointer-events: none;
     }
     &__splitter {
       @include size(0px, 12px);
@@ -459,6 +460,13 @@ export default defineComponent({
     transition-property: transform, left, right, padding;
     transition-duration: 300ms;
     transition-timing-function: ease-in-out;
+    &.disabled {
+      color: setColor(black-4);
+      pointer-events: none;
+      .payment__panel__chevron > svg {
+        color: setColor(black-4);
+      }
+    }
     &.close {
       padding: 16px 0 0 0;
       left: v-bind(panelPadding);
@@ -475,7 +483,9 @@ export default defineComponent({
       background-color: setColor(black-3);
       border-radius: 100px;
       >svg {
+        color: white;
         transform: v-bind("isPanelUp ? 'rotate(180deg)' : 'none'");
+        transition: none;
       }
     }
     &__title {
