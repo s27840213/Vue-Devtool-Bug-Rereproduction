@@ -223,7 +223,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         }
       }
     } as { [key: string]: IPrices }
-    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[i18n.global.locale] ?? defaultPrices.us })
+    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[this.STANDALONE_USER_INFO.locale] ?? defaultPrices.us })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
