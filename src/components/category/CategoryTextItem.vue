@@ -38,7 +38,8 @@ export default defineComponent({
   },
   data() {
     return {
-      fallbackSrc: ''
+      fallbackSrc: '',
+      dragUtils: new DragUtils()
     }
   },
   computed: {
@@ -64,7 +65,7 @@ export default defineComponent({
     dragStart(e: DragEvent) {
       if (!paymentUtils.checkPro(this.item, 'pro-text')) return
       const img = this.$refs.img as HTMLImageElement
-      new DragUtils().itemDragStart(e, 'group', {
+      this.dragUtils.itemDragStart(e, 'group', {
         ...this.item
       }, img.src, { aspectRatio: img.naturalWidth / img.naturalHeight })
     },

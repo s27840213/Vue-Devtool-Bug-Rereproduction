@@ -110,7 +110,8 @@ export default defineComponent({
       scrollTop: {
         mainContent: 0,
         searchResult: 0
-      }
+      },
+      dragUtils: new DragUtils()
     }
   },
   computed: {
@@ -301,7 +302,7 @@ export default defineComponent({
     },
     standardTextDrag(e: DragEvent, config: { type: string, text: string }) {
       const { type: textType, text } = config
-      new DragUtils().textItemDragStart(e, 'standardText', {
+      this.dragUtils.textItemDragStart(e, 'standardText', {
         textType: textType.toLowerCase(),
         text,
         locale: this.$i18n.locale,

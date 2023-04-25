@@ -245,7 +245,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .header-bar {
-  @include size(100%);
+  height: 26px;
   position: relative;
   background-color: setColor(nav);
   display: flex;
@@ -253,7 +253,6 @@ export default defineComponent({
   justify-content: space-between;
   padding-left: 16px;
   padding-right: 16px;
-  box-sizing: border-box;
   z-index: setZindex("header");
   -webkit-touch-callout: none;
   -webkit-user-select: none;
