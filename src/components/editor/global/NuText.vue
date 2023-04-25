@@ -260,6 +260,8 @@ export default defineComponent({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       await this.drawTextBg()
+      this.textFillBg = textFillUtils.drawTextFill(this.config)
+      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
     },
     async resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24

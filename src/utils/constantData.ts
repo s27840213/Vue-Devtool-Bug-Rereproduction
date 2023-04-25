@@ -380,7 +380,8 @@ class ConstantData {
         size: i18n.global.tc('NN0815'),
         lineHeight: i18n.global.tc('NN0110'),
         fontSpacing: i18n.global.tc('NN0109'),
-        img: 'Image'
+        img: 'Image',
+        customImg: 'Image',
       }
 
       return array.map((name: string) => {
@@ -393,7 +394,7 @@ class ConstantData {
         if (name.toLocaleLowerCase().endsWith('color')) {
           option.type = 'color'
         }
-        if (name === 'img') option.type = 'img'
+        if (name === 'customImg') option.type = 'img'
         switch (name) {
           case 'endpoint':
             option.type = 'select';
@@ -569,13 +570,21 @@ class ConstantData {
         options: [],
       }, {
         key: 'custom-fill-img',
-        label: 'fill-img',
+        label: '客製填滿',
         plan: 1,
-        options: toOptions(['img', 'xOffset200', 'yOffset200', 'size', 'opacity'], 'fill-img')
+        options: [...toOptions(['customImg', 'xOffset200', 'yOffset200', 'size', 'opacity'])]
       }, {
-        key: 'fill-img',
-        label: 'fill-img',
-        options: toOptions(['img', 'xOffset200', 'yOffset200', 'size', 'opacity'], 'fill-img')
+        key: 'doodle1',
+        label: '塗鴉',
+        options: [{
+          type: 'select',
+          key: 'img',
+          label: 'Image',
+          select: [
+            { key: '230424180325123sYxIzL8o', label: '' },
+            { key: '2304241803251250gC6SnPO', label: '' },
+          ]
+        }, ...toOptions(['xOffset200', 'yOffset200', 'size', 'opacity'])]
       }])
     }]
     return categories

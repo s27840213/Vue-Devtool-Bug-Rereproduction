@@ -8,7 +8,7 @@ import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import { omit } from 'lodash'
+import { find, omit } from 'lodash'
 
 class TextFill {
   effects = {} as Record<string, Record<string, unknown>>
@@ -18,6 +18,7 @@ class TextFill {
 
   getDefaultEffects() {
     const defaultOptions = {
+      customImg: null,
       xOffset200: 0,
       yOffset200: 0,
       size: 100,
@@ -25,24 +26,70 @@ class TextFill {
       focus: false,
     } as const
     return {
-      none: {},
+      none: {
+        customImg: null
+      },
       'custom-fill-img': {
-        img: null,
         ...defaultOptions
       },
-      'fill-img': {
-        img: null,
+      doodle1: {
+        img: '',
         ...defaultOptions
-      }
+      },
     }
+  }
+
+  getImg(effect: { img?: string, customImg?: IAssetPhoto | IPhotoItem | null }): IAssetPhoto | IPhotoItem | null {
+    if (effect.img) {
+      const myfileImgs = [{
+        width: 3240,
+        height: 1080,
+        id: '230424180325123sYxIzL8o',
+        assetIndex: 1481660,
+        preview: { width: 3240, height: 128 },
+        urls: {
+          prev: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/prev',
+          full: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/full',
+          larg: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/larg',
+          original: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/original',
+          midd: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/midd',
+          smal: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/smal',
+          tiny: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/tiny'
+        }
+      }, {
+        width: 3240,
+        height: 1080,
+        id: '2304241803251250gC6SnPO',
+        assetIndex: 1481661,
+        preview: { width: 3240, height: 128 },
+        urls: {
+          prev: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/prev',
+          full: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/full',
+          larg: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/larg',
+          original: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/original',
+          midd: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/midd',
+          smal: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/smal',
+          tiny: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/tiny'
+        }
+      }] as IAssetPhoto[]
+      return find(myfileImgs, ['id', effect.img]) ?? null
+    }
+    return effect.customImg ?? null
+  }
+
+  imgToSrc(img: IAssetPhoto | IPhotoItem | null): string {
+    // const img = effect.img ?? effect.customImg
+    if (!img) return ''
+    return isIAssetPhoto(img)
+      ? img.urls.original
+      : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 1000)
   }
 
   calcTextFillVar(config: IText) {
     const textFill = config.styles.textFill as ITextFillConfig
-    const img = textFill.img as IAssetPhoto | IPhotoItem
-    const imgSrc = isIAssetPhoto(img)
-      ? img.urls.original
-      : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 1000)
+    const img = this.getImg(textFill)
+    const imgSrc = this.imgToSrc(img)
+    if (!img) return {}
     const layerScale = config.styles.scale
     const divWidth = config.styles.width / layerScale
     const divHeight = config.styles.height / layerScale
@@ -58,9 +105,10 @@ class TextFill {
 
   async convertTextEffect(config: IText): Promise<Record<string, string | number>[][]> {
     const { textFill, textShape } = config.styles
-    if (textFill.name === 'none' || !textFill.img) return []
+    if (textFill.name === 'none') return []
 
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
+    if (!imgSrc) return []
 
     const myRect = new Rect()
     await myRect.init(config)
@@ -104,7 +152,7 @@ class TextFill {
         webkitBackgroundClip: 'text',
         // To fix a Safari bug that the element border of BG text clip will appear abnormally,
         // make border of element to be transparent.
-        maskImage: `url(${require('@/assets/img/png/text-fill-mask-image.png')})`,
+        maskImage: `url(${require('@/assets/img/svg/text-fill-mask-image.svg')})`,
         maskSize: '100% 100%',
         // About span color
         opacity: textFill.opacity / 100,
@@ -133,9 +181,10 @@ class TextFill {
 
   drawTextFill(config: IText): CustomElementConfig | null {
     const textFill = config.styles.textFill
-    if (textFill.name === 'none' || !textFill.img || !textFill.focus) return null
+    if (textFill.name === 'none' || !textFill.focus) return null
 
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
+    if (!imgSrc) return null
 
     return {
       tag: 'img',
@@ -145,7 +194,6 @@ class TextFill {
         left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200) * -1}px`,
         top: `${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200) * -1}px`,
         opacity: textFill.opacity / 200,
-        // opacity: textFill.opacity / 100,
       }
     }
   }
@@ -155,18 +203,18 @@ class TextFill {
     Object.assign(textFill, { name: textFill.name || effectName })
     if (textFill.name === 'none') return
 
-    const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textFillShare') ?? {}) as Record<string, string>
-    const newShareAttrs = { opacity: textFill.opacity }
-    const newEffect = { opacity: shareAttrs.opacity }
+    // const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textFillShare') ?? {}) as Record<string, string>
+    // const newShareAttrs = { opacity: textFill.opacity }
+    // const newEffect = { opacity: shareAttrs.opacity }
 
     // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
     if (!effectName) {
-      Object.assign(shareAttrs, newShareAttrs)
-      localStorageUtils.set('textEffectSetting', 'textFillShare', shareAttrs)
+      // Object.assign(shareAttrs, newShareAttrs)
+      // localStorageUtils.set('textEffectSetting', 'textFillShare', shareAttrs)
     } else {
       let effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
-      Object.assign(effect, newEffect)
-      effect = omit(effect, ['color', 'pColor', 'bColor'])
+      // Object.assign(effect, newEffect)
+      effect = omit(effect, ['customImg'])
       localStorageUtils.set('textEffectSetting', effectName, effect)
     }
   }
@@ -191,9 +239,9 @@ class TextFill {
         localStorageUtils.set('textEffectSetting', effect, newTextFill)
         // this.syncShareAttrs(textFill, null)
       } else { // Switch to other effect.
-        // this.syncShareAttrs(textFill, effect)
+        this.syncShareAttrs(newTextFill, effect)
         const localAttrs = localStorageUtils.get('textEffectSetting', effect)
-        Object.assign(newTextFill, defaultAttrs, localAttrs, attrs, { name: effect })
+        Object.assign(newTextFill, defaultAttrs, localAttrs, attrs, { name: effect, customImg: oldTextFill.customImg })
       }
 
       store.commit('UPDATE_specLayerData', {

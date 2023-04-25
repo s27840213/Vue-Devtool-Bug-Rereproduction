@@ -268,7 +268,7 @@ class LayerFactary {
         textEffect: { name: 'none' },
         textBg: { name: 'none' },
         textShape: { name: 'none' },
-        textFill: { name: 'none' },
+        textFill: { name: 'none', customImg: null },
       },
       paragraphs: [
         {

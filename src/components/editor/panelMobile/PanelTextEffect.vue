@@ -11,17 +11,17 @@ div(class="panel-text-effect")
               @click="pushHistory(category.name)")
       span(class="body-3") {{category.label}}
   //- To choose effect, ex: hollow, splice or echo.
-  div(v-if="state === 'effects' && currEffect !== null"
+  div(v-if="state === 'effects'"
       class="panel-text-effect__effects")
     div(v-for="effect in effectList"
         :key="`${currCategoryName}-${effect.key}`"
-        :class="{ 'selected': currEffect.key === effect.key }"
+        :class="{ 'selected': currEffect?.key === effect.key }"
         @click="onEffectClick(effect)")
       svg-icon(:iconName="effectIcon(currCategory, effect).name"
               :iconWidth="effectIcon(currCategory, effect).size"
               class="panel-text-effect__effects--icon" iconColor="gray-5")
       pro-item(v-if="effect.plan" theme="roundedRect")
-      div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
+      div(v-if="currEffect?.key === effect.key && effect.key !== 'none'"
           class="panel-text-effect__effects--more")
         svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
   //- To set effect optoin, ex: distance, color.
@@ -36,7 +36,7 @@ div(class="panel-text-effect")
           class="panel-text-effect__select")
         div(v-for="sel in option.select"
             :key="sel.key"
-            :class="{'selected': currentStyle.endpoint === sel.key }"
+            :class="{'selected': currentStyle[option.key] === sel.key }"
             @click="handleSelectInput(option.key, sel.key)")
           svg-icon(:iconName="`${option.key}-${sel.key}`"
             iconWidth="24px")
@@ -59,6 +59,10 @@ div(class="panel-text-effect")
         div {{option.label}}
         color-btn(:color="colorParser(currentStyle[option.key])"
                 size="24px" @click="openColorPanel(option.key)")
+      //- Option type img
+      //- div(v-if="option.type === 'img'"
+      //-     class="panel-text-effect__img")
+      //-   img(:src="")
     span(class="panel-text-effect__reset label-mid"
         @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
@@ -97,8 +101,8 @@ export default defineComponent({
     }
   },
   computed: {
-    currCategoryName(): 'shadow'|'bg'|'shape' {
-      return this.panelHistory[this.panelHistory.length - 1] as 'shadow'|'bg'|'shape'
+    currCategoryName(): 'shadow'|'bg'|'shape'|'fill' {
+      return this.panelHistory[this.panelHistory.length - 1] as 'shadow'|'bg'|'shape'|'fill'
     },
     effectList(): IEffect[] | null {
       if (!this.currCategory) return null

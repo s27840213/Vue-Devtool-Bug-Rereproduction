@@ -78,7 +78,8 @@ export function isITextLetterBg(object: ITextBg): object is ITextLetterBg {
 
 export interface ITextFillConfig {
   name: 'fill-img'
-  img: IAssetPhoto | IPhotoItem | null
+  customImg: IAssetPhoto | IPhotoItem | null
+  img: string
   xOffset200: number
   yOffset200: number
   size: number
@@ -86,7 +87,7 @@ export interface ITextFillConfig {
   focus: boolean
 }
 
-export type ITextFill = ITextFillConfig | { name: 'none' }
+export type ITextFill = ITextFillConfig | { name: 'none', customImg: IAssetPhoto | IPhotoItem | null }
 
 export function isITextFillConfig(object: ITextFill): object is ITextFillConfig {
   return object && object.name && object.name !== 'none'

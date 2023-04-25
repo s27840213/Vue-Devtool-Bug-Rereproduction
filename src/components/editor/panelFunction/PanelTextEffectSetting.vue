@@ -34,8 +34,8 @@ div(class="text-effect-setting mt-25")
             svg-icon(v-for="sel in option.select"
               :key="`${option.key}-${sel.key}`"
               :iconName="`${option.key}-${sel.key}`"
-              iconWidth="24px"
-              :class="{'selected': currentStyle.endpoint === sel.key }"
+              iconWidth="36px"
+              :class="{'selected': currentStyle[option.key] === sel.key }"
               @click="handleSelectInput(option.key, sel.key)")
           //- Option type range
           template(v-if="option.type === 'range'")
@@ -63,6 +63,13 @@ div(class="text-effect-setting mt-25")
             :color="colorParser(currentStyle[option.key])"
             :active="option.key === colorTarget && settingTextEffect"
             @click="handleColorModal(currCategoryName, option.key)")
+          //- Option type img
+          div(v-if="option.type === 'img'"
+              class="text-effect-setting-options__field--img"
+              @click="chooseImg(option.key)")
+            img(:src="currentStyleImg")
+            div
+            svg-icon(iconName="replace" iconColor="white" iconWidth="16px")
         div(class="text-effect-setting-options__field")
           span
           span(class="text-effect-setting-options__field--reset"
@@ -125,12 +132,15 @@ export default defineComponent({
         bg: styles.textBg,
         shape: styles.textShape,
         fill: styles.textFill,
-      }[this.currCategoryName] as Record<string, string>
+      }[this.currCategoryName] as Record<string, string> // Type incorrect
+    },
+    currentStyleImg(): string {
+      return textFillUtils.imgToSrc(textFillUtils.getImg(this.currentStyle))
     },
     settingTextEffect(): boolean {
       return colorUtils.currEvent === 'setTextEffectColor' &&
         editorUtils.showColorSlips
-    }
+    },
   },
   mounted() {
     colorUtils.on(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
@@ -223,15 +233,11 @@ export default defineComponent({
     },
     async onEffectClick(effect: IEffect): Promise<void> {
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
-      if (effect.key === 'custom-fill-img') {
-        popupUtils.openPopup('replace', undefined, {
-          selectImg: (img: IAssetPhoto|IPhotoItem) => {
-            this.setEffect({ effect: { img } })
-          }
-        })
-      }
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
+      if (effect.key === 'custom-fill-img' && !this.currentStyleImg) {
+        this.chooseImg('customImg')
+      }
     },
     async handleSelectInput(key: string, newVal: string) {
       await this.setEffect({ effect: { [key]: newVal } })
@@ -247,13 +253,22 @@ export default defineComponent({
       this.setEffect({ effect: newVal })
     },
     async setEffectFocus(focus: boolean) {
-      if (this.currentStyle.name === 'curve' || this.currentStyle.name.includes('fill-img')) {
+      if (this.currentStyle.name === 'curve' ||
+        ['custom-fill-img', 'doodle1'].includes(this.currentStyle.name)) {
         await this.setEffect({ effect: { focus } })
         if (!focus) this.recordChange()
       }
     },
     handleColorUpdate(color: string): void {
       this.setEffect({ effect: { [this.colorTarget]: color } })
+    },
+    chooseImg(key: string) {
+      popupUtils.openPopup('replace', undefined, {
+        selectImg: (img: IAssetPhoto|IPhotoItem) => {
+          this.setEffect({ effect: { [key]: img } })
+          this.recordChange()
+        }
+      })
     },
     colorParser(color: string) {
       return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
@@ -317,7 +332,7 @@ export default defineComponent({
     display: grid;
     gap: 10px;
     width: 100%;
-    padding: 10px;
+    padding: 10px 8px;
     background: #fff;
   }
   &-options__field {
@@ -342,16 +357,44 @@ export default defineComponent({
       border-radius: 3px;
     }
     &--select {
-      svg + svg {
-        margin-left: 8px
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px 7.25px;
+      > svg {
+        cursor: pointer;
       }
       &>svg.selected {
         box-sizing: border-box;
         border: 1px solid setColor(blue-1);;
       }
     }
-    &--range {
+    &--range, &--img, &--select {
       grid-column: 1/3;
+    }
+    &--img {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      border-radius: 2px;
+      overflow: hidden;
+      cursor: pointer;
+      > img {
+        width: 100%;
+        max-height: 120px;
+        object-fit: cover;
+      }
+      > div { // dark mask on img
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.2);
+      }
+      > svg { // replace button
+        position: absolute;
+      }
     }
     &--reset {
       color: setColor(blue-1);
