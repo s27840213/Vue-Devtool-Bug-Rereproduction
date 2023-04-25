@@ -63,6 +63,7 @@ export interface IPrices {
 }
 
 export interface IPaymentPending {
+  info: boolean,
   purchase: boolean,
   restore: boolean
 }

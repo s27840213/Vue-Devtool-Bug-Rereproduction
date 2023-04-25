@@ -134,6 +134,7 @@ const getDefaultState = (): IViviStickerState => ({
       },
     },
     pending: {
+      info: true,
       purchase: false,
       restore: false
     }

@@ -57,7 +57,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
           svg-icon(v-if="comparison.pro" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
           template(v-else) -
   Transition(name="fade")
-    div(v-if="pending.restore" class="payment__spinner")
+    div(v-if="pending.info || pending.restore" class="payment__spinner")
       svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
 </template>
 

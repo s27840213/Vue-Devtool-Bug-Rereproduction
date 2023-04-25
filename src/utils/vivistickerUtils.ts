@@ -1114,6 +1114,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         }
       }
     })
+    store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
   subscribeResult(data: ISubscribeResult) {
