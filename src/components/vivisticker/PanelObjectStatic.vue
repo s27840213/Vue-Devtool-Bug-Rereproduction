@@ -1,7 +1,7 @@
 <template lang="pug">
-div(class="panel-static" :class="{'in-category': isInCategory}")
+div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar': showSearchBar}")
   //- Search bar
-  search-bar(v-if="!isInCategory && !showFav"
+  search-bar(v-if="showSearchBar"
     class="panel-static__searchbar"
     :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
     clear
@@ -9,18 +9,23 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
     vivisticker="dark"
     :color="{close: 'black-5', search: 'black-5'}"
     :isFavorite="keywordIsFavaorites"
+    v-model:expanded="isSearchBarExpanded"
     @search="handleSearch"
-    @favorite="toggleFavoritesTag")
-  tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
-      :tags="tags" theme="dark" @search="handleSearch")
+    @favorite="toggleFavoritesTag"
+    @cancel="handleSearch('')")
+  tags(v-if="tags && tags.length"
+      class="panel-static__tags"
+      :tags="tags"
+      :scrollLeft="tagScrollLeft"
+      theme="dark"
+      @search="handleSearch"
+      @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray" :class="{invisible: !item.show}"
                 :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="item.loadMore")
     template(#before)
       div(class="panel-static__top-item")
-      tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" :style="{marginTop: 0}"
-        :tags="tags" :scrollLeft="tagScrollLeft" theme="dark" @search="handleSearch" @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
       //- Search result empty msg
       div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
       //- Empty favorites view
@@ -36,9 +41,9 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
         :isFavorite="isFavorite")
         template(v-slot:action)
           div(class="panel-static__list-rows-action")
-            svg-icon(v-if="isFavorite !== undefined"
+            svg-icon(v-if="isFavorite !== undefined" :class="{favorite: isFavorite}"
                     :iconName="isFavorite ? 'favorites-fill' : 'heart'"
-                    iconWidth="24px" iconColor="gray-2" @click="toggleFaovoritesCategoryByTitle(title)")
+                    iconWidth="24px" iconColor="black-5" @click="toggleFaovoritesCategoryByTitle(title)")
             span(@click="item.categorySearch && item.categorySearch(title)") {{$t('NN0082')}}
         template(v-slot:preview="{ item }")
           category-object-item(class="panel-static__item"
@@ -105,7 +110,8 @@ export default defineComponent({
         favoritesContent: 0,
         favoritesSearchResult: 0
       },
-      tagScrollLeft: 0
+      tagScrollLeft: 0,
+      isSearchBarExpanded: false,
     }
   },
   computed: {
@@ -135,6 +141,9 @@ export default defineComponent({
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
+    },
+    showSearchBar(): boolean {
+      return !this.isInCategory && !this.showFav
     },
     showAllRecently(): boolean {
       return this.isTabShowAllRecently('object')
@@ -283,6 +292,9 @@ export default defineComponent({
       }
     })
   },
+  deactivated() {
+    if (!this.keyword) this.isSearchBarExpanded = false
+  },
   watch: {
     keyword(newVal: string) {
       if (!newVal) {
@@ -334,6 +346,7 @@ export default defineComponent({
         this.resetSearch({ keepSearchResult: true })
         if (keyword) {
           this.getTagContent({ keyword })
+          this.isSearchBarExpanded = true
         }
       }
     },
@@ -423,11 +436,8 @@ export default defineComponent({
   flex-direction: column;
   color: setColor(white);
   overflow: hidden;
-  &__searchbar {
-    margin-bottom: 14px;
-  }
   &__tags {
-    margin: 14px 0 18px 0;
+    margin-top: 14px;
     color: setColor(black-5);
   }
   &__item {
@@ -439,6 +449,27 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(3, 1fr);
   }
+  &.with-search-bar {
+    height: calc(100% + 56px); // 42px (serach bar height) + 14px (margin-top of tags) = 56px
+    .panel-static__tags {
+      min-height: 42px;
+      background-color: setColor(black-2);
+      transition: transform 200ms ease-in-out, clip-path 200ms ease-in-out;
+      transform: v-bind("isSearchBarExpanded ? 'none' : 'translate(0, -56px)'");
+      clip-path: v-bind("isSearchBarExpanded ? 'inset(0 0 0 0)' : 'inset(0 42px 0 0)'");
+    }
+    .category-list {
+      transition: transform 200ms ease-in-out;
+      transform: v-bind("isSearchBarExpanded ? 'none' : 'translateY(-56px)'");
+    }
+    &::v-deep .vue-recycle-scroller__item-wrapper {
+      margin-bottom: 56px;
+    }
+    &::v-deep .tags__flex-container-mobile {
+      width: max-content;
+      margin-right: 42px;
+    }
+  }
   &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;
   }
@@ -446,9 +477,13 @@ export default defineComponent({
     display: flex;
     align-items: center;
     > svg {
+      transition: none;
       margin-right: 20px;
       padding-right: 20px;
       border-right: 1px solid setColor(gray-2);
+      &.favorite {
+        color: #FC5757;
+      }
     }
   }
   &__favorites-empty {

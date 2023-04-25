@@ -2,7 +2,7 @@
 div(class="panel-objects")
   div(v-show="!isInCategory" class="panel-objects__nav" :style="navStyles")
     template(v-if="isShowSearchBar && !isFavorites")
-      search-bar(class="panel-objects__nav__searchbar"
+      search-bar(class="panel-objects__nav__searchbar" ref="searchbar"
           :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
           clear
           :defaultKeyword="keywordLabel"
@@ -11,7 +11,7 @@ div(class="panel-objects")
           :isFavorite="keywordIsFavaorites"
           @search="handleSearch"
           @favorite="toggleFavoritesTag")
-      Nubtn(theme="secondary" size="sm" @click="handleCancel" :style="{height: 'fit-content', backgroundColor: '#D3D3D3', borderRadius: '10px', padding: '8px 8px'}") {{ "Cancel" }}
+      div(class="panel-objects__nav__btn-cancel body-SM" @click="handleCancel") {{ "Cancel" }}
     template(v-else)
       div(v-show="!isFavorites" class="panel-objects__nav__icon")
         svg-icon(class="pointer"
@@ -48,7 +48,6 @@ import SearchBar from '@/components/SearchBar.vue'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import Nubtn from '../../global/Nubtn.vue'
 import PanelObject from '../PanelObject.vue'
 import PanelObjectGifsUs from './PanelObjectGifs.vue'
 import PanelObjectStaticUs from './PanelObjectStatic.vue'
@@ -58,7 +57,6 @@ export default defineComponent({
   extends: PanelObject,
   components: {
     SearchBar,
-    Nubtn,
     PanelObjectStaticUs,
     PanelObjectGifsUs
   },
@@ -143,7 +141,12 @@ export default defineComponent({
       else if (this.isGifs) this.toggleFavoriteGif({ tags: `${this.nextTagContent.keyword}:${this.nextTagContent.type}` })
     },
     showSearchBar() {
-      if (!this.isInCategory) this.isShowSearchBar = true
+      if (!this.isInCategory) {
+        this.isShowSearchBar = true
+        this.$nextTick(() => {
+          (this.$refs.searchbar as any).focus()
+        })
+      }
     },
   }
 })
@@ -170,6 +173,10 @@ export default defineComponent({
     }
     &__searchbar {
       width: 100%;
+    }
+    &__btn-cancel {
+      padding: 8px;
+      color: setColor(gray-7)
     }
   }
   &__favorites-tabs {
