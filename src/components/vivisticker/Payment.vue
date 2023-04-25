@@ -120,7 +120,7 @@ export default defineComponent({
         {
           key: 'restorePurchase',
           title: this.$t('STK0045'),
-          action: () => this.handleSubscribe('restore', 30000)
+          action: () => this.handleSubscribe('restore', 5000)
         },
         {
           key: 'termsOfService',
