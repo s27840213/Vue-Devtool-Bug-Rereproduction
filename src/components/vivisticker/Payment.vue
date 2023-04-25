@@ -22,7 +22,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
     div(class="payment__content__plans")
       div(v-for="btnPlan in btnPlans" class="payment__btn-plan"
         :key="btnPlan.key"
-        :class="{selected: btnPlan.key === planSelected, disabled: pending}"
+        :class="{selected: btnPlan.key === planSelected, disabled: pending.purchase}"
         @tap="handleBtnPlanClick(btnPlan.key)")
         svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
         div(v-else class="payment__btn-plan__radio")
@@ -32,14 +32,14 @@ div(class="payment" v-touch @swipe="handleSwipe")
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub") {{ btnPlan.subTitle }}
           div(class="payment__btn-plan__content__price") {{ btnPlan.price }}
             div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
-    div(class="payment__btn-subscribe" :class="{pending}" @touchend="handleSubscribe(planSelected)")
-      svg-icon(v-if="pending" class="spiner" iconName="spiner" iconWidth="20px")
+    div(class="payment__btn-subscribe" :class="{pending: pending.purchase}" @touchend="handleSubscribe(planSelected)")
+      svg-icon(v-if="pending.purchase" class="spinner" iconName="spiner" iconWidth="20px")
       div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
-    div(class="payment__footer" :class="{disabled: pending}")
+    div(class="payment__footer" :class="{disabled: pending.purchase}")
       template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(@tap="footerLink.action") {{ footerLink.title }}
-  div(class="payment__panel" :class="{close: !isPanelUp, disabled: pending}" ref="panel")
+  div(class="payment__panel" :class="{close: !isPanelUp, disabled: pending.purchase}" ref="panel")
     div(class="payment__panel__chevron" @tap="togglePanel()" @swipeup="togglePanel(true)" @swipedown="togglePanel(false)")
       svg-icon(iconName="chevron-up" iconWidth="14px")
     div(class="payment__panel__title") {{ $t('STK0042') }}
@@ -56,11 +56,14 @@ div(class="payment" v-touch @swipe="handleSwipe")
         div(class="payment__panel__comparison__item")
           svg-icon(v-if="comparison.pro" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
           template(v-else) -
+  Transition(name="fade")
+    div(v-if="pending.restore" class="payment__spinner")
+      svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
 </template>
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
-import { IPrices } from '@/interfaces/vivisticker'
+import { IPaymentPending, IPrices } from '@/interfaces/vivisticker'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
@@ -153,11 +156,14 @@ export default defineComponent({
     ...mapState({
       windowSize: 'windowSize',
       isTablet: 'isTablet',
-      isLandscape: 'isLandscape',
+      isLandscape: 'isLandscape'
+    }),
+    ...mapState('vivisticker', {
+      pending: (state: any) => state.payment.pending as IPaymentPending,
     }),
     ...mapGetters({
       prices: 'vivisticker/getPrices',
-      pending: 'vivisticker/getIsPaymentPending',
+      isPaymentPending: 'vivisticker/getIsPaymentPending',
     }),
     txtBtnSubscribe() {
       return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
@@ -205,7 +211,7 @@ export default defineComponent({
     },
     panelPadding() {
       return `${this.containerPadding + (this.isTablet ? this.containerWidth * 0.028 : 24)}px`
-    },
+    }
   },
   methods: {
     ...mapMutations({
@@ -218,12 +224,12 @@ export default defineComponent({
       this.planSelected = key
     },
     handleSubscribe(option: string, timeout?: number) {
-      if (this.pending) return
+      if (this.isPaymentPending) return
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
       if (timeout) {
         setTimeout(() => {
-          this.setPaymentPending({ purchase: false, restore: false })
+          this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: false })
         }, timeout)
       }
     },
@@ -417,9 +423,9 @@ export default defineComponent({
     &:active {
       opacity: 0.8;
     }
-    .spiner {
+    .spinner {
       color: #D9D9D9;
-      animation: rotation 0.5s infinite linear;
+      animation: translate-rotate 0.5s infinite linear;
       position: absolute;
       left: 50%;
       top: 50%;
@@ -533,14 +539,50 @@ export default defineComponent({
       justify-content: left;
     }
   }
+  &__spinner {
+    @include size(120px);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(46, 46, 46, 0.5);
+    border-radius: 10px;
+    &::before {
+      content: "";
+      @include size(100vw, 100vh);
+      position: absolute;
+      background-color: setColor(gray-1);
+      opacity: 0.3;
+    }
+    .spinner {
+      color: #D9D9D9;
+      animation: rotate 0.5s infinite linear;
+    }
+  }
 }
 
-@keyframes rotation {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
+.fade {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.2s;
   }
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+  }
+}
 
-  100% {
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes translate-rotate {
+  to {
     transform: translate(-50%, -50%) rotate(360deg);
   }
 }
