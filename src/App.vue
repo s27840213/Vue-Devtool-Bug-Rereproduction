@@ -6,12 +6,9 @@ div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
   link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
   link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
-  //- div(class="coordinate" ref="coordinate")
-  //-   div(class="coordinate__val coordinate__width")
-  //-     span {{coordinateWidth}}px
-  //-   div(class="coordinate__val coordinate__height")
-  //-     span {{coordinateHeight}}px
-  router-view
+  div(class="main-content")
+    router-view
+    home-footer-tabs(v-if="showHomeFooterTabs")
   div(class="popup-area")
     popup
     res-info(v-show="currSelectedResInfo.type"
@@ -44,6 +41,7 @@ div(id="app" :style="appStyles()")
 
 <script lang="ts">
 import DebugTool from '@/components/componentLog/DebugTool.vue'
+import HomeFooterTabs from '@/components/homepage/HomeFooterTabs.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import Popup from '@/components/popup/Popup.vue'
@@ -60,7 +58,8 @@ export default defineComponent({
     Popup,
     ResInfo,
     ModalCard,
-    DebugTool
+    DebugTool,
+    HomeFooterTabs
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -101,11 +100,15 @@ export default defineComponent({
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
       userInfo: picWVUtils.appendModuleName('getUserInfo'),
-      browserInfo: 'user/getBrowserInfo'
+      browserInfo: 'user/getBrowserInfo',
+      inBrowserMode: 'webView/getInDevMode'
     }),
     currLocale(): string {
       return localeUtils.currLocale()
     },
+    showHomeFooterTabs (): boolean {
+      return ['Home', 'TemplateCenter', 'MyDesign', 'Settings'].includes(this.$route.name as string) && !this.inBrowserMode
+    }
   },
   methods: {
     ...mapMutations('text', {
@@ -150,7 +153,7 @@ export default defineComponent({
 <style lang="scss">
 @use "@/assets/scss/main.scss";
 
-#app {
+#app{
   @include size(100%, 100%);
   position: relative;
   max-height: 100%;
@@ -166,34 +169,13 @@ export default defineComponent({
   touch-action: none;
 }
 
-// Debug used class, won't be released in production
-.coordinate {
-  border-right: 1px solid red;
-  border-bottom: 1px solid red;
-  opacity: 0.5;
-  box-sizing: border-box;
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: setZindex(coordinate);
-  &__val {
-    position: absolute;
-    color: red;
-  }
-
-  &__width {
-    bottom: 5px;
-    left: 50%;
-
-    transform: translate(0, -50%);
-  }
-  &__height {
-    top: 50%;
-    right: 5px;
-    transform: translate(-50%, 0);
-  }
+.main-content {
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0,1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
 }
+
 .popup-area {
   @include size(100%, 100%);
   position: absolute;
