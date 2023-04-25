@@ -174,6 +174,7 @@ export default defineComponent({
       const prices = this.prices as IPrices
       const currency = prices.currency
       const price = round(prices.annually.value / 12, currency === 'TWD' || currency === 'JPY' ? 0 : 2)
+      if (isNaN(price)) return ''
       switch (currency) {
         case 'TWD':
           return `${price}元 / 月`
