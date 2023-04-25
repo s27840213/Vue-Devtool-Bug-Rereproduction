@@ -29,7 +29,7 @@ import generalUtils from '@/utils/generalUtils'
 import ImageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -274,7 +274,7 @@ export default defineComponent({
           height: `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`,
           // For controll pointer-events from parent, please don't add any pointer-events: initial to layer component.this.contentScaleRatio * this.$store.state.pageScaleRatio *
           // ...((this.contentScaleRatio !== 1 || this.config.styles.scale) && { transform: `scale(${1 / this.contentScaleRatio / this.config.styles.scale * this.$store.state.pageScaleRatio * 0.01})` }),
-          transform: `scale(${this.$store.state.pageScaleRatio / 100})`
+          // transform: `scale(${this.$store.state.pageScaleRatio / 100})`
         }
       }
       return {}

@@ -129,7 +129,6 @@ class EditorUtils {
       pageUtils.updatePagePos(pageIndex, pos)
       // @TODO: the initPos should be updated as the page size is updated
       pageUtils.updatePageInitPos(pageIndex, pos)
-      console.log(pos, editorUtils.mobileSize.height, page.height, this.contentScaleRatio)
       return contentScaleRatio
     }
   }

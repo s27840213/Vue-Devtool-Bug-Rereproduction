@@ -368,6 +368,11 @@ export default defineComponent({
           ...this.transformStyle
         }
       )
+      if (this.primaryLayer?.type === 'frame' && this.config.type === 'image') {
+        styles.transform += `scale(${this.$store.state.pageScaleRatio / 100})`
+        styles.width = `${this.config.styles.width * this.contentScaleRatio * this.scaleRatio * 0.01}px`
+        styles.height = `${this.config.styles.height * this.contentScaleRatio * this.scaleRatio * 0.01}px`
+      }
       if (!this.isImgCtrl && !this.inFrame && !this.$isTouchDevice() && !this.useMobileEditor) {
         styles.transform += `translateZ(${this.config.styles.zindex}px)`
       }
@@ -406,6 +411,7 @@ export default defineComponent({
     },
     frameClipStyles(): any {
       return {
+        ...(this.primaryLayer?.type === 'frame' && this.config.type === 'image' && { transform: `scale(${100 / this.scaleRatio})` }),
         fill: '#00000000',
         stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
         strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
@@ -932,13 +938,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .nu-layer {
   touch-action: none;
-  // position: absolute;
-  // pointer-events: initial;
-  // top: 0;
-  // left: 0;
-  // display: flex;
-  // width: 100px;
-  // height: 100px;
+  transform-origin: 0 0;
   position: absolute;
   top: 0;
   left: 0;
