@@ -5,7 +5,7 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IIosImgData, IMyDesign, IMyDesignTag, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import { nextTick } from 'vue'
@@ -185,6 +185,46 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       locale = localeUtils.getBrowserLang()
     }
     this.STANDALONE_USER_INFO.locale = locale
+  }
+
+  setDefaultPrices() {
+    const defaultPrices = {
+      tw: {
+        currency: 'TWD',
+        monthly: {
+          value: 140,
+          text: '140元'
+        },
+        annually: {
+          value: 799,
+          text: '799元'
+        }
+      },
+      us: {
+        currency: 'USD',
+        monthly: {
+          value: 4.99,
+          text: '$4.99'
+        },
+        annually: {
+          value: 26.90,
+          text: '$26.90'
+        }
+      },
+      jp: {
+        currency: 'JPY',
+        monthly: {
+          value: 600,
+          text: '¥600円(税込)'
+        },
+        annually: {
+          value: 3590,
+          text: '¥3590円(税込)'
+        }
+      }
+    } as { [key: string]: IPrices }
+    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[i18n.global.locale] ?? defaultPrices.us })
+    store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
   addDesignDisabled() {

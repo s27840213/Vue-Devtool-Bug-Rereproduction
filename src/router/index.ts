@@ -104,6 +104,7 @@ const router = createRouter({
         if (standalone) {
           vivistickerUtils.enterStandaloneMode()
           vivistickerUtils.setDefaultLocale()
+          vivistickerUtils.setDefaultPrices()
         }
         await vivistickerUtils.fetchDebugModeEntrance()
         await vivistickerUtils.fetchLoadedFonts()

@@ -1,4 +1,3 @@
-import i18n from '@/i18n'
 import { IAsset } from '@/interfaces/module'
 import { IMyDesign, IPayment, IPaymentPending, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
@@ -45,42 +44,6 @@ const EDITOR_BGS = [
   '#2E2E2E',
   '#F4F5F7'
 ]
-
-const DEFAULT_PRICES = {
-  tw: {
-    currency: 'TWD',
-    monthly: {
-      value: 140,
-      text: '140元'
-    },
-    annually: {
-      value: 799,
-      text: '799元'
-    }
-  },
-  us: {
-    currency: 'USD',
-    monthly: {
-      value: 4.99,
-      text: '$4.99'
-    },
-    annually: {
-      value: 26.90,
-      text: '$26.90'
-    }
-  },
-  jp: {
-    currency: 'JPY',
-    monthly: {
-      value: 600,
-      text: '¥600円(税込)'
-    },
-    annually: {
-      value: 3590,
-      text: '¥3590円(税込)'
-    }
-  }
-} as { [key: string]: IPrices }
 
 const getDefaultState = (): IViviStickerState => ({
   userInfo: vivistickerUtils.getDefaultUserInfo(),
@@ -252,7 +215,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
     return state.loadedFonts
   },
   getPrices(state: IViviStickerState): IPrices {
-    if (state.isStandaloneMode) return DEFAULT_PRICES[i18n.global.locale] ?? DEFAULT_PRICES.us
     return state.payment.prices
   },
   getIsPaymentPending(state) {
