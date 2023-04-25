@@ -100,6 +100,7 @@ export default defineComponent({
     this.isDestroyed = true
   },
   mounted() {
+    console.log(this.page.contentScaleRatio)
     this.resizeAfterFontLoaded()
   },
   computed: {
@@ -153,8 +154,10 @@ export default defineComponent({
   methods: {
     textWrapperStyle(): Record<string, string> {
       return {
-        width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`,
+        width: '100%',
+        height: '100%',
+        // width: `${this.config.styles.width / this.config.styles.scale}px`,
+        // height: `${this.config.styles.height / this.config.styles.scale}px`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
         ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
@@ -194,14 +197,14 @@ export default defineComponent({
       const textBg = this.config.styles.textBg
       const span = p.spans[sIndex]
       const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
-      return Object.assign(tiptapUtils.textStylesRaw(span.styles),
+      return Object.assign(tiptapUtils.textStylesRaw(span.styles, this.page.contentScaleRatio),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
         textEffectStyles,
         isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},
       )
     },
     pStyle(styles: any) {
-      return _.omit(tiptapUtils.textStylesRaw(styles), [
+      return _.omit(tiptapUtils.textStylesRaw(styles, this.page.contentScaleRatio), [
         'text-decoration-line', '-webkit-text-decoration-line'
       ])
     },

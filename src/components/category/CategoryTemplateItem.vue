@@ -17,7 +17,9 @@ div(class="category-template-item" :style="itemStyle")
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
+import editorUtils from '@/utils/editorUtils'
 import GeneralUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
@@ -131,6 +133,12 @@ export default defineComponent({
         AssetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
       } : (resize?: any) => {
         AssetUtils.addAsset(this.item as any, resize)
+          .then(() => {
+            console.log(1111)
+            if (this.$isTouchDevice()) {
+              editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+            }
+          })
         GeneralUtils.fbq('track', 'AddToWishlist', {
           content_ids: [this.item.id]
         })

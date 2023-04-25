@@ -188,31 +188,6 @@ export default defineComponent({
         }
       })
       editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
-
-      // const editorView = this.$refs.editorView as HTMLElement
-      // const rect = editorView.getBoundingClientRect()
-      // pageUtils.originEditorSize.width = rect.width
-      // pageUtils.originEditorSize.height = rect.height
-
-      // pageUtils.pageCenterPos = {
-      //   x: rect.width * 0.5,
-      //   y: rect.height * 0.5
-      // }
-
-      // let card = this.$refs.card as HTMLElement | HTMLElement[]
-      // if (Array.isArray(card)) card = card[0]
-      // const cardRect = card.getBoundingClientRect()
-      // const padding = +card.style.padding.slice(0, -2)
-      // pageUtils.pageEventPosOffset.x = cardRect.x + padding
-      // pageUtils.pageEventPosOffset.y = cardRect.y + padding
-
-      // pageUtils.originPageY = (pageUtils.originEditorSize.height - (pageUtils.getCurrPage.width * (pageUtils.scaleRatio * 0.01))) * 0.5 - padding
-      // pageUtils.getPages.forEach((_, i) => {
-      //   pageUtils.updatePagePos(i, {
-      //     x: 0,
-      //     y: pageUtils.originPageY
-      //   })
-      // })
     }
 
     this.$nextTick(() => {
@@ -249,9 +224,6 @@ export default defineComponent({
         this.cardHeight = this.editorView?.clientHeight
       })
     }
-    // currCardIndex(newVal) {
-    //   editorUtils.handleContentScaleRatio(newVal)
-    // }
   },
 
   computed: {

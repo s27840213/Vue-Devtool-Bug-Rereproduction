@@ -87,7 +87,7 @@ class EditorUtils {
 
     const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
 
-    if (!this.mobileSize.height || this.mobileSize.width) {
+    if (!this.mobileSize.height || !this.mobileSize.width) {
       const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
         this.setMobilePhysicalData({
@@ -129,6 +129,7 @@ class EditorUtils {
       pageUtils.updatePagePos(pageIndex, pos)
       // @TODO: the initPos should be updated as the page size is updated
       pageUtils.updatePageInitPos(pageIndex, pos)
+      console.log(pos, editorUtils.mobileSize.height, page.height, this.contentScaleRatio)
       return contentScaleRatio
     }
   }

@@ -92,16 +92,6 @@ export default defineComponent({
     eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {
-    if (this.$isTouchDevice()) {
-      // const el = this.$refs['mobile-editor__content'] as HTMLElement
-      // editorUtils.setMobilePhysicalData({
-      //   size: {
-      //     width: el.clientWidth,
-      //     height: el.clientHeight,
-      //   }
-      // })
-      // editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
-    }
     // const pz = new PinchZoom(el, {
     //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)
     // })

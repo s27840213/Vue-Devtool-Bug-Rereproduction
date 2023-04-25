@@ -372,7 +372,7 @@ export default defineComponent({
       }
     },
     textStyles(styles: any) {
-      const textStyles = CssConveter.convertFontStyle(styles)
+      const textStyles = CssConveter.convertFontStyle(styles, this.contentScaleRatio)
       Object.assign(textStyles, {
         'caret-color': this.config.contentEditable && !this.isControlling ? '' : '#00000000'
       })
