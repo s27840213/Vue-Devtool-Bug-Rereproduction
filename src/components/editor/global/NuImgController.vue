@@ -10,9 +10,10 @@ div(class="nu-img-controller")
     div(v-for="(scaler, index) in controlPoints.scalers"
         class="controller-point"
         :key="`scaler-${index}`"
-        :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
+        :style="_cursorStyles(scaler, index)"
         @pointerdown.prevent.stop="$isTouchDevice() ? null : scaleStart($event)"
         @touchstart="$isTouchDevice() ? null : disableTouchEvent($event)")
+        //- :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
     template(v-if="$isTouchDevice()" )
       div(v-for="(scaler, index) in controlPoints.scalerTouchAreas"
           class="controller-point"
@@ -121,13 +122,13 @@ export default defineComponent({
       getPage: 'getPage'
     }),
     styles(): any {
-      const zindex = (this.layerIndex + 1) * 1000
       const pos = this.imgControllerPosHandler()
+      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : (100 / this.scaleRatio)
       return {
-        transform: `translate(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
-        height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`,
+        transform: `translate(${pos.x * _f}px, ${pos.y * _f}px) rotate(${this.config.styles.rotate}deg)`,
+        width: `${this.config.styles.imgWidth * _f}px`,
+        height: `${this.config.styles.imgHeight * _f}px`,
+        outline: `${2 * (this.scaleRatio * 0.01)}px solid #7190CC`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
@@ -202,13 +203,13 @@ export default defineComponent({
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
     controllerStyles() {
-      const zindex = 0
+      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : (100 / this.scaleRatio)
       return {
-        transform: `translate(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate(${this.config.styles.x * _f}px, ${this.config.styles.y * _f}px) rotate(${this.config.styles.rotate}deg)`,
         // transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.width * this.contentScaleRatio}px`,
-        height: `${this.config.styles.height * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`
+        width: `${this.config.styles.width * _f}px`,
+        height: `${this.config.styles.height * _f}px`,
+        outline: `${2 * (100 / this.scaleRatio * _f)}px solid #7190CC`
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -307,7 +308,7 @@ export default defineComponent({
         height: (this.getImgHeight - this.config.styles.height * _layerScale) * 0.5
       }
 
-      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * 1 / this.contentScaleRatio) : (100 / this.scaleRatio)
+      const _f = this.$isTouchDevice() ? (100 / this.scaleRatio / this.contentScaleRatio) : (100 / this.scaleRatio)
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
       offsetPos.x = (offsetPos.x * _layerScale) * _f
@@ -374,7 +375,7 @@ export default defineComponent({
 
       const angleInRad = this.angleInRad
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 1 / this.contentScaleRatio * this.scaleRatio * 0.01 : undefined)
+      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 100 / this.scaleRatio / this.contentScaleRatio : undefined)
       if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
         const primaryScale = currLayer.styles.scale
         diff.offsetX /= primaryScale
@@ -473,6 +474,17 @@ export default defineComponent({
 
       eventUtils.removePointerEvent('pointerup', this.scaleEnd)
       eventUtils.removePointerEvent('pointermove', this.scaling)
+    },
+    _cursorStyles(scaler: any, index: number) {
+      const cursorIndex = this.getLayerRotate >= 0 ? (index + Math.floor(this.getLayerRotate / 45)) % 8
+        : (index + Math.ceil(this.getLayerRotate / 45) + 8) % 8
+      return {
+        ...scaler.styles,
+        width: `${scaler.styles.w * this.scaleRatio * 0.01}px`,
+        height: `${scaler.styles.h * this.scaleRatio * 0.01}px`,
+        cursor: this.controlPoints.cursors[cursorIndex],
+        pointerEvents: this.forRender ? 'none' : 'initial'
+      }
     },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8

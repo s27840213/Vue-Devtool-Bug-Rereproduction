@@ -11,6 +11,8 @@ export interface IScaler {
 }
 
 export interface IResizer {
+  w?: number
+  h?: number
   width: string
   height: string
   top?: string

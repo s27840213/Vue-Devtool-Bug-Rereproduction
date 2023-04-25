@@ -116,6 +116,8 @@ class Controller {
       {
         cursor: 0,
         styles: {
+          w: scalerSize,
+          h: scalerSize,
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
           left: '0',
@@ -130,6 +132,8 @@ class Controller {
       {
         cursor: 2,
         styles: {
+          w: scalerSize,
+          h: scalerSize,
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
           // transform: `translate(50%,-50%) scale(${contentScaleRatio})`,
@@ -144,6 +148,8 @@ class Controller {
       {
         cursor: 4,
         styles: {
+          w: scalerSize,
+          h: scalerSize,
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
           // transform: `translate(50%,50%) scale(${contentScaleRatio})`,
@@ -158,6 +164,8 @@ class Controller {
       {
         cursor: 6,
         styles: {
+          w: scalerSize,
+          h: scalerSize,
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
           // transform: `translate(-50%,50%) scale(${contentScaleRatio})`,
@@ -171,7 +179,7 @@ class Controller {
       }
     ] as {
       cursor: number
-      styles: Record<string, string>
+      styles: Record<string, string | number>
       scalerSize: number
     }[]
   }
@@ -182,6 +190,8 @@ class Controller {
         type: 'H',
         cursor: 7,
         styles: {
+          w: resizerShort,
+          h: resizerLong,
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           left: '0',
@@ -194,6 +204,8 @@ class Controller {
         type: 'H',
         cursor: 3,
         styles: {
+          w: resizerShort,
+          h: resizerLong,
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           right: '0',
@@ -206,6 +218,8 @@ class Controller {
         type: 'V',
         cursor: 5,
         styles: {
+          w: resizerLong,
+          h: resizerShort,
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           bottom: '0',
@@ -215,6 +229,8 @@ class Controller {
         }
       },
       {
+        w: resizerLong,
+        h: resizerShort,
         type: 'V',
         cursor: 1,
         styles: {
@@ -244,6 +260,8 @@ class Controller {
       cornerRotaters: this.getCornerRatater(scalerSize * 4 * scaleRatio),
       lineEnds: [
         {
+          w: scalerSize,
+          h: scalerSize,
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
           left: '0',
@@ -252,6 +270,8 @@ class Controller {
           borderRadius: '50%'
         },
         {
+          w: scalerSize,
+          h: scalerSize,
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
           transform: `translate(50%,-50%) scale(${scale})`,
