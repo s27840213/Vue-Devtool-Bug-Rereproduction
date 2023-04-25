@@ -64,6 +64,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
 import { IPaymentPending, IPrices } from '@/interfaces/vivisticker'
+import networkUtils from '@/utils/networkUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
@@ -224,6 +225,10 @@ export default defineComponent({
       this.planSelected = key
     },
     handleSubscribe(option: string, timeout?: number) {
+      if (!networkUtils.check()) {
+        networkUtils.notifyNetworkError()
+        return
+      }
       if (this.isPaymentPending) return
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
