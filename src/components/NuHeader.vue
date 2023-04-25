@@ -67,17 +67,12 @@ div(class="nu-header" :style="rootStyles")
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
           @click="closeSearchPage")
-      svg-icon(v-if="!isShowSearchPage"
-        :iconName="'menu'"
-        :iconWidth="'25px'"
-        :iconColor="'gray-1'"
-        @click="openMenu")
   slot
-  transition(name="slide-x-right")
-    div(v-if="isShowMenu"
-        class="nu-header__menu popup-window")
-      mobile-menu(@closeMenu="() => { isShowMenu = false }"
-        v-click-outside="() => { isShowMenu = false }")
+  //- transition(name="slide-x-right")
+  //-   div(v-if="isShowMenu"
+  //-       class="nu-header__menu popup-window")
+  //-     mobile-menu(@closeMenu="() => { isShowMenu = false }"
+  //-       v-click-outside="() => { isShowMenu = false }")
   div(v-if="isShowSearchPage"
     class="nu-header__search-mobile")
     search-bar(class="search"
@@ -92,7 +87,6 @@ div(class="nu-header" :style="rootStyles")
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
-import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import store from '@/store'
@@ -106,7 +100,6 @@ export default defineComponent({
   components: {
     SearchBar,
     PopupAccount,
-    MobileMenu,
     Avatar,
     Url
   },
@@ -125,7 +118,6 @@ export default defineComponent({
   data() {
     return {
       isAccountPopup: false,
-      isShowMenu: false,
       isShowSearchPage: false
     }
   },
@@ -174,9 +166,6 @@ export default defineComponent({
         this.$emit('search', keyword)
       }
       this.goToPage('TemplateCenter', keyword)
-    },
-    openMenu() {
-      this.isShowMenu = true
     },
     closeSearchPage() {
       this.isShowSearchPage = false

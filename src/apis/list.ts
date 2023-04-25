@@ -1,8 +1,5 @@
 import axios from '@/apis'
-import {
-  IListServiceParams,
-  IListServiceResponse
-} from '@/interfaces/api'
+import { IListServiceParams, IListServiceResponse } from '@/interfaces/api'
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
 import authToken from './auth-token'
@@ -25,6 +22,7 @@ class ListService {
       ver: params.cache ? store.getters['user/getVerApi'] : null,
       // [2022.01.19] uncached: font, layout
       all_theme: params.all_theme,
+      ...(params.shuffle === 1 && { shuffle: params.shuffle }),
       // If admin and url have 'app=1', bring app:1 to api.
       ...store.getters['user/isAdmin'] && /app=1/.test(window.location.href) ? { app: 1 } : {}
     }

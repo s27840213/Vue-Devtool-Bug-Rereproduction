@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="hashtag-row")
-  div(class="hashtag-row__title") {{ list.title }}
+  div(v-if="list.title" class="hashtag-row__title") {{ list.title }}
   div(class="hashtag-row__tags")
     div(class="hashtag-row__tags__tag"
         :class="{'selected': selected.length === 0}"

@@ -1,9 +1,10 @@
 <template lang="pug">
 div(class="list")
-  div(class="list-title text-H5")
+  div(class="list-title" :class="inBrowserMode ? 'text-H5' : 'text-H6'")
     span(class="list-title__text text-gray-1") {{title}}
     router-link(v-if="type !== 'theme'"
-      class="list-title__more body-MD text-gray-2"
+      class="list-title__more text-gray-2"
+      :class="inBrowserMode ? 'body-MD' : 'body-SM'"
       :to="moreLink")
       span {{$t('NN0082')}}
   div(class="list-content")
@@ -20,14 +21,25 @@ div(class="list")
         iconWidth="25px"
         iconColor="gray-3")
     div(class="list-content-items"
+      :style="itemContainerStyles"
       @scroll.passive="updateIcon"
       ref="items")
       div(v-if="isLoading")
         svg-icon(iconName="loading"
           iconWidth="50px"
           iconColor="gray-3")
+      template(v-else-if="type==='theme' && !inBrowserMode")
+        div(v-for="item in themeData"
+          :key="item.id"
+          class="list-content-items__app-theme-item")
+          router-link(:to="themeRouteInfo(item)")
+            img(class="list-content-items__theme-item-preset"
+              :src="item.url.replace('v2','v3')"
+              @error="imgOnerror"
+              @click="openProductPageNotification(item)")
+          span(class="body-XS text-gray-1") {{item.title}}
       //- type theme
-      template(v-else-if="type === 'theme'")
+      template(v-else-if="type === 'theme' && inBrowserMode")
         div(class="list-content-items__theme-item")
           btn-new-design(v-slot="slotProps")
             img(class="list-content-items__theme-item-new pointer"
@@ -39,7 +51,7 @@ div(class="list")
           class="list-content-items__theme-item")
           router-link(:to="themeRouteInfo(item)")
             img(class="list-content-items__theme-item-preset"
-              :src="item.url"
+              :src="item.url.replace('v2','v3')"
               @error="imgOnerror"
               @click="openProductPageNotification(item)")
           span(class="body-XS text-gray-1") {{item.title}}
@@ -90,6 +102,18 @@ export default defineComponent({
     },
     theme: {
       type: String
+    },
+    gridMode: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * used only for template
+     * plz see https://www.notion.so/vivipic/Vivipic-35c05fc6c7e04d509ab7eb7a0f393fe4
+     */
+    shuffle: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -101,22 +125,23 @@ export default defineComponent({
       moreLink: '',
       fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
       themeData: [] as Itheme[],
-      templateData: [] as IAssetTemplate[],
-      templateTitle: {
-        '1,2': this.$t('NN0368'),
-        3: this.$t('NN0026'),
-        8: this.$tc('NN0151', 2, { media: 'Facebook' }),
-        6: this.$t('NN0028'),
-        5: this.$t('NN0027'),
-        7: this.$t('NN0369'),
-        9: this.$t('NN0370')
-      } as Record<string, string>
+      templateData: [] as IAssetTemplate[]
     }
   },
   computed: {
     ...mapGetters({
-      mydesignData: 'design/getAllDesigns'
+      mydesignData: 'design/getAllDesigns',
+      inBrowserMode: 'webView/getInDevMode'
     }),
+    itemContainerStyles() {
+      return this.gridMode ? {
+        display: 'grid',
+        gridAutoColumns: '72px',
+        columnGap: '8px',
+        gridAutoFlow: 'column',
+        gridTemplateRows: '1fr'
+      } : {}
+    }
   },
   created() {
     switch (this.type) {
@@ -138,12 +163,13 @@ export default defineComponent({
         this.getTamplate({
           keyword: 'group::0;;order_by::popular',
           theme: this.theme,
+          shuffle: this.shuffle === true ? 1 : 0,
           cache: true
         }).then((response) => {
           this.templateData = response.data.content[0].list
           this.isLoading = false
         })
-        this.title = this.templateTitle[this.theme!]
+        this.title = themeUtils.getThemeTitleById(this.theme as string)
         this.moreLink = `/templates?themes=${this.theme}`
         break
     }
@@ -206,12 +232,16 @@ export default defineComponent({
       picWVUtils.openOrGoto(this.templateUrl(item))
     },
     templateImgStyle(match_cover: IAssetTemplate['match_cover']): Record<string, string> {
-      const height = this.theme === '3' ? 284
+      let height = this.theme === '3' ? 284
         : this.theme === '7' ? 320
           : 160
+      if (!this.inBrowserMode) {
+        height *= 2 / 3
+      }
+      const aspectRatio = match_cover.width / match_cover.height
       return {
         height: `${height}px`,
-        width: `${match_cover.width / match_cover.height * height}px`
+        width: `${height * aspectRatio}px`
       }
     },
     themeRouteInfo(theme: Itheme) {
@@ -243,6 +273,10 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   padding: 8px;
+
+  &__text {
+    text-align: left;
+  }
   &__more {
     text-decoration: none;
   }
@@ -269,7 +303,8 @@ export default defineComponent({
   @include no-scrollbar;
   display: flex;
   align-items: center;
-  overflow: auto;
+  overflow-x: scroll;
+  overflow-y: hidden;
   scroll-behavior: smooth;
   &__theme-item {
     display: flex;
@@ -280,6 +315,27 @@ export default defineComponent({
       transition: all 0.2s ease-in-out;
       box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
       transform: translate(0, -5px);
+    }
+  }
+  &__app-theme-item {
+    display: grid;
+    grid-template-rows: 1fr 46px;
+    grid-template-columns: 1fr;
+    text-align: center;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: bottom;
+    }
+
+    span {
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      text-overflow: ellipsis;
     }
   }
   &__mydesign-item {

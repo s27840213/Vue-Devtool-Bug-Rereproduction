@@ -2,7 +2,7 @@
 div(class="home")
   nu-header(v-header-border)
   div(class="home-content")
-    div(class="home-top")
+    div(v-if="inBrowserMode" class="home-top")
       div(class="home-top-text")
         span(class="home-top-text__title" v-html="$t('NN0464')")
         span(class="home-top-text__description") {{$t('NN0465')}}
@@ -13,33 +13,38 @@ div(class="home")
       iframe(title="Vivipic" class="home-top__yt"
         :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
         frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
-      router-link(:to="`/editor?type=new-design-size&width=1080&height=1080`"
+      router-link(v-if="inBrowserMode" :to="`/editor?type=new-design-size&width=1080&height=1080`"
           class="home-top__button rounded btn-primary-sm btn-LG")
         span {{$t('NN0391')}}
+      hashtag-category-row(v-if="!inBrowserMode"
+        class="home-list__hashtag"
+        :list="{title: '', list: [{name: 'Test1'}, {name: 'Test2'}, {name: 'Test3'}]}"
+        :defaultSelection="['Test1']")
     div(class="home-list")
       scroll-list(v-if="!isMobile || isLogin"
+        :gridMode="!inBrowserMode"
         type="theme" @openSizePopup="openSizePopup()")
-      scroll-list(v-if="isLogin"
+      scroll-list(v-if="isLogin && inBrowserMode"
         type="mydesign")
       template(v-if="isLogin")
         scroll-list(v-for="theme in themeList"
-          type="template" :theme="theme" :key="theme")
-    div(class="home-block")
+          type="template"
+          :theme="`${theme}`"
+          :key="theme"
+          :shuffle="true")
+    div(v-if="inBrowserMode" class="home-block")
       ta-block(v-for="item in blocklist"
         :key="item.title"
         :content="item")
-    nu-footer(:isHome="true")
+    nu-footer(v-if="inBrowserMode" :isHome="true")
 </template>
 
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
-import ScrollList from '@/components/homepage/ScrollList.vue'
-import TaBlock from '@/components/homepage/TaBlock.vue'
-import NuFooter from '@/components/NuFooter.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
 import _ from 'lodash'
-import { defineComponent } from 'vue'
+import { defineAsyncComponent, defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -48,14 +53,23 @@ export default defineComponent({
   components: {
     NuHeader,
     Animation,
-    ScrollList,
-    TaBlock,
-    NuFooter
+    ScrollList: defineAsyncComponent(() =>
+      import('@/components/homepage/ScrollList.vue')
+    ),
+    TaBlock: defineAsyncComponent(() =>
+      import('@/components/homepage/TaBlock.vue')
+    ),
+    NuFooter: defineAsyncComponent(() =>
+      import('@/components/NuFooter.vue')
+    ),
+    HashtagCategoryRow: defineAsyncComponent(() =>
+      import('@/components/templates/HashtagCategoryRow.vue')
+    ),
   },
   data() {
     return {
       showSizePopup: false,
-      themeList: ['1,2', '3', '8', '6', '5', '7', '9'],
+      // themeList: ['1,2', '3', '8', '6', '5', '7', '9'],
       colorBlock: [
         'vector_lightblue2.json',
         'vector_pink1.json',
@@ -109,7 +123,9 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      inBrowserMode: 'webView/getInDevMode',
+      themeList: 'getShuffledThemesIds'
     }),
     ...mapState({
       isMobile: 'isMobile'
@@ -150,6 +166,7 @@ export default defineComponent({
   height: 100%;
 }
 .home-content {
+  position: relative;
   @include hover-scrollbar();
   display: flex;
   flex-direction: column;
@@ -207,6 +224,12 @@ export default defineComponent({
 }
 .home-list {
   width: 80%;
+  &__hashtag {
+    position: sticky;
+    top: 0;
+    left: 0;
+    background-color: red;
+  }
 }
 @media screen and (max-width: 768px) {
   .home-content {

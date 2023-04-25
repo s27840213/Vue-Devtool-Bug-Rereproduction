@@ -113,8 +113,8 @@ const component = defineComponent({
     }
   }
 })
-export default component
 export type CImageGallery = typeof component
+export default component
 </script>
 
 <style lang="scss" scoped>
