@@ -111,6 +111,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
             target=".editor-view"
             :rootMargin="'1500px 0px 1500px 0px'"
             v-bind="lazyloadSize"
+            :forceRender="forceRender"
             :threshold="[0,1]")
           div(:style="sizeStyles")
             div(class="scale-container relative"
@@ -326,6 +327,9 @@ export default defineComponent({
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
+    forceRender(): boolean {
+      return this.$isTouchDevice() && this.pageIndex === layerUtils.pageIndex
+    },
     contentScaleRatio(): number {
       // return this.pageState.config.contentScaleRatio
       // if (this.$isTouchDevice()) {
@@ -345,10 +349,8 @@ export default defineComponent({
     lazyloadSize(): unknown {
       if (this.$isTouchDevice()) {
         return {
-          // minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100),
-          // maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)
-          minHeight: 2500,
-          maxHeight: 2500
+          minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100),
+          maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)
         }
       } else {
         return {

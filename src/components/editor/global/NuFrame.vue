@@ -270,8 +270,9 @@ export default defineComponent({
     styles(): Record<string, string> {
       if (!this.isFrameImg) {
         return {
-          width: `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`,
-          height: `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`,
+          // width: `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`,
+          // height: `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`,
+
           // For controll pointer-events from parent, please don't add any pointer-events: initial to layer component.this.contentScaleRatio * this.$store.state.pageScaleRatio *
           // ...((this.contentScaleRatio !== 1 || this.config.styles.scale) && { transform: `scale(${1 / this.contentScaleRatio / this.config.styles.scale * this.$store.state.pageScaleRatio * 0.01})` }),
           // transform: `scale(${this.$store.state.pageScaleRatio / 100})`
