@@ -17,9 +17,20 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     return false
   }
 
+  filterCallbackLog(callbackName: string) {
+    // implementation classes can filter out logs for certain callback
+    return false
+  }
+
   registerCallbacks(type: string) {
     for (const callbackName of this.CALLBACK_MAPS[type]) {
-      (window as any)[callbackName] = (this as any)[callbackName].bind(this)
+      (window as any)[callbackName] = (...args: any[]) => {
+        if (!this.filterCallbackLog(callbackName)) {
+          logUtils.setLogAndConsoleLog(callbackName, ...args)
+        }
+        const self = this as any
+        self[callbackName].bind(this)(...args)
+      }
     }
   }
 

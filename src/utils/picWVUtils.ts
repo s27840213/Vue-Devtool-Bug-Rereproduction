@@ -96,7 +96,6 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   launchResult(info: IUserInfo) {
-    logUtils.setLogAndConsoleLog(JSON.stringify(info))
     store.commit('webView/SET_userInfo', info)
     this.handleCallback('launch')
   }
@@ -106,7 +105,6 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   loginResult(data: { data: ILoginResult, flag: string | number, msg?: string }) {
-    logUtils.setLogAndConsoleLog(data)
     data.flag = typeof data.flag === 'string' ? parseInt(data.flag) : data.flag
     this.handleCallback('login', data)
   }
