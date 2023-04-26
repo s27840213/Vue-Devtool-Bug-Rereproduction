@@ -66,7 +66,8 @@ export default defineComponent({
       homeTabs: [
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
-        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' }
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' }
       ] as Array<IFooterTab>
     }
   },
@@ -765,7 +766,7 @@ export default defineComponent({
     &.main {
       overflow: hidden;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       align-items: center;
     }
   }
