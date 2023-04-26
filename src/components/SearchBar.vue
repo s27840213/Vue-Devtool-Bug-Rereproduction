@@ -25,13 +25,15 @@ div(class="search-bar" :class="{vivisticker: vivisticker !== 'none'}")
         @input="onUpdate"
         :placeholder="placeholder"
         :style="inputStyles()")
+      //- @mousedown.prevent to prevent input blur
       svg-icon(v-if="clear && keyword"
         class="pointer"
         :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
         iconName="close"
         :iconColor="color.close || 'gray-3'"
         iconWidth="20px"
-        @click="onClear")
+        @click="onClear"
+        @mousedown.prevent)
       slot
     //- placeholder
     span(v-if="expanded !== undefined" class="placeholder") {{ $t('NN0203') }}
@@ -90,7 +92,7 @@ export default defineComponent({
       default: undefined
     }
   },
-  emits: ['search', 'update', 'favorite', 'update:expanded', 'cancel'],
+  emits: ['search', 'update', 'favorite', 'update:expanded'],
   data() {
     return {
       keyword: this.defaultKeyword
@@ -108,7 +110,7 @@ export default defineComponent({
       }
       if (!val) {
         (this.$refs.searchbar as HTMLElement).blur()
-        this.$emit('cancel')
+        this.onClear()
       }
     }
   },

@@ -11,8 +11,7 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
     :isFavorite="checkTagFavorite(keyword)"
     v-model:expanded="isSearchBarExpanded"
     @search="handleSearch"
-    @favorite="toggleFavoritesTag"
-    @cancel="handleSearch('')")
+    @favorite="toggleFavoritesTag")
   tags(v-if="tags && tags.length"
     class="panel-gifs__tags"
     :class="{collapsed: !isSearchBarExpanded}"
