@@ -102,7 +102,10 @@ export default defineComponent({
     },
     expanded(val) {
       if (val && !this.defaultKeyword) this.focus()
-      if (!val) this.$emit('cancel')
+      if (!val) {
+        (this.$refs.searchbar as HTMLElement).blur()
+        this.$emit('cancel')
+      }
     }
   },
   computed: {
@@ -187,8 +190,12 @@ export default defineComponent({
     grid-template-columns: 1fr auto;
     &.vivisticker {
       column-gap: v-bind("expanded === undefined ? '0' : '10px'");
+      clip-path: inset(0 0 0 0);
+      transition: clip-path 200ms 100ms ease-in-out;
+      transform: translateZ(0);
       &.collapsed {
         pointer-events: none;
+        clip-path: inset(0 0 100% 0);
       }
       &.favorite {
         grid-template-columns: auto 1fr auto;

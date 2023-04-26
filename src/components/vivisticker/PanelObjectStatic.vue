@@ -15,13 +15,15 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
     @cancel="handleSearch('')")
   tags(v-if="tags && tags.length"
       class="panel-static__tags"
+      :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"
       :scrollLeft="tagScrollLeft"
       theme="dark"
       @search="handleSearch"
       @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
   //- Search result and static main content
-  category-list(v-for="item in categoryListArray" :class="{invisible: !item.show}"
+  category-list(v-for="item in categoryListArray"
+                :class="{invisible: !item.show, collapsed: !isSearchBarExpanded}"
                 :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="item.loadMore")
     template(#before)
@@ -452,15 +454,18 @@ export default defineComponent({
   &.with-search-bar {
     height: calc(100% + 56px); // 42px (serach bar height) + 14px (margin-top of tags) = 56px
     .panel-static__tags {
-      min-height: 42px;
-      background-color: setColor(black-2);
-      transition: transform 200ms ease-in-out, clip-path 200ms ease-in-out;
-      transform: v-bind("isSearchBarExpanded ? 'none' : 'translate(0, -56px)'");
-      clip-path: v-bind("isSearchBarExpanded ? 'inset(0 0 0 0)' : 'inset(0 42px 0 0)'");
+      clip-path: inset(0 0 0 0);
+      transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
+      &.collapsed {
+        transform: translateY(-56px);
+        clip-path: inset(0 42px 0 0);
+      }
     }
     .category-list {
-      transition: transform 200ms ease-in-out;
-      transform: v-bind("isSearchBarExpanded ? 'none' : 'translateY(-56px)'");
+      transition: transform 200ms 100ms ease-in-out;
+      &.collapsed{
+        transform: translateY(-56px) translateZ(0);
+      }
     }
     &::v-deep .vue-recycle-scroller__item-wrapper {
       margin-bottom: 56px;
