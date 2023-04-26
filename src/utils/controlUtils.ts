@@ -626,7 +626,7 @@ class Controller {
     })
   }
 
-  updateLayerInitSize(pageIndex: number, layerIndex: number, initWidth: number, initHeight: number, initSize: number) {
+  updateLayerInitSize(pageIndex: number, layerIndex: number, initWidth: number, initHeight: number, initSize?: number) {
     store.commit('UPDATE_layerStyles', {
       pageIndex,
       layerIndex,

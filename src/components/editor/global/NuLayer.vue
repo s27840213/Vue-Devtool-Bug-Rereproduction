@@ -544,7 +544,7 @@ export default defineComponent({
       // let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
       if (!isImgType) {
         // transform += this.compensationRatio() !== 1 ? `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})` : ''
-        transform += `scale(${scale}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
+        transform += `scale(${scale * (type === 'text' ? this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01 : 1)}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
       }
       const hasActualScale = !!transform && transform !== 'scale(1)'
       const styles = {
@@ -552,8 +552,12 @@ export default defineComponent({
       } as Record<string, string>
       if (hasActualScale) {
         if (this.config.type === LayerType.text) {
-          styles.width = `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
-          styles.height = `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
+          // styles.width = `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
+          // styles.height = `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
+          styles.width = `${this.config.styles.width}px`
+          styles.height = `${this.config.styles.height}px`
+          styles.width = `${this.config.styles.initWidth}px`
+          styles.height = `${this.config.styles.initHeight}px`
         } else {
           styles.width = `${this.config.styles.initWidth * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
           styles.height = `${this.config.styles.initHeight * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`

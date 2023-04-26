@@ -56,13 +56,13 @@ class CssConveter {
     }
   }
 
-  convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle | { [key: string]: string | number }, contentScaleRatio = 1): { [key: string]: string } {
+  convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle | { [key: string]: string | number }): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
       if (sourceStyles[prop] === undefined) return
 
       if (prop === 'size') {
-        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 1.333333 * store.state.pageScaleRatio * 0.01 * contentScaleRatio}px`
+        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 1.333333}px`
       } else if (prop === 'weight') {
         result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `calc(var(--base-stroke) + ${(sourceStyles.size as number) / 32}px)` : 'calc(var(--base-stroke))'
       } else if (prop === 'fontSpacing') {

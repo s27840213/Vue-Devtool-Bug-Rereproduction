@@ -1194,7 +1194,7 @@ export default defineComponent({
           }
           break
         }
-        case 'text':
+        case 'text': {
           /**
            * When the size is very close to the text-wrapping boundary, the getBoundingClientRect() result in textResizeHandler may be
            * wrong. That maybe results from the tiny delay between the size-update by setting layerSize and the function call. Thus,
@@ -1207,6 +1207,9 @@ export default defineComponent({
             ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width })
             height = TextUtils.getTextHW(this.config as IText, width).height
           }
+          const textInitWidth = width / this.config.styles.scale
+          const textInitHeight = height / this.config.styles.scale
+          ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textInitWidth, textInitHeight)
           /**
            * below make the anchor-point always pinned at the top-left or top-right
            */
@@ -1216,6 +1219,7 @@ export default defineComponent({
             this.control.ySign = 1
           }
           break
+        }
         case 'frame': {
           /**
            * only plain-rectangular-frame would have resizer
