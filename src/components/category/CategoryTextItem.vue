@@ -36,8 +36,7 @@ export default defineComponent({
   },
   data() {
     return {
-      fallbackSrc: '',
-      dragUtils: new DragUtils()
+      fallbackSrc: ''
     }
   },
   computed: {
