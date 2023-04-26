@@ -88,6 +88,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
         }),
         new Promise<undefined>(resolve => {
           setTimeout(() => {
+            logUtils.setLogAndConsoleLog(`${type} with ${message} timeouted after ${timeout}ms`)
             resolve(undefined)
           }, timeout)
         })
