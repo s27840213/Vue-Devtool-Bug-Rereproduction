@@ -111,6 +111,7 @@ export interface IText extends ILayer<ITextStyle> {
   inAutoRescaleMode: boolean,
   initScale: number,
   isDraggingCursor: boolean,
+  isFlipping: boolean,
 }
 
 export interface IShape extends ILayer<IStyle> {

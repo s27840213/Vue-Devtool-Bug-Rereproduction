@@ -607,6 +607,7 @@ class GroupUtils {
       layer.shown = false
       layer.locked = tmpLayer.locked
       layer.moved = tmpLayer.moved
+      layer.styles.opacity *= tmpLayer.styles.opacity / 100
     })
 
     return layers
@@ -769,6 +770,7 @@ class GroupUtils {
       layer.shown = false
       layer.locked = groupLayer.locked
       layer.moved = groupLayer.moved
+      layer.styles.opacity *= groupLayer.styles.opacity / 100
     })
 
     return layers

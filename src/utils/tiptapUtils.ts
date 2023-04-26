@@ -158,13 +158,7 @@ class TiptapUtils {
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
-          let config: IText
-          const target = layerUtils.getCurrLayer
-          if (target.type === 'group') {
-            config = target.layers[layerUtils.subLayerIdx] as IText
-          } else {
-            config = target as IText
-          }
+          const config = layerUtils.getCurrConfig as IText
           const textEffectStyles = textEffectUtils.convertTextEffect(config)
           pObj.content = spans.map((s, index) => {
             return {
