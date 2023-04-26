@@ -155,8 +155,8 @@ class TiptapUtils {
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
-          const config = layerUtils.getCurrLayer as IText
-          const textEffectStyles = textEffectUtils.convertTextEffect(config as IText)
+          const config = layerUtils.getCurrConfig as IText
+          const textEffectStyles = textEffectUtils.convertTextEffect(config)
           pObj.content = spans.map((s, index) => {
             return {
               type: 'text',
@@ -486,7 +486,7 @@ class TiptapUtils {
     const item: { [string: string]: any } = {}
     item[key] = value
     this.agent(editor => {
-      if (layerUtils.getCurrLayer.contentEditable) {
+      if (this.isCurrLayerContenteditable()) {
         editor.chain().updateAttributes('paragraph', item).run()
         const ranges = editor.state.selection.ranges
         if (ranges.length > 0) {

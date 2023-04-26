@@ -105,7 +105,8 @@ export default defineComponent({
   data() {
     return {
       imgLoaded: false,
-      imgLoading: false
+      imgLoading: false,
+      dragUtils: new DragUtils()
     }
   },
   computed: {
@@ -272,7 +273,7 @@ export default defineComponent({
       }
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
-        new DragUtils().itemOnDrop(e, this.pageIndex)
+        this.dragUtils.itemOnDrop(e, this.pageIndex)
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)

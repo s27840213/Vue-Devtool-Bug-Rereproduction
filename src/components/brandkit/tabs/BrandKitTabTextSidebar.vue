@@ -30,7 +30,8 @@ export default defineComponent({
         heading: `${this.$t('NN0408')}`,
         subheading: `${this.$t('NN0409')}`,
         body: `${this.$t('NN0410')}`
-      } as { [key: string]: string }
+      } as { [key: string]: string },
+      dragUtils: new DragUtils()
     }
   },
   created() {
@@ -96,7 +97,7 @@ export default defineComponent({
       assetUtils.addStandardText(type, this.MAPPING[type], this.$i18n.locale, undefined, undefined, this.getSpanStyles(type))
     },
     standardTextDrag(e: DragEvent, type: string) {
-      new DragUtils().textItemDragStart(e, 'standardText', {
+      this.dragUtils.textItemDragStart(e, 'standardText', {
         textType: type,
         text: this.MAPPING[type],
         locale: this.$i18n.locale,

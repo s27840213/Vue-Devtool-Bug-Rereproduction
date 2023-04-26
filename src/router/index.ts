@@ -1,5 +1,6 @@
 import i18n from '@/i18n'
 import store from '@/store'
+import { LayerType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -81,12 +82,24 @@ const routes: Array<RouteRecordRaw> = [
         const margins = margin ? margin.split(',') : []
         const renderForPDF = urlParams.get('renderForPDF')
 
+        const informBackend = () => {
+          console.log('all resize done')
+          const div = document.createElement('div')
+          div.id = 'vivipic-text-done'
+          div.innerHTML = 'xxx'
+          div.style.position = 'fixed'
+          div.style.top = '100%'
+          div.style.left = '100%'
+          document.body.appendChild(div)
+        }
+
         if (token && teamId && url) {
           // for new version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
           store.commit('user/SET_STATE', { token, teamId, dpi, backendRenderParams: { isBleed: bleed, isTrim: trim, margin: { bottom: +margins[0] || 0, right: +margins[1] || 0 } } })
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
           const response = await (await fetch(`https://${url}`)).json()
+          generalUtils.initializeFlags(LayerType.text, [response], informBackend)
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
           store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
@@ -115,6 +128,7 @@ const routes: Array<RouteRecordRaw> = [
           }
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
           const response = await (await fetch(`https://${src}`)).json()
+          generalUtils.initializeFlags(LayerType.text, [response], informBackend)
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
           store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
