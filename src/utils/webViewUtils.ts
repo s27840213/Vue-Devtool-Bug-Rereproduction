@@ -74,16 +74,16 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
   }
 
-  async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000): Promise<any> {
+  async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000): Promise<{ [key: string]: any } | undefined> {
     this.sendToIOS(type, message)
-    let result
+    let result: { [key: string]: any } | undefined
     if (timeout === -1) {
-      result = await (new Promise<any>(resolve => {
+      result = (await (new Promise<{ data?: { [key: string]: any }, isTimeouted: boolean }>(resolve => {
         this.callbackMap[event] = resolve
-      }))
+      }))).data
     } else {
       const raceResult = await Promise.race([
-        new Promise<{ data?: any, isTimeouted: boolean }>(resolve => {
+        new Promise<{ data?: { [key: string]: any }, isTimeouted: boolean }>(resolve => {
           this.callbackMap[event] = resolve
         }),
         new Promise<{ data: undefined, isTimeouted: boolean }>(resolve => {
