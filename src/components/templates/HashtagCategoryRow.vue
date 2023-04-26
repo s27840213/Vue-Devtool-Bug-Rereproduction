@@ -1,29 +1,37 @@
 <template lang="pug">
 div(class="hashtag-row")
-  div(v-if="list.title" class="hashtag-row__title") {{ list.title }}
+  div(v-if="title" class="hashtag-row__title") {{ title }}
   div(class="hashtag-row__tags")
     div(class="hashtag-row__tags__tag"
         :class="{'selected': selected.length === 0}"
         @click="handleSelectAll") {{ $t('NN0324') }}
-    div(v-for="tag in list.list"
-      :key="tag.id"
+    div(v-for="(tag,idx) in list"
+      :key="idx"
       class="hashtag-row__tags__tag"
       :class="{'selected': checkSelection(tag)}"
       @click="handleSelect(tag)") {{ tag.name }}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    list: {
-      type: Object,
-      required: true
-    },
     defaultSelection: {
       type: Array,
       required: true
+    },
+    type: {
+      type: String,
+      required: true
+    },
+    list: {
+      type: Array as PropType<{ name: string }[]>,
+      required: true
+    },
+    title: {
+      type: String,
+      default: ''
     }
   },
   mounted() {
@@ -44,7 +52,7 @@ export default defineComponent({
   },
   methods: {
     checkSelection(tag: any): boolean {
-      const key: string = this.list.type === 'theme' ? tag.id.toString() : tag.name
+      const key: string = this.type === 'theme' ? tag.id.toString() : tag.name
       return this.selected.includes(key)
     },
     handleSelectAll() {
@@ -52,7 +60,7 @@ export default defineComponent({
       this.emitSelect()
     },
     handleSelect(tag: any) {
-      const key: string = this.list.type === 'theme' ? tag.id.toString() : tag.name
+      const key: string = this.type === 'theme' ? tag.id.toString() : tag.name
       const index = this.selected.indexOf(key)
       if (index !== -1) {
         this.selected.splice(index, 1)
@@ -63,7 +71,7 @@ export default defineComponent({
     },
     emitSelect() {
       this.$emit('select', {
-        title: this.list.title,
+        title: this.title,
         selection: this.selected
       })
     }

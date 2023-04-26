@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="home")
-  nu-header(v-header-border)
+  nu-header
   div(class="home-content")
     div(v-if="inBrowserMode" class="home-top")
       div(class="home-top-text")
@@ -16,22 +16,33 @@ div(class="home")
       router-link(v-if="inBrowserMode" :to="`/editor?type=new-design-size&width=1080&height=1080`"
           class="home-top__button rounded btn-primary-sm btn-LG")
         span {{$t('NN0391')}}
-      hashtag-category-row(v-if="!inBrowserMode"
-        class="home-list__hashtag"
-        :list="{title: '', list: [{name: 'Test1'}, {name: 'Test2'}, {name: 'Test3'}]}"
-        :defaultSelection="['Test1']")
     div(class="home-list")
       scroll-list(v-if="!isMobile || isLogin"
         :gridMode="!inBrowserMode"
         type="theme" @openSizePopup="openSizePopup()")
-      scroll-list(v-if="isLogin && inBrowserMode"
-        type="mydesign")
-      template(v-if="isLogin")
-        scroll-list(v-for="theme in themeList"
-          type="template"
-          :theme="`${theme}`"
-          :key="theme"
-          :shuffle="true")
+      hashtag-category-row(v-if="!inBrowserMode"
+        class="home-list__hashtag"
+        :type="'tag'"
+        :title="''"
+        :list="homeTags"
+        :defaultSelection="[]"
+        @select="handleSelectTags")
+      template(v-if="selectedTags.length !== 0")
+        template-waterfall(:waterfallTemplates="waterfallTemplates"
+          :isTemplateReady="isTemplateReady"
+          :useScrollablePreview="!isMobile"
+          :useScrollSpace="isMobile"
+          :themes="themes"
+          @loadMore="handleLoadMore")
+      template(v-else)
+        scroll-list(v-if="isLogin && inBrowserMode"
+          type="mydesign")
+        template(v-if="isLogin")
+          scroll-list(v-for="theme in themeList"
+            type="template"
+            :theme="`${theme}`"
+            :key="theme"
+            :shuffle="true")
     div(v-if="inBrowserMode" class="home-block")
       ta-block(v-for="item in blocklist"
         :key="item.title"
@@ -42,10 +53,12 @@ div(class="home")
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
 import NuHeader from '@/components/NuHeader.vue'
+import { ITemplate } from '@/interfaces/template'
+import generalUtils from '@/utils/generalUtils'
 import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
-import _ from 'lodash'
+import templateCenterUtils from '@/utils/templateCenterUtils'
 import { defineAsyncComponent, defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -65,6 +78,9 @@ export default defineComponent({
     HashtagCategoryRow: defineAsyncComponent(() =>
       import('@/components/templates/HashtagCategoryRow.vue')
     ),
+    TemplateWaterfall: defineAsyncComponent(() =>
+      import('@/components/templates/TemplateWaterfall.vue')
+    )
   },
   data() {
     return {
@@ -75,7 +91,18 @@ export default defineComponent({
         'vector_pink1.json',
         'oval_pink4.json',
         'oval_yellow1.json'
-      ]
+      ],
+      waterfallTemplatesPC: [] as ITemplate[][],
+      waterfallTemplatesTAB: [] as ITemplate[][],
+      waterfallTemplatesMOBILE: [] as ITemplate[][],
+      isMobileSize: false,
+      isPCSize: false,
+      isTemplateReady: false,
+      selectedTags: [] as string[],
+      testHomeTags: [{ name: '1231241' }, { name: '12312312312' }]
+      // contentIds: [] as IContentTemplate[],
+      // groupId: '',
+      // modalTemplate: {} as ITemplate,
     }
   },
   // setup() {
@@ -121,15 +148,35 @@ export default defineComponent({
       }]
     }
   },
+  mounted() {
+    window.addEventListener('resize', this.handleResize)
+
+    this.handleResize()
+  },
+  unmounted() {
+    window.removeEventListener('resize', this.handleResize)
+  },
   computed: {
     ...mapGetters({
       isLogin: 'user/isLogin',
       inBrowserMode: 'webView/getInDevMode',
-      themeList: 'getShuffledThemesIds'
+      _themeList: 'getShuffledThemesIds',
+      themes: 'getMainHiddenThemes'
     }),
     ...mapState({
-      isMobile: 'isMobile'
+      isMobile: 'isMobile',
+      _homeTags: 'homeTags'
     }),
+    ...mapState('templates', {
+      templates: 'searchResult'
+    }),
+    homeTags(): Array<{name: string}> {
+      return this._homeTags.map((tag: string) => {
+        return {
+          name: tag
+        }
+      })
+    },
     blocklist(): IHomeBlockData[] {
       const blocklist = blocklistData.data().filter((item) => {
         return !(this.$i18n.locale === 'us' && item.img.name === 'e-commerce.json')
@@ -146,16 +193,72 @@ export default defineComponent({
       return this.$i18n.locale === 'us' ? 'GRSlz37Njo0'
         : this.$i18n.locale === 'jp' ? 'FzPHWU0O1uI'
           : this.$i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
+    },
+    waterfallTemplates(): ITemplate[][] {
+      if (this.isPCSize) {
+        return this.waterfallTemplatesPC
+      } else if (this.isMobileSize) {
+        return this.waterfallTemplatesMOBILE
+      } else {
+        return this.waterfallTemplatesTAB
+      }
+    },
+    themeList(): string[] {
+      if (this._themeList && this.$i18n.locale === 'us') {
+        return this._themeList.filter((theme: string) => theme !== '7')
+      }
+      return this._themeList
     }
   },
-  created() {
-    if (this.$i18n.locale === 'us') {
-      this.themeList = _.without(this.themeList, '7')
-    }
-  },
+  // created() {
+  //   if (this.$i18n.locale === 'us') {
+  //     this.themeList = _.without(this.themeList, '7')
+  //   }
+  // },
   methods: {
+    ...mapActions('templates', {
+      getTemplates: 'getThemeContent',
+      getMoreTemplates: 'getMoreContent'
+    }),
     openSizePopup() {
       this.showSizePopup = true
+    },
+    handleLoadMore() {
+      this.isTemplateReady = false
+      this.getMoreTemplates().then(() => {
+        this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
+        this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2, 2)
+        this.isTemplateReady = true
+      })
+    },
+    handleResize() {
+      this.isMobileSize = generalUtils.getWidth() <= 540
+      this.isPCSize = generalUtils.getWidth() >= 976
+    },
+    handleSelectTags(selectinfo: { title: string, selection: string[] }) {
+      this.selectedTags = [...selectinfo.selection]
+      this.composeKeyword()
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    composeKeyword() {
+      const res = ['group::0']
+      const tags = [this.selectedTags.join(' ')]
+
+      if (tags.length > 0) {
+        res.push('tag::' + tags.join('&&'))
+      }
+      res.push('order_by::popular')
+      this.waterfallTemplatesPC = []
+      this.waterfallTemplatesTAB = []
+      this.waterfallTemplatesMOBILE = []
+      this.isTemplateReady = false
+      this.getTemplates({ keyword: res.join(';;'), theme: '' }).then(() => {
+        this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
+        this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2, 2)
+        this.isTemplateReady = true
+      })
     },
   }
 })
@@ -224,11 +327,15 @@ export default defineComponent({
 }
 .home-list {
   width: 80%;
+  position: relative;
   &__hashtag {
+    z-index: 10;
     position: sticky;
-    top: 0;
+    top: 0px;
     left: 0;
-    background-color: red;
+    padding: 12px 0px;
+    margin: 0px;
+    background-color: white;
   }
 }
 @media screen and (max-width: 768px) {

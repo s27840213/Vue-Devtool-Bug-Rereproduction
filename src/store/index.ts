@@ -287,6 +287,11 @@ const getters: GetterTree<IEditorState, unknown> = {
   getThemes(state: IEditorState) {
     return state.themes
   },
+  getMainHiddenThemes(state: IEditorState) {
+    return state.themes.filter(theme => {
+      return theme.mainHidden === 0
+    })
+  },
   getEditThemes(state: IEditorState) {
     return state.themes.filter(theme => {
       return theme.editHidden === 0
