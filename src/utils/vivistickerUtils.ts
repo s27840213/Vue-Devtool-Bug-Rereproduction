@@ -927,20 +927,29 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   getEditorDimensions(): { x: number, y: number, width: number, height: number } {
-    const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
     const { width: pageWidth, height: pageHeight } = pageUtils.getPageSize(0)
+    const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
+    const defaultDimensions = {
+      x: 16,
+      y: 60,
+      width: pageWidth,
+      height: pageHeight
+    }
+    if (!editorEle) {
+      return defaultDimensions
+    }
     let { width, height, x, y } = editorEle.getBoundingClientRect()
     if (width <= 0) {
-      width = pageWidth
+      width = defaultDimensions.width
     }
     if (height <= 0) {
-      height = pageHeight
+      height = defaultDimensions.height
     }
     if (x <= 0) { // left-padding of editor view
-      x = 16
+      x = defaultDimensions.x
     }
     if (y <= 0) { // top-padding of editor view + height of headerTabs
-      y = 60
+      y = defaultDimensions.y
     }
     return { x, y, width, height }
   }
