@@ -199,6 +199,7 @@ export default defineComponent({
       hasDestroyed: false,
       isOnError: false,
       src: '',
+      errorSrcIdentifier: '',
       shadowBuff: {
         canvasShadowImg: undefined as undefined | HTMLImageElement,
         canvasSize: { width: 0, height: 0 },
@@ -472,10 +473,17 @@ export default defineComponent({
       setIsProcessing: 'bgRemove/SET_isProcessing',
       setImgConfig: 'imgControl/SET_CONFIG'
     }),
+    getErrorSrcIdentifier(config: IImage) {
+      const { srcObj, styles } = config
+      return srcObj.type + srcObj.assetId + srcObj.userId + (styles.adjust.blur > 0 ? '_blur' : '')
+    },
     onError() {
+      if (this.getErrorSrcIdentifier(this.config as IImage) === this.errorSrcIdentifier) return
+      this.errorSrcIdentifier = this.getErrorSrcIdentifier(this.config as IImage)
+
+      const { srcObj, styles: { width, height } } = this.config
       this.isOnError = true
       let updater
-      const { srcObj, styles: { width, height } } = this.config
       if (imageUtils.getSrcSize(srcObj, Math.max(width, height)) === 'xtra') {
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           srcObj: {
