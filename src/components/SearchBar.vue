@@ -101,7 +101,11 @@ export default defineComponent({
       this.keyword = val
     },
     expanded(val) {
-      if (val && !this.defaultKeyword) this.focus()
+      if (val && !this.defaultKeyword) {
+        window.setTimeout(() => { // wait for the searchbar to be visible
+          this.focus()
+        }, 100)
+      }
       if (!val) {
         (this.$refs.searchbar as HTMLElement).blur()
         this.$emit('cancel')
