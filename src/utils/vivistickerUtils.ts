@@ -19,7 +19,6 @@ import groupUtils from './groupUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import localeUtils from './localeUtils'
-import logUtils from './logUtils'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
@@ -274,7 +273,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   createUrl(item: IAsset): string {
-    logUtils.setLogAndConsoleLog(item)
     switch (item.type) {
       case 5:
       case 11:
@@ -599,7 +597,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   loginResult(info: IUserInfo) {
-    logUtils.setLogAndConsoleLog(JSON.stringify(info))
     store.commit('vivisticker/SET_userInfo', info)
     this.handleCallback('login')
   }
@@ -614,7 +611,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   updateInfoDone(data: { flag: string, msg?: string }) {
     if (data.flag !== '0') {
-      logUtils.setLogAndConsoleLog(data.msg)
       this.errorMessageMap.locale = data.msg ?? ''
     }
     this.handleCallback('update-user-info')
@@ -1132,7 +1128,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   subscribeInfo(data: ISubscribeInfo) {
-    console.log('subscribeInfo', data)
     store.commit('vivisticker/SET_uuid', data.uuid)
     if (data.complete === '0') {
       this.registerSticker()
@@ -1168,7 +1163,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   subscribeResult(data: ISubscribeResult) {
     if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if is timeout
-    console.log('subscribeResult', data)
     if (this.isPaymentDisabled) return
     if (data.reason) {
       store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
