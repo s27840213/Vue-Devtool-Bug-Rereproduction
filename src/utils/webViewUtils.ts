@@ -5,7 +5,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   abstract STANDALONE_USER_INFO: T
   abstract CALLBACK_MAPS: { [key: string]: string[] }
 
-  callbackMap = {} as { [key: string]: (data?: any) => void }
+  callbackMap = {} as { [key: string]: (res: { data?: any, isTimeouted: boolean }) => void }
   errorMessageMap = {} as { [key: string]: string }
 
   abstract getUserInfoFromStore(): T
@@ -78,21 +78,27 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     this.sendToIOS(type, message)
     let result: { [key: string]: any } | undefined
     if (timeout === -1) {
-      result = await (new Promise<{ [key: string]: any } | undefined>(resolve => {
+      result = (await (new Promise<{ data?: { [key: string]: any }, isTimeouted: boolean }>(resolve => {
         this.callbackMap[event] = resolve
-      }))
+      }))).data
     } else {
-      result = await Promise.race([
-        new Promise<{ [key: string]: any } | undefined>(resolve => {
+      const raceResult = await Promise.race([
+        new Promise<{ data?: { [key: string]: any }, isTimeouted: boolean }>(resolve => {
           this.callbackMap[event] = resolve
         }),
-        new Promise<undefined>(resolve => {
+        new Promise<{ data: undefined, isTimeouted: boolean }>(resolve => {
           setTimeout(() => {
-            logUtils.setLogAndConsoleLog(`${type} with ${message} timeouted after ${timeout}ms`)
-            resolve(undefined)
+            resolve({
+              data: undefined,
+              isTimeouted: true
+            })
           }, timeout)
         })
       ])
+      if (raceResult.isTimeouted) {
+        logUtils.setLogAndConsoleLog(`${type} timeouted after ${timeout}ms with message:`, message)
+      }
+      result = raceResult.data
     }
     delete this.callbackMap[event]
     return result
@@ -100,7 +106,10 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
 
   handleCallback(event: string, data?: any) {
     if (this.callbackMap[event]) {
-      this.callbackMap[event](data)
+      this.callbackMap[event]({
+        data,
+        isTimeouted: false
+      })
     }
   }
 }
