@@ -59,8 +59,10 @@ class ThemeUtils {
         const { data } = response.data
         console.log(data)
         store.commit('SET_themes', data.content)
-        store.commit('SET_homeTags', data.tags)
-        store.commit('SET_shuffledThemesIds', data.theme_ids)
+        if (store.getters.getHomeTags.length === 0) {
+          store.commit('SET_homeTags', data.tags)
+          store.commit('SET_shuffledThemesIds', data.theme_ids)
+        }
       } catch (error) {
         // handle error
       }
