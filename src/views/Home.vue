@@ -98,8 +98,7 @@ export default defineComponent({
       isMobileSize: false,
       isPCSize: false,
       isTemplateReady: false,
-      selectedTags: [] as string[],
-      testHomeTags: [{ name: '1231241' }, { name: '12312312312' }]
+      selectedTags: [] as string[]
       // contentIds: [] as IContentTemplate[],
       // groupId: '',
       // modalTemplate: {} as ITemplate,
@@ -159,7 +158,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       isLogin: 'user/isLogin',
-      inBrowserMode: 'webView/getInBrowserMode',
+      inBrowserMode: 'webView/getInDevMode',
       _themeList: 'getShuffledThemesIds',
       themes: 'getMainHiddenThemes'
     }),
