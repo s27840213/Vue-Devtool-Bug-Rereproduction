@@ -199,7 +199,7 @@ export default defineComponent({
       hasDestroyed: false,
       isOnError: false,
       src: '',
-      errorSrcIdentifier: '',
+      errorSrcIdentifier: { identifier: '', retry: 0 },
       shadowBuff: {
         canvasShadowImg: undefined as undefined | HTMLImageElement,
         canvasSize: { width: 0, height: 0 },
@@ -478,8 +478,15 @@ export default defineComponent({
       return srcObj.type + srcObj.assetId + srcObj.userId + (styles.adjust.blur > 0 ? '_blur' : '')
     },
     onError() {
-      if (this.getErrorSrcIdentifier(this.config as IImage) === this.errorSrcIdentifier) return
-      this.errorSrcIdentifier = this.getErrorSrcIdentifier(this.config as IImage)
+      if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {
+        if (this.errorSrcIdentifier.retry === 3) {
+          return
+        }
+        this.errorSrcIdentifier.retry++
+      } else {
+        this.errorSrcIdentifier.identifier = this.getErrorSrcIdentifier(this.config as IImage)
+        this.errorSrcIdentifier.retry = 1
+      }
 
       const { srcObj, styles: { width, height } } = this.config
       this.isOnError = true
