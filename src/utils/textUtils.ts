@@ -20,6 +20,7 @@ import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
 import textShapeUtils from './textShapeUtils'
 import tiptapUtils from './tiptapUtils'
+import mappingUtils from '@/utils/mappingUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -46,10 +47,10 @@ class TextUtils {
     this.toRecordId = ''
     this.toSetFlagId = ''
     this.fieldRange = {
-      fontSize: { min: 6, max: 800 },
-      lineHeight: { min: 0.5, max: 2.5 },
-      fontSpacing: { min: -200, max: 800 },
-      opacity: { min: 0, max: 100 }
+      fontSize: mappingUtils.mappingMinMax('fontSize'),
+      lineHeight: mappingUtils.mappingMinMax('lineHeight'),
+      fontSpacing: mappingUtils.mappingMinMax('letterSpacing'),
+      opacity: mappingUtils.mappingMinMax('opacity')
     }
 
     setInterval(() => {

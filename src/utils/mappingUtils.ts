@@ -18,19 +18,19 @@ const iconFontAlign = ['text-align-left', 'text-align-center', 'text-align-right
 const iconLineTemplate = [...Array(12).keys()].slice(1).map((num: number) => {
   return `line-template-${num}`
 })
-const minMaxHash: { [index: string]: { min: number, max: number } } = {
+const minMaxHash = {
   opacity: {
     min: 0,
     max: 100
   },
   fontSize: {
-    min: 6, max: 800
+    min: 1, max: 9999
   },
   lineHeight: {
     min: 0.5, max: 2.5
   },
   letterSpacing: {
-    min: -200, max: 800
+    min: -200, max: 1600
   },
   lineWidth: {
     min: 1, max: 100
@@ -40,7 +40,7 @@ const minMaxHash: { [index: string]: { min: number, max: number } } = {
   }
 }
 
-const langMap: { [index: string]: string } = {
+const langMap = {
   tw: 'zh-TW',
   us: 'en-US',
   jp: 'ja-JP'
@@ -189,11 +189,11 @@ class MappingUtils {
     return indexs.map(index => layers[index])
   }
 
-  mappingMinMax(type: string) {
+  mappingMinMax(type: keyof typeof minMaxHash) {
     return minMaxHash[type]
   }
 
-  mappingLocales(lang: string) {
+  mappingLocales(lang: keyof typeof langMap) {
     return langMap[lang]
   }
 }

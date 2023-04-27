@@ -172,7 +172,7 @@ export default defineComponent({
     async stripeInit() {
       await this.clientSecret // Wait for api promise
       this.stripe = await loadStripe('pk_live_51HPpbIJuHmbesNZIbXTLIiElWHqRqS9xLnCkoJ9LynKfQO2G9JIVpeEdogBdBU7aiqvXrTjjJQPUVVGQBdSxwmoc00bJcj9VG2', {
-        locale: mappingUtils.mappingLocales(this.$i18n.locale) as 'zh-TW'// | 'ja-JP' | 'en-US'
+        locale: mappingUtils.mappingLocales(this.$i18n.locale as 'tw' | 'us' | 'jp') as 'zh-TW'// | 'ja-JP' | 'en-US'
       }) as Stripe
       this.stripeElement = this.stripe.elements({
         clientSecret: this.clientSecret,
