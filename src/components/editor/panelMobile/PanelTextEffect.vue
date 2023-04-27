@@ -73,7 +73,7 @@ import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import { IEffect } from '@/utils/constantData'
+import { IEffect, IEffectCategory } from '@/utils/constantData'
 import paymentUtils from '@/utils/paymentUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -103,6 +103,9 @@ export default defineComponent({
   computed: {
     currCategoryName(): 'shadow'|'bg'|'shape'|'fill' {
       return this.panelHistory[this.panelHistory.length - 1] as 'shadow'|'bg'|'shape'|'fill'
+    },
+    currCategory(): IEffectCategory {
+      return _.find(this.textEffects, ['name', this.currCategoryName]) as IEffectCategory
     },
     effectList(): IEffect[] | null {
       if (!this.currCategory) return null

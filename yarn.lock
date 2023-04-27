@@ -10572,6 +10572,11 @@ vue-cli-plugin-i18n@~2.3.1:
     vue-i18n "^8.17.0"
     vue-i18n-extract "1.0.2"
 
+vue-collapsed@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/vue-collapsed/-/vue-collapsed-1.1.2.tgz#9cc9e6a4e633f5c7cf10da444b231050a2f9b637"
+  integrity sha512-XCP1j6C+lvPyb2/NW4Q5iDlR4qpDsm4tip5sWbQqMcBGWukovOvKqloLQbR5MiODArUXYH7R3eob9bCVVNjOng==
+
 vue-demi@^0.13.4:
   version "0.13.11"
   resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.13.11.tgz#7d90369bdae8974d87b1973564ad390182410d99"

@@ -1,79 +1,81 @@
 <template lang="pug">
-div(class="text-effect-setting mt-25")
-  //- Tabs to choose effect category: shadow, shape and bg.
-  div(class="text-effect-setting-tabs")
-    span(v-for="category in textEffects"
-        :key="category.name"
-        :selected="currCategoryName===category.name"
-        @click="switchTab(category.name)") {{category.label}}
-  div(class="action-bar")
-    template(v-for="effects1d in currCategory.effects2d" :key="effects1d.name")
-      //- To choose effect, ex: hollow, splice or echo.
-      div(class="text-effect-setting__effects mb-10")
-        div(v-for="effect in effects1d"
-            :key="`${currCategoryName}-${effect.key}`"
-            class="text-effect-setting__effect pointer"
-            :class="{'selected': currentStyle.name === effect.key }"
-            @click="onEffectClick(effect)")
-          svg-icon(
-            :iconName="effectIcon(currCategory, effect).name"
-            :iconWidth="effectIcon(currCategory, effect).size"
-            iconColor="white"
-            v-hint="effect.label")
-          pro-item(v-if="effect.plan" theme="roundedRect")
-      //- Effect option UI.
-      div(v-if="getOptions(effects1d) && getOptions(effects1d)?.length !== 0"
-          class="text-effect-setting-options")
-        div(v-for="option in getOptions(effects1d)"
-            :key="option.key"
-            class="text-effect-setting-options__field")
-          div(class="text-effect-setting-options__field--name") {{option.label}}
-          //- Option type select
-          div(v-if="option.type === 'select'"
-              class="text-effect-setting-options__field--select")
-            svg-icon(v-for="sel in option.select"
-              :key="`${option.key}-${sel.key}`"
-              :iconName="`${option.key}-${sel.key}`"
-              iconWidth="36px"
-              :class="{'selected': currentStyle[option.key] === sel.key }"
-              @click="handleSelectInput(option.key, sel.key)")
-          //- Option type range
-          template(v-if="option.type === 'range'")
-            input(class="text-effect-setting-options__field--number"
-              :value="getInputValue(currentStyle, option)"
-              :name="option.key"
-              :max="option.max"
-              :min="option.min"
-              :step="option.key === 'lineHeight' ? 0.01 : 1"
-              @change="(e)=>{handleRangeInputEvent(e, option);recordChange()}"
-              type="number")
-            input(class="text-effect-setting-options__field--range input__slider--range"
-              :value="getInputValue(currentStyle, option)"
-              :name="option.key"
-              :max="option.max"
-              :min="option.min"
-              :step="option.key === 'lineHeight' ? 0.01 : 1"
-              @input="(e)=>handleRangeInputEvent(e, option)"
-              @mousedown="setEffectFocus(true)"
-              @mouseup="setEffectFocus(false)"
-              v-ratio-change
-              type="range")
-          //- Option type color
-          color-btn(v-if="option.type === 'color'" size="25px"
-            :color="colorParser(currentStyle[option.key])"
-            :active="option.key === colorTarget && settingTextEffect"
-            @click="handleColorModal(currCategoryName, option.key)")
-          //- Option type img
-          div(v-if="option.type === 'img'"
-              class="text-effect-setting-options__field--img"
-              @click="chooseImg(option.key)")
-            img(:src="currentStyleImg")
-            div
-            svg-icon(iconName="replace" iconColor="white" iconWidth="16px")
-        div(class="text-effect-setting-options__field")
-          span
-          span(class="text-effect-setting-options__field--reset"
-              @click="resetTextEffect()") {{$t('NN0754')}}
+div(class="text-effect-setting")
+  div(class="text-effect-setting__title") {{ $t('NN0095') }}
+  //- Effect category: shadow, shape, bg and fill.
+  div(v-for="category in textEffects" :key="category.name"
+      class="text-effect-setting__category"
+      :selected="currCategoryName === category.name")
+    span(@click="switchTab(category.name)") {{category.label}}
+      svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="24px")
+    //- Effect icons and options.
+    collapse(:when="currCategoryName === category.name"
+            class="text-effect-setting__effects2d")
+      template(v-for="(effects1d, idx1d) in category.effects2d" :key="idx1d")
+        //- Effects, ex: hollow, splice or echo.
+        div(class="text-effect-setting__effects1d")
+          div(v-for="effect in effects1d"
+              :key="`${category.name}-${effect.key}`"
+              class="text-effect-setting__effect pointer"
+              :class="{'selected': getStyle(category).name === effect.key }"
+              @click="onEffectClick(category, effect)")
+            svg-icon(
+              :iconName="effectIcon(category, effect).name"
+              :iconWidth="effectIcon(category, effect).size"
+              iconColor="white"
+              v-hint="effect.label")
+            pro-item(v-if="effect.plan" theme="roundedRect")
+        //- Effect options.
+        div(v-if="getOptions(effects1d, category) && getOptions(effects1d, category)?.length !== 0"
+            class="text-effect-setting__options")
+          div(v-for="option in getOptions(effects1d, category)" :key="option.key"
+              class="text-effect-setting__option" :class="{disable: false}")
+            div(class="text-effect-setting__option--name") {{option.label}}
+            //- Option type select
+            div(v-if="option.type === 'select'"
+                class="text-effect-setting__option--select")
+              svg-icon(v-for="sel in option.select"
+                :key="`${option.key}-${sel.key}`"
+                :iconName="`${option.key}-${sel.key}`"
+                iconWidth="36px"
+                :class="{'selected': getStyle(category)[option.key] === sel.key }"
+                @click="handleSelectInput(option.key, sel.key)")
+            //- Option type range
+            template(v-if="option.type === 'range'")
+              input(class="text-effect-setting__option--number"
+                :value="getInputValue(getStyle(category), option)"
+                :name="option.key"
+                :max="option.max"
+                :min="option.min"
+                :step="option.key === 'lineHeight' ? 0.01 : 1"
+                @change="(e)=>{handleRangeInputEvent(e, option);recordChange()}"
+                type="number")
+              input(class="text-effect-setting__option--range input__slider--range"
+                :value="getInputValue(getStyle(category), option)"
+                :name="option.key"
+                :max="option.max"
+                :min="option.min"
+                :step="option.key === 'lineHeight' ? 0.01 : 1"
+                @input="(e)=>handleRangeInputEvent(e, option)"
+                @mousedown="setEffectFocus(true)"
+                @mouseup="setEffectFocus(false)"
+                v-ratio-change
+                type="range")
+            //- Option type color
+            color-btn(v-if="option.type === 'color' && getStyle(category)[option.key]" size="25px"
+              :color="colorParser(getStyle(category)[option.key])"
+              :active="option.key === colorTarget && settingTextEffect"
+              @click="handleColorModal(option)")
+            //- Option type img
+            div(v-if="option.type === 'img'"
+                class="text-effect-setting__option--img"
+                @click="chooseImg(option.key)")
+              img(:src="getStyleImg(category)")
+              div
+              svg-icon(iconName="replace" iconColor="white" iconWidth="16px")
+          div(class="text-effect-setting__option")
+            span
+            span(class="text-effect-setting__option--reset"
+                @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <!-- eslint-disable vue/no-unused-properties -->
@@ -84,7 +86,7 @@ import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
+import constantData, { IEffect, IEffectCategory, IEffectOption, IEffectOptionRange } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
@@ -97,6 +99,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
+import { Collapse } from 'vue-collapsed'
 import { mapState } from 'vuex'
 
 export default defineComponent({
@@ -104,38 +107,32 @@ export default defineComponent({
   components: {
     ColorBtn,
     ProItem,
+    Collapse,
   },
   emits: ['toggleColorPanel'],
   data() {
     return {
-      currTab: localStorageUtils.get('textEffectSetting', 'tab') as 'shadow'|'bg'|'shape'|'fill',
+      currTab: localStorageUtils.get('textEffectSetting', 'tab') as string,
       textEffects: constantData.textEffects(),
-      colorTarget: ''
+      colorTarget: '',
     }
   },
   computed: {
     ...mapState('text', {
       selectedTextProps: 'props'
     }),
-    currCategoryName(): 'shadow'|'bg'|'shape'|'fill' {
-      return ['shadow', 'bg', 'shape', 'fill'].includes(this.currTab)
-        ? this.currTab : 'shadow'
-    },
-    currCategory(): IEffectCategory {
-      return _.find(this.textEffects, ['name', this.currCategoryName]) as IEffectCategory
+    currCategoryName() {
+      return this.currTab
     },
     currentStyle(): Record<string, string> {
       const { styles } = textEffectUtils.getCurrentLayer()
-      if (!this.currCategory || !styles) return { name: 'none' }
+      if (!styles) return { name: 'none' }
       return {
         shadow: styles.textEffect,
         bg: styles.textBg,
         shape: styles.textShape,
         fill: styles.textFill,
-      }[this.currCategoryName] as Record<string, string> // Type incorrect
-    },
-    currentStyleImg(): string {
-      return textFillUtils.imgToSrc(textFillUtils.getImg(this.currentStyle))
+      }[this.currCategoryName] as Record<string, string> ?? {} // Type incorrect
     },
     settingTextEffect(): boolean {
       return colorUtils.currEvent === 'setTextEffectColor' &&
@@ -156,7 +153,7 @@ export default defineComponent({
         case 'text-book':
           return {
             name: `text-${category.name}-${effect.key}-${i18n.global.locale}`,
-            size: '56px',
+            size: '52px',
           }
         case 'custom-fill-img':
           return {
@@ -166,24 +163,37 @@ export default defineComponent({
         default:
           return {
             name: `text-${category.name}-${effect.key}`,
-            size: '56px',
+            size: '52px',
           }
       }
     },
-    handleColorModal(category: 'shadow'|'bg'|'shape'|'fill', key: string) {
-      const currColor = this.colorParser(this.currentStyle[key])
+    handleColorModal(option: IEffectOption) {
+      const currColor = this.colorParser(this.currentStyle[option.key])
 
-      this.colorTarget = key
+      this.colorTarget = option.key
       editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(currColor)
     },
     switchTab(category: 'shadow'|'bg'|'shape'|'fill') {
-      this.currTab = category
-      localStorageUtils.set('textEffectSetting', 'tab', category)
+      if (category === this.currTab) this.currTab = ''
+      else this.currTab = category
+      localStorageUtils.set('textEffectSetting', 'tab', this.currTab)
     },
-    getOptions(effects1d: IEffect[]) {
-      return _.find(effects1d, ['key', this.currentStyle.name])?.options
+    getStyle(category: IEffectCategory) {
+      const { styles } = textEffectUtils.getCurrentLayer()
+      return {
+        shadow: styles.textEffect,
+        bg: styles.textBg,
+        shape: styles.textShape,
+        fill: styles.textFill,
+      }[category.name] as Record<string, string> ?? {}
+    },
+    getStyleImg(category: IEffectCategory): string {
+      return textFillUtils.imgToSrc(textFillUtils.getImg(this.getStyle(category)))
+    },
+    getOptions(effects1d: IEffect[], category: IEffectCategory) {
+      return _.find(effects1d, ['key', this.getStyle(category).name])?.options
     },
     getInputValue(style: Record<string, string>, option: IEffectOptionRange) {
       if (['lineHeight', 'fontSpacing'].includes(option.key)) {
@@ -231,11 +241,11 @@ export default defineComponent({
           break
       }
     },
-    async onEffectClick(effect: IEffect): Promise<void> {
+    async onEffectClick(category: IEffectCategory, effect: IEffect): Promise<void> {
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
-      if (effect.key === 'custom-fill-img' && !this.currentStyleImg) {
+      if (effect.key === 'custom-fill-img' && !this.getStyleImg(category)) {
         this.chooseImg('customImg')
       }
     },
@@ -282,39 +292,47 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .text-effect-setting {
-  &-tabs {
-    @include caption-MD;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-    column-gap: 2.5px;
-    height: 36px;
+  text-align: left;
+  &__title {
+    @include text-H6;
+    color: setColor(blue-1);
+    margin: 15px 0;
+  }
+  &__category {
+    @include body-SM;
+    color: setColor(gray-1);
     > span {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      height: 100%;
-      &[selected=true] {
-        background-color: setColor(gray-6);
-      }
+      height: 33px;
+      cursor: pointer;
+    }
+    &[selected=true] .svg-chevron-down {
+      transform: scaleY(-1);
     }
   }
-  &__effects {
+  &__effects2d {
+    display: grid; // Prevent margin collapse
+    background: setColor(gray-6);
+    transition: all 0.5s ease-in-out
+  }
+  &__effects1d {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    column-gap: 7.5px;
-    width: 212px;
+    grid-template-columns: repeat(3, 56px);
+    gap: 20px;
+    margin: 10px auto;
+    width: 208px;
   }
   &__effect {
+    @include size(56px);
+    box-sizing: border-box;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-sizing: border-box;
-    margin-top: 10px;
-    border-radius: 3px;
     border: 2px solid transparent;
-    width: 60px;
-    height: 60px;
+    border-radius: 4px;
     background-color: white;
     .pro {
       left: 1px;
@@ -327,36 +345,52 @@ export default defineComponent({
       border-color: setColor(blue-1);
     }
   }
-  &-options {
-    @include body-SM;
+  &__options {
     display: grid;
-    gap: 10px;
-    width: 100%;
+    gap: 8px;
+    margin: 0 10px;
     padding: 10px 8px;
-    background: #fff;
+    background-color: white;
+    border-radius: 4px;
+    color: setColor(gray-2);
+    &:last-child {
+      margin-bottom: 10px;
+    }
   }
-  &-options__field {
+  &__option {
     display: grid;
     grid-template-columns: auto 1fr;
     justify-items: end;
-    row-gap: 10px;
+    row-gap: 4px;
+    &.disable {
+      > * {
+        color: setColor(gray-4);;
+      }
+      > *::-webkit-slider-thumb {
+        border: 2px solid setColor(gray-4);
+      }
+    }
+    &--range, &--img, &--select {
+      grid-column: 1/3;
+    }
     &--name {
       justify-self: start;
     }
-    &--options {
-      box-sizing: border-box;
-      width: 100px;
-      height: 25px;
-      padding: 0;
-    }
     &--number {
+      @include body-XS;
       box-sizing: border-box;
-      width: 35px;
-      height: 25px;
-      border: 1px solid setColor(gray-4);;
+      width: 30px;
+      height: 24px;
+      border: 1px solid setColor(gray-4);
       border-radius: 3px;
+      text-align: center;
+      color: setColor(gray-2);
     }
-    &--select {
+    &--range {
+      height: 16px;
+      margin-top: 6px;
+    }
+    &--select { // TODO
       width: 100%;
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -368,9 +402,6 @@ export default defineComponent({
         box-sizing: border-box;
         border: 1px solid setColor(blue-1);;
       }
-    }
-    &--range, &--img, &--select {
-      grid-column: 1/3;
     }
     &--img {
       position: relative;
@@ -401,10 +432,5 @@ export default defineComponent({
       cursor: pointer;
     }
   }
-}
-.action-bar {
-  padding: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 </style>
