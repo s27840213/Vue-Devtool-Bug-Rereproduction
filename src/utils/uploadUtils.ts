@@ -161,6 +161,7 @@ class UploadUtils {
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
+    inputNode.id = 'upload'
     inputNode.click()
 
     inputNode.addEventListener('change', (evt: Event) => {
