@@ -310,7 +310,7 @@ export default defineComponent({
   &__span {
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    // position: relative;
+    position: relative;
   }
   &__curve-text-in-editing {
     pointer-events: none;
