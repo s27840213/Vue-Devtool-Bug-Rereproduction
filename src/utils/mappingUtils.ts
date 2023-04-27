@@ -18,7 +18,7 @@ const iconFontAlign = ['text-align-left', 'text-align-center', 'text-align-right
 const iconLineTemplate = [...Array(12).keys()].slice(1).map((num: number) => {
   return `line-template-${num}`
 })
-const minMaxHash = {
+export const minMaxHash = {
   opacity: {
     min: 0,
     max: 100

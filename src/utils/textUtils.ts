@@ -7,6 +7,7 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { calcTmpProps } from '@/utils/groupUtils'
+import mappingUtils from '@/utils/mappingUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import Graphemer from 'graphemer'
 import _ from 'lodash'
@@ -20,7 +21,6 @@ import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
 import textShapeUtils from './textShapeUtils'
 import tiptapUtils from './tiptapUtils'
-import mappingUtils from '@/utils/mappingUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -34,11 +34,14 @@ class TextUtils {
   toRecordId: string
   toSetFlagId: string
   splitter: Graphemer = new Graphemer()
-  fieldRange: {
-    fontSize: { min: number, max: number }
-    lineHeight: { min: number, max: number }
-    fontSpacing: { min: number, max: number }
-    opacity: { min: number, max: number }
+
+  get fieldRange() {
+    return {
+      fontSize: mappingUtils.mappingMinMax('fontSize'),
+      lineHeight: mappingUtils.mappingMinMax('lineHeight'),
+      fontSpacing: mappingUtils.mappingMinMax('letterSpacing'),
+      opacity: mappingUtils.mappingMinMax('opacity'),
+    }
   }
 
   constructor() {
@@ -46,12 +49,6 @@ class TextUtils {
     this.observer = new IntersectionObserver(this.intersectionHandler.bind(this))
     this.toRecordId = ''
     this.toSetFlagId = ''
-    this.fieldRange = {
-      fontSize: mappingUtils.mappingMinMax('fontSize'),
-      lineHeight: mappingUtils.mappingMinMax('lineHeight'),
-      fontSpacing: mappingUtils.mappingMinMax('letterSpacing'),
-      opacity: mappingUtils.mappingMinMax('opacity')
-    }
 
     setInterval(() => {
       // ---------- snapshot current list in case that new divs are pushed into the list while deleting --------
