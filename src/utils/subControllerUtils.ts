@@ -20,6 +20,7 @@ export default class SubControllerUtils {
   private dblTapFlag = false
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
+  private _cursorDragEnd = null as unknown
   private get config(): ILayer { return this._config.config }
   private get primaryLayer(): IGroup | ITmp | IFrame { return this._config.primaryLayer }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
@@ -96,8 +97,12 @@ export default class SubControllerUtils {
     if (this.config.type === 'text') {
       this.posDiff.x = this.primaryLayer.styles.x
       this.posDiff.y = this.primaryLayer.styles.y
-      if (this.config?.active && this.config.contentEditable) return
-      else if (!this.config?.active) {
+      if (this.config?.active && this.config.contentEditable) {
+        layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { isDraggingCursor: true })
+        this._cursorDragEnd = this.onCursorDragEnd.bind(this)
+        eventUtils.addPointerEvent('pointerup', this._cursorDragEnd)
+        return
+      } else if (!this.config?.active) {
         // this.isControlling = true
         layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { contentEditable: false })
         this._onMouseup = this.onMouseup.bind(this)
@@ -108,6 +113,11 @@ export default class SubControllerUtils {
     }
     this._onMouseup = this.onMouseup.bind(this)
     eventUtils.addPointerEvent('pointerup', this._onMouseup)
+  }
+
+  onCursorDragEnd(e: PointerEvent) {
+    layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { isDraggingCursor: false })
+    eventUtils.removePointerEvent('pointerup', this._cursorDragEnd)
   }
 
   onMouseup(e: PointerEvent) {

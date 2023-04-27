@@ -112,7 +112,7 @@ import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
@@ -177,7 +177,7 @@ export default defineComponent({
       getPageSize: 'getPageSize'
     }),
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      return picWVUtils.inReviewMode
     },
     unitOptions(): string[] {
       return STR_UNITS

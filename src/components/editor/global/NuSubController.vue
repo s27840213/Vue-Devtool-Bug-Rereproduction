@@ -232,6 +232,9 @@ export default defineComponent({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
+    isFlipping(): boolean {
+      return this.config.isFlipping
+    },
     isTextEditing(): boolean {
       return !this.isControlling && this.config?.active
     },
@@ -321,7 +324,8 @@ export default defineComponent({
     },
     textBodyStyle() {
       const isTextFill = isITextFillConfig(this.config.styles.textFill)
-      const opacity = (this.isCurveText || this.isFlipped || isTextFill) && !this.config.contentEditable ? 0 : 1
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || isTextFill) &&
+        !this.config.contentEditable ? 0 : 1
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,

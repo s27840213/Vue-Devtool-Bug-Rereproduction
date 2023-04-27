@@ -7,6 +7,7 @@ import router from '@/router'
 import store from '@/store'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import Graphemer from 'graphemer'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
 import GeneralUtils from './generalUtils'
@@ -30,6 +31,7 @@ class TextUtils {
   trashDivs: HTMLDivElement[] = []
   toRecordId: string
   toSetFlagId: string
+  splitter: Graphemer = new Graphemer()
   fieldRange: {
     fontSize: { min: number, max: number }
     lineHeight: { min: number, max: number }
@@ -493,11 +495,8 @@ class TextUtils {
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
-          if (config.styles.writingMode.includes('vertical')) {
-            y = config.styles.y - (textHW.height - config.styles.height) / 2
-          } else {
-            x = config.styles.x - (textHW.width - config.styles.width) / 2
-          }
+          x = config.styles.x - (textHW.width - config.styles.width) / 2
+          y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
         LayerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit })
@@ -720,13 +719,13 @@ class TextUtils {
 
   async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
-    const { widthLimit, otherDimension } = await this.autoResizeCore(config, initSize)
+    const { widthLimit, otherDimension, loops } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
     const firstPText = config.paragraphs[0].spans.map(span => span.text).join('')
     if (router.currentRoute.value.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
-      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText}`)
+      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText} loops: ${loops}`)
     }
     if (limitDiff / initSize.widthLimit > 0.20) {
       return initSize.widthLimit
@@ -737,7 +736,8 @@ class TextUtils {
 
   async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<{
     widthLimit: number,
-    otherDimension: number
+    otherDimension: number,
+    loops: number
   }> {
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const scale = config.styles.scale
@@ -764,19 +764,21 @@ class TextUtils {
         if (minDiffWidLimit !== -1) {
           return {
             widthLimit: minDiffWidLimit,
-            otherDimension: minDiffDimension
+            otherDimension: minDiffDimension,
+            loops: Math.abs(direction)
           }
         } else {
           return {
             widthLimit: initSize.widthLimit,
-            otherDimension: originDimension
+            otherDimension: originDimension,
+            loops: Math.abs(direction)
           }
         }
       }
       prevDiff = currDiff
       if (autoDimension - originDimension > 5 * scale) {
         if (direction < 0) break
-        if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
+        if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
         widthLimit += scale
         direction += 1
         autoSize = await this.getTextHWAsync(config, widthLimit)
@@ -784,7 +786,7 @@ class TextUtils {
       }
       if (originDimension - autoDimension > 5 * scale) {
         if (direction > 0) break
-        if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
+        if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
         widthLimit -= scale
         direction -= 1
         autoSize = await this.getTextHWAsync(config, widthLimit)
@@ -794,7 +796,8 @@ class TextUtils {
     }
     return {
       widthLimit,
-      otherDimension: autoDimension
+      otherDimension: autoDimension,
+      loops: Math.abs(direction)
     }
   }
 
@@ -912,14 +915,19 @@ class TextUtils {
       })(),
       ...fontList.slice(1).map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem))
     ]) // wait until the css files of fonts are loaded
-    const allCharacters = paragraph.spans.flatMap(s => s.text.split(''))
+    const allCharacters = paragraph.spans.flatMap(s => this.splitter.splitGraphemes(s.text))
     await Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
   }
 
   async untilFontLoadedForChar(char: string, fontList: string[]): Promise<void> {
-    for (const font of fontList) {
-      const fontFileList = await window.document.fonts.load(`14px ${font}`, char)
-      if (fontFileList.length !== 0) return
+    try {
+      for (const font of fontList) {
+        const fontFileList = await window.document.fonts.load(`14px ${font}`, char)
+        if (fontFileList.length !== 0) return
+      }
+    } catch (error) {
+      console.error(error)
+      throw error
     }
   }
 

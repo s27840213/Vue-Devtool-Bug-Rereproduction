@@ -11,6 +11,7 @@ p(class="nu-curve-text__p" :style="pStyle()")
 
 <script lang="ts">
 import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
@@ -63,8 +64,9 @@ export default defineComponent({
     this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(async () => {
-        this.resizeCallback()
+        await this.resizeCallback()
         this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+        generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
       }, 100) // for the delay between font loading and dom rendering
     })
   },

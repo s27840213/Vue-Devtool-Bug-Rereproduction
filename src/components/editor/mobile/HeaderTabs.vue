@@ -36,7 +36,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -96,10 +96,10 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       hasBleed: 'getHasBleed',
-      userInfo: webViewUtils.appendModuleName('getUserInfo'),
+      userInfo: picWVUtils.appendModuleName('getUserInfo'),
     }),
     rootStyles(): {[key: string]: string} {
-      const basePadding = webViewUtils.inBrowserMode ? 10.7 : 8
+      const basePadding = picWVUtils.inBrowserMode ? 10.7 : 8
       return {
         paddingTop: `${this.userInfo.statusBarHeight + basePadding}px`,
         paddingBottom: `${basePadding}px`,
@@ -245,7 +245,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .header-bar {
-  @include size(100%);
+  height: 26px;
   position: relative;
   background-color: setColor(nav);
   display: flex;
@@ -253,7 +253,6 @@ export default defineComponent({
   justify-content: space-between;
   padding-left: 16px;
   padding-right: 16px;
-  box-sizing: border-box;
   z-index: setZindex("header");
   -webkit-touch-callout: none;
   -webkit-user-select: none;

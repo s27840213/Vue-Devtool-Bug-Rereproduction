@@ -113,6 +113,9 @@ export default defineComponent({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
+    isFlipping(): boolean {
+      return this.config.isFlipping
+    },
     isLocked(): boolean {
       return this.config.locked
     },
@@ -184,7 +187,7 @@ export default defineComponent({
       const { active, contentEditable } = this.config
       const isTextFill = isITextFillConfig(this.config.styles.textFill)
       if (active && !this.isLocked && !this.inPreview) {
-        if (this.isCurveText || this.isFlipped || isTextFill) {
+        if (this.isCurveText || this.isFlipped || this.isFlipping || isTextFill) {
           return contentEditable ? 0.2 : 1
         } else {
           return 0
@@ -238,11 +241,8 @@ export default defineComponent({
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
-          if (config.styles.writingMode.includes('vertical')) {
-            y = config.styles.y - (textHW.height - config.styles.height) / 2
-          } else {
-            x = config.styles.x - (textHW.width - config.styles.width) / 2
-          }
+          x = config.styles.x - (textHW.width - config.styles.width) / 2
+          y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
         // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
@@ -268,6 +268,9 @@ export default defineComponent({
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(async () => {
           await this.resizeCallback()
+          if (!this.isCurveText) {
+            generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
+          }
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawTextBg()

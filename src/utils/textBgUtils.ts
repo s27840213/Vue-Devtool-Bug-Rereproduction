@@ -99,9 +99,12 @@ export class Rect {
           span.appendChild(document.createElement('br'))
           p.appendChild(span)
         } else {
-          const fixedWidth = textBgUtils.isFixedWidth(config.styles);
-          (splitSpan ? [...spanData.text] : [spanData.text]).forEach(t => {
-            const isComposingText = spanData.text.length > 1
+          const fixedWidth = textBgUtils.isFixedWidth(config.styles)
+          const textArray = splitSpan
+            ? textUtils.splitter.splitGraphemes(spanData.text)
+            : [spanData.text]
+          textArray.forEach(t => {
+            const isComposingText = textUtils.splitter.countGraphemes(spanData.text) > 1
             const fixedWidthStyle = fixedWidth && isComposingText ? {
               letterSpacing: 0,
               display: 'inline-block',
@@ -576,7 +579,7 @@ class Gooey {
 }
 
 function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
-  let [href, color] = ['', '']
+  let [href, color] = [textBg.name as string, textBg.color]
   switch (textBg.name) {
     case 'rainbow':
       href = 'rainbow-circle'
@@ -588,24 +591,34 @@ function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
       break
     case 'circle':
       href = 'rainbow-circle'
-      color = textBg.color
       break
     case 'cloud':
       href = `cloud${index % 4}`
-      color = textBg.color
       break
     case 'penguin':
       href = `penguin${index % 5}`
-      color = textBg.color
       break
     case 'planet':
       href = `planet${index % 5}`
-      color = textBg.color
+      break
+    case 'heart':
+      href = 'solid-heart'
+      color = ['#BFE29A', '#ABDAED', '#FFBDC5', '#FFE299', '#CDBFDD', '#9BBCDD', '#F2C3AF'][index % 7]
+      break
+    case 'heart-warm':
+      href = 'solid-heart'
+      color = ['#9B5642', '#E48479', '#F7C3B0', '#D6805B', '#D45847', '#FAAE9F', '#F7C3B0'][index % 7]
+      break
+    case 'heart-custom':
+      href = 'solid-heart'
+      break
+    case 'gummybear':
+      href = `gummybear${index % 5}`
+      break
+    case 'leaf':
+      href = `leaf${index % 5}`
       break
     default: // text-book
-      href = textBg.name
-      color = textBg.color
-      break
   }
   return { href, color }
 }
@@ -621,6 +634,15 @@ class TextBg {
     textEffectUtils.convertColor2rgba(color, opacity)
 
   getDefaultEffects() {
+    const letterBGDefault = {
+      xOffset200: 0,
+      yOffset200: 0,
+      size: 100,
+      opacity: 100,
+      fixedWidth: true,
+      color: '', // no effect
+    } as const
+
     return {
       none: {},
       'square-borderless': {
@@ -691,61 +713,57 @@ class TextBg {
         color: 'fontColorL+-40/BC/00'
       },
       // A part of additional default ITextLetterBg setting is in setExtraDefaultAttrs func.
-      rainbow: {
-        xOffset200: 0,
-        yOffset200: 0,
-        size: 100,
-        opacity: 100,
-        fixedWidth: true,
-        color: '', // no effect
-      },
-      'rainbow-dark': {
-        xOffset200: 0,
-        yOffset200: 0,
-        size: 100,
-        opacity: 100,
-        fixedWidth: true,
-        color: '', // no effect
-      },
+      rainbow: letterBGDefault,
+      'rainbow-dark': letterBGDefault,
       circle: {
-        xOffset200: 0,
-        yOffset200: 0,
-        size: 100,
-        opacity: 100,
-        fixedWidth: true,
+        ...letterBGDefault,
         color: '#EEDFD1',
       },
       cloud: {
-        xOffset200: 0,
-        yOffset200: 0,
+        ...letterBGDefault,
         size: 180,
-        opacity: 100,
         fixedWidth: false, //!
         color: '#D3E2E3',
       },
       'text-book': {
-        xOffset200: 0,
-        yOffset200: 0,
+        ...letterBGDefault,
         size: 125,
-        opacity: 100,
-        fixedWidth: true,
         color: '#93BAA6',
       },
       penguin: {
-        xOffset200: 0,
+        ...letterBGDefault,
         yOffset200: -1,
         size: 200,
-        opacity: 100,
-        fixedWidth: true,
-        color: '', // no effect
       },
       planet: {
-        xOffset200: 0,
-        yOffset200: 0,
+        ...letterBGDefault,
         size: 135,
-        opacity: 100,
-        fixedWidth: true,
-        color: '', // no effect
+      },
+      heart: {
+        ...letterBGDefault,
+        yOffset200: -3,
+        size: 135,
+      },
+      'heart-warm': {
+        ...letterBGDefault,
+        yOffset200: -3,
+        size: 135,
+      },
+      'heart-custom': {
+        ...letterBGDefault,
+        yOffset200: -3,
+        size: 135,
+        color: '#FFB6C4',
+      },
+      gummybear: {
+        ...letterBGDefault,
+        yOffset200: -15,
+        size: 150,
+      },
+      leaf: {
+        ...letterBGDefault,
+        yOffset200: -7,
+        size: 165,
       }
     }
   }
@@ -759,6 +777,11 @@ class TextBg {
       'text-book': { lineHeight: 1.96, fontSpacing: 665 },
       penguin: { lineHeight: 1.96, fontSpacing: 800 },
       planet: { lineHeight: 1.96, fontSpacing: 410 },
+      heart: { lineHeight: 1.96, fontSpacing: 505 },
+      'heart-warm': { lineHeight: 1.96, fontSpacing: 505 },
+      'heart-custom': { lineHeight: 1.96, fontSpacing: 505 },
+      gummybear: { lineHeight: 1.96, fontSpacing: 800 },
+      leaf: { lineHeight: 1.96, fontSpacing: 800 },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
@@ -961,20 +984,24 @@ class TextBg {
         tag: 'svg',
         attrs: { width, height },
         style: { opacity },
-        content: pos.map(p => ({
-          tag: 'use',
-          attrs: {
-            href: `#${p.href}`,
-            transform,
-            width: p.height * scale,
-            height: p.height * scale,
-            // Scale will let width be (scale-1)*p.height times larger than before,
-            // So -(scale-1)*p.height/2 to justify it to center.
-            x: p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100,
-            y: p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100,
-          },
-          style: { color: p.color }
-        }))
+        content: pos.map(p => {
+          let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
+          let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
+          if (vertical) [x, y] = [y, x]
+          return {
+            tag: 'use',
+            attrs: {
+              href: `#${p.href}`,
+              width: p.height * scale,
+              height: p.height * scale,
+              // Scale will let width be (scale-1)*p.height times larger than before,
+              // So -(scale-1)*p.height/2 to justify it to center.
+              x: p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100,
+              y: p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100,
+            },
+            style: { color: p.color }
+          }
+        })
       }
     } else return null
   }
@@ -1108,7 +1135,8 @@ class TextBg {
     if (newSplitedSpan) { // Split span, another one in tiptapUtils.toIParagraph
       paragraphs.forEach(p => {
         const newSpans = p.spans.flatMap(span =>
-          [...span.text].map(t => ({ text: t, styles: span.styles }))
+          textUtils.splitter.splitGraphemes(span.text)
+            .map(t => ({ text: t, styles: span.styles }))
         )
         p.spans = newSpans.length !== 0 ? newSpans : p.spans
       })

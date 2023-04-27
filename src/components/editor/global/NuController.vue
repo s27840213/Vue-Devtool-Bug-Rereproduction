@@ -182,7 +182,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -381,6 +381,9 @@ export default defineComponent({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
+    isFlipping(): boolean {
+      return this.config.isFlipping
+    },
     // isTextEditing(): boolean {
     //   // return !this.isControlling && this.contentEditable
     //   // @Test
@@ -388,6 +391,9 @@ export default defineComponent({
     // },
     contentEditable(): boolean {
       return this.config.contentEditable
+    },
+    isDraggingCursor(): boolean {
+      return this.config.isDraggingCursor
     },
     isMoving(): boolean {
       return this.config.moving
@@ -615,12 +621,12 @@ export default defineComponent({
         transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
-        ...(this.contentEditable ? { zIndex: 100 } : {})
+        ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
     textBodyStyle() {
       const isTextFill = isITextFillConfig(this.config.styles.textFill)
-      const opacity = (this.isCurveText || this.isFlipped || isTextFill) && !this.contentEditable ? 0 : 1
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || isTextFill) && !this.contentEditable ? 0 : 1
       return {
         width: '100%',
         height: '100%',

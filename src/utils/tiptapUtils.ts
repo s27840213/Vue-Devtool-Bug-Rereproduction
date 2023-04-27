@@ -152,7 +152,7 @@ class TiptapUtils {
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
-          const config = textEffectUtils.getCurrentLayer()
+          const config = layerUtils.getCurrConfig as IText
           const splitedSpan = textBgUtils.isSplitedSpan(config.styles)
           const textEffectStyles = textEffectUtils.convertTextEffect(config)
           pObj.content = spans.map((s, sIndex) => {
@@ -289,7 +289,7 @@ class TiptapUtils {
       const spans: ISpan[] = []
       const pContent = splitedSpan && paragraph.content && !this.editor.view.composing
         // Split span for fixedWidth, another one in textBgUtils.setTextBg
-        ? paragraph.content.flatMap(span => [...span.text]
+        ? paragraph.content.flatMap(span => textUtils.splitter.splitGraphemes(span.text)
           .map(t => Object.assign({}, span, { text: t })))
         : paragraph.content
       for (const span of pContent ?? []) {
@@ -300,10 +300,7 @@ class TiptapUtils {
             sStyles.pre = undefined
             isSetContentRequired = true
           }
-          if (span.text.includes('\ufe0e') || span.text.includes('\ufe0f')) {
-            isSetContentRequired = true
-          }
-          spans.push({ text: span.text.replace(/[\ufe0e\ufe0f]/g, ''), styles: sStyles })
+          spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
           let sStyles: ISpanStyle
@@ -317,7 +314,7 @@ class TiptapUtils {
             sStyles.pre = undefined
             isSetContentRequired = true
           }
-          spans.push({ text: span.text.replace(/[\ufe0e\ufe0f]/g, ''), styles: sStyles })
+          spans.push({ text: span.text, styles: sStyles })
         }
       }
       if (spans.length === 0) {
@@ -486,7 +483,7 @@ class TiptapUtils {
     const item: { [string: string]: any } = {}
     item[key] = value
     this.agent(editor => {
-      if (layerUtils.getCurrLayer.contentEditable) {
+      if (this.isCurrLayerContenteditable()) {
         editor.chain().updateAttributes('paragraph', item).run()
         const ranges = editor.state.selection.ranges
         if (ranges.length > 0) {
