@@ -471,7 +471,7 @@ export default defineComponent({
     }
     &::v-deep .tags__flex-container-mobile {
       width: max-content;
-      margin-right: 42px;
+      padding-right: 42px;
     }
   }
   &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
