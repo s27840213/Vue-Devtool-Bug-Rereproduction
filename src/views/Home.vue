@@ -159,7 +159,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       isLogin: 'user/isLogin',
-      inBrowserMode: 'webView/getInDevMode',
+      inBrowserMode: 'webView/getInBrowserMode',
       _themeList: 'getShuffledThemesIds',
       themes: 'getMainHiddenThemes'
     }),
