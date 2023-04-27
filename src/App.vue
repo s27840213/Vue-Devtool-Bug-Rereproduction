@@ -101,7 +101,7 @@ export default defineComponent({
       showAllAdminTool: 'user/showAllAdminTool',
       userInfo: picWVUtils.appendModuleName('getUserInfo'),
       browserInfo: 'user/getBrowserInfo',
-      inBrowserMode: 'webView/getInDevMode'
+      inBrowserMode: 'webView/getInBrowserMode'
     }),
     currLocale(): string {
       return localeUtils.currLocale()

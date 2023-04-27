@@ -131,7 +131,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       mydesignData: 'design/getAllDesigns',
-      inBrowserMode: 'webView/getInDevMode'
+      inBrowserMode: 'webView/getInBrowserMode'
     }),
     itemContainerStyles() {
       return this.gridMode ? {
