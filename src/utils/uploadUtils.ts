@@ -205,6 +205,7 @@ class UploadUtils {
       const img = new Image()
       img.src = evt.target?.result as string
       img.onload = (evt) => {
+        store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: true })
         store.commit('file/ADD_PREVIEW', {
           width: img.width,
           height: img.height,
