@@ -40,7 +40,8 @@ div(class="search-bar" :class="{vivisticker: vivisticker !== 'none'}")
   div(v-if="expanded !== undefined" class="search-bar__switch")
     //- placeholder
     span(class="placeholder") {{ $t('NN0203') }}
-    div(class="search-bar__switch__text" :class="{collapsed}" @click="$emit('update:expanded', false)") {{ $t('NN0203') }}
+    div(class="search-bar__switch__text" :class="{collapsed}" @click="$emit('update:expanded', false)")
+      span {{ $t('NN0203') }}
     div(class="search-bar__switch__icon" :class="{collapsed}" @click="$emit('update:expanded', true)")
       svg-icon(class="pointer"
             iconName="search"
@@ -185,6 +186,10 @@ export default defineComponent({
       transform: translate(50%, -50%);
       white-space: nowrap;
       pointer-events: all;
+      padding: 0 10px;
+      height: 100%;
+      display: flex;
+      align-items: center;
       &.collapsed {
         pointer-events: none;
         visibility: hidden;
@@ -195,7 +200,6 @@ export default defineComponent({
     display: grid;
     grid-template-columns: 1fr auto;
     &.vivisticker {
-      column-gap: v-bind("expanded === undefined ? '0' : '10px'");
       clip-path: inset(0 0 0 0);
       transition: clip-path 200ms 100ms ease-in-out;
       transform: translateZ(0);
@@ -271,6 +275,7 @@ export default defineComponent({
   height: 42px;
   background-color: setColor(black-3);
   border-radius: 10px;
+  margin-right: 10px;
   & > svg.vivisticker {
     transition: none;
     &.favorite {
@@ -279,6 +284,7 @@ export default defineComponent({
   }
 }
 .placeholder {
+  padding: 0 10px;
   visibility: hidden;
 }
 </style>
