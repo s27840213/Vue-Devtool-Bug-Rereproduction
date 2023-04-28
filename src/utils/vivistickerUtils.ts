@@ -718,7 +718,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   async getState(key: string): Promise<{ [key: string]: any } | undefined> {
     if (this.isStandaloneMode) return
-    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState')
+    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
   }
 
   getStateResult(data: { key: string, value: string }) {
@@ -959,7 +959,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getIosImg(limit = 1): Promise<Array<string>> {
-    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', 60000) as IIosImgData
+    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', { timeout: 60000 }) as IIosImgData
     return images
   }
 

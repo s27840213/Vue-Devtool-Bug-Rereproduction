@@ -77,7 +77,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
 
   async callIOSAsAPI(type: string, message: any, event: string, {
     timeout = 5000, retry = false, retryTimes = 0, timeoutValue = undefined as WEBVIEW_API_RESULT
-  }): Promise<WEBVIEW_API_RESULT> {
+  } = {}): Promise<WEBVIEW_API_RESULT> {
     this.sendToIOS(type, message)
     let result: WEBVIEW_API_RESULT
     if (timeout === -1) {
