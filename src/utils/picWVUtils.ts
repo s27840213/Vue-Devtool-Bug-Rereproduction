@@ -161,7 +161,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
       }
       await store.dispatch('user/updateUser', {
         ...data,
-        app: 0,
+        app: this.inBrowserMode ? 0 : 1,
         country
         // If inBrowserMode, country = undefined,
         // otherwise country will be provided in arguments when called from getUserInfo
