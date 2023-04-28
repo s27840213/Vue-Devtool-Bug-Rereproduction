@@ -113,6 +113,7 @@ export class MovingUtils {
   }
 
   pageMoveStart(e: PointerEvent) {
+    if (store.getters['mobileEditor/getIsPinchingEditor']) return
     console.warn('page move start')
     // this.initPageTranslate.x = pageUtils.getCurrPage.x
     // this.initPageTranslate.y = pageUtils.getCurrPage.y
@@ -126,6 +127,10 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
+    if (store.getters['mobileEditor/getIsPinchingEditor']) {
+      this.removeListener()
+      return
+    }
     window.requestAnimationFrame(() => {
       // console.log('page moving', this.randId)
       this.pageMovingHandler(e)
