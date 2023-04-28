@@ -554,10 +554,8 @@ export default defineComponent({
         if (this.config.type === LayerType.text) {
           // styles.width = `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
           // styles.height = `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
-          styles.width = `${this.config.styles.width}px`
-          styles.height = `${this.config.styles.height}px`
-          styles.width = `${this.config.styles.initWidth}px`
-          styles.height = `${this.config.styles.initHeight}px`
+          styles.width = `${this.config.styles.width / this.config.styles.scale}px`
+          styles.height = `${this.config.styles.height / this.config.styles.scale}px`
         } else {
           styles.width = `${this.config.styles.initWidth * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
           styles.height = `${this.config.styles.initHeight * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`

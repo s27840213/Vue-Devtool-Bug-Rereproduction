@@ -58,7 +58,7 @@ import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-const MAX_SCALE = 500
+const MAX_SCALE = 300
 
 export default defineComponent({
   emits: [],
