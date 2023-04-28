@@ -16,7 +16,7 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
-  emits: ['menuAction', 'back', 'clear', 'close', 'push'],
+  emits: ['send', 'close'],
   directives: {
     clickOutside: vClickOutside.directive
   },
