@@ -1,5 +1,5 @@
 import { IAsset } from '@/interfaces/module'
-import { IMyDesign, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IMyDesign, IPayment, IPaymentPending, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
@@ -35,8 +35,8 @@ interface IViviStickerState {
   editingAssetInfo: { [key: string]: any },
   selectedDesigns: { [key: string]: IMyDesign },
   modalInfo: { [key: string]: any },
-  prices: IPrices,
-  expireDate: string,
+  payment: IPayment,
+  uuid: string,
   loadedFonts: { [key: string]: true }
 }
 
@@ -83,18 +83,26 @@ const getDefaultState = (): IViviStickerState => ({
   editingAssetInfo: {},
   selectedDesigns: {},
   modalInfo: {},
-  prices: {
-    currency: '',
-    monthly: {
-      value: NaN,
-      text: ''
+  payment: {
+    subscribe: false,
+    prices: {
+      currency: '',
+      monthly: {
+        value: NaN,
+        text: ''
+      },
+      annually: {
+        value: NaN,
+        text: ''
+      },
     },
-    annually: {
-      value: NaN,
-      text: ''
-    },
+    pending: {
+      info: true,
+      purchase: false,
+      restore: false
+    }
   },
-  expireDate: '',
+  uuid: '',
   loadedFonts: {}
 })
 
@@ -205,6 +213,18 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getLoadedFonts(state: IViviStickerState): { [key: string]: true } {
     return state.loadedFonts
+  },
+  getPrices(state: IViviStickerState): IPrices {
+    return state.payment.prices
+  },
+  getIsPaymentPending(state) {
+    return Object.entries(state.payment.pending).some(([key, value]) => value)
+  },
+  getIsSubscribed(state: IViviStickerState): boolean {
+    return state.payment.subscribe
+  },
+  getUuid(state: IViviStickerState): string {
+    return state.uuid
   }
 }
 
@@ -314,11 +334,18 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_modalInfo(state: IViviStickerState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
   },
-  SET_prices(state: IViviStickerState, prices: IPrices) {
-    state.prices = prices
+  UPDATE_payment(state: IViviStickerState, data: Partial<IPayment>) {
+    Object.entries(data).forEach(([key, value]) => {
+      (state.payment as any)[key] = value
+    })
   },
-  SET_expireDate(state: IViviStickerState, expireDate: string) {
-    state.expireDate = expireDate
+  SET_paymentPending(state: IViviStickerState, data: Record<keyof IPaymentPending, boolean>) {
+    for (const item of Object.entries(data)) {
+      state.payment.pending[item[0] as keyof IPaymentPending] = item[1]
+    }
+  },
+  SET_uuid(state: IViviStickerState, uuid: string) {
+    state.uuid = uuid
   },
   SET_loadedFonts(state: IViviStickerState, loadedFonts: { [key: string]: true }) {
     state.loadedFonts = loadedFonts

@@ -2,7 +2,7 @@
 div(class="payment" v-touch @swipe="handleSwipe")
   carousel(
     :items="carouselItems"
-    :itemWidth="windowSize.width"
+    :itemWidth="containerWidth"
     :initIndex="carouselItems.findIndex(item => item.key === target)"
     enableSwipe
     @change="handleImageChange")
@@ -22,7 +22,7 @@ div(class="payment" v-touch @swipe="handleSwipe")
     div(class="payment__content__plans")
       div(v-for="btnPlan in btnPlans" class="payment__btn-plan"
         :key="btnPlan.key"
-        :class="{selected: btnPlan.key === planSelected}"
+        :class="{selected: btnPlan.key === planSelected, disabled: pending.purchase}"
         @tap="handleBtnPlanClick(btnPlan.key)")
         svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
         div(v-else class="payment__btn-plan__radio")
@@ -32,15 +32,16 @@ div(class="payment" v-touch @swipe="handleSwipe")
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub") {{ btnPlan.subTitle }}
           div(class="payment__btn-plan__content__price") {{ btnPlan.price }}
             div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__price__tag") {{ btnPlan.tag }}
-    div(class="payment__btn-subscribe" @touchend="handleBtnSubscribeClick")
-      span {{ txtBtnSubscribe }}
-    div(class="payment__footer")
+    div(class="payment__btn-subscribe" :class="{pending: pending.purchase}" @touchend="handleSubscribe(planSelected)")
+      svg-icon(v-if="pending.purchase" class="spinner" iconName="spiner" iconWidth="20px")
+      div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
+    div(class="payment__footer" :class="{disabled: pending.purchase}")
       template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(@tap="footerLink.action") {{ footerLink.title }}
-  div(class="payment__panel" :class="{close: !isPanelUp}" ref="panel")
+  div(class="payment__panel" :class="{close: !isPanelUp, disabled: pending.purchase}" ref="panel")
     div(class="payment__panel__chevron" @tap="togglePanel()" @swipeup="togglePanel(true)" @swipedown="togglePanel(false)")
-      svg-icon(iconName="chevron-up" iconWidth="14px" iconColor="white")
+      svg-icon(iconName="chevron-up" iconWidth="14px")
     div(class="payment__panel__title") {{ $t('STK0042') }}
     div(class="payment__panel__comparison")
       div(class="payment__panel__comparison__title first-column") {{ $t('STK0043') }}
@@ -55,15 +56,20 @@ div(class="payment" v-touch @swipe="handleSwipe")
         div(class="payment__panel__comparison__item")
           svg-icon(v-if="comparison.pro" iconName="vivisticker-check" iconWidth="20px" iconColor="white")
           template(v-else) -
+  Transition(name="fade")
+    div(v-if="pending.info || pending.restore" class="payment__spinner")
+      svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
 </template>
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
+import { IPaymentPending, IPrices } from '@/interfaces/vivisticker'
+import networkUtils from '@/utils/networkUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
-import { mapMutations, mapState } from 'vuex'
+import { PropType, defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface CarouselItem {
   key: IViviStickerProFeatures
@@ -76,21 +82,6 @@ interface IComparison {
   free: boolean,
   pro: boolean
 }
-
-const PRICES = {
-  tw: {
-    monthly: 140,
-    annually: 799
-  },
-  us: {
-    monthly: 4.99,
-    annually: 26.90
-  },
-  jp: {
-    monthly: 600,
-    annually: 3590
-  }
-} as {[key: string]: { monthly: number, annually: number }}
 
 export default defineComponent({
   components: {
@@ -129,21 +120,17 @@ export default defineComponent({
         {
           key: 'restorePurchase',
           title: this.$t('STK0045'),
-          action: this.handleRestorePurchaseClick
+          action: () => this.handleSubscribe('restore', 5000)
         },
         {
           key: 'termsOfService',
           title: this.$t('NN0160'),
-          action: () => {
-            window.open(this.$t('STK0053'), '_blank')
-          }
+          action: () => window.open(this.$t('STK0053'), '_blank')
         },
         {
           key: 'privacyPolicy',
           title: this.$t('NN0161'),
-          action: () => {
-            window.open(this.$t('STK0052'), '_blank')
-          }
+          action: () => window.open(this.$t('STK0052'), '_blank')
         }
       ],
       comparisons: [
@@ -170,30 +157,31 @@ export default defineComponent({
     ...mapState({
       windowSize: 'windowSize',
       isTablet: 'isTablet',
-      isLandscape: 'isLandscape',
+      isLandscape: 'isLandscape'
+    }),
+    ...mapState('vivisticker', {
+      pending: (state: any) => state.payment.pending as IPaymentPending,
+    }),
+    ...mapGetters({
+      prices: 'vivisticker/getPrices',
+      isPaymentPending: 'vivisticker/getIsPaymentPending',
     }),
     txtBtnSubscribe() {
       return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
     },
-    localizedPrice(): {monthly: string, annually: string} {
-      const locale = this.$i18n.locale
-      return {
-        monthly: this.localizePrice(PRICES[locale].monthly, locale),
-        annually: this.localizePrice(PRICES[locale].annually, locale)
-      }
-    },
     localizedTag(): string {
-      const locale = this.$i18n.locale
-      const price = round(PRICES[locale].annually / 12, locale === 'us' ? 2 : 0)
-      switch (locale) {
-        case 'tw':
+      if (!this.prices) return ''
+      const prices = this.prices as IPrices
+      const currency = prices.currency
+      const price = round(prices.annually.value / 12, currency === 'TWD' || currency === 'JPY' ? 0 : 2)
+      if (isNaN(price)) return ''
+      switch (currency) {
+        case 'TWD':
           return `${price}元 / 月`
-        case 'us':
-          return `$${price} / Mo`
-        case 'jp':
+        case 'JPY':
           return `¥${price}円 / 月額`
         default:
-          return price.toString()
+          return `$${price} / Mo`
       }
     },
     btnPlans() {
@@ -202,25 +190,34 @@ export default defineComponent({
           key: 'monthly',
           title: this.$t('NN0514'),
           subTitle: '',
-          price: this.localizedPrice.monthly,
+          price: this.prices.monthly.text,
           tag: ''
         },
         {
           key: 'annually',
           title: this.$t('NN0515'),
           subTitle: this.$t('STK0048', { day: 3 }),
-          price: this.localizedPrice.annually,
+          price: this.prices.annually.text,
           tag: this.localizedTag
         }
       ]
     },
+    containerWidth() {
+      return this.isTablet && this.isLandscape ? round(this.windowSize.width * 0.44) : this.windowSize.width // round to prevent subpixel problem
+    },
+    containerPadding() {
+      return (this.windowSize.width - this.containerWidth) / 2
+    },
     padding() {
-      return this.isTablet ? '2.8%' : '24px'
+      return this.isTablet ? `${this.containerWidth * 0.028}px` : '24px'
+    },
+    panelPadding() {
+      return `${this.containerPadding + (this.isTablet ? this.containerWidth * 0.028 : 24)}px`
     }
   },
   methods: {
     ...mapMutations({
-      setFullPageConfig: 'vivisticker/SET_fullPageConfig'
+      setPaymentPending: 'vivisticker/SET_paymentPending'
     }),
     handleImageChange(index: number) {
       this.idxCurrImg = index
@@ -228,11 +225,19 @@ export default defineComponent({
     handleBtnPlanClick(key: string) {
       this.planSelected = key
     },
-    handleBtnSubscribeClick() {
-      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: this.planSelected })
-    },
-    handleRestorePurchaseClick() {
-      vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'restore' })
+    handleSubscribe(option: string, timeout?: number) {
+      if (!networkUtils.check()) {
+        networkUtils.notifyNetworkError()
+        return
+      }
+      if (this.isPaymentPending) return
+      this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
+      vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
+      if (timeout) {
+        setTimeout(() => {
+          this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: false })
+        }, timeout)
+      }
     },
     handleSwipe(e: AnyTouchEvent) {
       e.stopPropagation()
@@ -245,23 +250,6 @@ export default defineComponent({
       }
       this.isPanelUp = !this.isPanelUp
     },
-    // TODO
-    // eslint-disable-next-line vue/no-unused-properties
-    handleShowWelcome() {
-      this.setFullPageConfig({ type: 'welcome' })
-    },
-    localizePrice(price: number, locale: string): string {
-      switch (locale) {
-        case 'tw':
-          return `${price}元`
-        case 'us':
-          return `$${price}`
-        case 'jp':
-          return `¥${price}円(税込)`
-        default:
-          return price.toString()
-      }
-    },
   }
 })
 </script>
@@ -269,15 +257,19 @@ export default defineComponent({
 <style lang="scss" scoped>
 .payment {
   @include size(100%);
+  @include no-scrollbar;
   display: flex;
   flex-direction: column;
   font-family: 'Poppins';
+  overflow-x: hidden;
+  width: v-bind("containerWidth + 'px'");
+  margin: 0 auto;
   &__carousel-item {
     display: flex;
     justify-content: center;
     width: inherit;
-    height: 75vw;
-    max-height: v-bind("isLandscape ? '50vh' : 'unset'");
+    height: v-bind("containerWidth * 0.75 + 'px'");
+    // max-height: calc(100vh - 414px);
     &__img {
       width: 100%;
       object-fit: cover;
@@ -306,7 +298,7 @@ export default defineComponent({
     }
   }
   &__content {
-    margin: 0px v-bind(padding);
+    margin: 0px v-bind(padding) 84px v-bind(padding);
     &__indicator {
       margin: 42px auto 0 auto;
       display: flex;
@@ -339,10 +331,24 @@ export default defineComponent({
     column-gap: 16px;
     padding: 12px 24px 12px 16px;
     color: setColor(black-5);
+    &.disabled {
+      pointer-events: none;
+      color: setColor(black-3);
+      .payment__btn-plan__radio {
+        color: setColor(light-bg);
+        border-color: setColor(black-3);
+      }
+    }
     &.selected {
       background: white;
       border-radius: 10px;
       color: setColor(black-3);
+      &.disabled {
+        background: setColor(black-4);
+        .payment__btn-plan__content__title, .payment__btn-plan__content__title__sub {
+          color: setColor(black-2);
+        }
+      }
     }
     &__radio {
       @include size(20px);
@@ -400,6 +406,7 @@ export default defineComponent({
     }
   }
   &__btn-subscribe {
+    position: relative;
     width: fit-content;
     margin: 20px auto 0 auto;
     padding: 4px 16px;
@@ -410,11 +417,25 @@ export default defineComponent({
     align-items: center;
     text-align: center;
     color: setColor(black-3);
-    >span {
+    &__text {
       width: 100%;
+    }
+    &.pending {
+      pointer-events: none;
+      .payment__btn-subscribe__text {
+        visibility: hidden;
+      }
     }
     &:active {
       opacity: 0.8;
+    }
+    .spinner {
+      color: #D9D9D9;
+      animation: translate-rotate 0.5s infinite linear;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
   }
   &__footer {
@@ -427,6 +448,10 @@ export default defineComponent({
     line-height: 15px;
     color: setColor(black-5);
     column-gap: 10px;
+    &.disabled {
+      color: setColor(black-3);
+      pointer-events: none;
+    }
     &__splitter {
       @include size(0px, 12px);
       border: 1px solid #474747;
@@ -436,8 +461,8 @@ export default defineComponent({
   &__panel {
     position: absolute;
     bottom: 0px;
-    left: 0px;
-    right: 0px;
+    left: v-bind("containerPadding + 'px'");
+    right: v-bind("containerPadding + 'px'");
     box-sizing: border-box;
     // min-height: 57%;
     padding: 16px v-bind(padding) 0px v-bind(padding);
@@ -447,10 +472,17 @@ export default defineComponent({
     transition-property: transform, left, right, padding;
     transition-duration: 300ms;
     transition-timing-function: ease-in-out;
+    &.disabled {
+      color: setColor(black-4);
+      pointer-events: none;
+      .payment__panel__chevron > svg {
+        color: setColor(black-4);
+      }
+    }
     &.close {
       padding: 16px 0 0 0;
-      left: v-bind(padding);
-      right: v-bind(padding);
+      left: v-bind(panelPadding);
+      right: v-bind(panelPadding);
       bottom: -20px;
       transform: translateY(calc(100% - 68px));
     }
@@ -463,7 +495,9 @@ export default defineComponent({
       background-color: setColor(black-3);
       border-radius: 100px;
       >svg {
+        color: white;
         transform: v-bind("isPanelUp ? 'rotate(180deg)' : 'none'");
+        transition: none;
       }
     }
     &__title {
@@ -510,6 +544,52 @@ export default defineComponent({
       text-align: left;
       justify-content: left;
     }
+  }
+  &__spinner {
+    @include size(120px);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(46, 46, 46, 0.5);
+    border-radius: 10px;
+    &::before {
+      content: "";
+      @include size(100vw, 100vh);
+      position: absolute;
+      background-color: setColor(gray-1);
+      opacity: 0.3;
+    }
+    .spinner {
+      color: #D9D9D9;
+      animation: rotate 0.5s infinite linear;
+    }
+  }
+}
+
+.fade {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.2s;
+  }
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+  }
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes translate-rotate {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 </style>

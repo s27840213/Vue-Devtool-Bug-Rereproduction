@@ -387,6 +387,9 @@ export default defineComponent({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
+    isFlipping(): boolean {
+      return this.config.isFlipping
+    },
     // isTextEditing(): boolean {
     //   // return !this.isControlling && this.contentEditable
     //   // @Test
@@ -394,6 +397,9 @@ export default defineComponent({
     // },
     contentEditable(): boolean {
       return this.config.contentEditable
+    },
+    isDraggingCursor(): boolean {
+      return this.config.isDraggingCursor
     },
     isMoving(): boolean {
       return this.config.moving
@@ -628,7 +634,7 @@ export default defineComponent({
         transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
-        ...(this.contentEditable ? { zIndex: 100 } : {})
+        ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
     textBodyStyle() {
@@ -638,7 +644,7 @@ export default defineComponent({
         userSelect: this.contentEditable ? 'text' : 'none',
         opacity: 1
       }
-      return !(this.isCurveText || this.isFlipped) ? textstyles : {
+      return !(this.isCurveText || this.isFlipped || this.isFlipping) ? textstyles : {
         width: 'auto',
         height: 'auto',
         position: 'absolute',

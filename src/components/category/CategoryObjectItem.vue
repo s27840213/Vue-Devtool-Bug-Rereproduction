@@ -7,7 +7,7 @@ div(class="category-object-item" v-touch)
   template(v-else)
     img(class="category-object-item__img" draggable="false" @tap="clickObject" v-press="addSvg"
       :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-    pro-item(v-if="item.plan")
+    pro-item(v-if="item.plan" draggable="false")
     div(v-if="showEditor" class="category-object-item__icon" @click.stop.prevent="handleEditObject")
       svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
     div(v-if="item.type === 16" class="category-object-item__icon" @click.stop.prevent="openGiphyMore")
@@ -59,8 +59,8 @@ export default defineComponent({
     addSvg() {
       // if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
       console.log(generalUtils.deepCopy(this.item))
-      // if (!vivistickerUtils.checkPro({ plan }, 'object')) return
       if (this.item.type === 8 || this.item.has_frame) {
+        // if (!vivistickerUtils.checkPro(this.item, 'frame')) return
         this.handleEditObject()
         return
       }
@@ -72,6 +72,7 @@ export default defineComponent({
         })
         assetUtils.addAssetToRecentlyUsed(this.item, 'giphy')
       } else {
+        // if (!vivistickerUtils.checkPro(this.item, 'object')) return
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
         assetUtils.addAssetToRecentlyUsed(this.item, 'objects', 'svg')
       }
@@ -90,7 +91,7 @@ export default defineComponent({
       })
     },
     handleEditObject() {
-      // if (!vivistickerUtils.checkPro({ plan }, 'object')) return
+      // if (!vivistickerUtils.checkPro(this.item, 'object')) return
       if (this.item.type === 7 || this.item.has_frame) {
         vivistickerUtils.startEditing('objectGroup', {
           plan: this.item.plan,

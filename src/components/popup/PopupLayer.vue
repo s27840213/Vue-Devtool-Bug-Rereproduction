@@ -84,12 +84,14 @@ div(class=" popup-layer bg-gray-6"
 </template>
 
 <script lang="ts">
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IPopupOptions } from '@/interfaces/popup'
 import backgroundUtils from '@/utils/backgroundUtils'
 import frameUtils from '@/utils/frameUtils'
 import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -231,6 +233,19 @@ export default defineComponent({
           shortcutText: '',
           action: () => {
             uploadUtils.updateLayer(this.updateType)
+          }
+        },
+        {
+          icon: 'update',
+          text: '填滿 Page',
+          condition: this.showAdminTool && this.isLogin && this.isFrame,
+          shortcutText: '',
+          action: () => {
+            const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
+            const { width: currLayerWidth, height: currLayerHeight, scale, initWidth, initHeight } = layers[0].styles
+            pageUtils.setPageSize(pageIndex, initWidth, initHeight)
+
+            layerUtils.updateLayerStyles(pageIndex, index, { x: 0, y: 0, width: initWidth, height: initHeight, scale: scale * Math.min(initWidth / currLayerWidth, initHeight / currLayerHeight) })
           }
         }
       ]

@@ -5,7 +5,7 @@ div(class="panel-text__item"
   img(class="panel-text__img"
     :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
     @error="handleNotFound")
-  pro-item(v-if="item.plan")
+  pro-item(v-if="item.plan" draggable="false")
 </template>
 
 <script lang="ts">
@@ -52,14 +52,14 @@ export default defineComponent({
       return {
         width: `${width}px`
       }
-    }
+    },
   },
   methods: {
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addText() {
-      // if (!paymentUtils.checkPro(this.item, 'pro-text')) return
+      // if (!vivistickerUtils.checkPro(this.item, 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(this.item).then(() => {
           textPropUtils.updateTextPropsState()

@@ -112,7 +112,7 @@ import store from '@/store'
 import designUtils from '@/utils/designUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import themeUtils from '@/utils/themeUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -165,7 +165,7 @@ export default defineComponent({
     ...mapGetters({
       token: 'user/getToken',
       isLogin: 'user/isLogin',
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
     themeList(): Itheme[] {
       return themeUtils.themesMainHidden

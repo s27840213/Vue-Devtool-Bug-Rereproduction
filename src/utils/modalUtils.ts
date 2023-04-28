@@ -12,8 +12,22 @@ interface ModalOptions {
   onCheckedChange?: (checked: boolean) => void
 }
 class ModalUtils {
-  setModalInfo(title?: string, content?: Array<string> | string, confirmButton?: IModalButton, cancelButton?: IModalButton, options?: ModalOptions) {
-    const { imgSrc = '', noClose = false, noCloseIcon = false, backdropStyle = {}, cardStyle = {}, checkboxText = '', checked = false, onCheckedChange = undefined } = options || {}
+  setModalInfo(
+    title?: string,
+    content?: Array<string> | string,
+    confirmButton?: IModalButton,
+    cancelButton?: IModalButton,
+    options?: ModalOptions) {
+    const {
+      imgSrc = '',
+      noClose = false,
+      noCloseIcon = false,
+      backdropStyle = {},
+      cardStyle = {},
+      checkboxText = '',
+      checked = false,
+      onCheckedChange = undefined
+    } = options || {}
 
     if (typeof content === 'string') content = [content]
     store.commit('modal/SET_MODAL_INFO', {

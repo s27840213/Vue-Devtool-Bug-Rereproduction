@@ -3,7 +3,7 @@ import { Itheme } from '@/interfaces/theme'
 import store from '@/store'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
-import webViewUtils from './picWVUtils'
+import picWVUtils from './picWVUtils'
 import themeUtils from './themeUtils'
 
 interface BillingInfoInput {
@@ -322,7 +322,7 @@ class ConstantData {
       label: i18n.global.t('NN0670'),
       content: resource
     },
-    ...!webViewUtils.inReviewMode ? [pricing] : [],
+    ...!picWVUtils.inReviewMode ? [pricing] : [],
     {
       hidden: !this.isLogin,
       name: 'MyDesign',
@@ -532,6 +532,21 @@ class ConstantData {
         plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
       }, {
+        key: 'heart',
+        label: i18n.global.tc('NN0847'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'heart-warm',
+        label: i18n.global.tc('NN0848'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'heart-custom',
+        label: i18n.global.tc('NN0849'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
         key: 'cloud',
         label: i18n.global.tc('NN0818'),
         plan: 1,
@@ -544,11 +559,19 @@ class ConstantData {
       }, {
         key: 'penguin',
         label: i18n.global.tc('NN0821'),
-        plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }, {
         key: 'planet',
         label: i18n.global.tc('NN0822'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'leaf',
+        label: i18n.global.tc('NN0851'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'gummybear',
+        label: i18n.global.tc('NN0850'),
         plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }])
@@ -566,7 +589,7 @@ class ConstantData {
       name: 'security',
       label: i18n.global.tc('NN0166', 1),
       icon: 'lock'
-    }, ...!webViewUtils.inReviewMode ? [{
+    }, ...!picWVUtils.inReviewMode ? [{
       name: 'hr'
     }, {
       name: 'payment',

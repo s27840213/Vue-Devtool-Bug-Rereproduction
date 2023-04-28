@@ -15,7 +15,6 @@ interface IFileState {
   checkedAssets: Array<number>,
   pending: boolean,
   initialized: boolean,
-  regenerateGalleryFlag: boolean
   setLayersDone: boolean
   pageIndex: number,
   uploadingAssets: Array<{ id: string, pageIndex: number }>
@@ -27,7 +26,6 @@ const getDefaultState = (): IFileState => ({
   checkedAssets: [],
   pending: true,
   initialized: false,
-  regenerateGalleryFlag: false,
   setLayersDone: false,
   pageIndex: 0,
   uploadingAssets: []
@@ -290,10 +288,6 @@ const mutations: MutationTree<IFileState> = {
       state.myfileImages[targetIndex].height = height ?? myfileImages[targetIndex].height
     }
 
-    if (width || height) {
-      state.regenerateGalleryFlag = true
-    }
-
     state.editorViewImages[data[0].assetIndex] = data[0].urls
   },
   SET_UPLOADING_IMGS(state: IFileState, { id, adding, pageIndex }) {
@@ -304,9 +298,6 @@ const mutations: MutationTree<IFileState> = {
       index !== -1 && state.uploadingAssets.splice(index, 1)
     }
   },
-  SET_REGENERATE_GALLERY_FLAG(state: IFileState, bool) {
-    state.regenerateGalleryFlag = bool
-  }
 }
 
 const getters: GetterTree<IFileState, any> = {
@@ -325,9 +316,6 @@ const getters: GetterTree<IFileState, any> = {
   getUploadingImgs(state): Array<{ id: string, pageIndex: number }> {
     return state.uploadingAssets
   },
-  getIsUploadingImg(state): boolean {
-    return state.uploadingAssets.length > 0
-  }
 }
 
 export default {

@@ -496,7 +496,7 @@ export default defineComponent({
               rotate: layer.styles.rotate
             }
           }
-          if (mathUtils.calculateIfIntersect(selectionPolygonConfig, layerPolygonConfig)) {
+          if (!layer.locked && mathUtils.calculateIfIntersect(selectionPolygonConfig, layerPolygonConfig)) {
             layerIndexs.push(index)
           }
         })

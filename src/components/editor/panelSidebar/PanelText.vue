@@ -76,12 +76,12 @@ div(class="panel-text")
 
 <script lang="ts">
 import listApi from '@/apis/list'
-import SearchBar from '@/components/SearchBar.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import Url from '@/components/global/Url.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import AssetUtils from '@/utils/assetUtils'
@@ -110,7 +110,8 @@ export default defineComponent({
       scrollTop: {
         mainContent: 0,
         searchResult: 0
-      }
+      },
+      dragUtils: new DragUtils()
     }
   },
   computed: {
@@ -301,7 +302,7 @@ export default defineComponent({
     },
     standardTextDrag(e: DragEvent, config: { type: string, text: string }) {
       const { type: textType, text } = config
-      new DragUtils().itemDragStart(e, 'standardText', {
+      this.dragUtils.textItemDragStart(e, 'standardText', {
         textType: textType.toLowerCase(),
         text,
         locale: this.$i18n.locale,

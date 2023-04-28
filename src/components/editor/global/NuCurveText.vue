@@ -11,12 +11,13 @@ p(class="nu-curve-text__p" :style="pStyle()")
 
 <script lang="ts">
 import { IGroup, ISpan, IText } from '@/interfaces/layer'
+import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -59,8 +60,9 @@ export default defineComponent({
   },
   mounted() {
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
-      setTimeout(() => {
-        this.resizeCallback()
+      setTimeout(async () => {
+        await this.resizeCallback()
+        generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
       }, 100) // for the delay between font loading and dom rendering
     })
   },

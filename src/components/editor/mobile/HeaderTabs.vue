@@ -22,7 +22,8 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
           :iconWidth="'22px'")
   div(class="header-bar__right")
     div(v-for="(tab, index) in rightTabs" :key="`${tab.icon}-${index}`")
-      div(v-if="!tab.isHidden" class="header-bar__feature-icon" :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
+      div(v-if="!tab.isHidden" class="header-bar__feature-icon"
+        :class="{'click-disabled': tab.disable, 'panel-icon': tab.isPanelIcon }"
         @pointerdown="handleIconAction(tab.icon)")
         svg-icon(
           :iconName="tab.icon"
@@ -36,7 +37,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -46,8 +47,9 @@ import { mapGetters } from 'vuex'
 interface IIcon {
   icon: string,
   // If isPanelIcon is true, MobilePanel v-out will not be triggered by this icon.
-  isPanelIcon?: boolean,
+  isPanelIcon?: boolean
   isHidden?: boolean
+  disable?: boolean
 }
 
 export default defineComponent({
@@ -74,13 +76,6 @@ export default defineComponent({
   },
   data() {
     return {
-      homeTabs: [
-        { icon: 'bleed', isPanelIcon: true },
-        { icon: 'resize', isPanelIcon: true },
-        { icon: 'all-pages' },
-        { icon: 'download', isPanelIcon: true },
-        { icon: 'more', isPanelIcon: true }
-      ] as IIcon[],
     }
   },
   computed: {
@@ -96,10 +91,11 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       hasBleed: 'getHasBleed',
-      userInfo: webViewUtils.appendModuleName('getUserInfo'),
+      userInfo: picWVUtils.appendModuleName('getUserInfo'),
+      uploadingImgs: 'file/getUploadingImgs',
     }),
     rootStyles(): {[key: string]: string} {
-      const basePadding = webViewUtils.inBrowserMode ? 10.7 : 8
+      const basePadding = picWVUtils.inBrowserMode ? 10.7 : 8
       return {
         paddingTop: `${this.userInfo.statusBarHeight + basePadding}px`,
         paddingBottom: `${basePadding}px`,
@@ -110,15 +106,15 @@ export default defineComponent({
     },
     layerTabs(): IIcon[] {
       return [
-        { icon: 'copy' },
+        { icon: 'copy', disable: this.isLocked },
         { icon: this.isLocked ? 'lock' : 'unlock' },
-        { icon: 'trash' }
+        { icon: 'trash', disable: this.isLocked }
       ]
     },
     bgSettingTabs(): IIcon[] {
       return [
         { icon: backgroundUtils.backgroundLocked ? 'lock' : 'unlock' },
-        { icon: 'trash' }
+        { icon: 'trash', disable: this.isLocked }
       ]
     },
     rightTabs(): IIcon[] {
@@ -131,10 +127,13 @@ export default defineComponent({
       } else if (this.inBgSettingMode) {
         return this.bgSettingTabs
       } else {
-        return this.homeTabs.map(tab => {
-          if (tab.icon === 'bleed') tab.isHidden = !this.hasBleed
-          return tab
-        })
+        return [
+          { icon: 'bleed', isPanelIcon: true, isHidden: this.hasBleed },
+          { icon: 'resize', isPanelIcon: true },
+          { icon: 'all-pages' },
+          { icon: 'download', isPanelIcon: true, disable: (this.uploadingImgs as unknown[]).length > 0 },
+          { icon: 'more', isPanelIcon: true }
+        ] as IIcon[]
       }
     },
     selectedLayerNum(): number {
@@ -152,7 +151,7 @@ export default defineComponent({
       if (tab.icon === 'all-pages') {
         return this.inAllPagesMode ? 'blue-1' : 'white'
       }
-      return (this.isLocked && tab.icon !== 'lock') ? 'gray-2' : this.currTab === tab.icon ? 'blue-1' : 'white'
+      return tab.disable ? 'gray-2' : this.currTab === tab.icon ? 'blue-1' : 'white'
     },
     goHome() {
       this.$router.push({ name: 'Home' })
@@ -245,7 +244,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .header-bar {
-  @include size(100%);
+  height: 26px;
   position: relative;
   background-color: setColor(nav);
   display: flex;
@@ -253,7 +252,6 @@ export default defineComponent({
   justify-content: space-between;
   padding-left: 16px;
   padding-right: 16px;
-  box-sizing: border-box;
   z-index: setZindex("header");
   -webkit-touch-callout: none;
   -webkit-user-select: none;

@@ -23,7 +23,7 @@ if (host) {
 
 for (const pageIndex of config.page_index.split(',')) {
   for (const exportId of config.export_id.split(',')) {
-    var url = `${usedHost}/preview?url=template.vivipic.com%2Fexport%2F${config.team_id}%2F${exportId}%2Fpage_${pageIndex}.json%3Fver%3DvKIHd0sC%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET`
+    const url = `${usedHost}/preview?url=template.vivipic.com%2Fexport%2F${config.team_id}%2F${exportId}%2Fpage_${pageIndex}.json&ver=vKIHd0sC&token=QT0z7B3D3ZuXVp6R&team_id=PUPPET`
 
     open(url)
   }

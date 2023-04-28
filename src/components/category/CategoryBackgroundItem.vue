@@ -9,7 +9,7 @@ div(class="panel-bg__item"
     @error="handleNotFound")
   div(class="panel-bg__share" @click.stop.prevent="handleShare")
     svg-icon(iconName="share" iconColor="white" iconWidth="16px")
-  pro-item(v-if="item.plan")
+  pro-item(v-if="item.plan" draggable="false")
 </template>
 
 <script lang="ts">
@@ -51,11 +51,12 @@ export default defineComponent({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
-      // if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-bg')) return
+      // if (!vivistickerUtils.checkPro(this.item, 'object')) return
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
       AssetUtils.addAssetToRecentlyUsed(this.item, 'background')
     },
     handleShare() {
+      // if (!vivistickerUtils.checkPro(this.item, 'object')) return
       this.$emit('share', this.item)
     }
   }
