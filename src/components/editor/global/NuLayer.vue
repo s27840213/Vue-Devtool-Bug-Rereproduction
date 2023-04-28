@@ -414,9 +414,9 @@ export default defineComponent({
     pageScaleRatio(): number {
       return pageUtils.scaleRatio / 100
     },
-    compensationRatio(): number {
-      return !this.useMobileEditor ? 1 : Math.max(1, this.pageScaleRatio())
-    },
+    // compensationRatio(): number {
+    //   return !this.useMobileEditor ? 1 : Math.max(1, this.pageScaleRatio())
+    // },
     scaleStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles
       const { scale, scaleX, scaleY } = this.config.styles
