@@ -1,5 +1,5 @@
 import { ILoginResult } from '@/interfaces/api'
-import { IUserInfo, WEBVIEW_API_RESULT } from '@/interfaces/webView'
+import { IUserInfo } from '@/interfaces/webView'
 import store from '@/store'
 import { WebViewUtils } from '@/utils/webViewUtils'
 import generalUtils from './generalUtils'
@@ -73,11 +73,9 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     super.sendToIOS(messageType, message)
   }
 
-  async callIOSAsAPI(type: string, message: any, event: string, options: {
-    timeout?: number, retry?: boolean, retryTimes?: number, timeoutValue?: WEBVIEW_API_RESULT
-  } = {}): Promise<WEBVIEW_API_RESULT> {
+  callIOSAsAPI: InstanceType<typeof WebViewUtils>['callIOSAsAPI'] = async (...args) => {
     if (this.inBrowserMode) return
-    return super.callIOSAsAPI(type, message, event, options)
+    return super.callIOSAsAPI(...args)
   }
 
   sendAppLoaded() {
