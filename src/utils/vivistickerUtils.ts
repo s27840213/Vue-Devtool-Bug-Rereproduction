@@ -6,6 +6,7 @@ import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/laye
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import { nextTick } from 'vue'
@@ -716,7 +717,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('setState')
   }
 
-  async getState(key: string): Promise<{ [key: string]: any } | undefined> {
+  async getState(key: string): Promise<WEBVIEW_API_RESULT> {
     if (this.isStandaloneMode) return
     return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
   }
