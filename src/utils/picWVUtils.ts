@@ -1,5 +1,5 @@
 import { ILoginResult } from '@/interfaces/api'
-import { IUserInfo } from '@/interfaces/webView'
+import { IUserInfo, WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { WebViewUtils } from '@/utils/webViewUtils'
 import generalUtils from './generalUtils'
@@ -71,9 +71,11 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     super.sendToIOS(messageType, message)
   }
 
-  async callIOSAsAPI(type: string, message: any, event: string, timeout?: number): Promise<any> {
+  async callIOSAsAPI(type: string, message: any, event: string, options: {
+    timeout?: number, retry?: boolean, retryTimes?: number, timeoutValue?: WEBVIEW_API_RESULT
+  } = {}): Promise<WEBVIEW_API_RESULT> {
     if (this.inBrowserMode) return
-    return super.callIOSAsAPI(type, message, event, timeout)
+    return super.callIOSAsAPI(type, message, event, options)
   }
 
   sendAppLoaded() {
@@ -101,7 +103,12 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async login(type: 'APPLE' | 'Google' | 'Facebook', locale: string): Promise<{ data: ILoginResult, flag: number, msg?: string }> {
-    return await this.callIOSAsAPI('LOGIN', { type, locale }, 'login', -1)
+    const loginResult = await this.callIOSAsAPI('LOGIN', { type, locale }, 'login', { timeout: -1 })
+    if (loginResult) {
+      return loginResult as { data: ILoginResult, flag: number, msg?: string }
+    } else {
+      throw new Error('login failed')
+    }
   }
 
   loginResult(data: { data: ILoginResult, flag: string | number, msg?: string }) {
@@ -133,7 +140,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
 
   async getState(key: string): Promise<any> {
     if (this.inBrowserMode) return
-    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState')
+    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
   }
 
   getStateResult(data: { key: string, value: string }) {
@@ -159,7 +166,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
       }
       await store.dispatch('user/updateUser', {
         ...data,
-        app: 0,
+        app: this.inBrowserMode ? 0 : 1,
         country
         // If inBrowserMode, country = undefined,
         // otherwise country will be provided in arguments when called from getUserInfo

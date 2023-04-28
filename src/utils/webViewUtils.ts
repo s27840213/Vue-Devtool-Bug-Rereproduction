@@ -1,3 +1,4 @@
+import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import generalUtils from './generalUtils'
 import logUtils from './logUtils'
 
@@ -5,7 +6,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   abstract STANDALONE_USER_INFO: T
   abstract CALLBACK_MAPS: { [key: string]: string[] }
 
-  callbackMap = {} as { [key: string]: (res: { data?: any, isTimeouted: boolean }) => void }
+  callbackMap = {} as { [key: string]: (res: { data: WEBVIEW_API_RESULT, isTimeouted: boolean }) => void }
   errorMessageMap = {} as { [key: string]: string }
 
   abstract getUserInfoFromStore(): T
@@ -74,33 +75,42 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
   }
 
-  async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000): Promise<{ [key: string]: any } | undefined> {
+  async callIOSAsAPI(type: string, message: any, event: string, {
+    timeout = 5000, retry = false, retryTimes = 0, timeoutValue = undefined as WEBVIEW_API_RESULT
+  }): Promise<WEBVIEW_API_RESULT> {
     this.sendToIOS(type, message)
-    let result: { [key: string]: any } | undefined
+    let result: WEBVIEW_API_RESULT
     if (timeout === -1) {
-      result = (await (new Promise<{ data?: { [key: string]: any }, isTimeouted: boolean }>(resolve => {
+      result = (await (new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
         this.callbackMap[event] = resolve
       }))).data
+      delete this.callbackMap[event]
     } else {
       const raceResult = await Promise.race([
-        new Promise<{ data?: { [key: string]: any }, isTimeouted: boolean }>(resolve => {
+        new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
           this.callbackMap[event] = resolve
         }),
-        new Promise<{ data: undefined, isTimeouted: boolean }>(resolve => {
+        new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
           setTimeout(() => {
             resolve({
-              data: undefined,
+              data: timeoutValue,
               isTimeouted: true
             })
           }, timeout)
         })
       ])
+      delete this.callbackMap[event]
+      result = raceResult.data
       if (raceResult.isTimeouted) {
         logUtils.setLogAndConsoleLog(`${type} timeouted after ${timeout}ms with message:`, message)
+        if (retry && retryTimes < 2) {
+          logUtils.setLogAndConsoleLog(`retry: ${retryTimes + 1}`)
+          result = await this.callIOSAsAPI(type, message, event, {
+            timeout, retry, retryTimes: retryTimes + 1, timeoutValue
+          })
+        }
       }
-      result = raceResult.data
     }
-    delete this.callbackMap[event]
     return result
   }
 
