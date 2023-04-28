@@ -96,6 +96,10 @@ export default defineComponent({
       width: 80%;
       padding-left: 0;
     }
+    @media (max-width: 541px) {
+      width: 100%;
+      padding-top: 0;
+    }
   }
   &__title {
     text-align: left;

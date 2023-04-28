@@ -1,13 +1,13 @@
 <template lang="pug">
 div(class="my-design-mobile")
-  div(class="my-design-mobile__tab-bar" :style="footerStyles")
+  div(class="my-design-mobile__tab-bar"  :style="headerStyles")
     div(v-for="(tabButton,index) in tabButtons"
         :key="`${tabButton.text}-${index}`"
         class="my-design-mobile__tab-button pointer"
         :class="{active: tabButton.condition(currLocation)}"
         @click="handleGoTo(tabButton.tab)")
       div(class="my-design-mobile__tab-button__text text-H6 text-gray-3") {{ tabButton.text }}
-  div(v-if="menuButtons.length !== 0" class="my-design-mobile__nav-bar-wrapper" :style="headerStyles")
+  div(v-if="menuButtons.length !== 0" class="my-design-mobile__nav-bar-wrapper")
     div(class="my-design-mobile__nav-bar relative")
       div(class="my-design-mobile__nav-bar__menu")
         div(v-for="(button,index) in menuButtons"
@@ -220,16 +220,6 @@ export default defineComponent({
     ...mapGetters({
       userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
-    headerStyles(): {[key: string]: string} {
-      return {
-        paddingTop: `${this.userInfo.statusBarHeight}px`
-      }
-    },
-    footerStyles(): {[key: string]: string} {
-      return {
-        paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
-      }
-    },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
     },
@@ -281,6 +271,11 @@ export default defineComponent({
           return 'mobile-folder-design-view'
         default:
           return 'mobile-all-design-view'
+      }
+    },
+    headerStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${this.userInfo.statusBarHeight}px`
       }
     }
   },

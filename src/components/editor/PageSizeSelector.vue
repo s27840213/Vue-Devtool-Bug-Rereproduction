@@ -55,23 +55,24 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
         span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
   div(class="page-size-selector__body__hr first bg-gray-4")
   div(class="page-size-selector__container")
-      div(class="page-size-selector__body-row first-row")
-        span(class="page-size-selector__body__title subtitle-2"
-          :class="defaultTextColor") {{$t('NN0024')}}
-      div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
-      div(v-for="(format, index) in recentlyUsed"
-          :key="format.id"
-          class="page-size-selector__body-row pointer"
-          @click="selectFormat(`recent-${index}`)")
-        radio-btn(class="page-size-selector__body__radio"
-                  :isSelected="selectedFormat === `recent-${index}`",
-                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                  :formatKey="`recent-${index}`",
-                  @select="selectFormat")
-        span(class="page-size-selector__body__recently body-3 pointer"
-              :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
-              @click="selectFormat(`recent-${index}`)") {{ makeFormatTitle(format) }}
+      template(v-if="!forHomePage")
+        div(class="page-size-selector__body-row first-row")
+          span(class="page-size-selector__body__title subtitle-2"
+            :class="defaultTextColor") {{$t('NN0024')}}
+        div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
+          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+        div(v-for="(format, index) in recentlyUsed"
+            :key="format.id"
+            class="page-size-selector__body-row pointer"
+            @click="selectFormat(`recent-${index}`)")
+          radio-btn(class="page-size-selector__body__radio"
+                    :isSelected="selectedFormat === `recent-${index}`",
+                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                    :formatKey="`recent-${index}`",
+                    @select="selectFormat")
+          span(class="page-size-selector__body__recently body-3 pointer"
+                :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
+                @click="selectFormat(`recent-${index}`)") {{ makeFormatTitle(format) }}
       div(class="page-size-selector__body-row first-row")
         span(class="page-size-selector__body__title subtitle-2"
             :class="defaultTextColor") {{$t('NN0025')}}
@@ -88,10 +89,10 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
                   @select="selectFormat")
         span(class="page-size-selector__body__typical-name body-4"
               :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
-        span(class="page-size-selector__body__typical-size body-4"
+        span(class="page-size-selector__body__typical-size body-4 text-right"
               :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
   div(class="page-size-selector__body__hr second bg-gray-4")
-  div(class="page-size-selector__body__submit")
+  div(v-if="!forHomePage" class="page-size-selector__body__submit")
     div(class="page-size-selector__body__submit__option body-XS")
       checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
     btn(class="page-size-selector__body__button"
@@ -126,6 +127,10 @@ export default defineComponent({
     isDarkTheme: {
       type: Boolean,
       default: true
+    },
+    forHomePage: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['close'],

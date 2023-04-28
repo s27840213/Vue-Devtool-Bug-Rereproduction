@@ -38,7 +38,7 @@ div(class="sp")
   hr
   i18n-t(v-if="isErrorStatus" class="sp-error" keypath="NN0656" tag="div")
     template(#contactus)
-      a(class="text-blue-1 pointer" :href="contactUsUrl") {{$t('NN0642')}}
+      a(class="text-blue-1 pointer" :href="contactUsUrl") {{$tc('NN0642',1)}}
     template(#status)
       span {{status}}
   div(v-if="showBillingInfo" class="sp-info")
