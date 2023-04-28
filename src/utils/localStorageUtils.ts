@@ -1,5 +1,7 @@
-import vivistickerUtils from './vivistickerUtils'
+import i18n from '@/i18n'
+import modalUtils from '@/utils/modalUtils'
 import _ from 'lodash'
+import vivistickerUtils from './vivistickerUtils'
 
 class LocalStorage {
   defaultValue = {
@@ -38,6 +40,26 @@ class LocalStorage {
     }
   } as Record<string, Record<string, unknown>>
 
+  errorModal(errorCode: number) {
+    modalUtils.setModalInfo(
+      i18n.global.t('NN0457'),
+      i18n.global.t('NN0860', { feature: i18n.global.t('NN0759'), errorCode }),
+      {
+        msg: i18n.global.t('NN0861'),
+        action: () => { location.reload() }
+      },
+      {
+        msg: i18n.global.t('NN0271'),
+        class: 'btn-light-mid',
+        style: {
+          border: 'none',
+          color: '#474A57',
+          backgroundColor: '#D3D3D3'
+        },
+      },
+    )
+  }
+
   reset(category: string) {
     localStorage.setItem(category, JSON.stringify(this.defaultValue[category]))
   }
@@ -60,7 +82,7 @@ class LocalStorage {
     localStorage.setItem(category, JSON.stringify(obj))
   }
 
-  get(category: string, key: string):unknown {
+  get(category: string, key: string): unknown {
     const item = localStorage.getItem(category)
     if (item && typeof item === 'string') {
       try {
@@ -76,7 +98,7 @@ class LocalStorage {
     }
   }
 
-  update<T>(category: string, key: string, fn: (old: T)=>T) {
+  update<T>(category: string, key: string, fn: (old: T) => T) {
     const oldVal = this.get(category, key) as T
     const newVal = fn(oldVal)
     this.set(category, key, newVal)
@@ -97,15 +119,18 @@ class LocalStorage {
     }
 
     let item = await vivistickerUtils.getState(category)
-    if (!item) {
+    if (item === undefined) { // init
       this.appReset(category)
       item = this.defaultValue[category]
+    } else if (item === null) { // timeout or error
+      this.errorModal(1)
+      return
     }
     _.set(item, key, value)
     vivistickerUtils.setState(category, item)
   }
 
-  async appGet(category: string, key: string):Promise<unknown> {
+  async appGet(category: string, key: string): Promise<unknown> {
     if (vivistickerUtils.isStandaloneMode) {
       return this.get(category, key)
     }
@@ -113,13 +138,16 @@ class LocalStorage {
     const item = await vivistickerUtils.getState(category)
     if (item) {
       return _.get(item, key)
-    } else {
+    } else if (item === undefined) { // init
       this.appReset(category)
+      return _.get(this.defaultValue[category], key)
+    } else { // === null, timeout or error
+      this.errorModal(2)
       return _.get(this.defaultValue[category], key)
     }
   }
 
-  async appUpdate<T>(category: string, key: string, fn: (old: T)=>T) {
+  async appUpdate<T>(category: string, key: string, fn: (old: T) => T) {
     if (vivistickerUtils.isStandaloneMode) {
       return this.update(category, key, fn)
     }
