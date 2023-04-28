@@ -3,7 +3,7 @@ import { Itheme } from '@/interfaces/theme'
 import store from '@/store'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
-import webViewUtils from './picWVUtils'
+import picWVUtils from './picWVUtils'
 import themeUtils from './themeUtils'
 
 interface BillingInfoInput {
@@ -36,6 +36,7 @@ export type IEffectOption = IEffectOptionSelect | IEffectOptionColor | IEffectOp
 export interface IEffect {
   key: string
   label: string
+  plan: 0 | 1
   options: IEffectOption[]
 }
 export interface IEffectCategory {
@@ -61,6 +62,16 @@ export type IHeaderL1 = {
   label: string
   url?: string
   content?: IHeaderL2[]
+}
+
+export enum DeviceType {
+  iPhone,
+  iPad,
+  AndroidPhone,
+  AndroidTablet,
+  Mac,
+  Win,
+  Other
 }
 
 class ConstantData {
@@ -311,7 +322,7 @@ class ConstantData {
       label: i18n.global.t('NN0670'),
       content: resource
     },
-    ...!webViewUtils.inReviewMode ? [pricing] : [],
+    ...!picWVUtils.inReviewMode ? [pricing] : [],
     {
       hidden: !this.isLogin,
       name: 'MyDesign',
@@ -329,10 +340,11 @@ class ConstantData {
   }
 
   // For TextEffectSetting
-  textEffects() {
-    function arrTo2darr(arr: Array<unknown>) {
+  textEffects(): IEffectCategory[] {
+    function arrTo2darr(arr: Array<Omit<IEffect, 'plan'> & { plan?: number }>): IEffect[][] {
       const newArr = []
-      while (arr.length) newArr.push(arr.splice(0, 3))
+      arr.forEach(eff => { eff.plan = eff.plan || 0 })
+      while (arr.length) newArr.push(arr.splice(0, 3) as IEffect[])
       return newArr
     }
 
@@ -417,7 +429,7 @@ class ConstantData {
     }
 
     const categories = [{
-      name: 'shadow',
+      name: 'shadow' as const,
       label: i18n.global.t('NN0112'),
       effects2d: arrTo2darr([{
         key: 'none',
@@ -453,7 +465,7 @@ class ConstantData {
         options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
-      name: 'shape',
+      name: 'shape' as const,
       label: i18n.global.t('NN0070'),
       effects2d: arrTo2darr([{
         key: 'none',
@@ -465,7 +477,7 @@ class ConstantData {
         options: toOptions(['bend'])
       }])
     }, {
-      name: 'bg',
+      name: 'bg' as const,
       label: i18n.global.tc('NN0719'),
       effects2d: arrTo2darr([{
         key: 'none',
@@ -502,26 +514,47 @@ class ConstantData {
       }, {
         key: 'underline',
         label: i18n.global.tc('NN0727'),
+        plan: 1,
         options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
       }, {
         key: 'rainbow',
         label: i18n.global.tc('NN0816'),
+        plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }, {
         key: 'rainbow-dark',
         label: i18n.global.tc('NN0817'),
+        plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }, {
         key: 'circle',
         label: i18n.global.tc('NN0820'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'heart',
+        label: i18n.global.tc('NN0847'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'heart-warm',
+        label: i18n.global.tc('NN0848'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'heart-custom',
+        label: i18n.global.tc('NN0849'),
+        plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
       }, {
         key: 'cloud',
         label: i18n.global.tc('NN0818'),
+        plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
       }, {
         key: 'text-book',
         label: i18n.global.tc('NN0819'),
+        plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
       }, {
         key: 'penguin',
@@ -531,9 +564,19 @@ class ConstantData {
         key: 'planet',
         label: i18n.global.tc('NN0822'),
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'leaf',
+        label: i18n.global.tc('NN0851'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'gummybear',
+        label: i18n.global.tc('NN0850'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }])
     }]
-    return categories as IEffectCategory[]
+    return categories
   }
 
   // For Settings
@@ -546,7 +589,7 @@ class ConstantData {
       name: 'security',
       label: i18n.global.tc('NN0166', 1),
       icon: 'lock'
-    }, ...!webViewUtils.inReviewMode ? [{
+    }, ...!picWVUtils.inReviewMode ? [{
       name: 'hr'
     }, {
       name: 'payment',
@@ -646,7 +689,9 @@ class ConstantData {
       i18n.global.t('NN0572'),
       i18n.global.t('NN0573'),
       i18n.global.t('NN0769'),
-      i18n.global.t('NN0805')
+      i18n.global.t('NN0805'),
+      i18n.global.t('NN0842'),
+      i18n.global.t('NN0844'),
     ]
   }
 

@@ -199,6 +199,7 @@ export default defineComponent({
       hasDestroyed: false,
       isOnError: false,
       src: '',
+      errorSrcIdentifier: { identifier: '', retry: 0 },
       shadowBuff: {
         canvasShadowImg: undefined as undefined | HTMLImageElement,
         canvasSize: { width: 0, height: 0 },
@@ -461,7 +462,7 @@ export default defineComponent({
       return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     isBlurImg(): boolean {
-      return this.config.styles.adjust?.blur
+      return !!this.config.styles.adjust?.blur
     }
   },
   methods: {
@@ -472,10 +473,24 @@ export default defineComponent({
       setIsProcessing: 'bgRemove/SET_isProcessing',
       setImgConfig: 'imgControl/SET_CONFIG'
     }),
+    getErrorSrcIdentifier(config: IImage) {
+      const { srcObj, styles } = config
+      return srcObj.type + srcObj.assetId + srcObj.userId + (styles.adjust.blur > 0 ? '_blur' : '')
+    },
     onError() {
+      if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {
+        if (this.errorSrcIdentifier.retry === 3) {
+          return
+        }
+        this.errorSrcIdentifier.retry++
+      } else {
+        this.errorSrcIdentifier.identifier = this.getErrorSrcIdentifier(this.config as IImage)
+        this.errorSrcIdentifier.retry = 1
+      }
+
+      const { srcObj, styles: { width, height } } = this.config
       this.isOnError = true
       let updater
-      const { srcObj, styles: { width, height } } = this.config
       if (imageUtils.getSrcSize(srcObj, Math.max(width, height)) === 'xtra') {
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           srcObj: {
@@ -981,9 +996,6 @@ export default defineComponent({
       }
       return layerInfo
     },
-    isInFrame(): boolean {
-      return this.primaryLayerType() === 'frame'
-    },
     scaledConfig(): { [index: string]: string | number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
       const _f = this.contentScaleRatio * (this.primaryLayer?.type === 'frame' ? 1 : this.scaleRatio * 0.01)
@@ -1027,16 +1039,6 @@ export default defineComponent({
         transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
-    imgWrapperstyle() {
-      const { height, width } = this.scaledConfig()
-      let clipPath = ''
-      if (!this.imgControl && !this.isBgImgControl) {
-        clipPath = `path('M0,0h${width}v${height}h${-width}z`
-      }
-      return {
-        clipPath
-      }
-    },
     imgStyles() {
       let { imgX, imgY, imgHeight, imgWidth } = this.scaledConfig()
       if (this.isBgImgControl) {
@@ -1076,9 +1078,6 @@ export default defineComponent({
     hasHalation(): boolean {
       return this.config.styles.adjust?.halation
     },
-    srcObj() {
-      return (this.config as IImage).srcObj
-    },
     adjustImgStyles() {
       let styles = this.config.styles
       if (this.isBgImgControl) {
@@ -1100,21 +1099,12 @@ export default defineComponent({
     shadow(): IShadowProps {
       return (this.config as IImage).styles.shadow
     },
-    shadowEffects(): IShadowEffects {
-      return this.shadow().effects
-    },
     currentShadowEffect(): ShadowEffectType {
       return this.shadow().currentEffect
-    },
-    scale(): number {
-      return this.config.styles.scale
     },
     primaryLayerType(): string {
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
       return primaryLayer.type
-    },
-    inProcess(): boolean {
-      return this.config.inProcess
     },
     // uploadingImagePreviewSrc(): string {
     //   return this.config.previewSrc

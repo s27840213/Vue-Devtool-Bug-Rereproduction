@@ -39,7 +39,7 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
 
 <script lang="ts">
 import { SrcObj } from '@/interfaces/gallery'
-import { IImage, IImageStyle } from '@/interfaces/layer'
+import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { IBrowserInfo } from '@/store/module/user'
 import cssConverter from '@/utils/cssConverter'
@@ -86,7 +86,6 @@ export default defineComponent({
   data() {
     return {
       src: '',
-      stylesBuff: {} as IImage,
       imgNaturalSize: {
         width: 0,
         height: 0
@@ -169,9 +168,6 @@ export default defineComponent({
       inAllPagesMode: 'mobileAllPageMode',
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'dpi']),
-    configStyles(): IImageStyle {
-      return this.image.config.styles
-    },
     imgStyles(): Record<string, string> {
       return this.stylesConverter()
     },
@@ -245,16 +241,6 @@ export default defineComponent({
         .filter(([, val]) => typeof val === 'number' && val !== 0)
       return entries.length > 1 || (entries.length === 1 && entries[0][0] !== 'halation')
     },
-    adjustImgStyles(): { [key: string]: string | number } {
-      return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
-        width: this.pageSize.width,
-        height: this.pageSize.height,
-        imgX: this.imageSize.x,
-        imgY: this.imageSize.y,
-        imgWidth: this.imageSize.width,
-        imgHeight: this.imageSize.height
-      })
-    },
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
       const { width, height } = this.pageSize
@@ -288,12 +274,6 @@ export default defineComponent({
         const randomId = generalUtils.generateRandomString(5)
         return `filter__${randomId}`
       }
-    },
-    imageFilter(): string {
-      if (this.svgFilterElms.length) {
-        return `url(#${this.filterId})`
-      }
-      return ''
     },
     isBlurImg(): boolean {
       return !!this.image.config.styles.adjust?.blur

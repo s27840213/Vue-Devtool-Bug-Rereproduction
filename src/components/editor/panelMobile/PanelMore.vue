@@ -43,9 +43,8 @@ div(class="panel-more")
 </template>
 
 <script lang="ts">
-import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent, PropType } from 'vue'
@@ -68,7 +67,7 @@ export default defineComponent({
     }
   },
   async mounted() {
-    const debugMode = (await webViewUtils.getState('debugMode'))?.value ?? false
+    const debugMode = (await picWVUtils.getState('debugMode'))?.value ?? false
     this.debugMode = debugMode
   },
   computed: {
@@ -89,9 +88,6 @@ export default defineComponent({
     lastHistory(): string {
       return this.panelHistory[this.historySize - 1]
     },
-    opacity(): number {
-      return layerUtils.getCurrOpacity
-    },
     pagesName(): string {
       return pageUtils.pagesName
     },
@@ -100,7 +96,7 @@ export default defineComponent({
       return buildNumber ? `v.${buildNumber}` : 'local'
     },
     appVersion(): string {
-      return webViewUtils.inBrowserMode ? '' : ` - ${webViewUtils.getUserInfoFromStore().appVer}`
+      return picWVUtils.inBrowserMode ? '' : ` - ${picWVUtils.getUserInfoFromStore().appVer}`
     },
     domainList(): { key: string, title: string, selected: () => boolean }[] {
       return [
@@ -142,12 +138,9 @@ export default defineComponent({
     handleDomainSelected(selected: () => boolean): boolean {
       return selected()
     },
-    updateLayerOpacity(val: number) {
-      layerUtils.updateLayerOpacity(val)
-    },
     newDesign() {
       const path = `${window.location.origin}${window.location.pathname}`
-      webViewUtils.openOrGoto(path)
+      picWVUtils.openOrGoto(path)
     },
     save() {
       shortcutHandler.save()
@@ -180,7 +173,7 @@ export default defineComponent({
       this.$emit('pushHistory', 'domain-list')
     },
     switchDomain(key: string) {
-      webViewUtils.switchDomain(key)
+      picWVUtils.switchDomain(key)
     },
     handleDebugMode() {
       if (this.debugModeTimer) {
@@ -196,7 +189,7 @@ export default defineComponent({
     },
     toggleDebugMode() {
       this.debugMode = !this.debugMode
-      webViewUtils.setState('debugMode', { value: this.debugMode })
+      picWVUtils.setState('debugMode', { value: this.debugMode })
     },
   }
 })

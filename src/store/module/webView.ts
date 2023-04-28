@@ -1,5 +1,5 @@
 import { IUserInfo } from '@/interfaces/webView'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
 interface IWebViewState {
@@ -9,7 +9,7 @@ interface IWebViewState {
 }
 
 const getDefaultState = (): IWebViewState => ({
-  userInfo: webViewUtils.getDefaultUserInfo(),
+  userInfo: picWVUtils.getDefaultUserInfo(),
   inBrowserMode: false,
   inReviewMode: false,
 })

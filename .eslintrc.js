@@ -51,5 +51,14 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': offInCommand('warn'),
     // Require explicit function return type
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+
+    'vue/no-unused-properties': [
+      'error',
+      {
+        groups: ['props', 'data', 'computed', 'methods'],
+        deepData: true,
+        ignorePublicMembers: false,
+      },
+    ],
   }
 }

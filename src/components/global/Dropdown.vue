@@ -46,10 +46,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    disabled: {
-      type: Boolean,
-      default: false
-    }
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -65,6 +61,8 @@ export default defineComponent({
       this.showDropdown = true
       this.$emit('open', event)
     },
+    // Used by DownloadPageSelection.handleSubmit
+    // eslint-disable-next-line vue/no-unused-properties
     handleClose (event: Event) {
       this.showDropdown = false
       this.$emit('close', event)

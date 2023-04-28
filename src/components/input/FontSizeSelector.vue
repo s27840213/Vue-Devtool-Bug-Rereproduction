@@ -30,6 +30,7 @@ import ValueSelector from '@/components/ValueSelector.vue'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -50,12 +51,7 @@ export default defineComponent({
       openValueSelector: false,
       fontSelectValue,
       fieldRange: {
-        fontSize: { min: 1, max: 9999 },
-        lineHeight: { min: 0.5, max: 2.5 },
-        fontSpacing: { min: -200, max: 800 },
-        // fontSpacing: { min: -2, max: 8 },
-        // lineHeight: { min: 0, max: 300 },
-        opacity: { min: 0, max: 100 }
+        fontSize: mappingUtils.mappingMinMax('fontSize'),
       },
       iconSize: this.$isTouchDevice() ? '24px' : '14px',
       numberStyles: {

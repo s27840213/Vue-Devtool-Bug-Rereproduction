@@ -59,7 +59,7 @@ export default defineComponent({
       initImgPos: { x: 0, y: 0 },
       initImgSize: { width: this.config.styles.imgWidth, height: this.config.styles.imgHeight },
       center: { x: 0, y: 0 },
-      control: { xSign: 1, ySign: 1, isHorizon: false },
+      control: { xSign: 1, ySign: 1 },
       initPinchPos: null as null | { x: number, y: number },
       isPinching: false,
       isMoving: false
@@ -82,12 +82,6 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    isActive(): boolean {
-      return this.config.active
-    },
-    isShown(): boolean {
-      return this.config.shown
-    },
     getImgX(): number {
       // return this.page.backgroundImage.posX
       return this.config.styles.imgX
@@ -109,12 +103,6 @@ export default defineComponent({
     getPageRotate(): number {
       return 0
     },
-    dimBgStyles(): Record<string, string> {
-      return {
-        width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
-        height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`
-      }
-    },
     styles(): Record<string, string> {
       return {
         width: `${this.config.styles.imgWidth * this.getPageScale * this.contentScaleRatio}px`,
@@ -130,47 +118,6 @@ export default defineComponent({
     ...mapMutations({
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
-    imgControllerPosHandler(): ICoordinate {
-      const angleInRad = this.getPageRotate * Math.PI / 180
-      const rectCenter = {
-        x: this.pageSize.width * 0.5,
-        y: this.pageSize.height * 0.5
-      }
-      const pageVect = {
-        x: -rectCenter.x,
-        y: -rectCenter.y
-      }
-      /**
-       * Anchor denotes the top-left fix point of the elements
-       */
-      const scale = this.getPageScale
-      const PageAnchor = ControlUtils.getNoRotationPos(pageVect, rectCenter, -angleInRad)
-      const imgAnchor = {
-        x: Math.cos(angleInRad) * this.getImgX * scale - Math.sin(angleInRad) * this.getImgY * scale + PageAnchor.x,
-        y: Math.sin(angleInRad) * this.getImgX * scale + Math.cos(angleInRad) * this.getImgY * scale + PageAnchor.y
-      }
-      const [w, h] = [this.config.styles.imgWidth * scale, this.config.styles.imgHeight * scale]
-      const center = {
-        x: imgAnchor.x + (w * Math.cos(angleInRad) - h * Math.sin(angleInRad)) * 0.5,
-        y: imgAnchor.y + (w * Math.sin(angleInRad) + h * Math.cos(angleInRad)) * 0.5
-      }
-      const vect = {
-        x: imgAnchor.x - center.x,
-        y: imgAnchor.y - center.y
-      }
-
-      const imgControllerPos = ControlUtils.getNoRotationPos(vect, center, angleInRad)
-      return imgControllerPos
-    },
-    controllerStyles() {
-      return {
-        transform: `translate(${-this.page.backgroundImage.posX * this.contentScaleRatio}px, ${-this.page.backgroundImage.posY * this.contentScaleRatio}px)`,
-        width: `${this.pageSize.width * this.contentScaleRatio}px`,
-        height: `${this.pageSize.height * this.contentScaleRatio}px`,
-        outline: `${3 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`,
-        'pointer-events': 'none'
-      }
-    },
     pinchHandler(event: AnyTouchEvent) {
       switch (event.phase) {
         case 'start': {
@@ -525,12 +472,6 @@ export default defineComponent({
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
     },
-    disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice()) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-    }
   }
 })
 </script>

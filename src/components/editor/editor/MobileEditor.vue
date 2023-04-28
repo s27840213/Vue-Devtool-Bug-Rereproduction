@@ -21,11 +21,6 @@ div(class="mobile-editor")
         @switchTab="switchTab"
         @panelHeight="setPanelHeight"
         :footerTabsHeight="footerTabsHeight")
-    //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
-    //-   :currActivePanel="'color'"
-    //-   :currColorEvent="ColorEventType.background"
-    //-   :isExtraPanel="true"
-    //-   @switchTab="switchTab")
   footer-tabs(class="mobile-editor__bottom"
     @switchTab="switchTab"
     :currTab="currActivePanel"
@@ -41,10 +36,7 @@ import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import { IFooterTabProps } from '@/interfaces/editor'
-import { IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import store from '@/store'
-import { ColorEventType, FunctionPanelType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -53,6 +45,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { find } from 'lodash'
+// import VConsole from 'vconsole'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -68,15 +61,12 @@ export default defineComponent({
   },
   data() {
     return {
-      FunctionPanelType,
-      isColorPanelOpen: false,
       isConfigPanelOpen: false,
-      isLoading: false,
       currColorEvent: '',
-      ColorEventType,
       showMobilePanelAfterTransitoin: false,
       marginBottom: 0,
-      footerTabsHeight: 0
+      footerTabsHeight: 0,
+      // vConsole: null as any
     }
   },
   props: {
@@ -90,6 +80,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.switchTab)
+    // this.vConsole && this.vConsole.destroy()
   },
   mounted() {
     // const pz = new PinchZoom(el, {
@@ -123,16 +114,15 @@ export default defineComponent({
       lastTouchEnd = now
     }, false)
 
-    if (process.env.NODE_ENV === 'development') {
-      // const vconsole = new Vconsole()
-      // vconsole.setSwitchPosition(10, 80)
-    }
-
     brandkitUtils.fetchBrands(this.fetchBrands)
 
     this.setUserState({ enableAdminView: false })
 
     this.footerTabsHeight = (this.$refs.footerTabs as any).$el.clientHeight
+
+    // console.log('v console update')
+    // this.vConsole = new VConsole({ theme: 'dark' })
+    // this.vConsole.setSwitchPosition(25, 80)
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -157,48 +147,8 @@ export default defineComponent({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel'
     }),
-    inPagePanel(): boolean {
-      return SidebarPanelType.page === this.currPanel
-    },
     contentStyle(): Record<string, string> {
       return { transform: `translateY(-${this.marginBottom}px)` }
-    },
-    scaleRatioEditorPos(): { [index: string]: string } {
-      return this.inPagePanel ? {
-        right: '2rem'
-      } : {
-        left: '50%',
-        transform: 'translateX(-50%)'
-      }
-    },
-    isLogin(): boolean {
-      return store.getters['user/isLogin']
-    },
-    isLocked(): boolean {
-      return layerUtils.getSelectedLayer().locked
-    },
-    groupTypes(): Set<string> {
-      const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer) => {
-        return layer.type
-      })
-      return new Set(types)
-    },
-    isGroup(): boolean {
-      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
-    },
-    hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
-    },
-    subLayerType(): string {
-      return this.currSubSelectedInfo.type
-    },
-    showTextSetting(): boolean {
-      return this.isGroup ? (
-        this.hasSubSelectedLayer ? (
-          this.subLayerType === 'text' && !this.isLocked
-        ) : (this.groupTypes.has('text') && !this.isLocked)
-      ) : (this.currSelectedInfo.types.has('text'))
     }
   },
   watch: {

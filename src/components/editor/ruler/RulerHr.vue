@@ -2,7 +2,6 @@
 div(class="ruler-hr"
     :style="rulerRootStyles")
   div(class="ruler-hr__body"
-    ref="rulerBody"
     :style="rulerBodyStyles")
     div(v-for="(i, index) in scaleCount" class="ruler-hr__block ruler-hr__block--int" :key="index")
       span(class="ruler-hr__number") {{(i-1)*scale}}

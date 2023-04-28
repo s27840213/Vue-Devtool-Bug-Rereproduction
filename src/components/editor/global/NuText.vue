@@ -7,7 +7,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
               :is="elm.tag"
               v-bind="elm.attrs")
   div(v-for="text, idx in duplicatedText"
-      :key="`text${idx}`"
+      :key="`text${duplicatedText.length - idx}`"
       class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBodyStyle)")
     nu-curve-text(v-if="isCurveText"
@@ -17,7 +17,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :page="page"
       :subLayerIndex="subLayerIndex"
       :primaryLayer="primaryLayer"
-      :isDuplicated="idx !== duplicatedText.length-1")
+      :extraSpanStyle="text.extraSpanStyle")
     p(v-else
       v-for="(p, pIndex) in config.paragraphs"
       :key="`p${pIndex}`"
@@ -45,7 +45,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   components: {
@@ -104,15 +104,15 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
-    spanEffect() {
-      return textBgUtils.convertTextEffect(this.config.styles)
-    },
     isCurveText(): any {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    },
+    isFlipping(): boolean {
+      return this.config.isFlipping
     },
     isLocked(): boolean {
       return this.config.locked
@@ -163,9 +163,12 @@ export default defineComponent({
         ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
       }
     },
-    drawSvgBG() {
-      this.$nextTick(async () => {
-        this.svgBG = await textBgUtils.drawSvgBg(this.config)
+    drawSvgBG(): Promise<void> {
+      return new Promise(resolve => {
+        this.$nextTick(async () => {
+          this.svgBG = await textBgUtils.drawSvgBg(this.config)
+          resolve()
+        })
       })
     },
     isLayerAutoResizeNeeded(): boolean {
@@ -174,7 +177,7 @@ export default defineComponent({
     getOpacity() {
       const { active, contentEditable } = this.config
       if (active && !this.isLocked && !this.inPreview) {
-        if (this.isCurveText || this.isFlipped) {
+        if (this.isCurveText || this.isFlipped || this.isFlipping) {
           return contentEditable ? 0.2 : 1
         } else {
           return 0
@@ -226,11 +229,8 @@ export default defineComponent({
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
-          if (config.styles.writingMode.includes('vertical')) {
-            y = config.styles.y - (textHW.height - config.styles.height) / 2
-          } else {
-            x = config.styles.x - (textHW.width - config.styles.width) / 2
-          }
+          x = config.styles.x - (textHW.width - config.styles.width) / 2
+          y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
         // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
@@ -247,13 +247,16 @@ export default defineComponent({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      this.drawSvgBG()
+      await this.drawSvgBG()
     },
     resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
-        setTimeout(() => {
-          this.resizeCallback()
+        setTimeout(async () => {
+          await this.resizeCallback()
+          if (!this.isCurveText) {
+            generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
+          }
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawSvgBG()
@@ -268,6 +271,11 @@ export default defineComponent({
   height: 100%;
   position: absolute;
   left: 0;
+  top: 0;
+  font-feature-settings: 'liga' 0;
+  -webkit-font-feature-settings: 'liga' 0;
+  -webkit-font-smoothing: subpixel-antialiased; // for textUtils.getTextHW
+  text-rendering: geometricPrecision; // for textUtils.getTextHW
   &__BG {
     position: absolute;
     left: 0;

@@ -1,13 +1,14 @@
-import { ActionTree, MutationTree, GetterTree } from 'vuex'
-import { getField, updateField } from 'vuex-map-fields'
-import store from '..'
-import i18n from '@/i18n'
 import paymentApi from '@/apis/payment'
+import i18n from '@/i18n'
+import * as type from '@/interfaces/payment'
+import fbPixelUtils from '@/utils/fbPixelUtils'
 import generalUtils from '@/utils/generalUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import fbPixelUtils from '@/utils/fbPixelUtils'
-import * as type from '@/interfaces/payment'
+import picWVUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
+import { getField, updateField } from 'vuex-map-fields'
+import store from '..'
 
 interface IPaymentState {
   isLoading: boolean
@@ -122,8 +123,14 @@ function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
 
 function recordThePlanToGTM(trialStatus: string, isYearlyPlan: boolean) {
   if (trialStatus === 'not used') {
-    gtmUtils.startTrail(14)
-    fbPixelUtils.startTrail()
+    gtmUtils.startTrial(14)
+    if (picWVUtils.inBrowserMode) {
+      picWVUtils.sendAdEvent('startTrial', {
+        value: 0.00, currency: 'USD', predicted_ltv: 0.00
+      })
+    } else {
+      fbPixelUtils.startTrial()
+    }
   }
   gtmUtils.subscribe(isYearlyPlan)
   fbPixelUtils.subscribe(isYearlyPlan)

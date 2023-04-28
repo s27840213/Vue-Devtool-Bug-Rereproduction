@@ -13,7 +13,6 @@ div(class="panel-position bg-white")
 </template>
 
 <script lang="ts">
-import { ICurrSelectedInfo } from '@/interfaces/editor'
 import MappingUtils from '@/utils/mappingUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -29,9 +28,6 @@ export default defineComponent({
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
-    layerNum(): number {
-      return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
-    }
   },
   methods: {
     mappingIcons(type: string): string[] {
@@ -48,16 +44,6 @@ export default defineComponent({
         }
       })
     },
-    distributeDatas() {
-      const icons = this.mappingIcons('distribute')
-      const texts = [`${this.$t('NN0221')}`, `${this.$t('NN0222')}`]
-      return icons.map((icon: string, index: number) => {
-        return {
-          icon: icon,
-          text: texts[index]
-        }
-      })
-    }
   }
 })
 </script>

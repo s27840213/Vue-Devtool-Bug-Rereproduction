@@ -2,7 +2,7 @@
 div(class="popup-brand-settings")
   div(class="dim-background under")
   div(class="popup-brand-settings__window"
-      v-click-outside="handleCloseSettings")
+      v-click-outside="vcoConfig()")
     div(class="popup-brand-settings__wrapper relative")
       div(class="brand-kit relative"
         @dragover.prevent.stop="handleDragEnter"
@@ -82,7 +82,6 @@ export default defineComponent({
     return {
       isDraggedOver: false,
       isMessageShowing: false,
-      isTop: true,
       deleteBuffer: undefined as IDeletingItem | undefined,
       uploadHint: {
         logo: {
@@ -126,6 +125,14 @@ export default defineComponent({
     ...mapMutations('brandkit', {
       setIsSettingsOpen: 'SET_isSettingsOpen'
     }),
+    vcoConfig() {
+      return {
+        middleware: (e: MouseEvent) => {
+          return (e.target as HTMLElement | null)?.id !== 'upload'
+        },
+        handler: this.handleCloseSettings
+      }
+    },
     addNewBrand() {
       brandkitUtils.addNewBrand()
     },

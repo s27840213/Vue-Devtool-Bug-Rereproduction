@@ -36,7 +36,7 @@ import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
 import PageNumber from '@/components/editor/PageNumber.vue'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { ILayer } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import backgroundUtils from '@/utils/backgroundUtils'
@@ -68,14 +68,6 @@ export default defineComponent({
     PageCard
   },
   props: {
-    isConfigPanelOpen: {
-      type: Boolean,
-      required: true
-    },
-    inAllPagesMode: {
-      type: Boolean,
-      required: true
-    },
     currActivePanel: {
       default: 'none',
       type: String
@@ -92,16 +84,9 @@ export default defineComponent({
   },
   data() {
     return {
-      initialAbsPos: { x: 0, y: 0 },
-      initialRelPos: { x: 0, y: 0 },
-      currentAbsPos: { x: 0, y: 0 },
-      currentRelPos: { x: 0, y: 0 },
       editorView: null as unknown as HTMLElement,
       editorCanvas: null as unknown as HTMLElement,
-      pageIndex: -1,
       backgroundControllingPageIndex: -1,
-      pageUtils,
-      from: -1,
       scrollHeight: 0,
       tmpScaleRatio: 0,
       mounted: false,
@@ -169,8 +154,8 @@ export default defineComponent({
 
     if (this.$isTouchDevice()) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
-      pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
-      pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
+      pageUtils.originPageSize.width = pageUtils.getPages[0].width * pageUtils.mobileMinScaleRatio * 0.01
+      pageUtils.originPageSize.height = pageUtils.getPages[0].height * pageUtils.mobileMinScaleRatio * 0.01
 
       const rect = this.editorView.getBoundingClientRect()
       editorUtils.setMobilePhysicalData({
@@ -272,16 +257,6 @@ export default defineComponent({
     pageNum(): number {
       return this.pages.length
     },
-    isTyping(): boolean {
-      return (this.currSelectedInfo.layers as Array<IGroup | IShape | IText | IFrame | IImage>)
-        .some(l => l.type === 'text' && l.isTyping)
-    },
-    currFocusPage(): IPage {
-      return this.pageUtils.currFocusPage
-    },
-    minScaleRatio(): number {
-      return pageUtils.mobileMinScaleRatio
-    },
     isDetailPage(): boolean {
       return this.groupType === 1
     },
@@ -298,7 +273,7 @@ export default defineComponent({
     absContainerStyle(): { [index: string]: string | number } {
       const transformDuration = !this.showMobilePanel ? 0.3 : 0
       return {
-        transform: this.isDetailPage ? 'initial' : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
+        transform: this.isDetailPage || this.inBgRemoveMode ? 'initial' : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
         transition: `transform ${transformDuration}s`
       }
     }

@@ -45,7 +45,7 @@ import mouseUtils from '@/utils/mouseUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -82,6 +82,7 @@ export default defineComponent({
   },
   data() {
     return {
+      dragUtils: new DragUtils()
     }
   },
   computed: {
@@ -170,12 +171,14 @@ export default defineComponent({
           brandId: imageUtils.getBrandId(src, type)
         }
 
-        new DragUtils().itemDragStart(e, 'image', { type: 'image', srcObj }, {
+        const imgEl = this.$refs.img as HTMLImageElement
+        this.dragUtils.itemDragStart(e, 'image', { type: 'image', srcObj }, this.previewSrc, {
           width: photoWidth,
           height: photoHeight,
           offsetX: 10,
           offsetY: 15,
-          panelPreviewSrc: this.panelPreviewSrc
+          panelPreviewSrc: this.panelPreviewSrc,
+          aspectRatio: imgEl.naturalWidth / imgEl.naturalHeight
         })
 
         const previewSize = imageUtils.getSignificantDimension(this.photo.preview.width, this.photo.preview.height)

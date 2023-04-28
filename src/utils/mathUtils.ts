@@ -3,6 +3,14 @@ import { IBounding } from '@/interfaces/math'
 import store from '@/store'
 import Flatten from '@flatten-js/core'
 
+interface IPolygonConfig {
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  rotate?: number
+}
+
 class MathUtils {
   cos(angleDeg: number) {
     const angleInRad = angleDeg * Math.PI / 180
@@ -179,8 +187,8 @@ class MathUtils {
     return Array.isArray(result[0]) ? Object.fromEntries(result as [string, number][]) : result
   }
 
-  generatePolygon(styles: { x: number, y: number, width: number, height: number, scale: number, rotate: number }): Flatten.Polygon {
-    const { x, y, width, height, scale = 1, rotate = 0 } = styles
+  generatePolygon(styles: IPolygonConfig): Flatten.Polygon {
+    const { x, y, width, height, rotate = 0 } = styles
     const angle = rotate / 180 * Math.PI
     const object = new Flatten.Polygon([
       Flatten.point(x, y),
@@ -195,6 +203,12 @@ class MathUtils {
   getIntersectArea(polygon1: Flatten.Polygon, polygon2: Flatten.Polygon): number {
     const { intersect } = Flatten.BooleanOperations
     return intersect(polygon1, polygon2).area()
+  }
+
+  calculateIfIntersect(polygon1: Flatten.Polygon | IPolygonConfig, polygon2: Flatten.Polygon | IPolygonConfig): boolean {
+    polygon1 = (polygon1 instanceof Flatten.Polygon) ? polygon1 : this.generatePolygon(polygon1)
+    polygon2 = (polygon2 instanceof Flatten.Polygon) ? polygon2 : this.generatePolygon(polygon2)
+    return this.getIntersectArea(polygon1, polygon2) > 0
   }
 
   // Normal Distribution Between 0 and 1

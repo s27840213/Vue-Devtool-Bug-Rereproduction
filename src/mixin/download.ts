@@ -1,10 +1,11 @@
+/* eslint-disable vue/no-unused-properties */
 import { IDownloadServiceParams, IOutputType, ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
 import generalUtils from '@/utils/generalUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
@@ -86,7 +87,7 @@ export default defineComponent({
           { value: 0, label: 'RGB' },
           { value: 1, label: 'CMYK' }
         ]
-      } as {[key: string]: { value: number, label: string }[]},
+      } as { [key: string]: { value: number, label: string }[] },
       detailPageDownloadOptions: [
         { value: 'whole', label: this.$t('NN0347') as string },
         { value: 'splice', label: this.$t('NN0348') as string }
@@ -116,7 +117,7 @@ export default defineComponent({
       isAdmin: 'isAdmin'
     }),
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      return picWVUtils.inReviewMode
     },
     selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this

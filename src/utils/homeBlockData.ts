@@ -24,7 +24,7 @@ export interface IHomeBlockData {
 class HomeBlockData {
   data(): IHomeBlockData[] {
     return [{
-      title: i18n.global.t('NN0466', { newline: '<br>' }),
+      title: i18n.global.t('NN0466'),
       description: i18n.global.t('NN0467'),
       img: {
         name: 'templateGallery.json',
@@ -44,7 +44,7 @@ class HomeBlockData {
       ],
       align: 'column'
     }, {
-      title: i18n.global.t('NN0480', { newline: '<br>' }),
+      title: i18n.global.t('NN0480'),
       description: i18n.global.t('NN0481'),
       img: {
         name: 'remover.mp4',
@@ -58,7 +58,7 @@ class HomeBlockData {
       }],
       align: 'row'
     }, {
-      title: i18n.global.t('NN0471', { newline: '<br>' }),
+      title: i18n.global.t('NN0471'),
       description: i18n.global.t('NN0472'),
       img: {
         name: 'bundle.json',
@@ -71,7 +71,7 @@ class HomeBlockData {
       }],
       align: 'alternately'
     }, {
-      title: i18n.global.t('NN0473', { newline: '<br>' }),
+      title: i18n.global.t('NN0473'),
       description: i18n.global.t('NN0474'),
       img: {
         name: 'multiple-sizes.json',
@@ -84,7 +84,7 @@ class HomeBlockData {
       }],
       align: 'alternately'
     }, {
-      title: i18n.global.t('NN0475', { newline: '<br>' }),
+      title: i18n.global.t('NN0475'),
       description: i18n.global.t('NN0476'),
       link: {
         text: i18n.global.t('NN0477'),
@@ -112,7 +112,7 @@ class HomeBlockData {
       ],
       align: 'alternately'
     }, {
-      title: i18n.global.t('NN0468', { newline: '<br>' }),
+      title: i18n.global.t('NN0468'),
       description: i18n.global.t('NN0469'),
       link: {
         text: i18n.global.t('NN0470'),
@@ -140,7 +140,7 @@ class HomeBlockData {
       ],
       align: 'alternately'
     }, {
-      title: i18n.global.t('NN0478', { newline: '<br>' }),
+      title: i18n.global.t('NN0478'),
       description: i18n.global.t('NN0479'),
       link: {
         text: i18n.global.t('NN0477'),
@@ -159,7 +159,7 @@ class HomeBlockData {
       align: 'alternately'
     }, {
 
-      title: i18n.global.t('NN0482', { newline: '<br>' }),
+      title: i18n.global.t('NN0482'),
       description: i18n.global.t('NN0483'),
       img: {
         name: 'brandkit.json',
@@ -172,7 +172,7 @@ class HomeBlockData {
       }],
       align: 'alternately'
     }, {
-      title: i18n.global.t('NN0484', { newline: '<br>' }),
+      title: i18n.global.t('NN0484'),
       description: i18n.global.t('NN0485'),
       img: {
         name: 'comment.json',

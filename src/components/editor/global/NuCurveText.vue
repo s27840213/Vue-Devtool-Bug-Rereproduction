@@ -6,18 +6,18 @@ p(class="nu-curve-text__p" :style="pStyle()")
     class="nu-curve-text__span"
     :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
     :key="sIndex",
-    :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan)") {{ span.text }}
+    :style="Object.assign(styles(span.styles, sIndex), extraSpanStyle)") {{ span.text }}
 </template>
 
 <script lang="ts">
 import { IGroup, ISpan, IText } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -35,21 +35,12 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    page: {
-      type: Object as PropType<IPage>,
-      required: true
-    },
     subLayerIndex: {
       type: Number
     },
-    primaryLayer: {
-      type: Object,
-      default: () => { return undefined }
+    extraSpanStyle: {
+      type: Object as PropType<Record<string, string>>,
     },
-    isDuplicated: {
-      type: Boolean,
-      default: false
-    }
   },
   data () {
     return {
@@ -69,8 +60,9 @@ export default defineComponent({
   },
   mounted() {
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
-      setTimeout(() => {
-        this.resizeCallback()
+      setTimeout(async () => {
+        await this.resizeCallback()
+        generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
       }, 100) // for the delay between font loading and dom rendering
     })
   },
@@ -79,12 +71,6 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    duplicatedSpan(): Record<string, string> {
-      const textShadow = textEffectUtils.convertTextEffect(this.config)
-      return this.isDuplicated ? {
-        ...textShadow.duplicatedSpan
-      } : {}
-    }
   },
   watch: {
     'config.paragraphs': {

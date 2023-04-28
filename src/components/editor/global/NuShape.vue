@@ -13,7 +13,6 @@ div(class="nu-shape" :style="styles")
 
 <script lang="ts">
 import { IShape } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -63,10 +62,6 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    page: {
-      type: Object as PropType<IPage>,
-      required: true
-    },
     layerIndex: {
       type: Number,
       required: true
@@ -75,8 +70,8 @@ export default defineComponent({
       type: Number
     },
     contentScaleRatio: {
-      default: 1,
-      type: Number
+      type: Number,
+      default: 1
     }
   },
   data() {

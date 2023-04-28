@@ -5,23 +5,8 @@ export interface IUserInfo {
   locale: string,
   isFirstOpen: boolean,
   statusBarHeight: number,
-  homeIndicatorHeight: number
+  homeIndicatorHeight: number,
+  country?: string
 }
 
-export interface ILoginResult {
-  user_name: string,
-  user_id: string,
-  token: string,
-  account: string,
-  upass_update: number,
-  locale: string,
-  subscribe: string,
-  role: number,
-  roleRaw: number,
-  upload_map: object,
-  upload_log_map: object,
-  avatar: object,
-  view_guide: number,
-  email: string,
-  new_user: number
-}
+export type WEBVIEW_API_RESULT = { [key: string]: any } | null | undefined

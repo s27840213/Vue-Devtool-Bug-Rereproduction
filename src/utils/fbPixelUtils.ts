@@ -2,10 +2,11 @@
  * @Document -https://www.notion.so/vivipic/Vivipic-78df91b4ed454ae1867e01e9a6b21a87
  */
 
-import store from '@/store'
-import generalUtils from './generalUtils'
 import tracking from '@/apis/tracking'
 import { IFbTrackingData } from '@/interfaces/api'
+import store from '@/store'
+import generalUtils from './generalUtils'
+import picWVUtils from './picWVUtils'
 
 class FbPixelUtils {
   get userId(): string { return store.getters['user/getUserId'] }
@@ -47,7 +48,7 @@ class FbPixelUtils {
     })
   }
 
-  startTrail() {
+  startTrial() {
     const eventId = generalUtils.generateRandomString(8)
 
     // trail time: 14 days
@@ -62,9 +63,13 @@ class FbPixelUtils {
     const eventId = generalUtils.generateRandomString(8)
     // month : 8.99 usd (269 TWD), year: 79.99 usd (2388 TWD)
     const price = isYearlyPlany ? 79.99 : 8.99
-    this.fbq('track', 'Subscribe', { subscription_id: this.userId, value: 0, currency: 'USD', predicted_ltv: 0 }, {
-      eventID: eventId
-    })
+    if (picWVUtils.inBrowserMode) {
+      this.fbq('track', 'Subscribe', { subscription_id: this.userId, value: 0, currency: 'USD', predicted_ltv: 0 }, {
+        eventID: eventId
+      })
+    } else {
+      picWVUtils.sendAdEvent('subscribe', { subscription_id: this.userId, value: 0, currency: 'USD', predicted_ltv: 0 })
+    }
   }
 }
 

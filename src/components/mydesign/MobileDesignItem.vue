@@ -78,14 +78,6 @@ const component = defineComponent({
       type: Boolean,
       required: true
     },
-    isMultiSelected: {
-      type: Boolean,
-      required: true
-    },
-    index: {
-      type: Number,
-      required: true
-    }
   },
   emits: ['select', 'deselect'],
   data() {
@@ -292,11 +284,15 @@ const component = defineComponent({
         this.checkImageSize(this.startCarousel)
       }
     },
+    // Call by MobileDesignGallery
+    // eslint-disable-next-line vue/no-unused-properties
     handleEnterView() {
       this.isInView = true
       this.showCarousel = false
       this.checkImageSize(this.startCarousel)
     },
+    // Call by MobileDesignGallery
+    // eslint-disable-next-line vue/no-unused-properties
     handleLeaveView() {
       this.isInView = false
     }

@@ -151,6 +151,7 @@ div(class="panel-download" :style="containerStyles")
       span(class="body-XXS text-gray-2") {{btn.text}}
 </template>
 
+<!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
@@ -160,7 +161,7 @@ import MobileTypeSelector from '@/components/editor/mobile/MobileTypeSelector.vu
 import Btn from '@/components/global/Btn.vue'
 import { ITypeOption, PanelDownloadState } from '@/interfaces/download'
 import downloadMixin from '@/mixin/download'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 export default defineComponent({
   components: {

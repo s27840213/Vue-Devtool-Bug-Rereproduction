@@ -1,14 +1,15 @@
 <template lang="pug">
 div(class="category-template-item" :style="itemStyle")
   div(class="relative pointer"
+      draggable="true"
       @click="addTemplate"
       @dragstart="dragStart($event)")
     img(class="category-template-item__img"
-      draggable="true"
+      ref="img"
       :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
       :style="previewStyle"
       @error="handleNotFound")
-    pro-item(v-if="item.plan")
+    pro-item(v-if="item.plan" draggable="false")
   div(v-if="showId"
     class="category-template-item__id"
     @click="copyId") {{ item.id }}
@@ -16,7 +17,8 @@ div(class="category-template-item" :style="itemStyle")
 
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
-import AssetUtils from '@/utils/assetUtils'
+import assetUtils from '@/utils/assetUtils'
+import DragUtils from '@/utils/dragUtils'
 import editorUtils from '@/utils/editorUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -56,17 +58,14 @@ export default defineComponent({
   },
   data() {
     return {
-      fallbackSrc: ''
+      fallbackSrc: '',
+      dragUtils: new DragUtils()
     }
   },
   computed: {
     ...mapGetters({
       useMobileEditor: 'getUseMobileEditor'
     }),
-    previewImage(): string {
-      const { match_cover: cover, ver, id } = this.item
-      return `https://template.vivipic.com/template/${cover.id ?? id}/prev?ver=${ver}`
-    },
     designGroupType(): number {
       return this.$store.state.groupType
     },
@@ -89,13 +88,13 @@ export default defineComponent({
     dragStart(event: DragEvent) {
       if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
       else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
-      const dataTransfer = event.dataTransfer as DataTransfer
-      dataTransfer.dropEffect = 'move'
-      dataTransfer.effectAllowed = 'move'
-      dataTransfer.setDragImage((event.target as HTMLImageElement), 0, 0)
-      dataTransfer.setData('data', JSON.stringify(this.groupItem
-        ? Object.assign(this.groupItem, { groupChildId: this.item.id })
-        : this.item))
+      const img = this.$refs.img as HTMLImageElement
+      const type = assetUtils.getLayerType(this.item.type)
+      this.dragUtils.itemDragStart(event, type || '', {
+        ...(this.groupItem ? Object.assign(this.groupItem, { groupChildId: this.item.id }) : this.item)
+      }, img.src, {
+        aspectRatio: img.naturalWidth / img.naturalHeight
+      })
     },
     addTemplate() {
       if (this.isDetailPage && this.useMobileEditor) {
@@ -130,11 +129,10 @@ export default defineComponent({
       const pageSize = pageUtils.currFocusPageSize
       const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === unit
       const cb = this.groupItem ? (resize?: any) => {
-        AssetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
+        assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
       } : (resize?: any) => {
-        AssetUtils.addAsset(this.item as any, resize)
+        assetUtils.addAsset(this.item as any, resize)
           .then(() => {
-            console.log(1111)
             if (this.$isTouchDevice()) {
               editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
             }

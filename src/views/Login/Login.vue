@@ -70,9 +70,7 @@ div(style="position: relative;")
       div(class="text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0181')}}?
       div
-        i18n-t(keypath="NN0282" tag="span")
-          template(#newline)
-            br
+        span(v-html="$t('NN0282')")
       div
         property-bar(class="mt-5"
           :class="{'input-invalid': !mailValid || emailResponseError}")
@@ -84,10 +82,7 @@ div(style="position: relative;")
           class="invalid-message")
           span {{ mailErrorMessage }}
       div(class="pb-10")
-        i18n-t(keypath="NN0395" tag="span"
-          class="forgot-hint")
-          template(#newline)
-            br
+        span(class="forgot-hint" v-html="$t('NN0395')")
       div(class="flex"
         :class="hideBackButton ? 'pt-20' : ''"
         style="justify-content: center;")
@@ -203,13 +198,13 @@ div(style="position: relative;")
 
 <script lang="ts">
 import userApis from '@/apis/user'
-import { ILoginResult } from '@/interfaces/webView'
+import { ILoginResult } from '@/interfaces/api'
 import store from '@/store'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
 import loginUtils from '@/utils/loginUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 
@@ -285,7 +280,7 @@ export default defineComponent({
   },
   computed: {
     inReviewMode(): boolean {
-      return webViewUtils.inReviewMode
+      return picWVUtils.inReviewMode
     },
     mailValid(): boolean {
       if (!this.isLoginClicked) {
@@ -383,7 +378,11 @@ export default defineComponent({
     handleLoginResult(data: { data: ILoginResult, flag: number, msg?: string }, gtmTitle: 'Facebook' | 'Google' | 'Vivipic', loginType: string, redirect?: string) {
       if (data.flag === 0) {
         if (data.data.new_user) {
-          fbPixelUtils.fbq('track', 'CompleteRegistration')
+          if (picWVUtils.inBrowserMode) {
+            fbPixelUtils.fbq('track', 'CompleteRegistration')
+          } else {
+            picWVUtils.sendAdEvent('register')
+          }
           gtmUtils.signUp(gtmTitle)
         }
         store.dispatch('user/loginSetup', { data: data })
@@ -561,21 +560,21 @@ export default defineComponent({
       this.isLoading = false
     },
     async onFacebookClicked() {
-      if (webViewUtils.inBrowserMode) {
+      if (picWVUtils.inBrowserMode) {
         loginUtils.onFacebookClicked(this.redirect)
       } else {
         this.isLoading = true
-        const data = await webViewUtils.login('Facebook', this.$i18n.locale)
+        const data = await picWVUtils.login('Facebook', this.$i18n.locale)
         this.isLoading = false
         this.handleLoginResult(data, 'Facebook', 'fb')
       }
     },
     async onGoogleClicked() {
-      if (webViewUtils.inBrowserMode) {
+      if (picWVUtils.inBrowserMode) {
         loginUtils.onGoogleClicked(this.redirect)
       } else {
         this.isLoading = true
-        const data = await webViewUtils.login('Google', this.$i18n.locale)
+        const data = await picWVUtils.login('Google', this.$i18n.locale)
         this.isLoading = false
         this.handleLoginResult(data, 'Google', 'google')
       }

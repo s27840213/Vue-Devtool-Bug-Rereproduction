@@ -37,11 +37,11 @@ div(class="mobile-panel p-15"
 </template>
 
 <script lang="ts">
-import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
+import PageSizeSelector, { CPageSizeSelector } from '@/components/new-design/PageSizeSelector.vue'
 import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'
 import eventUtils from '@/utils/eventUtils'
-import webViewUtils from '@/utils/picWVUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
@@ -74,7 +74,7 @@ export default defineComponent({
       'folders'
     ]),
     ...mapGetters({
-      userInfo: webViewUtils.appendModuleName('getUserInfo')
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
     panelStyle(): { [index: string]: string } {
       return Object.assign(
@@ -100,7 +100,7 @@ export default defineComponent({
     rightButtonAction(): () => void {
       return () => {
         this.isConfirmClicked = true
-        if (!(this.$refs.pageSizeSelector as any).isFormatApplicable) return // TODO: disable submit button
+        if (!(this.$refs.pageSizeSelector as CPageSizeSelector).isFormatApplicable) return // TODO: disable submit button
         const path = this.$route.name === 'MyDesign' ? this.currLocation.split('/').slice(1).join(',') : undefined
         const foldername = this.$route.name === 'MyDesign' ? designUtils.search(this.folders, designUtils.makePath(this.currLocation))?.name : undefined
         designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, this.selectedFormat.unit, undefined, path, foldername)

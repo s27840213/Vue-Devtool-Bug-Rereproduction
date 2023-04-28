@@ -14,12 +14,12 @@ div(class="all-design-view")
 </template>
 
 <script lang="ts">
+import DesignGallery from '@/components/mydesign/DesignGallery.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
+import DiskWarning from '@/components/payment/DiskWarning.vue'
 import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapActions } from 'vuex'
-import DesignGallery from '@/components/mydesign/DesignGallery.vue'
-import DiskWarning from '@/components/payment/DiskWarning.vue'
-import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: ['clearSelection', ...DESIGN_MENU_EVENTS()],
@@ -34,7 +34,6 @@ export default defineComponent({
   data() {
     return {
       menuItems: designUtils.makeNormalMenuItems(),
-      isShowPopup: false
     }
   },
   watch: {

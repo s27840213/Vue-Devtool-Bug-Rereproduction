@@ -1,9 +1,9 @@
-import i18n from '@/i18n'
 import axios from '@/apis'
-import authToken from './auth-token'
-import { AxiosPromise } from 'axios'
-import store from '@/store'
+import i18n from '@/i18n'
 import * as type from '@/interfaces/payment'
+import store from '@/store'
+import { AxiosPromise } from 'axios'
+import authToken from './auth-token'
 
 class Payment {
   planList(country: string) {
@@ -79,6 +79,8 @@ class Payment {
         action: 'add_card',
         type: 'tappay',
         campaign: localStorage.getItem('campaign') || undefined,
+        device: store.getters['user/getDevice'],
+        app: store.getters['webView/getInBrowserMode'] ? 0 : 1,
         ...params
       }
     })
@@ -94,6 +96,8 @@ class Payment {
         action: 'add_card',
         type: 'stripe',
         campaign: localStorage.getItem('campaign') || undefined,
+        device: store.getters['user/getDevice'],
+        app: store.getters['webView/getInBrowserMode'] ? 0 : 1,
         ...params
       }
     })

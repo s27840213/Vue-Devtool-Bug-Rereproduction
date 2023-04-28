@@ -115,7 +115,7 @@ class GroupUtils {
         if (l.type === 'text') {
           const { width, height, writingMode } = l.styles
           LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
-            widthLimit: (writingMode as string).includes('vertical') ? height : width,
+            widthLimit: writingMode.includes('vertical') ? height : width,
             isTyping: false,
             shown: false,
             moved: false
@@ -562,6 +562,7 @@ class GroupUtils {
       layer.shown = false
       layer.locked = tmpLayer.locked
       layer.moved = tmpLayer.moved
+      layer.styles.opacity *= tmpLayer.styles.opacity / 100
     })
 
     return layers
@@ -724,6 +725,7 @@ class GroupUtils {
       layer.shown = false
       layer.locked = groupLayer.locked
       layer.moved = groupLayer.moved
+      layer.styles.opacity *= groupLayer.styles.opacity / 100
     })
 
     return layers

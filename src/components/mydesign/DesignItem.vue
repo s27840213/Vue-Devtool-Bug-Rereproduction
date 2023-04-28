@@ -145,10 +145,6 @@ export default defineComponent({
       type: Boolean,
       required: true
     },
-    index: {
-      type: Number,
-      required: true
-    }
   },
   emits: ['metaSelect', 'deselect', 'select', 'like', 'metaSelect'],
   data() {
@@ -203,9 +199,6 @@ export default defineComponent({
     },
     isTempDesign(): boolean {
       return (this.config.id ?? '').endsWith('_new')
-    },
-    isThumbnailFound(): boolean {
-      return this.config.thumbnail !== this.previewPlaceholder
     },
     sizeToShow(): {width: number, height: number, unit: string} {
       const precision = this.config.unit === 'px' ? 0 : PRECISION
