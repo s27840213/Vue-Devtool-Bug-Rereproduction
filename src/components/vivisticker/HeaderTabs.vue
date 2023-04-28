@@ -27,7 +27,7 @@ div(class="header-bar relative" @pointerdown.stop)
                   iconWidth="18px"
                   iconHeight="18px"
                   iconColor="black-1")
-        span Copy
+        span {{ $t('NN0032') }}
     div(v-if="isInMyDesign && !isInEditor" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
 </template>
 
