@@ -9,4 +9,4 @@ export interface IUserInfo {
   country?: string
 }
 
-export type WEBVIEW_API_RESULT = { [key: string]: any } | undefined
+export type WEBVIEW_API_RESULT = { [key: string]: any } | null | undefined
