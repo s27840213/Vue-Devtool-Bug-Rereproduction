@@ -221,7 +221,7 @@ export default defineComponent({
           this.resetTextsSearch()
           break
         case 'template':
-          this.resetTemplatesSearch()
+          this.resetTemplatesSearch({ resetCategoryInfo: true })
       }
     },
     clearBgShare() {

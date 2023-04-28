@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-template rwd-container" :class="{'in-category': isInCategory}")
+div(class="panel-template rwd-container" :class="{'in-category': isInCategory, 'with-search-bar': showSearchBar}")
   tabs(v-if="!isInCategory"
       class="panel-template__tabs"
       :tabs="['Story', 'Post']"
@@ -10,39 +10,44 @@ div(class="panel-template rwd-container" :class="{'in-category': isInCategory}")
       :groupItem="currentGroup"
       @close="currentGroup = null")
     //- Search bar
-    search-bar(v-if="!isInCategory"
-      class="panel-template__content__searchbar"
-      :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
+    search-bar(v-if="showSearchBar"
+      class="panel-template__searchbar"
+      :placeholder="$t('NN0092', { target: $tc('NN0001', 1) })"
       clear
       :defaultKeyword="keywordLabel"
       vivisticker="dark"
       :color="{close: 'black-5', search: 'black-5'}"
-      @search="handleSearch")
-    tags(v-if="isInCategory && tags && tags.length" class="panel-template__content__tags"
-        :tags="tags" theme="dark" @search="handleSearch")
+      v-model:expanded="isSearchBarExpanded"
+      @search="handleSearch"
+      @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
+    tags(v-if="tags && tags.length"
+        class="panel-template__tags"
+        :class="{collapsed: !isSearchBarExpanded}"
+        :tags="tags"
+        theme="dark"
+        @search="handleSearch")
     //- Search result and main content
     category-list(v-for="item in categoryListArray"
+                  :class="{invisible: !item.show, collapsed: !isSearchBarExpanded}"
                   v-show="item.show" :ref="item.key" :key="item.key"
                   :list="item.content" @loadMore="handleLoadMore"
                   @scroll.passive="handleScrollTop($event, item.key as 'mainContent'|'searchResult')")
       template(#before)
-        div(class="panel-template__content__top-item")
-        tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" :style="{marginTop: 0}"
-          :tags="tags" :scrollLeft="tagScrollLeft" theme="dark" @search="handleSearch" @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
+        div(class="panel-template__top-item")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(:list="list" :title="title" :columnGap="12"
           @action="handleCategorySearch")
           template(v-slot:preview="{ item }")
-            component(class="panel-template__content__item"
+            component(class="panel-template__item"
               :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
               :item="item"
               :style="itemStyles"
               @clickGroupItem="handleShowGroup")
       template(v-slot:category-template-item="{ list, title }")
-        div(v-if="title" class="panel-template__content__header") {{ title }}
-        div(class="panel-template__content__items")
+        div(v-if="title" class="panel-template__header") {{ title }}
+        div(class="panel-template__items")
           component(v-for="item in list"
-            class="panel-template__content__item"
+            class="panel-template__item"
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
             :item="item"
             :key="item.group_id"
@@ -76,7 +81,7 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
-  name: 'panel-object',
+  name: 'panel-template',
   components: {
     Tabs,
     SearchBar,
@@ -97,7 +102,8 @@ export default defineComponent({
         mainContent: 0,
         searchResult: 0
       },
-      tagScrollLeft: 0
+      tagScrollLeft: 0,
+      isSearchBarExpanded: false,
     }
   },
   mounted() {
@@ -151,6 +157,9 @@ export default defineComponent({
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('template')
+    },
+    showSearchBar(): boolean {
+      return !this.isInCategory
     },
     showAllRecently(): boolean {
       return this.isTabShowAllRecently('object')
@@ -231,15 +240,16 @@ export default defineComponent({
       for (const list of this.categoryListArray) {
         if (list.show) {
           const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
-          const top = categoryList.$el.querySelector('.panel-template__content__top-item') as HTMLElement
+          const top = categoryList.$el.querySelector('.panel-template__top-item') as HTMLElement
           top.scrollIntoView({ behavior: 'smooth' })
         }
       }
     },
     async handleSearch(keyword?: string) {
-      this.resetSearch()
+      this.resetSearch({ keepSearchResult: true })
       if (keyword) {
         await this.getTagContent({ keyword })
+        this.isSearchBarExpanded = true
       }
     },
     async handleCategorySearch(keyword: string, locale = '') {
@@ -309,9 +319,6 @@ export default defineComponent({
   &__tabs {
     margin-top: 24px;
   }
-  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
-    margin-top: 24px;
-  }
   &__content {
     @include size(100%, 100%);
     display: flex;
@@ -319,85 +326,109 @@ export default defineComponent({
     overflow-x: hidden;
     color: white;
     text-align: left;
-    &__searchbar {
-      margin-bottom: 14px;
-    }
-    &__tags {
-      margin: 14px 0 18px 0;
-      color: setColor(black-5);
-    }
-    &__item {
-      text-align: center;
-      vertical-align: middle;
-      margin: 0 auto;
-      >div {
-        border-radius: 5px;
-        overflow: hidden;
-      }
-    }
-    &__items {
-      display: grid;
-      column-gap: 20px;
-      grid-template-columns: repeat(3, 1fr);
-    }
-    &__header {
-      grid-column: 1 / 3;
-      line-height: 26px;
-      color: #ffffff;
-      padding: 10px 0;
-      text-align: left;
-    }
-    &__advanced--active {
-      color: setColor(blue-3);
-    }
-    &__theme {
-      position: absolute;
-      left: 20px;
-      right: 20px;
-    }
-    &__search {
-      position: relative;
-      z-index: 2;
-    }
-    &__wrap {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 1;
-      background: rgba(0, 0, 0, 0.8);
-    }
-    &__prompt {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      text-align: left;
-      left: 10px;
-      top: 55px;
-      width: 284px;
-      padding: 12px 8px;
-      line-height: 20px;
+  }
+  &__tags {
+    margin-top: 14px;
+    color: setColor(black-5);
+  }
+  &__item {
+    text-align: center;
+    vertical-align: middle;
+    margin: 0 auto;
+    >div {
       border-radius: 5px;
-      background-color: setColor(gray-4);
-      z-index: 99;
-      filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
-      > span {
-        width: 255px;
+      overflow: hidden;
+    }
+  }
+  &__items {
+    display: grid;
+    column-gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  &.with-search-bar {
+    height: calc(100% + 56px); // 42px (serach bar height) + 14px (margin-top of tags) = 56px
+    .panel-template__tags {
+      clip-path: inset(0 0 0 0);
+      transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
+      &.collapsed {
+        transform: translateY(-56px);
+        clip-path: inset(0 42px 0 0);
       }
-      &:before {
-        content: "";
-        display: block;
-        width: 0;
-        height: 0;
-        position: absolute;
-        right: 20px;
-        top: -12px;
-        transform: rotate(90deg);
-        border-style: solid;
-        border-width: 8px 10px 8px 0;
-        border-color: transparent setColor(gray-4) transparent transparent;
+    }
+    .category-list {
+      transition: transform 200ms 100ms ease-in-out;
+      &.collapsed{
+        transform: translateY(-56px) translateZ(0);
       }
+    }
+    &::v-deep .vue-recycle-scroller__item-wrapper {
+      margin-bottom: 56px;
+    }
+    &::v-deep .tags__flex-container-mobile {
+      width: max-content;
+      padding-right: 42px;
+    }
+  }
+  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
+    margin-top: 24px;
+  }
+  &__header {
+    grid-column: 1 / 3;
+    line-height: 26px;
+    color: #ffffff;
+    padding: 10px 0;
+    text-align: left;
+  }
+  &__advanced--active {
+    color: setColor(blue-3);
+  }
+  &__theme {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+  }
+  &__search {
+    position: relative;
+    z-index: 2;
+  }
+  &__wrap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.8);
+  }
+  &__prompt {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    left: 10px;
+    top: 55px;
+    width: 284px;
+    padding: 12px 8px;
+    line-height: 20px;
+    border-radius: 5px;
+    background-color: setColor(gray-4);
+    z-index: 99;
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+    > span {
+      width: 255px;
+    }
+    &:before {
+      content: "";
+      display: block;
+      width: 0;
+      height: 0;
+      position: absolute;
+      right: 20px;
+      top: -12px;
+      transform: rotate(90deg);
+      border-style: solid;
+      border-width: 8px 10px 8px 0;
+      border-color: transparent setColor(gray-4) transparent transparent;
     }
   }
 }
