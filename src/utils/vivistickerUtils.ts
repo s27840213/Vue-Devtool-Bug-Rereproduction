@@ -6,6 +6,7 @@ import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/laye
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import { nextTick } from 'vue'
@@ -133,7 +134,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get isPaymentDisabled(): boolean {
-    return !this.checkVersion('1.26')
+    return !this.checkVersion('2.26') // TODO: set support version back to 1.26
   }
 
   getUserInfoFromStore(): IUserInfo {
@@ -716,9 +717,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('setState')
   }
 
-  async getState(key: string): Promise<{ [key: string]: any } | undefined> {
+  async getState(key: string): Promise<WEBVIEW_API_RESULT> {
     if (this.isStandaloneMode) return
-    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState')
+    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
   }
 
   getStateResult(data: { key: string, value: string }) {
@@ -959,7 +960,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getIosImg(limit = 1): Promise<Array<string>> {
-    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', 60000) as IIosImgData
+    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', { timeout: 60000 }) as IIosImgData
     return images
   }
 

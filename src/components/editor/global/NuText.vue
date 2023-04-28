@@ -7,7 +7,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
               :is="elm.tag"
               v-bind="elm.attrs")
   div(v-for="text, idx in duplicatedText"
-      :key="`text${idx}`"
+      :key="`text${duplicatedText.length - idx}`"
       class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBodyStyle)")
     nu-curve-text(v-if="isCurveText"

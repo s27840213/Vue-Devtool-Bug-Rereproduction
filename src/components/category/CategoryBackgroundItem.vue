@@ -51,12 +51,12 @@ export default defineComponent({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
-      if (!vivistickerUtils.checkPro(this.item, 'object')) return
+      // if (!vivistickerUtils.checkPro(this.item, 'object')) return
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
       AssetUtils.addAssetToRecentlyUsed(this.item, 'background')
     },
     handleShare() {
-      if (!vivistickerUtils.checkPro(this.item, 'object')) return
+      // if (!vivistickerUtils.checkPro(this.item, 'object')) return
       this.$emit('share', this.item)
     }
   }
