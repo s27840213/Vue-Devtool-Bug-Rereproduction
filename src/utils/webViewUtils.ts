@@ -76,7 +76,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   }
 
   async callIOSAsAPI(type: string, message: any, event: string, {
-    timeout = 5000, retry = false, retryTimes = 0, timeoutValue = undefined as WEBVIEW_API_RESULT
+    timeout = 5000, retry = false, retryTimes = 0
   } = {}): Promise<WEBVIEW_API_RESULT> {
     this.sendToIOS(type, message)
     let result: WEBVIEW_API_RESULT
@@ -93,7 +93,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
         new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
           setTimeout(() => {
             resolve({
-              data: timeoutValue,
+              data: null,
               isTimeouted: true
             })
           }, timeout)
@@ -106,7 +106,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
         if (retry && retryTimes < 2) {
           logUtils.setLogAndConsoleLog(`retry: ${retryTimes + 1}`)
           result = await this.callIOSAsAPI(type, message, event, {
-            timeout, retry, retryTimes: retryTimes + 1, timeoutValue
+            timeout, retry, retryTimes: retryTimes + 1
           })
         }
       }
