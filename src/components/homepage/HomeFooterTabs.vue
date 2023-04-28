@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="footer-tabs")
+div(class="footer-tabs" :style="footerTabsStyles")
   router-link(:to="'/'" custom v-slot="{navigate, isExactActive}")
     div(class="footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
@@ -37,23 +37,31 @@ div(class="footer-tabs")
         :iconWidth="'22px'")
       span(class="body-XXS no-wrap click-disabled"
         :class="activeRouteName === 'Settings' ? 'text-blue-1' : 'text-gray-2'") {{$t('NN0082')}}
+  //- teleport(to=".main-content")
+  //-   size-menu(v-if="sizeMenuOpened")
 </template>
 
 <script lang="ts" setup>
+import picWVUtils from '@/utils/picWVUtils'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 const route = useRoute()
+const store = useStore()
 
+const userInfo = computed(() => store.getters[picWVUtils.appendModuleName('getUserInfo')])
+
+const footerTabsStyles = computed((): { [index: string]: string } => {
+  return {
+    paddingBottom: `${userInfo.value.homeIndicatorHeight}px`
+  }
+})
 const activeRouteName = computed(() => route.name)
+// const sizeMenuOpened = ref(false)
 </script>
 
 <style lang="scss" scoped>
-.test{
-  position: absolute;
-  top: -20px;
-  left: 0px;
-}
 .footer-tabs {
   position: relative;
   -webkit-touch-callout: none;

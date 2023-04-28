@@ -2,7 +2,7 @@
 div(class="home")
   nu-header
   div(class="home-content")
-    div(v-if="inBrowserMode" class="home-top")
+    div(v-if="onlyShowInMobileBrowser" class="home-top")
       div(class="home-top-text")
         span(class="home-top-text__title" v-html="$t('NN0464')")
         span(class="home-top-text__description") {{$t('NN0465')}}
@@ -13,11 +13,11 @@ div(class="home")
       iframe(title="Vivipic" class="home-top__yt"
         :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
         frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
-      router-link(v-if="inBrowserMode" :to="`/editor?type=new-design-size&width=1080&height=1080`"
-          class="home-top__button rounded btn-primary-sm btn-LG")
-        span {{$t('NN0391')}}
+      //- router-link(v-if="inBrowserMode" :to="`/editor?type=new-design-size&width=1080&height=1080`"
+      //-     class="home-top__button rounded btn-primary-sm btn-LG")
+      //-   span {{$t('NN0391')}}
     div(class="home-list")
-      scroll-list(v-if="!isMobile || isLogin"
+      scroll-list(
         :gridMode="!inBrowserMode"
         type="theme" @openSizePopup="openSizePopup()")
       hashtag-category-row(v-if="!inBrowserMode"
@@ -35,9 +35,9 @@ div(class="home")
           :themes="themes"
           @loadMore="handleLoadMore")
       template(v-else)
-        scroll-list(v-if="isLogin && inBrowserMode"
+        scroll-list(v-if="isLogin && onlyShowInMobileBrowser"
           type="mydesign")
-        template(v-if="isLogin")
+        template(v-if="isLogin || !inBrowserMode")
           scroll-list(v-for="theme in themeList"
             type="template"
             :theme="`${theme}`"
@@ -158,7 +158,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       isLogin: 'user/isLogin',
-      inBrowserMode: 'webView/getInDevMode',
+      inBrowserMode: 'webView/getInBrowserMode',
       _themeList: 'getShuffledThemesIds',
       themes: 'getMainHiddenThemes'
     }),
@@ -207,7 +207,13 @@ export default defineComponent({
         return this._themeList.filter((theme: string) => theme !== '7')
       }
       return this._themeList
-    }
+    },
+    onlyShowInMobileBrowser() {
+      return this.$isTouchDevice() && this.inBrowserMode
+    },
+    // onlyShowInMobileApp() {
+    //   return this.$isTouchDevice() && !this.inBrowserMode
+    // }
   },
   // created() {
   //   if (this.$i18n.locale === 'us') {

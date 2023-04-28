@@ -59,7 +59,7 @@ export default defineComponent({
     ResInfo,
     ModalCard,
     DebugTool,
-    HomeFooterTabs
+    HomeFooterTabs,
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -101,13 +101,13 @@ export default defineComponent({
       showAllAdminTool: 'user/showAllAdminTool',
       userInfo: picWVUtils.appendModuleName('getUserInfo'),
       browserInfo: 'user/getBrowserInfo',
-      inBrowserMode: 'webView/getInDevMode'
+      inBrowserMode: 'webView/getInBrowserMode'
     }),
     currLocale(): string {
       return localeUtils.currLocale()
     },
     showHomeFooterTabs (): boolean {
-      return ['Home', 'TemplateCenter', 'MyDesign', 'Settings'].includes(this.$route.name as string) && !this.inBrowserMode
+      return ['Home', 'TemplateCenter', 'MyDesign', 'Settings'].includes(this.$route.name as string) && this.$isTouchDevice()
     }
   },
   methods: {

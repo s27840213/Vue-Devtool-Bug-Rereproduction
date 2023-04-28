@@ -3,12 +3,12 @@ div(class="settings-account")
   avatar(class="mt-30 settings-account__avatar"
     :textSize="30" :avatarSize="75")
   div(class="settings-account__buttons")
-    div(v-if="hasAvatar"
+    div(v-if="hasAvatar && !isMobile"
       class="settings-account__button mr-30 pointer"
       @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
     div(class="settings-account__button pointer"
       @click="chooseAvatar()")
-      span(v-if="hasAvatar") {{$t('NN0171')}}
+      span(v-if="!isMobile") {{$t('NN0171')}}
       span(v-else) {{$t('NN0309')}}
   div(class="settings-account__info")
     div(class="settings-account__label space-between my-10")
@@ -96,6 +96,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState({
+      isMobile: 'isMobile'
+    }),
     ...mapState('user', [
       'uname']),
     ...mapGetters('user', {

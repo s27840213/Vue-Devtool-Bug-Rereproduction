@@ -51,7 +51,7 @@ div(class="list")
           class="list-content-items__theme-item")
           router-link(:to="themeRouteInfo(item)")
             img(class="list-content-items__theme-item-preset"
-              :src="item.url.replace('v2','v3')"
+              :src="item.url"
               @error="imgOnerror"
               @click="openProductPageNotification(item)")
           span(class="body-XS text-gray-1") {{item.title}}
@@ -131,7 +131,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       mydesignData: 'design/getAllDesigns',
-      inBrowserMode: 'webView/getInDevMode'
+      inBrowserMode: 'webView/getInBrowserMode'
     }),
     itemContainerStyles() {
       return this.gridMode ? {
