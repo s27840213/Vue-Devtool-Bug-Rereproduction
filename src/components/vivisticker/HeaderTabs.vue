@@ -68,6 +68,9 @@ export default defineComponent({
     ...mapState('textStock', {
       textKeyword: 'keyword'
     }),
+    ...mapState('templates', {
+      templateKeyword: 'keyword'
+    }),
     ...mapGetters({
       isInEditor: 'vivisticker/getIsInEditor',
       isCurrentInCategory: 'vivisticker/getIsInCategory',
@@ -129,6 +132,8 @@ export default defineComponent({
           return this.backgroundKeyword
         case 'text':
           return this.textKeyword
+        case 'template':
+          return this.templateKeyword
       }
       return ''
     },
@@ -179,6 +184,7 @@ export default defineComponent({
       resetGifTagContent: 'giphy/resetTagContent',
       resetBackgroundsSearch: 'background/resetSearch',
       resetTextsSearch: 'textStock/resetSearch',
+      resetTemplatesSearch: 'templates/resetSearch',
       updateUserSettings: 'vivisticker/updateUserSettings'
     }),
     ...mapMutations({
@@ -213,6 +219,9 @@ export default defineComponent({
           break
         case 'text':
           this.resetTextsSearch()
+          break
+        case 'template':
+          this.resetTemplatesSearch()
       }
     },
     clearBgShare() {

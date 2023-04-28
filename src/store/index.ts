@@ -19,6 +19,7 @@ import objects from '@/store/module/objects'
 import page from '@/store/module/page'
 import popup from '@/store/module/popup'
 import shadow from '@/store/module/shadow'
+import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
 import user from '@/store/module/user'
 import vivisticker from '@/store/module/vivisticker'
@@ -1149,6 +1150,7 @@ const store = createStore({
     giphy,
     textStock,
     background,
+    templates,
     mobileEditor,
     modal,
     popup,

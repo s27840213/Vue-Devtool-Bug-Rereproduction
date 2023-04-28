@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="category-template-item" :style="itemStyle")
+div(class="category-template-item")
   div(class="relative pointer"
       draggable="true"
       @click="addTemplate"
@@ -7,12 +7,8 @@ div(class="category-template-item" :style="itemStyle")
     img(class="category-template-item__img"
       ref="img"
       :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
-      :style="previewStyle"
       @error="handleNotFound")
     pro-item(v-if="item.plan" draggable="false")
-  div(v-if="showId"
-    class="category-template-item__id"
-    @click="copyId") {{ item.id }}
 </template>
 
 <script lang="ts">
@@ -24,7 +20,6 @@ import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import { PRECISION } from '@/utils/unitUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -44,10 +39,6 @@ export default defineComponent({
     },
     item: {
       type: Object,
-      required: true
-    },
-    showId: {
-      type: Boolean,
       required: true
     },
     groupItem: {
@@ -70,14 +61,6 @@ export default defineComponent({
     isDetailPage(): boolean {
       return this.designGroupType === 1 || this.groupItem?.group_type === 1
     },
-    previewStyle(): any {
-      const { width, height } = this.item.preview || { width: GeneralUtils.getListRowItemSize(), height: GeneralUtils.getListRowItemSize() }
-      return { width: `${width}px`, height: `${height}px` }
-    },
-    itemStyle(): any {
-      const { width } = this.item.preview || { width: GeneralUtils.getListRowItemSize() }
-      return { width: `${width}px` }
-    }
   },
   methods: {
     handleNotFound(event: Event) {
@@ -107,8 +90,8 @@ export default defineComponent({
         )
         return
       }
-      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
-      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
+      // if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
+      // else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
       const { match_cover: matchCover = {} } = this.item
       let { height, width, unit } = this.item
 
@@ -173,12 +156,6 @@ export default defineComponent({
       } else {
         cb()
       }
-    },
-    copyId() {
-      GeneralUtils.copyText(this.item.id)
-        .then(() => {
-          notify({ group: 'copy', text: `${this.item.id} 已複製` })
-        })
     }
   }
 })
@@ -187,19 +164,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 .category-template-item {
   &__img {
+    @include size(100%);
     object-fit: contain;
-    height: 145px;
-    width: 145px;
     vertical-align: top;
-  }
-  &__id {
-    color: #ffffff;
-    font-size: 20px;
-    line-height: 40px;
-    text-align: left;
-    transform: scale(0.5);
-    transform-origin: left top;
-    cursor: pointer;
+    border-radius: 5px;
   }
   &__index {
     position: absolute;
