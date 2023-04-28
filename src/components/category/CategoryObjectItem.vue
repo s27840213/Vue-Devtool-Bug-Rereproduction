@@ -60,7 +60,7 @@ export default defineComponent({
       // if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
       console.log(generalUtils.deepCopy(this.item))
       if (this.item.type === 8 || this.item.has_frame) {
-        if (!vivistickerUtils.checkPro(this.item, 'frame')) return
+        // if (!vivistickerUtils.checkPro(this.item, 'frame')) return
         this.handleEditObject()
         return
       }
@@ -72,7 +72,7 @@ export default defineComponent({
         })
         assetUtils.addAssetToRecentlyUsed(this.item, 'giphy')
       } else {
-        if (!vivistickerUtils.checkPro(this.item, 'object')) return
+        // if (!vivistickerUtils.checkPro(this.item, 'object')) return
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
         assetUtils.addAssetToRecentlyUsed(this.item, 'objects', 'svg')
       }
@@ -91,7 +91,7 @@ export default defineComponent({
       })
     },
     handleEditObject() {
-      if (!vivistickerUtils.checkPro(this.item, 'object')) return
+      // if (!vivistickerUtils.checkPro(this.item, 'object')) return
       if (this.item.type === 7 || this.item.has_frame) {
         vivistickerUtils.startEditing('objectGroup', {
           plan: this.item.plan,
