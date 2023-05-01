@@ -387,18 +387,18 @@ export default defineComponent({
     },
     openLineHeightSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineHeight)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight, noText: false, step: 0.01 }, MappingUtils.mappingMinMax('lineHeight')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight, step: 0.01, width: GeneralUtils.getSliderWidth() }, MappingUtils.mappingMinMax('lineHeight')))
       popupUtils.openPopup('slider', {
         posX: 'right',
-        target: '.btn-lh'
+        target: '.text-setting__row2'
       })
     },
     openSpacingSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.letterSpacing)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing, noText: false, step: 1 }, MappingUtils.mappingMinMax('letterSpacing')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing, step: 1, width: GeneralUtils.getSliderWidth() }, MappingUtils.mappingMinMax('letterSpacing')))
       popupUtils.openPopup('slider', {
         posX: 'right',
-        target: '.btn-ls'
+        target: '.text-setting__row2'
       })
     },
     copyColor() {
