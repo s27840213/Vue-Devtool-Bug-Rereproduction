@@ -332,13 +332,15 @@ export default defineComponent({
     lazyloadSize(): unknown {
       if (this.$isTouchDevice()) {
         return {
-          minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100),
-          maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)
+          // the max page scale size is currently set to 3
+          // using the max scale as a const scale factor prevents screen tearing as using the dynamic chaging scale factor
+          minHeight: this.config.height * this.contentScaleRatio * (this.pageIndex === layerUtils.pageIndex ? 3 : this.scaleRatio * 0.01),
+          maxHeight: this.config.height * this.contentScaleRatio * (this.pageIndex === layerUtils.pageIndex ? 3 : this.scaleRatio * 0.01)
         }
       } else {
         return {
-          minHeight: this.config.height * (this.scaleRatio / 100),
-          maxHeight: this.config.height * (this.scaleRatio / 100)
+          minHeight: this.config.height * (this.scaleRatio * 0.01),
+          maxHeight: this.config.height * (this.scaleRatio * 0.01)
         }
       }
     },

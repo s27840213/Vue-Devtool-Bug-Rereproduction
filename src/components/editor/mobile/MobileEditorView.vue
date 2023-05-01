@@ -235,6 +235,9 @@ export default defineComponent({
     pages(): Array<IPage> {
       return this.pagesState.map((p: IPageState) => p.config)
     },
+    currPageEl(): HTMLElement {
+      return document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+    },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
     },
@@ -456,9 +459,7 @@ export default defineComponent({
             const newScaleRatio = this.$store.state.mobileEditor.pinchScale * this.tmpScaleRatio
             const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(page, newScaleRatio * 0.01)
             if (newScaleRatio > MAX_SCALE) {
-              const pageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-              pageEl.classList.add('editor-view__pinch-transition')
-              console.log('this.tmpScaleRatio * evtScale > MAX_SCALE')
+              this.currPageEl.classList.add('editor-view__pinch-transition')
               this.isHandlingEdgeReach = true
 
               const sizeDiff = {
@@ -469,8 +470,6 @@ export default defineComponent({
               const xAtMaxScale = page.x + sizeDiff.width * this.translationRatio.x
               const yAtMaxScale = page.y + sizeDiff.height * this.translationRatio.y
               const edgeLimit = this.getEdgeLimit(page, MAX_SCALE * 0.01)
-              console.log(xAtMaxScale, yAtMaxScale, edgeLimit.left, edgeLimit.right)
-              console.log(mathUtils.clamp(xAtMaxScale, edgeLimit.right, edgeLimit.left), mathUtils.clamp(yAtMaxScale, edgeLimit.bottom, edgeLimit.top))
               pageUtils.updatePagePos(layerUtils.pageIndex, {
                 x: mathUtils.clamp(xAtMaxScale, edgeLimit.right, edgeLimit.left),
                 y: mathUtils.clamp(yAtMaxScale, edgeLimit.bottom, edgeLimit.top)
@@ -482,16 +481,15 @@ export default defineComponent({
                 this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
                 this.$store.commit('SET_pageScaleRatio', MAX_SCALE)
                 this.isHandlingEdgeReach = false
-                pageEl.classList.remove('editor-view__pinch-transition')
+                this.currPageEl.classList.remove('editor-view__pinch-transition')
               }, 200)
             } else if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
               this.isHandlingEdgeReach = true
-              const pageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-              pageEl.classList.add('editor-view__pinch-transition')
+              this.currPageEl.classList.add('editor-view__pinch-transition')
 
               const pos = { x: page.x, y: page.y }
               const EDGE_WIDTH = this.EDGE_WIDTH()
-              if (newScaleRatio < 100 && ((isReachLeftEdge && isReachRightEdge) || (isReachTopEdge && isReachBottomEdge))) {
+              if (newScaleRatio < 100 || ((isReachLeftEdge && isReachRightEdge) || (isReachTopEdge && isReachBottomEdge))) {
                 pos.x = EDGE_WIDTH.x
                 pos.y = EDGE_WIDTH.y
                 this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
@@ -502,7 +500,6 @@ export default defineComponent({
               } else {
                 if (isReachLeftEdge) {
                   pos.x = EDGE_WIDTH.x
-                  console.log(pos.x, EDGE_WIDTH.x)
                 }
                 if (isReachRightEdge) {
                   pos.x = editorUtils.mobileSize.width - page.width * contentScaleRatio * newScaleRatio * 0.01 - EDGE_WIDTH.x
@@ -523,7 +520,7 @@ export default defineComponent({
 
               setTimeout(() => {
                 this.isHandlingEdgeReach = false
-                pageEl.classList.remove('editor-view__pinch-transition')
+                this.currPageEl.classList.remove('editor-view__pinch-transition')
               }, 200)
             } else {
               this.$store.commit('mobileEditor/SET_isPinchingEditor', false)

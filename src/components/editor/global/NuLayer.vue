@@ -411,9 +411,9 @@ export default defineComponent({
         return ''
       }
     },
-    pageScaleRatio(): number {
-      return pageUtils.scaleRatio / 100
-    },
+    // pageScaleRatio(): number {
+    //   return pageUtils.scaleRatio / 100
+    // },
     // compensationRatio(): number {
     //   return !this.useMobileEditor ? 1 : Math.max(1, this.pageScaleRatio())
     // },
