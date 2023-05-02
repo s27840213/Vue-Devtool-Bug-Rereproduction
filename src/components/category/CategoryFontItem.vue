@@ -61,10 +61,10 @@ export default defineComponent({
       isSettingsOpen: 'getIsSettingsOpen'
     }),
     getPreview(): string {
-      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-name')
+      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-name', this.item.ver)
     },
     getPreview2(): string {
-      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-sample')
+      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-sample', this.item.ver)
     },
     itemFontType(): string {
       return this.item.src || this.item.fontType
