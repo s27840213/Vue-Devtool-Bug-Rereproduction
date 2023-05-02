@@ -89,13 +89,15 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
         //-   :title="$tc('NN0642',1)"
         //-   :iconName="'chevron-right'")
         //- hr
-        mobile-jump-btn(
-          :title="$t('NN0160')"
-          :iconName="'chevron-right'")
+        url(:url="$t('NN0857')")
+          mobile-jump-btn(
+            :title="$t('NN0160')"
+            :iconName="'chevron-right'")
         hr
-        mobile-jump-btn(
-          :title="$t('NN0161')"
-          :iconName="'chevron-right'")
+        url(:url="$t('NN0858')")
+          mobile-jump-btn(
+            :title="$t('NN0161')"
+            :iconName="'chevron-right'")
         hr
         mobile-jump-btn(
           :title="$t('NN0167')"

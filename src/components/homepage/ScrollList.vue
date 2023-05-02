@@ -28,19 +28,9 @@ div(class="list")
         svg-icon(iconName="loading"
           iconWidth="50px"
           iconColor="gray-3")
-      template(v-else-if="type==='theme' && !inBrowserMode")
-        div(v-for="item in themeData"
-          :key="item.id"
-          class="list-content-items__app-theme-item")
-          router-link(:to="themeRouteInfo(item)")
-            img(class="list-content-items__theme-item-preset"
-              :src="item.url.replace('v2','v3')"
-              @error="imgOnerror"
-              @click="openProductPageNotification(item)")
-          span(class="body-XS text-gray-1") {{item.title}}
       //- type theme
       template(v-else-if="type === 'theme' && inBrowserMode")
-        div(class="list-content-items__theme-item")
+        div(v-if="!$isTouchDevice()" class="list-content-items__theme-item")
           btn-new-design(v-slot="slotProps")
             img(class="list-content-items__theme-item-new pointer"
               :src="require('@/assets/img/svg/plus-origin.svg')"
@@ -51,11 +41,11 @@ div(class="list")
           class="list-content-items__theme-item")
           router-link(:to="themeRouteInfo(item)")
             img(class="list-content-items__theme-item-preset"
-              :src="item.url"
+              :src="item.url.replace('v2','v3')"
               @error="imgOnerror"
               @click="openProductPageNotification(item)")
           span(class="body-XS text-gray-1") {{item.title}}
-          span(class="body-XXS text-gray-3") {{item.description}}
+          span(v-if="!$isTouchDevice()" class="body-XXS text-gray-3") {{item.description}}
       //- type mydesign
       template(v-else-if="type === 'mydesign'")
         design-item(v-for="item in mydesignData"
@@ -136,8 +126,8 @@ export default defineComponent({
     itemContainerStyles() {
       return this.gridMode ? {
         display: 'grid',
-        gridAutoColumns: '72px',
-        columnGap: '8px',
+        gridAutoColumns: this.$isTouchDevice() ? '72px' : '96px',
+        columnGap: this.$isTouchDevice() ? '8px' : '24px',
         gridAutoFlow: 'column',
         gridTemplateRows: '1fr'
       } : {}
@@ -235,7 +225,7 @@ export default defineComponent({
       let height = this.theme === '3' ? 284
         : this.theme === '7' ? 320
           : 160
-      if (!this.inBrowserMode) {
+      if (this.$isTouchDevice()) {
         height *= 2 / 3
       }
       const aspectRatio = match_cover.width / match_cover.height
@@ -302,18 +292,33 @@ export default defineComponent({
 .list-content-items {
   @include no-scrollbar;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   overflow-x: scroll;
   overflow-y: hidden;
   scroll-behavior: smooth;
   &__theme-item {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 1fr 46px;
+    grid-template-columns: 1fr;
     text-align: center;
-    padding: 8px 12px;
-    img:hover {
+    box-sizing: border-box;
+    width: 100%;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: bottom;
       transition: all 0.2s ease-in-out;
-      box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
+    }
+
+    span {
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      text-overflow: ellipsis;
+    }
+
+    img:hover {
+      box-shadow: 0px 12px 10px 2px rgba(48, 55, 66, 0.15);
       transform: translate(0, -5px);
     }
   }
