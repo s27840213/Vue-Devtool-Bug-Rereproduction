@@ -2,7 +2,7 @@
 div(class="home")
   nu-header
   div(class="home-content")
-    div(v-if="onlyShowInMobileBrowser" class="home-top")
+    div(v-if="inBrowserMode" class="home-top")
       div(class="home-top-text")
         span(class="home-top-text__title" v-html="$t('NN0464')")
         span(class="home-top-text__description") {{$t('NN0465')}}
@@ -18,7 +18,7 @@ div(class="home")
       //-   span {{$t('NN0391')}}
     div(class="home-list")
       scroll-list(
-        :gridMode="!inBrowserMode"
+        :gridMode="true"
         type="theme" @openSizePopup="openSizePopup()")
       hashtag-category-row(v-if="!inBrowserMode"
         class="home-list__hashtag"
@@ -35,7 +35,7 @@ div(class="home")
           :themes="themes"
           @loadMore="handleLoadMore")
       template(v-else)
-        scroll-list(v-if="isLogin && onlyShowInMobileBrowser"
+        scroll-list(v-if="isLogin && inBrowserMode"
           type="mydesign")
         template(v-if="isLogin || !inBrowserMode")
           scroll-list(v-for="theme in themeList"
@@ -207,9 +207,6 @@ export default defineComponent({
         return this._themeList.filter((theme: string) => theme !== '7')
       }
       return this._themeList
-    },
-    onlyShowInMobileBrowser() {
-      return this.$isTouchDevice() && this.inBrowserMode
     },
     // onlyShowInMobileApp() {
     //   return this.$isTouchDevice() && !this.inBrowserMode

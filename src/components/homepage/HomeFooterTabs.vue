@@ -3,7 +3,7 @@ div(class="footer-tabs" :style="footerTabsStyles")
   router-link(:to="'/'" custom v-slot="{navigate, isExactActive}")
     div(class="footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
-        :iconName="'home'"
+        :iconName="isExactActive ? 'home-tap' :'home'"
         :iconColor="isExactActive ? 'blue-1' : 'gray-2'"
         :iconWidth="'22px'")
       span(class="body-XXS no-wrap click-disabled"
@@ -11,7 +11,7 @@ div(class="footer-tabs" :style="footerTabsStyles")
   router-link(:to="'/templates'" custom v-slot="{navigate, isExactActive}")
     div(class="footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
-        :iconName="'template'"
+        :iconName="isExactActive ? 'template-tap' :'template'"
         :iconColor="isExactActive ? 'blue-1' : 'gray-2'"
         :iconWidth="'22px'")
       span(class="body-XXS no-wrap click-disabled"
@@ -24,7 +24,7 @@ div(class="footer-tabs" :style="footerTabsStyles")
   router-link(:to="'/mydesign'" custom v-slot="{navigate}")
     div(class="footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
-        :iconName="'folder'"
+        :iconName="activeRouteName === 'MyDesign' ? 'folder-tap' : 'folder'"
         :iconColor="activeRouteName === 'MyDesign' ? 'blue-1' : 'gray-2'"
         :iconWidth="'22px'")
       span(class="body-XXS no-wrap click-disabled"
