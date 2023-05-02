@@ -385,20 +385,22 @@ export default defineComponent({
         const contentScaleRatio = this.$store.state.contentScaleRatio
         const evtScale = ((e.scale - 1) * 0.5 + 1)
         switch (e.phase) {
-          // case 'start': {
-          //   console.warn('pinching start')
-          //   this.movingUtils.removeListener()
-          //   this.initPagePos.x = page.x
-          //   this.initPagePos.y = page.y
-          //   this.initPinchPos = {
-          //     x: e.x,
-          //     y: e.y
-          //   }
-          //   this.tmpScaleRatio = scaleRatio
-          //   store.commit('SET_isPageScaling', true)
-          //   this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
-          //   break
-          // }
+          case 'start': {
+            if (this.isBgImgCtrl || this.isImgCtrl) return
+
+            console.warn('pinching start')
+            this.movingUtils.removeListener()
+            this.initPagePos.x = page.x
+            this.initPagePos.y = page.y
+            this.initPinchPos = {
+              x: e.x,
+              y: e.y
+            }
+            this.tmpScaleRatio = scaleRatio
+            store.commit('SET_isPageScaling', true)
+            this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
+            break
+          }
 
           case 'move': {
             if (this.isBgImgCtrl || this.isImgCtrl) return
@@ -439,17 +441,14 @@ export default defineComponent({
               width: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.width * contentScaleRatio),
               height: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.height * contentScaleRatio)
             }
-
             const movingTraslate = {
               x: (e.x - this.initPinchPos.x),
               y: (e.y - this.initPinchPos.y)
             }
-            // console.warn(this.initPagePos.x, this.initPagePos.y, page.x, page.y)
             pageUtils.updatePagePos(layerUtils.pageIndex, {
               x: this.initPagePos.x - sizeDiff.width * this.translationRatio.x + movingTraslate.x,
               y: this.initPagePos.y - sizeDiff.height * this.translationRatio.y + movingTraslate.y
             })
-            // console.log(this.initPagePos.x - sizeDiff.width * translationRatio.x + movingTraslate.x, this.initPagePos.y - sizeDiff.height * translationRatio.y + movingTraslate.y)
             console.log('pinch moving')
             break
           }
@@ -554,9 +553,6 @@ export default defineComponent({
           this.setCurrActivePageIndex(this.currCardIndex)
           this.$nextTick(() => {
             pageUtils.fitPage()
-            // setTimeout(() => {
-            //   pageUtils.fitPage()
-            // }, 300)
           })
         } else {
           GroupUtils.deselect()
@@ -576,9 +572,6 @@ export default defineComponent({
             editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
             this.setCurrActivePageIndex(this.currCardIndex)
             pageUtils.fitPage()
-            // setTimeout(() => {
-            //   pageUtils.fitPage()
-            // }, 300)
           })
           StepsUtils.record()
         }

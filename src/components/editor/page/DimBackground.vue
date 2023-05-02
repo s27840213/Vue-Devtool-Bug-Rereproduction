@@ -55,6 +55,7 @@ import NuBackgroundController from '@/components/editor/global/NuBackgroundContr
 import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import cssConverter from '@/utils/cssConverter'
+import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
 import { defineComponent, PropType } from 'vue'
@@ -83,7 +84,8 @@ export default defineComponent({
     ...mapGetters({
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       isImgCtrl: 'imgControl/isImgCtrl',
-      isBgImgCtrl: 'imgControl/isBgImgCtrl'
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      pageScaleRatio: 'getPageScaleRatio'
     }),
     pageIndex(): number {
       return this.layerInfo.pageIndex
@@ -99,11 +101,14 @@ export default defineComponent({
         imgX += this.config.bleeds.left
         imgY += this.config.bleeds.top
       }
+
+      const _f = this.contentScaleRatio * (generalUtils.isTouchDevice() ? this.pageScaleRatio * 0.01 : 1)
+      console.log(this.pageScaleRatio * 0.01, _f)
       return {
-        width: `${backgroundImage.styles.imgWidth * this.contentScaleRatio}px`,
-        height: `${backgroundImage.styles.imgHeight * this.contentScaleRatio}px`,
-        left: `${imgX * this.contentScaleRatio}px`,
-        top: `${imgY * this.contentScaleRatio}px`
+        width: `${backgroundImage.styles.imgWidth * _f}px`,
+        height: `${backgroundImage.styles.imgHeight * _f}px`,
+        left: `${imgX * _f}px`,
+        top: `${imgY * _f}px`
       }
     },
     backgroundFlipStyles() {

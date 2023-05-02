@@ -83,11 +83,9 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio'
     }),
     getImgX(): number {
-      // return this.page.backgroundImage.posX
       return this.config.styles.imgX
     },
     getImgY(): number {
-      // return this.page.backgroundImage.posY
       return this.config.styles.imgY
     },
     getImgWidth(): number {
@@ -96,17 +94,14 @@ export default defineComponent({
     getImgHeight(): number {
       return this.config.styles.imgHeight
     },
-    getPageScale(): number {
-      return 1
-      // return this.config.styles.scale
-    },
     getPageRotate(): number {
       return 0
     },
     styles(): Record<string, string> {
+      const _f = this.contentScaleRatio * (generalUtils.isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return {
-        width: `${this.config.styles.imgWidth * this.getPageScale * this.contentScaleRatio}px`,
-        height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
+        width: `${this.config.styles.imgWidth * _f}px`,
+        height: `${this.config.styles.imgHeight * _f}px`,
         outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
       }
     },
@@ -193,12 +188,12 @@ export default defineComponent({
     },
     imgPinchScaleClamp(newSize: ISize, newPos: ICoordinate, translationRatio: { x: number, y: number }, movingTraslate: { x: number, y: number }) {
       const baseLine = {
-        x: -newSize.width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5,
-        y: -newSize.height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
+        x: -newSize.width * 0.5 + (this.pageSize.width) * 0.5,
+        y: -newSize.height * 0.5 + (this.pageSize.height) * 0.5
       }
       const translateLimit = {
-        width: (newSize.width - this.pageSize.width / this.getPageScale) * 0.5,
-        height: (newSize.height - this.pageSize.height / this.getPageScale) * 0.5
+        width: (newSize.width - this.pageSize.width) * 0.5,
+        height: (newSize.height - this.pageSize.height) * 0.5
       }
       const sizeDiff = {
         width: newSize.width - this.initImgSize.width,
@@ -237,10 +232,10 @@ export default defineComponent({
           newSize.height = this.initImgSize.height + sizeDiff.height
           newPos.y = this.initImgPos.y + (sizeDiff.height * translationRatio.y) + movingTraslate.y
 
-          baseLine.x = -newSize.width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5
-          baseLine.y = -newSize.height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
-          translateLimit.width = (newSize.width - this.pageSize.width / this.getPageScale) * 0.5
-          translateLimit.height = (newSize.height - this.pageSize.height / this.getPageScale) * 0.5
+          baseLine.x = -newSize.width * 0.5 + (this.pageSize.width) * 0.5
+          baseLine.y = -newSize.height * 0.5 + (this.pageSize.height) * 0.5
+          translateLimit.width = (newSize.width - this.pageSize.width) * 0.5
+          translateLimit.height = (newSize.height - this.pageSize.height) * 0.5
         }
       }
       if (Math.abs(newPos.y - baseLine.y) > translateLimit.height) {
@@ -304,24 +299,24 @@ export default defineComponent({
       }
       event.preventDefault()
       const baseLine = {
-        x: -this.getImgWidth * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5,
-        y: -this.getImgHeight * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
+        x: -this.getImgWidth * 0.5 + (this.pageSize.width) * 0.5,
+        y: -this.getImgHeight * 0.5 + (this.pageSize.height) * 0.5
       }
       const translateLimit = {
-        width: (this.getImgWidth - this.pageSize.width / this.getPageScale) * 0.5,
-        height: (this.getImgHeight - this.pageSize.height / this.getPageScale) * 0.5
+        width: (this.getImgWidth - this.pageSize.width) * 0.5,
+        height: (this.getImgHeight - this.pageSize.height) * 0.5
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
 
-      offsetPos.x = (offsetPos.x / this.getPageScale) * (100 / this.scaleRatio) / this.page.contentScaleRatio
-      offsetPos.y = (offsetPos.y / this.getPageScale) * (100 / this.scaleRatio) / this.page.contentScaleRatio
+      offsetPos.x = offsetPos.x * (100 / this.scaleRatio) / this.page.contentScaleRatio
+      offsetPos.y = offsetPos.y * (100 / this.scaleRatio) / this.page.contentScaleRatio
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
-        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.pageSize.width / this.getPageScale - this.getImgWidth
+        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.pageSize.width - this.getImgWidth
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
-        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.pageSize.height / this.getPageScale - this.getImgHeight
+        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.pageSize.height - this.getImgHeight
       }
       this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y })
     },
@@ -379,7 +374,7 @@ export default defineComponent({
       const angleInRad = this.getPageRotate * Math.PI / 180
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      const [dx, dy] = [diff.offsetX / this.getPageScale / this.page.contentScaleRatio, diff.offsetY / this.getPageScale / this.page.contentScaleRatio]
+      const [dx, dy] = [diff.offsetX / this.page.contentScaleRatio, diff.offsetY / this.page.contentScaleRatio]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
@@ -406,12 +401,12 @@ export default defineComponent({
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.y : this.initImgPos.y
       }
       const baseLine = {
-        x: -width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5,
-        y: -height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
+        x: -width * 0.5 + this.pageSize.width * 0.5,
+        y: -height * 0.5 + this.pageSize.height * 0.5
       }
       const translateLimit = {
-        width: (width - this.pageSize.width / this.getPageScale) * 0.5,
-        height: (height - this.pageSize.height / this.getPageScale) * 0.5
+        width: (width - this.pageSize.width) * 0.5,
+        height: (height - this.pageSize.height) * 0.5
       }
 
       const ratio = width / height
@@ -427,10 +422,10 @@ export default defineComponent({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
 
-        baseLine.x = -width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5
-        baseLine.y = -height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
-        translateLimit.width = (width - this.pageSize.width / this.getPageScale) * 0.5
-        translateLimit.height = (height - this.pageSize.height / this.getPageScale) * 0.5
+        baseLine.x = -width * 0.5 + this.pageSize.width * 0.5
+        baseLine.y = -height * 0.5 + this.pageSize.height * 0.5
+        translateLimit.width = (width - this.pageSize.width) * 0.5
+        translateLimit.height = (height - this.pageSize.height) * 0.5
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         if (this.control.ySign < 0) {
