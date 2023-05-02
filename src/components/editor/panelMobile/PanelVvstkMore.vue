@@ -85,11 +85,11 @@ export default defineComponent({
         icon: 'vivisticker_play-circle',
         action: this.handleShowTutorial
       },
-      // {
-      //   text: 'Vivisticker Pro',
-      //   icon: 'pro',
-      //   action: () => { vivistickerUtils.openPayment() }
-      // },
+      {
+        text: 'Vivisticker Pro',
+        icon: 'pro',
+        action: () => { vivistickerUtils.openPayment() }
+      },
       {
         text: `${this.$t('NN0174')}`,
         icon: 'vivisticker_global',
