@@ -29,7 +29,7 @@ div(class="list")
           iconWidth="50px"
           iconColor="gray-3")
       //- type theme
-      template(v-else-if="type === 'theme' && inBrowserMode")
+      template(v-else-if="type === 'theme'")
         div(v-if="!$isTouchDevice()" class="list-content-items__theme-item")
           btn-new-design(v-slot="slotProps")
             img(class="list-content-items__theme-item-new pointer"
