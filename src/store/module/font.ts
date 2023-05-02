@@ -41,7 +41,6 @@ mutations[SET_MORE_CATEGORY] = function (state: IListModuleState, objects: IList
 
 getters.getFont = function (state: IListModuleState): (id: string) => IListServiceContentDataItem | undefined {
   return (id: string) => {
-    console.log(state.categories, id)
     for (const category of state.categories) {
       for (const font of category.list) {
         if (font.id === id) {

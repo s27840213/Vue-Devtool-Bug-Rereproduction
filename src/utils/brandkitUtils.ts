@@ -449,7 +449,6 @@ class BrandKitUtils {
       return font as { fontFamily: string, type: string, userId: string, assetId: string, ver: number }
     } else {
       const storeFont = store.getters['font/getFont'](font.fontFamily)
-      console.log(storeFont)
       if (storeFont) {
         return Object.assign({}, font, { ver: storeFont.ver })
       } else {

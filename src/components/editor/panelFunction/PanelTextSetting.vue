@@ -180,7 +180,6 @@ export default defineComponent({
       return MappingUtils.mappingIconSet(type)
     },
     getFontPrev() {
-      console.log('getFont')
       const url = brandkitUtils.getFontPrevUrlByFontFamily(brandkitUtils.fillFontVer({
         fontFamily: this.props.font,
         type: this.props.type,
