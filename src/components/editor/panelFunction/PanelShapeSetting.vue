@@ -426,14 +426,14 @@ export default defineComponent({
     },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
-      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth, noText: false }, MappingUtils.mappingMinMax('lineWidth')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth, width: GeneralUtils.getSliderWidth() }, MappingUtils.mappingMinMax('lineWidth')))
       popupUtils.openPopup('slider', {
         target: '.line-actions'
       })
     },
     openBasicShapeSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
-      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth, noText: false }, MappingUtils.mappingMinMax('lineWidth')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.lineWidth, width: GeneralUtils.getSliderWidth() }, MappingUtils.mappingMinMax('lineWidth')))
       popupUtils.openPopup('slider', {
         target: '.basic-shape-actions'
       })

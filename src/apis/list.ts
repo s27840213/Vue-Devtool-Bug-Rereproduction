@@ -47,7 +47,7 @@ class ListService {
       type,
       design_ids: designIds.join(','),
       locale: localeUtils.currLocale(),
-      cache: 'true',
+      cache: true,
       platform: window.location.host,
       app: 1
     }
@@ -62,27 +62,32 @@ class ListService {
   // For list factories
   getSvg(params: IListServiceParams) {
     params.type = 'svg'
+    params.cache = true // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getTemplate(params: IListServiceParams) {
     params.type = 'template'
+    params.cache = true // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getText(params: IListServiceParams) {
     params.type = 'text'
+    params.cache = true // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getBackground(params: IListServiceParams) {
     params.type = 'background'
+    params.cache = true // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getFont(params: IListServiceParams) {
     params.type = 'font'
     params.fontList = 2
+    params.cache = true // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
