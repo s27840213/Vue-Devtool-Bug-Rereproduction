@@ -59,7 +59,7 @@ export default defineComponent({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addText() {
-      // if (!vivistickerUtils.checkPro(this.item, 'text')) return
+      if (!vivistickerUtils.checkPro(this.item, 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(this.item).then(() => {
           textPropUtils.updateTextPropsState()
