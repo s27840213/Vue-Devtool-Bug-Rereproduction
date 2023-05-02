@@ -247,7 +247,8 @@ export default defineComponent({
       'fetchMoreFonts'
     ]),
     closeFontsPanel() {
-      this.resetContent()
+      // FIXME: ask Nathan if this can be removed
+      // this.resetContent()
       this.$emit('closeFontsPanel')
       this.setShowMore(false)
     },

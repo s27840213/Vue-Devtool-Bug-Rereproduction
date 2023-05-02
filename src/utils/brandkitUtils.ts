@@ -440,7 +440,29 @@ class BrandKitUtils {
     return await store.dispatch('brandkit/refreshFontAsset', assetId)
   }
 
-  getFontPrevUrlByFontFamily(fontFamily: string, type: string, userId: string, assetId: string, postfix: 'prev-name' | 'prev-sample', ver?: number): string {
+  fillFontVer(font: {
+    fontFamily: string, type: string, userId: string, assetId: string, ver?: number
+  }): {
+    fontFamily: string, type: string, userId: string, assetId: string, ver: number
+  } {
+    if (font.ver !== undefined) {
+      return font as { fontFamily: string, type: string, userId: string, assetId: string, ver: number }
+    } else {
+      const storeFont = store.getters['font/getFont'](font.fontFamily)
+      console.log(storeFont)
+      if (storeFont) {
+        return Object.assign({}, font, { ver: storeFont.ver })
+      } else {
+        return Object.assign({}, font, { ver: store.getters['user/getVerUni'] })
+      }
+    }
+  }
+
+  getFontPrevUrlByFontFamily({
+    fontFamily, type, userId, assetId, ver
+  }: {
+    fontFamily: string, type: string, userId: string, assetId: string, ver: number
+  }, postfix: 'prev-name' | 'prev-sample'): string {
     switch (type) {
       case 'public':
         return `https://template.vivipic.com/font/${fontFamily}/${postfix}?ver=${ver ?? generalUtils.generateRandomString(6)}`

@@ -1,8 +1,8 @@
-import { ActionTree, MutationTree } from 'vuex'
-import { captureException } from '@sentry/browser'
 import list from '@/apis/list'
-import { IListServiceData, IListServiceParams } from '@/interfaces/api'
+import { IListServiceContentDataItem, IListServiceData, IListServiceParams } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
+import { captureException } from '@sentry/browser'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 import listFactory from './listFactory'
 
 const SET_MORE_CATEGORY = 'SET_MORE_CATEGORY' as const
@@ -14,6 +14,7 @@ const font = listFactory.apply({
 
 const actions = font.actions as ActionTree<IListModuleState, unknown>
 const mutations = font.mutations as MutationTree<IListModuleState>
+const getters = font.getters as GetterTree<IListModuleState, any>
 
 actions.getMoreCategory = async ({ commit, getters, state }) => {
   const { nextParams, hasNextPage } = getters
@@ -36,6 +37,20 @@ mutations[SET_MORE_CATEGORY] = function (state: IListModuleState, objects: IList
   }
   state.pending = false
   state.nextPage = objects.next_page
+}
+
+getters.getFont = function (state: IListModuleState): (id: string) => IListServiceContentDataItem | undefined {
+  return (id: string) => {
+    console.log(state.categories, id)
+    for (const category of state.categories) {
+      for (const font of category.list) {
+        if (font.id === id) {
+          return font
+        }
+      }
+    }
+    return undefined
+  }
 }
 
 export default font

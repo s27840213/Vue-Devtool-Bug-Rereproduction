@@ -61,10 +61,22 @@ export default defineComponent({
       isSettingsOpen: 'getIsSettingsOpen'
     }),
     getPreview(): string {
-      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-name', this.item.ver)
+      return brandkitUtils.getFontPrevUrlByFontFamily({
+        fontFamily: this.item.id,
+        type: this.itemFontType,
+        userId: this.item.userId,
+        assetId: this.item.assetId,
+        ver: this.item.ver
+      }, 'prev-name')
     },
     getPreview2(): string {
-      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-sample', this.item.ver)
+      return brandkitUtils.getFontPrevUrlByFontFamily({
+        fontFamily: this.item.id,
+        type: this.itemFontType,
+        userId: this.item.userId,
+        assetId: this.item.assetId,
+        ver: this.item.ver
+      }, 'prev-sample')
     },
     itemFontType(): string {
       return this.item.src || this.item.fontType
