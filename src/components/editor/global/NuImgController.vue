@@ -77,12 +77,12 @@ export default defineComponent({
   data() {
     return {
       controlPoints: ControlUtils.getControlPoints(4, 25, (100 / this.$store.getters.getPageScaleRatio)),
-      isControlling: false,
       initialPos: { x: 0, y: 0 },
       initImgPos: { imgX: 0, imgY: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1 },
+      pointerId: -1
     }
   },
   mounted() {
@@ -210,25 +210,12 @@ export default defineComponent({
         y: imgAnchor.y - center.y
       }
       const imgControllerPos = ControlUtils.getNoRotationPos(vect, center, angleInRad)
-
-      /**
-       * For sub-img-controller under frame layer
-       * if the frame layer is set the flip prop, do following mapping modification
-       */
-      // const currLayer = LayerUtils.getCurrLayer
-      // if (currLayer.type === 'frame' && !this.config.forRender) {
-      //   const baseLine = {
-      //     x: -w / 2 + currLayer.styles.width / 2,
-      //     y: -h / 2 + currLayer.styles.height / 2
-      //   }
-      //   imgControllerPos.x += currLayer.styles.horizontalFlip ? -2 * (imgControllerPos.x - baseLine.x) : 0
-      //   imgControllerPos.y += currLayer.styles.verticalFlip ? -2 * (imgControllerPos.y - baseLine.y) : 0
-      // }
-
       return imgControllerPos
     },
     moveStart(event: MouseEvent | PointerEvent) {
-      this.isControlling = true
+      this.pointerId = (event as PointerEvent).pointerId ?? -1
+
+      console.warn('moveStart')
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
 
@@ -239,6 +226,8 @@ export default defineComponent({
       this.setLastSelectedLayerIndex(this.layerIndex)
     },
     moving(event: MouseEvent | PointerEvent) {
+      if (this.pointerId !== (event as PointerEvent).pointerId) return
+
       this.setCursorStyle('move')
       event.preventDefault()
       const _layerScale = 1 / this.getLayerScale
@@ -288,7 +277,6 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointermove', this.moving)
     },
     scaleStart(event: MouseEvent) {
-      this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initialWH = {
         width: this.getImgWidth,
@@ -412,7 +400,6 @@ export default defineComponent({
       })
     },
     scaleEnd(e: MouseEvent) {
-      this.isControlling = false
       this.setCursorStyle('default')
 
       eventUtils.removePointerEvent('pointerup', this.scaleEnd)

@@ -385,21 +385,24 @@ export default defineComponent({
         const contentScaleRatio = this.$store.state.contentScaleRatio
         const evtScale = ((e.scale - 1) * 0.5 + 1)
         switch (e.phase) {
-          case 'start': {
-            console.warn('pinching start')
-            this.movingUtils.removeListener()
-            this.initPagePos.x = page.x
-            this.initPagePos.y = page.y
-            this.initPinchPos = {
-              x: e.x,
-              y: e.y
-            }
-            this.tmpScaleRatio = scaleRatio
-            store.commit('SET_isPageScaling', true)
-            this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
-            break
-          }
+          // case 'start': {
+          //   console.warn('pinching start')
+          //   this.movingUtils.removeListener()
+          //   this.initPagePos.x = page.x
+          //   this.initPagePos.y = page.y
+          //   this.initPinchPos = {
+          //     x: e.x,
+          //     y: e.y
+          //   }
+          //   this.tmpScaleRatio = scaleRatio
+          //   store.commit('SET_isPageScaling', true)
+          //   this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
+          //   break
+          // }
+
           case 'move': {
+            if (this.isBgImgCtrl || this.isImgCtrl) return
+
             const newScaleRatio = evtScale * this.tmpScaleRatio
             if (!this.isPinchingEditor) {
               console.warn('pinching start')
