@@ -17,7 +17,7 @@ div(class="panel-vvstk-more")
         svg-icon(iconName="vivisticker_version"
                   iconWidth="24px"
                   iconColor="gray-3")
-      span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} on iOS ${iOSVer} ${buildNumber}${domain} - ${hostId}` }}
+      span(class="panel-vvstk-more__option-title version") {{ `${appVersion}/${iOSVer} ${buildNumber}${domain} ${hostId}` }}
   template(v-else)
     div(class="panel-vvstk-more__options")
       div(v-for="option in options"
@@ -50,7 +50,7 @@ export default defineComponent({
     return {
       debugModeTimer: -1,
       debugModeCounter: 0,
-      domain: window.location.hostname !== 'sticker.vivipic.com' ? ` - ${window.location.hostname.replace('.vivipic.com', '')}` : '',
+      domain: window.location.hostname !== 'sticker.vivipic.com' ? ` ${window.location.hostname.replace('.vivipic.com', '')}` : '',
       debugMode: false
     }
   },
