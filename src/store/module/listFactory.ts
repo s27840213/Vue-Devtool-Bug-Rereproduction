@@ -237,7 +237,7 @@ export default function (this: any) {
 
     // For search result.
     getTagContent: async ({ commit, state }, params = {}) => {
-      let { theme } = state
+      const { theme } = state
       let { keyword } = params
       const locale = localeUtils.currLocale()
       // If $all:, do category search instead of tag search.
@@ -245,7 +245,7 @@ export default function (this: any) {
         : keyword.includes('::') ? keyword : `tag::${keyword}`
       commit('SET_STATE', { keyword, locale })
       commit('SET_pending', { content: true })
-      if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      // if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       const isAdmin = store.getters['user/isAdmin']
       try {
         // Search tags and set as active.
