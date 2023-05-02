@@ -27,5 +27,6 @@ export interface ISliderConfig {
   min: number,
   max: number,
   step: number,
-  noText: boolean
+  noText: boolean,
+  width: number
 }
