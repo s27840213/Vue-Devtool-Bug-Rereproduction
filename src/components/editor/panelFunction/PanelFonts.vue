@@ -247,7 +247,8 @@ export default defineComponent({
       'fetchMoreFonts'
     ]),
     closeFontsPanel() {
-      this.resetContent()
+      // don't reset content for panelTextSetting preview to use ver looked-up from content
+      // this.resetContent()
       this.$emit('closeFontsPanel')
       this.setShowMore(false)
     },

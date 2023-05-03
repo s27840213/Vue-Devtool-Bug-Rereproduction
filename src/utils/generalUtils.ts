@@ -477,6 +477,16 @@ class GeneralUtils {
     }
     return textLayerIndexes
   }
+
+  getSliderWidth(): number | undefined {
+    let width: number | undefined
+    const functionPanelContent = document.querySelector('.function-panel__content')
+    if (functionPanelContent) {
+      const style = window.getComputedStyle(functionPanelContent, null)
+      width = parseInt(style.getPropertyValue('width').replace('px', ''))
+    }
+    return width
+  }
 }
 
 const generalUtils = new GeneralUtils()
