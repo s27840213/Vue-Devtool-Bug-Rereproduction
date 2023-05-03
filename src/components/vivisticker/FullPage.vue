@@ -1,9 +1,12 @@
 <template lang="pug">
 div(ref="main" class="full-page relative")
-  template(v-if="fullPageType === 'iOS16Video'")
+  template(v-if="fullPageType === 'video'")
     div(class="full-page__video")
-      video(autoplay playsinline muted loop :src="videoSource" :poster="thumbnail")
-  payment(v-if="fullPageType === 'payment'" :target="fullPageParams.target")
+      video(autoplay playsinline muted loop
+        :src="(fullPageParams as IFullPageVideoConfigParams).video"
+        :poster="(fullPageParams as IFullPageVideoConfigParams).thumbnail"
+        @ended="handleEnded")
+  payment(v-if="fullPageType === 'payment'" :target="(fullPageParams as IFullPagePaymentConfigParams).target")
   welcome(v-if="fullPageType === 'welcome'")
   div(v-if="showCloseButton"
     class="full-page__close"
@@ -18,6 +21,7 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import Payment from './Payment.vue'
 import Welcome from './Welcome.vue'
+import { IFullPageConfig, IFullPagePaymentConfigParams, IFullPageVideoConfigParams } from '@/interfaces/vivisticker'
 
 export default defineComponent({
   components: {
@@ -26,7 +30,8 @@ export default defineComponent({
   },
   data() {
     return {
-      showCloseButton: false
+      showCloseButton: false,
+      showOnVideoFinish: false
     }
   },
   mounted() {
@@ -40,15 +45,14 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters({
-      fullPageType: 'vivisticker/getFullPageType',
-      fullPageParams: 'vivisticker/getFullPageParams'
-    }),
-    videoSource(): string {
-      return `https://template.vivipic.com/static/video/${this.$i18n.locale.toUpperCase()}_IOS16.mp4`
+    ...(mapGetters({
+      fullPageConfig: 'vivisticker/getFullPageConfig',
+    })),
+    fullPageType(): IFullPageConfig['type'] {
+      return this.fullPageConfig.type
     },
-    thumbnail(): string {
-      return `https://template.vivipic.com/static/video/${this.$i18n.locale.toUpperCase()}_IOS16_thumb.jpg`
+    fullPageParams(): IFullPageConfig['params'] {
+      return this.fullPageConfig.params
     }
   },
   methods: {
@@ -57,14 +61,19 @@ export default defineComponent({
     }),
     initialize() {
       this.showCloseButton = false
-      switch (this.fullPageType) {
-        case 'iOS16Video':
+      this.showOnVideoFinish = false
+      switch (this.fullPageConfig.type) {
+        case 'video':
           // eslint-disable-next-line no-case-declarations
-          const fromModal = this.fullPageParams.fromModal ?? false
-          if (fromModal) {
-            setTimeout(() => {
-              this.showCloseButton = true
-            }, 5000)
+          const delayedClose = this.fullPageConfig.params.delayedClose
+          if (delayedClose !== undefined) {
+            if (delayedClose >= 0) {
+              window.setTimeout(() => {
+                this.showCloseButton = true
+              }, delayedClose)
+            } else {
+              this.showOnVideoFinish = true
+            }
           } else {
             this.showCloseButton = true
           }
@@ -75,6 +84,12 @@ export default defineComponent({
     },
     handleClose() {
       this.clearFullPageConfig()
+    },
+    handleEnded() {
+      if (this.showOnVideoFinish) {
+        this.showCloseButton = true
+        this.showOnVideoFinish = false
+      }
     }
   }
 })

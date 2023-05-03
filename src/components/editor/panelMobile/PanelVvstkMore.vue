@@ -33,6 +33,7 @@ div(class="panel-vvstk-more")
 </template>
 
 <script lang="ts">
+import constantData from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
@@ -47,11 +48,14 @@ type OptionConfig = {
 
 export default defineComponent({
   data() {
+    const videoUrls = constantData.stickerVideoUrls()
     return {
       debugModeTimer: -1,
       debugModeCounter: 0,
       domain: window.location.hostname !== 'sticker.vivipic.com' ? ` ${window.location.hostname.replace('.vivipic.com', '')}` : '',
-      debugMode: false
+      debugMode: false,
+      videoUrl: videoUrls.iOS.video,
+      thumbnailUrl: videoUrls.iOS.thumbnail
     }
   },
   props: {
@@ -232,7 +236,13 @@ export default defineComponent({
       editorUtils.setCloseMobilePanelFlag(true)
     },
     handleShowIOS16Tutorial() {
-      this.setFullPageConfig({ type: 'iOS16Video', params: { fromModal: false } })
+      this.setFullPageConfig({
+        type: 'video',
+        params: {
+          video: this.videoUrl,
+          thumbnail: this.thumbnailUrl
+        }
+      })
     },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')

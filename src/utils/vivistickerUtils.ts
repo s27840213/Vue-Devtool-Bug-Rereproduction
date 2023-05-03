@@ -27,6 +27,7 @@ import textPropUtils from './textPropUtils'
 import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
+import constantData from '@/utils/constantData'
 
 export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template'
 
@@ -1176,7 +1177,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       })
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
-    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
+    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
   }
 
   async registerSticker() {
@@ -1223,8 +1224,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
           store.commit('vivisticker/SET_fullPageConfig', {
-            type: 'iOS16Video',
-            params: { fromModal: true }
+            type: 'video',
+            params: {
+              video: constantData.stickerVideoUrls().iOS.video,
+              thumbnail: constantData.stickerVideoUrls().iOS.thumbnail,
+              delayedClose: 5000
+            }
           })
           modalUtils.clearModalInfo()
         }

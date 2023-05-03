@@ -1,5 +1,5 @@
 import { IAsset } from '@/interfaces/module'
-import { IMyDesign, IPayment, IPaymentPending, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IFullPageConfig, IMyDesign, IPayment, IPaymentPending, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
@@ -19,8 +19,7 @@ interface IViviStickerState {
   controllerHidden: boolean,
   isStandaloneMode: boolean,
   showTutorial: boolean,
-  fullPageType: string,
-  fullPageParams: { [key: string]: any },
+  fullPageConfig: IFullPageConfig,
   recentlyBgColors: string[],
   hasNewBgColor: boolean,
   isDuringCopy: boolean,
@@ -67,8 +66,10 @@ const getDefaultState = (): IViviStickerState => ({
   controllerHidden: false,
   isStandaloneMode: false,
   showTutorial: false,
-  fullPageType: 'none',
-  fullPageParams: {},
+  fullPageConfig: {
+    type: 'none',
+    params: {}
+  },
   recentlyBgColors: [],
   hasNewBgColor: false,
   isDuringCopy: false,
@@ -156,11 +157,14 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getShowTutorial(state: IViviStickerState): boolean {
     return state.showTutorial
   },
-  getFullPageType(state: IViviStickerState): string {
-    return state.fullPageType
+  getFullPageConfig(state: IViviStickerState): IFullPageConfig {
+    return state.fullPageConfig
   },
-  getFullPageParams(state: IViviStickerState): { [key: string]: any } {
-    return state.fullPageParams
+  getFullPageType(state: IViviStickerState): IFullPageConfig['type'] {
+    return state.fullPageConfig.type
+  },
+  getFullPageParams(state: IViviStickerState): IFullPageConfig['params'] {
+    return state.fullPageConfig.params
   },
   getRecentlyBgColors(state: IViviStickerState): string[] {
     return state.recentlyBgColors
@@ -281,19 +285,20 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_showTutorial(state: IViviStickerState, showTutorial: boolean) {
     state.showTutorial = showTutorial
   },
-  SET_fullPageType(state: IViviStickerState, fullPageType: string) {
-    state.fullPageType = fullPageType
+  SET_fullPageType(state: IViviStickerState, fullPageType: IFullPageConfig['type']) {
+    state.fullPageConfig.type = fullPageType
   },
-  SET_fullPageParams(state: IViviStickerState, fullPageParams: { [key: string]: any }) {
-    state.fullPageParams = fullPageParams
+  SET_fullPageParams(state: IViviStickerState, fullPageParams: IFullPageConfig['params']) {
+    state.fullPageConfig.params = fullPageParams
   },
-  SET_fullPageConfig(state: IViviStickerState, data: { type: string, params?: { [key: string]: any } }) {
-    state.fullPageType = data.type
-    state.fullPageParams = data.params ?? {}
+  SET_fullPageConfig(state: IViviStickerState, data: IFullPageConfig) {
+    state.fullPageConfig = data
   },
   UPDATE_clearFullPageConfig(state: IViviStickerState) {
-    state.fullPageType = 'none'
-    state.fullPageParams = {}
+    state.fullPageConfig = {
+      type: 'none',
+      params: {}
+    }
   },
   SET_recentlyBgColors(state: IViviStickerState, recentlyBgColors: string[]) {
     state.recentlyBgColors = recentlyBgColors
