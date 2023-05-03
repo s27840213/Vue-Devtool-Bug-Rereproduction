@@ -410,7 +410,8 @@ export class MovingUtils {
         const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
           page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
         // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
-        if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
+        if (!isPageFullyInsideEditor) {
+          // if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
           window.requestAnimationFrame(() => {
             this.pageMovingHandler(e)
           })

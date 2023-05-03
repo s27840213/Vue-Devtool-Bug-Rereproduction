@@ -320,7 +320,7 @@ export default defineComponent({
           body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
         })
         this.movingUtils.moveStart(e)
-      } else if (layerUtils.layerIndex === -1) {
+      } else {
         this.movingUtils.removeListener()
         this.movingUtils.pageMoveStart(e)
       }
