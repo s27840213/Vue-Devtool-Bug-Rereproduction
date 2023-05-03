@@ -345,12 +345,11 @@ export default defineComponent({
       }
     },
     scaleContainerStyles(): { [index: string]: string } {
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return {
-        // width: `${this.config.width * this.contentScaleRatio}px`,
-        // height: `${this.config.height * this.contentScaleRatio}px`,
-        width: `${this.config.width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
-        height: `${this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
-        ...(!generalUtils.isTouchDevice() && { transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})` }),
+        width: `${this.config.width * _f}px`,
+        height: `${this.config.height * _f}px`,
+        ...(!generalUtils.isTouchDevice() && { transform: `scale(${this.scaleRatio * 0.01 / this.contentScaleRatio})` }),
         willChange: this.isScaling ? 'transform' : ''
       }
     },
@@ -466,9 +465,10 @@ export default defineComponent({
       updateSnapUtilsIndex: 'UPDATE_snapUtilsIndex'
     }),
     styles(type: string): Record<string, string> {
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return type === 'content' ? {
-        width: `${this.config.width * this.contentScaleRatio}px`,
-        height: `${this.config.height * this.contentScaleRatio}px`,
+        width: `${this.config.width * _f}px`,
+        height: `${this.config.height * _f}px`,
         backgroundColor: this.config.backgroundColor,
         backgroundImage: `url(${ImageUtils.getSrc(this.config.backgroundImage.config)})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
