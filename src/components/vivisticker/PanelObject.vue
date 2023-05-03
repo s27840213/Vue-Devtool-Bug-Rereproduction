@@ -87,6 +87,7 @@ export default defineComponent({
   @include size(100%, 100%);
   display: grid;
   grid-template-rows: auto auto 1fr;
+  overflow: hidden;
   &__tabs {
     margin-top: 24px;
   }
