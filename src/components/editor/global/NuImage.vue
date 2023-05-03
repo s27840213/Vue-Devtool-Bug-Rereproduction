@@ -7,12 +7,12 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
   draggable="false")
   div(v-if="showCanvas"
     class="shadow__canvas-wrapper"
-    :style="canvasWrapperStyle()")
+    :style="canvasWrapperStyle")
     canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
   div(v-if="shadowSrc && !config.isFrameImg"
     :id="inPreview ? '' : `nu-image-${config.id}__shadow`"
     class="shadow__picture"
-    :style="imgShadowStyles()")
+    :style="imgShadowStyles")
     img(ref="shadow-img"
       class="nu-image__picture-shadow"
       draggable="false"
@@ -87,7 +87,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import unitUtils from '@/utils/unitUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -334,7 +334,7 @@ export default defineComponent({
   components: { NuAdjustImage },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
+      pageScaleRatio: 'getPageScaleRatio',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
@@ -366,6 +366,36 @@ export default defineComponent({
         return imageUtils.appendCompQueryForVivipic(src)
       }
       return src
+    },
+    canvasWrapperStyle(): any {
+      if (this.forRender) {
+        return {}
+      }
+      const { scale, horizontalFlip, verticalFlip } = this.config.styles
+      const { width, height } = this.shadowBuff.canvasSize
+      const _f = this.contentScaleRatio * (generalUtils.isTouchDevice() ? this.pageScaleRatio * 0.01 : 1)
+      console.log(this.contentScaleRatio, (generalUtils.isTouchDevice() ? this.pageScaleRatio * 0.01 : 1))
+
+      return {
+        width: `${width * _f}px`,
+        height: `${height * _f}px`,
+        transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
+      }
+    },
+    imgShadowStyles(): any {
+      if (this.forRender) {
+        return {}
+      }
+      const { imgWidth, imgHeight, imgX, imgY } = this.shadow().styles
+      const { scale, horizontalFlip, verticalFlip } = this.config.styles
+      const _f = this.contentScaleRatio * (generalUtils.isTouchDevice() ? this.pageScaleRatio * 0.01 : 1)
+      const xFactor = (horizontalFlip ? -1 : 1) * _f
+      const yFactor = (verticalFlip ? -1 : 1) * _f
+      return {
+        width: (imgWidth * _f).toString() + 'px',
+        height: (imgHeight * _f).toString() + 'px',
+        transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
+      }
     },
     flipStyles(): any {
       const { horizontalFlip, verticalFlip } = this.config.styles
@@ -456,7 +486,7 @@ export default defineComponent({
           renderH *= dpi / 96
         }
       }
-      return imageUtils.getSrcSize(srcObj, imageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
+      return imageUtils.getSrcSize(srcObj, imageUtils.getSignificantDimension(renderW, renderH) * (this.pageScaleRatio * 0.01))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
       return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
@@ -998,7 +1028,7 @@ export default defineComponent({
     },
     scaledConfig(): { [index: string]: string | number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
-      const _f = this.contentScaleRatio * (this.primaryLayer?.type === 'frame' ? 1 : this.scaleRatio * 0.01)
+      const _f = this.contentScaleRatio * (this.primaryLayer?.type === 'frame' ? 1 : this.pageScaleRatio * 0.01)
       return {
         width: width * _f,
         height: height * _f,
@@ -1025,20 +1055,6 @@ export default defineComponent({
       const { adjust } = this.adjustImgStyles()
       return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, this.config as IImage)
     },
-    canvasWrapperStyle() {
-      if (this.forRender) {
-        return {}
-      }
-      const { scale, horizontalFlip, verticalFlip } = this.config.styles
-      const { width, height } = this.shadowBuff.canvasSize
-
-      return {
-        width: `${width * this.contentScaleRatio}px`,
-        height: `${height * this.contentScaleRatio}px`,
-        // transform: `scale(${scale})`
-        transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
-      }
-    },
     imgStyles() {
       let { imgX, imgY, imgHeight, imgWidth } = this.scaledConfig()
       if (this.isBgImgControl) {
@@ -1049,20 +1065,6 @@ export default defineComponent({
         transform: `translate(${imgX}px, ${imgY}px)`,
         width: `${imgWidth}px`,
         height: `${imgHeight}px`
-      }
-    },
-    imgShadowStyles() {
-      if (this.forRender) {
-        return {}
-      }
-      const { imgWidth, imgHeight, imgX, imgY } = this.shadow().styles
-      const { scale, horizontalFlip, verticalFlip } = this.config.styles
-      const xFactor = (horizontalFlip ? -1 : 1) * this.contentScaleRatio
-      const yFactor = (verticalFlip ? -1 : 1) * this.contentScaleRatio
-      return {
-        width: (imgWidth * this.contentScaleRatio).toString() + 'px',
-        height: (imgHeight * this.contentScaleRatio).toString() + 'px',
-        transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
     getPreviewSize(): number | string {
