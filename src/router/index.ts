@@ -170,9 +170,13 @@ router.beforeEach(async (to, from, next) => {
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 
     // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.
-    if (/Firefox/i.test(navigator.userAgent || navigator.vendor)) {
-      defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
-    }
+    // if (/Firefox/i.test(navigator.userAgent || navigator.vendor)) {
+    //   defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
+    // }
+
+    // Vivisticker doesn't use Noto Color Emoji font, but iPhone default font.
+    // So remove it from the default fonts.
+    defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
 
     defaultFontsJson
       .forEach(_font => {
