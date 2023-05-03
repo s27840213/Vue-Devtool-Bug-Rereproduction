@@ -9,6 +9,7 @@ import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscri
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
+import constantData from '@/utils/constantData'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import colorUtils from './colorUtils'
@@ -27,7 +28,6 @@ import textPropUtils from './textPropUtils'
 import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
-import constantData from '@/utils/constantData'
 
 export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template'
 
@@ -599,6 +599,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   loginResult(info: IUserInfo) {
+    // info.isFirstOpen = true // NOTE: for testing
     store.commit('vivisticker/SET_userInfo', info)
     this.handleCallback('login')
   }

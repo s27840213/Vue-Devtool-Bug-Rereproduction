@@ -41,6 +41,7 @@ export interface IFullPageVideoConfigParams {
   video: string,
   thumbnail: string,
   delayedClose?: number, // -1 means close btn only shows after video is finished.
+  mediaPos?: 'top' | 'bottom' | 'center',
 }
 
 export interface IFullPageVideoConfig {

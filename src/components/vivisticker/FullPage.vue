@@ -1,13 +1,15 @@
 <template lang="pug">
 div(ref="main" class="full-page relative")
-  template(v-if="fullPageType === 'video'")
-    div(class="full-page__video")
-      video(autoplay playsinline muted loop
-        :src="(fullPageParams as IFullPageVideoConfigParams).video"
-        :poster="(fullPageParams as IFullPageVideoConfigParams).thumbnail"
-        @ended="handleEnded")
-  payment(v-if="fullPageType === 'payment'" :target="(fullPageParams as IFullPagePaymentConfigParams).target")
-  welcome(v-if="fullPageType === 'welcome'")
+  template(v-if="fullPageConfig.type === 'video'")
+    div(class="full-page__video" :class="fullPageConfig.params.mediaPos ? fullPageConfig.params.mediaPos : ''")
+      video(autoplay playsinline muted
+        :loop="fullPageConfig.params.delayedClose !== -1"
+        :src="fullPageConfig.params.video"
+        :poster="fullPageConfig.params.thumbnail"
+        @ended="handleEnded"
+        @canplay="handleVideoLoaded")
+  payment(v-if="fullPageConfig.type === 'payment'" :target="fullPageConfig.params.target")
+  welcome(v-if="fullPageConfig.type === 'welcome'")
   div(v-if="showCloseButton"
     class="full-page__close"
     @click.prevent.stop="handleClose")
@@ -17,11 +19,12 @@ div(ref="main" class="full-page relative")
 </template>
 
 <script lang="ts">
+import { IFullPageConfig } from '@/interfaces/vivisticker'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import Payment from './Payment.vue'
 import Welcome from './Welcome.vue'
-import { IFullPageConfig, IFullPagePaymentConfigParams, IFullPageVideoConfigParams } from '@/interfaces/vivisticker'
 
 export default defineComponent({
   components: {
@@ -47,13 +50,9 @@ export default defineComponent({
   computed: {
     ...(mapGetters({
       fullPageConfig: 'vivisticker/getFullPageConfig',
-    })),
-    fullPageType(): IFullPageConfig['type'] {
-      return this.fullPageConfig.type
-    },
-    fullPageParams(): IFullPageConfig['params'] {
-      return this.fullPageConfig.params
-    }
+    }) as {
+      fullPageConfig: () => IFullPageConfig
+    })
   },
   methods: {
     ...mapMutations({
@@ -84,6 +83,9 @@ export default defineComponent({
     },
     handleClose() {
       this.clearFullPageConfig()
+    },
+    handleVideoLoaded() {
+      vivistickerUtils.sendAppLoaded()
     },
     handleEnded() {
       if (this.showOnVideoFinish) {
@@ -119,6 +121,15 @@ export default defineComponent({
     width: 100vw;
     overflow: hidden;
     background: transparent;
+    &.top > video {
+      object-position: top;
+    }
+    &.center > video {
+      object-position: center;
+    }
+    &.bottom > video {
+      object-position: bottom;
+    }
     & > video {
       width: 100%;
       height: 100%;
