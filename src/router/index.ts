@@ -25,6 +25,8 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         if (vivistickerUtils.checkVersion('1.5')) {
+          await vivistickerUtils.fetchDebugModeEntrance()
+          await vivistickerUtils.fetchLoadedFonts()
           const recentPanel = await vivistickerUtils.getState('recentPanel')
           const userSettings = await vivistickerUtils.getState('userSettings')
           if (userSettings) {
@@ -106,16 +108,11 @@ const router = createRouter({
           vivistickerUtils.setDefaultLocale()
           vivistickerUtils.setDefaultPrices()
         }
-        await vivistickerUtils.fetchDebugModeEntrance()
-        await vivistickerUtils.fetchLoadedFonts()
         const userInfo = await vivistickerUtils.getUserInfo()
         if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
-          logUtils.uploadLog().then(() => {
-            logUtils.setLog('App Start')
-          })
-        } else {
-          logUtils.setLog('App Start')
+          await logUtils.uploadLog()
         }
+        logUtils.setLog('App Start')
         const locale = userInfo.locale
         i18n.global.locale = locale as 'jp' | 'us' | 'tw'
         localStorage.setItem('locale', locale)

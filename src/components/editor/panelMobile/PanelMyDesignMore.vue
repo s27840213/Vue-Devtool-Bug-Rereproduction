@@ -46,6 +46,7 @@ export default defineComponent({
       setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
     }),
     handleEdit() {
+      if (this.myDesignBuffer.type === 'object' && !vivistickerUtils.checkPro(this.myDesignBuffer.assetInfo, this.myDesignBuffer.assetInfo.isFrame ? 'frame' : 'object')) return
       const mydesign = generalUtils.deepCopy(this.myDesignBuffer)
       editorUtils.setCloseMobilePanelFlag(true)
       setTimeout(() => {

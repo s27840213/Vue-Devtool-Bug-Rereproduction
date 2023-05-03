@@ -134,7 +134,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get isPaymentDisabled(): boolean {
-    return !this.checkVersion('2.26') // TODO: set support version back to 1.26
+    return !this.checkVersion('1.26')
   }
 
   getUserInfoFromStore(): IUserInfo {
@@ -719,11 +719,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   async getState(key: string): Promise<WEBVIEW_API_RESULT> {
     if (this.isStandaloneMode) return
-    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
+    return await this.callIOSAsAPI('GET_STATE', { key }, `getState-${key}`, { retry: true })
   }
 
   getStateResult(data: { key: string, value: string }) {
-    this.handleCallback('getState', data.value ? JSON.parse(data.value) : undefined)
+    this.handleCallback(`getState-${data.key}`, data.value ? JSON.parse(data.value) : undefined)
   }
 
   async sendCopyEditor(): Promise<string> {

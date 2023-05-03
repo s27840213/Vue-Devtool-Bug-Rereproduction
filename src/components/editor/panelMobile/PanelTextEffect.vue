@@ -5,10 +5,9 @@ div(class="panel-text-effect")
     div(v-for="category in textEffects"
         :key="category.name"
         class="panel-text-effect__category pointer")
-      svg-icon(:iconName="`text-${category.name}-none`"
-              iconWidth="60px"
-              iconColor="gray-5"
-              @click="pushHistory(category.name)")
+      img(:src="require(`@/assets/img/png/text-effect-icon/${category.name}-none.png`)"
+          width="60" height="60"
+          @click="pushHistory(category.name)")
       span(class="body-3") {{category.label}}
   //- To choose effect, ex: hollow, splice or echo.
   div(v-if="state === 'effects' && currEffect !== null"
@@ -17,9 +16,9 @@ div(class="panel-text-effect")
         :key="`${currCategory.name}-${effect.key}`"
         :class="{ 'selected': currEffect.key === effect.key }"
         @click="onEffectClick(effect)")
-      svg-icon(:iconName="effectIcon(currCategory, effect)"
-              class="panel-text-effect__effects--icon"
-              iconWidth="48px" iconColor="gray-5")
+      img(:src="effectIcon(currCategory, effect)"
+          class="panel-text-effect__effects--icon"
+          width="48" height="48")
       pro-item(v-if="effect.plan" theme="roundedRect")
       div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
           class="panel-text-effect__effects--more")
@@ -76,7 +75,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
-// import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapState } from 'vuex'
@@ -136,7 +135,7 @@ export default defineComponent({
   methods: {
     effectIcon(category: IEffectCategory, effect: IEffect): string {
       const postfix = effect.key === 'text-book' ? `-${i18n.global.locale}` : ''
-      return `text-${category.name}-${effect.key}${postfix}`
+      return require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}${postfix}.png`)
     },
     pushHistory(type: string) {
       this.$emit('pushHistory', type)
@@ -198,7 +197,7 @@ export default defineComponent({
       this.recordChange()
     },
     async onEffectClick(effect: IEffect): Promise<void> {
-      // if (!vivistickerUtils.checkPro(effect, 'text')) return
+      if (!vivistickerUtils.checkPro(effect, 'text')) return
       if (effect.key !== this.currentStyle.name) {
         await this.setEffect({ effectName: effect.key })
         this.recordChange()
@@ -250,6 +249,9 @@ export default defineComponent({
     margin: 0 8px;
     width: 60px;
     box-sizing: border-box;
+    > img {
+      background-color: setColor(gray-5);
+    }
   }
 
   &__effects {

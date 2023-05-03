@@ -48,7 +48,7 @@ class FbPixelUtils {
     })
   }
 
-  startTrail() {
+  startTrial() {
     const eventId = generalUtils.generateRandomString(8)
 
     // trail time: 14 days

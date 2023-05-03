@@ -5,7 +5,6 @@ div(class="my-design-text-item"
   img(class="my-design-text-item__img"
     draggable="false"
     :src="src")
-  pro-item(v-if="item.assetInfo.plan")
   div(v-if="isInSelectionMode"
       class="my-design-text-item__checkbox"
       :class="{checked: checkSelected()}"
@@ -16,7 +15,6 @@ div(class="my-design-text-item"
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
 import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -25,9 +23,6 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
-  components: {
-    ProItem
-  },
   props: {
     item: {
       type: Object as PropType<IMyDesign>,
