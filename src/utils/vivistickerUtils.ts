@@ -740,7 +740,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       x,
       y,
       bgColor: store.getters['vivisticker/getEditorBg'] // for older app
-    }, 'copy-editor')
+    }, 'copy-editor', { timeout: -1 })
     return (data?.flag as string) ?? '0'
   }
 
@@ -860,7 +860,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
               y,
               needCrop: editorType === 'text' ? 0 : 1,
               bgColor: store.getters['vivisticker/getEditorBg'] // for older app
-            }, 'gen-thumb').then((data) => {
+            }, 'gen-thumb', { timeout: -1 }).then((data) => {
               this.postCopyEditor()
               resolve(data?.flag ?? '0')
             })
