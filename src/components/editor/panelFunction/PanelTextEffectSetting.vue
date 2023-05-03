@@ -18,10 +18,13 @@ div(class="text-effect-setting")
               class="text-effect-setting__effect pointer"
               :class="{'selected': getStyle(category).name === effect.key }"
               @click="onEffectClick(category, effect)")
-            svg-icon(
+            svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
               :iconName="effectIcon(category, effect).name"
               :iconWidth="effectIcon(category, effect).size"
               iconColor="white"
+              v-hint="effect.label")
+            img(v-else :src="effectIcon(category, effect).name"
+              :width="effectIcon(category, effect).size"
               v-hint="effect.label")
             pro-item(v-if="effect.plan" theme="roundedRect")
         //- Effect options.
@@ -152,18 +155,18 @@ export default defineComponent({
       switch (effect.key) {
         case 'text-book':
           return {
-            name: `text-${category.name}-${effect.key}-${i18n.global.locale}`,
-            size: '52px',
+            name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
+            size: '52',
           }
-        case 'custom-fill-img':
+        case 'custom-fill-img': // svg-icon
           return {
             name: 'add-image',
             size: '24px',
           }
         default:
           return {
-            name: `text-${category.name}-${effect.key}`,
-            size: '52px',
+            name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}.png`),
+            size: '52',
           }
       }
     },

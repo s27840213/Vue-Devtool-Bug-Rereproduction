@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="popup-window")
-  div(class="panel-replace" v-click-outside="closePopup")
+  div(class="panel-replace" v-click-outside="vcoConfig()")
     tabs(:tabs="[$t('NN0006'), $tc('NN0002', 2)]"
         v-model="tableIndex" theme="light")
     image-list(:images="data.images"
@@ -42,7 +42,7 @@ export default defineComponent({
   },
   data() {
     return {
-      tableIndex: 0
+      tableIndex: 0,
     }
   },
   computed: {
@@ -125,6 +125,14 @@ export default defineComponent({
       if (!item.img) return
       this.selectImg(item.img)
       this.closePopup()
+    },
+    vcoConfig() {
+      return {
+        middleware: (e: MouseEvent) => {
+          return (e.target as HTMLElement | null)?.id !== 'upload'
+        },
+        handler: this.closePopup
+      }
     },
     closePopup() {
       popupUtils.closePopup()

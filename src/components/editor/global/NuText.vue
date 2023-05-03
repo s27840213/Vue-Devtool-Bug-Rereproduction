@@ -4,7 +4,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
   template(v-for="(bgConfig, idx) in [textBg, textFillBg]")
     custom-element(v-if="bgConfig" class="nu-text__BG" :config="bgConfig" :key="`textSvgBg${idx}`")
   div(v-for="text, idx in duplicatedText"
-      :key="`text${idx}`"
+      :key="`text${duplicatedText.length - idx}`"
       class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBodyStyle)")
     nu-curve-text(v-if="isCurveText"

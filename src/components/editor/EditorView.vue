@@ -53,6 +53,7 @@ div(class="editor-view bg-gray-5"
 
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import NuPage from '@/components/editor/global/NuPage.vue'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
@@ -83,14 +84,14 @@ import { notify } from '@kyvg/vue3-notification'
 import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-
 export default defineComponent({
   emits: [],
   components: {
     RulerHr,
     RulerVr,
     BgRemoveArea,
-    DiskWarning
+    DiskWarning,
+    NuPage
   },
   data() {
     return {
@@ -496,7 +497,7 @@ export default defineComponent({
               rotate: layer.styles.rotate
             }
           }
-          if (mathUtils.calculateIfIntersect(selectionPolygonConfig, layerPolygonConfig)) {
+          if (!layer.locked && mathUtils.calculateIfIntersect(selectionPolygonConfig, layerPolygonConfig)) {
             layerIndexs.push(index)
           }
         })

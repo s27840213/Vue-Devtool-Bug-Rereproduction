@@ -190,7 +190,12 @@ export default defineComponent({
       return MappingUtils.mappingIconSet(type)
     },
     getFontPrev() {
-      const url = brandkitUtils.getFontPrevUrlByFontFamily(this.props.font, this.props.type, this.props.userId, this.props.assetId, 'prev-name')
+      const url = brandkitUtils.getFontPrevUrlByFontFamily(brandkitUtils.fillFontVer({
+        fontFamily: this.props.font,
+        type: this.props.type,
+        userId: this.props.userId,
+        assetId: this.props.assetId
+      }), 'prev-name')
       if (this.props.type === 'private' && url === '') {
         this.refreshFont(this.props.assetId)
       }
@@ -397,18 +402,18 @@ export default defineComponent({
     },
     openLineHeightSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineHeight)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight, noText: false, step: 0.01 }, MappingUtils.mappingMinMax('lineHeight')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight, step: 0.01, width: GeneralUtils.getSliderWidth() }, MappingUtils.mappingMinMax('lineHeight')))
       popupUtils.openPopup('slider', {
         posX: 'right',
-        target: '.btn-lh'
+        target: '.text-setting__row2'
       })
     },
     openSpacingSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.letterSpacing)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing, noText: false, step: 1 }, MappingUtils.mappingMinMax('letterSpacing')))
+      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing, step: 1, width: GeneralUtils.getSliderWidth() }, MappingUtils.mappingMinMax('letterSpacing')))
       popupUtils.openPopup('slider', {
         posX: 'right',
-        target: '.btn-ls'
+        target: '.text-setting__row2'
       })
     },
     copyColor() {

@@ -20,6 +20,7 @@ div(class="panel-spacing")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import mappingUtils from '@/utils/mappingUtils'
 import textUtils from '@/utils/textUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
@@ -32,8 +33,8 @@ export default defineComponent({
   data() {
     return {
       fieldRange: {
-        lineHeight: { min: 0.5, max: 2.5 },
-        fontSpacing: { min: -200, max: 800 },
+        lineHeight: mappingUtils.mappingMinMax('lineHeight'),
+        fontSpacing: mappingUtils.mappingMinMax('letterSpacing'),
       }
     }
   },

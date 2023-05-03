@@ -1448,6 +1448,7 @@ class TextPropUtils {
     tiptapUtils.forceUpdate(toRecord)
     this.updateTextPropsState({ fontSize: value.toString() })
     textEffectUtils.refreshSize()
+    tiptapUtils.updateHtml()
   }
 }
 

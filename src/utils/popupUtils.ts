@@ -1,7 +1,7 @@
 import { IPopupComponent, IPopupProps, ISliderConfig } from '@/interfaces/popup'
 import store from '@/store'
 import { EventEmitter } from 'events'
-import { nextTick } from 'vue'
+import { nextTick, reactive } from 'vue'
 import MouseUtils from './mouseUtils'
 
 class PopupUtils {
@@ -142,4 +142,4 @@ class PopupUtils {
 
 const popupUtils = new PopupUtils()
 
-export default popupUtils
+export default reactive(popupUtils)

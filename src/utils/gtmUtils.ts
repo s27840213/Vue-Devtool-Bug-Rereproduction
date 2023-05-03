@@ -47,9 +47,9 @@ class GtmUtils {
     // }
   }
 
-  startTrail(subScribePeriod: number) {
+  startTrial(subScribePeriod: number) {
     // if (this.isLogin) {
-    //   this.track('startTrail', {
+    //   this.track('startTrial', {
     //     subScribePeriod
     //   })
     // }

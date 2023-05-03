@@ -5,10 +5,9 @@ div(class="panel-text-effect")
     div(v-for="category in textEffects"
         :key="category.name"
         class="panel-text-effect__category pointer")
-      svg-icon(:iconName="`text-${category.name}-none`"
-              iconWidth="60px"
-              iconColor="gray-5"
-              @click="pushHistory(category.name)")
+      img(:src="require(`@/assets/img/png/text-effect-icon/${category.name}-none.png`)"
+          width="60" height="60"
+          @click="pushHistory(category.name)")
       span(class="body-3") {{category.label}}
   //- To choose effect, ex: hollow, splice or echo.
   div(v-if="state === 'effects'"
@@ -17,9 +16,13 @@ div(class="panel-text-effect")
         :key="`${currCategoryName}-${effect.key}`"
         :class="{ 'selected': currEffect?.key === effect.key }"
         @click="onEffectClick(effect)")
-      svg-icon(:iconName="effectIcon(currCategory, effect).name"
+      svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
+              :iconName="effectIcon(currCategory, effect).name"
               :iconWidth="effectIcon(currCategory, effect).size"
               class="panel-text-effect__effects--icon" iconColor="gray-5")
+      img(v-else :src="effectIcon(currCategory, effect).name"
+          class="panel-text-effect__effects--icon"
+          :width="effectIcon(currCategory, effect).size")
       pro-item(v-if="effect.plan" theme="roundedRect")
       div(v-if="currEffect?.key === effect.key && effect.key !== 'none'"
           class="panel-text-effect__effects--more")
@@ -183,6 +186,9 @@ export default defineComponent({
     margin: 0 8px;
     width: 60px;
     box-sizing: border-box;
+    > img {
+      background-color: setColor(gray-5);
+    }
   }
 
   &__effects {
