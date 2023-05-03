@@ -59,6 +59,7 @@ div(class="panel-template rwd-container" :class="{'in-category': isInCategory, '
           svg-icon(iconName="loading"
             iconColor="white"
             iconWidth="20px")
+    btn-add(:elScrollable="elMainContent" :text="'Create ' + (theme === '2' ? 'Post' : 'Story')")
 </template>
 
 <script lang="ts">
@@ -71,6 +72,7 @@ import Url from '@/components/global/Url.vue'
 import PopupTheme from '@/components/popup/PopupTheme.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Tabs from '@/components/Tabs.vue'
+import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import PanelGroupTemplate from '@/components/vivisticker/PanelGroupTemplate.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -92,7 +94,8 @@ export default defineComponent({
     CategoryGroupTemplateItem,
     PanelGroupTemplate,
     Url,
-    Tags
+    Tags,
+    BtnAdd
   },
   data() {
     return {
@@ -104,6 +107,7 @@ export default defineComponent({
       },
       tagScrollLeft: 0,
       isSearchBarExpanded: false,
+      elMainContent: undefined as HTMLElement | undefined,
     }
   },
   mounted() {
@@ -114,6 +118,7 @@ export default defineComponent({
       this.handleCategorySearch,
       this.getRecAndCate
     )
+    this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelObjectToTop)

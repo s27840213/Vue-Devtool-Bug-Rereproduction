@@ -48,11 +48,11 @@ export default defineComponent({
   },
   computed: {
     groupImages (): string[] {
-      return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev_4x?ver=${content.ver}`)
+      return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev_2x?ver=${content.ver}`)
     },
     previewImage (): string {
       const { match_cover: cover, ver, id } = this.item
-      return `https://template.vivipic.com/template/${cover.id ?? id}/prev_4x?ver=${ver}`
+      return `https://template.vivipic.com/template/${cover.id ?? id}/prev_2x?ver=${ver}`
     }
   },
   methods: {

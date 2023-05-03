@@ -1,7 +1,7 @@
 <template lang="pug">
-div(class="btn-add" ref="btnAddText" :style="`font-family: ${localeFont()}`")
-  span(ref="txtAddText") {{ text }}
-  div(class="btn-add__icon" ref="iconAddText")
+div(class="btn-add" ref="btnAdd" :style="`font-family: ${localeFont()}`")
+  span(ref="txtAdd") {{ text }}
+  div(class="btn-add__icon" ref="iconAdd")
     svg-icon(iconName="plus-small" iconWidth="24px" iconColor="white")
 </template>
 
@@ -36,7 +36,7 @@ export default defineComponent({
       scrollDirPrev: -1 as -1 | 1, // -1 for scroll up, 1 for scroll down
       destScrollProgress: -1 as -1 | 1, // -1 for expanded button, 1 for minimized button
       btnAniStartTime: null as number | null,
-      isPan: false,
+      isPan: false
     }
   },
   created() {
@@ -63,6 +63,12 @@ export default defineComponent({
       }
     })
   },
+  mounted() {
+    // update button styles at next frame to get correct width of text
+    window.requestAnimationFrame(() => {
+      this.updateBtnStyles()
+    })
+  },
   beforeUnmount() {
     if (this.atMainContent) {
       this.atMainContent.off('panstart')
@@ -79,6 +85,11 @@ export default defineComponent({
     },
     isPan(isPan) {
       if (!isPan) this.playBtnAnimation()
+    },
+    text() {
+      window.requestAnimationFrame(() => {
+        this.updateBtnStyles()
+      })
     }
   },
   computed: {
@@ -160,17 +171,18 @@ export default defineComponent({
       this.scrollProgressToFinish = this.destScrollProgress - this.scrollProgress
       const scrollRate = this.destScrollProgress > 0 ? this.scrollProgress : (1 + this.scrollProgress)
       const rScrollRate = 1 - scrollRate
-      const btn = this.$refs.btnAddText as HTMLElement
-      const txt = this.$refs.txtAddText as HTMLElement
-      const icon = this.$refs.iconAddText as HTMLElement
+      const btn = this.$refs.btnAdd as HTMLElement
+      const txt = this.$refs.txtAdd as HTMLElement
+      const icon = this.$refs.iconAdd as HTMLElement
       if (!btn || !txt || !icon) return
 
       const btnWidth = Math.max(Math.min(this.btnMaxWidth, this.btnMaxWidth * rScrollRate), btn.clientHeight)
       btn.style.maxWidth = btnWidth + 'px'
       txt.style.opacity = (1 - Math.min(scrollRate * 2, 1)).toString()
 
-      const targetIconPosLeft = btnWidth / 2 - icon.clientWidth / 2
-      icon.style.left = targetIconPosLeft + 52 * rScrollRate + 'px'
+      const posCenter = btnWidth / 2 - icon.clientWidth / 2
+      const iconOffest = txt.clientWidth / 2 + 4
+      icon.style.left = posCenter + iconOffest * rScrollRate + 'px'
       icon.style.transform = `rotate(${360 * rScrollRate}deg)`
     },
     btnAnimation(timestamp: number) {
@@ -235,7 +247,6 @@ export default defineComponent({
   &__icon {
     display: flex;
     position: absolute;
-    left: calc(50% + 40px);
   }
 }
 </style>
