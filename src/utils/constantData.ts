@@ -1137,6 +1137,51 @@ class ConstantData {
       { value: 'Wyoming', label: 'Wyoming' }
     ]
   }
+
+  stickerTutorialSteps(): { title: string, description: string, video: string, btnText?: string }[] {
+    // TODO: after tw and jp new videos are povided, remove title and description and make btnText required.
+    return i18n.global.locale === 'us' ? [
+      {
+        title: '',
+        description: '',
+        video: `https://template.vivipic.com/static/video/${i18n.global.locale}-01-copy_paste-v2.mp4`,
+        btnText: 'Next to Fonts'
+      },
+      {
+        title: '',
+        description: '',
+        video: `https://template.vivipic.com/static/video/${i18n.global.locale}-02-text-v2.mp4`,
+        btnText: 'Next to Backgrounds'
+      },
+      {
+        title: '',
+        description: '',
+        video: `https://template.vivipic.com/static/video/${i18n.global.locale}-04-background-v2.mp4`,
+        btnText: 'Let\'s explore'
+      }
+    ] : [
+      {
+        title: `${i18n.global.t('NN0746')}`,
+        description: `${i18n.global.t('NN0750')}`,
+        video: `https://template.vivipic.com/static/video/${i18n.global.locale}-01-copy_paste.mp4`
+      },
+      {
+        title: `${i18n.global.t('NN0747')}`,
+        description: `${i18n.global.t('NN0751')}`,
+        video: `https://template.vivipic.com/static/video/${i18n.global.locale}-02-text.mp4`
+      },
+      {
+        title: `${i18n.global.t('NN0748')}`,
+        description: `${i18n.global.t('NN0752')}`,
+        video: `https://template.vivipic.com/static/video/${i18n.global.locale}-03-objects.mp4`
+      },
+      {
+        title: `${i18n.global.t('NN0749')}`,
+        description: `${i18n.global.t('NN0753')}`,
+        video: `https://template.vivipic.com/static/video/${i18n.global.locale}-04-background.mp4`
+      }
+    ]
+  }
 }
 
 export default new ConstantData()

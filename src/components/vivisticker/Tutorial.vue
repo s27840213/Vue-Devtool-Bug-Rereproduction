@@ -2,7 +2,7 @@
 div(ref="main" class="tutorial relative" v-touch
     @swipeleft="handleSwipeLeft"
     @swiperight="handleSwipeRight")
-  div(class="tutorial__video")
+  div(class="tutorial__video" :class="{ blue: isBlueVideo }")
     video(autoplay playsinline muted :src="videoSource" @ended="handleEnded" @canplay="handleVideoLoaded")
   div(class="tutorial__content")
     div(class="tutorial__content__container")
@@ -10,8 +10,8 @@ div(ref="main" class="tutorial relative" v-touch
           class="tutorial__content__step"
           :key="stepConfig.title"
           :style="transformStyles()")
-        div(class="tutorial__content__title") {{ stepConfig.title }}
-        div(class="tutorial__content__description") {{ stepConfig.description }}
+        div(v-if="$i18n.locale !== 'us'" class="tutorial__content__title") {{ stepConfig.title }}
+        div(v-if="$i18n.locale !== 'us'" class="tutorial__content__description") {{ stepConfig.description }}
         div(class="tutorial__content__button-container")
           div(class="tutorial__content__button"
               @click.prevent.stop="handleNextStep")
@@ -34,7 +34,7 @@ div(ref="main" class="tutorial relative" v-touch
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
+import constantData from '@/utils/constantData'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
@@ -44,34 +44,16 @@ export default defineComponent({
   data() {
     return {
       step: 0,
-      stepConfigs: [
-        {
-          title: `${this.$t('NN0746')}`,
-          description: `${this.$t('NN0750')}`,
-          video: `https://template.vivipic.com/static/video/${i18n.global.locale}-01-copy_paste.mp4`
-        },
-        {
-          title: `${this.$t('NN0747')}`,
-          description: `${this.$t('NN0751')}`,
-          video: `https://template.vivipic.com/static/video/${i18n.global.locale}-02-text.mp4`
-        },
-        {
-          title: `${this.$t('NN0748')}`,
-          description: `${this.$t('NN0752')}`,
-          video: `https://template.vivipic.com/static/video/${i18n.global.locale}-03-objects.mp4`
-        },
-        {
-          title: `${this.$t('NN0749')}`,
-          description: `${this.$t('NN0753')}`,
-          video: `https://template.vivipic.com/static/video/${i18n.global.locale}-04-background.mp4`
-        }
-      ],
+      stepConfigs: constantData.stickerTutorialSteps(),
       basicWidth: window.outerWidth
     }
   },
   computed: {
     videoSource(): string {
       return this.stepConfigs[this.step].video
+    },
+    isBlueVideo(): boolean {
+      return this.$i18n.locale === 'us'
     }
   },
   methods: {
@@ -84,7 +66,11 @@ export default defineComponent({
       }
     },
     buttonText(index: number): string {
-      return index < this.stepConfigs.length - 1 ? `${this.$t('NN0744')}` : `${this.$t('NN0745')}`
+      if (this.$i18n.locale === 'us') {
+        return this.stepConfigs[index].btnText ?? ''
+      } else {
+        return index < this.stepConfigs.length - 1 ? `${this.$t('NN0744')}` : `${this.$t('NN0745')}`
+      }
     },
     handleClose() {
       this.setShowTutorial(false)
@@ -141,6 +127,9 @@ export default defineComponent({
     width: 100vw;
     overflow: hidden;
     background: setColor(black-1);
+    &.blue {
+      background: setColor(blue-tutorial);
+    }
     & > video {
       width: 100%;
       height: 100%;
@@ -171,6 +160,7 @@ export default defineComponent({
     }
     &__description {
       margin-top: 16px;
+      margin-bottom: 24px;
       @include body-SM;
       color: setColor(white);
       text-align: left;
@@ -186,7 +176,6 @@ export default defineComponent({
       gap: 10px;
       width: fit-content;
       height: 40px;
-      margin-top: 24px;
       padding-left: 24px;
       padding-right: 4px;
       box-sizing: border-box;
