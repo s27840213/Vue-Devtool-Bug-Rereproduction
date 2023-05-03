@@ -218,6 +218,10 @@ $spacer: 5;
     pointer-events: none;
 }
 
+.click-enable {
+    pointer-events: initial;
+}
+
 .visible-hidden {
     pointer-events: none;
     visibility: hidden;

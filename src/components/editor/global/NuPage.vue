@@ -114,7 +114,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
             v-bind="lazyloadSize"
             :forceRender="forceRender"
             :threshold="[0,1]")
-          div(:style="sizeStyles")
+          div(:style="sizeStyles" class="click-enable")
             div(class="scale-container relative"
                 :style="scaleContainerStyles")
               page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")

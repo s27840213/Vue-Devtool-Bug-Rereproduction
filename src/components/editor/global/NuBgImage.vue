@@ -46,6 +46,7 @@ import cssConverter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -387,7 +388,9 @@ export default defineComponent({
       }
     },
     setInBgSettingMode() {
+      console.warn('setInBgSettingMode')
       editorUtils.setInBgSettingMode(true)
+      groupUtils.deselect()
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.isBlurImg) return
