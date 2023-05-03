@@ -8,7 +8,7 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import Home from '@/views/Home.vue'
-import { h, resolveComponent } from 'vue'
+import { defineAsyncComponent, h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import { editorRouteHandler } from './handler'
 
@@ -41,7 +41,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'editor',
     name: 'Editor',
-    component: import('@/views/Editor.vue'),
+    component: defineAsyncComponent(() => import('@/views/Editor.vue')),
     beforeEnter: editorRouteHandler
   },
   // {
@@ -54,7 +54,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'preview',
     name: 'Preview',
-    component: import('@/views/Preview.vue'),
+    component: defineAsyncComponent(() => import('@/views/Preview.vue')),
     beforeEnter: async (to, from, next) => {
       try {
         const urlParams = new URLSearchParams(window.location.search)
@@ -129,7 +129,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'signup',
     name: 'SignUp',
     props: route => ({ redirect: route.query.redirect }),
-    component: import('@/views/Login/SignUp.vue'),
+    component: defineAsyncComponent(() => import('@/views/Login/SignUp.vue')),
     beforeEnter: async (to, from, next) => {
       try {
         if (store.getters['user/isLogin']) {
@@ -146,7 +146,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'login',
     name: 'Login',
     props: route => ({ redirect: route.query.redirect }),
-    component: import('@/views/Login/Login.vue'),
+    component: defineAsyncComponent(() => import('@/views/Login/Login.vue')),
     beforeEnter: async (to, from, next) => {
       try {
         if (to.query.type) {
@@ -166,34 +166,34 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'mydesign/:view?',
     name: 'MyDesign',
-    component: import('@/views/MyDesign.vue'),
+    component: defineAsyncComponent(() => import('@/views/MyDesign.vue')),
     props: true
   },
   {
     path: 'templates',
     name: 'TemplateCenter',
-    component: import('@/views/TemplateCenter.vue')
+    component: defineAsyncComponent(() => import('@/views/TemplateCenter.vue'))
   },
   {
     path: 'settings/:view?',
     name: 'Settings',
-    component: import('@/views/Settings.vue'),
+    component: defineAsyncComponent(() => import('@/views/Settings.vue')),
     props: true
   },
   {
     path: 'mobilewarning',
     name: 'MobileWarning',
-    component: import('@/views/MobileWarning.vue')
+    component: defineAsyncComponent(() => import('@/views/MobileWarning.vue'))
   },
   {
     path: 'browserwarning',
     name: 'BrowserWarning',
-    component: import('@/views/BrowserWarning.vue')
+    component: defineAsyncComponent(() => import('@/views/BrowserWarning.vue'))
   },
   {
     path: 'brandkit',
     name: 'BrandKit',
-    component: import('@/views/BrandKit.vue'),
+    component: defineAsyncComponent(() => import('@/views/BrandKit.vue')),
     beforeEnter: async (to, from, next) => {
       try {
         if (!brandkitUtils.isBrandkitAvailable) {
@@ -209,7 +209,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'pricing',
     name: 'Pricing',
-    component: import('@/views/Pricing.vue')
+    component: defineAsyncComponent(() => import('@/views/Pricing.vue'))
   }
 ]
 
@@ -217,17 +217,17 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: import('@/views/SvgIconView.vue')
+    component: defineAsyncComponent(() => import('@/views/SvgIconView.vue'))
   })
   routes.push({
     path: 'copytool',
     name: 'CopyTool',
-    component: import('@/views/CopyTool.vue')
+    component: defineAsyncComponent(() => import('@/views/CopyTool.vue'))
   })
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: import('@/views/NubtnList.vue')
+    component: defineAsyncComponent(() => import('@/views/NubtnList.vue'))
   })
 }
 
