@@ -61,6 +61,7 @@ export default defineComponent({
         key: logo.id,
         label: logo.name,
         src: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'tiny'),
+        width: logo.width / logo.height * 98,
         uploading: logo.id.startsWith('new_'),
         menuopen: this.menuOpenLogoId === logo.id,
         logo,

@@ -59,9 +59,10 @@ export default defineComponent({
         spItem('add'),
         ...(this._myfileImages as IAssetPhoto[]).map(img => ({
           type: '' as const,
-          key: img.id,
+          key: `${img.assetIndex}`,
           label: '',
           src: img.urls.tiny,
+          width: img.width / img.height * 98,
           uploading: false,
           menuopen: false,
           img,
@@ -82,6 +83,7 @@ export default defineComponent({
             key: `${img.id}-${index}`,
             label: '',
             src: imageUtils.getSrc(data, tinySize),
+            width: img.width / img.height * 98,
             uploading: false,
             menuopen: false,
             img,
@@ -133,6 +135,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .panel-replace {
+  display: grid;
+  grid-template-rows: auto 1fr;
   width: 80vw;
   height: 80vh;
   padding: 30px 24px 0 24px;
