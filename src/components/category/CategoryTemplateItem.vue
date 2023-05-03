@@ -135,6 +135,7 @@ export default defineComponent({
           .then(() => {
             if (this.$isTouchDevice()) {
               editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+              this.$store.commit('SET_pageScaleRatio', 100)
             }
           })
         GeneralUtils.fbq('track', 'AddToWishlist', {

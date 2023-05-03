@@ -472,7 +472,7 @@ export class MovingUtils {
       return
     }
 
-    const { originPageSize, getCurrPage: page } = pageUtils
+    const { getCurrPage: page } = pageUtils
     const contentScaleRatio = store.state.contentScaleRatio
     const pageScaleRatio = store.state.pageScaleRatio * 0.01
     const EDGE_WIDTH = {
@@ -481,22 +481,6 @@ export class MovingUtils {
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
 
-    const newPageSize = {
-      w: this.scaleRatio * page.width * 0.01,
-      h: this.scaleRatio * page.height * 0.01
-    }
-    const base = {
-      x: -(newPageSize.w - originPageSize.width) * 0.5,
-      y: 0
-    }
-    const limitRange = {
-      x: (newPageSize.w - originPageSize.width) * 0.5,
-      y: (newPageSize.h - originPageSize.height) * 0.5
-    }
-    const diff = {
-      x: Math.abs(page.x + offsetPos.x - base.x),
-      y: Math.abs(page.y + offsetPos.y - base.y)
-    }
     const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
     const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
     const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0

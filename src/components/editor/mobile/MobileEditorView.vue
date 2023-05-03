@@ -60,6 +60,7 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 const MAX_SCALE = 300
+const TRANSITION_TIME = 250
 
 export default defineComponent({
   emits: [],
@@ -100,7 +101,8 @@ export default defineComponent({
       initPinchPos: null as ICoordinate | null,
       isHandlingEdgeReach: false,
       movingUtils: null as unknown as MovingUtils,
-      translationRatio: null as null | ICoordinate
+      translationRatio: null as null | ICoordinate,
+      currPageEl: null as null | HTMLElement
     }
   },
   created() {
@@ -234,9 +236,6 @@ export default defineComponent({
     }),
     pages(): Array<IPage> {
       return this.pagesState.map((p: IPageState) => p.config)
-    },
-    currPageEl(): HTMLElement {
-      return document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
@@ -388,6 +387,7 @@ export default defineComponent({
           case 'start': {
             if (this.isBgImgCtrl || this.isImgCtrl) return
 
+            this.currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
             console.warn('pinching start')
             this.movingUtils.removeListener()
             this.initPagePos.x = page.x
@@ -407,6 +407,7 @@ export default defineComponent({
 
             const newScaleRatio = evtScale * this.tmpScaleRatio
             if (!this.isPinchingEditor) {
+              this.currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
               console.warn('pinching start')
               this.movingUtils.removeListener()
               this.initPagePos.x = page.x
@@ -461,7 +462,7 @@ export default defineComponent({
             const newScaleRatio = this.$store.state.mobileEditor.pinchScale * this.tmpScaleRatio
             const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(page, newScaleRatio * 0.01)
             if (newScaleRatio > MAX_SCALE) {
-              this.currPageEl.classList.add('editor-view__pinch-transition')
+              this.currPageEl?.classList.add('editor-view__pinch-transition')
               this.isHandlingEdgeReach = true
 
               const sizeDiff = {
@@ -483,11 +484,11 @@ export default defineComponent({
                 this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
                 this.$store.commit('SET_pageScaleRatio', MAX_SCALE)
                 this.isHandlingEdgeReach = false
-                this.currPageEl.classList.remove('editor-view__pinch-transition')
-              }, 200)
+                this.currPageEl?.classList.remove('editor-view__pinch-transition')
+              }, TRANSITION_TIME)
             } else if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
               this.isHandlingEdgeReach = true
-              this.currPageEl.classList.add('editor-view__pinch-transition')
+              this.currPageEl?.classList.add('editor-view__pinch-transition')
 
               const pos = { x: page.x, y: page.y }
               const EDGE_WIDTH = this.EDGE_WIDTH()
@@ -516,14 +517,14 @@ export default defineComponent({
                   this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
                   this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
                   this.$store.commit('SET_pageScaleRatio', newScaleRatio)
-                }, 200)
+                }, TRANSITION_TIME)
               }
               pageUtils.updatePagePos(layerUtils.pageIndex, pos)
 
               setTimeout(() => {
                 this.isHandlingEdgeReach = false
-                this.currPageEl.classList.remove('editor-view__pinch-transition')
-              }, 200)
+                this.currPageEl?.classList.remove('editor-view__pinch-transition')
+              }, TRANSITION_TIME)
             } else {
               this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
               this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
@@ -653,7 +654,7 @@ $REULER_SIZE: 20px;
     background-color: rgba(0, 0, 0, 0.4);
   }
   &__pinch-transition {
-    transition: transform .2s, webkit-transform .2s;
+    transition: transform .25s, webkit-transform .25s;
   }
 }
 
