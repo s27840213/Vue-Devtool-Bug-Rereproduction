@@ -8,3 +8,5 @@ export interface IUserInfo {
   homeIndicatorHeight: number,
   country?: string
 }
+
+export type WEBVIEW_API_RESULT = { [key: string]: any } | null | undefined

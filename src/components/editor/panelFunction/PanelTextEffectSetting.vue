@@ -15,11 +15,8 @@ div(class="text-effect-setting mt-25")
             class="text-effect-setting__effect pointer"
             :class="{'selected': currentStyle.name === effect.key }"
             @click="onEffectClick(effect)")
-          svg-icon(
-            :iconName="effectIcon(currCategory, effect)"
-            iconWidth="56px"
-            iconColor="white"
-            v-hint="effect.label")
+          img(:src="effectIcon(currCategory, effect)"
+              width="56" height="56" v-hint="effect.label")
           pro-item(v-if="effect.plan" theme="roundedRect")
       //- Effect option UI.
       div(v-if="getOptions(effects1d) && getOptions(effects1d)?.length !== 0"
@@ -132,7 +129,7 @@ export default defineComponent({
   methods: {
     effectIcon(category: IEffectCategory, effect: IEffect): string {
       const postfix = effect.key === 'text-book' ? `-${i18n.global.locale}` : ''
-      return `text-${category.name}-${effect.key}${postfix}`
+      return require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}${postfix}.png`)
     },
     handleColorModal(category: 'shadow'|'bg'|'shape', key: string) {
       const currColor = this.colorParser(this.currentStyle[key])
@@ -264,6 +261,7 @@ export default defineComponent({
     border: 2px solid transparent;
     width: 60px;
     height: 60px;
+    background-color: white;
     .pro {
       left: 1px;
       top: -4px;

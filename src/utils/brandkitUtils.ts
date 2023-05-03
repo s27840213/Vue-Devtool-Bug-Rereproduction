@@ -440,16 +440,37 @@ class BrandKitUtils {
     return await store.dispatch('brandkit/refreshFontAsset', assetId)
   }
 
-  getFontPrevUrlByFontFamily(fontFamily: string, type: string, userId: string, assetId: string, postfix: 'prev-name' | 'prev-sample'): string {
+  fillFontVer(font: {
+    fontFamily: string, type: string, userId: string, assetId: string, ver?: number
+  }): {
+    fontFamily: string, type: string, userId: string, assetId: string, ver: number
+  } {
+    if (font.ver !== undefined) {
+      return font as { fontFamily: string, type: string, userId: string, assetId: string, ver: number }
+    } else {
+      const storeFont = store.getters['font/getFont'](font.fontFamily)
+      if (storeFont) {
+        return Object.assign({}, font, { ver: storeFont.ver })
+      } else {
+        return Object.assign({}, font, { ver: store.getters['user/getVerUni'] })
+      }
+    }
+  }
+
+  getFontPrevUrlByFontFamily({
+    fontFamily, type, userId, assetId, ver
+  }: {
+    fontFamily: string, type: string, userId: string, assetId: string, ver: number
+  }, postfix: 'prev-name' | 'prev-sample'): string {
     switch (type) {
       case 'public':
-        return `https://template.vivipic.com/font/${fontFamily}/${postfix}?ver=${generalUtils.generateRandomString(6)}`
+        return `https://template.vivipic.com/font/${fontFamily}/${postfix}?ver=${ver ?? generalUtils.generateRandomString(6)}`
       case 'admin':
-        return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/${postfix}?ver=${generalUtils.generateRandomString(6)}`
+        return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/${postfix}?ver=${ver ?? generalUtils.generateRandomString(6)}`
       case 'private': {
         const urlMap = this.getFontUrlMap(assetId) as { [key: string]: string } | undefined
         const url = urlMap?.[postfix]
-        return url ? `${url}&ver=${generalUtils.generateRandomString(6)}` : ''
+        return url ? `${url}&ver=${ver ?? generalUtils.generateRandomString(6)}` : ''
       }
       default:
         return ''

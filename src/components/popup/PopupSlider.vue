@@ -56,8 +56,19 @@ export default defineComponent({
     noText(): boolean {
       return popupUtils.sliderConfig.noText
     },
-    styles(): string {
-      return this.noText ? 'grid-template-columns: 1fr; height: 26px' : 'grid-template-columns: 2.5fr 1fr;'
+    width(): number {
+      return popupUtils.sliderConfig.width
+    },
+    styles(): {[key: string]: string} {
+      return {
+        width: `${this.width}px`,
+        ...(this.noText ? {
+          height: '38px',
+          gridTemplateColumns: '1fr'
+        } : {
+          gridTemplateColumns: '2.5fr 1fr'
+        }),
+      }
     }
   },
   methods: {
@@ -71,16 +82,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .popup-slider {
-  width: 150px;
   display: grid;
   grid-template-rows: 1fr;
   column-gap: 10px;
   padding: 0.375rem 0.625rem;
+  box-sizing: border-box;
 
   &__text {
     text-align: center;
     border: 1px solid setColor(gray-4);
-    color: setColor(gray-3);
     border-radius: 0.25rem;
   }
 }

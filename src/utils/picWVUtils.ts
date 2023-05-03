@@ -73,9 +73,9 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     super.sendToIOS(messageType, message)
   }
 
-  async callIOSAsAPI(type: string, message: any, event: string, timeout?: number): Promise<any> {
+  callIOSAsAPI: InstanceType<typeof WebViewUtils>['callIOSAsAPI'] = async (...args) => {
     if (this.inBrowserMode) return
-    return super.callIOSAsAPI(type, message, event, timeout)
+    return super.callIOSAsAPI(...args)
   }
 
   sendAppLoaded() {
@@ -103,7 +103,12 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async login(type: 'APPLE' | 'Google' | 'Facebook', locale: string): Promise<{ data: ILoginResult, flag: number, msg?: string }> {
-    return await this.callIOSAsAPI('LOGIN', { type, locale }, 'login', -1)
+    const loginResult = await this.callIOSAsAPI('LOGIN', { type, locale }, 'login', { timeout: -1 })
+    if (loginResult) {
+      return loginResult as { data: ILoginResult, flag: number, msg?: string }
+    } else {
+      throw new Error('login failed')
+    }
   }
 
   loginResult(data: { data: ILoginResult, flag: string | number, msg?: string }) {
@@ -135,7 +140,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
 
   async getState(key: string): Promise<any> {
     if (this.inBrowserMode) return
-    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState')
+    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
   }
 
   getStateResult(data: { key: string, value: string }) {
