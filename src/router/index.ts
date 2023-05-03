@@ -8,10 +8,10 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import Home from '@/views/Home.vue'
+import Preview from '@/views/Preview.vue'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import { editorRouteHandler } from './handler'
-
 const MOBILE_ROUTES = [
   'Home',
   'TemplateCenter',
@@ -54,7 +54,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'preview',
     name: 'Preview',
-    component: import('@/views/Preview.vue'),
+    component: Preview,
     beforeEnter: async (to, from, next) => {
       try {
         const urlParams = new URLSearchParams(window.location.search)
