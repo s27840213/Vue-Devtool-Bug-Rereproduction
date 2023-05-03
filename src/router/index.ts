@@ -7,11 +7,25 @@ import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
+import BrandKit from '@/views/BrandKit.vue'
+import BrowserWarning from '@/views/BrowserWarning.vue'
+import CopyTool from '@/views/CopyTool.vue'
+import Editor from '@/views/Editor.vue'
 import Home from '@/views/Home.vue'
+import Login from '@/views/Login/Login.vue'
+import SignUp from '@/views/Login/SignUp.vue'
+import MobileWarning from '@/views/MobileWarning.vue'
+import MyDesign from '@/views/MyDesign.vue'
+import NubtnList from '@/views/NubtnList.vue'
 import Preview from '@/views/Preview.vue'
+import Pricing from '@/views/Pricing.vue'
+import Settings from '@/views/Settings.vue'
+import SvgIconView from '@/views/SvgIconView.vue'
+import TemplateCenter from '@/views/TemplateCenter.vue'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import { editorRouteHandler } from './handler'
+
 const MOBILE_ROUTES = [
   'Home',
   'TemplateCenter',
@@ -41,7 +55,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'editor',
     name: 'Editor',
-    component: import('@/views/Editor.vue'),
+    component: Editor,
     beforeEnter: editorRouteHandler
   },
   // {
@@ -129,7 +143,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'signup',
     name: 'SignUp',
     props: route => ({ redirect: route.query.redirect }),
-    component: import('@/views/Login/SignUp.vue'),
+    component: SignUp,
     beforeEnter: async (to, from, next) => {
       try {
         if (store.getters['user/isLogin']) {
@@ -146,7 +160,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'login',
     name: 'Login',
     props: route => ({ redirect: route.query.redirect }),
-    component: import('@/views/Login/Login.vue'),
+    component: Login,
     beforeEnter: async (to, from, next) => {
       try {
         if (to.query.type) {
@@ -166,34 +180,34 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'mydesign/:view?',
     name: 'MyDesign',
-    component: import('@/views/MyDesign.vue'),
+    component: MyDesign,
     props: true
   },
   {
     path: 'templates',
     name: 'TemplateCenter',
-    component: import('@/views/TemplateCenter.vue')
+    component: TemplateCenter
   },
   {
     path: 'settings/:view?',
     name: 'Settings',
-    component: import('@/views/Settings.vue'),
+    component: Settings,
     props: true
   },
   {
     path: 'mobilewarning',
     name: 'MobileWarning',
-    component: import('@/views/MobileWarning.vue')
+    component: MobileWarning
   },
   {
     path: 'browserwarning',
     name: 'BrowserWarning',
-    component: import('@/views/BrowserWarning.vue')
+    component: BrowserWarning
   },
   {
     path: 'brandkit',
     name: 'BrandKit',
-    component: import('@/views/BrandKit.vue'),
+    component: BrandKit,
     beforeEnter: async (to, from, next) => {
       try {
         if (!brandkitUtils.isBrandkitAvailable) {
@@ -209,7 +223,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'pricing',
     name: 'Pricing',
-    component: import('@/views/Pricing.vue')
+    component: Pricing
   }
 ]
 
@@ -217,17 +231,17 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: import('@/views/SvgIconView.vue')
+    component: SvgIconView
   })
   routes.push({
     path: 'copytool',
     name: 'CopyTool',
-    component: import('@/views/CopyTool.vue')
+    component: CopyTool
   })
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: import('@/views/NubtnList.vue')
+    component: NubtnList
   })
 }
 
