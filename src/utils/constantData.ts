@@ -606,6 +606,11 @@ class ConstantData {
           select: [
             { key: '230424180325123sYxIzL8o', label: '' },
             { key: '2304241803251250gC6SnPO', label: '' },
+            { key: '2304241803251250gC6SnPO', label: '' },
+            { key: '2304241803251250gC6SnPO', label: '' },
+            { key: '2304241803251250gC6SnPO', label: '' },
+            { key: '2304241803251250gC6SnPO', label: '' },
+            { key: '2304241803251250gC6SnPO', label: '' },
           ]
         }, ...toOptions(['xOffset200', 'yOffset200', 'size', 'opacity'])]
       }])

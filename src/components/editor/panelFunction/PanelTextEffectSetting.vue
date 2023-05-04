@@ -36,12 +36,11 @@ div(class="text-effect-setting")
             //- Option type select
             div(v-if="option.type === 'select'"
                 class="text-effect-setting__option--select")
-              svg-icon(v-for="sel in option.select"
-                :key="`${option.key}-${sel.key}`"
-                :iconName="`${option.key}-${sel.key}`"
-                iconWidth="36px"
-                :class="{'selected': getStyle(category)[option.key] === sel.key }"
-                @click="handleSelectInput(option.key, sel.key)")
+              div(v-for="sel in option.select"
+                  :key="`${option.key}-${sel.key}`")
+                svg-icon(:iconName="`${option.key}-${sel.key}`" iconWidth="100%"
+                  :class="{'selected': getStyle(category)[option.key] === sel.key }"
+                  @click="handleSelectInput(option.key, sel.key)")
             //- Option type range
             template(v-if="option.type === 'range'")
               input(class="text-effect-setting__option--number"
@@ -74,7 +73,7 @@ div(class="text-effect-setting")
                 @click="chooseImg(option.key)")
               img(:src="getStyleImg(category)")
               div
-              svg-icon(iconName="replace" iconColor="white" iconWidth="16px")
+              svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="16px")
           div(class="text-effect-setting__option")
             span
             span(class="text-effect-setting__option--reset"
@@ -156,7 +155,7 @@ export default defineComponent({
         case 'text-book':
           return {
             name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
-            size: '52',
+            size: '56',
           }
         case 'custom-fill-img': // svg-icon
           return {
@@ -166,7 +165,7 @@ export default defineComponent({
         default:
           return {
             name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}.png`),
-            size: '52',
+            size: '56',
           }
       }
     },
@@ -390,20 +389,32 @@ export default defineComponent({
       color: setColor(gray-2);
     }
     &--range {
-      height: 16px;
+      height: 15px;
       margin-top: 6px;
     }
-    &--select { // TODO
-      width: 100%;
+    &--select {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 4px 7.25px;
-      > svg {
-        cursor: pointer;
-      }
-      &>svg.selected {
-        box-sizing: border-box;
-        border: 1px solid setColor(blue-1);;
+      width: 100%;
+      > div {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-top: 100%;
+        > svg {
+          position: absolute;
+          height: 100%;
+          top: -2px;
+          left: -2px;
+          border: 2px solid transparent;
+          border-radius: 2px;
+          cursor: pointer;
+          transition: all 0.3s;
+          &.selected {
+            border-color: setColor(blue-1);
+          }
+        }
       }
     }
     &--img {
@@ -425,9 +436,6 @@ export default defineComponent({
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.2);
-      }
-      > svg { // replace button
-        position: absolute;
       }
     }
     &--reset {

@@ -1,15 +1,9 @@
 <template lang="pug">
 div(class="panel-text-effect")
-  //- To choose effect category: shadow, shape and bg.
-  div(v-if="state === 'categories'" class="panel-text-effect__categories flex-evenly")
-    div(v-for="category in textEffects"
-        :key="category.name"
-        class="panel-text-effect__category pointer")
-      img(:src="require(`@/assets/img/png/text-effect-icon/${category.name}-none.png`)"
-          width="60" height="60"
-          @click="pushHistory(category.name)")
-      span(class="body-3") {{category.label}}
   //- To choose effect, ex: hollow, splice or echo.
+  tabs(v-if="state === 'effects'"
+      :tabs="textEffects.map(t => t.label)"
+      v-model="currTabIndex" theme="light")
   div(v-if="state === 'effects'"
       class="panel-text-effect__effects")
     div(v-for="effect in effectList"
@@ -30,13 +24,15 @@ div(class="panel-text-effect")
   //- To set effect optoin, ex: distance, color.
   div(v-if="state === 'options' && currEffect !== null"
       class="w-full panel-text-effect__form")
-    span(class="panel-text-effect__name") {{currEffect.label}}
+    span(class="panel-text-effect__effect-name") {{currEffect.label}}
     div(v-for="option in currEffect.options"
         :key="option.key"
         class="panel-text-effect__field")
-      //- Option type select
-      div(v-if="option.type === 'select'"
-          class="panel-text-effect__select")
+      div(v-if="option.key !== 'endpoint' && !['range', 'color'].includes(option.type)"
+          class="panel-text-effect__option-name") {{option.label}}
+      //- Option type select (endpoint)
+      div(v-if="option.type === 'select' && option.key === 'endpoint'"
+          class="panel-text-effect__endpoint")
         div(v-for="sel in option.select"
             :key="sel.key"
             :class="{'selected': currentStyle[option.key] === sel.key }"
@@ -44,6 +40,13 @@ div(class="panel-text-effect")
           svg-icon(:iconName="`${option.key}-${sel.key}`"
             iconWidth="24px")
           span {{sel.label}}
+      //- Option type select
+      div(v-if="option.type === 'select' && option.key !== 'endpoint'"
+          class="panel-text-effect__select")
+        div(v-for="sel in option.select" :key="sel.key"
+            @click="handleSelectInput(option.key, sel.key)")
+          svg-icon(:iconName="`${option.key}-${sel.key}`" iconWidth="100%"
+            :class="{'selected': currentStyle[option.key] === sel.key }")
       //- Option type range
       mobile-slider(v-if="option.type === 'range'"
         :borderTouchArea="true"
@@ -53,6 +56,7 @@ div(class="panel-text-effect")
         :min="option.min ?? 0"
         :step="option.key === 'lineHeight' ? 0.01 : 1"
         :autoRecord="false"
+        :enableDefaultPadding="false"
         @update="(val)=>handleRangeInput(val, option)"
         @pointerdown="setEffectFocus(true)"
         @pointerup="setEffectFocus(false)")
@@ -61,12 +65,15 @@ div(class="panel-text-effect")
         class="panel-text-effect__color")
         div {{option.label}}
         color-btn(:color="colorParser(currentStyle[option.key])"
-                size="24px" @click="openColorPanel(option.key)")
+                size="30px" @click="openColorPanel(option.key)")
       //- Option type img
-      //- div(v-if="option.type === 'img'"
-      //-     class="panel-text-effect__img")
-      //-   img(:src="")
-    span(class="panel-text-effect__reset label-mid"
+      div(v-if="option.type === 'img'"
+          class="panel-text-effect__img"
+          @click="chooseImg(option.key)")
+        img(:src="getStyleImg(currCategory)")
+        div
+        svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="16px")
+    span(class="panel-text-effect__reset"
         @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
@@ -74,9 +81,11 @@ div(class="panel-text-effect")
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
+import Tabs from '@/components/Tabs.vue'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import { IEffect, IEffectCategory } from '@/utils/constantData'
+import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -91,6 +100,7 @@ export default defineComponent({
     MobileSlider,
     ColorBtn,
     ProItem,
+    Tabs,
   },
   props: {
     panelHistory: {
@@ -104,8 +114,19 @@ export default defineComponent({
     }
   },
   computed: {
-    currCategoryName(): 'shadow'|'bg'|'shape'|'fill' {
-      return this.panelHistory[this.panelHistory.length - 1] as 'shadow'|'bg'|'shape'|'fill'
+    currTabIndex: {
+      get: function (): number {
+        return {
+          shadow: 0,
+          shape: 1,
+          bg: 2,
+          fill: 3
+        }[this.currTab as 'shadow'|'bg'|'shape'|'fill'] ?? 0
+      },
+      set: function (newVal: number) {
+        this.currTab = ['shadow', 'shape', 'bg', 'fill'][newVal] ?? 0
+        localStorageUtils.set('textEffectSetting', 'tab', this.currTab)
+      }
     },
     currCategory(): IEffectCategory {
       return _.find(this.textEffects, ['name', this.currCategoryName]) as IEffectCategory
@@ -118,21 +139,13 @@ export default defineComponent({
       if (!this.currCategory) return null
       return _.find(this.effectList, ['key', this.currentStyle.name]) ?? null
     },
-    historySize(): number {
-      return this.panelHistory.length
-    },
     state(): string {
-      return this.historySize === 0 ? 'categories'
-        : this.historySize === 1 ? 'effects'
-          : 'options'
+      return this.panelHistory.length === 0 ? 'effects' : 'options'
     }
   },
   mounted() { /**/ },
   beforeUnmount() { /**/ },
   methods: {
-    pushHistory(type: string) {
-      this.$emit('pushHistory', type)
-    },
     openColorPanel(key: string) {
       if (this.currCategoryName === 'shadow') {
         colorUtils.setCurrEvent(ColorEventType.textEffect)
@@ -146,19 +159,15 @@ export default defineComponent({
     },
     async onEffectClick(effect: IEffect): Promise<void> {
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
-      // if (effect.key === 'custom-fill-img') {
-      //   popupUtils.openPopup('replace', undefined, {
-      //     selectImg: (img: IAssetPhoto|IPhotoItem) => {
-      //       this.setEffect({ effect: { img } })
-      //     }
-      //   })
-      // }
       if (effect.key !== this.currentStyle.name) {
         await this.setEffect({ effectName: effect.key })
         this.recordChange()
       } else if (effect.key !== 'none') {
-        this.pushHistory(this.currCategoryName)
+        this.$emit('pushHistory', this.currCategoryName)
       }
+    },
+    chooseImg(key: string) {
+      console.log('chooseImg', key)
     },
   }
 })
@@ -166,11 +175,25 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .panel-text-effect {
+  @include body-SM;
   width: 100%;
   height: 100%;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
+  color: setColor(gray-2);
+  text-align: left;
+
+  :deep(.tabs) {
+    height: 26px;
+    margin-bottom: 10px;
+    .tabs__item {
+      padding-bottom: 2px;
+    }
+    span {
+      @include body-XS;
+    }
+  }
 
   &__categories {
     @include no-scrollbar;
@@ -192,9 +215,11 @@ export default defineComponent({
   }
 
   &__effects {
+    @include no-scrollbar;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-    column-gap: 16px;
+    gap: 16px;
+    overflow: auto;
     > div {
       display: flex;
       justify-content: center;
@@ -202,18 +227,22 @@ export default defineComponent({
       position: relative;
       width: 56px;
       height: 56px;
-      box-sizing: border-box;
-      margin: 0px auto 16px auto;
-      padding: 2px;
-      background-color: setColor(gray-5);
+      margin: 0px auto;
       border-radius: 5px;
       border: 2px solid transparent;
+      .panel-text-effect__effects--icon {
+        background-color: setColor(gray-5);
+        border-radius: 5px;
+        &.svg-icon {
+          padding: 16px;
+        }
+      }
       &.selected {
         border: 2px solid setColor(blue-1);
       }
       > .pro {
-        left: -1px;
-        top: -6px;
+        left: 1px;
+        top: -4px;
       }
     }
     &--more {
@@ -223,27 +252,31 @@ export default defineComponent({
       position: absolute;
       top: 0px;
       left: 0px;
-      width: 52px;
-      height: 52px;
+      width: 56px;
+      height: 56px;
       border-radius: 3px;
       background: rgba(71, 74, 87, 0.6);
       backdrop-filter: blur(2px);
     }
   }
 
-  &__name {
-    margin-bottom: 20px;
-  }
-
   &__form {
     @include no-scrollbar;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    gap: 10px;
     overflow-y: scroll;
-    padding-bottom: 12px;
   }
 
-  &__select {
+  &__effect-name {
+    color: setColor(gray-1);
+    text-align: center;
+  }
+
+  &__option-name {
+    margin-bottom: 4px;
+  }
+
+  &__endpoint {
     display: grid;
     grid-auto-flow: column;
     grid-gap: 18px;
@@ -256,7 +289,6 @@ export default defineComponent({
       box-sizing: border-box;
       height: 42px;
       border-radius: 5px;
-      color: setColor(gray-2);
       background-color: setColor(gray-5);
       &.selected {
         border-color: setColor(blue-1);;
@@ -267,20 +299,60 @@ export default defineComponent({
     }
   }
 
+  &__select {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0 2px;
+    > div {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-top: 100%;
+      > svg {
+        position: absolute;
+        height: 100%;
+        top: -2px;
+        left: -2px;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+        &.selected {
+          border-color: setColor(blue-1);
+        }
+      }
+    }
+  }
+
   &__color {
-    @include body-SM;
-    flex: 1;
     display: flex;
     justify-content: space-between;
-    padding: 10px;
+    align-items: center;
+  }
+
+  &__img {
+    display: flex;
+    justify-content: center;
     align-items: center;
     position: relative;
-    color: setColor(gray-3);
+    border-radius: 2px;
+    overflow: hidden;
+    > img {
+      width: 100%;
+      max-height: 120px;
+      object-fit: cover;
+    }
+    > div { // dark mask on img
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.2);
+    }
   }
 
   &__reset {
-    margin-top: 10px;
+    @include btn-SM;
     color: setColor(blue-1);
+    text-align: center;
   }
 }
 </style>

@@ -131,11 +131,13 @@ export default defineComponent({
       let accWidth = 10000000
 
       this.images.forEach(image => {
-        if (accWidth + image.width + 17 > width) {
+        // 2 = border width, 15 = gap width
+        const imgWidth = image.type === '' ? Math.floor(image.width) + 2 : image.width
+        if (accWidth + imgWidth + 15 > width) {
           array2d.push({ id: `row${array2d.length}`, item: [] })
-          accWidth = image.width + 2
+          accWidth = imgWidth
         } else {
-          accWidth += image.width + 17
+          accWidth += imgWidth + 15
         }
         array2d[array2d.length - 1].item.push(image)
       })

@@ -238,11 +238,8 @@ export default defineComponent({
     hideFooter(): boolean {
       return ['download'].includes(this.currActivePanel)
     },
-    extraFixSizeCondition(): boolean {
+    extraFixSizeCondition(): boolean { // For panel that fix in some condition
       switch (this.currActivePanel) {
-        case 'text-effect': {
-          return this.panelHistory.length === 0
-        }
         default: {
           return false
         }
@@ -287,7 +284,8 @@ export default defineComponent({
       return ['crop', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
     },
     noRowGap(): boolean {
-      return ['crop', 'color', 'copy-style', 'multiple-select', 'remove-bg'].includes(this.currActivePanel)
+      return ['crop', 'color', 'copy-style', 'multiple-select', 'remove-bg',
+        'text-effect'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
@@ -720,6 +718,7 @@ export default defineComponent({
   }
 
   &__btn {
+    display: grid; // To fix div height != child height issue. https://stackoverflow.com/questions/5804256
     position: relative;
   }
 

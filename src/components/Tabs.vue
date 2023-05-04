@@ -72,8 +72,6 @@ export default defineComponent({
         color: this.colors[activeMode],
         backgroundColor: this.colors[`${activeMode}BG` as 'activeBG'|'inactiveBG']
       } : {
-        paddingBottom: '4px',
-        minWidth: 'fit-content',
         color: this.colors[activeMode],
         borderBottom: isActive ? `2px solid ${this.colors[activeMode]}` : '2px solid transparent',
         width: `${100 / this.tabs.length / 2}%`
@@ -98,7 +96,11 @@ export default defineComponent({
     transition: all 0.2s;
   }
   &.light, &.dark {
-    margin-bottom: 24px
+    margin-bottom: 24px;
+    .tabs__item {
+      padding-bottom: 4px;
+      min-width: fit-content;
+    }
   }
 }
 </style>

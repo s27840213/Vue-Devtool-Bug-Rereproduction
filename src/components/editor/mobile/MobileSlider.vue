@@ -1,8 +1,8 @@
 <template lang="pug">
 div(class="mobile-slider" :style="containerStyles")
-  div
-    span(class="mobile-slider__name text-gray-1 body-MD no-wrap") {{title}}
-    input(class="mobile-slider__text body-2 text-gray-2"
+  div(class="mobile-slider__top")
+    span(class="mobile-slider__name no-wrap") {{title}}
+    input(class="mobile-slider__number"
       type="number"
       v-model.number="propsVal"
       :name="name"
@@ -111,35 +111,52 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .mobile-slider {
+  @include body-SM;
   width: 100%;
   display: grid;
   grid-template-rows: auto auto;
   grid-template-columns: 1fr;
   row-gap: 10px;
   box-sizing: border-box;
+  color: setColor(gray-2);
 
-  > div:nth-child(1) {
+  &__top {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
 
-  &__text {
-    text-align: center;
+  &__number {
+    @include body-XS;
+    box-sizing: border-box;
+    width: 30px;
+    height: 24px;
+    padding: 0;
     border: 1px solid setColor(gray-4);
-    color: setColor(gray-3);
+    color: setColor(gray-2);
+    text-align: center;
     border-radius: 0.25rem;
-    width: 60px;
   }
 
   &__range-input-wrapper {
-    margin: 12px 0;
     position: relative;
+  }
+
+  .input__slider--range {
+    height: 16px;
+    &::-webkit-slider-thumb {
+      width: 16px;
+      height: 16px;
+      margin-top: -8px;
+    }
   }
 
   &__range-input-top {
     position: absolute;
     opacity: 0;
+    &::-webkit-slider-thumb {
+      margin-top: -28px;
+    }
   }
 }
 </style>
