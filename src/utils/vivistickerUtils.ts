@@ -5,7 +5,7 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, isV1_26, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -187,7 +187,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.STANDALONE_USER_INFO.locale = locale
   }
 
-  setDefaultPrices() {
+  setDefaultPrices(locale = 'us') {
     const defaultPrices = {
       tw: {
         currency: 'TWD',
@@ -223,7 +223,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         }
       }
     } as { [key: string]: IPrices }
-    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[this.STANDALONE_USER_INFO.locale] ?? defaultPrices.us })
+    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[locale] ?? defaultPrices.us })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
