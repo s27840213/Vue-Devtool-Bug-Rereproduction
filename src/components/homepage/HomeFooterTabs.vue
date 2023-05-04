@@ -16,11 +16,12 @@ div(class="footer-tabs" :style="footerTabsStyles")
         :iconWidth="'22px'")
       span(class="body-XXS no-wrap click-disabled"
       :class="isExactActive ? 'text-blue-1' : 'text-gray-2'") {{$tc('NN0001', 1)}}
-  div(class="footer-tabs__plus")
-    svg-icon(class="click-disabled"
+  btn-new-design(class="footer-tabs__plus" v-slot="slotProps")
+    svg-icon(
       :iconName="'insert-cross'"
       :iconColor="'blue-1'"
-      :iconWidth="'40px'")
+      :iconWidth="'40px'"
+      @click="slotProps.openPopup")
   router-link(:to="'/mydesign'" custom v-slot="{navigate}")
     div(class="footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
@@ -42,6 +43,7 @@ div(class="footer-tabs" :style="footerTabsStyles")
 </template>
 
 <script lang="ts" setup>
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import picWVUtils from '@/utils/picWVUtils'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -75,7 +77,7 @@ const activeRouteName = computed(() => route.name)
   height: 56px;
   background: setColor(white);
   border-top: 0.5px solid setColor(gray-4);
-  z-index: setZindex(footer);
+  z-index: setZindex(45);
 
   &__item {
     display: flex;

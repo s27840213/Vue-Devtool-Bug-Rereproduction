@@ -68,20 +68,11 @@ div(class="nu-header" :style="rootStyles")
           :iconWidth="'25px'"
           @click="closeSearchPage")
   slot
-  //- transition(name="slide-x-right")
-  //-   div(v-if="isShowMenu"
-  //-       class="nu-header__menu popup-window")
-  //-     mobile-menu(@closeMenu="() => { isShowMenu = false }"
-  //-       v-click-outside="() => { isShowMenu = false }")
   div(v-if="isShowSearchPage"
     class="nu-header__search-mobile")
     search-bar(class="search"
       :placeholder="$t('NN0092', {target: $t('NN0145')})"
       @search="handleSearch")
-    //- div(class="pt-20 nu-header__search-mobile__title") {{$t('NN0227')}}:
-    //- div(class="pt-10 nu-header__search-mobile__options")
-    //-   span(v-for="key in keys"
-    //-     @click="handleSearch(key)") {{key}}
 </template>
 
 <script lang="ts">

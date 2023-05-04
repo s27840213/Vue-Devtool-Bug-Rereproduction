@@ -2,7 +2,7 @@
 div(class="home")
   nu-header
   div(class="home-content")
-    div(v-if="inBrowserMode" class="home-top")
+    div(v-if="inBrowserMode && !(isMobile && isLogin)" class="home-top")
       div(class="home-top-text")
         span(class="home-top-text__title" v-html="$t('NN0464')")
         span(class="home-top-text__description") {{$t('NN0465')}}
@@ -19,8 +19,8 @@ div(class="home")
     div(class="home-list")
       scroll-list(
         :gridMode="true"
-        type="theme" @openSizePopup="openSizePopup()")
-      hashtag-category-row(v-if="!inBrowserMode"
+        type="theme")
+      hashtag-category-row(v-if="!inBrowserMode || (isMobile && isLogin)"
         class="home-list__hashtag"
         :type="'tag'"
         :title="''"
@@ -35,7 +35,7 @@ div(class="home")
           :themes="themes"
           @loadMore="handleLoadMore")
       template(v-else)
-        scroll-list(v-if="isLogin && inBrowserMode"
+        scroll-list(v-if="isLogin && inBrowserMode && !isMobile"
           type="mydesign")
         template(v-if="isLogin || !inBrowserMode")
           scroll-list(v-for="theme in themeList"
@@ -43,11 +43,11 @@ div(class="home")
             :theme="`${theme}`"
             :key="theme"
             :shuffle="true")
-    div(v-if="inBrowserMode" class="home-block")
+    div(v-if="inBrowserMode && !(isMobile && isLogin)" class="home-block")
       ta-block(v-for="item in blocklist"
         :key="item.title"
         :content="item")
-    nu-footer(v-if="inBrowserMode" :isHome="true")
+    nu-footer(v-if="inBrowserMode && !(isMobile && isLogin)" :isHome="true")
 </template>
 
 <script lang="ts">
@@ -80,11 +80,10 @@ export default defineComponent({
     ),
     TemplateWaterfall: defineAsyncComponent(() =>
       import('@/components/templates/TemplateWaterfall.vue')
-    )
+    ),
   },
   data() {
     return {
-      showSizePopup: false,
       // themeList: ['1,2', '3', '8', '6', '5', '7', '9'],
       colorBlock: [
         'vector_lightblue2.json',
@@ -222,9 +221,6 @@ export default defineComponent({
       getTemplates: 'getThemeContent',
       getMoreTemplates: 'getMoreContent'
     }),
-    openSizePopup() {
-      this.showSizePopup = true
-    },
     handleLoadMore() {
       this.isTemplateReady = false
       this.getMoreTemplates().then(() => {

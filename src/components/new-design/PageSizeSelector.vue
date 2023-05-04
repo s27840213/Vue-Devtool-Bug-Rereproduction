@@ -69,11 +69,11 @@ div(class="page-size-selector")
           :key="format.id"
           class="page-size-selector__body-row item pointer"
           @click="selectFormat(`recent-${index}`)")
-        radio-btn(class="page-size-selector__body-row__radio"
-                  :isSelected="selectedFormatKey === `recent-${index}`",
-                  :circleColor="isDarkTheme ? 'white' : 'light-gray'"
-                  :formatKey="`recent-${index}`",
-                  @select="selectFormat")
+        //- radio-btn(class="page-size-selector__body-row__radio"
+        //-           :isSelected="selectedFormatKey === `recent-${index}`",
+        //-           :circleColor="isDarkTheme ? 'white' : 'light-gray'"
+        //-           :formatKey="`recent-${index}`",
+        //-           @select="selectFormat")
         div(v-if="isMobile" class="page-size-selector__body-row__content")
           span(class="page-size-selector__body__recently body-3 pointer"
                 :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ format.description ? format.title : makeFormatTitle(format) }}
@@ -277,10 +277,12 @@ const component = defineComponent({
       } else if (this.selectedFormatKey.startsWith('recent')) {
         const [type, index] = this.selectedFormatKey.split('-')
         const format = this.recentlyUsed[parseInt(index)]
+        console.log(format)
         return format
       } else if (this.selectedFormatKey.startsWith('preset')) {
         const [type, index] = this.selectedFormatKey.split('-')
         const format = this.formatList[parseInt(index)]
+        console.log(format)
         return format
       } else {
         return undefined
