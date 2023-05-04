@@ -93,6 +93,7 @@ import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
+import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 
@@ -166,7 +167,8 @@ export default defineComponent({
     PanelColorPicker,
     PanelMyDesignMore,
     panelSelectDesign,
-    Tabs
+    PanelAddTemplate,
+    Tabs,
   },
   data() {
     return {
@@ -213,7 +215,7 @@ export default defineComponent({
       return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design'].includes(this.currActivePanel)
+      return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design', 'add-template'].includes(this.currActivePanel)
     },
     noHeaderTheme(): boolean {
       return ['select-design'].includes(this.currActivePanel)
@@ -260,7 +262,7 @@ export default defineComponent({
       }
     },
     insertTheme(): boolean {
-      return this.currActivePanel === 'text'
+      return ['text', 'add-template'].includes(this.currActivePanel)
     },
     showRightBtn(): boolean {
       return this.currActivePanel !== 'none'
@@ -272,7 +274,7 @@ export default defineComponent({
       return ['crop', 'copy-style'].includes(this.currActivePanel)
     },
     noRowGap(): boolean {
-      return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
+      return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)

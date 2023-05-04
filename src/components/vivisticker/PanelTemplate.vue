@@ -59,7 +59,7 @@ div(class="panel-template rwd-container" :class="{'in-category': isInCategory, '
           svg-icon(iconName="loading"
             iconColor="white"
             iconWidth="20px")
-    btn-add(:elScrollable="elMainContent" :text="'Create ' + (theme === '2' ? 'Post' : 'Story')")
+    btn-add(:elScrollable="elMainContent" :text="'Create ' + (theme === '2' ? 'Post' : 'Story')" @click="addTemplate")
 </template>
 
 <script lang="ts">
@@ -75,6 +75,7 @@ import Tabs from '@/components/Tabs.vue'
 import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import PanelGroupTemplate from '@/components/vivisticker/PanelGroupTemplate.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -311,7 +312,11 @@ export default defineComponent({
             title
           }
         })
-    }
+    },
+    addTemplate() {
+      editorUtils.setCurrActivePanel('add-template')
+      editorUtils.setShowMobilePanel(true)
+    },
   }
 })
 </script>
