@@ -54,8 +54,6 @@ export default defineComponent({
       debugModeCounter: 0,
       domain: window.location.hostname !== 'sticker.vivipic.com' ? ` ${window.location.hostname.replace('.vivipic.com', '')}` : '',
       debugMode: false,
-      videoUrl: videoUrls.iOS.video,
-      thumbnailUrl: videoUrls.iOS.thumbnail
     }
   },
   props: {
@@ -236,13 +234,7 @@ export default defineComponent({
       editorUtils.setCloseMobilePanelFlag(true)
     },
     handleShowIOS16Tutorial() {
-      this.setFullPageConfig({
-        type: 'video',
-        params: {
-          video: this.videoUrl,
-          thumbnail: this.thumbnailUrl
-        }
-      })
+      vivistickerUtils.openFullPageVideo('iOS')
     },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')

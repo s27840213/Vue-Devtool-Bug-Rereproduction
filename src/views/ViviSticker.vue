@@ -38,7 +38,6 @@ import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
-import constantData from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
@@ -79,16 +78,7 @@ export default defineComponent({
     vivistickerUtils.registerCallbacks('vvstk')
     if (this.userInfo.isFirstOpen) {
       if (this.$i18n.locale === 'us') {
-        const stickerVideoUrls = constantData.stickerVideoUrls()
-        this.setFullPageConfig({
-          type: 'video',
-          params: {
-            video: stickerVideoUrls.tutorial1.video,
-            thumbnail: stickerVideoUrls.tutorial1.thumbnail,
-            delayedClose: -1,
-            mediaPos: 'top'
-          }
-        })
+        vivistickerUtils.openFullPageVideo('iOS', { delayedClose: 5000 })
       } else {
         this.setShowTutorial(true)
       }
