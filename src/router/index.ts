@@ -7,12 +7,9 @@ import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import CopyTool from '@/views/CopyTool.vue'
-import NubtnList from '@/views/NubtnList.vue'
-import { h, resolveComponent } from 'vue'
+import { defineAsyncComponent, h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
-import SvgIconView from '../views/SvgIconView.vue'
 import ViviSticker from '../views/ViviSticker.vue'
 
 declare let window: CustomWindow
@@ -76,17 +73,17 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: SvgIconView
+    component: defineAsyncComponent(() => import('@/views/SvgIconView.vue'))
   })
   routes.push({
     path: 'copytool',
     name: 'CopyTool',
-    component: CopyTool
+    component: defineAsyncComponent(() => import('@/views/CopyTool.vue'))
   })
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: NubtnList
+    component: defineAsyncComponent(() => import('@/views/NubtnList.vue'))
   })
 }
 
