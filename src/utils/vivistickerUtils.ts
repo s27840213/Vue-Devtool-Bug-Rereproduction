@@ -68,6 +68,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
   hasCopied = false
   everEntersDebugMode = false
+  tutorialFlags = {} as { [key: string]: boolean }
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
@@ -242,13 +243,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         return message.key === 'tempDesign'
     }
     return false
-  }
-
-  sendToIOS(messageType: string, message: any) {
-    if (messageType === 'SCREENSHOT' && message.action !== 'editorCopy') {
-      this.handleIos16Video()
-    }
-    super.sendToIOS(messageType, message)
   }
 
   appToast(msg: string) {
@@ -1111,6 +1105,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async recordDebugModeEntrance() {
     this.everEntersDebugMode = true
     await this.setState('everEntersDebugMode', { value: this.everEntersDebugMode })
+  }
+
+  async fetchTutorialFlags() {
+    this.tutorialFlags = (await this.getState('tutorialFlags')) ?? {}
+  }
+
+  async updateTutorialFlags(updateItem: { [key: string]: boolean }) {
+    Object.assign(this.tutorialFlags, updateItem)
+    await this.setState('tutorialFlags', this.tutorialFlags)
   }
 
   openPayment(target?: IViviStickerProFeatures) {

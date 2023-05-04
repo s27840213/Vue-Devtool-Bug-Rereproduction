@@ -27,6 +27,7 @@ const routes: Array<RouteRecordRaw> = [
         if (vivistickerUtils.checkVersion('1.5')) {
           await vivistickerUtils.fetchDebugModeEntrance()
           await vivistickerUtils.fetchLoadedFonts()
+          await vivistickerUtils.fetchTutorialFlags()
           const recentPanel = await vivistickerUtils.getState('recentPanel')
           const userSettings = await vivistickerUtils.getState('userSettings')
           if (userSettings) {

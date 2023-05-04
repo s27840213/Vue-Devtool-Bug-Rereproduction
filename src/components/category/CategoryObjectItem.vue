@@ -21,7 +21,6 @@ import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapMutations } from 'vuex'
@@ -58,7 +57,7 @@ export default defineComponent({
     }),
     addSvg() {
       // if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
-      console.log(generalUtils.deepCopy(this.item))
+      // console.log(generalUtils.deepCopy(this.item))
       if (this.item.type === 8 || this.item.has_frame) {
         if (!vivistickerUtils.checkPro(this.item, 'frame')) return
         this.handleEditObject()
@@ -71,10 +70,12 @@ export default defineComponent({
           url: item.src.replace('-preview', item.has_d ? '-downsized' : '')
         })
         assetUtils.addAssetToRecentlyUsed(this.item, 'giphy')
+        vivistickerUtils.handleIos16Video()
       } else {
         if (!vivistickerUtils.checkPro(this.item, 'object')) return
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
         assetUtils.addAssetToRecentlyUsed(this.item, 'objects', 'svg')
+        vivistickerUtils.handleIos16Video()
       }
       if (this.isHideEditor) this.handleEditObject()
     },

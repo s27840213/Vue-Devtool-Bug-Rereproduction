@@ -78,7 +78,7 @@ export default defineComponent({
     vivistickerUtils.registerCallbacks('vvstk')
     if (this.userInfo.isFirstOpen) {
       if (this.$i18n.locale === 'us') {
-        vivistickerUtils.openFullPageVideo('iOS', { delayedClose: 5000 })
+        vivistickerUtils.openFullPageVideo('tutorial1', { delayedClose: 5000 })
       } else {
         this.setShowTutorial(true)
       }
@@ -280,6 +280,22 @@ export default defineComponent({
       this.setIsInMyDesign(false)
       this.setIsInSelectionMode(false)
       this.setCurrActiveTab(panelType)
+      if (this.$i18n.locale === 'us') {
+        switch (panelType) {
+          case 'text':
+            if (!vivistickerUtils.tutorialFlags.text) {
+              vivistickerUtils.openFullPageVideo('tutorial2', { delayedClose: 5000 })
+              vivistickerUtils.updateTutorialFlags({ text: true })
+            }
+            break
+          case 'background':
+            if (!vivistickerUtils.tutorialFlags.background) {
+              vivistickerUtils.openFullPageVideo('tutorial4', { delayedClose: 5000 })
+              vivistickerUtils.updateTutorialFlags({ background: true })
+            }
+            break
+        }
+      }
       if (this.currActivePanel === 'color-picker') {
         vivistickerUtils.setHasNewBgColor(false)
         this.switchTab('none')
