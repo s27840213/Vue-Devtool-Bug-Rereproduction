@@ -42,13 +42,7 @@ class PageUtils {
   get getPageSize(): (pageIndex: number) => { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
-  get currFocusPageSize(): {
-    width: number,
-    height: number,
-    physicalWidth: number,
-    physicalHeight: number,
-    unit: string
-    } { return store.getters.getPageSize(this.currFocusPageIndex) }
+  get currFocusPageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } { return store.getters.getPageSize(this.currFocusPageIndex) }
 
   get currFocusPageSizeWithBleeds() { return this.getPageSizeWithBleeds(this.currFocusPage) }
   get defaultBleed() { return i18n.global.locale === 'us' ? 3 : 2 } // mm
@@ -527,15 +521,10 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage(scrollToTop = false, minRatioFiRestricttDisable = false) {
+  fitPage(scrollToTop = false, minRatioFiRestricttDisable = false, resetPageScaleRatio = true) {
     // In these mode, don't fitPage.
 
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
-      return
-    }
-
-    // If mobile user zoom in page, don't fitPage.
-    if (this.isMobile && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
 
@@ -595,6 +584,7 @@ class PageUtils {
     }
 
     editorUtils.handleContentScaleRatio(this.currFocusPageIndex)
+    store.commit('SET_pageScaleRatio', 100)
   }
 
   fillPage() {

@@ -39,6 +39,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import { ILayer } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
+import { ILayerInfo } from '@/store/types'
 import backgroundUtils from '@/utils/backgroundUtils'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -184,10 +185,29 @@ export default defineComponent({
 
     this.editorViewResizeObserver.observe(this.editorView as HTMLElement)
 
+    const layerInfo = {} as ILayerInfo
+    Object.defineProperties(layerInfo, {
+      pageIndex: {
+        get() {
+          return layerUtils.pageIndex
+        }
+      },
+      layerIndex: {
+        get() {
+          return layerUtils.layerIndex
+        }
+      },
+      subLayerIdx: {
+        get() {
+          return layerUtils.subLayerIdx
+        }
+      }
+    })
     this.movingUtils = new MovingUtils({
       _config: { config: {} as ILayer },
       snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-      body: this.$refs.editorView as HTMLElement
+      body: this.$refs.editorView as HTMLElement,
+      layerInfo
     })
   },
   beforeUnmount() {

@@ -162,19 +162,21 @@ export default defineComponent({
     const lineMover = this.$refs.lineMover as HTMLElement
     const props = this.$props
     const layerInfo = {} as ILayerInfo
-    Object.defineProperty(layerInfo, 'pageIndex', {
-      get() {
-        return props.pageIndex
-      }
-    })
-    Object.defineProperty(layerInfo, 'layerIndex', {
-      get() {
-        return props.layerIndex
-      }
-    })
-    Object.defineProperty(layerInfo, 'subLayerIdx', {
-      get() {
-        return props.subLayerIndex
+    Object.defineProperties(layerInfo, {
+      pageIndex: {
+        get() {
+          return props.pageIndex
+        }
+      },
+      layerIndex: {
+        get() {
+          return props.layerIndex
+        }
+      },
+      subLayerIdx: {
+        get() {
+          return props.subLayerIndex
+        }
       }
     })
     const _config = { config: this.config }

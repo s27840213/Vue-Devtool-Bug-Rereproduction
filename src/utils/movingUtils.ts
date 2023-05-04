@@ -132,7 +132,6 @@ export class MovingUtils {
       return
     }
     window.requestAnimationFrame(() => {
-      // console.log('page moving', this.randId)
       this.pageMovingHandler(e)
     })
   }
@@ -500,7 +499,6 @@ export class MovingUtils {
     } else {
       y = offsetPos.y + page.y
     }
-    console.log('page moving', x, y)
     pageUtils.updatePagePos(this.pageIndex, { x, y })
 
     if (!isReachLeftEdge && !isReachRightEdge) {
