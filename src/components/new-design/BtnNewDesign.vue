@@ -11,10 +11,10 @@ div(class="btn-new-design")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import PopupSize from '@/components/new-design/PopupSize.vue'
 import PanelSize from '@/components/new-design/PanelSize.vue'
+import PopupSize from '@/components/new-design/PopupSize.vue'
 import generalUtils from '@/utils/generalUtils'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
