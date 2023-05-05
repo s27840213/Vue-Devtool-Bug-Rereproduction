@@ -85,8 +85,8 @@ div(ref="body"
                       @updateHashTagsAll="handleSelectAll")
     template-waterfall(:waterfallTemplates="waterfallTemplates"
                       :isTemplateReady="isTemplateReady"
-                      :useScrollablePreview="!isMobile"
-                      :useScrollSpace="isMobile"
+                      :useScrollablePreview="!isMobileSize"
+                      :useScrollSpace="isMobileSize"
                       :themes="themes"
                       @loadMore="handleLoadMore"
                       @clickWaterfall="handleClickWaterfall")
@@ -224,7 +224,7 @@ export default defineComponent({
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
-      isMobile: false,
+      isMobileSize: false,
       isPC: false
     }
   },
@@ -357,7 +357,7 @@ export default defineComponent({
     waterfallTemplates(): ITemplate[][] {
       if (this.isPC) {
         return this.waterfallTemplatesPC
-      } else if (this.isMobile) {
+      } else if (this.isMobileSize) {
         return this.waterfallTemplatesMOBILE
       } else {
         return this.waterfallTemplatesTAB
@@ -478,7 +478,7 @@ export default defineComponent({
         this.groupId = template.group_id ?? ''
         this.contentIds = template.content_ids
         this.modalTemplate = template
-        if (this.isMobile) {
+        if (this.isMobileSize) {
           this.modal = 'mobile-pages'
         } else {
           this.modal = 'pages'
@@ -552,7 +552,7 @@ export default defineComponent({
         return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
       }, [true, undefined, undefined])[0]
       if (content.themes.length > 1 && !allSameSize) {
-        if (this.isMobile) {
+        if (this.isMobileSize) {
           const route = this.$router.resolve({
             name: 'Editor',
             query: {
@@ -618,7 +618,7 @@ export default defineComponent({
       })
     },
     handleResize() {
-      this.isMobile = generalUtils.getWidth() <= 540
+      this.isMobileSize = generalUtils.getWidth() <= 540
       this.isPC = generalUtils.getWidth() >= 976
     },
     getPrevUrl(content?: IContentTemplate, scale?: number): string {
@@ -636,6 +636,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use "@/assets/scss/base/transition.scss";
+
 .template-center {
   @include size(100%, 100%);
   @include hover-scrollbar();

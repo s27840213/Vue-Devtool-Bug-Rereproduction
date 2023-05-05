@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="home")
-  nu-header
+  nu-header(:showCloseIcon="showTemplateList" @close="showTemplateList = false")
   div(class="home-content")
     div(v-if="inBrowserMode && !(isMobile && isLogin)" class="home-top")
       div(class="home-top-text")
@@ -49,12 +49,20 @@ div(class="home")
         :key="item.title"
         :content="item")
     nu-footer(v-if="inBrowserMode && !(isMobile && isLogin)" :isHome="true")
+  transition(name="fade-slide")
+    div(v-if="showTemplateList && isMobile" class="template-list")
+      div(class="template-list__content")
+        div(class="template-list__gallery")
+          div(v-for="content in contentIds" class="template-list__gallery-item"
+            :key="content.id"
+            :style="`background-image: url(${getPrevUrl(content, 2)})`"
+            @click="handleTemplateClick(content)")
 </template>
 
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
 import NuHeader from '@/components/NuHeader.vue'
-import { ITemplate } from '@/interfaces/template'
+import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
 import generalUtils from '@/utils/generalUtils'
 import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
@@ -102,7 +110,14 @@ export default defineComponent({
       isMobileSize: false,
       isPCSize: false,
       isTemplateReady: false,
-      selectedTags: [] as string[]
+      selectedTags: [] as string[],
+      contentIds: [] as IContentTemplate[],
+      groupId: '',
+      showTemplateList: false,
+      matchedThemes: [] as Itheme[],
+      selectedTheme: undefined as Itheme | undefined,
+      modalTemplate: {} as ITemplate,
+      contentBuffer: undefined as IContentTemplate | undefined,
       // contentIds: [] as IContentTemplate[],
       // groupId: '',
       // modalTemplate: {} as ITemplate,
@@ -164,8 +179,12 @@ export default defineComponent({
       isLogin: 'user/isLogin',
       inBrowserMode: 'webView/getInBrowserMode',
       _themeList: 'getShuffledThemesIds',
-      themes: 'getMainHiddenThemes'
+      themes: 'getMainHiddenThemes',
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
+    statusbarHeight (): string {
+      return `${this.userInfo.statusBarHeight ?? 0}px`
+    },
     ...mapState({
       isMobile: 'isMobile',
       _homeTags: 'homeTags'
@@ -317,18 +336,69 @@ export default defineComponent({
           content_ids: [template.id]
         })
       } else {
-        // this.groupId = template.group_id ?? ''
-        // this.contentIds = template.content_ids
-        // this.modalTemplate = template
-        // if (this.isMobile) {
-        //   this.modal = 'mobile-pages'
-        // } else {
-        //   this.modal = 'pages'
-        // }
+        this.groupId = template.group_id ?? ''
+        this.contentIds = template.content_ids
+        this.modalTemplate = template
+        this.showTemplateList = true
+      }
+    },
+    handleTemplateClick(content: IContentTemplate) {
+      if (!paymentUtils.checkProGroupTemplate(this.modalTemplate, content)) return
+      this.matchedThemes = this.themes.filter((theme: Itheme) => content.themes.includes(theme.id.toString()))
+      const allSameSize = this.matchedThemes.reduce<[boolean, number | undefined, number | undefined]>((acc, theme) => {
+        return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
+      }, [true, undefined, undefined])[0]
+      if (content.themes.length > 1 && !allSameSize) {
+        if (this.isMobileSize) {
+          const route = this.$router.resolve({
+            name: 'Editor',
+            query: {
+              type: 'new-design-template',
+              design_id: content.id,
+              width: this.matchedThemes[0].width.toString(),
+              height: this.matchedThemes[0].height.toString(),
+              group_id: this.groupId
+            }
+          })
+          this.openTemplate(route.href)
+          generalUtils.fbq('track', 'AddToWishlist', {
+            content_ids: [content.id]
+          })
+          return
+        }
+        this.contentBuffer = content
+        this.selectedTheme = undefined
+      } else {
+        const matchedTheme = this.themes.find((theme: Itheme) => theme.id.toString() === content.themes[0])
+        const format = matchedTheme ? {
+          width: matchedTheme.width.toString(),
+          height: matchedTheme.height.toString()
+        } : {
+          width: content.width.toString(),
+          height: content.height.toString()
+        }
+        const route = this.$router.resolve({
+          name: 'Editor',
+          query: {
+            type: 'new-design-template',
+            design_id: content.id,
+            width: format.width,
+            height: format.height,
+            group_id: this.groupId
+          }
+        })
+        this.openTemplate(route.href)
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [content.id]
+        })
       }
     },
     openTemplate(url: string) {
       picWVUtils.openOrGoto(url)
+    },
+    getPrevUrl(content?: IContentTemplate, scale?: number): string {
+      if (!content) return ''
+      return templateCenterUtils.getPrevUrl(content, scale)
     }
   }
 })
@@ -406,6 +476,54 @@ export default defineComponent({
     padding: 12px 0px;
     margin: 0px;
     background-color: white;
+  }
+}
+
+.template-list {
+  position: fixed;
+  top: calc(#{$header-height} + v-bind(statusbarHeight) - 2px);
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #ffffff;
+  z-index: setZindex("popup");
+  &__close {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: calc((#{($header-height)}  + v-bind(statusbarHeight)) / 2);
+    right: 55px;
+    width: 25px;
+    height: 25px;
+    z-index: setZindex("popup");
+    transform: translate(0%, -50%);
+    cursor: pointer;
+  }
+  &__content {
+    overflow-y: auto;
+    width: 100%;
+    height: calc(100vh - #{($header-height)} + v-bind(statusbarHeight));
+  }
+  &__gallery {
+    display: grid;
+    margin: 20px;
+    grid-gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  &__gallery-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-top: calc(100% - 2px);
+    background: white;
+    border: 1px solid setColor(gray-5);
+    box-sizing: border-box;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
   }
 }
 @media screen and (max-width: 768px) {
@@ -528,6 +646,18 @@ export default defineComponent({
       top: 259px;
       left: 1158px;
     }
+  }
+}
+
+.fade-slide {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    left: 100%;
   }
 }
 </style>
