@@ -33,7 +33,8 @@ div(class="home")
           :useScrollablePreview="!isMobile"
           :useScrollSpace="isMobile"
           :themes="themes"
-          @loadMore="handleLoadMore")
+          @loadMore="handleLoadMore"
+          @clickWaterfall="handleClickWaterfall")
       template(v-else)
         scroll-list(v-if="isLogin && inBrowserMode && !isMobile"
           type="mydesign")
@@ -54,8 +55,12 @@ div(class="home")
 import Animation from '@/components/Animation.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import { ITemplate } from '@/interfaces/template'
+import { Itheme } from '@/interfaces/theme'
 import generalUtils from '@/utils/generalUtils'
 import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
+import modalUtils from '@/utils/modalUtils'
+import paymentUtils from '@/utils/paymentUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import { defineAsyncComponent, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -258,6 +263,73 @@ export default defineComponent({
         this.isTemplateReady = true
       })
     },
+    handleClickWaterfall(template: ITemplate) {
+      if (template.group_type === 1) {
+        if (this.$isTouchDevice()) {
+          modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+          return
+        }
+        if (!paymentUtils.checkProTemplate(template)) return
+        const route = this.$router.resolve({
+          name: 'Editor',
+          query: {
+            type: 'product-page-template',
+            design_id: template.group_id,
+            themeId: template.content_ids[0].themes.join(',')
+          }
+        })
+        this.openTemplate(route.href)
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [template.group_id]
+        })
+        return
+      }
+      if (template.content_ids.length === 1) {
+        if (!paymentUtils.checkProTemplate(template)) return
+        const matchedTheme = this.themes.find((theme: Itheme) => theme.id.toString() === template.theme_id)
+        const format = matchedTheme ? {
+          width: matchedTheme.width.toString(),
+          height: matchedTheme.height.toString()
+        } : {
+          width: template.width.toString(),
+          height: template.height.toString()
+        }
+        const route = this.$router.resolve({
+          name: 'Editor',
+          query: {
+            type: 'new-design-template',
+            design_id: template.id,
+            themeId: template.content_ids[0].themes.join(','),
+            width: format.width,
+            height: format.height
+          }
+        })
+        this.openTemplate(route.href)
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [template.id]
+        })
+      } else {
+        // this.groupId = template.group_id ?? ''
+        // this.contentIds = template.content_ids
+        // this.modalTemplate = template
+        // if (this.isMobile) {
+        //   this.modal = 'mobile-pages'
+        // } else {
+        //   this.modal = 'pages'
+        // }
+      }
+    },
+    openTemplate(url: string) {
+      picWVUtils.openOrGoto(url)
+    }
   }
 })
 </script>

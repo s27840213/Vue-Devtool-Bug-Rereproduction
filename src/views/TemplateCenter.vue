@@ -348,6 +348,12 @@ export default defineComponent({
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
     }),
+    ...mapGetters({
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
+    }),
+    statusbarHeight (): number {
+      return this.userInfo.statusbarHeight
+    },
     waterfallTemplates(): ITemplate[][] {
       if (this.isPC) {
         return this.waterfallTemplatesPC
@@ -806,7 +812,7 @@ export default defineComponent({
       background-color: white;
       position: -webkit-sticky;
       position: sticky;
-      top: $header-height;
+      top: ($header-height + v-bind(statusbarHeight));
     }
     &__searchbar {
       height: 44px;
@@ -1016,7 +1022,7 @@ export default defineComponent({
   }
   &__mobile-multi {
     position: fixed;
-    top: $header-height;
+    top: ($header-height + v-bind(statusbarHeight));
     left: 0;
     width: 100vw;
     height: 100vh;
@@ -1027,7 +1033,7 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: center;
-      top: calc(#{$header-height} / 2);
+      top: calc(#{($header-height + v-bind(statusbarHeight))} / 2);
       right: 55px;
       width: 25px;
       height: 25px;
@@ -1038,7 +1044,7 @@ export default defineComponent({
     &__content {
       overflow-y: auto;
       width: 100%;
-      height: calc(100vh - #{$header-height});
+      height: calc(100vh - #{($header-height + v-bind(statusbarHeight))});
     }
     &__gallery {
       display: grid;
