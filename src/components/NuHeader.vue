@@ -67,6 +67,11 @@ div(class="nu-header" :style="rootStyles")
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
           @click="closeSearchPage")
+        svg-icon(v-if="showCloseIcon"
+          :iconName="'close'"
+          :iconColor="'gray-3'"
+          :iconWidth="'25px'"
+          @click="()=> $emit('close')")
   slot
   div(v-if="isShowSearchPage"
     class="nu-header__search-mobile")
@@ -103,9 +108,13 @@ export default defineComponent({
     },
     noNavigation: {
       type: Boolean
+    },
+    showCloseIcon: {
+      type: Boolean,
+      default: true
     }
   },
-  emits: ['search'],
+  emits: ['search', 'close'],
   data() {
     return {
       isAccountPopup: false,
