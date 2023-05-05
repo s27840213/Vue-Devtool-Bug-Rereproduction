@@ -247,8 +247,10 @@ export default defineComponent({
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
-      if (effect.key === 'custom-fill-img' && !this.getStyleImg(category)) {
-        this.chooseImg('customImg')
+
+      const chooseImgkey = effect.options.find(op => op.type === 'img')?.key ?? ''
+      if (chooseImgkey && !this.getStyleImg(category)) {
+        this.chooseImg(chooseImgkey)
       }
     },
     async handleSelectInput(key: string, newVal: string) {
@@ -271,16 +273,19 @@ export default defineComponent({
         if (!focus) this.recordChange()
       }
     },
-    handleColorUpdate(color: string): void {
-      this.setEffect({ effect: { [this.colorTarget]: color } })
+    replaceImg(key: string) {
+      return (img: IAssetPhoto | IPhotoItem) => {
+        this.setEffect({ effect: { [key]: img } })
+        this.recordChange()
+      }
     },
     chooseImg(key: string) {
       popupUtils.openPopup('replace', undefined, {
-        selectImg: (img: IAssetPhoto|IPhotoItem) => {
-          this.setEffect({ effect: { [key]: img } })
-          this.recordChange()
-        }
+        replaceImg: this.replaceImg(key)
       })
+    },
+    handleColorUpdate(color: string): void {
+      this.setEffect({ effect: { [this.colorTarget]: color } })
     },
     colorParser(color: string) {
       return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
@@ -341,7 +346,7 @@ export default defineComponent({
       top: -4px;
     }
     &:not(.selected):hover {
-      border-color: setColor(blue-1, 0.5);
+      border-color: setColor(blue-hover);
     }
     &.selected {
       border-color: setColor(blue-1);
@@ -395,7 +400,7 @@ export default defineComponent({
     &--select {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 4px 7.25px;
+      gap: 8px 7.25px;
       width: 100%;
       > div {
         position: relative;

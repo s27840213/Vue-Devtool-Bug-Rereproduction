@@ -9,6 +9,7 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import { find, omit } from 'lodash'
+import { InjectionKey } from 'vue'
 
 class TextFill {
   effects = {} as Record<string, Record<string, unknown>>
@@ -266,3 +267,4 @@ class TextFill {
 }
 
 export default new TextFill()
+export const replaceImgInject: InjectionKey<(img: IPhotoItem | IAssetPhoto) => void> = Symbol('replaceImg')

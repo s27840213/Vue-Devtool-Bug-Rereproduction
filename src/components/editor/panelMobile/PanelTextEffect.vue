@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="panel-text-effect")
-  //- To choose effect, ex: hollow, splice or echo.
+  //- To choose effect category and effect.
   tabs(v-if="state === 'effects'"
       :tabs="textEffects.map(t => t.label)"
       v-model="currTabIndex" theme="light")
@@ -9,7 +9,7 @@ div(class="panel-text-effect")
     div(v-for="effect in effectList"
         :key="`${currCategoryName}-${effect.key}`"
         :class="{ 'selected': currEffect?.key === effect.key }"
-        @click="onEffectClick(effect)")
+        @click="onEffectClick(currCategory, effect)")
       svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
               :iconName="effectIcon(currCategory, effect).name"
               :iconWidth="effectIcon(currCategory, effect).size"
@@ -21,7 +21,7 @@ div(class="panel-text-effect")
       div(v-if="currEffect?.key === effect.key && effect.key !== 'none'"
           class="panel-text-effect__effects--more")
         svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
-  //- To set effect optoin, ex: distance, color.
+  //- To set effect optoin.
   div(v-if="state === 'options' && currEffect !== null"
       class="w-full panel-text-effect__form")
     span(class="panel-text-effect__effect-name") {{currEffect.label}}
@@ -108,7 +108,7 @@ export default defineComponent({
       default: [] as string[]
     }
   },
-  emits: ['pushHistory', 'openExtraColorModal'],
+  emits: ['pushHistory', 'openExtraColorModal', 'openExtraPanelReplace'],
   data() {
     return {
     }
@@ -157,17 +157,26 @@ export default defineComponent({
         textBgUtils.setColorKey(key)
       }
     },
-    async onEffectClick(effect: IEffect): Promise<void> {
+    async onEffectClick(category: IEffectCategory, effect: IEffect): Promise<void> {
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      const chooseImgkey = effect.options.find(op => op.type === 'img')?.key ?? ''
+
       if (effect.key !== this.currentStyle.name) {
         await this.setEffect({ effectName: effect.key })
         this.recordChange()
+        if (chooseImgkey && !this.getStyleImg(category)) {
+          this.chooseImg(chooseImgkey)
+        }
       } else if (effect.key !== 'none') {
-        this.$emit('pushHistory', this.currCategoryName)
+        if (chooseImgkey && !this.getStyleImg(category)) {
+          this.chooseImg(chooseImgkey)
+          return
+        }
+        this.$emit('pushHistory', effect.key)
       }
     },
     chooseImg(key: string) {
-      console.log('chooseImg', key)
+      this.$emit('openExtraPanelReplace', this.replaceImg(key))
     },
   }
 })
@@ -219,6 +228,7 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
     gap: 16px;
+    margin: 0 15px 15px 15px;
     overflow: auto;
     > div {
       display: flex;
@@ -264,6 +274,7 @@ export default defineComponent({
     @include no-scrollbar;
     display: grid;
     gap: 10px;
+    margin: 0 15px 15px 15px;
     overflow-y: scroll;
   }
 
@@ -288,10 +299,11 @@ export default defineComponent({
       align-items: center;
       box-sizing: border-box;
       height: 42px;
+      border: 2px solid transparent;
       border-radius: 5px;
       background-color: setColor(gray-5);
       &.selected {
-        border-color: setColor(blue-1);;
+        border-color: setColor(blue-1);
       }
       > svg {
         margin-right: 8px;

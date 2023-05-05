@@ -35,7 +35,7 @@ export default defineComponent({
     clickOutside: vClickOutside.directive
   },
   props: {
-    selectImg: {
+    replaceImg: {
       type: Function as PropType<(img: IAssetPhoto|IPhotoItem) => void>,
       required: true,
     }
@@ -123,7 +123,7 @@ export default defineComponent({
     },
     clickImg(item: IPopupReplaceItem) {
       if (!item.img) return
-      this.selectImg(item.img)
+      this.replaceImg(item.img)
       this.closePopup()
     },
     vcoConfig() {

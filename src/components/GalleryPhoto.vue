@@ -45,7 +45,8 @@ import mouseUtils from '@/utils/mouseUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { PropType, defineComponent } from 'vue'
+import { replaceImgInject } from '@/utils/textFillUtils'
+import { defineComponent, inject, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -82,7 +83,8 @@ export default defineComponent({
   },
   data() {
     return {
-      dragUtils: new DragUtils()
+      dragUtils: new DragUtils(),
+      replaceImgInject: inject(replaceImgInject),
     }
   },
   computed: {
@@ -210,7 +212,9 @@ export default defineComponent({
       })
     },
     onClick(e: MouseEvent, photo: IAssetPhoto) {
-      if (this.$isTouchDevice() && this.mobilePanel === 'replace') {
+      if (this.replaceImgInject) {
+        this.replaceImgInject(photo)
+      } else if (this.$isTouchDevice() && this.mobilePanel === 'replace') { // Replace frame and img frame.
         this.replaceImg(photo)
       } else if (this.multiSelectMode === 'on' || this.hasCheckedAssets) {
         this.modifyCheckedAssets(photo.assetIndex as number)

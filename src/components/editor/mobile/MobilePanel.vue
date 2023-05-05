@@ -91,6 +91,7 @@ import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
+import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -105,10 +106,13 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import picWVUtils from '@/utils/picWVUtils'
+import { replaceImgInject } from '@/utils/textFillUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent, PropType } from 'vue'
+import { computed, defineComponent, PropType, provide } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+
+type IExtraPanelName = '' | 'color' | 'replace'
 
 export default defineComponent({
   name: 'mobile-panel',
@@ -171,7 +175,8 @@ export default defineComponent({
       // If fixSize is true, panelDragHeight take no effect.
       panelDragHeight: 0,
       lastPointerY: 0,
-      showExtraColorPanel: false,
+      extraPanel: '' as IExtraPanelName,
+      replaceImg: (() => { /**/ }) as (img: IAssetPhoto | IPhotoItem) => void,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
@@ -184,6 +189,10 @@ export default defineComponent({
       // }, 100, { trailing: false }),
       resizeObserver: null as unknown as ResizeObserver
     }
+  },
+  created() {
+    // Provide props to descendant component, https://vuejs.org/guide/components/provide-inject.html
+    provide(replaceImgInject, computed(() => this.replaceImg) as unknown as (img: IPhotoItem | IAssetPhoto) => void)
   },
   computed: {
     ...mapGetters('imgControl', {
@@ -223,11 +232,11 @@ export default defineComponent({
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
         'multiple-select', 'remove-bg']
-
-      return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
+      return this.extraPanel !== '' || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list'].includes(this.currActivePanel)
+      return this.extraPanel === '' &&
+        ['brand-list', 'text-effect'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return [
@@ -246,7 +255,7 @@ export default defineComponent({
       }
     },
     halfSizeInInitState(): boolean {
-      return this.showExtraColorPanel || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
+      return this.extraPanel !== '' || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -278,7 +287,7 @@ export default defineComponent({
     },
     showLeftBtn(): boolean {
       if (this.currActivePanel === 'download' && ['polling', 'downloaded', 'setting'].includes(this.currHistory)) return false
-      return this.bgRemoveMode || (this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel))
+      return this.bgRemoveMode || (this.whiteTheme && (this.panelHistory.length > 0 || this.extraPanel))
     },
     hideDynamicComp(): boolean {
       return ['crop', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
@@ -307,18 +316,17 @@ export default defineComponent({
       return this.innerTabs.key[this.innerTabIndex]
     },
     innerTabs(): Record<string, string[]> {
+      const panelReplace = {
+        key: ['photo', 'file'],
+        label: [this.$tc('NN0002', 2), this.$tc('NN0006')]
+      }
+
+      if (this.extraPanel === 'replace') {
+        return panelReplace
+      }
       switch (this.currActivePanel) {
         case 'replace':
-          return {
-            key: [
-              'photo',
-              'file'
-            ],
-            label: [
-              this.$tc('NN0002', 2),
-              this.$tc('NN0006')
-            ]
-          }
+          return panelReplace
         default:
           return {
             key: ['']
@@ -326,25 +334,24 @@ export default defineComponent({
       }
     },
     dynamicBindIs(): string {
-      if (this.showExtraColorPanel) {
-        return 'panel-color'
+      switch (this.extraPanel) {
+        case 'color':
+          return 'panel-color'
+        case 'replace':
+          return `panel-${this.innerTab}`
       }
 
-      const defaultVal = `panel-${this.currActivePanel}`
-
       switch (this.currActivePanel) {
-        case 'replace': {
+        case 'replace':
           return `panel-${this.innerTab}`
-        }
         case 'none':
           return ''
-        default: {
-          return defaultVal
-        }
+        default:
+          return `panel-${this.currActivePanel}`
       }
     },
     dynamicBindProps(): { [index: string]: any } {
-      if (this.showExtraColorPanel) {
+      if (this.extraPanel === 'color') {
         return {
           currEvent: this.extraColorEvent,
           panelHistory: this.panelHistory
@@ -410,9 +417,14 @@ export default defineComponent({
         this.panelHistory.push(history)
       }
       const openExtraColorModal = (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-        this.showExtraColorPanel = true
+        this.extraPanel = 'color'
         this.extraColorEvent = colorEventType
         this.panelHistory.push(initColorPanelType)
+      }
+      const openExtraPanelReplace = (replaceImg: (img: IAssetPhoto | IPhotoItem) => void) => {
+        this.extraPanel = 'replace'
+        this.replaceImg = replaceImg
+        this.panelHistory.push('replace')
       }
       switch (this.currActivePanel) {
         case 'color':
@@ -421,6 +433,7 @@ export default defineComponent({
         case 'background':
           return { openExtraColorModal }
         case 'text-effect':
+          return { pushHistory, openExtraColorModal, openExtraPanelReplace }
         case 'photo-shadow':
           return { pushHistory, openExtraColorModal }
         case 'download':
@@ -458,16 +471,22 @@ export default defineComponent({
       }
 
       const colorHandler = () => {
-        if (this.showExtraColorPanel || this.currActivePanel === 'color') {
+        if (this.extraPanel === 'color' || this.currActivePanel === 'color') {
           if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
             this.addRecentlyColors(colorUtils.currColor)
           }
         }
       }
-      if (this.showExtraColorPanel) {
+      if (this.extraPanel === 'color') {
         return () => {
           colorHandler()
-          this.showExtraColorPanel = false
+          this.extraPanel = ''
+          this.panelHistory.pop()
+        }
+      }
+      if (this.extraPanel === 'replace') {
+        return () => {
+          this.extraPanel = ''
           this.panelHistory.pop()
         }
       }
@@ -539,7 +558,7 @@ export default defineComponent({
             break
           }
         }
-        if (this.showExtraColorPanel) {
+        if (this.extraPanel === 'color') {
           this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
@@ -563,7 +582,7 @@ export default defineComponent({
     },
     showMobilePanel(newVal) {
       if (!newVal) {
-        this.showExtraColorPanel = false
+        this.extraPanel = ''
       }
     }
   },

@@ -46,6 +46,7 @@ declare module '@vue/runtime-core' {
     $eventBus: Emitter<Record<EventType, unknown>>
   }
 }
+app.config.unwrapInjectedRef = true
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 app.config.globalProperties.$isTablet = () => generalUtils.isTablet()
 app.config.globalProperties.$eventBus = eventBus
