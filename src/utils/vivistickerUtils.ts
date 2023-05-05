@@ -5,10 +5,11 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
+import constantData, { IStickerVideoUrls } from '@/utils/constantData'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import colorUtils from './colorUtils'
@@ -67,6 +68,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
   hasCopied = false
   everEntersDebugMode = false
+  tutorialFlags = {} as { [key: string]: boolean }
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
@@ -242,13 +244,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         return message.key === 'tempDesign'
     }
     return false
-  }
-
-  sendToIOS(messageType: string, message: any) {
-    if (messageType === 'SCREENSHOT' && message.action !== 'editorCopy') {
-      this.handleIos16Video()
-    }
-    super.sendToIOS(messageType, message)
   }
 
   appToast(msg: string) {
@@ -1117,6 +1112,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     await this.setState('everEntersDebugMode', { value: this.everEntersDebugMode })
   }
 
+  async fetchTutorialFlags() {
+    this.tutorialFlags = (await this.getState('tutorialFlags')) ?? {}
+  }
+
+  async updateTutorialFlags(updateItem: { [key: string]: boolean }) {
+    Object.assign(this.tutorialFlags, updateItem)
+    await this.setState('tutorialFlags', this.tutorialFlags)
+  }
+
   openPayment(target?: IViviStickerProFeatures) {
     if (this.isPaymentDisabled) {
       this.showUpdateModal()
@@ -1182,7 +1186,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       })
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
-    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
+    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
   }
 
   async registerSticker() {
@@ -1221,6 +1225,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return loadedFonts[face] ?? false
   }
 
+  openFullPageVideo(key: keyof IStickerVideoUrls, { delayedClose = undefined, mediaPos = 'top' }: Pick<IFullPageVideoConfigParams, 'delayedClose' | 'mediaPos'> = {}) {
+    const stickerVideoUrls = constantData.stickerVideoUrls()
+    store.commit('vivisticker/SET_fullPageConfig', {
+      type: 'video',
+      params: {
+        video: stickerVideoUrls[key].video,
+        thumbnail: stickerVideoUrls[key].thumbnail,
+        delayedClose,
+        mediaPos
+      }
+    })
+  }
+
   handleIos16Video() {
     if (!this.hasCopied && this.checkOSVersion('16.0')) {
       this.hasCopied = true
@@ -1228,10 +1245,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
-          store.commit('vivisticker/SET_fullPageConfig', {
-            type: 'iOS16Video',
-            params: { fromModal: true }
-          })
+          this.openFullPageVideo('iOS', { delayedClose: 5000 })
           modalUtils.clearModalInfo()
         }
       }, undefined, {

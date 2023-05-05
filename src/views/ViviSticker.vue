@@ -77,7 +77,11 @@ export default defineComponent({
     textUtils.loadDefaultFonts()
     vivistickerUtils.registerCallbacks('vvstk')
     if (this.userInfo.isFirstOpen) {
-      this.setShowTutorial(true)
+      if (this.$i18n.locale === 'us') {
+        vivistickerUtils.openFullPageVideo('tutorial1', { delayedClose: 5000 })
+      } else {
+        this.setShowTutorial(true)
+      }
     }
   },
   async mounted() {
@@ -235,7 +239,8 @@ export default defineComponent({
       setCurrActiveTab: 'vivisticker/SET_currActiveTab',
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
-      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
+      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
+      setFullPageConfig: 'vivisticker/SET_fullPageConfig',
     }),
     headerStyles() {
       return {
@@ -275,6 +280,22 @@ export default defineComponent({
       this.setIsInMyDesign(false)
       this.setIsInSelectionMode(false)
       this.setCurrActiveTab(panelType)
+      if (this.$i18n.locale === 'us') {
+        switch (panelType) {
+          case 'text':
+            if (!vivistickerUtils.tutorialFlags.text) {
+              vivistickerUtils.openFullPageVideo('tutorial2', { delayedClose: 5000 })
+              vivistickerUtils.updateTutorialFlags({ text: true })
+            }
+            break
+          case 'background':
+            if (!vivistickerUtils.tutorialFlags.background) {
+              vivistickerUtils.openFullPageVideo('tutorial4', { delayedClose: 5000 })
+              vivistickerUtils.updateTutorialFlags({ background: true })
+            }
+            break
+        }
+      }
       if (this.currActivePanel === 'color-picker') {
         vivistickerUtils.setHasNewBgColor(false)
         this.switchTab('none')

@@ -74,6 +74,7 @@ export default defineComponent({
       isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
+      editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorBg: 'vivisticker/getEditorBg',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
@@ -298,7 +299,7 @@ export default defineComponent({
                 msg: `${this.$t('STK0019')}`
               }
             )
-          } else {
+          } else if (['object', 'objectGroup'].includes(this.editorType)) {
             vivistickerUtils.handleIos16Video()
           }
         })
