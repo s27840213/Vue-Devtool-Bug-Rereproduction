@@ -7,6 +7,7 @@ export interface IUserInfoV1_0 {
   locale: string,
   isFirstOpen: boolean,
   editorBg: string,
+  modelName: string
 }
 
 export interface IUserInfoV1_26 extends IUserInfoV1_0 {

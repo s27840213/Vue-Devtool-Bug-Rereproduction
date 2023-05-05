@@ -78,7 +78,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     locale: 'us',
     isFirstOpen: false,
     editorBg: '',
-    osVer: '100.0'
+    osVer: '100.0',
+    modelName: '',
   }
 
   ROUTER_CALLBACKS = [
@@ -597,8 +598,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return userInfo
   }
 
-  loginResult(info: IUserInfo) {
-    store.commit('vivisticker/SET_userInfo', info)
+  loginResult(info: Omit<IUserInfo, 'modelName'> & { modelName?: string }) {
+    // input info may not contain modelName
+    if (info.modelName === undefined) { // if modelName isn't included, set '' as default
+      info.modelName = ''
+    }
+    // after previous handle, info is assured to have modelName
+    store.commit('vivisticker/SET_userInfo', info as IUserInfo)
     this.handleCallback('login')
   }
 

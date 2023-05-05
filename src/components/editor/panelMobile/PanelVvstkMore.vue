@@ -17,7 +17,7 @@ div(class="panel-vvstk-more")
         svg-icon(iconName="vivisticker_version"
                   iconWidth="24px"
                   iconColor="gray-3")
-      span(class="panel-vvstk-more__option-title version") {{ `${appVersion}/${iOSVer} ${buildNumber}${domain} ${hostId}` }}
+      span(class="panel-vvstk-more__option-title version") {{ `${userInfo.appVer}/${userInfo.osVer}/${userInfo.modelName} ${buildNumber}${domain} ${hostId}` }}
   template(v-else)
     div(class="panel-vvstk-more__options")
       div(v-for="option in options"
@@ -188,12 +188,6 @@ export default defineComponent({
         default:
           return []
       }
-    },
-    appVersion(): string {
-      return this.userInfo.appVer
-    },
-    iOSVer(): string {
-      return this.userInfo.osVer
     },
     buildNumber(): string {
       const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
