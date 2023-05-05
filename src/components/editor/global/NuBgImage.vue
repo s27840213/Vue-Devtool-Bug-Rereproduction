@@ -250,9 +250,9 @@ export default defineComponent({
       const elms = []
       if (adjust.halation) {
         const position = {
-          width: width / 2 * this.contentScaleRatio,
-          x: width / 2 * this.contentScaleRatio,
-          y: height / 2 * this.contentScaleRatio
+          width: width / 2 * this.contentScaleRatio * this.scaleRatio * 0.01,
+          x: width / 2 * this.contentScaleRatio * this.scaleRatio * 0.01,
+          y: height / 2 * this.contentScaleRatio * this.scaleRatio * 0.01
         }
         elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
       }

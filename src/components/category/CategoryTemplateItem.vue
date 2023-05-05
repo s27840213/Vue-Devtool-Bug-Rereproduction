@@ -130,6 +130,10 @@ export default defineComponent({
       const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === unit
       const cb = this.groupItem ? (resize?: any) => {
         assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
+          .then(() => {
+            editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+            this.$store.commit('SET_pageScaleRatio', 100)
+          })
       } : (resize?: any) => {
         assetUtils.addAsset(this.item as any, resize)
           .then(() => {

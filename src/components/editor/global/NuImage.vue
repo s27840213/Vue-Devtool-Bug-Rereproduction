@@ -1045,9 +1045,9 @@ export default defineComponent({
         return []
       }
       const position = {
-        width: width / 2 * this.contentScaleRatio,
-        x: width / 2 * this.contentScaleRatio,
-        y: height / 2 * this.contentScaleRatio
+        width: width / 2 * this.contentScaleRatio * this.pageScaleRatio * 0.01,
+        x: width / 2 * this.contentScaleRatio * this.pageScaleRatio * 0.01,
+        y: height / 2 * this.contentScaleRatio * this.pageScaleRatio * 0.01
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },

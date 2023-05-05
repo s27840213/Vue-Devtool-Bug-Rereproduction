@@ -233,7 +233,8 @@ export default defineComponent({
       MappingUtils,
       FrameUtils,
       controlPoints: (this.$isTouchDevice()
-        ? ControlUtils.getControlPoints(6, 25)
+        ? ControlUtils.getControlPoints(8, 25)
+        // ? ControlUtils.getControlPoints(6, 25)
         : ControlUtils.getControlPoints(4, 25)) as ICP,
       isControlling: false,
       isLineEndMoving: false,
@@ -282,9 +283,6 @@ export default defineComponent({
   computed: {
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId']),
-    ...mapState('mobileEditor', {
-      isPinchingEditor: 'isPinchingEditor'
-    }),
     ...mapState(['currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
@@ -540,6 +538,7 @@ export default defineComponent({
       const resizerStyle = { ...resizer }
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
+      console.log(resizer)
       const isHorizon = width > height
       const scalerOffset = this.$isTouchDevice() ? 36 : 20
       const HW = {
@@ -701,7 +700,7 @@ export default defineComponent({
       return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${this.contentScaleRatio})`
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
-      if (eventUtils.checkIsMultiTouch(event) || this.isPinchingEditor) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
 
@@ -742,7 +741,7 @@ export default defineComponent({
       window.addEventListener('keydown', this.handleScaleOffset)
     },
     scaling(event: MouseEvent | TouchEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       if (generalUtils.getEventType(event) !== 'touch') {
@@ -991,7 +990,7 @@ export default defineComponent({
       this.snapUtils.event.emit('clearSnapLines')
     },
     resizeStart(event: MouseEvent, type: string) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       if (eventUtils.checkIsMultiTouch(event)) {
@@ -1069,7 +1068,7 @@ export default defineComponent({
       }
     },
     resizing(event: MouseEvent | TouchEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       event.preventDefault()
@@ -1203,7 +1202,7 @@ export default defineComponent({
       this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent | PointerEvent, index = -1) {
-      if (eventUtils.checkIsMultiTouch(event) || this.isPinchingEditor) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
@@ -1235,7 +1234,7 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       if (!this.config.moved) {
@@ -1633,6 +1632,12 @@ export default defineComponent({
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
+    ctrlMiddleware(): boolean {
+      if (this.$isTouchDevice()) {
+        if (this.$store.getters['mobileEditor/getIsPinchingEditor']) return true
+      }
+      return false
+    }
   }
 })
 </script>
