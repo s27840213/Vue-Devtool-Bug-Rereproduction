@@ -40,7 +40,7 @@ export default defineComponent({
     }
   },
   created() {
-    const unwatchElScrollable = this.$watch('elScrollable', (newVal) => {
+    const unwatchElScrollable = this.$watch('elScrollable', (newVal: HTMLElement) => {
       if (newVal) {
         this.atMainContent = new AnyTouch(newVal, { preventDefault: false })
         this.atMainContent.on('panstart', (e: AnyTouchEvent) => {
@@ -55,10 +55,9 @@ export default defineComponent({
         this.atMainContent.on('panend', (e: AnyTouchEvent) => {
           this.isPan = false
         })
-        // eslint-disable-next-line vue/no-mutating-props
-        newVal.onscroll = (e: Event) => {
+        newVal.addEventListener('scroll', (e: Event) => {
           this.handleMainContentScroll()
-        }
+        }, { passive: true })
         unwatchElScrollable()
       }
     })
@@ -76,8 +75,7 @@ export default defineComponent({
       this.atMainContent.off('pandown')
       this.atMainContent.off('panend')
     }
-    // eslint-disable-next-line vue/no-mutating-props
-    if (this.elScrollable) this.elScrollable.onscroll = null
+    if (this.elScrollable) this.elScrollable.removeEventListener('scroll', this.handleMainContentScroll)
   },
   watch: {
     scrollOrResize() {
