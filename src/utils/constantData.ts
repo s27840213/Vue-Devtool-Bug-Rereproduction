@@ -1198,6 +1198,7 @@ class ConstantData {
     const tutorialPostFix = `${i18n.global.locale}`
     const videoFileName = '.mp4'
     const thumbnailFileName = '_thumb.jpg'
+    const verUni = store.getters['user/getVerUni']
     const seeds = {
       iOS: `${path}${iOS16PostFix}`,
       tutorial1: `${path}${tutorialPostFix}-01-copy_paste`,
@@ -1209,13 +1210,13 @@ class ConstantData {
     for (const [key, value] of Object.entries(seeds) as [keyof typeof seeds, string][]) {
       if (i18n.global.locale === 'us') {
         res[key] = {
-          video: `${value}${key === 'iOS' ? '_v2' : '-v2'}${videoFileName}`,
-          thumbnail: `${value}${key === 'iOS' ? '_v2' : '-v2'}${thumbnailFileName}`
+          video: `${value}${key === 'iOS' ? '_v2' : '-v2'}${videoFileName}?ver=${verUni}`,
+          thumbnail: `${value}${key === 'iOS' ? '_v2' : '-v2'}${thumbnailFileName}?ver=${verUni}`
         }
       } else {
         res[key] = {
-          video: `${value}${videoFileName}`,
-          thumbnail: `${value}${thumbnailFileName}`
+          video: `${value}${videoFileName}?ver=${verUni}`,
+          thumbnail: `${value}${thumbnailFileName}?ver=${verUni}`
         }
       }
     }
