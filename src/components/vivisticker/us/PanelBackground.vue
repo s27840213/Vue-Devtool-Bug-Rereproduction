@@ -3,14 +3,14 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
   div(v-show="!isInCategory" class="panel-bg__nav" :style="navStyles")
     template(v-if="!isInCategory")
       template(v-if="isShowSearchBar && showImageTab")
-        search-bar(class="panel-bg__nav__searchbar"
+        search-bar(class="panel-bg__nav__searchbar" ref="searchbar"
           :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
           clear
           :defaultKeyword="keywordLabel"
           vivisticker="dark"
           :color="{close: 'black-5', search: 'black-5'}"
           @search="handleSearch")
-        Nubtn(theme="secondary" size="sm" @click="handleCancel" :style="{height: 'fit-content', backgroundColor: '#D3D3D3', borderRadius: '10px', padding: '8px 8px'}") {{ "Cancel" }}
+        div(class="panel-bg__nav__btn-cancel body-SM" @click="handleCancel") {{ "Cancel" }}
       template(v-else)
         div(v-show="showImageTab" class="panel-bg__nav__icon")
           svg-icon(class="pointer"
@@ -28,7 +28,7 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
             iconName="search"
             iconColor="white"
             iconWidth="24px"
-            @click="isShowSearchBar = true")
+            @click="showSearchBar")
   div(v-show="showImageTab" class="panel-bg__list-wrapper")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(v-for="item in categoryListArray"
@@ -127,15 +127,11 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 import { ICategoryItem, IListServiceContentData } from '@/interfaces/api'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import Nubtn from '../../global/Nubtn.vue'
 import PanelBackground from '../PanelBackground.vue'
 
 export default defineComponent({
   name: 'panel-background-us',
   extends: PanelBackground,
-  components: {
-    Nubtn
-  },
   data() {
     return {
       isShowSearchBar: false
@@ -177,6 +173,12 @@ export default defineComponent({
       vivistickerUtils.setShowAllRecently('background', true)
       vivistickerUtils.setIsInCategory('background', true)
     },
+    showSearchBar() {
+      this.isShowSearchBar = true
+      this.$nextTick(() => {
+        (this.$refs.searchbar as any).focus()
+      })
+    },
   }
 })
 </script>
@@ -207,6 +209,10 @@ export default defineComponent({
     }
     &__searchbar {
       width: 100%;
+    }
+    &__btn-cancel {
+      padding: 8px;
+      color: setColor(gray-7)
     }
   }
   &__list-wrapper {

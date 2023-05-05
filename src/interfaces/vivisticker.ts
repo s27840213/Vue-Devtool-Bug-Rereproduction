@@ -1,3 +1,4 @@
+import { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { IPage } from './page'
 
 export interface IUserInfoV1_0 {
@@ -7,6 +8,7 @@ export interface IUserInfoV1_0 {
   locale: string,
   isFirstOpen: boolean,
   editorBg: string,
+  modelName: string
 }
 
 export interface IUserInfoV1_26 extends IUserInfoV1_0 {
@@ -27,6 +29,45 @@ export function isV1_26(userInfo: IUserInfo): userInfo is IUserInfoV1_26 {
 export interface IUserSettings {
   autoSave: boolean
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IFullPageNoneConfigParams { }
+
+export interface IFullPageNoneConfig {
+  type: 'none',
+  params: IFullPageNoneConfigParams
+}
+
+export interface IFullPageVideoConfigParams {
+  video: string,
+  thumbnail: string,
+  delayedClose?: number, // -1 means close btn only shows after video is finished.
+  mediaPos?: 'top' | 'bottom' | 'center',
+}
+
+export interface IFullPageVideoConfig {
+  type: 'video',
+  params: IFullPageVideoConfigParams
+}
+
+export interface IFullPagePaymentConfigParams {
+  target?: IViviStickerProFeatures
+}
+
+export interface IFullPagePaymentConfig {
+  type: 'payment',
+  params: IFullPagePaymentConfigParams
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IFullPageWelcomeConfigParams { }
+
+export interface IFullPageWelcomeConfig {
+  type: 'welcome',
+  params: IFullPageWelcomeConfigParams
+}
+
+export type IFullPageConfig = IFullPageNoneConfig | IFullPageVideoConfig | IFullPagePaymentConfig | IFullPageWelcomeConfig
 
 export interface ITempDesign {
   pages: Array<IPage>,

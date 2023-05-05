@@ -60,6 +60,7 @@ export default defineComponent({
         return
       }
       if (this.item.assetInfo.isFrame) {
+        if (!vivistickerUtils.checkPro(this.item.assetInfo, 'frame')) return
         vivistickerUtils.fetchMyDesign(this.item).then(data => {
           if (vivistickerUtils.checkForEmptyFrame(data.pages)) {
             // handle Dialog and File-selector
@@ -81,6 +82,7 @@ export default defineComponent({
           }
         })
       } else {
+        if (!vivistickerUtils.checkPro(this.item.assetInfo, 'object')) return
         vivistickerUtils.fetchMyDesign(this.item).then(data => {
           const pages = generalUtils.deepCopy(data.pages)
           vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]))

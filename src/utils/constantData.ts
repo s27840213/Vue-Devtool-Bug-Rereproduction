@@ -64,6 +64,14 @@ export type IHeaderL1 = {
   content?: IHeaderL2[]
 }
 
+export interface IStickerVideoUrls {
+  iOS: { video: string, thumbnail: string },
+  tutorial1: { video: string, thumbnail: string },
+  tutorial2: { video: string, thumbnail: string },
+  tutorial3: { video: string, thumbnail: string },
+  tutorial4: { video: string, thumbnail: string },
+}
+
 export enum DeviceType {
   iPhone,
   iPad,
@@ -1136,6 +1144,83 @@ class ConstantData {
       { value: 'Wisconsin', label: 'Wisconsin' },
       { value: 'Wyoming', label: 'Wyoming' }
     ]
+  }
+
+  stickerTutorialSteps(): { title: string, description: string, video: string, btnText?: string }[] {
+    const stickerVideoUrls = this.stickerVideoUrls()
+    // TODO: after tw and jp new videos are povided, remove title and description and make btnText required.
+    return i18n.global.locale === 'us' ? [
+      {
+        title: '',
+        description: '',
+        video: stickerVideoUrls.tutorial1.video,
+        btnText: 'Next to Fonts'
+      },
+      {
+        title: '',
+        description: '',
+        video: stickerVideoUrls.tutorial2.video,
+        btnText: 'Next to Backgrounds'
+      },
+      {
+        title: '',
+        description: '',
+        video: stickerVideoUrls.tutorial4.video,
+        btnText: 'Let\'s explore'
+      }
+    ] : [
+      {
+        title: `${i18n.global.t('NN0746')}`,
+        description: `${i18n.global.t('NN0750')}`,
+        video: stickerVideoUrls.tutorial1.video
+      },
+      {
+        title: `${i18n.global.t('NN0747')}`,
+        description: `${i18n.global.t('NN0751')}`,
+        video: stickerVideoUrls.tutorial2.video
+      },
+      {
+        title: `${i18n.global.t('NN0748')}`,
+        description: `${i18n.global.t('NN0752')}`,
+        video: stickerVideoUrls.tutorial3.video
+      },
+      {
+        title: `${i18n.global.t('NN0749')}`,
+        description: `${i18n.global.t('NN0753')}`,
+        video: stickerVideoUrls.tutorial4.video
+      }
+    ]
+  }
+
+  stickerVideoUrls(): IStickerVideoUrls {
+    const path = 'https://template.vivipic.com/static/video/'
+    const iOS16PostFix = `${i18n.global.locale.toUpperCase()}_IOS16`
+    const tutorialPostFix = `${i18n.global.locale}`
+    const videoFileName = '.mp4'
+    const thumbnailFileName = '_thumb.jpg'
+    const verUni = store.getters['user/getVerUni']
+    const seeds = {
+      iOS: `${path}${iOS16PostFix}`,
+      tutorial1: `${path}${tutorialPostFix}-01-copy_paste`,
+      tutorial2: `${path}${tutorialPostFix}-02-text`,
+      tutorial3: `${path}${tutorialPostFix}-03-objects`,
+      tutorial4: `${path}${tutorialPostFix}-04-background`,
+    }
+    const res = {} as IStickerVideoUrls
+    for (const [key, value] of Object.entries(seeds) as [keyof typeof seeds, string][]) {
+      if (i18n.global.locale === 'us') {
+        res[key] = {
+          video: `${value}${key === 'iOS' ? '_v2' : '-v2'}${videoFileName}?ver=${verUni}`,
+          thumbnail: `${value}${key === 'iOS' ? '_v2' : '-v2'}${thumbnailFileName}?ver=${verUni}`
+        }
+      } else {
+        res[key] = {
+          video: `${value}${videoFileName}?ver=${verUni}`,
+          thumbnail: `${value}${thumbnailFileName}?ver=${verUni}`
+        }
+      }
+    }
+    return res as IStickerVideoUrls
   }
 }
 

@@ -13,6 +13,8 @@ div(class="panel-more")
       span(class="body-2 pointer") {{$t('NN0009')}}
     div(class="panel-more__item" @click="newDesign()")
       span(class="body-2 pointer") {{$tc('NN0072')}}
+    div(class="panel-more__item" @click="copyDesignLink()")
+      span(class="body-2 pointer") {{$tc('NN0862', {item: `${$t('NN0863')}`})}}
     hr(class="panel-more__hr")
     div(class="panel-more__item " @click="toggleBleed()")
       span(class="body-2 pointer") {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
@@ -43,6 +45,7 @@ div(class="panel-more")
 </template>
 
 <script lang="ts">
+import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
@@ -191,6 +194,12 @@ export default defineComponent({
       this.debugMode = !this.debugMode
       picWVUtils.setState('debugMode', { value: this.debugMode })
     },
+    copyDesignLink() {
+      generalUtils.copyText(window.location.href)
+        .then(() => {
+          this.$notify({ group: 'copy', text: `${this.$tc('NN0210', { content: `${this.$t('NN0863')}` })}` })
+        })
+    }
   }
 })
 </script>

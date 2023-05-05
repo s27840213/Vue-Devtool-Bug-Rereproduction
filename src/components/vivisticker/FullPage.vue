@@ -1,10 +1,15 @@
 <template lang="pug">
 div(ref="main" class="full-page relative")
-  template(v-if="fullPageType === 'iOS16Video'")
-    div(class="full-page__video")
-      video(autoplay playsinline muted loop :src="videoSource" :poster="thumbnail")
-  payment(v-if="fullPageType === 'payment'" :target="fullPageParams.target")
-  welcome(v-if="fullPageType === 'welcome'")
+  template(v-if="fullPageConfig.type === 'video'")
+    div(class="full-page__video" :class="fullPageConfig.params.mediaPos ? fullPageConfig.params.mediaPos : ''")
+      video(autoplay playsinline muted
+        :loop="fullPageConfig.params.delayedClose !== -1"
+        :src="fullPageConfig.params.video"
+        :poster="fullPageConfig.params.thumbnail"
+        @ended="handleEnded"
+        @canplay="handleVideoLoaded")
+  payment(v-if="fullPageConfig.type === 'payment'" :target="fullPageConfig.params.target")
+  welcome(v-if="fullPageConfig.type === 'welcome'")
   div(v-if="showCloseButton"
     class="full-page__close"
     @click.prevent.stop="handleClose")
@@ -14,6 +19,8 @@ div(ref="main" class="full-page relative")
 </template>
 
 <script lang="ts">
+import { IFullPageConfig } from '@/interfaces/vivisticker'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import Payment from './Payment.vue'
@@ -26,7 +33,8 @@ export default defineComponent({
   },
   data() {
     return {
-      showCloseButton: false
+      showCloseButton: false,
+      showOnVideoFinish: false
     }
   },
   mounted() {
@@ -40,16 +48,11 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters({
-      fullPageType: 'vivisticker/getFullPageType',
-      fullPageParams: 'vivisticker/getFullPageParams'
-    }),
-    videoSource(): string {
-      return `https://template.vivipic.com/static/video/${this.$i18n.locale.toUpperCase()}_IOS16.mp4`
-    },
-    thumbnail(): string {
-      return `https://template.vivipic.com/static/video/${this.$i18n.locale.toUpperCase()}_IOS16_thumb.jpg`
-    }
+    ...(mapGetters({
+      fullPageConfig: 'vivisticker/getFullPageConfig',
+    }) as {
+      fullPageConfig: () => IFullPageConfig
+    })
   },
   methods: {
     ...mapMutations({
@@ -57,14 +60,19 @@ export default defineComponent({
     }),
     initialize() {
       this.showCloseButton = false
-      switch (this.fullPageType) {
-        case 'iOS16Video':
+      this.showOnVideoFinish = false
+      switch (this.fullPageConfig.type) {
+        case 'video':
           // eslint-disable-next-line no-case-declarations
-          const fromModal = this.fullPageParams.fromModal ?? false
-          if (fromModal) {
-            setTimeout(() => {
-              this.showCloseButton = true
-            }, 5000)
+          const delayedClose = this.fullPageConfig.params.delayedClose
+          if (delayedClose !== undefined) {
+            if (delayedClose >= 0) {
+              window.setTimeout(() => {
+                this.showCloseButton = true
+              }, delayedClose)
+            } else {
+              this.showOnVideoFinish = true
+            }
           } else {
             this.showCloseButton = true
           }
@@ -75,6 +83,15 @@ export default defineComponent({
     },
     handleClose() {
       this.clearFullPageConfig()
+    },
+    handleVideoLoaded() {
+      vivistickerUtils.sendAppLoaded()
+    },
+    handleEnded() {
+      if (this.showOnVideoFinish) {
+        this.showCloseButton = true
+        this.showOnVideoFinish = false
+      }
     }
   }
 })
@@ -104,6 +121,15 @@ export default defineComponent({
     width: 100vw;
     overflow: hidden;
     background: transparent;
+    &.top > video {
+      object-position: top;
+    }
+    &.center > video {
+      object-position: center;
+    }
+    &.bottom > video {
+      object-position: bottom;
+    }
     & > video {
       width: 100%;
       height: 100%;

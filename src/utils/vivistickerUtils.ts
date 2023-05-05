@@ -5,10 +5,11 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
+import constantData, { IStickerVideoUrls } from '@/utils/constantData'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import colorUtils from './colorUtils'
@@ -67,6 +68,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
   hasCopied = false
   everEntersDebugMode = false
+  tutorialFlags = {} as { [key: string]: boolean }
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
@@ -78,7 +80,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     locale: 'us',
     isFirstOpen: false,
     editorBg: '',
-    osVer: '100.0'
+    osVer: '100.0',
+    modelName: '',
   }
 
   ROUTER_CALLBACKS = [
@@ -187,7 +190,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.STANDALONE_USER_INFO.locale = locale
   }
 
-  setDefaultPrices() {
+  setDefaultPrices(locale = 'us') {
     const defaultPrices = {
       tw: {
         currency: 'TWD',
@@ -223,7 +226,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         }
       }
     } as { [key: string]: IPrices }
-    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[this.STANDALONE_USER_INFO.locale] ?? defaultPrices.us })
+    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[locale] ?? defaultPrices.us })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
@@ -241,13 +244,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         return message.key === 'tempDesign'
     }
     return false
-  }
-
-  sendToIOS(messageType: string, message: any) {
-    if (messageType === 'SCREENSHOT' && message.action !== 'editorCopy') {
-      this.handleIos16Video()
-    }
-    super.sendToIOS(messageType, message)
   }
 
   appToast(msg: string) {
@@ -597,8 +593,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return userInfo
   }
 
-  loginResult(info: IUserInfo) {
-    store.commit('vivisticker/SET_userInfo', info)
+  loginResult(info: Omit<IUserInfo, 'modelName'> & { modelName?: string }) {
+    // input info may not contain modelName
+    if (info.modelName === undefined) { // if modelName isn't included, set '' as default
+      info.modelName = ''
+    }
+    // after previous handle, info is assured to have modelName
+    store.commit('vivisticker/SET_userInfo', info as IUserInfo)
     this.handleCallback('login')
   }
 
@@ -740,7 +741,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       x,
       y,
       bgColor: store.getters['vivisticker/getEditorBg'] // for older app
-    }, 'copy-editor')
+    }, 'copy-editor', { timeout: -1 })
     return (data?.flag as string) ?? '0'
   }
 
@@ -860,7 +861,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
               y,
               needCrop: editorType === 'text' ? 0 : 1,
               bgColor: store.getters['vivisticker/getEditorBg'] // for older app
-            }, 'gen-thumb').then((data) => {
+            }, 'gen-thumb', { timeout: -1 }).then((data) => {
               this.postCopyEditor()
               resolve(data?.flag ?? '0')
             })
@@ -1111,6 +1112,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     await this.setState('everEntersDebugMode', { value: this.everEntersDebugMode })
   }
 
+  async fetchTutorialFlags() {
+    this.tutorialFlags = (await this.getState('tutorialFlags')) ?? {}
+  }
+
+  async updateTutorialFlags(updateItem: { [key: string]: boolean }) {
+    Object.assign(this.tutorialFlags, updateItem)
+    await this.setState('tutorialFlags', this.tutorialFlags)
+  }
+
   openPayment(target?: IViviStickerProFeatures) {
     if (this.isPaymentDisabled) {
       this.showUpdateModal()
@@ -1176,7 +1186,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       })
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
-    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome' })
+    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
   }
 
   async registerSticker() {
@@ -1215,6 +1225,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return loadedFonts[face] ?? false
   }
 
+  openFullPageVideo(key: keyof IStickerVideoUrls, { delayedClose = undefined, mediaPos = 'top' }: Pick<IFullPageVideoConfigParams, 'delayedClose' | 'mediaPos'> = {}) {
+    const stickerVideoUrls = constantData.stickerVideoUrls()
+    store.commit('vivisticker/SET_fullPageConfig', {
+      type: 'video',
+      params: {
+        video: stickerVideoUrls[key].video,
+        thumbnail: stickerVideoUrls[key].thumbnail,
+        delayedClose,
+        mediaPos
+      }
+    })
+  }
+
   handleIos16Video() {
     if (!this.hasCopied && this.checkOSVersion('16.0')) {
       this.hasCopied = true
@@ -1222,10 +1245,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
-          store.commit('vivisticker/SET_fullPageConfig', {
-            type: 'iOS16Video',
-            params: { fromModal: true }
-          })
+          this.openFullPageVideo('iOS', { delayedClose: 5000 })
           modalUtils.clearModalInfo()
         }
       }, undefined, {
