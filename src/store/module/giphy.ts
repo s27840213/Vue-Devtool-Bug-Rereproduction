@@ -164,7 +164,7 @@ const actions: ActionTree<IGiphyState, unknown> = {
 
     await giphyApi.getCategories(nextCategory).then((response) => {
       const data = response.data.data
-      logUtils.setLog(`giphyApi.getCategories(${nextCategory}): contentId = [${data.content.map(c => c.id)}]`)
+      logUtils.setLog(`giphyApi.getCategories(${nextCategory}): contentTitle = [${data.content.map(c => c.title)}]`)
       let oldCategories = state.categories
       processGiphy(data)
 
@@ -318,7 +318,7 @@ const actions: ActionTree<IGiphyState, unknown> = {
 
     await giphyApi.getFavoritesCategories(toRequest.join(','), 0).then((response) => {
       const data = response.data.data
-      logUtils.setLog(`giphyApi.getFavoritesCategories(${toRequest}): contentId = [${data.content.map(c => c.id)}]`)
+      logUtils.setLog(`giphyApi.getFavoritesCategories(${toRequest}): contentTitle = [${data.content.map(c => c.title)}]`)
       processGiphy(data)
       const result = cloneDeep(state.favorites.categoriesContent)
       for (const category of data.content) {
@@ -351,7 +351,7 @@ const actions: ActionTree<IGiphyState, unknown> = {
 
     await giphyApi.getFavoritesTags(toRequest.join(','), 0).then((response) => {
       const data = response.data.data
-      logUtils.setLog(`giphyApi.getFavoritesTags(${toRequest}): contentId = [${data.content.map(c => c.title)}]`)
+      logUtils.setLog(`giphyApi.getFavoritesTags(${toRequest}): contentTitle = [${data.content.map(c => c.title)}]`)
       processGiphy(data)
       const result = cloneDeep(state.favorites.tagsContent)
       for (const category of data.content) {
