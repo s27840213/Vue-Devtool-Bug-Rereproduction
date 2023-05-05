@@ -18,6 +18,7 @@ export default class SubControllerUtils {
   private _config = { config: null as unknown as ILayer, primaryLayer: null as unknown as IGroup | ITmp | IFrame }
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
   private dblTapFlag = false
+  private touches = new Set()
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
   private _cursorDragEnd = null as unknown
@@ -46,7 +47,12 @@ export default class SubControllerUtils {
       }
       return
     }
+    if (store.getters['mobileEditor/getIsPinchingEditor']) return
     if (e.button !== 0) return
+
+    if (!this.touches.has(e.pointerId)) {
+      this.touches.add(e.pointerId)
+    }
 
     if (imageUtils.isImgControl()) {
       imageUtils.setImgControlDefault()
@@ -57,7 +63,7 @@ export default class SubControllerUtils {
         const interval = 500
         const doubleTap = (e: PointerEvent) => {
           e.preventDefault()
-          if (Date.now() - touchtime < interval && !this.dblTapFlag) {
+          if (Date.now() - touchtime < interval && !this.dblTapFlag && this.touches.size === 1) {
             /**
              * This is the dbl-click callback block
              */
@@ -83,7 +89,6 @@ export default class SubControllerUtils {
           this.dblTapFlag = false
         }, interval)
       }
-      this.component && this.component.$emit('pointerDownSubController')
     }
     if (store.getters.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
       groupUtils.deselect()
@@ -121,6 +126,8 @@ export default class SubControllerUtils {
   }
 
   onMouseup(e: PointerEvent) {
+    this.touches.delete(e.pointerId)
+
     eventUtils.removePointerEvent('pointerup', this._onMouseup)
     e.stopPropagation()
     if (!this.primaryLayer.active) return

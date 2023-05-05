@@ -482,12 +482,27 @@ export default defineComponent({
       // }
     },
     dblTap(e: PointerEvent) {
+      // console.log(this.layerIndex, this.subLayerIndex, this.config.type)
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.getLayerType === LayerType.image) {
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
             eventUtils.emit(PanelEvent.switchTab, 'crop')
           }
+          // console.log(this.config.type, this.primaryLayer, this.primaryLayer?.type)
+          // if (this.config.type === LayerType.image) {
+          //   switch (this.primaryLayer?.type) {
+          //     case LayerType.group:
+          //       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIndex)
+          //       break
+          //     case LayerType.frame:
+          //       if ((this.config as IImage).srcObj.type !== 'frame') {
+          //         frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { imgControl: true })
+          //       }
+          //       break
+          //   }
+          //   eventUtils.emit(PanelEvent.switchTab, 'crop')
+          // }
         }
       })
     },

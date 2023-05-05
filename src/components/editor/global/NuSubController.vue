@@ -59,7 +59,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import SvgPath from 'svgpath'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -127,33 +127,38 @@ export default defineComponent({
     if (body) {
       const props = this.$props
       const layerInfo = { } as ILayerInfo
-      Object.defineProperty(layerInfo, 'pageIndex', {
-        get() {
-          return props.pageIndex
-        }
-      })
-      Object.defineProperty(layerInfo, 'layerIndex', {
-        get() {
-          return props.primaryLayerIndex
-        }
-      })
-      Object.defineProperty(layerInfo, 'subLayerIdx', {
-        get() {
-          return props.layerIndex
+      Object.defineProperties(layerInfo, {
+        pageIndex: {
+          get() {
+            return props.pageIndex
+          }
+        },
+        layerIndex: {
+          get() {
+            return props.primaryLayerIndex
+          }
+        },
+        subLayerIdx: {
+          get() {
+            return props.layerIndex
+          }
         }
       })
       const _config = {
         config: { active: false },
         primaryLayer: {}
       } as { config: ILayer, primaryLayer: ITmp | IGroup | IFrame }
-      Object.defineProperty(_config, 'config', {
-        get() {
-          return props.config
-        }
-      })
-      Object.defineProperty(_config, 'primaryLayer', {
-        get() {
-          return props.primaryLayer
+
+      Object.defineProperties(_config, {
+        config: {
+          get() {
+            return props.config
+          }
+        },
+        primaryLayer: {
+          get() {
+            return props.primaryLayer
+          }
         }
       })
       this.subLayerCtrlUtils = new SubCtrlUtils({
