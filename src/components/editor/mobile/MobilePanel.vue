@@ -192,7 +192,7 @@ export default defineComponent({
   },
   created() {
     // Provide props to descendant component, https://vuejs.org/guide/components/provide-inject.html
-    provide(replaceImgInject, computed(() => this.replaceImg) as unknown as (img: IPhotoItem | IAssetPhoto) => void)
+    provide(replaceImgInject, computed(() => this.replaceImg))
   },
   computed: {
     ...mapGetters('imgControl', {

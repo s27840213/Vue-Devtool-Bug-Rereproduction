@@ -72,7 +72,7 @@ div(class="panel-text-effect")
           @click="chooseImg(option.key)")
         img(:src="getStyleImg(currCategory)")
         div
-        svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="16px")
+        svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="32px")
     span(class="panel-text-effect__reset"
         @click="resetTextEffect()") {{$t('NN0754')}}
 </template>

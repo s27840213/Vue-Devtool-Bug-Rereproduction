@@ -7,7 +7,7 @@ import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
 import platform from 'platform'
-import { createApp, defineAsyncComponent, nextTick } from 'vue'
+import { ComputedRef, createApp, defineAsyncComponent, nextTick } from 'vue'
 import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import { RecycleScroller } from 'vue-virtual-scroller'
@@ -45,6 +45,7 @@ declare module '@vue/runtime-core' {
     $isTouchDevice: () => boolean,
     $eventBus: Emitter<Record<EventType, unknown>>
   }
+  function provide<T>(key: InjectionKey<T> | string | number, value: T | ComputedRef<T>): void
 }
 app.config.unwrapInjectedRef = true
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
