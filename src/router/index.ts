@@ -104,7 +104,6 @@ const router = createRouter({
         if (standalone) {
           vivistickerUtils.enterStandaloneMode()
           vivistickerUtils.setDefaultLocale()
-          vivistickerUtils.setDefaultPrices()
         }
         const userInfo = await vivistickerUtils.getUserInfo()
         if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
@@ -119,6 +118,7 @@ const router = createRouter({
           store.commit('vivisticker/SET_editorBg', editorBg)
         }
         picWVUtils.updateLocale(locale)
+        vivistickerUtils.setDefaultPrices(locale)
 
         document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()

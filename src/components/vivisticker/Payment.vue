@@ -35,6 +35,8 @@ div(class="payment" v-touch @swipe="handleSwipe")
     div(class="payment__btn-subscribe" :class="{pending: pending.purchase}" @touchend="handleSubscribe(planSelected)")
       svg-icon(v-if="pending.purchase" class="spinner" iconName="spiner" iconWidth="20px")
       div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
+    div(class="payment__notice body-XS text-black-5 mt-10" ref="notice")
+      div(class="payment__notice__text" ref="txtNotice") {{ strNotice }}
     div(class="payment__footer" :class="{disabled: pending.purchase}")
       template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
         span(v-if="idx > 0" class="payment__footer__splitter")
@@ -68,7 +70,7 @@ import networkUtils from '@/utils/networkUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface CarouselItem {
@@ -152,6 +154,15 @@ export default defineComponent({
       const elTarget = e.target as HTMLElement
       if (elTarget === elPanel) this.isPanelTransitioning = false
     }
+    this.updateNoticeStyles()
+  },
+  watch: {
+    'windowSize.width'() {
+      this.updateNoticeStyles()
+    },
+    strNotice() {
+      this.updateNoticeStyles()
+    }
   },
   computed: {
     ...mapState({
@@ -213,7 +224,17 @@ export default defineComponent({
     },
     panelPadding() {
       return `${this.containerPadding + (this.isTablet ? this.containerWidth * 0.028 : 24)}px`
-    }
+    },
+    strNotice() {
+      switch (this.planSelected) {
+        case 'monthly':
+          return this.$t('STK0056')
+        case 'annually':
+          return this.$t('STK0057')
+        default:
+          return ''
+      }
+    },
   },
   methods: {
     ...mapMutations({
@@ -250,6 +271,29 @@ export default defineComponent({
       }
       this.isPanelUp = !this.isPanelUp
     },
+    updateNoticeStyles() {
+      const elNotice = this.$refs.notice as HTMLElement
+      const elTxtNotice = this.$refs.txtNotice as HTMLElement
+      this.$nextTick(() => {
+        elTxtNotice.style.paddingRight = ''
+        elTxtNotice.style.width = ''
+        elNotice.onscroll = null
+
+        elTxtNotice.style.display = 'inline-block'
+        const txtWidth = elTxtNotice.clientWidth + 10
+        elTxtNotice.style.display = ''
+        if (txtWidth > elNotice.clientWidth) {
+          const updateTxtNoticeStyles = () => {
+            const scrollLeft = elNotice.scrollLeft
+            const clientWidth = elNotice.clientWidth
+            elTxtNotice.style.paddingRight = `${txtWidth - scrollLeft - clientWidth}px`
+            elTxtNotice.style.width = `${scrollLeft + clientWidth}px`
+          }
+          elNotice.onscroll = updateTxtNoticeStyles
+          updateTxtNoticeStyles()
+        }
+      })
+    }
   }
 })
 </script>
@@ -436,6 +480,16 @@ export default defineComponent({
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
+    }
+  }
+  &__notice {
+    width: 100%;
+    overflow-x: auto;
+    @include no-scrollbar;
+    &__text {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
   }
   &__footer {

@@ -190,7 +190,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.STANDALONE_USER_INFO.locale = locale
   }
 
-  setDefaultPrices() {
+  setDefaultPrices(locale = 'us') {
     const defaultPrices = {
       tw: {
         currency: 'TWD',
@@ -226,7 +226,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         }
       }
     } as { [key: string]: IPrices }
-    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[this.STANDALONE_USER_INFO.locale] ?? defaultPrices.us })
+    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[locale] ?? defaultPrices.us })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
