@@ -1,22 +1,5 @@
 import App from '@/App.vue'
-import NuController from '@/components/editor/global/NuController.vue'
-import NuFrame from '@/components/editor/global/NuFrame.vue'
-import NuGroup from '@/components/editor/global/NuGroup.vue'
-import NuImage from '@/components/editor/global/NuImage.vue'
-import NuImgController from '@/components/editor/global/NuImgController.vue'
-import NuLayer from '@/components/editor/global/NuLayer.vue'
-import NuPage from '@/components/editor/global/NuPage.vue'
-import NuShape from '@/components/editor/global/NuShape.vue'
-import NuSubController from '@/components/editor/global/NuSubController.vue'
-import NuText from '@/components/editor/global/NuText.vue'
-import NuTmp from '@/components/editor/global/NuTmp.vue'
-import Btn from '@/components/global/Btn.vue'
-import Dropdown from '@/components/global/Dropdown.vue'
-import Hint from '@/components/global/Hint.vue'
-import Nubtn from '@/components/global/Nubtn.vue'
-import PropertyBar from '@/components/global/PropertyBar.vue'
-import Spinner from '@/components/global/Spinner.vue'
-import SvgIcon from '@/components/global/SvgIcon.vue'
+import svgIconUtils from '@/utils/svgIconUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
 import Notifications from '@kyvg/vue3-notification'
@@ -24,7 +7,7 @@ import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
 import platform from 'platform'
-import { createApp, nextTick } from 'vue'
+import { createApp, defineAsyncComponent, nextTick } from 'vue'
 import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import { RecycleScroller } from 'vue-virtual-scroller'
@@ -34,7 +17,6 @@ import store from './store'
 import generalUtils from './utils/generalUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
-import svgIconUtils from './utils/svgIconUtils'
 import TooltipUtils from './utils/tooltipUtils'
 
 const eventBus = mitt()
@@ -90,24 +72,57 @@ app.use(FloatingVue, {
 
 app.component('RecycleScroller', RecycleScroller)
 
-app.component('svg-icon', SvgIcon)
-app.component('btn', Btn)
-app.component('property-bar', PropertyBar)
-app.component('dropdown', Dropdown)
-app.component('nu-page', NuPage)
-app.component('nu-image', NuImage)
-app.component('nu-layer', NuLayer)
-app.component('nu-text', NuText)
-app.component('nu-group', NuGroup)
-app.component('nu-tmp', NuTmp)
-app.component('nu-controller', NuController)
-app.component('nu-sub-controller', NuSubController)
-app.component('nu-shape', NuShape)
-app.component('nu-img-controller', NuImgController)
-app.component('nu-frame', NuFrame)
-app.component('nubtn', Nubtn)
-app.component('spinner', Spinner)
-app.component('hint', Hint)
+app.component('svg-icon', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/global/SvgIcon.vue')
+))
+app.component('btn', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
+))
+app.component('property-bar', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/global/PropertyBar.vue')
+))
+app.component('dropdown', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Dropdown.vue')
+))
+app.component('nu-image', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImage.vue')
+))
+app.component('nu-layer', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuLayer.vue')
+))
+app.component('nu-text', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuText.vue')
+))
+app.component('nu-group', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuGroup.vue')
+))
+app.component('nu-tmp', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuTmp.vue')
+))
+app.component('nu-controller', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuController.vue')
+))
+app.component('nu-sub-controller', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuSubController.vue')
+))
+app.component('nu-shape', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuShape.vue')
+))
+app.component('nu-img-controller', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImgController.vue')
+))
+app.component('nu-frame', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuFrame.vue')
+))
+app.component('nubtn', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Nubtn.vue')
+))
+app.component('spinner', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Spinner.vue')
+))
+app.component('hint', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Hint.vue')
+))
 
 app.directive('hint', {
   // When the bound element is inserted into the DOM...
@@ -212,16 +227,18 @@ app.directive('custom-swipe', {
 
 app.directive('press', longpress)
 
-const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-const req = require.context('@/assets/icon', true, /\.svg$/)
+document.addEventListener('DOMContentLoaded', async () => {
+  const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
+  const req = require.context('@/assets/icon', true, /\.svg$/)
 
-if (window.location.host !== 'vivipic.com') {
-  svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-    return context.default?.id ?? ''
-  }))
-} else {
-  requireAll(req)
-}
+  if (window.location.host !== 'vivipic.com') {
+    svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+      return context.default?.id ?? ''
+    }))
+  } else {
+    requireAll(req)
+  }
+}, false)
 
 // add temporarily for testing
 if (window.location.href.indexOf('logout') > -1) {
