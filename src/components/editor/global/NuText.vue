@@ -45,7 +45,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -100,7 +100,6 @@ export default defineComponent({
     this.isDestroyed = true
   },
   mounted() {
-    console.log(this.page.contentScaleRatio)
     this.resizeAfterFontLoaded()
   },
   computed: {
@@ -215,8 +214,6 @@ export default defineComponent({
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
-      // console.log('resize')
-
       let widthLimit
       if (this.isLayerAutoResizeNeeded()) {
         widthLimit = await textUtils.autoResize(config, this.initSize)
@@ -232,7 +229,6 @@ export default defineComponent({
           x = config.styles.x - (textHW.width - config.styles.width) / 2
           y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
-        // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
       } else {

@@ -120,12 +120,14 @@ export default defineComponent({
     }),
     styles(): any {
       const pos = this.imgControllerPosHandler()
-      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : (100 / this.scaleRatio)
+      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : 1
+      // const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : (100 / this.scaleRatio)
       return {
         transform: `translate(${pos.x * _f}px, ${pos.y * _f}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * _f}px`,
         height: `${this.config.styles.imgHeight * _f}px`,
-        outline: `${2 * (this.scaleRatio * 0.01)}px solid #7190CC`,
+        // outline: '2px solid #7190CC',
+        outline: `${2 * (this.$isTouchDevice() ? 1 : 100 / this.scaleRatio)}px solid #7190CC`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
@@ -172,13 +174,15 @@ export default defineComponent({
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
     controllerStyles() {
-      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : (100 / this.scaleRatio)
+      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : 1
+      // const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : (100 / this.scaleRatio)
       return {
         transform: `translate(${this.config.styles.x * _f}px, ${this.config.styles.y * _f}px) rotate(${this.config.styles.rotate}deg)`,
         // transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width * _f}px`,
         height: `${this.config.styles.height * _f}px`,
-        outline: `${2 * (100 / this.scaleRatio * _f)}px solid #7190CC`
+        // outline: '2px solid #7190CC'
+        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -408,10 +412,11 @@ export default defineComponent({
     _cursorStyles(scaler: any, index: number) {
       const cursorIndex = this.getLayerRotate >= 0 ? (index + Math.floor(this.getLayerRotate / 45)) % 8
         : (index + Math.ceil(this.getLayerRotate / 45) + 8) % 8
+      const _f = this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1
       return {
         ...scaler.styles,
-        width: `${scaler.styles.w * this.scaleRatio * 0.01}px`,
-        height: `${scaler.styles.h * this.scaleRatio * 0.01}px`,
+        width: `${scaler.styles.w * _f}px`,
+        height: `${scaler.styles.h * _f}px`,
         cursor: this.controlPoints.cursors[cursorIndex],
         pointerEvents: this.forRender ? 'none' : 'initial'
       }

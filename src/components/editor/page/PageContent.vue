@@ -131,7 +131,7 @@ export default defineComponent({
       return this.isProcessImgShadow || this.isUploadImgShadow
     },
     pageStyles(): { [index: string]: string } {
-      const _f = this.contentScaleRatio * (this.inPreview ? 1 : this.scaleRatio * 0.01)
+      const _f = this.contentScaleRatio * (this.inPreview || !this.$isTouchDevice() ? 1 : this.scaleRatio * 0.01)
       return {
         width: `${this.config.width * _f + this.margin.right}px`,
         height: `${this.config.height * _f + this.margin.bottom}px`,

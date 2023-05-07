@@ -273,7 +273,7 @@ export default defineComponent({
     },
     styles() {
       if (this.paramsReady) {
-        const _f = this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01
+        const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.$store.state.pageScaleRatio * 0.01 : 1)
         return {
           width: `${((this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])) * _f}px`,
           height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1]) * _f}px`,
@@ -290,9 +290,6 @@ export default defineComponent({
         }
       }
     }
-  },
-  mounted() {
-    console.log(this.layerIndex, this.config.category)
   },
   methods: {
     className(): string {

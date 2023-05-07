@@ -538,7 +538,6 @@ export default defineComponent({
       const resizerStyle = { ...resizer }
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
-      console.log(resizer)
       const isHorizon = width > height
       const scalerOffset = this.$isTouchDevice() ? 36 : 20
       const HW = {
@@ -1682,14 +1681,14 @@ export default defineComponent({
     }
   }
   &__content {
-    border-width: 0;
     z-index: 10000;
-    border-color: transparent;
-    background-color: transparent;
-    background-image: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    // border-width: 0;
+    // border-color: transparent;
+    // background-color: transparent;
+    // background-image: none;
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
     position: absolute;
     touch-action: none;
   }

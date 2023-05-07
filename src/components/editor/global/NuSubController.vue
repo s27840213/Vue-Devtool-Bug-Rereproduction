@@ -378,7 +378,7 @@ export default defineComponent({
     },
     positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
-      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       let { x, y } = this.config.styles
 
       if (this.type === 'frame' && horizontalFlip) {

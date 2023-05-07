@@ -374,7 +374,6 @@ export default defineComponent({
       const { scale, horizontalFlip, verticalFlip } = this.config.styles
       const { width, height } = this.shadowBuff.canvasSize
       const _f = this.contentScaleRatio * (generalUtils.isTouchDevice() ? this.pageScaleRatio * 0.01 : 1)
-      console.log(this.contentScaleRatio, (generalUtils.isTouchDevice() ? this.pageScaleRatio * 0.01 : 1))
 
       return {
         width: `${width * _f}px`,
@@ -1028,7 +1027,7 @@ export default defineComponent({
     },
     scaledConfig(): { [index: string]: string | number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
-      const _f = this.contentScaleRatio * (this.primaryLayer?.type === 'frame' ? 1 : this.pageScaleRatio * 0.01)
+      const _f = this.contentScaleRatio * (this.primaryLayer?.type === 'frame' || !this.$isTouchDevice() ? 1 : this.pageScaleRatio * 0.01)
       return {
         width: width * _f,
         height: height * _f,
@@ -1044,10 +1043,12 @@ export default defineComponent({
       if (Number.isNaN(adjust.halation) || !adjust.halation) {
         return []
       }
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.pageScaleRatio * 0.01 : 1)
+
       const position = {
-        width: width / 2 * this.contentScaleRatio * this.pageScaleRatio * 0.01,
-        x: width / 2 * this.contentScaleRatio * this.pageScaleRatio * 0.01,
-        y: height / 2 * this.contentScaleRatio * this.pageScaleRatio * 0.01
+        width: width / 2 * _f,
+        x: width / 2 * _f,
+        y: height / 2 * _f
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },

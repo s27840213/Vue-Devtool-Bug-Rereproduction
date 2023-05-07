@@ -281,8 +281,9 @@ export default defineComponent({
         ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
       const pointerEvents = this.getPointerEvents
       const outline = this.outlineStyles()
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio * this.scaleRatio * 0.01),
+        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, _f),
         {
           outline,
           willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
@@ -293,9 +294,11 @@ export default defineComponent({
         }
       )
       if (this.primaryLayer?.type === 'frame' && this.config.type === 'image') {
-        styles.transform += `scale(${this.$store.state.pageScaleRatio / 100})`
-        styles.width = `${this.config.styles.width * this.contentScaleRatio * this.scaleRatio * 0.01}px`
-        styles.height = `${this.config.styles.height * this.contentScaleRatio * this.scaleRatio * 0.01}px`
+        if (this.$isTouchDevice()) {
+          styles.transform += `scale(${this.$store.state.pageScaleRatio / 100})`
+        }
+        styles.width = `${this.config.styles.width * _f}px`
+        styles.height = `${this.config.styles.height * _f}px`
       }
       if (!this.isImgCtrl && !this.inFrame && !this.$isTouchDevice() && !this.useMobileEditor) {
         styles.transform += `translateZ(${this.config.styles.zindex}px)`
@@ -329,10 +332,10 @@ export default defineComponent({
     },
     frameClipStyles(): any {
       return {
-        ...(this.primaryLayer?.type === 'frame' && this.config.type === 'image' && { transform: `scale(${100 / this.scaleRatio})` }),
+        ...(this.primaryLayer?.type === 'frame' && this.config.type === 'image' && this.$isTouchDevice() && { transform: `scale(${100 / this.scaleRatio})` }),
         fill: '#00000000',
         stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
-        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
+        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (this.$isTouchDevice() ? 1 : 100 / this.scaleRatio)}px`
       }
     },
     getPointerEvents(): string {
@@ -424,11 +427,12 @@ export default defineComponent({
       const { scale, scaleX, scaleY } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       let transform = ''
       // let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
       if (!isImgType) {
         // transform += this.compensationRatio() !== 1 ? `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})` : ''
-        transform += `scale(${scale * (type === 'text' ? this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01 : 1)}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
+        transform += `scale(${scale * (type === 'text' ? _f : 1)}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
       }
       const hasActualScale = !!transform && transform !== 'scale(1)'
       const styles = {
@@ -441,8 +445,8 @@ export default defineComponent({
           styles.width = `${this.config.styles.width / this.config.styles.scale}px`
           styles.height = `${this.config.styles.height / this.config.styles.scale}px`
         } else {
-          styles.width = `${this.config.styles.initWidth * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
-          styles.height = `${this.config.styles.initHeight * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
+          styles.width = `${this.config.styles.initWidth * _f}px`
+          styles.height = `${this.config.styles.initHeight * _f}px`
         }
         styles.transform = transform
       }
