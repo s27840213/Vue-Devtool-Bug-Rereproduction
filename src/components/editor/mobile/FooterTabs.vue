@@ -100,18 +100,7 @@ export default defineComponent({
       leftOverflow: false,
       rightOverflow: false,
       clickedTab: '',
-      clickedTabTimer: -1,
-      homeTabs: [
-        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
-        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
-        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
-        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
-        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
-        { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
-        { icon: 'add-page', text: `${this.$t('NN0139')}` },
-        { icon: 'paste', text: `${this.$t('NN0230')}` },
-        ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
-      ] as Array<IFooterTab>
+      clickedTabTimer: -1
     }
   },
   computed: {
@@ -199,6 +188,21 @@ export default defineComponent({
       return {
         icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
       }
+    },
+    homeTabs() :Array<IFooterTab> {
+      return [
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
+        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
+        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
+        { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
+        { icon: 'add-page', text: `${this.$t('NN0139')}` },
+        { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 },
+        { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
+        { icon: 'paste', text: `${this.$t('NN0230')}` },
+        ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
+      ] as Array<IFooterTab>
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
