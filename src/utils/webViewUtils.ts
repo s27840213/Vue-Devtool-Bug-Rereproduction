@@ -128,7 +128,8 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     } catch (error) {
       const theError = error as Error
       console.error(error)
-      logUtils.setLog(`Error occurs in callIOSAsAPI: ${theError.name}, ${theError.message}, ${theError.cause}, ${theError.stack}`)
+      logUtils.setLog(`Error occurs in callIOSAsAPI with type: ${type}, message: ${message}, event: ${event}`)
+      logUtils.setLog(`Error: ${theError.name}, ${theError.message}, ${theError.cause}, ${theError.stack}`)
       result = null
     }
     return result
