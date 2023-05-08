@@ -737,7 +737,7 @@ class AssetUtils {
           if (resize) resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
           if (isDetailPage && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
-            const { width: pageWidth = 1000, physicalWidth: pagePhysicalWidth = pageWidth, unit: pageUnit = 'px' } = currFocusPage
+            const { width: pageWidth = 1000, physicalWidth: pagePhysicalWidth = pageWidth, unit: pageUnit = 'px' } = this.getPage(pageUtils.currFocusPageIndex)
             const precision = pageUnit === 'px' ? 0 : PRECISION
             for (const idx in jsonDataList) {
               const { height, width, physicalWidth = width, physicalHeight = height, unit = 'px' } = jsonDataList[idx]

@@ -176,7 +176,6 @@ const result = {
         parallel: versionCheckAndBuild()
       },
       getDeploy('deploy test', 'test', 'TEST'),
-      getDeploy('deploy edit', 'staging', 'EDIT', 'EDIT', true),
       getDeploy('deploy prod', 'production', 'PROD', 'PROD', true)
       ],
       develop: [{

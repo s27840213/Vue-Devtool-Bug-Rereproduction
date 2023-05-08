@@ -282,6 +282,9 @@ export default defineComponent({
   overflow-x: hidden;
   color: white;
   text-align: left;
+  .tabs {
+    margin-bottom: 24px;
+  }
   &__color-sets {
     filter: none;
     height: calc(100% - 54px);
