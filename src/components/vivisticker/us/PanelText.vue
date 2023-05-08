@@ -373,13 +373,13 @@ export default defineComponent({
     column-gap: 30px;
     justify-content: center;
   }
-  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
+  &.in-category:deep(.vue-recycle-scroller__item-wrapper) {
     margin-top: 24px;
   }
   &.in-editor {
     padding-top: 0;
   }
-  &.in-editor::v-deep .vue-recycle-scroller__item-wrapper {
+  &.in-editor:deep(.vue-recycle-scroller__item-wrapper) {
     margin-top: 0;
   }
   &__header {

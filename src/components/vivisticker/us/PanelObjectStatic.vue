@@ -397,7 +397,7 @@ export default defineComponent({
     grid-template-columns: repeat(v-bind(numCardColumns), 1fr);
     column-gap: 20px;
   }
-  &.in-category::v-deep .category-list .vue-recycle-scroller__item-wrapper {
+  &.in-category:deep(.category-list .vue-recycle-scroller__item-wrapper) {
     margin-top: 24px;
   }
   &__list-rows-action {
