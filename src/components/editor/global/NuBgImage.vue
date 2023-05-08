@@ -218,7 +218,7 @@ export default defineComponent({
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
       const x = image.posX - (aspectRatio < 1 ? offset : offset * aspectRatio)
       const y = image.posY - (aspectRatio > 1 ? offset : offset / aspectRatio)
-      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return {
         width: width * _f,
         height: height * _f,
