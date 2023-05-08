@@ -616,7 +616,8 @@ export default defineComponent({
       )
     },
     closeMobilePanel() {
-      editorUtils.setShowMobilePanel(false)
+      if (this.isSubPanel) editorUtils.setCurrActiveSubPanel('none')
+      else editorUtils.setShowMobilePanel(false)
     },
     haederbarHeight () {
       return document.querySelector('.mobile-editor .header-bar')?.clientHeight ?? 0
@@ -629,7 +630,8 @@ export default defineComponent({
       return (this.$refs.panel as HTMLElement).clientHeight
     },
     panelParentHeight() {
-      return (this.$el.parentElement as HTMLElement).clientHeight - this.userInfo.statusBarHeight
+      return (document.querySelector('.mobile-editor .mobile-editor__top') as HTMLElement).clientHeight -
+        this.userInfo.statusBarHeight
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
@@ -720,6 +722,7 @@ export default defineComponent({
   }
 
   &__btn {
+    display: grid; // To fix div height != child height issue. https://stackoverflow.com/questions/5804256
     position: relative;
   }
 

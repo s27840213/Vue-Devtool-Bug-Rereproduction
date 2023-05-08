@@ -9,6 +9,7 @@ export interface IMobileEditorState {
   currActiveSubPanel: string,
   inBgSettingMode: boolean,
   showMobilePanel: boolean
+  showMobileSubPanel: boolean
 }
 
 const getDefaultState = (): IMobileEditorState => ({
@@ -19,7 +20,8 @@ const getDefaultState = (): IMobileEditorState => ({
   currActivePanel: 'none',
   currActiveSubPanel: 'none',
   inBgSettingMode: false,
-  showMobilePanel: false
+  showMobilePanel: false,
+  showMobileSubPanel: false,
 })
 
 const state = getDefaultState()
@@ -78,6 +80,9 @@ const mutations: MutationTree<IMobileEditorState> = {
   },
   SET_showMobilePanel(state: IMobileEditorState, bool: boolean) {
     state.showMobilePanel = bool
+  },
+  SET_showMobileSubPanel(state: IMobileEditorState, bool: boolean) {
+    state.showMobileSubPanel = bool
   },
   INIT_STATE(state: IMobileEditorState) {
     state.closeMobilePanelFlag = false
