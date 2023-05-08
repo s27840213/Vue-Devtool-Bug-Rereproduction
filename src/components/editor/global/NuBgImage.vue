@@ -389,7 +389,6 @@ export default defineComponent({
       }
     },
     setInBgSettingMode() {
-      console.warn('setInBgSettingMode')
       editorUtils.setInBgSettingMode(true)
       groupUtils.deselect()
     },

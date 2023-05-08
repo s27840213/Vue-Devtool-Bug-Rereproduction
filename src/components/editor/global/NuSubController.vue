@@ -317,11 +317,13 @@ export default defineComponent({
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
     textWrapperStyle() {
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
+      // const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01})`,
+        transform: `scaleX(${this.config.styles.scale * _f}) scaleY(${this.config.styles.scale * _f})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
       }
@@ -378,7 +380,8 @@ export default defineComponent({
     },
     positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
-      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
+      // const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       let { x, y } = this.config.styles
 
       if (this.type === 'frame' && horizontalFlip) {
@@ -404,6 +407,7 @@ export default defineComponent({
     sizeStyle() {
       const { isFrameImg } = this.config
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
+      // const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
         width = `${this.config.styles.initWidth * _f}px`

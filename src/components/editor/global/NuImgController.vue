@@ -219,7 +219,6 @@ export default defineComponent({
     moveStart(event: MouseEvent | PointerEvent) {
       this.pointerId = (event as PointerEvent).pointerId ?? -1
 
-      console.warn('moveStart')
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
 

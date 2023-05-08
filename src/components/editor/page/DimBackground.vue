@@ -103,7 +103,6 @@ export default defineComponent({
       }
 
       const _f = this.contentScaleRatio * (generalUtils.isTouchDevice() ? this.pageScaleRatio * 0.01 : 1)
-      console.log(this.pageScaleRatio * 0.01, _f)
       return {
         width: `${backgroundImage.styles.imgWidth * _f}px`,
         height: `${backgroundImage.styles.imgHeight * _f}px`,
