@@ -775,3 +775,8 @@ pipelines:
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
+          - step:
+              name: "create pull request"
+              trigger: manual
+              script:
+                - ./bash/create_pull_request.sh
