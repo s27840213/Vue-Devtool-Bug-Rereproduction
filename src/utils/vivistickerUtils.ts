@@ -73,6 +73,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   loadingCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
   designDeletionQueue = [] as { key: string, id: string, thumbType: string }[]
+  saveDesignQueue = [] as { design: string }[]
 
   STANDALONE_USER_INFO: IUserInfo = {
     hostId: '',
@@ -106,7 +107,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   SCREENSHOT_CALLBACKS = [
     'thumbDone',
-    'updateFileDone',
     'informWebResult'
   ]
 
@@ -238,13 +238,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     store.commit('vivisticker/SET_currActiveTab', tab)
   }
 
-  filterLog(messageType: string, message: any) {
-    switch (messageType) {
-      case 'SET_STATE':
-        return message.key === 'tempDesign'
-    }
-    return false
-  }
+  // filterLog(messageType: string, message: any) {
+  //   switch (messageType) {
+  //     case 'SET_STATE':
+  //       return message.key === 'tempDesign'
+  //   }
+  //   return false
+  // }
 
   appToast(msg: string) {
     this.sendToIOS('SHOW_TOAST', { msg })
@@ -694,28 +694,43 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   async addAsset(key: string, asset: any, limit = 100, files: { [key: string]: any } = {}) {
     if (this.isStandaloneMode) return
-    if (this.checkVersion('1.9')) {
+    if (this.checkVersion('1.27')) {
+      await this.callIOSAsAPI('ADD_ASSET', { key, asset, limit, files }, `addAsset-${key}-${asset.id}`)
+    } else if (this.checkVersion('1.9')) {
       await this.callIOSAsAPI('ADD_ASSET', { key, asset, limit, files }, 'addAsset')
     } else {
       this.sendToIOS('ADD_ASSET', { key, asset })
     }
   }
 
-  addAssetDone() {
-    this.handleCallback('addAsset')
+  addAssetDone(data: { key: string, id: string } | undefined) {
+    if (data !== undefined) {
+      this.handleCallback(`addAsset-${data.key}-${data.id}`)
+    } else {
+      this.handleCallback('addAsset')
+    }
   }
 
   async setState(key: string, value: any) {
     if (this.isStandaloneMode) return
-    if (this.checkVersion('1.9')) {
+    if (key === 'tempDesign') {
+      // console.trace()
+    }
+    if (this.checkVersion('1.27')) {
+      await this.callIOSAsAPI('SET_STATE', { key, value }, `setState-${key}`)
+    } else if (this.checkVersion('1.9')) {
       await this.callIOSAsAPI('SET_STATE', { key, value }, 'setState')
     } else {
       this.sendToIOS('SET_STATE', { key, value })
     }
   }
 
-  setStateDone() {
-    this.handleCallback('setState')
+  setStateDone(data: { key: string } | undefined) {
+    if (data !== undefined) {
+      this.handleCallback(`setState-${data.key}`)
+    } else {
+      this.handleCallback('setState')
+    }
   }
 
   async getState(key: string): Promise<WEBVIEW_API_RESULT> {
@@ -762,7 +777,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       id: editingDesignId,
       assetInfo
     } as ITempDesign
-    this.setState('tempDesign', { design: JSON.stringify(design) })
+    this.saveDesignQueue.push({ design: JSON.stringify(design) })
+    if (this.saveDesignQueue.length === 1) {
+      this.processSaveDesign()
+    }
+  }
+
+  async processSaveDesign() {
+    const designToSave = this.saveDesignQueue[0]
+    if (designToSave) {
+      await this.setState('tempDesign', designToSave)
+      this.saveDesignQueue.shift()
+      this.processSaveDesign()
+    }
   }
 
   async fetchDesign(): Promise<ITempDesign | undefined> {
@@ -888,15 +915,23 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const deletion = this.designDeletionQueue[0]
     if (deletion) {
       const { key, id, thumbType } = deletion
-      await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, 'delete-asset')
+      if (this.checkVersion('1.27')) {
+        await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, `delete-asset-${key}-${id}`)
+      } else {
+        await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, 'delete-asset')
+      }
       store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), id })
       this.designDeletionQueue.shift()
       this.processDeleteAsset()
     }
   }
 
-  deleteAssetDone() {
-    this.handleCallback('delete-asset')
+  deleteAssetDone(data: { key: string, id: string } | undefined) {
+    if (data !== undefined) {
+      this.handleCallback(`delete-asset-${data.key}-${data.id}`)
+    } else {
+      this.handleCallback('delete-asset')
+    }
   }
 
   async saveDesignJson(id: string): Promise<IMyDesign | undefined> {
@@ -967,10 +1002,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   uploadImageURL(data: any) {
     this.handleCallback('upload-image', data)
-  }
-
-  updateFileDone() {
-    this.handleCallback('update-file')
   }
 
   informWebResult(data: { info: any }) {
