@@ -249,10 +249,11 @@ export default defineComponent({
 
       const elms = []
       if (adjust.halation) {
+        const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
         const position = {
-          width: width / 2 * this.contentScaleRatio * this.scaleRatio * 0.01,
-          x: width / 2 * this.contentScaleRatio * this.scaleRatio * 0.01,
-          y: height / 2 * this.contentScaleRatio * this.scaleRatio * 0.01
+          width: width / 2 * _f,
+          x: width / 2 * _f,
+          y: height / 2 * _f
         }
         elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
       }
