@@ -13,6 +13,7 @@ export interface IMobileEditorState {
   pageCenterPos: { x: number, y: number },
   isPinchingEditor: boolean,
   pinchScale: number
+  showMobileSubPanel: boolean
 }
 
 const getDefaultState = (): IMobileEditorState => ({
@@ -26,7 +27,8 @@ const getDefaultState = (): IMobileEditorState => ({
   showMobilePanel: false,
   pageCenterPos: { x: -1, y: -1 },
   isPinchingEditor: false,
-  pinchScale: 1
+  pinchScale: 1,
+  showMobileSubPanel: false,
 })
 
 const state = getDefaultState()
@@ -98,6 +100,9 @@ const mutations: MutationTree<IMobileEditorState> = {
   },
   UPDATE_pinchScale(state: IMobileEditorState, scale: number) {
     state.pinchScale = scale
+  },
+  SET_showMobileSubPanel(state: IMobileEditorState, bool: boolean) {
+    state.showMobileSubPanel = bool
   },
   INIT_STATE(state: IMobileEditorState) {
     state.closeMobilePanelFlag = false
