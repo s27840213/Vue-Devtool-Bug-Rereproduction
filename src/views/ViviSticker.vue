@@ -141,8 +141,10 @@ export default defineComponent({
     )
 
     // show popup
+    const lastModalMsg = await vivistickerUtils.getState('lastModalMsg')
+    const shown = (exp || lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
     const btn_txt = modalInfo.btn_txt
-    if (btn_txt) {
+    if (btn_txt && !shown) {
       const options = {
         imgSrc: modalInfo.img_url,
         noClose: !!exp,
@@ -180,6 +182,7 @@ export default defineComponent({
         },
         options
       )
+      if (!exp) await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
     }
   },
   unmounted() {
