@@ -30,7 +30,7 @@ import resizeUtils from '@/utils/resizeUtils'
 import SnapUtils from '@/utils/snapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   props: {
@@ -48,18 +48,28 @@ export default defineComponent({
   created() {
     this.pagesState[this.pageIndex].modules.snapUtils.pageIndex = this.pageIndex
   },
-  mounted() {
-    window.addEventListener('resize', this.handleResize)
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.handleResize)
-  },
   watch: {
     isInEditor(newVal, oldVal): void {
-      if (newVal && !oldVal) this.handleResize()
-    }
+      if (newVal && !oldVal) {
+        this.$nextTick(() => {
+          this.handleResize()
+        })
+      }
+    },
+    windowSize: {
+      handler(): void {
+        if (!this.isInEditor) return
+        this.$nextTick(() => {
+          this.handleResize()
+        })
+      },
+      deep: true
+    },
   },
   computed: {
+    ...mapState({
+      windowSize: 'windowSize'
+    }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -70,6 +80,7 @@ export default defineComponent({
       pagesState: 'getPagesState',
       getLayer: 'getLayer',
       editorBg: 'vivisticker/getEditorBg',
+      editorType: 'vivisticker/getEditorType',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       contentScaleRatio: 'getContentScaleRatio',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
@@ -158,11 +169,10 @@ export default defineComponent({
       }
     },
     handleResize() {
+      resizeUtils.resizePage(0, this.config, vivistickerUtils.getPageSize(this.editorType))
       const elTop = document.getElementsByClassName('vivisticker__top')[0]
       const headerHeight = 44
       const shortEdge = Math.min(elTop.clientWidth, elTop.clientHeight - headerHeight)
-      const pageSize = Math.round(shortEdge * 0.9)
-      resizeUtils.resizePage(0, this.config, { width: pageSize, height: pageSize })
       this.marginTop = Math.round(shortEdge * 0.05)
     }
   }

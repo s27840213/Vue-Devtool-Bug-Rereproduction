@@ -5,7 +5,7 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, isV1_26, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -353,14 +353,37 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return (jsonData: any) => { }
   }
 
-  startEditing(editorType: string, assetInfo: { [key: string]: any }, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
+  getPageSize(editorType: string) {
     const elTop = document.getElementsByClassName('vivisticker__top')[0]
     const headerHeight = 44
-    const shortEdge = Math.min(elTop.clientWidth, elTop.clientHeight - headerHeight)
-    const pageSize = Math.round(shortEdge * 0.9)
+    const editorWidth = elTop.clientWidth * 0.9
+    const editorHeight = (elTop.clientHeight - headerHeight) * 0.9
+    const shortEdge = Math.min(editorWidth, editorHeight)
+
+    if (editorType === 'templateStory') {
+      const aspectRatio = editorWidth / editorHeight
+      const targetAspectRatio = 9 / 16
+      if (aspectRatio > targetAspectRatio) {
+        return {
+          width: Math.round(editorHeight * targetAspectRatio),
+          height: editorHeight,
+        }
+      } else {
+        return {
+          width: editorWidth,
+          height: Math.round(editorWidth / targetAspectRatio),
+        }
+      }
+    }
+    return {
+      width: shortEdge,
+      height: shortEdge,
+    }
+  }
+
+  startEditing(editorType: string, assetInfo: { [key: string]: any }, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
     pageUtils.setPages([pageUtils.newPage({
-      width: pageSize,
-      height: pageSize,
+      ...this.getPageSize(editorType),
       backgroundColor: '#F8F8F8',
       isAutoResizeNeeded: true
     })])

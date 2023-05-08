@@ -16,6 +16,8 @@ div(class="panel-add-template")
 </template>
 
 <script lang="ts">
+import editorUtils from '@/utils/editorUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -30,6 +32,16 @@ export default defineComponent({
   methods: {
     addTemplate(photo = false) {
       console.log('addTemplate', photo)
+      vivistickerUtils.startEditing(
+        'templateStory',
+        { plan: 0, assetId: '' },
+        async () => {
+          console.log('start editing template story')
+          return true
+        },
+        vivistickerUtils.getEmptyCallback()
+      )
+      editorUtils.setShowMobilePanel(false)
     }
   }
 })
