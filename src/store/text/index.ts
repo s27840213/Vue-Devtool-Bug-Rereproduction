@@ -85,8 +85,9 @@ const state = getDefaultState()
 
 const getters: GetterTree<ITextState, unknown> = {
   getDefaultFonts(state): string {
-    return state.defaultFonts
-      .map(font => font.face).join(',')
+    const fontFaces = state.defaultFonts.map(font => font.face)
+    fontFaces.splice(fontFaces.length - 1, 0, '-apple-system')
+    return fontFaces.join(', ')
   },
   getDefaultFontsList(state): IFont[] {
     return state.defaultFonts

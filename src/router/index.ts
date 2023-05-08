@@ -7,12 +7,9 @@ import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import CopyTool from '@/views/CopyTool.vue'
-import NubtnList from '@/views/NubtnList.vue'
-import { h, resolveComponent } from 'vue'
+import { defineAsyncComponent, h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
-import SvgIconView from '../views/SvgIconView.vue'
 import ViviSticker from '../views/ViviSticker.vue'
 
 declare let window: CustomWindow
@@ -27,6 +24,7 @@ const routes: Array<RouteRecordRaw> = [
         if (vivistickerUtils.checkVersion('1.5')) {
           await vivistickerUtils.fetchDebugModeEntrance()
           await vivistickerUtils.fetchLoadedFonts()
+          await vivistickerUtils.fetchTutorialFlags()
           const recentPanel = await vivistickerUtils.getState('recentPanel')
           const userSettings = await vivistickerUtils.getState('userSettings')
           if (userSettings) {
@@ -75,17 +73,17 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: SvgIconView
+    component: defineAsyncComponent(() => import('@/views/SvgIconView.vue'))
   })
   routes.push({
     path: 'copytool',
     name: 'CopyTool',
-    component: CopyTool
+    component: defineAsyncComponent(() => import('@/views/CopyTool.vue'))
   })
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: NubtnList
+    component: defineAsyncComponent(() => import('@/views/NubtnList.vue'))
   })
 }
 
@@ -106,7 +104,6 @@ const router = createRouter({
         if (standalone) {
           vivistickerUtils.enterStandaloneMode()
           vivistickerUtils.setDefaultLocale()
-          vivistickerUtils.setDefaultPrices()
         }
         const userInfo = await vivistickerUtils.getUserInfo()
         if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
@@ -121,6 +118,7 @@ const router = createRouter({
           store.commit('vivisticker/SET_editorBg', editorBg)
         }
         picWVUtils.updateLocale(locale)
+        vivistickerUtils.setDefaultPrices(locale)
 
         document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
@@ -170,9 +168,13 @@ router.beforeEach(async (to, from, next) => {
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 
     // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.
-    if (/Firefox/i.test(navigator.userAgent || navigator.vendor)) {
-      defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
-    }
+    // if (/Firefox/i.test(navigator.userAgent || navigator.vendor)) {
+    //   defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
+    // }
+
+    // Vivisticker doesn't use Noto Color Emoji font, but iPhone default font.
+    // So remove it from the default fonts.
+    defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
 
     defaultFontsJson
       .forEach(_font => {

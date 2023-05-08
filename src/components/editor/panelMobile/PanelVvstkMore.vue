@@ -17,7 +17,7 @@ div(class="panel-vvstk-more")
         svg-icon(iconName="vivisticker_version"
                   iconWidth="24px"
                   iconColor="gray-3")
-      span(class="panel-vvstk-more__option-title version") {{ `${appVersion}/${iOSVer} ${buildNumber}${domain} ${hostId}` }}
+      span(class="panel-vvstk-more__option-title version") {{ `${userInfo.appVer}/${userInfo.osVer}/${userInfo.modelName} ${buildNumber}${domain} ${hostId}` }}
   template(v-else)
     div(class="panel-vvstk-more__options")
       div(v-for="option in options"
@@ -33,6 +33,7 @@ div(class="panel-vvstk-more")
 </template>
 
 <script lang="ts">
+import constantData from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
@@ -47,11 +48,12 @@ type OptionConfig = {
 
 export default defineComponent({
   data() {
+    const videoUrls = constantData.stickerVideoUrls()
     return {
       debugModeTimer: -1,
       debugModeCounter: 0,
       domain: window.location.hostname !== 'sticker.vivipic.com' ? ` ${window.location.hostname.replace('.vivipic.com', '')}` : '',
-      debugMode: false
+      debugMode: false,
     }
   },
   props: {
@@ -189,12 +191,6 @@ export default defineComponent({
           return []
       }
     },
-    appVersion(): string {
-      return this.userInfo.appVer
-    },
-    iOSVer(): string {
-      return this.userInfo.osVer
-    },
     buildNumber(): string {
       const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
       return buildNumber ? `v.${buildNumber}` : 'local'
@@ -232,7 +228,7 @@ export default defineComponent({
       editorUtils.setCloseMobilePanelFlag(true)
     },
     handleShowIOS16Tutorial() {
-      this.setFullPageConfig({ type: 'iOS16Video', params: { fromModal: false } })
+      vivistickerUtils.openFullPageVideo('iOS')
     },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')

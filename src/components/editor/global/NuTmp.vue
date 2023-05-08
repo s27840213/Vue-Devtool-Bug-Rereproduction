@@ -23,7 +23,7 @@ import { IPage } from '@/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
