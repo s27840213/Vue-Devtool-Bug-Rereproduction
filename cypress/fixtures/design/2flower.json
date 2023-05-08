@@ -2,6 +2,7 @@
   {
     "width": 1080,
     "height": 1080,
+    "contentScaleRatio": 0.3343888888888889,
     "x": 0,
     "y": 0,
     "physicalWidth": 1080,
@@ -220,9 +221,7 @@
         "panelPreviewSrc": "https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=320&origin=true&ver=OsZD5g"
       }
     ],
-    "documentColors": [
-      "#ffffff"
-    ],
+    "documentColors": ["#ffffff"],
     "designId": "",
     "id": "CtlnEYHK",
     "guidelines": {
