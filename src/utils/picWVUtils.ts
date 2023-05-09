@@ -68,9 +68,9 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     window.open(url, this.inBrowserMode ? '_blank' : '_self')
   }
 
-  sendToIOS(messageType: string, message: any): void {
+  sendToIOS: InstanceType<typeof WebViewUtils>['sendToIOS'] = (...args) => {
     if (this.inBrowserMode) return
-    super.sendToIOS(messageType, message)
+    super.sendToIOS(...args)
   }
 
   callIOSAsAPI: InstanceType<typeof WebViewUtils>['callIOSAsAPI'] = async (...args) => {
