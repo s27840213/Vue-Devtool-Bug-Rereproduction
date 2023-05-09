@@ -248,7 +248,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
   const isFonLoaded = await vivistickerUtils.checkFontLoaded(face)
   switch (type) {
     case 'public':
-      cssUrl = addPlatform(`https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`)
+      cssUrl = addPlatform(`https://media.vivipic.cc/font/${face}/subset/font.css?ver=${ver}&origin=true`)
       if (isInPrevew || isFonLoaded) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
@@ -298,7 +298,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     case 'URL':
       return url
   }
-  cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
+  cssUrl = `https://media.vivipic.cc/font/${face}/subset/font.css?ver=${ver}&origin=true`
   if (isInPrevew) return cssUrl
   try {
     response = await fetch(cssUrl)
