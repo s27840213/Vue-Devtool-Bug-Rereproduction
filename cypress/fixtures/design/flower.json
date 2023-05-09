@@ -2,6 +2,7 @@
   {
     "width": 1080,
     "height": 1080,
+    "contentScaleRatio": 0.3343888888888889,
     "x": 0,
     "y": 0,
     "physicalWidth": 1080,
@@ -151,9 +152,7 @@
         "panelPreviewSrc": "https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2302081104321519Yqr7H96/tiny"
       }
     ],
-    "documentColors": [
-      "#ffffff"
-    ],
+    "documentColors": ["#ffffff"],
     "designId": "",
     "id": "DP5xb2jX",
     "guidelines": {

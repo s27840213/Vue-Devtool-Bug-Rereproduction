@@ -90,6 +90,9 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-around;
+  &.light, &.dark {
+    margin-bottom: 24px;
+  }
   &__item {
     box-sizing: border-box;
     text-align: center;

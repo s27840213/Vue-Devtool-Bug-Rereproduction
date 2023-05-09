@@ -75,55 +75,55 @@ app.use(FloatingVue, {
 app.component('RecycleScroller', RecycleScroller)
 
 app.component('svg-icon', defineAsyncComponent(() =>
-  import('@/components/global/SvgIcon.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/global/SvgIcon.vue')
 ))
 app.component('btn', defineAsyncComponent(() =>
-  import('@/components/global/Btn.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))
 app.component('property-bar', defineAsyncComponent(() =>
-  import('@/components/global/PropertyBar.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/global/PropertyBar.vue')
 ))
 app.component('dropdown', defineAsyncComponent(() =>
-  import('@/components/global/Dropdown.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Dropdown.vue')
 ))
 app.component('nu-image', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuImage.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImage.vue')
 ))
 app.component('nu-layer', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuLayer.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuLayer.vue')
 ))
 app.component('nu-text', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuText.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuText.vue')
 ))
 app.component('nu-group', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuGroup.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuGroup.vue')
 ))
 app.component('nu-tmp', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuTmp.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuTmp.vue')
 ))
 app.component('nu-controller', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuController.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuController.vue')
 ))
 app.component('nu-sub-controller', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuSubController.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuSubController.vue')
 ))
 app.component('nu-shape', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuShape.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuShape.vue')
 ))
 app.component('nu-img-controller', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuImgController.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImgController.vue')
 ))
 app.component('nu-frame', defineAsyncComponent(() =>
-  import('@/components/editor/global/NuFrame.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuFrame.vue')
 ))
 app.component('nubtn', defineAsyncComponent(() =>
-  import('@/components/global/Nubtn.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Nubtn.vue')
 ))
 app.component('spinner', defineAsyncComponent(() =>
-  import('@/components/global/Spinner.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Spinner.vue')
 ))
 app.component('hint', defineAsyncComponent(() =>
-  import('@/components/global/Hint.vue')
+  import(/* webpackChunkName: "global-component" */ '@/components/global/Hint.vue')
 ))
 
 app.directive('hint', {

@@ -903,7 +903,7 @@ class TextUtils {
   }
 
   async untilFontLoadedForP(paragraph: IParagraph): Promise<void> {
-    const fontList = cssConverter.getFontFamily(paragraph.styles.font as string).split(',')
+    const fontList = cssConverter.getFontFamily(paragraph.styles.font as string).replace(/\s+/g, '').split(',').filter(id => id !== '-apple-system')
     await Promise.all([
       (async (): Promise<void> => {
         const valid = await store.dispatch('text/checkFontLoaded', fontList[0])
