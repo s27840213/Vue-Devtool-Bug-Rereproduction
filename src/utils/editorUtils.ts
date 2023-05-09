@@ -141,6 +141,8 @@ class EditorUtils {
     if (generalUtils.isTouchDevice()) {
       store.commit('mobileEditor/SET_currActiveSubPanel', panel)
     }
+    if (panel === 'none') this.setShowMobileSubPanel(false)
+    else this.setShowMobileSubPanel(true)
   }
 
   setCurrCardIndex(index: number): void {
@@ -158,6 +160,12 @@ class EditorUtils {
   setShowMobilePanel(bool: boolean): void {
     if (generalUtils.isTouchDevice()) {
       store.commit('mobileEditor/SET_showMobilePanel', bool)
+    }
+  }
+
+  setShowMobileSubPanel(bool: boolean): void {
+    if (generalUtils.isTouchDevice()) {
+      store.commit('mobileEditor/SET_showMobileSubPanel', bool)
     }
   }
 
