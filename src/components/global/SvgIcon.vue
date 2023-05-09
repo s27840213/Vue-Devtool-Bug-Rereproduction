@@ -13,6 +13,12 @@ svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
 <script lang="ts">
 import { defineComponent } from 'vue'
 
+declare module '@vue/runtime-core' {
+  export interface GlobalComponents {
+    SvgIcon: typeof component
+  }
+}
+
 /**
  * 這個 Components 我把它註冊在全域，使用時可以用不Import
  * 另外，在@/assets/icon 資料夾的 icon 我有另外進行輸出處理
@@ -25,7 +31,7 @@ import { defineComponent } from 'vue'
  * 2021.9.24 更新: 如果說圖片是 svg 格式，但沒有顏色切換需求，其實也可以用這個元件，就只是改顏色不會影響到他而已
  */
 
-export default defineComponent({
+const component = defineComponent({
   emits: [],
   name: 'SvgIcon',
   props: {
@@ -90,6 +96,7 @@ export default defineComponent({
     }
   }
 })
+export default component
 </script>
 
 <style lang="scss" scoped>
