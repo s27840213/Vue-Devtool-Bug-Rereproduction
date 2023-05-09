@@ -213,9 +213,10 @@ export default defineComponent({
     ...mapActions({
       closePopup: 'popup/closePopup'
     }),
-    middleware() { // These component controll v-click-o by themself.
+    middleware(e: MouseEvent) { // These component controll v-click-o by themself.
       if (['popup-payment'].includes(this.component)) return false
-      return true
+      // For "Upload image" btn in popup, which is implement with click #upload btn by js.
+      return (e.target as HTMLElement | null)?.id !== 'upload'
     },
     async close() {
       await (this.popupComponent as IPopupComponent).closeHandler()

@@ -163,6 +163,9 @@ export default defineComponent({
   line-height: 0;
   text-align: left;
   box-sizing: border-box;
+  .vue-recycle-scroller {
+    height: 100%;
+  }
   &__row {
     display: flex;
     justify-content: space-between;

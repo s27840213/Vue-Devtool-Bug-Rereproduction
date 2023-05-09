@@ -1,22 +1,10 @@
 <template lang="pug">
-recycle-scroller(class="image-list" :items="images2d" :itemSize="115")
+div(v-if="showUploadArea" class="upload-area") {{'Click Upload or Drag & drop photos here'}}
+recycle-scroller(class="image-list" :items="images2d" :itemSize="140" ref="recycle")
   template(v-slot="{ item }: {item:{id: string, item: IImageListItem[]}}")
     div(class="image-list__row")
       template(v-for="img in item.item" :key="img.id")
-        div(v-if="img.type === 'add'"
-          class="image-list__item add pointer relative"
-          @click="$emit('addImage')")
-          span(class="primary") {{ $t('NN0411') }}
-          span(class="secondary" v-html="$t('NN0412')")
-          svg-icon(class="hover"
-                  iconName="plus-origin"
-                  iconWidth="16px"
-                  iconColor="gray-2")
-        div(v-else-if="img.type === 'loading'"
-            class="image-list-loading no-trans")
-          svg-icon(iconName="loading"
-                  iconWidth="50px"
-                  iconColor="gray-3")
+        div(v-if="img.type === 'placeholder'" class="image-list__placeholder")
         observer-sentinel(v-else-if="img.type === 'sentinel'"
                           class="no-trans"
                           :target="$route.name === 'Editor' ? '.popup-brand-settings__window' : undefined"
@@ -25,7 +13,7 @@ recycle-scroller(class="image-list" :items="images2d" :itemSize="115")
           class="image-list__item relative")
           svg-icon(v-if="img.uploading" iconName="loading" iconWidth="24px" iconColor="gray-3")
           img(v-else :src="img.src" class="image-list__item__img"
-              :width="img.width" @click="$emit('clickImage', img)")
+              @click="$emit('clickImage', img)")
           div(v-if="showMore && !img.uploading" class="image-list__item__more pointer"
             @click="$emit('handleOpenMenu', img)")
             div(class="image-list__item__more-container relative")
@@ -50,33 +38,31 @@ recycle-scroller(class="image-list" :items="images2d" :itemSize="115")
                           iconWidth="24px"
                           iconColor="gray-2")
                   span {{ $t('NN0034') }}
+  template(#after)
+    div(v-if="true || loading" class="flex-center")
+      svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
 </template>
 
 <script lang="ts">
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import i18n from '@/i18n'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 
 export interface IImageListItem {
-  type: '' | 'add' | 'loading' | 'sentinel'
+  type: '' | 'sentinel' | 'placeholder'
   key: string
   label: string
   src: string
-  width: number
   uploading: boolean
   menuopen: boolean
 }
-export const spItem = (type: 'add' | 'loading' | 'sentinel') => ({
+export const spItem = (type: 'sentinel' | 'placeholder') => ({
   type,
   key: type,
   label: '',
   src: '',
-  width: type === 'add' ? {
-    tw: 158,
-    us: 203.66,
-    jp: 277.64
-  }[i18n.global.locale as 'tw'|'us'|'jp'] : 0,
   uploading: false,
   menuopen: false,
 })
@@ -105,6 +91,12 @@ export default defineComponent({
     showMore: {
       type: Boolean,
     },
+    showUploadArea: {
+      type: Boolean
+    },
+    loading: {
+      type: Boolean
+    },
   },
   data() {
     return {
@@ -121,26 +113,25 @@ export default defineComponent({
   },
   methods: {
     updateImg() {
-      if (!this.$el) {
+      const container = (this.$refs.recycle as {$el: HTMLElement}).$el
+      if (!container) {
         this.images2d = []
         return
       }
 
-      const width = (this.$el as HTMLElement).clientWidth
+      const width = container.clientWidth
+      const imgInRow = Math.floor((width - 120) / 140) + 1
       const array2d = [] as {id: string, item: IImageListItem[]}[]
-      let accWidth = 10000000
 
       this.images.forEach(image => {
-        // 2 = border width, 15 = gap width
-        const imgWidth = image.type === '' ? Math.floor(image.width) + 2 : image.width
-        if (accWidth + imgWidth + 15 > width) {
+        if (array2d.length === 0 || array2d[array2d.length - 1].item.length >= imgInRow) {
           array2d.push({ id: `row${array2d.length}`, item: [] })
-          accWidth = imgWidth
-        } else {
-          accWidth += imgWidth + 15
         }
         array2d[array2d.length - 1].item.push(image)
       })
+      while (array2d.length && array2d[array2d.length - 1].item.length < imgInRow) {
+        array2d[array2d.length - 1].item.push(spItem('placeholder'))
+      }
       this.images2d = array2d
     }
   },
@@ -148,68 +139,37 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.image-list-loading {
-  display: flex;
-  justify-content: center;
+.upload-area {
+  @include body-XS;
+  color: setColor(gray-3);
+  margin-bottom: 20px;
 }
 .image-list {
   @include hover-scrollbar;
+  @include push-scrollbar10;
   display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  height: 100%;
   &__row {
     display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  &__placeholder, &__item {
+    height: 120px;
+    width: 120px;
   }
   &__item {
-    height: 100px;
-    min-width: 60px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    border: 1px solid setColor(gray-4);
+    align-items: center;
     box-sizing: border-box;
-    border-radius: 4px;
-    &.add {
-      // width: 100px;
-      display: flex;
-      flex-direction: column;
-      padding: 25px 30px;
-      border: 1px dashed setColor(gray-4);
-      & > .hover {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: none;
-        z-index: 1;
-      }
-      &:hover {
-        background-color: setColor(blue-4);
-        border: 1px solid setColor(blue-4);
-        & > span.primary,
-        & > span.secondary {
-          color: setColor(blue-4);
-        }
-        & > .hover {
-          display: block;
-        }
-      }
-      & > span.primary {
-        @include body-SM;
-        color: setColor(gray-2);
-      }
-      & > span.secondary {
-        @include body-XS;
-        color: setColor(gray-3);
-      }
-    }
+    padding: 10px;
+    border: 1px solid setColor(gray-5);
     &__img {
-      height: 100%;
-      // width: auto;
+      max-height: 100px;
+      max-width: 100px;
     }
-    &:not(.add):hover,
+    &:hover,
     &.hovered {
       background-color: rgba(setColor(gray-4), 0.5);
       border: 1px solid setColor(gray-4);
@@ -239,8 +199,6 @@ export default defineComponent({
       flex-direction: column;
       gap: 10px;
       padding: 8px 0px;
-      top: calc(100% + 10px);
-      left: 0;
       width: 216px;
       position: absolute;
       background: white;
@@ -248,6 +206,12 @@ export default defineComponent({
       border-radius: 5px;
       z-index: 1;
       cursor: initial;
+      top: -4px;
+      left: calc(100% + 10px);
+      .image-list__item:nth-last-child(-n+2) & { // Last 2 menu show at the left side.
+        left: initial;
+        right: calc(100% + 10px);
+      }
       &__name {
         height: 25px;
         padding: 0px 8px;

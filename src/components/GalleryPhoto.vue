@@ -84,7 +84,7 @@ export default defineComponent({
   data() {
     return {
       dragUtils: new DragUtils(),
-      replaceImgInject: inject(replaceImgInject),
+      replaceImgInject: inject(replaceImgInject, null),
     }
   },
   computed: {

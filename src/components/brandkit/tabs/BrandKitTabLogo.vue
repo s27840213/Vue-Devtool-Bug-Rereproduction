@@ -1,12 +1,15 @@
 <template lang="pug">
-image-list(:images="renderedLogos"
-  :showMore="true"
-  @addImage="handleUploadLogo"
-  @handleDownload="handleDownload"
-  @handleDeleteLogo="handleDeleteLogo"
-  @handleOpenMenu="handleOpenMenu"
-  @handleCloseMenu="handleCloseMenu"
-  @loadMore="handleLoadMore")
+div(class="brand-kit-tab-logo")
+  image-list(:images="renderedLogos"
+    :showMore="true"
+    :showUploadArea="true"
+    :loading="isLogosLoading"
+    @addImage="handleUploadLogo"
+    @handleDownload="handleDownload"
+    @handleDeleteLogo="handleDeleteLogo"
+    @handleOpenMenu="handleOpenMenu"
+    @handleCloseMenu="handleCloseMenu"
+    @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">
@@ -56,19 +59,16 @@ export default defineComponent({
       return (this.currentBrand as IBrand).logos
     },
     renderedLogos(): IRenderedLogos[] {
-      const res = [spItem('add'), ...this.logos.map(logo => ({
+      const res = this.logos.map(logo => ({
         type: '' as const,
         key: logo.id,
         label: logo.name,
         src: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'tiny'),
-        width: logo.width / logo.height * 98,
         uploading: logo.id.startsWith('new_'),
         menuopen: this.menuOpenLogoId === logo.id,
         logo,
-      }))]
-      if (this.isLogosLoading) {
-        res.push(spItem('loading'))
-      } else if (this.logosPageIndex >= 0) {
+      })) as IRenderedLogos[]
+      if (!this.isLogosLoading && this.logosPageIndex >= 0) {
         res.push(spItem('sentinel'))
       }
       return res
@@ -140,4 +140,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.brand-kit-tab-logo {
+  display: grid;
+  height: 100%;
+}
 </style>
