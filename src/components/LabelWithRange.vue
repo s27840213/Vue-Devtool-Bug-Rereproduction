@@ -20,6 +20,7 @@ import { defineComponent } from 'vue'
 import vClickOutside from 'click-outside-vue3'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   directives: {
@@ -57,7 +58,7 @@ export default defineComponent({
     openCorRadSliderPopup() {
       if (this.disabled) return
       popupUtils.setCurrEvent(this.event)
-      popupUtils.setSliderConfig({ value: this.value, min: this.min, max: this.max, noText: true })
+      popupUtils.setSliderConfig({ value: this.value, min: this.min, max: this.max, noText: true, width: generalUtils.getSliderWidth() })
       popupUtils.openPopup('slider', {
         posX: 'right',
         target: '.label-with-range__label'

@@ -3,6 +3,7 @@ import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
+import logUtils from '@/utils/logUtils'
 import themeUtils from '@/utils/themeUtils'
 import { captureException } from '@sentry/browser'
 import { find } from 'lodash'
@@ -66,13 +67,16 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit('SET_STATE', { pending: true, categories: [], locale }) // Reset categories
       try {
-        const { data } = await this.api({
+        const apiParams = {
           token: store.getters['user/getToken'],
           locale,
           theme,
           listAll: 0,
           listCategory: 0
-        })
+        }
+
+        const { data } = await this.api(apiParams)
+        logUtils.setLog(`api(${JSON.stringify(apiParams)}): content = [${data.data.content.map((c: { title: string, list: { id: string }[] }) => `${c.title}[${c.list.slice(0, 3).map((l: { id: string }) => l.id)}...]`)}]`)
         if (writeBack) commit('SET_RECENTLY', data.data)
         else return data.data
       } catch (error) {
@@ -88,7 +92,7 @@ export default function (this: any) {
       commit('SET_STATE', { pending: true, locale })
       try {
         const isAdmin = store.getters['user/isAdmin']
-        const { data } = await this.api({
+        const apiParams = {
           token: '1',
           locale,
           theme,
@@ -96,7 +100,9 @@ export default function (this: any) {
           listCategory: 1,
           pageIndex: state.nextCategory,
           cache: !isAdmin
-        })
+        }
+        const { data } = await this.api(apiParams)
+        logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentTitle = [${data.data.content.map((l: { title: string }) => l.title)}]`)
         if (writeBack) commit('SET_CATEGORIES', data.data)
         else return data.data
         // If content empty, auto load more category
@@ -134,7 +140,7 @@ export default function (this: any) {
       try {
         const isAdmin = store.getters['user/isAdmin']
         const needCache = !((keyword && find(state.categories, ['title', keyword])?.is_recent) || isAdmin)
-        const { data } = await this.api({
+        const apiParams = {
           token: needCache ? '1' : store.getters['user/getToken'],
           locale,
           keyword,
@@ -142,7 +148,9 @@ export default function (this: any) {
           listAll: 1,
           listCategory: 0,
           cache: needCache
-        })
+        }
+        const { data } = await this.api(apiParams)
+        logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
         console.error(error)
@@ -156,7 +164,7 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit('SET_STATE', { pending: true, keyword, theme, locale, content: {} })
       try {
-        const { data } = await this.api({
+        const apiParams = {
           token: '1',
           locale,
           keyword,
@@ -164,7 +172,9 @@ export default function (this: any) {
           listAll: 1,
           listCategory: 0,
           cache: true
-        })
+        }
+        const { data } = await this.api(apiParams)
+        logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
         console.error(error)
@@ -182,7 +192,7 @@ export default function (this: any) {
       if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       const isAdmin = store.getters['user/isAdmin']
       try {
-        const { data } = await this.api({
+        const apiParams = {
           token: isAdmin ? store.getters['user/getToken'] : '1',
           locale,
           theme,
@@ -190,7 +200,9 @@ export default function (this: any) {
           listAll: 1,
           listCategory: 0,
           cache: !isAdmin
-        })
+        }
+        const { data } = await this.api(apiParams)
+        logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_CONTENT', { objects: data.data, isSearch: true })
       } catch (error) {
         console.error(error)
@@ -216,6 +228,7 @@ export default function (this: any) {
       commit('SET_STATE', { pending: true })
       try {
         const { data } = await this.api(nextParams)
+        logUtils.setLog(`api(${JSON.stringify(nextParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_MORE_CONTENT', data.data)
       } catch (error) {
         console.error(error)

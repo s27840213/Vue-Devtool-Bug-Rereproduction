@@ -161,6 +161,7 @@ class UploadUtils {
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
+    inputNode.id = 'upload'
     inputNode.click()
 
     inputNode.addEventListener('change', (evt: Event) => {
@@ -205,6 +206,7 @@ class UploadUtils {
       const img = new Image()
       img.src = evt.target?.result as string
       img.onload = (evt) => {
+        store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: true })
         store.commit('file/ADD_PREVIEW', {
           width: img.width,
           height: img.height,
@@ -540,7 +542,8 @@ class UploadUtils {
     }
   }
 
-  uploadLog(logContent: string) {
+  async uploadLog(logContent: string) {
+    await this.checkIfUrlExpires()
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_log_map.fields).forEach(key => {
       formData.append(key, this.loginOutput.upload_log_map.fields[key])
@@ -1063,6 +1066,13 @@ class UploadUtils {
         modalUtils.setModalInfo('更新失敗', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`, '已複製錯誤訊息至剪貼簿，麻煩將錯誤訊息貼至群組'])
         navigator.clipboard.writeText([`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`].join('\n'))
       }
+    }
+  }
+
+  async checkIfUrlExpires() {
+    const expire = new Date(Date.parse(this.loginOutput.upload_log_map.expire + 'Z'))
+    if (new Date() >= expire) {
+      await store.dispatch('user/login', { token: store.getters['user/getToken'] })
     }
   }
 

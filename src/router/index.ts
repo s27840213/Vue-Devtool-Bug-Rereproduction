@@ -7,22 +7,8 @@ import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
-import BrandKit from '@/views/BrandKit.vue'
-import BrowserWarning from '@/views/BrowserWarning.vue'
-import CopyTool from '@/views/CopyTool.vue'
-import Editor from '@/views/Editor.vue'
 import Home from '@/views/Home.vue'
-import Login from '@/views/Login/Login.vue'
-import SignUp from '@/views/Login/SignUp.vue'
-import MobileWarning from '@/views/MobileWarning.vue'
-import MyDesign from '@/views/MyDesign.vue'
-import NubtnList from '@/views/NubtnList.vue'
-import Preview from '@/views/Preview.vue'
-import Pricing from '@/views/Pricing.vue'
-import Settings from '@/views/Settings.vue'
-import SvgIconView from '@/views/SvgIconView.vue'
-import TemplateCenter from '@/views/TemplateCenter.vue'
-import { h, resolveComponent } from 'vue'
+import { defineAsyncComponent, h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import { editorRouteHandler } from './handler'
 
@@ -55,7 +41,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'editor',
     name: 'Editor',
-    component: Editor,
+    component: defineAsyncComponent(() => import('@/views/Editor.vue')),
     beforeEnter: editorRouteHandler
   },
   // {
@@ -68,7 +54,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'preview',
     name: 'Preview',
-    component: Preview,
+    component: defineAsyncComponent(() => import('@/views/Preview.vue')),
     beforeEnter: async (to, from, next) => {
       try {
         const urlParams = new URLSearchParams(window.location.search)
@@ -145,7 +131,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'signup',
     name: 'SignUp',
     props: route => ({ redirect: route.query.redirect }),
-    component: SignUp,
+    component: defineAsyncComponent(() => import('@/views/Login/SignUp.vue')),
     beforeEnter: async (to, from, next) => {
       try {
         if (store.getters['user/isLogin']) {
@@ -162,7 +148,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'login',
     name: 'Login',
     props: route => ({ redirect: route.query.redirect }),
-    component: Login,
+    component: defineAsyncComponent(() => import('@/views/Login/Login.vue')),
     beforeEnter: async (to, from, next) => {
       try {
         if (to.query.type) {
@@ -182,34 +168,34 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'mydesign/:view?',
     name: 'MyDesign',
-    component: MyDesign,
+    component: defineAsyncComponent(() => import('@/views/MyDesign.vue')),
     props: true
   },
   {
     path: 'templates',
     name: 'TemplateCenter',
-    component: TemplateCenter
+    component: defineAsyncComponent(() => import('@/views/TemplateCenter.vue'))
   },
   {
     path: 'settings/:view?',
     name: 'Settings',
-    component: Settings,
+    component: defineAsyncComponent(() => import('@/views/Settings.vue')),
     props: true
   },
   {
     path: 'mobilewarning',
     name: 'MobileWarning',
-    component: MobileWarning
+    component: defineAsyncComponent(() => import('@/views/MobileWarning.vue'))
   },
   {
     path: 'browserwarning',
     name: 'BrowserWarning',
-    component: BrowserWarning
+    component: defineAsyncComponent(() => import('@/views/BrowserWarning.vue'))
   },
   {
     path: 'brandkit',
     name: 'BrandKit',
-    component: BrandKit,
+    component: defineAsyncComponent(() => import('@/views/BrandKit.vue')),
     beforeEnter: async (to, from, next) => {
       try {
         if (!brandkitUtils.isBrandkitAvailable) {
@@ -225,7 +211,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'pricing',
     name: 'Pricing',
-    component: Pricing
+    component: defineAsyncComponent(() => import('@/views/Pricing.vue'))
   }
 ]
 
@@ -233,17 +219,17 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: SvgIconView
+    component: defineAsyncComponent(() => import('@/views/SvgIconView.vue'))
   })
   routes.push({
     path: 'copytool',
     name: 'CopyTool',
-    component: CopyTool
+    component: defineAsyncComponent(() => import('@/views/CopyTool.vue'))
   })
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: NubtnList
+    component: defineAsyncComponent(() => import('@/views/NubtnList.vue'))
   })
 }
 
