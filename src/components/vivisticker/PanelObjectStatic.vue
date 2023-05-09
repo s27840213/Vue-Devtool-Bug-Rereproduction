@@ -336,7 +336,7 @@ export default defineComponent({
         if (list.show) {
           const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
           const top = categoryList.$el.querySelector('.panel-static__top-item') as HTMLElement
-          top.scrollIntoView({ behavior: 'smooth' })
+          top.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
         }
       }
     },
