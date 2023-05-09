@@ -30,7 +30,6 @@ import pageUtils from './pageUtils'
 import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import themeUtils from './themeUtils'
-import vivistickerUtils from './vivistickerUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -1074,7 +1073,9 @@ class UploadUtils {
   async checkIfUrlExpires() {
     const expire = new Date(Date.parse(this.loginOutput.upload_log_map.expire + 'Z'))
     if (new Date() >= expire) {
-      await vivistickerUtils.getUserInfo()
+      const response = await fetch(`https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
+      const json = await response.json()
+      this.setLoginOutput({ upload_log_map: json.ul_log_map })
     }
   }
 
