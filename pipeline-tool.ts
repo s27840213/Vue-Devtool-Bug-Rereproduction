@@ -176,7 +176,6 @@ const result = {
         parallel: versionCheckAndBuild()
       },
       getDeploy('deploy test', 'test', 'TEST'),
-      getDeploy('deploy edit', 'staging', 'EDIT', 'EDIT', true),
       getDeploy('deploy prod', 'production', 'PROD', 'PROD', true)
       ],
       develop: [{
@@ -211,7 +210,7 @@ const result = {
       'app/vivisticker-develop': [{
         parallel: versionCheckAndBuild(false)
       }, {
-        parallel: [getDeploy('deploy test', 'stkrd', 'STICKER_RD', 'STICKER')]
+        parallel: [getDeploy('deploy test', 'stkrd', 'STICKER_RD', 'STICKER'), pullRequest()] // add pull request to app/vivisticker
       }],
       // 'feature/?': [{
       //   parallel: versionCheckAndBuild()

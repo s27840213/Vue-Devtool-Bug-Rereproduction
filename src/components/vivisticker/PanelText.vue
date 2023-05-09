@@ -363,7 +363,7 @@ export default defineComponent({
     grid-template-columns: repeat(3, 1fr);
     column-gap: 10px;
   }
-  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
+  &.in-category:deep(.vue-recycle-scroller__item-wrapper) {
     margin-top: 24px;
   }
   &__header {

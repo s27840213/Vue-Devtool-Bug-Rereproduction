@@ -969,6 +969,7 @@ class TextBg {
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
           let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
           if (vertical) [x, y] = [y, x]
+          // TODO: move BG img back to icon folder
           const colorChangeable = /(cloud\d|rainbow-circle|solid-heart|text-book)/.test(p.href)
           return {
             tag: colorChangeable ? 'use' : 'image',
