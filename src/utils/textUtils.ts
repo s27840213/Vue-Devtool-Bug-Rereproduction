@@ -533,7 +533,7 @@ class TextUtils {
       })
     }
     LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
-      x: group.styles.x + minX
+      x: group.styles.x + minX * group.styles.scale
     })
   }
 
@@ -551,7 +551,7 @@ class TextUtils {
       })
     }
     LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
-      y: group.styles.y + minY
+      y: group.styles.y + minY * group.styles.scale
     })
   }
 
