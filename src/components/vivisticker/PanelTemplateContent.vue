@@ -24,7 +24,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
                 :class="{invisible: !item.show, collapsed: !isSearchBarExpanded}"
-                v-show="item.show" :ref="item.key" :key="item.key"
+                :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="handleLoadMore"
                 @scroll.passive="handleScrollTop($event, item.key as 'mainContent'|'searchResult')")
     template(#before)
@@ -54,7 +54,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
         svg-icon(iconName="loading"
           iconColor="white"
           iconWidth="20px")
-  btn-add(v-if="!isInCategory" :elScrollable="elMainContent" :text="'Create ' + igLayout" @click="addTemplate")
+  btn-add(v-show="!isInCategory && !keyword" :elScrollable="elMainContent" :text="'Create ' + igLayout" @click="addTemplate")
 </template>
 
 <script lang="ts">
@@ -237,8 +237,8 @@ export default defineComponent({
     getContent(params = {}) {
       this.$store.dispatch(`templates/${this.igLayout}/getContent`, params)
     },
-    getTagContent(params = {}) {
-      this.$store.dispatch(`templates/${this.igLayout}/getTagContent`, params)
+    async getTagContent(params = {}) {
+      await this.$store.dispatch(`templates/${this.igLayout}/getTagContent`, params)
     },
     getMoreContent() {
       this.$store.dispatch(`templates/${this.igLayout}/getMoreContent`)
@@ -420,6 +420,14 @@ export default defineComponent({
       border-width: 8px 10px 8px 0;
       border-color: transparent setColor(gray-4) transparent transparent;
     }
+  }
+  .category-list {
+    overflow-x: hidden;
+  }
+  .invisible {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
   }
 }
 </style>
