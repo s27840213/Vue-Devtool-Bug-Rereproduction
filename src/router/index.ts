@@ -110,7 +110,18 @@ const router = createRouter({
           await logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
-        const locale = userInfo.locale
+        let locale = 'us'
+        if (userInfo.appVer === '1.28') {
+          const localLocale = localStorage.getItem('locale')
+          if (localLocale) {
+            locale = localLocale
+          } else {
+            locale = localeUtils.getBrowserLang()
+          }
+        } else {
+          locale = userInfo.locale
+        }
+        logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
         i18n.global.locale = locale as 'jp' | 'us' | 'tw'
         localStorage.setItem('locale', locale)
         const editorBg = userInfo.editorBg

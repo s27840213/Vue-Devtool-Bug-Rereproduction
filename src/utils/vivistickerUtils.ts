@@ -604,8 +604,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async updateLocale(locale: string): Promise<void> {
+    localStorage.setItem('locale', locale) // set locale to localStorage whether standalone mode or not
     if (this.isStandaloneMode) {
-      localStorage.setItem('locale', locale)
       return
     }
     await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
