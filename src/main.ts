@@ -1,6 +1,7 @@
 import App from '@/App.vue'
 import modalUtils from '@/utils/modalUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
 import Notifications, { notify } from '@kyvg/vue3-notification'
@@ -34,7 +35,7 @@ window.onerror = function (msg, url, line, colno, error) {
   logUtils.setLog(message)
   logUtils.uploadLog().then(() => {
     if (store.getters.getShowGlobalErrorModal) {
-      const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+      const hint = `${vivistickerUtils.getUserInfoFromStore().hostId}, ${generalUtils.generateTimeStamp()}, ${errorId}`
       modalUtils.setModalInfo(
         i18n.global.t('NN0457'),
         hint,
