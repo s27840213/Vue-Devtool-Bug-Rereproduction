@@ -30,8 +30,10 @@ class ListService {
       all_theme: params.all_theme,
       // app: 0: vivipic (default), 1: vivisticker
       app: 1,
-      // for text panel of US version
+      // for vivisticker text panel of US version
       col_num: params.colNum,
+      // for vivisticker template
+      ig_layout: params.igLayout
     }
 
     return axios.request<IListServiceResponse>({

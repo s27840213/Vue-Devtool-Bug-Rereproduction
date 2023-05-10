@@ -69,7 +69,7 @@ export default defineComponent({
       textKeyword: 'keyword'
     }),
     ...mapState('templates', {
-      templateKeyword: 'keyword'
+      templatesIgLayout: 'igLayout'
     }),
     ...mapGetters({
       isInEditor: 'vivisticker/getIsInEditor',
@@ -84,6 +84,9 @@ export default defineComponent({
       isInSelectionMode: 'vivisticker/getIsInSelectionMode',
       userSettings: 'vivisticker/getUserSettings'
     }),
+    templateKeyword() {
+      return this.$store.state.templates[this.templatesIgLayout].keyword
+    },
     stepCount(): number {
       return stepsUtils.steps.length
     },
@@ -185,7 +188,6 @@ export default defineComponent({
       resetGifTagContent: 'giphy/resetTagContent',
       resetBackgroundsSearch: 'background/resetSearch',
       resetTextsSearch: 'textStock/resetSearch',
-      resetTemplatesSearch: 'templates/resetSearch',
       updateUserSettings: 'vivisticker/updateUserSettings'
     }),
     ...mapMutations({
@@ -199,6 +201,9 @@ export default defineComponent({
       setMyDesignTab: 'vivisticker/SET_myDesignTab',
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
     }),
+    resetTemplatesSearch(params = {}) {
+      this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
+    },
     handleTabAction(action?: () => void) {
       if (action) {
         action()

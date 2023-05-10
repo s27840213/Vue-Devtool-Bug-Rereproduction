@@ -19,6 +19,7 @@ div(class="panel-add-template")
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   data() {
@@ -28,15 +29,18 @@ export default defineComponent({
   props: {
   },
   computed: {
+    ...mapState('templates', {
+      igLayout: 'igLayout'
+    }),
   },
   methods: {
     addTemplate(photo = false) {
-      console.log('addTemplate', photo)
+      console.log('addTemplate', this.igLayout, photo)
       vivistickerUtils.startEditing(
-        'templateStory',
+        this.igLayout,
         { plan: 0, assetId: '' },
         async () => {
-          console.log('start editing template story')
+          console.log('start editing template', this.igLayout)
           return true
         },
         vivistickerUtils.getEmptyCallback()

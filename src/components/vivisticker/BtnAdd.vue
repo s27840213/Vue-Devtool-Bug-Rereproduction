@@ -42,33 +42,22 @@ export default defineComponent({
   created() {
     const unwatchElScrollable = this.$watch('elScrollable', (newVal: HTMLElement) => {
       if (newVal) {
-        this.atMainContent = new AnyTouch(newVal, { preventDefault: false })
-        this.atMainContent.on('panstart', (e: AnyTouchEvent) => {
-          if (this.isPan) return // because this event will trigger when pan direction changes
-          this.isPan = true
-          this.scrollTopStart = newVal.scrollTop
-          this.scrollProgressStart = this.destScrollProgress
-        })
-        this.atMainContent.on(['panup', 'pandown'], (e: AnyTouchEvent) => {
-          this.handleMainContentPan()
-        })
-        this.atMainContent.on('panend', (e: AnyTouchEvent) => {
-          this.isPan = false
-        })
-        newVal.addEventListener('scroll', (e: Event) => {
-          this.handleMainContentScroll()
-        }, { passive: true })
+        this.addEventListeners(newVal)
         unwatchElScrollable()
       }
     })
   },
-  mounted() {
-    // update button styles at next frame to get correct width of text
+  activated() {
+    // delay button style update to get correct width of text
     window.requestAnimationFrame(() => {
       this.updateBtnStyles()
+
+      // add event listeners after button styles initialized to avoid flickering
+      // this.elScrollable will be undefined when component first activated, so no duplicate listeners
+      if (this.elScrollable) this.addEventListeners(this.elScrollable)
     })
   },
-  beforeUnmount() {
+  deactivated() {
     if (this.atMainContent) {
       this.atMainContent.off('panstart')
       this.atMainContent.off('panup')
@@ -104,6 +93,22 @@ export default defineComponent({
   methods: {
     localeFont() {
       return AssetUtils.getFontMap()[this.$i18n.locale]
+    },
+    addEventListeners(elScrollable: HTMLElement) {
+      this.atMainContent = new AnyTouch(elScrollable, { preventDefault: false })
+      this.atMainContent.on('panstart', (e: AnyTouchEvent) => {
+        if (this.isPan) return // because this event will trigger when pan direction changes
+        this.isPan = true
+        this.scrollTopStart = elScrollable.scrollTop
+        this.scrollProgressStart = this.destScrollProgress
+      })
+      this.atMainContent.on(['panup', 'pandown'], (e: AnyTouchEvent) => {
+        this.handleMainContentPan()
+      })
+      this.atMainContent.on('panend', (e: AnyTouchEvent) => {
+        this.isPan = false
+      })
+      elScrollable.addEventListener('scroll', this.handleMainContentScroll, { passive: true })
     },
     handleMainContentScroll() {
       if (!this.elScrollable) return

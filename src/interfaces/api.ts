@@ -123,7 +123,8 @@ export interface IListServiceParams {
   cache?: boolean
   platform?: string
   all_theme?: number
-  colNum?: number
+  colNum?: number,
+  igLayout?: string
 }
 
 export interface IGroupDesignInputParams {

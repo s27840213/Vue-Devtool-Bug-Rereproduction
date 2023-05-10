@@ -360,7 +360,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const editorHeight = (elTop.clientHeight - headerHeight) * 0.9
     const shortEdge = Math.min(editorWidth, editorHeight)
 
-    if (editorType === 'templateStory') {
+    if (editorType === 'story') {
       const aspectRatio = editorWidth / editorHeight
       const targetAspectRatio = 9 / 16
       if (aspectRatio > targetAspectRatio) {
