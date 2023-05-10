@@ -88,7 +88,8 @@ export interface IEditorState {
   inScreenshotPreviewRoute: boolean,
   cursor: string,
   isPageScaling: boolean,
-  isGettingDesign: boolean
+  isGettingDesign: boolean,
+  showGlobalErrorModal: boolean,
 }
 
 export enum SidebarPanelType {
