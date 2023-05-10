@@ -34,6 +34,14 @@ div(class="popup-page bg-gray-6"
       :iconWidth="'16px'"
       :iconColor="'gray-1'")
     span(class="ml-10 body-2") {{$t('NN0275')}}
+  div(class="popup-page__item"
+      @click="testError")
+    svg-icon(
+      class="pointer"
+      :iconName="'copy'"
+      :iconWidth="'16px'"
+      :iconColor="'gray-1'")
+    span(class="ml-10 body-2") test error
 </template>
 
 <script lang="ts">
@@ -47,7 +55,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -168,6 +176,9 @@ export default defineComponent({
     },
     closePopup() {
       popupUtils.closePopup()
+    },
+    testError() {
+      throw Error('s')
     }
   }
 })

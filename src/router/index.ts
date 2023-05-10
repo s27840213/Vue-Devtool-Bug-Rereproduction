@@ -323,7 +323,12 @@ router.beforeEach(async (to, from, next) => {
 
     // const json = appJson
 
-    process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('static json loaded: ', json)
+      store.commit('SET_showGlobalErrorModal', true) // local always show error modal
+    } else {
+      store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
+    }
 
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
