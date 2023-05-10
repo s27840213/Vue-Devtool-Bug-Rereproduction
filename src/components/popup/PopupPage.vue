@@ -34,14 +34,6 @@ div(class="popup-page bg-gray-6"
       :iconWidth="'16px'"
       :iconColor="'gray-1'")
     span(class="ml-10 body-2") {{$t('NN0275')}}
-  div(class="popup-page__item"
-      @click="testError")
-    svg-icon(
-      class="pointer"
-      :iconName="'copy'"
-      :iconWidth="'16px'"
-      :iconColor="'gray-1'")
-    span(class="ml-10 body-2") test error
 </template>
 
 <script lang="ts">
@@ -177,9 +169,6 @@ export default defineComponent({
     closePopup() {
       popupUtils.closePopup()
     },
-    testError() {
-      throw Error('s')
-    }
   }
 })
 </script>
