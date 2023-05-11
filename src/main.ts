@@ -37,10 +37,10 @@ window.onerror = function (msg, url, line, colno, error) {
     if (store.getters.getShowGlobalErrorModal) {
       const hint = `${vivistickerUtils.getUserInfoFromStore().hostId}, ${generalUtils.generateTimeStamp()}, ${errorId}`
       modalUtils.setModalInfo(
-        i18n.global.t('NN0457'),
+        i18n.global.t('NN0866'),
         hint,
         {
-          msg: i18n.global.t('NN0866'),
+          msg: i18n.global.t('NN0032'),
           action() {
             generalUtils.copyText(hint).then(() => {
               notify({ group: 'copy', text: '已複製' })
