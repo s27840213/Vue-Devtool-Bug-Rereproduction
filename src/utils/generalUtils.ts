@@ -392,15 +392,17 @@ class GeneralUtils {
     return val
   }
 
-  OSversionCheck(data: { greaterThen?: string, lessThen?: string, version?: string }): boolean {
-    const { lessThen, greaterThen } = data
+  // greaterThan actually means "greater than or equal to", the same as lessThan.
+  // So { greaterThan: '16.0', lessThan: '16.3' } means 16.0 <= v <= 16.3.
+  versionCheck(data: { greaterThan?: string, lessThan?: string, version?: string }): boolean {
+    const { lessThan, greaterThan } = data
     let { version } = data
     if (!version) {
       version = (store.getters['user/getBrowserInfo'] as IBrowserInfo).version
     }
     const vArr = version.split('.')
-    if (lessThen) {
-      const lessArr = lessThen.split('.')
+    if (lessThan) {
+      const lessArr = lessThan.split('.')
       for (const [i, e] of lessArr.entries()) {
         if (+e < +vArr[i]) {
           return false
@@ -410,8 +412,8 @@ class GeneralUtils {
         return false
       }
     }
-    if (greaterThen) {
-      const greatArr = greaterThen.split('.')
+    if (greaterThan) {
+      const greatArr = greaterThan.split('.')
       for (const [i, e] of greatArr.entries()) {
         if (+e > +vArr[i]) {
           return false
