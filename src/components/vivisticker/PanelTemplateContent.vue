@@ -90,6 +90,7 @@ export default defineComponent({
   },
   data() {
     return {
+      targets: ['mainContent', 'searchResult', 'groupContent'],
       currentGroup: null as IAssetTemplate | null,
       scrollTop: {
         mainContent: 0,
@@ -120,6 +121,13 @@ export default defineComponent({
           mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
+    },
+    isInMainContent() {
+      // skip transitions when entering of leaving category
+      this.toggleTransitions(false)
+      this.$nextTick(() => {
+        this.toggleTransitions(true)
+      })
     }
   },
   computed: {
@@ -153,6 +161,9 @@ export default defineComponent({
     },
     isInCategory(): boolean {
       return this.isTabInCategory('template')
+    },
+    isInMainContent(): boolean {
+      return !this.isInCategory && !this.showAllRecently && !this.isInGroupTemplate
     },
     showSearchBar(): boolean {
       return !this.isInCategory && !this.isInGroupTemplate
@@ -307,6 +318,17 @@ export default defineComponent({
       editorUtils.setCurrActivePanel('add-template')
       editorUtils.setShowMobilePanel(true)
     },
+    toggleTransitions(enable: boolean) {
+      // tags
+      const elTags = (this.$refs.tags as any)?.$el as HTMLElement
+      if (elTags) elTags.style.transition = enable ? '' : 'none'
+
+      // category list
+      const ref = this.$refs as Record<string, CCategoryList[]>
+      for (const name of this.targets) {
+        ref[name][0].$el.style.transition = enable ? '' : 'none'
+      }
+    }
   }
 })
 </script>
