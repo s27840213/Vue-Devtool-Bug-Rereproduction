@@ -229,7 +229,7 @@ export default defineComponent({
   margin: 5px 5px 0 0;
   border-radius: 5px;
   &.copy {
-    background-color: setColor(blue-2);
+    background-color: setColor(black-2);
   }
   &.error {
     background-color: setColor(red-2);

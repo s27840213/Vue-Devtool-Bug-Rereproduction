@@ -65,18 +65,13 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   }
 
   checkVersion(targetVersion: string) {
-    // targetVersion must be in format: <main>.<sub> e.g. 1.18
-    const [targetMain, targetSub] = targetVersion.split('.')
-    const [currMain, currSub] = this.getUserInfoFromStore().appVer.split('.')
-    return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
+    const currVer = this.getUserInfoFromStore().appVer ?? '0.0'
+    return generalUtils.versionCheck({ greaterThan: targetVersion, version: currVer })
   }
 
   checkOSVersion(targetVersion: string) {
-    // targetVersion must be in format: <main>.<sub> e.g. 1.18
-    const [targetMain, targetSub] = targetVersion.split('.')
-    const [currMain, currSubRaw] = (this.getUserInfoFromStore().osVer ?? '0.0').split('.')
-    const currSub = currSubRaw ?? '0'
-    return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
+    const currVer = this.getUserInfoFromStore().osVer ?? '0.0'
+    return generalUtils.versionCheck({ greaterThan: targetVersion, version: currVer })
   }
 
   registerResolve(event: string, resolve: (value: any) => void) {

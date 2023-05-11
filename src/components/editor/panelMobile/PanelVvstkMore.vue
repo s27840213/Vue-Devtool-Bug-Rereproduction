@@ -122,6 +122,10 @@ export default defineComponent({
           text: 'App 事件測試',
           icon: 'vivisticker_global',
           action: () => { this.handleList('event-test') }
+        }, {
+          text: 'test error',
+          icon: 'vivisticker_global',
+          action: () => { throw Error('test') }
         }
       ] : []]
     },

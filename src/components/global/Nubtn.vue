@@ -11,7 +11,13 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice()?'mobile':'
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 
-export default defineComponent({
+declare module '@vue/runtime-core' {
+  export interface GlobalComponents {
+    nubtn: typeof component
+  }
+}
+
+const component = defineComponent({
   name: 'Nubtn',
   // Let status prop and @status will be the target of v-model, https://bit.ly/3ukz2Yq
   model: {
@@ -79,6 +85,8 @@ export default defineComponent({
     }
   }
 })
+
+export default component
 </script>
 
 <style lang="scss" scoped>

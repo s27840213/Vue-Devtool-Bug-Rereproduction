@@ -110,7 +110,18 @@ const router = createRouter({
           await logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
-        const locale = userInfo.locale
+        let locale = 'us'
+        if (userInfo.appVer === '1.28') {
+          const localLocale = localStorage.getItem('locale')
+          if (localLocale) {
+            locale = localLocale
+          } else {
+            locale = localeUtils.getBrowserLang()
+          }
+        } else {
+          locale = userInfo.locale
+        }
+        logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
         i18n.global.locale = locale as 'jp' | 'us' | 'tw'
         localStorage.setItem('locale', locale)
         const editorBg = userInfo.editorBg
@@ -157,7 +168,12 @@ router.beforeEach(async (to, from, next) => {
     console.log(json)
     // const json = appJson
 
-    process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('static json loaded: ', json)
+      store.commit('SET_showGlobalErrorModal', true) // local always show error modal
+    } else {
+      store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
+    }
 
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,

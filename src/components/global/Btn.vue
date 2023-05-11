@@ -16,7 +16,13 @@ button(class="btn"
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 
-export default defineComponent({
+declare module '@vue/runtime-core' {
+  export interface GlobalComponents {
+    btn: typeof component
+  }
+}
+
+const component = defineComponent({
   emits: [],
   name: 'Btn',
   components: {
@@ -77,6 +83,7 @@ export default defineComponent({
     }
   }
 })
+export default component
 </script>
 
 <style lang="scss" scoped>
