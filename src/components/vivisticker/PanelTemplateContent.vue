@@ -1,10 +1,5 @@
 <template lang="pug">
-div(class="panel-template-content" ref="panel" :class="{'in-category': isInCategory, 'with-search-bar': showSearchBar}")
-  //- Group template UI
-  panel-group-template(v-if="currentGroup"
-    :groupItem="currentGroup"
-    @close="currentGroup = null")
-  //- Search bar
+div(class="panel-template-content" ref="panel" :class="{'in-category': isInCategory, 'in-group-template': isInGroupTemplate, 'with-search-bar': showSearchBar}")
   search-bar(v-if="showSearchBar"
     class="panel-template-content__searchbar"
     :placeholder="$t('NN0092', { target: $tc('NN0001', 1) })"
@@ -54,7 +49,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
         svg-icon(iconName="loading"
           iconColor="white"
           iconWidth="20px")
-  btn-add(v-show="!isInCategory && !keyword" :elScrollable="elMainContent" :text="'Create ' + igLayout" @click="addTemplate")
+  btn-add(v-show="!isInCategory && !isInGroupTemplate && !keyword" :elScrollable="elMainContent" :text="'Create ' + igLayout" @click="addTemplate")
 </template>
 
 <script lang="ts">
@@ -66,8 +61,8 @@ import Tags, { ITag } from '@/components/global/Tags.vue'
 import Url from '@/components/global/Url.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
-import PanelGroupTemplate from '@/components/vivisticker/PanelGroupTemplate.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IContentTemplate } from '@/interfaces/template'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -83,7 +78,6 @@ export default defineComponent({
     CategoryListRows,
     CategoryTemplateItem,
     CategoryGroupTemplateItem,
-    PanelGroupTemplate,
     Url,
     Tags,
     BtnAdd
@@ -96,7 +90,7 @@ export default defineComponent({
   },
   data() {
     return {
-      currentGroup: null as IListServiceContentDataItem | null,
+      currentGroup: null as IAssetTemplate | null,
       scrollTop: {
         mainContent: 0,
         searchResult: 0
@@ -136,6 +130,7 @@ export default defineComponent({
     ...mapGetters({
       editorThemes: 'getEditThemes',
       isTabInCategory: 'vivisticker/getIsInCategory',
+      isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
       isTabShowAllRecently: 'vivisticker/getShowAllRecently'
     }),
     categories() {
@@ -160,7 +155,7 @@ export default defineComponent({
       return this.isTabInCategory('template')
     },
     showSearchBar(): boolean {
-      return !this.isInCategory
+      return !this.isInCategory && !this.isInGroupTemplate
     },
     showAllRecently(): boolean {
       return this.isTabShowAllRecently('object')
@@ -196,6 +191,10 @@ export default defineComponent({
       }
       return list
     },
+    groupContent(): ICategoryItem[] {
+      if (this.currentGroup === null) return []
+      return this.processListResult(this.currentGroup.content_ids, true)
+    },
     mainContent(): ICategoryItem[] {
       const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
       if (list.length !== 0) {
@@ -209,8 +208,12 @@ export default defineComponent({
         show: this.keyword,
         key: 'searchResult'
       }, {
+        content: this.groupContent,
+        show: this.isInGroupTemplate,
+        key: 'groupContent'
+      }, {
         content: this.mainContent,
-        show: !this.keyword,
+        show: !this.keyword && !this.isInGroupTemplate,
         key: 'mainContent'
       }]
     },
@@ -221,10 +224,11 @@ export default defineComponent({
       }
     },
     tags(): ITag[] {
-      return this.showAllRecently ? [] : this.tagsBar
+      return this.showAllRecently || this.isInGroupTemplate ? [] : this.tagsBar
     },
   },
   methods: {
+    ...mapMutations('vivisticker', { setIsInGroupTemplate: 'SET_isInGroupTemplate' }),
     ...mapMutations('templates', { setIgLayout: 'SET_igLayout' }),
     getRecAndCate(params = {}) {
       this.$store.dispatch(`templates/${this.igLayout}/getRecAndCate`, params)
@@ -275,13 +279,14 @@ export default defineComponent({
     handleLoadMore() {
       this.getMoreContent()
     },
-    handleShowGroup(group: IListServiceContentDataItem) {
+    handleShowGroup(group: IAssetTemplate) {
       this.currentGroup = group
+      this.setIsInGroupTemplate(true)
     },
     handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
-    processListResult(list = [] as IAssetTemplate[], isSearch: boolean): ICategoryItem[] {
+    processListResult(list = [] as IAssetTemplate[] | IContentTemplate[], isSearch: boolean): ICategoryItem[] {
       const titleHeight = 46
       const gap = 20
       return new Array(Math.ceil(list.length / 3))
@@ -356,7 +361,7 @@ export default defineComponent({
       padding-right: 42px;
     }
   }
-  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
+  &.in-category, &.in-group-template::v-deep .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;
   }
   &__header {

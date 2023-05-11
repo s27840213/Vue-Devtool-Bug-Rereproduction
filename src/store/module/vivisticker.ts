@@ -12,6 +12,7 @@ interface IViviStickerState {
   isInCategoryDict: { [key: string]: boolean },
   showAllRecentlyDict: { [key: string]: boolean },
   isInBgShare: boolean,
+  isInGroupTemplate: boolean,
   shareItem: IAsset | undefined,
   shareColor: string,
   editorBgIndex: number,
@@ -59,6 +60,7 @@ const getDefaultState = (): IViviStickerState => ({
     text: false
   },
   isInBgShare: false,
+  isInGroupTemplate: false,
   shareItem: undefined,
   shareColor: '',
   editorBgIndex: 0,
@@ -132,6 +134,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsInBgShare(state: IViviStickerState): boolean {
     return state.isInBgShare
+  },
+  getIsInGroupTemplate(state: IViviStickerState): boolean {
+    return state.isInGroupTemplate
   },
   getShareItem(state: IViviStickerState): IAsset | undefined {
     return state.shareItem
@@ -257,6 +262,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_isInBgShare(state: IViviStickerState, bool: boolean) {
     state.isInBgShare = bool
+  },
+  SET_isInGroupTemplate(state: IViviStickerState, bool: boolean) {
+    state.isInGroupTemplate = bool
   },
   SET_shareItem(state: IViviStickerState, shareItem: IAsset | undefined) {
     state.shareItem = shareItem

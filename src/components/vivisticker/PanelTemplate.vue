@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="panel-template rwd-container")
-  tabs(v-if="!isInCategory"
+  tabs(v-if="!isInCategory && !isInGroupTemplate"
       class="panel-template__tabs"
       :tabs="['Story', 'Post']"
       v-model="tabIndex")
@@ -42,7 +42,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isTabInCategory: 'vivisticker/getIsInCategory'
+      isTabInCategory: 'vivisticker/getIsInCategory',
+      isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
 
     isInCategory(): boolean {

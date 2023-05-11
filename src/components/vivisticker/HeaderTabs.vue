@@ -77,6 +77,7 @@ export default defineComponent({
       isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
+      isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorBg: 'vivisticker/getEditorBg',
@@ -116,6 +117,10 @@ export default defineComponent({
       } else if (this.isInBgShare) {
         return [
           { icon: 'chevron-left', width: 24, action: this.clearBgShare }
+        ]
+      } else if (this.isInGroupTemplate) {
+        return [
+          { icon: 'chevron-left', width: 24, action: () => this.setIsInGroupTemplate(false) }
         ]
       } else if (this.isInCategory) {
         return [
@@ -194,6 +199,7 @@ export default defineComponent({
       setIsInCategory: 'vivisticker/SET_isInCategory',
       setShowAllRecently: 'vivisticker/SET_showAllRecently',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
+      setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor',
       switchBg: 'vivisticker/UPDATE_switchBg',
