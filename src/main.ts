@@ -39,7 +39,7 @@ window.onerror = function (msg, url, line, colno, error) {
         i18n.global.t('NN0457'),
         hint,
         {
-          msg: i18n.global.t('NN0032'),
+          msg: i18n.global.t('NN0866'),
           action() {
             generalUtils.copyText(hint).then(() => {
               notify({ group: 'copy', text: '已複製' })
