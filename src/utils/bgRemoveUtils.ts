@@ -48,7 +48,6 @@ class BgRemoveUtils {
   }
 
   private setAutoRemoveResult(info: IBgRemoveInfo) {
-    console.log(info)
     store.commit('bgRemove/SET_autoRemoveResult', info)
   }
 
@@ -58,6 +57,10 @@ class BgRemoveUtils {
 
   setInBgRemoveMode(inBgRemoveMode: boolean) {
     store.commit('bgRemove/SET_inBgRemoveMode', inBgRemoveMode)
+  }
+
+  setPreviewImage(previewImage: { src: string, width: number, height: number }) {
+    store.commit('bgRemove/SET_previewImage', previewImage)
   }
 
   private setLoading(bool: boolean) {
@@ -152,6 +155,20 @@ class BgRemoveUtils {
         paymentUtils.errorHandler(data.msg)
       }
     })
+  }
+
+  async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number): Promise<void> {
+    editorUtils.setCurrActivePanel('remove-bg')
+    this.setIsProcessing(true)
+    this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
+    const data = await store.dispatch('user/removeBgStk', { uuid, assetId })
+    this.setIsProcessing(false)
+    const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
+    this.setAutoRemoveResult(autoRemoveResult)
+    this.setInBgRemoveMode(true)
+    // this.setIsProcessing(false)
+
+    // return data
   }
 
   cancel() {

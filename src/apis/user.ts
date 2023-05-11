@@ -172,5 +172,14 @@ export default {
         debug: process.env.NODE_ENV === 'production' ? 0 : 1
       }
     }))
+  },
+  async removeBgStk(uuid: string, assetId?: number): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/remove-bg-sticker', {
+      method: 'POST',
+      data: {
+        path: `removebg/${uuid}/${assetId}/bg`,
+        locale: this.getLocale(),
+      }
+    }))
   }
 }

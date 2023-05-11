@@ -10,9 +10,10 @@ div(class="main-menu"
 
 <script lang="ts">
 import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
-import PanelBackgroundUs from '@/components/vivisticker/us/PanelBackground.vue'
 import PanelObject from '@/components/vivisticker/PanelObject.vue'
+import PanelRemoveBg from '@/components/vivisticker/PanelRemoveBg.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
+import PanelBackgroundUs from '@/components/vivisticker/us/PanelBackground.vue'
 import PanelObjectUs from '@/components/vivisticker/us/PanelObject.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 
@@ -29,7 +30,8 @@ export default defineComponent({
     PanelBackground,
     PanelBackgroundUs,
     PanelText,
-    PanelTextUs
+    PanelTextUs,
+    PanelRemoveBg
   },
   computed: {
     ...mapGetters({
@@ -37,7 +39,6 @@ export default defineComponent({
     }),
     currTab(): string {
       if (!this.$options.components) return ''
-
       const currTab = `panel-${this.currActiveTab}`
       if (this.$i18n.locale !== 'us') return currTab
 

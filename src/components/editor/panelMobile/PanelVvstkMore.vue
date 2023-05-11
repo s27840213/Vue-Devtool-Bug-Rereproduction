@@ -53,7 +53,6 @@ export default defineComponent({
       debugModeTimer: -1,
       debugModeCounter: 0,
       domain: window.location.hostname !== 'sticker.vivipic.com' ? ` ${window.location.hostname.replace('.vivipic.com', '')}` : '',
-      debugMode: false,
     }
   },
   props: {
@@ -62,15 +61,20 @@ export default defineComponent({
       default: () => []
     }
   },
-  async mounted() {
-    const debugMode = (await vivistickerUtils.getState('debugMode'))?.value ?? false
-    this.debugMode = debugMode
-  },
   computed: {
     ...mapGetters({
       userInfo: 'vivisticker/getUserInfo',
-      inReviewMode: 'webView/getInReviewMode'
+      inReviewMode: 'webView/getInReviewMode',
+      _debugMode: 'vivisticker/getDebugMode'
     }),
+    debugMode: {
+      get() {
+        return this._debugMode
+      },
+      set(value: boolean) {
+        this.setDebugMode(value)
+      }
+    },
     hostId(): string {
       return this.userInfo.hostId
     },
@@ -213,7 +217,8 @@ export default defineComponent({
     ...mapMutations({
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setSlideType: 'vivisticker/SET_slideType',
-      setFullPageConfig: 'vivisticker/SET_fullPageConfig'
+      setFullPageConfig: 'vivisticker/SET_fullPageConfig',
+      setDebugMode: 'vivisticker/SET_debugMode'
     }),
     handleOptionAction(action?: () => void) {
       if (action) {
