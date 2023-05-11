@@ -241,11 +241,13 @@ const actions: ActionTree<ITextState, unknown> = {
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
   let cssUrl
   let response
-  const isInPrevew = router.currentRoute.value.name === 'Preview'
+  const isInPreview = router.currentRoute.value.name === 'Preview'
+  const noArgo = 'https://template.vivipic.com/'
+  const argo = 'https://media.vivipic.cc/'
   switch (type) {
     case 'public':
-      cssUrl = addPlatform(`https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`)
-      if (isInPrevew) return cssUrl
+      cssUrl = addPlatform(`${isInPreview ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`)
+      if (isInPreview) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) return cssUrl
@@ -259,7 +261,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       return ''
     case 'admin':
       cssUrl = addPlatform(`https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`)
-      if (isInPrevew) return cssUrl
+      if (isInPreview) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) return cssUrl
@@ -275,7 +277,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       let urlMap = brandkitUtils.getFontUrlMap(assetId)
       if (urlMap) { // if font is in font-list or has been seen before
         cssUrl = getCssUrl(urlMap, ver)
-        if (isInPrevew) return cssUrl
+        if (isInPreview) return cssUrl
         response = await fetch(randomizeVer(cssUrl)) // check if the url is still valid
         if (response.ok) return cssUrl
         urlMap = await brandkitUtils.refreshFontAsset(assetId)
@@ -288,8 +290,8 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     case 'URL':
       return url
   }
-  cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
-  if (isInPrevew) return cssUrl
+  cssUrl = `${isInPreview ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`
+  if (isInPreview) return cssUrl
   try {
     response = await fetch(cssUrl)
     if (response.ok) return cssUrl
