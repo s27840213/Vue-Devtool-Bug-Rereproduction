@@ -6,6 +6,7 @@ import { LayerProcessType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import { isEqual } from 'lodash'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import localeUtils from './localeUtils'
@@ -322,7 +323,7 @@ class LayerFactary {
      * 7: span has no font
      * 8: span contains invalid unicode characters (which breaks emoji)
      * 9: replace textShape and textEffect value {} to {name: none}
-     * 10: Fix problem that some text effect will not scale with font-size
+     * 10: Fix problem that some text effect and text shape will not scale with font-size
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -412,7 +413,7 @@ class LayerFactary {
     for (const key of ['textShape', 'textEffect'] as const) {
       if (isEqual(basicConfig.styles[key], {})) basicConfig.styles[key] = { name: 'none' }
     }
-    // 10: Fix problem that some text effect will not scale with font-size
+    // 10: Fix problem that some text effect and text shape will not scale with font-size
     if (generalUtils.versionCheck({ version: jsonVer, lessThan: '1.0.7' })) {
       const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs as any) / 60
       const isTextBox = /(square-borderless|rounded-borderless|square-hollow|rounded-hollow|square-both|rounded-both)/
@@ -423,11 +424,21 @@ class LayerFactary {
         { category: 'textBg', effect: isTextBox, option: 'bStroke' },
         { category: 'textBg', effect: isTextBox, option: 'pStrokeY' },
         { category: 'textBg', effect: isTextBox, option: 'pStrokeX' },
-      ] as { category: 'textEffect' | 'textBg', effect: RegExp, option: string}[]
+        {
+          category: 'textShape',
+          effect: /curve/,
+          option: 'bend',
+          modFunc: (val) => {
+            return val * Math.pow(fontSizeModifier, 1 / 0.6)
+          }
+        }
+      ] as { category: 'textEffect' | 'textBg' | 'textShape', effect: RegExp, option: string, modFunc?: (val: number) => number }[]
       for (const t of target) {
         const effect = basicConfig.styles[t.category] as ITextEffect | ITextShape | ITextBgEffect
         if (t.effect.test(effect.name)) {
-          (effect as Record<string, number>)[t.option] /= fontSizeModifier
+          const effect_ = effect as Record<string, number>
+          const modFunc = t.modFunc ?? ((val) => val / fontSizeModifier)
+          effect_[t.option] = modFunc(effect_[t.option])
         }
       }
     }
