@@ -15,7 +15,7 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-teleport(v-if="useMobileEditor" to=".header-bar")
+teleport(v-if="useMobileEditor || inVivisticker" to=".header-bar")
   div(class="magnify-area" :style="magnifyAreaStyle")
     canvas(class="magnify-area__canvas"  ref="magnify")
     div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
@@ -36,6 +36,14 @@ export default defineComponent({
     editorViewCanvas: {
       type: HTMLElement,
       required: true
+    },
+    inVivisticker: {
+      default: false,
+      type: Boolean
+    },
+    fitScaleRatio: {
+      default: 1,
+      type: Number
     }
   },
   data() {
@@ -77,7 +85,12 @@ export default defineComponent({
   created() {
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
-    this.canvasHeight = 1600 / aspectRatio
+    if (this.inVivisticker) {
+      this.canvasWidth = width
+      this.canvasHeight = height
+    } else {
+      this.canvasHeight = 1600 / aspectRatio
+    }
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
   },
@@ -102,6 +115,12 @@ export default defineComponent({
       this.createInitImageCtx()
     }
     this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
+    if (this.$isTouchDevice()) {
+      this.editorViewCanvas.addEventListener('touchstart', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      })
+    }
     window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
@@ -118,6 +137,12 @@ export default defineComponent({
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
     this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
+    if (this.$isTouchDevice()) {
+      this.editorViewCanvas.removeEventListener('touchstart', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      })
+    }
     window.removeEventListener('keydown', this.handleKeydown)
   },
   computed: {
@@ -151,21 +176,21 @@ export default defineComponent({
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${this.scaleRatio * this.contentScaleRatio / 100})`
+        transform: `scale(${this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100})`
       }
     },
     wrapperStyles(): { [index: string]: string } {
       return {
-        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio / 100)}px`
+        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`
       }
     },
     initPhotoStyles(): { [index: string]: string } {
       const backgroundImage = this.showInitImage ? `url(${this.initImgSrc})` : ''
       const backgroundSize = this.showInitImage ? 'cover' : 'initial'
       return {
-        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
+        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
         backgroundImage,
         backgroundSize
       }
@@ -324,7 +349,7 @@ export default defineComponent({
     drawLine(e: MouseEvent, ctx: CanvasRenderingContext2D) {
       ctx.beginPath()
       ctx.moveTo(this.initPos.x, this.initPos.y)
-      const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root)
+      const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
       this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
       ctx.lineTo(x, y)
       ctx.stroke()
@@ -337,7 +362,7 @@ export default defineComponent({
     },
     drawStart(e: PointerEvent) {
       if (!this.inGestureMode) {
-        const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
+        const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
         Object.assign(this.initPos, {
           x,
           y
@@ -373,7 +398,7 @@ export default defineComponent({
       }
     },
     setBrushPos(e: MouseEvent) {
-      const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
+      const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
       this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
     },
     drawImageToCtx(img?: HTMLImageElement) {
@@ -472,9 +497,13 @@ export default defineComponent({
       if (!this.currCanvasImageElement) {
         this.currCanvasImageElement = new Image()
       }
-      const url = URL.createObjectURL(blob ?? this.steps[this.currStep])
-      this.currCanvasImageElement.src = URL.createObjectURL(blob ?? this.steps[this.currStep])
-      return url
+      if (blob) {
+        const url = URL.createObjectURL(blob ?? this.steps[this.currStep])
+        this.currCanvasImageElement.src = URL.createObjectURL(blob ?? this.steps[this.currStep])
+        return url
+      }
+
+      return ''
     },
     undo() {
       if (!this.isProcessingStepsQueue) {

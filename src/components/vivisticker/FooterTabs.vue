@@ -55,20 +55,13 @@ export default defineComponent({
   },
   data() {
     // const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
-
     return {
       isFontsPanelOpened: false,
       disableTabScroll: false,
       leftOverflow: false,
       rightOverflow: false,
       clickedTab: '',
-      clickedTabTimer: -1,
-      homeTabs: [
-        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
-        { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
-        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
-        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' }
-      ] as Array<IFooterTab>
+      clickedTabTimer: -1
     }
   },
   computed: {
@@ -89,7 +82,8 @@ export default defineComponent({
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       controllerHidden: 'vivisticker/getControllerHidden',
-      hasCopiedFormat: 'getHasCopiedFormat'
+      hasCopiedFormat: 'getHasCopiedFormat',
+      debugMode: 'vivisticker/getDebugMode'
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
@@ -180,6 +174,19 @@ export default defineComponent({
         })
       }
       return tabs
+    },
+    homeTabs(): Array<IFooterTab> {
+      return [
+        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
+        // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
+      ]
+    },
+    homeTabsSize(): number {
+      return this.homeTabs.filter(tab => !tab.hidden).length
     },
     fontTabs(): Array<IFooterTab> {
       return [
@@ -283,6 +290,11 @@ export default defineComponent({
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ]
     },
+    bgRemoveTabs(): Array<IFooterTab> {
+      return [
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
+      ]
+    },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
         this.groupTab,
@@ -313,7 +325,9 @@ export default defineComponent({
           targetType = LayerType.image
         }
       }
-      if (this.isGroupOrTmp && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
+      if (this.inBgRemoveMode) {
+        return this.bgRemoveTabs
+      } else if (this.isGroupOrTmp && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
         /** tmp layer treated as group */
         return this.multiPhotoTabs
       } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
@@ -766,7 +780,7 @@ export default defineComponent({
     &.main {
       overflow: hidden;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(v-bind(homeTabsSize), 1fr);
       align-items: center;
     }
   }

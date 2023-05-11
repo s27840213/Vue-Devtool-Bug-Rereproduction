@@ -165,6 +165,7 @@ router.beforeEach(async (to, from, next) => {
     const response = await fetch(`https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
     const json = await response.json()
 
+    console.log(json)
     // const json = appJson
 
     if (process.env.NODE_ENV === 'development') {
@@ -204,7 +205,10 @@ router.beforeEach(async (to, from, next) => {
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
 
-    uploadUtils.setLoginOutput({ upload_log_map: json.ul_log_map })
+    uploadUtils.setLoginOutput({
+      upload_log_map: json.ul_log_map,
+      ul_removebg_map: json.ul_removebg_map
+    })
   }
   next()
 })

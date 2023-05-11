@@ -62,6 +62,7 @@ div(class="mobile-panel"
       @close="closeMobilePanel")
 </template>
 <script lang="ts">
+import Tabs from '@/components/Tabs.vue'
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
@@ -81,10 +82,11 @@ import PanelOpacity from '@/components/editor/panelMobile/PanelOpacity.vue'
 import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
+import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
-import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
+import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
@@ -92,7 +94,6 @@ import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
-import Tabs from '@/components/Tabs.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
@@ -101,6 +102,7 @@ import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
@@ -112,7 +114,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -169,6 +171,7 @@ export default defineComponent({
     panelSelectDesign,
     PanelAddTemplate,
     Tabs,
+    PanelRemoveBg
   },
   data() {
     return {
@@ -190,7 +193,8 @@ export default defineComponent({
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       isInCategory: 'vivisticker/getIsInCategory',
       isShowAllRecently: 'vivisticker/getShowAllRecently',
-      isDuringCopy: 'vivisticker/getIsDuringCopy'
+      isDuringCopy: 'vivisticker/getIsDuringCopy',
+      bgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
@@ -206,7 +210,7 @@ export default defineComponent({
     },
     whiteTheme(): boolean {
       const whiteThemePanel = [
-        'replace', 'crop', 'bgRemove', 'position', 'flip',
+        'replace', 'crop', 'bgRemove', 'position', 'flip', 'remove-bg',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
@@ -507,6 +511,13 @@ export default defineComponent({
             break
           }
 
+          case 'remove-bg': {
+            if (this.bgRemoveMode) {
+              bgRemoveUtils.setInBgRemoveMode(false)
+            }
+            break
+          }
+
           case 'copy-style': {
             formatUtils.clearCopiedFormat()
             break
@@ -569,7 +580,11 @@ export default defineComponent({
     }),
     vcoConfig() {
       return {
-        handler: this.closeMobilePanel,
+        handler: () => {
+          if (!this.bgRemoveMode) {
+            this.closeMobilePanel()
+          }
+        },
         middleware: this.middleware,
         events: ['touchstart', 'pointerdown',
           ...window.location.host === 'localhost:8080' ? [] : ['contextmenu']]

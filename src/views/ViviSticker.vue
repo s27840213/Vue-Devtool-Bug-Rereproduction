@@ -184,6 +184,9 @@ export default defineComponent({
       )
       if (!exp) await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
     }
+
+    const debugMode = (await vivistickerUtils.getState('debugMode'))?.value ?? false
+    this.setDebugMode(debugMode)
   },
   unmounted() {
     document.removeEventListener('scroll', this.handleScroll)
@@ -244,6 +247,7 @@ export default defineComponent({
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
       setFullPageConfig: 'vivisticker/SET_fullPageConfig',
+      setDebugMode: 'vivisticker/SET_debugMode'
     }),
     headerStyles() {
       return {

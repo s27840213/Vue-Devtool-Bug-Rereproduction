@@ -579,6 +579,28 @@ class ImageUtils {
     }
   }
 
+  async getBgRemoveInfoStk(url: string, initSrc: string) {
+    const { width, height } = await this.getImageSize(url, 1000, 1000)
+
+    return {
+      width: width,
+      height: height,
+      id: '',
+      assetIndex: -1,
+      teamId: '',
+      urls: {
+        prev: url,
+        full: url,
+        larg: url,
+        original: url,
+        midd: url,
+        smal: url,
+        tiny: url,
+      },
+      initSrc
+    }
+  }
+
   appendOriginQuery(src: string) {
     if (!src) return src
     if (src.includes('origin=true')) return src

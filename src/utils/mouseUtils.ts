@@ -53,11 +53,11 @@ class MouseUtils {
     return { x, y }
   }
 
-  getMousePosInTarget(e: MouseEvent | TouchEvent | PointerEvent, target: HTMLElement): { x: number, y: number, xPercentage: number, yPercentage: number } {
+  getMousePosInTarget(e: MouseEvent | TouchEvent | PointerEvent, target: HTMLElement, extraScaleRatio = 1): { x: number, y: number, xPercentage: number, yPercentage: number } {
     const mouseRelPos = this.getMouseRelPoint(e, target)
     return {
-      x: mouseRelPos.x / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio / 100),
-      y: mouseRelPos.y / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio / 100),
+      x: mouseRelPos.x / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio * extraScaleRatio / 100),
+      y: mouseRelPos.y / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio * extraScaleRatio / 100),
       xPercentage: mouseRelPos.x / target.clientWidth,
       yPercentage: mouseRelPos.y / target.clientHeight,
 

@@ -230,7 +230,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .popup-download {
-  width: 100%;
+  // width: 100%;
+  width: 210px;
   display: grid;
   grid-template-columns: 1fr;
   box-sizing: border-box;

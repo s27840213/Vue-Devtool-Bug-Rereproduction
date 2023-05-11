@@ -13,6 +13,7 @@ interface IViviStickerState {
   showAllRecentlyDict: { [key: string]: boolean },
   isInBgShare: boolean,
   isInGroupTemplate: boolean,
+  isInBgRemoveSection: boolean,
   shareItem: IAsset | undefined,
   shareColor: string,
   editorBgIndex: number,
@@ -27,6 +28,7 @@ interface IViviStickerState {
   isInMyDesign: boolean,
   myDesignTab: string,
   isInSelectionMode: boolean,
+  debugMode: boolean,
   slideType: string,
   myDesignFiles: { [key: string]: IMyDesign[] },
   myDesignNextPages: { [key: string]: number },
@@ -61,6 +63,7 @@ const getDefaultState = (): IViviStickerState => ({
   },
   isInBgShare: false,
   isInGroupTemplate: false,
+  isInBgRemoveSection: false,
   shareItem: undefined,
   shareColor: '',
   editorBgIndex: 0,
@@ -106,7 +109,8 @@ const getDefaultState = (): IViviStickerState => ({
     }
   },
   uuid: '',
-  loadedFonts: {}
+  loadedFonts: {},
+  debugMode: false
 })
 
 const state = getDefaultState()
@@ -158,6 +162,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsStandaloneMode(state: IViviStickerState): boolean {
     return state.isStandaloneMode
+  },
+  getIsInBgRemoveSection(state: IViviStickerState): boolean {
+    return state.isInBgRemoveSection
   },
   getShowTutorial(state: IViviStickerState): boolean {
     return state.showTutorial
@@ -234,6 +241,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getUuid(state: IViviStickerState): string {
     return state.uuid
+  },
+  getDebugMode(state: IViviStickerState): boolean {
+    return state.debugMode
   }
 }
 
@@ -320,6 +330,9 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_isInMyDesign(state: IViviStickerState, isInMyDesign: boolean) {
     state.isInMyDesign = isInMyDesign
   },
+  SET_isInBgRemoveSection(state: IViviStickerState, isInBgRemoveSection: boolean) {
+    state.isInBgRemoveSection = isInBgRemoveSection
+  },
   SET_myDesignTab(state: IViviStickerState, myDesignTab: string) {
     state.myDesignTab = myDesignTab
   },
@@ -362,6 +375,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_loadedFonts(state: IViviStickerState, loadedFonts: { [key: string]: true }) {
     state.loadedFonts = loadedFonts
+  },
+  SET_debugMode(state: IViviStickerState, debugMode: boolean) {
+    state.debugMode = debugMode
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {

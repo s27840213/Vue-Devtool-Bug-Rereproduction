@@ -396,33 +396,31 @@ class GeneralUtils {
     return val
   }
 
-  OSversionCheck(data: { greaterThen?: string, lessThen?: string, version?: string }): boolean {
-    const { lessThen, greaterThen } = data
+  // greaterThan actually means "greater than or equal to", the same as lessThan.
+  // So { greaterThan: '16.0', lessThan: '16.3' } means 16.0 <= v <= 16.3.
+  versionCheck(data: { greaterThan?: string, lessThan?: string, version?: string }): boolean {
+    const { lessThan, greaterThan } = data
     let { version } = data
     if (!version) {
       version = (store.getters['user/getBrowserInfo'] as IBrowserInfo).version
     }
     const vArr = version.split('.')
-    if (lessThen) {
-      const lessArr = lessThen.split('.')
-      for (const [i, e] of lessArr.entries()) {
-        if (+e < +vArr[i]) {
-          return false
-        }
-      }
-      if (lessArr.length < vArr.length && vArr[vArr.length - 2] === lessArr[lessArr.length - 1] && +vArr[vArr.length - 1] !== 0) {
-        return false
+    if (lessThan) {
+      const lessArr = lessThan.split('.')
+      for (let i = 0; i < Math.max(vArr.length, lessArr.length); i++) {
+        const less = lessArr[i] ?? '0'
+        const v = vArr[i] ?? '0'
+        if (less > v) break
+        else if (less < v) return false
       }
     }
-    if (greaterThen) {
-      const greatArr = greaterThen.split('.')
-      for (const [i, e] of greatArr.entries()) {
-        if (+e > +vArr[i]) {
-          return false
-        }
-      }
-      if (greatArr.length > vArr.length && greatArr[greatArr.length - 2] === vArr[vArr.length - 1] && +greatArr[greatArr.length - 1] !== 0) {
-        return false
+    if (greaterThan) {
+      const greaterArr = greaterThan.split('.')
+      for (let i = 0; i < Math.max(vArr.length, greaterArr.length); i++) {
+        const greater = greaterArr[i] ?? '0'
+        const v = vArr[i] ?? '0'
+        if (greater < v) break
+        else if (greater > v) return false
       }
     }
     return true
