@@ -1,13 +1,15 @@
 import App from '@/App.vue'
+import modalUtils from '@/utils/modalUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
-import Notifications from '@kyvg/vue3-notification'
+import Notifications, { notify } from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
 import platform from 'platform'
-import { createApp, defineAsyncComponent, nextTick } from 'vue'
+import { ComputedRef, createApp, defineAsyncComponent, nextTick } from 'vue'
 import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import { RecycleScroller } from 'vue-virtual-scroller'
@@ -20,13 +22,34 @@ import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
 
 const eventBus = mitt()
-window.onerror = function (msg, url, line) {
+window.onerror = function (msg, url, line, colno, error) {
+  const errorId = generalUtils.generateRandomString(6)
   const message = [
+    'Error ID:' + errorId,
     'Message: ' + msg,
     'URL: ' + url,
     'Line: ' + line,
+    'Col: ' + colno,
+    'Stack: ' + error?.stack
   ].join(' - ')
   logUtils.setLog(message)
+  logUtils.uploadLog().then(() => {
+    if (store.getters.getShowGlobalErrorModal) {
+      const hint = `${vivistickerUtils.getUserInfoFromStore().hostId}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+      modalUtils.setModalInfo(
+        i18n.global.t('NN0457'),
+        hint,
+        {
+          msg: i18n.global.t('NN0032'),
+          action() {
+            generalUtils.copyText(hint).then(() => {
+              notify({ group: 'copy', text: '已複製' })
+            })
+          }
+        }
+      )
+    }
+  })
 }
 
 const app = createApp(App).use(i18n).use(router).use(store)
@@ -45,6 +68,7 @@ declare module '@vue/runtime-core' {
     $isTouchDevice: () => boolean,
     $eventBus: Emitter<Record<EventType, unknown>>
   }
+  function provide<T>(key: InjectionKey<T> | string | number, value: T | ComputedRef<T>): void
 }
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 app.config.globalProperties.$isTablet = () => generalUtils.isTablet()

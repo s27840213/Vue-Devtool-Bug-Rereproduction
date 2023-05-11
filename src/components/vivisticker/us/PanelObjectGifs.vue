@@ -251,7 +251,7 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(4, 1fr);
   }
-  &.in-category::v-deep .category-list .vue-recycle-scroller__item-wrapper {
+  &.in-category:deep(.category-list .vue-recycle-scroller__item-wrapper) {
     margin-top: 24px;
   }
   &__list-rows-action {

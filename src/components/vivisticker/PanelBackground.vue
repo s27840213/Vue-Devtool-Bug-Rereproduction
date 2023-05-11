@@ -623,7 +623,7 @@ export default defineComponent({
   // &__color-inner {
   //   @include size(100%);
   // }
-  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
+  &.in-category:deep(.vue-recycle-scroller__item-wrapper) {
     margin-top: 24px;
   }
   &__color-controller {

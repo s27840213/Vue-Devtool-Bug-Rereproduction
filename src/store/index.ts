@@ -127,7 +127,8 @@ const getDefaultState = (): IEditorState => ({
   inScreenshotPreviewRoute: false,
   cursor: '',
   isPageScaling: false,
-  isGettingDesign: false
+  isGettingDesign: false,
+  showGlobalErrorModal: true,
 })
 
 const state = getDefaultState()
@@ -316,7 +317,10 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getHasBleed(state: IEditorState) {
     return state.pages.some((page: IPageState) => page.config.isEnableBleed)
-  }
+  },
+  getShowGlobalErrorModal(state: IEditorState) {
+    return state.showGlobalErrorModal
+  },
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -1132,7 +1136,10 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   ...imgShadowMutations,
-  ADD_subLayer
+  ADD_subLayer,
+  SET_showGlobalErrorModal(state: IEditorState, showGlobalErrorModal: boolean) {
+    state.showGlobalErrorModal = showGlobalErrorModal
+  },
 }
 window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500))
 
