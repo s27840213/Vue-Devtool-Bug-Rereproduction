@@ -69,7 +69,6 @@ import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import PanelGroupTemplate from '@/components/vivisticker/PanelGroupTemplate.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import editorUtils from '@/utils/editorUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { round } from 'lodash'
@@ -108,16 +107,12 @@ export default defineComponent({
     }
   },
   mounted() {
-    eventUtils.on(PanelEvent.scrollPanelObjectToTop, this.scrollToTop)
     generalUtils.panelInit('template',
       this.handleSearch,
       this.handleCategorySearch,
       this.getRecAndCate
     )
     this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
-  },
-  beforeUnmount() {
-    eventUtils.off(PanelEvent.scrollPanelObjectToTop)
   },
   activated() {
     this.setIgLayout(this.igLayout)
@@ -246,12 +241,14 @@ export default defineComponent({
     resetSearch(params = {}) {
       this.$store.dispatch(`templates/${this.igLayout}/resetSearch`, params)
     },
+    // Used by PanelTemplate.vue
+    // eslint-disable-next-line vue/no-unused-properties
     scrollToTop() {
       for (const list of this.categoryListArray) {
         if (list.show) {
           const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
           const top = categoryList.$el.querySelector('.panel-template-content__top-item') as HTMLElement
-          top.scrollIntoView({ behavior: 'smooth' })
+          top.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
         }
       }
     },

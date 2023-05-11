@@ -35,10 +35,10 @@ export default defineComponent({
     }
   },
   mounted() {
-    eventUtils.on(PanelEvent.scrollPanelObjectToTop, this.scrollToTop)
+    eventUtils.on(PanelEvent.scrollPanelTemplateToTop, this.scrollToTop)
   },
   beforeUnmount() {
-    eventUtils.off(PanelEvent.scrollPanelObjectToTop)
+    eventUtils.off(PanelEvent.scrollPanelTemplateToTop)
   },
   computed: {
     ...mapGetters({
