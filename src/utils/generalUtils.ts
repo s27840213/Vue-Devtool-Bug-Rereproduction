@@ -403,24 +403,20 @@ class GeneralUtils {
     const vArr = version.split('.')
     if (lessThan) {
       const lessArr = lessThan.split('.')
-      for (const [i, e] of lessArr.entries()) {
-        if (+e < +vArr[i]) {
-          return false
-        }
-      }
-      if (lessArr.length < vArr.length && vArr[vArr.length - 2] === lessArr[lessArr.length - 1] && +vArr[vArr.length - 1] !== 0) {
-        return false
+      for (let i = 0; i < Math.max(vArr.length, lessArr.length); i++) {
+        const less = lessArr[i] ?? '0'
+        const v = vArr[i] ?? '0'
+        if (less > v) break
+        else if (less < v) return false
       }
     }
     if (greaterThan) {
-      const greatArr = greaterThan.split('.')
-      for (const [i, e] of greatArr.entries()) {
-        if (+e > +vArr[i]) {
-          return false
-        }
-      }
-      if (greatArr.length > vArr.length && greatArr[greatArr.length - 2] === vArr[vArr.length - 1] && +greatArr[greatArr.length - 1] !== 0) {
-        return false
+      const greaterArr = greaterThan.split('.')
+      for (let i = 0; i < Math.max(vArr.length, greaterArr.length); i++) {
+        const greater = greaterArr[i] ?? '0'
+        const v = vArr[i] ?? '0'
+        if (greater < v) break
+        else if (greater > v) return false
       }
     }
     return true
