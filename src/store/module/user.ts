@@ -474,6 +474,14 @@ const actions: ActionTree<IUserModule, unknown> = {
     } catch (error) {
       console.log(error)
     }
+  },
+  async removeBgStk({ state }, { uuid, assetId }) {
+    try {
+      const { data } = await userApis.removeBgStk(uuid, assetId)
+      return data
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 

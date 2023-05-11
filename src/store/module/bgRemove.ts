@@ -23,6 +23,11 @@ interface IBgRemoveState {
   idInfo: {
     pageId: number,
     layerId: number
+  },
+  previewImage: {
+    src: string,
+    width: number,
+    height: number
   }
 }
 
@@ -47,6 +52,11 @@ const getDefaultState = (): IBgRemoveState => ({
   idInfo: {
     pageId: -1,
     layerId: -1
+  },
+  previewImage: {
+    src: '',
+    width: 0,
+    height: 0
   }
 })
 
@@ -102,6 +112,9 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
   },
   getIdInfo(state: IBgRemoveState): { pageId: number, layerId: number } {
     return state.idInfo
+  },
+  getPreviewImage(state: IBgRemoveState): { src: string, width: number, height: number} {
+    return state.previewImage
   }
 }
 
@@ -195,6 +208,9 @@ const mutations: MutationTree<IBgRemoveState> = {
       pageId,
       layerId
     })
+  },
+  SET_previewImage(state: IBgRemoveState, previewImage: { src: string, width: number, height: number }) {
+    Object.assign(state.previewImage, previewImage)
   }
 }
 
