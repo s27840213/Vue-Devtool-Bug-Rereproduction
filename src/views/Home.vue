@@ -25,6 +25,7 @@ div(class="home")
         :type="'tag'"
         :title="''"
         :list="homeTags"
+        :singleChoice="true"
         :defaultSelection="[]"
         @select="handleSelectTags")
       template(v-if="selectedTags.length !== 0")

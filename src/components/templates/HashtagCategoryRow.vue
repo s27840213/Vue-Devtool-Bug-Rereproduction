@@ -32,6 +32,10 @@ export default defineComponent({
     title: {
       type: String,
       default: ''
+    },
+    singleChoice: {
+      type: Boolean,
+      default: false
     }
   },
   mounted() {
@@ -65,6 +69,9 @@ export default defineComponent({
       if (index !== -1) {
         this.selected.splice(index, 1)
       } else {
+        if (this.singleChoice) {
+          this.selected = []
+        }
         this.selected.push(key)
       }
       this.emitSelect()
