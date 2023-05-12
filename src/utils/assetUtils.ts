@@ -170,10 +170,7 @@ class AssetUtils {
     json = await this.updateBackground(generalUtils.deepCopy(json))
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
-    let newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    if (store.getters['user/getUserId'] === 'backendRendering' && store.getters['user/getUnitScale']) {
-      newPage = textUtils.resetScale(newPage)
-    }
+    const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     pageUtils.updateSpecPage(targetPageIndex, newPage)
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 

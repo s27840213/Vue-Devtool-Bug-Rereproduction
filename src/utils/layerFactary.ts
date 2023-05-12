@@ -6,14 +6,13 @@ import { LayerProcessType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
+import textUtils from '@/utils/textUtils'
 import { isEqual } from 'lodash'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import localeUtils from './localeUtils'
 import mouseUtils from './mouseUtils'
 import textPropUtils from './textPropUtils'
 import ZindexUtils from './zindexUtils'
-
 class LayerFactary {
   newImage(config: any): IImage {
     const {
@@ -606,12 +605,12 @@ class LayerFactary {
       /* delete the layer */
       if (config.layers[layerIndex].type === LayerType.shape) {
         const shape = config.layers[layerIndex] as IShape
-        if (!shape.designId && !shape.svg && !['D', 'E'].includes(shape.category)) {
+        if (!shape.designId && !['D', 'E'].includes(shape.category) && !shape.svg) {
           config.layers.splice(+layerIndex, 1)
           console.warn('layer:', layerIndex, 'has no designId and empty svg, it has been removed!')
           continue
         }
-        !shape.designId && console.warn('layer:', layerIndex, 'has no designId!')
+        !shape.designId && !['D', 'E'].includes(shape.category) && console.warn('layer:', layerIndex, 'has no designId!')
       }
       init(config.layers[layerIndex])
     }
@@ -624,6 +623,7 @@ class LayerFactary {
       }
     }
     config.jsonVer = latestJsonVer
+    textUtils.resetScale(config)
     return config
   }
 
