@@ -318,7 +318,6 @@ export default defineComponent({
     }
 
     img:hover {
-      box-shadow: 0px 12px 10px 2px rgba(48, 55, 66, 0.15);
       transform: translate(0, -5px);
     }
   }

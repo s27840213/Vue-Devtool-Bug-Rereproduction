@@ -154,6 +154,7 @@ export interface IListServiceContentDataItem {
   unit?: string
   valid?: number
   plan?: number
+  icon?: string
 }
 
 export interface ICategoryItem {

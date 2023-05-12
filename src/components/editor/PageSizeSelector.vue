@@ -55,24 +55,21 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
         span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
   div(class="page-size-selector__body__hr first bg-gray-4")
   div(class="page-size-selector__container")
-      template(v-if="!forHomePage")
-        div(class="page-size-selector__body-row first-row")
-          span(class="page-size-selector__body__title subtitle-2"
-            :class="defaultTextColor") {{$t('NN0024')}}
-        div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
-        div(v-for="(format, index) in recentlyUsed"
-            :key="format.id"
-            class="page-size-selector__body-row pointer"
-            @click="selectFormat(`recent-${index}`)")
-          radio-btn(class="page-size-selector__body__radio"
-                    :isSelected="selectedFormat === `recent-${index}`",
-                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                    :formatKey="`recent-${index}`",
-                    @select="selectFormat")
-          span(class="page-size-selector__body__recently body-3 pointer"
-                :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
-                @click="selectFormat(`recent-${index}`)") {{ makeFormatTitle(format) }}
+      div(class="page-size-selector__body-row first-row")
+        span(class="page-size-selector__body__title subtitle-2"
+          :class="defaultTextColor") {{$t('NN0024')}}
+      div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+      div(v-for="(format, index) in recentlyUsed"
+          :key="format.id"
+          class="page-size-selector__body-row item pointer"
+          @click="selectFormat(`recent-${index}`)")
+        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.title === '' || format.icon === 'custom' ? isDarkTheme ? 'custom-white' : 'custom-white' : format.icon}.svg`)")
+        div(class="page-size-selector__body-row__text-content")
+          span(class="page-size-selector__body__page-text body-3 pointer"
+                :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
+          span(class="page-size-selector__body__page-text body-3 pointer"
+                :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
       div(class="page-size-selector__body-row first-row")
         span(class="page-size-selector__body__title subtitle-2"
             :class="defaultTextColor") {{$t('NN0025')}}
@@ -80,19 +77,16 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
       div(v-for="(format, index) in formatList"
           :key="format.id"
-          class="page-size-selector__body-row typical-row pointer"
+          class="page-size-selector__body-row item pointer"
           @click="selectFormat(`preset-${index}`)")
-        radio-btn(class="page-size-selector__body__radio"
-                  :isSelected="selectedFormat === `preset-${index}`",
-                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                  :formatKey="`preset-${index}`",
-                  @select="selectFormat")
-        span(class="page-size-selector__body__typical-name body-4"
-              :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
-        span(class="page-size-selector__body__typical-size body-4 text-right"
-              :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
+        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.icon}.svg`)")
+        div(class="page-size-selector__body-row__text-content")
+          span(class="page-size-selector__body__page-text body-3 pointer"
+                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
+          span(class="page-size-selector__body__page-text body-3 pointer"
+                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
   div(class="page-size-selector__body__hr second bg-gray-4")
-  div(v-if="!forHomePage" class="page-size-selector__body__submit")
+  div(class="page-size-selector__body__submit")
     div(class="page-size-selector__body__submit__option body-XS")
       checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
     btn(class="page-size-selector__body__button"
@@ -127,10 +121,6 @@ export default defineComponent({
     isDarkTheme: {
       type: Boolean,
       default: true
-    },
-    forHomePage: {
-      type: Boolean,
-      default: false
     }
   },
   emits: ['close'],
@@ -272,7 +262,8 @@ export default defineComponent({
         height: item.height ?? 0,
         title: item.title ?? '',
         description: item.description ?? '',
-        unit: item.unit ?? 'px'
+        unit: item.unit ?? 'px',
+        icon: item.icon ?? ''
       })) : []
     },
     recentlyUsed(): ILayout[] {
@@ -285,7 +276,8 @@ export default defineComponent({
         height: item.height ?? 0,
         title: item.title ?? '',
         description: item.description ?? '',
-        unit: item.unit ?? 'px'
+        unit: item.unit ?? 'px',
+        icon: item.icon ?? ''
       })).filter((layout: ILayout) => {
         const pxSize = unitUtils.convertSize(layout.width, layout.height, layout.unit, 'px')
         if (pxSize.width * pxSize.height > pageUtils.MAX_AREA) return false
@@ -319,7 +311,7 @@ export default defineComponent({
     getSelectedFormat(): ILayout | undefined {
       if (this.selectedFormat === 'custom') {
         if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit }
+        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit, icon: '' }
       } else if (this.selectedFormat.startsWith('recent')) {
         const [type, index] = this.selectedFormat.split('-')
         const format = this.recentlyUsed[parseInt(index)]
@@ -338,15 +330,8 @@ export default defineComponent({
       this.isLocked = !this.isLocked
       if (this.isLocked) this.aspectRatio = this.pageWidth * this.pageHeight <= 0 ? 1 : this.pageWidth / this.pageHeight
     },
-    makeFormatTitle(format: ILayout) {
-      if (format.id !== '') {
-        return `${format.title} ${this.makeFormatDescription(format)}`
-      } else {
-        return `${format.width} x ${format.height} ${format.unit}`
-      }
-    },
     makeFormatDescription(format: ILayout): string {
-      return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
+      return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description === '' ? format.title : format.description} ${format.unit ?? 'px'}`
     },
     handleCurrFocusPageIndexChange() {
       const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize
@@ -575,7 +560,6 @@ export default defineComponent({
       grid-template-rows: auto;
       column-gap: 12px;
       width: 100%;
-      padding: 3px 22px 3px 10px;
       align-items: center;
       box-sizing: border-box;
       text-align: left;
@@ -584,6 +568,17 @@ export default defineComponent({
         display: flex;
         align-items: center;
         justify-content: center;
+      }
+
+      &__text-content {
+        max-width: 100%;
+        height: 24px;
+        display: grid;
+        grid-template-rows: 1fr;
+        grid-template-columns: auto auto;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
       }
       &.first-row {
         display: block;
@@ -596,8 +591,9 @@ export default defineComponent({
           text-transform: uppercase;
         }
       }
-      &.typical-row  {
-        grid-template-columns: 12px calc((100% - 36px) * 0.5) auto;
+      &__icon {
+        width: 18px;
+        height: 18px;
       }
     }
     &__close {
@@ -607,6 +603,10 @@ export default defineComponent({
     }
     &__title {
       font-weight: 700;
+    }
+
+    &__page-text {
+      overflow-wrap: break-word;
     }
     &__custom {
       display: grid;
@@ -777,7 +777,11 @@ export default defineComponent({
   }
 }
 
-@media (max-width: 1260px) {
-
+.item {
+  display: grid;
+  margin: 0px;
+  padding: 4px 4px;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
 }
 </style>

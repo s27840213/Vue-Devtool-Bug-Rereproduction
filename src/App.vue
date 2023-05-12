@@ -7,7 +7,8 @@ div(id="app" :style="appStyles()")
   link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
   link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
   div(class="main-content")
-    router-view
+    div(class="main-content__router-view")
+      router-view
     home-footer-tabs(v-if="showHomeFooterTabs")
   div(class="popup-area")
     popup
@@ -171,8 +172,14 @@ export default defineComponent({
 .main-content {
   height: 100%;
   display: grid;
-  grid-template-rows: minmax(0,1fr) auto;
+  grid-template-rows: 1fr auto;
   grid-template-columns: minmax(0, 1fr);
+
+  &__router-view {
+    height: 100%;
+    max-height: 100%;
+    overflow: scroll
+  }
 }
 
 .popup-area {

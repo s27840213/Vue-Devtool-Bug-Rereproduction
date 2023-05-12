@@ -38,8 +38,6 @@ div(class="footer-tabs" :style="footerTabsStyles")
         :iconWidth="'22px'")
       span(class="body-XXS no-wrap click-disabled"
         :class="activeRouteName === 'Settings' ? 'text-blue-1' : 'text-gray-2'") {{$t('NN0082')}}
-  //- teleport(to=".main-content")
-  //-   size-menu(v-if="sizeMenuOpened")
 </template>
 
 <script lang="ts" setup>

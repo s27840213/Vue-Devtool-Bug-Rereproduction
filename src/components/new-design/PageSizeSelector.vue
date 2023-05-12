@@ -69,42 +69,27 @@ div(class="page-size-selector")
           :key="format.id"
           class="page-size-selector__body-row item pointer"
           @click="selectFormat(`recent-${index}`)")
-        //- radio-btn(class="page-size-selector__body-row__radio"
-        //-           :isSelected="selectedFormatKey === `recent-${index}`",
-        //-           :circleColor="isDarkTheme ? 'white' : 'light-gray'"
-        //-           :formatKey="`recent-${index}`",
-        //-           @select="selectFormat")
-        div(v-if="isMobile" class="page-size-selector__body-row__content")
+        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.title === '' ? 'custom' : format.icon}.svg`)")
+        div(class="page-size-selector__body-row__content")
           span(class="page-size-selector__body__recently body-3 pointer"
-                :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ format.description ? format.title : makeFormatTitle(format) }}
-          span(v-if="format.description" class="page-size-selector__body__recently body-3 pointer"
-                :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatDescription(format) }}
-        div(v-else class="page-size-selector__body-row__content")
+                :class="selectedFormatKey === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
           span(class="page-size-selector__body__recently body-3 pointer"
-            :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatTitle(format) }}
+                :class="selectedFormatKey === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
       div(v-if="isLayoutReady && formatList.length > 0" class="page-size-selector__body-row first-row")
         span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
       div(v-for="(format, index) in formatList"
           :key="format.id"
           class="page-size-selector__body-row item pointer"
           @click="selectFormat(`preset-${index}`)")
-        radio-btn(class="page-size-selector__body-row__radio"
-                  :isSelected="selectedFormatKey === `preset-${index}`",
-                  :circleColor="isDarkTheme ? 'white' : 'light-gray'"
-                  :formatKey="`preset-${index}`",
-                  @select="selectFormat")
-        div(v-if="isMobile" class="page-size-selector__body-row__content")
-          span(class="page-size-selector__body__typical-name body-4"
+        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.icon}.svg`)")
+        div(class="page-size-selector__body-row__content")
+          span(class="page-size-selector__body__recently body-3 pointer"
                 :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
-          span(class="page-size-selector__body__typical-size body-4"
+          span(class="page-size-selector__body__recently body-3 pointer"
                 :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
-        div(v-else class="page-size-selector__body-row__content")
-          span(class="page-size-selector__body__typical-name body-4"
-                :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatTitle(format) }}
 </template>
 
 <script lang="ts">
-import RadioBtn from '@/components/global/RadioBtn.vue'
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import pageUtils from '@/utils/pageUtils'
@@ -131,9 +116,6 @@ const component = defineComponent({
   },
   directives: {
     clickOutside: vClickOutside.directive
-  },
-  components: {
-    RadioBtn
   },
   emits: ['select'],
   created() {
@@ -273,7 +255,7 @@ const component = defineComponent({
     selectedFormat(): ILayout | undefined {
       if (this.selectedFormatKey === 'custom') {
         if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit }
+        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit, icon: '' }
       } else if (this.selectedFormatKey.startsWith('recent')) {
         const [type, index] = this.selectedFormatKey.split('-')
         const format = this.recentlyUsed[parseInt(index)]
@@ -311,15 +293,8 @@ const component = defineComponent({
       this.isLocked = !this.isLocked
       if (this.isLocked) this.aspectRatio = this.pageWidth * this.pageHeight <= 0 ? 1 : this.pageWidth / this.pageHeight
     },
-    makeFormatTitle(format: ILayout) {
-      if (format.id !== '') {
-        return `${format.title} ${this.makeFormatDescription(format)}`
-      } else {
-        return `${format.width} x ${format.height} ${format.unit}`
-      }
-    },
     makeFormatDescription(format: ILayout): string {
-      return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
+      return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description === '' ? format.title : format.description} ${format.unit ?? 'px'}`
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
@@ -400,7 +375,8 @@ const component = defineComponent({
               height: item.height ?? 0,
               title: item.title ?? '',
               description: item.description ?? '',
-              unit: item.unit ?? 'px'
+              unit: item.unit ?? 'px',
+              icon: item.icon ?? ''
             }))
           }
           if (category.title === `${this.$t('NN0024')}`) {
@@ -410,7 +386,8 @@ const component = defineComponent({
               height: item.height ?? 0,
               title: item.title ?? '',
               description: item.description ?? '',
-              unit: item.unit ?? 'px'
+              unit: item.unit ?? 'px',
+              icon: item.icon ?? ''
             })).filter((layout: ILayout) => {
               const pxSize = unitUtils.convertSize(layout.width, layout.height, layout.unit, 'px')
               return !(pxSize.width * pxSize.height > pageUtils.MAX_AREA)
@@ -511,9 +488,10 @@ export type CPageSizeSelector = InstanceType<typeof component>
       &.item {
         display: grid;
         margin: 0px;
-        padding: 2px 16px;
+        padding: 4px 4px;
         grid-template-columns: 28px 1fr;
         justify-content: left;
+        gap: 8px;
       }
       &__radio {
         height: 24px;
@@ -526,8 +504,12 @@ export type CPageSizeSelector = InstanceType<typeof component>
         grid-template-columns: auto auto;
         align-items: center;
         justify-content: space-between;
-        white-space: nowrap;
         line-height: 20px;
+      }
+
+      &__icon {
+        width: 24px;
+        height: 24px;
       }
     }
     &__title {
