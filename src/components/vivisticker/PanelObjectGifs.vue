@@ -310,7 +310,7 @@ export default defineComponent({
     isInCategory() {
       // skip transitions when entering of leaving category
       this.toggleTransitions(false)
-      this.$nextTick(() => {
+      window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
       })
     }

@@ -1,6 +1,6 @@
 <template lang="pug">
-div(class="panel-template-content" ref="panel" :class="{'in-category': isInCategory, 'in-group-template': isInGroupTemplate, 'with-search-bar': showSearchBar}")
-  search-bar(v-if="showSearchBar"
+div(class="panel-template-content" ref="panel" :class="{'in-category': isInCategory, 'in-group-template': isInGroupTemplate, 'with-search-bar': isInMainContent}")
+  search-bar(v-if="isInMainContent"
     class="panel-template-content__searchbar"
     :placeholder="$t('NN0092', { target: $tc('NN0001', 1) })"
     clear
@@ -10,10 +10,11 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
     v-model:expanded="isSearchBarExpanded"
     @search="handleSearch"
     @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
-  tags(v-if="tags && tags.length"
+  tags(v-show="tags && tags.length"
       class="panel-template-content__tags"
       :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"
+      ref="tags"
       theme="dark"
       @search="handleSearch")
   //- Search result and main content
@@ -123,9 +124,9 @@ export default defineComponent({
       }
     },
     isInMainContent() {
-      // skip transitions when entering of leaving category
+      // skip transitions when entering of leaving main content
       this.toggleTransitions(false)
-      this.$nextTick(() => {
+      window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
       })
     }
@@ -163,9 +164,6 @@ export default defineComponent({
       return this.isTabInCategory('template')
     },
     isInMainContent(): boolean {
-      return !this.isInCategory && !this.showAllRecently && !this.isInGroupTemplate
-    },
-    showSearchBar(): boolean {
       return !this.isInCategory && !this.isInGroupTemplate
     },
     showAllRecently(): boolean {
