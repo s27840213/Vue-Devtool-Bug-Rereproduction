@@ -1,8 +1,9 @@
 import App from '@/App.vue'
+import modalUtils from '@/utils/modalUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
-import Notifications from '@kyvg/vue3-notification'
+import Notifications, { notify } from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
@@ -20,13 +21,34 @@ import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
 
 const eventBus = mitt()
-window.onerror = function (msg, url, line) {
+window.onerror = function (msg, url, line, colno, error) {
+  const errorId = generalUtils.generateRandomString(6)
   const message = [
+    'Error ID:' + errorId,
     'Message: ' + msg,
     'URL: ' + url,
     'Line: ' + line,
+    'Col: ' + colno,
+    'Stack: ' + error?.stack
   ].join(' - ')
   logUtils.setLog(message)
+  logUtils.uploadLog().then(() => {
+    if (store.getters.getShowGlobalErrorModal) {
+      const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+      modalUtils.setModalInfo(
+        i18n.global.t('NN0866'),
+        hint,
+        {
+          msg: i18n.global.t('NN0032'),
+          action() {
+            generalUtils.copyText(hint).then(() => {
+              notify({ group: 'copy', text: '已複製' })
+            })
+          }
+        }
+      )
+    }
+  })
 }
 
 const app = createApp(App).use(i18n).use(router).use(store)
