@@ -5,10 +5,6 @@ recycle-scroller(class="image-list" :items="images2d" :itemSize="140" ref="recyc
     div(class="image-list__row")
       template(v-for="img in item.item" :key="img.id")
         div(v-if="img.type === 'placeholder'" class="image-list__placeholder")
-        observer-sentinel(v-else-if="img.type === 'sentinel'"
-                          class="no-trans"
-                          :target="$route.name === 'Editor' ? '.popup-brand-settings__window' : undefined"
-                          @callback="$emit('loadMore')")
         div(v-else :class="{hovered: img.menuopen}"
           class="image-list__item relative")
           svg-icon(v-if="img.uploading" iconName="loading" iconWidth="24px" iconColor="gray-3")
@@ -39,10 +35,13 @@ recycle-scroller(class="image-list" :items="images2d" :itemSize="140" ref="recyc
                           iconColor="gray-2")
                   span {{ $t('NN0034') }}
   template(#after)
-    div(v-if="true || loading" class="flex-center")
+    div(v-if="loading" class="flex-center")
       svg-icon(iconName="loading"
               iconWidth="50px"
               iconColor="gray-3")
+    observer-sentinel(v-else-if="sentinel"
+              :target="$route.name === 'Editor' ? '.popup-brand-settings__window' : undefined"
+              @callback="$emit('loadMore')")
 </template>
 
 <script lang="ts">
@@ -51,14 +50,14 @@ import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 
 export interface IImageListItem {
-  type: '' | 'sentinel' | 'placeholder'
+  type: '' | 'placeholder'
   key: string
   label: string
   src: string
   uploading: boolean
   menuopen: boolean
 }
-export const spItem = (type: 'sentinel' | 'placeholder') => ({
+const spItem = (type: 'placeholder') => ({
   type,
   key: type,
   label: '',
@@ -95,6 +94,9 @@ export default defineComponent({
       type: Boolean
     },
     loading: {
+      type: Boolean
+    },
+    sentinel: {
       type: Boolean
     },
   },

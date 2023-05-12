@@ -18,6 +18,7 @@ div(class="popup-window")
       :showMore="false"
       :showUploadArea="inMyfile"
       :loading="data.loading"
+      :sentinel="data.sentinel"
       @addImage="handleUploadLogo"
       @clickImage="clickImg"
       @loadMore="data.loadmore")
@@ -26,7 +27,7 @@ div(class="popup-window")
 
 <script lang="ts">
 import DragHover from '@/components/image-gallery/DragHover.vue'
-import ImageList, { IImageListItem, spItem } from '@/components/image-gallery/ImageList.vue'
+import ImageList, { IImageListItem } from '@/components/image-gallery/ImageList.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import Tabs from '@/components/Tabs.vue'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
@@ -36,7 +37,7 @@ import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 interface IPopupReplaceItem extends IImageListItem {
   img?: IAssetPhoto | IPhotoItem
@@ -68,6 +69,7 @@ export default defineComponent({
     ...mapState('file', {
       _myfileImages: 'myfileImages',
       myfileLoading: 'pending',
+      myfilePageIndex: 'pageIndex',
     }),
     ...mapState('unsplash', {
       _unsplashImages: 'content',
@@ -75,52 +77,51 @@ export default defineComponent({
       unsplashLoading: 'pending',
       keyword: 'keyword'
     }),
+    ...mapGetters('unsplash', {
+      upsplashNextParams: 'getNextParams',
+    }),
     inMyfile() {
       return this.tableIndex === 0
     },
     myfileImages(): IPopupReplaceItem[] {
-      return [
-        ...(this._myfileImages as IAssetPhoto[]).map(img => ({
-          type: '' as const,
-          key: `${img.assetIndex}`,
-          label: '',
-          src: img.urls.tiny,
-          uploading: img.urls.tiny.startsWith('data'),
-          menuopen: false,
-          img,
-        })),
-        ...this.myfileLoading ? [] : [spItem('sentinel')]
-      ]
+      return (this._myfileImages as IAssetPhoto[]).map(img => ({
+        type: '' as const,
+        key: `${img.assetIndex}`,
+        label: '',
+        src: img.urls.tiny,
+        uploading: img.urls.tiny.startsWith('data'),
+        menuopen: false,
+        img,
+      }))
     },
     unsplashImages(): IPopupReplaceItem[] {
       const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
       const tinySize = sizeMap.find(e => e.key === 'tiny')?.size || 320
-      return [
-        ...((this.keyword ? this.searchResult : this._unsplashImages) as IPhotoItem[]).map((img, index) => {
-          const data = {
-            srcObj: { type: 'unsplash', userId: '', assetId: img.id }
-          }
-          return {
-            type: '' as const,
-            key: `${img.id}-${index}`,
-            label: '',
-            src: imageUtils.getSrc(data, tinySize),
-            uploading: false,
-            menuopen: false,
-            img,
-          }
-        }),
-        ...this.unsplashLoading ? [] : [spItem('sentinel')]
-      ]
+      return ((this.keyword ? this.searchResult : this._unsplashImages) as IPhotoItem[]).map((img, index) => {
+        const data = {
+          srcObj: { type: 'unsplash', userId: '', assetId: img.id }
+        }
+        return {
+          type: '' as const,
+          key: `${img.id}-${index}`,
+          label: '',
+          src: imageUtils.getSrc(data, tinySize),
+          uploading: false,
+          menuopen: false,
+          img,
+        }
+      })
     },
     data() {
       return [{
         images: this.myfileImages,
         loading: this.myfileLoading,
+        sentinel: !this.myfileLoading && this.myfilePageIndex > 0,
         loadmore: this.loadmoreMyfile,
       }, {
         images: this.unsplashImages,
         loading: this.unsplashLoading,
+        sentinel: !this.unsplashLoading && this.upsplashNextParams.pageIndex > 0,
         loadmore: this.loadmoreUnsplash,
       }][this.tableIndex]
     },

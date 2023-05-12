@@ -4,6 +4,7 @@ div(class="brand-kit-tab-logo")
     :showMore="true"
     :showUploadArea="true"
     :loading="isLogosLoading"
+    :sentinel="!isLogosLoading && logosPageIndex >= 0"
     @addImage="handleUploadLogo"
     @handleDownload="handleDownload"
     @handleDeleteLogo="handleDeleteLogo"
@@ -13,7 +14,7 @@ div(class="brand-kit-tab-logo")
 </template>
 
 <script lang="ts">
-import ImageList, { IImageListItem, spItem } from '@/components/image-gallery/ImageList.vue'
+import ImageList, { IImageListItem } from '@/components/image-gallery/ImageList.vue'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -68,9 +69,6 @@ export default defineComponent({
         menuopen: this.menuOpenLogoId === logo.id,
         logo,
       })) as IRenderedLogos[]
-      if (!this.isLogosLoading && this.logosPageIndex >= 0) {
-        res.push(spItem('sentinel'))
-      }
       return res
     }
   },

@@ -143,6 +143,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .brand-kit-tab {
   @include size(100%, 100%);
+  $tab-header: 54px;
+  $content-margin: 30px;
+
   display: grid;
   grid-auto-columns: minmax(0, 1fr);
   grid-template-rows: auto auto minmax(0, 1fr);
@@ -161,7 +164,7 @@ export default defineComponent({
   &__header {
     display: flex;
     gap: 20px;
-    height: 54px;
+    height: $tab-header;
     &.editor-theme {
       justify-content: center;
     }
@@ -232,7 +235,10 @@ export default defineComponent({
     border-radius: 5px;
   }
   &__content {
-    margin-top: 30px;
+    margin-top: $content-margin;
+    .brand-kit-tab-logo {
+      max-height: calc(100vh - $header-height - $tab-header - $content-margin);
+    }
     &.editor-theme {
       // height: calc(100% - 138px);
     }
