@@ -468,10 +468,11 @@ export default defineComponent({
 .home-list {
   width: 80%;
   position: relative;
+  padding-bottom: calc(v-bind(statusbarHeight) * 1px);
   &__hashtag {
     z-index: 10;
     position: sticky;
-    top: 0px;
+    top: -1px;
     left: 0;
     padding: 12px 0px;
     margin: 0px;
