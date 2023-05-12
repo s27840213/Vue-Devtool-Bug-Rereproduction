@@ -10,6 +10,7 @@ import store from '@/store'
 import { LayerType } from '@/store/types'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import Graphemer from 'graphemer'
 import _ from 'lodash'
@@ -1106,6 +1107,9 @@ class TextUtils {
             x: originHW.x + (newHW.width - originHW.width) / 2,
             y: originHW.y + (newHW.height - originHW.height) / 2
           })
+          if (layer.styles.textEffect.fontSize !== undefined) {
+            layer.styles.textEffect.fontSize = textEffectUtils.getLayerFontSize(layer.paragraphs)
+          }
         }
         break
       case LayerType.tmp:
