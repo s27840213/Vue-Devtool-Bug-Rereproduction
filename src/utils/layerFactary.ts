@@ -623,7 +623,7 @@ class LayerFactary {
       }
     }
     config.jsonVer = latestJsonVer
-    textUtils.resetScale(config)
+    textUtils.resetScale(config, true)
     return config
   }
 

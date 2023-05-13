@@ -1078,7 +1078,7 @@ class TextUtils {
     })
   }
 
-  resetScaleForLayer(layer: AllLayerTypes): AllLayerTypes {
+  resetScaleForLayer(layer: AllLayerTypes, preMount = false): AllLayerTypes {
     layer = generalUtils.deepCopy(layer)
     let scale = 1
     let subLayers
@@ -1094,19 +1094,25 @@ class TextUtils {
           layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
             return size * scale
           })
-          originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
-          layer.widthLimit = this.autoResizeCoreSync(layer, {
-            width: originHW.width,
-            height: originHW.height,
-            widthLimit: layer.widthLimit
-          }).widthLimit
-          newHW = this.getTextHW(layer, layer.widthLimit)
-          Object.assign(layer.styles, {
-            width: newHW.width,
-            height: newHW.height,
-            x: originHW.x + (newHW.width - originHW.width) / 2,
-            y: originHW.y + (newHW.height - originHW.height) / 2
-          })
+          if (!preMount) {
+            // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
+            // and let the mounted hook of NuText to deal with size and position
+            originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
+            if (layer.widthLimit !== -1) {
+              layer.widthLimit = this.autoResizeCoreSync(layer, {
+                width: originHW.width,
+                height: originHW.height,
+                widthLimit: layer.widthLimit
+              }).widthLimit
+            }
+            newHW = this.getTextHW(layer, layer.widthLimit)
+            Object.assign(layer.styles, {
+              width: newHW.width,
+              height: newHW.height,
+              x: originHW.x + (newHW.width - originHW.width) / 2,
+              y: originHW.y + (newHW.height - originHW.height) / 2
+            })
+          }
           if (layer.styles.textEffect.fontSize !== undefined) {
             layer.styles.textEffect.fontSize = textEffectUtils.getLayerFontSize(layer.paragraphs)
           }
@@ -1123,7 +1129,7 @@ class TextUtils {
          */
         opacity = layer.styles.opacity
         layer.styles.opacity = 100
-        subLayers = groupUtils.mapLayersToPage(layer.layers, layer).map(l => this.resetScaleForLayer(l) as Exclude<AllLayerTypes, ITmp>)
+        subLayers = groupUtils.mapLayersToPage(layer.layers, layer).map(l => this.resetScaleForLayer(l, preMount) as Exclude<AllLayerTypes, ITmp>)
         newStyles = calcTmpProps(subLayers)
         subLayers = groupUtils.mapLayersToTmp(subLayers, newStyles)
         Object.assign(layer.styles, newStyles)
@@ -1135,8 +1141,8 @@ class TextUtils {
     return layer
   }
 
-  resetScale(page: IPage): void {
-    page.layers = page.layers.map(layer => this.resetScaleForLayer(layer))
+  resetScale(page: IPage, preLoad = false): void {
+    page.layers = page.layers.map(layer => this.resetScaleForLayer(layer, preLoad))
   }
 }
 
