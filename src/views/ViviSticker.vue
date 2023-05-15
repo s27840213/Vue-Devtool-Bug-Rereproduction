@@ -411,6 +411,7 @@ export default defineComponent({
     width: 100%;
     overflow: hidden;
     z-index: setZindex("editor-view");
+    transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
   }
 
   &__slide {

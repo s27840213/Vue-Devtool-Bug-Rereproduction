@@ -1,4 +1,5 @@
 import App from '@/App.vue'
+import PropertyBar from '@/components/global/PropertyBar.vue'
 import modalUtils from '@/utils/modalUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -102,9 +103,11 @@ app.component('svg-icon', defineAsyncComponent(() =>
 app.component('btn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))
-app.component('property-bar', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/PropertyBar.vue')
-))
+/**
+ * bcz this components use slot, and some components need to get its ref in mounted,
+ * so we can't use async component
+ */
+app.component('property-bar', PropertyBar)
 app.component('dropdown', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Dropdown.vue')
 ))
