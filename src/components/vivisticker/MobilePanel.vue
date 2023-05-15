@@ -180,7 +180,8 @@ export default defineComponent({
       showExtraColorPanel: false,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
-      innerTabIndex: 0
+      innerTabIndex: 0,
+      resizeObserver: null as unknown as ResizeObserver
     }
   },
   computed: {
@@ -564,6 +565,18 @@ export default defineComponent({
   mounted() {
     this.panelDragHeight = this.currActivePanel === 'none'
       ? 0 : this.initPanelHeight()
+    this.resizeObserver = new ResizeObserver(() => {
+      this.$emit('panelHeight', this.currPanelHeight())
+      // No fit page in mobile now
+      // Prevent fitPage when full size panel open, ex: SidebarPanel
+      // if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
+      //   this.fitPage()
+      // }
+    })
+    this.resizeObserver.observe(this.$refs.panel as Element)
+  },
+  beforeUnmount() {
+    this.resizeObserver && this.resizeObserver.disconnect()
   },
   methods: {
     ...mapMutations({
@@ -598,9 +611,7 @@ export default defineComponent({
       )
     },
     closeMobilePanel() {
-      this.$emit('switchTab', 'none')
-      this.panelHistory = []
-      editorUtils.setCurrActivePanel('none')
+      editorUtils.setShowMobilePanel(false)
     },
     initPanelHeight() {
       // 40 = HeaderTabs height
