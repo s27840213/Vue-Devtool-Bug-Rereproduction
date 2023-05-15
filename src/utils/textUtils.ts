@@ -1135,6 +1135,9 @@ class TextUtils {
          * after that, re-form the group/tmp with those sub-layers.
          */
         stylesBuffer = this.setStylesBuffer(layer.styles, ['opacity', 'rotate', 'horizontalFlip', 'verticalFlip'])
+        layer.layers.forEach((subLayer: AllLayerTypes, index: number) => {
+          subLayer.styles.zindex = layer.styles.zindex + index
+        }) // some subLayers in template have inconsistent zindexes with layer indexes, fix them here
         layer.styles.opacity = 100
         layer.styles.rotate = 0
         layer.styles.horizontalFlip = false
