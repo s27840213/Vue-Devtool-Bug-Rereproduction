@@ -72,8 +72,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
-  designDeletionQueue = [] as { key: string, id: string, thumbType: string }[]
-  saveDesignQueue = [] as { design: string }[]
 
   STANDALONE_USER_INFO: IUserInfo = {
     hostId: '',
@@ -777,19 +775,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       id: editingDesignId,
       assetInfo
     } as ITempDesign
-    this.saveDesignQueue.push({ design: JSON.stringify(design) })
-    if (this.saveDesignQueue.length === 1) {
-      this.processSaveDesign()
-    }
-  }
-
-  async processSaveDesign() {
-    const designToSave = this.saveDesignQueue[0]
-    if (designToSave) {
-      await this.setState('tempDesign', designToSave)
-      this.saveDesignQueue.shift()
-      this.processSaveDesign()
-    }
+    this.setState('tempDesign', { design: JSON.stringify(design) })
   }
 
   async fetchDesign(): Promise<ITempDesign | undefined> {
@@ -905,25 +891,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {
-    this.designDeletionQueue.push({ key, id, thumbType })
-    if (this.designDeletionQueue.length === 1) {
-      this.processDeleteAsset()
+    if (this.checkVersion('1.27')) {
+      await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, `delete-asset-${key}-${id}`)
+    } else {
+      await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, 'delete-asset')
     }
-  }
-
-  async processDeleteAsset() {
-    const deletion = this.designDeletionQueue[0]
-    if (deletion) {
-      const { key, id, thumbType } = deletion
-      if (this.checkVersion('1.27')) {
-        await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, `delete-asset-${key}-${id}`)
-      } else {
-        await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, 'delete-asset')
-      }
-      store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), id })
-      this.designDeletionQueue.shift()
-      this.processDeleteAsset()
-    }
+    store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), id })
   }
 
   deleteAssetDone(data: { key: string, id: string } | undefined) {
