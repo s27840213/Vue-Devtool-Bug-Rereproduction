@@ -1078,21 +1078,28 @@ class TextUtils {
     })
   }
 
+  setStylesBuffer(styles: { [key: string]: any }, keys: string[]): { [key: string]: any } {
+    const res = {} as { [key: string]: any }
+    for (const key of keys) {
+      res[key] = styles[key]
+    }
+    return res
+  }
+
   resetScaleForLayer(layer: AllLayerTypes, preMount = false): AllLayerTypes {
     layer = generalUtils.deepCopy(layer)
-    let scale = 1
     let subLayers
     let newStyles
-    let opacity
+    let stylesBuffer = {} as { [key: string]: any }
     let originHW
     let newHW
     switch (layer.type) {
       case LayerType.text:
         if (layer.styles.scale > 1) {
-          scale = layer.styles.scale
+          stylesBuffer = this.setStylesBuffer(layer.styles, ['scale'])
           layer.styles.scale = 1
           layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
-            return size * scale
+            return size * stylesBuffer.scale
           })
           if (!preMount) {
             // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
@@ -1127,13 +1134,16 @@ class TextUtils {
          * and reset the scale individually for certain typed sub-layers.
          * after that, re-form the group/tmp with those sub-layers.
          */
-        opacity = layer.styles.opacity
+        stylesBuffer = this.setStylesBuffer(layer.styles, ['opacity', 'rotate', 'horizontalFlip', 'verticalFlip'])
         layer.styles.opacity = 100
+        layer.styles.rotate = 0
+        layer.styles.horizontalFlip = false
+        layer.styles.verticalFlip = false
         subLayers = groupUtils.mapLayersToPage(layer.layers, layer).map(l => this.resetScaleForLayer(l, preMount) as Exclude<AllLayerTypes, ITmp>)
         newStyles = calcTmpProps(subLayers)
         subLayers = groupUtils.mapLayersToTmp(subLayers, newStyles)
         Object.assign(layer.styles, newStyles)
-        layer.styles.opacity = opacity
+        Object.assign(layer.styles, stylesBuffer)
         layer.styles.scale = 1
         layer.layers = subLayers
         break
