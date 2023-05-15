@@ -356,28 +356,32 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   getPageSize(editorType: string) {
     const elTop = document.getElementsByClassName('vivisticker__top')[0]
     const headerHeight = 44
-    const editorWidth = elTop.clientWidth * 0.9
-    const editorHeight = (elTop.clientHeight - headerHeight) * 0.9
+    const editorWidth = elTop.clientWidth
+    const editorHeight = (elTop.clientHeight - headerHeight)
     const shortEdge = Math.min(editorWidth, editorHeight)
-
     if (editorType === 'story') {
-      const aspectRatio = editorWidth / editorHeight
       const targetAspectRatio = 9 / 16
+      const footerHeight = 60
+      const maxPageWidth = Math.round(editorWidth * 0.9)
+      const maxPageHeight = Math.round(editorHeight - shortEdge * 0.05 - footerHeight)
+      const aspectRatio = maxPageWidth / maxPageHeight
       if (aspectRatio > targetAspectRatio) {
         return {
-          width: Math.round(editorHeight * targetAspectRatio),
-          height: editorHeight,
+          width: Math.round(maxPageHeight * targetAspectRatio),
+          height: maxPageHeight,
         }
       } else {
         return {
-          width: editorWidth,
-          height: Math.round(editorWidth / targetAspectRatio),
+          width: maxPageWidth,
+          height: Math.round(maxPageWidth / targetAspectRatio),
         }
       }
     }
+
+    const pageSize = Math.round(shortEdge * 0.9)
     return {
-      width: shortEdge,
-      height: shortEdge,
+      width: pageSize,
+      height: pageSize,
     }
   }
 

@@ -13,6 +13,9 @@ div(class="vvstk-editor" :style="copyingStyles()" @pointerdown="selectStart")
         :config="currLayer"
         :snapUtils="snapUtils"
         :contentScaleRatio="contentScaleRatio")
+  div(v-if="isMultiPage" class="page-pill" @click="showPanelPageManagement")
+    svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
+    span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
 </template>
 
 <script lang="ts">
@@ -22,6 +25,7 @@ import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
+import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
@@ -31,6 +35,8 @@ import SnapUtils from '@/utils/snapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
+
+const MULTI_PAGE_EDITOR_TYPES = ['story', 'post']
 
 export default defineComponent({
   props: {
@@ -101,6 +107,12 @@ export default defineComponent({
     },
     selectedLayerCount(): number {
       return this.currSelectedInfo.layers.length
+    },
+    strPagePill(): string {
+      return 'Pages'
+    },
+    isMultiPage(): boolean {
+      return MULTI_PAGE_EDITOR_TYPES.includes(this.editorType)
     }
   },
   components: {
@@ -168,6 +180,10 @@ export default defineComponent({
         }
       }
     },
+    showPanelPageManagement() {
+      editorUtils.setCurrActivePanel('page-management')
+      editorUtils.setShowMobilePanel(true)
+    },
     handleResize() {
       resizeUtils.resizePage(0, this.config, vivistickerUtils.getPageSize(this.editorType))
       const elTop = document.getElementsByClassName('vivisticker__top')[0]
@@ -210,5 +226,21 @@ export default defineComponent({
   :focus {
     outline: none;
   }
+}
+
+.page-pill {
+  @include size(80px, 30px);
+  padding: 4px 8px;
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  background-color: setColor(black-3);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 4px;
 }
 </style>

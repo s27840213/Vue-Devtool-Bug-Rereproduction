@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="mobile-panel"
-    :class="{'panel-padding': !noPaddingTheme, 'not-rounded': insertTheme}"
+    :class="{'panel-padding': !noPaddingTheme, 'not-rounded': insertTheme, 'at-bottom': bottomTheme}"
     :style="panelStyle"
     v-click-outside="vcoConfig()"
     ref="panel")
@@ -62,7 +62,6 @@ div(class="mobile-panel"
       @close="closeMobilePanel")
 </template>
 <script lang="ts">
-import Tabs from '@/components/Tabs.vue'
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
@@ -84,9 +83,9 @@ import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.v
 import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
+import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
-import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
@@ -94,7 +93,9 @@ import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
+import Tabs from '@/components/Tabs.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
+import PanelPageManagement from '@/components/vivisticker/PanelPageManagement.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 
@@ -114,11 +115,12 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import vClickOutside from 'click-outside-vue3'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   name: 'mobile-panel',
+  emits: ['switchTab', 'panelHeight', 'bottomThemeChange'],
   props: {
     currActivePanel: {
       default: 'none',
@@ -171,7 +173,8 @@ export default defineComponent({
     panelSelectDesign,
     PanelAddTemplate,
     Tabs,
-    PanelRemoveBg
+    PanelRemoveBg,
+    PanelPageManagement
   },
   data() {
     return {
@@ -219,10 +222,13 @@ export default defineComponent({
       return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design', 'add-template'].includes(this.currActivePanel)
+      return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     noHeaderTheme(): boolean {
-      return ['select-design'].includes(this.currActivePanel)
+      return ['select-design', 'page-management'].includes(this.currActivePanel)
+    },
+    bottomTheme(): boolean {
+      return ['add-template', 'page-management'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return [
@@ -266,7 +272,7 @@ export default defineComponent({
       }
     },
     insertTheme(): boolean {
-      return ['text', 'add-template'].includes(this.currActivePanel)
+      return ['text', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     showRightBtn(): boolean {
       return this.currActivePanel !== 'none'
@@ -286,7 +292,7 @@ export default defineComponent({
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
-          backgroundColor: this.whiteTheme ? 'white' : '#1F1F1F',
+          backgroundColor: this.whiteTheme ? 'white' : this.bottomTheme ? '#141414' : '#1F1F1F',
           maxHeight: this.isDuringCopy ? '0' : (
             this.fixSize || this.extraFixSizeCondition
               ? '100%' : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px'
@@ -561,6 +567,9 @@ export default defineComponent({
       if (!newVal) {
         this.showExtraColorPanel = false
       }
+    },
+    bottomTheme(newVal) {
+      this.$emit('bottomThemeChange', newVal)
     }
   },
   mounted() {
@@ -689,6 +698,10 @@ export default defineComponent({
 
   &.panel-padding {
     padding: 16px;
+  }
+
+  &.at-bottom {
+    z-index: setZindex(mobile-panel-bottom);
   }
 
   &__top-section {

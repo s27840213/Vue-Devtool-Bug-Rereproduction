@@ -7,16 +7,19 @@ div(class="vivisticker" :style="copyingStyles()")
       my-design(v-show="isInMyDesign && !isInEditor")
       vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
-    transition(name="panel-up")
-      mobile-panel(v-show="showMobilePanel"
-        :currActivePanel="currActivePanel"
-        :currPage="currPage"
-        @switchTab="switchTab")
+    teleport(v-if="mounted" to="#vivisticker__mobile-panel-bottom" :disabled="!isMobilePanelBottom")
+      transition(name="panel-up")
+        mobile-panel(v-show="showMobilePanel"
+          :currActivePanel="currActivePanel"
+          :currPage="currPage"
+          @switchTab="switchTab"
+          @bottomThemeChange="(val) => isMobilePanelBottom = val")
   footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
     @switchTab="switchTab"
     @switchMainTab="switchMainTab"
     :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
     :inAllPagesMode="false")
+  div(id="vivisticker__mobile-panel-bottom")
   transition(name="slide-left")
     component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
   transition(name="panel-up")
@@ -69,7 +72,9 @@ export default defineComponent({
     return {
       currColorEvent: '',
       headerOffset: 0,
-      isKeyboardAnimation: 0
+      isKeyboardAnimation: 0,
+      mounted: false,
+      isMobilePanelBottom: false,
     }
   },
   created() {
@@ -85,6 +90,7 @@ export default defineComponent({
     }
   },
   async mounted() {
+    this.mounted = true
     const tempDesign = await vivistickerUtils.fetchDesign()
     if (tempDesign) {
       try {

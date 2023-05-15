@@ -57,14 +57,12 @@ export default defineComponent({
   &__content {
     display: grid;
     grid-auto-flow: column;
-    grid-template: auto auto;
     column-gap: 70px;
     justify-content: center;
     margin-top: 20px;
   }
   &__item {
     display: grid;
-    grid-template: auto auto;
     row-gap: 10px;
   }
   &__bg {
