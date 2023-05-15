@@ -26,10 +26,6 @@ class LogUtils {
       console.error(error)
       if ((error as Error).name.includes('QuotaExceededError')) {
         // log can only be uploaded when user is logged in, otherwise, discard the log to avoid quota exceeded error.
-        if (!uploadUtils.isLogin) {
-          this.clearLog()
-          return
-        }
         this.uploadLog()
         try {
           localStorage.setItem('log', newLog)
