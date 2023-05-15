@@ -2,17 +2,24 @@
 div(class="vivisticker" :style="copyingStyles()")
   div(class="vivisticker__top" :style="topStyles()")
     header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
-    div(class="vivisticker__content"
+    div(ref="vivisticker__content"
+        class="vivisticker__content"
+        :style="contentStyle"
         @click.self="outerClick")
       my-design(v-show="isInMyDesign && !isInEditor")
       vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
     teleport(v-if="mounted" to="#vivisticker__mobile-panel-bottom" :disabled="!isMobilePanelBottom")
-      transition(name="panel-up")
+      transition(name="panel-up"
+                @before-enter="beforeEnter"
+                @after-enter="afterEnter"
+                @after-leave="afterLeave")
         mobile-panel(v-show="showMobilePanel"
+          ref="mobilePanel"
           :currActivePanel="currActivePanel"
           :currPage="currPage"
           @switchTab="switchTab"
+          @panelHeight="setPanelHeight"
           @bottomThemeChange="(val) => isMobilePanelBottom = val")
   footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
     @switchTab="switchTab"
@@ -50,6 +57,7 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { find } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -73,6 +81,8 @@ export default defineComponent({
       currColorEvent: '',
       headerOffset: 0,
       isKeyboardAnimation: 0,
+      showMobilePanelAfterTransitoin: false,
+      marginBottom: 0,
       mounted: false,
       isMobilePanelBottom: false,
     }
@@ -206,6 +216,7 @@ export default defineComponent({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      contentScaleRatio: 'getContentScaleRatio',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
@@ -226,6 +237,9 @@ export default defineComponent({
     }),
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
+    },
+    contentStyle(): Record<string, string> {
+      return this.isInEditor ? { transform: `translateY(-${this.marginBottom}px)` } : {}
     }
   },
   watch: {
@@ -278,7 +292,7 @@ export default defineComponent({
         this.currColorEvent = props.currColorEvent
       // Close panel if re-click
       } else if (this.currActivePanel === panelType || panelType === 'none') {
-        editorUtils.setCurrActivePanel('none')
+        editorUtils.setShowMobilePanel(false)
       } else {
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
@@ -327,6 +341,42 @@ export default defineComponent({
       this.isKeyboardAnimation = window.setTimeout(() => {
         this.isKeyboardAnimation = 0
       }, 500)
+    },
+    setPanelHeight(height: number) {
+      const content = this.$refs.vivisticker__content as HTMLElement
+      const contentHeight = content?.clientHeight ?? 0
+      if (height === 0 || height > contentHeight) {
+        this.marginBottom = 0
+        return
+      }
+
+      // Calc additional page card translation by layer position
+      const activeLayer = find(this.currPage.layers, ['active', true])
+      let offset = 0
+      let pageOffset = 0
+      if (activeLayer && contentHeight) {
+        const layerMiddleY = activeLayer.styles.y +
+          activeLayer.styles.height / 2 - this.currPage.height / 2
+        offset = layerMiddleY * this.contentScaleRatio
+      }
+      const pseudoPage = document.querySelector('.vvstk-editor__pseudo-page') as HTMLElement | null
+      if (pseudoPage) {
+        pageOffset = contentHeight - pseudoPage.clientHeight
+      }
+      this.marginBottom = Math.max((height - pageOffset) / 2 + offset, 0)
+    },
+    beforeEnter() {
+      this.showMobilePanelAfterTransitoin = true
+    },
+    afterEnter() {
+      this.setPanelHeight((this.$refs.mobilePanel as {$el: HTMLElement}).$el.clientHeight)
+    },
+    afterLeave() {
+      editorUtils.setCurrActivePanel('none')
+      this.setPanelHeight(0)
+      setTimeout(() => {
+        this.showMobilePanelAfterTransitoin = false
+      }, 300)
     }
   }
 })
