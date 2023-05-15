@@ -53,12 +53,14 @@ export default defineComponent({
     },
     handleSelect(tag: any) {
       const key: string = this.list.type === 'theme' ? tag.id.toString() : tag.name
-      const index = this.selected.indexOf(key)
-      if (index !== -1) {
-        this.selected.splice(index, 1)
-      } else {
-        this.selected.push(key)
-      }
+      // multiple selections
+      // const index = this.selected.indexOf(key)
+      // if (index !== -1) {
+      //   this.selected.splice(index, 1)
+      // } else {
+      //   this.selected.push(key)
+      // }
+      this.selected = [key] // single selection
       this.emitSelect()
     },
     emitSelect() {

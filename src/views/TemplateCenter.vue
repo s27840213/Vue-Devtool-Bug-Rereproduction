@@ -308,6 +308,7 @@ export default defineComponent({
         }
         this.hashtagSelections[hashtag.title] = {
           type: hashtag.type,
+          // selection: selection.slice(0, 1) // limit querystring selection as single selection
           selection
         }
       }
