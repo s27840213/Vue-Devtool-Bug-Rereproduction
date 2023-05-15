@@ -73,8 +73,6 @@ export default defineComponent({
       console.log('preview')
     },
     close() {
-      // TODO: close mobile panel
-      editorUtils.setCurrActivePanel('none')
       editorUtils.setShowMobilePanel(false)
     }
   }
