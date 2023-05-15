@@ -12,7 +12,7 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
     v-model:expanded="isSearchBarExpanded"
     @search="handleSearch"
     @favorite="toggleFavoritesTag")
-  tags(v-if="tags && tags.length"
+  tags(v-show="tags && tags.length"
       class="panel-static__tags"
       :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"
