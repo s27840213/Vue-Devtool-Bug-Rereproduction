@@ -89,7 +89,8 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     }
   }
 
-  callIOSAsAPI: typeof WebViewUtils.prototype.callIOSAsAPICore = async (...args) => {
+  async callIOSAsAPI(...args: Parameters<typeof WebViewUtils.prototype.callIOSAsAPICore>):
+    ReturnType<typeof WebViewUtils.prototype.callIOSAsAPICore> {
     const event = args[2]
     const eventId = generalUtils.generateRandomString(12)
     if (this.apiQueueMap[event] === undefined) { this.apiQueueMap[event] = [] }
