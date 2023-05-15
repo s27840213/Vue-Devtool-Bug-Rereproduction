@@ -6,7 +6,7 @@ div(class="page-size-selector")
     div(class="page-size-selector__body__custom")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
-        input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputWidth"
+        input(class="body-MD page-size-selector__body__custom__box__input" type="number" min="0" ref="inputWidth"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
               :style="{position: isInputFocused ? 'static' : 'fixed'}"
               :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
@@ -15,12 +15,12 @@ div(class="page-size-selector")
               @focus="lastFocusedInput = 'width'"
               @blur="handleInputBlur('width')")
         input(v-if="!isInputFocused"
-              class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
+              class="body-MD page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
               :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
               :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
               @click="handleDummyClick($event, $refs.inputWidth, 'width')")
-        span(class="body-4 page-size-selector__body__custom__box__input-label"
+        span(class="body-MD page-size-selector__body__custom__box__input-label"
             :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
@@ -28,7 +28,7 @@ div(class="page-size-selector")
           @click="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
-        input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
+        input(class="body-MD page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
               :style="{position: isInputFocused ? 'static' : 'fixed'}"
               :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
@@ -37,27 +37,28 @@ div(class="page-size-selector")
               @focus="lastFocusedInput = 'height'"
               @blur="handleInputBlur('height')")
         input(v-if="!isInputFocused"
-              class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
+              class="body-MD page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
               :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
               :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
               @click="handleDummyClick($event, $refs.inputHeight, 'height')")
-        span(class="body-4 page-size-selector__body__custom__box__input-label"
+        span(class="body-MD page-size-selector__body__custom__box__input-label"
             :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                     class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
                     @click="showUnitOptions = !showUnitOptions")
-        span(class="page-size-selector__body__custom__unit__label body-XXS" :class="selectedFormatKey === 'custom' ? 'black' : defaultTextColor") {{selectedUnit}}
+        span(class="page-size-selector__body__custom__unit__label body-MD" :class="selectedFormatKey === 'custom' ? 'black' : defaultTextColor") {{selectedUnit}}
         svg-icon(class="page-size-selector__body__custom__unit__icon"
           iconName="chevron-down"
           iconWidth="16px"
           :iconColor="selectedFormatKey === 'custom' ? 'black' : 'gray-3'")
         div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-white")
           div(v-for="(unit) in unitOptions" :key="unit" class="page-size-selector__body__custom__unit__option__item text-black" @click="selectUnit($event, unit)")
-            span(class="body-XS text-black") {{unit}}
+            span(class="body-MD text-black") {{unit}}
       div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
-        class="page-size-selector__body__custom__err body-XS text-red") {{errMsg}}
+        class="page-size-selector__body__custom__err body-MD text-red") {{errMsg}}
         span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{'Fix it for me.'}}
+  nubtn(size="sm-full" class="mt-15" @click="createCustomDesign") {{$t('NN0867')}}
   div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
   div(class="page-size-selector__container"
     @touchmove="handleTouchMove")
@@ -71,9 +72,9 @@ div(class="page-size-selector")
           @click="selectFormat(`recent-${index}`)")
         img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.title === '' ? 'custom' : format.icon}.svg`)")
         div(class="page-size-selector__body-row__content")
-          span(class="page-size-selector__body__recently body-3 pointer"
+          span(class="page-size-selector__body__recently body-SM pointer"
                 :class="selectedFormatKey === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
-          span(class="page-size-selector__body__recently body-3 pointer"
+          span(class="page-size-selector__body__recently body-SM pointer"
                 :class="selectedFormatKey === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
       div(v-if="isLayoutReady && formatList.length > 0" class="page-size-selector__body-row first-row")
         span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
@@ -83,15 +84,16 @@ div(class="page-size-selector")
           @click="selectFormat(`preset-${index}`)")
         img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.icon}.svg`)")
         div(class="page-size-selector__body-row__content")
-          span(class="page-size-selector__body__recently body-3 pointer"
+          span(class="page-size-selector__body__recently body-SM pointer"
                 :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
-          span(class="page-size-selector__body__recently body-3 pointer"
+          span(class="page-size-selector__body__recently body-SM pointer"
                 :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
 </template>
 
 <script lang="ts">
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
+import designUtils from '@/utils/designUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
 import vClickOutside from 'click-outside-vue3'
@@ -102,10 +104,6 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 const component = defineComponent({
   props: {
     isDarkTheme: {
-      type: Boolean,
-      default: false
-    },
-    isValidate: {
       type: Boolean,
       default: false
     },
@@ -125,13 +123,13 @@ const component = defineComponent({
     document.addEventListener('scroll', this.handleScroll)
     this.fetchLayouts()
     const inputWidth = this.$refs.inputWidth as HTMLInputElement
-    inputWidth.focus({ preventScroll: true })
     if (this.isMobile) {
       // prevent document scroll
       setTimeout(() => {
         this.isInputFocused = true
       }, 100)
     } else {
+      inputWidth.focus({ preventScroll: true })
       // disable dummy inputs
       this.isInputFocused = true
     }
@@ -155,7 +153,8 @@ const component = defineComponent({
       recentlyUsed: new Array<ILayout>(),
       isLayoutReady: false,
       isInputFocused: false,
-      lastFocusedInput: 'width'
+      lastFocusedInput: 'width',
+      isValidate: false
     }
   },
   watch: {
@@ -170,6 +169,10 @@ const component = defineComponent({
         'categories'
       ]
     ),
+    ...mapState('design', [
+      'currLocation',
+      'folders'
+    ]),
     ...mapGetters({
       getPage: 'getPage',
       token: 'user/getToken',
@@ -186,9 +189,6 @@ const component = defineComponent({
     },
     // Call by PanelSize and PopupSize.vue
     // eslint-disable-next-line vue/no-unused-properties
-    isFormatApplicable(): boolean {
-      return this.selectedFormatKey === 'custom' ? this.isCustomValid : (this.selectedFormatKey !== '')
-    },
     widthValid(): boolean {
       if (!this.pageWidth) return false
       if (this.pageWidth < 0) return false
@@ -251,24 +251,6 @@ const component = defineComponent({
         }).toString() + ' '
       }
       return ''
-    },
-    selectedFormat(): ILayout | undefined {
-      if (this.selectedFormatKey === 'custom') {
-        if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit, icon: '' }
-      } else if (this.selectedFormatKey.startsWith('recent')) {
-        const [type, index] = this.selectedFormatKey.split('-')
-        const format = this.recentlyUsed[parseInt(index)]
-        console.log(format)
-        return format
-      } else if (this.selectedFormatKey.startsWith('preset')) {
-        const [type, index] = this.selectedFormatKey.split('-')
-        const format = this.formatList[parseInt(index)]
-        console.log(format)
-        return format
-      } else {
-        return undefined
-      }
     }
   },
   methods: {
@@ -343,8 +325,25 @@ const component = defineComponent({
       }
       this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
-    selectFormat(key: string) {
-      this.selectedFormatKey = key
+    selectFormat(selectedFormatKey: string) {
+      this.selectedFormatKey = selectedFormatKey
+      const format = {} as ILayout
+
+      if (this.selectedFormatKey === 'custom') {
+        return
+      }
+      if (selectedFormatKey.startsWith('recent')) {
+        const [type, index] = selectedFormatKey.split('-')
+        Object.assign(format, this.recentlyUsed[parseInt(index)])
+      } else if (selectedFormatKey.startsWith('preset')) {
+        const [type, index] = selectedFormatKey.split('-')
+        Object.assign(format, this.formatList[parseInt(index)])
+      } else {
+        return undefined
+      }
+
+      if (selectedFormatKey === '') return
+      this.newDesign(format)
     },
     selectUnit(evt: Event, unit: string) {
       evt.stopPropagation()
@@ -444,6 +443,18 @@ const component = defineComponent({
         this.valPageSize.height = this.pageHeight.toString()
       }
       if (convert) this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
+    },
+    newDesign(format: ILayout) {
+      const path = this.$route.name === 'MyDesign' ? this.currLocation.split('/').slice(1).join(',') : undefined
+      const foldername = this.$route.name === 'MyDesign' ? designUtils.search(this.folders, designUtils.makePath(this.currLocation))?.name : undefined
+      designUtils.newDesignWithLoginRedirect(format.width, format.height, format.unit, undefined, path, foldername)
+    },
+    createCustomDesign() {
+      if (this.selectedFormatKey === 'custom' ? this.isCustomValid : (this.selectedFormatKey !== '')) {
+        this.newDesign({ id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit, icon: '' })
+      } else {
+        this.isValidate = true
+      }
     }
   }
 })
@@ -490,6 +501,7 @@ export type CPageSizeSelector = InstanceType<typeof component>
         margin: 0px;
         padding: 4px 4px;
         grid-template-columns: 28px 1fr;
+        grid-template-rows: 1fr;
         justify-content: left;
         gap: 8px;
       }
@@ -499,7 +511,6 @@ export type CPageSizeSelector = InstanceType<typeof component>
         align-items: center;
       }
       &__content {
-        height: 24px;
         display: grid;
         grid-template-columns: auto auto;
         align-items: center;
@@ -523,7 +534,7 @@ export type CPageSizeSelector = InstanceType<typeof component>
       column-gap: 6px;
       align-items: center;
       &__box {
-        height: 30px;
+        height: 40px;
         box-sizing: border-box;
         padding: 5px 5px;
         &__input-label {
@@ -633,7 +644,7 @@ export type CPageSizeSelector = InstanceType<typeof component>
   }
 
   .page-size-selector__body-row.item {
-    padding: 4px 16px;
+    padding: 4px 4px;
   }
 }
 </style>

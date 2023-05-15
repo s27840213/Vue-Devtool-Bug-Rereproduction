@@ -11,14 +11,14 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
                 @select="selectFormat")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
-        input(class="body-XS" type="number" min="0"
+        input(class="body-SM" type="number" min="0"
               :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
               :value="valPageSize.width"
               @input="setPageWidth"
               @click="selectFormat('custom')"
               @focus="lastFocusedInput = 'width'"
               @blur="handleInputBlur('width')")
-        span(class="body-XS"
+        span(class="body-SM"
             :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
@@ -26,20 +26,20 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
           @click="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
-        input(class="body-XS" type="number" min="0"
+        input(class="body-SM" type="number" min="0"
               :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
               :value="valPageSize.height"
               @input="setPageHeight"
               @click="selectFormat('custom')"
               @focus="lastFocusedInput = 'height'"
               @blur="() => handleInputBlur('height')")
-        span(class="body-XS"
+        span(class="body-SM"
             :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                   class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
                   :class="selectedFormat === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
           @click="showUnitOptions = !showUnitOptions")
-        span(class="page-size-selector__body__custom__unit__label body-XXS" :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
+        span(class="page-size-selector__body__custom__unit__label body-SM" :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
         svg-icon(class="page-size-selector__body__custom__unit__icon"
           iconName="chevron-down"
           iconWidth="16px"
@@ -49,9 +49,9 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
               :key="unit"
               class="page-size-selector__body__custom__unit__option__item text-gray-2"
               :style="unitOptionStyles" @click="selectUnit($event, unit)")
-            span(class="body-XS text-gray-1") {{unit}}
+            span(class="body-SM text-gray-1") {{unit}}
       div(v-if="selectedFormat === 'custom' && isValidate && !isCustomValid"
-        class="page-size-selector__body__custom__err body-XS text-red text-left") {{errMsg}}
+        class="page-size-selector__body__custom__err body-SM text-red text-left") {{errMsg}}
         span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
   div(class="page-size-selector__body__hr first bg-gray-4")
   div(class="page-size-selector__container")
@@ -66,9 +66,9 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
           @click="selectFormat(`recent-${index}`)")
         img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.title === '' || format.icon === 'custom' ? isDarkTheme ? 'custom-white' : 'custom-white' : format.icon}.svg`)")
         div(class="page-size-selector__body-row__text-content")
-          span(class="page-size-selector__body__page-text body-3 pointer"
+          span(class="page-size-selector__body__page-text body-SM pointer"
                 :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
-          span(class="page-size-selector__body__page-text body-3 pointer"
+          span(class="page-size-selector__body__page-text body-SM pointer"
                 :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
       div(class="page-size-selector__body-row first-row")
         span(class="page-size-selector__body__title subtitle-2"
@@ -81,13 +81,13 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
           @click="selectFormat(`preset-${index}`)")
         img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.icon}.svg`)")
         div(class="page-size-selector__body-row__text-content")
-          span(class="page-size-selector__body__page-text body-3 pointer"
+          span(class="page-size-selector__body__page-text body-SM pointer"
                 :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
-          span(class="page-size-selector__body__page-text body-3 pointer"
+          span(class="page-size-selector__body__page-text body-SM pointer"
                 :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
   div(class="page-size-selector__body__hr second bg-gray-4")
   div(class="page-size-selector__body__submit")
-    div(class="page-size-selector__body__submit__option body-XS")
+    div(class="page-size-selector__body__submit__option body-SM")
       checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
     btn(class="page-size-selector__body__button"
         :disabled="!isFormatApplicable"
@@ -572,7 +572,6 @@ export default defineComponent({
 
       &__text-content {
         max-width: 100%;
-        height: 24px;
         display: grid;
         grid-template-rows: 1fr;
         grid-template-columns: auto auto;
