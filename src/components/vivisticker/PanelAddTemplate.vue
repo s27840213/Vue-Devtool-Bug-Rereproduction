@@ -66,7 +66,8 @@ export default defineComponent({
     row-gap: 10px;
   }
   &__bg {
-    @include size(72px, 128px);
+    width: 72px;
+    height: v-bind("igLayout === 'story' ? '128px' : '72px'");
     display: flex;
     background: #2E2E2E;
     border-radius: 5px;
