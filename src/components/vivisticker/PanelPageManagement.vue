@@ -12,8 +12,16 @@ div(class="panel-page-management")
 </template>
 
 <script lang="ts">
+import { IFrame, IGroup } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
-import { defineComponent } from 'vue'
+import frameUtils from '@/utils/frameUtils'
+import groupUtils from '@/utils/groupUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 interface IButton {
   key: string,
@@ -28,6 +36,10 @@ export default defineComponent({
     }
   },
   props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
   },
   computed: {
     buttons(): IButton[] {
@@ -60,8 +72,54 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      setCurrActivePageIndex: 'SET_currActivePageIndex',
+    }),
     addPage() {
       console.log('addPage')
+      const { getCurrLayer: currLayer, layerIndex, pageIndex } = layerUtils
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { active: false, shown: false })
+      if (currLayer) {
+        switch (currLayer.type) {
+          case 'tmp':
+            groupUtils.deselect()
+            break
+          case 'group':
+            (currLayer as IGroup).layers
+              .forEach((l, idx) => {
+                if (l.active) {
+                  layerUtils.updateSubLayerProps(pageIndex, layerIndex, idx, {
+                    active: false,
+                    shown: false,
+                    ...(l.type === 'image' && { imgControl: false })
+                  })
+                }
+              })
+            break
+          case 'frame':
+            (currLayer as IFrame).clips
+              .forEach((_, idx) => {
+                frameUtils.updateFrameLayerProps(pageIndex, layerIndex, idx, { active: false, shown: false, imgControl: false })
+              })
+            break
+        }
+      }
+      groupUtils.reset()
+
+      pageUtils.addPageToPos(pageUtils.newPage({
+        width: this.currPage.width,
+        height: this.currPage.height,
+        physicalWidth: this.currPage.physicalWidth,
+        backgroundColor: this.currPage.backgroundColor,
+        physicalHeight: this.currPage.physicalHeight,
+        isEnableBleed: this.currPage.isEnableBleed,
+        bleeds: this.currPage.bleeds,
+        physicalBleeds: this.currPage.physicalBleeds,
+        unit: this.currPage.unit
+      }), pageUtils.currFocusPageIndex + 1)
+      this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300) })
+      stepsUtils.record()
     },
     duplicatePage() {
       console.log('duplicatePage')

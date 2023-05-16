@@ -327,14 +327,33 @@ class PageUtils {
     FocusUtils.focusElement(`.nu-page-${this.currFocusPageIndex}`, true)
   }
 
-  scrollIntoPage(pageIndex: number, behavior?: 'auto' | 'smooth'): void {
+  scrollIntoPage(pageIndex: number, behavior?: 'auto' | 'smooth', duration?: number): void {
     const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
+    const container = currentPage.parentElement
     if (currentPage !== undefined) {
-      currentPage.scrollIntoView({
-        behavior: behavior ?? 'smooth',
-        block: 'center',
-        inline: 'center'
-      })
+      if (duration && container) {
+        const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
+        const startPos = container.scrollLeft
+        const diff = targetPos - startPos
+        let startTime = null as number | null
+        let requestId: number
+        const aniScroll = function (timestamp: number) {
+          if (!startTime) startTime = timestamp
+          const runtime = timestamp - startTime
+          const relativeProgress = Math.max(Math.min(runtime / duration, 1), 0)
+          container.scrollLeft = startPos + diff * relativeProgress
+          if (runtime < duration) {
+            requestId = window.requestAnimationFrame(aniScroll)
+          } else window.cancelAnimationFrame(requestId)
+        }
+        requestId = window.requestAnimationFrame(aniScroll)
+      } else {
+        currentPage.scrollIntoView({
+          behavior: behavior ?? 'smooth',
+          block: 'center',
+          inline: 'center'
+        })
+      }
       this.findCentralPageIndexInfo()
     }
   }

@@ -1,18 +1,19 @@
 <template lang="pug">
-div(class="vvstk-editor" :style="copyingStyles()" @pointerdown="selectStart")
-  div(class="vvstk-editor__pseudo-page" :style="styles('page')")
-    div(class="vvstk-editor__scale-container" :style="styles('scale')")
-      page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
-      dim-background(v-if="isImgCtrl" :config="config" :contentScaleRatio="contentScaleRatio")
-    div(class="page-control" :style="styles('control')")
-      nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
-        :key="`controller-${currLayer.id}`"
-        :layerIndex="currSelectedIndex"
-        :pageIndex="pageIndex"
-        :page="config"
-        :config="currLayer"
-        :snapUtils="snapUtils"
-        :contentScaleRatio="contentScaleRatio")
+div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectStart" @swiperight="handleSwipeRight" @swipeleft="handleSwipeLeft")
+  transition-group(name="scale" tag="div" class="vvstk-editor__pages" :style="styles('pages')")
+    div(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`" class="vvstk-editor__pseudo-page" :class="`nu-page nu-page_${index}`" :style="styles('page')")
+      div(class="vvstk-editor__scale-container" :style="styles('scale')")
+        page-content(id="vvstk-editor" :config="page.config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+        dim-background(v-if="isImgCtrl" :config="page.config" :contentScaleRatio="contentScaleRatio")
+      div(class="page-control" :style="styles('control')")
+        nu-controller(v-if="currFocusPageIndex === index && currLayer.type" data-identifier="controller"
+          :key="`controller-${currLayer.id}`"
+          :layerIndex="currSelectedIndex"
+          :pageIndex="index"
+          :page="page.config"
+          :config="currLayer"
+          :snapUtils="snapUtils"
+          :contentScaleRatio="contentScaleRatio")
   div(v-if="isMultiPage" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
@@ -34,12 +35,16 @@ import resizeUtils from '@/utils/resizeUtils'
 import SnapUtils from '@/utils/snapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const MULTI_PAGE_EDITOR_TYPES = ['story', 'post']
 
 export default defineComponent({
   props: {
+    // currPage: {
+    //   type: Object as PropType<IPage>,
+    //   required: true
+    // },
     isInEditor: {
       type: Boolean,
       required: true
@@ -109,7 +114,7 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length
     },
     strPagePill(): string {
-      return 'Pages'
+      return this.pagesState.length > 1 ? `${this.currFocusPageIndex + 1} / ${this.pagesState.length}` : 'Pages'
     },
     isMultiPage(): boolean {
       return MULTI_PAGE_EDITOR_TYPES.includes(this.editorType)
@@ -120,6 +125,9 @@ export default defineComponent({
     DimBackground
   },
   methods: {
+    ...mapMutations({
+      setCurrActivePageIndex: 'SET_currActivePageIndex',
+    }),
     styles(type: string) {
       switch (type) {
         case 'control':
@@ -133,7 +141,7 @@ export default defineComponent({
             width: `${this.config.width}px`,
             height: `${this.config.height}px`,
             backgroundColor: this.isDuringCopy ? 'transparent' : this.editorBg,
-            margin: `${this.marginTop}px auto 0 auto`,
+            margin: `${this.marginTop}px calc((100% - ${this.config.width}px) / 2) 0`,
             ...(this.isDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {})
           }
         case 'scale':
@@ -190,6 +198,16 @@ export default defineComponent({
       const headerHeight = 44
       const shortEdge = Math.min(elTop.clientWidth, elTop.clientHeight - headerHeight)
       this.marginTop = Math.round(shortEdge * 0.05)
+    },
+    handleSwipeRight() {
+      console.log('handleSwipeRight')
+      this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300) })
+    },
+    handleSwipeLeft() {
+      console.log('handleSwipeLeft')
+      this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300) })
     }
   }
 })
@@ -200,6 +218,12 @@ export default defineComponent({
   @include size(100%);
   background: setColor(black-2);
   overflow: hidden;
+  &__pages {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: repeat(v-bind("pagesState.length"), 100%);
+    overflow: hidden;
+  }
   &__pseudo-page {
     position: relative;
     transform-style: preserve-3d;
@@ -242,5 +266,17 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   column-gap: 4px;
+}
+
+.scale {
+  &-enter-active,
+  &-leave-active {
+    transition: transform 300ms ease-in-out;
+    transform: scale(1);
+  }
+  &-enter-from,
+  &-leave-to {
+    transform: scale(0.75);
+  }
 }
 </style>
