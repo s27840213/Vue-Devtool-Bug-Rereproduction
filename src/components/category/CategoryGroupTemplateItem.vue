@@ -1,9 +1,9 @@
 <template lang="pug">
 div(class="category-template-item" @click="handleClickGroup")
   div(class="relative pointer"
-    @mouseover="() => handleCarouse()"
-    @mouseleave="stopCarouse()")
-    image-carousel(v-if="showCarousel"
+    @mouseover="() => !noCarousel && handleCarouse()"
+    @mouseleave="!noCarousel && stopCarouse()")
+    image-carousel(v-if="!noCarousel && showCarousel"
       :imgs="groupImages"
       @change="handleCarouselIdx")
       template(v-slot="{ url }")
@@ -31,6 +31,10 @@ export default defineComponent({
     item: {
       type: Object,
       required: true
+    },
+    noCarousel: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
