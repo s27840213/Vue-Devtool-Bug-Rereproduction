@@ -38,6 +38,18 @@ export default defineComponent({
     subLayerIndex: {
       type: Number,
       required: true
+    },
+    pageId: {
+      type: String,
+      required: true
+    },
+    layerId: {
+      type: String,
+      required: true
+    },
+    subLayerId: {
+      type: String,
+      required: true
     }
   },
   emits: ['update', 'compositionend'],
@@ -105,9 +117,10 @@ export default defineComponent({
         editorDiv.addEventListener('compositionend', () => {
           let toRecord = false
           const pages = stepsUtils.getPrevPages()
-          let currLayerInPrevStep = pages[this.pageIndex].layers[this.layerIndex]
-          if (currLayerInPrevStep.type === 'group') {
-            currLayerInPrevStep = (currLayerInPrevStep as IGroup).layers[this.subLayerIndex] as IText
+          const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(this.pageId, this.layerId, this.subLayerId, pages)
+          let currLayerInPrevStep = pages[pageIndex].layers[layerIndex]
+          if (subLayerIdx !== -1) {
+            currLayerInPrevStep = (currLayerInPrevStep as IGroup).layers[subLayerIdx] as IText
           } else {
             currLayerInPrevStep = currLayerInPrevStep as IText
           }
