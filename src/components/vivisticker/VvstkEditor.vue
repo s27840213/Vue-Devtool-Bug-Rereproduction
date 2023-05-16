@@ -198,6 +198,7 @@ export default defineComponent({
       const headerHeight = 44
       const shortEdge = Math.min(elTop.clientWidth, elTop.clientHeight - headerHeight)
       this.marginTop = Math.round(shortEdge * 0.05)
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 0) })
     },
     handleSwipeRight() {
       console.log('handleSwipeRight')

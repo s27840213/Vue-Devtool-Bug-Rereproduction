@@ -331,7 +331,7 @@ class PageUtils {
     const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
     const container = currentPage.parentElement
     if (currentPage !== undefined) {
-      if (duration && container) {
+      if (duration !== undefined && container) {
         // smooth scroll
         // const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
         // const startPos = container.scrollLeft
