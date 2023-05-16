@@ -216,7 +216,7 @@ export default defineComponent({
     categoryListArray(): ICategoryList[] {
       return [{
         content: this.searchResult,
-        show: this.keyword,
+        show: this.keyword && !this.isInGroupTemplate,
         key: 'searchResult'
       }, {
         content: this.groupContent,
