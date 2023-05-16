@@ -222,7 +222,6 @@ export default defineComponent({
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: repeat(v-bind("pagesState.length"), 100%);
-    overflow: hidden;
   }
   &__pseudo-page {
     position: relative;

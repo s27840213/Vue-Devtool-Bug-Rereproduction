@@ -21,7 +21,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapMutations } from 'vuex'
 
 interface IButton {
   key: string,

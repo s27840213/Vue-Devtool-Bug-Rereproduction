@@ -332,21 +332,28 @@ class PageUtils {
     const container = currentPage.parentElement
     if (currentPage !== undefined) {
       if (duration && container) {
+        // smooth scroll
+        // const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
+        // const startPos = container.scrollLeft
+        // const diff = targetPos - startPos
+        // let startTime = null as number | null
+        // let requestId: number
+        // const aniScroll = function (timestamp: number) {
+        //   if (!startTime) startTime = timestamp
+        //   const runtime = timestamp - startTime
+        //   const relativeProgress = Math.max(Math.min(runtime / duration, 1), 0)
+        //   container.scrollLeft = startPos + diff * relativeProgress
+        //   if (runtime < duration) {
+        //     requestId = window.requestAnimationFrame(aniScroll)
+        //   } else window.cancelAnimationFrame(requestId)
+        // }
+        // requestId = window.requestAnimationFrame(aniScroll)
         const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
-        const startPos = container.scrollLeft
-        const diff = targetPos - startPos
-        let startTime = null as number | null
-        let requestId: number
-        const aniScroll = function (timestamp: number) {
-          if (!startTime) startTime = timestamp
-          const runtime = timestamp - startTime
-          const relativeProgress = Math.max(Math.min(runtime / duration, 1), 0)
-          container.scrollLeft = startPos + diff * relativeProgress
-          if (runtime < duration) {
-            requestId = window.requestAnimationFrame(aniScroll)
-          } else window.cancelAnimationFrame(requestId)
-        }
-        requestId = window.requestAnimationFrame(aniScroll)
+        container.style.transition = `transform ${duration}ms ease-in-out`
+        container.style.transform = `translateX(-${targetPos}px)`
+        window.setTimeout(() => {
+          container.style.transition = ''
+        }, duration)
       } else {
         currentPage.scrollIntoView({
           behavior: behavior ?? 'smooth',
