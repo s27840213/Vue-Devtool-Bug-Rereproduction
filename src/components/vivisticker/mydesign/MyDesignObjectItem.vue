@@ -78,7 +78,7 @@ export default defineComponent({
             })
           } else {
             const pages = generalUtils.deepCopy(data.pages)
-            vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0], this.item))
+            vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0], { asset: this.item }))
           }
         })
       } else {

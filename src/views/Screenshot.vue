@@ -15,12 +15,13 @@ div(class="screenshot")
 <script lang="ts">
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
-import { IGroup, IImageStyle, ILayer, IText } from '@/interfaces/layer'
+import { IImageStyle, ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
 import pageUtils from '@/utils/pageUtils'
+import resizeUtils from '@/utils/resizeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -95,6 +96,7 @@ export default defineComponent({
         const thumbType = urlParams.get('thumbType')
         const designId = urlParams.get('designId')
         const key = urlParams.get('key')
+        const source = urlParams.get('source')
         this.extraData = { thumbType, designId, key }
         switch (type) {
           case 'svg': {
@@ -193,52 +195,52 @@ export default defineComponent({
             })
             break
           }
-          case 'text': {
-            const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json() as IText | IGroup
-            const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
-            page.isAutoResizeNeeded = true
-            pageUtils.setPages([page])
-            vivistickerUtils.initLoadingFlags({ layers: [json] }, () => {
-              this.onload()
-            })
+          // case 'text': { deprecated
+          //   const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json() as IText | IGroup
+          //   const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
+          //   layerUtils.setAutoResizeNeededForLayersInPage(page, true)
+          //   pageUtils.setPages([page])
+          //   vivistickerUtils.initLoadingFlags({ layers: [json] }, () => {
+          //     this.onload()
+          //   })
 
-            const { width, height, scale } = json.styles
-            const pageAspectRatio = window.outerWidth / window.outerHeight
-            const textAspectRatio = width / height
-            const textWidth = textAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * textAspectRatio
-            const textHeight = textAspectRatio > pageAspectRatio ? window.outerWidth / textAspectRatio : window.outerHeight
-            const rescaleFactor = textWidth / width
+          //   const { width, height, scale } = json.styles
+          //   const pageAspectRatio = window.outerWidth / window.outerHeight
+          //   const textAspectRatio = width / height
+          //   const textWidth = textAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * textAspectRatio
+          //   const textHeight = textAspectRatio > pageAspectRatio ? window.outerWidth / textAspectRatio : window.outerHeight
+          //   const rescaleFactor = textWidth / width
 
-            const config = {
-              ...json,
-              styles: {
-                ...json.styles,
-                width: textWidth,
-                height: textHeight,
-                scale: scale * rescaleFactor,
-                x: 0,
-                y: 0
-              }
-            }
+          //   const config = {
+          //     ...json,
+          //     styles: {
+          //       ...json.styles,
+          //       width: textWidth,
+          //       height: textHeight,
+          //       scale: scale * rescaleFactor,
+          //       x: 0,
+          //       y: 0
+          //     }
+          //   }
 
-            if (config.type === 'text') {
-              Object.assign(config, {
-                widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor
-              })
-            }
+          //   if (config.type === 'text') {
+          //     Object.assign(config, {
+          //       widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor
+          //     })
+          //   }
 
-            const newLayer = config.type === 'group'
-              ? layerFactary.newGroup(config, (config as IGroup).layers)
-              : layerFactary.newText(config as IText)
-            layerUtils.addLayers(0, [newLayer])
+          //   const newLayer = config.type === 'group'
+          //     ? layerFactary.newGroup(config, (config as IGroup).layers)
+          //     : layerFactary.newText(config as IText)
+          //   layerUtils.addLayers(0, [newLayer])
 
-            this.JSONcontentSize = {
-              width: page.width,
-              height: page.height
-            }
-            this.usingJSON = true
-            break
-          }
+          //   this.JSONcontentSize = {
+          //     width: page.width,
+          //     height: page.height
+          //   }
+          //   this.usingJSON = true
+          //   break
+          // }
           case 'background': {
             this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
             break
@@ -250,16 +252,26 @@ export default defineComponent({
           }
           case 'json': {
             const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
+            layerUtils.setAutoResizeNeededForLayersInPage(page, true)
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })
-            page.isAutoResizeNeeded = true
             pageUtils.setPages([page])
-            this.JSONcontentSize = {
-              width: page.width,
-              height: page.height
+            if (source === 'editor') {
+              const newSize = {
+                width: page.width * 2,
+                height: page.height * 2
+              }
+              resizeUtils.resizePage(0, page, newSize)
+              this.JSONcontentSize = newSize
+              this.usingJSON = true
+            } else {
+              this.JSONcontentSize = {
+                width: page.width,
+                height: page.height
+              }
+              this.usingJSON = true
             }
-            this.usingJSON = true
             break
           }
         }

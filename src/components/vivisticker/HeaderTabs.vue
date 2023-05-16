@@ -289,23 +289,24 @@ export default defineComponent({
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
       }
-      if (vivistickerUtils.checkVersion('1.3')) {
-        vivistickerUtils.copyEditor((flag: string) => {
-          if (flag === '1') {
-            modalUtils.setModalInfo(
-              `${this.$t('STK0017')}`,
-              [`${this.$t('STK0018')}`],
-              {
-                msg: `${this.$t('STK0019')}`
-              }
-            )
-          } else if (['object', 'objectGroup'].includes(this.editorType)) {
-            vivistickerUtils.handleIos16Video()
-          }
-        })
-      } else {
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
-      }
+      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
+      // if (vivistickerUtils.checkVersion('1.3')) {
+      //   vivistickerUtils.copyEditor((flag: string) => {
+      //     if (flag === '1') {
+      //       modalUtils.setModalInfo(
+      //         `${this.$t('STK0017')}`,
+      //         [`${this.$t('STK0018')}`],
+      //         {
+      //           msg: `${this.$t('STK0019')}`
+      //         }
+      //       )
+      //     } else if (['object', 'objectGroup'].includes(this.editorType)) {
+      //       vivistickerUtils.handleIos16Video()
+      //     }
+      //   })
+      // } else {
+      //   vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
+      // }
     },
     handleMore() {
       editorUtils.setCurrActivePanel('vvstk-more')

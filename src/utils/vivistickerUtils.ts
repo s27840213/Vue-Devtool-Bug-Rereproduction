@@ -277,8 +277,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         return `type=svgImage2&id=${item.id}&ver=${item.ver}`
       case 15:
         return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
-      case 7:
-        return `type=text&id=${item.id}&ver=${item.ver}`
+      // case 7: deprecated
+      //   return `type=text&id=${item.id}&ver=${item.ver}`
       case 1:
         return `type=background&id=${item.id}&ver=${item.ver}`
       default:
@@ -286,16 +286,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  createUrlForJSON(page?: IPage, asset?: IMyDesign): string {
+  createUrlForJSON(page?: IPage, { asset = undefined, source = undefined }: { asset?: IMyDesign, source?: string } = {}): string {
     page = page ?? pageUtils.getPage(0)
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
-    const res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
+    let res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
     if (asset) {
       const key = this.mapEditorType2MyDesignKey(asset.type)
-      return res + `&thumbType=mydesign&designId=${asset.id}&key=${key}`
-    } else {
-      return res
+      res += `&thumbType=mydesign&designId=${asset.id}&key=${key}`
     }
+    if (source) {
+      res += `&source=${source}`
+    }
+    return res
   }
 
   setIsInCategory(tab: string, bool: boolean) {
