@@ -619,6 +619,25 @@ function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
     case 'leaf':
       href = `leaf${index % 5}`
       break
+    case 'butter-flower':
+      href = `butter-flower${index % 5}`
+      break
+    case 'flower-frame':
+      href = `flower-frame${index % 5}`
+      color = ['#F4D0E0', '#BDDBD0', '#D9CCED', '#C7DAEF', '#F4CAC1'][index % 5]
+      break
+    case 'flower-frame-custom':
+      href = `flower-frame${index % 5}`
+      break
+    case 'vintage-flower':
+      color = ['#E8A98E', '#EE8854', '#F3B132', '#94A084', '#B17357'][index % 5]
+      break
+    case 'cat-paw':
+      href = `cat-paw${index % 5}`
+      break
+    case 'bread':
+      href = `bread${index % 5}`
+      break
     default: // text-book
   }
   return { href, color }
@@ -765,7 +784,40 @@ class TextBg {
         ...letterBGDefault,
         yOffset200: -7,
         size: 165,
-      }
+      },
+      'butter-flower': {
+        ...letterBGDefault,
+        size: 140,
+        color: '#F4E4BD'
+      },
+      'flower-frame': {
+        ...letterBGDefault,
+        size: 140,
+      },
+      'flower-frame-custom': {
+        ...letterBGDefault,
+        size: 140,
+        color: '#BDDBD0'
+      },
+      'vintage-flower': {
+        ...letterBGDefault,
+        yOffset200: -3,
+        size: 160,
+      },
+      'vintage-flower-custom': {
+        ...letterBGDefault,
+        yOffset200: -3,
+        size: 130,
+        color: '#E8A98E'
+      },
+      'cat-paw': {
+        ...letterBGDefault,
+        size: 135,
+      },
+      bread: {
+        ...letterBGDefault,
+        size: 155,
+      },
     }
   }
 
@@ -783,6 +835,13 @@ class TextBg {
       'heart-custom': { lineHeight: 1.96, fontSpacing: 505 },
       gummybear: { lineHeight: 1.96, fontSpacing: 800 },
       leaf: { lineHeight: 1.96, fontSpacing: 800 },
+      'butter-flower': { lineHeight: 1.96, fontSpacing: 900 },
+      'flower-frame': { lineHeight: 1.96, fontSpacing: 950 },
+      'flower-frame-custom': { lineHeight: 1.96, fontSpacing: 950 },
+      'vintage-flower': { lineHeight: 1.96, fontSpacing: 1300 },
+      'vintage-flower-custom': { lineHeight: 1.96, fontSpacing: 950 },
+      'cat-paw': { lineHeight: 1.96, fontSpacing: 950 },
+      bread: { lineHeight: 1.96, fontSpacing: 1200 },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
@@ -973,13 +1032,10 @@ class TextBg {
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
           let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
           if (vertical) [x, y] = [y, x]
-          // TODO: move BG img back to icon folder
-          const colorChangeable = /(cloud\d|rainbow-circle|solid-heart|text-book)/.test(p.href)
           return {
-            tag: colorChangeable ? 'use' : 'image',
+            tag: 'use',
             attrs: {
-              href: colorChangeable ? `#${p.href}`
-                : require(`@/assets/img/svg/text-effect/${p.href}.svg`),
+              href: `#${p.href}`,
               width: p.height * scale,
               height: p.height * scale,
               // Scale will let width be (scale-1)*p.height times larger than before,

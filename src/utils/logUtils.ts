@@ -20,9 +20,8 @@ class LogUtils {
 
   setLog(logContent: string) {
     const newContent = `${logContent} - [Log generated time: ${generalUtils.generateTimeStamp()}]`
-    const newLog = `${this.getLog()}\n${newContent}`
     try {
-      localStorage.setItem('log', newLog)
+      localStorage.setItem('log', `${this.getLog()}\n${newContent}`)
     } catch (error) {
       console.error(error)
       if ((error as Error).name.includes('QuotaExceededError')) {
@@ -33,7 +32,7 @@ class LogUtils {
         }
         this.uploadLog()
         try {
-          localStorage.setItem('log', newLog)
+          localStorage.setItem('log', `##Log uploaded because of QuotaExceededError\n${newContent}`)
         } catch (error) {
           console.log('Error happened again when setting log, discard the log')
           console.error(error)

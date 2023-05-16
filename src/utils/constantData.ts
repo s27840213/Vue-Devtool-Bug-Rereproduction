@@ -416,7 +416,7 @@ class ConstantData {
             Object.assign(option, { min: 0.5, max: 2.5, isPStyle: true })
             break
           case 'fontSpacing':
-            Object.assign(option, { min: -200, max: 800, isPStyle: true })
+            Object.assign(option, { min: -200, max: 1600, isPStyle: true })
             break
           default:
             /* distance, blur, opacity, spread, stroke,
@@ -572,6 +572,39 @@ class ConstantData {
       }, {
         key: 'gummybear',
         label: i18n.global.tc('NN0850'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'butter-flower',
+        label: i18n.global.tc('NN0852'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'flower-frame',
+        label: i18n.global.tc('NN0853'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'flower-frame-custom',
+        label: i18n.global.tc('NN0854'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'vintage-flower',
+        label: i18n.global.tc('NN0855'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'vintage-flower-custom',
+        label: i18n.global.tc('NN0856'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'cat-paw',
+        label: i18n.global.tc('NN0864'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'bread',
+        label: i18n.global.tc('NN0865'),
         plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }])

@@ -42,6 +42,9 @@ div(:layer-index="`${layerIndex}`"
             :layerIndex="layerIndex"
             :config="(config as IText)"
             :subLayerIndex="-1"
+            :pageId="page.id"
+            :layerId="config.id"
+            :subLayerId="''"
             @keydown.left.stop
             @keydown.up.stop
             @keydown.right.stop

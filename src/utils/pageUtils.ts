@@ -309,8 +309,8 @@ class PageUtils {
     })
   }
 
-  getPageIndexById(id: string): number {
-    return this.getPages.findIndex((page: IPage) => {
+  getPageIndexById(id: string, pages?: IPage[]): number {
+    return (pages ?? this.getPages).findIndex((page: IPage) => {
       return page.id === id
     })
   }
