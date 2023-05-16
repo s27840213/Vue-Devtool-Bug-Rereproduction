@@ -17,6 +17,9 @@ div(class="nu-sub-controller")
               :config="(config as IText)"
               :primaryLayer="primaryLayer"
               :subLayerIndex="layerIndex"
+              :pageId="page.id"
+              :layerId="primaryLayer.id"
+              :subLayerId="config.id"
               @keydown.arrow-left.stop
               @keydown.arrow-up.stop
               @keydown.arrow-right.stop
