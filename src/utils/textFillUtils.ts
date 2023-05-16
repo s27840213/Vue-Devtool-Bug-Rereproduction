@@ -1,23 +1,33 @@
+import textEffect, { IPutTextEffectResponse } from '@/apis/textEffect'
 import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
 import { ITextFill, ITextFillConfig } from '@/interfaces/format'
 import { AllLayerTypes, IText } from '@/interfaces/layer'
 import store from '@/store'
+import constantData from '@/utils/constantData'
+import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import { find, omit } from 'lodash'
+import { notify } from '@kyvg/vue3-notification'
+import { AxiosResponse } from 'axios'
+import { find, omit, pick } from 'lodash'
 import { InjectionKey } from 'vue'
 
-class TextFill {
-  effects = {} as Record<string, Record<string, unknown>>
-  constructor() {
-    this.effects = this.getDefaultEffects()
-  }
+interface ITextFillPresetRawImg {
+  assetIndex: number
+  teamId: string
+  id: string
+  width: number
+  height: number
+}
 
-  getDefaultEffects() {
+class TextFill {
+  fillCategory = constantData.textEffects()
+
+  getDefaultEffects(effectName: string) {
     const defaultOptions = {
       customImg: null,
       xOffset200: 0,
@@ -26,18 +36,10 @@ class TextFill {
       opacity: 100,
       focus: false,
     } as const
-    return {
-      none: {
-        customImg: null
-      },
-      'custom-fill-img': {
-        ...defaultOptions
-      },
-      doodle1: {
-        img: '',
-        ...defaultOptions
-      },
-    }
+
+    if (effectName === 'none') return { customImg: null }
+    else if (effectName === 'custom-fill-img') return defaultOptions
+    else return { img: '', ...defaultOptions }
   }
 
   getImg(effect: { img?: string, customImg?: IAssetPhoto | IPhotoItem | null }): IAssetPhoto | IPhotoItem | null {
@@ -225,7 +227,7 @@ class TextFill {
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
     const subLayerIndex = layerUtils.subLayerIdx
-    const defaultAttrs = this.effects[effect]
+    const defaultAttrs = this.getDefaultEffects(effect)
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
@@ -262,7 +264,54 @@ class TextFill {
 
   async resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textFill.name
-    this.setTextFill(effectName, omit(this.effects[effectName], 'img'))
+    this.setTextFill(effectName, omit(this.getDefaultEffects(effectName), 'img'))
+  }
+
+  async uploadTextFill() {
+    const currText = layerUtils.getCurrLayer
+    if (currText.type !== 'text') {
+      notify({ group: 'error', text: '當前layer並非text' })
+      return
+    }
+
+    const fill = currText.styles.textFill
+    if (fill.name === 'none') {
+      notify({ group: 'error', text: '當前layer不含有文字填滿' })
+      return
+    }
+
+    let res: AxiosResponse<IPutTextEffectResponse>
+    const params = pick(fill, ['xOffset200', 'yOffset200', 'size', 'opacity'])
+
+    if (fill.name === 'custom-fill-img') {
+      if (!isIAssetPhoto(fill.customImg)) {
+        notify({ group: 'error', text: '當前文字填滿沒有圖片，或是圖片不是來自管理員上傳。' })
+        return
+      }
+      Object.assign(params, {
+        img: {
+          assetIndex: fill.customImg.assetIndex,
+          teamId: store.getters['user/getUserId'],
+          id: fill.customImg.id,
+          width: fill.customImg.width,
+          height: fill.customImg.height,
+        } as ITextFillPresetRawImg
+      })
+      res = await textEffect.addTextFill(generalUtils.generateRandomString(20), params)
+    } else {
+      // const currFillCategory = find(this.fillCategory, ['name', fill.name])
+      // if (!currFillCategory) {
+      //   notify({ group: 'error', text: 'error' })
+      //   return
+      // }
+      // const targetEffect = ''
+      // Object.assign(params, { img:  })
+      // res = await textEffect.updateTextFill(fillId, params)
+      res = { data: { flag: 1, msg: '還沒實作' } } as any
+    }
+
+    if (res.data.flag) notify({ group: 'error', text: res.data.msg })
+    else if (res.data.flag === 0) notify({ group: 'copy', text: '文字填滿上傳/更新成功。' })
   }
 }
 

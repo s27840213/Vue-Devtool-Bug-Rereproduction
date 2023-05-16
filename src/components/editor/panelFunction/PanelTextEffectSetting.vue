@@ -75,7 +75,8 @@ div(class="text-effect-setting")
               div
               svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="16px")
           div(class="text-effect-setting__option")
-            span
+            span(class="text-effect-setting__option--admin"
+                @click="adminTool.action()") {{ adminTool.label }}
             span(class="text-effect-setting__option--reset"
                 @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
@@ -102,7 +103,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
 import { Collapse } from 'vue-collapsed'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'PanelTextEffectSetting',
@@ -123,6 +124,9 @@ export default defineComponent({
     ...mapState('text', {
       selectedTextProps: 'props'
     }),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    }),
     currCategoryName() {
       return this.currTab
     },
@@ -139,6 +143,15 @@ export default defineComponent({
     settingTextEffect(): boolean {
       return colorUtils.currEvent === 'setTextEffectColor' &&
         editorUtils.showColorSlips
+    },
+    adminTool() {
+      if (this.isAdmin && this.currCategoryName === 'fill' && this.currentStyle.name === 'custom-fill-img') {
+        return {
+          label: '上傳文字填滿',
+          action: textFillUtils.uploadTextFill,
+        }
+      }
+      return { label: '', action: () => { /**/ } }
     },
   },
   mounted() {
@@ -443,7 +456,7 @@ export default defineComponent({
         background: rgba(0, 0, 0, 0.2);
       }
     }
-    &--reset {
+    &--reset, &--admin {
       color: setColor(blue-1);
       cursor: pointer;
     }

@@ -78,7 +78,7 @@ export function isITextLetterBg(object: ITextBg): object is ITextLetterBg {
 }
 
 export interface ITextFillConfig {
-  name: 'fill-img'
+  name: 'fill-img' | 'custom-fill-img'
   customImg: IAssetPhoto | IPhotoItem | null
   img: string
   xOffset200: number
