@@ -875,13 +875,14 @@ class TextBg {
     if (textBg.name === 'none') return null
 
     const opacity = textBg.opacity * 0.01
+    const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
     const myRect = new Rect()
     await myRect.init(config, { splitSpan: isITextLetterBg(textBg) })
     myRect.preprocess()
     const { vertical, width, height, transform, rects, rows } = myRect.get()
 
     if (isITextGooey(textBg)) {
-      const padding = textBg.distance
+      const padding = textBg.distance * fontSizeModifier
       const color = textEffectUtils.colorParser(textBg.color, config)
       const fill = this.rgba(color, opacity)
 
@@ -953,24 +954,27 @@ class TextBg {
     } else if (isITextBox(textBg)) {
       const pColor = textEffectUtils.colorParser(textBg.pColor, config)
       const bColor = textEffectUtils.colorParser(textBg.bColor, config)
-      let boxWidth = (width + textBg.bStroke)
-      let boxHeight = (height + textBg.bStroke)
-      let top = -textBg.bStroke
-      let left = -textBg.bStroke
+      const bStroke = textBg.bStroke * fontSizeModifier
+      const pStrokeY = textBg.pStrokeY * fontSizeModifier
+      const pStrokeX = textBg.pStrokeX * fontSizeModifier
+      let boxWidth = (width + bStroke)
+      let boxHeight = (height + bStroke)
+      let top = -bStroke
+      let left = -bStroke
       if (vertical) {
-        boxWidth += textBg.pStrokeY * 2
-        boxHeight += textBg.pStrokeX * 2
-        top -= textBg.pStrokeX
-        left -= textBg.pStrokeY
+        boxWidth += pStrokeY * 2
+        boxHeight += pStrokeX * 2
+        top -= pStrokeX
+        left -= pStrokeY
       } else {
-        boxWidth += textBg.pStrokeX * 2
-        boxHeight += textBg.pStrokeY * 2
-        top -= textBg.pStrokeY
-        left -= textBg.pStrokeX
+        boxWidth += pStrokeX * 2
+        boxHeight += pStrokeY * 2
+        top -= pStrokeY
+        left -= pStrokeX
       }
       const boxRadius = Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
 
-      const path = new Path(new Point(textBg.bStroke / 2, textBg.bStroke / 2 + boxRadius))
+      const path = new Path(new Point(bStroke / 2, bStroke / 2 + boxRadius))
       path.a(boxRadius, boxRadius, 1, boxRadius, -boxRadius)
       path.h(boxWidth - boxRadius * 2)
       path.a(boxRadius, boxRadius, 1, boxRadius, boxRadius)
@@ -981,8 +985,8 @@ class TextBg {
 
       return {
         attrs: {
-          width: boxWidth + textBg.bStroke,
-          height: boxHeight + textBg.bStroke,
+          width: boxWidth + bStroke,
+          height: boxHeight + bStroke,
           style: `left: ${left}px;
             top: ${top}px;`
         },
@@ -990,7 +994,7 @@ class TextBg {
           tag: 'path',
           attrs: {
             style: `fill:${pColor}; stroke:${bColor}; opacity:${opacity}`,
-            'stroke-width': textBg.bStroke,
+            'stroke-width': bStroke,
             d: path.result()
           }
         }]

@@ -26,7 +26,7 @@ import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import textShapeUtils from './textShapeUtils'
-import TextUtils from './textUtils'
+import textUtils from './textUtils'
 import unitUtils, { PRECISION } from './unitUtils'
 import ZindexUtils from './zindexUtils'
 
@@ -170,9 +170,9 @@ class AssetUtils {
     json = await this.updateBackground(generalUtils.deepCopy(json))
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
-    const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    pageUtils.updateSpecPage(targetPageIndex, newLayer)
-    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
+    const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+    pageUtils.updateSpecPage(targetPageIndex, newPage)
+    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
     if (store.getters['user/getUserId'] === 'backendRendering') {
       const { isBleed, isTrim } = store.getters['user/getBackendRenderParams']
@@ -214,10 +214,10 @@ class AssetUtils {
     for (let i = 0; i < pageNum; i++) {
       json = await this.updateBackground(generalUtils.deepCopy(json))
       layerUtils.setAutoResizeNeededForLayersInPage(json, true)
-      const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-      pageUtils.updateSpecPage(i, newLayer)
+      const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+      pageUtils.updateSpecPage(i, newPage)
       if (width && height) {
-        resizeUtils.resizePage(i, newLayer, { width, height })
+        resizeUtils.resizePage(i, newPage, { width, height })
       }
     }
 
@@ -487,7 +487,7 @@ class AssetUtils {
     Object.assign(
       config.styles,
       typeof y === 'undefined' || typeof x === 'undefined'
-        ? TextUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
+        ? textUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
         : { x, y }
     )
     const newLayer = config.type === 'group'
@@ -521,7 +521,7 @@ class AssetUtils {
         Object.assign(textLayer.paragraphs[0].spans[0].styles, spanStyles)
       }
 
-      TextUtils.resetTextField(textLayer, targetPageIndex, field)
+      textUtils.resetTextField(textLayer, targetPageIndex, field)
       layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, {
         editing: false,
         contentEditable: !generalUtils.isTouchDevice(),

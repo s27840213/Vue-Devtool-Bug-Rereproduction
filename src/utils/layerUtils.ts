@@ -205,7 +205,7 @@ class LayerUtils {
     })
   }
 
-  replaceLayer(pageIndex: number, layerIndex: number, layer: IImage | IText | IShape | IGroup | IFrame) {
+  replaceLayer(pageIndex: number, layerIndex: number, layer: IImage | IText | IShape | IGroup | IFrame | ITmp) {
     store.commit('REPLACE_layer', {
       pageIndex,
       layerIndex,
