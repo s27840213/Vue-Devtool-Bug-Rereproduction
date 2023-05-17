@@ -19,7 +19,7 @@ class LogUtils {
 
   setLog(logContent: string, trimLog = true) {
     if (trimLog) logContent = logContent.substring(0, 500)
-    const newContent = `${logContent} - [Log generated time: ${generalUtils.generateTimeStamp()}]`
+    const newContent = `[${generalUtils.generateTimeStamp()}] ${logContent}`
     try {
       localStorage.setItem('log', `${this.getLog()}\n${newContent}`)
     } catch (error) {
