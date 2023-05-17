@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectStart" @swiperight="handleSwipeRight" @swipeleft="handleSwipeLeft")
-  transition-group(name="scale" tag="div" class="vvstk-editor__pages" :style="styles('pages')")
+  transition-group(name="scale" tag="div" class="vvstk-editor__pages" :style="styles('pages')" @before-leave="handleBeforePageLeave")
     div(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`" class="vvstk-editor__pseudo-page" :class="`nu-page nu-page_${index}`" :style="styles('page')")
       div(class="vvstk-editor__scale-container" :style="styles('scale')")
         page-content(id="vvstk-editor" :config="page.config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
@@ -136,6 +136,10 @@ export default defineComponent({
             height: `${this.config.height}px`,
             overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
           }
+        case 'pages':
+          return {
+            gridTemplateColumns: `repeat(${this.pagesState.length}, 100%)`
+          }
         case 'page':
           return {
             width: `${this.config.width}px`,
@@ -209,6 +213,19 @@ export default defineComponent({
       console.log('handleSwipeLeft')
       this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
       this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300) })
+    },
+    handleBeforePageLeave(el: Element) {
+      const elTarget = el as HTMLElement
+      const { margin, marginLeft, marginTop, width, height } = window.getComputedStyle(elTarget)
+
+      // set absolute position
+      elTarget.style.left = `${elTarget.offsetLeft - parseFloat(marginLeft)}px`
+      elTarget.style.top = `${elTarget.offsetTop - parseFloat(marginTop)}px`
+
+      // set computed size
+      elTarget.style.width = width
+      elTarget.style.height = height
+      elTarget.style.margin = margin
     }
   }
 })
@@ -222,7 +239,7 @@ export default defineComponent({
   &__pages {
     display: grid;
     grid-auto-flow: column;
-    grid-template-columns: repeat(v-bind("pagesState.length"), 100%);
+    position: relative;
   }
   &__pseudo-page {
     position: relative;
@@ -269,14 +286,22 @@ export default defineComponent({
 }
 
 .scale {
-  &-enter-active,
-  &-leave-active {
+  &-move {
+    transition: transform 300ms ease-in-out;
+  }
+  &-enter-active {
     transition: transform 300ms ease-in-out;
     transform: scale(1);
   }
-  &-enter-from,
-  &-leave-to {
+  &-enter-from {
     transform: scale(0.75);
+  }
+  &-leave-active {
+    transition: opacity 300ms ease-in-out;
+    position: absolute;
+  }
+  &-leave-to {
+    opacity: 0;
   }
 }
 </style>

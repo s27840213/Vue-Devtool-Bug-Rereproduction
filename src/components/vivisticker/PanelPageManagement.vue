@@ -21,7 +21,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent, PropType } from 'vue'
-import { mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 interface IButton {
   key: string,
@@ -42,6 +42,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapGetters({
+      pages: 'getPages',
+    }),
     buttons(): IButton[] {
       return [
         {
@@ -61,14 +64,13 @@ export default defineComponent({
           title: 'Preview',
           iconName: 'grid',
           action: this.preview
-        },
-        {
-          key: 'delete',
-          title: 'Delete',
-          iconName: 'delete',
-          action: this.deletePage
         }
-      ]
+      ].concat(this.pages.length > 1 ? {
+        key: 'delete',
+        title: 'Delete',
+        iconName: 'delete',
+        action: this.deletePage
+      } : [])
     }
   },
   methods: {
@@ -126,6 +128,18 @@ export default defineComponent({
     },
     deletePage() {
       console.log('deletePage')
+      const pageIndex = pageUtils.currFocusPageIndex
+      groupUtils.deselect()
+      if (this.pages.length - 1 === pageIndex) {
+        this.setCurrActivePageIndex(pageIndex - 1)
+      } else {
+        this.setCurrActivePageIndex(pageIndex)
+      }
+      this.$nextTick(() => {
+        pageUtils.deletePage(pageIndex)
+        pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300)
+        stepsUtils.record()
+      })
     },
     preview() {
       console.log('preview')
