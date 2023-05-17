@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectStart" @swiperight="handleSwipeRight" @swipeleft="handleSwipeLeft")
   transition-group(name="scale" tag="div" class="vvstk-editor__pages" :style="styles('pages')" @before-leave="handleBeforePageLeave")
-    div(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`" class="vvstk-editor__pseudo-page" :class="`nu-page nu-page_${index}`" :style="styles('page')")
+    div(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`" :class="`vvstk-editor__pseudo-page nu-page nu-page_${index}${currActivePageIndex < 0 ? ' no-transition' : ''}`" :style="styles('page')")
       div(class="vvstk-editor__scale-container" :style="styles('scale')")
         page-content(id="vvstk-editor" :config="page.config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
         dim-background(v-if="isImgCtrl" :config="page.config" :contentScaleRatio="contentScaleRatio")
@@ -303,5 +303,9 @@ export default defineComponent({
   &-leave-to {
     opacity: 0;
   }
+}
+
+.no-transition {
+  transition: none !important;
 }
 </style>
