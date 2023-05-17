@@ -243,14 +243,14 @@ class Controller {
         return {
           '--base-stroke': '0px',
           ...this.funky3d(
-            distance,
-            effect.distanceInverse,
+            distance * fontSize / 60,
+            effect.distanceInverse * fontSize / 60,
             effect.angle,
             colorWithOpacity
           )
         }
       case 'bold3d': {
-        const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2, y: 0 })
+        const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2 * fontSize / 60, y: 0 })
         return {
           '--base-stroke': '1px',
           webkitTextStrokeColor: `${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
