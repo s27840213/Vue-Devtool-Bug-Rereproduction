@@ -289,7 +289,7 @@ export default defineComponent({
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
       }
-      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
+      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(undefined, { source: 'editor' }))
       // if (vivistickerUtils.checkVersion('1.3')) {
       //   vivistickerUtils.copyEditor((flag: string) => {
       //     if (flag === '1') {
