@@ -17,8 +17,9 @@ class LogUtils {
     return localStorage.getItem('log') ?? ''
   }
 
-  setLog(logContent: string) {
-    const newContent = `${logContent} - [Log generated time: ${generalUtils.generateTimeStamp()}]`
+  setLog(logContent: string, trimLog = true) {
+    if (trimLog) logContent = logContent.substring(0, 500)
+    const newContent = `[${generalUtils.generateTimeStamp()}] ${logContent}`
     try {
       localStorage.setItem('log', `${this.getLog()}\n${newContent}`)
     } catch (error) {
@@ -38,9 +39,9 @@ class LogUtils {
 
   setLogAndConsoleLog(...logContent: any[]) {
     console.log(...logContent)
-    logContent = logContent.map(lc => typeof lc === 'string' ? lc : JSON.stringify(lc)).map(lc => lc.substring(0, 200))
-    // slice every string to 200 characters to avoid localStorage quota exceeds
-    this.setLog(logContent.join(' '))
+    logContent = logContent.map(lc => typeof lc === 'string' ? lc : JSON.stringify(lc)).map(lc => lc.substring(0, 500))
+    // slice every string to 500 characters to avoid localStorage quota exceeds
+    this.setLog(logContent.join(' '), false)
   }
 
   clearLog() {

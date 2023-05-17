@@ -59,6 +59,7 @@ export interface IUserModule {
   updateDesignId: string,
   updateDesignType: string,
   renderForPDF: boolean,
+  unitScale: boolean,
   dimensionMap: {
     [key: string]: {
       [key: number]: {
@@ -135,6 +136,7 @@ const getDefaultState = (): IUserModule => ({
   dimensionMap: {},
   dpi: -1,
   renderForPDF: false,
+  unitScale: false,
   backendRenderParams: {
     isBleed: false,
     isTrim: false,
@@ -240,6 +242,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getRenderForPDF(state) {
     return state.renderForPDF
+  },
+  getUnitScale(state) {
+    return state.unitScale
   },
   showAdminTool(state) { // Partial admin tool
     return state.role === 0 && state.adminMode && state.enableAdminView

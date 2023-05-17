@@ -420,10 +420,10 @@ class GroupUtils {
     })
   }
 
-  mapLayersToTmp(layers: Array<IShape | IText | IImage | IGroup>, styles: ICalculatedGroupStyle): Array<IShape | IText | IImage | IGroup> {
+  mapLayersToTmp(layers: Array<IShape | IText | IImage | IGroup | IFrame>, styles: ICalculatedGroupStyle): Array<IShape | IText | IImage | IGroup | IFrame> {
     layers = generalUtils.deepCopy(layers.sort((a, b) => a.styles.zindex - b.styles.zindex))
 
-    layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+    layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
       layer.styles.x -= styles.x
       layer.styles.y -= styles.y
     })
