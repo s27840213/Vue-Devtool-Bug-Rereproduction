@@ -1,29 +1,15 @@
 <template lang="pug">
 div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectStart" @swiperight="handleSwipeRight" @swipeleft="handleSwipeLeft")
-  transition-group(name="scale" tag="div" class="vvstk-editor__pages" :style="styles('pages')" @before-leave="handleBeforePageLeave")
-    div(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`" :class="`vvstk-editor__pseudo-page nu-page nu-page_${index}${currActivePageIndex < 0 ? ' no-transition' : ''}`" :style="styles('page')")
-      div(class="vvstk-editor__scale-container" :style="styles('scale')")
-        page-content(id="vvstk-editor" :config="page.config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
-        dim-background(v-if="isImgCtrl" :config="page.config" :contentScaleRatio="contentScaleRatio")
-      div(class="page-control" :style="styles('control')")
-        nu-controller(v-if="currFocusPageIndex === index && currLayer.type" data-identifier="controller"
-          :key="`controller-${currLayer.id}`"
-          :layerIndex="currSelectedIndex"
-          :pageIndex="index"
-          :page="page.config"
-          :config="currLayer"
-          :snapUtils="snapUtils"
-          :contentScaleRatio="contentScaleRatio")
+  transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" :style="styles('pages')" @before-leave="handleBeforePageLeave")
+    page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`" :class="{'no-transition': currActivePageIndex < 0}" :pageIndex="index" :pageState="page" :cardWidth="cardWidth" :cardHeight="cardHeight" :marginTop="marginTop")
   div(v-if="isMultiPage" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
 </template>
 
 <script lang="ts">
-import DimBackground from '@/components/editor/page/DimBackground.vue'
-import PageContent from '@/components/editor/page/PageContent.vue'
-import { ILayer } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import PageCard from '@/components/vivisticker/PageCard.vue'
+import { IPage, IPageState } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -32,7 +18,6 @@ import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
-import SnapUtils from '@/utils/snapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -41,10 +26,6 @@ const MULTI_PAGE_EDITOR_TYPES = ['story', 'post']
 
 export default defineComponent({
   props: {
-    // currPage: {
-    //   type: Object as PropType<IPage>,
-    //   required: true
-    // },
     isInEditor: {
       type: Boolean,
       required: true
@@ -53,11 +34,10 @@ export default defineComponent({
   data() {
     return {
       pageIndex: 0,
-      marginTop: 44
+      marginTop: 44,
+      cardWidth: 0,
+      cardHeight: 0
     }
-  },
-  created() {
-    this.pagesState[this.pageIndex].modules.snapUtils.pageIndex = this.pageIndex
   },
   watch: {
     isInEditor(newVal, oldVal): void {
@@ -101,12 +81,6 @@ export default defineComponent({
     config(): IPage {
       return this.pagesState[this.pageIndex].config
     },
-    snapUtils(): SnapUtils {
-      return this.pagesState[this.pageIndex].modules.snapUtils
-    },
-    currLayer(): ILayer {
-      return layerUtils.getCurrLayer
-    },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
     },
@@ -121,8 +95,7 @@ export default defineComponent({
     }
   },
   components: {
-    PageContent,
-    DimBackground
+    PageCard
   },
   methods: {
     ...mapMutations({
@@ -197,20 +170,29 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(true)
     },
     handleResize() {
-      resizeUtils.resizePage(0, this.config, vivistickerUtils.getPageSize(this.editorType))
+      // resize all pages
+      this.pagesState.forEach((pageState: IPageState, pageIndex: number) => {
+        resizeUtils.resizePage(pageIndex, pageState.config, vivistickerUtils.getPageSize(this.editorType))
+      })
+
+      // update margin-top
       const elTop = document.getElementsByClassName('vivisticker__top')[0]
       const headerHeight = 44
       const shortEdge = Math.min(elTop.clientWidth, elTop.clientHeight - headerHeight)
       this.marginTop = Math.round(shortEdge * 0.05)
+
+      // update page card size
+      const elEditor = this.$el as HTMLElement
+      this.cardWidth = elEditor.clientWidth
+      this.cardHeight = elEditor.clientHeight
+
       this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 0) })
     },
     handleSwipeRight() {
-      console.log('handleSwipeRight')
       this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
       this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300) })
     },
     handleSwipeLeft() {
-      console.log('handleSwipeLeft')
       this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
       this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300) })
     },
@@ -241,32 +223,6 @@ export default defineComponent({
     grid-auto-flow: column;
     position: relative;
   }
-  &__pseudo-page {
-    position: relative;
-    transform-style: preserve-3d;
-    user-select: none;
-    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-    border-radius: 10px;
-  }
-  &__scale-container {
-    width: 0px;
-    height: 0px;
-    position: relative;
-    box-sizing: border-box;
-    transform-origin: 0 0;
-  }
-}
-
-.page-control {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  transform-style: preserve-3d;
-  // this css property will prevent the page-control div from blocking all the event of page-content
-  pointer-events: none;
-  :focus {
-    outline: none;
-  }
 }
 
 .page-pill {
@@ -285,7 +241,7 @@ export default defineComponent({
   column-gap: 4px;
 }
 
-.scale {
+.scale-in-fade-out {
   &-move {
     transition: transform 300ms ease-in-out;
   }
