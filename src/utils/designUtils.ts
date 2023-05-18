@@ -817,7 +817,7 @@ class DesignUtils {
     return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
   }
 
-  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, unit = 'px', id: number | string | undefined = undefined, path?: string, folderName?: string) {
+  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, unit = 'px', id: number | string | undefined = undefined, path?: string, folderName?: string, bleeds?: IBleed) {
     // Redirect user to editor and create new design, will be use by login redirect.
     const query = {
       type: 'new-design-size',
@@ -826,7 +826,8 @@ class DesignUtils {
       unit,
       themeId: id ? id.toString() : undefined,
       path,
-      folderName
+      folderName,
+      ...(bleeds !== undefined && { bleeds: `${bleeds.top},${bleeds.right},${bleeds.bottom},${bleeds.left}` })
     }
     router.push({ name: 'Editor', query })
   }

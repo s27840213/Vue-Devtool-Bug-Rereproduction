@@ -1,3 +1,5 @@
+import { IBleed } from '@/interfaces/page'
+
 export interface ILayout {
     id: string;
     width: number;
@@ -6,4 +8,5 @@ export interface ILayout {
     description: string;
     unit: string;
     icon: string
+    bleed?: IBleed
 }

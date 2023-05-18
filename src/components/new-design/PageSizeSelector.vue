@@ -372,7 +372,8 @@ const component = defineComponent({
               title: item.title ?? '',
               description: item.description ?? '',
               unit: item.unit ?? 'px',
-              icon: item.icon ?? ''
+              icon: item.icon ?? '',
+              bleed: item.bleed
             }))
           }
           if (category.title === `${this.$t('NN0024')}`) {
@@ -444,7 +445,8 @@ const component = defineComponent({
     newDesign(format: ILayout) {
       const path = this.$route.name === 'MyDesign' ? this.currLocation.split('/').slice(1).join(',') : undefined
       const foldername = this.$route.name === 'MyDesign' ? designUtils.search(this.folders, designUtils.makePath(this.currLocation))?.name : undefined
-      designUtils.newDesignWithLoginRedirect(format.width, format.height, format.unit, undefined, path, foldername)
+      const bleeds = format.unit !== 'px' ? format.bleed : undefined
+      designUtils.newDesignWithLoginRedirect(format.width, format.height, format.unit, undefined, path, foldername, bleeds)
     },
     createCustomDesign() {
       if (this.selectedFormatKey === 'custom' ? this.isCustomValid : (this.selectedFormatKey !== '')) {
