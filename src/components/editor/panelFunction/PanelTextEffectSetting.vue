@@ -17,7 +17,7 @@ div(class="text-effect-setting")
               :key="`${category.name}-${effect.key}`"
               class="text-effect-setting__effect pointer"
               :class="{'selected': getStyle(category).name === effect.key }"
-              @click="onEffectClick(category, effect)")
+              @click="onEffectClick(effect)")
             svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
               :iconName="effectIcon(category, effect).name"
               :iconWidth="effectIcon(category, effect).size"
@@ -71,7 +71,7 @@ div(class="text-effect-setting")
             div(v-if="option.type === 'img'"
                 class="text-effect-setting__option--img"
                 @click="chooseImg(option.key)")
-              img(:src="getStyleImg(category)")
+              img(:src="getStyleImg")
               div
               svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="16px")
           div(class="text-effect-setting__option")
@@ -144,6 +144,9 @@ export default defineComponent({
       return colorUtils.currEvent === 'setTextEffectColor' &&
         editorUtils.showColorSlips
     },
+    getStyleImg(): string {
+      return textFillUtils.getTextFillImg(textEffectUtils.getCurrentLayer())
+    },
     adminTool() {
       if (this.isAdmin && this.currCategoryName === 'fill' && this.currentStyle.name !== 'none') {
         return {
@@ -210,9 +213,6 @@ export default defineComponent({
         fill: styles.textFill,
       }[category.name] as Record<string, unknown> ?? {}
     },
-    getStyleImg(category: IEffectCategory): string {
-      return textFillUtils.imgToSrc(textFillUtils.getImg(this.getStyle(category)))
-    },
     getOptions(effects1d: IEffect[], category: IEffectCategory) {
       return _.find(effects1d, ['key', this.getStyle(category).name])?.options
     },
@@ -262,13 +262,13 @@ export default defineComponent({
           break
       }
     },
-    async onEffectClick(category: IEffectCategory, effect: IEffect): Promise<void> {
+    async onEffectClick(effect: IEffect): Promise<void> {
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
 
       const chooseImgkey = effect.options.find(op => op.type === 'img')?.key ?? ''
-      if (chooseImgkey && !this.getStyleImg(category)) {
+      if (chooseImgkey && !this.getStyleImg) {
         this.chooseImg(chooseImgkey)
       }
     },

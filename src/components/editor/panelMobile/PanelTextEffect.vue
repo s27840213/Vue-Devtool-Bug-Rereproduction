@@ -69,7 +69,7 @@ div(class="panel-text-effect")
       div(v-if="option.type === 'img'"
           class="panel-text-effect__img"
           @click="chooseImg(option.key)")
-        img(:src="getStyleImg(currCategory)")
+        img(:src="getStyleImg")
         div
         svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="32px")
     span(class="panel-text-effect__reset"
@@ -163,11 +163,11 @@ export default defineComponent({
       if (effect.key !== this.currentStyle.name) {
         await this.setEffect({ effectName: effect.key })
         this.recordChange()
-        if (chooseImgkey && !this.getStyleImg(category)) {
+        if (chooseImgkey && !this.getStyleImg) {
           this.chooseImg(chooseImgkey)
         }
       } else if (effect.key !== 'none') {
-        if (chooseImgkey && !this.getStyleImg(category)) {
+        if (chooseImgkey && !this.getStyleImg) {
           this.chooseImg(chooseImgkey)
           return
         }

@@ -14,7 +14,7 @@ import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
-import { find, omit, pick } from 'lodash'
+import { find, findLast, omit, pick } from 'lodash'
 import { InjectionKey } from 'vue'
 
 interface ITextFillPresetRawImg {
@@ -74,7 +74,7 @@ class TextFill {
         options: [{
           type: 'select' as const,
           key: 'img',
-          label: 'Image', // TODO: i18n
+          label: i18n.global.t('NN0870'),
           select: fill.list.map(eff => ({
             key: eff.id,
             img: `https://template.vivipic.com/admin/${eff.param.img.teamId}/asset/image/${eff.param.img.id}/tiny`,
@@ -84,7 +84,7 @@ class TextFill {
               img: {
                 ...eff.param.img,
                 preview: { width: eff.param.img.width, height: eff.param.img.height },
-                urls: ['prev', 'full', 'larg', 'original', 'midd', 'smal', 'tiny'].reduce((acc, size) => ({
+                urls: ['prev', 'tiny', 'smal', 'midd', 'full', 'larg', 'xtra'].reduce((acc, size) => ({
                   ...acc, [size]: `https://template.vivipic.com/admin/${eff.param.img.teamId}/asset/image/${eff.param.img.id}/${size}`
                 }), {}),
                 key: eff.id,
@@ -118,19 +118,24 @@ class TextFill {
     return effect.img ?? effect.customImg ?? null
   }
 
-  imgToSrc(img: IAssetPhoto | IPhotoItem | null): string {
-    // const img = effect.img ?? effect.customImg
+  getTextFillImg(config: IText): string {
+    const img = this.getImg(config.styles.textFill)
     if (!img) return ''
+    const pageScale = store.getters.getPageScaleRatio * 0.01
+    const layerSize = Math.max(config.styles.height, config.styles.width) * pageScale
+    const sizeMap = store.getters['user/getImgSizeMap'] as Array<{ key: string, size: number }>
+    const targetSize = findLast(sizeMap, s => layerSize < s.size) ?? sizeMap[0]
+
     return isIAssetPhoto(img)
-      ? img.urls.original
-      : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 1000)
+      ? img.urls[targetSize.key as keyof typeof img.urls] ?? img.urls.original
+      : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, targetSize.size)
   }
 
   calcTextFillVar(config: IText) {
     const textFill = config.styles.textFill as ITextFillConfig
     const img = this.getImg(textFill)
-    const imgSrc = this.imgToSrc(img)
     if (!img) return {}
+    const imgSrc = this.getTextFillImg(config)
     const layerScale = config.styles.scale
     const divWidth = config.styles.width / layerScale
     const divHeight = config.styles.height / layerScale

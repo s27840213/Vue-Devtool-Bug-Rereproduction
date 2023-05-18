@@ -379,8 +379,8 @@ class ConstantData {
       size: i18n.global.tc('NN0815'),
       lineHeight: i18n.global.tc('NN0110'),
       fontSpacing: i18n.global.tc('NN0109'),
-      img: 'Image',
-      customImg: 'Image',
+      img: i18n.global.t('NN0870'),
+      customImg: i18n.global.t('NN0871'),
     }
 
     return array.map((name: string) => {
@@ -590,14 +590,14 @@ class ConstantData {
       }])
     }, {
       name: 'fill' as const,
-      label: '文字填滿',
+      label: i18n.global.t('NN0868'),
       effects2d: arrTo2darr([{
         key: 'none',
         label: i18n.global.t('NN0111'),
         options: [],
       }, {
         key: 'custom-fill-img',
-        label: '客製填滿',
+        label: i18n.global.t('NN0869'),
         plan: 1,
         options: [...toOptions(['customImg', 'xOffset200', 'yOffset200', 'size', 'opacity'])]
       }, ...textFillUtils.fillCategories])
