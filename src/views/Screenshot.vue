@@ -252,12 +252,21 @@ export default defineComponent({
           }
           case 'json': {
             const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
+            if (page.layers.length === 0) {
+              this.JSONcontentSize = {
+                width: page.width,
+                height: page.height
+              }
+              this.usingJSON = true
+              this.onload()
+              return
+            }
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })
             pageUtils.setPages([page])
-            if (source === 'editor') {
+            if (vivistickerUtils.checkVersion('1.31')) {
               const newSize = {
                 width: page.width * 2,
                 height: page.height * 2

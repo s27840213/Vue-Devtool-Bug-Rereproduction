@@ -261,6 +261,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
+  copyWithScreenshotUrl(query: string, afterCopy?: (flag: string) => void) {
+    this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'copy' }, `screenshot-${query}`).then((data) => {
+      afterCopy && afterCopy(data?.flag ?? '0')
+    })
+  }
+
+  screenshotDone(data: { flag: string, params: string, action: string }) {
+    this.handleCallback(`screenshot-${data.params}`, data)
+  }
+
   sendAppLoaded() {
     if (!this.appLoadedSent) {
       this.sendToIOS('APP_LOADED', { hideReviewRequest: false })
@@ -287,7 +297,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  createUrlForJSON(page?: IPage, { asset = undefined, source = undefined }: { asset?: IMyDesign, source?: string } = {}): string {
+  createUrlForJSON({ page = undefined, asset = undefined, source = undefined }: { page?: IPage, asset?: IMyDesign, source?: string } = {}): string {
     page = page ?? pageUtils.getPage(0)
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
     let res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
