@@ -1,13 +1,17 @@
+import { IBleed } from '@/interfaces/page'
+
 /* eslint-disable camelcase */
 export interface Itheme {
     id: number,
     width: number,
     height: number,
+    unit: string,
     title: string,
     description: string,
     url: string,
     mainHidden: number,
-    editHidden: number
+    editHidden: number,
+    bleed: IBleed
 }
 
 export interface IContentTemplate {

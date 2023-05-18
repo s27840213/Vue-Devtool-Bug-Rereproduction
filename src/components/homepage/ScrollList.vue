@@ -241,7 +241,8 @@ export default defineComponent({
       if (this.$isTouchDevice() && theme.id === 7) {
         return ''
       } else {
-        return `/editor?type=new-design-size&themeId=${theme.id}&width=${theme.width}&height=${theme.height}`
+        const queryBleed = theme.unit !== 'px' ? `&bleeds=${theme.bleed.top},${theme.bleed.right},${theme.bleed.bottom},${theme.bleed.left}` : ''
+        return `/editor?type=new-design-size&themeId=${theme.id}&width=${theme.width}&height=${theme.height}&unit=${theme.unit}${queryBleed}`
       }
     },
     openProductPageNotification(theme: Itheme) {
