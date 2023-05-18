@@ -1,13 +1,13 @@
 <template lang="pug">
 div(class="page-size-selector")
   div(v-if="isMobile" class="page-size-selector__body-row first-row")
-    span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0023')}}
+    span(class="page-size-selector__body__title caption-LG text-black") {{$t('NN0023')}}
   div(class="page-size-selector__body-row")
     div(class="page-size-selector__body__custom")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
         input(class="body-MD page-size-selector__body__custom__box__input" type="number" min="0" ref="inputWidth"
-              :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
+              :class="selectedFormatKey === 'custom' ? 'text-black' : 'text-gray-3'"
               :style="{position: isInputFocused ? 'static' : 'fixed'}"
               :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
               @click="selectFormat('custom')"
@@ -17,11 +17,11 @@ div(class="page-size-selector")
         input(v-if="!isInputFocused"
               class="body-MD page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
-              :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
+              :class="(selectedFormatKey === 'custom' ? 'text-black' : 'text-gray-3')"
               :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
               @click="handleDummyClick($event, $refs.inputWidth, 'width')")
         span(class="body-MD page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
+            :class="selectedFormatKey === 'custom' ? 'text-gray-3' : 'text-gray-3'") W
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
           iconWidth="20px" :iconColor="selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')"
@@ -29,7 +29,7 @@ div(class="page-size-selector")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
         input(class="body-MD page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
-              :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
+              :class="selectedFormatKey === 'custom' ? 'text-black' : 'text-gray-3'"
               :style="{position: isInputFocused ? 'static' : 'fixed'}"
               :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
               @click="selectFormat('custom')"
@@ -39,15 +39,15 @@ div(class="page-size-selector")
         input(v-if="!isInputFocused"
               class="body-MD page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
-              :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
+              :class="(selectedFormatKey === 'custom' ? 'text-black' : 'text-gray-3')"
               :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
               @click="handleDummyClick($event, $refs.inputHeight, 'height')")
         span(class="body-MD page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
+            :class="selectedFormatKey === 'custom' ? 'text-gray-3' : 'text-gray-3'") H
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                     class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
                     @click="showUnitOptions = !showUnitOptions")
-        span(class="page-size-selector__body__custom__unit__label body-MD" :class="selectedFormatKey === 'custom' ? 'black' : defaultTextColor") {{selectedUnit}}
+        span(class="page-size-selector__body__custom__unit__label body-MD" :class="selectedFormatKey === 'custom' ? 'black' : 'text-gray-3'") {{selectedUnit}}
         svg-icon(class="page-size-selector__body__custom__unit__icon"
           iconName="chevron-down"
           iconWidth="16px"
@@ -63,9 +63,9 @@ div(class="page-size-selector")
   div(class="page-size-selector__container"
     @touchmove="handleTouchMove")
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="'text-gray-3'")
       div(v-if="isLayoutReady && recentlyUsed.length > 0" class="page-size-selector__body-row first-row")
-        span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
+        span(class="page-size-selector__body__title caption-LG text-black") {{$t('NN0024')}}
       div(v-for="(format, index) in recentlyUsed"
           :key="format.id"
           class="page-size-selector__body-row item pointer"
@@ -73,11 +73,11 @@ div(class="page-size-selector")
         img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.title === '' ? 'custom' : format.icon}.svg`)")
         div(class="page-size-selector__body-row__content")
           span(class="page-size-selector__body__recently body-SM pointer"
-                :class="selectedFormatKey === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
+                :class="selectedFormatKey === `recent-${index}` ? 'text-blue-1' : 'text-gray-2'") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
           span(class="page-size-selector__body__recently body-SM pointer"
-                :class="selectedFormatKey === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
+                :class="selectedFormatKey === `recent-${index}` ? 'text-blue-1' : 'text-gray-3'") {{ makeFormatDescription(format) }}
       div(v-if="isLayoutReady && formatList.length > 0" class="page-size-selector__body-row first-row")
-        span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
+        span(class="page-size-selector__body__title caption-LG text-black") {{$t('NN0025')}}
       div(v-for="(format, index) in formatList"
           :key="format.id"
           class="page-size-selector__body-row item pointer"
@@ -85,9 +85,9 @@ div(class="page-size-selector")
         img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.icon}.svg`)")
         div(class="page-size-selector__body-row__content")
           span(class="page-size-selector__body__recently body-SM pointer"
-                :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
+                :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : 'text-gray-2'") {{ format.title }}
           span(class="page-size-selector__body__recently body-SM pointer"
-                :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
+                :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : 'text-gray-3'") {{ makeFormatDescription(format) }}
 </template>
 
 <script lang="ts">
@@ -183,9 +183,6 @@ const component = defineComponent({
     }),
     isCustomValid(): boolean {
       return this.widthValid && this.heightValid && !this.isOverArea()
-    },
-    defaultTextColor(): string {
-      return this.isDarkTheme ? 'text-white' : 'text-gray-3'
     },
     // Call by PanelSize and PopupSize.vue
     // eslint-disable-next-line vue/no-unused-properties
@@ -539,7 +536,7 @@ export type CPageSizeSelector = InstanceType<typeof component>
         padding: 5px 5px;
         &__input-label {
           width: 30px;
-          font-weight: 700;
+          font-weight: 400;
           text-align: center;
         }
         &__input {

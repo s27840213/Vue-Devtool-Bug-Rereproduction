@@ -679,6 +679,11 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: center;
+      > span {
+        @include text-H2;
+        display: block;
+        color: setColor(nav);
+      }
       @media screen and (max-width: 540px) {
         position: static;
         transform: none;
@@ -687,12 +692,8 @@ export default defineComponent({
         margin-bottom: 38px;
         > span {
           text-align: left;
+          @include text-H3
         }
-      }
-      > span {
-        @include text-H2;
-        display: block;
-        color: setColor(nav);
       }
     }
     &__text {

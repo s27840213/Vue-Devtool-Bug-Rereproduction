@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="list")
-  div(class="list-title" :class="inBrowserMode ? 'text-H5' : 'text-H6'")
+  div(class="list-title" :class="!isMobile ? 'text-H5' : 'text-H6'")
     span(class="list-title__text text-gray-1") {{title}}
     router-link(v-if="type !== 'theme'"
       class="list-title__more text-gray-2"
@@ -75,7 +75,7 @@ import picWVUtils from '@/utils/picWVUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
 import { defineComponent } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -119,6 +119,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState({
+      isMobile: 'isMobile'
+    }),
     ...mapGetters({
       mydesignData: 'design/getAllDesigns',
       inBrowserMode: 'webView/getInBrowserMode'

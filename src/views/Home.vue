@@ -27,6 +27,7 @@ div(class="home")
         :list="homeTags"
         :singleChoice="true"
         :defaultSelection="[]"
+        :shinkWidth="0"
         @select="handleSelectTags")
       template(v-if="selectedTags.length !== 0")
         template-waterfall(:waterfallTemplates="waterfallTemplates"

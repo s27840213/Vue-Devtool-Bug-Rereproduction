@@ -23,7 +23,7 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
     template(v-if="currentView === ''")
       div(class="settings-mobile__row mb-10")
         div(class="text-H4")
-          span {{$tc('NN0165', 2)}}
+          span {{$tc('NN0165', 1)}}
         div(v-if="isLogin")
           mobile-jump-btn(
               :iconName="'chevron-right'"

@@ -36,6 +36,10 @@ export default defineComponent({
     singleChoice: {
       type: Boolean,
       default: false
+    },
+    shinkWidth: {
+      type: Number,
+      default: 5
     }
   },
   mounted() {
@@ -94,7 +98,7 @@ export default defineComponent({
   @media screen and (max-width: 540px) {
     flex-direction: column;
     align-items: start;
-    width: calc(100% - 5px);
+    width: calc(100% - v-bind(shinkWidth) * 1px);
     overflow-x: auto;
     @include no-scrollbar;
   }

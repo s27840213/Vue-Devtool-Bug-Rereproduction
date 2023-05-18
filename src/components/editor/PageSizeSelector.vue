@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
   div(class="page-size-selector__body-row first-row")
-    span(class="page-size-selector__body__title subtitle-2"
+    span(class="page-size-selector__body__title caption-LG"
       :class="defaultTextColor") {{$t('NN0023')}}
   div(class="page-size-selector__body__custom")
       radio-btn(class="page-size-selector__body__radio"
@@ -56,7 +56,7 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
   div(class="page-size-selector__body__hr first bg-gray-4")
   div(class="page-size-selector__container")
       div(class="page-size-selector__body-row first-row")
-        span(class="page-size-selector__body__title subtitle-2"
+        span(class="page-size-selector__body__title caption-LG"
           :class="defaultTextColor") {{$t('NN0024')}}
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
@@ -71,7 +71,7 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
           span(class="page-size-selector__body__page-text body-SM pointer"
                 :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
       div(class="page-size-selector__body-row first-row")
-        span(class="page-size-selector__body__title subtitle-2"
+        span(class="page-size-selector__body__title caption-LG"
             :class="defaultTextColor") {{$t('NN0025')}}
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")

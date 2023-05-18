@@ -20,7 +20,7 @@ div(class="footer-tabs" :style="footerTabsStyles")
     svg-icon(
       :iconName="'insert-cross'"
       :iconColor="'blue-1'"
-      :iconWidth="'40px'"
+      :iconWidth="'56px'"
       @click="slotProps.openPopup")
   router-link(:to="'/mydesign'" custom v-slot="{navigate}")
     div(class="footer-tabs__item" @click="navigate")
@@ -67,12 +67,12 @@ const activeRouteName = computed(() => route.name)
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
   padding: 0px 16px;
 
-  height: 56px;
+  height: 60px;
   background: setColor(white);
   border-top: 0.5px solid setColor(gray-4);
   z-index: setZindex(45);
@@ -87,6 +87,12 @@ const activeRouteName = computed(() => route.name)
       transition: background-color 0.2s, color 0.2s;
       transform: scale(calc(10 / 12));
     }
+  }
+
+  &__plus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>
