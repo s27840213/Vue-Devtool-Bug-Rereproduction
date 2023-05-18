@@ -263,7 +263,8 @@ export default defineComponent({
         title: item.title ?? '',
         description: item.description ?? '',
         unit: item.unit ?? 'px',
-        icon: item.icon ?? ''
+        icon: item.icon ?? '',
+        bleed: item.bleed
       })) : []
     },
     recentlyUsed(): ILayout[] {
@@ -415,6 +416,14 @@ export default defineComponent({
       if (!this.isFormatApplicable) return
       const format = this.getSelectedFormat()
       if (!format) return
+      const bleeds = format.unit !== 'px' && format.bleed ? generalUtils.deepCopy(format.bleed) : null
+      if (bleeds) {
+        const maxBleed = floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', format.unit), PRECISION)
+        Object.keys(bleeds).forEach(key => {
+          bleeds[key] = Math.min(bleeds[key], maxBleed)
+        })
+      }
+
       if (this.groupType !== 1) {
         // resize page with px size
         const { width, height } = this.pageSizes.px
@@ -426,6 +435,7 @@ export default defineComponent({
           physicalHeight: format.height,
           unit: format.unit
         }, currPageIndex)
+        if (bleeds) pageUtils.setBleeds(currPageIndex, bleeds)
       } else {
         // resize電商詳情頁時 其他頁面要依width做resize
         const { pagesLength, getPageSize } = this
@@ -451,6 +461,14 @@ export default defineComponent({
               physicalHeight: newHeight,
               unit: format.unit
             })
+          }
+          if (bleeds) {
+            const detailPageBleeds = {
+              ...bleeds,
+              top: pageIndex !== 0 ? 0 : bleeds.top,
+              bottom: pageIndex !== pagesLength - 1 ? 0 : bleeds.bottom
+            }
+            pageUtils.setBleeds(pageIndex, detailPageBleeds)
           }
         }
       }
