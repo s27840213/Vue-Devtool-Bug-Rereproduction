@@ -16,12 +16,12 @@ div(class="panel-download" :style="containerStyles")
       span {{$t('NN0827')}}
   template(v-else-if="currState === 'setting'")
     div(class="text-H6") {{$t('NN0121')}}
-    mobile-type-selector(
+    mobile-jump-btn(
       :title="selectedType.name"
       :iconName="'chevron-right'"
       @click="handleTypeSelectorAction('type')")
     hr(class="full-width")
-    mobile-type-selector(v-if="'scale' in selected"
+    mobile-jump-btn(v-if="'scale' in selected"
       :title="`${$t('NN0122')}`"
       :description="`${selected.scale} ${$t('NN0123')}`"
       :iconName="'chevron-right'"
@@ -59,7 +59,7 @@ div(class="panel-download" :style="containerStyles")
         :modelValue="selected.outline===2"
         @update:modelValue="(bool) => handleUpdate('outline', bool ? 2 : 0)")
       hr(v-if="'outline' in selected" class="full-width")
-      mobile-type-selector(
+      mobile-jump-btn(
         v-if="selectedTypeVal !== 'jpg' && selectedTypeVal !== 'png'"
         class="py-5"
         :title="`${$t('NN0777')}`"
@@ -67,7 +67,7 @@ div(class="panel-download" :style="containerStyles")
         :iconName="'chevron-right'"
         @click="handleTypeSelectorAction('colorMode')")
       div(class="text-H6") {{$t('NN0124')}}
-      mobile-type-selector(
+      mobile-jump-btn(
         :title="noPageRange && rangeType === 'spec' ? `${$t('NN0823')}` : rangeTypeText"
         :iconName="'chevron-right'"
         :textSize="'body-SM'"
@@ -155,19 +155,19 @@ div(class="panel-download" :style="containerStyles")
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
+import MobileJumpBtn from '@/components/editor/mobile/MobileJumpBtn.vue'
 import MobilePropsToggle from '@/components/editor/mobile/MobilePropsToggle.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import MobileTypeSelector from '@/components/editor/mobile/MobileTypeSelector.vue'
 import Btn from '@/components/global/Btn.vue'
 import { ITypeOption, PanelDownloadState } from '@/interfaces/download'
 import downloadMixin from '@/mixin/download'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 export default defineComponent({
   components: {
     Animation,
     MobileSlider,
-    MobileTypeSelector,
+    MobileJumpBtn,
     MobilePropsToggle,
     DownloadTypeOption,
     Btn

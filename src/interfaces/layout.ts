@@ -5,4 +5,5 @@ export interface ILayout {
     title: string;
     description: string;
     unit: string;
+    icon: string
 }

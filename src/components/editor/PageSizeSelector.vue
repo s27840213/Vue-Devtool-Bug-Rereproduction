@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
   div(class="page-size-selector__body-row first-row")
-    span(class="page-size-selector__body__title subtitle-2"
+    span(class="page-size-selector__body__title caption-LG"
       :class="defaultTextColor") {{$t('NN0023')}}
   div(class="page-size-selector__body__custom")
       radio-btn(class="page-size-selector__body__radio"
@@ -11,14 +11,14 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
                 @select="selectFormat")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
-        input(class="body-XS" type="number" min="0"
+        input(class="body-SM" type="number" min="0"
               :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
               :value="valPageSize.width"
               @input="setPageWidth"
               @click="selectFormat('custom')"
               @focus="lastFocusedInput = 'width'"
               @blur="handleInputBlur('width')")
-        span(class="body-XS"
+        span(class="body-SM"
             :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
@@ -26,20 +26,20 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
           @click="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
-        input(class="body-XS" type="number" min="0"
+        input(class="body-SM" type="number" min="0"
               :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
               :value="valPageSize.height"
               @input="setPageHeight"
               @click="selectFormat('custom')"
               @focus="lastFocusedInput = 'height'"
               @blur="() => handleInputBlur('height')")
-        span(class="body-XS"
+        span(class="body-SM"
             :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                   class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
                   :class="selectedFormat === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
           @click="showUnitOptions = !showUnitOptions")
-        span(class="page-size-selector__body__custom__unit__label body-XXS" :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
+        span(class="page-size-selector__body__custom__unit__label body-SM" :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
         svg-icon(class="page-size-selector__body__custom__unit__icon"
           iconName="chevron-down"
           iconWidth="16px"
@@ -49,50 +49,45 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
               :key="unit"
               class="page-size-selector__body__custom__unit__option__item text-gray-2"
               :style="unitOptionStyles" @click="selectUnit($event, unit)")
-            span(class="body-XS text-gray-1") {{unit}}
+            span(class="body-SM text-gray-1") {{unit}}
       div(v-if="selectedFormat === 'custom' && isValidate && !isCustomValid"
-        class="page-size-selector__body__custom__err body-XS text-red text-left") {{errMsg}}
+        class="page-size-selector__body__custom__err body-SM text-red text-left") {{errMsg}}
         span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
   div(class="page-size-selector__body__hr first bg-gray-4")
   div(class="page-size-selector__container")
       div(class="page-size-selector__body-row first-row")
-        span(class="page-size-selector__body__title subtitle-2"
+        span(class="page-size-selector__body__title caption-LG"
           :class="defaultTextColor") {{$t('NN0024')}}
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
       div(v-for="(format, index) in recentlyUsed"
           :key="format.id"
-          class="page-size-selector__body-row pointer"
+          class="page-size-selector__body-row item pointer"
           @click="selectFormat(`recent-${index}`)")
-        radio-btn(class="page-size-selector__body__radio"
-                  :isSelected="selectedFormat === `recent-${index}`",
-                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                  :formatKey="`recent-${index}`",
-                  @select="selectFormat")
-        span(class="page-size-selector__body__recently body-3 pointer"
-              :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
-              @click="selectFormat(`recent-${index}`)") {{ makeFormatTitle(format) }}
+        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.title === '' || format.icon === 'custom' ? isDarkTheme ? 'custom-white' : 'custom-white' : format.icon}.svg`)")
+        div(class="page-size-selector__body-row__text-content")
+          span(class="page-size-selector__body__page-text body-SM pointer"
+                :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
+          span(class="page-size-selector__body__page-text body-SM pointer"
+                :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
       div(class="page-size-selector__body-row first-row")
-        span(class="page-size-selector__body__title subtitle-2"
+        span(class="page-size-selector__body__title caption-LG"
             :class="defaultTextColor") {{$t('NN0025')}}
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
       div(v-for="(format, index) in formatList"
           :key="format.id"
-          class="page-size-selector__body-row typical-row pointer"
+          class="page-size-selector__body-row item pointer"
           @click="selectFormat(`preset-${index}`)")
-        radio-btn(class="page-size-selector__body__radio"
-                  :isSelected="selectedFormat === `preset-${index}`",
-                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                  :formatKey="`preset-${index}`",
-                  @select="selectFormat")
-        span(class="page-size-selector__body__typical-name body-4"
-              :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
-        span(class="page-size-selector__body__typical-size body-4"
-              :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
+        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.icon}.svg`)")
+        div(class="page-size-selector__body-row__text-content")
+          span(class="page-size-selector__body__page-text body-SM pointer"
+                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
+          span(class="page-size-selector__body__page-text body-SM pointer"
+                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
   div(class="page-size-selector__body__hr second bg-gray-4")
   div(class="page-size-selector__body__submit")
-    div(class="page-size-selector__body__submit__option body-XS")
+    div(class="page-size-selector__body__submit__option body-SM")
       checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
     btn(class="page-size-selector__body__button"
         :disabled="!isFormatApplicable"
@@ -267,7 +262,8 @@ export default defineComponent({
         height: item.height ?? 0,
         title: item.title ?? '',
         description: item.description ?? '',
-        unit: item.unit ?? 'px'
+        unit: item.unit ?? 'px',
+        icon: item.icon ?? ''
       })) : []
     },
     recentlyUsed(): ILayout[] {
@@ -280,7 +276,8 @@ export default defineComponent({
         height: item.height ?? 0,
         title: item.title ?? '',
         description: item.description ?? '',
-        unit: item.unit ?? 'px'
+        unit: item.unit ?? 'px',
+        icon: item.icon ?? ''
       })).filter((layout: ILayout) => {
         const pxSize = unitUtils.convertSize(layout.width, layout.height, layout.unit, 'px')
         if (pxSize.width * pxSize.height > pageUtils.MAX_AREA) return false
@@ -314,7 +311,7 @@ export default defineComponent({
     getSelectedFormat(): ILayout | undefined {
       if (this.selectedFormat === 'custom') {
         if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit }
+        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit, icon: '' }
       } else if (this.selectedFormat.startsWith('recent')) {
         const [type, index] = this.selectedFormat.split('-')
         const format = this.recentlyUsed[parseInt(index)]
@@ -333,15 +330,8 @@ export default defineComponent({
       this.isLocked = !this.isLocked
       if (this.isLocked) this.aspectRatio = this.pageWidth * this.pageHeight <= 0 ? 1 : this.pageWidth / this.pageHeight
     },
-    makeFormatTitle(format: ILayout) {
-      if (format.id !== '') {
-        return `${format.title} ${this.makeFormatDescription(format)}`
-      } else {
-        return `${format.width} x ${format.height} ${format.unit}`
-      }
-    },
     makeFormatDescription(format: ILayout): string {
-      return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
+      return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description === '' ? format.title : format.description} ${format.unit ?? 'px'}`
     },
     handleCurrFocusPageIndexChange() {
       const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize
@@ -570,7 +560,6 @@ export default defineComponent({
       grid-template-rows: auto;
       column-gap: 12px;
       width: 100%;
-      padding: 3px 22px 3px 10px;
       align-items: center;
       box-sizing: border-box;
       text-align: left;
@@ -580,6 +569,16 @@ export default defineComponent({
         align-items: center;
         justify-content: center;
       }
+
+      &__text-content {
+        max-width: 100%;
+        display: grid;
+        grid-template-rows: 1fr;
+        grid-template-columns: auto auto;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
       &.first-row {
         display: block;
         padding: 0px;
@@ -587,12 +586,12 @@ export default defineComponent({
         > span {
           display: block;
           height: 16px;
-          word-spacing: 1.5px;
           text-transform: uppercase;
         }
       }
-      &.typical-row  {
-        grid-template-columns: 12px calc((100% - 36px) * 0.5) auto;
+      &__icon {
+        width: 18px;
+        height: 18px;
       }
     }
     &__close {
@@ -602,6 +601,10 @@ export default defineComponent({
     }
     &__title {
       font-weight: 700;
+    }
+
+    &__page-text {
+      overflow-wrap: break-word;
     }
     &__custom {
       display: grid;
@@ -732,7 +735,7 @@ export default defineComponent({
   }
   &__container {
     display: grid;
-    gap: 4px;
+    gap: 10px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     @include firefoxOnly {
@@ -772,7 +775,11 @@ export default defineComponent({
   }
 }
 
-@media (max-width: 1260px) {
-
+.item {
+  display: grid;
+  margin: 0px;
+  padding: 4px 4px;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
 }
 </style>

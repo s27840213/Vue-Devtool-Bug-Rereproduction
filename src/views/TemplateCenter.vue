@@ -55,14 +55,18 @@ div(ref="body"
         :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0', 'pointer-events': isShowOptions ? 'initial' : 'none'}")
       hashtag-category-row(v-for="hashtag in hashtags"
         :key="hashtag.title"
-        :list="hashtag"
+        :list="hashtag.list"
+        :type="hashtag.type"
+        :title="hashtag.title"
         :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
         @select="handleHashtagSelect")
   div(class="template-center__content")
     div(class="template-center__filter non-mobile-show")
       hashtag-category-row(v-for="hashtag in hashtags"
         :key="hashtag.title"
-        :list="hashtag"
+        :list="hashtag.list"
+        :type="hashtag.type"
+        :title="hashtag.title"
         :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
         @select="handleHashtagSelect")
     div(class="template-center__hr non-mobile-show")
@@ -81,8 +85,8 @@ div(ref="body"
                       @updateHashTagsAll="handleSelectAll")
     template-waterfall(:waterfallTemplates="waterfallTemplates"
                       :isTemplateReady="isTemplateReady"
-                      :useScrollablePreview="!isMobile"
-                      :useScrollSpace="isMobile"
+                      :useScrollablePreview="!isMobileSize"
+                      :useScrollSpace="isMobileSize"
                       :themes="themes"
                       @loadMore="handleLoadMore"
                       @clickWaterfall="handleClickWaterfall")
@@ -220,7 +224,7 @@ export default defineComponent({
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
-      isMobile: false,
+      isMobileSize: false,
       isPC: false
     }
   },
@@ -344,10 +348,16 @@ export default defineComponent({
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
     }),
+    ...mapGetters({
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
+    }),
+    statusbarHeight (): string {
+      return `${this.userInfo.statusBarHeight ?? 0}px`
+    },
     waterfallTemplates(): ITemplate[][] {
       if (this.isPC) {
         return this.waterfallTemplatesPC
-      } else if (this.isMobile) {
+      } else if (this.isMobileSize) {
         return this.waterfallTemplatesMOBILE
       } else {
         return this.waterfallTemplatesTAB
@@ -468,7 +478,7 @@ export default defineComponent({
         this.groupId = template.group_id ?? ''
         this.contentIds = template.content_ids
         this.modalTemplate = template
-        if (this.isMobile) {
+        if (this.isMobileSize) {
           this.modal = 'mobile-pages'
         } else {
           this.modal = 'pages'
@@ -542,7 +552,7 @@ export default defineComponent({
         return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
       }, [true, undefined, undefined])[0]
       if (content.themes.length > 1 && !allSameSize) {
-        if (this.isMobile) {
+        if (this.isMobileSize) {
           const route = this.$router.resolve({
             name: 'Editor',
             query: {
@@ -608,7 +618,7 @@ export default defineComponent({
       })
     },
     handleResize() {
-      this.isMobile = generalUtils.getWidth() <= 540
+      this.isMobileSize = generalUtils.getWidth() <= 540
       this.isPC = generalUtils.getWidth() >= 976
     },
     getPrevUrl(content?: IContentTemplate, scale?: number): string {
@@ -626,6 +636,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use "@/assets/scss/base/transition.scss";
+
 .template-center {
   @include size(100%, 100%);
   @include hover-scrollbar();
@@ -667,20 +679,21 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: center;
-      @media screen and (max-width: 540px) {
-        position: static;
-        transform: none;
-        margin: auto;
-        margin-top: 24px;
-        margin-bottom: 38px;
-        > span {
-          text-align: left;
-        }
-      }
       > span {
         @include text-H2;
         display: block;
         color: setColor(nav);
+      }
+      @media screen and (max-width: 540px) {
+        position: static;
+        transform: none;
+        margin: auto;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        > span {
+          text-align: left;
+          @include text-H3
+        }
       }
     }
     &__text {
@@ -802,7 +815,7 @@ export default defineComponent({
       background-color: white;
       position: -webkit-sticky;
       position: sticky;
-      top: $header-height;
+      top: calc(#{$header-height} + v-bind(statusbarHeight));
     }
     &__searchbar {
       height: 44px;
@@ -1012,7 +1025,7 @@ export default defineComponent({
   }
   &__mobile-multi {
     position: fixed;
-    top: $header-height;
+    top: calc(#{$header-height} + v-bind(statusbarHeight));
     left: 0;
     width: 100vw;
     height: 100vh;
@@ -1023,7 +1036,7 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: center;
-      top: calc(#{$header-height} / 2);
+      top: calc((#{($header-height)}  + v-bind(statusbarHeight)) / 2);
       right: 55px;
       width: 25px;
       height: 25px;
@@ -1034,7 +1047,7 @@ export default defineComponent({
     &__content {
       overflow-y: auto;
       width: 100%;
-      height: calc(100vh - #{$header-height});
+      height: calc(100vh - #{($header-height)} + v-bind(statusbarHeight));
     }
     &__gallery {
       display: grid;
