@@ -255,7 +255,8 @@ class BgRemoveUtils {
           this.setIsProcessing(false)
         },
         id: id ?? privateId,
-        needCompressed: false
+        needCompressed: false,
+        pollingJsonName: 'result2.json'
       })
     }
   }
