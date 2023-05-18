@@ -53,7 +53,8 @@ export default defineComponent({
         height: 0
       },
       extraData: undefined as any,
-      options: ''
+      options: '',
+      params: ''
     }
   },
   components: {
@@ -86,6 +87,7 @@ export default defineComponent({
     fetchDesign(query: string, options = '') {
       this.clearBuffers()
       this.options = options
+      this.params = query
       this.$nextTick(async () => {
         const urlParams = new URLSearchParams(query)
         const type = urlParams.get('type')
@@ -337,15 +339,15 @@ export default defineComponent({
             to: 'UI'
           })
         } else {
-          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, true)
+          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, this.params)
         }
       } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
         const element = this.$refs.target
         const target: HTMLElement = (element as any).$el ? (element as any).$el : element
         const { width, height } = target.getBoundingClientRect()
-        vivistickerUtils.sendDoneLoading(width, height, this.options)
+        vivistickerUtils.sendDoneLoading(width, height, this.options, this.params)
       } else {
-        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options)
+        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params)
       }
     }
     // fitPageToScreen(width: number, height: number): number {

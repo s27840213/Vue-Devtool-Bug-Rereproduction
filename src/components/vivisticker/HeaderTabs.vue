@@ -303,11 +303,10 @@ export default defineComponent({
         }
       }
       if (vivistickerUtils.checkVersion('1.31')) {
-        // vivistickerUtils.copyWithScreenshotUrl(
-        //   vivistickerUtils.createUrlForJSON({ source: 'editor' }),
-        //   copyCallback
-        // )
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ source: 'editor' }))
+        vivistickerUtils.copyWithScreenshotUrl(
+          vivistickerUtils.createUrlForJSON({ source: 'editor' }),
+          copyCallback
+        )
       } else if (vivistickerUtils.checkVersion('1.3')) {
         vivistickerUtils.copyEditor(copyCallback)
       } else {

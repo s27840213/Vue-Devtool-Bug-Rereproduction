@@ -101,7 +101,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getAssetResult',
     'uploadImageURL',
     'informWebResult',
-    'subscribeResult'
+    'subscribeResult',
+    'screenshotDone'
   ]
 
   SCREENSHOT_CALLBACKS = [
@@ -249,8 +250,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.sendToIOS('SHOW_TOAST', { msg })
   }
 
-  sendDoneLoading(width: number, height: number, options: string, needCrop = false) {
-    this.sendToIOS('DONE_LOADING', { width, height, options, needCrop })
+  sendDoneLoading(width: number, height: number, options: string, params: string) {
+    this.sendToIOS('DONE_LOADING', { width, height, options, params })
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
@@ -262,7 +263,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   copyWithScreenshotUrl(query: string, afterCopy?: (flag: string) => void) {
-    this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'copy' }, `screenshot-${query}`).then((data) => {
+    this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'editorCopy' }, `screenshot-${query}`).then((data) => {
       afterCopy && afterCopy(data?.flag ?? '0')
     })
   }
