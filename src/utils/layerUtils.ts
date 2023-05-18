@@ -205,7 +205,7 @@ class LayerUtils {
     })
   }
 
-  replaceLayer(pageIndex: number, layerIndex: number, layer: IImage | IText | IShape | IGroup | IFrame) {
+  replaceLayer(pageIndex: number, layerIndex: number, layer: IImage | IText | IShape | IGroup | IFrame | ITmp) {
     store.commit('REPLACE_layer', {
       pageIndex,
       layerIndex,
@@ -519,14 +519,37 @@ class LayerUtils {
     return -1
   }
 
-  getLayerIndexById(pageIndex: number, id: string) {
-    return this.getLayers(pageIndex).findIndex((layer: ILayer) => {
+  getLayerIndexById(pageIndex: number, id: string, pages?: IPage[]) {
+    return (pages ? pages[pageIndex].layers : this.getLayers(pageIndex)).findIndex((layer: ILayer) => {
       return layer.id === id
     })
   }
 
-  getSubLayerIndexById(pageIndex: number, layerIndex: number, id: string) {
-    const primaryLayer = this.getLayer(pageIndex, layerIndex)
+  getLayerIndexByIdAsSubLayer(pageIndex: number, id: string, pages?: IPage[]): {
+    layerIndex: number,
+    subLayerIdx: number
+  } {
+    const layers = pages ? pages[pageIndex].layers : this.getLayers(pageIndex)
+    for (const [layerIndex, layer] of layers.entries()) {
+      if (layer.type !== 'tmp' && layer.type !== 'group') continue
+      const subLayerIdx = layer.layers.findIndex((sublayer: ILayer) => {
+        return sublayer.id === id
+      })
+      if (subLayerIdx !== -1) {
+        return {
+          layerIndex,
+          subLayerIdx
+        }
+      }
+    }
+    return {
+      layerIndex: -1,
+      subLayerIdx: -1
+    }
+  }
+
+  getSubLayerIndexById(pageIndex: number, layerIndex: number, id: string, pages?: IPage[]) {
+    const primaryLayer = pages ? pages[pageIndex].layers[layerIndex] : this.getLayer(pageIndex, layerIndex)
     if (primaryLayer.type === LayerType.group) {
       return (primaryLayer as IGroup).layers
         .findIndex(l => l.id === id)
@@ -538,28 +561,38 @@ class LayerUtils {
     return -1
   }
 
-  getLayerInfoById(pageId: string, layerId: string, subLayerId = '') {
-    const pageIndex = pageId ? pageUtils.getPageIndexById(pageId) : this.pageIndex
+  getLayerInfoById(pageId: string, layerId: string, subLayerId = '', pages?: IPage[]) {
+    const pageIndex = pageId ? pageUtils.getPageIndexById(pageId, pages) : this.pageIndex
     let layerIndex
     let subLayerIdx
     if (subLayerId) {
       // If the layer was in a group, search for it as primaryLayer first,
       // since it may be ungrouped and becomes primaryLayer.
-      layerIndex = this.getLayerIndexById(pageIndex, subLayerId)
+      layerIndex = this.getLayerIndexById(pageIndex, subLayerId, pages)
       if (layerIndex === -1) {
         // If no primaryLayer has the subLayerId, it may be still in the same group.
-        layerIndex = this.getLayerIndexById(pageIndex, layerId)
+        layerIndex = this.getLayerIndexById(pageIndex, layerId, pages)
       }
     } else {
-      layerIndex = this.getLayerIndexById(pageIndex, layerId)
+      // A primaryLayer may be a subLayer now, check if it's a subLayer first.
+      const layerInfo = this.getLayerIndexByIdAsSubLayer(pageIndex, layerId, pages)
+      if (layerInfo.layerIndex === -1) {
+        layerIndex = this.getLayerIndexById(pageIndex, layerId, pages)
+      } else {
+        return {
+          pageIndex,
+          layerIndex: layerInfo.layerIndex,
+          subLayerIdx: layerInfo.subLayerIdx
+        }
+      }
     }
     /**  If the layerIndex === -1 means the layer is grouped or deleted */
     if (layerIndex === -1) {
-      layerIndex = pageUtils.getPage(pageIndex).layers
+      layerIndex = (pages ? pages[pageIndex] : pageUtils.getPage(pageIndex)).layers
         .findIndex(l => l.type === LayerType.group && (l as IGroup).layers.find(subLayer => subLayer.id === layerId))
-      subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, layerId)
+      subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, layerId, pages)
     } else {
-      subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, subLayerId)
+      subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, subLayerId, pages)
     }
     return {
       pageIndex,

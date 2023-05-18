@@ -17,6 +17,9 @@ div(class="nu-sub-controller")
               :config="(config as IText)"
               :primaryLayer="primaryLayer"
               :subLayerIndex="layerIndex"
+              :pageId="page.id"
+              :layerId="primaryLayer.id"
+              :subLayerId="config.id"
               @keydown.arrow-left.stop
               @keydown.arrow-up.stop
               @keydown.arrow-right.stop
@@ -59,7 +62,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import SvgPath from 'svgpath'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({

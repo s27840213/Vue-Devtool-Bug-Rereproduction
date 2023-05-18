@@ -50,10 +50,18 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
         }
       }
     } else if (type === 'new-design-size' && width && height) {
+      const bleeds = urlParams.get('bleeds')
+      const arrBleeds = bleeds ? bleeds.split(',').map((item) => parseFloat(item)) : null
       designUtils.newDesign(
         parseFloat(width),
         parseFloat(height === '0' ? width : height),
         unit || 'px',
+        arrBleeds ? {
+          top: arrBleeds[0],
+          right: arrBleeds[1],
+          bottom: arrBleeds[2],
+          left: arrBleeds[3]
+        } : undefined
       )
       if (themeId === '7') {
         store.commit('SET_groupType', 1)

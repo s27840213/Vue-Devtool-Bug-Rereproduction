@@ -71,7 +71,8 @@ export default defineComponent({
       isProcessingStepsQueue: false,
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
       magnifyUtils: null as unknown as MagnifyUtils,
-      showMagnifyAtRight: false
+      showMagnifyAtRight: false,
+      clearModeShift: 4
     }
   },
   created() {
@@ -290,8 +291,8 @@ export default defineComponent({
     },
     initClearModeCanvas() {
       this.clearModeCanvas = document.createElement('canvas') as HTMLCanvasElement
-      this.clearModeCanvas.width = this.size.width
-      this.clearModeCanvas.height = this.size.height
+      this.clearModeCanvas.width = this.size.width + this.clearModeShift
+      this.clearModeCanvas.height = this.size.height + this.clearModeShift
       const ctx = this.clearModeCanvas.getContext('2d') as CanvasRenderingContext2D
       // set up drawing settings
       ctx.lineCap = 'round'
@@ -322,11 +323,12 @@ export default defineComponent({
       this.drawImageToInitImgCanvas()
     },
     drawLine(e: MouseEvent, ctx: CanvasRenderingContext2D) {
+      const shift = this.clearMode ? this.clearModeShift : 0
       ctx.beginPath()
-      ctx.moveTo(this.initPos.x, this.initPos.y)
+      ctx.moveTo(this.initPos.x + shift, this.initPos.y + shift)
       const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root)
       this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
-      ctx.lineTo(x, y)
+      ctx.lineTo(x + shift, y + shift)
       ctx.stroke()
       Object.assign(this.initPos, {
         x,
@@ -397,7 +399,7 @@ export default defineComponent({
       this.drawLine(e, this.clearModeCtx)
       this.setCompositeOperationMode('destination-out')
       this.contentCtx.filter = `blur(${this.blurPx}px)`
-      this.contentCtx.drawImage(this.clearModeCanvas, 0, 0, this.size.width, this.size.height)
+      this.contentCtx.drawImage(this.clearModeCanvas, 0 - this.clearModeShift, 0 - this.clearModeShift, this.size.width + 2 * this.clearModeShift, this.size.height + 2 * this.clearModeShift)
       this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {

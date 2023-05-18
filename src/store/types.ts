@@ -68,7 +68,16 @@ export interface IEditorState {
   showGuideline: boolean,
   lockGuideline: boolean,
   isDraggingGuideline: boolean,
+  /**
+   * @param themes
+   * @param homeTags
+   * @param shuffledThemesId
+   * for the above param, please read the following notion document
+   * https://www.notion.so/vivipic/Vivipic-35c05fc6c7e04d509ab7eb7a0f393fe4
+   */
   themes: Itheme[],
+  homeTags: Array<string>,
+  shuffledThemesIds: Array<number>,
   hasCopiedFormat: boolean,
   inGestureToolMode: boolean,
   isMobile: boolean
@@ -82,7 +91,8 @@ export interface IEditorState {
   inScreenshotPreviewRoute: boolean,
   cursor: string,
   isPageScaling: boolean,
-  isGettingDesign: boolean
+  isGettingDesign: boolean,
+  showGlobalErrorModal: boolean,
 }
 
 export enum SidebarPanelType {

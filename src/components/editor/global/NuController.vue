@@ -42,6 +42,9 @@ div(:layer-index="`${layerIndex}`"
             :layerIndex="layerIndex"
             :config="(config as IText)"
             :subLayerIndex="-1"
+            :pageId="page.id"
+            :layerId="config.id"
+            :subLayerId="''"
             @keydown.left.stop
             @keydown.up.stop
             @keydown.right.stop
@@ -167,6 +170,7 @@ import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
 import ImageUtils from '@/utils/imageUtils'
 import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
@@ -456,6 +460,7 @@ export default defineComponent({
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setMoving: 'SET_moving',
+      replaceLayer: 'REPLACE_layer',
       setImgConfig: 'imgControl/SET_CONFIG',
       setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
@@ -890,6 +895,14 @@ export default defineComponent({
       }
       this.isControlling = false
       // StepsUtils.record()
+      if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
+        const newLayer = TextUtils.resetScaleForLayer(this.config as AllLayerTypes)
+        LayerUtils.replaceLayer(this.pageIndex, this.layerIndex, newLayer)
+        if (newLayer.type === 'tmp') {
+          groupUtils.set(this.pageIndex, this.layerIndex, newLayer.layers)
+        }
+        tiptapUtils.updateHtml()
+      }
       StepsUtils.asyncRecord()
 
       this.setCursorStyle('')

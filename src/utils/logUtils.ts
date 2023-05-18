@@ -2,33 +2,55 @@ import generalUtils from './generalUtils'
 import uploadUtils from './uploadUtils'
 
 class LogUtils {
-  uploadLog() {
-    if (uploadUtils.isLogin) {
-      uploadUtils.uploadLog(this.getLog() ?? '')
-    }
-    // this.consoleLog()
+  async uploadLog() {
+    if (!uploadUtils.isLogin) return
+    const log = this.getLog()
     this.clearLog()
+    try {
+      await uploadUtils.uploadLog(log)
+    } catch (error) {
+      console.log('Error happened while uploading log')
+      console.error(error)
+    }
   }
 
-  getLog() {
-    return localStorage.getItem('log')
+  getLog(): string {
+    return localStorage.getItem('log') ?? ''
   }
 
-  setLog(logContent: string) {
-    const newContent = `${logContent} - [Log generated time: ${generalUtils.generateTimeStamp()}]`
-    localStorage.setItem('log', this.getLog ? `${this.getLog()}\n${newContent}` : newContent)
+  setLog(logContent: string, trimLog = true) {
+    if (trimLog) logContent = logContent.substring(0, 500)
+    const newContent = `[${generalUtils.generateTimeStamp()}] ${logContent}`
+    try {
+      localStorage.setItem('log', `${this.getLog()}\n${newContent}`)
+    } catch (error) {
+      console.error(error)
+      if ((error as Error).name.includes('QuotaExceededError')) {
+        // log can only be uploaded when user is logged in, otherwise, discard the log to avoid quota exceeded error.
+        if (!uploadUtils.isLogin) {
+          this.clearLog()
+          return
+        }
+        this.uploadLog()
+        try {
+          localStorage.setItem('log', `##Log uploaded because of QuotaExceededError\n${newContent}`)
+        } catch (error) {
+          console.log('Error happened again when setting log, discard the log')
+          console.error(error)
+        }
+      }
+    }
   }
 
   setLogAndConsoleLog(...logContent: any[]) {
     console.log(...logContent)
-    logContent = logContent.map(lc => typeof lc === 'string' ? lc : JSON.stringify(lc))
-    this.setLog(logContent.join(' '))
+    logContent = logContent.map(lc => typeof lc === 'string' ? lc : JSON.stringify(lc)).map(lc => lc.substring(0, 500))
+    // slice every string to 500 characters to avoid localStorage quota exceeds
+    this.setLog(logContent.join(' '), false)
   }
 
   clearLog() {
-    if (this.getLog()) {
-      localStorage.setItem('log', '')
-    }
+    localStorage.setItem('log', '')
   }
 
   consoleLog() {
@@ -37,5 +59,7 @@ class LogUtils {
 }
 
 const logUtils = new LogUtils()
+
+window.consoleLog = logUtils.consoleLog.bind(logUtils)
 
 export default logUtils

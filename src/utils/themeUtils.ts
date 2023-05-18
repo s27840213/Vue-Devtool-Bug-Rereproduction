@@ -52,14 +52,21 @@ class ThemeUtils {
 
   async checkThemeState() {
     const { themes } = this
+
     if (!themes.length) {
-      await listService.getTheme({ locale: i18n.global.locale })
-        .then(response => {
-          const { data } = response.data
-          store.commit('SET_themes', data.content)
-        })
+      try {
+        const response = await listService.getTheme({ locale: i18n.global.locale })
+        const { data } = response.data
+        console.log(data)
+        store.commit('SET_themes', data.content)
+        if (store.getters.getHomeTags.length === 0) {
+          store.commit('SET_homeTags', data.tags)
+          store.commit('SET_shuffledThemesIds', data.theme_ids)
+        }
+      } catch (error) {
+        // handle error
+      }
     }
-    return Promise.resolve()
   }
 
   setPageThemes() {
@@ -122,6 +129,11 @@ class ThemeUtils {
     const pageSize = this.getFocusPageSize(pageIndex)
     const pageThemes = this.getThemesBySize(pageSize.width, pageSize.height)
     return pageThemes.some(theme => themes.includes(`${theme.id}`))
+  }
+
+  getThemeTitleById(id: string) {
+    const theme = this.themes.find(theme => theme.id === parseInt(id))
+    return theme ? theme.title : ''
   }
 
   private isSameDirection(targetRatio: number, ratio: number) {
