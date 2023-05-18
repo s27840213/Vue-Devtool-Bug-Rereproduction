@@ -470,7 +470,7 @@ export default defineComponent({
 .home-list {
   width: 80%;
   position: relative;
-  padding-bottom: calc(v-bind(statusbarHeight) * 1px);
+  padding-bottom: calc(44 * 1px);
   &__hashtag {
     z-index: 10;
     position: sticky;

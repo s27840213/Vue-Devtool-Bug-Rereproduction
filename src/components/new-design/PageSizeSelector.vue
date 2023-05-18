@@ -491,7 +491,6 @@ export type CPageSizeSelector = InstanceType<typeof component>
         display: block;
         margin-top: 0px;
         color: setColor(gray-2);
-        letter-spacing: 1.5px;
       }
       &.item {
         display: grid;
@@ -611,7 +610,7 @@ export type CPageSizeSelector = InstanceType<typeof component>
   }
   &__container {
     display: grid;
-    gap: 4px;
+    gap: 10px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     &::-webkit-scrollbar {

@@ -98,6 +98,7 @@ class BgRemoveUtils {
     store.dispatch('user/removeBg', { srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
       if (data.flag === 0) {
         uploadUtils.polling(data.url, (json: any) => {
+          console.log(json.flag, json.data)
           if (json.flag === 0 && json.data) {
             this.reduceBgrmRemain()
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)

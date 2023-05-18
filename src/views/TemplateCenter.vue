@@ -688,8 +688,8 @@ export default defineComponent({
         position: static;
         transform: none;
         margin: auto;
-        margin-top: 24px;
-        margin-bottom: 38px;
+        margin-top: 20px;
+        margin-bottom: 20px;
         > span {
           text-align: left;
           @include text-H3
@@ -815,7 +815,7 @@ export default defineComponent({
       background-color: white;
       position: -webkit-sticky;
       position: sticky;
-      top: (#{$header-height} + v-bind(statusbarHeight));
+      top: calc(#{$header-height} + v-bind(statusbarHeight));
     }
     &__searchbar {
       height: 44px;

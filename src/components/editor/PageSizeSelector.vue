@@ -586,7 +586,6 @@ export default defineComponent({
         > span {
           display: block;
           height: 16px;
-          word-spacing: 1.5px;
           text-transform: uppercase;
         }
       }
@@ -736,7 +735,7 @@ export default defineComponent({
   }
   &__container {
     display: grid;
-    gap: 4px;
+    gap: 10px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     @include firefoxOnly {
