@@ -158,7 +158,7 @@ div(:layer-index="`${layerIndex}`"
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import { IResizer } from '@/interfaces/controller'
-import { isITextFillConfig } from '@/interfaces/format'
+import { isTextFill } from '@/interfaces/format'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
@@ -625,8 +625,8 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const isTextFill = isITextFillConfig(this.config.styles.textFill)
-      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || isTextFill) && !this.contentEditable ? 0 : 1
+      const checkTextFill = isTextFill(this.config.styles.textFill)
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) && !this.contentEditable ? 0 : 1
       return {
         width: '100%',
         height: '100%',

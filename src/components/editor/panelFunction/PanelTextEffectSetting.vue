@@ -24,7 +24,7 @@ div(class="text-effect-setting")
               iconColor="white"
               v-hint="effect.label")
             img(v-else :src="effectIcon(category, effect).name"
-              :width="effectIcon(category, effect).size"
+              :height="effectIcon(category, effect).size"
               v-hint="effect.label")
             pro-item(v-if="effect.plan" theme="roundedRect")
         //- Effect options.
@@ -38,9 +38,9 @@ div(class="text-effect-setting")
                 class="text-effect-setting__option--select")
               div(v-for="sel in option.select"
                   :key="`${option.key}-${sel.key}`")
-                svg-icon(:iconName="`${option.key}-${sel.key}`" iconWidth="100%"
-                  :class="{'selected': getStyle(category)[option.key] === sel.key }"
-                  @click="handleSelectInput(option.key, sel.key)")
+                img(:src="sel.img"
+                    :class="{'selected': ((getStyle(category)[option.key] as Record<'key', string>).key ?? getStyle(category)[option.key]) === sel.key }"
+                    @click="handleSelectInput(sel.attrs)")
             //- Option type range
             template(v-if="option.type === 'range'")
               input(class="text-effect-setting__option--number"
@@ -64,7 +64,7 @@ div(class="text-effect-setting")
                 type="range")
             //- Option type color
             color-btn(v-if="option.type === 'color' && getStyle(category)[option.key]" size="25px"
-              :color="colorParser(getStyle(category)[option.key])"
+              :color="colorParser(getStyle(category)[option.key] as string)"
               :active="option.key === colorTarget && settingTextEffect"
               @click="handleColorModal(option)")
             //- Option type img
@@ -148,7 +148,7 @@ export default defineComponent({
       if (this.isAdmin && this.currCategoryName === 'fill' && this.currentStyle.name === 'custom-fill-img') {
         return {
           label: '上傳文字填滿',
-          action: textFillUtils.uploadTextFill,
+          action: () => { textFillUtils.uploadTextFill() },
         }
       }
       return { label: '', action: () => { /**/ } }
@@ -164,6 +164,12 @@ export default defineComponent({
   },
   methods: {
     effectIcon(category: IEffectCategory, effect: IEffect) {
+      if (effect.img) { // For TextFill that from appJSON, use web img as icon.
+        return {
+          name: effect.img,
+          size: '56',
+        }
+      }
       switch (effect.key) {
         case 'text-book':
           return {
@@ -202,7 +208,7 @@ export default defineComponent({
         bg: styles.textBg,
         shape: styles.textShape,
         fill: styles.textFill,
-      }[category.name] as Record<string, string> ?? {}
+      }[category.name] as Record<string, unknown> ?? {}
     },
     getStyleImg(category: IEffectCategory): string {
       return textFillUtils.imgToSrc(textFillUtils.getImg(this.getStyle(category)))
@@ -210,7 +216,7 @@ export default defineComponent({
     getOptions(effects1d: IEffect[], category: IEffectCategory) {
       return _.find(effects1d, ['key', this.getStyle(category).name])?.options
     },
-    getInputValue(style: Record<string, string>, option: IEffectOptionRange) {
+    getInputValue(style: Record<string, unknown>, option: IEffectOptionRange) {
       if (['lineHeight', 'fontSpacing'].includes(option.key)) {
         return this.selectedTextProps[option.key]
       } else {
@@ -266,8 +272,8 @@ export default defineComponent({
         this.chooseImg(chooseImgkey)
       }
     },
-    async handleSelectInput(key: string, newVal: string) {
-      await this.setEffect({ effect: { [key]: newVal } })
+    async handleSelectInput(attrs: Record<string, unknown>) {
+      await this.setEffect({ effect: attrs })
       this.recordChange()
     },
     handleRangeInputEvent(event: Event, option: IEffectOptionRange) {
@@ -281,7 +287,7 @@ export default defineComponent({
     },
     async setEffectFocus(focus: boolean) {
       if (this.currentStyle.name === 'curve' ||
-        ['custom-fill-img', 'doodle1'].includes(this.currentStyle.name)) {
+        (this.currCategoryName === 'fill' && this.currentStyle.name !== 'none')) {
         await this.setEffect({ effect: { focus } })
         if (!focus) this.recordChange()
       }
@@ -354,6 +360,7 @@ export default defineComponent({
     border: 2px solid transparent;
     border-radius: 4px;
     background-color: white;
+    overflow: hidden;
     .pro {
       left: 1px;
       top: -4px;
@@ -420,13 +427,14 @@ export default defineComponent({
         width: 100%;
         height: 0;
         padding-top: 100%;
-        > svg {
+        > img {
           position: absolute;
+          width: 100%;
           height: 100%;
           top: -2px;
           left: -2px;
           border: 2px solid transparent;
-          border-radius: 2px;
+          border-radius: 4px;
           cursor: pointer;
           transition: all 0.3s;
           &.selected {

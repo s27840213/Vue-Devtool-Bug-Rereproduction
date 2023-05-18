@@ -39,7 +39,7 @@ div(class="nu-sub-controller")
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import { isITextFillConfig } from '@/interfaces/format'
+import { isTextFill } from '@/interfaces/format'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
@@ -323,8 +323,8 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const isTextFill = isITextFillConfig(this.config.styles.textFill)
-      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || isTextFill) &&
+      const checkTextFill = isTextFill(this.config.styles.textFill)
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
         !this.config.contentEditable ? 0 : 1
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,

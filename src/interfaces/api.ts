@@ -87,7 +87,7 @@ export interface IAssetPhoto {
 export function isIAssetPhoto(object: unknown): object is IAssetPhoto {
   return typeof object === 'object' && !!object &&
     isEqual(
-      intersection(Object.keys(object), ['width', 'height', 'id', 'preview', 'urls']),
+      intersection(['width', 'height', 'id', 'preview', 'urls'], Object.keys(object)),
       ['width', 'height', 'id', 'preview', 'urls']
     )
 }

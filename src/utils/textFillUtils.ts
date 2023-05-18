@@ -1,10 +1,11 @@
 import textEffect, { IPutTextEffectResponse } from '@/apis/textEffect'
+import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { ITextFill, ITextFillConfig } from '@/interfaces/format'
+import { isITextFillCustom, ITextFill, ITextFillConfig } from '@/interfaces/format'
 import { AllLayerTypes, IText } from '@/interfaces/layer'
 import store from '@/store'
-import constantData from '@/utils/constantData'
+import constantData, { IEffect, IEffectOptionSelect } from '@/utils/constantData'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -24,12 +25,84 @@ interface ITextFillPresetRawImg {
   height: number
 }
 
+export interface ITextFIllPreset {
+  id: string
+  param: {
+    img: ITextFillPresetRawImg
+    opacity: number
+    size: number
+    xOffset200: number
+    yOffset200: number
+  }
+}
+
+export interface ITextFillCategory {
+  id: number
+  list: ITextFIllPreset[]
+  plan: 0 | 1
+  title_jp: string
+  title_tw: string
+  title_us: string
+}
+
 class TextFill {
-  fillCategory = constantData.textEffects()
+  normalFills = [] as ITextFillCategory[]
+  adminFills = [] as ITextFIllPreset[]
+
+  get fillCategories(): IEffect[] { // TextFill that from appJSON
+    const isAdmin = store.getters['user/isAdmin']
+    const fills = [
+      ...isAdmin ? [{
+        id: 0,
+        list: this.adminFills,
+        plan: 1 as const,
+        title_jp: '管理員測試用',
+        title_tw: '管理員測試用',
+        title_us: '管理員測試用',
+      }] : [],
+      ...this.normalFills,
+    ]
+
+    return fills.map(fill => {
+      const firstImg = fill.list[0]?.param.img
+      return {
+        key: `${fill.id}`,
+        label: fill[`title_${i18n.global.locale}`],
+        plan: fill.plan,
+        img: firstImg ? `https://template.vivipic.com/admin/${firstImg.teamId}/asset/image/${firstImg.id}/tiny`
+          : require('@/assets/img/svg/image-preview.svg') as string,
+        options: [{
+          type: 'select' as const,
+          key: 'img',
+          label: 'Image', // TODO: i18n
+          select: fill.list.map(eff => ({
+            key: eff.id,
+            img: `https://template.vivipic.com/admin/${eff.param.img.teamId}/asset/image/${eff.param.img.id}/tiny`,
+            label: '',
+            attrs: {
+              ...eff.param,
+              img: {
+                ...eff.param.img,
+                preview: { width: eff.param.img.width, height: eff.param.img.height },
+                urls: ['prev', 'full', 'larg', 'original', 'midd', 'smal', 'tiny'].reduce((acc, size) => ({
+                  ...acc, [size]: `https://template.vivipic.com/admin/${eff.param.img.teamId}/asset/image/${eff.param.img.id}/${size}`
+                }), {}),
+                key: eff.id,
+              },
+            }
+          }))
+        }, ...constantData.toOptions(['xOffset200', 'yOffset200', 'size', 'opacity'])]
+      }
+    })
+  }
+
+  updateFillCategory(normalFills: ITextFillCategory[], adminFills: ITextFIllPreset[]) {
+    this.normalFills = normalFills
+    this.adminFills = adminFills
+  }
 
   getDefaultEffects(effectName: string) {
     const defaultOptions = {
-      customImg: null,
       xOffset200: 0,
       yOffset200: 0,
       size: 100,
@@ -37,47 +110,12 @@ class TextFill {
       focus: false,
     } as const
 
-    if (effectName === 'none') return { customImg: null }
-    else if (effectName === 'custom-fill-img') return defaultOptions
-    else return { img: '', ...defaultOptions }
+    if (effectName === 'custom-fill-img') return defaultOptions
+    else return { customImg: null }
   }
 
-  getImg(effect: { img?: string, customImg?: IAssetPhoto | IPhotoItem | null }): IAssetPhoto | IPhotoItem | null {
-    if (effect.img) {
-      const myfileImgs = [{
-        width: 3240,
-        height: 1080,
-        id: '230424180325123sYxIzL8o',
-        assetIndex: 1481660,
-        preview: { width: 3240, height: 128 },
-        urls: {
-          prev: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/prev',
-          full: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/full',
-          larg: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/larg',
-          original: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/original',
-          midd: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/midd',
-          smal: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/smal',
-          tiny: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/230424180325123sYxIzL8o/tiny'
-        }
-      }, {
-        width: 3240,
-        height: 1080,
-        id: '2304241803251250gC6SnPO',
-        assetIndex: 1481661,
-        preview: { width: 3240, height: 128 },
-        urls: {
-          prev: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/prev',
-          full: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/full',
-          larg: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/larg',
-          original: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/original',
-          midd: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/midd',
-          smal: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/smal',
-          tiny: 'https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2304241803251250gC6SnPO/tiny'
-        }
-      }] as IAssetPhoto[]
-      return find(myfileImgs, ['id', effect.img]) ?? null
-    }
-    return effect.customImg ?? null
+  getImg(effect: { img?: IAssetPhoto, customImg?: IAssetPhoto | IPhotoItem | null }): IAssetPhoto | IPhotoItem | null {
+    return effect.img ?? effect.customImg ?? null
   }
 
   imgToSrc(img: IAssetPhoto | IPhotoItem | null): string {
@@ -201,28 +239,7 @@ class TextFill {
     }
   }
 
-  // Read/write text effect setting from local storage
-  syncShareAttrs(textFill: ITextFill, effectName: string | null) {
-    Object.assign(textFill, { name: textFill.name || effectName })
-    if (textFill.name === 'none') return
-
-    // const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textFillShare') ?? {}) as Record<string, string>
-    // const newShareAttrs = { opacity: textFill.opacity }
-    // const newEffect = { opacity: shareAttrs.opacity }
-
-    // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
-    if (!effectName) {
-      // Object.assign(shareAttrs, newShareAttrs)
-      // localStorageUtils.set('textEffectSetting', 'textFillShare', shareAttrs)
-    } else {
-      let effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
-      // Object.assign(effect, newEffect)
-      effect = omit(effect, ['customImg'])
-      localStorageUtils.set('textEffectSetting', effectName, effect)
-    }
-  }
-
-  setTextFill(effect: string, attrs?: Record<string, unknown>) {
+  setTextFill(effect: string, attrs?: Record<string, unknown>, reset = false) {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
@@ -238,13 +255,21 @@ class TextFill {
       const newTextFill = {} as ITextFill
 
       if (oldTextFill && oldTextFill.name === effect) { // Adjust effect option.
-        Object.assign(newTextFill, oldTextFill, attrs)
-        localStorageUtils.set('textEffectSetting', effect, newTextFill)
-        // this.syncShareAttrs(textFill, null)
+        const localAttrs = !reset && attrs && Object.keys(attrs).includes('img')
+          ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as {img: {key:string}}).img.key}`) : null
+        Object.assign(newTextFill, oldTextFill, attrs, localAttrs)
+
+        // Only TextFill from appJSON need to store to localstorage
+        if (isITextFillCustom(newTextFill) && newTextFill.name !== '0' && newTextFill.img) {
+          localStorageUtils.set('textEffectSetting', `fill.${newTextFill.img.key}`, omit(newTextFill, ['customImg', 'name']))
+        }
       } else { // Switch to other effect.
-        this.syncShareAttrs(newTextFill, effect)
-        const localAttrs = localStorageUtils.get('textEffectSetting', effect)
-        Object.assign(newTextFill, defaultAttrs, localAttrs, attrs, { name: effect, customImg: oldTextFill.customImg })
+        const targetEffect = find(this.fillCategories, ['key', effect])
+        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as {img: {key:string}} | undefined
+        const localAttrs = effectDefaultPreset?.img?.key ? localStorageUtils.get('textEffectSetting', `fill.${effectDefaultPreset.img.key}`) : null
+        Object.assign(newTextFill, defaultAttrs, effectDefaultPreset, localAttrs,
+          { name: effect, customImg: oldTextFill.customImg }
+        )
       }
 
       store.commit('UPDATE_specLayerData', {
@@ -263,8 +288,17 @@ class TextFill {
   }
 
   async resetCurrTextEffect() {
-    const effectName = textEffectUtils.getCurrentLayer().styles.textFill.name
-    this.setTextFill(effectName, omit(this.getDefaultEffects(effectName), 'img'))
+    const textFill = textEffectUtils.getCurrentLayer().styles.textFill
+    const effectName = textFill.name
+    if (effectName === 'none') return
+    else if (effectName === 'custom-fill-img') {
+      this.setTextFill(effectName, this.getDefaultEffects(effectName), true)
+      return
+    }
+    const targetEffect = find(this.fillCategories, ['key', effectName])
+    const targetFillImg = find((targetEffect?.options[0] as IEffectOptionSelect)?.select, ['key', textFill.img.key])
+    const effectDefaultPreset = targetFillImg?.attrs
+    this.setTextFill(effectName, effectDefaultPreset, true)
   }
 
   async uploadTextFill() {

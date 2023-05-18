@@ -1,5 +1,5 @@
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextBox, isITextFillConfig, isITextGooey, isITextLetterBg, isITextUnderline, ITextBg, ITextGooey, ITextLetterBg } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, isTextFill, ITextBg, ITextGooey, ITextLetterBg } from '@/interfaces/format'
 import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
@@ -801,7 +801,7 @@ class TextBg {
   isSplitedSpan(styles: ITextStyle) {
     const { textBg, textFill } = styles
     return (isITextLetterBg(textBg) && textBg.fixedWidth) ||
-      (isITextFillConfig(textFill))
+      (isTextFill(textFill))
   }
 
   isFixedWidth(styles: ITextStyle) {

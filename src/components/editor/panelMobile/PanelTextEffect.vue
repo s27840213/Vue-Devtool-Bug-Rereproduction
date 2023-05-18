@@ -36,7 +36,7 @@ div(class="panel-text-effect")
         div(v-for="sel in option.select"
             :key="sel.key"
             :class="{'selected': currentStyle[option.key] === sel.key }"
-            @click="handleSelectInput(option.key, sel.key)")
+            @click="handleSelectInput(sel.attrs)")
           svg-icon(:iconName="`${option.key}-${sel.key}`"
             iconWidth="24px")
           span {{sel.label}}
@@ -44,7 +44,7 @@ div(class="panel-text-effect")
       div(v-if="option.type === 'select' && option.key !== 'endpoint'"
           class="panel-text-effect__select")
         div(v-for="sel in option.select" :key="sel.key"
-            @click="handleSelectInput(option.key, sel.key)")
+            @click="handleSelectInput(sel.attrs)")
           svg-icon(:iconName="`${option.key}-${sel.key}`" iconWidth="100%"
             :class="{'selected': currentStyle[option.key] === sel.key }")
       //- Option type range

@@ -32,7 +32,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
 import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextFillConfig } from '@/interfaces/format'
+import { isTextFill } from '@/interfaces/format'
 import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
@@ -185,9 +185,9 @@ export default defineComponent({
     },
     getOpacity() {
       const { active, contentEditable } = this.config
-      const isTextFill = isITextFillConfig(this.config.styles.textFill)
+      const checkTextFill = isTextFill(this.config.styles.textFill)
       if (active && !this.isLocked && !this.inPreview) {
-        if (this.isCurveText || this.isFlipped || this.isFlipping || isTextFill) {
+        if (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) {
           return contentEditable ? 0.2 : 1
         } else {
           return 0
