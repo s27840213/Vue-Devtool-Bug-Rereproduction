@@ -144,7 +144,7 @@ div(ref="body"
             div(class="template-center__multi__themes__title")
               span {{ theme.title }}
             div(class="template-center__multi__themes__description")
-              span {{ `${theme.width}x${theme.height}` }}
+              span {{ `${theme.width}x${theme.height} ${theme.unit}` }}
         div(class="template-center__multi__button"
             :class="selectedTheme ? '' : 'disabled'"
             @click="handleThemeSubmit")
