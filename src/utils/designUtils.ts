@@ -853,6 +853,7 @@ class DesignUtils {
         bleeds[key] = Math.min(bleeds[key], maxBleed)
       })
       pageUtils.setBleeds(0, bleeds)
+      pageUtils.setIsEnableBleed(true, 0)
     }
     pageUtils.clearPagesInfo()
     editorUtils.handleContentScaleRatio(0)
