@@ -1,4 +1,5 @@
 import { RawImage } from '@/interfaces/gallery'
+import { IBleed } from '@/interfaces/page'
 
 /* eslint-disable camelcase */
 export interface IPhotoTag {
@@ -154,7 +155,8 @@ export interface IListServiceContentDataItem {
   unit?: string
   valid?: number
   plan?: number
-  icon?: string
+  icon?: string,
+  bleed?: IBleed
 }
 
 export interface ICategoryItem {

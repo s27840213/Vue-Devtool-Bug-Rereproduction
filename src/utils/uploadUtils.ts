@@ -708,6 +708,7 @@ class UploadUtils {
             delete query.unit
             delete query.path
             delete query.folderName
+            delete query.bleeds
             router.replace({ query })
           }
           notify({ group: 'copy', text: `${i18n.global.t('NN0357')}` })
