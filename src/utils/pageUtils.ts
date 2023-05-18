@@ -43,13 +43,9 @@ class PageUtils {
   get getPageSize(): (pageIndex: number) => { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
-  get currFocusPageSize(): {
-    width: number,
-    height: number,
-    physicalWidth: number,
-    physicalHeight: number,
-    unit: string
-    } { return store.getters.getPageSize(this.currFocusPageIndex) }
+  get currFocusPageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
+    return store.getters.getPageSize(this.currFocusPageIndex)
+  }
 
   get currFocusPageSizeWithBleeds() { return this.getPageSizeWithBleeds(this.currFocusPage) }
   get defaultBleed() { return i18n.global.locale === 'us' ? 3 : 2 } // mm
@@ -313,8 +309,8 @@ class PageUtils {
     })
   }
 
-  getPageIndexById(id: string): number {
-    return this.getPages.findIndex((page: IPage) => {
+  getPageIndexById(id: string, pages?: IPage[]): number {
+    return (pages ?? this.getPages).findIndex((page: IPage) => {
       return page.id === id
     })
   }

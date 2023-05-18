@@ -7,7 +7,14 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   abstract CALLBACK_MAPS: { [key: string]: string[] }
 
   callbackMap = {} as { [key: string]: (res: { data: WEBVIEW_API_RESULT, isTimeouted: boolean }) => void }
+  eventMap = {} as { [key: string]: (data: WEBVIEW_API_RESULT) => void }
   errorMessageMap = {} as { [key: string]: string }
+  apiQueueMap = {} as {
+    [key: string]: {
+      eventId: string,
+      args: Parameters<typeof WebViewUtils.prototype.callIOSAsAPICore>
+    }[]
+  }
 
   abstract getUserInfoFromStore(): T
 
@@ -82,7 +89,36 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     }
   }
 
-  async callIOSAsAPI(type: string, message: any, event: string, {
+  async callIOSAsAPI(...args: Parameters<typeof WebViewUtils.prototype.callIOSAsAPICore>):
+    ReturnType<typeof WebViewUtils.prototype.callIOSAsAPICore> {
+    const event = args[2]
+    const eventId = generalUtils.generateRandomString(12)
+    if (this.apiQueueMap[event] === undefined) { this.apiQueueMap[event] = [] }
+    this.apiQueueMap[event].push({
+      eventId,
+      args
+    })
+    const result = await new Promise<WEBVIEW_API_RESULT>(resolve => {
+      if (this.apiQueueMap[event].length === 1) {
+        this.processApiQueue(event)
+      }
+      this.eventMap[eventId] = resolve
+    })
+    delete this.eventMap[eventId]
+    return result
+  }
+
+  async processApiQueue(event: string) {
+    const apiArgs = this.apiQueueMap[event][0]
+    if (apiArgs) {
+      const result = await this.callIOSAsAPICore(...apiArgs.args)
+      this.eventMap[apiArgs.eventId](result)
+      this.apiQueueMap[event].shift()
+      this.processApiQueue(event)
+    }
+  }
+
+  async callIOSAsAPICore(type: string, message: any, event: string, {
     timeout = 5000, retry = false, retryTimes = 0
   } = {}): Promise<WEBVIEW_API_RESULT> {
     let result: WEBVIEW_API_RESULT

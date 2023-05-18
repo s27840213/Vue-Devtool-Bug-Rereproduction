@@ -133,7 +133,8 @@ export default defineComponent({
       }
     },
     transforms(): string[] {
-      return TextShapeUtils.convertTextShape(this.textWidth, this.bend())
+      const mainFontSize = textEffectUtils.getLayerFontSize(this.config.paragraphs)
+      return TextShapeUtils.convertTextShape(this.textWidth, this.bend(), mainFontSize)
     },
     styles(styles: any, idx: number) {
       const { textHeight, minHeight } = this

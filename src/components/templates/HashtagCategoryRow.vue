@@ -33,10 +33,6 @@ export default defineComponent({
       type: String,
       default: ''
     },
-    singleChoice: {
-      type: Boolean,
-      default: false
-    },
     shinkWidth: {
       type: Number,
       default: 5
@@ -69,15 +65,15 @@ export default defineComponent({
     },
     handleSelect(tag: any) {
       const key: string = this.type === 'theme' ? tag.id.toString() : tag.name
-      const index = this.selected.indexOf(key)
-      if (index !== -1) {
-        this.selected.splice(index, 1)
-      } else {
-        if (this.singleChoice) {
-          this.selected = []
-        }
-        this.selected.push(key)
-      }
+
+      // multiple selections
+      // const index = this.selected.indexOf(key)
+      // if (index !== -1) {
+      //   this.selected.splice(index, 1)
+      // } else {
+      //   this.selected.push(key)
+      // }
+      this.selected = [key] // single selection
       this.emitSelect()
     },
     emitSelect() {
