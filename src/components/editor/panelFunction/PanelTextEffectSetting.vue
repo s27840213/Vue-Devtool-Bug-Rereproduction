@@ -130,7 +130,7 @@ export default defineComponent({
     currCategoryName() {
       return this.currTab
     },
-    currentStyle(): Record<string, string> {
+    currentStyle(): {name: string} & Record<string, unknown> {
       const { styles } = textEffectUtils.getCurrentLayer()
       if (!styles) return { name: 'none' }
       return {
@@ -138,7 +138,7 @@ export default defineComponent({
         bg: styles.textBg,
         shape: styles.textShape,
         fill: styles.textFill,
-      }[this.currCategoryName] as Record<string, string> ?? {} // Type incorrect
+      }[this.currCategoryName] as {name: string} & Record<string, unknown> ?? {} // Type incorrect
     },
     settingTextEffect(): boolean {
       return colorUtils.currEvent === 'setTextEffectColor' &&
@@ -189,7 +189,7 @@ export default defineComponent({
       }
     },
     handleColorModal(option: IEffectOption) {
-      const currColor = this.colorParser(this.currentStyle[option.key])
+      const currColor = this.colorParser(this.currentStyle[option.key] as string)
 
       this.colorTarget = option.key
       editorUtils.toggleColorSlips(true)
@@ -432,14 +432,16 @@ export default defineComponent({
           position: absolute;
           width: 100%;
           height: 100%;
-          top: -2px;
-          left: -2px;
-          border: 2px solid transparent;
+          top: -1px;
+          left: -1px;
+          border: 1px solid setColor(gray-5);
           border-radius: 4px;
           cursor: pointer;
           transition: all 0.3s;
           &.selected {
-            border-color: setColor(blue-1);
+            top: -2px;
+            left: -2px;
+            border: 2px solid setColor(blue-1);
           }
         }
       }

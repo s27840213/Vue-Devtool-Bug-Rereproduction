@@ -16,7 +16,7 @@ div(class="panel-text-effect")
               class="panel-text-effect__effects--icon" iconColor="gray-5")
       img(v-else :src="effectIcon(currCategory, effect).name"
           class="panel-text-effect__effects--icon"
-          :width="effectIcon(currCategory, effect).size")
+          :height="effectIcon(currCategory, effect).size")
       pro-item(v-if="effect.plan" theme="roundedRect")
       div(v-if="currEffect?.key === effect.key && effect.key !== 'none'"
           class="panel-text-effect__effects--more")
@@ -37,16 +37,15 @@ div(class="panel-text-effect")
             :key="sel.key"
             :class="{'selected': currentStyle[option.key] === sel.key }"
             @click="handleSelectInput(sel.attrs)")
-          svg-icon(:iconName="`${option.key}-${sel.key}`"
-            iconWidth="24px")
+          img(:src="sel.img")
           span {{sel.label}}
       //- Option type select
       div(v-if="option.type === 'select' && option.key !== 'endpoint'"
           class="panel-text-effect__select")
         div(v-for="sel in option.select" :key="sel.key"
             @click="handleSelectInput(sel.attrs)")
-          svg-icon(:iconName="`${option.key}-${sel.key}`" iconWidth="100%"
-            :class="{'selected': currentStyle[option.key] === sel.key }")
+          img(:src="sel.img"
+              :class="{'selected': ((currentStyle[option.key] as Record<'key', string>).key ?? currentStyle[option.key]) === sel.key }")
       //- Option type range
       mobile-slider(v-if="option.type === 'range'"
         :borderTouchArea="true"
@@ -64,7 +63,7 @@ div(class="panel-text-effect")
       div(v-if="option.type === 'color'"
         class="panel-text-effect__color")
         div {{option.label}}
-        color-btn(:color="colorParser(currentStyle[option.key])"
+        color-btn(:color="colorParser(currentStyle[option.key] as string)"
                 size="30px" @click="openColorPanel(option.key)")
       //- Option type img
       div(v-if="option.type === 'img'"
@@ -240,6 +239,7 @@ export default defineComponent({
       margin: 0px auto;
       border-radius: 5px;
       border: 2px solid transparent;
+      overflow: hidden;
       .panel-text-effect__effects--icon {
         background-color: setColor(gray-5);
         border-radius: 5px;
@@ -305,7 +305,7 @@ export default defineComponent({
       &.selected {
         border-color: setColor(blue-1);
       }
-      > svg {
+      > img {
         margin-right: 8px;
       }
     }
@@ -313,7 +313,7 @@ export default defineComponent({
 
   &__select {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: 10px;
     margin: 0 2px;
     > div {
@@ -321,15 +321,19 @@ export default defineComponent({
       width: 100%;
       height: 0;
       padding-top: 100%;
-      > svg {
+      > img {
         position: absolute;
+        width: 100%;
         height: 100%;
-        top: -2px;
-        left: -2px;
-        border: 2px solid transparent;
+        top: -1px;
+        left: -1px;
+        border: 1px solid setColor(gray-5);
+        border-radius: 4px;
         transition: all 0.3s;
         &.selected {
-          border-color: setColor(blue-1);
+          top: -2px;
+          left: -2px;
+          border: 2px solid setColor(blue-1);
         }
       }
     }
