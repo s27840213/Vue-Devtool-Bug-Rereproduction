@@ -25,7 +25,6 @@ div(class="home")
         :type="'tag'"
         :title="''"
         :list="homeTags"
-        :singleChoice="true"
         :defaultSelection="[]"
         :shinkWidth="0"
         @select="handleSelectTags")
