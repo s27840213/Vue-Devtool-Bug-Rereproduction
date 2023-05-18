@@ -145,9 +145,9 @@ export default defineComponent({
         editorUtils.showColorSlips
     },
     adminTool() {
-      if (this.isAdmin && this.currCategoryName === 'fill' && this.currentStyle.name === 'custom-fill-img') {
+      if (this.isAdmin && this.currCategoryName === 'fill' && this.currentStyle.name !== 'none') {
         return {
-          label: '上傳文字填滿',
+          label: this.currentStyle.name === 'custom-fill-img' ? '上傳文字填滿' : '更新文字填滿',
           action: () => { textFillUtils.uploadTextFill() },
         }
       }
@@ -345,13 +345,13 @@ export default defineComponent({
   }
   &__effects1d {
     display: grid;
-    grid-template-columns: repeat(3, 56px);
+    grid-template-columns: repeat(3, 60px);
     gap: 20px;
     margin: 10px auto;
-    width: 208px;
+    width: 220px;
   }
   &__effect {
-    @include size(56px);
+    @include size(60px);
     box-sizing: border-box;
     position: relative;
     display: flex;
@@ -360,6 +360,7 @@ export default defineComponent({
     border: 2px solid transparent;
     border-radius: 4px;
     background-color: white;
+    background-clip: content-box;
     overflow: hidden;
     .pro {
       left: 1px;

@@ -315,33 +315,29 @@ class TextFill {
     }
 
     let res: AxiosResponse<IPutTextEffectResponse>
-    const params = pick(fill, ['xOffset200', 'yOffset200', 'size', 'opacity'])
-
+    const params = pick(fill, ['xOffset200', 'yOffset200', 'size', 'opacity']) as ITextFIllPreset['param']
     if (fill.name === 'custom-fill-img') {
-      if (!isIAssetPhoto(fill.customImg)) {
+      if (!isIAssetPhoto(fill.customImg) || !fill.customImg.assetIndex) {
         notify({ group: 'error', text: '當前文字填滿沒有圖片，或是圖片不是來自管理員上傳。' })
         return
       }
-      Object.assign(params, {
-        img: {
-          assetIndex: fill.customImg.assetIndex,
-          teamId: store.getters['user/getUserId'],
-          id: fill.customImg.id,
-          width: fill.customImg.width,
-          height: fill.customImg.height,
-        } as ITextFillPresetRawImg
-      })
+      params.img = {
+        assetIndex: fill.customImg.assetIndex,
+        teamId: store.getters['user/getUserId'],
+        id: fill.customImg.id,
+        width: fill.customImg.width,
+        height: fill.customImg.height,
+      }
       res = await textEffect.addTextFill(generalUtils.generateRandomString(20), params)
     } else {
-      // const currFillCategory = find(this.fillCategory, ['name', fill.name])
-      // if (!currFillCategory) {
-      //   notify({ group: 'error', text: 'error' })
-      //   return
-      // }
-      // const targetEffect = ''
-      // Object.assign(params, { img:  })
-      // res = await textEffect.updateTextFill(fillId, params)
-      res = { data: { flag: 1, msg: '還沒實作' } } as any
+      const targetEffect = find(this.fillCategories, ['key', fill.name])
+      const targetFillImg = find((targetEffect?.options[0] as IEffectOptionSelect)?.select, ['key', fill.img.key])
+      if (!targetFillImg) {
+        notify({ group: 'error', text: '找不到文字填滿id' })
+        return
+      }
+      params.img = pick(fill.img, ['assetIndex', 'teamId', 'id', 'width', 'height']) as ITextFillPresetRawImg
+      res = await textEffect.updateTextFill(targetFillImg.key, params)
     }
 
     if (res.data.flag) notify({ group: 'error', text: res.data.msg })

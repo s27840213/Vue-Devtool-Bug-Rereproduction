@@ -90,7 +90,10 @@ export interface ITextFillConfig {
 export interface ITextFillCustom {
   name: '0' | '1' | '2' // ....
   customImg: IAssetPhoto | IPhotoItem | null
-  img: IAssetPhoto & {key: string}
+  img: IAssetPhoto & {
+    key: string
+    teamId: string
+  }
   xOffset200: number
   yOffset200: number
   size: number
