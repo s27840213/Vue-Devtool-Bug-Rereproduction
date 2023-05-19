@@ -13,16 +13,16 @@ div(class="category-template-item")
 
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
+import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import { PRECISION } from '@/utils/unitUtils'
-import { round } from 'lodash'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 /**
  * @Todo - fix the any type problems -> TingAn
@@ -52,8 +52,12 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState('templates', {
+      igLayout: 'igLayout'
+    }),
     ...mapGetters({
-      useMobileEditor: 'getUseMobileEditor'
+      useMobileEditor: 'getUseMobileEditor',
+      isInEditor: 'vivisticker/getIsInEditor'
     }),
     designGroupType(): number {
       return this.$store.state.groupType
@@ -128,34 +132,47 @@ export default defineComponent({
         return cb(resize)
       }
 
-      if (!isSameSize) {
-        let btnWidth = '120px'
-        if (this.$i18n.locale === 'tw') {
-          btnWidth = '120px'
-        } else if (this.$i18n.locale === 'us') {
-          btnWidth = '160px'
-        } else if (this.$i18n.locale === 'jp') {
-          btnWidth = '180px'
-        }
-        modalUtils.setModalInfo(
-          this.$t('NN0695') as string,
-          [`${this.$t('NN0209', { tsize: `${width}x${height} ${unit}`, psize: `${round(pageSize.physicalWidth, PRECISION)}x${round(pageSize.physicalHeight, PRECISION)} ${pageSize.unit}` })}`],
-          {
-            msg: `${this.$t('NN0021')}`,
-            class: 'btn-light-mid',
-            style: { border: '1px solid #4EABE6' },
-            action: () => {
-              cb(pageSize)
-            }
-          },
-          {
-            msg: `${this.$t('NN0208')}`,
-            action: cb
-          }
-        )
+      // for vivisticker
+      if (this.isInEditor) {
+        cb(pageSize)
       } else {
         cb()
+        vivistickerUtils.startEditing(
+          this.igLayout, {
+            plan: this.item.plan,
+            assetId: this.item.id
+          }, vivistickerUtils.getAssetInitiator(this.item as IAsset), vivistickerUtils.getAssetCallback(this.item as IAsset)
+        )
       }
+      // size check skiped in vivisticker
+      // if (!isSameSize) {
+      //   let btnWidth = '120px'
+      //   if (this.$i18n.locale === 'tw') {
+      //     btnWidth = '120px'
+      //   } else if (this.$i18n.locale === 'us') {
+      //     btnWidth = '160px'
+      //   } else if (this.$i18n.locale === 'jp') {
+      //     btnWidth = '180px'
+      //   }
+      //   modalUtils.setModalInfo(
+      //     this.$t('NN0695') as string,
+      //     [`${this.$t('NN0209', { tsize: `${width}x${height} ${unit}`, psize: `${round(pageSize.physicalWidth, PRECISION)}x${round(pageSize.physicalHeight, PRECISION)} ${pageSize.unit}` })}`],
+      //     {
+      //       msg: `${this.$t('NN0021')}`,
+      //       class: 'btn-light-mid',
+      //       style: { border: '1px solid #4EABE6' },
+      //       action: () => {
+      //         cb(pageSize)
+      //       }
+      //     },
+      //     {
+      //       msg: `${this.$t('NN0208')}`,
+      //       action: cb
+      //     }
+      //   )
+      // } else {
+      //   cb()
+      // }
     }
   }
 })
