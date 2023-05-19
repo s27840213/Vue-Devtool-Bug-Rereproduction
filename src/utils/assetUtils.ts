@@ -26,7 +26,7 @@ import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import textShapeUtils from './textShapeUtils'
-import TextUtils from './textUtils'
+import textUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
 import unitUtils, { PRECISION } from './unitUtils'
 import vivistickerUtils from './vivistickerUtils'
@@ -171,9 +171,9 @@ class AssetUtils {
     json = await this.updateBackground(generalUtils.deepCopy(json))
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
-    const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    pageUtils.updateSpecPage(targetPageIndex, newLayer)
-    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
+    const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+    pageUtils.updateSpecPage(targetPageIndex, newPage)
+    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
     if (store.getters['user/getUserId'] === 'backendRendering') {
       const { isBleed, isTrim } = store.getters['user/getBackendRenderParams']
@@ -215,10 +215,10 @@ class AssetUtils {
     for (let i = 0; i < pageNum; i++) {
       json = await this.updateBackground(generalUtils.deepCopy(json))
       layerUtils.setAutoResizeNeededForLayersInPage(json, true)
-      const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-      pageUtils.updateSpecPage(i, newLayer)
+      const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+      pageUtils.updateSpecPage(i, newPage)
       if (width && height) {
-        resizeUtils.resizePage(i, newLayer, { width, height })
+        resizeUtils.resizePage(i, newPage, { width, height })
       }
     }
 
@@ -484,7 +484,7 @@ class AssetUtils {
     let isCenter = false
 
     if (typeof y === 'undefined' || typeof x === 'undefined') {
-      const { x: newX, y: newY, center } = TextUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
+      const { x: newX, y: newY, center } = textUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
       Object.assign(
         config.styles,
         { x: newX, y: newY }
@@ -511,7 +511,7 @@ class AssetUtils {
       })
       newLayer = LayerFactary.newText(config)
       const { x, y, width, height } = newLayer.styles
-      const textHW = TextUtils.getTextHW(newLayer, -1)
+      const textHW = textUtils.getTextHW(newLayer, -1)
       Object.assign(newLayer.styles, {
         ...textHW,
         x: x + (width - textHW.width) / 2,
@@ -563,7 +563,7 @@ class AssetUtils {
         Object.assign(textLayer.paragraphs[0].spans[0].styles, spanStyles)
       }
 
-      TextUtils.resetTextField(textLayer, targetPageIndex, field)
+      textUtils.resetTextField(textLayer, targetPageIndex, field)
       layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, {
         editing: false,
         contentEditable: true,

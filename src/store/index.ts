@@ -604,7 +604,7 @@ const mutations: MutationTree<IEditorState> = {
     // currSelectedInfo.layers.splice(subIndex, 1)
     // currSelectedInfo.types = groupUtils.calcType(currSelectedInfo.layers)
   },
-  REPLACE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, layer: IShape | IGroup | IImage | IText }) {
+  REPLACE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, layer: IShape | IGroup | IImage | IText | ITmp }) {
     const { pageIndex, layerIndex, layer } = updateInfo
     state.pages[pageIndex].config.layers.splice(layerIndex, 1, layer)
   },

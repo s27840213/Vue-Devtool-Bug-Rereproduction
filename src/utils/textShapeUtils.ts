@@ -168,11 +168,11 @@ class Controller {
     }
   }
 
-  convertTextShape(textWidth: number[], bend: number): string[] {
+  convertTextShape(textWidth: number[], bend: number, fontSize: number): string[] {
     if (textWidth.length === 0) return []
     const angleOffset = bend >= 0 ? 90 : 270
     const ratioFix = bend >= 0 ? 1 : -1
-    const radius = this.getRadiusByBend(bend)
+    const radius = this.getRadiusByBend(bend) * fontSize / 60
     // 每一段文字寬度對應角度
     const textAngles = textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
     // 總角度
@@ -356,7 +356,8 @@ class Controller {
     bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
     const scale = config.styles.scale
     const { textWidth, minHeight } = this.getTextHWs(config)
-    const transforms = this.convertTextShape(textWidth, bend)
+    const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
+    const transforms = this.convertTextShape(textWidth, bend, mainFontSize)
     const { areaWidth, areaHeight } = this.calcArea(transforms, minHeight, scale, config)
     return { areaWidth, areaHeight, minHeight }
   }
@@ -365,7 +366,8 @@ class Controller {
     bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
     const scale = config.styles.scale
     const { textWidth, minHeight } = await this.getTextHWsAsync(config)
-    const transforms = this.convertTextShape(textWidth, bend)
+    const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
+    const transforms = this.convertTextShape(textWidth, bend, mainFontSize)
     const { areaWidth, areaHeight } = await this.calcAreaAsync(transforms, minHeight, scale, config)
     return { areaWidth, areaHeight, minHeight }
   }

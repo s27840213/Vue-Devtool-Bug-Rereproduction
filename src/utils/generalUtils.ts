@@ -410,8 +410,8 @@ class GeneralUtils {
       for (let i = 0; i < Math.max(vArr.length, lessArr.length); i++) {
         const less = lessArr[i] ?? '0'
         const v = vArr[i] ?? '0'
-        if (less > v) break
-        else if (less < v) return false
+        if (+less > +v) break
+        else if (+less < +v) return false
       }
     }
     if (greaterThan) {
@@ -419,8 +419,8 @@ class GeneralUtils {
       for (let i = 0; i < Math.max(vArr.length, greaterArr.length); i++) {
         const greater = greaterArr[i] ?? '0'
         const v = vArr[i] ?? '0'
-        if (greater < v) break
-        else if (greater > v) return false
+        if (+greater < +v) break
+        else if (+greater > +v) return false
       }
     }
     return true

@@ -619,6 +619,25 @@ function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
     case 'leaf':
       href = `leaf${index % 5}`
       break
+    case 'butter-flower':
+      href = `butter-flower${index % 5}`
+      break
+    case 'flower-frame':
+      href = `flower-frame${index % 5}`
+      color = ['#F4D0E0', '#BDDBD0', '#D9CCED', '#C7DAEF', '#F4CAC1'][index % 5]
+      break
+    case 'flower-frame-custom':
+      href = `flower-frame${index % 5}`
+      break
+    case 'vintage-flower':
+      color = ['#E8A98E', '#EE8854', '#F3B132', '#94A084', '#B17357'][index % 5]
+      break
+    case 'cat-paw':
+      href = `cat-paw${index % 5}`
+      break
+    case 'bread':
+      href = `bread${index % 5}`
+      break
     default: // text-book
   }
   return { href, color }
@@ -765,7 +784,40 @@ class TextBg {
         ...letterBGDefault,
         yOffset200: -7,
         size: 165,
-      }
+      },
+      'butter-flower': {
+        ...letterBGDefault,
+        size: 140,
+        color: '#F4E4BD'
+      },
+      'flower-frame': {
+        ...letterBGDefault,
+        size: 140,
+      },
+      'flower-frame-custom': {
+        ...letterBGDefault,
+        size: 140,
+        color: '#BDDBD0'
+      },
+      'vintage-flower': {
+        ...letterBGDefault,
+        yOffset200: -3,
+        size: 160,
+      },
+      'vintage-flower-custom': {
+        ...letterBGDefault,
+        yOffset200: -3,
+        size: 130,
+        color: '#E8A98E'
+      },
+      'cat-paw': {
+        ...letterBGDefault,
+        size: 135,
+      },
+      bread: {
+        ...letterBGDefault,
+        size: 155,
+      },
     }
   }
 
@@ -783,6 +835,13 @@ class TextBg {
       'heart-custom': { lineHeight: 1.96, fontSpacing: 505 },
       gummybear: { lineHeight: 1.96, fontSpacing: 800 },
       leaf: { lineHeight: 1.96, fontSpacing: 800 },
+      'butter-flower': { lineHeight: 1.96, fontSpacing: 900 },
+      'flower-frame': { lineHeight: 1.96, fontSpacing: 950 },
+      'flower-frame-custom': { lineHeight: 1.96, fontSpacing: 950 },
+      'vintage-flower': { lineHeight: 1.96, fontSpacing: 1300 },
+      'vintage-flower-custom': { lineHeight: 1.96, fontSpacing: 950 },
+      'cat-paw': { lineHeight: 1.96, fontSpacing: 950 },
+      bread: { lineHeight: 1.96, fontSpacing: 1200 },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
@@ -816,13 +875,14 @@ class TextBg {
     if (textBg.name === 'none') return null
 
     const opacity = textBg.opacity * 0.01
+    const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
     const myRect = new Rect()
     await myRect.init(config, { splitSpan: isITextLetterBg(textBg) })
     myRect.preprocess()
     const { vertical, width, height, transform, rects, rows } = myRect.get()
 
     if (isITextGooey(textBg)) {
-      const padding = textBg.distance
+      const padding = textBg.distance * fontSizeModifier
       const color = textEffectUtils.colorParser(textBg.color, config)
       const fill = this.rgba(color, opacity)
 
@@ -894,24 +954,27 @@ class TextBg {
     } else if (isITextBox(textBg)) {
       const pColor = textEffectUtils.colorParser(textBg.pColor, config)
       const bColor = textEffectUtils.colorParser(textBg.bColor, config)
-      let boxWidth = (width + textBg.bStroke)
-      let boxHeight = (height + textBg.bStroke)
-      let top = -textBg.bStroke
-      let left = -textBg.bStroke
+      const bStroke = textBg.bStroke * fontSizeModifier
+      const pStrokeY = textBg.pStrokeY * fontSizeModifier
+      const pStrokeX = textBg.pStrokeX * fontSizeModifier
+      let boxWidth = (width + bStroke)
+      let boxHeight = (height + bStroke)
+      let top = -bStroke
+      let left = -bStroke
       if (vertical) {
-        boxWidth += textBg.pStrokeY * 2
-        boxHeight += textBg.pStrokeX * 2
-        top -= textBg.pStrokeX
-        left -= textBg.pStrokeY
+        boxWidth += pStrokeY * 2
+        boxHeight += pStrokeX * 2
+        top -= pStrokeX
+        left -= pStrokeY
       } else {
-        boxWidth += textBg.pStrokeX * 2
-        boxHeight += textBg.pStrokeY * 2
-        top -= textBg.pStrokeY
-        left -= textBg.pStrokeX
+        boxWidth += pStrokeX * 2
+        boxHeight += pStrokeY * 2
+        top -= pStrokeY
+        left -= pStrokeX
       }
       const boxRadius = Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
 
-      const path = new Path(new Point(textBg.bStroke / 2, textBg.bStroke / 2 + boxRadius))
+      const path = new Path(new Point(bStroke / 2, bStroke / 2 + boxRadius))
       path.a(boxRadius, boxRadius, 1, boxRadius, -boxRadius)
       path.h(boxWidth - boxRadius * 2)
       path.a(boxRadius, boxRadius, 1, boxRadius, boxRadius)
@@ -922,8 +985,8 @@ class TextBg {
 
       return {
         attrs: {
-          width: boxWidth + textBg.bStroke,
-          height: boxHeight + textBg.bStroke,
+          width: boxWidth + bStroke,
+          height: boxHeight + bStroke,
           style: `left: ${left}px;
             top: ${top}px;`
         },
@@ -931,7 +994,7 @@ class TextBg {
           tag: 'path',
           attrs: {
             style: `fill:${pColor}; stroke:${bColor}; opacity:${opacity}`,
-            'stroke-width': textBg.bStroke,
+            'stroke-width': bStroke,
             d: path.result()
           }
         }]
@@ -969,13 +1032,10 @@ class TextBg {
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
           let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
           if (vertical) [x, y] = [y, x]
-          // TODO: move BG img back to icon folder
-          const colorChangeable = /(cloud\d|rainbow-circle|solid-heart|text-book)/.test(p.href)
           return {
-            tag: colorChangeable ? 'use' : 'image',
+            tag: 'use',
             attrs: {
-              href: colorChangeable ? `#${p.href}`
-                : require(`@/assets/img/svg/text-effect/${p.href}.svg`),
+              href: `#${p.href}`,
               width: p.height * scale,
               height: p.height * scale,
               // Scale will let width be (scale-1)*p.height times larger than before,
