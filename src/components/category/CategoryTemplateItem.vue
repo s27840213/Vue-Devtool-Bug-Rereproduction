@@ -134,14 +134,13 @@ export default defineComponent({
 
       // for vivisticker
       if (this.isInEditor) {
-        cb(pageSize)
+        cb(vivistickerUtils.getPageSize(this.igLayout))
       } else {
-        cb()
         vivistickerUtils.startEditing(
           this.igLayout, {
             plan: this.item.plan,
             assetId: this.item.id
-          }, vivistickerUtils.getAssetInitiator(this.item as IAsset), vivistickerUtils.getAssetCallback(this.item as IAsset)
+          }, vivistickerUtils.getAssetInitiator(this.item as IAsset, vivistickerUtils.getPageSize(this.igLayout)), vivistickerUtils.getAssetCallback(this.item as IAsset)
         )
       }
       // size check skiped in vivisticker
