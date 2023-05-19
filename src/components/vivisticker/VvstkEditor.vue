@@ -7,7 +7,8 @@ div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectSt
               :pageState="page"
               :cardWidth="cardWidth"
               :cardHeight="cardHeight"
-              :marginTop="marginTop")
+              :marginTop="marginTop"
+              :no-bg="!isMultiPage")
   div(v-if="isMultiPage" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}

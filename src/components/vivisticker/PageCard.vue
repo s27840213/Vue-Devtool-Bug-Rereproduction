@@ -3,7 +3,7 @@ div(:class="`page-card nu-page nu-page_${pageIndex}`"
   :style="styles('card')")
   div(:class="`page-card__pseudo-page`" :style="styles('page')")
     div(class="page-card__scale-container" :style="styles('scale')")
-      page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+      page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="noBg" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
       dim-background(v-if="isImgCtrl" :config="config" :contentScaleRatio="contentScaleRatio")
     div(class="page-control" :style="styles('control')")
       nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
@@ -48,6 +48,10 @@ export default defineComponent({
     pageState: {
       type: Object as PropType<IPageState>,
       required: true
+    },
+    noBg: {
+      type: Boolean,
+      default: false
     },
   },
   data() {
