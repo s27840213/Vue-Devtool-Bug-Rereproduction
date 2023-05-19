@@ -80,6 +80,7 @@ export default defineComponent({
       isInEditor: 'vivisticker/getIsInEditor',
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       controllerHidden: 'vivisticker/getControllerHidden',
       hasCopiedFormat: 'getHasCopiedFormat',
@@ -180,7 +181,7 @@ export default defineComponent({
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
-        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
+        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template' },
         // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
         { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
       ]
@@ -295,6 +296,12 @@ export default defineComponent({
         { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
       ]
     },
+    templateTabs(): Array<IFooterTab> {
+      return [
+        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template' },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' }
+      ]
+    },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
         this.groupTab,
@@ -361,6 +368,8 @@ export default defineComponent({
         return this.homeTabs
       } else if (this.editorTypeTextLike) {
         return [{ icon: 'plus-square', text: `${this.$t('STK0006')}`, panelType: 'text' }]
+      } else if (this.editorTypeTemplate) {
+        return this.templateTabs
       } else {
         return []
       }

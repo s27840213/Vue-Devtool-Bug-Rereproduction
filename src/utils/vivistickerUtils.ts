@@ -123,6 +123,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return store.getters['vivisticker/getEditorTypeTextLike']
   }
 
+  get editorTypeTemplate(): string {
+    return store.getters['vivisticker/getEditorTypeTemplate']
+  }
+
   get controllerHidden(): boolean {
     return store.getters['vivisticker/getControllerHidden']
   }
@@ -488,7 +492,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   deselect() {
-    if (this.editorTypeTextLike) {
+    if (this.editorTypeTextLike || this.editorTypeTemplate) {
       groupUtils.deselect()
       editorUtils.setInMultiSelectionMode(false)
       // store.commit('SET_currActivePageIndex', 0)
