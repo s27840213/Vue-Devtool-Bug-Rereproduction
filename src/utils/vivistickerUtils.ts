@@ -404,6 +404,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   endEditing() {
     groupUtils.deselect()
+    store.commit('SET_currActivePageIndex', 0)
     pageUtils.setPages()
     this.showController()
     this.setState('tempDesign', { design: 'none' })
@@ -490,7 +491,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (this.editorTypeTextLike) {
       groupUtils.deselect()
       editorUtils.setInMultiSelectionMode(false)
-      store.commit('SET_currActivePageIndex', 0)
+      // store.commit('SET_currActivePageIndex', 0)
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault(false)
       }
@@ -1340,6 +1341,20 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       },
       options
     )
+  }
+
+  scrollIntoPage(pageIndex: number, duration: number): void {
+    const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
+    const container = currentPage && currentPage.parentElement
+    if (currentPage && container) {
+      const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
+      container.style.transition = `transform ${duration}ms ease-in-out`
+      container.style.transform = `translateX(-${targetPos}px)`
+      window.setTimeout(() => {
+        container.style.transition = ''
+      }, duration)
+      store.commit('SET_middlemostPageIndex', pageIndex)
+    }
   }
 }
 
