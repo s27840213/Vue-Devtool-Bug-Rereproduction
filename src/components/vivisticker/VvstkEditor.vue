@@ -1,7 +1,13 @@
 <template lang="pug">
 div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectStart" @swiperight="handleSwipeRight" @swipeleft="handleSwipeLeft")
   transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" :style="styles('pages')" @before-leave="handleBeforePageLeave")
-    page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`" :class="{'no-transition': currActivePageIndex < 0}" :pageIndex="index" :pageState="page" :cardWidth="cardWidth" :cardHeight="cardHeight" :marginTop="marginTop")
+    page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
+              :class="{'no-transition': currActivePageIndex < 0}"
+              :pageIndex="index"
+              :pageState="page"
+              :cardWidth="cardWidth"
+              :cardHeight="cardHeight"
+              :marginTop="marginTop")
   div(v-if="isMultiPage" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
@@ -186,15 +192,15 @@ export default defineComponent({
       this.cardWidth = elEditor.clientWidth
       this.cardHeight = elEditor.clientHeight
 
-      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 0) })
+      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0) })
     },
     handleSwipeRight() {
       this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
-      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300) })
+      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
     },
     handleSwipeLeft() {
       this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
-      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300) })
+      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
     },
     handleBeforePageLeave(el: Element) {
       const elTarget = el as HTMLElement

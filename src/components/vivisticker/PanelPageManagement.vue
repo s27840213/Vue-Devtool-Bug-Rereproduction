@@ -20,6 +20,7 @@ import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -120,7 +121,7 @@ export default defineComponent({
         unit: this.currPage.unit
       }), pageUtils.currFocusPageIndex + 1)
       this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300) })
+      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
       stepsUtils.record()
     },
     duplicatePage() {
@@ -137,7 +138,7 @@ export default defineComponent({
       }
       this.$nextTick(() => {
         pageUtils.deletePage(pageIndex)
-        pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, undefined, 300)
+        vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300)
         stepsUtils.record()
       })
     },

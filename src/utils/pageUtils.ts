@@ -323,40 +323,14 @@ class PageUtils {
     FocusUtils.focusElement(`.nu-page-${this.currFocusPageIndex}`, true)
   }
 
-  scrollIntoPage(pageIndex: number, behavior?: 'auto' | 'smooth', duration?: number): void {
+  scrollIntoPage(pageIndex: number, behavior?: 'auto' | 'smooth'): void {
     const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
-    const container = currentPage.parentElement
     if (currentPage !== undefined) {
-      if (duration !== undefined && container) {
-        // smooth scroll
-        // const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
-        // const startPos = container.scrollLeft
-        // const diff = targetPos - startPos
-        // let startTime = null as number | null
-        // let requestId: number
-        // const aniScroll = function (timestamp: number) {
-        //   if (!startTime) startTime = timestamp
-        //   const runtime = timestamp - startTime
-        //   const relativeProgress = Math.max(Math.min(runtime / duration, 1), 0)
-        //   container.scrollLeft = startPos + diff * relativeProgress
-        //   if (runtime < duration) {
-        //     requestId = window.requestAnimationFrame(aniScroll)
-        //   } else window.cancelAnimationFrame(requestId)
-        // }
-        // requestId = window.requestAnimationFrame(aniScroll)
-        const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
-        container.style.transition = `transform ${duration}ms ease-in-out`
-        container.style.transform = `translateX(-${targetPos}px)`
-        window.setTimeout(() => {
-          container.style.transition = ''
-        }, duration)
-      } else {
-        currentPage.scrollIntoView({
-          behavior: behavior ?? 'smooth',
-          block: 'center',
-          inline: 'center'
-        })
-      }
+      currentPage.scrollIntoView({
+        behavior: behavior ?? 'smooth',
+        block: 'center',
+        inline: 'center'
+      })
       this.findCentralPageIndexInfo()
     }
   }
