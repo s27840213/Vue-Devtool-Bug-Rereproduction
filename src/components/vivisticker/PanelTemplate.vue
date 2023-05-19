@@ -5,9 +5,9 @@ div(class="panel-template rwd-container")
       :tabs="['Story', 'Post']"
       v-model="tabIndex")
   keep-alive
-    panel-template-content(v-if="isStory" igLayout="story" ref='story')
+    panel-template-content(v-if="isStory" initIgLayout="story" ref='story')
   keep-alive
-    panel-template-content(v-if="isPost" igLayout="post" ref='post')
+    panel-template-content(v-if="isPost" initIgLayout="post" ref='post')
 </template>
 
 <script lang="ts">

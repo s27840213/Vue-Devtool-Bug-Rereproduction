@@ -92,10 +92,11 @@ import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
+import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import Tabs from '@/components/Tabs.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
 import PanelPageManagement from '@/components/vivisticker/PanelPageManagement.vue'
-import PanelTemplate from '@/components/vivisticker/PanelTemplate.vue'
+import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 
@@ -174,7 +175,8 @@ export default defineComponent({
     PanelAddTemplate,
     Tabs,
     PanelRemoveBg,
-    PanelPageManagement
+    PanelPageManagement,
+    PanelTemplateContent
   },
   data() {
     return {
@@ -238,7 +240,7 @@ export default defineComponent({
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
     },
     trueWholeSize(): boolean {
-      return ['text'].includes(this.currActivePanel)
+      return ['text', 'template-content'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
@@ -273,7 +275,7 @@ export default defineComponent({
       }
     },
     insertTheme(): boolean {
-      return ['text', 'add-template', 'page-management'].includes(this.currActivePanel)
+      return ['text', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     showRightBtn(): boolean {
       return this.currActivePanel !== 'none'
@@ -288,7 +290,7 @@ export default defineComponent({
       return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
-      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
+      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts', 'template-content'].includes(this.currActivePanel)
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {

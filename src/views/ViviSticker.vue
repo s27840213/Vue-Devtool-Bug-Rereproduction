@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="vivisticker" :style="copyingStyles()")
   div(class="vivisticker__top" :style="topStyles()")
-    header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
+    header-tabs(v-show="showHeaderTabs" :style="headerStyles()")
     div(ref="vivisticker__content"
         class="vivisticker__content"
         :style="contentStyle"
@@ -240,6 +240,9 @@ export default defineComponent({
     },
     contentStyle(): Record<string, string> {
       return this.isInEditor ? { transform: `translateY(-${this.marginBottom}px)` } : {}
+    },
+    showHeaderTabs(): boolean {
+      return !['text', 'template-content'].includes(this.currActivePanel)
     }
   },
   watch: {

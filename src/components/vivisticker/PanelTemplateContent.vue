@@ -86,9 +86,9 @@ export default defineComponent({
     BtnAdd
   },
   props: {
-    igLayout: {
+    initIgLayout: {
       type: String,
-      required: true
+      default: 'story'
     }
   },
   data() {
@@ -142,8 +142,13 @@ export default defineComponent({
       editorThemes: 'getEditThemes',
       isTabInCategory: 'vivisticker/getIsInCategory',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently'
+      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
+      isInEditor: 'vivisticker/getIsInEditor',
+      editorType: 'vivisticker/getEditorType',
     }),
+    igLayout() {
+      return this.isInEditor ? this.editorType : this.initIgLayout
+    },
     categories() {
       return this.$store.state.templates[this.igLayout].categories
     },

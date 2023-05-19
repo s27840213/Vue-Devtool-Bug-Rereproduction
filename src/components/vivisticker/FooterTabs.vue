@@ -298,7 +298,7 @@ export default defineComponent({
     },
     templateTabs(): Array<IFooterTab> {
       return [
-        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template' },
+        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template-content' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' }
       ]
     },
