@@ -148,6 +148,7 @@ export default defineComponent({
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     border-radius: 10px;
     margin: 0 auto;
+    overflow: hidden;
   }
   &__scale-container {
     width: 0px;
