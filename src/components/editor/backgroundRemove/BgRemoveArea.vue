@@ -291,8 +291,8 @@ export default defineComponent({
     },
     initClearModeCanvas() {
       this.clearModeCanvas = document.createElement('canvas') as HTMLCanvasElement
-      this.clearModeCanvas.width = this.size.width + this.clearModeShift
-      this.clearModeCanvas.height = this.size.height + this.clearModeShift
+      this.clearModeCanvas.width = this.size.width + 2 * this.clearModeShift
+      this.clearModeCanvas.height = this.size.height + 2 * this.clearModeShift
       const ctx = this.clearModeCanvas.getContext('2d') as CanvasRenderingContext2D
       // set up drawing settings
       ctx.lineCap = 'round'
