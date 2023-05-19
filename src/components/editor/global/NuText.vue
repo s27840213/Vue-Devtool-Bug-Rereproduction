@@ -104,6 +104,7 @@ export default defineComponent({
   },
   mounted() {
     this.resizeAfterFontLoaded()
+    textBgUtils.on(this.config.id, this.drawTextBg)
   },
   computed: {
     isCurveText() {
@@ -142,9 +143,7 @@ export default defineComponent({
   watch: {
     'config.paragraphs'(newVal) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
-      this.drawTextBg()
       textUtils.untilFontLoaded(newVal).then(async () => {
-        this.drawTextBg()
         this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
       })
     },
@@ -156,7 +155,6 @@ export default defineComponent({
       this.drawTextBg()
       this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
     },
-    'config.styles.textBg'() { this.drawTextBg() },
     async 'config.styles.textFill'() {
       this.textFillBg = textFillUtils.drawTextFill(this.config)
       this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)

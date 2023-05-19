@@ -288,7 +288,7 @@ class TextFill {
       const oldSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: oldTextFill })
       const newSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: newTextFill })
       textBgUtils.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
-        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex, 'textFill')
     }
   }
 

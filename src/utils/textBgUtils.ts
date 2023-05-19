@@ -8,6 +8,7 @@ import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
+import { EventEmitter } from 'events'
 import _, { cloneDeep, isEqual } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
@@ -625,9 +626,18 @@ function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
 
 class TextBg {
   private currColorKey = ''
-  effects = {} as Record<string, Record<string, string | number | boolean>>
-  constructor() {
-    this.effects = this.getDefaultEffects()
+  effects = this.getDefaultEffects() as Record<string, Record<string, string | number | boolean>>
+  event = new EventEmitter()
+  eventHash = {} as { [index: string]: (color: string) => void }
+
+  on(type: string, callback: (color: string) => void) {
+    // replace origin event
+    if (this.eventHash[type]) {
+      this.event.off(type, this.eventHash[type])
+      delete this.eventHash[type]
+    }
+    this.event.on(type, callback)
+    this.eventHash[type] = callback
   }
 
   rgba = (color: string, opacity: number) =>
@@ -1120,18 +1130,19 @@ class TextBg {
       const oldSplitedSpan = this.isSplitedSpan({ ...layer.styles, textBg: oldTextBg })
       const newSplitedSpan = this.isSplitedSpan({ ...layer.styles, textBg: newTextBg })
       await this.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
-        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex, 'textBG')
 
       // If user leave LetterBg, reset lineHeight and fontSpacing
       if (isITextLetterBg(oldTextBg) && !isITextLetterBg(newTextBg)) {
         await textUtils.setParagraphProp('lineHeight', 1.4)
         await textUtils.setParagraphProp('fontSpacing', 0)
       }
+      this.event.emit(layer.id) // Update textBg local var in NuText.vue
     }
   }
 
   async splitOrMergeSpan(oldSplitedSpan: boolean, newSplitedSpan: boolean, layer: IText,
-    pageIndex: number, layerIndex: number, subLayerIndex: number) {
+    pageIndex: number, layerIndex: number, subLayerIndex: number, useage: 'textBG' | 'textFill') {
     if (oldSplitedSpan === newSplitedSpan) return
 
     const paragraphs = cloneDeep(layer.paragraphs)
@@ -1159,8 +1170,10 @@ class TextBg {
     layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs }, subLayerIndex)
     tiptapUtils.updateHtml() // Vuex config => tiptap
     // Update widthLimit for widthLimit !== -1 layers
-    const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
-    layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, subLayerIndex)
+    if (useage === 'textFill' && layer.widthLimit !== -1) {
+      const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, subLayerIndex)
+    }
     // Update width for tiptap layer
     textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
 
