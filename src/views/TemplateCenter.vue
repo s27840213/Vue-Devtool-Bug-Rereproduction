@@ -166,6 +166,7 @@ import TemplateWaterfall from '@/components/templates/TemplateWaterfall.vue'
 import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
 import hashtag from '@/store/module/hashtag'
+import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
@@ -455,10 +456,13 @@ export default defineComponent({
         const matchedTheme = this.themes.find(theme => theme.id.toString() === template.theme_id)
         const format = matchedTheme ? {
           width: matchedTheme.width.toString(),
-          height: matchedTheme.height.toString()
+          height: matchedTheme.height.toString(),
+          unit: matchedTheme.unit,
+          bleed: matchedTheme.bleed
         } : {
           width: template.width.toString(),
-          height: template.height.toString()
+          height: template.height.toString(),
+          unit: template.unit,
         }
         const route = this.$router.resolve({
           name: 'Editor',
@@ -467,7 +471,9 @@ export default defineComponent({
             design_id: template.id,
             themeId: template.content_ids[0].themes.join(','),
             width: format.width,
-            height: format.height
+            height: format.height,
+            unit: format.unit,
+            ...(format.unit !== 'px' && format.bleed !== undefined ? { bleeds: designUtils.convertBleedsToQuery(format.bleed) } : {})
           }
         })
         this.openTemplate(route.href)
@@ -553,14 +559,17 @@ export default defineComponent({
       }, [true, undefined, undefined])[0]
       if (content.themes.length > 1 && !allSameSize) {
         if (this.isMobileSize) {
+          const usedTheme = this.matchedThemes[0]
           const route = this.$router.resolve({
             name: 'Editor',
             query: {
               type: 'new-design-template',
               design_id: content.id,
-              width: this.matchedThemes[0].width.toString(),
-              height: this.matchedThemes[0].height.toString(),
-              group_id: this.groupId
+              width: usedTheme.width.toString(),
+              height: usedTheme.height.toString(),
+              group_id: this.groupId,
+              unit: usedTheme.unit,
+              ...(usedTheme.unit !== 'px' ? { bleeds: designUtils.convertBleedsToQuery(usedTheme.bleed) } : {})
             }
           })
           this.openTemplate(route.href)
@@ -576,10 +585,13 @@ export default defineComponent({
         const matchedTheme = this.themes.find(theme => theme.id.toString() === content.themes[0])
         const format = matchedTheme ? {
           width: matchedTheme.width.toString(),
-          height: matchedTheme.height.toString()
+          height: matchedTheme.height.toString(),
+          unit: matchedTheme.unit,
+          bleed: matchedTheme.bleed
         } : {
           width: content.width.toString(),
-          height: content.height.toString()
+          height: content.height.toString(),
+          unit: content.unit
         }
         const route = this.$router.resolve({
           name: 'Editor',
@@ -588,7 +600,9 @@ export default defineComponent({
             design_id: content.id,
             width: format.width,
             height: format.height,
-            group_id: this.groupId
+            group_id: this.groupId,
+            unit: format.unit,
+            ...(format.unit !== 'px' && format.bleed !== undefined ? { bleeds: designUtils.convertBleedsToQuery(format.bleed) } : {})
           }
         })
         this.openTemplate(route.href)
@@ -609,7 +623,9 @@ export default defineComponent({
           design_id: this.contentBuffer.id,
           width: this.selectedTheme.width.toString(),
           height: this.selectedTheme.height.toString(),
-          group_id: this.groupId
+          group_id: this.groupId,
+          unit: this.selectedTheme.unit,
+          ...(this.selectedTheme.unit !== 'px' ? { bleeds: designUtils.convertBleedsToQuery(this.selectedTheme.bleed) } : {})
         }
       })
       this.openTemplate(route.href)

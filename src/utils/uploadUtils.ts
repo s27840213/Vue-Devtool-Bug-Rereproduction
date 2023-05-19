@@ -1262,7 +1262,7 @@ class UploadUtils {
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
-                designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json, designId, params.groupId)
+                designUtils.newDesignWithTemplate(Number(params.width), Number(params.height), json, designId, params.unit, params.bleeds)
                 logUtils.setLog('Successfully get new design template')
                 break
               }

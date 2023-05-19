@@ -449,6 +449,7 @@ export interface IAssetTemplate {
     width: number
     height: number
     themes: string[]
+    unit: string
   }[]
   match_cover: {
     id: string
@@ -456,6 +457,7 @@ export interface IAssetTemplate {
     width: number
     height: number
     theme_id: string
+    unit: string
   }
   group_type: number
   preview: RawImage
