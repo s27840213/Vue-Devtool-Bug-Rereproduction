@@ -22,7 +22,7 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconWidth="`${tab.width}px`"
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
-    div(v-if="isInEditor" class="header-bar__feature-icon body-XS text-black-1 btn-copy" @click.prevent.stop="handleCopy")
+    div(v-if="isInEditor && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-copy" @click.prevent.stop="handleCopy")
         svg-icon(iconName="copy"
                   iconWidth="18px"
                   iconHeight="18px"
@@ -80,6 +80,7 @@ export default defineComponent({
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       editorBg: 'vivisticker/getEditorBg',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       isInSelectionMode: 'vivisticker/getIsInSelectionMode',
@@ -165,6 +166,13 @@ export default defineComponent({
     },
     rightTabs(): TabConfig[] {
       if (this.isInEditor) {
+        if (this.editorTypeTemplate) {
+          return [
+            { icon: 'copy', width: 24, action: this.handleCopy },
+            { icon: 'trash', width: 24, action: shortcutUtils.del },
+            { icon: 'share', width: 24, action: this.handleShare },
+          ]
+        }
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
           ...(this.editorTypeTextLike ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
@@ -357,7 +365,14 @@ export default defineComponent({
     },
     handleSelectDesign() {
       this.setIsInSelectionMode(!this.isInSelectionMode)
-    }
+    },
+    handleShare() {
+      if (this.editorType === 'story') {
+        console.log('share IG story')
+      } else if (this.editorType === 'post') {
+        console.log('share IG post')
+      }
+    },
   }
 })
 </script>

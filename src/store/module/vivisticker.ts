@@ -128,7 +128,10 @@ const getters: GetterTree<IViviStickerState, unknown> = {
     return state.editorType !== 'none'
   },
   getEditorTypeTextLike(state: IViviStickerState): boolean {
-    return ['objectGroup', 'text', 'story', 'post'].includes(state.editorType)
+    return ['objectGroup', 'text'].includes(state.editorType)
+  },
+  getEditorTypeTemplate(state: IViviStickerState): boolean {
+    return ['story', 'post'].includes(state.editorType)
   },
   getIsInCategory(state: IViviStickerState): (tab: string) => boolean {
     return (tab: string): boolean => state.isInCategoryDict[tab] ?? false

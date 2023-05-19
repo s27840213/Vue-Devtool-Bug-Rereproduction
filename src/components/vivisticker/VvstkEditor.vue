@@ -8,8 +8,8 @@ div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectSt
               :cardWidth="cardWidth"
               :cardHeight="cardHeight"
               :marginTop="marginTop"
-              :no-bg="!isMultiPage")
-  div(v-if="isMultiPage" class="page-pill" @click="showPanelPageManagement")
+              :no-bg="!editorTypeTemplate")
+  div(v-if="editorTypeTemplate" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
 </template>
@@ -28,8 +28,6 @@ import resizeUtils from '@/utils/resizeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-
-const MULTI_PAGE_EDITOR_TYPES = ['story', 'post']
 
 export default defineComponent({
   props: {
@@ -79,6 +77,7 @@ export default defineComponent({
       getLayer: 'getLayer',
       editorBg: 'vivisticker/getEditorBg',
       editorType: 'vivisticker/getEditorType',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       contentScaleRatio: 'getContentScaleRatio',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
@@ -96,9 +95,6 @@ export default defineComponent({
     },
     strPagePill(): string {
       return this.pagesState.length > 1 ? `${this.currFocusPageIndex + 1} / ${this.pagesState.length}` : 'Pages'
-    },
-    isMultiPage(): boolean {
-      return MULTI_PAGE_EDITOR_TYPES.includes(this.editorType)
     }
   },
   components: {
