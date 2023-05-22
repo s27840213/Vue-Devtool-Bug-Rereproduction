@@ -376,14 +376,15 @@ export class MovingUtils {
             return
           }
         }
-        const { pageRect, editorRect } = pageUtils.getEditorRenderSize
-        const isPageFullyInsideEditor = pageRect.width + 30 < editorRect.width
-        // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
-        if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
-          window.requestAnimationFrame(() => {
-            this.pageMovingHandler(e)
-          })
-        }
+        // vivisticker doesn't have page moving feature
+        // const { pageRect, editorRect } = pageUtils.getEditorRenderSize
+        // const isPageFullyInsideEditor = pageRect.width + 30 < editorRect.width
+        // // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
+        // if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
+        //   window.requestAnimationFrame(() => {
+        //     this.pageMovingHandler(e)
+        //   })
+        // }
       } else {
         if (posDiff.x < 1 && posDiff.y < 1) {
           return
@@ -436,52 +437,53 @@ export class MovingUtils {
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
-    const { originPageSize, getCurrPage: currPage } = pageUtils
-    const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
+    // vivisticker doesn't have page moving feature
+    // if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
+    // const { originPageSize, getCurrPage: currPage } = pageUtils
+    // const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
 
-    const newPageSize = {
-      w: this.scaleRatio * currPage.width * 0.01,
-      h: this.scaleRatio * currPage.height * 0.01
-    }
-    const base = {
-      x: -(newPageSize.w - originPageSize.width) * 0.5,
-      y: 0
-    }
-    const limitRange = {
-      x: (newPageSize.w - originPageSize.width) * 0.5,
-      y: (newPageSize.h - originPageSize.height) * 0.5
-    }
-    const diff = {
-      x: Math.abs(currPage.x + offsetPos.x - base.x),
-      y: Math.abs(currPage.y + offsetPos.y - base.y)
-    }
-    const isReachRightEdge = currPage.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
-    const isReachLeftEdge = currPage.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
-    const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
-    const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
+    // const newPageSize = {
+    //   w: this.scaleRatio * currPage.width * 0.01,
+    //   h: this.scaleRatio * currPage.height * 0.01
+    // }
+    // const base = {
+    //   x: -(newPageSize.w - originPageSize.width) * 0.5,
+    //   y: 0
+    // }
+    // const limitRange = {
+    //   x: (newPageSize.w - originPageSize.width) * 0.5,
+    //   y: (newPageSize.h - originPageSize.height) * 0.5
+    // }
+    // const diff = {
+    //   x: Math.abs(currPage.x + offsetPos.x - base.x),
+    //   y: Math.abs(currPage.y + offsetPos.y - base.y)
+    // }
+    // const isReachRightEdge = currPage.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
+    // const isReachLeftEdge = currPage.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
+    // const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
+    // const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
 
-    if (isReachRightEdge || isReachLeftEdge) {
-      pageUtils.updatePagePos(this.pageIndex, {
-        x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0
-      })
-    } else {
-      pageUtils.updatePagePos(this.pageIndex, {
-        x: offsetPos.x + currPage.x
-      })
-    }
+    // if (isReachRightEdge || isReachLeftEdge) {
+    //   pageUtils.updatePagePos(this.pageIndex, {
+    //     x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0
+    //   })
+    // } else {
+    //   pageUtils.updatePagePos(this.pageIndex, {
+    //     x: offsetPos.x + currPage.x
+    //   })
+    // }
 
-    if (isReachTopEdge || isReachBottomEdge) {
-      pageUtils.updatePagePos(this.pageIndex, {
-        y: isReachTopEdge ? -(originPageSize.height - newPageSize.h) * 0.5 : (originPageSize.height - newPageSize.h) * 0.5
-      })
-    } else {
-      pageUtils.updatePagePos(this.pageIndex, {
-        y: offsetPos.y + currPage.y
-      })
-    }
-    this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
-    this.initialPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
+    // if (isReachTopEdge || isReachBottomEdge) {
+    //   pageUtils.updatePagePos(this.pageIndex, {
+    //     y: isReachTopEdge ? -(originPageSize.height - newPageSize.h) * 0.5 : (originPageSize.height - newPageSize.h) * 0.5
+    //   })
+    // } else {
+    //   pageUtils.updatePagePos(this.pageIndex, {
+    //     y: offsetPos.y + currPage.y
+    //   })
+    // }
+    // this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
+    // this.initialPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
