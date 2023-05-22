@@ -1,13 +1,14 @@
 <template lang="pug">
 div(class="page-size-selector")
-  div(v-if="isMobile" class="page-size-selector__body-row first-row")
+  div(v-if="isMobile || forEditor" class="page-size-selector__body-row first-row")
     span(class="page-size-selector__body__title caption-LG text-black") {{$t('NN0023')}}
   div(class="page-size-selector__body-row")
     div(class="page-size-selector__body__custom")
       property-bar(class="page-size-selector__body__custom__box"
-                  :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
+          :class="(selectedFormatKey === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')"
+          :borderColor="(selectedFormatKey === 'custom' ? 'blue-1' : `${isDarkTheme ? 'white' : 'gray-4'}`)")
         input(class="body-MD page-size-selector__body__custom__box__input" type="number" min="0" ref="inputWidth"
-              :class="selectedFormatKey === 'custom' ? 'text-black' : 'text-gray-3'"
+              :class="selectedFormatKey === 'custom' ? (isValidate && !widthValid) ? 'text-red-1' : 'text-blue-1 input-focused' : 'text-gray-3'"
               :style="{position: isInputFocused ? 'static' : 'fixed'}"
               :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
               @click="selectFormat('custom')"
@@ -17,19 +18,20 @@ div(class="page-size-selector")
         input(v-if="!isInputFocused"
               class="body-MD page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
-              :class="(selectedFormatKey === 'custom' ? 'text-black' : 'text-gray-3')"
+              :class="(selectedFormatKey === 'custom' ? 'text-blue-1 input-focused' : 'text-gray-3')"
               :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
               @click="handleDummyClick($event, $refs.inputWidth, 'width')")
         span(class="body-MD page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-gray-3' : 'text-gray-3'") W
+            :class="selectedFormatKey === 'custom' ? (isValidate && !widthValid) ? 'text-red-1' : 'text-blue-1 input-focused' : 'text-gray-3'") W
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
-          iconWidth="20px" :iconColor="selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')"
+          iconWidth="20px" :iconColor="selectedFormatKey === 'custom' ? 'blue-1' : (isDarkTheme ? 'white' : 'gray-4')"
           @click="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
-                  :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
+                  :class="(selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')"
+                  :borderColor="selectedFormatKey === 'custom' ? 'blue-1' : `${isDarkTheme ? 'white' : 'gray-4'}`")
         input(class="body-MD page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
-              :class="selectedFormatKey === 'custom' ? 'text-black' : 'text-gray-3'"
+              :class="selectedFormatKey === 'custom' ? (isValidate && !widthValid) ? 'text-red-1' : 'text-blue-1 input-focused' : 'text-gray-3'"
               :style="{position: isInputFocused ? 'static' : 'fixed'}"
               :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
               @click="selectFormat('custom')"
@@ -39,26 +41,27 @@ div(class="page-size-selector")
         input(v-if="!isInputFocused"
               class="body-MD page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
-              :class="(selectedFormatKey === 'custom' ? 'text-black' : 'text-gray-3')"
+              :class="(selectedFormatKey === 'custom' ? 'text-blue-1 input-focused' : 'text-gray-3')"
               :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
               @click="handleDummyClick($event, $refs.inputHeight, 'height')")
         span(class="body-MD page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-gray-3' : 'text-gray-3'") H
+            :class="selectedFormatKey === 'custom' ? (isValidate && !widthValid) ? 'text-red-1' : 'text-blue-1 input-focused' : 'text-gray-3'") H
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                     class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
+                    :borderColor="selectedFormatKey === 'custom' ? 'blue-1' : `${isDarkTheme ? 'white' : 'gray-4'}`"
                     @click="showUnitOptions = !showUnitOptions")
-        span(class="page-size-selector__body__custom__unit__label body-MD" :class="selectedFormatKey === 'custom' ? 'black' : 'text-gray-3'") {{selectedUnit}}
+        span(class="page-size-selector__body__custom__unit__label body-MD" :class="selectedFormatKey === 'custom' ? 'text-blue-1' : 'text-gray-3'") {{selectedUnit}}
         svg-icon(class="page-size-selector__body__custom__unit__icon"
           iconName="chevron-down"
           iconWidth="16px"
-          :iconColor="selectedFormatKey === 'custom' ? 'black' : 'gray-3'")
+          :iconColor="selectedFormatKey === 'custom' ? 'blue-1' : 'gray-3'")
         div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-white")
           div(v-for="(unit) in unitOptions" :key="unit" class="page-size-selector__body__custom__unit__option__item text-black" @click="selectUnit($event, unit)")
             span(class="body-MD text-black") {{unit}}
       div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
         class="page-size-selector__body__custom__err body-MD text-red") {{errMsg}}
         span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{'Fix it for me.'}}
-  nubtn(size="sm-full" class="mt-15" @click="createCustomDesign") {{$t('NN0867')}}
+  nubtn(v-if="!forEditor" size="sm-full" class="mt-15" @click="createCustomDesign") {{$t('NN0867')}}
   div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
   div(class="page-size-selector__container"
     @touchmove="handleTouchMove")
@@ -88,16 +91,38 @@ div(class="page-size-selector")
                 :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : 'text-gray-2'") {{ format.title }}
           span(class="page-size-selector__body__recently body-SM pointer"
                 :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : 'text-gray-3'") {{ makeFormatDescription(format) }}
+  template(v-if="forEditor")
+    div(class="page-size-selector__hr bg-gray-4")
+    div(class="page-size-selector__submit")
+      div(class="page-size-selector__submit__option body-SM mb-10")
+        checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
+      nubtn(class="page-size-selector__button"
+          size="mid-full"
+          :theme="'icon_text'"
+          :icon="'pro'"
+          :iconColor="'alarm'"
+          :showIcon="!inReviewMode"
+          :status="isFormatApplicable ? 'default' : 'disabled'"
+          @click="submit") {{$t('NN0022')}}
 </template>
 
 <script lang="ts">
+import listApi from '@/apis/list'
+import Checkbox from '@/components/global/Checkbox.vue'
 import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'
+import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
+import paymentUtils from '@/utils/paymentUtils'
+import picWVUtils from '@/utils/picWVUtils'
+import resizeUtils from '@/utils/resizeUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
 import vClickOutside from 'click-outside-vue3'
-import { ceil, floor, round } from 'lodash'
+import { ceil, floor, round, throttle } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -110,7 +135,14 @@ const component = defineComponent({
     isMobile: {
       type: Boolean,
       default: false
+    },
+    forEditor: {
+      type: Boolean,
+      default: false
     }
+  },
+  components: {
+    Checkbox
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -154,7 +186,8 @@ const component = defineComponent({
       isLayoutReady: false,
       isInputFocused: false,
       lastFocusedInput: 'width',
-      isValidate: false
+      isValidate: false,
+      copyBeforeApply: true,
     }
   },
   watch: {
@@ -179,8 +212,12 @@ const component = defineComponent({
       getAsset: 'getAsset',
       groupId: 'getGroupId',
       groupType: 'getGroupType',
-      pagesLength: 'getPagesLength'
+      pagesLength: 'getPagesLength',
+      getPageSize: 'getPageSize'
     }),
+    inReviewMode(): boolean {
+      return picWVUtils.inReviewMode
+    },
     isCustomValid(): boolean {
       return this.widthValid && this.heightValid && !this.isOverArea()
     },
@@ -248,11 +285,16 @@ const component = defineComponent({
         }).toString() + ' '
       }
       return ''
+    },
+    isFormatApplicable(): boolean {
+      return this.selectedFormatKey === 'custom' ? this.isCustomValid : (this.selectedFormatKey !== '')
     }
   },
   methods: {
     ...mapMutations({
-      updateRecentlyUsed: 'layouts/UPDATE_RECENTLY_PAGE'
+      updateRecentlyUsed: 'layouts/UPDATE_RECENTLY_PAGE',
+      setCurrActivePageIndex: 'SET_currActivePageIndex',
+
     }),
     ...mapActions('layouts',
       [
@@ -269,6 +311,7 @@ const component = defineComponent({
       return size < pageUtils.MIN_SIZE
     },
     toggleLock() {
+      this.selectedFormatKey = 'custom'
       this.isLocked = !this.isLocked
       if (this.isLocked) this.aspectRatio = this.pageWidth * this.pageHeight <= 0 ? 1 : this.pageWidth / this.pageHeight
     },
@@ -326,7 +369,7 @@ const component = defineComponent({
       this.selectedFormatKey = selectedFormatKey
       const format = {} as ILayout
 
-      if (this.selectedFormatKey === 'custom') {
+      if (this.selectedFormatKey === 'custom' || this.forEditor) {
         return
       }
       if (selectedFormatKey.startsWith('recent')) {
@@ -449,12 +492,140 @@ const component = defineComponent({
       designUtils.newDesignWithLoginRedirect(format.width, format.height, format.unit, undefined, path, foldername, bleeds)
     },
     createCustomDesign() {
-      if (this.selectedFormatKey === 'custom' ? this.isCustomValid : (this.selectedFormatKey !== '')) {
+      this.selectedFormatKey = 'custom'
+      if (this.isFormatApplicable) {
         this.newDesign({ id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit, icon: '' })
       } else {
         this.isValidate = true
       }
-    }
+    },
+    copyAndApplySelectedFormat() {
+      if (!this.isFormatApplicable) return
+      const pageIndex = pageUtils.currFocusPageIndex
+      const page = generalUtils.deepCopy(this.getPage(pageIndex))
+      page.designId = ''
+      page.id = generalUtils.generateRandomString(8)
+      pageUtils.addPageToPos(page, pageIndex + 1)
+      groupUtils.deselect()
+      this.setCurrActivePageIndex(pageIndex + 1)
+      this.applySelectedFormat(false, pageIndex + 1)
+      stepsUtils.record()
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageIndex + 1) })
+    },
+    applySelectedFormat(record = true, currPageIndex = -1) {
+      if (!this.isFormatApplicable) return
+      const format = this.getSelectedFormat()
+      if (!format) return
+      const bleeds = format.unit !== 'px' && format.bleed ? generalUtils.deepCopy(format.bleed) : null
+      if (bleeds) {
+        const maxBleed = floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', format.unit), PRECISION)
+        Object.keys(bleeds).forEach(key => {
+          bleeds[key] = Math.min(bleeds[key], maxBleed)
+        })
+      }
+
+      if (this.groupType !== 1) {
+        // resize page with px size
+        const { width, height } = this.pageSizes.px
+        currPageIndex = currPageIndex === -1 ? pageUtils.currFocusPageIndex : currPageIndex
+        this.resizePage({
+          width,
+          height,
+          physicalWidth: format.width,
+          physicalHeight: format.height,
+          unit: format.unit
+        }, currPageIndex)
+        if (bleeds) pageUtils.setBleeds(currPageIndex, bleeds)
+      } else {
+        // resize電商詳情頁時 其他頁面要依width做resize
+        const { pagesLength, getPageSize } = this
+        const resizingPage = pageUtils.getPage(pageUtils.currFocusPageIndex)
+        for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
+          const isNewUnitPx = format.unit === 'px'
+          if (pageIndex === pageUtils.currFocusPageIndex) { // resize current page
+            this.resizePage({
+              width: isNewUnitPx ? format.width : resizingPage.width,
+              height: isNewUnitPx ? format.height : round(resizingPage.width / format.width * format.height),
+              physicalWidth: format.width,
+              physicalHeight: format.height,
+              unit: format.unit
+            })
+          } else { // resize other pages to same px width and unit
+            const { width, height, physicalWidth, physicalHeight } = getPageSize(pageIndex)
+            const newWidth = format.width
+            const newHeight = round(newWidth / physicalWidth * physicalHeight, isNewUnitPx ? 0 : PRECISION)
+            resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), {
+              width: isNewUnitPx ? newWidth : width,
+              height: isNewUnitPx ? newHeight : height,
+              physicalWidth: newWidth,
+              physicalHeight: newHeight,
+              unit: format.unit
+            })
+          }
+          if (bleeds) {
+            const detailPageBleeds = {
+              ...bleeds,
+              top: pageIndex !== 0 ? 0 : bleeds.top,
+              bottom: pageIndex !== pagesLength - 1 ? 0 : bleeds.bottom
+            }
+            pageUtils.setBleeds(pageIndex, detailPageBleeds)
+          }
+        }
+      }
+
+      // update recently used size
+      const precision = format.unit === 'px' ? 0 : PRECISION
+      format.width = round(format.width, precision)
+      format.height = round(format.height, precision)
+
+      listApi.addDesign(format.id, 'layout', format)
+      const index = this.recentlyUsed.findIndex((recent) => {
+        return format.id === recent.id && format.width === recent.width && format.height === recent.height && format.unit === recent.unit
+      })
+      this.updateRecentlyUsed({
+        index,
+        format
+      })
+
+      if (this.$isTouchDevice()) {
+        pageUtils.fitPage()
+      }
+      if (record) {
+        stepsUtils.record()
+      }
+    },
+    getSelectedFormat(): ILayout | undefined {
+      if (this.selectedFormatKey === 'custom') {
+        if (!this.isCustomValid) return undefined
+        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit, icon: '' }
+      } else if (this.selectedFormatKey.startsWith('recent')) {
+        const [type, index] = this.selectedFormatKey.split('-')
+        const format = this.recentlyUsed[parseInt(index)]
+        this.pageSizes = unitUtils.convertAllSize(format.width, format.height, format.unit)
+        return format
+      } else if (this.selectedFormatKey.startsWith('preset')) {
+        const [type, index] = this.selectedFormatKey.split('-')
+        const format = this.formatList[parseInt(index)]
+        this.pageSizes = unitUtils.convertAllSize(format.width, format.height, format.unit)
+        return format
+      } else {
+        return undefined
+      }
+    },
+    resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}, pageIndex = pageUtils.currFocusPageIndex) {
+      resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), format)
+    },
+    submit: throttle(function(this: any) {
+      // Use throttle to prevent submit multiple times.
+      if (!paymentUtils.checkPro({ plan: 1 }, 'page-resize') || !this.isFormatApplicable) return
+      if (this.copyBeforeApply) {
+        this.copyAndApplySelectedFormat()
+      } else {
+        this.applySelectedFormat()
+      }
+      editorUtils.setShowMobilePanel(false) // For mobile
+      this.$emit('close') // For PC
+    }, 2000, { trailing: false }),
   }
 })
 
@@ -557,6 +728,7 @@ export type CPageSizeSelector = InstanceType<typeof component>
             /* Microsoft Edge */
             color: setColor(gray-3);
           }
+
           &.dummy{
             position: static;
           }
@@ -624,6 +796,34 @@ export type CPageSizeSelector = InstanceType<typeof component>
       background-color: setColor(gray-3);
     }
   }
+
+  &__hr {
+      width: 100%;
+      height: 1px;
+      margin: 12px 0px 16px 0px;
+    }
+    &__buttons {
+      display: flex;
+      width: 95%;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 29px;
+      margin-bottom: 17.43px;
+      gap: 11px;
+    }
+    &__button {
+      flex-grow: 1;
+      border-radius: 3px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 4px;
+      text-align: center;
+      &__text {
+        font-weight: 700;
+        font-size: 12px;
+      }
+    }
 }
 .horizontal-rule {
   height: 1px;
@@ -634,6 +834,37 @@ export type CPageSizeSelector = InstanceType<typeof component>
 
 .input-invalid {
   border: 1px solid setColor(red) !important;
+  > input {
+    &::placeholder {
+    /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: setColor(red);
+    opacity: 1; /* Firefox */
+    }
+    &:-ms-input-placeholder {
+      /* Internet Explorer 10-11 */
+      color: setColor(red);
+    }
+    &::-ms-input-placeholder {
+      /* Microsoft Edge */
+      color: setColor(red);
+    }
+  }
+}
+
+.input-focused {
+  &::placeholder {
+    /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: setColor(blue-1);
+    opacity: 1; /* Firefox */
+  }
+  &:-ms-input-placeholder {
+    /* Internet Explorer 10-11 */
+    color: setColor(blue-1);
+  }
+  &::-ms-input-placeholder {
+    /* Microsoft Edge */
+    color: setColor(blue-1);
+  }
 }
 
 @media screen and (max-width: 540px) {

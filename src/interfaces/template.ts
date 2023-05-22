@@ -5,7 +5,8 @@ export interface IContentTemplate {
   ver: number,
   width: number,
   height: number,
-  themes: string[]
+  themes: string[],
+  unit: string,
 }
 export interface ITemplate {
   url: string,
@@ -19,5 +20,6 @@ export interface ITemplate {
   plan: number,
   content_ids: IContentTemplate[],
   group_type: number
-  group_id: string
+  group_id: string,
+  unit: string
 }

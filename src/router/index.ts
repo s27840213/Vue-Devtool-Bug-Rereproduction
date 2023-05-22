@@ -325,9 +325,10 @@ router.beforeEach(async (to, from, next) => {
 
     // const json = appJson
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('static json loaded: ', json)
-      store.commit('SET_showGlobalErrorModal', true) // local always show error modal
+    process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    if (window.location.hostname !== 'vivipic.com') {
+      store.commit('SET_showGlobalErrorModal', true) // non-production always show error modal
     } else {
       store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
     }
