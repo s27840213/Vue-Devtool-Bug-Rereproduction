@@ -496,7 +496,6 @@ export default defineComponent({
       }
     },
     updateCurrCanvasImageElement(blob?: Blob) {
-      console.log(this.currCanvasImageElement)
       if (!this.currCanvasImageElement) {
         this.currCanvasImageElement = new Image()
       }
