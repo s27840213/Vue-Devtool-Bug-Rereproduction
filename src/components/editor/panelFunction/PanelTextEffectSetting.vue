@@ -258,7 +258,7 @@ export default defineComponent({
           await textBgUtils.setTextBg('none') // Bg & shape are exclusive.
           break
         case 'fill':
-          textFillUtils.setTextFill(effectName, effect)
+          await textFillUtils.setTextFill(effectName, effect)
           break
       }
     },

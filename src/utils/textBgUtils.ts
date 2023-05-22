@@ -9,7 +9,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
 import { EventEmitter } from 'events'
-import _, { cloneDeep, isEqual } from 'lodash'
+import _, { cloneDeep, isEqual, omit } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
 
@@ -1090,9 +1090,9 @@ class TextBg {
       for (const [key, val] of Object.entries(attrs ?? {})) {
         if (['lineHeight', 'fontSpacing'].includes(key)) {
           await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val as number)
-          return
         }
       }
+      attrs = omit(attrs, ['lineHeight', 'fontSpacing'])
 
       if (oldTextBg && oldTextBg.name === effect) { // Adjust effect option.
         Object.assign(newTextBg, oldTextBg, attrs)
@@ -1129,8 +1129,15 @@ class TextBg {
       // If SplitedSpan setting changed, force split/unsplit span text
       const oldSplitedSpan = this.isSplitedSpan({ ...layer.styles, textBg: oldTextBg })
       const newSplitedSpan = this.isSplitedSpan({ ...layer.styles, textBg: newTextBg })
-      await this.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
-        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex, 'textBG')
+      this.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
+        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+
+      // Update width for tiptap layer
+      const oldFixedWidth = isITextLetterBg(oldTextBg) && oldTextBg.fixedWidth
+      const newFixedWidth = isITextLetterBg(newTextBg) && newTextBg.fixedWidth
+      if (oldFixedWidth !== newFixedWidth) {
+        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
+      }
 
       // If user leave LetterBg, reset lineHeight and fontSpacing
       if (isITextLetterBg(oldTextBg) && !isITextLetterBg(newTextBg)) {
@@ -1141,8 +1148,8 @@ class TextBg {
     }
   }
 
-  async splitOrMergeSpan(oldSplitedSpan: boolean, newSplitedSpan: boolean, layer: IText,
-    pageIndex: number, layerIndex: number, subLayerIndex: number, useage: 'textBG' | 'textFill') {
+  splitOrMergeSpan(oldSplitedSpan: boolean, newSplitedSpan: boolean, layer: IText,
+    pageIndex: number, layerIndex: number, subLayerIndex: number) {
     if (oldSplitedSpan === newSplitedSpan) return
 
     const paragraphs = cloneDeep(layer.paragraphs)
@@ -1169,13 +1176,6 @@ class TextBg {
 
     layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs }, subLayerIndex)
     tiptapUtils.updateHtml() // Vuex config => tiptap
-    // Update widthLimit for widthLimit !== -1 layers
-    if (useage === 'textFill' && layer.widthLimit !== -1) {
-      const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
-      layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, subLayerIndex)
-    }
-    // Update width for tiptap layer
-    textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
 
     // When fixedWith true => false, this can force tiptap merge span that have same attrs.
     if (document.querySelector('.ProseMirror') && !newSplitedSpan) {

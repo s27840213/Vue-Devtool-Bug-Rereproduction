@@ -143,7 +143,9 @@ export default defineComponent({
   watch: {
     'config.paragraphs'(newVal) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
+      this.drawTextBg()
       textUtils.untilFontLoaded(newVal).then(async () => {
+        this.drawTextBg()
         this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
       })
     },

@@ -12,6 +12,7 @@ import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textUtils from '@/utils/textUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
 import { find, findLast, omit, pick } from 'lodash'
@@ -244,7 +245,7 @@ class TextFill {
     }
   }
 
-  setTextFill(effect: string, attrs?: Record<string, unknown>, reset = false) {
+  async setTextFill(effect: string, attrs?: Record<string, unknown>, reset = false) {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
@@ -288,7 +289,13 @@ class TextFill {
       const oldSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: oldTextFill })
       const newSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: newTextFill })
       textBgUtils.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
-        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex, 'textFill')
+        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+
+      // Update widthLimit for widthLimit !== -1 layers
+      if (layer.widthLimit !== -1) {
+        const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, subLayerIndex)
+      }
     }
   }
 
