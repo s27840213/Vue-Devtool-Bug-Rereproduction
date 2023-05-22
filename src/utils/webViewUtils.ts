@@ -7,7 +7,14 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   abstract CALLBACK_MAPS: { [key: string]: string[] }
 
   callbackMap = {} as { [key: string]: (res: { data: WEBVIEW_API_RESULT, isTimeouted: boolean }) => void }
+  eventMap = {} as { [key: string]: (data: WEBVIEW_API_RESULT) => void }
   errorMessageMap = {} as { [key: string]: string }
+  apiQueueMap = {} as {
+    [key: string]: {
+      eventId: string,
+      args: Parameters<typeof WebViewUtils.prototype.callIOSAsAPICore>
+    }[]
+  }
 
   abstract getUserInfoFromStore(): T
 
@@ -43,7 +50,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     return { empty: '' }
   }
 
-  sendToIOS(messageType: string, message: any) {
+  sendToIOS(messageType: string, message: any, throwsError = false) {
     if (!this.filterLog(messageType, message)) {
       logUtils.setLogAndConsoleLog(messageType, message)
     }
@@ -56,60 +63,105 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
       }
       messageHandler.postMessage(generalUtils.unproxify(message))
     } catch (error) {
-      logUtils.setLogAndConsoleLog(error)
+      if (throwsError) {
+        throw error
+      } else {
+        logUtils.setLogAndConsoleLog(error)
+      }
     }
   }
 
   checkVersion(targetVersion: string) {
-    // targetVersion must be in format: <main>.<sub> e.g. 1.18
-    const [targetMain, targetSub] = targetVersion.split('.')
-    const [currMain, currSub] = this.getUserInfoFromStore().appVer.split('.')
-    return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
+    const currVer = this.getUserInfoFromStore().appVer ?? '0.0'
+    return generalUtils.versionCheck({ greaterThan: targetVersion, version: currVer })
   }
 
   checkOSVersion(targetVersion: string) {
-    // targetVersion must be in format: <main>.<sub> e.g. 1.18
-    const [targetMain, targetSub] = targetVersion.split('.')
-    const [currMain, currSubRaw] = (this.getUserInfoFromStore().osVer ?? '0.0').split('.')
-    const currSub = currSubRaw ?? '0'
-    return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
+    const currVer = this.getUserInfoFromStore().osVer ?? '0.0'
+    return generalUtils.versionCheck({ greaterThan: targetVersion, version: currVer })
   }
 
-  async callIOSAsAPI(type: string, message: any, event: string, {
+  registerResolve(event: string, resolve: (value: any) => void) {
+    if (this.callbackMap[event] !== undefined) {
+      throw new Error(`duplicate event callback: ${event} already exists!`)
+    } else {
+      this.callbackMap[event] = resolve
+    }
+  }
+
+  async callIOSAsAPI(...args: Parameters<typeof WebViewUtils.prototype.callIOSAsAPICore>):
+    ReturnType<typeof WebViewUtils.prototype.callIOSAsAPICore> {
+    const event = args[2]
+    const eventId = generalUtils.generateRandomString(12)
+    if (this.apiQueueMap[event] === undefined) { this.apiQueueMap[event] = [] }
+    this.apiQueueMap[event].push({
+      eventId,
+      args
+    })
+    const result = await new Promise<WEBVIEW_API_RESULT>(resolve => {
+      if (this.apiQueueMap[event].length === 1) {
+        this.processApiQueue(event)
+      }
+      this.eventMap[eventId] = resolve
+    })
+    delete this.eventMap[eventId]
+    return result
+  }
+
+  async processApiQueue(event: string) {
+    const apiArgs = this.apiQueueMap[event][0]
+    if (apiArgs) {
+      const result = await this.callIOSAsAPICore(...apiArgs.args)
+      this.eventMap[apiArgs.eventId](result)
+      this.apiQueueMap[event].shift()
+      this.processApiQueue(event)
+    }
+  }
+
+  async callIOSAsAPICore(type: string, message: any, event: string, {
     timeout = 5000, retry = false, retryTimes = 0
   } = {}): Promise<WEBVIEW_API_RESULT> {
-    this.sendToIOS(type, message)
     let result: WEBVIEW_API_RESULT
-    if (timeout === -1) {
-      result = (await (new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
-        this.callbackMap[event] = resolve
-      }))).data
-      delete this.callbackMap[event]
-    } else {
-      const raceResult = await Promise.race([
-        new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
-          this.callbackMap[event] = resolve
-        }),
-        new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
-          setTimeout(() => {
-            resolve({
-              data: null,
-              isTimeouted: true
-            })
-          }, timeout)
-        })
-      ])
-      delete this.callbackMap[event]
-      result = raceResult.data
-      if (raceResult.isTimeouted) {
-        logUtils.setLogAndConsoleLog(`${type} timeouted after ${timeout}ms with message:`, message)
-        if (retry && retryTimes < 2) {
-          logUtils.setLogAndConsoleLog(`retry: ${retryTimes + 1}`)
-          result = await this.callIOSAsAPI(type, message, event, {
-            timeout, retry, retryTimes: retryTimes + 1
+    try {
+      if (timeout === -1) {
+        result = (await (new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
+          this.registerResolve(event, resolve)
+          this.sendToIOS(type, message, true) // send message to iOS only when resolve is successfully registered
+        }))).data
+        delete this.callbackMap[event]
+      } else {
+        const raceResult = await Promise.race([
+          new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
+            this.registerResolve(event, resolve)
+            this.sendToIOS(type, message, true) // send message to iOS only when resolve is successfully registered
+          }),
+          new Promise<{ data: WEBVIEW_API_RESULT, isTimeouted: boolean }>(resolve => {
+            setTimeout(() => {
+              resolve({
+                data: null,
+                isTimeouted: true
+              })
+            }, timeout)
           })
+        ])
+        delete this.callbackMap[event]
+        result = raceResult.data
+        if (raceResult.isTimeouted) {
+          logUtils.setLogAndConsoleLog(`${type} timeouted after ${timeout}ms with message:`, message)
+          if (retry && retryTimes < 2) {
+            logUtils.setLogAndConsoleLog(`retry: ${retryTimes + 1}`)
+            result = await this.callIOSAsAPI(type, message, event, {
+              timeout, retry, retryTimes: retryTimes + 1
+            })
+          }
         }
       }
+    } catch (error) {
+      const theError = error as Error
+      console.error(error)
+      logUtils.setLog(`Error occurs in callIOSAsAPI with type: ${type}, message: ${message}, event: ${event}`)
+      logUtils.setLog(`Error: ${theError.name}, ${theError.message}, ${theError.cause}, ${theError.stack}`)
+      result = null
     }
     return result
   }

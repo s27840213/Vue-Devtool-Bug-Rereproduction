@@ -125,9 +125,8 @@ export default defineComponent({
       type: Object as PropType<IPage>,
       required: true
     },
-    footerTabsHeight: {
-      default: 0,
-      type: Number
+    footerTabsRef: {
+      type: HTMLElement
     },
   },
   emits: ['panelHeight', 'switchTab'],
@@ -291,18 +290,19 @@ export default defineComponent({
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
-      return Object.assign({ bottom: this.hideFooter ? -1 * this.footerTabsHeight + 'px' : '0' },
-        (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
-        {
-          'row-gap': this.noRowGap ? '0px' : '10px',
-          backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
-          maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? '100%' : this.panelDragHeight + 'px',
-          ...(this.hideFooter && { zIndex: '100' }),
-          ...(this.hideFooter && { paddingBottom: `${this.userInfo.homeIndicatorHeight}px` })
-        },
-        // Prevent MobilePanel collapse
-        isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
+      const footerTabsHeight = this.footerTabsRef?.clientHeight || 0
+      return Object.assign({ bottom: this.hideFooter ? -1 * footerTabsHeight + 'px' : '0' },
+      (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
+      {
+        'row-gap': this.noRowGap ? '0px' : '10px',
+        backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
+        maxHeight: this.fixSize || this.extraFixSizeCondition
+          ? '100%' : this.panelDragHeight + 'px',
+        ...(this.hideFooter && { zIndex: '100' }),
+        ...(this.hideFooter && { paddingBottom: `${this.userInfo.homeIndicatorHeight + 8}px` })
+      },
+      // Prevent MobilePanel collapse
+      isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
       )
     },
     innerTab(): string {
@@ -616,7 +616,8 @@ export default defineComponent({
       )
     },
     closeMobilePanel() {
-      editorUtils.setShowMobilePanel(false)
+      if (this.isSubPanel) editorUtils.setCurrActiveSubPanel('none')
+      else editorUtils.setShowMobilePanel(false)
     },
     haederbarHeight () {
       return document.querySelector('.mobile-editor .header-bar')?.clientHeight ?? 0
@@ -629,7 +630,8 @@ export default defineComponent({
       return (this.$refs.panel as HTMLElement).clientHeight
     },
     panelParentHeight() {
-      return (this.$el.parentElement as HTMLElement).clientHeight - this.userInfo.statusBarHeight
+      return (document.querySelector('.mobile-editor .mobile-editor__top') as HTMLElement).clientHeight -
+        this.userInfo.statusBarHeight
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
@@ -719,7 +721,12 @@ export default defineComponent({
     }
   }
 
+  .tabs {
+    margin-bottom: 14px;
+  }
+
   &__btn {
+    display: grid; // To fix div height != child height issue. https://stackoverflow.com/questions/5804256
     position: relative;
   }
 
@@ -735,11 +742,17 @@ export default defineComponent({
   }
 
   &__bottom-section {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-auto-columns: minmax(0, 1fr);
     width: 100%;
     height: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
     @include no-scrollbar;
+    > *:last-child { // panel-* always take minmax(0, 1fr) grid layout.
+      grid-row: 2 / 3;
+    }
   }
 
   &__title {

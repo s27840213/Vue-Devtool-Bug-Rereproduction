@@ -47,7 +47,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -168,7 +168,7 @@ export default defineComponent({
     },
     closePopup() {
       popupUtils.closePopup()
-    }
+    },
   }
 })
 </script>

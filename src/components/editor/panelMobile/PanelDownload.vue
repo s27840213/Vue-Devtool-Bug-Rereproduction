@@ -16,12 +16,12 @@ div(class="panel-download" :style="containerStyles")
       span {{$t('NN0827')}}
   template(v-else-if="currState === 'setting'")
     div(class="text-H6") {{$t('NN0121')}}
-    mobile-type-selector(
+    mobile-jump-btn(
       :title="selectedType.name"
       :iconName="'chevron-right'"
       @click="handleTypeSelectorAction('type')")
     hr(class="full-width")
-    mobile-type-selector(v-if="'scale' in selected"
+    mobile-jump-btn(v-if="'scale' in selected"
       :title="`${$t('NN0122')}`"
       :description="`${selected.scale} ${$t('NN0123')}`"
       :iconName="'chevron-right'"
@@ -59,7 +59,7 @@ div(class="panel-download" :style="containerStyles")
         :modelValue="selected.outline===2"
         @update:modelValue="(bool) => handleUpdate('outline', bool ? 2 : 0)")
       hr(v-if="'outline' in selected" class="full-width")
-      mobile-type-selector(
+      mobile-jump-btn(
         v-if="selectedTypeVal !== 'jpg' && selectedTypeVal !== 'png'"
         class="py-5"
         :title="`${$t('NN0777')}`"
@@ -67,7 +67,7 @@ div(class="panel-download" :style="containerStyles")
         :iconName="'chevron-right'"
         @click="handleTypeSelectorAction('colorMode')")
       div(class="text-H6") {{$t('NN0124')}}
-      mobile-type-selector(
+      mobile-jump-btn(
         :title="noPageRange && rangeType === 'spec' ? `${$t('NN0823')}` : rangeTypeText"
         :iconName="'chevron-right'"
         :textSize="'body-SM'"
@@ -82,6 +82,22 @@ div(class="panel-download" :style="containerStyles")
             class="mr-5"
             iconName="pro" iconWidth="22px" iconColor="alarm")
           span {{$t('NN0010')}}
+      template(v-if="isAdmin || onDev")
+        hr(class="full-width")
+        div(class="text-H6") {{$t('NN0460')}}
+        mobile-jump-btn(
+          :title="selectedDevLabel"
+          :iconName="'chevron-right'"
+          @click="handleTypeSelectorAction('domain')")
+        hr(class="full-width")
+        btn(class="full-width body-3 rounded"
+          :disabled="isButtonDisabled"
+          @click="handleSubmit(true)")
+          div(class="flex items-center")
+            svg-icon(v-if="selectedTypeVal === 'pdf_print' && !inReviewMode"
+              class="mr-5"
+              iconName="pro" iconWidth="22px" iconColor="alarm")
+            span {{`${$t('NN0010')} (${$t('NN0460')})`}}
   template(v-else-if="currState === 'type'")
     div(class="flex flex-column")
       div(v-for="option in typeOptions"
@@ -137,6 +153,18 @@ div(class="panel-download" :style="containerStyles")
           :iconName="pageRange.includes(idx-1) ? 'checkbox-checked' : 'checkbox'"
           :iconWidth="'16px'")
         span {{ `${$t('NN0134', { num:`${idx}` })}${currFocusPageIndex === (idx-1) ? `(${$t('NN0125')})` :''}` }}
+  template(v-else-if="currState === 'domain'")
+    div(class="flex flex-column")
+      div(v-for="option in devs"
+          :key="option.value"
+          class="flex items-center full-width" @click="handleDevSelect(option)")
+        svg-icon(
+          class="mr-10"
+          :iconColor="option.value === selectedDev ? 'blue-1' : 'light-gray'"
+          :iconName="option.value === selectedDev ? 'radio-checked' : 'radio'"
+          :iconWidth="'16px'")
+        div(class="flex flex-between p-5 full-width")
+          div(class="body-S text-left") {{ `${option.label}`}}
   template(v-else)
     div(v-for="(btn,index) in btnInfo"
         :key="`panel-download-${index}`"
@@ -155,19 +183,19 @@ div(class="panel-download" :style="containerStyles")
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
+import MobileJumpBtn from '@/components/editor/mobile/MobileJumpBtn.vue'
 import MobilePropsToggle from '@/components/editor/mobile/MobilePropsToggle.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import MobileTypeSelector from '@/components/editor/mobile/MobileTypeSelector.vue'
 import Btn from '@/components/global/Btn.vue'
 import { ITypeOption, PanelDownloadState } from '@/interfaces/download'
 import downloadMixin from '@/mixin/download'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 export default defineComponent({
   components: {
     Animation,
     MobileSlider,
-    MobileTypeSelector,
+    MobileJumpBtn,
     MobilePropsToggle,
     DownloadTypeOption,
     Btn
@@ -236,7 +264,8 @@ export default defineComponent({
       switch (type) {
         case 'colorMode':
         case 'size':
-        case 'type': {
+        case 'type':
+        case 'domain': {
           break
         }
         case 'selectPage': {
