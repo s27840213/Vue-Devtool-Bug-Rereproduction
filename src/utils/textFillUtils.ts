@@ -13,6 +13,7 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
 import { find, findLast, omit, pick } from 'lodash'
@@ -290,6 +291,8 @@ class TextFill {
       const newSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: newTextFill })
       textBgUtils.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
         pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+
+      tiptapUtils.updateHtml() // Vuex config => tiptap
 
       // Update widthLimit for widthLimit !== -1 layers
       if (layer.widthLimit !== -1) {

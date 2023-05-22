@@ -24,6 +24,7 @@ div(class="text-effect-setting")
               iconColor="white"
               v-hint="effect.label")
             img(v-else :src="effectIcon(category, effect).name"
+              :width="effectIcon(category, effect).size"
               :height="effectIcon(category, effect).size"
               v-hint="effect.label")
             pro-item(v-if="effect.plan" theme="roundedRect")
@@ -362,6 +363,9 @@ export default defineComponent({
     background-color: white;
     background-clip: content-box;
     overflow: hidden;
+    > img {
+      object-fit: cover;
+    }
     .pro {
       left: 1px;
       top: -4px;
