@@ -8,7 +8,7 @@ div(class="page-size-selector")
           :class="(selectedFormatKey === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')"
           :borderColor="(selectedFormatKey === 'custom' ? 'blue-1' : `${isDarkTheme ? 'white' : 'gray-4'}`)")
         input(class="body-MD page-size-selector__body__custom__box__input" type="number" min="0" ref="inputWidth"
-              :class="selectedFormatKey === 'custom' ? 'text-blue-1' : 'text-gray-3'"
+              :class="selectedFormatKey === 'custom' ? (isValidate && !widthValid) ? 'text-red-1' : 'text-blue-1 input-focused' : 'text-gray-3'"
               :style="{position: isInputFocused ? 'static' : 'fixed'}"
               :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
               @click="selectFormat('custom')"
@@ -18,11 +18,11 @@ div(class="page-size-selector")
         input(v-if="!isInputFocused"
               class="body-MD page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
-              :class="(selectedFormatKey === 'custom' ? 'text-blue-1' : 'text-gray-3')"
+              :class="(selectedFormatKey === 'custom' ? 'text-blue-1 input-focused' : 'text-gray-3')"
               :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
               @click="handleDummyClick($event, $refs.inputWidth, 'width')")
         span(class="body-MD page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-blue-1' : 'text-gray-3'") W
+            :class="selectedFormatKey === 'custom' ? (isValidate && !widthValid) ? 'text-red-1' : 'text-blue-1 input-focused' : 'text-gray-3'") W
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
           iconWidth="20px" :iconColor="selectedFormatKey === 'custom' ? 'blue-1' : (isDarkTheme ? 'white' : 'gray-4')"
@@ -31,7 +31,7 @@ div(class="page-size-selector")
                   :class="(selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')"
                   :borderColor="selectedFormatKey === 'custom' ? 'blue-1' : `${isDarkTheme ? 'white' : 'gray-4'}`")
         input(class="body-MD page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
-              :class="selectedFormatKey === 'custom' ? 'text-blue-1' : 'text-gray-3'"
+              :class="selectedFormatKey === 'custom' ? (isValidate && !widthValid) ? 'text-red-1' : 'text-blue-1 input-focused' : 'text-gray-3'"
               :style="{position: isInputFocused ? 'static' : 'fixed'}"
               :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
               @click="selectFormat('custom')"
@@ -41,11 +41,11 @@ div(class="page-size-selector")
         input(v-if="!isInputFocused"
               class="body-MD page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
-              :class="(selectedFormatKey === 'custom' ? 'text-blue-1' : 'text-gray-3')"
+              :class="(selectedFormatKey === 'custom' ? 'text-blue-1 input-focused' : 'text-gray-3')"
               :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
               @click="handleDummyClick($event, $refs.inputHeight, 'height')")
         span(class="body-MD page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-blue-1' : 'text-gray-3'") H
+            :class="selectedFormatKey === 'custom' ? (isValidate && !widthValid) ? 'text-red-1' : 'text-blue-1 input-focused' : 'text-gray-3'") H
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                     class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
                     :borderColor="selectedFormatKey === 'custom' ? 'blue-1' : `${isDarkTheme ? 'white' : 'gray-4'}`"
@@ -458,7 +458,6 @@ const component = defineComponent({
       }, 100)
     },
     handleInputBlur(target: string) {
-      this.selectedFormatKey = ''
       if ((target === 'width' || this.isLocked) && isNaN(this.pageWidth)) {
         this.pageWidth = 0
         this.valPageSize.width = ''
@@ -493,6 +492,7 @@ const component = defineComponent({
       designUtils.newDesignWithLoginRedirect(format.width, format.height, format.unit, undefined, path, foldername, bleeds)
     },
     createCustomDesign() {
+      this.selectedFormatKey = 'custom'
       if (this.isFormatApplicable) {
         this.newDesign({ id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit, icon: '' })
       } else {
@@ -728,6 +728,7 @@ export type CPageSizeSelector = InstanceType<typeof component>
             /* Microsoft Edge */
             color: setColor(gray-3);
           }
+
           &.dummy{
             position: static;
           }
@@ -833,6 +834,37 @@ export type CPageSizeSelector = InstanceType<typeof component>
 
 .input-invalid {
   border: 1px solid setColor(red) !important;
+  > input {
+    &::placeholder {
+    /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: setColor(red);
+    opacity: 1; /* Firefox */
+    }
+    &:-ms-input-placeholder {
+      /* Internet Explorer 10-11 */
+      color: setColor(red);
+    }
+    &::-ms-input-placeholder {
+      /* Microsoft Edge */
+      color: setColor(red);
+    }
+  }
+}
+
+.input-focused {
+  &::placeholder {
+    /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: setColor(blue-1);
+    opacity: 1; /* Firefox */
+  }
+  &:-ms-input-placeholder {
+    /* Internet Explorer 10-11 */
+    color: setColor(blue-1);
+  }
+  &::-ms-input-placeholder {
+    /* Microsoft Edge */
+    color: setColor(blue-1);
+  }
 }
 
 @media screen and (max-width: 540px) {
