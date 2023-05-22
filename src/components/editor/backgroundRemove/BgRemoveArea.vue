@@ -351,7 +351,7 @@ export default defineComponent({
       const shift = this.clearMode ? this.clearModeShift : 0
       ctx.beginPath()
       ctx.moveTo(this.initPos.x + shift, this.initPos.y + shift)
-      const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root)
+      const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
       this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
       ctx.lineTo(x + shift, y + shift)
       ctx.stroke()
@@ -496,16 +496,13 @@ export default defineComponent({
       }
     },
     updateCurrCanvasImageElement(blob?: Blob) {
+      console.log(this.currCanvasImageElement)
       if (!this.currCanvasImageElement) {
         this.currCanvasImageElement = new Image()
       }
-      if (blob) {
-        const url = URL.createObjectURL(blob ?? this.steps[this.currStep])
-        this.currCanvasImageElement.src = URL.createObjectURL(blob ?? this.steps[this.currStep])
-        return url
-      }
-
-      return ''
+      const url = URL.createObjectURL(blob ?? this.steps[this.currStep])
+      this.currCanvasImageElement.src = URL.createObjectURL(blob ?? this.steps[this.currStep])
+      return url
     },
     undo() {
       if (!this.isProcessingStepsQueue) {

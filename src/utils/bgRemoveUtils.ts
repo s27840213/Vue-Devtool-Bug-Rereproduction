@@ -159,10 +159,10 @@ class BgRemoveUtils {
   }
 
   async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number): Promise<void> {
-    editorUtils.setCurrActivePanel('remove-bg')
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
     const data = await store.dispatch('user/removeBgStk', { uuid, assetId })
+    editorUtils.setCurrActivePanel('remove-bg')
     this.setIsProcessing(false)
     const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
     this.setAutoRemoveResult(autoRemoveResult)
