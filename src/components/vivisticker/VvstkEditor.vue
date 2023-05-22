@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectStart" @swiperight="handleSwipeRight" @swipeleft="handleSwipeLeft")
-  transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" :style="styles('pages')" @before-leave="handleBeforePageLeave")
+  transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" :style="pagesStyles" @before-leave="handleBeforePageLeave")
     page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
               :class="{'no-transition': currActivePageIndex < 0}"
               :pageIndex="index"
@@ -16,7 +16,7 @@ div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectSt
 
 <script lang="ts">
 import PageCard from '@/components/vivisticker/PageCard.vue'
-import { IPage, IPageState } from '@/interfaces/page'
+import { IPageState } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -38,7 +38,6 @@ export default defineComponent({
   },
   data() {
     return {
-      pageIndex: 0,
       marginTop: 44,
       cardWidth: 0,
       cardHeight: 0
@@ -84,14 +83,8 @@ export default defineComponent({
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
-    config(): IPage {
-      return this.pagesState[this.pageIndex].config
-    },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
-    },
-    selectedLayerCount(): number {
-      return this.currSelectedInfo.layers.length
     },
     strPagePill(): string {
       return this.pagesState.length > 1 ? `${this.currFocusPageIndex + 1} / ${this.pagesState.length}` : 'Pages'
@@ -104,30 +97,9 @@ export default defineComponent({
     ...mapMutations({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
     }),
-    styles(type: string) {
-      switch (type) {
-        case 'control':
-          return {
-            width: `${this.config.width}px`,
-            height: `${this.config.height}px`,
-            overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
-          }
-        case 'pages':
-          return {
-            gridTemplateColumns: `repeat(${this.pagesState.length}, 100%)`
-          }
-        case 'page':
-          return {
-            width: `${this.config.width}px`,
-            height: `${this.config.height}px`,
-            backgroundColor: this.isDuringCopy ? 'transparent' : this.editorBg,
-            margin: `${this.marginTop}px calc((100% - ${this.config.width}px) / 2) 0`,
-            ...(this.isDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {})
-          }
-        case 'scale':
-          return {
-            transform: `scale(${1 / this.contentScaleRatio})`
-          }
+    pagesStyles() {
+      return {
+        gridTemplateColumns: `repeat(${this.pagesState.length}, 100%)`
       }
     },
     copyingStyles() {

@@ -966,8 +966,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   getEditorDimensions(): { x: number, y: number, width: number, height: number } {
-    const { width: pageWidth, height: pageHeight } = pageUtils.getPageSize(0)
-    const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
+    const { width: pageWidth, height: pageHeight } = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
+    const editorEle = document.getElementById(`vvstk-page-${pageUtils.currFocusPageIndex}`) as HTMLElement
     const defaultDimensions = {
       x: 16,
       y: 60,
@@ -1348,7 +1348,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   scrollIntoPage(pageIndex: number, duration: number): void {
-    const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
+    const currentPage = document.getElementById(`page-card-${pageIndex}`) as HTMLElement
     const container = currentPage && currentPage.parentElement
     if (currentPage && container) {
       const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)

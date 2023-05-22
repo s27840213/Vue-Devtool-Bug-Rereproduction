@@ -1,9 +1,8 @@
 <template lang="pug">
-div(:class="`page-card nu-page nu-page_${pageIndex}`"
-  :style="styles('card')")
+div(class="page-card" :id="`page-card-${pageIndex}`" :style="styles('card')")
   div(:class="`page-card__pseudo-page`" :style="styles('page')")
     div(class="page-card__scale-container" :style="styles('scale')")
-      page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="noBg" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+      page-content(:id="`vvstk-page-${pageIndex}`" :config="config" :pageIndex="pageIndex" :noBg="noBg" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
       dim-background(v-if="isImgCtrl" :config="config" :contentScaleRatio="contentScaleRatio")
     div(class="page-control" :style="styles('control')")
       nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
@@ -101,6 +100,9 @@ export default defineComponent({
     selectedLayerCount(): number {
       return this.currSelectedInfo.layers.length
     },
+    isPageDuringCopy(): boolean {
+      return this.isDuringCopy && this.pageIndex === pageUtils.currFocusPageIndex
+    }
   },
   components: {
     PageContent,
@@ -128,9 +130,9 @@ export default defineComponent({
           return {
             width: `${this.config.width}px`,
             height: `${this.config.height}px`,
-            backgroundColor: this.isDuringCopy ? 'transparent' : this.editorBg,
+            backgroundColor: this.isPageDuringCopy ? 'transparent' : this.editorBg,
             marginTop: `${this.marginTop}px`,
-            ...(this.isDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {})
+            ...(this.isPageDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {})
           }
         case 'scale':
           return {
