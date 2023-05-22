@@ -621,6 +621,10 @@ class LayerFactary {
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     const bgImgConfig = config.backgroundImage.config
+    // the following code used to solve the error/bug template json.config
+    // which it's background.config.styles.imgHeight gets a string type instead of a number type
+    config.backgroundImage.config.styles.imgWidth = +config.backgroundImage.config.styles.imgWidth
+    config.backgroundImage.config.styles.imgHeight = +config.backgroundImage.config.styles.imgHeight
     bgImgConfig.id = generalUtils.generateRandomString(8)
     if (bgImgConfig.srcObj.type) {
       if (!bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {

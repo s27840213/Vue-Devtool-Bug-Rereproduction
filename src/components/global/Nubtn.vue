@@ -2,8 +2,8 @@
 div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice()?'mobile':'desktop'}`"
     v-hint="hint"
     @click="click")
-  svg-icon(v-if="theme.includes('icon')"
-          :iconName="icon" :iconWidth="iconSize" :iconColor="iconColor")
+  svg-icon(v-if="theme.includes('icon') && showIcon"
+          :iconName="icon" :iconWidth="iconSize" :iconColor="svgIconColor")
   span(v-if="!theme.includes('icon') || theme === 'icon_text'")
     slot
 </template>
@@ -53,6 +53,14 @@ const component = defineComponent({
       type: String,
       default: ''
     },
+    iconColor: {
+      type: String,
+      default: 'white'
+    },
+    showIcon: {
+      type: Boolean,
+      default: true
+    }
   },
   data() {
     return {
@@ -63,8 +71,8 @@ const component = defineComponent({
     sizeClass(): string {
       return this.size.replace('-', ' ')
     },
-    iconColor(): string {
-      return this.theme === 'icon_text' ? 'white'
+    svgIconColor(): string {
+      return this.theme === 'icon_text' ? this.iconColor
         : this.status === 'disabled' ? 'gray-4' : 'gray-2'
     },
     iconSize(): string {
