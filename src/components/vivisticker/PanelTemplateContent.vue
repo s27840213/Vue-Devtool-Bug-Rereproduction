@@ -145,9 +145,10 @@ export default defineComponent({
       isTabShowAllRecently: 'vivisticker/getShowAllRecently',
       isInEditor: 'vivisticker/getIsInEditor',
       editorType: 'vivisticker/getEditorType',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),
     igLayout() {
-      return this.isInEditor ? this.editorType : this.initIgLayout
+      return this.editorTypeTemplate ? this.editorType : this.initIgLayout
     },
     categories() {
       return this.$store.state.templates[this.igLayout].categories
