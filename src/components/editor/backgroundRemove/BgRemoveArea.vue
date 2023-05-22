@@ -103,6 +103,12 @@ export default defineComponent({
       this.createInitImageCtx()
     }
     this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
+    if (this.$isTouchDevice()) {
+      this.editorViewCanvas.addEventListener('touchstart', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      })
+    }
     window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
@@ -119,6 +125,12 @@ export default defineComponent({
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
     this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
+    if (this.$isTouchDevice()) {
+      this.editorViewCanvas.removeEventListener('touchstart', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      })
+    }
     window.removeEventListener('keydown', this.handleKeydown)
   },
   computed: {
