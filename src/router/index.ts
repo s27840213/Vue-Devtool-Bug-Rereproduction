@@ -170,7 +170,9 @@ router.beforeEach(async (to, from, next) => {
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 
-    if (window.location.hostname !== 'sticker.vivipic.com') {
+    if (to.name === 'Screenshot') {
+      store.commit('SET_showGlobalErrorModal', false) // /screenshot never shows error modal
+    } else if (window.location.hostname !== 'sticker.vivipic.com') {
       store.commit('SET_showGlobalErrorModal', true) // non-production always show error modal
     } else {
       store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
