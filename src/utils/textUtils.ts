@@ -1144,6 +1144,13 @@ class TextUtils {
         layer.styles.rotate = 0
         layer.styles.horizontalFlip = false
         layer.styles.verticalFlip = false
+        layer.layers
+          .forEach(l => {
+            if (l.type === LayerType.image) {
+              l.styles.scale *= layer.styles.scale
+            }
+            l.parentLayerStyles = undefined
+          })
         subLayers = groupUtils.mapLayersToPage(layer.layers, layer).map(l => this.resetScaleForLayer(l, preMount) as Exclude<AllLayerTypes, ITmp>)
         newStyles = calcTmpProps(subLayers)
         subLayers = groupUtils.mapLayersToTmp(subLayers, newStyles)

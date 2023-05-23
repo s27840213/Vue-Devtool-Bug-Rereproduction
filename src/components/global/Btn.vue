@@ -77,7 +77,7 @@ const component = defineComponent({
     },
     btnStyles(): {[index: string]: string} {
       return {
-        display: this.flexDir === 'row' ? 'initial' : 'flex',
+        display: 'flex',
         'flex-direction': this.flexDir
       }
     }
@@ -88,6 +88,7 @@ export default component
 
 <style lang="scss" scoped>
 .btn {
+  box-sizing: border-box;
   transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
   &__text {
     white-space: nowrap;
