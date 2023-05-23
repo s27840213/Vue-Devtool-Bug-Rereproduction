@@ -16,6 +16,7 @@ div(class="panel-text-effect")
               class="panel-text-effect__effects--icon" iconColor="gray-5")
       img(v-else :src="effectIcon(currCategory, effect).name"
           class="panel-text-effect__effects--icon"
+          :width="effectIcon(currCategory, effect).size"
           :height="effectIcon(currCategory, effect).size")
       pro-item(v-if="effect.plan" theme="roundedRect")
       div(v-if="currEffect?.key === effect.key && effect.key !== 'none'"
@@ -243,6 +244,7 @@ export default defineComponent({
       .panel-text-effect__effects--icon {
         background-color: setColor(gray-5);
         border-radius: 5px;
+        object-fit: cover;
         &.svg-icon {
           padding: 16px;
         }
@@ -325,6 +327,7 @@ export default defineComponent({
         position: absolute;
         width: 100%;
         height: 100%;
+        object-fit: cover;
         top: -1px;
         left: -1px;
         border: 1px solid setColor(gray-5);

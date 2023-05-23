@@ -91,7 +91,9 @@ export default defineComponent({
         height: this.config.styles.height,
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
+      textBgVersion: 0,
       textBg: {} as CustomElementConfig | null,
+      textFillVersion: 0,
       textFillBg: {} as CustomElementConfig | null,
       textFillSpanStyle: [] as Record<string, string | number>[][]
     }
@@ -104,7 +106,6 @@ export default defineComponent({
   },
   mounted() {
     this.resizeAfterFontLoaded()
-    textBgUtils.on(this.config.id, this.drawTextBg)
   },
   computed: {
     isCurveText() {
@@ -146,21 +147,19 @@ export default defineComponent({
       this.drawTextBg()
       textUtils.untilFontLoaded(newVal).then(async () => {
         this.drawTextBg()
-        this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+        this.drawTextFill()
       })
     },
     async 'config.styles.width'() {
       this.drawTextBg()
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+      this.drawTextFill()
     },
     async 'config.styles.height'() {
       this.drawTextBg()
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+      this.drawTextFill()
     },
-    async 'config.styles.textFill'() {
-      this.textFillBg = textFillUtils.drawTextFill(this.config)
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
-    },
+    'config.styles.textBg'() { this.drawTextBg() },
+    'config.styles.textFill'() { this.drawTextFill() },
   },
   methods: {
     textWrapperStyle(): Record<string, string> {
@@ -175,10 +174,20 @@ export default defineComponent({
     drawTextBg(): Promise<void> {
       return new Promise(resolve => {
         this.$nextTick(async () => {
-          this.textBg = await textBgUtils.drawTextBg(this.config)
+          // Prevent earlier result overwrite later result
+          const newTextBgVersion = this.textBgVersion = this.textBgVersion + 1
+          const result = await textBgUtils.drawTextBg(this.config)
+          if (newTextBgVersion === this.textBgVersion) this.textBg = result
           resolve()
         })
       })
+    },
+    async drawTextFill() {
+      // Prevent earlier result overwrite later result
+      const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
+      this.textFillBg = textFillUtils.drawTextFill(this.config)
+      const result = await textFillUtils.convertTextEffect(this.config)
+      if (newTextFillVersion === this.textFillVersion) this.textFillSpanStyle = result
     },
     isLayerAutoResizeNeeded(): boolean {
       return this.config.isAutoResizeNeeded
@@ -260,8 +269,7 @@ export default defineComponent({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       await this.drawTextBg()
-      this.textFillBg = textFillUtils.drawTextFill(this.config)
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+      await this.drawTextFill()
     },
     async resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
@@ -274,8 +282,7 @@ export default defineComponent({
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawTextBg()
-      this.textFillBg = textFillUtils.drawTextFill(this.config)
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+      this.drawTextFill()
     }
   }
 })

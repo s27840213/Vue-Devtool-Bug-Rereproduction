@@ -436,6 +436,7 @@ export default defineComponent({
           position: absolute;
           width: 100%;
           height: 100%;
+          object-fit: cover;
           top: -1px;
           left: -1px;
           border: 1px solid setColor(gray-5);

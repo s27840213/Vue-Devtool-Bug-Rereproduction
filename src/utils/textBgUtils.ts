@@ -8,7 +8,6 @@ import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
-import { EventEmitter } from 'events'
 import _, { cloneDeep, isEqual, omit } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
@@ -627,18 +626,6 @@ function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
 class TextBg {
   private currColorKey = ''
   effects = this.getDefaultEffects() as Record<string, Record<string, string | number | boolean>>
-  event = new EventEmitter()
-  eventHash = {} as { [index: string]: (color: string) => void }
-
-  on(type: string, callback: (color: string) => void) {
-    // replace origin event
-    if (this.eventHash[type]) {
-      this.event.off(type, this.eventHash[type])
-      delete this.eventHash[type]
-    }
-    this.event.on(type, callback)
-    this.eventHash[type] = callback
-  }
 
   rgba = (color: string, opacity: number) =>
     textEffectUtils.convertColor2rgba(color, opacity)
@@ -1144,7 +1131,6 @@ class TextBg {
         await textUtils.setParagraphProp('lineHeight', 1.4)
         await textUtils.setParagraphProp('fontSpacing', 0)
       }
-      this.event.emit(layer.id) // Update textBg local var in NuText.vue
     }
   }
 
