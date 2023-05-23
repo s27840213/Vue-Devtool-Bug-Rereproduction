@@ -133,7 +133,7 @@ export default defineComponent({
       line-height: 20px;
       @media screen and (max-width: 540px) {
         white-space: nowrap;
-        padding: 3px 26px;
+        padding: 3px 10px;
       }
       &.selected {
         background: setColor(blue-1);
