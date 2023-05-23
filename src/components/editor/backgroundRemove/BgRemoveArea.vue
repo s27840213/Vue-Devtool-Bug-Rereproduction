@@ -85,7 +85,7 @@ export default defineComponent({
     }
   },
   created() {
-    logUtils.setLog('BgRemoveArea created')
+    logUtils.setLogAndConsoleLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
     if (this.inVivisticker) {
@@ -96,11 +96,11 @@ export default defineComponent({
     }
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
-    logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)
-    logUtils.setLog(`auto remove img src: ${this.imgSrc}`)
+    logUtils.setLogAndConsoleLog(`initImgSrc: ${this.initImgSrc}`)
+    logUtils.setLogAndConsoleLog(`auto remove img src: ${this.imgSrc}`)
   },
   mounted() {
-    logUtils.setLog('BgRemoveArea mounted')
+    logUtils.setLogAndConsoleLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
 
     this.imageElement = new Image()
@@ -291,6 +291,7 @@ export default defineComponent({
       clearSteps: 'bgRemove/CLEAR_steps'
     }),
     initCanvas() {
+      logUtils.setLogAndConsoleLog('initCanvas')
       this.contentCanvas = this.$refs.canvas as HTMLCanvasElement
       this.contentCanvas.width = this.canvasWidth
       this.contentCanvas.height = this.canvasHeight
@@ -299,8 +300,12 @@ export default defineComponent({
       ctx.lineWidth = this.brushSize
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
+      logUtils.setLogAndConsoleLog('setup contentCtx')
+      logUtils.setLogAndConsoleLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.contentCtx = ctx
+      logUtils.setLogAndConsoleLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       // this.ctx.globalCompositeOperation = 'destination-out'
+      logUtils.setLogAndConsoleLog(`ctx: ${JSON.stringify(this.contentCtx)}`)
 
       this.drawImageToCtx()
       this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -409,6 +414,8 @@ export default defineComponent({
       this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
     },
     drawImageToCtx(img?: HTMLImageElement) {
+      logUtils.setLogAndConsoleLog('draw imag to ctx: ')
+      logUtils.setLogAndConsoleLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.setCompositeOperationMode('source-over')
       this.contentCtx.drawImage(img ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       this._setCanvas(this.contentCanvas)
@@ -456,7 +463,9 @@ export default defineComponent({
       /**
        * @Note GlobalCompositeOperation type has some problems
        */
-      logUtils.setLog('setCompositeOperationMode: ' + mode)
+      logUtils.setLogAndConsoleLog('setCompositeOperationMode: ' + mode)
+      logUtils.setLogAndConsoleLog('ctx: ' + JSON.stringify(ctx))
+      logUtils.setLogAndConsoleLog('contenCtxx: ' + JSON.stringify(this.contentCtx))
       if (ctx) {
         ctx.globalCompositeOperation = mode as any
       } else {
