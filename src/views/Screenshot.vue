@@ -1,21 +1,21 @@
 <template lang="pug">
 div(class="screenshot")
-  nu-layer(v-if="config !== undefined"
+  nu-layer(v-if="usingLayer"
             ref="target"
             :config="config"
-            :page="pages[0]"
+            :page="page"
             :pageIndex="0"
             :layerIndex="0")
   div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
     img(:src="backgroundImage" @load="onload")
   div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
-  page-content(v-if="usingJSON" :config="pages[0]" :pageIndex="0" :noBg="true" :style="pageTransforms()")
+  page-content(v-if="usingJSON" :config="page" :pageIndex="0" :noBg="true" :style="pageTransforms()")
 </template>
 
 <script lang="ts">
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
-import { IImageStyle, ILayer } from '@/interfaces/layer'
+import { AllLayerTypes, IImageStyle, ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
@@ -39,7 +39,7 @@ export default defineComponent({
   name: 'ScreenShot',
   data() {
     return {
-      config: undefined as any,
+      usingLayer: false,
       backgroundImage: '',
       backgroundColor: '',
       usingJSON: false,
@@ -68,15 +68,21 @@ export default defineComponent({
     vivistickerUtils.registerCallbacks('screenshot')
   },
   computed: {
-    ...mapGetters({
+    ...(mapGetters({
       pages: 'getPages'
-    }),
+    }) as { pages: () => IPage[] }),
+    page(): IPage {
+      return this.pages[0]
+    },
+    config(): ILayer {
+      return this.page.layers[0]
+    },
     mode(): ScreenShotMode {
       if (this.backgroundImage !== '') {
         return ScreenShotMode.BG_IMG
       } else if (this.backgroundColor !== '') {
         return ScreenShotMode.BG_COLOR
-      } else if (this.config !== undefined) {
+      } else if (this.usingLayer) {
         return ScreenShotMode.LAYER
       } else {
         return ScreenShotMode.PAGE
@@ -112,18 +118,20 @@ export default defineComponent({
             const svgWidth = svgAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * svgAspectRatio
             const svgHeight = svgAspectRatio > pageAspectRatio ? window.outerWidth / svgAspectRatio : window.outerHeight
             json.ratio = 1
-            this.config = layerFactary.newShape({
-              ...json,
-              styles: {
-                width: svgWidth,
-                height: svgHeight,
-                initWidth: vSize[0],
-                initHeight: vSize[1],
-                scale: svgWidth / vSize[0],
-                color: json.color,
-                vSize: json.vSize
-              }
-            })
+            this.setConfig(
+              layerFactary.newShape({
+                ...json,
+                styles: {
+                  width: svgWidth,
+                  height: svgHeight,
+                  initWidth: vSize[0],
+                  initHeight: vSize[1],
+                  scale: svgWidth / vSize[0],
+                  color: json.color,
+                  vSize: json.vSize
+                }
+              })
+            )
             setTimeout(() => { this.onload() }, 100)
             break
           }
@@ -143,19 +151,21 @@ export default defineComponent({
               this.onload()
             })
 
-            this.config = layerFactary.newImage({
-              srcObj,
-              styles: {
-                x: 0,
-                y: 0,
-                width: photoWidth,
-                height: photoHeight,
-                initWidth: photoWidth,
-                initHeight: photoHeight,
-                imgWidth: photoWidth,
-                imgHeight: photoHeight
-              }
-            })
+            this.setConfig(
+              layerFactary.newImage({
+                srcObj,
+                styles: {
+                  x: 0,
+                  y: 0,
+                  width: photoWidth,
+                  height: photoHeight,
+                  initWidth: photoWidth,
+                  initHeight: photoHeight,
+                  imgWidth: photoWidth,
+                  imgHeight: photoHeight
+                }
+              })
+            )
             break
           }
           case 'svgImage2': {
@@ -179,22 +189,24 @@ export default defineComponent({
               this.onload()
             })
 
-            this.config = layerFactary.newImage({
-              srcObj,
-              styles: {
-                ...styles,
-                x: xDiff * scaleRatio,
-                y: yDiff * scaleRatio,
-                width: styles.width * scaleRatio,
-                height: styles.height * scaleRatio,
-                initWidth: styles.width * scaleRatio,
-                initHeight: styles.height * scaleRatio,
-                imgWidth: imgWidth * scaleRatio,
-                imgHeight: imgHeight * scaleRatio,
-                imgX: imgX * scaleRatio,
-                imgY: imgY * scaleRatio
-              }
-            })
+            this.setConfig(
+              layerFactary.newImage({
+                srcObj,
+                styles: {
+                  ...styles,
+                  x: xDiff * scaleRatio,
+                  y: yDiff * scaleRatio,
+                  width: styles.width * scaleRatio,
+                  height: styles.height * scaleRatio,
+                  initWidth: styles.width * scaleRatio,
+                  initHeight: styles.height * scaleRatio,
+                  imgWidth: imgWidth * scaleRatio,
+                  imgHeight: imgHeight * scaleRatio,
+                  imgX: imgX * scaleRatio,
+                  imgY: imgY * scaleRatio
+                }
+              })
+            )
             break
           }
           // case 'text': { deprecated
@@ -314,7 +326,7 @@ export default defineComponent({
       }
     },
     clearBuffers() {
-      this.config = undefined
+      this.usingLayer = false
       this.backgroundImage = ''
       this.backgroundColor = ''
       this.usingJSON = false
@@ -323,6 +335,7 @@ export default defineComponent({
       this.JSONcontentSize = { width: 0, height: 0 }
       vivistickerUtils.isAnyIOSImgOnError = false
       this.extraData = undefined
+      pageUtils.setPages()
     },
     onload() {
       console.log('loaded')
@@ -349,38 +362,11 @@ export default defineComponent({
       } else {
         vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params)
       }
+    },
+    setConfig(layer: AllLayerTypes) {
+      layerUtils.addLayersToPos(0, [layer], 0)
+      this.usingLayer = true
     }
-    // fitPageToScreen(width: number, height: number): number {
-    //   const screenWidth = window.outerWidth
-    //   const screenHeight = window.outerHeight
-    //   const screenRatio = screenWidth / screenHeight
-    //   const objectRatio = width / height
-    //   if (screenRatio > objectRatio) {
-    //     this.JSONcontentSize = {
-    //       width: screenHeight * objectRatio,
-    //       height: screenHeight
-    //     }
-    //     return screenHeight / height
-    //   } else {
-    //     this.JSONcontentSize = {
-    //       width: screenWidth,
-    //       height: screenWidth / objectRatio
-    //     }
-    //     return screenWidth / width
-    //   }
-    // },
-    // resizePage(data: { x: number, y: number, width: number, height: number, options: string }) {
-    //   const { x, y, width, height, options } = data
-    //   this.options = options
-    //   this.pageTranslate = { x: -x, y: -y }
-    //   const page = pageUtils.getPage(0)
-    //   this.pageScale = this.fitPageToScreen(width, height)
-    //   pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
-    //   setTimeout(() => {
-    //     console.log('resized')
-    //     vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, false)
-    //   }, 100)
-    // }
   }
 })
 </script>
