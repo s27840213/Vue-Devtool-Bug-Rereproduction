@@ -6,6 +6,7 @@ import { IImage } from '@/interfaces/layer'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import store from '@/store'
 import { LayerProcessType, LayerType, SidebarPanelType } from '@/store/types'
+import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
@@ -161,12 +162,14 @@ class BgRemoveUtils {
   async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number): Promise<void> {
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
+    logUtils.setLog('start removing bg')
     const data = await store.dispatch('user/removeBgStk', { uuid, assetId })
-    generalUtils.copyText(JSON.stringify(data))
-    notify({ group: 'copy', text: '去背測試已複製' })
+    logUtils.setLog('finish removing bg')
+    logUtils.setLog(`remove bg result: ${JSON.stringify(data)}`)
     editorUtils.setCurrActivePanel('remove-bg')
     this.setIsProcessing(false)
     const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
+    logUtils.setLog(`autoRemoveResult: ${JSON.stringify(autoRemoveResult)}`)
     this.setAutoRemoveResult(autoRemoveResult)
     this.setInBgRemoveMode(true)
     // this.setIsProcessing(false)
