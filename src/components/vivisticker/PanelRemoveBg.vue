@@ -48,12 +48,13 @@ export default defineComponent({
         height: this.panelRemoveBg ? this.panelRemoveBg.offsetHeight : 0,
       }
     },
-    // eslint-disable-next-line vue/no-unused-properties
     scaleRatio() {
       const { width, height } = this.containerWH
       const { width: imgWidth, height: imgHeight } = this.previewImage
-      const ratio = Math.min(width / imgWidth, height / imgHeight)
-      return ratio * 0.9
+      if (width === 0 || height === 0 || imgWidth === 0 || imgHeight === 0) return 1
+      const ratio = Math.min(width / imgWidth, height / imgHeight) * 0.9
+
+      return ratio
     },
     alignPos(): string {
       return this.inBgRemoveMode || this.isProcessing ? 'flex-start' : 'center'
@@ -76,7 +77,6 @@ export default defineComponent({
       if (val) {
         this.$nextTick(() => {
           this.mobilePanelHeight = document.querySelector('.mobile-panel')?.clientHeight || 0
-          console.log(this.mobilePanelHeight)
         })
       }
     }
