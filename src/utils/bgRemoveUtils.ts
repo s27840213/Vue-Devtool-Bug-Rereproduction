@@ -162,6 +162,8 @@ class BgRemoveUtils {
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
     const data = await store.dispatch('user/removeBgStk', { uuid, assetId })
+    generalUtils.copyText(JSON.stringify(data))
+    notify({ group: 'copy', text: '去背測試已複製' })
     editorUtils.setCurrActivePanel('remove-bg')
     this.setIsProcessing(false)
     const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
