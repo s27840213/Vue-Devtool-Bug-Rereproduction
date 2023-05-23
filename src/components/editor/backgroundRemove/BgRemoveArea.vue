@@ -114,12 +114,12 @@ export default defineComponent({
     }
     this.imageElement.onerror = (ev) => {
       logUtils.setLogAndConsoleLog('imageElement onerror triggered')
-      logUtils.setLogAndConsoleLog(`${ev}`)
+      logUtils.setLogAndConsoleLog(`${JSON.stringify(ev)}`)
     }
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     logUtils.setLogAndConsoleLog(`set image element src: ${this.imgSrc}`)
-    logUtils.setLogAndConsoleLog(`set image element: ${this.imageElement}`)
+    logUtils.setLogAndConsoleLog(`set image element: ${JSON.stringify(this.imageElement)}`)
 
     this.initImageElement = new Image()
     this.initImageElement.onload = () => {
