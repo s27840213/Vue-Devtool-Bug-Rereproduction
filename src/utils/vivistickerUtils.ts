@@ -263,7 +263,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   copyWithScreenshotUrl(query: string, afterCopy?: (flag: string) => void) {
-    this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'editorCopy' }, `screenshot-${query}`).then((data) => {
+    this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'editorResizeCopy' }, `screenshot-${query}`).then((data) => {
       afterCopy && afterCopy(data?.flag ?? '0')
     })
   }
