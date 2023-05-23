@@ -1,14 +1,15 @@
 <template lang="pug">
 div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectStart" @swiperight="handleSwipeRight" @swipeleft="handleSwipeLeft")
-  transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" :style="pagesStyles" @before-leave="handleBeforePageLeave" :css="animated")
-    page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
-              :class="{'no-transition': currActivePageIndex < 0}"
-              :pageIndex="index"
-              :pageState="page"
-              :cardWidth="cardWidth"
-              :cardHeight="cardHeight"
-              :marginTop="marginTop"
-              :no-bg="!editorTypeTemplate")
+  div(class="vvstk-editor__pages-container" :style="containerStyles()")
+    transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" @before-leave="handleBeforePageLeave" :css="animated")
+      page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
+                :class="{'no-transition': currActivePageIndex < 0}"
+                :pageIndex="index"
+                :pageState="page"
+                :cardWidth="cardWidth"
+                :cardHeight="cardHeight"
+                :marginTop="marginTop"
+                :no-bg="!editorTypeTemplate")
   div(v-if="editorTypeTemplate" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
@@ -34,6 +35,10 @@ export default defineComponent({
     isInEditor: {
       type: Boolean,
       required: true
+    },
+    marginBottom: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -102,13 +107,11 @@ export default defineComponent({
     ...mapMutations({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
     }),
-    pagesStyles() {
-      return {
-        gridTemplateColumns: `repeat(${this.pagesState.length}, 100%)`
-      }
-    },
     copyingStyles() {
       return this.isDuringCopy ? { background: 'transparent' } : {}
+    },
+    containerStyles() {
+      return this.isInEditor ? { transform: `translateY(-${this.marginBottom}px)` } : {}
     },
     selectStart(e: PointerEvent) {
       if (e.pointerType === 'mouse' && e.button !== 0) return
@@ -200,6 +203,9 @@ export default defineComponent({
   @include size(100%);
   background: setColor(black-2);
   overflow: hidden;
+  &__pages-container {
+    transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
+  }
   &__pages {
     display: grid;
     grid-auto-flow: column;

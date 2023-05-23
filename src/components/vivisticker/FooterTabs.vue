@@ -515,6 +515,9 @@ export default defineComponent({
         }
         const container = this.$refs.container as HTMLElement
         container.scrollTo(0, 0)
+        this.$nextTick(() => {
+          this.updateContainerOverflow()
+        })
       },
       deep: true
     },

@@ -4,10 +4,9 @@ div(class="vivisticker" :style="copyingStyles()")
     header-tabs(v-show="showHeaderTabs" :style="headerStyles()")
     div(ref="vivisticker__content"
         class="vivisticker__content"
-        :style="contentStyle"
         @click.self="outerClick")
       my-design(v-show="isInMyDesign && !isInEditor")
-      vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor" :currPage="currPage")
+      vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor" :currPage="currPage" :marginBottom="marginBottom")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
       share-template(v-if="isInTemplateShare" :config="currPage")
     teleport(v-if="mounted" to="#vivisticker__mobile-panel-bottom" :disabled="!isMobilePanelBottom")
@@ -242,9 +241,6 @@ export default defineComponent({
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
     },
-    contentStyle(): Record<string, string> {
-      return this.isInEditor ? { transform: `translateY(-${this.marginBottom}px)` } : {}
-    },
     showHeaderTabs(): boolean {
       return !['text', 'template-content'].includes(this.currActivePanel)
     },
@@ -292,7 +288,7 @@ export default defineComponent({
     topStyles() {
       return {
         ...this.isDuringCopy ? { background: 'transparent' } : {},
-        gridTemplateRows: this.currActivePanel === 'text' ? '1fr' : 'auto 1fr'
+        gridTemplateRows: ['text', 'template-content'].includes(this.currActivePanel) ? '1fr' : 'auto 1fr'
       }
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
@@ -421,7 +417,6 @@ export default defineComponent({
     width: 100%;
     overflow: hidden;
     z-index: setZindex("editor-view");
-    transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
   }
 
   &__slide {
