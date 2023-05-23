@@ -1,7 +1,4 @@
-import {
-AllLayerTypes,
-IGroup, IParagraph, IText, ITmp
-} from '@/interfaces/layer'
+import { AllLayerTypes, IGroup, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ISelection } from '@/interfaces/text'
 import router from '@/router'
