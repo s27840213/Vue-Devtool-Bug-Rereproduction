@@ -112,6 +112,10 @@ export default defineComponent({
       this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
     }
+    this.imageElement.onerror = (ev) => {
+      logUtils.setLogAndConsoleLog('imageElement onerror triggered')
+      logUtils.setLogAndConsoleLog(`${ev}`)
+    }
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     logUtils.setLogAndConsoleLog(`set image element src: ${this.imgSrc}`)
