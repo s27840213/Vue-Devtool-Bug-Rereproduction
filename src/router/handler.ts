@@ -27,7 +27,14 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
     const height = urlParams.get('height')
     const unit = urlParams.get('unit')
     const themeId = urlParams.get('themeId')
-    const groupId = urlParams.get('group_id')
+    const bleeds = urlParams.get('bleeds')
+    const arrBleeds = bleeds ? bleeds.split(',').map((item) => parseFloat(item)) : null
+    const bleedsConfig = arrBleeds ? {
+      top: arrBleeds[0],
+      right: arrBleeds[1],
+      bottom: arrBleeds[2],
+      left: arrBleeds[3]
+    } : undefined
 
     if (type && designId) {
       switch (type) {
@@ -45,7 +52,7 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
           break
         }
         default: {
-          await uploadUtils.getDesign(type, { designId }, { width, height, groupId: groupId ?? '' })
+          await uploadUtils.getDesign(type, { designId }, { width, height, unit: unit || 'px', bleeds: bleedsConfig })
           store.commit('file/SET_setLayersDone')
         }
       }
@@ -54,6 +61,7 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
         parseFloat(width),
         parseFloat(height === '0' ? width : height),
         unit || 'px',
+        bleedsConfig
       )
       if (themeId === '7') {
         store.commit('SET_groupType', 1)

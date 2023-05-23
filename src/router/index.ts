@@ -68,6 +68,10 @@ const routes: Array<RouteRecordRaw> = [
         const margin = urlParams.get('margin')
         const margins = margin ? margin.split(',') : []
         const renderForPDF = urlParams.get('renderForPDF')
+        const unitScale = urlParams.get('unit_scale')
+
+        store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
+        store.commit('user/SET_STATE', { unitScale: unitScale === '1' })
 
         const informBackend = () => {
           console.log('all resize done')
@@ -89,7 +93,6 @@ const routes: Array<RouteRecordRaw> = [
           generalUtils.initializeFlags(LayerType.text, [response], informBackend)
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
         } else if (url) {
           // for old version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
@@ -118,7 +121,6 @@ const routes: Array<RouteRecordRaw> = [
           generalUtils.initializeFlags(LayerType.text, [response], informBackend)
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
         }
         next()
       } catch (error) {
@@ -296,7 +298,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Force login in these page
-  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
+  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) && !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode'])) {
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
       if (token === '' || !token) {
@@ -325,6 +327,12 @@ router.beforeEach(async (to, from, next) => {
     // const json = appJson
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    if (window.location.hostname !== 'vivipic.com') {
+      store.commit('SET_showGlobalErrorModal', true) // non-production always show error modal
+    } else {
+      store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
+    }
 
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,

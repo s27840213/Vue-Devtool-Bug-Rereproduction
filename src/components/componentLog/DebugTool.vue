@@ -173,7 +173,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  background: white;
+  background: setColor(white, 0.4);
   padding: 2px;
   position: absolute;
   bottom: 60px;

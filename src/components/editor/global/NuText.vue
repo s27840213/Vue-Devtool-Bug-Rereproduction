@@ -168,7 +168,6 @@ export default defineComponent({
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
-        ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
       }
     },
     drawTextBg(): Promise<void> {

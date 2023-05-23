@@ -47,7 +47,6 @@ function resolve (dir) {
 module.exports = defineConfig({
     transpileDependencies: true,
     chainWebpack: (config) => {
-        // config.cache(true)
         /**
          * use esbuild-loader to replace babel-loader
          */

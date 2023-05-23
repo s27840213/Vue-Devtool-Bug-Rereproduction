@@ -95,13 +95,13 @@ export default defineComponent({
                 disabled: this.usage.diskLoading,
                 type: 'transparent-mid'
               }, {
-                label: this.$t('NN0642'),
+                label: this.$tc('NN0642', 1),
                 func: this.contact
               }]
             },
             small: {
               desc: 'NN0640',
-              buttonLabel: this.$t('NN0642'),
+              buttonLabel: this.$tc('NN0642', 1),
               func: this.contact
             }
           }

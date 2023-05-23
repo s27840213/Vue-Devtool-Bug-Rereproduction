@@ -1,18 +1,21 @@
 import {
-  IGroup, IParagraph, IText, ITmp
+AllLayerTypes,
+IGroup, IParagraph, IText, ITmp
 } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
-import { calcTmpProps } from '@/utils/groupUtils'
+import { LayerType } from '@/store/types'
+import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
-import TextPropUtils from '@/utils/textPropUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import Graphemer from 'graphemer'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
-import GeneralUtils from './generalUtils'
-import LayerUtils from './layerUtils'
+import generalUtils from './generalUtils'
+import layerUtils from './layerUtils'
 import logUtils from './logUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
@@ -205,7 +208,7 @@ class TextUtils {
       .every(k => (start[k] as any) === end[k])
   }
 
-  focus(start?: ISelection, end?: ISelection, subLayerIndex?: number, layerIndex = LayerUtils.layerIndex) {
+  focus(start?: ISelection, end?: ISelection, subLayerIndex?: number, layerIndex = layerUtils.layerIndex) {
     let text: HTMLElement
     const range = new Range()
     if (typeof subLayerIndex !== 'undefined') {
@@ -275,7 +278,7 @@ class TextUtils {
   }
 
   async getTextHWAsync(_content: IText, widthLimit = -1): Promise<{ width: number, height: number }> {
-    const textId = GeneralUtils.generateRandomString(12)
+    const textId = generalUtils.generateRandomString(12)
     const body = this.genTextDiv(_content, widthLimit)
     body.setAttribute('id', textId)
     const scale = _content.styles.scale ?? 1
@@ -292,7 +295,7 @@ class TextUtils {
 
   genTextDiv(_content: IText, widthLimit = -1): HTMLDivElement {
     const body = document.createElement('div')
-    const content = GeneralUtils.deepCopy(_content)
+    const content = generalUtils.deepCopy(_content)
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
       let fontSize = 0
@@ -361,7 +364,7 @@ class TextUtils {
   }
 
   updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false, noPush = false) {
-    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     if (subLayerIndex !== -1) {
       const config = group.layers[subLayerIndex] as IText
@@ -372,7 +375,7 @@ class TextUtils {
         textHW = originSize
       } else {
         textHW = this.getTextHW(config, config.widthLimit)
-        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+        layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
       }
       /**
        * Group layout height compensation
@@ -393,7 +396,7 @@ class TextUtils {
             })
           targetSubLayers
             .forEach(data => {
-              LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, data[0], {
+              layerUtils.updateSubLayerStyles(layerUtils.pageIndex, layerIndex, data[0], {
                 y: data[1] + diff
               })
             })
@@ -403,7 +406,7 @@ class TextUtils {
     let { width, height } = calcTmpProps(group.layers)
     width *= group.styles.scale
     height *= group.styles.scale
-    LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
+    layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
 
     /**
      * Compensate the offset difference to the left-edge of group layer
@@ -416,7 +419,7 @@ class TextUtils {
         })
       if (minX > 0) {
         for (const [idx, layer] of Object.entries(group.layers)) {
-          LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+          layerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
             x: layer.styles.x - minX
           })
         }
@@ -425,7 +428,7 @@ class TextUtils {
   }
 
   asSubLayerSizeRefresh(pageIndex: number, layerIndex: number, subLayerIndex: number, height: number, heightOri: number, noPush = false) {
-    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     const targetSubLayers = [] as Array<[number, number]>
     const config = group.layers[subLayerIndex]
@@ -442,7 +445,7 @@ class TextUtils {
           })
         targetSubLayers
           .forEach(data => {
-            LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
+            layerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
               y: data[1] + (height - heightOri)
             })
           })
@@ -456,7 +459,7 @@ class TextUtils {
           })
         targetSubLayers
           .forEach(data => {
-            LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
+            layerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
               y: data[1] - (height - heightOri)
             })
           })
@@ -466,14 +469,14 @@ class TextUtils {
   }
 
   updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, noPush = false) {
-    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     const config = group.layers[subLayerIndex]
     if (config.type !== 'text') throw new Error('updateGroupLayerSizeByShape only accepts text subLayer')
     if (textShapeUtils.isCurvedText(config.styles)) {
       const heightOri = config.styles.height
       const textHW = textShapeUtils.getCurveTextProps(config as IText)
-      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textHW)
+      layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textHW)
       this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri, noPush)
       this.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
@@ -482,11 +485,11 @@ class TextUtils {
   }
 
   updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
-    const targetLayer = LayerUtils.getLayer(pageIndex, layerIndex)
+    const targetLayer = layerUtils.getLayer(pageIndex, layerIndex)
     if (subLayerIndex === -1) { // single text layer
       const config = targetLayer as IText
       if (textShapeUtils.isCurvedText(config.styles)) {
-        LayerUtils.updateLayerStyles(pageIndex, layerIndex, textShapeUtils.getCurveTextProps(config))
+        layerUtils.updateLayerStyles(pageIndex, layerIndex, textShapeUtils.getCurveTextProps(config))
       } else {
         const widthLimit = config.widthLimit
         const textHW = this.getTextHW(config, widthLimit)
@@ -496,29 +499,29 @@ class TextUtils {
           x = config.styles.x - (textHW.width - config.styles.width) / 2
           y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
-        LayerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        LayerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit })
+        layerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit })
       }
     } else { // sub text layer in a group
       const group = targetLayer as IGroup
       const config = group.layers[subLayerIndex] as IText
       if (textShapeUtils.isCurvedText(config.styles)) {
-        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textShapeUtils.getCurveTextProps(config))
+        layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textShapeUtils.getCurveTextProps(config))
         this.updateGroupLayerSize(pageIndex, layerIndex)
         this.fixGroupCoordinates(pageIndex, layerIndex)
       } else {
         const widthLimit = config.widthLimit
         const textHW = this.getTextHW(config, widthLimit)
-        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
-        LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { widthLimit })
+        layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+        layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { widthLimit })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-        LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
+        layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
       }
     }
   }
 
   fixGroupXCoordinates(pageIndex: number, layerIndex: number) {
-    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minX = Number.MAX_SAFE_INTEGER
     if (!group.layers) return
     group.layers
@@ -526,17 +529,17 @@ class TextUtils {
         minX = Math.min(minX, mathUtils.getBounding(l.styles).x)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
-      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+      layerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
         x: layer.styles.x - minX
       })
     }
-    LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
-      x: group.styles.x + minX
+    layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+      x: group.styles.x + minX * group.styles.scale
     })
   }
 
   fixGroupYCoordinates(pageIndex: number, layerIndex: number) {
-    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minY = Number.MAX_SAFE_INTEGER
     if (!group.layers) return
     group.layers
@@ -544,12 +547,12 @@ class TextUtils {
         minY = Math.min(minY, mathUtils.getBounding(l.styles).y)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
-      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
+      layerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
         y: layer.styles.y - minY
       })
     }
-    LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
-      y: group.styles.y + minY
+    layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+      y: group.styles.y + minY * group.styles.scale
     })
   }
 
@@ -560,12 +563,12 @@ class TextUtils {
 
   getAddPosition(width: number, height: number, pageIndex?: number) {
     const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
-    const page = LayerUtils.getPage(targePageIndex)
+    const page = layerUtils.getPage(targePageIndex)
     const x = (page.width - width) / 2
     const y = (page.height - height) / 2
 
     if (targePageIndex === pageUtils.currFocusPageIndex) {
-      const currLayer = LayerUtils.getLayer(targePageIndex, LayerUtils.layerIndex)
+      const currLayer = layerUtils.getLayer(targePageIndex, layerUtils.layerIndex)
       if (currLayer.styles) {
         const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
         const specy = currLayer.styles.y + currLayer.styles.height
@@ -579,7 +582,7 @@ class TextUtils {
 
   // TODO: In addStandardText call resetTextField, textLayer is Partial<IText>, need more type check here.
   resetTextField(textLayer: IText, pageIndex: number, field?: string) {
-    const page = LayerUtils.getPage(pageIndex) as IPage
+    const page = layerUtils.getPage(pageIndex) as IPage
     /**
      * Add the response font-size for each paragraph
      */
@@ -732,6 +735,73 @@ class TextUtils {
     }
   }
 
+  autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number }): {
+    widthLimit: number,
+    otherDimension: number,
+    loops: number
+  } {
+    const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+    const scale = config.styles.scale
+    let direction = 0
+    let shouldContinue = true
+    let widthLimit = initSize.widthLimit
+    let autoDimension = -1
+    let autoSize = this.getTextHW(config, widthLimit)
+    const originDimension = initSize[dimension]
+    let prevDiff = Number.MAX_VALUE
+    let minDiff = Number.MAX_VALUE
+    let minDiffWidLimit = -1
+    let minDiffDimension = -1
+    while (shouldContinue) {
+      autoDimension = autoSize[dimension]
+      const currDiff = Math.abs(autoDimension - originDimension)
+      // console.log(autoDimension, originDimension, currDiff, widthLimit, config.widthLimit)
+      if (currDiff < minDiff) {
+        minDiff = currDiff
+        minDiffWidLimit = widthLimit
+        minDiffDimension = autoDimension
+      }
+      if (currDiff > prevDiff) {
+        if (minDiffWidLimit !== -1) {
+          return {
+            widthLimit: minDiffWidLimit,
+            otherDimension: minDiffDimension,
+            loops: Math.abs(direction)
+          }
+        } else {
+          return {
+            widthLimit: initSize.widthLimit,
+            otherDimension: originDimension,
+            loops: Math.abs(direction)
+          }
+        }
+      }
+      prevDiff = currDiff
+      if (autoDimension - originDimension > 5 * scale) {
+        if (direction < 0) break
+        if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
+        widthLimit += scale
+        direction += 1
+        autoSize = this.getTextHW(config, widthLimit)
+        continue
+      }
+      if (originDimension - autoDimension > 5 * scale) {
+        if (direction > 0) break
+        if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
+        widthLimit -= scale
+        direction -= 1
+        autoSize = this.getTextHW(config, widthLimit)
+        continue
+      }
+      shouldContinue = false
+    }
+    return {
+      widthLimit,
+      otherDimension: autoDimension,
+      loops: Math.abs(direction)
+    }
+  }
+
   async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<{
     widthLimit: number,
     otherDimension: number,
@@ -801,8 +871,8 @@ class TextUtils {
 
   async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
     return new Promise<void>((resolve) => {
-      if (GeneralUtils.isValidFloat(_value.toString())) {
-        _value = GeneralUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max)
+      if (generalUtils.isValidFloat(_value.toString())) {
+        _value = generalUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max)
 
         let preprocessedValue: number
         switch (prop) {
@@ -812,18 +882,18 @@ class TextUtils {
           case 'fontSpacing':
             preprocessedValue = _value / 1000
         }
-        const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = LayerUtils
+        const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
         window.requestAnimationFrame(() => {
           if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
             (currLayer as IGroup | ITmp).layers
               .forEach((l, idx) => {
-                l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, preprocessedValue)
-                l.type === 'text' && this.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
+                l.type === 'text' && textPropUtils.propAppliedAllText(layerIndex, idx, prop, preprocessedValue)
+                l.type === 'text' && this.updateGroupLayerSizeByShape(layerUtils.pageIndex, layerIndex, idx)
               })
-            TextPropUtils.updateTextPropsState({ [prop]: _value })
+            textPropUtils.updateTextPropsState({ [prop]: _value })
           } else {
             tiptapUtils.applyParagraphStyle(prop, preprocessedValue, false)
-            TextPropUtils.updateTextPropsState({ [prop]: _value })
+            textPropUtils.updateTextPropsState({ [prop]: _value })
           }
           resolve()
         })
@@ -832,7 +902,7 @@ class TextUtils {
   }
 
   async untilFontLoadedForPage(page: IPage, toSetFlag = false): Promise<void> {
-    const setFlagId = GeneralUtils.generateRandomString(12)
+    const setFlagId = generalUtils.generateRandomString(12)
     if (toSetFlag) {
       this.toSetFlagId = setFlagId
       this.setIsFontLoading(true)
@@ -872,7 +942,7 @@ class TextUtils {
   }
 
   async untilFontLoaded(paragraphs: IParagraph[], toSetFlag = false): Promise<void> {
-    const setFlagId = GeneralUtils.generateRandomString(12)
+    const setFlagId = generalUtils.generateRandomString(12)
     if (toSetFlag) {
       this.toSetFlagId = setFlagId
       this.setIsFontLoading(true)
@@ -934,7 +1004,7 @@ class TextUtils {
   }
 
   waitFontLoadingAndRecord(paragraphs: IParagraph[], callback: (() => void) | undefined = undefined) {
-    const recordId = GeneralUtils.generateRandomString(12)
+    const recordId = generalUtils.generateRandomString(12)
     this.toRecordId = recordId
     this.toSetFlagId = recordId
     this.setIsFontLoading(true)
@@ -969,7 +1039,7 @@ class TextUtils {
   }
 
   waitGroupFontLoadingAndRecord(group: IGroup, callback: (() => void) | undefined = undefined) {
-    const recordId = GeneralUtils.generateRandomString(12)
+    const recordId = generalUtils.generateRandomString(12)
     this.toRecordId = recordId
     this.toSetFlagId = recordId
     this.setIsFontLoading(true)
@@ -1005,6 +1075,95 @@ class TextUtils {
       console.log(error)
       finalCallBack(true)
     })
+  }
+
+  setStylesBuffer(styles: { [key: string]: any }, keys: string[]): { [key: string]: any } {
+    const res = {} as { [key: string]: any }
+    for (const key of keys) {
+      res[key] = styles[key]
+    }
+    return res
+  }
+
+  resetScaleForLayer(layer: AllLayerTypes, preMount = false): AllLayerTypes {
+    layer = generalUtils.deepCopy(layer)
+    let subLayers
+    let newStyles
+    let stylesBuffer = {} as { [key: string]: any }
+    let originHW
+    let newHW
+    switch (layer.type) {
+      case LayerType.text:
+        if (layer.styles.scale > 1) {
+          stylesBuffer = this.setStylesBuffer(layer.styles, ['scale'])
+          layer.styles.scale = 1
+          layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
+            return size * stylesBuffer.scale
+          })
+          if (!preMount) {
+            // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
+            // and let the mounted hook of NuText to deal with size and position
+            originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
+            if (layer.widthLimit !== -1) {
+              layer.widthLimit = this.autoResizeCoreSync(layer, {
+                width: originHW.width,
+                height: originHW.height,
+                widthLimit: layer.widthLimit
+              }).widthLimit
+            }
+            newHW = this.getTextHW(layer, layer.widthLimit)
+            Object.assign(layer.styles, {
+              width: newHW.width,
+              height: newHW.height,
+              x: originHW.x + (newHW.width - originHW.width) / 2,
+              y: originHW.y + (newHW.height - originHW.height) / 2
+            })
+          }
+          if (layer.styles.textEffect.fontSize !== undefined) {
+            layer.styles.textEffect.fontSize = textEffectUtils.getLayerFontSize(layer.paragraphs)
+          }
+        }
+        break
+      case LayerType.tmp:
+      case LayerType.group:
+        /**
+         * record the opacity of group/tmp and reset it before ungrouping and re-apply it to the re-formed group/tmp,
+         * because opacity behaves differently on group from on individual layers.
+         * map the layers back to page to apply the scale to all sub-layers,
+         * and reset the scale individually for certain typed sub-layers.
+         * after that, re-form the group/tmp with those sub-layers.
+         */
+        stylesBuffer = this.setStylesBuffer(layer.styles, ['opacity', 'rotate', 'horizontalFlip', 'verticalFlip'])
+        if (layer.type === LayerType.group) {
+          layer.layers.forEach((subLayer: AllLayerTypes, index: number) => {
+            subLayer.styles.zindex = layer.styles.zindex + index
+          }) // some subLayers in template have inconsistent zindexes with layer indexes, fix them here
+        }
+        layer.styles.opacity = 100
+        layer.styles.rotate = 0
+        layer.styles.horizontalFlip = false
+        layer.styles.verticalFlip = false
+        layer.layers
+          .forEach(l => {
+            if (l.type === LayerType.image) {
+              l.styles.scale *= layer.styles.scale
+            }
+            l.parentLayerStyles = undefined
+          })
+        subLayers = groupUtils.mapLayersToPage(layer.layers, layer).map(l => this.resetScaleForLayer(l, preMount) as Exclude<AllLayerTypes, ITmp>)
+        newStyles = calcTmpProps(subLayers)
+        subLayers = groupUtils.mapLayersToTmp(subLayers, newStyles)
+        Object.assign(layer.styles, newStyles)
+        Object.assign(layer.styles, stylesBuffer)
+        layer.styles.scale = 1
+        layer.layers = subLayers
+        break
+    }
+    return layer
+  }
+
+  resetScale(page: IPage, preLoad = false): void {
+    page.layers = page.layers.map(layer => this.resetScaleForLayer(layer, preLoad))
   }
 }
 

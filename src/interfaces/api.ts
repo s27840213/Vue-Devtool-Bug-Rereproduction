@@ -1,4 +1,5 @@
 import { RawImage } from '@/interfaces/gallery'
+import { IBleed } from '@/interfaces/page'
 import { intersection, isEqual } from 'lodash'
 
 /* eslint-disable camelcase */
@@ -131,6 +132,7 @@ export interface IListServiceParams {
   cache?: boolean
   platform?: string
   all_theme?: number
+  shuffle?: number
 }
 
 export interface IGroupDesignInputParams {
@@ -161,6 +163,8 @@ export interface IListServiceContentDataItem {
   unit?: string
   valid?: number
   plan?: number
+  icon?: string,
+  bleed?: IBleed
 }
 
 export interface ICategoryItem {
@@ -195,6 +199,10 @@ export interface IListServiceData {
   preview2?: string
   next_page?: number
   tags?: string[]
+  /**
+   * @param theme_ids - plz see https://www.notion.so/vivipic/Vivipic-35c05fc6c7e04d509ab7eb7a0f393fe4
+   */
+  theme_ids?: number[]
   url?: string // For IG tutorial viedo
 }
 
@@ -449,6 +457,7 @@ export interface IAssetTemplate {
     width: number
     height: number
     themes: string[]
+    unit: string
   }[]
   match_cover: {
     id: string
@@ -456,6 +465,7 @@ export interface IAssetTemplate {
     width: number
     height: number
     theme_id: string
+    unit: string
   }
   group_type: number
   preview: RawImage
