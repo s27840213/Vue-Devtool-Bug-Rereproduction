@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectStart" @swiperight="handleSwipeRight" @swipeleft="handleSwipeLeft")
-  transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" :style="pagesStyles" @before-leave="handleBeforePageLeave")
+  transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" :style="pagesStyles" @before-leave="handleBeforePageLeave" :css="animated")
     page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
               :class="{'no-transition': currActivePageIndex < 0}"
               :pageIndex="index"
@@ -40,7 +40,8 @@ export default defineComponent({
     return {
       marginTop: 44,
       cardWidth: 0,
-      cardHeight: 0
+      cardHeight: 0,
+      animated: false
     }
   },
   watch: {
@@ -48,7 +49,10 @@ export default defineComponent({
       if (newVal && !oldVal) {
         this.$nextTick(() => {
           this.handleResize()
+          this.animated = true
         })
+      } else {
+        this.animated = false
       }
     },
     windowSize: {
@@ -221,7 +225,7 @@ export default defineComponent({
 
 .scale-in-fade-out {
   &-move {
-    transition: transform 300ms ease-in-out;
+    transition: v-bind("animated ? 'transform 300ms ease-in-out' : 'none'");
   }
   &-enter-active {
     transition: transform 300ms ease-in-out;

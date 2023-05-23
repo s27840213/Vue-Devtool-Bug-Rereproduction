@@ -369,7 +369,7 @@ export default defineComponent({
           activeLayer.styles.height / 2 - this.currPage.height / 2
         offset = layerMiddleY * this.contentScaleRatio
       }
-      const pseudoPage = document.querySelector('.vvstk-editor__pseudo-page') as HTMLElement | null
+      const pseudoPage = document.getElementById(`vvstk-page-${pageUtils.currFocusPageIndex}`) as HTMLElement | null
       if (pseudoPage) {
         pageOffset = contentHeight - pseudoPage.clientHeight
       }
