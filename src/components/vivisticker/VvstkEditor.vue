@@ -202,8 +202,9 @@ export default defineComponent({
 .vvstk-editor {
   @include size(100%);
   background: setColor(black-2);
-  overflow: hidden;
   &__pages-container {
+    @include size(100%);
+    overflow: hidden;
     transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
   }
   &__pages {
