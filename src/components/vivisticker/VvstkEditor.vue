@@ -81,7 +81,8 @@ export default defineComponent({
       contentScaleRatio: 'getContentScaleRatio',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isImgCtrl: 'imgControl/isImgCtrl',
-      isBgImgCtrl: 'imgControl/isBgImgCtrl'
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isInTemplateShare: 'vivisticker/getIsInTemplateShare'
     }),
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -145,6 +146,8 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(true)
     },
     handleResize() {
+      if (this.isInTemplateShare) return
+
       // resize all pages
       this.pagesState.forEach((pageState: IPageState, pageIndex: number) => {
         resizeUtils.resizePage(pageIndex, pageState.config, vivistickerUtils.getPageSize(this.editorType))

@@ -39,7 +39,8 @@ interface IViviStickerState {
   modalInfo: { [key: string]: any },
   payment: IPayment,
   uuid: string,
-  loadedFonts: { [key: string]: true }
+  loadedFonts: { [key: string]: true },
+  templateShareType: 'none' | 'story' | 'post',
 }
 
 const EDITOR_BGS = [
@@ -110,7 +111,8 @@ const getDefaultState = (): IViviStickerState => ({
   },
   uuid: '',
   loadedFonts: {},
-  debugMode: false
+  debugMode: false,
+  templateShareType: 'none'
 })
 
 const state = getDefaultState()
@@ -141,6 +143,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsInBgShare(state: IViviStickerState): boolean {
     return state.isInBgShare
+  },
+  getIsInTemplateShare(state: IViviStickerState): boolean {
+    return state.templateShareType !== 'none'
   },
   getIsInGroupTemplate(state: IViviStickerState): boolean {
     return state.isInGroupTemplate
@@ -453,7 +458,10 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   UPDATE_addLoadedFont(state: IViviStickerState, font: string) {
     state.loadedFonts[font] = true
-  }
+  },
+  SET_templateShareType(state: IViviStickerState, type: 'none' | 'story' | 'post') {
+    state.templateShareType = type
+  },
 }
 
 export default {

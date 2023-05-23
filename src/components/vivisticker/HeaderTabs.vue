@@ -77,6 +77,7 @@ export default defineComponent({
       isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
+      isInTemplateShare: 'vivisticker/getIsInTemplateShare',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
@@ -102,7 +103,11 @@ export default defineComponent({
       return imageUtils.isImgControl()
     },
     leftTabs(): TabConfig[] {
-      if (this.isInEditor) {
+      if (this.isInTemplateShare) {
+        return [
+          { icon: 'chevron-left', width: 24, action: this.clearTemplateShare }
+        ]
+      } else if (this.isInEditor) {
         const retTabs = []
         const stepTabs = [
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: shortcutUtils.undo },
@@ -148,12 +153,12 @@ export default defineComponent({
       return ''
     },
     centerTitle(): string {
-      if (this.isInEditor) {
+      if (this.isInBgShare || this.isInTemplateShare) {
+        return `${this.$t('NN0214')}`
+      } else if (this.isInEditor) {
         return ''
       } else if (this.isInMyDesign) {
         return `${this.$t('NN0080')}`
-      } else if (this.isInBgShare) {
-        return `${this.$t('NN0214')}`
       } else if (this.isInCategory) {
         if (this.showAllRecently) {
           return `${this.$t('NN0024')}`
@@ -165,12 +170,14 @@ export default defineComponent({
       }
     },
     rightTabs(): TabConfig[] {
-      if (this.isInEditor) {
+      if (this.isInTemplateShare) {
+        return []
+      } else if (this.isInEditor) {
         if (this.editorTypeTemplate) {
           return [
             { icon: 'copy', width: 24, action: this.handleCopy },
             { icon: 'trash', width: 24, action: shortcutUtils.del },
-            { icon: 'share', width: 24, action: this.handleShare },
+            { icon: 'share', width: 24, action: this.handleShareTemplate },
           ]
         }
         return [
@@ -207,6 +214,7 @@ export default defineComponent({
       setIsInCategory: 'vivisticker/SET_isInCategory',
       setShowAllRecently: 'vivisticker/SET_showAllRecently',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
+      setTemplateShareType: 'vivisticker/SET_templateShareType',
       setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor',
@@ -248,6 +256,9 @@ export default defineComponent({
       this.setIsInBgShare(false)
       this.setShareItem(undefined)
       this.setShareColor('')
+    },
+    clearTemplateShare() {
+      this.setTemplateShareType('none')
     },
     handleSwitchBg() {
       this.switchBg()
@@ -366,12 +377,8 @@ export default defineComponent({
     handleSelectDesign() {
       this.setIsInSelectionMode(!this.isInSelectionMode)
     },
-    handleShare() {
-      if (this.editorType === 'story') {
-        console.log('share IG story')
-      } else if (this.editorType === 'post') {
-        console.log('share IG post')
-      }
+    handleShareTemplate() {
+      this.setTemplateShareType(this.editorType)
     },
   }
 })

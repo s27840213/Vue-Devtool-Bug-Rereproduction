@@ -9,6 +9,7 @@ div(class="vivisticker" :style="copyingStyles()")
       my-design(v-show="isInMyDesign && !isInEditor")
       vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor" :currPage="currPage")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
+      share-template(v-if="isInTemplateShare" :config="currPage")
     teleport(v-if="mounted" to="#vivisticker__mobile-panel-bottom" :disabled="!isMobilePanelBottom")
       transition(name="panel-up"
                 @before-enter="beforeEnter"
@@ -21,7 +22,7 @@ div(class="vivisticker" :style="copyingStyles()")
           @switchTab="switchTab"
           @panelHeight="setPanelHeight"
           @bottomThemeChange="(val) => isMobilePanelBottom = val")
-  footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
+  footer-tabs(v-if="showFooterTabs" class="vivisticker__bottom"
     @switchTab="switchTab"
     @switchMainTab="switchMainTab"
     :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
@@ -42,6 +43,7 @@ import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import MainMenu from '@/components/vivisticker/MainMenu.vue'
 import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
+import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
 import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
@@ -74,7 +76,8 @@ export default defineComponent({
     FooterTabs,
     Tutorial,
     FullPage,
-    SlideUserSettings
+    SlideUserSettings,
+    ShareTemplate
   },
   data() {
     return {
@@ -226,6 +229,7 @@ export default defineComponent({
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInEditor: 'vivisticker/getIsInEditor',
       isInBgShare: 'vivisticker/getIsInBgShare',
+      isInTemplateShare: 'vivisticker/getIsInTemplateShare',
       showTutorial: 'vivisticker/getShowTutorial',
       fullPageType: 'vivisticker/getFullPageType',
       userInfo: 'vivisticker/getUserInfo',
@@ -243,6 +247,9 @@ export default defineComponent({
     },
     showHeaderTabs(): boolean {
       return !['text', 'template-content'].includes(this.currActivePanel)
+    },
+    showFooterTabs(): boolean {
+      return !(this.isInBgShare || this.isInTemplateShare)
     }
   },
   watch: {
