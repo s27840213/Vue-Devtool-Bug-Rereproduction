@@ -9,6 +9,7 @@ div(class="bg-remove-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
     canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
+    img(:src="imgSrc")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
@@ -112,9 +113,9 @@ export default defineComponent({
       this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
     }
-    this.imageElement.onerror = (ev) => {
+    this.imageElement.onerror = (event) => {
       logUtils.setLogAndConsoleLog('imageElement onerror triggered')
-      logUtils.setLogAndConsoleLog(`${JSON.stringify(ev)}`)
+      logUtils.setLogAndConsoleLog(`${JSON.stringify(event)}`)
     }
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
