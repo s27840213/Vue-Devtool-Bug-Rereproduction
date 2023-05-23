@@ -106,7 +106,10 @@ export default defineComponent({
     this.imageElement = new Image()
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
+    logUtils.setLogAndConsoleLog(`set image element src: ${this.imgSrc}`)
+    logUtils.setLogAndConsoleLog(`set image element: ${this.imageElement}`)
     this.imageElement.onload = () => {
+      logUtils.setLogAndConsoleLog('imageElement onload triggered')
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
@@ -248,6 +251,7 @@ export default defineComponent({
       }
     },
     clearMode(newVal) {
+      logUtils.setLogAndConsoleLog('trigger clear mode watch')
       if (newVal) {
         this.contentCtx.globalCompositeOperation = 'destination-out'
         this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -345,6 +349,7 @@ export default defineComponent({
       this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
     },
     createInitImageCtx() {
+      logUtils.setLogAndConsoleLog('createInitImageCtx')
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
       this.initImgCanvas.width = this.size.width
       this.initImgCanvas.height = this.size.height
@@ -426,6 +431,7 @@ export default defineComponent({
       }
     },
     drawInClearMode(e: MouseEvent) {
+      logUtils.setLogAndConsoleLog('draw in clear mode')
       this.cyReady = false
       this.setCompositeOperationMode('source-over', this.contentCtx)
       this.contentCtx.filter = 'none'
@@ -440,6 +446,7 @@ export default defineComponent({
       this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
+      logUtils.setLogAndConsoleLog('draw in restore mode')
       this.clearCtx(this.blurCtx)
       this.drawLine(e, this.blurCtx)
       this.setCompositeOperationMode('source-in', this.blurCtx)
