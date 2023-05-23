@@ -23,6 +23,7 @@ teleport(v-if="useMobileEditor || inVivisticker" to=".header-bar")
 
 <script lang="ts">
 import { IBgRemoveInfo } from '@/interfaces/image'
+import logUtils from '@/utils/logUtils'
 import MagnifyUtils from '@/utils/magnifyUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -84,6 +85,7 @@ export default defineComponent({
     }
   },
   created() {
+    logUtils.setLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
     if (this.inVivisticker) {
@@ -94,8 +96,11 @@ export default defineComponent({
     }
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
+    logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)
+    logUtils.setLog(`auto remove img src: ${this.imgSrc}`)
   },
   mounted() {
+    logUtils.setLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
 
     this.imageElement = new Image()
@@ -351,7 +356,7 @@ export default defineComponent({
       const shift = this.clearMode ? this.clearModeShift : 0
       ctx.beginPath()
       ctx.moveTo(this.initPos.x + shift, this.initPos.y + shift)
-      const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root)
+      const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
       this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
       ctx.lineTo(x + shift, y + shift)
       ctx.stroke()
@@ -451,6 +456,7 @@ export default defineComponent({
       /**
        * @Note GlobalCompositeOperation type has some problems
        */
+      logUtils.setLog('setCompositeOperationMode: ' + mode)
       if (ctx) {
         ctx.globalCompositeOperation = mode as any
       } else {
@@ -499,13 +505,9 @@ export default defineComponent({
       if (!this.currCanvasImageElement) {
         this.currCanvasImageElement = new Image()
       }
-      if (blob) {
-        const url = URL.createObjectURL(blob ?? this.steps[this.currStep])
-        this.currCanvasImageElement.src = URL.createObjectURL(blob ?? this.steps[this.currStep])
-        return url
-      }
-
-      return ''
+      const url = URL.createObjectURL(blob ?? this.steps[this.currStep])
+      this.currCanvasImageElement.src = URL.createObjectURL(blob ?? this.steps[this.currStep])
+      return url
     },
     undo() {
       if (!this.isProcessingStepsQueue) {
