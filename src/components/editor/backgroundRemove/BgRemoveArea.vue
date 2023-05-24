@@ -9,7 +9,6 @@ div(class="bg-remove-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
     canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
-    img(:src="imgSrc")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
@@ -86,7 +85,7 @@ export default defineComponent({
     }
   },
   created() {
-    logUtils.setLogAndConsoleLog('BgRemoveArea created')
+    logUtils.setLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
     if (this.inVivisticker) {
@@ -97,34 +96,34 @@ export default defineComponent({
     }
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
-    logUtils.setLogAndConsoleLog(`initImgSrc: ${this.initImgSrc}`)
-    logUtils.setLogAndConsoleLog(`auto remove img src: ${this.imgSrc}`)
+    logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)
+    logUtils.setLog(`auto remove img src: ${this.imgSrc}`)
   },
   mounted() {
-    logUtils.setLogAndConsoleLog('BgRemoveArea mounted')
+    logUtils.setLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
 
     this.imageElement = new Image()
     this.imageElement.onload = () => {
-      logUtils.setLogAndConsoleLog('imageElement onload triggered')
+      logUtils.setLog('imageElement onload triggered')
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
       this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
     }
-    this.imageElement.onerror = (event) => {
-      logUtils.setLogAndConsoleLog('imageElement onerror triggered')
-      logUtils.setLogAndConsoleLog(`${JSON.stringify(event)}`)
+    this.imageElement.onerror = (ev) => {
+      logUtils.setLog('imageElement onerror triggered')
+      logUtils.setLog(`${JSON.stringify(ev)}`)
     }
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
-    logUtils.setLogAndConsoleLog(`set image element src: ${this.imgSrc}`)
-    logUtils.setLogAndConsoleLog(`set image element: ${JSON.stringify(this.imageElement)}`)
+    logUtils.setLog(`set image element src: ${this.imgSrc}`)
+    logUtils.setLog(`set image element: ${JSON.stringify(this.imageElement)}`)
 
     this.initImageElement = new Image()
     this.initImageElement.onload = () => {
-      logUtils.setLogAndConsoleLog('initImageElement onload triggered')
+      logUtils.setLog('initImageElement onload triggered')
       this.createInitImageCtx()
     }
     this.initImageElement.src = this.initImgSrc
@@ -258,7 +257,7 @@ export default defineComponent({
       }
     },
     clearMode(newVal) {
-      logUtils.setLogAndConsoleLog('trigger clear mode watch')
+      logUtils.setLog('trigger clear mode watch')
       if (newVal) {
         this.contentCtx.globalCompositeOperation = 'destination-out'
         this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -302,7 +301,7 @@ export default defineComponent({
       clearSteps: 'bgRemove/CLEAR_steps'
     }),
     initCanvas() {
-      logUtils.setLogAndConsoleLog('initCanvas')
+      logUtils.setLog('initCanvas')
       this.contentCanvas = this.$refs.canvas as HTMLCanvasElement
       this.contentCanvas.width = this.canvasWidth
       this.contentCanvas.height = this.canvasHeight
@@ -311,12 +310,12 @@ export default defineComponent({
       ctx.lineWidth = this.brushSize
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
-      logUtils.setLogAndConsoleLog('setup contentCtx')
-      logUtils.setLogAndConsoleLog('contentCtx: ' + JSON.stringify(this.contentCtx))
+      logUtils.setLog('setup contentCtx')
+      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.contentCtx = ctx
-      logUtils.setLogAndConsoleLog('contentCtx: ' + JSON.stringify(this.contentCtx))
+      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       // this.ctx.globalCompositeOperation = 'destination-out'
-      logUtils.setLogAndConsoleLog(`ctx: ${JSON.stringify(this.contentCtx)}`)
+      logUtils.setLog(`ctx: ${JSON.stringify(this.contentCtx)}`)
 
       this.drawImageToCtx()
       this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -356,7 +355,7 @@ export default defineComponent({
       this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
     },
     createInitImageCtx() {
-      logUtils.setLogAndConsoleLog('createInitImageCtx')
+      logUtils.setLog('createInitImageCtx')
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
       this.initImgCanvas.width = this.size.width
       this.initImgCanvas.height = this.size.height
@@ -426,8 +425,8 @@ export default defineComponent({
       this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
     },
     drawImageToCtx(img?: HTMLImageElement) {
-      logUtils.setLogAndConsoleLog('draw imag to ctx: ')
-      logUtils.setLogAndConsoleLog('contentCtx: ' + JSON.stringify(this.contentCtx))
+      logUtils.setLog('draw imag to ctx: ')
+      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.setCompositeOperationMode('source-over')
       this.contentCtx.drawImage(img ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       this._setCanvas(this.contentCanvas)
@@ -438,7 +437,7 @@ export default defineComponent({
       }
     },
     drawInClearMode(e: MouseEvent) {
-      logUtils.setLogAndConsoleLog('draw in clear mode')
+      logUtils.setLog('draw in clear mode')
       this.cyReady = false
       this.setCompositeOperationMode('source-over', this.contentCtx)
       this.contentCtx.filter = 'none'
@@ -453,7 +452,7 @@ export default defineComponent({
       this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
-      logUtils.setLogAndConsoleLog('draw in restore mode')
+      logUtils.setLog('draw in restore mode')
       this.clearCtx(this.blurCtx)
       this.drawLine(e, this.blurCtx)
       this.setCompositeOperationMode('source-in', this.blurCtx)
@@ -477,9 +476,9 @@ export default defineComponent({
       /**
        * @Note GlobalCompositeOperation type has some problems
        */
-      logUtils.setLogAndConsoleLog('setCompositeOperationMode: ' + mode)
-      logUtils.setLogAndConsoleLog('ctx: ' + JSON.stringify(ctx))
-      logUtils.setLogAndConsoleLog('contenCtxx: ' + JSON.stringify(this.contentCtx))
+      logUtils.setLog('setCompositeOperationMode: ' + mode)
+      logUtils.setLog('ctx: ' + JSON.stringify(ctx))
+      logUtils.setLog('contenCtxx: ' + JSON.stringify(this.contentCtx))
       if (ctx) {
         ctx.globalCompositeOperation = mode as any
       } else {
