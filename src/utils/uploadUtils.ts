@@ -747,8 +747,8 @@ class UploadUtils {
       })
       .catch(async (error) => {
         // Error: 403: Forbidden
-        logUtils.setLog(`Failed: ${error}`)
-        console.error(error)
+        logUtils.setLog('uploadDesign failed:')
+        logUtils.setLogForError(error as Error)
         await store.dispatch('user/login', { token: this.token })
       })
   }

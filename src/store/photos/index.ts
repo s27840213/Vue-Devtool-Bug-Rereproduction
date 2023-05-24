@@ -2,6 +2,7 @@ import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import unsplash from '@/apis/unsplash'
 import pexels from '@/apis/pexels'
 import { IPhoto } from '@/interfaces/api'
+import logUtils from '@/utils/logUtils'
 
 const UNSPLASH_PER_PAGE = 30 as const
 const PEXELS_PER_PAGE = 50 as const
@@ -41,7 +42,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
         ...params
       })
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async getMorePhotosFromUnsplash({ commit, getters, state }) {
@@ -58,7 +59,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
         ...params
       })
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async getPhotosFromPexels({ commit }, params = {}) {
@@ -75,7 +76,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
         ...params
       })
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async getMorePhotosFromPexels({ commit, getters, state }) {
@@ -92,7 +93,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
         ...params
       })
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
     }
   }
 }
