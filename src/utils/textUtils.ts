@@ -930,7 +930,7 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      logUtils.setLogAndConsoleLog('untilFontLoadedForPage:', error)
+      logUtils.setLogForError(error as Error)
       isError = true
     } finally {
       if (isError === true) {
@@ -960,7 +960,7 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      logUtils.setLogAndConsoleLog('untilFontLoaded:', error)
+      logUtils.setLogForError(error as Error)
       isError = true
     } finally {
       if (isError === true) {
@@ -1033,7 +1033,7 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      logUtils.setLogAndConsoleLog('waitFontLoadingAndRecord:', error)
+      logUtils.setLogForError(error as Error)
       finalCallBack(true)
     })
   }
@@ -1072,7 +1072,7 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      logUtils.setLogAndConsoleLog('waitGroupFontLoadingAndRecord:', error)
+      logUtils.setLogForError(error as Error)
       finalCallBack(true)
     })
   }
