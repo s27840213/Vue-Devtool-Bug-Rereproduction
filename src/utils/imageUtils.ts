@@ -581,7 +581,7 @@ class ImageUtils {
 
   async getBgRemoveInfoStk(url: string, initSrc: string) {
     const { width, height } = await this.getImageSize(url, 1000, 1000)
-
+    url = this.appendRandomQuery(url)
     return {
       width: width,
       height: height,
