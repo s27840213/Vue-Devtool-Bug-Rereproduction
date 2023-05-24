@@ -11,7 +11,20 @@ svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
 </template>
 
 <script lang="ts">
+import svgIconUtils from '@/utils/svgIconUtils'
 import { defineComponent } from 'vue'
+
+// eslint-disable-next-line no-undef
+const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
+const req = require.context('@/assets/icon', true, /\.svg$/)
+
+if (window.location.host !== 'vivipic.com') {
+  svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+    return context.default?.id ?? ''
+  }))
+} else {
+  requireAll(req)
+}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
