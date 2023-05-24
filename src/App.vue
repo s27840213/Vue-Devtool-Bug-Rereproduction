@@ -180,7 +180,8 @@ export default defineComponent({
   &__router-view {
     height: 100%;
     max-height: 100%;
-    overflow: scroll
+    overflow: scroll;
+    @include no-scrollbar;
   }
 }
 

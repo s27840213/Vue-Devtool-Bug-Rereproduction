@@ -37,7 +37,7 @@ const routes: Array<RouteRecordRaw> = [
         }
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -51,7 +51,7 @@ const routes: Array<RouteRecordRaw> = [
         vivistickerUtils.hideController()
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -63,7 +63,7 @@ const routes: Array<RouteRecordRaw> = [
       try {
         router.replace({ name: 'ViviSticker', query: {}, params: {} })
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   }

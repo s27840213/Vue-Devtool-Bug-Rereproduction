@@ -313,7 +313,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         root: true
       })
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async groupDesign({ commit, dispatch }, params: IGroupDesignInputParams) {
@@ -341,7 +341,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         commit('SET_groupId', '', { root: true })
       }
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async putAssetDesign({ dispatch }, { assetId, type, wait }) {
@@ -377,7 +377,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       return Promise.reject(error)
     }
   },
@@ -387,7 +387,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       const { data } = await userApis.register('token', JSON.stringify(meta))
       return Promise.resolve(data)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       return Promise.reject(error)
     }
   },
@@ -448,7 +448,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       const { data } = await userApis.sendVcode(uname, account, upass, register, vcode_only, type, token, locale)
       return Promise.resolve(data)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       return Promise.reject(error)
     }
   },
@@ -458,7 +458,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       const { data } = await userApis.verifyVcode(account, vcode, token, type)
       return Promise.resolve(data)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       return Promise.reject(error)
     }
   },
@@ -467,7 +467,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       const { data } = await userApis.updateUser(token, account, upass, uname, locale, subscribe, country, device, app)
       return Promise.resolve(data)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       return Promise.reject(error)
     }
   },
@@ -477,7 +477,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       const { data } = await userApis.removeBg(srcObj, aspect)
       return data
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async removeBgStk({ state }, { uuid, assetId }) {

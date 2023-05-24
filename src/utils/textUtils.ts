@@ -1007,11 +1007,11 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      // console.log(error)
+      logUtils.setLogForError(error as Error)
       isError = true
     } finally {
       if (isError === true) {
-        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)
@@ -1037,12 +1037,11 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      console.log(error)
-      logUtils.setLog(JSON.stringify(error))
+      logUtils.setLogForError(error as Error)
       isError = true
     } finally {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)
@@ -1072,7 +1071,7 @@ class TextUtils {
         if (fontFileList.length !== 0) return
       }
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       throw error
     }
   }
@@ -1088,7 +1087,7 @@ class TextUtils {
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void) => {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       setTimeout(() => {
         if (callback) {
@@ -1111,7 +1110,7 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       finalCallBack(true)
     })
   }
@@ -1123,7 +1122,7 @@ class TextUtils {
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void[]) => {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       setTimeout(() => {
         if (callback) {
@@ -1150,7 +1149,7 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       finalCallBack(true)
     })
   }
@@ -1168,6 +1167,7 @@ class TextUtils {
     let subLayers
     let newStyles
     let stylesBuffer = {} as { [key: string]: any }
+    let preParams
     let originHW
     let newHW
     switch (layer.type) {
@@ -1182,20 +1182,25 @@ class TextUtils {
             // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
             // and let the mounted hook of NuText to deal with size and position
             originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
-            if (layer.widthLimit !== -1) {
-              layer.widthLimit = this.autoResizeCoreSync(layer, {
-                width: originHW.width,
-                height: originHW.height,
-                widthLimit: layer.widthLimit
-              }).widthLimit
+            if (textShapeUtils.isCurvedText(layer.styles)) {
+              newHW = textShapeUtils.getCurveTextProps(layer)
+              Object.assign(layer.styles, newHW)
+            } else {
+              if (layer.widthLimit !== -1) {
+                layer.widthLimit = this.autoResizeCoreSync(layer, {
+                  width: originHW.width,
+                  height: originHW.height,
+                  widthLimit: layer.widthLimit
+                }).widthLimit
+              }
+              newHW = this.getTextHW(layer, layer.widthLimit)
+              Object.assign(layer.styles, {
+                width: newHW.width,
+                height: newHW.height,
+                x: originHW.x + (newHW.width - originHW.width) / 2,
+                y: originHW.y + (newHW.height - originHW.height) / 2
+              })
             }
-            newHW = this.getTextHW(layer, layer.widthLimit)
-            Object.assign(layer.styles, {
-              width: newHW.width,
-              height: newHW.height,
-              x: originHW.x + (newHW.width - originHW.width) / 2,
-              y: originHW.y + (newHW.height - originHW.height) / 2
-            })
           }
           if (layer.styles.textEffect.fontSize !== undefined) {
             layer.styles.textEffect.fontSize = textEffectUtils.getLayerFontSize(layer.paragraphs)
@@ -1221,6 +1226,13 @@ class TextUtils {
         layer.styles.rotate = 0
         layer.styles.horizontalFlip = false
         layer.styles.verticalFlip = false
+        layer.layers
+          .forEach(l => {
+            if (l.type === LayerType.image) {
+              l.styles.scale *= layer.styles.scale
+            }
+            l.parentLayerStyles = undefined
+          })
         subLayers = groupUtils.mapLayersToPage(layer.layers, layer).map(l => this.resetScaleForLayer(l, preMount) as Exclude<AllLayerTypes, ITmp>)
         newStyles = calcTmpProps(subLayers)
         subLayers = groupUtils.mapLayersToTmp(subLayers, newStyles)

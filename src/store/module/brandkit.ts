@@ -13,6 +13,7 @@ import _ from 'lodash'
 import apiUtils from '@/utils/apiUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import { notify } from '@kyvg/vue3-notification'
+import logUtils from '@/utils/logUtils'
 
 interface IBrandKitState {
   brands: IBrand[],
@@ -157,7 +158,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('SET_brands', brands)
       commit('SET_currentBrand', brands[0] ?? { id: '' })
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       showNetworkError()
     }
   },
@@ -181,7 +182,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
         commit('SET_editorViewLogos', Object.assign({}, state.editorViewLogos, data))
       }
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       showNetworkError()
     }
   },
@@ -209,7 +210,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
         commit('SET_editorViewLogos', Object.assign({}, state.editorViewLogos, data))
       }
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       showNetworkError()
     }
   },
@@ -222,7 +223,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       const palettes = data.palettes
       commit('SET_palettes', { brandId: state.currentBrandId, palettes })
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       showNetworkError()
     }
   },
@@ -243,7 +244,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
         commit('UPDATE_setFetchedFont', data)
       }
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       showNetworkError()
     }
   },
@@ -268,7 +269,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
         commit('UPDATE_setFetchedFont', data)
       }
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       showNetworkError()
     }
   },
