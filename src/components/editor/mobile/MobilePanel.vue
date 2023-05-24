@@ -609,8 +609,8 @@ export default defineComponent({
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
       const target = event.target as HTMLElement
-      return !(target.matches('.header-bar .panel-icon *') || // Skip header-bar icon
-        target.matches('.modal-container, .modal-container *') || // Skip modal-card
+      return !(target.matches?.('.header-bar .panel-icon *') || // Skip header-bar icon
+        target.matches?.('.modal-container, .modal-container *') || // Skip modal-card
         target.className.includes?.('footer-tabs') || // Skip footer-bar icon
         target.className === 'inputNode'
       )
