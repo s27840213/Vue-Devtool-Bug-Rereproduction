@@ -107,7 +107,7 @@ export default defineComponent({
   methods: {
     save() {
       console.log('saveTemplate')
-      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(undefined, undefined, false), 'download')
+      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ noBg: false }), 'download')
     },
     share() {
       console.log('shareTemplate', this.templateShareType)
@@ -115,7 +115,7 @@ export default defineComponent({
         story: 'IGStory',
         post: 'IGPost'
       } as Record<string, string>
-      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(undefined, undefined, false), mapAction[this.templateShareType])
+      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ noBg: false }), mapAction[this.templateShareType])
     },
     handleResize() {
       const elPreview = this.$refs.preview as HTMLElement

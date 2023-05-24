@@ -1,26 +1,27 @@
 <template lang="pug">
 div(class="screenshot")
-  nu-layer(v-if="config !== undefined"
+  nu-layer(v-if="usingLayer"
             ref="target"
             :config="config"
-            :page="pages[0]"
+            :page="page"
             :pageIndex="0"
             :layerIndex="0")
   div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
     img(:src="backgroundImage" @load="onload")
   div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
-  page-content(v-if="usingJSON" :config="pages[0]" :pageIndex="0" :noBg="extraData.noBg" :style="pageTransforms()")
+  page-content(v-if="usingJSON" :config="page" :pageIndex="0" :noBg="extraData.noBg" :style="pageTransforms()")
 </template>
 
 <script lang="ts">
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
-import { IGroup, IImageStyle, ILayer, IText } from '@/interfaces/layer'
+import { AllLayerTypes, IImageStyle, ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
 import pageUtils from '@/utils/pageUtils'
+import resizeUtils from '@/utils/resizeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -38,7 +39,7 @@ export default defineComponent({
   name: 'ScreenShot',
   data() {
     return {
-      config: undefined as any,
+      usingLayer: false,
       backgroundImage: '',
       backgroundColor: '',
       usingJSON: false,
@@ -52,7 +53,8 @@ export default defineComponent({
         height: 0
       },
       extraData: undefined as any,
-      options: ''
+      options: '',
+      params: ''
     }
   },
   components: {
@@ -66,15 +68,21 @@ export default defineComponent({
     vivistickerUtils.registerCallbacks('screenshot')
   },
   computed: {
-    ...mapGetters({
+    ...(mapGetters({
       pages: 'getPages'
-    }),
+    }) as { pages: () => IPage[] }),
+    page(): IPage {
+      return this.pages[0]
+    },
+    config(): ILayer {
+      return this.page.layers[0]
+    },
     mode(): ScreenShotMode {
       if (this.backgroundImage !== '') {
         return ScreenShotMode.BG_IMG
       } else if (this.backgroundColor !== '') {
         return ScreenShotMode.BG_COLOR
-      } else if (this.config !== undefined) {
+      } else if (this.usingLayer) {
         return ScreenShotMode.LAYER
       } else {
         return ScreenShotMode.PAGE
@@ -85,6 +93,7 @@ export default defineComponent({
     fetchDesign(query: string, options = '') {
       this.clearBuffers()
       this.options = options
+      this.params = query
       this.$nextTick(async () => {
         const urlParams = new URLSearchParams(query)
         const type = urlParams.get('type')
@@ -95,6 +104,7 @@ export default defineComponent({
         const thumbType = urlParams.get('thumbType')
         const designId = urlParams.get('designId')
         const key = urlParams.get('key')
+        const source = urlParams.get('source')
         const noBg = urlParams.get('noBg') === 'true'
         this.extraData = { thumbType, designId, key, noBg }
         switch (type) {
@@ -109,18 +119,20 @@ export default defineComponent({
             const svgWidth = svgAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * svgAspectRatio
             const svgHeight = svgAspectRatio > pageAspectRatio ? window.outerWidth / svgAspectRatio : window.outerHeight
             json.ratio = 1
-            this.config = layerFactary.newShape({
-              ...json,
-              styles: {
-                width: svgWidth,
-                height: svgHeight,
-                initWidth: vSize[0],
-                initHeight: vSize[1],
-                scale: svgWidth / vSize[0],
-                color: json.color,
-                vSize: json.vSize
-              }
-            })
+            this.setConfig(
+              layerFactary.newShape({
+                ...json,
+                styles: {
+                  width: svgWidth,
+                  height: svgHeight,
+                  initWidth: vSize[0],
+                  initHeight: vSize[1],
+                  scale: svgWidth / vSize[0],
+                  color: json.color,
+                  vSize: json.vSize
+                }
+              })
+            )
             setTimeout(() => { this.onload() }, 100)
             break
           }
@@ -140,19 +152,21 @@ export default defineComponent({
               this.onload()
             })
 
-            this.config = layerFactary.newImage({
-              srcObj,
-              styles: {
-                x: 0,
-                y: 0,
-                width: photoWidth,
-                height: photoHeight,
-                initWidth: photoWidth,
-                initHeight: photoHeight,
-                imgWidth: photoWidth,
-                imgHeight: photoHeight
-              }
-            })
+            this.setConfig(
+              layerFactary.newImage({
+                srcObj,
+                styles: {
+                  x: 0,
+                  y: 0,
+                  width: photoWidth,
+                  height: photoHeight,
+                  initWidth: photoWidth,
+                  initHeight: photoHeight,
+                  imgWidth: photoWidth,
+                  imgHeight: photoHeight
+                }
+              })
+            )
             break
           }
           case 'svgImage2': {
@@ -176,70 +190,72 @@ export default defineComponent({
               this.onload()
             })
 
-            this.config = layerFactary.newImage({
-              srcObj,
-              styles: {
-                ...styles,
-                x: xDiff * scaleRatio,
-                y: yDiff * scaleRatio,
-                width: styles.width * scaleRatio,
-                height: styles.height * scaleRatio,
-                initWidth: styles.width * scaleRatio,
-                initHeight: styles.height * scaleRatio,
-                imgWidth: imgWidth * scaleRatio,
-                imgHeight: imgHeight * scaleRatio,
-                imgX: imgX * scaleRatio,
-                imgY: imgY * scaleRatio
-              }
-            })
-            break
-          }
-          case 'text': {
-            const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json() as IText | IGroup
-            const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
-            page.isAutoResizeNeeded = true
-            pageUtils.setPages([page])
-            vivistickerUtils.initLoadingFlags({ layers: [json] }, () => {
-              this.onload()
-            })
-
-            const { width, height, scale } = json.styles
-            const pageAspectRatio = window.outerWidth / window.outerHeight
-            const textAspectRatio = width / height
-            const textWidth = textAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * textAspectRatio
-            const textHeight = textAspectRatio > pageAspectRatio ? window.outerWidth / textAspectRatio : window.outerHeight
-            const rescaleFactor = textWidth / width
-
-            const config = {
-              ...json,
-              styles: {
-                ...json.styles,
-                width: textWidth,
-                height: textHeight,
-                scale: scale * rescaleFactor,
-                x: 0,
-                y: 0
-              }
-            }
-
-            if (config.type === 'text') {
-              Object.assign(config, {
-                widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor
+            this.setConfig(
+              layerFactary.newImage({
+                srcObj,
+                styles: {
+                  ...styles,
+                  x: xDiff * scaleRatio,
+                  y: yDiff * scaleRatio,
+                  width: styles.width * scaleRatio,
+                  height: styles.height * scaleRatio,
+                  initWidth: styles.width * scaleRatio,
+                  initHeight: styles.height * scaleRatio,
+                  imgWidth: imgWidth * scaleRatio,
+                  imgHeight: imgHeight * scaleRatio,
+                  imgX: imgX * scaleRatio,
+                  imgY: imgY * scaleRatio
+                }
               })
-            }
-
-            const newLayer = config.type === 'group'
-              ? layerFactary.newGroup(config, (config as IGroup).layers)
-              : layerFactary.newText(config as IText)
-            layerUtils.addLayers(0, [newLayer])
-
-            this.JSONcontentSize = {
-              width: page.width,
-              height: page.height
-            }
-            this.usingJSON = true
+            )
             break
           }
+          // case 'text': { deprecated
+          //   const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json() as IText | IGroup
+          //   const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
+          //   layerUtils.setAutoResizeNeededForLayersInPage(page, true)
+          //   pageUtils.setPages([page])
+          //   vivistickerUtils.initLoadingFlags({ layers: [json] }, () => {
+          //     this.onload()
+          //   })
+
+          //   const { width, height, scale } = json.styles
+          //   const pageAspectRatio = window.outerWidth / window.outerHeight
+          //   const textAspectRatio = width / height
+          //   const textWidth = textAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * textAspectRatio
+          //   const textHeight = textAspectRatio > pageAspectRatio ? window.outerWidth / textAspectRatio : window.outerHeight
+          //   const rescaleFactor = textWidth / width
+
+          //   const config = {
+          //     ...json,
+          //     styles: {
+          //       ...json.styles,
+          //       width: textWidth,
+          //       height: textHeight,
+          //       scale: scale * rescaleFactor,
+          //       x: 0,
+          //       y: 0
+          //     }
+          //   }
+
+          //   if (config.type === 'text') {
+          //     Object.assign(config, {
+          //       widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor
+          //     })
+          //   }
+
+          //   const newLayer = config.type === 'group'
+          //     ? layerFactary.newGroup(config, (config as IGroup).layers)
+          //     : layerFactary.newText(config as IText)
+          //   layerUtils.addLayers(0, [newLayer])
+
+          //   this.JSONcontentSize = {
+          //     width: page.width,
+          //     height: page.height
+          //   }
+          //   this.usingJSON = true
+          //   break
+          // }
           case 'background': {
             this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
             break
@@ -251,16 +267,35 @@ export default defineComponent({
           }
           case 'json': {
             const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
+            if (page.layers.length === 0) {
+              this.JSONcontentSize = {
+                width: page.width,
+                height: page.height
+              }
+              this.usingJSON = true
+              this.onload()
+              return
+            }
+            layerUtils.setAutoResizeNeededForLayersInPage(page, true)
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })
-            page.isAutoResizeNeeded = true
             pageUtils.setPages([page])
-            this.JSONcontentSize = {
-              width: page.width,
-              height: page.height
+            if (vivistickerUtils.checkVersion('1.31')) {
+              const newSize = {
+                width: page.width * 2,
+                height: page.height * 2
+              }
+              resizeUtils.resizePage(0, page, newSize)
+              this.JSONcontentSize = newSize
+              this.usingJSON = true
+            } else {
+              this.JSONcontentSize = {
+                width: page.width,
+                height: page.height
+              }
+              this.usingJSON = true
             }
-            this.usingJSON = true
             break
           }
         }
@@ -292,7 +327,7 @@ export default defineComponent({
       }
     },
     clearBuffers() {
-      this.config = undefined
+      this.usingLayer = false
       this.backgroundImage = ''
       this.backgroundColor = ''
       this.usingJSON = false
@@ -301,6 +336,7 @@ export default defineComponent({
       this.JSONcontentSize = { width: 0, height: 0 }
       vivistickerUtils.isAnyIOSImgOnError = false
       this.extraData = undefined
+      pageUtils.setPages()
     },
     onload() {
       console.log('loaded')
@@ -317,48 +353,21 @@ export default defineComponent({
             to: 'UI'
           })
         } else {
-          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, true)
+          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, this.params)
         }
       } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
         const element = this.$refs.target
         const target: HTMLElement = (element as any).$el ? (element as any).$el : element
         const { width, height } = target.getBoundingClientRect()
-        vivistickerUtils.sendDoneLoading(width, height, this.options)
+        vivistickerUtils.sendDoneLoading(width, height, this.options, this.params)
       } else {
-        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options)
+        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params)
       }
+    },
+    setConfig(layer: AllLayerTypes) {
+      layerUtils.addLayersToPos(0, [layer], 0)
+      this.usingLayer = true
     }
-    // fitPageToScreen(width: number, height: number): number {
-    //   const screenWidth = window.outerWidth
-    //   const screenHeight = window.outerHeight
-    //   const screenRatio = screenWidth / screenHeight
-    //   const objectRatio = width / height
-    //   if (screenRatio > objectRatio) {
-    //     this.JSONcontentSize = {
-    //       width: screenHeight * objectRatio,
-    //       height: screenHeight
-    //     }
-    //     return screenHeight / height
-    //   } else {
-    //     this.JSONcontentSize = {
-    //       width: screenWidth,
-    //       height: screenWidth / objectRatio
-    //     }
-    //     return screenWidth / width
-    //   }
-    // },
-    // resizePage(data: { x: number, y: number, width: number, height: number, options: string }) {
-    //   const { x, y, width, height, options } = data
-    //   this.options = options
-    //   this.pageTranslate = { x: -x, y: -y }
-    //   const page = pageUtils.getPage(0)
-    //   this.pageScale = this.fitPageToScreen(width, height)
-    //   pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
-    //   setTimeout(() => {
-    //     console.log('resized')
-    //     vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, false)
-    //   }, 100)
-    // }
   }
 })
 </script>

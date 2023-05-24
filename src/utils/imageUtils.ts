@@ -92,14 +92,14 @@ class ImageUtils {
         if (typeof size === 'string' && (size as string).includes('ext')) {
           return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
         } else {
-          const query = forBgRemove ? '' : '?origin=true'
-          return this.appendRandomQuery(`https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`)
+          const query = forBgRemove ? `?rand_ver=${generalUtils.generateRandomString(6)}` : '?origin=true'
+          return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`
         }
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
-        const query = forBgRemove ? '' : '&origin=true'
-        return this.appendRandomQuery(editorImg(assetId) ? editorImg(assetId)[size as string] + query : '')
+        const query = forBgRemove ? `&rand_ver=${generalUtils.generateRandomString(6)}` : '&origin=true'
+        return editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
       }
       case 'logo-public':
         if ((size as string).includes('ext')) {
@@ -581,7 +581,7 @@ class ImageUtils {
 
   async getBgRemoveInfoStk(url: string, initSrc: string) {
     const { width, height } = await this.getImageSize(url, 1000, 1000)
-
+    url = this.appendRandomQuery(url)
     return {
       width: width,
       height: height,

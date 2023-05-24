@@ -22,7 +22,7 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconWidth="`${tab.width}px`"
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
-    div(v-if="isInEditor && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-copy" @click.prevent.stop="handleCopy")
+    div(v-if="(isInEditor || inBgRemoveMode) && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-copy" @click.prevent.stop="handleCopy")
         svg-icon(iconName="copy"
                   iconWidth="18px"
                   iconHeight="18px"
@@ -32,6 +32,7 @@ div(class="header-bar relative" @pointerdown.stop)
 </template>
 
 <script lang="ts">
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
 import modalUtils from '@/utils/modalUtils'
@@ -39,7 +40,7 @@ import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 type TabConfig = {
@@ -54,6 +55,14 @@ type TabConfig = {
 }
 
 export default defineComponent({
+  setup() {
+    const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
+    const isInLastStep = computed(() => stepsUtils.isInLastStep)
+    return {
+      isInFirstStep,
+      isInLastStep
+    }
+  },
   computed: {
     ...mapGetters('objects', {
       staticHeaderTab: 'headerTab'
@@ -85,7 +94,10 @@ export default defineComponent({
       editorBg: 'vivisticker/getEditorBg',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       isInSelectionMode: 'vivisticker/getIsInSelectionMode',
-      userSettings: 'vivisticker/getUserSettings'
+      userSettings: 'vivisticker/getUserSettings',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      inBgRemoveFirstStep: 'bgRemove/inFirstStep',
+      inBgRemoveLastStep: 'bgRemove/inLastStep',
     }),
     templateKeyword() {
       return this.$store.state.templates[this.templatesIgLayout].keyword
@@ -110,8 +122,8 @@ export default defineComponent({
       } else if (this.isInEditor) {
         const retTabs = []
         const stepTabs = [
-          { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: shortcutUtils.undo },
-          { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: shortcutUtils.redo }
+          { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: this.undo },
+          { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: this.redo }
         ]
         retTabs.push({ icon: 'vivisticker_close', disabled: false, width: 24, action: this.handleEndEditing })
         if (this.stepCount > 1) retTabs.push(...stepTabs)
@@ -132,6 +144,23 @@ export default defineComponent({
         return [
           { icon: 'chevron-left', width: 24, action: this.clearCategory }
         ]
+      } else if (this.inBgRemoveMode) {
+        const retTabs = []
+        const stepTabs = [
+          { icon: 'undo', disabled: this.inBgRemoveFirstStep || this.isCropping, width: 24, action: this.undo },
+          { icon: 'redo', disabled: this.inBgRemoveLastStep || this.isCropping, width: 24, action: this.redo }
+        ]
+        retTabs.push({
+          icon: 'vivisticker_close',
+          disabled: false,
+          width: 24,
+          action: () => {
+            bgRemoveUtils.setInBgRemoveMode(false)
+            editorUtils.setCurrActivePanel('none')
+          }
+        })
+        retTabs.push(...stepTabs)
+        return retTabs
       } else {
         return [
           { icon: 'vivisticker_logo', logo: true, width: 20, action: this.handleOpenIG },
@@ -192,6 +221,14 @@ export default defineComponent({
         return this.gihpyHeaderTab
       } else if (this.isInCategory || this.isInBgShare) {
         return []
+      } else if (this.inBgRemoveMode) {
+        return [{
+          icon: 'download',
+          width: 24,
+          action: () => {
+            console.log('download')
+          }
+        }]
       } else {
         return [
           ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
@@ -328,22 +365,28 @@ export default defineComponent({
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
       }
-      if (vivistickerUtils.checkVersion('1.3')) {
-        vivistickerUtils.copyEditor((flag: string) => {
-          if (flag === '1') {
-            modalUtils.setModalInfo(
-              `${this.$t('STK0017')}`,
-              [`${this.$t('STK0018')}`],
-              {
-                msg: `${this.$t('STK0019')}`
-              }
-            )
-          } else if (['object', 'objectGroup'].includes(this.editorType)) {
-            vivistickerUtils.handleIos16Video()
-          }
-        })
+      const copyCallback = (flag: string) => {
+        if (flag === '1') {
+          modalUtils.setModalInfo(
+            `${this.$t('STK0017')}`,
+            [`${this.$t('STK0018')}`],
+            {
+              msg: `${this.$t('STK0019')}`
+            }
+          )
+        } else if (['object', 'objectGroup'].includes(this.editorType)) {
+          vivistickerUtils.handleIos16Video()
+        }
+      }
+      if (vivistickerUtils.checkVersion('1.31')) {
+        vivistickerUtils.copyWithScreenshotUrl(
+          vivistickerUtils.createUrlForJSON({ source: 'editor' }),
+          copyCallback
+        )
+      } else if (vivistickerUtils.checkVersion('1.3')) {
+        vivistickerUtils.copyEditor(copyCallback)
       } else {
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
+        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ source: 'editor' }))
       }
     },
     handleMore() {
@@ -377,9 +420,38 @@ export default defineComponent({
     handleSelectDesign() {
       this.setIsInSelectionMode(!this.isInSelectionMode)
     },
+    undo() {
+      if (this.inBgRemoveMode) {
+        // BgRemoveArea will listen to Ctrl/Cmd + Z event, so I dispatch an event to make the undo function in BgRemoveArea.vue conducted
+        const event = new KeyboardEvent('keydown', {
+          ctrlKey: true,
+          metaKey: true,
+          shiftKey: false,
+          key: 'z',
+          repeat: false
+        })
+        window.dispatchEvent(event)
+      } else {
+        shortcutUtils.undo()
+      }
+    },
+    redo() {
+      if (this.inBgRemoveMode) {
+        const event = new KeyboardEvent('keydown', {
+          ctrlKey: true,
+          metaKey: true,
+          shiftKey: true,
+          key: 'z',
+          repeat: false
+        })
+        window.dispatchEvent(event)
+      } else {
+        shortcutUtils.redo()
+      }
+    },
     handleShareTemplate() {
       this.setTemplateShareType(this.editorType)
-    },
+    }
   }
 })
 </script>

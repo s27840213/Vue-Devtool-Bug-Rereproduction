@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="panel-background-remove")
   div(class="panel-background-remove__grid mb-5")
-    btn( class="full-width"
+    btn(class="full-width"
       :type="clearMode ? 'gray-active-mid' :'gray-mid'"
       :hasIcon="true"
       :iconName="'clear'"

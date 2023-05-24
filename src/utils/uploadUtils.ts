@@ -286,13 +286,14 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false }: {
+  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false, pollingJsonName = 'result.json' }: {
     addToPage?: boolean,
     id?: string,
     pollingCallback?: (json: IUploadAssetResponse) => void,
     needCompressed?: boolean,
     brandId?: string
-    isShadow?: boolean
+    isShadow?: boolean,
+    pollingJsonName?: string
   } = {}) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
@@ -415,7 +416,7 @@ class UploadUtils {
             xhr.onload = () => {
               // polling the JSON file of uploaded image
               const interval = window.setInterval(() => {
-                const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
+                const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
                 fetch(pollingTargetSrc).then((response) => {
                   if (response.status === 200) {
                     clearInterval(interval)
@@ -463,7 +464,7 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -493,7 +494,7 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/avatar/result.json?ver=${generalUtils.generateRandomString(6)}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/avatar/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -527,7 +528,7 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -738,6 +739,7 @@ class UploadUtils {
             delete query.unit
             delete query.path
             delete query.folderName
+            delete query.bleeds
             router.replace({ query })
           }
           notify({ group: 'copy', text: `${i18n.global.t('NN0357')}` })
@@ -745,8 +747,8 @@ class UploadUtils {
       })
       .catch(async (error) => {
         // Error: 403: Forbidden
-        logUtils.setLog(`Failed: ${error}`)
-        console.error(error)
+        logUtils.setLog('uploadDesign failed:')
+        logUtils.setLogForError(error as Error)
         await store.dispatch('user/login', { token: this.token })
       })
   }
@@ -1293,7 +1295,7 @@ class UploadUtils {
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
-                designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json, designId, params.groupId)
+                designUtils.newDesignWithTemplate(Number(params.width), Number(params.height), json, designId, params.unit, params.bleeds)
                 logUtils.setLog('Successfully get new design template')
                 break
               }

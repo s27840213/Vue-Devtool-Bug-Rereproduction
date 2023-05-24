@@ -1165,7 +1165,7 @@ class TextBg {
             paragraphs.forEach(p => {
               const newSpans = p.spans.flatMap(span =>
                 textUtils.splitter.splitGraphemes(span.text)
-                  .map(t => ({ text: t, styles: span.styles }))
+                  .map(t => ({ text: t, styles: cloneDeep(span.styles) }))
               )
               p.spans = newSpans.length !== 0 ? newSpans : p.spans
             })

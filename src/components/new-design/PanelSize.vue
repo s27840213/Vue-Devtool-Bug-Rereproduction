@@ -20,26 +20,15 @@ div(class="mobile-panel p-15"
           @pointerdown="leftButtonAction"
           @touchstart="disableTouchEvent")
       div(class="mobile-panel__btn mobile-panel__right-btn")
-        svg-icon(
-          class="click-disabled"
-          :iconName="rightBtnName"
-          :iconColor="'white'"
-          :iconWidth="'20px'")
-        div(class="mobile-panel__btn-click-zone"
-          @pointerdown="rightButtonAction"
-          @touchstart="disableTouchEvent")
   div(class="mobile-panel__bottom-section")
     PageSizeSelector(:isMobile="true"
       :isValidate="isConfirmClicked"
       defaultFormat="custom"
-      ref="pageSizeSelector"
-      @select="selectFormat")
+      ref="pageSizeSelector")
 </template>
 
 <script lang="ts">
-import PageSizeSelector, { CPageSizeSelector } from '@/components/new-design/PageSizeSelector.vue'
-import { ILayout } from '@/interfaces/layout'
-import designUtils from '@/utils/designUtils'
+import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 import eventUtils from '@/utils/eventUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import vClickOutside from 'click-outside-vue3'
@@ -61,7 +50,6 @@ export default defineComponent({
       panelPaddingBottom: window.innerHeight - window.visualViewport!.height,
       lastPointerY: 0,
       isDraggingPanel: false,
-      selectedFormat: {} as ILayout,
       isConfirmClicked: false,
       isFullScreen: true,
       innerHeight: window.innerHeight,
@@ -89,21 +77,10 @@ export default defineComponent({
     leftBtnName(): string {
       return 'close-circle'
     },
-    rightBtnName(): string {
-      return 'check-mobile-circle'
-    },
+
     leftButtonAction(): (e: PointerEvent) => void {
       return () => {
         this.closeMobilePanel()
-      }
-    },
-    rightButtonAction(): () => void {
-      return () => {
-        this.isConfirmClicked = true
-        if (!(this.$refs.pageSizeSelector as CPageSizeSelector).isFormatApplicable) return // TODO: disable submit button
-        const path = this.$route.name === 'MyDesign' ? this.currLocation.split('/').slice(1).join(',') : undefined
-        const foldername = this.$route.name === 'MyDesign' ? designUtils.search(this.folders, designUtils.makePath(this.currLocation))?.name : undefined
-        designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, this.selectedFormat.unit, undefined, path, foldername)
       }
     }
   },
@@ -118,9 +95,6 @@ export default defineComponent({
     window.visualViewport!.removeEventListener('scroll', this.handleVisualViewportScroll)
   },
   methods: {
-    selectFormat(layout: ILayout) {
-      this.selectedFormat = layout
-    },
     closeMobilePanel() {
       this.$emit('close')
     },

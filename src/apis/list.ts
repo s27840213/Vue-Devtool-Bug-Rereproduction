@@ -1,8 +1,5 @@
 import axios from '@/apis'
-import {
-  IListServiceParams,
-  IListServiceResponse
-} from '@/interfaces/api'
+import { IListServiceParams, IListServiceResponse } from '@/interfaces/api'
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -28,6 +25,7 @@ class ListService {
       ver: params.cache ? store.getters['user/getVerApi'] : null,
       // [2022.01.19] uncached: font, layout
       all_theme: params.all_theme,
+      ...(params.shuffle === 1 && { shuffle: params.shuffle }),
       // app: 0: vivipic (default), 1: vivisticker
       app: 1,
       // for vivisticker text panel of US version

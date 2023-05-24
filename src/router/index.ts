@@ -37,7 +37,7 @@ const routes: Array<RouteRecordRaw> = [
         }
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -51,7 +51,7 @@ const routes: Array<RouteRecordRaw> = [
         vivistickerUtils.hideController()
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -63,7 +63,7 @@ const routes: Array<RouteRecordRaw> = [
       try {
         router.replace({ name: 'ViviSticker', query: {}, params: {} })
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   }
@@ -168,9 +168,12 @@ router.beforeEach(async (to, from, next) => {
     console.log(json)
     // const json = appJson
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('static json loaded: ', json)
-      store.commit('SET_showGlobalErrorModal', true) // local always show error modal
+    process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    if (to.name === 'Screenshot') {
+      store.commit('SET_showGlobalErrorModal', false) // /screenshot never shows error modal
+    } else if (window.location.hostname !== 'sticker.vivipic.com') {
+      store.commit('SET_showGlobalErrorModal', true) // non-production always show error modal
     } else {
       store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
     }

@@ -103,7 +103,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getAssetResult',
     'uploadImageURL',
     'informWebResult',
-    'subscribeResult'
+    'subscribeResult',
+    'screenshotDone'
   ]
 
   SCREENSHOT_CALLBACKS = [
@@ -255,8 +256,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.sendToIOS('SHOW_TOAST', { msg })
   }
 
-  sendDoneLoading(width: number, height: number, options: string, needCrop = false) {
-    this.sendToIOS('DONE_LOADING', { width, height, options, needCrop })
+  sendDoneLoading(width: number, height: number, options: string, params: string) {
+    this.sendToIOS('DONE_LOADING', { width, height, options, params })
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
@@ -265,6 +266,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
     }
+  }
+
+  copyWithScreenshotUrl(query: string, afterCopy?: (flag: string) => void) {
+    this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'editorResizeCopy' }, `screenshot-${query}`).then((data) => {
+      afterCopy && afterCopy(data?.flag ?? '0')
+    })
+  }
+
+  screenshotDone(data: { flag: string, params: string, action: string }) {
+    this.handleCallback(`screenshot-${data.params}`, data)
   }
 
   sendAppLoaded() {
@@ -284,8 +295,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         return `type=svgImage2&id=${item.id}&ver=${item.ver}`
       case 15:
         return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
-      case 7:
-        return `type=text&id=${item.id}&ver=${item.ver}`
+      // case 7: deprecated
+      //   return `type=text&id=${item.id}&ver=${item.ver}`
       case 1:
         return `type=background&id=${item.id}&ver=${item.ver}`
       default:
@@ -293,16 +304,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  createUrlForJSON(page?: IPage, asset?: IMyDesign, noBg = true): string {
+  createUrlForJSON({ page = undefined, asset = undefined, source = undefined, noBg = true }: { page?: IPage, asset?: IMyDesign, source?: string, noBg?: boolean } = {}): string {
     page = page ?? pageUtils.currFocusPage
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
-    const res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
+    let res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
     if (asset) {
       const key = this.mapEditorType2MyDesignKey(asset.type)
-      return res + `&thumbType=mydesign&designId=${asset.id}&key=${key}`
-    } else {
-      return res
+      res += `&thumbType=mydesign&designId=${asset.id}&key=${key}`
     }
+    if (source) {
+      res += `&source=${source}`
+    }
+    return res
   }
 
   setIsInCategory(tab: string, bool: boolean) {
@@ -1169,6 +1182,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
+    return true
     const isPro = store.getters['vivisticker/getIsSubscribed']
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)

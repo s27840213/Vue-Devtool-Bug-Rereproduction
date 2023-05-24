@@ -23,6 +23,7 @@ teleport(v-if="useMobileEditor || inVivisticker" to=".header-bar")
 
 <script lang="ts">
 import { IBgRemoveInfo } from '@/interfaces/image'
+import logUtils from '@/utils/logUtils'
 import MagnifyUtils from '@/utils/magnifyUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -79,10 +80,12 @@ export default defineComponent({
       isProcessingStepsQueue: false,
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
       magnifyUtils: null as unknown as MagnifyUtils,
-      showMagnifyAtRight: false
+      showMagnifyAtRight: false,
+      clearModeShift: 4
     }
   },
   created() {
+    logUtils.setLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
     if (this.inVivisticker) {
@@ -93,27 +96,39 @@ export default defineComponent({
     }
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
+    logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)
+    logUtils.setLog(`auto remove img src: ${this.imgSrc}`)
   },
   mounted() {
+    logUtils.setLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
 
     this.imageElement = new Image()
-    this.imageElement.src = this.imgSrc
-    this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     this.imageElement.onload = () => {
+      logUtils.setLog('imageElement onload triggered')
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
       this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
     }
+    this.imageElement.onerror = (ev) => {
+      logUtils.setLog('imageElement onerror triggered')
+      logUtils.setLog(`${JSON.stringify(ev)}`)
+    }
+    this.imageElement.src = this.imgSrc
+    this.imageElement.setAttribute('crossOrigin', 'Anonymous')
+    logUtils.setLog(`set image element src: ${this.imgSrc}`)
+    logUtils.setLog(`set image element: ${JSON.stringify(this.imageElement)}`)
 
     this.initImageElement = new Image()
-    this.initImageElement.src = this.initImgSrc
-    this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
     this.initImageElement.onload = () => {
+      logUtils.setLog('initImageElement onload triggered')
       this.createInitImageCtx()
     }
+    this.initImageElement.src = this.initImgSrc
+    this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
+
     this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
     if (this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('touchstart', (e) => {
@@ -242,6 +257,7 @@ export default defineComponent({
       }
     },
     clearMode(newVal) {
+      logUtils.setLog('trigger clear mode watch')
       if (newVal) {
         this.contentCtx.globalCompositeOperation = 'destination-out'
         this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -285,6 +301,7 @@ export default defineComponent({
       clearSteps: 'bgRemove/CLEAR_steps'
     }),
     initCanvas() {
+      logUtils.setLog('initCanvas')
       this.contentCanvas = this.$refs.canvas as HTMLCanvasElement
       this.contentCanvas.width = this.canvasWidth
       this.contentCanvas.height = this.canvasHeight
@@ -293,8 +310,12 @@ export default defineComponent({
       ctx.lineWidth = this.brushSize
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
+      logUtils.setLog('setup contentCtx')
+      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.contentCtx = ctx
+      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       // this.ctx.globalCompositeOperation = 'destination-out'
+      logUtils.setLog(`ctx: ${JSON.stringify(this.contentCtx)}`)
 
       this.drawImageToCtx()
       this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -315,8 +336,8 @@ export default defineComponent({
     },
     initClearModeCanvas() {
       this.clearModeCanvas = document.createElement('canvas') as HTMLCanvasElement
-      this.clearModeCanvas.width = this.size.width
-      this.clearModeCanvas.height = this.size.height
+      this.clearModeCanvas.width = this.size.width + 2 * this.clearModeShift
+      this.clearModeCanvas.height = this.size.height + 2 * this.clearModeShift
       const ctx = this.clearModeCanvas.getContext('2d') as CanvasRenderingContext2D
       // set up drawing settings
       ctx.lineCap = 'round'
@@ -334,6 +355,7 @@ export default defineComponent({
       this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
     },
     createInitImageCtx() {
+      logUtils.setLog('createInitImageCtx')
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
       this.initImgCanvas.width = this.size.width
       this.initImgCanvas.height = this.size.height
@@ -347,11 +369,12 @@ export default defineComponent({
       this.drawImageToInitImgCanvas()
     },
     drawLine(e: MouseEvent, ctx: CanvasRenderingContext2D) {
+      const shift = this.clearMode ? this.clearModeShift : 0
       ctx.beginPath()
-      ctx.moveTo(this.initPos.x, this.initPos.y)
+      ctx.moveTo(this.initPos.x + shift, this.initPos.y + shift)
       const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
       this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
-      ctx.lineTo(x, y)
+      ctx.lineTo(x + shift, y + shift)
       ctx.stroke()
       Object.assign(this.initPos, {
         x,
@@ -402,6 +425,8 @@ export default defineComponent({
       this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
     },
     drawImageToCtx(img?: HTMLImageElement) {
+      logUtils.setLog('draw imag to ctx: ')
+      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.setCompositeOperationMode('source-over')
       this.contentCtx.drawImage(img ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       this._setCanvas(this.contentCanvas)
@@ -412,6 +437,7 @@ export default defineComponent({
       }
     },
     drawInClearMode(e: MouseEvent) {
+      logUtils.setLog('draw in clear mode')
       this.cyReady = false
       this.setCompositeOperationMode('source-over', this.contentCtx)
       this.contentCtx.filter = 'none'
@@ -422,10 +448,11 @@ export default defineComponent({
       this.drawLine(e, this.clearModeCtx)
       this.setCompositeOperationMode('destination-out')
       this.contentCtx.filter = `blur(${this.blurPx}px)`
-      this.contentCtx.drawImage(this.clearModeCanvas, 0, 0, this.size.width, this.size.height)
+      this.contentCtx.drawImage(this.clearModeCanvas, 0 - this.clearModeShift, 0 - this.clearModeShift, this.size.width + 2 * this.clearModeShift, this.size.height + 2 * this.clearModeShift)
       this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
+      logUtils.setLog('draw in restore mode')
       this.clearCtx(this.blurCtx)
       this.drawLine(e, this.blurCtx)
       this.setCompositeOperationMode('source-in', this.blurCtx)
@@ -449,6 +476,9 @@ export default defineComponent({
       /**
        * @Note GlobalCompositeOperation type has some problems
        */
+      logUtils.setLog('setCompositeOperationMode: ' + mode)
+      logUtils.setLog('ctx: ' + JSON.stringify(ctx))
+      logUtils.setLog('contenCtxx: ' + JSON.stringify(this.contentCtx))
       if (ctx) {
         ctx.globalCompositeOperation = mode as any
       } else {
@@ -497,13 +527,9 @@ export default defineComponent({
       if (!this.currCanvasImageElement) {
         this.currCanvasImageElement = new Image()
       }
-      if (blob) {
-        const url = URL.createObjectURL(blob ?? this.steps[this.currStep])
-        this.currCanvasImageElement.src = URL.createObjectURL(blob ?? this.steps[this.currStep])
-        return url
-      }
-
-      return ''
+      const url = URL.createObjectURL(blob ?? this.steps[this.currStep])
+      this.currCanvasImageElement.src = URL.createObjectURL(blob ?? this.steps[this.currStep])
+      return url
     },
     undo() {
       if (!this.isProcessingStepsQueue) {

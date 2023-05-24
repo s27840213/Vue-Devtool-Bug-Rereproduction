@@ -66,7 +66,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
       if (throwsError) {
         throw error
       } else {
-        logUtils.setLogAndConsoleLog(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   }
@@ -157,10 +157,8 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
         }
       }
     } catch (error) {
-      const theError = error as Error
-      console.error(error)
       logUtils.setLog(`Error occurs in callIOSAsAPI with type: ${type}, message: ${message}, event: ${event}`)
-      logUtils.setLog(`Error: ${theError.name}, ${theError.message}, ${theError.cause}, ${theError.stack}`)
+      logUtils.setLogForError(error as Error)
       result = null
     }
     return result

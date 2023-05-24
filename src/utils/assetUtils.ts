@@ -5,6 +5,7 @@ import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IStyle, IText, ITmp } 
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
 import store from '@/store'
+import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
 import { get, round } from 'lodash'
@@ -172,6 +173,7 @@ class AssetUtils {
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
     const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+    console.log(generalUtils.deepCopy(newPage))
     pageUtils.updateSpecPage(targetPageIndex, newPage)
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
@@ -575,7 +577,7 @@ class AssetUtils {
         tiptapUtils.agent(editor => editor.commands.selectAll())
       }, 100)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       console.log('Cannot find the file')
     }
   }
@@ -870,7 +872,7 @@ class AssetUtils {
       this.addAssetToRecentlyUsed(asset, key)
       return asset.jsonData
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   }

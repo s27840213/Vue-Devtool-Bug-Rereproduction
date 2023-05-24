@@ -595,11 +595,13 @@ export default defineComponent({
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        if (this.primaryLayerIndex !== -1) {
-          vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
-        } else {
-          vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
-        }
+        window.setTimeout(() => {
+          if (this.primaryLayerIndex !== -1) {
+            vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+          } else {
+            vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+          }
+        }, 100)
       }
       imageUtils.imgLoadHandler(this.src, (img) => {
         if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {

@@ -4,6 +4,7 @@ import router from '@/router'
 import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
@@ -264,7 +265,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
         if (error instanceof Error && error.message === '404') {
           errorHandleUtils.addMissingDesign('font', face)
         }
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
       return ''
     case 'admin':
@@ -281,7 +282,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
         if (error instanceof Error && error.message === '404') {
           errorHandleUtils.addMissingDesign('asset-font', assetId)
         }
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
       return ''
     case 'private': {
@@ -311,7 +312,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     if (error instanceof Error && error.message === '404') {
       errorHandleUtils.addMissingDesign('font', face)
     }
-    console.log(error)
+    logUtils.setLogForError(error as Error)
   }
   return ''
 }

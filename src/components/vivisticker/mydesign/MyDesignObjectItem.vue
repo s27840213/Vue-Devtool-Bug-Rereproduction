@@ -78,14 +78,14 @@ export default defineComponent({
             })
           } else {
             const pages = generalUtils.deepCopy(data.pages)
-            vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0], this.item))
+            vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign', asset: this.item }))
           }
         })
       } else {
         if (!vivistickerUtils.checkPro(this.item.assetInfo, 'object')) return
         vivistickerUtils.fetchMyDesign(this.item).then(data => {
           const pages = generalUtils.deepCopy(data.pages)
-          vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]))
+          vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign' }))
         })
       }
     },

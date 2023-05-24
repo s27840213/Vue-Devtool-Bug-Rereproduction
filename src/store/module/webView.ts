@@ -5,19 +5,24 @@ import { GetterTree, MutationTree } from 'vuex'
 interface IWebViewState {
   userInfo: IUserInfo
   inBrowserMode: boolean
-  inReviewMode: boolean
+  inReviewMode: boolean,
+  inDevMode: boolean
 }
 
 const getDefaultState = (): IWebViewState => ({
   userInfo: picWVUtils.getDefaultUserInfo(),
   inBrowserMode: false,
   inReviewMode: false,
+  inDevMode: false
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IWebViewState, unknown> = {
   getUserInfo(state: IWebViewState): IUserInfo {
     return state.userInfo
+  },
+  getInDevMode(state: IWebViewState): boolean {
+    return state.inDevMode
   },
   getInBrowserMode(state: IWebViewState): boolean {
     return state.inBrowserMode

@@ -109,6 +109,8 @@ const getDefaultState = (): IEditorState => ({
   lockGuideline: false,
   isDraggingGuideline: false,
   themes: [],
+  homeTags: [],
+  shuffledThemesIds: [],
   hasCopiedFormat: false,
   inGestureToolMode: false,
   isMobile: generalUtils.getWidth() <= 768,
@@ -286,10 +288,21 @@ const getters: GetterTree<IEditorState, unknown> = {
   getThemes(state: IEditorState) {
     return state.themes
   },
+  getMainHiddenThemes(state: IEditorState) {
+    return state.themes.filter(theme => {
+      return theme.mainHidden === 0
+    })
+  },
   getEditThemes(state: IEditorState) {
     return state.themes.filter(theme => {
       return theme.editHidden === 0
     })
+  },
+  getHomeTags(state: IEditorState) {
+    return state.homeTags
+  },
+  getShuffledThemesIds(state: IEditorState) {
+    return state.shuffledThemesIds
   },
   getHasCopiedFormat(state: IEditorState) {
     return state.hasCopiedFormat
@@ -1029,6 +1042,12 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_themes(state: IEditorState, themes: Itheme[]) {
     state.themes = themes
+  },
+  SET_homeTags(state: IEditorState, homeTags: string[]) {
+    state.homeTags = homeTags
+  },
+  SET_shuffledThemesIds(state: IEditorState, themeIds: number[]) {
+    state.shuffledThemesIds = themeIds
   },
   UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
