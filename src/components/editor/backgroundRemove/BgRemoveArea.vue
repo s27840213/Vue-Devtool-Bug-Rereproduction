@@ -7,7 +7,8 @@ div(class="bg-remove-area"
     :style="initPhotoStyles")
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
-      :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
+      :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}"
+      :ref="'scaleArea'")
     canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
@@ -51,6 +52,7 @@ export default defineComponent({
     return {
       cyReady: false,
       root: undefined as unknown as HTMLElement,
+      scaleArea: undefined as unknown as HTMLElement,
       canvasWidth: 1600,
       canvasHeight: 1600,
       contentCanvas: undefined as unknown as HTMLCanvasElement,
@@ -102,6 +104,7 @@ export default defineComponent({
   mounted() {
     logUtils.setLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
+    this.scaleArea = this.$refs.scaleArea as HTMLElement
 
     this.imageElement = new Image()
     this.imageElement.onload = () => {
@@ -578,8 +581,7 @@ export default defineComponent({
 .bg-remove-area {
   position: relative;
   box-sizing: content-box;
-  margin: 0px auto;
-  overflow: hidden;
+  margin: auto auto;
 
   &__initPhoto {
     position: absolute;

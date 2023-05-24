@@ -195,7 +195,7 @@ export default defineComponent({
       if (!exp) await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
     }
 
-    const debugMode = (await vivistickerUtils.getState('debugMode'))?.value ?? false
+    const debugMode = process.env.NODE_ENV === 'development' ? true : (await vivistickerUtils.getState('debugMode'))?.value ?? false
     this.setDebugMode(debugMode)
   },
   unmounted() {

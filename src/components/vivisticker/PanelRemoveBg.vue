@@ -1,35 +1,52 @@
 <template lang="pug">
 div(class="panel-remove-bg" ref="panelRemoveBg")
-  div(v-if="inBgRemoveMode || isProcessing" class="panel-remove-bg__rm-section")
+  div(v-if="inBgRemoveMode || isProcessing" class="panel-remove-bg__rm-section" ref="rmSection")
     div(v-if="isProcessing" class="panel-remove-bg__preview-section")
       img(:src="previewImage.src")
       div(class="gray-mask")
       img(class="loading" :src="require('@/assets/img/gif/gray-loading.gif')")
     bg-remove-area(v-else :editorViewCanvas="panelRemoveBg"
       :inVivisticker="true"
-      :fitScaleRatio="scaleRatio")
+      :fitScaleRatio="bgRemoveScaleRatio")
   nubtn(v-else theme="primary" size="mid-center" @click="removeBg") {{ $t('NN0043') }}
+  teleport(to="body")
+    div(class="panel-remove-bg__test-input")
+      mobile-slider(
+        :title="'scale'"
+        :borderTouchArea="true"
+        :name="'scale'"
+        :value="bgRemoveScaleRatio"
+        :min="0.1"
+        :max="5"
+        :step="0.01"
+        @update="setScaleRatio")
 </template>
 
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import generalUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
-    BgRemoveArea
+    BgRemoveArea,
+    MobileSlider
   },
   data() {
     return {
       panelRemoveBg: null as unknown as HTMLElement,
-      mobilePanelHeight: 0
+      rmSection: null as unknown as HTMLElement,
+      mobilePanelHeight: 0,
+      bgRemoveScaleRatio: 1
     }
   },
   mounted() {
     this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
+    this.rmSection = this.$refs.rmSection as HTMLElement
   },
   unmounted() {
     bgRemoveUtils.setInBgRemoveMode(false)
@@ -48,7 +65,7 @@ export default defineComponent({
         height: this.panelRemoveBg ? this.panelRemoveBg.offsetHeight : 0,
       }
     },
-    scaleRatio() {
+    fitScaleRatio(): number {
       const { width, height } = this.containerWH
       const { width: imgWidth, height: imgHeight } = this.previewImage
       if (width === 0 || height === 0 || imgWidth === 0 || imgHeight === 0) return 1
@@ -56,6 +73,7 @@ export default defineComponent({
 
       return ratio
     },
+    // eslint-disable-next-line vue/no-unused-properties
     alignPos(): string {
       return this.inBgRemoveMode || this.isProcessing ? 'flex-start' : 'center'
     }
@@ -63,6 +81,10 @@ export default defineComponent({
   methods: {
     removeBg() {
       uploadUtils.chooseAssets('stk-bg-remove')
+    },
+    setScaleRatio(val: number) {
+      console.log('update')
+      this.bgRemoveScaleRatio = val
     }
   },
   watch: {
@@ -79,6 +101,17 @@ export default defineComponent({
           this.mobilePanelHeight = document.querySelector('.mobile-panel')?.clientHeight || 0
         })
       }
+    },
+    fitScaleRatio(val) {
+      console.log('watch update')
+      this.bgRemoveScaleRatio = val
+    },
+    bgRemoveScaleRatio(val) {
+      if (!this.rmSection) {
+        this.rmSection = this.$refs.rmSection as HTMLElement
+        return
+      }
+      generalUtils.scaleFromCenter(this.rmSection)
     }
   }
 })
@@ -86,24 +119,38 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .panel-remove-bg {
+  position: relative;
   width: 100%;
-  height: 100%;
+  height: calc(100% - v-bind(mobilePanelHeight)* 1px);
   max-height: 100%;
   display: flex;
-  align-items: v-bind(alignPos);
-
+  align-items: center;
   justify-content: center;
 
   &__rm-section {
     width: 100%;
-    height: calc(100% - v-bind(mobilePanelHeight)* 1px);
+    height: 100%;
+    box-sizing: border-box;
+    overflow: overlay;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 20px;
   }
 
   &__preview-section {
-    transform: scale(v-bind(scaleRatio));
+    position: relative;
+    margin: auto;
+    width: 100%;
+    > img:nth-of-type(1) {
+      width: 100%;
+    }
+  }
+
+  &__test-input {
+    position: absolute;
+    width: 100%;
+    top: 10%;
+    left: 0;
+    z-index: 999;
   }
 }
 
@@ -118,6 +165,7 @@ export default defineComponent({
 }
 
 .loading {
+  width: 30%;
   position: absolute;
   top: 50%;
   left: 50%;
