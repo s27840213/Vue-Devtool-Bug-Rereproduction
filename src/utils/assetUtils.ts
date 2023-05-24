@@ -7,7 +7,7 @@ import { IBleed, IPage } from '@/interfaces/page'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
-import { round } from 'lodash'
+import { get, round } from 'lodash'
 import { nextTick } from 'vue'
 import backgroundUtils from './backgroundUtils'
 import ControlUtils from './controlUtils'
@@ -901,7 +901,7 @@ class AssetUtils {
     const typeModule = key ?? this.getTypeModule(type)
     if (typeCategory && typeModule) {
       // @TODO 手動加入最近使用
-      const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
+      const categories = generalUtils.deepCopy(get(store.state, typeModule.split('/').concat('categories')))
       const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
       if (recentlyUsed) {
         const assetIndex = recentlyUsed.list.findIndex((asset: IListServiceContentDataItem) => asset.id === id)
@@ -932,7 +932,7 @@ class AssetUtils {
       const recently = recentlyUsedList.map(({ id }: { id: string }) => `#${id}`)
       store.commit('vivisticker/SET_recentlyBgColors', recently)
     } else {
-      const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
+      const categories = generalUtils.deepCopy(get(store.state, typeModule.split('/').concat('categories')))
       const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
       if (recentlyUsed) {
         recentlyUsed.list = recentlyUsedList

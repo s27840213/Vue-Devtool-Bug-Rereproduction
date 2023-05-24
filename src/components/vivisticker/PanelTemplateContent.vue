@@ -108,7 +108,9 @@ export default defineComponent({
     generalUtils.panelInit('template',
       this.handleSearch,
       this.handleCategorySearch,
-      this.getRecAndCate
+      async ({ reset }: {reset: boolean}) => {
+        await this.getRecAndCate({ reset, key: `templates/${this.igLayout}` })
+      }
     )
     this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
   },
@@ -175,7 +177,7 @@ export default defineComponent({
       return !this.isInCategory && !this.isInGroupTemplate
     },
     showAllRecently(): boolean {
-      return this.isTabShowAllRecently('object')
+      return this.isTabShowAllRecently('template')
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
@@ -198,6 +200,23 @@ export default defineComponent({
           title: category.title
         }))
     },
+    listRecently(): ICategoryItem[] {
+      const { categories } = this
+      const list = (categories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
+      const result = new Array(Math.ceil(list.length / 3))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-template-item',
+            list: rowItems,
+            size: this.itemHeight + 20,
+            title: ''
+          }
+        })
+      return result
+    },
     listResult(): ICategoryItem[] {
       return this.processListResult(this.rawContent.list, false)
     },
@@ -213,6 +232,9 @@ export default defineComponent({
       return this.processListResult(this.currentGroup.content_ids, true)
     },
     mainContent(): ICategoryItem[] {
+      if (this.showAllRecently) {
+        return this.listRecently
+      }
       const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
@@ -247,8 +269,8 @@ export default defineComponent({
   methods: {
     ...mapMutations('vivisticker', { setIsInGroupTemplate: 'SET_isInGroupTemplate' }),
     ...mapMutations('templates', { setIgLayout: 'SET_igLayout' }),
-    getRecAndCate(params = {}) {
-      this.$store.dispatch(`templates/${this.igLayout}/getRecAndCate`, params)
+    async getRecAndCate(params = {}) {
+      await this.$store.dispatch(`templates/${this.igLayout}/getRecAndCate`, params)
     },
     getContent(params = {}) {
       this.$store.dispatch(`templates/${this.igLayout}/getContent`, params)

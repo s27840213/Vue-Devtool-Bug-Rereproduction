@@ -52,7 +52,9 @@ export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
   textStock: 'text',
   background: 'background',
-  font: 'font'
+  font: 'font',
+  'templates/story': 'template',
+  'templates/post': 'template'
 }
 
 const MYDESIGN_TAGS = [{
