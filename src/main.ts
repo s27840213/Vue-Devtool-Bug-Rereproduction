@@ -1,7 +1,6 @@
 import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import modalUtils from '@/utils/modalUtils'
-import svgIconUtils from '@/utils/svgIconUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
 import Notifications, { notify } from '@kyvg/vue3-notification'
@@ -253,18 +252,21 @@ app.directive('custom-swipe', {
 
 app.directive('press', longpress)
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-  const req = require.context('@/assets/icon', true, /\.svg$/)
+/**
+ * move to the SvgIcon.vue component
+ */
+// document.addEventListener('DOMContentLoaded', async () => {
+//   const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
+//   const req = require.context('@/assets/icon', true, /\.svg$/)
 
-  if (window.location.host !== 'vivipic.com') {
-    svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-      return context.default?.id ?? ''
-    }))
-  } else {
-    requireAll(req)
-  }
-}, false)
+//   if (window.location.host !== 'vivipic.com') {
+//     svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+//       return context.default?.id ?? ''
+//     }))
+//   } else {
+//     requireAll(req)
+//   }
+// }, false)
 
 // add temporarily for testing
 if (window.location.href.indexOf('logout') > -1) {
