@@ -930,11 +930,11 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      // console.log(error)
+      logUtils.setLogAndConsoleLog('untilFontLoadedForPage:', error)
       isError = true
     } finally {
       if (isError === true) {
-        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)
@@ -960,12 +960,11 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      console.log(error)
-      logUtils.setLog(JSON.stringify(error))
+      logUtils.setLogAndConsoleLog('untilFontLoaded:', error)
       isError = true
     } finally {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)
@@ -1011,7 +1010,7 @@ class TextUtils {
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void) => {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       setTimeout(() => {
         if (callback) {
@@ -1034,7 +1033,7 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      console.log(error)
+      logUtils.setLogAndConsoleLog('waitFontLoadingAndRecord:', error)
       finalCallBack(true)
     })
   }
@@ -1046,7 +1045,7 @@ class TextUtils {
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void[]) => {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       setTimeout(() => {
         if (callback) {
@@ -1073,7 +1072,7 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      console.log(error)
+      logUtils.setLogAndConsoleLog('waitGroupFontLoadingAndRecord:', error)
       finalCallBack(true)
     })
   }
