@@ -17,6 +17,7 @@ div(class="share-template" :style="containerStyles")
 import PageContent from '@/components/editor/page/PageContent.vue'
 import Tabs from '@/components/Tabs.vue'
 import { IPage } from '@/interfaces/page'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapState } from 'vuex'
 
@@ -84,7 +85,7 @@ export default defineComponent({
           title: 'Post',
           iconName: 'ig_post',
           action: this.share
-        } : this.templateShareType === 'story' ? {
+        } : this.templateShareType === 'story' && this.tabIndex === 0 ? {
           key: 'story',
           title: 'Story',
           iconName: 'ig_story',
@@ -106,9 +107,11 @@ export default defineComponent({
   methods: {
     save() {
       console.log('saveTemplate')
+      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(undefined, undefined, false), 'download')
     },
     share() {
       console.log('shareTemplate', this.templateShareType)
+      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(undefined, undefined, false), 'IGStory')
     },
     handleResize() {
       const elPreview = this.$refs.preview as HTMLElement

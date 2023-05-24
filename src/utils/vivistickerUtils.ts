@@ -293,10 +293,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  createUrlForJSON(page?: IPage, asset?: IMyDesign): string {
-    page = page ?? pageUtils.getPage(0)
+  createUrlForJSON(page?: IPage, asset?: IMyDesign, noBg = true): string {
+    page = page ?? pageUtils.currFocusPage
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
-    const res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
+    const res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
     if (asset) {
       const key = this.mapEditorType2MyDesignKey(asset.type)
       return res + `&thumbType=mydesign&designId=${asset.id}&key=${key}`

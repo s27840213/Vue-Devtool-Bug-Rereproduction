@@ -9,7 +9,7 @@ div(class="screenshot")
   div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
     img(:src="backgroundImage" @load="onload")
   div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
-  page-content(v-if="usingJSON" :config="pages[0]" :pageIndex="0" :noBg="true" :style="pageTransforms()")
+  page-content(v-if="usingJSON" :config="pages[0]" :pageIndex="0" :noBg="extraData.noBg" :style="pageTransforms()")
 </template>
 
 <script lang="ts">
@@ -95,7 +95,8 @@ export default defineComponent({
         const thumbType = urlParams.get('thumbType')
         const designId = urlParams.get('designId')
         const key = urlParams.get('key')
-        this.extraData = { thumbType, designId, key }
+        const noBg = urlParams.get('noBg') === 'true'
+        this.extraData = { thumbType, designId, key, noBg }
         switch (type) {
           case 'svg': {
             const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json() as ILayer
