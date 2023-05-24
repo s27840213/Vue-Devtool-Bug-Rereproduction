@@ -9,7 +9,6 @@ div(class="bg-remove-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
     canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
-    img(:src="imgSrc")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
@@ -101,7 +100,6 @@ export default defineComponent({
     logUtils.setLog(`auto remove img src: ${this.imgSrc}`)
   },
   mounted() {
-    console.log(this.scaleRatio)
     logUtils.setLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
 
@@ -114,12 +112,12 @@ export default defineComponent({
       this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
     }
-    this.imageElement.onerror = (event) => {
+    this.imageElement.onerror = (ev) => {
       logUtils.setLog('imageElement onerror triggered')
-      logUtils.setLog(`${JSON.stringify(event)}`)
+      logUtils.setLog(`${JSON.stringify(ev)}`)
     }
     this.imageElement.src = this.imgSrc
-    // this.imageElement.setAttribute('crossOrigin', 'Anonymous')
+    this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     logUtils.setLog(`set image element src: ${this.imgSrc}`)
     logUtils.setLog(`set image element: ${JSON.stringify(this.imageElement)}`)
 
