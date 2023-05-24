@@ -283,7 +283,8 @@ class TextFill {
         pageIndex,
         layerIndex,
         subLayerIndex: +idx,
-        styles: { textFill: newTextFill }
+        styles: { textFill: newTextFill },
+        props: { contentEditable: false },
       })
 
       // If SplitedSpan setting changed, force split/unsplit span text
@@ -291,6 +292,11 @@ class TextFill {
       const newSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: newTextFill })
       textBgUtils.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
         pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+
+      // Recalc width/height since split span will alter width slightly
+      if (oldSplitedSpan !== newSplitedSpan) {
+        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
+      }
 
       tiptapUtils.updateHtml() // Vuex config => tiptap
 
