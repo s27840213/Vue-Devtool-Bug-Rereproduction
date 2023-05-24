@@ -994,7 +994,7 @@ class TextUtils {
         if (fontFileList.length !== 0) return
       }
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       throw error
     }
   }

@@ -4,6 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import store from '@/store'
 import text, { ITextState } from '@/store/text/index'
 import { LayerType } from '@/store/types'
+import logUtils from '@/utils/logUtils'
 import _ from 'lodash'
 import { nextTick } from 'vue'
 import generalUtils from './generalUtils'
@@ -612,7 +613,7 @@ class TextPropUtils {
             return (propName === 'fontSize' && typeof propBuff === 'number') ? propBuff * primaryScale : propBuff
           }
         } catch (error) {
-          console.log(error)
+          logUtils.setLogForError(error as Error)
         }
         break
       }

@@ -5,6 +5,7 @@ import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IStyle, IText, ITmp } 
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
 import store from '@/store'
+import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
 import { round } from 'lodash'
@@ -530,7 +531,7 @@ class AssetUtils {
       }))])
       editorUtils.setCloseMobilePanelFlag(true)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       console.log('Cannot find the file')
     }
   }
@@ -815,7 +816,7 @@ class AssetUtils {
       editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset)
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   }

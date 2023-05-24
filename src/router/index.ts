@@ -34,7 +34,7 @@ const routes: Array<RouteRecordRaw> = [
       try {
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -123,7 +123,7 @@ const routes: Array<RouteRecordRaw> = [
         }
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -140,7 +140,7 @@ const routes: Array<RouteRecordRaw> = [
           next()
         }
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -161,7 +161,7 @@ const routes: Array<RouteRecordRaw> = [
           }
         }
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -204,7 +204,7 @@ const routes: Array<RouteRecordRaw> = [
           next()
         }
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },

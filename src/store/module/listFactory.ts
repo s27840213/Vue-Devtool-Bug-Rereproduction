@@ -80,7 +80,7 @@ export default function (this: any) {
         if (writeBack) commit('SET_RECENTLY', data.data)
         else return data.data
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -110,7 +110,7 @@ export default function (this: any) {
           dispatch('getMoreContent')
         }
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -153,7 +153,7 @@ export default function (this: any) {
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -177,7 +177,7 @@ export default function (this: any) {
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -205,7 +205,7 @@ export default function (this: any) {
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_CONTENT', { objects: data.data, isSearch: true })
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -231,7 +231,7 @@ export default function (this: any) {
         logUtils.setLog(`api(${JSON.stringify(nextParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_MORE_CONTENT', data.data)
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -274,7 +274,7 @@ export default function (this: any) {
         })
         commit('SET_STATE', { sum: data.data.sum })
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     }
