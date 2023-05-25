@@ -132,13 +132,10 @@ export default defineComponent({
     this.initImageElement.src = this.initImgSrc
     this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
 
-    // this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
-    // if (this.$isTouchDevice()) {
-    //   this.editorViewCanvas.addEventListener('touchstart', (e) => {
-    //     e.preventDefault()
-    //     e.stopPropagation()
-    //   })
-    // }
+    this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
+    if (this.$isTouchDevice()) {
+      this.editorViewCanvas.addEventListener('touchstart', this.touchEventHandler)
+    }
     window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
@@ -154,13 +151,10 @@ export default defineComponent({
     window.removeEventListener('pointermove', this.drawing)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
-    // this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
-    // if (this.$isTouchDevice()) {
-    //   this.editorViewCanvas.removeEventListener('touchstart', (e) => {
-    //     e.preventDefault()
-    //     e.stopPropagation()
-    //   })
-    // }
+    this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
+    if (this.$isTouchDevice()) {
+      this.editorViewCanvas.removeEventListener('touchstart', this.touchEventHandler)
+    }
     window.removeEventListener('keydown', this.handleKeydown)
   },
   computed: {
@@ -301,7 +295,8 @@ export default defineComponent({
       addStep: 'bgRemove/ADD_step',
       setCurrStep: 'bgRemove/SET_currStep',
       setPrevPageScaleRatio: 'bgRemove/SET_prevPageScaleRatio',
-      clearSteps: 'bgRemove/CLEAR_steps'
+      clearSteps: 'bgRemove/CLEAR_steps',
+      setInGestureMode: 'SET_inGestureMode'
     }),
     initCanvas() {
       logUtils.setLog('initCanvas')
@@ -573,6 +568,15 @@ export default defineComponent({
     },
     handleBrushLeave() {
       this.showBrush = false
+    },
+    touchEventHandler(e: TouchEvent) {
+      if (e.touches.length >= 2) {
+        this.setInGestureMode(true)
+      } else if (e.touches.length <= 1) {
+        this.setInGestureMode(false)
+      }
+      e.preventDefault()
+      e.stopPropagation()
     }
   }
 })
