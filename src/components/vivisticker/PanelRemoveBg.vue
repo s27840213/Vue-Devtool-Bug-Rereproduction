@@ -16,8 +16,8 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
         :borderTouchArea="true"
         :name="'scale'"
         :value="bgRemoveScaleRatio"
-        :min="0.1"
-        :max="5"
+        :min="minRatio"
+        :max="maxRatio"
         :step="0.01"
         @update="setScaleRatio")
 </template>
@@ -43,7 +43,10 @@ export default defineComponent({
       rmSection: null as unknown as HTMLElement,
       mobilePanelHeight: 0,
       bgRemoveScaleRatio: 1,
-      panelRemoveBgAt: null as unknown as AnyTouch
+      panelRemoveBgAt: null as unknown as AnyTouch,
+      tmpScaleRatio: 1,
+      minRatio: 0.1,
+      maxRatio: 5
     }
   },
   mounted() {
@@ -100,10 +103,20 @@ export default defineComponent({
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
          */
         case 'start': {
+          this.tmpScaleRatio = this.bgRemoveScaleRatio
           break
         }
         case 'move': {
-          this.bgRemoveScaleRatio *= event.scale
+          const ratio = this.tmpScaleRatio * event.scale
+
+          if (ratio <= this.minRatio) {
+            this.bgRemoveScaleRatio = this.minRatio
+          } else if (ratio >= this.maxRatio) {
+            this.bgRemoveScaleRatio = this.maxRatio
+          } else {
+            this.bgRemoveScaleRatio = ratio
+          }
+
           break
         }
 
@@ -124,13 +137,16 @@ export default defineComponent({
     showMobilePanel(val) {
       if (val) {
         this.$nextTick(() => {
-          this.mobilePanelHeight = document.querySelector('.mobile-panel')?.clientHeight || 0
+          // to prevent the problems that the mobile panel is not fully expanded
+          setTimeout(() => {
+            this.mobilePanelHeight = document.querySelector('.mobile-panel')?.clientHeight || 0
+          }, 500)
         })
       }
     },
     fitScaleRatio(val) {
-      console.log('watch update')
       this.bgRemoveScaleRatio = val
+      this.tmpScaleRatio = val
     },
     bgRemoveScaleRatio(val) {
       if (!this.rmSection) {
