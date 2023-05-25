@@ -383,6 +383,7 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
+      console.log(`in gesture mode: ${this.inGestureMode}`)
       if (!this.inGestureMode) {
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
         Object.assign(this.initPos, {
