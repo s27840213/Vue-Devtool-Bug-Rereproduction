@@ -198,7 +198,7 @@ export default defineComponent({
           icon: 'download',
           width: 24,
           action: () => {
-            console.log('download')
+            bgRemoveUtils.downloadCanvas()
           }
         }]
       } else {

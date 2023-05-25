@@ -86,7 +86,7 @@ export default defineComponent({
     enableDefaultPadding: {
       type: Boolean,
       default: true
-    }
+    },
   },
   computed: {
     propsVal: {

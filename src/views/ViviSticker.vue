@@ -39,9 +39,9 @@ import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import MainMenu from '@/components/vivisticker/MainMenu.vue'
 import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
-import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
+import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
@@ -55,6 +55,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { find } from 'lodash'
+import VConsole from 'vconsole'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -80,6 +81,7 @@ export default defineComponent({
       isKeyboardAnimation: 0,
       showMobilePanelAfterTransitoin: false,
       marginBottom: 0,
+      vConsole: null as any
     }
   },
   created() {
@@ -195,11 +197,17 @@ export default defineComponent({
       if (!exp) await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
     }
 
-    const debugMode = (await vivistickerUtils.getState('debugMode'))?.value ?? false
+    const debugMode = process.env.NODE_ENV === 'development' ? true : (await vivistickerUtils.getState('debugMode'))?.value ?? false
     this.setDebugMode(debugMode)
+
+    if (process.env.NODE_ENV === 'development' && debugMode) {
+      this.vConsole = new VConsole({ theme: 'dark' })
+      this.vConsole.setSwitchPosition(25, 80)
+    }
   },
   unmounted() {
     document.removeEventListener('scroll', this.handleScroll)
+    this.vConsole && this.vConsole.destroy()
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -227,7 +235,8 @@ export default defineComponent({
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       slideType: 'vivisticker/getSlideType',
       isSlideShown: 'vivisticker/getIsSlideShown',
-      modalInfo: 'vivisticker/getModalInfo'
+      modalInfo: 'vivisticker/getModalInfo',
+      debugMode: 'vivisticker/getDebugMode'
     }),
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
@@ -248,6 +257,15 @@ export default defineComponent({
     mobilePanel(newVal, oldVal) {
       if (oldVal === 'photo-shadow') {
         imageShadowPanelUtils.handleShadowUpload()
+      }
+    },
+    debugMode(newVal) {
+      if (newVal && !this.vConsole) {
+        this.vConsole = new VConsole({ theme: 'dark' })
+        this.vConsole.setSwitchPosition(25, 80)
+      } else if (!newVal && this.vConsole) {
+        this.vConsole.destroy()
+        this.vConsole = null
       }
     }
   },

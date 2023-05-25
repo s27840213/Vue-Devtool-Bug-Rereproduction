@@ -167,12 +167,11 @@ class BgRemoveUtils {
     logUtils.setLog('finish removing bg')
     logUtils.setLog(`remove bg result: ${JSON.stringify(data)}`)
     editorUtils.setCurrActivePanel('remove-bg')
-    this.setIsProcessing(false)
     const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
     logUtils.setLog(`autoRemoveResult: ${JSON.stringify(autoRemoveResult)}`)
     this.setAutoRemoveResult(autoRemoveResult)
     this.setInBgRemoveMode(true)
-    // this.setIsProcessing(false)
+    this.setIsProcessing(false)
 
     // return data
   }
@@ -187,8 +186,6 @@ class BgRemoveUtils {
   }
 
   save() {
-    console.log(generalUtils.deepCopy(this.autoRemoveResult))
-    console.log(store.getters['bgRemove/getAutoRemoveResult'])
     const { index, pageIndex } = pageUtils.currSelectedInfo as ICurrSelectedInfo
     imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
     imageShadowUtils.updateEffectProps({ pageIndex, layerIndex: index }, { isTransparent: true })
@@ -282,6 +279,12 @@ class BgRemoveUtils {
         pollingJsonName: 'result2.json'
       })
     }
+  }
+
+  downloadCanvas() {
+    const src = this.canvas.toDataURL('image/png;base64')
+
+    generalUtils.downloadImage(src, `vivistiker-${generalUtils.generateRandomString}.png`)
   }
 }
 

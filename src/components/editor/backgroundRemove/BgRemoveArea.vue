@@ -7,7 +7,8 @@ div(class="bg-remove-area"
     :style="initPhotoStyles")
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
-      :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
+      :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}"
+      :ref="'scaleArea'")
     canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
@@ -15,7 +16,7 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-teleport(v-if="useMobileEditor || inVivisticker" to=".header-bar")
+teleport(v-if="useMobileEditor || inVivisticker" :to="teleportTarget")
   div(class="magnify-area" :style="magnifyAreaStyle")
     canvas(class="magnify-area__canvas"  ref="magnify")
     div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
@@ -45,12 +46,17 @@ export default defineComponent({
     fitScaleRatio: {
       default: 1,
       type: Number
+    },
+    teleportTarget: {
+      default: '.header-bar',
+      type: String
     }
   },
   data() {
     return {
       cyReady: false,
       root: undefined as unknown as HTMLElement,
+      scaleArea: undefined as unknown as HTMLElement,
       canvasWidth: 1600,
       canvasHeight: 1600,
       contentCanvas: undefined as unknown as HTMLCanvasElement,
@@ -102,6 +108,7 @@ export default defineComponent({
   mounted() {
     logUtils.setLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
+    this.scaleArea = this.$refs.scaleArea as HTMLElement
 
     this.imageElement = new Image()
     this.imageElement.onload = () => {
@@ -129,13 +136,10 @@ export default defineComponent({
     this.initImageElement.src = this.initImgSrc
     this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
 
-    this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
     if (this.$isTouchDevice()) {
-      this.editorViewCanvas.addEventListener('touchstart', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      })
+      this.editorViewCanvas.addEventListener('touchstart', this.touchEventHandler)
     }
+    this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
     window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
@@ -151,13 +155,10 @@ export default defineComponent({
     window.removeEventListener('pointermove', this.drawing)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
-    this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
     if (this.$isTouchDevice()) {
-      this.editorViewCanvas.removeEventListener('touchstart', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      })
+      this.editorViewCanvas.removeEventListener('touchstart', this.touchEventHandler)
     }
+    this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
   },
   computed: {
@@ -167,6 +168,7 @@ export default defineComponent({
       brushSize: 'bgRemove/getBrushSize',
       restoreInitState: 'bgRemove/getRestoreInitState',
       clearMode: 'bgRemove/getClearMode',
+      movingMode: 'bgRemove/getMovingMode',
       showInitImage: 'bgRemove/getShowInitImage',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
       modifiedFlag: 'bgRemove/getModifiedFlag',
@@ -218,7 +220,8 @@ export default defineComponent({
         bottom: '10px',
         left: '80px'
       } : {
-        bottom: '-70px',
+        bottom: this.inVivisticker ? 'none' : '-70px',
+        top: this.inVivisticker ? '20px' : 'none',
         ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
         visibility: this.showBrush ? 'visible' : 'hidden'
       }
@@ -298,7 +301,8 @@ export default defineComponent({
       addStep: 'bgRemove/ADD_step',
       setCurrStep: 'bgRemove/SET_currStep',
       setPrevPageScaleRatio: 'bgRemove/SET_prevPageScaleRatio',
-      clearSteps: 'bgRemove/CLEAR_steps'
+      clearSteps: 'bgRemove/CLEAR_steps',
+      setInGestureMode: 'SET_inGestureMode'
     }),
     initCanvas() {
       logUtils.setLog('initCanvas')
@@ -352,7 +356,7 @@ export default defineComponent({
 
       this.magnifyCtx = ctx
 
-      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
+      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
     },
     createInitImageCtx() {
       logUtils.setLog('createInitImageCtx')
@@ -383,8 +387,10 @@ export default defineComponent({
 
       this.setModifiedFlag(true)
     },
+    // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
-      if (!this.inGestureMode) {
+      console.log(`in gesture mode: ${this.inGestureMode}`)
+      if (!this.inGestureMode && !this.movingMode) {
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
         Object.assign(this.initPos, {
           x,
@@ -405,10 +411,12 @@ export default defineComponent({
       }
     },
     drawing(e: MouseEvent) {
-      if (this.clearMode) {
-        this.drawInClearMode(e)
-      } else {
-        this.drawInRestoreMode(e)
+      if (!this.inGestureMode && !this.movingMode) {
+        if (this.clearMode) {
+          this.drawInClearMode(e)
+        } else {
+          this.drawInRestoreMode(e)
+        }
       }
     },
     drawEnd() {
@@ -569,6 +577,19 @@ export default defineComponent({
     },
     handleBrushLeave() {
       this.showBrush = false
+    },
+    touchEventHandler(e: TouchEvent) {
+      if (this.movingMode) {
+        return
+      }
+      if (e.touches.length === 2) {
+        this.setInGestureMode(true)
+        return
+      } else if (e.touches.length <= 1) {
+        this.setInGestureMode(false)
+      }
+      e.preventDefault()
+      e.stopPropagation()
     }
   }
 })
@@ -578,8 +599,7 @@ export default defineComponent({
 .bg-remove-area {
   position: relative;
   box-sizing: content-box;
-  margin: 0px auto;
-  overflow: hidden;
+  margin: auto auto;
 
   &__initPhoto {
     position: absolute;
