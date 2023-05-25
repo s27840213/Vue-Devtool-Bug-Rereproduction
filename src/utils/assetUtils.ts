@@ -476,12 +476,13 @@ class AssetUtils {
     if (config.type === 'text') {
       Object.assign(config, {
         widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
-        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
+        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles.textShape),
       })
     } else if (config.type === 'group') {
       for (const subLayer of config.layers) {
+        if (subLayer.type !== 'text') continue
         Object.assign(subLayer, {
-          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles)
+          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles.textShape)
         })
       }
     }

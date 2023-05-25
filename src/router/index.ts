@@ -244,14 +244,28 @@ const router = createRouter({
         render() { return h(resolveComponent('router-view')) }
       },
       async beforeEnter(to, from, next) {
-        if (!picWVUtils.inBrowserMode) {
-          picWVUtils.registerCallbacks('router')
-        }
-        await picWVUtils.getUserInfo()
         if (logUtils.getLog()) {
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
+        if (!picWVUtils.inBrowserMode) {
+          picWVUtils.registerCallbacks('router')
+        }
+        await picWVUtils.getUserInfo()
+        let argoError = false
+        try {
+          const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
+          if (status !== 200) {
+            argoError = true
+            logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
+          }
+        } catch (error) {
+          argoError = true
+          logUtils.setLogForError(error as Error)
+          logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
+        } finally {
+          store.commit('text/SET_isArgoAvailable', !argoError)
+        }
         let locale = localStorage.getItem('locale') as '' | 'tw' | 'us' | 'jp'
         // if local storage is empty
         if (locale === '' || !locale) {
@@ -327,8 +341,8 @@ router.beforeEach(async (to, from, next) => {
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 
-    if (window.location.hostname !== 'vivipic.com') {
-      store.commit('SET_showGlobalErrorModal', true) // non-production always show error modal
+    if (window.location.hostname !== 'vivipic.com' || store.getters['user/isAdmin']) {
+      store.commit('SET_showGlobalErrorModal', true) // always show error modal for non-production domains or admin users
     } else {
       store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
     }
