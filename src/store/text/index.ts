@@ -1,6 +1,7 @@
 import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { IFont, ISelection } from '@/interfaces/text'
 import router from '@/router'
+import store from '@/store'
 import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -37,7 +38,8 @@ export interface ITextState {
   },
   paragraphs: Array<IParagraph>,
   firstLoad: boolean,
-  isFontLoading: boolean
+  isFontLoading: boolean,
+  isArgoAvailable: boolean,
 }
 
 const getDefaultState = (): ITextState => ({
@@ -78,7 +80,8 @@ const getDefaultState = (): ITextState => ({
   defaultFonts: [],
   paragraphs: [],
   firstLoad: false,
-  isFontLoading: false
+  isFontLoading: false,
+  isArgoAvailable: false,
 })
 const state = getDefaultState()
 
@@ -95,6 +98,9 @@ const getters: GetterTree<ITextState, unknown> = {
   },
   getIsFontLoading(state): boolean {
     return state.isFontLoading
+  },
+  getIsArgoAvailable(state): boolean {
+    return state.isArgoAvailable
   }
 }
 
@@ -158,6 +164,9 @@ const mutations: MutationTree<ITextState> = {
   },
   SET_isFontLoading(state: ITextState, isFontLoading: boolean) {
     state.isFontLoading = isFontLoading
+  },
+  SET_isArgoAvailable(state: ITextState, isArgoAvailable: boolean) {
+    state.isArgoAvailable = isArgoAvailable
   }
 }
 
@@ -244,9 +253,10 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
   const isInPreview = router.currentRoute.value.name === 'Preview'
   const noArgo = 'https://template.vivipic.com/'
   const argo = 'https://media.vivipic.cc/'
+  const isArgoAvailable = store.getters['text/getIsArgoAvailable']
   switch (type) {
     case 'public':
-      cssUrl = addPlatform(`${isInPreview ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`)
+      cssUrl = addPlatform(`${(isInPreview || !isArgoAvailable) ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`)
       if (isInPreview) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
@@ -290,7 +300,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     case 'URL':
       return url
   }
-  cssUrl = `${isInPreview ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`
+  cssUrl = `${(isInPreview || !isArgoAvailable) ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`
   if (isInPreview) return cssUrl
   try {
     response = await fetch(cssUrl)
