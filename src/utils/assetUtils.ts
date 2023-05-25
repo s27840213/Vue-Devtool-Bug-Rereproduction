@@ -506,7 +506,7 @@ class AssetUtils {
       Object.assign(config, {
         // widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
         widthLimit: -1, // for autoRescaleMode
-        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
+        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles.textShape),
         inAutoRescaleMode: isCenter,
         initScale: config.styles.scale,
         // contentEditable: true
@@ -522,8 +522,9 @@ class AssetUtils {
       isText = true
     } else if (config.type === 'group') {
       for (const subLayer of config.layers) {
+        if (subLayer.type !== 'text') continue
         Object.assign(subLayer, {
-          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles)
+          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles.textShape)
         })
       }
       newLayer = LayerFactary.newGroup(config, (config as IGroup).layers)

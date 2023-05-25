@@ -34,12 +34,12 @@ export default defineComponent({
     hasCurveText(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
       if (subLayerIdx !== -1) {
-        return textShapeUtils.isCurvedText((currLayer as IGroup).layers[subLayerIdx].styles)
+        return textShapeUtils.isCurvedText(((currLayer as IGroup).layers[subLayerIdx] as IText).styles.textShape)
       }
       if (currLayer.type === 'text') {
-        return textShapeUtils.isCurvedText(currLayer.styles)
+        return textShapeUtils.isCurvedText(currLayer.styles.textShape)
       }
-      return (currLayer as IGroup).layers.some(l => textShapeUtils.isCurvedText(l.styles))
+      return (currLayer as IGroup).layers.some(l => l.type === 'text' && textShapeUtils.isCurvedText(l.styles.textShape))
     },
     hasOnlyVerticalText(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
