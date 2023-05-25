@@ -5,19 +5,21 @@ class MagnifyUtils {
   private magnifyCanvas: HTMLCanvasElement;
   private contentCanvas: HTMLCanvasElement;
   private targetEl: HTMLElement;
+  private fitScaleRatio: number
   private magnifyContext: CanvasRenderingContext2D;
   private posInMagnifierCanvas = { x: 0, y: 0 };
   private raf: number | undefined;
   SCALE_RATIO = 0.4
   MAGNIFY_RADIUS =30
 
-  constructor(magnifyCanvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, contentCanvas: HTMLCanvasElement, targetEl: HTMLElement) {
+  constructor(magnifyCanvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, contentCanvas: HTMLCanvasElement, targetEl: HTMLElement, fitScaleRatio: number) {
     this.magnifyCanvas = magnifyCanvas
     this.magnifyCanvas.width = this.MAGNIFY_RADIUS * 2
     this.magnifyCanvas.height = this.MAGNIFY_RADIUS * 2
     this.magnifyContext = ctx
     this.contentCanvas = contentCanvas
     this.targetEl = targetEl
+    this.fitScaleRatio = fitScaleRatio
 
     this.bind()
   }
@@ -31,7 +33,7 @@ class MagnifyUtils {
   }
 
   render(event: PointerEvent): void {
-    this.posInMagnifierCanvas = mouseUtils.getMousePosInTarget(event, this.targetEl)
+    this.posInMagnifierCanvas = mouseUtils.getMousePosInTarget(event, this.targetEl, this.fitScaleRatio)
     this.clear()
     // this.context.save()
 

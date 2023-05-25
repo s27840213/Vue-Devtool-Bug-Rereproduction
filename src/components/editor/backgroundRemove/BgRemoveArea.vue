@@ -220,7 +220,8 @@ export default defineComponent({
         bottom: '10px',
         left: '80px'
       } : {
-        bottom: '-70px',
+        bottom: this.inVivisticker ? 'none' : '-70px',
+        top: this.inVivisticker ? '20px' : 'none',
         ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
         visibility: this.showBrush ? 'visible' : 'hidden'
       }
@@ -355,7 +356,7 @@ export default defineComponent({
 
       this.magnifyCtx = ctx
 
-      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
+      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
     },
     createInitImageCtx() {
       logUtils.setLog('createInitImageCtx')

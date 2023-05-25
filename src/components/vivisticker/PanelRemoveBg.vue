@@ -6,6 +6,7 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
       div(class="gray-mask")
       img(class="loading" :src="require('@/assets/img/gif/gray-loading.gif')")
     bg-remove-area(v-else :editorViewCanvas="panelRemoveBg"
+      :teleportTarget="'.panel-remove-bg__rm-section'"
       :inVivisticker="true"
       :fitScaleRatio="bgRemoveScaleRatio")
   nubtn(v-else theme="primary" size="mid-center" @click="removeBg") {{ $t('NN0043') }}
