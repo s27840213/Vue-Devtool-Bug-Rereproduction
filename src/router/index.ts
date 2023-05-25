@@ -261,7 +261,7 @@ const router = createRouter({
           }
         } catch (error) {
           argoError = true
-          console.error(error)
+          logUtils.setLogForError(error as Error)
           logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
         } finally {
           store.commit('text/SET_isArgoAvailable', !argoError)
