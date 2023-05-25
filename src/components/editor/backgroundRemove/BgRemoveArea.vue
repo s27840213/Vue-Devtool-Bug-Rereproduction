@@ -571,8 +571,9 @@ export default defineComponent({
     },
     touchEventHandler(e: TouchEvent) {
       console.log(e.touches.length)
-      if (e.touches.length === 1) {
+      if (e.touches.length === 2) {
         this.setInGestureMode(true)
+        return
       } else if (e.touches.length <= 1) {
         this.setInGestureMode(false)
       }

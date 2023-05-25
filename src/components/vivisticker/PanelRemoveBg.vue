@@ -30,7 +30,7 @@ import generalUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -87,6 +87,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      setInGestureMode: 'SET_inGestureMode'
+    }),
     removeBg() {
       uploadUtils.chooseAssets('stk-bg-remove')
     },
@@ -100,11 +103,12 @@ export default defineComponent({
          */
         case 'start': {
           this.tmpScaleRatio = this.bgRemoveScaleRatio
+          this.setInGestureMode(true)
           break
         }
         case 'move': {
           const ratio = this.tmpScaleRatio * event.scale
-
+          console.log(`delta scale: ${event.deltaScale}`)
           if (ratio <= this.minRatio) {
             this.bgRemoveScaleRatio = this.minRatio
           } else if (ratio >= this.maxRatio) {
@@ -117,6 +121,7 @@ export default defineComponent({
         }
 
         case 'end': {
+          this.setInGestureMode(false)
           break
         }
       }
