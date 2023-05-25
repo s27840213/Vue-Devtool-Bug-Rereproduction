@@ -54,8 +54,6 @@ export default defineComponent({
     this.rmSection = this.$refs.rmSection as HTMLElement
 
     this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
-    console.log(this.panelRemoveBg)
-    console.log(this.panelRemoveBgAt)
   },
   unmounted() {
     bgRemoveUtils.setInBgRemoveMode(false)
@@ -93,11 +91,9 @@ export default defineComponent({
       uploadUtils.chooseAssets('stk-bg-remove')
     },
     setScaleRatio(val: number) {
-      console.log('update')
       this.bgRemoveScaleRatio = val
     },
     pinchHandler(event: AnyTouchEvent) {
-      console.log('pinch start')
       switch (event.phase) {
         /**
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
@@ -142,6 +138,8 @@ export default defineComponent({
             this.mobilePanelHeight = document.querySelector('.mobile-panel')?.clientHeight || 0
           }, 500)
         })
+      } else {
+        this.mobilePanelHeight = 0
       }
     },
     fitScaleRatio(val) {

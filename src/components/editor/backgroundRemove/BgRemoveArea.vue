@@ -132,10 +132,10 @@ export default defineComponent({
     this.initImageElement.src = this.initImgSrc
     this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
 
-    this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
     if (this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('touchstart', this.touchEventHandler)
     }
+    this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
     window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
@@ -151,10 +151,10 @@ export default defineComponent({
     window.removeEventListener('pointermove', this.drawing)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
-    this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
     if (this.$isTouchDevice()) {
       this.editorViewCanvas.removeEventListener('touchstart', this.touchEventHandler)
     }
+    this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
   },
   computed: {
@@ -570,7 +570,8 @@ export default defineComponent({
       this.showBrush = false
     },
     touchEventHandler(e: TouchEvent) {
-      if (e.touches.length >= 2) {
+      console.log(e.touches.length)
+      if (e.touches.length === 1) {
         this.setInGestureMode(true)
       } else if (e.touches.length <= 1) {
         this.setInGestureMode(false)

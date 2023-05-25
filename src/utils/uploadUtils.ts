@@ -326,12 +326,12 @@ class UploadUtils {
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
-      // const assetId = id ?? generalUtils.generateAssetId()
-      // const uuid = generalUtils.generateAssetId()
+      const assetId = id ?? generalUtils.generateAssetId()
+      const uuid = generalUtils.generateAssetId()
 
       // for horizontal image test
-      const assetId = '230511154035471yNJGiW58'
-      const uuid = '230511154035471qUvA6TTT'
+      // const assetId = '230511154035471yNJGiW58'
+      // const uuid = '230511154035471qUvA6TTT'
       const formData = new FormData()
       if (type === 'stk-bg-remove') {
         Object.keys(this.loginOutput.ul_removebg_map.fields).forEach(key => {
@@ -747,8 +747,8 @@ class UploadUtils {
       })
       .catch(async (error) => {
         // Error: 403: Forbidden
-        logUtils.setLog('uploadDesign failed:')
-        logUtils.setLogForError(error as Error)
+        logUtils.setLog(`Failed: ${error}`)
+        console.error(error)
         await store.dispatch('user/login', { token: this.token })
       })
   }
