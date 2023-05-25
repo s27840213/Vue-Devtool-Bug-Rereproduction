@@ -86,12 +86,13 @@ export default defineComponent({
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorBg: 'vivisticker/getEditorBg',
+      editingAssetInfo: 'vivisticker/getEditingAssetInfo',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       isInSelectionMode: 'vivisticker/getIsInSelectionMode',
       userSettings: 'vivisticker/getUserSettings',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      inBgRemoveLastStep: 'bgRemove/inLastStep',
+      inBgRemoveLastStep: 'bgRemove/inLastStep'
     }),
     stepCount(): number {
       return stepsUtils.steps.length
@@ -339,7 +340,7 @@ export default defineComponent({
           vivistickerUtils.handleIos16Video()
         }
       }
-      if (vivistickerUtils.checkVersion('1.31')) {
+      if (vivistickerUtils.checkVersion('1.31') && this.editingAssetInfo.isFrame) {
         vivistickerUtils.copyWithScreenshotUrl(
           vivistickerUtils.createUrlForJSON({ source: 'editor' }),
           copyCallback
