@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-remove-bg" ref="panelRemoveBg")
+div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
   div(v-if="inBgRemoveMode || isProcessing" class="panel-remove-bg__rm-section" ref="rmSection")
     div(v-if="isProcessing" class="panel-remove-bg__preview-section")
       img(:src="previewImage.src")
@@ -28,6 +28,7 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import generalUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -41,7 +42,7 @@ export default defineComponent({
       panelRemoveBg: null as unknown as HTMLElement,
       rmSection: null as unknown as HTMLElement,
       mobilePanelHeight: 0,
-      bgRemoveScaleRatio: 1
+      bgRemoveScaleRatio: 1,
     }
   },
   mounted() {
@@ -85,7 +86,26 @@ export default defineComponent({
     setScaleRatio(val: number) {
       console.log('update')
       this.bgRemoveScaleRatio = val
-    }
+    },
+    pinchHandler(event: AnyTouchEvent) {
+      console.log('pinch start')
+      switch (event.phase) {
+        /**
+         * @Note the very first event won't fire start phase, it's very strange and need to pay attention
+         */
+        case 'start': {
+          break
+        }
+        case 'move': {
+          this.bgRemoveScaleRatio *= event.scale
+          break
+        }
+
+        case 'end': {
+          break
+        }
+      }
+    },
   },
   watch: {
     inBgRemoveMode(val) {
