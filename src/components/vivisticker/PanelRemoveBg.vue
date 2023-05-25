@@ -9,22 +9,21 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
       :inVivisticker="true"
       :fitScaleRatio="bgRemoveScaleRatio")
   nubtn(v-else theme="primary" size="mid-center" @click="removeBg") {{ $t('NN0043') }}
-  teleport(to="body")
-    div(class="panel-remove-bg__test-input")
-      mobile-slider(
-        :title="'scale'"
-        :borderTouchArea="true"
-        :name="'scale'"
-        :value="bgRemoveScaleRatio"
-        :min="minRatio"
-        :max="maxRatio"
-        :step="0.01"
-        @update="setScaleRatio")
+  //- teleport(to="body")
+  //-   div(class="panel-remove-bg__test-input")
+  //-     mobile-slider(
+  //-       :title="'scale'"
+  //-       :borderTouchArea="true"
+  //-       :name="'scale'"
+  //-       :value="bgRemoveScaleRatio"
+  //-       :min="minRatio"
+  //-       :max="maxRatio"
+  //-       :step="0.01"
+  //-       @update="setScaleRatio")
 </template>
 
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import generalUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -34,8 +33,7 @@ import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   components: {
-    BgRemoveArea,
-    MobileSlider
+    BgRemoveArea
   },
   data() {
     return {
@@ -70,7 +68,7 @@ export default defineComponent({
     containerWH() {
       return {
         width: this.panelRemoveBg ? this.panelRemoveBg.offsetWidth : 0,
-        height: this.panelRemoveBg ? this.panelRemoveBg.offsetHeight : 0,
+        height: this.panelRemoveBg ? this.panelRemoveBg.offsetHeight - this.mobilePanelHeight : 0,
       }
     },
     fitScaleRatio(): number {
@@ -92,9 +90,6 @@ export default defineComponent({
     }),
     removeBg() {
       uploadUtils.chooseAssets('stk-bg-remove')
-    },
-    setScaleRatio(val: number) {
-      this.bgRemoveScaleRatio = val
     },
     pinchHandler(event: AnyTouchEvent) {
       switch (event.phase) {

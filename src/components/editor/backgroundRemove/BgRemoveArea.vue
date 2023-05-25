@@ -16,7 +16,7 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-teleport(v-if="useMobileEditor || inVivisticker" to=".header-bar")
+teleport(v-if="useMobileEditor || inVivisticker" :to="teleportTarget")
   div(class="magnify-area" :style="magnifyAreaStyle")
     canvas(class="magnify-area__canvas"  ref="magnify")
     div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
@@ -46,6 +46,10 @@ export default defineComponent({
     fitScaleRatio: {
       default: 1,
       type: Number
+    },
+    teleportTarget: {
+      default: '.header-bar',
+      type: String
     }
   },
   data() {
@@ -164,6 +168,7 @@ export default defineComponent({
       brushSize: 'bgRemove/getBrushSize',
       restoreInitState: 'bgRemove/getRestoreInitState',
       clearMode: 'bgRemove/getClearMode',
+      movingMode: 'bgRemove/getMovingMode',
       showInitImage: 'bgRemove/getShowInitImage',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
       modifiedFlag: 'bgRemove/getModifiedFlag',
@@ -384,7 +389,7 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
       console.log(`in gesture mode: ${this.inGestureMode}`)
-      if (!this.inGestureMode) {
+      if (!this.inGestureMode && !this.movingMode) {
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
         Object.assign(this.initPos, {
           x,
@@ -405,7 +410,7 @@ export default defineComponent({
       }
     },
     drawing(e: MouseEvent) {
-      if (!this.inGestureMode) {
+      if (!this.inGestureMode && !this.movingMode) {
         if (this.clearMode) {
           this.drawInClearMode(e)
         } else {
@@ -573,8 +578,10 @@ export default defineComponent({
       this.showBrush = false
     },
     touchEventHandler(e: TouchEvent) {
-      console.log(e.touches.length)
-      if (e.touches.length === 1) {
+      if (this.movingMode) {
+        return
+      }
+      if (e.touches.length === 2) {
         this.setInGestureMode(true)
         return
       } else if (e.touches.length <= 1) {

@@ -7,6 +7,7 @@ interface IBgRemoveState {
   brushSize: number,
   showInitImage: boolean,
   clearMode: boolean,
+  movingMode: boolean,
   restoreInitState: boolean,
   canvas: HTMLCanvasElement,
   autoRemoveResult: IBgRemoveInfo,
@@ -36,6 +37,7 @@ const getDefaultState = (): IBgRemoveState => ({
   brushSize: 16,
   showInitImage: false,
   clearMode: true,
+  movingMode: false,
   restoreInitState: false,
   canvas: null as unknown as HTMLCanvasElement,
   autoRemoveResult: null as unknown as IBgRemoveInfo,
@@ -73,6 +75,9 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
   },
   getClearMode(state: IBgRemoveState) {
     return state.clearMode
+  },
+  getMovingMode(state: IBgRemoveState) {
+    return state.movingMode
   },
   getRestoreInitState(state: IBgRemoveState) {
     return state.restoreInitState
@@ -145,6 +150,9 @@ const mutations: MutationTree<IBgRemoveState> = {
   },
   SET_clearMode(state: IBgRemoveState, bool: boolean) {
     state.clearMode = bool
+  },
+  SET_movingMode(state: IBgRemoveState, bool: boolean) {
+    state.movingMode = bool
   },
   SET_restoreInitState(state: IBgRemoveState, bool: boolean) {
     state.restoreInitState = bool
