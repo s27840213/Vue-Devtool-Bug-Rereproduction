@@ -1,3 +1,4 @@
+import { ITextShape } from '@/interfaces/format'
 import { ISpan, IText } from '@/interfaces/layer'
 import { ICurveTextPostParams, ICurveTextPreParams } from '@/interfaces/text'
 import store from '@/store'
@@ -111,8 +112,8 @@ class Controller {
     return value
   }
 
-  isCurvedText(styles: any): boolean {
-    return styles.textShape?.name === 'curve'
+  isCurvedText(textShape?: ITextShape): boolean {
+    return textShape?.name === 'curve'
   }
 
   resetCurrTextEffect() {
@@ -336,7 +337,7 @@ class Controller {
   getAnchors(config: IText, minHeight: number): { top: number, bottom: number, center: number } {
     const { x, y, width, height } = config.styles
     const center = x + width / 2
-    if (this.isCurvedText(config.styles)) {
+    if (this.isCurvedText(config.styles.textShape)) {
       const bend = +(config.styles as any).textShape.bend
       return {
         top: bend >= 0 ? y : y + height - minHeight,
@@ -396,7 +397,7 @@ class Controller {
   getPreParams(config: IText): ICurveTextPreParams {
     const bendOri: number = +((config.styles as any).textShape?.bend ?? 0)
     const { scale, height } = config.styles
-    const wasCurveText = this.isCurvedText(config.styles)
+    const wasCurveText = this.isCurvedText(config.styles.textShape)
     let minHeight = height * scale
     let hDiff1 = (minHeight - height) / 2
     if (wasCurveText) {
@@ -409,7 +410,7 @@ class Controller {
   getPostParams(config: IText, preParams: ICurveTextPreParams, newSize: { width: number, height: number }): ICurveTextPostParams {
     const { wasCurveText, bendOri, hDiff1, minHeight } = preParams
     const { x, y, width, height, rotate } = config.styles
-    if (this.isCurvedText(config.styles)) {
+    if (this.isCurvedText(config.styles.textShape)) {
       const bend = +(config.styles as any).textShape?.bend
       const hDiff2 = bend < 0 ? (minHeight - newSize.height) / 2 : (newSize.height - minHeight) / 2
       return {

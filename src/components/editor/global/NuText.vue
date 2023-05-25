@@ -104,8 +104,7 @@ export default defineComponent({
   },
   computed: {
     isCurveText(): any {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
+      return textShapeUtils.isCurvedText(this.config.styles.textShape)
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
@@ -209,7 +208,7 @@ export default defineComponent({
     },
     async resizeCallback() {
       const config = generalUtils.deepCopy(this.config) as IText
-      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
+      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles.textShape)) return
 
       // console.log('resize')
 
