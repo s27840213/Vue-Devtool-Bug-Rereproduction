@@ -132,13 +132,13 @@ export default defineComponent({
     this.initImageElement.src = this.initImgSrc
     this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
 
-    this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
-    if (this.$isTouchDevice()) {
-      this.editorViewCanvas.addEventListener('touchstart', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      })
-    }
+    // this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
+    // if (this.$isTouchDevice()) {
+    //   this.editorViewCanvas.addEventListener('touchstart', (e) => {
+    //     e.preventDefault()
+    //     e.stopPropagation()
+    //   })
+    // }
     window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
@@ -154,13 +154,13 @@ export default defineComponent({
     window.removeEventListener('pointermove', this.drawing)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
-    this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
-    if (this.$isTouchDevice()) {
-      this.editorViewCanvas.removeEventListener('touchstart', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      })
-    }
+    // this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
+    // if (this.$isTouchDevice()) {
+    //   this.editorViewCanvas.removeEventListener('touchstart', (e) => {
+    //     e.preventDefault()
+    //     e.stopPropagation()
+    //   })
+    // }
     window.removeEventListener('keydown', this.handleKeydown)
   },
   computed: {
@@ -386,6 +386,7 @@ export default defineComponent({
 
       this.setModifiedFlag(true)
     },
+    // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
       if (!this.inGestureMode) {
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)

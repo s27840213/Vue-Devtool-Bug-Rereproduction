@@ -28,7 +28,7 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import generalUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { AnyTouchEvent } from 'any-touch'
+import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -43,14 +43,20 @@ export default defineComponent({
       rmSection: null as unknown as HTMLElement,
       mobilePanelHeight: 0,
       bgRemoveScaleRatio: 1,
+      panelRemoveBgAt: null as unknown as AnyTouch
     }
   },
   mounted() {
     this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
     this.rmSection = this.$refs.rmSection as HTMLElement
+
+    this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
+    console.log(this.panelRemoveBg)
+    console.log(this.panelRemoveBgAt)
   },
   unmounted() {
     bgRemoveUtils.setInBgRemoveMode(false)
+    this.panelRemoveBgAt.destroy()
   },
   computed: {
     ...mapGetters({
