@@ -405,10 +405,12 @@ export default defineComponent({
       }
     },
     drawing(e: MouseEvent) {
-      if (this.clearMode) {
-        this.drawInClearMode(e)
-      } else {
-        this.drawInRestoreMode(e)
+      if (!this.inGestureMode) {
+        if (this.clearMode) {
+          this.drawInClearMode(e)
+        } else {
+          this.drawInRestoreMode(e)
+        }
       }
     },
     drawEnd() {
