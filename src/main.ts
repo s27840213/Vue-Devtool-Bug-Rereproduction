@@ -33,6 +33,7 @@ window.onerror = function (msg, url, line, colno, error) {
   ].join(' - ')
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
+    console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
     if (store.getters.getShowGlobalErrorModal) {
       const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
       modalUtils.setModalInfo(
