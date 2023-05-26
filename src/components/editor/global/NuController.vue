@@ -1454,8 +1454,7 @@ export default defineComponent({
       })
     },
     checkIfCurve(config: IText): boolean {
-      const { textShape } = config.styles
-      return textShape && textShape.name === 'curve'
+      return textShapeUtils.isCurvedText(config.styles.textShape)
     },
     calcSize(config: IText, composing: boolean, keepCenter = false) {
       this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing, keepCenter)

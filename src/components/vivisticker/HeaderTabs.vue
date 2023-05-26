@@ -92,12 +92,13 @@ export default defineComponent({
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       editorBg: 'vivisticker/getEditorBg',
+      editingAssetInfo: 'vivisticker/getEditingAssetInfo',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       isInSelectionMode: 'vivisticker/getIsInSelectionMode',
       userSettings: 'vivisticker/getUserSettings',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      inBgRemoveLastStep: 'bgRemove/inLastStep',
+      inBgRemoveLastStep: 'bgRemove/inLastStep'
     }),
     templateKeyword() {
       return this.$store.state.templates[this.templatesIgLayout].keyword
@@ -226,7 +227,7 @@ export default defineComponent({
           icon: 'download',
           width: 24,
           action: () => {
-            console.log('download')
+            bgRemoveUtils.downloadCanvas()
           }
         }]
       } else {
@@ -378,7 +379,7 @@ export default defineComponent({
           vivistickerUtils.handleIos16Video()
         }
       }
-      if (vivistickerUtils.checkVersion('1.31')) {
+      if (vivistickerUtils.checkVersion('1.31') && this.editingAssetInfo.isFrame) {
         vivistickerUtils.copyWithScreenshotUrl(
           vivistickerUtils.createUrlForJSON({ source: 'editor' }),
           copyCallback

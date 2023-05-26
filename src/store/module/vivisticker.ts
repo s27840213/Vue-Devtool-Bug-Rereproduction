@@ -111,7 +111,7 @@ const getDefaultState = (): IViviStickerState => ({
   },
   uuid: '',
   loadedFonts: {},
-  debugMode: false,
+  debugMode: process.env.NODE_ENV === 'development',
   templateShareType: 'none'
 })
 
