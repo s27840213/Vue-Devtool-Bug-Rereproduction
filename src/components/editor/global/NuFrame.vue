@@ -175,7 +175,7 @@ export default defineComponent({
       }
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
       vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
-    }
+    } else vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
   },
   mounted() {
     if (this.config.clips.length === 1) {
