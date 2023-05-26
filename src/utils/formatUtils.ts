@@ -1,4 +1,4 @@
-import { IFormat, IImageFormat, ITextFormat } from '@/interfaces/format'
+import { IFormat, IImageFormat, ITextFormat, ITextShape } from '@/interfaces/format'
 import { IGroup, IImage, ILayer, IParagraph, IText } from '@/interfaces/layer'
 import store from '@/store'
 import frameUtils from './frameUtils'
@@ -17,8 +17,8 @@ class FormatUtils {
     text: ['text']
   }
 
-  isCurveText(textShape: any): boolean {
-    return textShape.name === 'curve'
+  isCurveText(textShape: ITextShape): boolean {
+    return textShapeUtils.isCurvedText(textShape)
   }
 
   isApplicableType(copiedType: string, type: string): boolean {

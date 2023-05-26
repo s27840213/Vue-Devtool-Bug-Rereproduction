@@ -57,6 +57,8 @@ div(class="popup-file")
       span clearAllPages
     div(class="popup-file__item" @click="duplicatePageTwentyTimes()")
       span duplicatePageTwentyTimes
+    div(class="popup-file__item" @click="testError()")
+      span textError
   //- div(class="popup-file__item" @click="uploadTmpJson()")
   //-   span Upload Temp.json
   //- div(class="popup-file__item" @click="getTmpJson()")
@@ -175,6 +177,9 @@ export default defineComponent({
     },
     duplicatePageTwentyTimes() {
       pageUtils.duplicatePage1(40)
+    },
+    testError() {
+      throw new Error('test')
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')

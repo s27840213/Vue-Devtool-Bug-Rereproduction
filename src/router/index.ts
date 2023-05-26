@@ -110,6 +110,20 @@ const router = createRouter({
           await logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
+        let argoError = false
+        try {
+          const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
+          if (status !== 200) {
+            argoError = true
+            logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
+          }
+        } catch (error) {
+          argoError = true
+          logUtils.setLogForError(error as Error)
+          logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
+        } finally {
+          store.commit('text/SET_isArgoAvailable', !argoError)
+        }
         let locale = 'us'
         if (userInfo.appVer === '1.28') {
           const localLocale = localStorage.getItem('locale')
@@ -173,7 +187,7 @@ router.beforeEach(async (to, from, next) => {
     if (to.name === 'Screenshot') {
       store.commit('SET_showGlobalErrorModal', false) // /screenshot never shows error modal
     } else if (window.location.hostname !== 'sticker.vivipic.com') {
-      store.commit('SET_showGlobalErrorModal', true) // non-production always show error modal
+      store.commit('SET_showGlobalErrorModal', true) // always show error modal for non-production domains
     } else {
       store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
     }

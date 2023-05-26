@@ -155,7 +155,7 @@ class StepsUtils {
   }
 
   async fillLoadingSize(layer: IText, inGroupOrTmp = false): Promise<IText> {
-    if (textShapeUtils.isCurvedText(layer.styles)) return layer
+    if (textShapeUtils.isCurvedText(layer.styles.textShape)) return layer
     const dimension = layer.styles.writingMode.includes('vertical') ? layer.styles.height : layer.styles.width
     const initSize = {
       width: layer.styles.width,
