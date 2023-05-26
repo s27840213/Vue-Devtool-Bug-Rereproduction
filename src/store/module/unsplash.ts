@@ -1,6 +1,7 @@
 import photos from '@/apis/photos'
 import i18n from '@/i18n'
 import { IPhotoItem, IPhotoServiceData } from '@/interfaces/api'
+import logUtils from '@/utils/logUtils'
 import { captureException } from '@sentry/browser'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
@@ -43,7 +44,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
       commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   },
@@ -56,7 +57,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
       commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   },

@@ -187,7 +187,8 @@ class Controller {
             ${colorWithOpacity} 
             ${effectShadowOffset * Math.cos(angle * Math.PI / 180)}px
             ${effectShadowOffset * Math.sin(angle * Math.PI / 180)}px
-            ${effectBlur / 2}px)`
+            ${effectBlur / 2}px)`,
+          willChange: 'filter',
         }
       case 'lift':
         return {
@@ -196,7 +197,8 @@ class Controller {
             ${this.convertColor2rgba('#000000', Math.max(0.05, effectSpread))} 
             ${0}px
             ${0.3 * unit}px
-            ${((0.3 * unit) + effectSpreadBlur) / 2}px)`
+            ${((0.3 * unit) + effectSpreadBlur) / 2}px)`,
+          willChange: 'filter',
         }
       case 'hollow':
         return {

@@ -368,7 +368,7 @@ class TextUtils {
       if (config.type !== 'text') throw new Error('updateGroupLayerSize with subLayerIndex argument only accepts text subLayer')
       const originSize = { width: config.styles.width, height: config.styles.height }
       let textHW
-      if (textShapeUtils.isCurvedText(config.styles)) {
+      if (textShapeUtils.isCurvedText(config.styles.textShape)) {
         textHW = originSize
       } else {
         textHW = this.getTextHW(config, config.widthLimit)
@@ -470,7 +470,7 @@ class TextUtils {
     if (!group.layers) return
     const config = group.layers[subLayerIndex]
     if (config.type !== 'text') throw new Error('updateGroupLayerSizeByShape only accepts text subLayer')
-    if (textShapeUtils.isCurvedText(config.styles)) {
+    if (textShapeUtils.isCurvedText(config.styles.textShape)) {
       const heightOri = config.styles.height
       const textHW = textShapeUtils.getCurveTextProps(config as IText)
       layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textHW)
@@ -485,7 +485,7 @@ class TextUtils {
     const targetLayer = layerUtils.getLayer(pageIndex, layerIndex)
     if (subLayerIndex === -1) { // single text layer
       const config = targetLayer as IText
-      if (textShapeUtils.isCurvedText(config.styles)) {
+      if (textShapeUtils.isCurvedText(config.styles.textShape)) {
         layerUtils.updateLayerStyles(pageIndex, layerIndex, textShapeUtils.getCurveTextProps(config))
       } else {
         const widthLimit = config.widthLimit
@@ -502,7 +502,7 @@ class TextUtils {
     } else { // sub text layer in a group
       const group = targetLayer as IGroup
       const config = group.layers[subLayerIndex] as IText
-      if (textShapeUtils.isCurvedText(config.styles)) {
+      if (textShapeUtils.isCurvedText(config.styles.textShape)) {
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textShapeUtils.getCurveTextProps(config))
         this.updateGroupLayerSize(pageIndex, layerIndex)
         this.fixGroupCoordinates(pageIndex, layerIndex)
@@ -926,7 +926,7 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      logUtils.setLogAndConsoleLog('untilFontLoadedForPage:', error)
+      logUtils.setLogForError(error as Error)
       isError = true
     } finally {
       if (isError === true) {
@@ -956,7 +956,7 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      logUtils.setLogAndConsoleLog('untilFontLoaded:', error)
+      logUtils.setLogForError(error as Error)
       isError = true
     } finally {
       if (isError === true) {
@@ -990,7 +990,7 @@ class TextUtils {
         if (fontFileList.length !== 0) return
       }
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       throw error
     }
   }
@@ -1029,7 +1029,7 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      logUtils.setLogAndConsoleLog('waitFontLoadingAndRecord:', error)
+      logUtils.setLogForError(error as Error)
       finalCallBack(true)
     })
   }
@@ -1068,7 +1068,7 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      logUtils.setLogAndConsoleLog('waitGroupFontLoadingAndRecord:', error)
+      logUtils.setLogForError(error as Error)
       finalCallBack(true)
     })
   }
@@ -1101,7 +1101,7 @@ class TextUtils {
             // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
             // and let the mounted hook of NuText to deal with size and position
             originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
-            if (textShapeUtils.isCurvedText(layer.styles)) {
+            if (textShapeUtils.isCurvedText(layer.styles.textShape)) {
               newHW = textShapeUtils.getCurveTextProps(layer)
               Object.assign(layer.styles, newHW)
             } else {

@@ -229,9 +229,11 @@ class LayerFactary {
     } as IFrame
     frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
     if (frame.decoration && !frame.decoration.svg) {
-      (frame as any).needFetch = true
+      frame.needFetch = true
     } else if (frame.decorationTop && !frame.decorationTop.svg) {
-      (frame as any).needFetch = true
+      frame.needFetch = true
+    } else if (clips.some(c => !c.clipPath && !c.isFrameImg)) {
+      frame.needFetch = true
     }
     return frame
   }
@@ -627,6 +629,7 @@ class LayerFactary {
         config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
       }
     }
+    config.backgroundImage.config = this.newImage(config.backgroundImage.config)
     config.jsonVer = latestJsonVer
     textUtils.resetScale(config, true)
     return config

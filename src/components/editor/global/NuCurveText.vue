@@ -152,7 +152,6 @@ export default defineComponent({
       const transforms = this.transforms()
       const baseline = `${(minHeight - textHeight[sIndex]) / 2}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
-      const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
       const textFillStyle = this.textFillSpanStyle[0]?.[sIndex] ?? {}
       return Object.assign(
         fontStyles,
@@ -160,7 +159,6 @@ export default defineComponent({
         { transform: transforms[sIndex] || 'none' },
         bend >= 0 ? { top: baseline } : { bottom: baseline },
         textFillStyle,
-        textEffectStyles,
       )
     },
     async computeDimensions(spans: ISpan[]) {

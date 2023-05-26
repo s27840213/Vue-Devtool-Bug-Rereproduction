@@ -1,5 +1,6 @@
 import i18n from '@/i18n'
 import { Itheme } from '@/interfaces/theme'
+import router from '@/router'
 import store from '@/store'
 import textFillUtils from '@/utils/textFillUtils'
 import _ from 'lodash'
@@ -328,7 +329,7 @@ class ConstantData {
       content: templateType
     }, {
       name: 'TemplateCenter',
-      url: `${base}/templates`,
+      url: router.currentRoute.value.name === 'TemplateCenter' ? `${base}/templates` : '/templates',
       label: i18n.global.t('NN0145')
     }, {
       label: i18n.global.t('NN0670'),

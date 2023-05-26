@@ -296,6 +296,7 @@ export default Extension.create({
           webkitBackgroundClip: cssBaseAttr('-webkit-background-clip'),
           opacity: cssBaseAttr('opacity'),
           filter: cssBaseAttr('filter'),
+          willChange: cssBaseAttr('will-change'),
           '--base-stroke': cssBaseAttr('--base-stroke'),
           webkitTextFillColor: cssBaseAttr('-webkit-text-fill-color'),
           webkitTextStrokeColor: cssBaseAttr('-webkit-text-stroke-color'),

@@ -16,7 +16,7 @@ import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
-import { find, findLast, omit, pick } from 'lodash'
+import { find, findLast, max, omit, pick } from 'lodash'
 import { InjectionKey } from 'vue'
 
 interface ITextFillPresetRawImg {
@@ -178,6 +178,8 @@ class TextFill {
     const isTextShape = config.styles.textShape.name !== 'none'
     const isTextShapeFocus = isTextShape && textFill.focus
     const isFixedWidth = textBgUtils.isFixedWidth(config.styles)
+    // If not TextShape, need add maxFontSize to top/left to fix its position.
+    const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
     return div.map(p => p.map(span => {
       const rect = span[0]
       let { width: spanWidth, height: spanHeight, x, y } = rect
@@ -219,8 +221,8 @@ class TextFill {
           top: `${-spanHeight * spanExpandRatio}px`,
           lineHeight: 'initial',
         } : {
-          top: `${y - spanHeight * spanExpandRatio}px`,
-          left: `${x - spanWidth * spanExpandRatio}px`,
+          top: `${y - spanHeight * spanExpandRatio + maxFontSize}px`,
+          left: `${x - spanWidth * spanExpandRatio + maxFontSize}px`,
           ...!isFixedWidth ? { lineHeight: 'initial' } : {},
         }
       }

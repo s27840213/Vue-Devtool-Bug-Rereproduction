@@ -435,8 +435,7 @@ export default defineComponent({
       })
     },
     checkIfCurve(config: IText): boolean {
-      const { textShape } = config.styles
-      return textShape && textShape.name === 'curve'
+      return textShapeUtils.isCurvedText(config.styles.textShape)
     },
     calcSize(config: IText) {
       this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)

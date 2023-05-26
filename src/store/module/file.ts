@@ -5,6 +5,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import store from '@/store'
 import apiUtils from '@/utils/apiUtils'
+import logUtils from '@/utils/logUtils'
 import { captureException } from '@sentry/browser'
 import _ from 'lodash'
 import { ActionTree, GetterTree, ModuleTree, MutationTree } from 'vuex'
@@ -104,7 +105,7 @@ const actions: ActionTree<IFileState, unknown> = {
       const rawData = await apiUtils.requestWithRetry(() => file.getFiles({ pageIndex }))
       addMyfile(rawData.data.data.image.content, rawData.data.next_page)
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   },
@@ -129,7 +130,7 @@ const actions: ActionTree<IFileState, unknown> = {
         })
       })
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async updatePageImages({ dispatch }, { pageIndex }: { pageIndex: number }) {

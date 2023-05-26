@@ -18,7 +18,7 @@ class FormatUtils {
   }
 
   isCurveText(textShape: ITextShape): boolean {
-    return textShape.name === 'curve'
+    return textShapeUtils.isCurvedText(textShape)
   }
 
   isApplicableType(copiedType: string, type: string): boolean {
