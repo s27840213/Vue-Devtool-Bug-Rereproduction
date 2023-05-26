@@ -341,6 +341,7 @@ router.beforeEach(async (to, from, next) => {
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 
+    console.log(window.location.hostname, store.getters['user/isAdmin'])
     if (window.location.hostname !== 'vivipic.com' || store.getters['user/isAdmin']) {
       store.commit('SET_showGlobalErrorModal', true) // always show error modal for non-production domains or admin users
     } else {
