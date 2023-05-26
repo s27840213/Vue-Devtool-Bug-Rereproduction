@@ -200,10 +200,10 @@ export default defineComponent({
     const debugMode = process.env.NODE_ENV === 'development' ? true : (await vivistickerUtils.getState('debugMode'))?.value ?? false
     this.setDebugMode(debugMode)
 
-    if (process.env.NODE_ENV === 'development' && debugMode) {
-      this.vConsole = new VConsole({ theme: 'dark' })
-      this.vConsole.setSwitchPosition(25, 80)
-    }
+    // if (process.env.NODE_ENV === 'development' && debugMode) {
+    //   this.vConsole = new VConsole({ theme: 'dark' })
+    //   this.vConsole.setSwitchPosition(25, 80)
+    // }
   },
   unmounted() {
     document.removeEventListener('scroll', this.handleScroll)

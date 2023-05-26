@@ -1,6 +1,5 @@
 import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
-import SvgIcon from '@/components/global/SvgIcon.vue'
 import modalUtils from '@/utils/modalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import Core from '@any-touch/core'
@@ -97,13 +96,9 @@ app.use(FloatingVue, {
 
 app.component('RecycleScroller', RecycleScroller)
 
-if (window.location.pathname === '/screenshot') {
-  app.component('svg-icon', SvgIcon)
-} else {
-  app.component('svg-icon', defineAsyncComponent(() =>
-    import(/* webpackChunkName: "global-component" */ '@/components/global/SvgIcon.vue')
-  ))
-}
+app.component('svg-icon', defineAsyncComponent(() =>
+  import(/* webpackChunkName: "global-component" */ '@/components/global/SvgIcon.vue')
+))
 app.component('btn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))
