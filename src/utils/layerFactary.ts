@@ -626,6 +626,7 @@ class LayerFactary {
         config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
       }
     }
+    config.backgroundImage.config = this.newImage(config.backgroundImage.config)
     config.jsonVer = latestJsonVer
     textUtils.resetScale(config, true)
     return config
