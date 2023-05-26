@@ -1032,10 +1032,12 @@ class TextBg {
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
           let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
           if (vertical) [x, y] = [y, x]
+          const colorChangeable = /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower)/.test(p.href)
           return {
-            tag: 'use',
+            tag: colorChangeable ? 'use' : 'image',
             attrs: {
-              href: `#${p.href}`,
+              href: colorChangeable ? `#${p.href}`
+                : require(`@/assets/img/svg/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
               // Scale will let width be (scale-1)*p.height times larger than before,
