@@ -16,7 +16,7 @@ import { defineComponent } from 'vue'
 
 // eslint-disable-next-line no-undef
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-const req = require.context('@/assets/icon', true, /\.svg$/)
+const req = require.context('@/assets/icon', true, /\.svg$/, 'lazy-once')
 
 if (window.location.host !== 'vivipic.com') {
   svgIconUtils.setIcons(requireAll(req).map((context: any) => {
