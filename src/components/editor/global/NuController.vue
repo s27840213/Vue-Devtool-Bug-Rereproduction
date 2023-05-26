@@ -34,7 +34,7 @@ div(:layer-index="`${layerIndex}`"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
         div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
+          nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
             class="text__body"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
@@ -410,7 +410,10 @@ export default defineComponent({
     },
     getLayerType(): string {
       return this.config.type
-    }
+    },
+    textHtml(): any {
+      return tiptapUtils.toJSON(this.config.paragraphs)
+    },
   },
   watch: {
     scaleRatio() {
@@ -1611,9 +1614,6 @@ export default defineComponent({
         transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px) scale(${this.contentScaleRatio})`
           : `translate(0px, 0px) scale(${this.contentScaleRatio})`
       }
-    },
-    textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
     },
   }
 })

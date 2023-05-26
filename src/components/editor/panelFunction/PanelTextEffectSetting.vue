@@ -359,7 +359,7 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     border: 2px solid transparent;
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: white;
     background-clip: content-box;
     overflow: hidden;

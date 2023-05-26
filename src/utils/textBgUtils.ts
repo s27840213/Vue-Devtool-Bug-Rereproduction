@@ -1045,6 +1045,8 @@ class TextBg {
         attrs: { width, height },
         style: { opacity },
         content: pos.map(p => {
+          // Scale will let width be (scale-1)*p.height times larger than before,
+          // So -(scale-1)*p.height/2 to justify it to center.
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
           let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
           if (vertical) [x, y] = [y, x]
@@ -1056,10 +1058,8 @@ class TextBg {
                 : require(`@/assets/img/svg/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
-              // Scale will let width be (scale-1)*p.height times larger than before,
-              // So -(scale-1)*p.height/2 to justify it to center.
-              x: p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100,
-              y: p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100,
+              x,
+              y,
             },
             style: { color: p.color }
           }
