@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="share-template" :style="containerStyles")
   div(class="share-template__preview" ref="preview")
-    page-content(class="share-template__preview__page" :config="config" :pageIndex="0" :style="pageStyles" :inPreview="true")
+    page-content(class="share-template__preview__page" :config="config" :pageIndex="currFocusPageIndex" :style="pageStyles" :inPreview="true")
     div(class="share-template__preview__cover" @pointerdown="disableEvent")
   tabs(class="share-template__tabs"
     :tabs="['This page', 'Multi pages']"
@@ -17,9 +17,10 @@ div(class="share-template" :style="containerStyles")
 import PageContent from '@/components/editor/page/PageContent.vue'
 import Tabs from '@/components/Tabs.vue'
 import { IPage } from '@/interfaces/page'
+import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 interface IButton {
   key: string,
@@ -71,6 +72,10 @@ export default defineComponent({
     ...mapState('templates', {
       igLayout: 'igLayout',
     }),
+    ...mapGetters({
+      pagesLength: 'getPagesLength',
+      currFocusPageIndex: 'getCurrFocusPageIndex',
+    }),
     buttons(): IButton[] {
       return [
         {
@@ -107,7 +112,20 @@ export default defineComponent({
   methods: {
     save() {
       console.log('saveTemplate')
-      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ noBg: false }), 'download')
+      if (this.tabIndex === 0) {
+        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ noBg: false }), 'download')
+      } else {
+        let pageIndex = 0
+        const copyCallback = (flag: string) => {
+          console.log('copyCallback', flag)
+          if (flag === '0' && pageIndex < this.pagesLength) {
+            vivistickerUtils.callScreenshotAsAPI(vivistickerUtils.createUrlForJSON({ page: pageUtils.getPage(pageIndex), noBg: false }), copyCallback, 'download')
+            pageIndex += 1
+          }
+        }
+        vivistickerUtils.callScreenshotAsAPI(vivistickerUtils.createUrlForJSON({ page: pageUtils.getPage(pageIndex), noBg: false }), copyCallback, 'download')
+        pageIndex += 1
+      }
     },
     share() {
       console.log('shareTemplate', this.templateShareType)
