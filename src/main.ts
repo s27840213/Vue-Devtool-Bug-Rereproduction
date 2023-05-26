@@ -34,21 +34,21 @@ window.onerror = function (msg, url, line, colno, error) {
   ].join(' - ')
   logUtils.setLog(message)
   logUtils.uploadLog().then(() => {
-    if (store.getters.getShowGlobalErrorModal) {
-      const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
-      modalUtils.setModalInfo(
-        i18n.global.t('NN0866'),
-        hint,
-        {
-          msg: i18n.global.t('NN0032'),
-          action() {
-            generalUtils.copyText(hint).then(() => {
-              notify({ group: 'copy', text: '已複製' })
-            })
-          }
-        }
-      )
-    }
+    // if (store.getters.getShowGlobalErrorModal) {
+    //   const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+    //   modalUtils.setModalInfo(
+    //     i18n.global.t('NN0866'),
+    //     hint,
+    //     {
+    //       msg: i18n.global.t('NN0032'),
+    //       action() {
+    //         generalUtils.copyText(hint).then(() => {
+    //           notify({ group: 'copy', text: '已複製' })
+    //         })
+    //       }
+    //     }
+    //   )
+    // }
   })
 }
 
