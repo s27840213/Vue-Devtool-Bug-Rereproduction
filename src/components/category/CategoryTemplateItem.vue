@@ -134,7 +134,7 @@ export default defineComponent({
 
       // for vivisticker
       if (this.isInEditor) {
-        cb(vivistickerUtils.getPageSize(this.igLayout))
+        assetUtils.addAsset(this.item as any, vivistickerUtils.getPageSize(this.igLayout))
       } else {
         vivistickerUtils.startEditing(
           this.igLayout, {
