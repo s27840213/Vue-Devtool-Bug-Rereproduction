@@ -595,13 +595,20 @@ export default defineComponent({
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        window.setTimeout(() => {
-          if (this.primaryLayerIndex !== -1) {
-            vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+
+        // detect if SVG image rendered
+        const rendering = () => {
+          const elImg = this.$refs.img as SVGImageElement
+          if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
+            // Render complete
+            if (this.primaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+            else vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
           } else {
-            vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+            // Rendering
+            window.requestAnimationFrame(rendering)
           }
-        }, 100)
+        }
+        window.requestAnimationFrame(rendering)
       }
       imageUtils.imgLoadHandler(this.src, (img) => {
         if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
