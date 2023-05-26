@@ -44,7 +44,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import _ from 'lodash'
+import _, { max } from 'lodash'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
@@ -119,9 +119,11 @@ export default defineComponent({
     duplicatedText(): (Partial<Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>>)[] {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
-        top: '0px',
+        top: 0,
+        left: 0,
         width: '100%',
         height: '100%',
+        padding: 0,
         opacity: 1
       }
       const duplicatedTexts = textEffectUtils.convertTextEffect(this.config).duplicatedTexts as
@@ -184,20 +186,25 @@ export default defineComponent({
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
+      const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
+      const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
       return {
         width: isVertical ? 'auto' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        opacity
+        opacity,
+        ...textEffectStyles,
+        // Add padding at body to prevent Safari bug that overflow text of drop-shadow/opacity<1 will be cliped
+        padding: `${maxFontSize}px`,
+        left: `${maxFontSize * -1}px`,
+        top: `${maxFontSize * -1}px`,
       }
     },
     spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
       const textBg = this.config.styles.textBg
       const span = p.spans[sIndex]
-      const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        textEffectStyles,
         isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},
       )
     },
@@ -260,6 +267,15 @@ export default defineComponent({
 })
 </script>
 
+<style lang="scss" scoped>
+.nu-text {
+  &__body {
+    width: 100%;
+    height: 100%;
+  }
+}
+</style>
+
 <style lang="scss">
 .nu-text {
   width: 100%;
@@ -289,7 +305,9 @@ export default defineComponent({
   &__span {
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    position: relative;
+    // Should no have position: relative here, or Safari bug that
+    // overflow text of drop-shadow/opacity<1 will be cliped will happen
+    // position: relative;
   }
   &__curve-text-in-editing {
     pointer-events: none;
