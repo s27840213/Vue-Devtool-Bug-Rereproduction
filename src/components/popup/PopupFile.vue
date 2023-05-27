@@ -58,7 +58,7 @@ div(class="popup-file")
     div(class="popup-file__item" @click="duplicatePageTwentyTimes()")
       span duplicatePageTwentyTimes
     div(class="popup-file__item" @click="testError()")
-      span textError
+      span testError
   //- div(class="popup-file__item" @click="uploadTmpJson()")
   //-   span Upload Temp.json
   //- div(class="popup-file__item" @click="getTmpJson()")

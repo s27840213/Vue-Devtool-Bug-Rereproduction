@@ -1167,7 +1167,6 @@ class TextUtils {
     let subLayers
     let newStyles
     let stylesBuffer = {} as { [key: string]: any }
-    let preParams
     let originHW
     let newHW
     switch (layer.type) {
