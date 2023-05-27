@@ -172,7 +172,7 @@ class AssetUtils {
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
     const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    console.log(generalUtils.deepCopy(newPage))
+    // console.log(generalUtils.deepCopy(newPage)) // remove unneccessary use of deepCopy(...) for performance
     pageUtils.updateSpecPage(targetPageIndex, newPage)
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
@@ -496,7 +496,7 @@ class AssetUtils {
     const newLayer = config.type === 'group'
       ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
-    layerUtils.addLayers(targetPageIndex, [newLayer])
+    layerUtils.addLayers(targetPageIndex, [textUtils.resetScaleForLayer(newLayer, true)])
   }
 
   async addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
