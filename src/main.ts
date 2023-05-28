@@ -1,9 +1,11 @@
 import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import SvgIcon from '@/components/global/SvgIcon.vue'
+import modalUtils from '@/utils/modalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
-import Notifications from '@kyvg/vue3-notification'
+import Notifications, { notify } from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
@@ -33,22 +35,23 @@ window.onerror = function (msg, url, line, colno, error) {
   ].join(' - ')
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
-    // console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
-    // if (store.getters.getShowGlobalErrorModal) {
-    //   const hint = `${vivistickerUtils.getUserInfoFromStore().hostId}, ${generalUtils.generateTimeStamp()}, ${errorId}`
-    //   modalUtils.setModalInfo(
-    //     i18n.global.t('NN0866'),
-    //     hint,
-    //     {
-    //       msg: i18n.global.t('NN0032'),
-    //       action() {
-    //         generalUtils.copyText(hint).then(() => {
-    //           notify({ group: 'copy', text: '已複製' })
-    //         })
-    //       }
-    //     }
-    //   )
-    // }
+    console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
+    // if (store.getters['vivisticker/getDebugMode'] && (window.location.hostname !== 'sticker.vivipic.com' || store.getters.getShowGlobalErrorModal))
+    if (store.getters['vivisticker/getDebugMode']) {
+      const hint = `${vivistickerUtils.getUserInfoFromStore().hostId}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+      modalUtils.setModalInfo(
+        i18n.global.t('NN0866'),
+        hint,
+        {
+          msg: i18n.global.t('NN0032'),
+          action() {
+            generalUtils.copyText(hint).then(() => {
+              notify({ group: 'copy', text: '已複製' })
+            })
+          }
+        }
+      )
+    }
   })
 }
 

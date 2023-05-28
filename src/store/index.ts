@@ -129,7 +129,7 @@ const getDefaultState = (): IEditorState => ({
   cursor: '',
   isPageScaling: false,
   isGettingDesign: false,
-  showGlobalErrorModal: true,
+  showGlobalErrorModal: false,
 })
 
 const state = getDefaultState()
