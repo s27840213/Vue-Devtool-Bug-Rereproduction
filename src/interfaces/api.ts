@@ -156,8 +156,9 @@ export interface IListServiceContentDataItem {
   unit?: string
   valid?: number
   plan?: number
-  icon?: string,
+  icon?: string
   bleed?: IBleed
+  fit?: number
 }
 
 export interface ICategoryItem {

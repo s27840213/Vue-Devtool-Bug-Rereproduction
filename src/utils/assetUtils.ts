@@ -234,7 +234,7 @@ class AssetUtils {
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -465,7 +465,7 @@ class AssetUtils {
     const { width, height, scale } = json.styles
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_TEXT
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_TEXT
     const pageAspectRatio = currentPage.width / currentPage.height
     const textAspectRatio = width / height
     const textWidth = textAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * textAspectRatio
@@ -803,6 +803,7 @@ class AssetUtils {
       store.commit('SET_mobileSidebarPanelOpen', false)
       let key = ''
       const asset = await this.get(item, attrs.db) as IAsset
+      attrs.fit = item.fit
 
       switch (asset.type) {
         case 1: {
