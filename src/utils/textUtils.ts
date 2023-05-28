@@ -13,7 +13,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import Graphemer from 'graphemer'
-import _ from 'lodash'
+import _, { pick } from 'lodash'
 import cssConverter from './cssConverter'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
@@ -1077,14 +1077,6 @@ class TextUtils {
     })
   }
 
-  setStylesBuffer(styles: { [key: string]: any }, keys: string[]): { [key: string]: any } {
-    const res = {} as { [key: string]: any }
-    for (const key of keys) {
-      res[key] = styles[key]
-    }
-    return res
-  }
-
   resetScaleForLayer(layer: AllLayerTypes, preMount = false): AllLayerTypes {
     layer = generalUtils.deepCopy(layer)
     let subLayers
@@ -1095,7 +1087,7 @@ class TextUtils {
     switch (layer.type) {
       case LayerType.text:
         if (layer.styles.scale > 1) {
-          stylesBuffer = this.setStylesBuffer(layer.styles, ['scale'])
+          stylesBuffer = pick(layer.styles, ['scale'])
           layer.styles.scale = 1
           layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
             return size * stylesBuffer.scale
@@ -1138,7 +1130,7 @@ class TextUtils {
          * and reset the scale individually for certain typed sub-layers.
          * after that, re-form the group/tmp with those sub-layers.
          */
-        stylesBuffer = this.setStylesBuffer(layer.styles, ['opacity', 'rotate', 'horizontalFlip', 'verticalFlip'])
+        stylesBuffer = pick(layer.styles, ['opacity', 'rotate', 'horizontalFlip', 'verticalFlip'])
         if (layer.type === LayerType.group) {
           layer.layers.forEach((subLayer: AllLayerTypes, index: number) => {
             subLayer.styles.zindex = layer.styles.zindex + index
