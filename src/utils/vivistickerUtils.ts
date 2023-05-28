@@ -376,7 +376,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       backgroundColor: '#F8F8F8'
     })])
     store.commit('vivisticker/SET_editingDesignId', designId ?? '')
-    console.log(assetInfo)
     store.commit('vivisticker/SET_editingAssetInfo', assetInfo)
     initiator().then((jsonData?: any) => {
       if (jsonData) {
