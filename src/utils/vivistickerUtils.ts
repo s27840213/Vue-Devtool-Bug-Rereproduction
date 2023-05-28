@@ -373,8 +373,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     pageUtils.setPages([pageUtils.newPage({
       width: pageSize,
       height: pageSize,
-      backgroundColor: '#F8F8F8',
-      isAutoResizeNeeded: true
+      backgroundColor: '#F8F8F8'
     })])
     store.commit('vivisticker/SET_editingDesignId', designId ?? '')
     store.commit('vivisticker/SET_editingAssetInfo', assetInfo)
