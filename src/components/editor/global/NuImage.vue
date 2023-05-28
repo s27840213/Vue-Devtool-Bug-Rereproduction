@@ -88,7 +88,7 @@ import unitUtils from '@/utils/unitUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -134,7 +134,7 @@ export default defineComponent({
       type: Object,
       default: () => { return undefined }
     },
-    primaryLayerIndex: {
+    priPrimaryLayerIndex: {
       type: Number,
       default: -1
     },
@@ -559,8 +559,8 @@ export default defineComponent({
               if ((this.primaryLayer as IFrame).decoration) {
                 subLayerIdx++
               }
-              if (this.primaryLayerIndex !== -1) {
-                vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+              if (this.priPrimaryLayerIndex !== -1) {
+                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
               } else {
                 vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
               }
@@ -596,8 +596,8 @@ export default defineComponent({
           subLayerIdx++
         }
         window.setTimeout(() => {
-          if (this.primaryLayerIndex !== -1) {
-            vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+          if (this.priPrimaryLayerIndex !== -1) {
+            vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
           } else {
             vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
           }
@@ -616,8 +616,9 @@ export default defineComponent({
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        if (this.primaryLayerIndex !== -1) {
-          vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+        console.log(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+        if (this.priPrimaryLayerIndex !== -1) {
+          vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
         } else {
           vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
         }
