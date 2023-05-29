@@ -64,6 +64,10 @@ export default defineComponent({
     primaryLayer: {
       default: undefined,
       type: Object as PropType<IGroup | ITmp>
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   async created() {
@@ -182,9 +186,9 @@ export default defineComponent({
       frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
       if (this.config.clips[0].srcObj.type === 'frame') {
         /**
-         * If the frame contain only one clip, and is not init from mydesign auto popping the photo-selector
+         * If the frame contain only one clip, and is not init from mydesign or in preview auto popping the photo-selector
          */
-        if (!this.config.initFromMydesign) {
+        if (!(this.config.initFromMydesign || this.inPreview)) {
           window.requestAnimationFrame(() => {
             if (this.primaryLayer) {
               frameUtils.iosPhotoSelect({
