@@ -10,7 +10,7 @@ div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectSt
                 :cardHeight="cardHeight"
                 :marginTop="marginTop"
                 :no-bg="!editorTypeTemplate")
-  div(v-if="editorTypeTemplate" class="page-pill" @click="showPanelPageManagement")
+  div(v-if="editorTypeTemplate && !isDuringCopy" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
 </template>
