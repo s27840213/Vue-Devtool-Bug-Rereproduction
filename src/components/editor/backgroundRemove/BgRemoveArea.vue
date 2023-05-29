@@ -104,10 +104,7 @@ export default defineComponent({
     }
     this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
     if (this.$isTouchDevice()) {
-      this.editorViewCanvas.addEventListener('touchstart', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      })
+      this.editorViewCanvas.addEventListener('touchstart', this.disableTouchEvent)
     }
     window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
@@ -126,10 +123,7 @@ export default defineComponent({
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
     this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
     if (this.$isTouchDevice()) {
-      this.editorViewCanvas.removeEventListener('touchstart', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      })
+      this.editorViewCanvas.removeEventListener('touchstart', this.disableTouchEvent)
     }
     window.removeEventListener('keydown', this.handleKeydown)
   },
@@ -528,6 +522,10 @@ export default defineComponent({
     },
     handleBrushLeave() {
       this.showBrush = false
+    },
+    disableTouchEvent(e: TouchEvent) {
+      e.preventDefault()
+      e.stopPropagation()
     }
   }
 })
