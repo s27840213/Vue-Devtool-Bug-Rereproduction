@@ -48,6 +48,7 @@ import ValueSelector from '@/components/ValueSelector.vue'
 import { IBrandTextStyle } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
 import { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vClickOutside from 'click-outside-vue3'
@@ -214,7 +215,7 @@ export default defineComponent({
           try {
             this.fontSizeBuffer += step
           } catch (error) {
-            console.error(error)
+            logUtils.setLogForError(error as Error)
             window.removeEventListener('mouseup', onmouseup)
             clearInterval(interval)
           }

@@ -72,8 +72,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
-  designDeletionQueue = [] as { key: string, id: string, thumbType: string }[]
-  saveDesignQueue = [] as { design: string }[]
 
   STANDALONE_USER_INFO: IUserInfo = {
     hostId: '',
@@ -89,7 +87,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'loginResult',
     'getStateResult',
     'setStateDone',
-    'subscribeInfo'
+    'subscribeInfo',
+    'internelError'
   ]
 
   VVSTK_CALLBACKS = [
@@ -102,7 +101,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getAssetResult',
     'uploadImageURL',
     'informWebResult',
-    'subscribeResult'
+    'subscribeResult',
+    'screenshotDone'
   ]
 
   SCREENSHOT_CALLBACKS = [
@@ -250,8 +250,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.sendToIOS('SHOW_TOAST', { msg })
   }
 
-  sendDoneLoading(width: number, height: number, options: string, needCrop = false) {
-    this.sendToIOS('DONE_LOADING', { width, height, options, needCrop })
+  sendDoneLoading(width: number, height: number, options: string, params: string) {
+    this.sendToIOS('DONE_LOADING', { width, height, options, params })
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
@@ -260,6 +260,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
     }
+  }
+
+  copyWithScreenshotUrl(query: string, afterCopy?: (flag: string) => void) {
+    this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'editorResizeCopy' }, `screenshot-${query}`).then((data) => {
+      afterCopy && afterCopy(data?.flag ?? '0')
+    })
+  }
+
+  screenshotDone(data: { flag: string, params: string, action: string }) {
+    this.handleCallback(`screenshot-${data.params}`, data)
   }
 
   sendAppLoaded() {
@@ -279,8 +289,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         return `type=svgImage2&id=${item.id}&ver=${item.ver}`
       case 15:
         return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
-      case 7:
-        return `type=text&id=${item.id}&ver=${item.ver}`
+      // case 7: deprecated
+      //   return `type=text&id=${item.id}&ver=${item.ver}`
       case 1:
         return `type=background&id=${item.id}&ver=${item.ver}`
       default:
@@ -288,16 +298,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  createUrlForJSON(page?: IPage, asset?: IMyDesign): string {
+  createUrlForJSON({ page = undefined, asset = undefined, source = undefined }: { page?: IPage, asset?: IMyDesign, source?: string } = {}): string {
     page = page ?? pageUtils.getPage(0)
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
-    const res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
+    let res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
     if (asset) {
       const key = this.mapEditorType2MyDesignKey(asset.type)
-      return res + `&thumbType=mydesign&designId=${asset.id}&key=${key}`
-    } else {
-      return res
+      res += `&thumbType=mydesign&designId=${asset.id}&key=${key}`
     }
+    if (source) {
+      res += `&source=${source}`
+    }
+    return res
   }
 
   setIsInCategory(tab: string, bool: boolean) {
@@ -361,8 +373,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     pageUtils.setPages([pageUtils.newPage({
       width: pageSize,
       height: pageSize,
-      backgroundColor: '#F8F8F8',
-      isAutoResizeNeeded: true
+      backgroundColor: '#F8F8F8'
     })])
     store.commit('vivisticker/SET_editingDesignId', designId ?? '')
     store.commit('vivisticker/SET_editingAssetInfo', assetInfo)
@@ -777,19 +788,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       id: editingDesignId,
       assetInfo
     } as ITempDesign
-    this.saveDesignQueue.push({ design: JSON.stringify(design) })
-    if (this.saveDesignQueue.length === 1) {
-      this.processSaveDesign()
-    }
-  }
-
-  async processSaveDesign() {
-    const designToSave = this.saveDesignQueue[0]
-    if (designToSave) {
-      await this.setState('tempDesign', designToSave)
-      this.saveDesignQueue.shift()
-      this.processSaveDesign()
-    }
+    this.setState('tempDesign', { design: JSON.stringify(design) })
   }
 
   async fetchDesign(): Promise<ITempDesign | undefined> {
@@ -905,25 +904,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {
-    this.designDeletionQueue.push({ key, id, thumbType })
-    if (this.designDeletionQueue.length === 1) {
-      this.processDeleteAsset()
+    if (this.checkVersion('1.27')) {
+      await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, `delete-asset-${key}-${id}`)
+    } else {
+      await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, 'delete-asset')
     }
-  }
-
-  async processDeleteAsset() {
-    const deletion = this.designDeletionQueue[0]
-    if (deletion) {
-      const { key, id, thumbType } = deletion
-      if (this.checkVersion('1.27')) {
-        await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, `delete-asset-${key}-${id}`)
-      } else {
-        await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, 'delete-asset')
-      }
-      store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), id })
-      this.designDeletionQueue.shift()
-      this.processDeleteAsset()
-    }
+    store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), id })
   }
 
   deleteAssetDone(data: { key: string, id: string } | undefined) {
@@ -1254,6 +1240,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async checkFontLoaded(face: string): Promise<boolean> {
     const loadedFonts = store.getters['vivisticker/getLoadedFonts'] as { [key: string]: true }
     return loadedFonts[face] ?? false
+  }
+
+  internelError(data: { route: string, data: { [key: string]: any } }) {
+    console.error(`Error occurs in App when processing ${data.route} with ${JSON.stringify(data.data)}`)
   }
 
   openFullPageVideo(key: keyof IStickerVideoUrls, { delayedClose = undefined, mediaPos = 'top' }: Pick<IFullPageVideoConfigParams, 'delayedClose' | 'mediaPos'> = {}) {

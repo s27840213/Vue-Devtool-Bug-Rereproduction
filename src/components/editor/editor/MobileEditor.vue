@@ -21,7 +21,7 @@ div(class="mobile-editor")
         :currPage="currPage"
         @switchTab="switchTab"
         @panelHeight="setPanelHeight"
-        :footerTabsHeight="footerTabsHeight")
+        :footerTabsRef="footerTabsRef")
   footer-tabs(class="mobile-editor__bottom"
     @switchTab="switchTab"
     :currTab="currActivePanel"
@@ -66,7 +66,7 @@ export default defineComponent({
       currColorEvent: '',
       showMobilePanelAfterTransitoin: false,
       marginBottom: 0,
-      footerTabsHeight: 0,
+      footerTabsRef: undefined as unknown as HTMLElement,
       // vConsole: null as any
     }
   },
@@ -127,8 +127,7 @@ export default defineComponent({
 
     this.setUserState({ enableAdminView: false })
 
-    this.footerTabsHeight = (this.$refs.footerTabs as any).$el.clientHeight
-
+    this.footerTabsRef = (this.$refs.footerTabs as any).$el as HTMLElement
     // console.log('v console update')
     // this.vConsole = new VConsole({ theme: 'dark' })
     // this.vConsole.setSwitchPosition(25, 80)

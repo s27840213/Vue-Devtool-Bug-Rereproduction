@@ -5,6 +5,7 @@ import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IStyle, IText, ITmp } 
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
 import store from '@/store'
+import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
 import { round } from 'lodash'
@@ -26,7 +27,7 @@ import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import textShapeUtils from './textShapeUtils'
-import TextUtils from './textUtils'
+import textUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
 import unitUtils, { PRECISION } from './unitUtils'
 import vivistickerUtils from './vivistickerUtils'
@@ -171,9 +172,10 @@ class AssetUtils {
     json = await this.updateBackground(generalUtils.deepCopy(json))
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
-    const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    pageUtils.updateSpecPage(targetPageIndex, newLayer)
-    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
+    const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+    // console.log(generalUtils.deepCopy(newPage)) // remove unneccessary use of deepCopy(...) for performance
+    pageUtils.updateSpecPage(targetPageIndex, newPage)
+    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
     if (store.getters['user/getUserId'] === 'backendRendering') {
       const { isBleed, isTrim } = store.getters['user/getBackendRenderParams']
@@ -215,10 +217,10 @@ class AssetUtils {
     for (let i = 0; i < pageNum; i++) {
       json = await this.updateBackground(generalUtils.deepCopy(json))
       layerUtils.setAutoResizeNeededForLayersInPage(json, true)
-      const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-      pageUtils.updateSpecPage(i, newLayer)
+      const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+      pageUtils.updateSpecPage(i, newPage)
       if (width && height) {
-        resizeUtils.resizePage(i, newLayer, { width, height })
+        resizeUtils.resizePage(i, newPage, { width, height })
       }
     }
 
@@ -232,7 +234,7 @@ class AssetUtils {
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -463,7 +465,7 @@ class AssetUtils {
     const { width, height, scale } = json.styles
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_TEXT
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_TEXT
     const pageAspectRatio = currentPage.width / currentPage.height
     const textAspectRatio = width / height
     const textWidth = textAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * textAspectRatio
@@ -484,7 +486,7 @@ class AssetUtils {
     let isCenter = false
 
     if (typeof y === 'undefined' || typeof x === 'undefined') {
-      const { x: newX, y: newY, center } = TextUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
+      const { x: newX, y: newY, center } = textUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
       Object.assign(
         config.styles,
         { x: newX, y: newY }
@@ -504,14 +506,14 @@ class AssetUtils {
       Object.assign(config, {
         // widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
         widthLimit: -1, // for autoRescaleMode
-        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
+        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles.textShape),
         inAutoRescaleMode: isCenter,
         initScale: config.styles.scale,
         // contentEditable: true
       })
       newLayer = LayerFactary.newText(config)
       const { x, y, width, height } = newLayer.styles
-      const textHW = TextUtils.getTextHW(newLayer, -1)
+      const textHW = textUtils.getTextHW(newLayer, -1)
       Object.assign(newLayer.styles, {
         ...textHW,
         x: x + (width - textHW.width) / 2,
@@ -520,8 +522,9 @@ class AssetUtils {
       isText = true
     } else if (config.type === 'group') {
       for (const subLayer of config.layers) {
+        if (subLayer.type !== 'text') continue
         Object.assign(subLayer, {
-          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles)
+          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles.textShape)
         })
       }
       newLayer = LayerFactary.newGroup(config, (config as IGroup).layers)
@@ -534,7 +537,7 @@ class AssetUtils {
     // }
 
     if (newLayer !== null) {
-      layerUtils.addLayers(targetPageIndex, [newLayer])
+      layerUtils.addLayers(targetPageIndex, [textUtils.resetScaleForLayer(newLayer, true)])
     }
   }
 
@@ -563,7 +566,7 @@ class AssetUtils {
         Object.assign(textLayer.paragraphs[0].spans[0].styles, spanStyles)
       }
 
-      TextUtils.resetTextField(textLayer, targetPageIndex, field)
+      textUtils.resetTextField(textLayer, targetPageIndex, field)
       layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, {
         editing: false,
         contentEditable: true,
@@ -575,7 +578,7 @@ class AssetUtils {
         tiptapUtils.agent(editor => editor.commands.selectAll())
       }, 100)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       console.log('Cannot find the file')
     }
   }
@@ -800,6 +803,7 @@ class AssetUtils {
       store.commit('SET_mobileSidebarPanelOpen', false)
       let key = ''
       const asset = await this.get(item, attrs.db) as IAsset
+      attrs.fit = item.fit
 
       switch (asset.type) {
         case 1: {
@@ -870,7 +874,7 @@ class AssetUtils {
       this.addAssetToRecentlyUsed(asset, key)
       return asset.jsonData
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   }

@@ -187,7 +187,8 @@ class Controller {
             ${colorWithOpacity} 
             ${effectShadowOffset * Math.cos(angle * Math.PI / 180)}px
             ${effectShadowOffset * Math.sin(angle * Math.PI / 180)}px
-            ${effectBlur / 2}px)`
+            ${effectBlur / 2}px)`,
+          willChange: 'filter',
         }
       case 'lift':
         return {
@@ -196,7 +197,8 @@ class Controller {
             ${this.convertColor2rgba('#000000', Math.max(0.05, effectSpread))} 
             ${0}px
             ${0.3 * unit}px
-            ${((0.3 * unit) + effectSpreadBlur) / 2}px)`
+            ${((0.3 * unit) + effectSpreadBlur) / 2}px)`,
+          willChange: 'filter',
         }
       case 'hollow':
         return {
@@ -243,14 +245,14 @@ class Controller {
         return {
           '--base-stroke': '0px',
           ...this.funky3d(
-            distance,
-            effect.distanceInverse,
+            distance * fontSize / 60,
+            effect.distanceInverse * fontSize / 60,
             effect.angle,
             colorWithOpacity
           )
         }
       case 'bold3d': {
-        const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2, y: 0 })
+        const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2 * fontSize / 60, y: 0 })
         return {
           '--base-stroke': '1px',
           webkitTextStrokeColor: `${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,

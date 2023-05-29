@@ -1,8 +1,9 @@
 <template lang="pug">
 div(class="mobile-type-selector flex flex-between items-center py-5")
   div(class="full-width flex flex-between items-center")
-    span(:class="`${textColor} ${textSize}`") {{ title }}
-    span(class="text-gray-3 mr-10" :class="textSize") {{ description }}
+    span(v-if="title" :class="`${textColor} ${textSize}`") {{ title }}
+    span(v-if="description" class="text-gray-3 mr-10" :class="textSize") {{ description }}
+    slot
   svg-icon(:iconName="iconName"
     iconWidth="18px"
     iconColor="gray-2")
@@ -18,12 +19,10 @@ export default defineComponent({
       default: 'chevron-right'
     },
     title: {
-      type: String,
-      default: ''
+      type: String
     },
     description: {
-      type: String,
-      default: ''
+      type: String
     },
     textColor: {
       type: String,

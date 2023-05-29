@@ -12,7 +12,9 @@ $buttons: (
 	icon: none,
 	light: setColor(white),
 	transparent: transparent,
-	red: setColor(red)
+	red: setColor(red),
+	stk-active: setColor(gray-2),
+	stk-inactive: setColor(gray-5),
 );
 
 $hoveredColor: (
@@ -25,7 +27,9 @@ $hoveredColor: (
 	icon: none,
 	light: setColor(white),
 	transparent: transparent,
-	red: #FC5757
+	red: #FC5757,
+	stk-active: setColor(gray-2),
+	stk-inactive: setColor(gray-5),
 );
 
 $textColor: (
@@ -38,7 +42,9 @@ $textColor: (
 	icon: none,
 	light: setColor(blue-1),
 	transparent: setColor(white),
-	red: setColor(white)
+	red: setColor(white),
+	stk-active: setColor(white),
+	stk-inactive: setColor(gray-2)
 );
 
 $borderColor: (
@@ -51,7 +57,9 @@ $borderColor: (
 	icon: none,
 	light: setColor(blue-1),
 	transparent: setColor(white),
-	red: none
+	red: none,
+	stk-active: none,
+	stk-inactive: none
 );
 
 $padding: (

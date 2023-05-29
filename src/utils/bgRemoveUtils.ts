@@ -6,6 +6,7 @@ import { IImage } from '@/interfaces/layer'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import store from '@/store'
 import { LayerProcessType, LayerType, SidebarPanelType } from '@/store/types'
+import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
@@ -48,7 +49,6 @@ class BgRemoveUtils {
   }
 
   private setAutoRemoveResult(info: IBgRemoveInfo) {
-    console.log(info)
     store.commit('bgRemove/SET_autoRemoveResult', info)
   }
 
@@ -58,6 +58,10 @@ class BgRemoveUtils {
 
   setInBgRemoveMode(inBgRemoveMode: boolean) {
     store.commit('bgRemove/SET_inBgRemoveMode', inBgRemoveMode)
+  }
+
+  setPreviewImage(previewImage: { src: string, width: number, height: number }) {
+    store.commit('bgRemove/SET_previewImage', previewImage)
   }
 
   private setLoading(bool: boolean) {
@@ -98,6 +102,7 @@ class BgRemoveUtils {
     store.dispatch('user/removeBg', { srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
       if (data.flag === 0) {
         uploadUtils.polling(data.url, (json: any) => {
+          console.log(json.flag, json.data)
           if (json.flag === 0 && json.data) {
             this.reduceBgrmRemain()
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
@@ -154,6 +159,23 @@ class BgRemoveUtils {
     })
   }
 
+  async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number): Promise<void> {
+    this.setIsProcessing(true)
+    this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
+    logUtils.setLog('start removing bg')
+    const data = await store.dispatch('user/removeBgStk', { uuid, assetId })
+    logUtils.setLog('finish removing bg')
+    logUtils.setLog(`remove bg result: ${JSON.stringify(data)}`)
+    editorUtils.setCurrActivePanel('remove-bg')
+    const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
+    logUtils.setLog(`autoRemoveResult: ${JSON.stringify(autoRemoveResult)}`)
+    this.setAutoRemoveResult(autoRemoveResult)
+    this.setInBgRemoveMode(true)
+    this.setIsProcessing(false)
+
+    // return data
+  }
+
   cancel() {
     this.setIsProcessing(false)
     this.setInBgRemoveMode(false)
@@ -164,8 +186,6 @@ class BgRemoveUtils {
   }
 
   save() {
-    console.log(generalUtils.deepCopy(this.autoRemoveResult))
-    console.log(store.getters['bgRemove/getAutoRemoveResult'])
     const { index, pageIndex } = pageUtils.currSelectedInfo as ICurrSelectedInfo
     imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
     imageShadowUtils.updateEffectProps({ pageIndex, layerIndex: index }, { isTransparent: true })
@@ -255,9 +275,16 @@ class BgRemoveUtils {
           this.setIsProcessing(false)
         },
         id: id ?? privateId,
-        needCompressed: false
+        needCompressed: false,
+        pollingJsonName: 'result2.json'
       })
     }
+  }
+
+  downloadCanvas() {
+    const src = this.canvas.toDataURL('image/png;base64')
+
+    generalUtils.downloadImage(src, `vivistiker-${generalUtils.generateRandomString}.png`)
   }
 }
 

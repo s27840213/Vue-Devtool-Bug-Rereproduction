@@ -1,8 +1,9 @@
-import { GetterTree, ActionTree } from 'vuex'
-import { floor } from 'lodash'
 import list from '@/apis/list'
-import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
+import logUtils from '@/utils/logUtils'
+import { captureException } from '@sentry/browser'
+import { floor } from 'lodash'
+import { ActionTree, GetterTree } from 'vuex'
 
 interface IHomeTemplateState {
   locale: string,
@@ -26,18 +27,19 @@ const getters: GetterTree<IHomeTemplateState, unknown> = {
 }
 
 const actions: ActionTree<IHomeTemplateState, unknown> = {
-  async getTagContent({ commit }, { keyword, theme, cache }) {
+  async getTagContent({ commit }, { keyword, theme, cache, shuffle }) {
     const locale = localeUtils.currLocale()
     try {
       const { data } = await list.getTemplate({
         locale,
         keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
         theme: theme,
+        shuffle: shuffle,
         cache: cache
       })
       return Promise.resolve(data)
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   }

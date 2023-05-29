@@ -37,7 +37,7 @@ const routes: Array<RouteRecordRaw> = [
         }
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -51,7 +51,7 @@ const routes: Array<RouteRecordRaw> = [
         vivistickerUtils.hideController()
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -63,7 +63,7 @@ const routes: Array<RouteRecordRaw> = [
       try {
         router.replace({ name: 'ViviSticker', query: {}, params: {} })
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   }
@@ -110,6 +110,20 @@ const router = createRouter({
           await logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
+        let argoError = false
+        try {
+          const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
+          if (status !== 200) {
+            argoError = true
+            logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
+          }
+        } catch (error) {
+          argoError = true
+          logUtils.setLogForError(error as Error)
+          logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
+        } finally {
+          store.commit('text/SET_isArgoAvailable', !argoError)
+        }
         let locale = 'us'
         if (userInfo.appVer === '1.28') {
           const localLocale = localStorage.getItem('locale')
@@ -165,9 +179,12 @@ router.beforeEach(async (to, from, next) => {
     const response = await fetch(`https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
     const json = await response.json()
 
+    console.log(json)
     // const json = appJson
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
 
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
@@ -199,7 +216,10 @@ router.beforeEach(async (to, from, next) => {
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
 
-    uploadUtils.setLoginOutput({ upload_log_map: json.ul_log_map })
+    uploadUtils.setLoginOutput({
+      upload_log_map: json.ul_log_map,
+      ul_removebg_map: json.ul_removebg_map
+    })
   }
   next()
 })

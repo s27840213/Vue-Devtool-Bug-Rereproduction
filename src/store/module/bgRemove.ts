@@ -7,6 +7,7 @@ interface IBgRemoveState {
   brushSize: number,
   showInitImage: boolean,
   clearMode: boolean,
+  movingMode: boolean,
   restoreInitState: boolean,
   canvas: HTMLCanvasElement,
   autoRemoveResult: IBgRemoveInfo,
@@ -23,6 +24,11 @@ interface IBgRemoveState {
   idInfo: {
     pageId: number,
     layerId: number
+  },
+  previewImage: {
+    src: string,
+    width: number,
+    height: number
   }
 }
 
@@ -31,6 +37,7 @@ const getDefaultState = (): IBgRemoveState => ({
   brushSize: 16,
   showInitImage: false,
   clearMode: true,
+  movingMode: false,
   restoreInitState: false,
   canvas: null as unknown as HTMLCanvasElement,
   autoRemoveResult: null as unknown as IBgRemoveInfo,
@@ -47,6 +54,11 @@ const getDefaultState = (): IBgRemoveState => ({
   idInfo: {
     pageId: -1,
     layerId: -1
+  },
+  previewImage: {
+    src: '',
+    width: 0,
+    height: 0
   }
 })
 
@@ -63,6 +75,9 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
   },
   getClearMode(state: IBgRemoveState) {
     return state.clearMode
+  },
+  getMovingMode(state: IBgRemoveState) {
+    return state.movingMode
   },
   getRestoreInitState(state: IBgRemoveState) {
     return state.restoreInitState
@@ -102,6 +117,9 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
   },
   getIdInfo(state: IBgRemoveState): { pageId: number, layerId: number } {
     return state.idInfo
+  },
+  getPreviewImage(state: IBgRemoveState): { src: string, width: number, height: number} {
+    return state.previewImage
   }
 }
 
@@ -132,6 +150,9 @@ const mutations: MutationTree<IBgRemoveState> = {
   },
   SET_clearMode(state: IBgRemoveState, bool: boolean) {
     state.clearMode = bool
+  },
+  SET_movingMode(state: IBgRemoveState, bool: boolean) {
+    state.movingMode = bool
   },
   SET_restoreInitState(state: IBgRemoveState, bool: boolean) {
     state.restoreInitState = bool
@@ -195,6 +216,9 @@ const mutations: MutationTree<IBgRemoveState> = {
       pageId,
       layerId
     })
+  },
+  SET_previewImage(state: IBgRemoveState, previewImage: { src: string, width: number, height: number }) {
+    Object.assign(state.previewImage, previewImage)
   }
 }
 

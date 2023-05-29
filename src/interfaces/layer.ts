@@ -5,7 +5,13 @@ import { SrcObj } from './gallery'
 import { IShadowProps, IShadowStyles } from './imgShadow'
 import { ITiptapSelection } from './text'
 
-export const jsonVer = '1.0.7'
+/**
+ * before 1.0.7: IDK.
+ * 1.0.8: Fix problem that some text effect will not scale with font-size,
+ *        and NuText layer will always scale 1 and only use font-size to adjust its size.
+ */
+
+export const jsonVer = '1.0.8'
 
 export interface ILayerIdentifier {
   pageId: string,
@@ -172,7 +178,8 @@ export interface IFrame extends ILayer<IFrameStyle> {
   clips: Array<IImage>
   decoration?: IShape,
   decorationTop?: IShape
-  blendLayers?: Array<IShape>
+  blendLayers?: Array<IShape>,
+  needFetch?: boolean
 }
 export interface IGroup extends ILayer<IStyle> {
   type: 'group'

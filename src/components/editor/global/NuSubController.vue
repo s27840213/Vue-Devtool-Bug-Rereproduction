@@ -17,6 +17,9 @@ div(class="nu-sub-controller")
               :config="(config as IText)"
               :primaryLayer="primaryLayer"
               :subLayerIndex="layerIndex"
+              :pageId="page.id"
+              :layerId="primaryLayer.id"
+              :subLayerId="config.id"
               @keydown.arrow-left.stop
               @keydown.arrow-up.stop
               @keydown.arrow-right.stop
@@ -413,8 +416,7 @@ export default defineComponent({
       })
     },
     checkIfCurve(config: IText): boolean {
-      const { textShape } = config.styles
-      return textShape && textShape.name === 'curve'
+      return textShapeUtils.isCurvedText(config.styles.textShape)
     },
     calcSize(config: IText) {
       this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)

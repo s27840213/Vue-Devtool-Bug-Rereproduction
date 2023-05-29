@@ -31,7 +31,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({

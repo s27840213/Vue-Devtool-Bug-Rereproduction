@@ -1,8 +1,8 @@
 <template lang="pug">
 div(class="home")
-  nu-header(v-header-border)
+  nu-header(:showCloseIcon="showTemplateList" @close="showTemplateList = false")
   div(class="home-content")
-    div(class="home-top")
+    div(v-if="inBrowserMode && !(isMobile && isLogin)" class="home-top")
       div(class="home-top-text")
         span(class="home-top-text__title" v-html="$t('NN0464')")
         span(class="home-top-text__description") {{$t('NN0465')}}
@@ -13,34 +13,66 @@ div(class="home")
       iframe(title="Vivipic" class="home-top__yt"
         :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
         frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
-      router-link(:to="`/editor?type=new-design-size&width=1080&height=1080`"
+      router-link(v-if="inBrowserMode && !isMobileSize" :to="`/editor?type=new-design-size&width=1080&height=1080`"
           class="home-top__button rounded btn-primary-sm btn-LG")
         span {{$t('NN0391')}}
     div(class="home-list")
-      scroll-list(v-if="!isMobile || isLogin"
-        type="theme" @openSizePopup="openSizePopup()")
-      scroll-list(v-if="isLogin"
-        type="mydesign")
-      template(v-if="isLogin")
-        scroll-list(v-for="theme in themeList"
-          type="template" :theme="theme" :key="theme")
-    div(class="home-block")
+      scroll-list(
+        :gridMode="true"
+        type="theme")
+      hashtag-category-row(v-if="!inBrowserMode || (isMobile && isLogin)"
+        class="home-list__hashtag"
+        :type="'tag'"
+        :title="''"
+        :list="homeTags"
+        :defaultSelection="[]"
+        :shinkWidth="0"
+        @select="handleSelectTags")
+      template(v-if="selectedTags.length !== 0")
+        template-waterfall(:waterfallTemplates="waterfallTemplates"
+          :isTemplateReady="isTemplateReady"
+          :useScrollablePreview="!isMobile"
+          :useScrollSpace="isMobile"
+          :themes="themes"
+          @loadMore="handleLoadMore"
+          @clickWaterfall="handleClickWaterfall")
+      template(v-else)
+        scroll-list(v-if="isLogin && inBrowserMode && !isMobile"
+          type="mydesign")
+        template(v-if="isLogin || !inBrowserMode")
+          scroll-list(v-for="theme in themeList"
+            type="template"
+            :theme="`${theme}`"
+            :key="theme"
+            :shuffle="true")
+    div(v-if="inBrowserMode && !(isMobile && isLogin)" class="home-block")
       ta-block(v-for="item in blocklist"
         :key="item.title"
         :content="item")
-    nu-footer(:isHome="true")
+    nu-footer(v-if="inBrowserMode && !(isMobile && isLogin)" :isHome="true")
+  transition(name="fade-slide")
+    div(v-if="showTemplateList && isMobile" class="template-list")
+      div(class="template-list__content")
+        div(class="template-list__gallery")
+          div(v-for="content in contentIds" class="template-list__gallery-item"
+            :key="content.id"
+            :style="`background-image: url(${getPrevUrl(content, 2)})`"
+            @click="handleTemplateClick(content)")
 </template>
 
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
-import ScrollList from '@/components/homepage/ScrollList.vue'
-import TaBlock from '@/components/homepage/TaBlock.vue'
-import NuFooter from '@/components/NuFooter.vue'
 import NuHeader from '@/components/NuHeader.vue'
+import { IContentTemplate, ITemplate } from '@/interfaces/template'
+import { Itheme } from '@/interfaces/theme'
+import generalUtils from '@/utils/generalUtils'
 import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
-import _ from 'lodash'
-import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import modalUtils from '@/utils/modalUtils'
+import paymentUtils from '@/utils/paymentUtils'
+import picWVUtils from '@/utils/picWVUtils'
+import templateCenterUtils from '@/utils/templateCenterUtils'
+import { defineAsyncComponent, defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -48,20 +80,48 @@ export default defineComponent({
   components: {
     NuHeader,
     Animation,
-    ScrollList,
-    TaBlock,
-    NuFooter
+    ScrollList: defineAsyncComponent(() =>
+      import('@/components/homepage/ScrollList.vue')
+    ),
+    TaBlock: defineAsyncComponent(() =>
+      import('@/components/homepage/TaBlock.vue')
+    ),
+    NuFooter: defineAsyncComponent(() =>
+      import('@/components/NuFooter.vue')
+    ),
+    HashtagCategoryRow: defineAsyncComponent(() =>
+      import('@/components/templates/HashtagCategoryRow.vue')
+    ),
+    TemplateWaterfall: defineAsyncComponent(() =>
+      import('@/components/templates/TemplateWaterfall.vue')
+    ),
   },
   data() {
     return {
-      showSizePopup: false,
-      themeList: ['1,2', '3', '8', '6', '5', '7', '9'],
+      // themeList: ['1,2', '3', '8', '6', '5', '7', '9'],
       colorBlock: [
         'vector_lightblue2.json',
         'vector_pink1.json',
         'oval_pink4.json',
         'oval_yellow1.json'
-      ]
+      ],
+      waterfallTemplatesPC: [] as ITemplate[][],
+      waterfallTemplatesTAB: [] as ITemplate[][],
+      waterfallTemplatesMOBILE: [] as ITemplate[][],
+      isMobileSize: false,
+      isPCSize: false,
+      isTemplateReady: false,
+      selectedTags: [] as string[],
+      contentIds: [] as IContentTemplate[],
+      groupId: '',
+      showTemplateList: false,
+      matchedThemes: [] as Itheme[],
+      selectedTheme: undefined as Itheme | undefined,
+      modalTemplate: {} as ITemplate,
+      contentBuffer: undefined as IContentTemplate | undefined,
+      // contentIds: [] as IContentTemplate[],
+      // groupId: '',
+      // modalTemplate: {} as ITemplate,
     }
   },
   // setup() {
@@ -107,13 +167,39 @@ export default defineComponent({
       }]
     }
   },
+  mounted() {
+    window.addEventListener('resize', this.handleResize)
+
+    this.handleResize()
+  },
+  unmounted() {
+    window.removeEventListener('resize', this.handleResize)
+  },
   computed: {
     ...mapGetters({
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      inBrowserMode: 'webView/getInBrowserMode',
+      _themeList: 'getShuffledThemesIds',
+      themes: 'getMainHiddenThemes',
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
+    statusbarHeight (): string {
+      return `${this.userInfo.statusBarHeight ?? 0}px`
+    },
     ...mapState({
-      isMobile: 'isMobile'
+      isMobile: 'isMobile',
+      _homeTags: 'homeTags'
     }),
+    ...mapState('templates', {
+      templates: 'searchResult'
+    }),
+    homeTags(): Array<{name: string}> {
+      return this._homeTags.map((tag: string) => {
+        return {
+          name: tag
+        }
+      })
+    },
     blocklist(): IHomeBlockData[] {
       const blocklist = blocklistData.data().filter((item) => {
         return !(this.$i18n.locale === 'us' && item.img.name === 'e-commerce.json')
@@ -130,17 +216,191 @@ export default defineComponent({
       return this.$i18n.locale === 'us' ? 'GRSlz37Njo0'
         : this.$i18n.locale === 'jp' ? 'FzPHWU0O1uI'
           : this.$i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
-    }
-  },
-  created() {
-    if (this.$i18n.locale === 'us') {
-      this.themeList = _.without(this.themeList, '7')
-    }
-  },
-  methods: {
-    openSizePopup() {
-      this.showSizePopup = true
     },
+    waterfallTemplates(): ITemplate[][] {
+      if (this.isPCSize) {
+        return this.waterfallTemplatesPC
+      } else if (this.isMobileSize) {
+        return this.waterfallTemplatesMOBILE
+      } else {
+        return this.waterfallTemplatesTAB
+      }
+    },
+    themeList(): string[] {
+      if (this._themeList && this.$i18n.locale === 'us') {
+        return this._themeList.filter((theme: string) => theme !== '7')
+      }
+      return this._themeList
+    },
+    // onlyShowInMobileApp() {
+    //   return this.$isTouchDevice() && !this.inBrowserMode
+    // }
+  },
+  // created() {
+  //   if (this.$i18n.locale === 'us') {
+  //     this.themeList = _.without(this.themeList, '7')
+  //   }
+  // },
+  methods: {
+    ...mapActions('templates', {
+      getTemplates: 'getThemeContent',
+      getMoreTemplates: 'getMoreContent'
+    }),
+    handleLoadMore() {
+      this.isTemplateReady = false
+      this.getMoreTemplates().then(() => {
+        this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
+        this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2, 2)
+        this.isTemplateReady = true
+      })
+    },
+    handleResize() {
+      this.isMobileSize = generalUtils.getWidth() <= 540
+      this.isPCSize = generalUtils.getWidth() >= 976
+    },
+    handleSelectTags(selectinfo: { title: string, selection: string[] }) {
+      this.selectedTags = [...selectinfo.selection]
+      this.composeKeyword()
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    composeKeyword() {
+      const res = ['group::0']
+      const tags = [this.selectedTags.join(' ')]
+
+      if (tags.length > 0) {
+        res.push('tag::' + tags.join('&&'))
+      }
+      res.push('order_by::popular')
+      this.waterfallTemplatesPC = []
+      this.waterfallTemplatesTAB = []
+      this.waterfallTemplatesMOBILE = []
+      this.isTemplateReady = false
+      this.getTemplates({ keyword: res.join(';;'), theme: '' }).then(() => {
+        this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
+        this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2, 2)
+        this.isTemplateReady = true
+      })
+    },
+    handleClickWaterfall(template: ITemplate) {
+      if (template.group_type === 1) {
+        if (this.$isTouchDevice()) {
+          modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+          return
+        }
+        if (!paymentUtils.checkProTemplate(template)) return
+        const route = this.$router.resolve({
+          name: 'Editor',
+          query: {
+            type: 'product-page-template',
+            design_id: template.group_id,
+            themeId: template.content_ids[0].themes.join(',')
+          }
+        })
+        this.openTemplate(route.href)
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [template.group_id]
+        })
+        return
+      }
+      if (template.content_ids.length === 1) {
+        if (!paymentUtils.checkProTemplate(template)) return
+        const matchedTheme = this.themes.find((theme: Itheme) => theme.id.toString() === template.theme_id)
+        const format = matchedTheme ? {
+          width: matchedTheme.width.toString(),
+          height: matchedTheme.height.toString()
+        } : {
+          width: template.width.toString(),
+          height: template.height.toString()
+        }
+        const route = this.$router.resolve({
+          name: 'Editor',
+          query: {
+            type: 'new-design-template',
+            design_id: template.id,
+            themeId: template.content_ids[0].themes.join(','),
+            width: format.width,
+            height: format.height
+          }
+        })
+        this.openTemplate(route.href)
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [template.id]
+        })
+      } else {
+        this.groupId = template.group_id ?? ''
+        this.contentIds = template.content_ids
+        this.modalTemplate = template
+        this.showTemplateList = true
+      }
+    },
+    handleTemplateClick(content: IContentTemplate) {
+      if (!paymentUtils.checkProGroupTemplate(this.modalTemplate, content)) return
+      this.matchedThemes = this.themes.filter((theme: Itheme) => content.themes.includes(theme.id.toString()))
+      const allSameSize = this.matchedThemes.reduce<[boolean, number | undefined, number | undefined]>((acc, theme) => {
+        return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
+      }, [true, undefined, undefined])[0]
+      if (content.themes.length > 1 && !allSameSize) {
+        if (this.isMobileSize) {
+          const route = this.$router.resolve({
+            name: 'Editor',
+            query: {
+              type: 'new-design-template',
+              design_id: content.id,
+              width: this.matchedThemes[0].width.toString(),
+              height: this.matchedThemes[0].height.toString(),
+              group_id: this.groupId
+            }
+          })
+          this.openTemplate(route.href)
+          generalUtils.fbq('track', 'AddToWishlist', {
+            content_ids: [content.id]
+          })
+          return
+        }
+        this.contentBuffer = content
+        this.selectedTheme = undefined
+      } else {
+        const matchedTheme = this.themes.find((theme: Itheme) => theme.id.toString() === content.themes[0])
+        const format = matchedTheme ? {
+          width: matchedTheme.width.toString(),
+          height: matchedTheme.height.toString()
+        } : {
+          width: content.width.toString(),
+          height: content.height.toString()
+        }
+        const route = this.$router.resolve({
+          name: 'Editor',
+          query: {
+            type: 'new-design-template',
+            design_id: content.id,
+            width: format.width,
+            height: format.height,
+            group_id: this.groupId
+          }
+        })
+        this.openTemplate(route.href)
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [content.id]
+        })
+      }
+    },
+    openTemplate(url: string) {
+      picWVUtils.openOrGoto(url)
+    },
+    getPrevUrl(content?: IContentTemplate, scale?: number): string {
+      if (!content) return ''
+      return templateCenterUtils.getPrevUrl(content, scale)
+    }
   }
 })
 </script>
@@ -150,6 +410,7 @@ export default defineComponent({
   height: 100%;
 }
 .home-content {
+  position: relative;
   @include hover-scrollbar();
   display: flex;
   flex-direction: column;
@@ -207,6 +468,65 @@ export default defineComponent({
 }
 .home-list {
   width: 80%;
+  position: relative;
+  padding-bottom: calc(44 * 1px);
+  &__hashtag {
+    z-index: 10;
+    position: sticky;
+    top: -1px;
+    left: 0;
+    padding: 12px 0px;
+    margin: 0px;
+    background-color: white;
+  }
+}
+
+.template-list {
+  position: fixed;
+  top: calc(#{$header-height} + v-bind(statusbarHeight) - 2px);
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #ffffff;
+  z-index: setZindex("popup");
+  &__close {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: calc((#{($header-height)}  + v-bind(statusbarHeight)) / 2);
+    right: 55px;
+    width: 25px;
+    height: 25px;
+    z-index: setZindex("popup");
+    transform: translate(0%, -50%);
+    cursor: pointer;
+  }
+  &__content {
+    overflow-y: auto;
+    width: 100%;
+    height: calc(100vh - #{($header-height)} + v-bind(statusbarHeight));
+  }
+  &__gallery {
+    display: grid;
+    margin: 20px;
+    grid-gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  &__gallery-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-top: calc(100% - 2px);
+    background: white;
+    border: 1px solid setColor(gray-5);
+    box-sizing: border-box;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
 }
 @media screen and (max-width: 768px) {
   .home-content {
@@ -328,6 +648,18 @@ export default defineComponent({
       top: 259px;
       left: 1158px;
     }
+  }
+}
+
+.fade-slide {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    left: 100%;
   }
 }
 </style>

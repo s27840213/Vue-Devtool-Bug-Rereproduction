@@ -7,7 +7,8 @@ div(class="bg-remove-area"
     :style="initPhotoStyles")
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
-      :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
+      :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}"
+      :ref="'scaleArea'")
     canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
@@ -15,7 +16,7 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-teleport(v-if="useMobileEditor" to=".header-bar")
+teleport(v-if="useMobileEditor || inVivisticker" :to="teleportTarget")
   div(class="magnify-area" :style="magnifyAreaStyle")
     canvas(class="magnify-area__canvas"  ref="magnify")
     div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
@@ -23,6 +24,7 @@ teleport(v-if="useMobileEditor" to=".header-bar")
 
 <script lang="ts">
 import { IBgRemoveInfo } from '@/interfaces/image'
+import logUtils from '@/utils/logUtils'
 import MagnifyUtils from '@/utils/magnifyUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -36,12 +38,25 @@ export default defineComponent({
     editorViewCanvas: {
       type: HTMLElement,
       required: true
+    },
+    inVivisticker: {
+      default: false,
+      type: Boolean
+    },
+    fitScaleRatio: {
+      default: 1,
+      type: Number
+    },
+    teleportTarget: {
+      default: '.header-bar',
+      type: String
     }
   },
   data() {
     return {
       cyReady: false,
       root: undefined as unknown as HTMLElement,
+      scaleArea: undefined as unknown as HTMLElement,
       canvasWidth: 1600,
       canvasHeight: 1600,
       contentCanvas: undefined as unknown as HTMLCanvasElement,
@@ -71,35 +86,58 @@ export default defineComponent({
       isProcessingStepsQueue: false,
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
       magnifyUtils: null as unknown as MagnifyUtils,
-      showMagnifyAtRight: false
+      showMagnifyAtRight: false,
+      clearModeShift: 4
     }
   },
   created() {
+    logUtils.setLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
-    this.canvasHeight = 1600 / aspectRatio
+    if (this.inVivisticker) {
+      this.canvasWidth = width
+      this.canvasHeight = height
+    } else {
+      this.canvasHeight = 1600 / aspectRatio
+    }
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
+    logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)
+    logUtils.setLog(`auto remove img src: ${this.imgSrc}`)
   },
   mounted() {
+    logUtils.setLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
+    this.scaleArea = this.$refs.scaleArea as HTMLElement
 
     this.imageElement = new Image()
-    this.imageElement.src = this.imgSrc
-    this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     this.imageElement.onload = () => {
+      logUtils.setLog('imageElement onload triggered')
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
       this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
     }
+    this.imageElement.onerror = (ev) => {
+      logUtils.setLog('imageElement onerror triggered')
+      logUtils.setLog(`${JSON.stringify(ev)}`)
+    }
+    this.imageElement.src = this.imgSrc
+    this.imageElement.setAttribute('crossOrigin', 'Anonymous')
+    logUtils.setLog(`set image element src: ${this.imgSrc}`)
+    logUtils.setLog(`set image element: ${JSON.stringify(this.imageElement)}`)
 
     this.initImageElement = new Image()
+    this.initImageElement.onload = () => {
+      logUtils.setLog('initImageElement onload triggered')
+      this.createInitImageCtx()
+    }
     this.initImageElement.src = this.initImgSrc
     this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
-    this.initImageElement.onload = () => {
-      this.createInitImageCtx()
+
+    if (this.$isTouchDevice()) {
+      this.editorViewCanvas.addEventListener('touchstart', this.touchEventHandler)
     }
     this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
     window.addEventListener('pointermove', this.setBrushPos)
@@ -117,6 +155,9 @@ export default defineComponent({
     window.removeEventListener('pointermove', this.drawing)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
+    if (this.$isTouchDevice()) {
+      this.editorViewCanvas.removeEventListener('touchstart', this.touchEventHandler)
+    }
     this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
   },
@@ -127,6 +168,7 @@ export default defineComponent({
       brushSize: 'bgRemove/getBrushSize',
       restoreInitState: 'bgRemove/getRestoreInitState',
       clearMode: 'bgRemove/getClearMode',
+      movingMode: 'bgRemove/getMovingMode',
       showInitImage: 'bgRemove/getShowInitImage',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
       modifiedFlag: 'bgRemove/getModifiedFlag',
@@ -151,21 +193,22 @@ export default defineComponent({
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${this.scaleRatio * this.contentScaleRatio / 100})`
+        transform: `scale(${this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100})`,
+        willChange: this.inGestureMode ? 'transform' : ''
       }
     },
     wrapperStyles(): { [index: string]: string } {
       return {
-        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio / 100)}px`
+        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`
       }
     },
     initPhotoStyles(): { [index: string]: string } {
       const backgroundImage = this.showInitImage ? `url(${this.initImgSrc})` : ''
       const backgroundSize = this.showInitImage ? 'cover' : 'initial'
       return {
-        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
+        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
         backgroundImage,
         backgroundSize
       }
@@ -178,7 +221,8 @@ export default defineComponent({
         bottom: '10px',
         left: '80px'
       } : {
-        bottom: '-70px',
+        bottom: this.inVivisticker ? 'none' : '-70px',
+        top: this.inVivisticker ? '20px' : 'none',
         ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
         visibility: this.showBrush ? 'visible' : 'hidden'
       }
@@ -217,6 +261,7 @@ export default defineComponent({
       }
     },
     clearMode(newVal) {
+      logUtils.setLog('trigger clear mode watch')
       if (newVal) {
         this.contentCtx.globalCompositeOperation = 'destination-out'
         this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -257,9 +302,11 @@ export default defineComponent({
       addStep: 'bgRemove/ADD_step',
       setCurrStep: 'bgRemove/SET_currStep',
       setPrevPageScaleRatio: 'bgRemove/SET_prevPageScaleRatio',
-      clearSteps: 'bgRemove/CLEAR_steps'
+      clearSteps: 'bgRemove/CLEAR_steps',
+      setInGestureMode: 'SET_inGestureMode'
     }),
     initCanvas() {
+      logUtils.setLog('initCanvas')
       this.contentCanvas = this.$refs.canvas as HTMLCanvasElement
       this.contentCanvas.width = this.canvasWidth
       this.contentCanvas.height = this.canvasHeight
@@ -268,8 +315,12 @@ export default defineComponent({
       ctx.lineWidth = this.brushSize
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
+      logUtils.setLog('setup contentCtx')
+      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.contentCtx = ctx
+      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       // this.ctx.globalCompositeOperation = 'destination-out'
+      logUtils.setLog(`ctx: ${JSON.stringify(this.contentCtx)}`)
 
       this.drawImageToCtx()
       this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -290,8 +341,8 @@ export default defineComponent({
     },
     initClearModeCanvas() {
       this.clearModeCanvas = document.createElement('canvas') as HTMLCanvasElement
-      this.clearModeCanvas.width = this.size.width
-      this.clearModeCanvas.height = this.size.height
+      this.clearModeCanvas.width = this.size.width + 2 * this.clearModeShift
+      this.clearModeCanvas.height = this.size.height + 2 * this.clearModeShift
       const ctx = this.clearModeCanvas.getContext('2d') as CanvasRenderingContext2D
       // set up drawing settings
       ctx.lineCap = 'round'
@@ -306,9 +357,10 @@ export default defineComponent({
 
       this.magnifyCtx = ctx
 
-      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
+      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
     },
     createInitImageCtx() {
+      logUtils.setLog('createInitImageCtx')
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
       this.initImgCanvas.width = this.size.width
       this.initImgCanvas.height = this.size.height
@@ -322,11 +374,12 @@ export default defineComponent({
       this.drawImageToInitImgCanvas()
     },
     drawLine(e: MouseEvent, ctx: CanvasRenderingContext2D) {
+      const shift = this.clearMode ? this.clearModeShift : 0
       ctx.beginPath()
-      ctx.moveTo(this.initPos.x, this.initPos.y)
-      const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root)
+      ctx.moveTo(this.initPos.x + shift, this.initPos.y + shift)
+      const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
       this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
-      ctx.lineTo(x, y)
+      ctx.lineTo(x + shift, y + shift)
       ctx.stroke()
       Object.assign(this.initPos, {
         x,
@@ -335,9 +388,11 @@ export default defineComponent({
 
       this.setModifiedFlag(true)
     },
+    // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
-      if (!this.inGestureMode) {
-        const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
+      console.log(`in gesture mode: ${this.inGestureMode}`)
+      if (!this.inGestureMode && !this.movingMode) {
+        const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
         Object.assign(this.initPos, {
           x,
           y
@@ -357,10 +412,12 @@ export default defineComponent({
       }
     },
     drawing(e: MouseEvent) {
-      if (this.clearMode) {
-        this.drawInClearMode(e)
-      } else {
-        this.drawInRestoreMode(e)
+      if (!this.inGestureMode && !this.movingMode) {
+        if (this.clearMode) {
+          this.drawInClearMode(e)
+        } else {
+          this.drawInRestoreMode(e)
+        }
       }
     },
     drawEnd() {
@@ -373,10 +430,12 @@ export default defineComponent({
       }
     },
     setBrushPos(e: MouseEvent) {
-      const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
+      const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
       this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
     },
     drawImageToCtx(img?: HTMLImageElement) {
+      logUtils.setLog('draw imag to ctx: ')
+      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.setCompositeOperationMode('source-over')
       this.contentCtx.drawImage(img ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       this._setCanvas(this.contentCanvas)
@@ -387,6 +446,7 @@ export default defineComponent({
       }
     },
     drawInClearMode(e: MouseEvent) {
+      logUtils.setLog('draw in clear mode')
       this.cyReady = false
       this.setCompositeOperationMode('source-over', this.contentCtx)
       this.contentCtx.filter = 'none'
@@ -397,10 +457,11 @@ export default defineComponent({
       this.drawLine(e, this.clearModeCtx)
       this.setCompositeOperationMode('destination-out')
       this.contentCtx.filter = `blur(${this.blurPx}px)`
-      this.contentCtx.drawImage(this.clearModeCanvas, 0, 0, this.size.width, this.size.height)
+      this.contentCtx.drawImage(this.clearModeCanvas, 0 - this.clearModeShift, 0 - this.clearModeShift, this.size.width + 2 * this.clearModeShift, this.size.height + 2 * this.clearModeShift)
       this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
+      logUtils.setLog('draw in restore mode')
       this.clearCtx(this.blurCtx)
       this.drawLine(e, this.blurCtx)
       this.setCompositeOperationMode('source-in', this.blurCtx)
@@ -424,6 +485,9 @@ export default defineComponent({
       /**
        * @Note GlobalCompositeOperation type has some problems
        */
+      logUtils.setLog('setCompositeOperationMode: ' + mode)
+      logUtils.setLog('ctx: ' + JSON.stringify(ctx))
+      logUtils.setLog('contenCtxx: ' + JSON.stringify(this.contentCtx))
       if (ctx) {
         ctx.globalCompositeOperation = mode as any
       } else {
@@ -514,6 +578,19 @@ export default defineComponent({
     },
     handleBrushLeave() {
       this.showBrush = false
+    },
+    touchEventHandler(e: TouchEvent) {
+      if (this.movingMode) {
+        return
+      }
+      if (e.touches.length === 2) {
+        this.setInGestureMode(true)
+        return
+      } else if (e.touches.length <= 1) {
+        this.setInGestureMode(false)
+      }
+      e.preventDefault()
+      e.stopPropagation()
     }
   }
 })
@@ -523,8 +600,7 @@ export default defineComponent({
 .bg-remove-area {
   position: relative;
   box-sizing: content-box;
-  margin: 0px auto;
-  overflow: hidden;
+  margin: auto auto;
 
   &__initPhoto {
     position: absolute;

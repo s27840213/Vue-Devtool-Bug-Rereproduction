@@ -2,27 +2,34 @@
 div(class="panel-remove-bg")
   div(class="panel-remove-bg__btns")
     btn(class="full-width"
-      :type="clearMode ? 'gray-active-sm' :'gray-sm'"
+      :type="clearMode && !movingMode ? 'stk-active-sm' :'stk-inactive-sm'"
       :hasIcon="true"
       :iconName="'clear'"
       :iconMargin="4"
       :flexDir="'column'"
       @click="setClearMode(true)") {{ $t('NN0385') }}
     btn(class="full-width"
-      :type="clearMode ? 'gray-sm' :'gray-active-sm'"
+      :type="clearMode || movingMode ? 'stk-inactive-sm' :'stk-active-sm'"
       :hasIcon="true"
       :iconName="'preserve'"
       :iconMargin="4"
       :flexDir="'column'"
       @click="setClearMode(false)") {{ $t('NN0386') }}
-    btn(class="btn-recover full-width"
-      type="gray-sm"
+    btn(class="full-width"
+      :type="movingMode ? 'stk-active-sm' :'stk-inactive-sm'"
       :hasIcon="true"
-      :iconName="'reset'"
+      :iconName="'move-cross'"
       :iconMargin="4"
       :flexDir="'column'"
-      @click="restoreInitState()") {{$t('NN0389')}}
-  div(class="panel-remove-bg__slider full")
+      @click="setMovingMode(true)") {{ $t('NN0872') }}
+  btn(class="btn-recover full-width my-10"
+    type="stk-inactive-sm"
+    :hasIcon="true"
+    :iconName="'reset'"
+    :iconMargin="4"
+    :flexDir="'column'"
+    @click="restoreInitState()") {{$t('NN0389')}}
+  div(class="panel-remove-bg__slider full mt-10")
     mobile-slider(
       :title="`${$t('NN0387')}`"
       :borderTouchArea="true"
@@ -60,6 +67,7 @@ export default defineComponent({
     ...mapGetters({
       useMobileEditor: 'getUseMobileEditor',
       clearMode: 'bgRemove/getClearMode',
+      movingMode: 'bgRemove/getMovingMode',
       showInitImage: 'bgRemove/getShowInitImage',
       modifiedFlag: 'bgRemove/getModifiedFlag',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -75,9 +83,14 @@ export default defineComponent({
     ...mapMutations({
       setBrushSize: 'bgRemove/SET_brushSize',
       setRestoreInitState: 'bgRemove/SET_restoreInitState',
-      setClearMode: 'bgRemove/SET_clearMode',
+      _setClearMode: 'bgRemove/SET_clearMode',
+      setMovingMode: 'bgRemove/SET_movingMode',
       setShowInitImage: 'bgRemove/SET_showInitImage',
     }),
+    setClearMode(bool: boolean) {
+      this._setClearMode(bool)
+      this.setMovingMode(false)
+    },
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)
     },

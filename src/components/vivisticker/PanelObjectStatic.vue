@@ -12,14 +12,13 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
     v-model:expanded="isSearchBarExpanded"
     @search="handleSearch"
     @favorite="toggleFavoritesTag")
-  tags(v-if="tags && tags.length"
+  tags(v-show="tags && tags.length"
       class="panel-static__tags"
       :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"
-      :scrollLeft="tagScrollLeft"
+      ref="tags"
       theme="dark"
-      @search="handleSearch"
-      @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
+      @search="handleSearch")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
                 :class="{invisible: !item.show, collapsed: !isSearchBarExpanded}"
@@ -111,7 +110,6 @@ export default defineComponent({
         favoritesContent: 0,
         favoritesSearchResult: 0
       },
-      tagScrollLeft: 0,
       isSearchBarExpanded: false,
     }
   },
@@ -312,6 +310,13 @@ export default defineComponent({
           ref[name][0].$el.scrollTop = this.scrollTop[name]
         }
       })
+    },
+    isInCategory() {
+      // skip transitions when entering of leaving category
+      this.toggleTransitions(false)
+      this.$nextTick(() => {
+        this.toggleTransitions(true)
+      })
     }
   },
   methods: {
@@ -425,6 +430,17 @@ export default defineComponent({
             size: this.itemHeight + gap
           }
         })
+    },
+    toggleTransitions(enable: boolean) {
+      // tags
+      const elTags = (this.$refs.tags as any)?.$el as HTMLElement
+      if (elTags) elTags.style.transition = enable ? '' : 'none'
+
+      // category list
+      const ref = this.$refs as Record<string, CCategoryList[]>
+      for (const name of this.targets) {
+        ref[name][0].$el.style.transition = enable ? '' : 'none'
+      }
     }
   }
 })
@@ -463,7 +479,7 @@ export default defineComponent({
     .category-list {
       transition: transform 200ms 100ms ease-in-out;
       &.collapsed{
-        transform: translateY(-56px) translateZ(0);
+        transform: translateY(-56px);
       }
     }
     &:deep(.vue-recycle-scroller__item-wrapper) {

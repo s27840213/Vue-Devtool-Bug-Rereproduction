@@ -1,9 +1,11 @@
 import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { IFont, ISelection } from '@/interfaces/text'
 import router from '@/router'
+import store from '@/store'
 import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
@@ -38,7 +40,8 @@ export interface ITextState {
   },
   paragraphs: Array<IParagraph>,
   firstLoad: boolean,
-  isFontLoading: boolean
+  isFontLoading: boolean,
+  isArgoAvailable: boolean,
 }
 
 const getDefaultState = (): ITextState => ({
@@ -79,7 +82,8 @@ const getDefaultState = (): ITextState => ({
   defaultFonts: [],
   paragraphs: [],
   firstLoad: false,
-  isFontLoading: false
+  isFontLoading: false,
+  isArgoAvailable: false,
 })
 const state = getDefaultState()
 
@@ -97,6 +101,9 @@ const getters: GetterTree<ITextState, unknown> = {
   },
   getIsFontLoading(state): boolean {
     return state.isFontLoading
+  },
+  getIsArgoAvailable(state): boolean {
+    return state.isArgoAvailable
   }
 }
 
@@ -160,6 +167,9 @@ const mutations: MutationTree<ITextState> = {
   },
   SET_isFontLoading(state: ITextState, isFontLoading: boolean) {
     state.isFontLoading = isFontLoading
+  },
+  SET_isArgoAvailable(state: ITextState, isArgoAvailable: boolean) {
+    state.isArgoAvailable = isArgoAvailable
   }
 }
 
@@ -244,12 +254,16 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
   let cssUrl
   let response
   const routeName = router.currentRoute.value.name
-  const isInPrevew = routeName === 'Preview' || routeName === 'Screenshot'
+  const isInPreview = routeName === 'Preview'
+  const isInScreenshot = routeName === 'Screenshot'
   const isFonLoaded = await vivistickerUtils.checkFontLoaded(face)
+  const noArgo = 'https://template.vivipic.com/'
+  const argo = 'https://media.vivipic.cc/'
+  const isArgoAvailable = store.getters['text/getIsArgoAvailable']
   switch (type) {
     case 'public':
-      cssUrl = addPlatform(`https://media.vivipic.cc/font/${face}/subset/font.css?ver=${ver}&origin=true`)
-      if (isInPrevew || isFonLoaded) return cssUrl
+      cssUrl = addPlatform(`${(isInPreview || !isArgoAvailable) ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`)
+      if (isInPreview || isInScreenshot || isFonLoaded) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) {
@@ -261,12 +275,12 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
         if (error instanceof Error && error.message === '404') {
           errorHandleUtils.addMissingDesign('font', face)
         }
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
       return ''
     case 'admin':
       cssUrl = addPlatform(`https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`)
-      if (isInPrevew || isFonLoaded) return cssUrl
+      if (isInPreview || isInScreenshot || isFonLoaded) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) {
@@ -278,14 +292,14 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
         if (error instanceof Error && error.message === '404') {
           errorHandleUtils.addMissingDesign('asset-font', assetId)
         }
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
       return ''
     case 'private': {
       let urlMap = brandkitUtils.getFontUrlMap(assetId)
       if (urlMap) { // if font is in font-list or has been seen before
         cssUrl = getCssUrl(urlMap, ver)
-        if (isInPrevew) return cssUrl
+        if (isInPreview) return cssUrl
         response = await fetch(randomizeVer(cssUrl)) // check if the url is still valid
         if (response.ok) return cssUrl
         urlMap = await brandkitUtils.refreshFontAsset(assetId)
@@ -298,8 +312,8 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     case 'URL':
       return url
   }
-  cssUrl = `https://media.vivipic.cc/font/${face}/subset/font.css?ver=${ver}&origin=true`
-  if (isInPrevew) return cssUrl
+  cssUrl = `${(isInPreview || !isArgoAvailable) ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`
+  if (isInPreview || isInScreenshot || isFonLoaded) return cssUrl
   try {
     response = await fetch(cssUrl)
     if (response.ok) return cssUrl
@@ -308,7 +322,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     if (error instanceof Error && error.message === '404') {
       errorHandleUtils.addMissingDesign('font', face)
     }
-    console.log(error)
+    logUtils.setLogForError(error as Error)
   }
   return ''
 }

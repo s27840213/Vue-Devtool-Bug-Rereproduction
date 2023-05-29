@@ -3,6 +3,7 @@ import { captureException } from '@sentry/browser'
 import i18n from '@/i18n'
 import photos from '@/apis/photos'
 import { IPhotoItem, IPhotoServiceData } from '@/interfaces/api'
+import logUtils from '@/utils/logUtils'
 
 const SET_STATE = 'SET_STATE' as const
 const REGEX_JAPANESE = /[\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f]/
@@ -34,12 +35,12 @@ const actions: ActionTree<IPhotoState, unknown> = {
     // if japanese keyword
     keyword && REGEX_JAPANESE.test(keyword) && (locale = 'ja')
     commit(SET_STATE, { pending: true, locale })
-    if (keyword)commit('SET_STATE', { keyword })
+    if (keyword) commit('SET_STATE', { keyword })
     try {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
       commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   },
@@ -52,7 +53,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
       commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   },
@@ -75,7 +76,7 @@ const mutations: MutationTree<IPhotoState> = {
         }
       })
   },
-  SET_CONTENT(state: IPhotoState, { data, isSearch }: {data: IPhotoServiceData, isSearch: boolean}) {
+  SET_CONTENT(state: IPhotoState, { data, isSearch }: { data: IPhotoServiceData, isSearch: boolean }) {
     const { searchResult, content } = state
     const { next_page } = data
 

@@ -67,32 +67,22 @@ div(class="nu-header" :style="rootStyles")
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
           @click="closeSearchPage")
-      svg-icon(v-if="!isShowSearchPage"
-        :iconName="'menu'"
-        :iconWidth="'25px'"
-        :iconColor="'gray-1'"
-        @click="openMenu")
+        svg-icon(v-if="showCloseIcon"
+          :iconName="'close'"
+          :iconColor="'gray-3'"
+          :iconWidth="'25px'"
+          @click="()=> $emit('close')")
   slot
-  transition(name="slide-x-right")
-    div(v-if="isShowMenu"
-        class="nu-header__menu popup-window")
-      mobile-menu(@closeMenu="() => { isShowMenu = false }"
-        v-click-outside="() => { isShowMenu = false }")
   div(v-if="isShowSearchPage"
     class="nu-header__search-mobile")
     search-bar(class="search"
       :placeholder="$t('NN0092', {target: $t('NN0145')})"
       @search="handleSearch")
-    //- div(class="pt-20 nu-header__search-mobile__title") {{$t('NN0227')}}:
-    //- div(class="pt-10 nu-header__search-mobile__options")
-    //-   span(v-for="key in keys"
-    //-     @click="handleSearch(key)") {{key}}
 </template>
 
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
-import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import store from '@/store'
@@ -106,7 +96,6 @@ export default defineComponent({
   components: {
     SearchBar,
     PopupAccount,
-    MobileMenu,
     Avatar,
     Url
   },
@@ -119,13 +108,16 @@ export default defineComponent({
     },
     noNavigation: {
       type: Boolean
+    },
+    showCloseIcon: {
+      type: Boolean,
+      default: true
     }
   },
-  emits: ['search'],
+  emits: ['search', 'close'],
   data() {
     return {
       isAccountPopup: false,
-      isShowMenu: false,
       isShowSearchPage: false
     }
   },
@@ -174,9 +166,6 @@ export default defineComponent({
         this.$emit('search', keyword)
       }
       this.goToPage('TemplateCenter', keyword)
-    },
-    openMenu() {
-      this.isShowMenu = true
     },
     closeSearchPage() {
       this.isShowSearchPage = false

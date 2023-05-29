@@ -32,6 +32,7 @@ class TemplateCenterUtils {
       aspect_ratio: ratio,
       width: cover.width,
       height: cover.height,
+      unit: cover.unit,
       type: 6,
       ver: cover.ver,
       plan: template.plan,
@@ -41,7 +42,7 @@ class TemplateCenterUtils {
     }
   }
 
-  getPrevUrl(item: {id: string, ver: number}, scale = 4): string {
+  getPrevUrl(item: { id: string, ver: number }, scale = 4): string {
     const postfix = scale === 1 ? 'prev' : `prev_${scale}x`
     return `https://template.vivipic.com/template/${item.id}/${postfix}?ver=${item.ver}`
   }

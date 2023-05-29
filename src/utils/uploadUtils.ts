@@ -10,7 +10,8 @@ import { IUploadAssetFontResponse, IUploadAssetLogoResponse, IUploadAssetRespons
 import router from '@/router'
 import store from '@/store'
 import { SidebarPanelType } from '@/store/types'
-import ImageUtils from '@/utils/imageUtils'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import imageUtils from '@/utils/imageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import { PRECISION } from '@/utils/unitUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -147,14 +148,15 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
+  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
       avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
-      logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
+      logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
+      'stk-bg-remove': '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
     document.body.appendChild(inputNode)
@@ -277,15 +279,21 @@ class UploadUtils {
     }
     reader.readAsDataURL(blob)
   }
+  //
+
+  uploadBgRemoveImg() {
+    console.log(store.getters['vivisticker/getUuid'])
+  }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false }: {
+  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false, pollingJsonName = 'result.json' }: {
     addToPage?: boolean,
     id?: string,
     pollingCallback?: (json: IUploadAssetResponse) => void,
     needCompressed?: boolean,
     brandId?: string
-    isShadow?: boolean
+    isShadow?: boolean,
+    pollingJsonName?: string
   } = {}) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
@@ -319,14 +327,27 @@ class UploadUtils {
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
       const assetId = id ?? generalUtils.generateAssetId()
+      const uuid = generalUtils.generateAssetId()
+
+      // for horizontal image test
+      // const assetId = '230511154035471yNJGiW58'
+      // const uuid = '230511154035471qUvA6TTT'
       const formData = new FormData()
-      Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
-        formData.append(key, this.loginOutput.upload_map.fields[key])
-      })
+      if (type === 'stk-bg-remove') {
+        Object.keys(this.loginOutput.ul_removebg_map.fields).forEach(key => {
+          formData.append(key, this.loginOutput.ul_removebg_map.fields[key])
+        })
+      } else {
+        Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+          formData.append(key, this.loginOutput.upload_map.fields[key])
+        })
+      }
       if (type === 'avatar') {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
       } else if (type === 'font') {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.global.locale}_original`)
+      } else if (type === 'stk-bg-remove') {
+        formData.append('key', `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bg`)
       } else if (type === 'logo') {
         if (!brandId) return
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`)
@@ -395,7 +416,7 @@ class UploadUtils {
             xhr.onload = () => {
               // polling the JSON file of uploaded image
               const interval = window.setInterval(() => {
-                const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
+                const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
                 fetch(pollingTargetSrc).then((response) => {
                   if (response.status === 200) {
                     clearInterval(interval)
@@ -443,7 +464,7 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -473,7 +494,7 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/avatar/result.json?ver=${generalUtils.generateRandomString(6)}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/avatar/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -507,7 +528,7 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -527,6 +548,15 @@ class UploadUtils {
                 }
               })
             }, 2000)
+          }
+        } else if (type === 'stk-bg-remove') {
+          xhr.open('POST', this.loginOutput.ul_removebg_map.url, true)
+          xhr.send(formData)
+          xhr.onerror = networkUtils.notifyNetworkError
+          xhr.onload = () => {
+            imageUtils.getImageSize(src, 0, 0).then(({ width, height }) => {
+              bgRemoveUtils.removeBgStk(uuid, assetId, src, width, height)
+            })
           }
         }
       }
@@ -552,6 +582,7 @@ class UploadUtils {
 
     const logName = `log-${generalUtils.generateTimeStamp()}.txt`
     formData.append('key', `${this.loginOutput.upload_log_map.path}${this.hostId}/${logName}`)
+    console.log(formData.get('key'))
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`)
     formData.append('x-amz-meta-tn', this.hostId)
     const xhr = new XMLHttpRequest()
@@ -708,6 +739,7 @@ class UploadUtils {
             delete query.unit
             delete query.path
             delete query.folderName
+            delete query.bleeds
             router.replace({ query })
           }
           notify({ group: 'copy', text: `${i18n.global.t('NN0357')}` })
@@ -1094,12 +1126,12 @@ class UploadUtils {
 
     if (page.backgroundImage.config.src) {
       const src = page.backgroundImage.config.src as string
-      const type = ImageUtils.getSrcType(page.backgroundImage.config.src as any)
+      const type = imageUtils.getSrcType(page.backgroundImage.config.src as any)
       page.backgroundImage.config.srcObj = {
         type,
-        userId: ImageUtils.getUserId(src, type),
-        assetId: ImageUtils.getAssetId(src, type),
-        brandId: ImageUtils.getBrandId(src, type)
+        userId: imageUtils.getUserId(src, type),
+        assetId: imageUtils.getAssetId(src, type),
+        brandId: imageUtils.getBrandId(src, type)
       }
       delete page.backgroundImage.config.src
     }
@@ -1263,7 +1295,7 @@ class UploadUtils {
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
-                designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json, designId, params.groupId)
+                designUtils.newDesignWithTemplate(Number(params.width), Number(params.height), json, designId, params.unit, params.bleeds)
                 logUtils.setLog('Successfully get new design template')
                 break
               }

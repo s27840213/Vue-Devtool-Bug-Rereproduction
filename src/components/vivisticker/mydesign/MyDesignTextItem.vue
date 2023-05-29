@@ -54,7 +54,7 @@ export default defineComponent({
       }
       vivistickerUtils.fetchMyDesign(this.item).then(data => {
         const pages = generalUtils.deepCopy(data.pages)
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]))
+        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign' }))
       })
     },
     handleMoreActions() {

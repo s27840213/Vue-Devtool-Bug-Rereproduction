@@ -2,16 +2,23 @@
 div(class="vivisticker" :style="copyingStyles()")
   div(class="vivisticker__top" :style="topStyles()")
     header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
-    div(class="vivisticker__content"
+    div(ref="vivisticker__content"
+        class="vivisticker__content"
+        :style="contentStyle"
         @click.self="outerClick")
       my-design(v-show="isInMyDesign && !isInEditor")
       vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
-    transition(name="panel-up")
+    transition(name="panel-up"
+              @before-enter="beforeEnter"
+              @after-enter="afterEnter"
+              @after-leave="afterLeave")
       mobile-panel(v-show="showMobilePanel"
+        ref="mobilePanel"
         :currActivePanel="currActivePanel"
         :currPage="currPage"
-        @switchTab="switchTab")
+        @switchTab="switchTab"
+        @panelHeight="setPanelHeight")
   footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
     @switchTab="switchTab"
     @switchMainTab="switchMainTab"
@@ -32,9 +39,9 @@ import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import MainMenu from '@/components/vivisticker/MainMenu.vue'
 import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
-import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
+import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
@@ -47,6 +54,7 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { find } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -69,7 +77,10 @@ export default defineComponent({
     return {
       currColorEvent: '',
       headerOffset: 0,
-      isKeyboardAnimation: 0
+      isKeyboardAnimation: 0,
+      showMobilePanelAfterTransitoin: false,
+      marginBottom: 0,
+      vConsole: null as any
     }
   },
   created() {
@@ -184,9 +195,18 @@ export default defineComponent({
       )
       if (!exp) await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
     }
+
+    const debugMode = process.env.NODE_ENV === 'development' ? true : (await vivistickerUtils.getState('debugMode'))?.value ?? false
+    this.setDebugMode(debugMode)
+
+    // if (process.env.NODE_ENV === 'development' && debugMode) {
+    //   this.vConsole = new VConsole({ theme: 'dark' })
+    //   this.vConsole.setSwitchPosition(25, 80)
+    // }
   },
   unmounted() {
     document.removeEventListener('scroll', this.handleScroll)
+    this.vConsole && this.vConsole.destroy()
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -197,6 +217,7 @@ export default defineComponent({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      contentScaleRatio: 'getContentScaleRatio',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
@@ -213,10 +234,14 @@ export default defineComponent({
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       slideType: 'vivisticker/getSlideType',
       isSlideShown: 'vivisticker/getIsSlideShown',
-      modalInfo: 'vivisticker/getModalInfo'
+      modalInfo: 'vivisticker/getModalInfo',
+      debugMode: 'vivisticker/getDebugMode'
     }),
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
+    },
+    contentStyle(): Record<string, string> {
+      return this.isInEditor ? { transform: `translateY(-${this.marginBottom}px)` } : {}
     }
   },
   watch: {
@@ -232,7 +257,16 @@ export default defineComponent({
       if (oldVal === 'photo-shadow') {
         imageShadowPanelUtils.handleShadowUpload()
       }
-    }
+    },
+    // debugMode(newVal) {
+    //   if (newVal && !this.vConsole) {
+    //     this.vConsole = new VConsole({ theme: 'dark' })
+    //     this.vConsole.setSwitchPosition(25, 80)
+    //   } else if (!newVal && this.vConsole) {
+    //     this.vConsole.destroy()
+    //     this.vConsole = null
+    //   }
+    // }
   },
   methods: {
     ...mapMutations({
@@ -244,6 +278,7 @@ export default defineComponent({
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
       setFullPageConfig: 'vivisticker/SET_fullPageConfig',
+      setDebugMode: 'vivisticker/SET_debugMode'
     }),
     headerStyles() {
       return {
@@ -268,7 +303,7 @@ export default defineComponent({
         this.currColorEvent = props.currColorEvent
       // Close panel if re-click
       } else if (this.currActivePanel === panelType || panelType === 'none') {
-        editorUtils.setCurrActivePanel('none')
+        editorUtils.setShowMobilePanel(false)
       } else {
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
@@ -317,6 +352,42 @@ export default defineComponent({
       this.isKeyboardAnimation = window.setTimeout(() => {
         this.isKeyboardAnimation = 0
       }, 500)
+    },
+    setPanelHeight(height: number) {
+      const content = this.$refs.vivisticker__content as HTMLElement
+      const contentHeight = content?.clientHeight ?? 0
+      if (height === 0 || height > contentHeight) {
+        this.marginBottom = 0
+        return
+      }
+
+      // Calc additional page card translation by layer position
+      const activeLayer = find(this.currPage.layers, ['active', true])
+      let offset = 0
+      let pageOffset = 0
+      if (activeLayer && contentHeight) {
+        const layerMiddleY = activeLayer.styles.y +
+          activeLayer.styles.height / 2 - this.currPage.height / 2
+        offset = layerMiddleY * this.contentScaleRatio
+      }
+      const pseudoPage = document.querySelector('.vvstk-editor__pseudo-page') as HTMLElement | null
+      if (pseudoPage) {
+        pageOffset = contentHeight - pseudoPage.clientHeight
+      }
+      this.marginBottom = Math.max((height - pageOffset) / 2 + offset, 0)
+    },
+    beforeEnter() {
+      this.showMobilePanelAfterTransitoin = true
+    },
+    afterEnter() {
+      this.setPanelHeight((this.$refs.mobilePanel as {$el: HTMLElement}).$el.clientHeight)
+    },
+    afterLeave() {
+      editorUtils.setCurrActivePanel('none')
+      this.setPanelHeight(0)
+      setTimeout(() => {
+        this.showMobilePanelAfterTransitoin = false
+      }, 300)
     }
   }
 })
@@ -351,6 +422,7 @@ export default defineComponent({
     width: 100%;
     overflow: hidden;
     z-index: setZindex("editor-view");
+    transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
   }
 
   &__slide {

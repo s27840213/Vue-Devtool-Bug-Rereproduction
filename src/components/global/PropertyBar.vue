@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="property-bar px-5 py-10")
+div(class="property-bar px-5 py-10" :class="borderStyle")
   slot
 </template>
 
@@ -8,7 +8,18 @@ div(class="property-bar px-5 py-10")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  emits: []
+  emits: [],
+  props: {
+    borderColor: {
+      type: String,
+      default: 'gray-4'
+    }
+  },
+  computed: {
+    borderStyle() {
+      return `border-${this.borderColor}`
+    }
+  }
 })
 </script>
 
