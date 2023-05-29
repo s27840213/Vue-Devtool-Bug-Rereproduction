@@ -193,7 +193,8 @@ export default defineComponent({
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100})`
+        transform: `scale(${this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100})`,
+        willChange: this.inGestureMode ? 'transform' : ''
       }
     },
     wrapperStyles(): { [index: string]: string } {
