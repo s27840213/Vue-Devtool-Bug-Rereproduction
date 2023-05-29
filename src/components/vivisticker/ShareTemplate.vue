@@ -1,7 +1,8 @@
 <template lang="pug">
 div(class="share-template" :style="containerStyles")
   div(class="share-template__preview" ref="preview")
-    page-content(class="share-template__preview__page" :config="config" :pageIndex="currFocusPageIndex" :contentScaleRatio="previewScale" :inPreview="true")
+    div(class="share-template__preview__bg-page bg-black-6" :style="bgPageStyles()")
+    page-content(class="share-template__preview__page" :config="config" :pageIndex="currFocusPageIndex" :contentScaleRatio="previewScale" :inPreview="true" :style="pageStyles()")
     div(class="share-template__preview__cover" @pointerdown="disableEvent")
   tabs(class="share-template__tabs"
     :tabs="['This page', 'Multi pages']"
@@ -102,9 +103,24 @@ export default defineComponent({
       return {
         padding: `0 ${this.isLandscape ? 28 : 10}% 24px`
       }
+    },
+    previewOffset() {
+      return this.tabIndex === 1 ? 12 : 0
     }
   },
   methods: {
+    pageStyles(): {[key: string]: string} {
+      return {
+        transform: `translateX(-${this.previewOffset}px)`
+      }
+    },
+    bgPageStyles(): {[key: string]: string} {
+      return {
+        width: `${this.config.width * this.previewScale}px`,
+        height: `${this.config.height * this.previewScale - 32}px`,
+        transform: `translateX(${this.previewOffset}px)`
+      }
+    },
     save() {
       console.log('saveTemplate')
       if (this.tabIndex === 0) {
@@ -164,10 +180,18 @@ export default defineComponent({
     justify-content: center;
     box-sizing: border-box;
     position: relative;
+    &__bg-page {
+      position: absolute;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 10px;
+      box-sizing: border-box;
+      transition: transform 0.2s ease-in-out;
+    }
     &__page {
       position: absolute;
       border-radius: 10px;
-      transform-origin: center top;
+      transition: transform 0.2s ease-in-out;
+      box-shadow: 0px 0px 10px 8px rgba(60, 60, 60, 0.35);
     }
     &__cover {
       position: absolute;
