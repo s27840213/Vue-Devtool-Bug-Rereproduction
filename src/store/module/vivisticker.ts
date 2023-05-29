@@ -253,9 +253,6 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_userInfo(state: IViviStickerState, userInfo: IUserInfo) {
     state.userInfo = userInfo
   },
-  SET_userSettings(state: IViviStickerState, userSettings: IUserSettings) {
-    state.userSettings = userSettings
-  },
   SET_currActiveTab(state: IViviStickerState, panel: string) {
     state.currActiveTab = panel
   },
