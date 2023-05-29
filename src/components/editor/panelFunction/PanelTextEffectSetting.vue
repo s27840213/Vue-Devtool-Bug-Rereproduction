@@ -232,9 +232,10 @@ export default defineComponent({
       const config = textEffectUtils.getCurrentLayer()
       const textFill = config.styles.textFill
       if (this.currCategoryName === 'fill' && isTextFill(textFill) && textFill.size === 100) {
-        const { scaleByWidth } = textFillUtils.calcTextFillVar(config)
-        if ((option.key === 'xOffset200' && scaleByWidth) ||
-          (option.key === 'yOffset200' && !scaleByWidth)) {
+        const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } =
+          textFillUtils.calcTextFillVar(config)
+        if ((option.key === 'xOffset200' && (imgWidth === divWidth || scaleByWidth)) ||
+          (option.key === 'yOffset200' && (imgHeight === divHeight || !scaleByWidth))) {
           return true
         }
       }

@@ -191,7 +191,7 @@ export default defineComponent({
   },
   created() {
     // Provide props to descendant component, https://vuejs.org/guide/components/provide-inject.html
-    provide(replaceImgInject, computed(() => this.replaceImg))
+    provide(replaceImgInject, computed(() => this.extraPanel === 'replace' ? this.replaceImg : null))
   },
   computed: {
     ...mapGetters('imgControl', {
