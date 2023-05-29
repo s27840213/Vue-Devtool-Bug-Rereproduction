@@ -406,6 +406,9 @@ const mutations: MutationTree<IViviStickerState> = {
     state.myDesignFiles[tab] = []
     state.myDesignNextPages[tab] = -1
   },
+  UPDATE_addDesign(state: IViviStickerState, updateInfo: { tab: string, list: IMyDesign[] }) {
+    state.myDesignFiles[updateInfo.tab] = updateInfo.list.concat(state.myDesignFiles[updateInfo.tab])
+  },
   UPDATE_deleteDesign(state: IViviStickerState, updateInfo: { tab: string, id: string }) {
     const list = state.myDesignFiles[updateInfo.tab]
     if (!list) return

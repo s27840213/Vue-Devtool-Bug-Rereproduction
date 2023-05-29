@@ -63,6 +63,9 @@ const MYDESIGN_TAGS = [{
 }, {
   name: 'NN0003',
   tab: 'object'
+}, {
+  name: 'NN0001',
+  tab: 'template'
 }] as IMyDesignTag[]
 
 class ViviStickerUtils extends WebViewUtils<IUserInfo> {
@@ -965,12 +968,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (this.isStandaloneMode) return
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
+    const editorTypeTemplate = store.getters['vivisticker/getEditorTypeTemplate']
     const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
     const json = {
       type: editorType,
       id,
       updateTime: new Date(Date.now()).toISOString(),
-      assetInfo
+      assetInfo: {
+        ...assetInfo,
+        ...(editorTypeTemplate && {
+          pageNum: pages.length
+        })
+      }
     } as IMyDesign
     await this.addAsset(`mydesign-${this.mapEditorType2MyDesignKey(editorType)}`, json, 0, {
       config: { pages: uploadUtils.prepareJsonToUpload(pages) }
@@ -1151,11 +1160,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   mapEditorType2MyDesignKey(editorType: string): string {
-    if (editorType === 'objectGroup') {
-      return 'object'
-    } else {
-      return editorType
+    switch (editorType) {
+      case 'objectGroup':
+        return 'object'
+      case 'story':
+      case 'post':
+        return 'template'
     }
+    return editorType
   }
 
   async fetchDebugModeEntrance() {

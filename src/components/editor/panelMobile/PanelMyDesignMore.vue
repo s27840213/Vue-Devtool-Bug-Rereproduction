@@ -9,6 +9,13 @@ div(class="panel-my-design-more")
                   iconColor="gray-2")
       div(class="panel-my-design-more__option-title") {{ $t('NN0504') }}
     div(class="panel-my-design-more__option"
+        @click.prevent.stop="handleDuplicate")
+      div(class="panel-my-design-more__option-icon")
+        svg-icon(iconName="duplicate"
+                  iconWidth="18px"
+                  iconColor="gray-2")
+      div(class="panel-my-design-more__option-title") {{ $t('NN0251') }}
+    div(class="panel-my-design-more__option"
         @click.prevent.stop="handleDelete")
       div(class="panel-my-design-more__option-icon")
         svg-icon(iconName="trash"
@@ -43,7 +50,8 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
+      setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer',
+      addDesign: 'vivisticker/UPDATE_addDesign'
     }),
     handleEdit() {
       if (this.myDesignBuffer.type === 'object' && !vivistickerUtils.checkPro(this.myDesignBuffer.assetInfo, this.myDesignBuffer.assetInfo.isFrame ? 'frame' : 'object')) return
@@ -64,6 +72,23 @@ export default defineComponent({
           }
         })
       }, 300)
+    },
+    handleDuplicate() {
+      vivistickerUtils.fetchMyDesign(this.myDesignBuffer).then((data) => {
+        const json = {
+          ...this.myDesignBuffer,
+          id: generalUtils.generateAssetId(),
+          updateTime: new Date(Date.now()).toISOString()
+        }
+        vivistickerUtils.addAsset(`mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type)}`, json, 0, {
+          config: { pages: data.pages }
+        }).then(() => {
+          this.addDesign({
+            tab: 'template',
+            list: [json]
+          })
+        })
+      })
     },
     handleDelete() {
       modalUtils.setModalInfo(
