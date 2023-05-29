@@ -290,6 +290,7 @@ export default Extension.create({
           'min-width': cssBaseAttr('min-width'),
           'min-height': cssBaseAttr('min-height'),
           filter: cssBaseAttr('filter'),
+          willChange: cssBaseAttr('will-change'),
           '--base-stroke': cssBaseAttr('--base-stroke'),
           webkitTextFillColor: cssBaseAttr('-webkit-text-fill-color'),
           webkitTextStrokeColor: cssBaseAttr('-webkit-text-stroke-color'),

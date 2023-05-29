@@ -8,7 +8,10 @@ const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
   'min-width', 'min-height', 'backgroundImage', 'backgroundSize', 'backgroundPosition',
   'opacity', 'webkitTextFillColor', '-webkit-background-clip', 'filter', '--base-stroke',
-  'webkitTextStrokeColor', 'textShadow',
+  'webkitTextStrokeColor', 'textShadow', 'willChange',
+  // below are not css valid properties
+  // for nuTextStyle to record spanStyle and used by empty line <p> in tiptap
+  'type', 'assetId', 'userId', 'fontUrl'
 ] as const
 
 type IStyleMap = Record<typeof fontProps[number], string>
@@ -27,6 +30,12 @@ const styleMap = Object.assign({}, ...fontProps.map(prop => // Transfer camelCas
   size: 'font-size',
   decoration: 'text-decoration-line',
   style: 'font-style',
+  // below are not css valid properties
+  // for nuTextStyle to record spanStyle and used by empty line <p> in tiptap
+  type: 'font-type',
+  assetId: 'asset-id',
+  userId: 'user-id',
+  fontUrl: 'font-url'
 } as Partial<IStyleMap>
 ) as IStyleMap
 

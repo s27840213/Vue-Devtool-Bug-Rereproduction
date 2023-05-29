@@ -5,6 +5,7 @@ import store from '@/store'
 import { IBrand, IBrandParams } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import i18n from '@/i18n'
+import logUtils from '@/utils/logUtils'
 
 export default {
   getToken(): string {
@@ -128,7 +129,7 @@ export default {
         responseHandler(response.data)
       }
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       fallbacker()
       errorShower((error as Error).message)
       return false

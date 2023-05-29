@@ -28,6 +28,7 @@ import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import layerUtils from '@/utils/layerUtils'
+import logUtils from '@/utils/logUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -305,7 +306,7 @@ export default defineComponent({
         })
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         notify({
           group: 'error',
           text: `${this.$t('NN0248')} (ErrorCode: ${code})`

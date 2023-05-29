@@ -13,7 +13,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import Graphemer from 'graphemer'
-import _ from 'lodash'
+import _, { pick } from 'lodash'
 import cssConverter from './cssConverter'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
@@ -373,7 +373,7 @@ class TextUtils {
       if (config.type !== 'text') throw new Error('updateGroupLayerSize with subLayerIndex argument only accepts text subLayer')
       const originSize = { width: config.styles.width, height: config.styles.height }
       let textHW
-      if (textShapeUtils.isCurvedText(config.styles)) {
+      if (textShapeUtils.isCurvedText(config.styles.textShape)) {
         textHW = originSize
       } else {
         textHW = this.getTextHW(config, config.widthLimit)
@@ -475,7 +475,7 @@ class TextUtils {
     if (!group.layers) return
     const config = group.layers[subLayerIndex]
     if (config.type !== 'text') throw new Error('updateGroupLayerSizeByShape only accepts text subLayer')
-    if (textShapeUtils.isCurvedText(config.styles)) {
+    if (textShapeUtils.isCurvedText(config.styles.textShape)) {
       const heightOri = config.styles.height
       const textHW = textShapeUtils.getCurveTextProps(config as IText)
       layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textHW)
@@ -490,7 +490,7 @@ class TextUtils {
     const targetLayer = layerUtils.getLayer(pageIndex, layerIndex)
     if (subLayerIndex === -1) { // single text layer
       const config = targetLayer as IText
-      if (textShapeUtils.isCurvedText(config.styles)) {
+      if (textShapeUtils.isCurvedText(config.styles.textShape)) {
         layerUtils.updateLayerStyles(pageIndex, layerIndex, textShapeUtils.getCurveTextProps(config))
       } else {
         const widthLimit = config.widthLimit
@@ -507,7 +507,7 @@ class TextUtils {
     } else { // sub text layer in a group
       const group = targetLayer as IGroup
       const config = group.layers[subLayerIndex] as IText
-      if (textShapeUtils.isCurvedText(config.styles)) {
+      if (textShapeUtils.isCurvedText(config.styles.textShape)) {
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textShapeUtils.getCurveTextProps(config))
         this.updateGroupLayerSize(pageIndex, layerIndex)
         this.fixGroupCoordinates(pageIndex, layerIndex)
@@ -930,11 +930,11 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      // console.log(error)
+      logUtils.setLogForError(error as Error)
       isError = true
     } finally {
       if (isError === true) {
-        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)
@@ -960,12 +960,11 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      console.log(error)
-      logUtils.setLog(JSON.stringify(error))
+      logUtils.setLogForError(error as Error)
       isError = true
     } finally {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)
@@ -995,7 +994,7 @@ class TextUtils {
         if (fontFileList.length !== 0) return
       }
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       throw error
     }
   }
@@ -1011,7 +1010,7 @@ class TextUtils {
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void) => {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       setTimeout(() => {
         if (callback) {
@@ -1034,7 +1033,7 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       finalCallBack(true)
     })
   }
@@ -1046,7 +1045,7 @@ class TextUtils {
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void[]) => {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        logUtils.setLogAndConsoleLog('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       setTimeout(() => {
         if (callback) {
@@ -1073,17 +1072,9 @@ class TextUtils {
         }, 40000)
       })
     ]).then(finalCallBack).catch((error) => {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       finalCallBack(true)
     })
-  }
-
-  setStylesBuffer(styles: { [key: string]: any }, keys: string[]): { [key: string]: any } {
-    const res = {} as { [key: string]: any }
-    for (const key of keys) {
-      res[key] = styles[key]
-    }
-    return res
   }
 
   resetScaleForLayer(layer: AllLayerTypes, preMount = false): AllLayerTypes {
@@ -1096,7 +1087,7 @@ class TextUtils {
     switch (layer.type) {
       case LayerType.text:
         if (layer.styles.scale > 1) {
-          stylesBuffer = this.setStylesBuffer(layer.styles, ['scale'])
+          stylesBuffer = pick(layer.styles, ['scale'])
           layer.styles.scale = 1
           layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
             return size * stylesBuffer.scale
@@ -1105,20 +1096,25 @@ class TextUtils {
             // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
             // and let the mounted hook of NuText to deal with size and position
             originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
-            if (layer.widthLimit !== -1) {
-              layer.widthLimit = this.autoResizeCoreSync(layer, {
-                width: originHW.width,
-                height: originHW.height,
-                widthLimit: layer.widthLimit
-              }).widthLimit
+            if (textShapeUtils.isCurvedText(layer.styles.textShape)) {
+              newHW = textShapeUtils.getCurveTextProps(layer)
+              Object.assign(layer.styles, newHW)
+            } else {
+              if (layer.widthLimit !== -1) {
+                layer.widthLimit = this.autoResizeCoreSync(layer, {
+                  width: originHW.width,
+                  height: originHW.height,
+                  widthLimit: layer.widthLimit
+                }).widthLimit
+              }
+              newHW = this.getTextHW(layer, layer.widthLimit)
+              Object.assign(layer.styles, {
+                width: newHW.width,
+                height: newHW.height,
+                x: originHW.x + (newHW.width - originHW.width) / 2,
+                y: originHW.y + (newHW.height - originHW.height) / 2
+              })
             }
-            newHW = this.getTextHW(layer, layer.widthLimit)
-            Object.assign(layer.styles, {
-              width: newHW.width,
-              height: newHW.height,
-              x: originHW.x + (newHW.width - originHW.width) / 2,
-              y: originHW.y + (newHW.height - originHW.height) / 2
-            })
           }
           if (layer.styles.textEffect.fontSize !== undefined) {
             layer.styles.textEffect.fontSize = textEffectUtils.getLayerFontSize(layer.paragraphs)
@@ -1134,7 +1130,7 @@ class TextUtils {
          * and reset the scale individually for certain typed sub-layers.
          * after that, re-form the group/tmp with those sub-layers.
          */
-        stylesBuffer = this.setStylesBuffer(layer.styles, ['opacity', 'rotate', 'horizontalFlip', 'verticalFlip'])
+        stylesBuffer = pick(layer.styles, ['opacity', 'rotate', 'horizontalFlip', 'verticalFlip'])
         if (layer.type === LayerType.group) {
           layer.layers.forEach((subLayer: AllLayerTypes, index: number) => {
             subLayer.styles.zindex = layer.styles.zindex + index

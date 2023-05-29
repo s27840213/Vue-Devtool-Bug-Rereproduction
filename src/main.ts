@@ -1,7 +1,7 @@
 import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
+import SvgIcon from '@/components/global/SvgIcon.vue'
 import modalUtils from '@/utils/modalUtils'
-import svgIconUtils from '@/utils/svgIconUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
 import Notifications, { notify } from '@kyvg/vue3-notification'
@@ -32,23 +32,25 @@ window.onerror = function (msg, url, line, colno, error) {
     'Col: ' + colno,
     'Stack: ' + error?.stack
   ].join(' - ')
-  logUtils.setLog(message)
+  logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
-    // if (store.getters.getShowGlobalErrorModal) {
-    //   const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
-    //   modalUtils.setModalInfo(
-    //     i18n.global.t('NN0866'),
-    //     hint,
-    //     {
-    //       msg: i18n.global.t('NN0032'),
-    //       action() {
-    //         generalUtils.copyText(hint).then(() => {
-    //           notify({ group: 'copy', text: '已複製' })
-    //         })
-    //       }
-    //     }
-    //   )
-    // }
+    console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
+    // if (store.getters['user/isAdmin'] && (window.location.hostname !== 'vivipic.com' || store.getters.getShowGlobalErrorModal))
+    if (store.getters['user/isAdmin']) {
+      const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+      modalUtils.setModalInfo(
+        i18n.global.t('NN0866'),
+        hint,
+        {
+          msg: i18n.global.t('NN0032'),
+          action() {
+            generalUtils.copyText(hint).then(() => {
+              notify({ group: 'copy', text: '已複製' })
+            })
+          }
+        }
+      )
+    }
   })
 }
 
@@ -96,9 +98,7 @@ app.use(FloatingVue, {
 
 app.component('RecycleScroller', RecycleScroller)
 
-app.component('svg-icon', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/SvgIcon.vue')
-))
+app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))
@@ -253,18 +253,21 @@ app.directive('custom-swipe', {
 
 app.directive('press', longpress)
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-  const req = require.context('@/assets/icon', true, /\.svg$/)
+/**
+ * move to the SvgIcon.vue component
+ */
+// document.addEventListener('DOMContentLoaded', async () => {
+//   const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
+//   const req = require.context('@/assets/icon', true, /\.svg$/)
 
-  if (window.location.host !== 'vivipic.com') {
-    svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-      return context.default?.id ?? ''
-    }))
-  } else {
-    requireAll(req)
-  }
-}, false)
+//   if (window.location.host !== 'vivipic.com') {
+//     svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+//       return context.default?.id ?? ''
+//     }))
+//   } else {
+//     requireAll(req)
+//   }
+// }, false)
 
 // add temporarily for testing
 if (window.location.href.indexOf('logout') > -1) {

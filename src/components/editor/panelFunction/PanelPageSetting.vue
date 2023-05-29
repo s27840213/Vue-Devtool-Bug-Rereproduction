@@ -632,7 +632,7 @@ export default defineComponent({
     },
     isDisabled(idx: number, themeWidth: number, themeHeight: number) {
       const themeAspectRatio = themeWidth / themeHeight
-      const templateAspectRatio = parseInt(this.templateInfo.width) / parseInt(this.templateInfo.height)
+      const templateAspectRatio = parseFloat(this.templateInfo.width) / parseFloat(this.templateInfo.height)
       if (themeHeight === 0) { // 詳情頁模板
         return false
       } else if (themeAspectRatio === templateAspectRatio) {

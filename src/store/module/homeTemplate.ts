@@ -1,5 +1,6 @@
 import list from '@/apis/list'
 import localeUtils from '@/utils/localeUtils'
+import logUtils from '@/utils/logUtils'
 import { captureException } from '@sentry/browser'
 import { floor } from 'lodash'
 import { ActionTree, GetterTree } from 'vuex'
@@ -38,7 +39,7 @@ const actions: ActionTree<IHomeTemplateState, unknown> = {
       })
       return Promise.resolve(data)
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   }

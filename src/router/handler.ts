@@ -4,6 +4,7 @@ import assetUtils from '@/utils/assetUtils'
 import designUtils from '@/utils/designUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { nextTick } from 'vue'
@@ -104,6 +105,6 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
       store.commit('SET_currSidebarPanelType', -1)
     }
   } catch (error) {
-    console.log(error)
+    logUtils.setLogForError(error as Error)
   }
 }

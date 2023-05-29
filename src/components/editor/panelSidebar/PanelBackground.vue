@@ -223,10 +223,6 @@ export default defineComponent({
         pageIndex: pageUtils.addAssetTargetPageIndex,
         color: color
       })
-
-      if (this.$isTouchDevice()) {
-        this.setCloseMobilePanelFlag(true)
-      }
     },
     async handleSearch(keyword: string) {
       this.resetSearch()
