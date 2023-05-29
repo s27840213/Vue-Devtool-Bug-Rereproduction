@@ -1,5 +1,6 @@
 import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
+import SvgIcon from '@/components/global/SvgIcon.vue'
 import modalUtils from '@/utils/modalUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
@@ -97,9 +98,7 @@ app.use(FloatingVue, {
 
 app.component('RecycleScroller', RecycleScroller)
 
-app.component('svg-icon', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/SvgIcon.vue')
-))
+app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))

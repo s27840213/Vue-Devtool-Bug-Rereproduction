@@ -19,9 +19,11 @@ const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requir
 const req = require.context('@/assets/icon', true, /\.svg$/, 'lazy-once')
 
 if (window.location.host !== 'vivipic.com') {
-  svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-    return context.default?.id ?? ''
-  }))
+  requireAll(req).forEach((promise: any) => {
+    promise.then((context: any) => {
+      svgIconUtils.pushIcon(context.default?.id)
+    })
+  })
 } else {
   requireAll(req)
 }
