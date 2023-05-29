@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="share-template" :style="containerStyles")
   div(class="share-template__preview" ref="preview")
-    page-content(class="share-template__preview__page" :config="config" :pageIndex="currFocusPageIndex" :style="pageStyles" :inPreview="true")
+    page-content(class="share-template__preview__page" :config="config" :pageIndex="currFocusPageIndex" :contentScaleRatio="previewScale" :inPreview="true")
     div(class="share-template__preview__cover" @pointerdown="disableEvent")
   tabs(class="share-template__tabs"
     :tabs="['This page', 'Multi pages']"
@@ -98,11 +98,6 @@ export default defineComponent({
         } : []
       )
     },
-    pageStyles() {
-      return {
-        transform: `scale(${this.previewScale})`,
-      }
-    },
     containerStyles() {
       return {
         padding: `0 ${this.isLandscape ? 28 : 10}% 24px`
@@ -138,9 +133,9 @@ export default defineComponent({
     handleResize() {
       const elPreview = this.$refs.preview as HTMLElement
       if (!elPreview) return
-      const targetAspectRatio = 9 / 16
+      const targetAspectRatio = this.templateShareType === 'story' ? 9 / 16 : 1
       const aspectRatio = elPreview.clientWidth / elPreview.clientHeight
-      this.previewScale = aspectRatio > targetAspectRatio ? elPreview.clientHeight / this.config.height : elPreview.clientWidth / this.config.width
+      this.previewScale = aspectRatio > targetAspectRatio ? (elPreview.clientHeight - 48) / this.config.height : elPreview.clientWidth / this.config.width
     },
     disableEvent(e: Event) {
       e.preventDefault()
@@ -166,8 +161,8 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     box-sizing: border-box;
-    margin: 24px 0;
     position: relative;
     &__page {
       position: absolute;
