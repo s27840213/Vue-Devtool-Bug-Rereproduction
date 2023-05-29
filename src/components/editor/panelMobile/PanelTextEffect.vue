@@ -215,15 +215,6 @@ export default defineComponent({
     padding-bottom: 20px;
   }
 
-  &__category {
-    margin: 0 8px;
-    width: 60px;
-    box-sizing: border-box;
-    > img {
-      background-color: setColor(gray-5);
-    }
-  }
-
   &__effects {
     @include no-scrollbar;
     display: grid;
@@ -246,6 +237,7 @@ export default defineComponent({
         background-color: setColor(gray-5);
         border-radius: 5px;
         object-fit: cover;
+        pointer-events: none;
         &.svg-icon {
           padding: 16px;
         }
@@ -322,6 +314,7 @@ export default defineComponent({
       }
       > img {
         margin-right: 8px;
+        pointer-events: none;
       }
     }
   }
@@ -346,6 +339,7 @@ export default defineComponent({
         border: 1px solid setColor(gray-5);
         border-radius: 4px;
         transition: all 0.3s;
+        pointer-events: none;
         &.selected {
           top: -2px;
           left: -2px;

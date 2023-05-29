@@ -5,7 +5,7 @@ import { lab2rgb, rgb2lab } from '@/utils/colorUtils'
 import LayerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
-import _ from 'lodash'
+import _, { max } from 'lodash'
 import tiptapUtils from './tiptapUtils'
 
 class Controller {
@@ -179,6 +179,8 @@ class Controller {
     color = this.colorParser(color, config)
     const colorWithOpacity = color ? this.convertColor2rgba(color, effectOpacity) : ''
 
+    const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
+
     switch (name) {
       case 'shadow':
         return {
@@ -214,8 +216,8 @@ class Controller {
           webkitTextFillColor: 'transparent',
           duplicatedTexts: [{
             extraBodyStyle: {
-              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180)}px`,
-              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180)}px`,
+              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) - maxFontSize}px`,
+              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) - maxFontSize}px`,
             },
             extraSpanStyle: {
               color,
@@ -231,8 +233,8 @@ class Controller {
           '--base-stroke': '0px',
           duplicatedTexts: [0.5, 0.2].map((opacity, i) => ({
             extraBodyStyle: {
-              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1)}px`,
-              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) * (i + 1)}px`,
+              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
+              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
             },
             extraSpanStyle: {
               opacity,
@@ -260,8 +262,8 @@ class Controller {
           webkitTextStrokeColor: `${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
           duplicatedTexts: [{
             extraBodyStyle: {
-              left: `${x}px`,
-              top: `${y}px`,
+              left: `${x - maxFontSize}px`,
+              top: `${y - maxFontSize}px`,
             },
             extraSpanStyle: {
               color: colorWithOpacity,

@@ -26,6 +26,7 @@ div(class="text-effect-setting")
             img(v-else :src="effectIcon(category, effect).name"
               :width="effectIcon(category, effect).size"
               :height="effectIcon(category, effect).size"
+              draggable="false"
               v-hint="effect.label")
             pro-item(v-if="effect.plan" theme="roundedRect")
         //- Effect options.
@@ -42,6 +43,7 @@ div(class="text-effect-setting")
                   :key="`${option.key}-${sel.key}`")
                 img(:src="sel.img"
                     :class="{'selected': ((getStyle(category)[option.key] as Record<'key', string>).key ?? getStyle(category)[option.key]) === sel.key }"
+                    draggable="false"
                     @click="handleSelectInput(sel.attrs)")
             //- Option type range
             template(v-if="option.type === 'range'")
@@ -89,6 +91,7 @@ import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
+import { isTextFill } from '@/interfaces/format'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOption, IEffectOptionRange } from '@/utils/constantData'
@@ -226,11 +229,12 @@ export default defineComponent({
       }
     },
     optionDisabled(option: IEffectOption) {
-      if (this.currCategoryName === 'fill') {
-        const { divHeight, divWidth, imgHeight, imgWidth } =
-          textFillUtils.calcTextFillVar(textEffectUtils.getCurrentLayer())
-        if ((option.key === 'xOffset200' && imgWidth === divWidth) ||
-          (option.key === 'yOffset200' && imgHeight === divHeight)) {
+      const config = textEffectUtils.getCurrentLayer()
+      const textFill = config.styles.textFill
+      if (this.currCategoryName === 'fill' && isTextFill(textFill) && textFill.size === 100) {
+        const { scaleByWidth } = textFillUtils.calcTextFillVar(config)
+        if ((option.key === 'xOffset200' && scaleByWidth) ||
+          (option.key === 'yOffset200' && !scaleByWidth)) {
           return true
         }
       }

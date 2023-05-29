@@ -124,11 +124,8 @@ export default defineComponent({
     duplicatedText(): (Partial<Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>>)[] {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
-        top: 0,
-        left: 0,
         width: '100%',
         height: '100%',
-        padding: 0,
         opacity: 1
       }
       const duplicatedTexts = textEffectUtils.convertTextEffect(this.config).duplicatedTexts as
