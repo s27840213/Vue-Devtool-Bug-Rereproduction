@@ -28,7 +28,8 @@ div(class="panel-text-effect")
     span(class="panel-text-effect__effect-name") {{currEffect.label}}
     div(v-for="option in currEffect.options"
         :key="option.key"
-        class="panel-text-effect__field")
+        class="panel-text-effect__field"
+        :class="{disabled: optionDisabled(option)}")
       div(v-if="option.key !== 'endpoint' && !['range', 'color'].includes(option.type)"
           class="panel-text-effect__option-name") {{option.label}}
       //- Option type select (endpoint)
@@ -278,6 +279,18 @@ export default defineComponent({
     gap: 10px;
     margin: 0 15px 15px 15px;
     overflow-y: scroll;
+  }
+
+  &__field {
+    &.disabled {
+      :deep(*) {
+        color: setColor(gray-4);
+        pointer-events: none;
+      }
+      :deep(*::-webkit-slider-thumb) {
+        border: 2px solid setColor(gray-4);
+      }
+    }
   }
 
   &__effect-name {

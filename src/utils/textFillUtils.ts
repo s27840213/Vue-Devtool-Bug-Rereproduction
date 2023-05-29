@@ -180,6 +180,8 @@ class TextFill {
     const isFixedWidth = textBgUtils.isFixedWidth(config.styles)
     // If not TextShape, need add maxFontSize to top/left to fix its position.
     const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
+    const leftDir = imgWidth - divWidth < 0 ? -1 : 1
+    const topDir = imgHeight - divHeight < 0 ? -1 : 1
     return div.map(p => p.map(span => {
       const rect = span[0]
       let { width: spanWidth, height: spanHeight, x, y } = rect
@@ -195,8 +197,8 @@ class TextFill {
         // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
         // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position#regarding_percentages
         backgroundPosition: `
-          ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200)) * -1}px
-          ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200)) * -1}px`,
+          ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200)) * -1}px
+          ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200)) * -1}px`,
         backgroundOrigin: 'content-box',
         backgroundRepeat: 'no-repeat',
         webkitBackgroundClip: 'text',
@@ -236,13 +238,15 @@ class TextFill {
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
     if (!imgSrc) return null
 
+    const leftDir = imgWidth - divWidth < 0 ? -1 : 1
+    const topDir = imgHeight - divHeight < 0 ? -1 : 1
     return {
       tag: 'img',
       attrs: { src: imgSrc },
       style: {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
-        left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 / 200) * -1}px`,
-        top: `${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 / 200) * -1}px`,
+        left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200) * -1}px`,
+        top: `${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200) * -1}px`,
         opacity: textFill.opacity / 200,
       }
     }

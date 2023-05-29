@@ -32,7 +32,8 @@ div(class="text-effect-setting")
         div(v-if="getOptions(effects1d, category) && getOptions(effects1d, category)?.length !== 0"
             class="text-effect-setting__options")
           div(v-for="option in getOptions(effects1d, category)" :key="option.key"
-              class="text-effect-setting__option" :class="{disable: false}")
+              class="text-effect-setting__option"
+              :class="{disabled: optionDisabled(option)}")
             div(class="text-effect-setting__option--name") {{option.label}}
             //- Option type select
             div(v-if="option.type === 'select'"
@@ -224,6 +225,17 @@ export default defineComponent({
         return style[option.key]
       }
     },
+    optionDisabled(option: IEffectOption) {
+      if (this.currCategoryName === 'fill') {
+        const { divHeight, divWidth, imgHeight, imgWidth } =
+          textFillUtils.calcTextFillVar(textEffectUtils.getCurrentLayer())
+        if ((option.key === 'xOffset200' && imgWidth === divWidth) ||
+          (option.key === 'yOffset200' && imgHeight === divHeight)) {
+          return true
+        }
+      }
+      return false
+    },
     async resetTextEffect() {
       const target = this.currCategoryName === 'shadow' ? textEffectUtils
         : this.currCategoryName === 'shape' ? textShapeUtils
@@ -394,9 +406,10 @@ export default defineComponent({
     grid-template-columns: auto 1fr;
     justify-items: end;
     row-gap: 4px;
-    &.disable {
+    &.disabled {
       > * {
-        color: setColor(gray-4);;
+        color: setColor(gray-4);
+        pointer-events: none;
       }
       > *::-webkit-slider-thumb {
         border: 2px solid setColor(gray-4);
