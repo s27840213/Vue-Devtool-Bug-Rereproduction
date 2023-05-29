@@ -22,7 +22,7 @@ import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 /**
  * @Todo - fix the any type problems -> TingAn
@@ -67,6 +67,7 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapMutations('vivisticker', { setIsInGroupTemplate: 'SET_isInGroupTemplate' }),
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
@@ -143,6 +144,8 @@ export default defineComponent({
           }, vivistickerUtils.getAssetInitiator(this.item as IAsset, vivistickerUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`), vivistickerUtils.getAssetCallback(this.item as IAsset)
         )
       }
+      this.setIsInGroupTemplate(false)
+
       // size check skiped in vivisticker
       // if (!isSameSize) {
       //   let btnWidth = '120px'

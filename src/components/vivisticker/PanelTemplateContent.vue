@@ -117,6 +117,9 @@ export default defineComponent({
   activated() {
     this.setIgLayout(this.igLayout)
   },
+  unmounted() {
+    this.setIsInGroupTemplate(false)
+  },
   watch: {
     keyword(newVal: string) {
       if (!newVal) {
@@ -229,7 +232,7 @@ export default defineComponent({
     },
     groupContent(): ICategoryItem[] {
       if (this.currentGroup === null) return []
-      return this.processListResult(this.currentGroup.content_ids, true)
+      return this.processListResult(this.currentGroup.content_ids.map(content => ({ ...content, type: 6 })), true)
     },
     mainContent(): ICategoryItem[] {
       if (this.showAllRecently) {
