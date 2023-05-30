@@ -30,6 +30,9 @@ div(class="panel-more")
       div(class="panel-more__item"
           @click="onDomainListClicked()")
           span(class="body-2 pointer") domain 選單
+      div(class="panel-more__item"
+          @click="testError()")
+          span(class="body-2 pointer") testError
     div(v-if="isAdmin" class="panel-more__item"
         @click="toggleDebugTool")
       span Toggle admin tool
@@ -199,7 +202,10 @@ export default defineComponent({
         .then(() => {
           this.$notify({ group: 'copy', text: `${this.$tc('NN0210', { content: `${this.$t('NN0863')}` })}` })
         })
-    }
+    },
+    testError() {
+      throw new Error('test')
+    },
   }
 })
 </script>

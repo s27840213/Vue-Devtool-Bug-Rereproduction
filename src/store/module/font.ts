@@ -4,6 +4,7 @@ import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 import listFactory from './listFactory'
+import logUtils from '@/utils/logUtils'
 
 const SET_MORE_CATEGORY = 'SET_MORE_CATEGORY' as const
 
@@ -26,7 +27,7 @@ actions.getMoreCategory = async ({ commit, getters, state }) => {
     const { data } = await list.getFont(nextParams)
     commit(SET_MORE_CATEGORY, data.data)
   } catch (error) {
-    console.error(error)
+    logUtils.setLogForError(error as Error)
     captureException(error)
   }
 }

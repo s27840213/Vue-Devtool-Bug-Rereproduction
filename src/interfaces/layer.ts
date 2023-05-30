@@ -176,7 +176,8 @@ export interface IFrame extends ILayer<IFrameStyle> {
   clips: Array<IImage>
   decoration?: IShape,
   decorationTop?: IShape
-  blendLayers?: Array<IShape>
+  blendLayers?: Array<IShape>,
+  needFetch?: boolean
 }
 export interface IGroup extends ILayer<IStyle> {
   type: 'group'

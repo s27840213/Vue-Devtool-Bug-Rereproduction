@@ -5,6 +5,7 @@ import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IStyle, IText, ITmp } 
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
 import store from '@/store'
+import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
 import { round } from 'lodash'
@@ -171,7 +172,7 @@ class AssetUtils {
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
     const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    console.log(generalUtils.deepCopy(newPage))
+    // console.log(generalUtils.deepCopy(newPage)) // remove unneccessary use of deepCopy(...) for performance
     pageUtils.updateSpecPage(targetPageIndex, newPage)
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
@@ -475,12 +476,13 @@ class AssetUtils {
     if (config.type === 'text') {
       Object.assign(config, {
         widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
-        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
+        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles.textShape),
       })
     } else if (config.type === 'group') {
       for (const subLayer of config.layers) {
+        if (subLayer.type !== 'text') continue
         Object.assign(subLayer, {
-          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles)
+          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles.textShape)
         })
       }
     }
@@ -494,7 +496,7 @@ class AssetUtils {
     const newLayer = config.type === 'group'
       ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
-    layerUtils.addLayers(targetPageIndex, [newLayer])
+    layerUtils.addLayers(targetPageIndex, [textUtils.resetScaleForLayer(newLayer, true)])
   }
 
   async addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
@@ -530,7 +532,7 @@ class AssetUtils {
       }))])
       editorUtils.setCloseMobilePanelFlag(true)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       console.log('Cannot find the file')
     }
   }
@@ -812,10 +814,11 @@ class AssetUtils {
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
-      editorUtils.setCloseMobilePanelFlag(true)
+      // Prevent close panel only for panelBG
+      if (asset.type !== 1) editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset)
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   }
