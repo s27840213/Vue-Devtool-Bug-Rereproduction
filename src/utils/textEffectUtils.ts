@@ -8,6 +8,18 @@ import mathUtils from '@/utils/mathUtils'
 import _, { max } from 'lodash'
 import tiptapUtils from './tiptapUtils'
 
+type ITextShadowCSS = {
+  '--base-stroke'?: string
+  filter?: string
+  willChange?: string
+  webkitTextStrokeColor?: string
+  webkitTextFillColor?: string
+  duplicatedTexts?: {
+    extraBodyStyle?: Record<string, string|number>
+    extraSpanStyle?: Record<string, string|number>
+  }[]
+}
+
 class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
@@ -162,7 +174,7 @@ class Controller {
     return { textShadow: shadow.join(',') }
   }
 
-  convertTextEffect(config: IText): Record<string, any> {
+  convertTextEffect(config: IText): ITextShadowCSS {
     const effect = config.styles.textEffect as any
     let { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, ver } = effect || {}
     const unit = this.shadowScale * fontSize
@@ -274,32 +286,9 @@ class Controller {
         }
       }
       default:
-        return { textShadow: 'none', '--base-stroke': '0px' }
+        return { '--base-stroke': '0px' }
     }
   }
-
-  // syncShareAttrs(textShadow: ITextEffect, effectName: string|null) {
-  //   if (textShadow.name === 'none') return
-  //   Object.assign(textShadow, { name: textShadow.name || effectName })
-  //   const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textShadowShare') ?? {}) as Record<string, string>
-  //   const newShareAttrs = { }
-  //   const newEffect = { }
-  //   // if (['funky3d', 'bold3d'].includes(textShadow.name)) {
-  //   //   Object.assign(newShareAttrs, { color: textShadow.color })
-  //   //   Object.assign(newEffect, { color: shareAttrs.color })
-  //   // }
-
-  //   // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
-  //   if (!effectName) {
-  //     Object.assign(shareAttrs, newShareAttrs)
-  //     localStorageUtils.set('textEffectSetting', 'textShadowShare', shareAttrs)
-  //   } else {
-  //     let effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
-  //     Object.assign(effect, newEffect)
-  //     effect = _.omit(effect, ['color'])
-  //     localStorageUtils.set('textEffectSetting', effectName, effect)
-  //   }
-  // }
 
   setColorKey(key: string) {
     this.currColorKey = key

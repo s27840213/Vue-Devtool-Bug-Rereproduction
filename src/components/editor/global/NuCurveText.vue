@@ -40,7 +40,7 @@ export default defineComponent({
       type: Number
     },
     extraSpanStyle: {
-      type: Object as PropType<Record<string, string>>,
+      type: Object as PropType<Record<string, string|number>>,
     },
   },
   data () {

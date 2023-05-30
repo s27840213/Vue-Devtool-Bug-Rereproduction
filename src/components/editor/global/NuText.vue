@@ -44,7 +44,7 @@ import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import _, { max } from 'lodash'
+import { max, omit } from 'lodash'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
@@ -121,15 +121,14 @@ export default defineComponent({
       return this.config.locked
     },
     // Use duplicated of text to do some text effect, define their difference css here.
-    duplicatedText(): (Partial<Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>>)[] {
+    duplicatedText() {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
         width: '100%',
         height: '100%',
         opacity: 1
       }
-      const duplicatedTexts = textEffectUtils.convertTextEffect(this.config).duplicatedTexts as
-        Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>[] | undefined
+      const duplicatedTexts = textEffectUtils.convertTextEffect(this.config).duplicatedTexts
       return [
         ...duplicatedTexts ? duplicatedTexts.map(d => {
           d.extraBodyStyle = Object.assign({}, duplicatedBodyBasicCss, d.extraBodyStyle) // Set extra body default style
@@ -205,7 +204,7 @@ export default defineComponent({
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
-      const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
+      const textEffectStyles = omit(textEffectUtils.convertTextEffect(this.config), ['duplicatedTexts'])
       const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
       return {
         width: isVertical ? '100%' : '',
@@ -223,14 +222,17 @@ export default defineComponent({
       const p = config.paragraphs[pIndex]
       const span = p.spans[sIndex]
       const textFillStyle = this.textFillSpanStyle[pIndex]?.[sIndex] ?? {}
+      const textShadowStrokeColor = textEffectUtils.convertTextEffect(config).webkitTextStrokeColor
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
         textFillStyle,
+        // Overwrite stroke color
+        textShadowStrokeColor ? { webkitTextStrokeColor: textShadowStrokeColor } : {},
         textBgUtils.fixedWidthStyle(span.styles, p.styles, config),
       )
     },
     pStyle(styles: IParagraphStyle) {
-      return _.omit(tiptapUtils.textStylesRaw(styles), [
+      return omit(tiptapUtils.textStylesRaw(styles), [
         'text-decoration-line', '-webkit-text-decoration-line'
       ])
     },
