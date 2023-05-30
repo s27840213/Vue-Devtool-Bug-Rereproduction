@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="showUploadArea" class="upload-area") {{'Click Upload or Drag & drop photos here'}}
+div(v-if="showUploadArea" class="upload-area") {{$t('NN0873')}}
 recycle-scroller(class="image-list" :items="images2d" :itemSize="140" ref="recycle")
   template(v-slot="{ item }: {item:{id: string, item: IImageListItem[]}}")
     div(class="image-list__row")
@@ -249,6 +249,10 @@ export default defineComponent({
         }
       }
     }
+  }
+  .observer-sentinel {
+    // Without this, some resolution display will not trigger loadmore
+    margin-bottom: 1px;
   }
 }
 </style>
