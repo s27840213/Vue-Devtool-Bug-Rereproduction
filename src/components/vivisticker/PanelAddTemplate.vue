@@ -16,7 +16,10 @@ div(class="panel-add-template")
 </template>
 
 <script lang="ts">
+import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
+import layerFactary from '@/utils/layerFactary'
+import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
@@ -36,15 +39,47 @@ export default defineComponent({
   methods: {
     addTemplate(photo = false) {
       console.log('addTemplate', this.igLayout, photo)
-      vivistickerUtils.startEditing(
-        this.igLayout,
-        { plan: 0, assetId: '' },
-        async () => {
-          console.log('start editing template', this.igLayout)
-          return true
-        },
-        vivistickerUtils.getEmptyCallback()
-      )
+      if (photo) {
+        vivistickerUtils.getIosImg()
+          .then(async (images: Array<string>) => {
+            if (!images.length) return
+            vivistickerUtils.startEditing(
+              this.igLayout,
+              { plan: 0, assetId: '' },
+              async () => {
+                console.log('start editing template', this.igLayout)
+                return true
+              },
+              vivistickerUtils.getEmptyCallback()
+            )
+            backgroundUtils.setBgImage({
+              pageIndex: pageUtils.currFocusPageIndex,
+              config: layerFactary.newImage({
+                srcObj: {
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                },
+                styles: {
+                  width: 0,
+                  height: 0,
+                  zindex: -1,
+                  opacity: 100
+                }
+              })
+            })
+          })
+      } else {
+        vivistickerUtils.startEditing(
+          this.igLayout,
+          { plan: 0, assetId: '' },
+          async () => {
+            console.log('start editing template', this.igLayout)
+            return true
+          },
+          vivistickerUtils.getEmptyCallback()
+        )
+      }
       editorUtils.setShowMobilePanel(false)
     }
   }
