@@ -257,6 +257,7 @@ export default defineComponent({
       if (timeout) {
         setTimeout(() => {
           this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: false })
+          vivistickerUtils.appToast('Network timeout error')
         }, timeout)
       }
     },
