@@ -8,7 +8,7 @@ div(class="panel-my-design-more")
                   iconWidth="18px"
                   iconColor="gray-2")
       div(class="panel-my-design-more__option-title") {{ $t('NN0504') }}
-    div(class="panel-my-design-more__option"
+    div(v-if="isTemplate" class="panel-my-design-more__option"
         @click.prevent.stop="handleDuplicate")
       div(class="panel-my-design-more__option-icon")
         svg-icon(iconName="duplicate"
@@ -46,7 +46,10 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       myDesignBuffer: 'vivisticker/getMyDesignBuffer'
-    })
+    }),
+    isTemplate() {
+      return vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type) === 'template'
+    }
   },
   methods: {
     ...mapMutations({
