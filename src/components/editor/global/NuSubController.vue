@@ -240,6 +240,9 @@ export default defineComponent({
     isTextEditing(): boolean {
       return !this.isControlling && this.config?.active
     },
+    isDraggingCursor(): boolean {
+      return this.config.isDraggingCursor
+    },
     getPrimaryLayerSubLayerNum(): number {
       return (this.primaryLayer as IGroup | ITmp).layers.length
     },
@@ -321,7 +324,8 @@ export default defineComponent({
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01})`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode
+        writingMode: this.config.styles.writingMode,
+        ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
     textBodyStyle() {
