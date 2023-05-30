@@ -91,7 +91,7 @@ class Rect {
 
     let div = document.createElement('div')
     div.classList.add('nu-text__body')
-    // Prevent this div to be screenshot by backend
+    // Prevent this div to be screenshoted by backend
     if (['test.vivipic.com', 'vivipic.com'].includes(window.location.host)) {
       div.style.opacity = '0'
     }
