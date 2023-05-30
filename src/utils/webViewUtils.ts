@@ -150,6 +150,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
           logUtils.setLogAndConsoleLog(`${type} timeouted after ${timeout}ms with message:`, message)
           if (retry && retryTimes < 2) {
             logUtils.setLogAndConsoleLog(`retry: ${retryTimes + 1}`)
+            await new Promise(resolve => setTimeout(resolve, 1000))
             result = await this.callIOSAsAPI(type, message, event, {
               timeout, retry, retryTimes: retryTimes + 1
             })
