@@ -153,8 +153,9 @@ Cypress.Commands.add('layerRotateAndResize', { prevSubject: 'element' }, (subjec
     .snapshotTest('RotateAndResize after resize')
     // Restore layer to original state
     .get('.svg-undo').click()
-    // XXX: Wait time to prevent undo only trigger once
-    .wait(200).click()
+    // Wait for undo take effect and click undo again. Desktop version only.
+    .get('.svg-redo').should('not.have.class', 'text-gray-4')
+    .get('.svg-undo').click()
   return cy.wrap(subject)
 })
 
