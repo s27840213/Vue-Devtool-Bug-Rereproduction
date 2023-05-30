@@ -199,16 +199,6 @@ const actions: ActionTree<ITextState, unknown> = {
           commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
           state.pending = ''
         }
-        // await new Promise(resolve => setTimeout(resolve, 10000))
-        // return new Promise<void>(resolve => {
-        //   newFont.load()
-        //     .then(newFont => {
-        //       document.fonts.add(newFont)
-        //       commit(UPDATE_FONTFACE, { name: newFont.family, face: newFont.family, loaded: true })
-        //       resolve()
-        //       state.pending = ''
-        //     })
-        // })
       } else {
         return new Promise<void>(resolve => {
           const checkLoaded = window.setInterval(() => {
