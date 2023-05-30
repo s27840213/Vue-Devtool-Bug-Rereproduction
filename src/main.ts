@@ -100,7 +100,6 @@ app.use(FloatingVue, {
 app.component('RecycleScroller', RecycleScroller)
 
 app.component('svg-icon', SvgIcon)
-
 app.component('btn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))

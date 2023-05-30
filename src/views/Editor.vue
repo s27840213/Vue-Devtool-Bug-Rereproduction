@@ -47,6 +47,7 @@ export default defineComponent({
     // }
     editorUtils.setCloseMobilePanelFlag(true)
     stepsUtils.clearSteps()
+    editorUtils.setCurrCardIndex(0)
     if (uploadUtils.isLogin && this.$router.currentRoute.value.query.design_id && this.$router.currentRoute.value.query.type) {
       this.isSaving = true
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
