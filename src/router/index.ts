@@ -28,7 +28,8 @@ const routes: Array<RouteRecordRaw> = [
           const recentPanel = await vivistickerUtils.getState('recentPanel')
           const userSettings = await vivistickerUtils.getState('userSettings')
           if (userSettings) {
-            store.commit('vivisticker/SET_userSettings', userSettings)
+            store.commit('vivisticker/UPDATE_userSettings', userSettings)
+            vivistickerUtils.addFontForEmoji()
           }
           const hasCopied = await vivistickerUtils.getState('hasCopied')
           vivistickerUtils.hasCopied = hasCopied?.data ?? false

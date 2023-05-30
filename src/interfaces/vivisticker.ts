@@ -27,7 +27,8 @@ export function isV1_26(userInfo: IUserInfo): userInfo is IUserInfoV1_26 {
 }
 
 export interface IUserSettings {
-  autoSave: boolean
+  autoSave: boolean,
+  emojiSetting: string
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

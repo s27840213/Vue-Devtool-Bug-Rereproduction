@@ -90,7 +90,7 @@ const state = getDefaultState()
 const getters: GetterTree<ITextState, unknown> = {
   getDefaultFonts(state): string {
     const fontFaces = state.defaultFonts.map(font => font.face)
-    fontFaces.splice(fontFaces.length - 1, 0, '-apple-system')
+    fontFaces.splice(fontFaces.length - 1, 0, vivistickerUtils.userSettings.emojiSetting)
     return fontFaces.join(', ')
   },
   getDefaultFontsList(state): IFont[] {

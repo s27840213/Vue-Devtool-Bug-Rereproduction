@@ -122,7 +122,7 @@ export default defineComponent({
         {
           key: 'restorePurchase',
           title: this.$t('STK0045'),
-          action: () => this.handleSubscribe('restore', 5000)
+          action: () => this.handleSubscribe('restore', 30000)
         },
         {
           key: 'termsOfService',
@@ -257,6 +257,7 @@ export default defineComponent({
       if (timeout) {
         setTimeout(() => {
           this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: false })
+          vivistickerUtils.appToast('Network timeout error')
         }, timeout)
       }
     },

@@ -32,6 +32,7 @@ div(class="nu-layer flex-center"
             :page="page"
             :scaleRatio="scaleRatio"
             :primaryLayer="primaryLayer"
+            :priPrimaryLayerIndex="priPrimaryLayerIndex"
             :forRender="forRender"
             :inPreview="inPreview")
           svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !controllerHidden && !forRender"
