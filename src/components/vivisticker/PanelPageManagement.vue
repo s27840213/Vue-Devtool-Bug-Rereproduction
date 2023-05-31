@@ -12,15 +12,20 @@ div(class="panel-page-management")
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
 import { IFrame, IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import { LayerType } from '@/store/types'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
+import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -45,6 +50,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       pages: 'getPages',
+      isProcessingShadow: 'shadow/isProcessing',
     }),
     buttons(): IButton[] {
       return [
@@ -79,7 +85,7 @@ export default defineComponent({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
     }),
     addPage() {
-      console.log('addPage')
+      if (!this.checkMaxPageNum()) return
       const { getCurrLayer: currLayer, layerIndex, pageIndex } = layerUtils
       layerUtils.updateLayerProps(pageIndex, layerIndex, { active: false, shown: false })
       if (currLayer) {
@@ -125,10 +131,29 @@ export default defineComponent({
       stepsUtils.record()
     },
     duplicatePage() {
-      console.log('duplicatePage')
+      if (!this.checkMaxPageNum()) return
+      if (this.isProcessingShadow) {
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        return
+      }
+      groupUtils.deselect()
+      const page = generalUtils.deepCopy(pageUtils.currFocusPage) as IPage
+      page.layers.forEach(l => {
+        l.id = generalUtils.generateRandomString(8)
+        if (l.type === LayerType.frame) {
+          (l as IFrame).clips.forEach(c => (c.id = generalUtils.generateRandomString(8)))
+        } else if (l.type === LayerType.group) {
+          (l as IGroup).layers.forEach(l => (l.id = generalUtils.generateRandomString(8)))
+        }
+      })
+      page.designId = ''
+      page.id = generalUtils.generateRandomString(8)
+      pageUtils.addPageToPos(page, pageUtils.currFocusPageIndex + 1)
+      this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
+      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+      stepsUtils.record()
     },
     deletePage() {
-      console.log('deletePage')
       const pageIndex = pageUtils.currFocusPageIndex
       groupUtils.deselect()
       if (this.pages.length - 1 === pageIndex) {
@@ -147,6 +172,20 @@ export default defineComponent({
     },
     close() {
       editorUtils.setShowMobilePanel(false)
+    },
+    checkMaxPageNum() {
+      if (this.pages.length >= 20) {
+        modalUtils.setModalInfo(
+          'Title', // TODO: translate
+          'Your file has reached its maximum of 20 pages. To design more pages, please create a new file.', // TODO: translate
+          {
+            msg: 'Okay, I got it!', // TODO: translate
+            class: 'btn-black-mid',
+          }
+        )
+        return false
+      }
+      return true
     }
   }
 })
