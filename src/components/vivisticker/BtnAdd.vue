@@ -47,13 +47,23 @@ export default defineComponent({
       }
     })
   },
+  mounted() {
+    // delay button style update to get correct width of text
+    window.requestAnimationFrame(() => {
+      this.updateBtnStyles()
+
+      // add event listeners after button styles initialized to avoid flickering
+      // this.elScrollable will be undefined when component first activated, so no duplicated listeners
+      if (this.elScrollable) this.addEventListeners(this.elScrollable)
+    })
+  },
   activated() {
     // delay button style update to get correct width of text
     window.requestAnimationFrame(() => {
       this.updateBtnStyles()
 
       // add event listeners after button styles initialized to avoid flickering
-      // this.elScrollable will be undefined when component first activated, so no duplicate listeners
+      // this.elScrollable will be undefined when component first activated, so no duplicated listeners
       if (this.elScrollable) this.addEventListeners(this.elScrollable)
     })
   },

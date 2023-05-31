@@ -200,7 +200,8 @@ export default defineComponent({
       isInCategory: 'vivisticker/getIsInCategory',
       isShowAllRecently: 'vivisticker/getShowAllRecently',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
-      bgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      bgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isInPagePreview: 'vivisticker/getIsInPagePreview',
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
@@ -612,7 +613,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: () => {
-          if (!this.bgRemoveMode) {
+          if (!(this.bgRemoveMode || this.isInPagePreview)) {
             this.closeMobilePanel()
           }
         },

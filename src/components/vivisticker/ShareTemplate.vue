@@ -260,6 +260,7 @@ export default defineComponent({
     box-sizing: border-box;
     position: relative;
     &.multi-page {
+      @include no-scrollbar;
       display: grid;
       grid-template-columns: 1fr 1fr;
       column-gap: 16px;

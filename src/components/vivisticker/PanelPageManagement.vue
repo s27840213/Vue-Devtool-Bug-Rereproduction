@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="panel-page-management")
-  div(class="panel-page-management__actions")
+  div(v-if="!isInPagePreview" class="panel-page-management__actions")
     div(v-for="button in buttons" :key="button.key" class="panel-page-management__actions__item" @click="button.action")
       svg-icon(:iconName="button.iconName" iconWidth="24px" iconColor="white")
       div(class="panel-page-management__actions__item__text text-white")
@@ -51,6 +51,7 @@ export default defineComponent({
     ...mapGetters({
       pages: 'getPages',
       isProcessingShadow: 'shadow/isProcessing',
+      isInPagePreview: 'vivisticker/getIsInPagePreview',
     }),
     buttons(): IButton[] {
       return [
@@ -83,6 +84,7 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
+      setIsInPagePreview: 'vivisticker/SET_isInPagePreview',
     }),
     addPage() {
       if (!this.checkMaxPageNum()) return
@@ -168,10 +170,11 @@ export default defineComponent({
       })
     },
     preview() {
-      console.log('preview')
+      this.setIsInPagePreview(true)
     },
     close() {
-      editorUtils.setShowMobilePanel(false)
+      if (this.isInPagePreview) this.setIsInPagePreview(false)
+      else editorUtils.setShowMobilePanel(false)
     },
     checkMaxPageNum() {
       if (this.pages.length >= 20) {
@@ -196,7 +199,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
-  row-gap: 16px;
   padding-bottom: 14px;
   &__actions {
     display: grid;
@@ -241,5 +243,6 @@ export default defineComponent({
   gap: 4px;
   background: #FFFFFF;
   border-radius: 100px;
+  margin-top: 16px;
 }
 </style>

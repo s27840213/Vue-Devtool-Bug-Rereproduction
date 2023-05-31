@@ -88,6 +88,7 @@ export default defineComponent({
       isInBgShare: 'vivisticker/getIsInBgShare',
       isInTemplateShare: 'vivisticker/getIsInTemplateShare',
       isInMultiPageShare: 'vivisticker/getIsInMultiPageShare',
+      isInPagePreview: 'vivisticker/getIsInPagePreview',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
@@ -126,6 +127,7 @@ export default defineComponent({
           { icon: 'chevron-left', width: 24, action: this.clearTemplateShare }
         ]
       } else if (this.isInEditor) {
+        if (this.isInPagePreview) return [{ icon: 'chevron-left', width: 24, action: () => this.setIsInPagePreview(false) }]
         const retTabs = []
         const stepTabs = [
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: this.undo },
@@ -193,6 +195,7 @@ export default defineComponent({
       } else if (this.isInBgShare || this.isInTemplateShare) {
         return `${this.$t('NN0214')}`
       } else if (this.isInEditor) {
+        if (this.isInPagePreview) return `${'Preview'}` // TODO: translate
         return ''
       } else if (this.isInMyDesign) {
         return `${this.$t('NN0080')}`
@@ -210,6 +213,7 @@ export default defineComponent({
       if (this.isInTemplateShare) {
         return []
       } else if (this.isInEditor) {
+        if (this.isInPagePreview) return []
         if (this.editorTypeTemplate) {
           return [
             { icon: 'copy', width: 24, action: this.handleCopy },
@@ -261,6 +265,7 @@ export default defineComponent({
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
       setIsInMultiPageShare: 'vivisticker/SET_isInMultiPageShare',
       setTemplateShareType: 'vivisticker/SET_templateShareType',
+      setIsInPagePreview: 'vivisticker/SET_isInPagePreview',
       setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor',

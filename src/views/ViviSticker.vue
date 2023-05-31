@@ -236,6 +236,7 @@ export default defineComponent({
       isInEditor: 'vivisticker/getIsInEditor',
       isInBgShare: 'vivisticker/getIsInBgShare',
       isInTemplateShare: 'vivisticker/getIsInTemplateShare',
+      isInPagePreview: 'vivisticker/getIsInPagePreview',
       showTutorial: 'vivisticker/getShowTutorial',
       fullPageType: 'vivisticker/getFullPageType',
       userInfo: 'vivisticker/getUserInfo',
@@ -253,7 +254,7 @@ export default defineComponent({
       return !['text', 'template-content'].includes(this.currActivePanel)
     },
     showFooterTabs(): boolean {
-      return !(this.isInBgShare || this.isInTemplateShare)
+      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview)
     }
   },
   watch: {
@@ -368,7 +369,7 @@ export default defineComponent({
     setPanelHeight(height: number) {
       const content = this.$refs.vivisticker__content as HTMLElement
       const contentHeight = content?.clientHeight ?? 0
-      if (height === 0 || height > contentHeight) {
+      if (height === 0 || height > contentHeight || this.currActivePanel === 'page-management') {
         this.marginBottom = 0
         return
       }

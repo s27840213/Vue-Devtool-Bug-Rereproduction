@@ -13,6 +13,7 @@ div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectSt
   div(v-if="editorTypeTemplate && !isDuringCopy" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
+  page-preivew(v-if="isInPagePreview" :pagesState="pagesState")
 </template>
 
 <script lang="ts">
@@ -27,6 +28,7 @@ import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -91,7 +93,8 @@ export default defineComponent({
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
-      isInTemplateShare: 'vivisticker/getIsInTemplateShare'
+      isInTemplateShare: 'vivisticker/getIsInTemplateShare',
+      isInPagePreview: 'vivisticker/getIsInPagePreview',
     }),
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -101,7 +104,8 @@ export default defineComponent({
     }
   },
   components: {
-    PageCard
+    PageCard,
+    PagePreivew
   },
   methods: {
     ...mapMutations({
@@ -153,7 +157,7 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(true)
     },
     handleResize() {
-      if (this.isInTemplateShare) return
+      if (this.isInTemplateShare || this.isInPagePreview) return
 
       // resize all pages
       this.pagesState.forEach((pageState: IPageState, pageIndex: number) => {
