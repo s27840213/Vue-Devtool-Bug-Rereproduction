@@ -63,18 +63,18 @@ export default defineComponent({
     PageContent,
     Tabs
   },
+  props: {
+    config: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   data() {
     return {
       tabIndex: 0,
       previewScale: 1,
       selectedPages: new Set<number>(),
       currAction: null as IButton | null
-    }
-  },
-  props: {
-    config: {
-      type: Object as PropType<IPage>,
-      required: true
     }
   },
   mounted() {
@@ -92,10 +92,8 @@ export default defineComponent({
       deep: true
     },
     isInMultiPageShare(newVal) {
-      if (!newVal) {
-        this.currAction = null
-        this.selectedPages.clear()
-      }
+      if (newVal) this.initSelectedPages()
+      else this.currAction = null
       this.$nextTick(() => {
         this.handleResize()
       })
@@ -154,6 +152,10 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations('vivisticker', { setIsInMultiPageShare: 'SET_isInMultiPageShare' }),
+    initSelectedPages() {
+      if (this.currAction?.key === 'post') this.selectedPages = new Set()
+      else this.selectedPages = new Set(this.pagesState.keys())
+    },
     previewPageStyles(): {[key: string]: string} {
       return {
 
