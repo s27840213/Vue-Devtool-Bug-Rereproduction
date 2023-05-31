@@ -54,7 +54,8 @@ export default defineComponent({
       },
       extraData: undefined as any,
       options: '',
-      params: ''
+      params: '',
+      toast: undefined as boolean | undefined
     }
   },
   components: {
@@ -106,6 +107,10 @@ export default defineComponent({
         const key = urlParams.get('key')
         const source = urlParams.get('source')
         const noBg = urlParams.get('noBg') === 'true'
+        const toast = urlParams.get('toast')
+        if (toast !== null) {
+          this.toast = toast === 'true'
+        }
         this.extraData = { thumbType, designId, key, noBg }
         switch (type) {
           case 'svg': {
@@ -353,15 +358,15 @@ export default defineComponent({
             to: 'UI'
           })
         } else {
-          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, this.params)
+          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, this.params, this.toast)
         }
       } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
         const element = this.$refs.target
         const target: HTMLElement = (element as any).$el ? (element as any).$el : element
         const { width, height } = target.getBoundingClientRect()
-        vivistickerUtils.sendDoneLoading(width, height, this.options, this.params)
+        vivistickerUtils.sendDoneLoading(width, height, this.options, this.params, this.toast)
       } else {
-        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params)
+        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params, this.toast)
       }
     },
     setConfig(layer: AllLayerTypes) {

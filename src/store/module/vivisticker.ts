@@ -12,6 +12,7 @@ interface IViviStickerState {
   isInCategoryDict: { [key: string]: boolean },
   showAllRecentlyDict: { [key: string]: boolean },
   isInBgShare: boolean,
+  isInMultiPageShare: boolean,
   isInGroupTemplate: boolean,
   isInBgRemoveSection: boolean,
   shareItem: IAsset | undefined,
@@ -63,6 +64,7 @@ const getDefaultState = (): IViviStickerState => ({
     text: false
   },
   isInBgShare: false,
+  isInMultiPageShare: false,
   isInGroupTemplate: false,
   isInBgRemoveSection: false,
   shareItem: undefined,
@@ -146,6 +148,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsInTemplateShare(state: IViviStickerState): boolean {
     return state.templateShareType !== 'none'
+  },
+  getIsInMultiPageShare(state: IViviStickerState): boolean {
+    return state.isInMultiPageShare
   },
   getIsInGroupTemplate(state: IViviStickerState): boolean {
     return state.isInGroupTemplate
@@ -280,6 +285,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_isInBgShare(state: IViviStickerState, bool: boolean) {
     state.isInBgShare = bool
+  },
+  SET_isInMultiPageShare(state: IViviStickerState, bool: boolean) {
+    state.isInMultiPageShare = bool
   },
   SET_isInGroupTemplate(state: IViviStickerState, bool: boolean) {
     state.isInGroupTemplate = bool

@@ -259,8 +259,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.sendToIOS('SHOW_TOAST', { msg })
   }
 
-  sendDoneLoading(width: number, height: number, options: string, params: string) {
-    this.sendToIOS('DONE_LOADING', { width, height, options, params })
+  sendDoneLoading(width: number, height: number, options: string, params: string, toast?: boolean) {
+    this.sendToIOS('DONE_LOADING', { width, height, options, params, ...(toast !== undefined && { toast }) })
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
@@ -313,7 +313,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  createUrlForJSON({ page = undefined, asset = undefined, source = undefined, noBg = true }: { page?: IPage, asset?: IMyDesign, source?: string, noBg?: boolean } = {}): string {
+  createUrlForJSON({ page = undefined, asset = undefined, source = undefined, noBg = true, toast = undefined }: { page?: IPage, asset?: IMyDesign, source?: string, noBg?: boolean, toast?: boolean } = {}): string {
     page = page ?? pageUtils.currFocusPage
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
     let res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
@@ -323,6 +323,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
     if (source) {
       res += `&source=${source}`
+    }
+    if (toast !== undefined) {
+      res += `&toast=${toast}`
     }
     return res
   }

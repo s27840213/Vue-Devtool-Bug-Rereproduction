@@ -87,6 +87,7 @@ export default defineComponent({
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
       isInTemplateShare: 'vivisticker/getIsInTemplateShare',
+      isInMultiPageShare: 'vivisticker/getIsInMultiPageShare',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
@@ -116,7 +117,11 @@ export default defineComponent({
       return imageUtils.isImgControl()
     },
     leftTabs(): TabConfig[] {
-      if (this.isInTemplateShare) {
+      if (this.isInMultiPageShare) {
+        return [
+          { icon: 'chevron-left', width: 24, action: () => this.setIsInMultiPageShare(false) }
+        ]
+      } else if (this.isInTemplateShare) {
         return [
           { icon: 'chevron-left', width: 24, action: this.clearTemplateShare }
         ]
@@ -183,7 +188,9 @@ export default defineComponent({
       return ''
     },
     centerTitle(): string {
-      if (this.isInBgShare || this.isInTemplateShare) {
+      if (this.isInMultiPageShare) {
+        return `${'Select pages'}` // TODO: translate
+      } else if (this.isInBgShare || this.isInTemplateShare) {
         return `${this.$t('NN0214')}`
       } else if (this.isInEditor) {
         return ''
@@ -252,6 +259,7 @@ export default defineComponent({
       setIsInCategory: 'vivisticker/SET_isInCategory',
       setShowAllRecently: 'vivisticker/SET_showAllRecently',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
+      setIsInMultiPageShare: 'vivisticker/SET_isInMultiPageShare',
       setTemplateShareType: 'vivisticker/SET_templateShareType',
       setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
       setShareItem: 'vivisticker/SET_shareItem',
