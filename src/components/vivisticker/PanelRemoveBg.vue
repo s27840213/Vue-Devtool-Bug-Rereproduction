@@ -24,6 +24,7 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
 </template>
 
 <script lang="ts">
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -31,10 +32,10 @@ import uploadUtils from '@/utils/uploadUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-
 export default defineComponent({
   components: {
-    BgRemoveArea
+    BgRemoveArea,
+    MobileSlider
   },
   data() {
     return {
