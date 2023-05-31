@@ -10,7 +10,7 @@ div(class="nu-layer flex-center"
   //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
   //- ref="body"
   div(class="full-size pos-left"
-      :class="{'preserve3D': !isTouchDevice}"
+      :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
       :style="layerStyles()"
       @pointerdown="onPointerDown($event)"
       @pointerup="onPointerUp($event)"
@@ -19,12 +19,12 @@ div(class="nu-layer flex-center"
       @dragenter="dragEnter($event)"
       @dblclick="dblClick($event)")
     div(class="nu-layer__scale full-size pos-left"
-        :class="{'preserve3D': !isTouchDevice}" ref="scale"
+        :class="{'preserve3D': !isTouchDevice && isMultipleSelect}" ref="scale"
         :style="scaleStyles()")
-      div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
+      div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice && isMultipleSelect}" :style="flipStyles")
           component(:is="`nu-${config.type}`"
             class="transition-none"
-            :class="{'preserve3D': !isTouchDevice}"
+            :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
             :config="config"
             :imgControl="imgControl"
             :contentScaleRatio="contentScaleRatio"
@@ -54,6 +54,7 @@ div(class="nu-layer flex-center"
 import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -369,6 +370,9 @@ export default defineComponent({
     },
     isTouchDevice(): boolean {
       return generalUtils.isTouchDevice()
+    },
+    isMultipleSelect(): boolean {
+      return (this.currSelectedInfo as ICurrSelectedInfo).layers.length > 1
     }
   },
   methods: {

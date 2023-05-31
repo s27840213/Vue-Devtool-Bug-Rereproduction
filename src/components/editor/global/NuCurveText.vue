@@ -17,7 +17,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -137,15 +137,19 @@ export default defineComponent({
       return TextShapeUtils.convertTextShape(this.textWidth, this.bend(), mainFontSize)
     },
     styles(styles: any, idx: number) {
+      const fontSize = styles.size
       const { textHeight, minHeight } = this
       const bend = this.bend()
       const transforms = this.transforms()
-      const baseline = `${(minHeight - textHeight[idx]) / 2}px`
+      const baseline = `${(minHeight - textHeight[idx]) / 2 - fontSize}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
       return Object.assign(
         fontStyles,
-        { textIndent: fontStyles['letter-spacing'] || 'initial' },
-        { transform: transforms[idx] || 'none' },
+        {
+          textIndent: fontStyles['letter-spacing'] || 'initial',
+          transform: transforms[idx] || 'none',
+          padding: `${fontSize}px`,
+        },
         bend >= 0 ? { top: baseline } : { bottom: baseline },
       )
     },

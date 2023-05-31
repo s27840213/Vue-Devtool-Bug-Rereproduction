@@ -25,7 +25,7 @@ div(class="overflow-container"
             @mousedown.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
             :padding="contentStyles.margin")
-        div(class="layers-wrapper" :class="{'preserve3D': !isTouchDevice}")
+        div(class="layers-wrapper" :class="{'preserve3D': !isTouchDevice && isMultipleSelect}")
           nu-layer(
             v-for="(layer,index) in config.layers"
             :key="layer.id"
@@ -51,6 +51,7 @@ div(class="overflow-container"
 <script lang="ts">
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import i18n from '@/i18n'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
 import { SidebarPanelType } from '@/store/types'
 import doubleTapUtils from '@/utils/doubleTapUtils'
@@ -224,6 +225,9 @@ export default defineComponent({
     },
     isTouchDevice(): boolean {
       return generalUtils.isTouchDevice()
+    },
+    isMultipleSelect(): boolean {
+      return (this.currSelectedInfo as ICurrSelectedInfo).layers.length > 1
     }
   },
   methods: {

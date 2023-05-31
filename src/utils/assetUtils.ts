@@ -870,7 +870,8 @@ class AssetUtils {
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
       key = moduleKey ?? key
-      editorUtils.setCloseMobilePanelFlag(true)
+      // Prevent close panel only for panelBG
+      if (asset.type !== 1) editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset, key)
       return asset.jsonData
     } catch (error) {
