@@ -107,7 +107,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'uploadImageURL',
     'informWebResult',
     'subscribeResult',
-    'screenshotDone'
+    'screenshotDone',
+    'cloneImageDone',
   ]
 
   SCREENSHOT_CALLBACKS = [
@@ -285,6 +286,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   screenshotDone(data: { flag: string, params: string, action: string }) {
     this.handleCallback(`screenshot-${data.params}`, data)
+  }
+
+  cloneImageDone(data: any) {
+    this.handleCallback(`screenshot-${data.type}-${data.srcId}-${data.desId}`, data)
   }
 
   sendAppLoaded() {

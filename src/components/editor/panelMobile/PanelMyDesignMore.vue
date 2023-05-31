@@ -86,9 +86,12 @@ export default defineComponent({
         vivistickerUtils.addAsset(`mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type)}`, json, 0, {
           config: { pages: data.pages }
         }).then(() => {
-          this.addDesign({
-            tab: 'template',
-            list: [json]
+          vivistickerUtils.callIOSAsAPI('CLONE_IMAGE', { type: 'mydesign', srcId: this.myDesignBuffer.id, desId: json.id }, `screenshot-mydesign-${this.myDesignBuffer.id}-${json.id}`).then((data) => {
+            this.addDesign({
+              tab: 'template',
+              list: [json]
+            })
+            editorUtils.setCloseMobilePanelFlag(true)
           })
         })
       })
