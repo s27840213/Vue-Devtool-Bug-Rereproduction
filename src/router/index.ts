@@ -9,7 +9,7 @@ import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import Home from '@/views/Home.vue'
-import { defineAsyncComponent, h, resolveComponent } from 'vue'
+import { h, resolveComponent } from 'vue'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { editorRouteHandler } from './handler'
 
@@ -42,7 +42,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'editor',
     name: 'Editor',
-    component: defineAsyncComponent(() => import('@/views/Editor.vue')),
+    component: () => import('@/views/Editor.vue'),
     beforeEnter: editorRouteHandler
   },
   // {
@@ -55,7 +55,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'preview',
     name: 'Preview',
-    component: defineAsyncComponent(() => import('@/views/Preview.vue')),
+    component: () => import('@/views/Preview.vue'),
     beforeEnter: async (to, from, next) => {
       try {
         const urlParams = new URLSearchParams(window.location.search)
@@ -132,7 +132,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'signup',
     name: 'SignUp',
     props: route => ({ redirect: route.query.redirect }),
-    component: defineAsyncComponent(() => import('@/views/Login/SignUp.vue')),
+    component: () => import('@/views/Login/SignUp.vue'),
     beforeEnter: async (to, from, next) => {
       try {
         if (store.getters['user/isLogin']) {
@@ -149,7 +149,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'login',
     name: 'Login',
     props: route => ({ redirect: route.query.redirect }),
-    component: defineAsyncComponent(() => import('@/views/Login/Login.vue')),
+    component: () => import('@/views/Login/Login.vue'),
     beforeEnter: async (to, from, next) => {
       try {
         if (to.query.type) {
@@ -169,34 +169,34 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'mydesign/:view?',
     name: 'MyDesign',
-    component: defineAsyncComponent(() => import('@/views/MyDesign.vue')),
+    component: () => import('@/views/MyDesign.vue'),
     props: true
   },
   {
     path: 'templates',
     name: 'TemplateCenter',
-    component: defineAsyncComponent(() => import('@/views/TemplateCenter.vue'))
+    component: () => import('@/views/TemplateCenter.vue')
   },
   {
     path: 'settings/:view?',
     name: 'Settings',
-    component: defineAsyncComponent(() => import('@/views/Settings.vue')),
+    component: () => import('@/views/Settings.vue'),
     props: true
   },
   {
     path: 'mobilewarning',
     name: 'MobileWarning',
-    component: defineAsyncComponent(() => import('@/views/MobileWarning.vue'))
+    component: () => import('@/views/MobileWarning.vue')
   },
   {
     path: 'browserwarning',
     name: 'BrowserWarning',
-    component: defineAsyncComponent(() => import('@/views/BrowserWarning.vue'))
+    component: () => import('@/views/BrowserWarning.vue')
   },
   {
     path: 'brandkit',
     name: 'BrandKit',
-    component: defineAsyncComponent(() => import('@/views/BrandKit.vue')),
+    component: () => import('@/views/BrandKit.vue'),
     beforeEnter: async (to, from, next) => {
       try {
         if (!brandkitUtils.isBrandkitAvailable) {
@@ -212,7 +212,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'pricing',
     name: 'Pricing',
-    component: defineAsyncComponent(() => import('@/views/Pricing.vue'))
+    component: () => import('@/views/Pricing.vue')
   }
 ]
 
@@ -220,17 +220,17 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: defineAsyncComponent(() => import('@/views/SvgIconView.vue'))
+    component: () => import('@/views/SvgIconView.vue')
   })
   routes.push({
     path: 'copytool',
     name: 'CopyTool',
-    component: defineAsyncComponent(() => import('@/views/CopyTool.vue'))
+    component: () => import('@/views/CopyTool.vue')
   })
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: defineAsyncComponent(() => import('@/views/NubtnList.vue'))
+    component: () => import('@/views/NubtnList.vue')
   })
 }
 
@@ -342,13 +342,7 @@ router.beforeEach(async (to, from, next) => {
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 
-    console.log(json.show_error_modal)
-    console.log(window.location.hostname, store.getters['user/isAdmin'])
-    if (window.location.hostname !== 'vivipic.com' || store.getters['user/isAdmin']) {
-      store.commit('SET_showGlobalErrorModal', true) // always show error modal for non-production domains or admin users
-    } else {
-      store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
-    }
+    store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
 
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,

@@ -60,7 +60,7 @@ div(class="page-size-selector")
             span(class="body-MD text-black") {{unit}}
       div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
         class="page-size-selector__body__custom__err body-MD text-red") {{errMsg}}
-        span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{'Fix it for me.'}}
+        span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
   nubtn(v-if="!forEditor" size="sm-full" class="mt-15" @click="createCustomDesign") {{$t('NN0867')}}
   div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
   div(class="page-size-selector__container"

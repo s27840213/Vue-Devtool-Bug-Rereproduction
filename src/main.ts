@@ -1,5 +1,6 @@
 import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
+import SvgIcon from '@/components/global/SvgIcon.vue'
 import modalUtils from '@/utils/modalUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
@@ -34,7 +35,8 @@ window.onerror = function (msg, url, line, colno, error) {
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
     console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
-    if (store.getters.getShowGlobalErrorModal) {
+    // if (store.getters['user/isAdmin'] && (window.location.hostname !== 'vivipic.com' || store.getters.getShowGlobalErrorModal))
+    if (store.getters['user/isAdmin']) {
       const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
       modalUtils.setModalInfo(
         i18n.global.t('NN0866'),
@@ -97,9 +99,7 @@ app.use(FloatingVue, {
 
 app.component('RecycleScroller', RecycleScroller)
 
-app.component('svg-icon', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/SvgIcon.vue')
-))
+app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))
