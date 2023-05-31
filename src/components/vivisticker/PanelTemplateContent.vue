@@ -45,7 +45,8 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
           :key="item.group_id"
           :style="itemStyles"
           noCarousel
-          @clickGroupItem="handleShowGroup")
+          @clickGroupItem="handleShowGroup"
+          :groupItem="currentGroup")
     template(#after)
       //- Loading icon
       div(v-if="pending" class="text-center")
@@ -53,6 +54,12 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
           iconColor="white"
           iconWidth="20px")
   btn-add(v-show="!isInCategory && !isInGroupTemplate && !keyword" :elScrollable="elMainContent" :text="'Create ' + igLayout" @click="addTemplate")
+  div(v-if="isInGroupTemplate" class="panel-template-content__btn-add-group-template" @click="addGroupTemplate")
+    svg-icon(class="panel-template-content__btn-add-group-template__icon"
+            iconName="add-page"
+            iconColor="gray-2"
+            iconWidth="24px")
+    span(class="body-SM text-black-3") {{`Add all pages (${currentGroup?.content_ids.length ?? 0} pages)`}}
 </template>
 
 <script lang="ts">
@@ -66,6 +73,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IContentTemplate } from '@/interfaces/template'
+import assetUtils from '@/utils/assetUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -349,6 +357,23 @@ export default defineComponent({
       editorUtils.setCurrActivePanel('add-template')
       editorUtils.setShowMobilePanel(true)
     },
+    addGroupTemplate() {
+      if (!this.currentGroup) return
+      const cb = async () => {
+        await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, vivistickerUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`)
+        return true
+      }
+      if (this.isInEditor) {
+        cb()
+      } else {
+        vivistickerUtils.startEditing(
+          this.igLayout, {
+            plan: this.currentGroup.plan,
+            assetId: this.currentGroup.id
+          }, cb, vivistickerUtils.getAssetCallback(this.currentGroup as any)
+        )
+      }
+    },
     toggleTransitions(enable: boolean) {
       // tags
       const elTags = (this.$refs.tags as any)?.$el as HTMLElement
@@ -475,6 +500,24 @@ export default defineComponent({
       border-width: 8px 10px 8px 0;
       border-color: transparent setColor(gray-4) transparent transparent;
     }
+  }
+  &__btn-add-group-template {
+    position: absolute;
+    right: 40px;
+    left: 40px;
+    bottom: 24px;
+    width: min-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 16px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    white-space: nowrap;
   }
   .category-list {
     overflow-x: hidden;

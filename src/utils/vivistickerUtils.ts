@@ -366,6 +366,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (asset.type === 7) {
         textPropUtils.updateTextPropsState()
       }
+      if (asset.type === 6) {
+        store.commit('vivisticker/SET_isInGroupTemplate', false)
+      }
     }
   }
 

@@ -683,7 +683,7 @@ class AssetUtils {
     stepsUtils.record()
   }
 
-  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
+  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }, moduleKey?: string) {
     console.log('add group template ')
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
@@ -699,7 +699,7 @@ class AssetUtils {
     }
     const promises = contents?.filter(content => childId ? content.id === childId : true)
       .map(content => this.get({ ...content, type }))
-    this.addAssetToRecentlyUsed(item as any)
+    this.addAssetToRecentlyUsed(item as any, moduleKey ?? `templates/${(store.state as any).templates.igLayout}`)
     return Promise.all(promises)
       .then(assets => {
         const updatePromise = assets.map(asset =>
@@ -737,7 +737,13 @@ class AssetUtils {
         nextTick(() => {
           pageUtils.scrollIntoPage(targetIndex)
           // @TODO: resize page/layer before adding to the store.
-          if (resize) resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
+          // if (resize) resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
+          if (resize) {
+            for (let pageOffset = 0; pageOffset < jsonDataList.length; pageOffset++) {
+              const pageIndex = targetIndex + pageOffset
+              resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), resize)
+            }
+          }
           if (isDetailPage && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
             const { width: pageWidth = 1000, physicalWidth: pagePhysicalWidth = pageWidth, unit: pageUnit = 'px' } = this.getPage(pageUtils.currFocusPageIndex)

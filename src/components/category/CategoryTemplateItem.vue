@@ -16,13 +16,10 @@ import ProItem from '@/components/payment/ProItem.vue'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import modalUtils from '@/utils/modalUtils'
-import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 /**
  * @Todo - fix the any type problems -> TingAn
@@ -59,15 +56,8 @@ export default defineComponent({
       useMobileEditor: 'getUseMobileEditor',
       isInEditor: 'vivisticker/getIsInEditor'
     }),
-    designGroupType(): number {
-      return this.$store.state.groupType
-    },
-    isDetailPage(): boolean {
-      return this.designGroupType === 1 || this.groupItem?.group_type === 1
-    },
   },
   methods: {
-    ...mapMutations('vivisticker', { setIsInGroupTemplate: 'SET_isInGroupTemplate' }),
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
@@ -83,98 +73,21 @@ export default defineComponent({
       })
     },
     addTemplate() {
-      if (this.isDetailPage && this.useMobileEditor) {
-        modalUtils.setModalInfo(
-            `${this.$t('NN0808')}`,
-            [],
-            {
-              msg: `${this.$t('NN0358')}`,
-              class: 'btn-blue-mid',
-              action: () => { return false }
-            }
-        )
-        return
-      }
-      // if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
-      // else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
-      const { match_cover: matchCover = {} } = this.item
-      let { height, width, unit } = this.item
-
-      // in some cases (single page group template), there is no item.width/item.height (unknown reason), then we get them by match_cover
-      if (width === undefined || height === undefined || unit === undefined) {
-        width = this.item.match_cover.width
-        height = this.item.match_cover.height
-        unit = this.item.match_cover.unit
-      }
-      /*
-      const theme = themeUtils
-        .getThemesBySize(matchCover.width || width, matchCover.height || height)
-        .map(theme => theme.id).join(',')
-      const isSameTheme = themeUtils.compareThemesWithPage(theme)
-      */
-      const pageSize = pageUtils.currFocusPageSize
-      const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === unit
-      const cb = this.groupItem ? (resize?: any) => {
-        assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
-      } : (resize?: any) => {
-        assetUtils.addAsset(this.item as any, resize)
-        GeneralUtils.fbq('track', 'AddToWishlist', {
-          content_ids: [this.item.id]
-        })
-      }
-
-      /**
-       * @todo show the modal if the width,height are not the same in detailed page mode
-       */
-      if (this.isDetailPage) {
-        const { width: pageWidth = 1000 } = pageSize
-        const ratio = pageWidth / (matchCover.width || width)
-        const resize = { width: pageWidth, height: (matchCover.height || height) * ratio }
-        return cb(resize)
-      }
-
-      // for vivisticker
-      if (this.isInEditor) {
-        assetUtils.addAsset(this.item as any, vivistickerUtils.getPageSize(this.igLayout))
-      } else {
+      const resize = vivistickerUtils.getPageSize(this.igLayout)
+      const moduleKey = `templates/${this.igLayout}`
+      const cb = this.groupItem ? async () => {
+        await assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize, moduleKey)
+        return true
+      } : vivistickerUtils.getAssetInitiator(this.item as IAsset, resize, moduleKey)
+      if (this.isInEditor) cb()
+      else {
         vivistickerUtils.startEditing(
           this.igLayout, {
             plan: this.item.plan,
             assetId: this.item.id
-          }, vivistickerUtils.getAssetInitiator(this.item as IAsset, vivistickerUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`), vivistickerUtils.getAssetCallback(this.item as IAsset)
+          }, cb, vivistickerUtils.getAssetCallback(this.item as IAsset)
         )
       }
-      this.setIsInGroupTemplate(false)
-
-      // size check skiped in vivisticker
-      // if (!isSameSize) {
-      //   let btnWidth = '120px'
-      //   if (this.$i18n.locale === 'tw') {
-      //     btnWidth = '120px'
-      //   } else if (this.$i18n.locale === 'us') {
-      //     btnWidth = '160px'
-      //   } else if (this.$i18n.locale === 'jp') {
-      //     btnWidth = '180px'
-      //   }
-      //   modalUtils.setModalInfo(
-      //     this.$t('NN0695') as string,
-      //     [`${this.$t('NN0209', { tsize: `${width}x${height} ${unit}`, psize: `${round(pageSize.physicalWidth, PRECISION)}x${round(pageSize.physicalHeight, PRECISION)} ${pageSize.unit}` })}`],
-      //     {
-      //       msg: `${this.$t('NN0021')}`,
-      //       class: 'btn-light-mid',
-      //       style: { border: '1px solid #4EABE6' },
-      //       action: () => {
-      //         cb(pageSize)
-      //       }
-      //     },
-      //     {
-      //       msg: `${this.$t('NN0208')}`,
-      //       action: cb
-      //     }
-      //   )
-      // } else {
-      //   cb()
-      // }
     }
   }
 })
