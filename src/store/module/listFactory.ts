@@ -6,7 +6,7 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import themeUtils from '@/utils/themeUtils'
 import { captureException } from '@sentry/browser'
-import { find } from 'lodash'
+import { cloneDeep, find } from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 export default function (this: any) {
@@ -122,8 +122,9 @@ export default function (this: any) {
         dispatch('getRecently', false),
         dispatch('getCategories', false)
       ]).then(([recently, category]) => {
-        category.content = recently.content.concat(category.content)
-        commit('SET_CATEGORIES', category)
+        const result = cloneDeep(category)
+        result.content = recently.content.concat(category.content)
+        commit('SET_CATEGORIES', result)
         if (category.content.length === 0) {
           dispatch('getMoreContent')
         }
