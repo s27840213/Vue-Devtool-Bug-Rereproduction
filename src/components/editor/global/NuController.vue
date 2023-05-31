@@ -34,7 +34,7 @@ div(:layer-index="`${layerIndex}`"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
         div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
+          nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
             class="text__body"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
@@ -161,6 +161,7 @@ div(:layer-index="`${layerIndex}`"
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import { IResizer } from '@/interfaces/controller'
+import { isTextFill } from '@/interfaces/format'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
@@ -181,12 +182,11 @@ import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import textBgUtils from '@/utils/textBgUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -347,7 +347,6 @@ export default defineComponent({
       }
     },
     contentStyles(): any {
-      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
@@ -361,7 +360,6 @@ export default defineComponent({
          * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
          */
         // touchAction: this.isActive ? 'none' : 'initial',
-        ...textBgStyles,
       }
     },
     isImgControl(): boolean {
@@ -412,7 +410,10 @@ export default defineComponent({
     },
     getLayerType(): string {
       return this.config.type
-    }
+    },
+    textHtml(): any {
+      return tiptapUtils.toJSON(this.config.paragraphs)
+    },
   },
   watch: {
     scaleRatio() {
@@ -632,19 +633,12 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const textstyles = {
+      const checkTextFill = isTextFill(this.config.styles.textFill)
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) && !this.contentEditable ? 0 : 1
+      return {
         width: '100%',
         height: '100%',
-        userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: 1
-      }
-      return !(this.isCurveText || this.isFlipped || this.isFlipping) ? textstyles : {
-        width: 'auto',
-        height: 'auto',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        opacity: this.contentEditable ? 1 : 0
+        opacity,
       }
     },
     primaryLayerZindex() {
@@ -1620,9 +1614,6 @@ export default defineComponent({
         transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px) scale(${this.contentScaleRatio})`
           : `translate(0px, 0px) scale(${this.contentScaleRatio})`
       }
-    },
-    textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
     },
   }
 })

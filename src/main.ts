@@ -72,6 +72,7 @@ declare module '@vue/runtime-core' {
   }
   function provide<T>(key: InjectionKey<T> | string | number, value: T | ComputedRef<T>): void
 }
+// app.config.unwrapInjectedRef = true
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 app.config.globalProperties.$isTablet = () => generalUtils.isTablet()
 app.config.globalProperties.$eventBus = eventBus

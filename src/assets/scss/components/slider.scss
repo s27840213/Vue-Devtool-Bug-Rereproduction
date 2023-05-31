@@ -21,6 +21,7 @@
                 transition: 0.2s;
                 margin-top: -6.5px;
                 position: relative;
+                cursor: pointer;
                 @media screen and (max-width: 976px) {
                     @if $type=='top' {
                         width: 40px;
