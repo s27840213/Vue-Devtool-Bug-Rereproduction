@@ -147,16 +147,20 @@ export default defineComponent({
       return TextShapeUtils.convertTextShape(this.textWidth, this.bend(), mainFontSize)
     },
     spanStyle(styles: ISpanStyle, sIndex: number) {
+      const fontSize = styles.size
       const { textHeight, minHeight } = this
       const bend = this.bend()
       const transforms = this.transforms()
-      const baseline = `${(minHeight - textHeight[sIndex]) / 2}px`
+      const baseline = `${(minHeight - textHeight[sIndex]) / 2 - fontSize}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
       const textFillStyle = this.textFillSpanStyle[0]?.[sIndex] ?? {}
       return Object.assign(
         fontStyles,
-        { textIndent: fontStyles['letter-spacing'] || 'initial' },
-        { transform: transforms[sIndex] || 'none' },
+        {
+          textIndent: fontStyles['letter-spacing'] || 'initial',
+          transform: transforms[sIndex] || 'none',
+          padding: `${fontSize}px`,
+        },
         bend >= 0 ? { top: baseline } : { bottom: baseline },
         textFillStyle,
       )
