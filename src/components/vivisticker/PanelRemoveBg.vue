@@ -10,31 +10,32 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
       :inVivisticker="true"
       :fitScaleRatio="bgRemoveScaleRatio")
   nubtn(v-else theme="primary" size="mid-center" @click="removeBg") {{ $t('NN0043') }}
-  //- teleport(to="body")
-  //-   div(class="panel-remove-bg__test-input")
-  //-     mobile-slider(
-  //-       :title="'scale'"
-  //-       :borderTouchArea="true"
-  //-       :name="'scale'"
-  //-       :value="bgRemoveScaleRatio"
-  //-       :min="minRatio"
-  //-       :max="maxRatio"
-  //-       :step="0.01"
-  //-       @update="setScaleRatio")
+  teleport(to="body")
+    div(class="panel-remove-bg__test-input")
+      mobile-slider(
+        :title="'scale'"
+        :borderTouchArea="true"
+        :name="'scale'"
+        :value="bgRemoveScaleRatio"
+        :min="minRatio"
+        :max="maxRatio"
+        :step="0.01"
+        @update="setScaleRatio")
 </template>
 
 <script lang="ts">
-import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import generalUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-
 export default defineComponent({
   components: {
-    BgRemoveArea
+    BgRemoveArea,
+    MobileSlider
   },
   data() {
     return {
@@ -52,7 +53,7 @@ export default defineComponent({
     this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
     this.rmSection = this.$refs.rmSection as HTMLElement
 
-    this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
+    // this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
   },
   unmounted() {
     bgRemoveUtils.setInBgRemoveMode(false)
@@ -92,6 +93,9 @@ export default defineComponent({
     removeBg() {
       uploadUtils.chooseAssets('stk-bg-remove')
     },
+    setScaleRatio(val: number) {
+      this.bgRemoveScaleRatio = val
+    },
     pinchHandler(event: AnyTouchEvent) {
       switch (event.phase) {
         /**
@@ -104,7 +108,6 @@ export default defineComponent({
         }
         case 'move': {
           const ratio = this.tmpScaleRatio * event.scale
-          console.log(`delta scale: ${event.deltaScale}`)
           if (ratio <= this.minRatio) {
             this.bgRemoveScaleRatio = this.minRatio
           } else if (ratio >= this.maxRatio) {
