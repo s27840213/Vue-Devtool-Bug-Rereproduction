@@ -10,17 +10,17 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
       :inVivisticker="true"
       :fitScaleRatio="bgRemoveScaleRatio")
   nubtn(v-else theme="primary" size="mid-center" @click="removeBg") {{ $t('NN0043') }}
-  //- teleport(to="body")
-  //-   div(class="panel-remove-bg__test-input")
-  //-     mobile-slider(
-  //-       :title="'scale'"
-  //-       :borderTouchArea="true"
-  //-       :name="'scale'"
-  //-       :value="bgRemoveScaleRatio"
-  //-       :min="minRatio"
-  //-       :max="maxRatio"
-  //-       :step="0.01"
-  //-       @update="setScaleRatio")
+  teleport(to="body")
+    div(class="panel-remove-bg__test-input")
+      mobile-slider(
+        :title="'scale'"
+        :borderTouchArea="true"
+        :name="'scale'"
+        :value="bgRemoveScaleRatio"
+        :min="minRatio"
+        :max="maxRatio"
+        :step="0.01"
+        @update="setScaleRatio")
 </template>
 
 <script lang="ts">
@@ -91,6 +91,9 @@ export default defineComponent({
     }),
     removeBg() {
       uploadUtils.chooseAssets('stk-bg-remove')
+    },
+    setScaleRatio(val: number) {
+      this.bgRemoveScaleRatio = val
     },
     pinchHandler(event: AnyTouchEvent) {
       switch (event.phase) {
