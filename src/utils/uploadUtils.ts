@@ -560,10 +560,13 @@ class UploadUtils {
 
     formData.append('file', blob)
 
-    await new Promise<void>(resolve => {
+    await new Promise<void>((resolve, reject) => {
       xhr.open('POST', this.loginOutput.upload_log_map.url, true)
       xhr.send(formData)
-      xhr.onerror = networkUtils.notifyNetworkError
+      xhr.onerror = () => {
+        networkUtils.notifyNetworkError()
+        reject(new Error('upload to s3 failed'))
+      }
       xhr.onload = () => {
         resolve()
       }
