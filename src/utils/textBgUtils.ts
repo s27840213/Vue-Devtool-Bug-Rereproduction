@@ -854,7 +854,7 @@ class TextBg {
     return {}
   }
 
-  isSplitedSpan(styles: ITextStyle) {
+  isSplitSpan(styles: ITextStyle) {
     const { textBg, textFill } = styles
     return (isITextLetterBg(textBg) && textBg.fixedWidth) ||
       (isTextFill(textFill))
@@ -1175,10 +1175,10 @@ class TextBg {
         styles: { textBg: newTextBg }
       })
 
-      // If SplitedSpan setting changed, force split/unsplit span text
-      const oldSplitedSpan = this.isSplitedSpan({ ...layer.styles, textBg: oldTextBg })
-      const newSplitedSpan = this.isSplitedSpan({ ...layer.styles, textBg: newTextBg })
-      this.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
+      // If SplitSpan setting changed, force split/unsplit span text
+      const oldSplitSpan = this.isSplitSpan({ ...layer.styles, textBg: oldTextBg })
+      const newSplitSpan = this.isSplitSpan({ ...layer.styles, textBg: newTextBg })
+      this.splitOrMergeSpan(oldSplitSpan, newSplitSpan, layer,
         pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
 
       // Update width for tiptap layer
@@ -1196,12 +1196,12 @@ class TextBg {
     }
   }
 
-  splitOrMergeSpan(oldSplitedSpan: boolean, newSplitedSpan: boolean, layer: IText,
+  splitOrMergeSpan(oldSplitSpan: boolean, newSplitSpan: boolean, layer: IText,
     pageIndex: number, layerIndex: number, subLayerIndex: number) {
-    if (oldSplitedSpan === newSplitedSpan) return
+    if (oldSplitSpan === newSplitSpan) return
 
     const paragraphs = cloneDeep(layer.paragraphs)
-    if (newSplitedSpan) { // Split span, another one in tiptapUtils.toIParagraph
+    if (newSplitSpan) { // Split span, another one in tiptapUtils.toIParagraph
       paragraphs.forEach(p => {
         const newSpans = p.spans.flatMap(span =>
           textUtils.splitter.splitGraphemes(span.text)
@@ -1226,7 +1226,7 @@ class TextBg {
     tiptapUtils.updateHtml() // Vuex config => tiptap
 
     // When fixedWith true => false, this can force tiptap merge span that have same attrs.
-    if (document.querySelector('.ProseMirror') && !newSplitedSpan) {
+    if (document.querySelector('.ProseMirror') && !newSplitSpan) {
       tiptapUtils.agent((editor: Editor) => {
         editor.commands.selectAll()
         editor.chain().updateAttributes('textStyle', { spanIndex: -1 }).run()

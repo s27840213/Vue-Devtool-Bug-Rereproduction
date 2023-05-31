@@ -153,7 +153,7 @@ class TiptapUtils {
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
           const config = layerUtils.getCurrConfig as IText
-          const splitedSpan = textBgUtils.isSplitedSpan(config.styles)
+          const splitSpan = textBgUtils.isSplitSpan(config.styles)
           const textEffectStyles = textEffectUtils.convertTextEffect(config)
           pObj.content = spans.map((s, sIndex) => {
             return {
@@ -163,7 +163,7 @@ class TiptapUtils {
                 type: 'textStyle',
                 attrs: Object.assign(this.makeSpanStyle(s.styles),
                   textEffectStyles,
-                  splitedSpan ? { spanIndex: sIndex, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {},
+                  splitSpan ? { spanIndex: sIndex, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {},
                 )
               }]
             }
@@ -262,10 +262,10 @@ class TiptapUtils {
     let isSetContentRequired = false
 
     // If fixedWidth, all span should split into one text per span
-    const splitedSpan = tiptapJSON.content?.some(p => {
+    const splitSpan = tiptapJSON.content?.some(p => {
       return p.content?.some(span => ![-1, undefined].includes(span.marks?.[0].attrs?.spanIndex))
     })
-    if (splitedSpan) {
+    if (splitSpan) {
       tiptapJSON.content.forEach(p => {
         p.content && p.content.forEach(s => {
           // Check if some text need to be split here.
@@ -287,7 +287,7 @@ class TiptapUtils {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
       let largestSize = 0
       const spans: ISpan[] = []
-      const pContent = splitedSpan && paragraph.content && !this.editor.view.composing
+      const pContent = splitSpan && paragraph.content && !this.editor.view.composing
         // Split span for fixedWidth, another one in textBgUtils.setTextBg
         ? paragraph.content.flatMap(span => textUtils.splitter.splitGraphemes(span.text)
           .map(t => Object.assign({}, span, { text: t })))

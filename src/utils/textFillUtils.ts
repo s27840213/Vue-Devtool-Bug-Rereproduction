@@ -293,14 +293,14 @@ class TextFill {
         props: { contentEditable: false },
       })
 
-      // If SplitedSpan setting changed, force split/unsplit span text
-      const oldSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: oldTextFill })
-      const newSplitedSpan = textBgUtils.isSplitedSpan({ ...layer.styles, textFill: newTextFill })
-      textBgUtils.splitOrMergeSpan(oldSplitedSpan, newSplitedSpan, layer,
+      // If SplitSpan setting changed, force split/unsplit span text
+      const oldSplitSpan = textBgUtils.isSplitSpan({ ...layer.styles, textFill: oldTextFill })
+      const newSplitSpan = textBgUtils.isSplitSpan({ ...layer.styles, textFill: newTextFill })
+      textBgUtils.splitOrMergeSpan(oldSplitSpan, newSplitSpan, layer,
         pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
 
       // Recalc width/height since split span will alter width slightly
-      if (oldSplitedSpan !== newSplitedSpan) {
+      if (oldSplitSpan !== newSplitSpan) {
         textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
       }
 
