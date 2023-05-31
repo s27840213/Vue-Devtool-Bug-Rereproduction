@@ -91,8 +91,8 @@ import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
-import PopupDownload from '@/components/popup/PopupDownload.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
+import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
 import PanelPageManagement from '@/components/vivisticker/PanelPageManagement.vue'
@@ -233,6 +233,9 @@ export default defineComponent({
     bottomTheme(): boolean {
       return ['add-template', 'page-management'].includes(this.currActivePanel)
     },
+    glassTheme(): boolean {
+      return ['page-management'].includes(this.currActivePanel)
+    },
     fixSize(): boolean {
       return [
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
@@ -295,7 +298,11 @@ export default defineComponent({
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
-          backgroundColor: this.whiteTheme ? 'white' : this.bottomTheme ? '#141414' : '#1F1F1F',
+          backgroundColor: this.whiteTheme ? 'white'
+            : this.glassTheme ? 'rgba(20, 20, 20, 0.8)'
+              : this.bottomTheme ? '#141414'
+                : '#1F1F1F',
+          backdropFilter: this.glassTheme ? 'blur(5px)' : 'none',
           maxHeight: this.isDuringCopy ? '0' : (
             this.fixSize || this.extraFixSizeCondition
               ? '100%' : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px'
