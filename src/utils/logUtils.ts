@@ -11,7 +11,7 @@ class LogUtils {
     try {
       await uploadUtils.uploadLog(log)
       this.clearLog() // clear log only after log is successfully uploaded
-      this.setLog(this.logBuffer, false) // set content of log buffer back to localStorage
+      localStorage.setItem('log', this.logBuffer) // set content of log buffer back to localStorage
       this.logBuffer = ''
       this.isUploadingLog = false
     } catch (error) {

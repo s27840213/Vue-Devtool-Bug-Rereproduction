@@ -591,12 +591,15 @@ class UploadUtils {
 
     formData.append('file', blob)
 
-    xhr.open('POST', this.loginOutput.upload_log_map.url, true)
-    xhr.send(formData)
-    xhr.onerror = networkUtils.notifyNetworkError
-    xhr.onload = () => {
-      // console.log(xhr)
-    }
+    await new Promise<void>(resolve => {
+      xhr.open('POST', this.loginOutput.upload_log_map.url, true)
+      xhr.send(formData)
+      xhr.onerror = networkUtils.notifyNetworkError
+      xhr.onload = (data) => {
+        console.log(xhr)
+        resolve()
+      }
+    })
   }
 
   async uploadDesign(putAssetDesignType?: PutAssetDesignType, params?: { clonedPages?: Array<IPage> }) {
