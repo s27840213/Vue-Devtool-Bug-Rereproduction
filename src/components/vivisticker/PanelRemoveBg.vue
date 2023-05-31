@@ -24,7 +24,7 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
 </template>
 
 <script lang="ts">
-import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import generalUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -52,7 +52,7 @@ export default defineComponent({
     this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
     this.rmSection = this.$refs.rmSection as HTMLElement
 
-    this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
+    // this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
   },
   unmounted() {
     bgRemoveUtils.setInBgRemoveMode(false)
@@ -104,7 +104,6 @@ export default defineComponent({
         }
         case 'move': {
           const ratio = this.tmpScaleRatio * event.scale
-          console.log(`delta scale: ${event.deltaScale}`)
           if (ratio <= this.minRatio) {
             this.bgRemoveScaleRatio = this.minRatio
           } else if (ratio >= this.maxRatio) {
