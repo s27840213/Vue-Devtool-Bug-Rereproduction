@@ -46,14 +46,19 @@ export default defineComponent({
       panelRemoveBgAt: null as unknown as AnyTouch,
       tmpScaleRatio: 1,
       minRatio: 0.1,
-      maxRatio: 5
+      maxRatio: 5,
+      isPanning: false,
+      startScrollTop: 0,
+      startClientY: 0,
+      startScrollLeft: 0,
+      startClientX: 0
     }
   },
   mounted() {
     this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
     this.rmSection = this.$refs.rmSection as HTMLElement
 
-    // this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
+    this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
   },
   unmounted() {
     bgRemoveUtils.setInBgRemoveMode(false)
@@ -125,6 +130,35 @@ export default defineComponent({
         }
       }
     },
+    // eslint-disable-next-line vue/no-unused-properties
+    handleTouchStart(event: TouchEvent) {
+      if (event.touches.length === 2) {
+        // If two fingers are detected, start panning
+        this.isPanning = true
+        this.startScrollTop = this.rmSection.scrollTop
+        this.startClientY = event.touches[0].clientY
+
+        this.startScrollLeft = this.rmSection.scrollLeft
+        this.startClientX = event.touches[0].clientX
+      }
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    handleTouchMove(event: TouchEvent) {
+      if (this.isPanning && event.touches.length === 2) {
+        // Calculate the vertical distance moved by the two fingers
+        const deltaX = event.touches[0].clientX - this.startClientX
+        const deltaY = event.touches[0].clientY - this.startClientY
+
+        // Set the new scrollTop position based on the initial position and the finger movement
+        this.rmSection.scrollLeft = this.startScrollLeft - deltaX
+        this.rmSection.scrollTop = this.startScrollTop - deltaY
+        event.preventDefault() // Prevent the default scrolling behavior
+      }
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    handleTouchEnd() {
+      this.isPanning = false
+    }
   },
   watch: {
     inBgRemoveMode(val) {
@@ -153,6 +187,11 @@ export default defineComponent({
     bgRemoveScaleRatio(val) {
       if (!this.rmSection) {
         this.rmSection = this.$refs.rmSection as HTMLElement
+        this.$nextTick(() => {
+          this.rmSection.addEventListener('touchstart', this.handleTouchStart, false)
+          this.rmSection.addEventListener('touchmove', this.handleTouchMove, false)
+          this.rmSection.addEventListener('touchend', this.handleTouchEnd, false)
+        })
         return
       }
       generalUtils.scaleFromCenter(this.rmSection)
