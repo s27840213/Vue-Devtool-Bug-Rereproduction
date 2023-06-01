@@ -163,6 +163,7 @@
   display: block;
   appearance: none;
   outline: none;
+  background: transparent;
 
   &::-webkit-slider-runnable-track {
     height: $height;

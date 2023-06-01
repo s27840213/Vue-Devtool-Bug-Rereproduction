@@ -143,6 +143,7 @@ export default defineComponent({
     color: setColor(gray-2);
     text-align: center;
     border-radius: 0.25rem;
+    background: transparent;
   }
 
   &__range-input-wrapper {
