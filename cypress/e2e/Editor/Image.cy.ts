@@ -110,7 +110,7 @@ for (const isMobile of [true, false]) {
             .layerLock()
             .layerDelete()
             .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
-            .layerRotateAndResize()
+            .layerRotateAndResize(isMobile)
             // .layerMultipleCopyAndMove('functionalPanel', isMobile)
             // .layerMultipleCopyAndMove('shortcut', isMobile) // Skip in mobile
             // .layerMultipleCopyAndMove('rightclick', isMobile) // Skip in mobile

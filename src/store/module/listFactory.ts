@@ -2,14 +2,16 @@ import list from '@/apis/list'
 import i18n from '@/i18n'
 import { IListServiceContentData, IListServiceData } from '@/interfaces/api'
 import {
-  IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, IPending, isICategory,
-  isITag, ITag, ITagExtend
+  IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, IPending,
+  ITag, ITagExtend,
+  isICategory,
+  isITag
 } from '@/interfaces/module'
 import store from '@/store'
-import localeUtils from '@/utils/localeUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
-import popupUtils from '@/utils/popupUtils'
+import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
+import popupUtils from '@/utils/popupUtils'
 import themeUtils from '@/utils/themeUtils'
 import vivistickerUtils, { MODULE_TYPE_MAPPING } from '@/utils/vivistickerUtils'
 import { captureException } from '@sentry/browser'
@@ -177,14 +179,14 @@ export default function (this: any) {
       await Promise.all([
         dispatch('getRecently', { writeBack: false }),
         dispatch('getCategories', false)
-      ]).then(([recently, category]) => {
-        category.content = recently.content.concat(category.content)
-        commit('SET_CATEGORIES', category)
+      ]).then(async ([recently, category]) => {
+        const result = cloneDeep(category)
+        result.content = recently.content.concat(category.content)
+        commit('SET_CATEGORIES', result)
         if (key) {
-          return vivistickerUtils.listAsset(key)
+          await vivistickerUtils.listAsset(key)
         }
-      }).then(() => {
-        if (state.categories.length === 0) {
+        if (category.content.length === 0) {
           dispatch('getMoreContent')
         }
       })

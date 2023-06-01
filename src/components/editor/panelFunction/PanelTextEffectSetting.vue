@@ -1,122 +1,167 @@
 <template lang="pug">
-div(class="text-effect-setting mt-25")
-  //- Tabs to choose effect category: shadow, shape and bg.
-  div(class="text-effect-setting-tabs")
-    span(v-for="category in textEffects"
-      :key="category.name"
-      :selected="currTab===category.name"
-      @click="switchTab(category.name)") {{category.label}}
-  div(class="action-bar")
-    template(v-for="effects1d in currCategory.effects2d" :key="effects1d.name")
-      //- To choose effect, ex: hollow, splice or echo.
-      div(class="text-effect-setting__effects mb-10")
-        div(v-for="effect in effects1d"
-            :key="`${currCategory.name}-${effect.key}`"
-            class="text-effect-setting__effect pointer"
-            :class="{'selected': currentStyle.name === effect.key }"
-            @click="onEffectClick(effect)")
-          img(:src="effectIcon(currCategory, effect)"
-              width="56" height="56" v-hint="effect.label")
-          pro-item(v-if="effect.plan" theme="roundedRect")
-      //- Effect option UI.
-      div(v-if="getOptions(effects1d) && getOptions(effects1d)?.length !== 0"
-          class="text-effect-setting-options")
-        div(v-for="option in getOptions(effects1d)"
-            :key="option.key"
-            class="text-effect-setting-options__field")
-          div(class="text-effect-setting-options__field--name") {{option.label}}
-          //- Option type select
-          div(v-if="option.type === 'select'"
-              class="text-effect-setting-options__field--select")
-            svg-icon(v-for="sel in option.select"
-              :key="`${option.key}-${sel.key}`"
-              :iconName="`${option.key}-${sel.key}`"
-              iconWidth="24px"
-              :class="{'selected': currentStyle.endpoint === sel.key }"
-              @click="handleSelectInput(option.key, sel.key)")
-          //- Option type range
-          template(v-if="option.type === 'range'")
-            input(class="text-effect-setting-options__field--number"
-              :value="getInputValue(currentStyle, option)"
-              :name="option.key"
-              :max="option.max"
-              :min="option.min"
-              :step="option.key === 'lineHeight' ? 0.01 : 1"
-              @change="(e)=>{handleRangeInput(e, option);recordChange()}"
-              type="number")
-            input(class="text-effect-setting-options__field--range input__slider--range"
-              :value="getInputValue(currentStyle, option)"
-              :name="option.key"
-              :max="option.max"
-              :min="option.min"
-              :step="option.key === 'lineHeight' ? 0.01 : 1"
-              @input="(e)=>handleRangeInput(e, option)"
-              @mousedown="handleRangeMousedown()"
-              @mouseup="handleRangeMouseup()"
-              v-ratio-change
-              type="range")
-          //- Option type color
-          color-btn(v-if="option.type === 'color'" size="25px"
-            :color="colorParser(currentStyle[option.key])"
-            :active="option.key === colorTarget && settingTextEffect"
-            @click="handleColorModal(currCategory.name, option.key)")
-        div(class="text-effect-setting-options__field")
-          span
-          span(class="text-effect-setting-options__field--reset"
-              @click="resetTextEffect()") {{$t('NN0754')}}
+div(class="text-effect-setting")
+  div(class="text-effect-setting__title") {{ $t('NN0095') }}
+  //- Effect category: shadow, shape, bg and fill.
+  div(v-for="category in textEffects" :key="category.name"
+      class="text-effect-setting__category"
+      :selected="currCategoryName === category.name")
+    span(@click="switchTab(category.name)") {{category.label}}
+      svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="24px")
+    //- Effect icons and options.
+    collapse(:when="currCategoryName === category.name"
+            class="text-effect-setting__effects2d")
+      template(v-for="(effects1d, idx1d) in category.effects2d" :key="idx1d")
+        //- Effects, ex: hollow, splice or echo.
+        div(class="text-effect-setting__effects1d")
+          div(v-for="effect in effects1d"
+              :key="`${category.name}-${effect.key}`"
+              class="text-effect-setting__effect pointer"
+              :class="{'selected': getStyle(category).name === effect.key }"
+              @click="onEffectClick(effect)")
+            svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
+              :iconName="effectIcon(category, effect).name"
+              :iconWidth="effectIcon(category, effect).size"
+              iconColor="white"
+              v-hint="effect.label")
+            img(v-else :src="effectIcon(category, effect).name"
+              :width="effectIcon(category, effect).size"
+              :height="effectIcon(category, effect).size"
+              draggable="false"
+              v-hint="effect.label")
+            pro-item(v-if="effect.plan" theme="roundedRect")
+        //- Effect options.
+        div(v-if="getOptions(effects1d, category) && getOptions(effects1d, category)?.length !== 0"
+            class="text-effect-setting__options")
+          div(v-for="option in getOptions(effects1d, category)" :key="option.key"
+              class="text-effect-setting__option"
+              :class="{disabled: optionDisabled(option)}")
+            div(class="text-effect-setting__option--name") {{option.label}}
+            //- Option type select
+            div(v-if="option.type === 'select'"
+                class="text-effect-setting__option--select")
+              div(v-for="sel in option.select"
+                  :key="`${option.key}-${sel.key}`")
+                img(:src="sel.img"
+                    :class="{'selected': ((getStyle(category)[option.key] as Record<'key', string>).key ?? getStyle(category)[option.key]) === sel.key }"
+                    draggable="false"
+                    @click="handleSelectInput(sel.attrs)")
+            //- Option type range
+            template(v-if="option.type === 'range'")
+              input(class="text-effect-setting__option--number"
+                :value="getInputValue(getStyle(category), option)"
+                :name="option.key"
+                :max="option.max"
+                :min="option.min"
+                :step="option.key === 'lineHeight' ? 0.01 : 1"
+                @change="(e)=>{handleRangeInputEvent(e, option);recordChange()}"
+                type="number")
+              input(class="text-effect-setting__option--range input__slider--range"
+                v-progress
+                :value="getInputValue(getStyle(category), option)"
+                :name="option.key"
+                :max="option.max"
+                :min="option.min"
+                :step="option.key === 'lineHeight' ? 0.01 : 1"
+                @input="(e)=>handleRangeInputEvent(e, option)"
+                @mousedown="setEffectFocus(true)"
+                @mouseup="setEffectFocus(false)"
+                v-ratio-change
+                type="range")
+            //- Option type color
+            color-btn(v-if="option.type === 'color' && getStyle(category)[option.key]" size="25px"
+              :color="colorParser(getStyle(category)[option.key] as string)"
+              :active="option.key === colorTarget && settingTextEffect"
+              @click="handleColorModal(option)")
+            //- Option type img
+            div(v-if="option.type === 'img'"
+                class="text-effect-setting__option--img"
+                @click="chooseImg(option.key)")
+              img(:src="getStyleImg")
+              div
+              svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="16px")
+          div(class="text-effect-setting__option")
+            span(class="text-effect-setting__option--admin"
+                @click="adminTool.action()") {{ adminTool.label }}
+            span(class="text-effect-setting__option--reset"
+                @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
+<!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
+import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
+import { isTextFill } from '@/interfaces/format'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
+import constantData, { IEffect, IEffectCategory, IEffectOption, IEffectOptionRange } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textFillUtils from '@/utils/textFillUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
-import { mapState } from 'vuex'
+import { Collapse } from 'vue-collapsed'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
+  name: 'PanelTextEffectSetting',
   components: {
     ColorBtn,
     ProItem,
+    Collapse,
   },
   emits: ['toggleColorPanel'],
   data() {
     return {
-      currTab: localStorageUtils.get('textEffectSetting', 'tab') as 'shadow'|'bg'|'shape',
+      currTab: localStorageUtils.get('textEffectSetting', 'tab') as string,
       textEffects: constantData.textEffects(),
-      colorTarget: ''
+      colorTarget: '',
     }
   },
   computed: {
     ...mapState('text', {
       selectedTextProps: 'props'
     }),
-    currCategory():IEffectCategory {
-      return _.find(this.textEffects, ['name', this.currTab]) as IEffectCategory
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    }),
+    currCategoryName() {
+      return this.currTab
     },
-    currentStyle(): Record<string, string> {
+    currentStyle(): {name: string} & Record<string, unknown> {
       const { styles } = textEffectUtils.getCurrentLayer()
+      if (!styles) return { name: 'none' }
       return {
         shadow: styles.textEffect,
         bg: styles.textBg,
-        shape: styles.textShape
-      }[this.currTab] as Record<string, string>
+        shape: styles.textShape,
+        fill: styles.textFill,
+      }[this.currCategoryName] as {name: string} & Record<string, unknown> ?? {} // Type incorrect
     },
     settingTextEffect(): boolean {
       return colorUtils.currEvent === 'setTextEffectColor' &&
         editorUtils.showColorSlips
-    }
+    },
+    getStyleImg(): string {
+      return textFillUtils.getTextFillImg(textEffectUtils.getCurrentLayer())
+    },
+    adminTool() {
+      if (this.isAdmin && this.currCategoryName === 'fill' && this.currentStyle.name !== 'none') {
+        return {
+          label: this.currentStyle.name === 'custom-fill-img' ? '上傳文字填滿' : '更新文字填滿',
+          action: () => { textFillUtils.uploadTextFill() },
+        }
+      }
+      return { label: '', action: () => { /**/ } }
+    },
   },
   mounted() {
     colorUtils.on(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
@@ -127,35 +172,86 @@ export default defineComponent({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
-    effectIcon(category: IEffectCategory, effect: IEffect): string {
-      const postfix = effect.key === 'text-book' ? `-${i18n.global.locale}` : ''
-      return require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}${postfix}.png`)
+    effectIcon(category: IEffectCategory, effect: IEffect) {
+      if (effect.img) { // For TextFill that from appJSON, use web img as icon.
+        return {
+          name: effect.img,
+          size: '56',
+        }
+      }
+      switch (effect.key) {
+        case 'text-book':
+          return {
+            name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
+            size: '56',
+          }
+        case 'custom-fill-img': // svg-icon
+          return {
+            name: 'add-image',
+            size: '24px',
+          }
+        default:
+          return {
+            name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}.png`),
+            size: '56',
+          }
+      }
     },
-    handleColorModal(category: 'shadow'|'bg'|'shape', key: string) {
-      const currColor = this.colorParser(this.currentStyle[key])
+    handleColorModal(option: IEffectOption) {
+      const currColor = this.colorParser(this.currentStyle[option.key] as string)
 
-      this.colorTarget = key
+      this.colorTarget = option.key
       editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(currColor)
     },
-    switchTab(category: 'shadow'|'bg'|'shape') {
-      this.currTab = category
-      localStorageUtils.set('textEffectSetting', 'tab', category)
+    switchTab(category: 'shadow'|'bg'|'shape'|'fill') {
+      if (category === this.currTab) this.currTab = ''
+      else this.currTab = category
+      localStorageUtils.set('textEffectSetting', 'tab', this.currTab)
     },
-    getOptions(effects1d: IEffect[]) {
-      return _.find(effects1d, ['key', this.currentStyle.name])?.options
+    getStyle(category: IEffectCategory) {
+      const { styles } = textEffectUtils.getCurrentLayer()
+      return {
+        shadow: styles.textEffect,
+        bg: styles.textBg,
+        shape: styles.textShape,
+        fill: styles.textFill,
+      }[category.name] as Record<string, unknown> ?? {}
     },
-    getInputValue(style: Record<string, string>, option: IEffectOptionRange) {
+    getOptions(effects1d: IEffect[], category: IEffectCategory) {
+      return _.find(effects1d, ['key', this.getStyle(category).name])?.options
+    },
+    getInputValue(style: Record<string, unknown>, option: IEffectOptionRange) {
       if (['lineHeight', 'fontSpacing'].includes(option.key)) {
         return this.selectedTextProps[option.key]
       } else {
         return style[option.key]
       }
     },
+    optionDisabled(option: IEffectOption) {
+      const config = textEffectUtils.getCurrentLayer()
+      const textFill = config.styles.textFill
+      if (this.currCategoryName === 'fill' && isTextFill(textFill) && textFill.size === 100) {
+        const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } =
+          textFillUtils.calcTextFillVar(config)
+        if ((option.key === 'xOffset200' && (imgWidth === divWidth || scaleByWidth)) ||
+          (option.key === 'yOffset200' && (imgHeight === divHeight || !scaleByWidth))) {
+          return true
+        }
+      }
+      return false
+    },
+    async resetTextEffect() {
+      const target = this.currCategoryName === 'shadow' ? textEffectUtils
+        : this.currCategoryName === 'shape' ? textShapeUtils
+          : this.currCategoryName === 'bg' ? textBgUtils : textFillUtils
+      await target.resetCurrTextEffect()
+      this.recordChange()
+    },
     async setEffect(options:{
       effectName?: string,
-      effect?: Record<string, string|number|boolean>
+      effect?: Record<string, unknown>
     }) {
       let { effectName, effect } = options
       const { textShape } = textEffectUtils.getCurrentLayer().styles
@@ -163,22 +259,25 @@ export default defineComponent({
         effectName = this.currentStyle.name || 'none'
       }
 
-      switch (this.currTab) {
+      switch (this.currCategoryName) {
         case 'shadow':
           textEffectUtils.setTextEffect(effectName,
             Object.assign({}, effect, { ver: 'v1' }))
           break
         case 'bg':
-          await textBgUtils.setTextBg(effectName, Object.assign({}, effect))
+          await textBgUtils.setTextBg(effectName, effect)
           if (textShape.name !== 'none') {
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
             textPropUtils.updateTextPropsState()
           }
           break
         case 'shape':
-          textShapeUtils.setTextShape(effectName, Object.assign({}, effect))
+          textShapeUtils.setTextShape(effectName, effect)
           textPropUtils.updateTextPropsState()
           await textBgUtils.setTextBg('none') // Bg & shape are exclusive.
+          break
+        case 'fill':
+          await textFillUtils.setTextFill(effectName, effect)
           break
       }
     },
@@ -186,35 +285,42 @@ export default defineComponent({
       if (!paymentUtils.checkPro(effect, 'pro-text')) return
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
+
+      const chooseImgkey = effect.options.find(op => op.type === 'img')?.key ?? ''
+      if (chooseImgkey && !this.getStyleImg) {
+        this.chooseImg(chooseImgkey)
+      }
     },
-    resetTextEffect() {
-      const target = this.currTab === 'shadow' ? textEffectUtils
-        : this.currTab === 'shape' ? textShapeUtils : textBgUtils
-      target.resetCurrTextEffect()
+    async handleSelectInput(attrs: Record<string, unknown>) {
+      await this.setEffect({ effect: attrs })
       this.recordChange()
     },
-    async handleSelectInput(key: string, newVal: string) {
-      await this.setEffect({ effect: { [key]: newVal } })
-      this.recordChange()
+    handleRangeInputEvent(event: Event, option: IEffectOptionRange) {
+      this.handleRangeInput(parseFloat((event.target as HTMLInputElement).value), option)
     },
-    handleRangeInput(event: Event, option: IEffectOptionRange) {
-      const name = (event.target as HTMLInputElement).name
-      const value = parseFloat((event.target as HTMLInputElement).value)
+    handleRangeInput(value: number, option: IEffectOptionRange) {
       const newVal = {
-        [name]: _.clamp(value, option.min, option.max)
+        [option.key]: _.clamp(value, option.min, option.max)
       }
       this.setEffect({ effect: newVal })
     },
-    handleRangeMouseup() {
-      if (this.currTab === 'shape') {
-        this.setEffect({ effect: { focus: false } })
+    async setEffectFocus(focus: boolean) {
+      if (this.currentStyle.name === 'curve' ||
+        (this.currCategoryName === 'fill' && this.currentStyle.name !== 'none')) {
+        await this.setEffect({ effect: { focus } })
+        if (!focus) this.recordChange()
       }
-      this.recordChange()
     },
-    handleRangeMousedown() {
-      if (this.currTab === 'shape') {
-        this.setEffect({ effect: { focus: true } })
+    replaceImg(key: string) {
+      return (img: IAssetPhoto | IPhotoItem) => {
+        this.setEffect({ effect: { [key]: img } })
+        this.recordChange()
       }
+    },
+    chooseImg(key: string) {
+      popupUtils.openPopup('replace', undefined, {
+        replaceImg: this.replaceImg(key)
+      })
     },
     handleColorUpdate(color: string): void {
       this.setEffect({ effect: { [this.colorTarget]: color } })
@@ -224,105 +330,171 @@ export default defineComponent({
     },
     recordChange() {
       stepsUtils.record()
-    }
+    },
   }
 })
 </script>
 
 <style lang="scss" scoped>
 .text-effect-setting {
-  &-tabs {
-    @include caption-MD;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-    column-gap: 2.5px;
-    height: 36px;
+  text-align: left;
+  &__title {
+    @include text-H6;
+    color: setColor(blue-1);
+    margin: 15px 0;
+  }
+  &__category {
+    @include body-SM;
+    color: setColor(gray-1);
     > span {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      height: 100%;
-      &[selected=true] {
-        background-color: setColor(gray-6);
-      }
+      height: 33px;
+      cursor: pointer;
+    }
+    &[selected=true] .svg-chevron-down {
+      transform: scaleY(-1);
     }
   }
-  &__effects {
+  &__effects2d {
+    display: grid; // Prevent margin collapse
+    background: setColor(gray-6);
+    transition: all 0.5s ease-in-out
+  }
+  &__effects1d {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    column-gap: 7.5px;
-    width: 212px;
+    grid-template-columns: repeat(3, 60px);
+    gap: 20px;
+    margin: 10px auto;
+    width: 220px;
   }
   &__effect {
-    position: relative;
+    @include size(60px);
     box-sizing: border-box;
-    margin-top: 10px;
-    border-radius: 3px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: 2px solid transparent;
-    width: 60px;
-    height: 60px;
+    border-radius: 6px;
     background-color: white;
+    background-clip: content-box;
+    overflow: hidden;
+    > img {
+      object-fit: cover;
+    }
     .pro {
       left: 1px;
       top: -4px;
     }
     &:not(.selected):hover {
-      border-color: setColor(blue-1, 0.5);
+      border-color: setColor(blue-hover);
     }
     &.selected {
       border-color: setColor(blue-1);
     }
   }
-  &-options {
-    @include body-SM;
+  &__options {
     display: grid;
-    gap: 10px;
-    width: 100%;
-    padding: 10px;
-    background: #fff;
+    gap: 8px;
+    margin: 0 10px;
+    padding: 10px 8px;
+    background-color: white;
+    border-radius: 4px;
+    color: setColor(gray-2);
+    &:last-child {
+      margin-bottom: 10px;
+    }
   }
-  &-options__field {
+  &__option {
     display: grid;
     grid-template-columns: auto 1fr;
     justify-items: end;
-    row-gap: 10px;
+    row-gap: 4px;
+    &.disabled {
+      > * {
+        color: setColor(gray-4);
+        pointer-events: none;
+      }
+      > *::-webkit-slider-thumb {
+        border: 2px solid setColor(gray-4);
+      }
+    }
+    &--range, &--img, &--select {
+      grid-column: 1/3;
+    }
     &--name {
       justify-self: start;
     }
-    &--options {
-      box-sizing: border-box;
-      width: 100px;
-      height: 25px;
-      padding: 0;
-    }
     &--number {
+      @include body-XS;
       box-sizing: border-box;
-      width: 35px;
-      height: 25px;
-      border: 1px solid setColor(gray-4);;
+      width: 30px;
+      height: 24px;
+      border: 1px solid setColor(gray-4);
       border-radius: 3px;
-    }
-    &--select {
-      svg + svg {
-        margin-left: 8px
-      }
-      &>svg.selected {
-        box-sizing: border-box;
-        border: 1px solid setColor(blue-1);;
-      }
+      text-align: center;
+      color: setColor(gray-2);
     }
     &--range {
-      grid-column: 1/3;
+      height: 15px;
+      margin-top: 6px;
     }
-    &--reset {
+    &--select {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px 7.25px;
+      width: 100%;
+      > div {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-top: 100%;
+        > img {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          top: -1px;
+          left: -1px;
+          border: 1px solid setColor(gray-5);
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.3s;
+          &.selected {
+            top: -2px;
+            left: -2px;
+            border: 2px solid setColor(blue-1);
+          }
+        }
+      }
+    }
+    &--img {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      border-radius: 2px;
+      overflow: hidden;
+      cursor: pointer;
+      > img {
+        width: 100%;
+        max-height: 120px;
+        object-fit: cover;
+      }
+      > div { // dark mask on img
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.2);
+      }
+    }
+    &--reset, &--admin {
       color: setColor(blue-1);
       cursor: pointer;
     }
   }
-}
-.action-bar {
-  padding: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 </style>

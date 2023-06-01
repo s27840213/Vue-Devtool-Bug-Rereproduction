@@ -24,7 +24,7 @@ export default defineComponent({
       required: true
     },
     theme: {
-      type: String as PropType<'dark'|'light'|'dark-rect'>,
+      type: String as PropType<'dark'|'light'|'dark-rect'|'light-stk'>,
       default: 'dark'
     }
   },
@@ -38,6 +38,11 @@ export default defineComponent({
         case 'light':
           return {
             active: '#4EABE6',
+            inactive: '#969BAB'
+          }
+        case 'light-stk':
+          return {
+            active: '#141414',
             inactive: '#969BAB'
           }
         case 'dark-rect':
@@ -72,8 +77,6 @@ export default defineComponent({
         color: this.colors[activeMode],
         backgroundColor: this.colors[`${activeMode}BG` as 'activeBG'|'inactiveBG']
       } : {
-        paddingBottom: '4px',
-        minWidth: 'fit-content',
         color: this.colors[activeMode],
         borderBottom: isActive ? `2px solid ${this.colors[activeMode]}` : '2px solid transparent',
         width: `${100 / this.tabs.length / 2}%`
@@ -92,13 +95,20 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-around;
-  &.light, &.dark {
+  &.light, &.dark, &.light-stk {
     margin-bottom: 24px;
   }
   &__item {
     box-sizing: border-box;
     text-align: center;
     transition: all 0.2s;
+  }
+  &.light, &.dark, &.light-stk {
+    margin-bottom: 24px;
+    .tabs__item {
+      padding-bottom: 4px;
+      min-width: fit-content;
+    }
   }
 }
 </style>

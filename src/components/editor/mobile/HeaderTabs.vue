@@ -128,7 +128,7 @@ export default defineComponent({
         return this.bgSettingTabs
       } else {
         return [
-          { icon: 'bleed', isPanelIcon: true, isHidden: this.hasBleed },
+          { icon: 'bleed', isPanelIcon: true, isHidden: !this.hasBleed },
           { icon: 'resize', isPanelIcon: true },
           { icon: 'all-pages' },
           { icon: 'download', isPanelIcon: true, disable: (this.uploadingImgs as unknown[]).length > 0 },

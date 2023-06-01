@@ -1,4 +1,3 @@
-import { isITextLetterBg } from '@/interfaces/format'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import cssConveter from '@/utils/cssConverter'
@@ -33,8 +32,8 @@ interface ITiptapJson extends JSONContent {
       marks?: {
         type: 'textStyle'
         attrs: Record<'assetId' | 'color' | 'decoration' | 'font' | 'fontUrl' |
-          'randomId' | 'style' | 'type' | 'userId' | 'weight' | 'width', string>
-        & Record<'size', number>
+          'style' | 'type' | 'userId' | 'weight' | 'width', string>
+        & Record<'size' | 'spanIndex', number>
         & Record<'pre', string>
       }[]
     }[]
@@ -146,8 +145,6 @@ class TiptapUtils {
           type: 'paragraph'
         } as { [key: string]: any }
         const attrs = this.makeParagraphStyle(p.styles) as any
-        const textBg = textEffectUtils.getCurrentLayer().styles.textBg
-        const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
 
         // If p is empty, no span exist, so need to store span style in p.spanStyle
         if (p.spanStyle) {
@@ -159,16 +156,17 @@ class TiptapUtils {
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
           const config = layerUtils.getCurrConfig as IText
+          const splitSpan = textBgUtils.isSplitSpan(config.styles)
           const textEffectStyles = textEffectUtils.convertTextEffect(config)
-          pObj.content = spans.map((s, index) => {
+          pObj.content = spans.map((s, sIndex) => {
             return {
               type: 'text',
               text: s.text,
               marks: [{
                 type: 'textStyle',
                 attrs: Object.assign(this.makeSpanStyle(s.styles),
-                  fixedWidth ? { randomId: `${index}`, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {},
                   textEffectStyles,
+                  splitSpan ? { spanIndex: sIndex, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {},
                 )
               }]
             }
@@ -267,11 +265,10 @@ class TiptapUtils {
     let isSetContentRequired = false
 
     // If fixedWidth, all span should split into one text per span
-    const fixedWidth = _tiptapJSON.content?.some(p => {
-      return p.content?.some(span => span.marks?.[0].attrs?.['min-width'] !== undefined ||
-        span.marks?.[0].attrs?.['min-height'] !== undefined)
+    const splitSpan = tiptapJSON.content?.some(p => {
+      return p.content?.some(span => ![-1, undefined].includes(span.marks?.[0].attrs?.spanIndex))
     })
-    if (fixedWidth) {
+    if (splitSpan) {
       tiptapJSON.content.forEach(p => {
         p.content && p.content.forEach(s => {
           // Check if some text need to be split here.
@@ -293,7 +290,7 @@ class TiptapUtils {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
       let largestSize = 0
       const spans: ISpan[] = []
-      const pContent = fixedWidth && paragraph.content && !this.editor.view.composing
+      const pContent = splitSpan && paragraph.content && !this.editor.view.composing
         // Split span for fixedWidth, another one in textBgUtils.setTextBg
         ? paragraph.content.flatMap(span => textUtils.splitter.splitGraphemes(span.text)
           .map(t => Object.assign({}, span, { text: t })))
@@ -515,6 +512,19 @@ class TiptapUtils {
       } else {
         editor.chain().updateAttributes('paragraph', item).run()
       }
+    })
+  }
+
+  applyDivStyle() { // If you need to add some css to div of tiptap, use it.
+    const style = Object.entries({
+    }).map(([k, v]) => `${k}: ${v}`).join('; ')
+
+    this.agent(editor => {
+      editor.setOptions({
+        editorProps: {
+          attributes: { style },
+        },
+      })
     })
   }
 

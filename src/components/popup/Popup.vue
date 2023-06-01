@@ -22,6 +22,7 @@ import PopupOrder from '@/components/popup/PopupOrder.vue'
 import PopupPage from '@/components/popup/PopupPage.vue'
 import PopupPageScale from '@/components/popup/PopupPageScale.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
+import PopupReplace from '@/components/popup/PopupReplace.vue'
 import PopupSlider from '@/components/popup/PopupSlider.vue'
 import PopupSubmit from '@/components/popup/PopupSubmit.vue'
 import { IPage } from '@/interfaces/page'
@@ -51,6 +52,7 @@ export default defineComponent({
     PopupPayment,
     PopupIcon,
     PopupDeleteAccount,
+    PopupReplace,
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -213,9 +215,10 @@ export default defineComponent({
     ...mapActions({
       closePopup: 'popup/closePopup'
     }),
-    middleware() { // These component controll v-click-o by themself.
+    middleware(e: MouseEvent) { // These component controll v-click-o by themself.
       if (['popup-payment', 'popup-icon'].includes(this.component)) return false
-      return true
+      // For "Upload image" btn in popup, which is implement with click #upload btn by js.
+      return (e.target as HTMLElement | null)?.id !== 'upload'
     },
     async close() {
       await (this.popupComponent as IPopupComponent).closeHandler()

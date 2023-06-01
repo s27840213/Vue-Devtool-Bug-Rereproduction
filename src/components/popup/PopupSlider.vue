@@ -2,6 +2,7 @@
 div(class="popup-slider"
     :style="styles")
   input(class="popup-slider__range-input input__slider--range"
+    v-progress
     v-model.number="value"
     :max="max"
     :min="min"

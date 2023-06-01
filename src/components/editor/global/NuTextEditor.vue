@@ -73,6 +73,7 @@ export default defineComponent({
     const contentEditable = this.config.contentEditable
 
     tiptapUtils.init(this.initText, contentEditable)
+    // tiptapUtils.applyDivStyle()
     /**
      * @Note why I use as any is bcz when I update the tiptap from vue2 ver to vue 3 ver, it throw some weird error
      * If TingAn is avalible, maybe we could discuss and fix the error.
@@ -153,6 +154,8 @@ export default defineComponent({
     }
     this.layerInfo = undefined
   },
+  computed: {
+  },
   methods: {
     updateLayerProps(props: { [key: string]: string | number | boolean }) {
       if (this.layerInfo) {
@@ -179,6 +182,10 @@ export default defineComponent({
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
+}
+
+.ProseMirror:hover, .ProseMirror:not(:hover)  {
+  position: initial; // Overwrite 'position: relative' css rule
 }
 
 .ProseMirror.non-selectable {

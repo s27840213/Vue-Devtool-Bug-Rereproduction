@@ -165,6 +165,9 @@ const component = defineComponent({
       // disable dummy inputs
       this.isInputFocused = true
     }
+
+    this.copyBeforeApply = localStorage.getItem('copyBeforeApply') !== 'false'
+    this.handleCurrFocusPageIndexChange()
   },
   beforeUnmount() {
     document.removeEventListener('scroll', this.handleScroll)
@@ -193,7 +196,10 @@ const component = defineComponent({
   watch: {
     selectedFormat(layout: ILayout) {
       this.$emit('select', layout)
-    }
+    },
+    copyBeforeApply(val: boolean) {
+      localStorage.setItem('copyBeforeApply', String(val))
+    },
   },
   computed: {
     ...mapState(
@@ -317,6 +323,16 @@ const component = defineComponent({
     },
     makeFormatDescription(format: ILayout): string {
       return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description === '' ? format.title : format.description} ${format.unit ?? 'px'}`
+    },
+    handleCurrFocusPageIndexChange() {
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize
+      this.selectedUnit = unit ?? 'px'
+      this.pageWidth = physicalWidth ?? width ?? 0
+      this.pageHeight = physicalHeight ?? height ?? 0
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
+      this.aspectRatio = this.pageWidth / this.pageHeight
+      this.valPageSize.width = round(this.pageWidth, this.selectedUnit === 'px' ? 0 : PRECISION).toString()
+      this.valPageSize.height = round(this.pageHeight, this.selectedUnit === 'px' ? 0 : PRECISION).toString()
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value

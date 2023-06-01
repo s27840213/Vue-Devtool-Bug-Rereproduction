@@ -46,6 +46,7 @@ div(class="popup-download text-left"
               type="text"
               v-model.number="selectedTypeQuality")
         input(class="popup-download__range-input input__slider--range"
+          v-progress
           v-model.number="selected.quality"
           max="100"
           min="1"
