@@ -199,7 +199,7 @@ export default defineComponent({
           icon: 'download',
           width: 24,
           action: () => {
-            bgRemoveUtils.downloadCanvas()
+            bgRemoveUtils.screenshot()
           }
         }]
       } else {
