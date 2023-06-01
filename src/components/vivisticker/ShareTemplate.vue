@@ -40,13 +40,18 @@ div(class="share-template" :style="containerStyles")
         svg-icon(:iconName="button.iconName" iconWidth="24px" iconColor="white")
         div(class="share-template__actions__action__text text-white body-XS")
           span {{ button.title }}
+  Transition(name="fade")
+    div(v-if="pending" class="share-template__pending text-H6 text-white")
+      div(class="share-template__pending__spinner")
+        svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
+      div(class="share-template__pending__progress") {{ strDownloadProgress }}
+      div(class="share-template__pending__text") Saving to Camera Roll
 </template>
 
 <script lang="ts">
 import PageContent from '@/components/editor/page/PageContent.vue'
 import Tabs from '@/components/Tabs.vue'
 import { IPage } from '@/interfaces/page'
-import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -74,7 +79,9 @@ export default defineComponent({
       tabIndex: 0,
       previewScale: 1,
       selectedPages: new Set<number>(),
-      currAction: null as IButton | null
+      currAction: null as IButton | null,
+      pending: false,
+      downloadProgress: 0
     }
   },
   mounted() {
@@ -148,6 +155,12 @@ export default defineComponent({
     },
     strToggleSelectAll() {
       return this.selectedPages.size === this.pagesState.length ? 'Unselect all' : 'Select all' // TODO: translate
+    },
+    strDownloadProgress() {
+      return `${this.downloadProgress}/${this.selectedPages.size}`
+    },
+    selectedPageIndexes() {
+      return Array.from(this.selectedPages).sort((a, b) => b - a)
     }
   },
   methods: {
@@ -183,39 +196,18 @@ export default defineComponent({
     },
     handleAction(action: IButton) {
       this.currAction = action
-      action.action()
+      !this.pending && action.action()
     },
     save() {
       if (this.isInMultiPageShare) {
-        const selectedPageIndexs = Array.from(this.selectedPages)
-        selectedPageIndexs.sort((a, b) => b - a)
-
-        let idx = 0
-        const copyCallback = (flag: string) => {
-          if (flag === '0' && idx < selectedPageIndexs.length) {
-            vivistickerUtils.callScreenshotAsAPI(vivistickerUtils.createUrlForJSON({ page: pageUtils.getPage(selectedPageIndexs[idx]), noBg: false, toast: idx === selectedPageIndexs.length - 1 }), copyCallback, 'download')
-            idx += 1
-          }
-        }
-        vivistickerUtils.callScreenshotAsAPI(vivistickerUtils.createUrlForJSON({ page: pageUtils.getPage(selectedPageIndexs[idx]), noBg: false, toast: selectedPageIndexs.length === 1 }), copyCallback, 'download')
-        idx += 1
+        this.multiPageScreenShot('download')
       } else if (this.tabIndex === 0) {
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ noBg: false }), 'download')
       } else this.setIsInMultiPageShare(true)
     },
     share() {
       if (this.isInMultiPageShare && this.templateShareType === 'post') {
-        const selectedPageIndexs = Array.from(this.selectedPages)
-        selectedPageIndexs.sort((a, b) => b - a)
-        let idx = 0
-        const copyCallback = (flag: string) => {
-          if (flag === '0' && idx < selectedPageIndexs.length) {
-            vivistickerUtils.callScreenshotAsAPI(vivistickerUtils.createUrlForJSON({ page: pageUtils.getPage(selectedPageIndexs[idx]), noBg: false, toast: false }), copyCallback, idx === selectedPageIndexs.length - 1 ? 'IGPost' : 'download')
-            idx += 1
-          }
-        }
-        vivistickerUtils.callScreenshotAsAPI(vivistickerUtils.createUrlForJSON({ page: pageUtils.getPage(selectedPageIndexs[idx]), noBg: false, toast: false }), copyCallback, selectedPageIndexs.length === 1 ? 'IGPost' : 'download')
-        idx += 1
+        this.multiPageScreenShot('IGPost')
       } else if (this.tabIndex === 0) {
         const mapAction = {
           story: 'IGStory',
@@ -223,6 +215,13 @@ export default defineComponent({
         } as Record<string, string>
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ noBg: false }), mapAction[this.templateShareType])
       } else this.setIsInMultiPageShare(true)
+    },
+    multiPageScreenShot(action: 'IGPost' | 'download') {
+      this.pending = true
+      vivistickerUtils.multiPageDownload(action, this.selectedPageIndexes, (progress: number) => { this.downloadProgress = progress }).then((success) => {
+        this.pending = false
+        this.downloadProgress = 0
+      })
     },
     handleResize() {
       const elPreview = this.$refs.preview as HTMLElement
@@ -367,6 +366,38 @@ export default defineComponent({
     }
   }
 
+  &__pending {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    row-gap: 10px;
+    &__spinner {
+      @include size(120px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(46, 46, 46, 0.5);
+      border-radius: 10px;
+      .spinner {
+        color: #D9D9D9;
+        animation: rotate 0.5s infinite linear;
+      }
+    }
+    &::before {
+      content: "";
+      @include size(100vw, 100vh);
+      z-index: -1;
+      position: absolute;
+      background-color: rgba(24, 25, 31, 0.8);
+    }
+  }
+
   .checkbox {
     @include size(20px);
     background: setColor(gray-6);
@@ -380,6 +411,23 @@ export default defineComponent({
       background: setColor(black-3);
       border: none;
     }
+  }
+}
+
+.fade {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.2s;
+  }
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+  }
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>

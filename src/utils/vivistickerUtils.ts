@@ -272,10 +272,26 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  callScreenshotAsAPI(query: string, screenshotCallback?: (flag: string) => void, action = 'copy') {
-    this.callIOSAsAPI('SCREENSHOT', { params: query, action }, `screenshot-${query}`, { timeout: 10000 }).then((data) => {
-      screenshotCallback && screenshotCallback(data?.flag ?? '0')
-    })
+  /**
+   * Sequentially download multiple pages, and returns whether the operation succeeded or not.
+   *
+   * @param action - Either 'download' to download pages or 'IGPost' to open IG post after download.
+   * @param pageIndex - An array of target page index.
+   * @param cbProgress - A callback function called when download succeeded.
+   * @param idx - The end index of the operation.
+   * @return A boolean indicating whether the operation succeeded or not.
+   */
+  async multiPageDownload(action:'download' | 'IGPost', pageIndex: number[], cbProgress: (progress: number) => void, idx?: number): Promise<boolean> {
+    idx = idx ?? pageIndex.length - 1
+    if (idx < 0) return true
+    else if (await this.multiPageDownload(action === 'IGPost' ? 'download' : action, pageIndex, cbProgress, idx - 1)) {
+      const toast = action === 'download' ? idx === pageIndex.length - 1 : false
+      const query = this.createUrlForJSON({ page: pageUtils.getPage(pageIndex[idx]), noBg: false, toast })
+      const data = await this.callIOSAsAPI('SCREENSHOT', { params: query, action }, `screenshot-${query}`, { timeout: 10000 })
+      const succeeded = data?.flag === '0'
+      if (succeeded) cbProgress(idx + 1)
+      return succeeded
+    } else return false
   }
 
   copyWithScreenshotUrl(query: string, afterCopy?: (flag: string) => void) {
