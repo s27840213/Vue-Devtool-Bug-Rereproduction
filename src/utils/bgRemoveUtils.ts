@@ -298,8 +298,14 @@ class BgRemoveUtils {
       type: 'png',
       url: src
     })
-    // const query = 'type=bgRemove'
-    // vivistickerUtils.sendScreenshotUrl(query, 'download')
+  }
+
+  saveToIOS() {
+    const src = this.canvas.toDataURL('image/png;base64')
+    vivistickerUtils.sendToIOS('SAVE_IMAGE_FROM_URL', {
+      type: 'png',
+      url: src
+    })
   }
 }
 
