@@ -24,7 +24,7 @@ export default defineComponent({
       required: true
     },
     theme: {
-      type: String as PropType<'dark'|'light'|'dark-rect'>,
+      type: String as PropType<'dark'|'light'|'dark-rect'|'light-stk'>,
       default: 'dark'
     }
   },
@@ -38,6 +38,11 @@ export default defineComponent({
         case 'light':
           return {
             active: '#4EABE6',
+            inactive: '#969BAB'
+          }
+        case 'light-stk':
+          return {
+            active: '#141414',
             inactive: '#969BAB'
           }
         case 'dark-rect':
@@ -90,7 +95,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-around;
-  &.light, &.dark {
+  &.light, &.dark, &.light-stk {
     margin-bottom: 24px;
   }
   &__item {
@@ -98,7 +103,7 @@ export default defineComponent({
     text-align: center;
     transition: all 0.2s;
   }
-  &.light, &.dark {
+  &.light, &.dark, &.light-stk {
     margin-bottom: 24px;
     .tabs__item {
       padding-bottom: 4px;

@@ -129,16 +129,15 @@ export default defineComponent({
   display: grid;
   grid-template-rows: auto auto;
   grid-template-columns: 1fr;
-  row-gap: 20px;
+  row-gap: 10px;
   box-sizing: border-box;
-  overflow-y: hidden;
   color: setColor(gray-2);
 
   &__top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    &.dark {
+    &.light {
       color: setColor(white);
     }
   }
@@ -153,22 +152,14 @@ export default defineComponent({
     color: setColor(gray-2);
     text-align: center;
     border-radius: 0.25rem;
-    &.dark {
+    background: transparent;
+    &.light {
       color: setColor(white);
     }
   }
 
   &__range-input-wrapper {
     position: relative;
-  }
-
-  .input__slider--range {
-    height: 16px;
-    &::-webkit-slider-thumb {
-      width: 16px;
-      height: 16px;
-      margin-top: -8px;
-    }
   }
 
   &__range-input {
@@ -193,10 +184,10 @@ export default defineComponent({
   &__range-input-top {
     @include progressSlider($height: 3px, $thumbSize: 40px, $marginTop: -20px);
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     opacity: 0;
-    &::-webkit-slider-thumb {
-      margin-top: -28px;
-    }
   }
 }
 </style>

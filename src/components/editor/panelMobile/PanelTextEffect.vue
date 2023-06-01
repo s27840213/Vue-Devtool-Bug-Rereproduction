@@ -3,7 +3,7 @@ div(class="panel-text-effect")
   //- To choose effect category and effect.
   tabs(v-if="state === 'effects'"
       :tabs="textEffects.map(t => t.label)"
-      v-model="currTabIndex" theme="light")
+      v-model="currTabIndex" theme="light-stk")
   div(v-if="state === 'effects'"
       class="panel-text-effect__effects")
     div(v-for="effect in effectList"
@@ -354,7 +354,6 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 10px; // TODO: check if needed
   }
 
   &__img {

@@ -179,7 +179,7 @@ export default function (this: any) {
       await Promise.all([
         dispatch('getRecently', { writeBack: false }),
         dispatch('getCategories', false)
-      ]).then(([recently, category]) => {
+      ]).then(async ([recently, category]) => {
         const result = cloneDeep(category)
         result.content = recently.content.concat(category.content)
         commit('SET_CATEGORIES', result)

@@ -21,7 +21,9 @@
 
 // for vivisticker
 @mixin layout-tablet {
-  @media screen and (min-width: 768px) and (orientation: portrait), screen and (min-height: 768px) and (orientation: landscape) {
+
+  @media screen and (min-width: 768px) and (orientation: portrait),
+  screen and (min-height: 768px) and (orientation: landscape) {
     @content;
   }
 }
@@ -36,9 +38,11 @@
 // for vivisticker
 @mixin rwd-container($pd: 24px, $pt: 5%, $pl: 18%) {
   padding: 0 $pd;
-  @include layout-tablet{
+
+  @include layout-tablet {
     padding: 0 $pt;
-    @include layout-landscape{
+
+    @include layout-landscape {
       padding: 0 $pl;
     }
   }
@@ -183,15 +187,15 @@
 }
 
 @mixin progressSlider($height: 5px, $thumbSize: 12px, $marginTop: -3.5px, $thumbColor: white, $scale: false) {
-  height: $height;
+  height: $thumbSize;
   display: block;
   appearance: none;
   outline: none;
-  background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
-  border-radius: $height / 2;
 
   &::-webkit-slider-runnable-track {
-    height: $height / 2;
+    background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
+    border-radius: $height / 2;
+    height: $height;
   }
 
   &::-webkit-slider-thumb {
@@ -241,7 +245,8 @@
   &:active {
     color: setColor(blue-1);
     font-weight: bold;
-    &:deep(.svg-icon)  {
+
+    &:deep(.svg-icon) {
       color: setColor(blue-1);
     }
   }
