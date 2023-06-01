@@ -199,7 +199,7 @@ export default defineComponent({
           icon: 'download',
           width: 24,
           action: () => {
-            bgRemoveUtils.screenshot()
+            bgRemoveUtils.saveToIOS()
           }
         }]
       } else {
@@ -340,7 +340,9 @@ export default defineComponent({
           vivistickerUtils.handleIos16Video()
         }
       }
-      if (vivistickerUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
+      if (this.inBgRemoveMode) {
+        bgRemoveUtils.screenshot()
+      } else if (vivistickerUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
         vivistickerUtils.copyWithScreenshotUrl(
           vivistickerUtils.createUrlForJSON({ source: 'editor' }),
           copyCallback
