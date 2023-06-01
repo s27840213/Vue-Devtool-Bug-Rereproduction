@@ -144,6 +144,9 @@ export default defineComponent({
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
       })
+    },
+    isInGroupTemplate(newVal) {
+      if (!newVal) this.currentGroup = null
     }
   },
   computed: {
