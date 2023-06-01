@@ -69,6 +69,7 @@ import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import { IAssetTemplate } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
+import designUtils from '@/utils/designUtils'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import picWVUtils from '@/utils/picWVUtils'
@@ -153,13 +154,19 @@ export default defineComponent({
         this.moreLink = '/mydesign'
         break
       case 'template':
-        this.getTamplate({
-          keyword: 'group::0;;order_by::popular',
-          theme: this.theme,
-          shuffle: this.shuffle === true ? 1 : 0,
-          cache: true
-        }).then((response) => {
-          this.templateData = response.data.content[0].list
+        Promise.all([
+          this.getTamplate({
+            keyword: 'group::0;;order_by::popular',
+            theme: this.theme,
+            shuffle: this.shuffle === true ? 1 : 0,
+            cache: true
+          }).then((response) => {
+            this.templateData = response.data.content[0].list
+          }),
+          themeUtils.checkThemeState().then(() => {
+            this.themeData = themeUtils.themesMainHidden
+          })
+        ]).then(() => {
           this.isLoading = false
         })
         this.title = themeUtils.getThemeTitleById(this.theme as string)
@@ -196,6 +203,7 @@ export default defineComponent({
       items.scrollLeft += items.offsetWidth / 2 * (next ? 1 : -1)
     },
     templateUrl(item: IAssetTemplate): string {
+      const matchedTheme = this.themeData.find(theme => theme.id.toString() === item.match_cover.theme_id)
       return this.$router.resolve({
         name: 'Editor',
         query: {
@@ -203,7 +211,9 @@ export default defineComponent({
           design_id: this.theme === '7' ? item.group_id : item.match_cover.id,
           themeId: item.content_ids[0].themes.join(','),
           width: String(item.match_cover.width),
-          height: String(item.match_cover.height)
+          height: String(item.match_cover.height),
+          unit: matchedTheme?.unit ?? 'px',
+          ...(matchedTheme?.unit !== 'px' && matchedTheme?.bleed !== undefined ? { bleeds: designUtils.convertBleedsToQuery(matchedTheme.bleed) } : {})
         }
       }).href
     },
@@ -241,7 +251,7 @@ export default defineComponent({
       if (this.$isTouchDevice() && theme.id === 7) {
         return ''
       } else {
-        const queryBleed = theme.unit !== 'px' ? `&bleeds=${theme.bleed.top},${theme.bleed.right},${theme.bleed.bottom},${theme.bleed.left}` : ''
+        const queryBleed = theme.unit !== 'px' ? `&bleeds=${designUtils.convertBleedsToQuery(theme.bleed)}` : ''
         return `/editor?type=new-design-size&themeId=${theme.id}&width=${theme.width}&height=${theme.height}&unit=${theme.unit}${queryBleed}`
       }
     },

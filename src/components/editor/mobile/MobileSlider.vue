@@ -9,9 +9,10 @@ div(class="mobile-slider" :style="containerStyles")
       :name="name"
       @change="handleChangeStop")
   div(class="mobile-slider__range-input-wrapper")
-    input(class="mobile-slider__range-input"
+    input(class="mobile-slider__range-input input__slider--range"
       :class="theme"
-      :style="progressStyles()"
+      v-progress
+      :style="{ 'pointer-events': borderTouchArea ? 'none' : 'auto' }"
       v-model.number="propsVal"
       :name="name"
       :max="max"
@@ -19,10 +20,11 @@ div(class="mobile-slider" :style="containerStyles")
       :step="step"
       v-ratio-change
       type="range"
+      :disabled="disabled"
       @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
       @pointerup="!borderTouchArea ? handlePointerup : null")
     input(v-if="borderTouchArea"
-      class="mobile-slider__range-input mobile-slider__range-input-top"
+      class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
       :class="theme"
       v-model.number="propsVal"
       :name="name"
@@ -31,6 +33,7 @@ div(class="mobile-slider" :style="containerStyles")
       :step="step"
       v-ratio-change
       type="range"
+      :disabled="disabled"
       @pointerdown="$emit('pointerdown', $event)"
       @pointerup="handlePointerup")
 </template>
@@ -84,6 +87,10 @@ export default defineComponent({
     autoRecord: {
       type: Boolean,
       default: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     }
   },
   computed: {
@@ -106,12 +113,6 @@ export default defineComponent({
     }
   },
   methods: {
-    progressStyles(): {[key: string]: string} {
-      return {
-        '--progress': (typeof this.value === 'string') ? '50%' : `${(this.value - this.min) / (this.max - this.min) * 100}%`,
-        'pointer-events': this.borderTouchArea ? 'none' : 'auto'
-      }
-    },
     handleChangeStop() {
       if (this.autoRecord)stepsUtils.record()
     },
@@ -162,27 +163,18 @@ export default defineComponent({
     position: relative;
   }
 
-  &__range-input {
-    margin: 0;
-    --lower-color: #{setColor(black-5)};
-    --upper-color: #{setColor(black-6)};
-    @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
+  &__range-input.light {
+    --lower-color: #{setColor(gray-6)};
+    --upper-color: #{setColor(gray-2)};
     &::-webkit-slider-thumb {
-      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-      position: relative;
+      border-color: setColor(white);
     }
     &::-moz-range-thumb {
-      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-      position: relative;
-    }
-    &.light {
-      --lower-color: #{setColor(gray-6)};
-      --upper-color: #{setColor(gray-2)};
+      border-color: setColor(white);
     }
   }
 
   &__range-input-top {
-    @include progressSlider($height: 3px, $thumbSize: 40px, $marginTop: -20px);
     position: absolute;
     top: 50%;
     left: 50%;

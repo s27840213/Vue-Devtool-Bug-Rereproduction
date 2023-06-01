@@ -58,6 +58,7 @@ div(class="panel-text-effect")
         :step="option.key === 'lineHeight' ? 0.01 : 1"
         :autoRecord="false"
         :enableDefaultPadding="false"
+        :disabled="optionDisabled(option)"
         @update="(val)=>handleRangeInput(val, option)"
         @pointerdown="setEffectFocus(true)"
         @pointerup="setEffectFocus(false)")
@@ -278,9 +279,6 @@ export default defineComponent({
       :deep(*) {
         color: setColor(gray-4);
         pointer-events: none;
-      }
-      :deep(*::-webkit-slider-thumb) {
-        border: 2px solid setColor(gray-4);
       }
     }
   }
