@@ -288,9 +288,18 @@ class BgRemoveUtils {
     generalUtils.downloadImage(src, `vivistiker-${generalUtils.generateRandomString}.png`)
   }
 
+  getBgRemoveResultSrc() {
+    return this.canvas.toDataURL('image/png;base64')
+  }
+
   screenshot() {
     const src = this.canvas.toDataURL('image/png;base64')
-    vivistickerUtils.sendScreenshotUrl(src)
+    vivistickerUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
+      type: 'png',
+      url: src
+    })
+    // const query = 'type=bgRemove'
+    // vivistickerUtils.sendScreenshotUrl(query, 'download')
   }
 }
 
