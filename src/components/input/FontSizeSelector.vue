@@ -143,7 +143,7 @@ export default defineComponent({
   user-select: none;
   &__number {
     border: 1px solid setColor(gray-4);
-    border-radius: 3px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
 

@@ -58,6 +58,7 @@ div(class="panel-text-effect")
         :step="option.key === 'lineHeight' ? 0.01 : 1"
         :autoRecord="false"
         :enableDefaultPadding="false"
+        :disabled="optionDisabled(option)"
         @update="(val)=>handleRangeInput(val, option)"
         @pointerdown="setEffectFocus(true)"
         @pointerup="setEffectFocus(false)")
@@ -79,10 +80,10 @@ div(class="panel-text-effect")
 </template>
 
 <script lang="ts">
+import Tabs from '@/components/Tabs.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import Tabs from '@/components/Tabs.vue'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import { IEffect, IEffectCategory } from '@/utils/constantData'
@@ -91,7 +92,7 @@ import paymentUtils from '@/utils/paymentUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import PanelTextEffectSetting from '../panelFunction/PanelTextEffectSetting.vue'
 
 export default defineComponent({
@@ -278,9 +279,6 @@ export default defineComponent({
       :deep(*) {
         color: setColor(gray-4);
         pointer-events: none;
-      }
-      :deep(*::-webkit-slider-thumb) {
-        border: 2px solid setColor(gray-4);
       }
     }
   }

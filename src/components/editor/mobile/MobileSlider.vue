@@ -9,6 +9,7 @@ div(class="mobile-slider" :style="containerStyles")
       @change="handleChangeStop")
   div(class="mobile-slider__range-input-wrapper")
     input(class="input__slider--range"
+      v-progress
       :style="{ 'pointer-events': borderTouchArea ? 'none' : 'auto' }"
       v-model.number="propsVal"
       :name="name"
@@ -17,6 +18,7 @@ div(class="mobile-slider" :style="containerStyles")
       :step="step"
       v-ratio-change
       type="range"
+      :disabled="disabled"
       @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
       @pointerup="!borderTouchArea ? handlePointerup : null")
     input(v-if="borderTouchArea"
@@ -28,6 +30,7 @@ div(class="mobile-slider" :style="containerStyles")
       :step="step"
       v-ratio-change
       type="range"
+      :disabled="disabled"
       @pointerdown="$emit('pointerdown', $event)"
       @pointerup="handlePointerup")
 </template>
@@ -77,6 +80,10 @@ export default defineComponent({
     autoRecord: {
       type: Boolean,
       default: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     }
   },
   computed: {
@@ -142,21 +149,12 @@ export default defineComponent({
     position: relative;
   }
 
-  .input__slider--range {
-    height: 16px;
-    &::-webkit-slider-thumb {
-      width: 16px;
-      height: 16px;
-      margin-top: -8px;
-    }
-  }
-
   &__range-input-top {
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     opacity: 0;
-    &::-webkit-slider-thumb {
-      margin-top: -28px;
-    }
   }
 }
 </style>
