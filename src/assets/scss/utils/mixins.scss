@@ -158,15 +158,15 @@
 }
 
 @mixin progressSlider($height: 5px, $thumbSize: 12px, $marginTop: -3.5px, $thumbColor: white, $scale: false) {
-  height: $height;
+  height: $thumbSize;
   display: block;
   appearance: none;
   outline: none;
-  background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
-  border-radius: $height / 2;
 
   &::-webkit-slider-runnable-track {
-    height: $height / 2;
+    height: $height;
+    background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
+    border-radius: $height / 2;
   }
 
   &::-webkit-slider-thumb {
@@ -216,7 +216,8 @@
   &:active {
     color: setColor(blue-1);
     font-weight: bold;
-    &:deep(.svg-icon)  {
+
+    &:deep(.svg-icon) {
       color: setColor(blue-1);
     }
   }
