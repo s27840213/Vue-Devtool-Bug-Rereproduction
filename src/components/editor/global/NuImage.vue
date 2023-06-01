@@ -1243,6 +1243,7 @@ export default defineComponent({
 
   &__img {
     object-fit: cover;
+    display: block;
   }
 
   &__picture {
