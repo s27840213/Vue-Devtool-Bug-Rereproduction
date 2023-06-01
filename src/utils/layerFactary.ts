@@ -1,4 +1,4 @@
-import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
+import { ITextBg, ITextEffect, ITextShape } from '@/interfaces/format'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText, ITmp, jsonVer as latestJsonVer } from '@/interfaces/layer'
@@ -272,7 +272,8 @@ class LayerFactary {
         verticalFlip: false,
         textEffect: { name: 'none' },
         textBg: { name: 'none' },
-        textShape: { name: 'none' }
+        textShape: { name: 'none' },
+        textFill: { name: 'none', customImg: null },
       },
       paragraphs: [
         {
@@ -435,7 +436,7 @@ class LayerFactary {
         }
       ] as { category: 'textEffect' | 'textBg' | 'textShape', effect: RegExp, option: string, modFunc?: (val: number) => number }[]
       for (const t of target) {
-        const effect = basicConfig.styles[t.category] as ITextEffect | ITextShape | ITextBgEffect
+        const effect = basicConfig.styles[t.category] as ITextEffect | ITextShape | ITextBg
         if (t.effect.test(effect.name)) {
           const effect_ = effect as Record<string, number>
           const modFunc = t.modFunc ?? ((val) => val / fontSizeModifier)

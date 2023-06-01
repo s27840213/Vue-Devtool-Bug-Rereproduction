@@ -34,14 +34,15 @@ class FormatUtils {
       paragraphStyle: generalUtils.deepCopy(lastParagraph.styles),
       spanStyle: generalUtils.deepCopy(lastSpan.styles),
       scale: text.styles.scale,
-      textEffect: generalUtils.deepCopy((text as any).styles.textEffect),
-      textBg: generalUtils.deepCopy((text as any).styles.textBg),
-      textShape: generalUtils.deepCopy((text as any).styles.textShape),
-      writingMode: (text as any).styles.writingMode
+      textEffect: generalUtils.deepCopy(text.styles.textEffect),
+      textBg: generalUtils.deepCopy(text.styles.textBg),
+      textShape: generalUtils.deepCopy(text.styles.textShape),
+      textFill: generalUtils.deepCopy(text.styles.textFill),
+      writingMode: text.styles.writingMode
     }
   }
 
-  extractImageFormat(image: any): IImageFormat {
+  extractImageFormat(image: IImage): IImageFormat {
     return generalUtils.deepCopy(image.styles.adjust)
   }
 

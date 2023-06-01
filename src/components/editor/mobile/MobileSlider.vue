@@ -1,14 +1,15 @@
 <template lang="pug">
 div(class="mobile-slider" :style="containerStyles")
-  div
-    span(class="mobile-slider__name text-gray-1 body-MD no-wrap") {{title}}
-    input(class="mobile-slider__text body-2 text-gray-2"
+  div(class="mobile-slider__top")
+    span(class="mobile-slider__name no-wrap") {{title}}
+    input(class="mobile-slider__number"
       type="number"
       v-model.number="propsVal"
       :name="name"
       @change="handleChangeStop")
   div(class="mobile-slider__range-input-wrapper")
     input(class="input__slider--range"
+      v-progress
       :style="{ 'pointer-events': borderTouchArea ? 'none' : 'auto' }"
       v-model.number="propsVal"
       :name="name"
@@ -17,6 +18,7 @@ div(class="mobile-slider" :style="containerStyles")
       :step="step"
       v-ratio-change
       type="range"
+      :disabled="disabled"
       @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
       @pointerup="!borderTouchArea ? handlePointerup : null")
     input(v-if="borderTouchArea"
@@ -28,6 +30,7 @@ div(class="mobile-slider" :style="containerStyles")
       :step="step"
       v-ratio-change
       type="range"
+      :disabled="disabled"
       @pointerdown="$emit('pointerdown', $event)"
       @pointerup="handlePointerup")
 </template>
@@ -37,6 +40,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: ['pointerdown', 'update'],
   data() {
     return {
     }
@@ -69,16 +73,17 @@ export default defineComponent({
       default: 1,
       type: Number
     },
-    /**
-     * @param key - use to identify the target we want to update
-     */
-    propKey: {
-      type: String,
-      default: ''
-    },
     enableDefaultPadding: {
       type: Boolean,
       default: true
+    },
+    autoRecord: {
+      type: Boolean,
+      default: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     }
   },
   computed: {
@@ -87,11 +92,7 @@ export default defineComponent({
         return this.value
       },
       set(val: number): void {
-        if (this.propKey !== '') {
-          this.$emit(`update:${this.propKey}`, val)
-        } else {
-          this.$emit('update', val, this.name)
-        }
+        this.$emit('update', val, this.name)
         // The below line is necessary for value that would be rounded.
         // If a value is rounded and not changed compared to previous value after rounded,
         // the value in this component will not be synced with the rounded value (since not change happens).
@@ -106,10 +107,9 @@ export default defineComponent({
   },
   methods: {
     handleChangeStop() {
-      stepsUtils.record()
+      if (this.autoRecord)stepsUtils.record()
     },
-    handlePointerup(e: Event) {
-      this.$emit('pointerup', e)
+    handlePointerup() {
       this.handleChangeStop()
     }
   }
@@ -118,34 +118,43 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .mobile-slider {
+  @include body-SM;
   width: 100%;
   display: grid;
   grid-template-rows: auto auto;
   grid-template-columns: 1fr;
   row-gap: 10px;
   box-sizing: border-box;
+  color: setColor(gray-2);
 
-  > div:nth-child(1) {
+  &__top {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
 
-  &__text {
-    text-align: center;
+  &__number {
+    @include body-XS;
+    box-sizing: border-box;
+    width: 30px;
+    height: 24px;
+    padding: 0;
     border: 1px solid setColor(gray-4);
-    color: setColor(gray-3);
+    color: setColor(gray-2);
+    text-align: center;
     border-radius: 0.25rem;
-    width: 60px;
+    background: transparent;
   }
 
   &__range-input-wrapper {
-    margin: 12px 0;
     position: relative;
   }
 
   &__range-input-top {
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     opacity: 0;
   }
 }

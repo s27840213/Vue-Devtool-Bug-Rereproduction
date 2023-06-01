@@ -7,9 +7,10 @@ import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
+import textFillUtils from '@/utils/textFillUtils'
 import Home from '@/views/Home.vue'
 import { h, resolveComponent } from 'vue'
-import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { editorRouteHandler } from './handler'
 
 const MOBILE_ROUTES = [
@@ -350,6 +351,7 @@ router.beforeEach(async (to, from, next) => {
       imgSizeMapExtra: json.image_size_map_extra,
       dimensionMap: json.dimension_map
     })
+    textFillUtils.updateFillCategory(json.text_effect, json.text_effect_admin)
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 
     // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.

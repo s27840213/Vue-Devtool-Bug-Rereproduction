@@ -157,16 +157,28 @@
   }
 }
 
-@mixin progressSlider($height: 5px, $thumbSize: 12px, $marginTop: -3.5px, $thumbColor: white, $scale: false) {
-  height: $height;
+@mixin progressSlider($height: 5px, $thumbSize: 12px, $marginTop: -3.5px, $thumbColor: white, $scale: false, $border: none, $boxShadow: 0px 0px 8px rgba(60, 60, 60, 0.31)) {
+  --base: 0;
+  height: $thumbSize;
   display: block;
   appearance: none;
   outline: none;
-  background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
-  border-radius: $height / 2;
+  background: transparent;
 
   &::-webkit-slider-runnable-track {
-    height: $height / 2;
+    height: $height;
+    background: linear-gradient(to right, var(--upper-color) 0 var(--base), var(--lower-color) var(--base) var(--progress), var(--upper-color) var(--progress) 100%);
+    border-radius: $height / 2;
+  }
+
+  &::-moz-range-track {
+    height: $height;
+    background: linear-gradient(to right, var(--upper-color) 0 var(--base), var(--lower-color) var(--base) var(--progress), var(--upper-color) var(--progress) 100%);
+    border-radius: $height / 2;
+  }
+
+  &::-webkit-progress-bar {
+    background-color: var(--lower-color);
   }
 
   &::-webkit-slider-thumb {
@@ -175,10 +187,14 @@
     height: $thumbSize;
     border-radius: 50%;
     background-color: $thumbColor;
-    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    box-shadow: $boxShadow;
+    border: $border;
+    transition: 0.2s;
     margin-top: $marginTop;
     position: relative;
+    cursor: pointer;
   }
+
 
   &::-moz-range-thumb {
     appearance: none;
@@ -186,10 +202,12 @@
     height: $thumbSize;
     border-radius: 50%;
     background-color: $thumbColor;
-    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-    border: none;
+    box-shadow: $boxShadow;
+    border: $border;
+    transition: 0.2s;
     margin-top: $marginTop;
     position: relative;
+    cursor: pointer;
   }
 
   @if $scale {
@@ -216,7 +234,8 @@
   &:active {
     color: setColor(blue-1);
     font-weight: bold;
-    &:deep(.svg-icon)  {
+
+    &:deep(.svg-icon) {
       color: setColor(blue-1);
     }
   }

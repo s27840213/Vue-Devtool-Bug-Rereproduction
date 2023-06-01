@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="brand-kit-tab" :class="`${theme}-theme`" :style="gridStyles()")
+div(class="brand-kit-tab" :class="`${theme}-theme`")
   div(class="brand-kit-tab__header"
     :class="`${theme}-theme`")
     div(v-for="tab in tabs"
@@ -45,13 +45,13 @@ import BrandKitTabText from '@/components/brandkit/tabs/BrandKitTabText.vue'
 import BrandKitTabTextSidebar from '@/components/brandkit/tabs/BrandKitTabTextSidebar.vue'
 import { IDeletingItem } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   props: {
     theme: {
-      type: String,
+      type: String as PropType<'editor' | 'mobile-editor' | 'brandkit'>,
       default: 'brandkit'
     },
     maxheight: {
@@ -121,11 +121,6 @@ export default defineComponent({
     ...mapMutations('brandkit', {
       setSelectedTab: 'SET_selectedTab'
     }),
-    gridStyles() {
-      return (this.theme === 'mobile-editor' && this.settingmode) ? {
-        gridTemplateRows: `auto ${42 + this.tabActions[this.selectedTab as 'logo' | 'color' | 'text'].margin}px minmax(0, 1fr)`
-      } : {}
-    },
     marginStyles() {
       return { marginBottom: `${this.tabActions[this.selectedTab as 'logo' | 'color' | 'text'].margin}px` }
     },
@@ -147,19 +142,29 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .brand-kit-tab {
-  &.editor-theme {
-    height: 100%;
+  @include size(100%, 100%);
+  $tab-header: 54px;
+  $content-margin: 30px;
+
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  > div:last-child { // Tab content always take 1fr
+    grid-row: 3 / 4;
   }
-  &.mobile-editor-theme {
-    @include size(100%, 100%);
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-    grid-template-columns: 1fr;
-  }
+  // &.editor-theme {
+  //   height: 100%;
+  // }
+  // &.mobile-editor-theme {
+  //   @include size(100%, 100%);
+  //   display: grid;
+  //   grid-template-rows: auto minmax(0, 1fr);
+  //   grid-template-columns: 1fr;
+  // }
   &__header {
     display: flex;
     gap: 20px;
-    height: 54px;
+    height: $tab-header;
     &.editor-theme {
       justify-content: center;
     }
@@ -230,9 +235,12 @@ export default defineComponent({
     border-radius: 5px;
   }
   &__content {
-    margin-top: 30px;
+    margin-top: $content-margin;
+    .brand-kit-tab-logo {
+      max-height: calc(100vh - $header-height - $tab-header - $content-margin);
+    }
     &.editor-theme {
-      height: calc(100% - 138px);
+      // height: calc(100% - 138px);
     }
     &.mobile-editor-theme {
       margin-top: 0;

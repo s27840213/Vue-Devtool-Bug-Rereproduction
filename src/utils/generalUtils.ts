@@ -485,6 +485,10 @@ class GeneralUtils {
     }
     return width
   }
+
+  async sleep(ms: number) {
+    await new Promise(resolve => setTimeout(resolve, ms))
+  }
 }
 
 const generalUtils = new GeneralUtils()
