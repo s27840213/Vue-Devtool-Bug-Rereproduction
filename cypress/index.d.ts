@@ -36,7 +36,7 @@ declare namespace Cypress {
       after: (subject: JQuery<HTMLElement>) => void): Chainable<JQuery<HTMLElement>>
     layerRotate(): Chainable<JQuery<HTMLElement>>
     layerScale(): Chainable<JQuery<HTMLElement>>
-    layerRotateAndResize(): Chainable<JQuery<HTMLElement>>
+    layerRotateAndResize(isMobile: boolean): Chainable<JQuery<HTMLElement>>
     layerMultipleCopyAndMove(method: 'functionalPanel' | 'shortcut' | 'rightclick', isMobile: boolean): Chainable<JQuery<HTMLElement>>
     layerMoveToPage2(isMobile: boolean): Chainable<JQuery<HTMLElement>>
 

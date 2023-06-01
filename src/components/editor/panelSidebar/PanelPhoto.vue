@@ -21,11 +21,11 @@ div(class="panel-photo")
 </template>
 
 <script lang="ts">
+import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import generalUtils from '@/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
-import SearchBar from '@/components/SearchBar.vue'
-import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
-import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   name: 'PanelPhoto',
@@ -65,7 +65,7 @@ export default defineComponent({
     generalUtils.panelInit('photo',
       this.handleSearch,
       async () => { /**/ },
-      () => this.getPhotos({ keyword: '' })
+      this.init
     )
   },
   activated() {
@@ -89,6 +89,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions('unsplash', [
+      'init',
       'getPhotos',
       'getMorePhotos',
       'resetSearch'
