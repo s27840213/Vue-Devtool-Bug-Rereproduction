@@ -87,7 +87,10 @@ export default defineComponent({
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
       magnifyUtils: null as unknown as MagnifyUtils,
       showMagnifyAtRight: false,
-      clearModeShift: 4
+      clearModeShift: 4,
+      pointerStartX: 0,
+      pointerStartY: 0,
+      isDrawing: false
     }
   },
   created() {
@@ -272,6 +275,11 @@ export default defineComponent({
         this.contentCtx.filter = 'none'
       }
     },
+    inGestureMode(val) {
+      if (val) {
+        this.showBrush = false
+      }
+    },
     brushColor(newVal) {
       this.brushStyle.backgroundColor = newVal
     },
@@ -292,7 +300,12 @@ export default defineComponent({
         this.isProcessingStepsQueue = false
       },
       deep: true
-    }
+    },
+    fitScaleRatio(newVal) {
+      if (this.magnifyUtils) {
+        this.magnifyUtils.updateFitScaleRatio(newVal)
+      }
+    },
   },
   methods: {
     ...mapMutations({
@@ -393,14 +406,19 @@ export default defineComponent({
       console.log(`in gesture mode: ${this.inGestureMode}`)
       if (!this.inGestureMode && !this.movingMode) {
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
+        this.pointerStartX = e.clientX
+        this.pointerStartY = e.clientY
         Object.assign(this.initPos, {
           x,
           y
         })
-        if (this.clearMode) {
-          this.drawInClearMode(e)
-        } else {
-          this.drawInRestoreMode(e)
+        // if we trigger the drawing event in start phase, we couldn't draw the dot bcz it will conflict with the pinch behavior
+        if (!this.$isTouchDevice()) {
+          if (this.clearMode) {
+            this.drawInClearMode(e)
+          } else {
+            this.drawInRestoreMode(e)
+          }
         }
         if (this.$isTouchDevice()) {
           this.showBrush = true
@@ -413,10 +431,24 @@ export default defineComponent({
     },
     drawing(e: MouseEvent) {
       if (!this.inGestureMode && !this.movingMode) {
-        if (this.clearMode) {
-          this.drawInClearMode(e)
-        } else {
-          this.drawInRestoreMode(e)
+        const pointerCurrentX = e.clientX
+        const pointerCurrentY = e.clientY
+
+        const distanceX = Math.abs(pointerCurrentX - this.pointerStartX)
+        const distanceY = Math.abs(pointerCurrentY - this.pointerStartY)
+
+        this.pointerStartX = pointerCurrentX
+        this.pointerStartY = pointerCurrentY
+
+        const threshold = 0.5
+        if (!this.$isTouchDevice() || this.isDrawing || distanceX > threshold || distanceY > threshold) {
+          this.isDrawing = true
+          // Trigger your pointermove event here
+          if (this.clearMode) {
+            this.drawInClearMode(e)
+          } else {
+            this.drawInRestoreMode(e)
+          }
         }
       }
     },
@@ -425,6 +457,7 @@ export default defineComponent({
       window.removeEventListener('pointermove', this.drawing)
       this._setCanvas(this.contentCanvas)
       this.pushStep()
+      this.isDrawing = false
       if (this.$isTouchDevice()) {
         this.showBrush = false
       }

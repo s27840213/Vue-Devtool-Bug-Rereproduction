@@ -27,7 +27,6 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
-import generalUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
@@ -46,14 +45,25 @@ export default defineComponent({
       panelRemoveBgAt: null as unknown as AnyTouch,
       tmpScaleRatio: 1,
       minRatio: 0.1,
-      maxRatio: 5
+      maxRatio: 5,
+      isPanning: false,
+      startScrollTop: 0,
+      startScrollLeft: 0,
+      initPinchPos: null as null | { x: number, y: number },
+      // eslint-disable-next-line vue/no-unused-properties
+      initImgSize: { width: 0, height: 0 },
+      // p1StartClientY: 0,
+      // p1StartClientX: 0,
+      // p2StartClientY: 0,
+      // p2StartClientX: 0,
+      // distanceBetweenFingers: 0
     }
   },
   mounted() {
     this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
     this.rmSection = this.$refs.rmSection as HTMLElement
 
-    // this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
+    this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
   },
   unmounted() {
     bgRemoveUtils.setInBgRemoveMode(false)
@@ -104,9 +114,48 @@ export default defineComponent({
         case 'start': {
           this.tmpScaleRatio = this.bgRemoveScaleRatio
           this.setInGestureMode(true)
+
+          this.isPanning = true
+          this.startScrollTop = this.rmSection.scrollTop
+          this.startScrollLeft = this.rmSection.scrollLeft
+
+          this.initImgSize = {
+            width: this.autoRemoveResult.width * this.bgRemoveScaleRatio,
+            height: this.autoRemoveResult.height * this.bgRemoveScaleRatio
+          }
           break
         }
         case 'move': {
+          this.isPanning = true
+
+          if (!this.initPinchPos) {
+            this.initPinchPos = { x: event.x, y: event.y }
+          }
+
+          const movingTraslate = {
+            x: (event.x - this.initPinchPos.x),
+            y: (event.y - this.initPinchPos.y)
+          }
+
+          const sizeDiff = {
+            width: this.initImgSize.width * (event.scale - 1) * 0.5,
+            height: this.initImgSize.height * (event.scale - 1) * 0.5
+          }
+
+          // Set the new scrollTop position based on the initial position and the finger movement
+          // this.rmSection.scrollLeft = this.startScrollLeft - movingTraslate.x
+          // this.rmSection.scrollTop = this.startScrollTop - movingTraslate.y
+          this.rmSection.scrollLeft = this.startScrollLeft + sizeDiff.width - movingTraslate.x
+          this.rmSection.scrollTop = this.startScrollTop + sizeDiff.height - movingTraslate.y
+
+          // const scrollCenterX = (2 * this.rmSection.scrollLeft + this.rmSection.clientWidth)
+          // const scrollCenterY = (2 * this.rmSection.scrollTop + this.rmSection.clientHeight)
+          // const oldScrollWidth = this.rmSection.scrollWidth
+          // const oldScrollHeight = this.rmSection.scrollHeight
+
+          // this.rmSection.scrollLeft = (scrollCenterX * this.rmSection.scrollWidth / oldScrollWidth - this.rmSection.clientWidth) / 2
+          // this.rmSection.scrollTop = (scrollCenterY * this.rmSection.scrollHeight / oldScrollHeight - this.rmSection.clientHeight) / 2
+
           const ratio = this.tmpScaleRatio * event.scale
           if (ratio <= this.minRatio) {
             this.bgRemoveScaleRatio = this.minRatio
@@ -120,6 +169,8 @@ export default defineComponent({
         }
 
         case 'end': {
+          this.isPanning = false
+          this.initPinchPos = null
           this.setInGestureMode(false)
           break
         }
@@ -153,9 +204,8 @@ export default defineComponent({
     bgRemoveScaleRatio(val) {
       if (!this.rmSection) {
         this.rmSection = this.$refs.rmSection as HTMLElement
-        return
       }
-      generalUtils.scaleFromCenter(this.rmSection)
+      // generalUtils.scaleFromCenter(this.rmSection)
     }
   }
 })
