@@ -475,7 +475,7 @@ export default defineComponent({
     position: sticky;
     top: -1px;
     left: 0;
-    padding: 12px 0px;
+    padding: 4px 12px;
     margin: 0px;
     background-color: white;
   }
@@ -530,7 +530,6 @@ export default defineComponent({
 }
 @media screen and (max-width: 768px) {
   .home-content {
-    padding: 0 5%;
     // Always show scrollbar in mobile
     overflow-y: overlay;
     &::-webkit-scrollbar {

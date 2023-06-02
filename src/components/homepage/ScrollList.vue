@@ -58,7 +58,7 @@ div(class="list")
             :key="item.id"
             @click="clickTemplate(item)")
           img(loading="lazy"
-            :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
+            :src="`https://template.vivipic.com/template/${item.match_cover.id}/${prevSize(item.match_cover)}?ver=${item.ver}`"
             :style="templateImgStyle(item.match_cover)")
           pro-item(v-if="item.plan === 1")
 </template>
@@ -135,7 +135,7 @@ export default defineComponent({
         gridAutoFlow: 'column',
         gridTemplateRows: '1fr'
       } : {}
-    }
+    },
   },
   created() {
     switch (this.type) {
@@ -247,6 +247,11 @@ export default defineComponent({
         width: `${height * aspectRatio}px`
       }
     },
+    prevSize (match_cover: IAssetTemplate['match_cover']): string {
+      const aspectRatio = match_cover.width / match_cover.height
+
+      return aspectRatio > 1.7 ? 'prev_4x' : 'prev_2x'
+    },
     themeRouteInfo(theme: Itheme) {
       if (this.$isTouchDevice() && theme.id === 7) {
         return ''
@@ -284,6 +289,10 @@ export default defineComponent({
   &__more {
     text-decoration: none;
   }
+
+  @media screen and (max-width: 768px) {
+    padding: 8px 12px;
+  }
 }
 .list-content {
   display: flex;
@@ -307,9 +316,11 @@ export default defineComponent({
   @include no-scrollbar;
   display: flex;
   align-items: flex-end;
+  padding: 0 12px;
   overflow-x: scroll;
   overflow-y: hidden;
   scroll-behavior: smooth;
+  gap: 8px;
   &__theme-item {
     display: grid;
     grid-template-rows: 1fr 46px;
@@ -333,6 +344,12 @@ export default defineComponent({
 
     img:hover {
       transform: translate(0, -5px);
+    }
+
+    @media screen and (max-width: 768px) {
+      img:hover {
+        transform: none;
+      }
     }
   }
   &__app-theme-item {
@@ -361,15 +378,27 @@ export default defineComponent({
     margin: 8px;
   }
   &__template-item {
-    margin: 8px;
     position: relative;
     cursor: pointer;
+    img {
+      border: 2px solid setColor(gray-5);
+      box-sizing: border-box;
+    }
     &:hover {
       transition: all 0.2s ease-in-out;
       transform: translate(0, -5px);
     }
     img:hover {
       box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
+    }
+
+    @media screen and (max-width: 768px) {
+      &:hover {
+        transform: none;
+      }
+      img:hover {
+        box-shadow: none;
+      }
     }
   }
 }
