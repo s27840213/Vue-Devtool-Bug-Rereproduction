@@ -124,8 +124,7 @@ div(:layer-index="`${layerIndex}`"
               @pointerdown.prevent.stop="scaleStart"
               @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
-            v-if="isLine()"
-            :style="`transform: scale(${contentScaleRatio})`")
+            v-if="isLine()")
           svg-icon(class="control-point__rotater"
             iconName="rotate" iconWidth="20px"
             iconColor="blue-1"
@@ -188,7 +187,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -682,9 +681,9 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `2px solid ${outlineColor}`
+          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         } else {
-          return `2px solid ${outlineColor}`
+          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         }
       } else {
         return 'none'
