@@ -41,7 +41,7 @@ class ListService {
     })
   }
 
-  getInfoList(type: string, designIds: string[]) {
+  getInfoList(type: string, designIds: string[], igLayout?: 'story' | 'post') {
     const searchParams = {
       token: '1',
       type,
@@ -49,9 +49,11 @@ class ListService {
       locale: localeUtils.currLocale(),
       cache: true,
       platform: window.location.host,
-      app: 1
+      ver: store.getters['user/getVerApi'],
+      app: 1,
+      // for vivisticker template
+      ...(igLayout && { ig_layout: igLayout })
     }
-
     return axios.request<IListServiceResponse>({
       url: '/list-design',
       method: 'GET',

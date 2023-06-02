@@ -125,7 +125,7 @@ export interface IListServiceParams {
   platform?: string
   all_theme?: number
   colNum?: number,
-  igLayout?: string
+  igLayout?: 'story' | 'post'
   shuffle?: number
 }
 
