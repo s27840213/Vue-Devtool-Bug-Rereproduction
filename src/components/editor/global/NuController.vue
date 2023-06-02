@@ -127,28 +127,30 @@ div(:layer-index="`${layerIndex}`"
             v-if="isLine()"
             :style="`transform: scale(${contentScaleRatio})`")
           svg-icon(class="control-point__rotater"
-            :iconName="'rotate'" :iconWidth="`${20}px`"
-            :src="require('@/assets/img/svg/rotate.svg')"
+            iconName="rotate" iconWidth="20px"
+            iconColor="blue-1"
             :style='lineControlPointStyles()'
             @pointerdown.stop="lineRotateStart"
             @touchstart="lineRotateStart")
-          img(class="control-point__mover"
+          svg-icon(class="control-point__mover"
             ref="moveStart-mover"
-            :src="require('@/assets/img/svg/move.svg')"
+            iconName="move" iconWidth="20px"
+            iconColor="blue-1"
             :style='lineControlPointStyles()'
             @touchstart="disableTouchEvent")
         template(v-else)
           div(class="control-point__controller-wrapper"
               ref="rotater")
             svg-icon(class="control-point__rotater"
-              :iconName="'rotate'" :iconWidth="`${20}px`"
-              :src="require('@/assets/img/svg/rotate.svg')"
+              iconName="rotate" iconWidth="20px"
+              iconColor="blue-1"
               :style='controlPointStyles()'
               @pointerdown.stop="rotateStart"
               @touchstart="disableTouchEvent")
-            img(class="control-point__mover"
+            svg-icon(class="control-point__mover"
               ref="moveStart-mover"
-              :src="require('@/assets/img/svg/move.svg')"
+              iconName="move" iconWidth="20px"
+              iconColor="blue-1"
               :style='controlPointStyles()'
               @touchstart="disableTouchEvent")
     div(v-if="isControllerShown && isLocked() && (scaleRatio >20)"
@@ -525,9 +527,18 @@ export default defineComponent({
           if (k.includes('moveStart')) {
             const ref = this.$refs[k]
             if (ref instanceof Array) {
-              ref[0].addEventListener('pointerdown', this.moveStart)
+              if (ref[0].$el) {
+                ref[0].$el.addEventListener('pointerdown', this.moveStart)
+              } else {
+                ref[0].addEventListener('pointerdown', this.moveStart)
+              }
             } else {
-              (ref as HTMLElement).addEventListener('pointerdown', this.moveStart)
+              const refElement = ref as any
+              if (refElement.$el) {
+                refElement.$el.addEventListener('pointerdown', this.moveStart)
+              } else {
+                refElement.addEventListener('pointerdown', this.moveStart)
+              }
             }
           }
         })
