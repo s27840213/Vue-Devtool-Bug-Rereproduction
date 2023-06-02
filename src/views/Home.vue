@@ -542,6 +542,10 @@ export default defineComponent({
     @include firefoxOnly {
       scrollbar-color: setColor(gray-3) transparent;
     }
+
+    @media screen and (max-height: 960px) {
+      @include no-scrollbar;
+    }
   }
   .home-list, .home-block {
     width: 100%;
