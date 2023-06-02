@@ -8,7 +8,7 @@ div(class="brand-kit-text-setting relative")
       v-click-outside="() => { isConfigOpen = false }")
     span(class="brand-kit-text-setting__config__title") {{ $t('NN0062') }}
     div(class="brand-kit-text-setting__config__family-size")
-      div(class="property-bar pointer" @click="openFontsPanel")
+      property-bar(class="pointer" @click="openFontsPanel")
         img(:src="fontPrevUrl" @error="onError")
         svg-icon(class="pointer"
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")

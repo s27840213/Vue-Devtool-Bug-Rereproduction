@@ -87,7 +87,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import unitUtils from '@/utils/unitUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -1140,6 +1140,7 @@ export default defineComponent({
 
   &__img {
     object-fit: cover;
+    display: block;
   }
 
   &__picture {

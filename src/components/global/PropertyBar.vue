@@ -24,4 +24,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.property-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 3px;
+  padding: 5px 10px;
+  transition: border-color .2s ease-in-out;
+
+  >* {
+    transition: color .2s ease-in-out;
+  }
+}
+
 </style>
