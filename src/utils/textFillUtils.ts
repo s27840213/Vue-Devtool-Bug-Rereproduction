@@ -226,7 +226,9 @@ class TextFill {
           top: `${y - spanHeight * spanExpandRatio + maxFontSize}px`,
           left: `${x - spanWidth * spanExpandRatio + maxFontSize}px`,
           ...!isFixedWidth ? { lineHeight: 'initial' } : {},
-        }
+        },
+        // To fix Safari PDF reader bug: https://bit.ly/3IPcS8o
+        ...store.getters['user/getUserId'] === 'backendRendering' ? { filter: 'opacity(1)' } : {},
       }
     }))
   }
