@@ -42,6 +42,7 @@ div(class="nu-sub-controller")
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import { isTextFill } from '@/interfaces/format'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
@@ -240,6 +241,9 @@ export default defineComponent({
     isTextEditing(): boolean {
       return !this.isControlling && this.isControllerShown
     },
+    isDraggingCursor(): boolean {
+      return this.config.isDraggingCursor
+    },
     getPrimaryLayerSubLayerNum(): number {
       return (this.primaryLayer as IGroup | ITmp).layers.length
     },
@@ -321,23 +325,18 @@ export default defineComponent({
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01})`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode
+        writingMode: this.config.styles.writingMode,
+        ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
     textBodyStyle() {
-      const textstyles = {
+      const checkTextFill = isTextFill(this.config.styles.textFill)
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
+        !this.config.contentEditable ? 0 : 1
+      return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
-        userSelect: this.config.contentEditable ? 'text' : 'none',
-        opacity: 1
-      }
-      return !(this.isCurveText || this.isFlipped || this.isFlipping) ? textstyles : {
-        width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        opacity: this.config.contentEditable ? 1 : 0
+        opacity,
       }
     },
     onPointerdown(e: PointerEvent) {

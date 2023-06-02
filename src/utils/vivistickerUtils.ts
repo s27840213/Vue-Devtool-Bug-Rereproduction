@@ -34,11 +34,17 @@ export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame'
 /**
  * shown prop indicates if the user-setting-config is shown in the setting page
  */
-const USER_SETTINGS_CONFIG: { [key: string]: { default: any, description: string, shown: boolean, val?: any } } = {
+const USER_SETTINGS_CONFIG: { [key: string]: { default: any, description: string, shown: boolean, val?: any, isList?: boolean } } = {
   autoSave: {
     default: false,
     description: 'STK0012',
     shown: true
+  },
+  emojiSetting: {
+    default: 0,
+    description: 'STK0058',
+    shown: true,
+    isList: true
   },
   mydesignShowMissingPhotoAsk: {
     default: true,
@@ -46,6 +52,32 @@ const USER_SETTINGS_CONFIG: { [key: string]: { default: any, description: string
     shown: false,
     val: true
   }
+}
+
+interface IUserSettingListOption {
+  val: any
+  description: string
+  icon?: string
+}
+
+const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
+  emojiSetting: [
+    {
+      val: '-apple-system',
+      description: '<P>Apple Emoji',
+      icon: 'apple_emoji'
+    },
+    {
+      val: 'zVUjQ0MaGOm7HOJXv5gB',
+      description: '<P>Noto Color Emoji',
+      icon: 'noto_color_emoji'
+    },
+    {
+      val: 'dLe1S0oDanIJjvty5RxG',
+      description: '<P>Noto Emoji',
+      icon: 'noto_emoji'
+    },
+  ],
 }
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
@@ -163,13 +195,34 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     for (const [key, value] of Object.entries(USER_SETTINGS_CONFIG)) {
       if (value.shown) {
         res[key] = value.default
+        if (value.isList) {
+          res[key] = USER_SETTINGS_LIST_CONFIG[key][value.default].val
+        }
       }
     }
     return res as IUserSettings
   }
 
+  getUserSettingIsList(key: string): boolean {
+    return USER_SETTINGS_CONFIG[key]?.isList ?? false
+  }
+
+  getUserSettingOptions(key: string): IUserSettingListOption[] {
+    return USER_SETTINGS_LIST_CONFIG[key] ?? []
+  }
+
   getUserSettingDescription(key: string): string {
     return USER_SETTINGS_CONFIG[key]?.description ?? ''
+  }
+
+  addFontForEmoji() {
+    const defaultEmoji = this.userSettings.emojiSetting
+    if (defaultEmoji === '-apple-system') return
+    store.dispatch('text/addFont', {
+      face: defaultEmoji,
+      type: 'public',
+      ver: store.getters['user/getVerUni']
+    })
   }
 
   getMyDesignTags(): IMyDesignTag[] {
@@ -442,8 +495,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   startEditing(editorType: string, assetInfo: { [key: string]: any }, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
     pageUtils.setPages([pageUtils.newPage({
       ...this.getPageSize(editorType),
-      backgroundColor: '#F8F8F8',
-      isAutoResizeNeeded: true
+      backgroundColor: '#F8F8F8'
     })])
     store.commit('vivisticker/SET_editingDesignId', designId ?? '')
     store.commit('vivisticker/SET_editingAssetInfo', assetInfo)

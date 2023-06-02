@@ -200,11 +200,11 @@ export default class SubControllerUtils {
     switch (this.primaryLayer.type) {
       case 'group':
         updateSubLayerProps = layerUtils.updateSubLayerProps
-        layers = (layerUtils.getCurrLayer as IGroup).layers
+        layers = (this.primaryLayer as IGroup).layers
         break
       case 'frame':
         updateSubLayerProps = frameUtils.updateFrameLayerProps
-        layers = (layerUtils.getCurrLayer as IFrame).clips
+        layers = (this.primaryLayer as IFrame).clips
     }
 
     if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
@@ -221,7 +221,6 @@ export default class SubControllerUtils {
       }
       const isFrameSub = this.primaryLayer.type === LayerType.frame && !(this.primaryLayer as IFrame).clips[this.subLayerIdx].active
       const isGroupSub = this.primaryLayer.type === LayerType.group && !(this.primaryLayer as IGroup).layers[this.subLayerIdx].active
-      console.log(isGroupSub)
       if (isFrameSub || isGroupSub) {
         if (this.isControllerShown) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { active: true })

@@ -13,7 +13,7 @@ div(class="home")
       iframe(title="Vivipic" class="home-top__yt"
         :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
         frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
-      router-link(v-if="inBrowserMode" :to="`/editor?type=new-design-size&width=1080&height=1080`"
+      router-link(v-if="inBrowserMode && !isMobileSize" :to="`/editor?type=new-design-size&width=1080&height=1080`"
           class="home-top__button rounded btn-primary-sm btn-LG")
         span {{$t('NN0391')}}
     div(class="home-list")
@@ -475,7 +475,7 @@ export default defineComponent({
     position: sticky;
     top: -1px;
     left: 0;
-    padding: 12px 0px;
+    padding: 4px 12px;
     margin: 0px;
     background-color: white;
   }
@@ -530,7 +530,6 @@ export default defineComponent({
 }
 @media screen and (max-width: 768px) {
   .home-content {
-    padding: 0 5%;
     // Always show scrollbar in mobile
     overflow-y: overlay;
     &::-webkit-scrollbar {
@@ -542,6 +541,10 @@ export default defineComponent({
     }
     @include firefoxOnly {
       scrollbar-color: setColor(gray-3) transparent;
+    }
+
+    @media screen and (max-height: 960px) {
+      @include no-scrollbar;
     }
   }
   .home-list, .home-block {

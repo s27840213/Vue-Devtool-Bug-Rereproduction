@@ -16,12 +16,14 @@ import { defineComponent } from 'vue'
 
 // eslint-disable-next-line no-undef
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-const req = require.context('@/assets/icon', true, /\.svg$/)
+const req = require.context('@/assets/icon', true, /\.svg$/, 'lazy-once')
 
 if (window.location.host !== 'vivipic.com') {
-  svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-    return context.default?.id ?? ''
-  }))
+  requireAll(req).forEach((promise: any) => {
+    promise.then((context: any) => {
+      svgIconUtils.pushIcon(context.default?.id)
+    })
+  })
 } else {
   requireAll(req)
 }

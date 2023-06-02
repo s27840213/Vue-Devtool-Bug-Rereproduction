@@ -1,12 +1,24 @@
 import { ITextEffect } from '@/interfaces/format'
-import { IParagraph, IText } from '@/interfaces/layer'
+import { AllLayerTypes, IParagraph, IText } from '@/interfaces/layer'
 import store from '@/store'
 import { lab2rgb, rgb2lab } from '@/utils/colorUtils'
 import LayerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
-import _ from 'lodash'
+import _, { max } from 'lodash'
 import tiptapUtils from './tiptapUtils'
+
+type ITextShadowCSS = {
+  '--base-stroke'?: string
+  filter?: string
+  willChange?: string
+  webkitTextStrokeColor?: string
+  webkitTextFillColor?: string
+  duplicatedTexts?: {
+    extraBodyStyle?: Record<string, string|number>
+    extraSpanStyle?: Record<string, string|number>
+  }[]
+}
 
 class Controller {
   private shadowScale = 0.2
@@ -162,7 +174,7 @@ class Controller {
     return { textShadow: shadow.join(',') }
   }
 
-  convertTextEffect(config: IText): Record<string, any> {
+  convertTextEffect(config: IText): ITextShadowCSS {
     const effect = config.styles.textEffect as any
     let { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, ver } = effect || {}
     const unit = this.shadowScale * fontSize
@@ -179,6 +191,8 @@ class Controller {
     color = this.colorParser(color, config)
     const colorWithOpacity = color ? this.convertColor2rgba(color, effectOpacity) : ''
 
+    const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
+
     switch (name) {
       case 'shadow':
         return {
@@ -187,7 +201,8 @@ class Controller {
             ${colorWithOpacity} 
             ${effectShadowOffset * Math.cos(angle * Math.PI / 180)}px
             ${effectShadowOffset * Math.sin(angle * Math.PI / 180)}px
-            ${effectBlur / 2}px)`
+            ${effectBlur / 2}px)`,
+          willChange: 'filter',
         }
       case 'lift':
         return {
@@ -196,7 +211,8 @@ class Controller {
             ${this.convertColor2rgba('#000000', Math.max(0.05, effectSpread))} 
             ${0}px
             ${0.3 * unit}px
-            ${((0.3 * unit) + effectSpreadBlur) / 2}px)`
+            ${((0.3 * unit) + effectSpreadBlur) / 2}px)`,
+          willChange: 'filter',
         }
       case 'hollow':
         return {
@@ -212,8 +228,8 @@ class Controller {
           webkitTextFillColor: 'transparent',
           duplicatedTexts: [{
             extraBodyStyle: {
-              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180)}px`,
-              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180)}px`,
+              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) - maxFontSize}px`,
+              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) - maxFontSize}px`,
             },
             extraSpanStyle: {
               color,
@@ -229,8 +245,8 @@ class Controller {
           '--base-stroke': '0px',
           duplicatedTexts: [0.5, 0.2].map((opacity, i) => ({
             extraBodyStyle: {
-              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1)}px`,
-              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) * (i + 1)}px`,
+              left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
+              top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
             },
             extraSpanStyle: {
               opacity,
@@ -242,12 +258,14 @@ class Controller {
       case 'funky3d':
         return {
           '--base-stroke': '0px',
-          ...this.funky3d(
-            distance * fontSize / 60,
-            effect.distanceInverse * fontSize / 60,
-            effect.angle,
-            colorWithOpacity
-          )
+          duplicatedTexts: [{
+            extraBodyStyle: this.funky3d(
+              distance * fontSize / 60,
+              effect.distanceInverse * fontSize / 60,
+              effect.angle,
+              colorWithOpacity
+            ),
+          }]
         }
       case 'bold3d': {
         const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2 * fontSize / 60, y: 0 })
@@ -256,8 +274,8 @@ class Controller {
           webkitTextStrokeColor: `${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
           duplicatedTexts: [{
             extraBodyStyle: {
-              left: `${x}px`,
-              top: `${y}px`,
+              left: `${x - maxFontSize}px`,
+              top: `${y - maxFontSize}px`,
             },
             extraSpanStyle: {
               color: colorWithOpacity,
@@ -268,32 +286,9 @@ class Controller {
         }
       }
       default:
-        return { textShadow: 'none', '--base-stroke': '0px' }
+        return { '--base-stroke': '0px' }
     }
   }
-
-  // syncShareAttrs(textShadow: ITextEffect, effectName: string|null) {
-  //   if (textShadow.name === 'none') return
-  //   Object.assign(textShadow, { name: textShadow.name || effectName })
-  //   const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textShadowShare') ?? {}) as Record<string, string>
-  //   const newShareAttrs = { }
-  //   const newEffect = { }
-  //   // if (['funky3d', 'bold3d'].includes(textShadow.name)) {
-  //   //   Object.assign(newShareAttrs, { color: textShadow.color })
-  //   //   Object.assign(newEffect, { color: shareAttrs.color })
-  //   // }
-
-  //   // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
-  //   if (!effectName) {
-  //     Object.assign(shareAttrs, newShareAttrs)
-  //     localStorageUtils.set('textEffectSetting', 'textShadowShare', shareAttrs)
-  //   } else {
-  //     let effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
-  //     Object.assign(effect, newEffect)
-  //     effect = _.omit(effect, ['color'])
-  //     localStorageUtils.set('textEffectSetting', effectName, effect)
-  //   }
-  // }
 
   setColorKey(key: string) {
     this.currColorKey = key
@@ -316,42 +311,43 @@ class Controller {
   setTextEffect(effect: string, attrs = {} as any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
+    const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
     const subLayerIndex = LayerUtils.subLayerIdx
     const defaultAttrs = this.effects[effect]
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
+      const layer = layers[idx]
+      if (layer.type !== 'text') continue
 
-      const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
-      if (type === 'text') {
-        const textEffect = {} as ITextEffect
-        if (layerTextEffect && layerTextEffect.name === effect) {
-          Object.assign(textEffect, layerTextEffect, attrs)
-          localStorageUtils.set('textEffectSetting', effect, textEffect)
-          // this.syncShareAttrs(textEffect, null)
-        } else {
-          // this.syncShareAttrs(textEffect, effect)
-          let localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
-          localAttrs = _.omit(localAttrs, ['color']) as ITextEffect
-          Object.assign(textEffect, defaultAttrs, localAttrs, attrs, { name: effect })
-        }
-        const mainColor = this.getLayerMainColor(paragraphs)
-        const mainFontSize = this.getLayerFontSize(paragraphs)
-        Object.assign(textEffect, {
-          color: textEffect.color || mainColor,
-          strokeColor: textEffect.strokeColor || mainColor,
-          fontSize: mainFontSize
-        })
-        store.commit('UPDATE_specLayerData', {
-          pageIndex,
-          layerIndex,
-          subLayerIndex: +idx,
-          styles: { textEffect }
-        })
+      const paragraphs = layer.paragraphs
+      const oldTextEffect = layer.styles.textEffect
+      const newTextEffect = {} as ITextEffect
 
-        tiptapUtils.updateHtml()
+      if (oldTextEffect && oldTextEffect.name === effect) { // Adjust effect option.
+        Object.assign(newTextEffect, oldTextEffect, attrs)
+        localStorageUtils.set('textEffectSetting', effect, newTextEffect)
+        // this.syncShareAttrs(textEffect, null)
+      } else { // Switch to other effect.
+        // this.syncShareAttrs(textEffect, effect)
+        let localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
+        localAttrs = _.omit(localAttrs, ['color']) as ITextEffect
+        Object.assign(newTextEffect, defaultAttrs, localAttrs, attrs, { name: effect })
       }
+      const mainColor = this.getLayerMainColor(paragraphs)
+      const mainFontSize = this.getLayerFontSize(paragraphs)
+      Object.assign(newTextEffect, {
+        color: newTextEffect.color || mainColor,
+        strokeColor: newTextEffect.strokeColor || mainColor,
+        fontSize: mainFontSize
+      })
+      store.commit('UPDATE_specLayerData', {
+        pageIndex,
+        layerIndex,
+        subLayerIndex: +idx,
+        styles: { textEffect: newTextEffect }
+      })
+      tiptapUtils.updateHtml()
     }
   }
 

@@ -88,7 +88,7 @@ import unitUtils from '@/utils/unitUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -134,7 +134,7 @@ export default defineComponent({
       type: Object,
       default: () => { return undefined }
     },
-    primaryLayerIndex: {
+    priPrimaryLayerIndex: {
       type: Number,
       default: -1
     },
@@ -559,8 +559,8 @@ export default defineComponent({
               if ((this.primaryLayer as IFrame).decoration) {
                 subLayerIdx++
               }
-              if (this.primaryLayerIndex !== -1) {
-                vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+              if (this.priPrimaryLayerIndex !== -1) {
+                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
               } else {
                 vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
               }
@@ -601,7 +601,7 @@ export default defineComponent({
           const elImg = this.$refs.img as SVGImageElement
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            if (this.primaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+            if (this.priPrimaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
             else vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
           } else {
             // Rendering
@@ -623,8 +623,9 @@ export default defineComponent({
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        if (this.primaryLayerIndex !== -1) {
-          vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+        console.log(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+        if (this.priPrimaryLayerIndex !== -1) {
+          vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
         } else {
           vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
         }
@@ -1180,7 +1181,7 @@ export default defineComponent({
     getPreviewSize(): number | string {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return imageUtils
-        .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
+        .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 320)
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config
@@ -1249,6 +1250,7 @@ export default defineComponent({
 
   &__img {
     object-fit: cover;
+    display: block;
   }
 
   &__picture {

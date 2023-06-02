@@ -173,7 +173,7 @@ class AssetUtils {
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
     const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    console.log(generalUtils.deepCopy(newPage))
+    // console.log(generalUtils.deepCopy(newPage)) // remove unneccessary use of deepCopy(...) for performance
     pageUtils.updateSpecPage(targetPageIndex, newPage)
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
@@ -234,7 +234,7 @@ class AssetUtils {
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -465,7 +465,7 @@ class AssetUtils {
     const { width, height, scale } = json.styles
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_TEXT
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_TEXT
     const pageAspectRatio = currentPage.width / currentPage.height
     const textAspectRatio = width / height
     const textWidth = textAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * textAspectRatio
@@ -537,7 +537,7 @@ class AssetUtils {
     // }
 
     if (newLayer !== null) {
-      layerUtils.addLayers(targetPageIndex, [newLayer])
+      layerUtils.addLayers(targetPageIndex, [textUtils.resetScaleForLayer(newLayer, true)])
     }
   }
 
@@ -809,6 +809,7 @@ class AssetUtils {
       store.commit('SET_mobileSidebarPanelOpen', false)
       let key = ''
       const asset = await this.get(item, attrs.db) as IAsset
+      attrs.fit = item.fit
 
       switch (asset.type) {
         case 1: {
@@ -875,7 +876,8 @@ class AssetUtils {
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
       key = moduleKey ?? key
-      editorUtils.setCloseMobilePanelFlag(true)
+      // Prevent close panel only for panelBG
+      if (asset.type !== 1) editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset, key)
       return asset.jsonData
     } catch (error) {

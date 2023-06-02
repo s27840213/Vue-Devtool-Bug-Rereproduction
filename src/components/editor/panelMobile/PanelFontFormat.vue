@@ -50,20 +50,33 @@ export default defineComponent({
         return (currLayer as IText).styles.writingMode.includes('vertical')
       }
       return !(currLayer as IGroup).layers.some(l => l.type === 'text' && !(l as IText).styles.writingMode.includes('vertical'))
-    }
+    },
+    hasTextFill(): boolean {
+      const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
+      if (subLayerIdx !== -1) {
+        return ((currLayer as IGroup).layers[subLayerIdx] as IText).styles.textFill.name !== 'none'
+      }
+      if (currLayer.type === 'text') {
+        return (currLayer as IText).styles.textFill.name !== 'none'
+      }
+      return !(currLayer as IGroup).layers.some(l => l.type === 'text' && (l as IText).styles.textFill.name !== 'none')
+    },
   },
   methods: {
     mappingIcons(type: string) {
       return mappingUtils.mappingIconSet(type)
     },
     iconClickable(icon: string): boolean {
-      if (icon === 'font-vertical') { // if there is any curveText, vertical mode is disabled
-        return !this.hasCurveText
+      switch (icon) {
+        case 'font-vertical':
+          return !this.hasCurveText
+        case 'underline':
+          return !(this.hasOnlyVerticalText || this.hasTextFill)
+        case 'italic':
+          return !this.hasOnlyVerticalText
+        default:
+          return true
       }
-      if (['underline', 'italic'].includes(icon)) { // if it is single vertical text or group with only veritical texts, underline and italic are disabled
-        return !this.hasOnlyVerticalText
-      }
-      return true
     },
     iconIsActived(iconName: string): boolean {
       switch (iconName) {
@@ -71,7 +84,7 @@ export default defineComponent({
           if (this.props.weight === 'bold') return true
           break
         case 'underline':
-          if (this.props.decoration === 'underline') return true
+          if (this.props.decoration === 'underline' && !this.hasTextFill) return true
           break
         case 'italic':
           if (this.props.style === 'italic') return true

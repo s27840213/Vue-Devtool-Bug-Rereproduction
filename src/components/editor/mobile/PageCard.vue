@@ -72,7 +72,7 @@ export default defineComponent({
       groupType: 'getGroupType',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
       hasBleed: 'getHasBleed',
-      showMobilePanel: 'mobileEditor/getShowMobilePanel'
+      currActivePanel: 'mobileEditor/getCurrActivePanel',
     }),
     cardStyle(): { [index: string]: string | number } {
       return {
@@ -100,10 +100,10 @@ export default defineComponent({
     hasBleed() {
       this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
     },
-    showMobilePanel() {
-      window.setTimeout(() => {
+    currActivePanel(newVal, oldVal) {
+      if (oldVal === 'bleed') {
         this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
-      }, 500)
+      }
     }
   }
 })

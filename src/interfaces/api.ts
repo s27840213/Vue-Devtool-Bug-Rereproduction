@@ -1,5 +1,6 @@
 import { RawImage } from '@/interfaces/gallery'
 import { IBleed } from '@/interfaces/page'
+import { intersection, isEqual } from 'lodash'
 
 /* eslint-disable camelcase */
 export interface IPhotoTag {
@@ -84,6 +85,13 @@ export interface IAssetPhoto {
     tiny: string
   }
 }
+export function isIAssetPhoto(object: unknown): object is IAssetPhoto {
+  return typeof object === 'object' && !!object &&
+    isEqual(
+      intersection(['width', 'height', 'id', 'preview', 'urls'], Object.keys(object)),
+      ['width', 'height', 'id', 'preview', 'urls']
+    )
+}
 
 export interface IPexelsSearchResponse {
   photos: IPexelsPhoto[]
@@ -157,8 +165,9 @@ export interface IListServiceContentDataItem {
   unit?: string
   valid?: number
   plan?: number
-  icon?: string,
+  icon?: string
   bleed?: IBleed
+  fit?: number
 }
 
 export interface ICategoryItem {

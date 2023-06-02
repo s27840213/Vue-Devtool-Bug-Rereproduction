@@ -16,8 +16,8 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-teleport(v-if="useMobileEditor || inVivisticker" :to="teleportTarget")
-  div(class="magnify-area" :style="magnifyAreaStyle")
+teleport(:to="teleportTarget")
+  div(v-show="useMobileEditor || inVivisticker" class="magnify-area" :style="magnifyAreaStyle")
     canvas(class="magnify-area__canvas"  ref="magnify")
     div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
 </template>
@@ -193,7 +193,8 @@ export default defineComponent({
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100})`
+        transform: `scale(${this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100})`,
+        willChange: this.inGestureMode ? 'transform' : ''
       }
     },
     wrapperStyles(): { [index: string]: string } {
@@ -352,6 +353,7 @@ export default defineComponent({
     },
     initMagnifyCanvas() {
       this.magnifyCanvas = this.$refs.magnify as HTMLCanvasElement
+      console.log(this.magnifyCanvas)
       const ctx = this.magnifyCanvas.getContext('2d') as CanvasRenderingContext2D
 
       this.magnifyCtx = ctx

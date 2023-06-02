@@ -226,7 +226,7 @@ export default defineComponent({
       return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design', 'add-template', 'page-management'].includes(this.currActivePanel)
+      return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     noHeaderTheme(): boolean {
       return ['select-design', 'page-management'].includes(this.currActivePanel)
@@ -248,9 +248,6 @@ export default defineComponent({
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
-        case 'text-effect': {
-          return this.panelHistory.length === 0
-        }
         default: {
           return false
         }

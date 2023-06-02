@@ -1,8 +1,4 @@
-import { isITextLetterBg } from '@/interfaces/format'
-import {
-  AllLayerTypes,
-  IGroup, IParagraph, IText, ITmp
-} from '@/interfaces/layer'
+import { AllLayerTypes, IGroup, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ISelection } from '@/interfaces/text'
 import router from '@/router'
@@ -13,7 +9,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import Graphemer from 'graphemer'
-import _ from 'lodash'
+import _, { pick } from 'lodash'
 import cssConverter from './cssConverter'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
@@ -296,7 +292,7 @@ class TextUtils {
 
   genTextDiv(_content: IText, widthLimit = -1): HTMLDivElement {
     const body = document.createElement('div')
-    const content = generalUtils.deepCopy(_content) as IText
+    const content = generalUtils.deepCopy(_content)
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
       let fontSize = 0
@@ -305,10 +301,9 @@ class TextUtils {
         span.textContent = spanData.text
 
         const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
-        const fixedWidth = isITextLetterBg(content.styles.textBg) && content.styles.textBg.fixedWidth
         const additionalStyle = {
           ...index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-          ...fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, pData.styles, content) : {}
+          ...textBgUtils.fixedWidthStyle(spanData.styles, pData.styles, content)
         }
         Object.assign(span.style, spanStyleObject, additionalStyle)
         // Set CSS var to span
@@ -659,6 +654,7 @@ class TextUtils {
     return { x, y, center: true }
   }
 
+  // TODO: In addStandardText call resetTextField, textLayer is Partial<IText>, need more type check here.
   resetTextField(textLayer: IText, pageIndex: number, field?: string) {
     const page = layerUtils.getPage(pageIndex) as IPage
     /**
@@ -1154,26 +1150,17 @@ class TextUtils {
     })
   }
 
-  setStylesBuffer(styles: { [key: string]: any }, keys: string[]): { [key: string]: any } {
-    const res = {} as { [key: string]: any }
-    for (const key of keys) {
-      res[key] = styles[key]
-    }
-    return res
-  }
-
   resetScaleForLayer(layer: AllLayerTypes, preMount = false): AllLayerTypes {
     layer = generalUtils.deepCopy(layer)
     let subLayers
     let newStyles
     let stylesBuffer = {} as { [key: string]: any }
-    let preParams
     let originHW
     let newHW
     switch (layer.type) {
       case LayerType.text:
         if (layer.styles.scale > 1) {
-          stylesBuffer = this.setStylesBuffer(layer.styles, ['scale'])
+          stylesBuffer = pick(layer.styles, ['scale'])
           layer.styles.scale = 1
           layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
             return size * stylesBuffer.scale
@@ -1216,7 +1203,7 @@ class TextUtils {
          * and reset the scale individually for certain typed sub-layers.
          * after that, re-form the group/tmp with those sub-layers.
          */
-        stylesBuffer = this.setStylesBuffer(layer.styles, ['opacity', 'rotate', 'horizontalFlip', 'verticalFlip'])
+        stylesBuffer = pick(layer.styles, ['opacity', 'rotate', 'horizontalFlip', 'verticalFlip'])
         if (layer.type === LayerType.group) {
           layer.layers.forEach((subLayer: AllLayerTypes, index: number) => {
             subLayer.styles.zindex = layer.styles.zindex + index

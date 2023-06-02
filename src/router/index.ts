@@ -5,9 +5,10 @@ import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
+import textFillUtils from '@/utils/textFillUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { defineAsyncComponent, h, resolveComponent } from 'vue'
+import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import ViviSticker from '../views/ViviSticker.vue'
@@ -28,7 +29,8 @@ const routes: Array<RouteRecordRaw> = [
           const recentPanel = await vivistickerUtils.getState('recentPanel')
           const userSettings = await vivistickerUtils.getState('userSettings')
           if (userSettings) {
-            store.commit('vivisticker/SET_userSettings', userSettings)
+            store.commit('vivisticker/UPDATE_userSettings', userSettings)
+            vivistickerUtils.addFontForEmoji()
           }
           const hasCopied = await vivistickerUtils.getState('hasCopied')
           vivistickerUtils.hasCopied = hasCopied?.data ?? false
@@ -73,17 +75,17 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: defineAsyncComponent(() => import('@/views/SvgIconView.vue'))
+    component: () => import('@/views/SvgIconView.vue')
   })
   routes.push({
     path: 'copytool',
     name: 'CopyTool',
-    component: defineAsyncComponent(() => import('@/views/CopyTool.vue'))
+    component: () => import('@/views/CopyTool.vue')
   })
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: defineAsyncComponent(() => import('@/views/NubtnList.vue'))
+    component: () => import('@/views/NubtnList.vue')
   })
 }
 
@@ -184,13 +186,7 @@ router.beforeEach(async (to, from, next) => {
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 
-    if (to.name === 'Screenshot') {
-      store.commit('SET_showGlobalErrorModal', false) // /screenshot never shows error modal
-    } else if (window.location.hostname !== 'sticker.vivipic.com') {
-      store.commit('SET_showGlobalErrorModal', true) // always show error modal for non-production domains
-    } else {
-      store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
-    }
+    store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
 
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
@@ -199,6 +195,7 @@ router.beforeEach(async (to, from, next) => {
       imgSizeMapExtra: json.image_size_map_extra,
       dimensionMap: json.dimension_map
     })
+    textFillUtils.updateFillCategory(json.text_effect, json.text_effect_admin)
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 
     // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.

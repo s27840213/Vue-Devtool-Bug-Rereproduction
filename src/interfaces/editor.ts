@@ -25,3 +25,10 @@ export interface IFooterTab {
   disabled?: boolean,
   props?: IFooterTabProps
 }
+
+export interface CustomElementConfig {
+  tag: string
+  attrs?: Record<string, string | number>
+  content?: CustomElementConfig[]
+  style?: Record<string, string | number>
+}

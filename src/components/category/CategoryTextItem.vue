@@ -67,7 +67,8 @@ export default defineComponent({
       } else {
         vivistickerUtils.startEditing('text', {
           plan: this.item.plan,
-          assetId: this.item.id
+          assetId: this.item.id,
+          fit: this.item.fit ?? 0,
         }, vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
       }
     }

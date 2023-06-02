@@ -234,13 +234,14 @@ export default defineComponent({
       } else if (this.isInCategory || this.isInBgShare) {
         return []
       } else if (this.inBgRemoveMode) {
-        return [{
-          icon: 'download',
-          width: 24,
-          action: () => {
-            bgRemoveUtils.downloadCanvas()
-          }
-        }]
+        return []
+        // return [{
+        //   icon: 'download',
+        //   width: 24,
+        //   action: () => {
+        //     bgRemoveUtils.saveToIOS()
+        //   }
+        // }]
       } else {
         return [
           ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
@@ -392,7 +393,9 @@ export default defineComponent({
           vivistickerUtils.handleIos16Video()
         }
       }
-      if (vivistickerUtils.checkVersion('1.31') && this.editingAssetInfo.isFrame) {
+      if (this.inBgRemoveMode) {
+        bgRemoveUtils.screenshot()
+      } else if (vivistickerUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
         vivistickerUtils.copyWithScreenshotUrl(
           vivistickerUtils.createUrlForJSON({ source: 'editor' }),
           copyCallback

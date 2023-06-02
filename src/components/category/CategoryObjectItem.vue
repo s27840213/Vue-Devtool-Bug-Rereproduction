@@ -98,12 +98,14 @@ export default defineComponent({
           plan: this.item.plan,
           assetId: this.item.id,
           isFrame: this.item.has_frame,
+          fit: this.item.fit ?? 0,
         }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects'), vivistickerUtils.getAssetCallback(this.item))
       } else {
         vivistickerUtils.startEditing('object', {
           plan: this.item.plan,
           isFrame: this.item.type === 8,
-          assetId: this.item.id
+          assetId: this.item.id,
+          fit: this.item.fit ?? 0,
         }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg' }), vivistickerUtils.getAssetCallback(this.item))
       }
     },

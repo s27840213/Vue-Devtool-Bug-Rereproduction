@@ -58,7 +58,7 @@ div(class="list")
             :key="item.id"
             @click="clickTemplate(item)")
           img(loading="lazy"
-            :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
+            :src="`https://template.vivipic.com/template/${item.match_cover.id}/${prevSize(item.match_cover)}?ver=${item.ver}`"
             :style="templateImgStyle(item.match_cover)")
           pro-item(v-if="item.plan === 1")
 </template>
@@ -69,6 +69,7 @@ import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import { IAssetTemplate } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
+import designUtils from '@/utils/designUtils'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import picWVUtils from '@/utils/picWVUtils'
@@ -134,7 +135,7 @@ export default defineComponent({
         gridAutoFlow: 'column',
         gridTemplateRows: '1fr'
       } : {}
-    }
+    },
   },
   created() {
     switch (this.type) {
@@ -153,13 +154,19 @@ export default defineComponent({
         this.moreLink = '/mydesign'
         break
       case 'template':
-        this.getTamplate({
-          keyword: 'group::0;;order_by::popular',
-          theme: this.theme,
-          shuffle: this.shuffle === true ? 1 : 0,
-          cache: true
-        }).then((response) => {
-          this.templateData = response.data.content[0].list
+        Promise.all([
+          this.getTamplate({
+            keyword: 'group::0;;order_by::popular',
+            theme: this.theme,
+            shuffle: this.shuffle === true ? 1 : 0,
+            cache: true
+          }).then((response) => {
+            this.templateData = response.data.content[0].list
+          }),
+          themeUtils.checkThemeState().then(() => {
+            this.themeData = themeUtils.themesMainHidden
+          })
+        ]).then(() => {
           this.isLoading = false
         })
         this.title = themeUtils.getThemeTitleById(this.theme as string)
@@ -196,6 +203,7 @@ export default defineComponent({
       items.scrollLeft += items.offsetWidth / 2 * (next ? 1 : -1)
     },
     templateUrl(item: IAssetTemplate): string {
+      const matchedTheme = this.themeData.find(theme => theme.id.toString() === item.match_cover.theme_id)
       return this.$router.resolve({
         name: 'Editor',
         query: {
@@ -203,7 +211,9 @@ export default defineComponent({
           design_id: this.theme === '7' ? item.group_id : item.match_cover.id,
           themeId: item.content_ids[0].themes.join(','),
           width: String(item.match_cover.width),
-          height: String(item.match_cover.height)
+          height: String(item.match_cover.height),
+          unit: matchedTheme?.unit ?? 'px',
+          ...(matchedTheme?.unit !== 'px' && matchedTheme?.bleed !== undefined ? { bleeds: designUtils.convertBleedsToQuery(matchedTheme.bleed) } : {})
         }
       }).href
     },
@@ -237,11 +247,16 @@ export default defineComponent({
         width: `${height * aspectRatio}px`
       }
     },
+    prevSize (match_cover: IAssetTemplate['match_cover']): string {
+      const aspectRatio = match_cover.width / match_cover.height
+
+      return aspectRatio > 1.7 ? 'prev_4x' : 'prev_2x'
+    },
     themeRouteInfo(theme: Itheme) {
       if (this.$isTouchDevice() && theme.id === 7) {
         return ''
       } else {
-        const queryBleed = theme.unit !== 'px' ? `&bleeds=${theme.bleed.top},${theme.bleed.right},${theme.bleed.bottom},${theme.bleed.left}` : ''
+        const queryBleed = theme.unit !== 'px' ? `&bleeds=${designUtils.convertBleedsToQuery(theme.bleed)}` : ''
         return `/editor?type=new-design-size&themeId=${theme.id}&width=${theme.width}&height=${theme.height}&unit=${theme.unit}${queryBleed}`
       }
     },
@@ -274,6 +289,10 @@ export default defineComponent({
   &__more {
     text-decoration: none;
   }
+
+  @media screen and (max-width: 768px) {
+    padding: 8px 12px;
+  }
 }
 .list-content {
   display: flex;
@@ -297,9 +316,11 @@ export default defineComponent({
   @include no-scrollbar;
   display: flex;
   align-items: flex-end;
+  padding: 0 12px;
   overflow-x: scroll;
   overflow-y: hidden;
   scroll-behavior: smooth;
+  gap: 8px;
   &__theme-item {
     display: grid;
     grid-template-rows: 1fr 46px;
@@ -323,6 +344,12 @@ export default defineComponent({
 
     img:hover {
       transform: translate(0, -5px);
+    }
+
+    @media screen and (max-width: 768px) {
+      img:hover {
+        transform: none;
+      }
     }
   }
   &__app-theme-item {
@@ -351,15 +378,28 @@ export default defineComponent({
     margin: 8px;
   }
   &__template-item {
-    margin: 8px;
+    margin: 8px 0px;
     position: relative;
     cursor: pointer;
+    img {
+      border: 2px solid setColor(gray-5);
+      box-sizing: border-box;
+    }
     &:hover {
       transition: all 0.2s ease-in-out;
       transform: translate(0, -5px);
     }
     img:hover {
       box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
+    }
+
+    @media screen and (max-width: 768px) {
+      &:hover {
+        transform: none;
+      }
+      img:hover {
+        box-shadow: none;
+      }
     }
   }
 }

@@ -6,18 +6,19 @@ p(class="nu-curve-text__p" :style="pStyle()")
     class="nu-curve-text__span"
     :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
     :key="sIndex",
-    :style="Object.assign(styles(span.styles, sIndex), extraSpanStyle)") {{ span.text }}
+    :style="Object.assign(spanStyle(span.styles, sIndex), extraSpanStyle)") {{ span.text }}
 </template>
 
 <script lang="ts">
-import { IGroup, ISpan, IText } from '@/interfaces/layer'
+import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textFillUtils from '@/utils/textFillUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -39,7 +40,7 @@ export default defineComponent({
       type: Number
     },
     extraSpanStyle: {
-      type: Object as PropType<Record<string, string>>,
+      type: Object as PropType<Record<string, string|number>>,
     },
   },
   data () {
@@ -47,7 +48,8 @@ export default defineComponent({
       textWidth: [] as number[],
       textHeight: [] as number[],
       minHeight: 0,
-      isDestroyed: false
+      isDestroyed: false,
+      textFillSpanStyle: [] as Record<string, string | number>[][]
     }
   },
   async created () {
@@ -58,10 +60,12 @@ export default defineComponent({
   unmounted() {
     this.isDestroyed = true
   },
-  mounted() {
+  async mounted() {
+    this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(async () => {
         await this.resizeCallback()
+        this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
         generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
       }, 100) // for the delay between font loading and dom rendering
     })
@@ -81,7 +85,13 @@ export default defineComponent({
         })
       },
       deep: true
-    }
+    },
+    async 'config.styles.textFill'() {
+      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+    },
+    async 'config.styles.textShape'() {
+      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+    },
   },
   methods: {
     focus(): boolean {
@@ -95,7 +105,7 @@ export default defineComponent({
     spans(): ISpan[] {
       return TextShapeUtils.flattenSpans(this.config)
     },
-    pStyle(): any {
+    pStyle(): Record<string, string | number> {
       const { height, width, scale } = this.config.styles
       return {
         margin: 0,
@@ -103,11 +113,11 @@ export default defineComponent({
         width: `${width / scale}px`
       }
     },
-    circleStyle(): any {
+    circleStyle(): Record<string, string> {
       const { minHeight, scaleRatio } = this
       const bend = this.bend()
       const borderWidth = `${1 / (scaleRatio * 0.01)}px`
-      const style = {} as any
+      const style = {} as Record<string, string|number>
       const radius = 1000 / Math.pow(Math.abs(bend), 0.6)
       if (bend >= 0) {
         style.top = `${minHeight / 2}px`
@@ -124,7 +134,7 @@ export default defineComponent({
         width: `${radius * 2}px`
       }
     },
-    curveIconStyle(): any {
+    curveIconStyle(): Record<string, string> {
       const { config: { styles }, scaleRatio } = this
       const size = 13 / (scaleRatio * 0.01)
       return {
@@ -136,19 +146,23 @@ export default defineComponent({
       const mainFontSize = textEffectUtils.getLayerFontSize(this.config.paragraphs)
       return TextShapeUtils.convertTextShape(this.textWidth, this.bend(), mainFontSize)
     },
-    styles(styles: any, idx: number) {
+    spanStyle(styles: ISpanStyle, sIndex: number) {
+      const fontSize = styles.size
       const { textHeight, minHeight } = this
       const bend = this.bend()
       const transforms = this.transforms()
-      const baseline = `${(minHeight - textHeight[idx]) / 2}px`
+      const baseline = `${(minHeight - textHeight[sIndex]) / 2 - fontSize}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
-      const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
+      const textFillStyle = this.textFillSpanStyle[0]?.[sIndex] ?? {}
       return Object.assign(
         fontStyles,
-        { textIndent: fontStyles['letter-spacing'] || 'initial' },
-        { transform: transforms[idx] || 'none' },
+        {
+          textIndent: fontStyles['letter-spacing'] || 'initial',
+          transform: transforms[sIndex] || 'none',
+          padding: `${fontSize}px`,
+        },
         bend >= 0 ? { top: baseline } : { bottom: baseline },
-        textEffectStyles,
+        textFillStyle,
       )
     },
     async computeDimensions(spans: ISpan[]) {

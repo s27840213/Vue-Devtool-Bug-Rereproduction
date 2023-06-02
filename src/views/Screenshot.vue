@@ -6,6 +6,8 @@ div(class="screenshot")
             :page="page"
             :pageIndex="0"
             :layerIndex="0")
+  div(v-if="bgRemoveSrc !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
+    img(:src="backgroundImage" @load="onload")
   div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
     img(:src="backgroundImage" @load="onload")
   div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
@@ -17,6 +19,7 @@ import PageContent from '@/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { AllLayerTypes, IImageStyle, ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
@@ -32,7 +35,8 @@ enum ScreenShotMode {
   LAYER,
   BG_IMG,
   BG_COLOR,
-  PAGE
+  PAGE,
+  BG_REMOVE
 }
 
 export default defineComponent({
@@ -42,6 +46,7 @@ export default defineComponent({
       usingLayer: false,
       backgroundImage: '',
       backgroundColor: '',
+      bgRemoveSrc: '',
       usingJSON: false,
       pageTranslate: {
         x: 0,
@@ -72,6 +77,9 @@ export default defineComponent({
     ...(mapGetters({
       pages: 'getPages'
     }) as { pages: () => IPage[] }),
+    ...mapGetters({
+      bgRemoveCanvas: 'bgRemove/getCanvas'
+    }),
     page(): IPage {
       return this.pages[0]
     },
@@ -106,6 +114,7 @@ export default defineComponent({
         const designId = urlParams.get('designId')
         const key = urlParams.get('key')
         const source = urlParams.get('source')
+        const src = urlParams.get('src')
         const noBg = urlParams.get('noBg') === 'true'
         const toast = urlParams.get('toast')
         if (toast !== null) {
@@ -263,6 +272,10 @@ export default defineComponent({
           // }
           case 'background': {
             this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
+            break
+          }
+          case 'bgRemove': {
+            this.bgRemoveSrc = bgRemoveUtils.getBgRemoveResultSrc()
             break
           }
           case 'backgroundColor': {

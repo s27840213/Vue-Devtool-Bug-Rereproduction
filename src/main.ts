@@ -1,5 +1,6 @@
 import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
+import SvgIcon from '@/components/global/SvgIcon.vue'
 import modalUtils from '@/utils/modalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import Core from '@any-touch/core'
@@ -34,7 +35,9 @@ window.onerror = function (msg, url, line, colno, error) {
   ].join(' - ')
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
-    if (store.getters.getShowGlobalErrorModal) {
+    console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
+    // if (store.getters['vivisticker/getDebugMode'] && (window.location.hostname !== 'sticker.vivipic.com' || store.getters.getShowGlobalErrorModal))
+    if (store.getters['vivisticker/getDebugMode']) {
       const hint = `${vivistickerUtils.getUserInfoFromStore().hostId}, ${generalUtils.generateTimeStamp()}, ${errorId}`
       modalUtils.setModalInfo(
         i18n.global.t('NN0866'),
@@ -70,6 +73,7 @@ declare module '@vue/runtime-core' {
   }
   function provide<T>(key: InjectionKey<T> | string | number, value: T | ComputedRef<T>): void
 }
+// app.config.unwrapInjectedRef = true
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 app.config.globalProperties.$isTablet = () => generalUtils.isTablet()
 app.config.globalProperties.$eventBus = eventBus
@@ -96,9 +100,7 @@ app.use(FloatingVue, {
 
 app.component('RecycleScroller', RecycleScroller)
 
-app.component('svg-icon', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/SvgIcon.vue')
-))
+app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))
@@ -258,6 +260,27 @@ app.directive('custom-swipe', {
 })
 
 app.directive('press', longpress)
+
+function setProgressStyle(el: HTMLInputElement) {
+  nextTick(() => {
+    if (el.disabled) {
+      el.style.setProperty('--base', '0')
+      el.style.setProperty('--progress', '50%')
+    } else {
+      el.style.setProperty('--base', `${(Math.min(+el.value, 0) - (+el.min)) / (+el.max - (+el.min)) * 100}%`)
+      el.style.setProperty('--progress', `${(Math.max(+el.value, 0) - (+el.min)) / (+el.max - (+el.min)) * 100}%`)
+    }
+  })
+}
+
+app.directive('progress', {
+  mounted: (el) => {
+    setProgressStyle(el)
+  },
+  updated: (el) => {
+    setProgressStyle(el)
+  }
+})
 
 /**
  * move to the SvgIcon.vue component

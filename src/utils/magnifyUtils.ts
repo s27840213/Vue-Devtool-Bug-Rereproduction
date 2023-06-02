@@ -1,11 +1,12 @@
 import store from '@/store'
 import mouseUtils from '@/utils/mouseUtils'
+import { debounce } from 'lodash'
 
 class MagnifyUtils {
   private magnifyCanvas: HTMLCanvasElement;
   private contentCanvas: HTMLCanvasElement;
   private targetEl: HTMLElement;
-  private fitScaleRatio: number
+  fitScaleRatio: number
   private magnifyContext: CanvasRenderingContext2D;
   private posInMagnifierCanvas = { x: 0, y: 0 };
   private raf: number | undefined;
@@ -55,6 +56,12 @@ class MagnifyUtils {
   reset(): void {
     window.cancelAnimationFrame(this.raf!)
     this.magnifyContext.clearRect(0, 0, this.magnifyCanvas.width, this.magnifyCanvas.height)
+  }
+
+  updateFitScaleRatio(fitScaleRatio: number): void {
+    debounce(() => {
+      this.fitScaleRatio = fitScaleRatio
+    }, 1000)()
   }
 }
 
