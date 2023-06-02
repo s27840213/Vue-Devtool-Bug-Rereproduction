@@ -18,6 +18,7 @@ div(class="panel-background-remove")
         span(class="label-mid") {{ $t('NN0387') }}
       div(class="flex")
         input(class="input__slider--range"
+          v-progress
           v-model.number="brushSize"
           :max="maxBrushSize"
           :min="minBrushSize"

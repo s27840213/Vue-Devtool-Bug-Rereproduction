@@ -56,6 +56,7 @@ div(class="text-effect-setting")
                 @change="(e)=>{handleRangeInputEvent(e, option);recordChange()}"
                 type="number")
               input(class="text-effect-setting__option--range input__slider--range"
+                v-progress
                 :value="getInputValue(getStyle(category), option)"
                 :name="option.key"
                 :max="option.max"
