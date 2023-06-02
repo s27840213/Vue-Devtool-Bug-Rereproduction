@@ -378,6 +378,7 @@ export default defineComponent({
     margin: 8px;
   }
   &__template-item {
+    margin: 8px 0px;
     position: relative;
     cursor: pointer;
     img {
