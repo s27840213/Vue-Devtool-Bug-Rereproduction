@@ -300,7 +300,12 @@ export default defineComponent({
         this.isProcessingStepsQueue = false
       },
       deep: true
-    }
+    },
+    fitScaleRatio(newVal) {
+      if (this.magnifyUtils) {
+        this.magnifyUtils.updateFitScaleRatio(newVal)
+      }
+    },
   },
   methods: {
     ...mapMutations({
