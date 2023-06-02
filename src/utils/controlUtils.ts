@@ -177,6 +177,7 @@ class Controller {
   }
 
   private getResizers = (resizerShort: number, resizerLong: number, contentScaleRatio: number, isTouchArea = false) => {
+    const isMobile = generalUtils.isTouchDevice()
     return [
       {
         type: 'H',
@@ -187,7 +188,8 @@ class Controller {
           left: '0',
           // transform: isTouchArea ? `translate(-75%, 0%) scale(${contentScaleRatio})` : `translate(-50%, 0%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(-75%, 0%)' : 'translate(-50%, 0%)',
-          opacity: isTouchArea ? '0' : '1'
+          opacity: isTouchArea ? '0' : '1',
+          borderRadius: isMobile ? `${resizerShort / 2}px` : 'none'
         }
       },
       {
@@ -199,7 +201,8 @@ class Controller {
           right: '0',
           // transform: isTouchArea ? `translate(75%, 0%) scale(${contentScaleRatio})` : `translate(50%, 0%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(75%, 0%)' : 'translate(50%, 0%)',
-          opacity: isTouchArea ? '0' : '1'
+          opacity: isTouchArea ? '0' : '1',
+          borderRadius: isMobile ? `${resizerShort / 2}px` : 'none'
         }
       },
       {
@@ -211,7 +214,8 @@ class Controller {
           bottom: '0',
           // transform: isTouchArea ? `translate(0%, 75%) scale(${contentScaleRatio})` : `translate(0%, 50%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(0%, 75%)' : 'translate(0%, 50%)',
-          opacity: isTouchArea ? '0' : '1'
+          opacity: isTouchArea ? '0' : '1',
+          borderRadius: isMobile ? `${resizerShort / 2}px` : 'none'
         }
       },
       {
@@ -223,7 +227,8 @@ class Controller {
           top: '0',
           // transform: isTouchArea ? `translate(0%, -75%) scale(${contentScaleRatio})` : `translate(0%, -50%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(0%, -75%)' : 'translate(0%, -50%)',
-          opacity: isTouchArea ? '0' : '1'
+          opacity: isTouchArea ? '0' : '1',
+          borderRadius: isMobile ? `${resizerShort / 2}px` : 'none'
         }
       }
     ] as {
@@ -235,8 +240,7 @@ class Controller {
 
   getControlPoints = (resizerShort: number, resizerLong: number, scaleRatio = 1) => {
     const scale = editorUtils.contentScaleRatio * scaleRatio
-    const isMobile = generalUtils.isTouchDevice()
-    const scalerSize = isMobile ? 12 : 8
+    const scalerSize = 8
 
     return {
       scalers: this.getScalers(scalerSize * scaleRatio),

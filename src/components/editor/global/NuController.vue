@@ -156,7 +156,7 @@ div(:layer-index="`${layerIndex}`"
         class="nu-controller__lock-icon"
         :style="lockIconStyles()"
         @click="MappingUtils.mappingIconAction('lock')")
-      svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'")
+      svg-icon(iconName="lock" iconWidth="16px" iconColor="red")
 </template>
 
 <script lang="ts">
@@ -236,7 +236,7 @@ export default defineComponent({
       MappingUtils,
       FrameUtils,
       controlPoints: (this.$isTouchDevice()
-        ? ControlUtils.getControlPoints(6, 25)
+        ? ControlUtils.getControlPoints(4, 17)
         : ControlUtils.getControlPoints(4, 25)) as ICP,
       isControlling: false,
       isLineEndMoving: false,
@@ -352,7 +352,7 @@ export default defineComponent({
       return {
         ...this.sizeStyles,
         willChange: this.isDragging() && !this.useMobileEditor ? 'transform' : '',
-        outline: this.outlineStyles(),
+        ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
         /**
@@ -575,6 +575,7 @@ export default defineComponent({
     getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
       let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
       const { tooShort, tooNarrow } = this.checkLimits()
+      const isMobile = this.$isTouchDevice()
       switch (this.getLayerType) {
         case 'image':
           resizers = this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
@@ -587,9 +588,9 @@ export default defineComponent({
             resizers = []
           } else {
             resizers = this.config.styles.writingMode.includes('vertical') ? (
-              tooNarrow ? resizers.slice(3, 4) : resizers.slice(2, 4)
+              tooNarrow ? (isMobile ? [] : resizers.slice(3, 4)) : resizers.slice(2, 4)
             ) : (
-              tooShort ? resizers.slice(0, 1) : resizers.slice(0, 2)
+              tooShort ? (isMobile ? [] : resizers.slice(0, 1)) : resizers.slice(0, 2)
             )
           }
           break
@@ -614,11 +615,17 @@ export default defineComponent({
       resizers = resizers ?? []
 
       if (this.getLayerType !== 'text') {
-        if (tooShort) {
-          resizers = resizers.filter(r => r.type !== 'H')
-        }
-        if (tooNarrow) {
-          resizers = resizers.filter(r => r.type !== 'V')
+        if (isMobile) {
+          if (tooShort || tooNarrow) {
+            resizers = []
+          }
+        } else {
+          if (tooShort) {
+            resizers = resizers.filter(r => r.type !== 'H')
+          }
+          if (tooNarrow) {
+            resizers = resizers.filter(r => r.type !== 'V')
+          }
         }
       }
       return resizers
@@ -666,7 +673,7 @@ export default defineComponent({
         transform: `rotate(${-this.config.styles.rotate}deg)`
       }
     },
-    outlineStyles() {
+    outlineStyles(): { outline: string, outlineOffset: string } {
       const outlineColor = (() => {
         if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
           return '#F10994'
@@ -677,16 +684,22 @@ export default defineComponent({
         }
       })()
 
+      let outline = ''
+
       if (this.isLine() || (this.isMoving && this.currSelectedInfo.index !== this.layerIndex)) {
-        return 'none'
+        outline = 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
+          outline = `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         } else {
-          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
+          outline = `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         }
       } else {
-        return 'none'
+        outline = 'none'
+      }
+      return {
+        outline,
+        outlineOffset: `${this.$isTouchDevice() ? -0.25 : -1}px`
       }
     },
     hintStyles() {
@@ -1621,8 +1634,8 @@ export default defineComponent({
     lockIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
       return {
-        transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px) scale(${this.contentScaleRatio})`
-          : `translate(0px, 0px) scale(${this.contentScaleRatio})`
+        transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px)`
+          : 'translate(0px, 0px)'
       }
     },
   }
@@ -1699,13 +1712,13 @@ export default defineComponent({
   }
 
   &__lock-icon {
-    @include size(30px, 30px);
+    @include size(24px, 24px);
     @include flexCenter;
     pointer-events: initial;
     position: absolute;
-    right: -15px;
-    bottom: -15px;
-    border: 1px solid setColor(red);
+    right: -12px;
+    bottom: -12px;
+    filter: drop-shadow(0px 0px 8px rgba(60, 60, 60, 0.3));
     border-radius: 50%;
     background-color: setColor(white);
   }
@@ -1733,6 +1746,9 @@ export default defineComponent({
   position: absolute;
   background-color: setColor(white);
   border: 1px solid setColor(blue-2);
+  @media screen and (max-width: 976px) {
+    border-width: 1.5px;
+  }
 
   &__resize-bar {
     position: absolute;
