@@ -21,6 +21,9 @@
     // Prevent volar or prettier format vue file
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
+  "[svg]": {
+    "editor.formatOnSave": false,
+  },
   "files.insertFinalNewline": true,
   "i18n-ally.localesPaths": [
     "src/locales"
