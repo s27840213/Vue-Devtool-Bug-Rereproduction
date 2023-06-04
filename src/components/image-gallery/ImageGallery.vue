@@ -71,19 +71,22 @@ const component = defineComponent({
         this.myfileUpdate()
       },
     },
-    images(newImages: GalleryImage[]) { // For panel unsplash and pexel
-      this.nextIndex = newImages.length
-      this.rows = this.galleryUtils
-        .generate(newImages)
-        .map((row, idx) => ({
-          list: row,
-          id: `row_${idx}`,
-          sentinel: false,
-          size: row[0].preview.height + this.margin
-        }))
-      if (this.rows.length) {
-        this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
-      }
+    images: { // For panel unsplash
+      immediate: true,
+      handler: function(newImages: GalleryImage[]) {
+        this.nextIndex = newImages.length
+        this.rows = this.galleryUtils
+          .generate(newImages)
+          .map((row, idx) => ({
+            list: row,
+            id: `row_${idx}`,
+            sentinel: false,
+            size: row[0].preview.height + this.margin
+          }))
+        if (this.rows.length) {
+          this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
+        }
+      },
     }
   },
   methods: {
