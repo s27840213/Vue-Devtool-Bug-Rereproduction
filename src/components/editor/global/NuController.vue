@@ -125,35 +125,51 @@ div(:layer-index="`${layerIndex}`"
               @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine()")
-          svg-icon(class="control-point__rotater"
-            iconName="rotate" iconWidth="20px"
-            iconColor="blue-1"
-            :style='lineControlPointStyles()'
-            @pointerdown.stop="lineRotateStart"
-            @touchstart="lineRotateStart")
-          svg-icon(class="control-point__mover"
-            ref="moveStart-mover"
-            iconName="move" iconWidth="20px"
-            iconColor="blue-1"
-            :style='lineControlPointStyles()'
-            @touchstart="disableTouchEvent")
-        template(v-else)
-          div(class="control-point__controller-wrapper"
-              ref="rotater")
-            svg-icon(class="control-point__rotater"
+          template(v-if="$isTouchDevice()")
+            div(class="control-point__action shadow"
+                ref="moveStart-mover")
+              svg-icon(class="control-point__action-svg"
+                iconName="move2" iconWidth="24px"
+                iconColor="blue-2"
+                :style='controlPointStyles()'
+                @touchstart="disableTouchEvent")
+          template(v-else)
+            svg-icon(class="control-point__widget"
+              iconName="rotate" iconWidth="20px"
+              iconColor="blue-1"
+              :style='lineControlPointStyles()'
+              @pointerdown.stop="lineRotateStart"
+              @touchstart="lineRotateStart")
+            svg-icon(class="control-point__widget"
+              ref="moveStart-mover"
+              iconName="move" iconWidth="20px"
+              iconColor="blue-1"
+              :style='lineControlPointStyles()'
+              @touchstart="disableTouchEvent")
+        div(v-else class="control-point__controller-wrapper")
+          template(v-if="$isTouchDevice()")
+            div(class="control-point__action shadow"
+                ref="moveStart-mover")
+              svg-icon(class="control-point__action-svg"
+                iconName="move2" iconWidth="24px"
+                iconColor="blue-2"
+                :style='controlPointStyles()'
+                @touchstart="disableTouchEvent")
+          template(v-else)
+            svg-icon(class="control-point__widget"
               iconName="rotate" iconWidth="20px"
               iconColor="blue-1"
               :style='controlPointStyles()'
               @pointerdown.stop="rotateStart"
               @touchstart="disableTouchEvent")
-            svg-icon(class="control-point__mover"
+            svg-icon(class="control-point__widget"
               ref="moveStart-mover"
               iconName="move" iconWidth="20px"
               iconColor="blue-1"
               :style='controlPointStyles()'
               @touchstart="disableTouchEvent")
     div(v-if="isActive && isLocked() && (scaleRatio >20)"
-        class="nu-controller__lock-icon"
+        class="nu-controller__lock-icon control-point__action shadow"
         :style="lockIconStyles()"
         @click="MappingUtils.mappingIconAction('lock')")
       svg-icon(iconName="lock" iconWidth="16px" iconColor="red")
@@ -632,7 +648,7 @@ export default defineComponent({
     },
     getScaler(scalers: any) {
       const { tooShort, tooNarrow } = this.checkLimits()
-      return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
+      return this.$isTouchDevice() ? scalers.slice(1, 2) : ((tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers)
     },
     getCornerRotaters(scalers: any) {
       const { tooShort, tooNarrow } = this.checkLimits()
@@ -1712,22 +1728,16 @@ export default defineComponent({
   }
 
   &__lock-icon {
-    @include size(24px, 24px);
-    @include flexCenter;
-    pointer-events: initial;
     position: absolute;
     right: -12px;
     bottom: -12px;
-    filter: drop-shadow(0px 0px 8px rgba(60, 60, 60, 0.3));
-    border-radius: 50%;
-    background-color: setColor(white);
   }
 }
 
 @mixin widget-point-wrapper {
   position: absolute;
   top: 100%;
-  padding: 10px;
+  padding: 24px;
   box-sizing: border-box;
   transform-origin: top;
 }
@@ -1765,10 +1775,7 @@ export default defineComponent({
       pointer-events: none;
     }
   }
-  &__rotater-wrapper {
-    @include widget-point-wrapper;
-  }
-  &__rotater {
+  &__widget {
     @include widget-point;
   }
   &__controller-wrapper {
@@ -1778,9 +1785,6 @@ export default defineComponent({
   &__line-controller-wrapper {
     @include widget-point-wrapper;
   }
-  &__mover {
-    @include widget-point;
-  }
   &__move-bar {
     cursor: move;
   }
@@ -1789,6 +1793,19 @@ export default defineComponent({
     border: none;
     pointer-events: auto;
     position: absolute;
+  }
+  &__action {
+    @include size(24px, 24px);
+    @include flexCenter;
+    pointer-events: initial;
+    border-radius: 50%;
+    background-color: setColor(white);
+  }
+  &__action-svg {
+    @include size(24px);
+    position: relative;
+    left: 0;
+    top: 0;
   }
 }
 
@@ -1835,5 +1852,9 @@ export default defineComponent({
   &:hover {
     cursor: pointer;
   }
+}
+
+.shadow {
+  filter: drop-shadow(0px 0px 8px rgba(60, 60, 60, 0.3));
 }
 </style>
