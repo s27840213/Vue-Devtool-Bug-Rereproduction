@@ -690,7 +690,7 @@ export default defineComponent({
       }
     },
     hintStyles() {
-      return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${this.contentScaleRatio})`
+      return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px)`
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
@@ -956,7 +956,7 @@ export default defineComponent({
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      const [dx, dy] = [diff.offsetX, diff.offsetY]
+      const [dx, dy] = [diff.offsetX / this.contentScaleRatio, diff.offsetY / this.contentScaleRatio]
       const markerIndex = this.initMarkerIndex
 
       const copiedPoint: number[] = Array.from(this.config.point)
