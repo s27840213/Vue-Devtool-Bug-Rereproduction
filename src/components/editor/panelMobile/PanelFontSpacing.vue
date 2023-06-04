@@ -6,16 +6,16 @@ div(class="panel-spacing")
     :min="fieldRange.fontSpacing.min"
     :max="fieldRange.fontSpacing.max"
     :step="1"
-    :propKey="'fs'"
-    @update:fs="updateFontSpacing")
+    name="fs"
+    @update="updateValue")
   mobile-slider(:title="`${$t('NN0110')}`"
     :borderTouchArea="true"
     :value="lineHeight"
     :min="fieldRange.lineHeight.min"
     :max="fieldRange.lineHeight.max"
     :step="0.01"
-    :propKey="'lh'"
-    @update:lh="updateLineHeight")
+    name="lh"
+    @update="updateValue")
 </template>
 
 <script lang="ts">
@@ -48,11 +48,8 @@ export default defineComponent({
     }
   },
   methods: {
-    updateLineHeight(val: number) {
-      this.setParagraphProp('lineHeight', val)
-    },
-    updateFontSpacing(val: number) {
-      this.setParagraphProp('fontSpacing', val)
+    updateValue(val: number, name: 'fs' | 'lh') {
+      this.setParagraphProp(name === 'fs' ? 'fontSpacing' : 'lineHeight', val)
     },
     setParagraphProp(prop: 'lineHeight' | 'fontSpacing', value: number) {
       textUtils.setParagraphProp(prop, value)

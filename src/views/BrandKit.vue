@@ -53,17 +53,17 @@ div(class="brand-kit relative"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import NuHeader from '@/components/NuHeader.vue'
-import NuFooter from '@/components/NuFooter.vue'
-import BrandSelector from '@/components/brandkit/BrandSelector.vue'
-import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
-import vClickOutside from 'click-outside-vue3'
-import brandkitUtils from '@/utils/brandkitUtils'
-import { mapActions, mapGetters } from 'vuex'
+import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
+import BrandSelector from '@/components/brandkit/BrandSelector.vue'
+import NuFooter from '@/components/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -208,7 +208,7 @@ export default defineComponent({
     align-items: center;
   }
   &__tab {
-    margin: 28px 0px;
+    margin: 28px 0 0 0;
   }
 }
 

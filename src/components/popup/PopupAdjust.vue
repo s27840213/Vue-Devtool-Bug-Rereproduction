@@ -12,6 +12,7 @@ div(class="popup-adjust p-10")
         @blur="handleChangeStop"
         :value="adjustTmp[field.name] || 0")
     input(class="popup-adjust__range-input input__slider--range"
+      v-progress
       :value="adjustTmp[field.name] || 0"
       :max="field.max"
       :min="field.min"
@@ -23,9 +24,9 @@ div(class="popup-adjust p-10")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import stepsUtils from '@/utils/stepsUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
@@ -109,9 +110,6 @@ export default defineComponent({
     width: 100%;
     height: 20px;
     margin: 0;
-    &::-webkit-slider-thumb {
-      border: 2px solid #4eabe6;
-    }
   }
   &__reset {
     @include body-SM;

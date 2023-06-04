@@ -87,7 +87,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import unitUtils from '@/utils/unitUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -1067,7 +1067,7 @@ export default defineComponent({
     getPreviewSize(): number | string {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return imageUtils
-        .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
+        .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 320)
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config
@@ -1140,6 +1140,7 @@ export default defineComponent({
 
   &__img {
     object-fit: cover;
+    display: block;
   }
 
   &__picture {

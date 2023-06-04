@@ -1,6 +1,6 @@
 import { IAdjustJsonProps } from '@/interfaces/adjust'
 import { LayerProcessType } from '@/store/types'
-import { ITextBgEffect, ITextEffect, ITextShape } from './format'
+import { ITextBg, ITextEffect, ITextFill, ITextShape } from './format'
 import { SrcObj } from './gallery'
 import { IShadowProps, IShadowStyles } from './imgShadow'
 import { ITiptapSelection } from './text'
@@ -63,7 +63,8 @@ export interface ITextStyle extends IStyle {
   writingMode: string
   textShape: ITextShape
   textEffect: ITextEffect
-  textBg: ITextBgEffect
+  textBg: ITextBg
+  textFill: ITextFill
   align: string
 }
 

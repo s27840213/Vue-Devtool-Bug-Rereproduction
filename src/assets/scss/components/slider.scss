@@ -1,57 +1,44 @@
 @use '@/assets/scss/utils' as *;
+
 @mixin inputType($type: '') {
     &__slider {
         &--range {
-            appearance: none;
-            display: block;
-            margin: auto;
-            outline: none;
-            background: none;
-            &::-webkit-slider-runnable-track {
-                height: 2px;
-                background-color: setColor(gray-4);
-            }
-            &::-webkit-slider-thumb {
-                appearance: none;
-                width: 15px;
-                height: 15px;
-                border-radius: 50%;
-                background-color: setColor(white);
-                border: 2px solid setColor(blue-1);
-                transition: 0.2s;
-                margin-top: -6.5px;
-                position: relative;
-                @media screen and (max-width: 976px) {
-                    @if $type=='top' {
-                        width: 40px;
-                        height: 40px;
-                        margin-top: -20px;
-                    }
-                    @else {
-                        width: 20px;
-                        height: 20px;
-                        margin-top: -10px;
-                    }
+            @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -6.5px, $thumbColor: setColor(white), $border: 2px solid setColor(blue-1), $boxShadow: none);
+
+            @if $type=='top' {
+                &::-webkit-slider-thumb {
+                    width: 40px;
+                    height: 40px;
+                    margin-top: -18.5px;
+                }
+
+                &::-moz-range-thumb {
+                    width: 40px;
+                    height: 40px;
+                    margin-top: -18.5px;
                 }
             }
-            &::-webkit-progress-bar {
-                background-color: setColor(blue-1);
+
+            margin: auto;
+            --lower-color: #{setColor(blue-1)};
+            --upper-color: #{setColor(gray-4)};
+
+            &[disabled] {
+                &::-webkit-slider-thumb {
+                    border: 2px solid setColor(gray-4);
+                }
+
+                &::-moz-range-thumb {
+                    border: 2px solid setColor(gray-4);
+                }
+
+                --lower-color: #{setColor(gray-4)};
             }
-            &::-moz-range-track {
-                background-color: setColor(gray-4);
-            }
-            &::-moz-range-thumb {
-                appearance: none;
-                width: 11px;
-                height: 11px;
-                border-radius: 50%;
-                background-color: setColor(white);
-                border: 2px solid setColor(bu);
-                transition: 0.2s;
-                margin-top: -6.5px;
-                position: relative;
-            }
+
+            // @media screen and (max-width: 976px) {
+            // }
         }
+
         &--text {
             box-sizing: border-box;
             text-align: center;

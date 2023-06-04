@@ -560,12 +560,17 @@ class UploadUtils {
 
     formData.append('file', blob)
 
-    xhr.open('POST', this.loginOutput.upload_log_map.url, true)
-    xhr.send(formData)
-    xhr.onerror = networkUtils.notifyNetworkError
-    xhr.onload = () => {
-      // console.log(xhr)
-    }
+    await new Promise<void>((resolve, reject) => {
+      xhr.open('POST', this.loginOutput.upload_log_map.url, true)
+      xhr.send(formData)
+      xhr.onerror = () => {
+        networkUtils.notifyNetworkError()
+        reject(new Error('upload to s3 failed'))
+      }
+      xhr.onload = () => {
+        resolve()
+      }
+    })
   }
 
   async uploadDesign(putAssetDesignType?: PutAssetDesignType, params?: { clonedPages?: Array<IPage> }) {
@@ -1372,6 +1377,7 @@ class UploadUtils {
           align: styles.align,
           textEffect: styles.textEffect,
           textBg: styles.textBg,
+          textFill: styles.textFill,
           textShape: styles.textShape,
           type: styles.type,
           userId: styles.userId

@@ -1,5 +1,6 @@
-import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
-import { IParagraph, IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
+import { CustomElementConfig } from '@/interfaces/editor'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, isTextFill, ITextBg, ITextGooey, ITextLetterBg } from '@/interfaces/format'
+import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -7,17 +8,9 @@ import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
-import _, { cloneDeep, isEqual } from 'lodash'
+import _, { cloneDeep, isEqual, omit } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
-
-export interface textBgSvg {
-  attrs: Record<string, string | number>
-  content: {
-    tag: string
-    attrs: Record<string, string | number>
-  }[]
-}
 
 // For text effect gooey
 export class Point {
@@ -54,7 +47,7 @@ function obj2Point(p: { x: number, y: number }) {
   return new Point(p.x, p.y)
 }
 
-class Rect {
+export class Rect {
   bodyRect = new DOMRect()
   vertical = false
   width = 0
@@ -69,6 +62,8 @@ class Rect {
       height: number
       text: string
       letterSpacing: number
+      pIndex: number
+      sIndex: number
     }[]
   }[] = []
 
@@ -87,10 +82,13 @@ class Rect {
 
   async init(config: IText, { splitSpan } = { splitSpan: false }) {
     this.vertical = config.styles.writingMode === 'vertical-lr'
-    const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
 
     let div = document.createElement('div')
     div.classList.add('nu-text__body')
+    // Prevent this div to be screenshoted by backend
+    if (['test.vivipic.com', 'vivipic.com'].includes(window.location.host)) {
+      div.style.opacity = '0'
+    }
     config.paragraphs.forEach(para => {
       const p = document.createElement('p')
       p.classList.add('nu-text__p')
@@ -105,6 +103,7 @@ class Rect {
           span.appendChild(document.createElement('br'))
           p.appendChild(span)
         } else {
+          const fixedWidth = textBgUtils.isFixedWidth(config.styles)
           const textArray = splitSpan
             ? textUtils.splitter.splitGraphemes(spanData.text)
             : [spanData.text]
@@ -173,12 +172,14 @@ class Rect {
     this.transform = this.vertical ? 'rotate(90) scale(1,-1)' : ''
     this.rows = []
 
-    for (const p of div.children) {
+    for (let pIndex = 0; pIndex < div.children.length; pIndex++) {
+      const p = div.children[pIndex]
       const fontSize = parseFloat((p as HTMLElement).style.fontSize)
       const letterSpacingEm = parseFloat((p as HTMLElement).style.letterSpacing)
       const lineHeight = parseFloat((p as HTMLElement).style.lineHeight)
       const letterSpacing = fontSize * letterSpacingEm
-      for (const span of p.children) {
+      for (let sIndex = 0; sIndex < p.children.length; sIndex++) {
+        const span = p.children[sIndex]
         for (const cr of span.getClientRects()) {
           // If span is fixedWidth, its display will be inline-block
           // Height of inline-block span will grow with lineHeight
@@ -201,7 +202,9 @@ class Rect {
               width,
               height,
               text: span.textContent ?? '',
-              letterSpacing
+              letterSpacing,
+              pIndex,
+              sIndex,
             }]
           })
         }
@@ -294,10 +297,10 @@ class Rect {
     })
   }
 
-  preprocess() {
+  preprocess({ skipMergeLine } = { skipMergeLine: false }) {
     const { vertical } = this
     if (vertical) this.xyExchange()
-    this.mergeLine()
+    if (!skipMergeLine) this.mergeLine()
     this.expandEmptyLine()
     this.coordinateInit()
   }
@@ -645,10 +648,7 @@ function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
 
 class TextBg {
   private currColorKey = ''
-  effects = {} as Record<string, Record<string, string | number | boolean>>
-  constructor() {
-    this.effects = this.getDefaultEffects()
-  }
+  effects = this.getDefaultEffects() as Record<string, Record<string, string | number | boolean>>
 
   rgba = (color: string, opacity: number) =>
     textEffectUtils.convertColor2rgba(color, opacity)
@@ -853,12 +853,25 @@ class TextBg {
     return svg.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
   }
 
-  convertTextEffect(styles: IStyle) { // to-delete
-    const effect = styles.textBg as ITextBgEffect
-    if (!isITextBox(effect)) return {}
+  convertTextEffect(/* styles: ITextStyle */): Partial<Record<'div' | 'p' | 'span', Record<string, string | number>>> {
+    // const textBg = styles.textBg
+    return {}
+  }
+
+  isSplitSpan(styles: ITextStyle) {
+    const { textBg, textFill } = styles
+    return (isITextLetterBg(textBg) && textBg.fixedWidth) ||
+      (isTextFill(textFill))
+  }
+
+  isFixedWidth(styles: ITextStyle) {
+    const { textBg } = styles
+    return isITextLetterBg(textBg) && textBg.fixedWidth
   }
 
   fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle, config: IText) {
+    if (!this.isFixedWidth(config.styles)) return null
+
     let [w, h] = ['min-width', 'min-height']
     if (config.styles.writingMode === 'vertical-lr') [w, h] = [h, w]
     // If tiptap attr have min-w/h, convertFontStyle() in cssConverter.ts will add some style to tiptap.
@@ -870,7 +883,7 @@ class TextBg {
     }
   }
 
-  async drawSvgBg(config: IText): Promise<textBgSvg | null> {
+  async drawTextBg(config: IText): Promise<CustomElementConfig | null> {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
 
@@ -899,6 +912,7 @@ class TextBg {
       const d = cps.process()
 
       return {
+        tag: 'svg',
         attrs: { width, height, fill },
         content: [{
           tag: 'path',
@@ -912,7 +926,7 @@ class TextBg {
     } else if (isITextUnderline(textBg)) {
       const color = textEffectUtils.colorParser(textBg.color, config)
       const fill = this.rgba(color, opacity)
-      const paths = [] as textBgSvg['content']
+      const paths = [] as CustomElementConfig[]
       rects.forEach(rect => {
         const capWidth = rect.height * 0.005 * textBg.height
         const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
@@ -948,12 +962,13 @@ class TextBg {
       })
 
       return {
+        tag: 'svg',
         attrs: { width, height, fill },
         content: paths
       }
     } else if (isITextBox(textBg)) {
-      const pColor = textEffectUtils.colorParser(textBg.pColor, config)
-      const bColor = textEffectUtils.colorParser(textBg.bColor, config)
+      const fill = textEffectUtils.colorParser(textBg.pColor, config)
+      const stroke = textEffectUtils.colorParser(textBg.bColor, config)
       const bStroke = textBg.bStroke * fontSizeModifier
       const pStrokeY = textBg.pStrokeY * fontSizeModifier
       const pStrokeX = textBg.pStrokeX * fontSizeModifier
@@ -984,19 +999,22 @@ class TextBg {
       path.a(boxRadius, boxRadius, 1, -boxRadius, -boxRadius)
 
       return {
+        tag: 'svg',
         attrs: {
           width: boxWidth + bStroke,
           height: boxHeight + bStroke,
-          style: `left: ${left}px;
-            top: ${top}px;`
+        },
+        style: {
+          left: `${left}px`,
+          top: `${top}px`
         },
         content: [{
           tag: 'path',
           attrs: {
-            style: `fill:${pColor}; stroke:${bColor}; opacity:${opacity}`,
             'stroke-width': bStroke,
             d: path.result()
-          }
+          },
+          style: { fill, stroke, opacity }
         }]
         // .concat(path.toCircle() as any) // Show control point
       }
@@ -1027,8 +1045,12 @@ class TextBg {
       })
 
       return {
-        attrs: { width, height, style: `opacity: ${opacity}` },
+        tag: 'svg',
+        attrs: { width, height },
+        style: { opacity },
         content: pos.map(p => {
+          // Scale will let width be (scale-1)*p.height times larger than before,
+          // So -(scale-1)*p.height/2 to justify it to center.
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
           let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
           if (vertical) [x, y] = [y, x]
@@ -1040,12 +1062,10 @@ class TextBg {
                 : require(`@/assets/img/svg/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
-              // Scale will let width be (scale-1)*p.height times larger than before,
-              // So -(scale-1)*p.height/2 to justify it to center.
               x,
               y,
-              style: `color: ${p.color}`
-            }
+            },
+            style: { color: p.color }
           }
         })
       }
@@ -1065,7 +1085,7 @@ class TextBg {
     return (textEffectUtils.getCurrentLayer().styles.textBg as Record<string, string>)[this.currColorKey]
   }
 
-  getEffectMainColor(effect: ITextBgEffect) {
+  getEffectMainColor(effect: ITextBg) {
     if (isITextBox(effect) &&
       ['square-hollow', 'rounded-hollow'].includes(effect.name)) {
       return ['bColor', effect.bColor]
@@ -1079,7 +1099,7 @@ class TextBg {
   }
 
   // Read/write text effect setting from local storage
-  syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
+  syncShareAttrs(textBg: ITextBg, effectName: string | null) {
     Object.assign(textBg, { name: textBg.name || effectName })
     if (textBg.name === 'none') return
 
@@ -1104,116 +1124,124 @@ class TextBg {
     }
   }
 
-  async setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): Promise<void> {
+  async setTextBg(effect: string, attrs?: Record<string, unknown>): Promise<void> {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
-    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
+    const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
+    const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
     const subLayerIndex = layerUtils.subLayerIdx
     const defaultAttrs = this.effects[effect]
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
 
-      const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
-      if (type === 'text') {
-        const textBg = {} as ITextBgEffect
+      const layer = layers[idx]
+      if (layer.type !== 'text') continue
+      const oldTextBg = layer.styles.textBg
+      const newTextBg = {} as ITextBg
 
-        // Set lineHeight and fontSpacing by call tiptap
-        for (const [key, val] of Object.entries(attrs ?? {})) {
-          if (['lineHeight', 'fontSpacing'].includes(key)) {
-            await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val as number)
-            return
-          }
+      // Set lineHeight and fontSpacing by call tiptap
+      for (const [key, val] of Object.entries(attrs ?? {})) {
+        if (['lineHeight', 'fontSpacing'].includes(key)) {
+          await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val as number)
         }
+      }
+      attrs = omit(attrs, ['lineHeight', 'fontSpacing'])
 
-        if (layerTextBg && layerTextBg.name === effect) { // Adjust effect option.
-          Object.assign(textBg, layerTextBg, attrs)
-          localStorageUtils.set('textEffectSetting', effect, textBg)
-          this.syncShareAttrs(textBg, null)
-        } else { // Switch to other effect.
-          this.syncShareAttrs(textBg, effect)
-          const localAttrs = localStorageUtils.get('textEffectSetting', effect)
-          Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
-          await this.setExtraDefaultAttrs(effect)
+      if (oldTextBg && oldTextBg.name === effect) { // Adjust effect option.
+        Object.assign(newTextBg, oldTextBg, attrs)
+        localStorageUtils.set('textEffectSetting', effect, newTextBg)
+        this.syncShareAttrs(newTextBg, null)
+      } else { // Switch to other effect.
+        this.syncShareAttrs(newTextBg, effect)
+        const localAttrs = localStorageUtils.get('textEffectSetting', effect)
+        Object.assign(newTextBg, defaultAttrs, localAttrs, attrs, { name: effect })
+        await this.setExtraDefaultAttrs(effect)
 
-          // Sync setting between different name effect:
-          // Bring original effect color to new effect.
-          const oldColor = this.getEffectMainColor(layerTextBg)[1]
-          const newColorKey = this.getEffectMainColor(textBg)[0]
-          if (oldColor.startsWith('#') && !(isITextLetterBg(textBg) || isITextLetterBg(layerTextBg))) {
-            Object.assign(textBg, { [newColorKey]: oldColor })
-          }
-          // Sync setting between TextLetterBg: rainbow, rainbow-dark, circle
-          if (isITextLetterBg(textBg) && isITextLetterBg(layerTextBg) && textBg.name !== layerTextBg.name &&
-            ['rainbow', 'rainbow-dark', 'circle'].includes(textBg.name) &&
-            ['rainbow', 'rainbow-dark', 'circle'].includes(layerTextBg.name)) {
-            Object.assign(textBg, layerTextBg, { name: textBg.name, color: textBg.color })
-          }
+        // Sync setting between different name effect:
+        // Bring original effect color to new effect.
+        const oldColor = this.getEffectMainColor(oldTextBg)[1]
+        const newColorKey = this.getEffectMainColor(newTextBg)[0]
+        if (oldColor.startsWith('#') && !(isITextLetterBg(newTextBg) || isITextLetterBg(oldTextBg))) {
+          Object.assign(newTextBg, { [newColorKey]: oldColor })
         }
-
-        store.commit('UPDATE_specLayerData', {
-          pageIndex,
-          layerIndex,
-          subLayerIndex: +idx,
-          styles: { textBg }
-        })
-
-        // If fixedWidth setting changed, force split/unsplit span text
-        const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
-        const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
-        if (oldFixedWidth !== newFixedWidth) {
-          const paragraphs = cloneDeep(layers[idx].paragraphs as IParagraph[])
-          if (newFixedWidth) { // Split span, another one in tiptapUtils.toIParagraph
-            paragraphs.forEach(p => {
-              const newSpans = p.spans.flatMap(span =>
-                textUtils.splitter.splitGraphemes(span.text)
-                  .map(t => ({ text: t, styles: cloneDeep(span.styles) }))
-              )
-              p.spans = newSpans.length !== 0 ? newSpans : p.spans
-            })
-          } else { // Merge span
-            paragraphs.forEach(p => {
-              for (let i = 0; i + 1 < p.spans.length;) {
-                const curr = p.spans[i]
-                const next = p.spans[i + 1]
-                if (isEqual(curr.styles, next.styles)) {
-                  curr.text += next.text
-                  p.spans.splice(i + 1, 1)
-                } else { i++ }
-              }
-            })
-          }
-
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs },
-            targetLayer.layers ? +idx : subLayerIndex
-          )
-          tiptapUtils.updateHtml() // Vuex config => tiptap
-          textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex,
-            targetLayer.layers ? +idx : subLayerIndex
-          )
-
-          // When fixedWith true => false, this can force tiptap merge span that have same attrs.
-          if (document.querySelector('.ProseMirror') && !newFixedWidth) {
-            tiptapUtils.agent((editor: Editor) => {
-              editor.commands.selectAll()
-              editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
-            })
-          }
+        // Sync setting between TextLetterBg: rainbow, rainbow-dark, circle
+        if (isITextLetterBg(newTextBg) && isITextLetterBg(oldTextBg) && newTextBg.name !== oldTextBg.name &&
+          ['rainbow', 'rainbow-dark', 'circle'].includes(newTextBg.name) &&
+          ['rainbow', 'rainbow-dark', 'circle'].includes(oldTextBg.name)) {
+          Object.assign(newTextBg, oldTextBg, { name: newTextBg.name, color: newTextBg.color })
         }
+      }
 
-        // If user leave LetterBg, reset lineHeight and fontSpacing
-        if (isITextLetterBg(layerTextBg) && !isITextLetterBg(textBg)) {
-          await textUtils.setParagraphProp('lineHeight', 1.4)
-          await textUtils.setParagraphProp('fontSpacing', 0)
-        }
+      store.commit('UPDATE_specLayerData', {
+        pageIndex,
+        layerIndex,
+        subLayerIndex: +idx,
+        styles: { textBg: newTextBg }
+      })
+
+      // If SplitSpan setting changed, force split/unsplit span text
+      const oldSplitSpan = this.isSplitSpan({ ...layer.styles, textBg: oldTextBg })
+      const newSplitSpan = this.isSplitSpan({ ...layer.styles, textBg: newTextBg })
+      this.splitOrMergeSpan(oldSplitSpan, newSplitSpan, layer,
+        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+
+      // Update width for tiptap layer
+      const oldFixedWidth = isITextLetterBg(oldTextBg) && oldTextBg.fixedWidth
+      const newFixedWidth = isITextLetterBg(newTextBg) && newTextBg.fixedWidth
+      if (oldFixedWidth !== newFixedWidth) {
+        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
+      }
+
+      // If user leave LetterBg, reset lineHeight and fontSpacing
+      if (isITextLetterBg(oldTextBg) && !isITextLetterBg(newTextBg)) {
+        await textUtils.setParagraphProp('lineHeight', 1.4)
+        await textUtils.setParagraphProp('fontSpacing', 0)
       }
     }
   }
 
-  resetCurrTextEffect() {
+  splitOrMergeSpan(oldSplitSpan: boolean, newSplitSpan: boolean, layer: IText,
+    pageIndex: number, layerIndex: number, subLayerIndex: number) {
+    if (oldSplitSpan === newSplitSpan) return
+
+    const paragraphs = cloneDeep(layer.paragraphs)
+    if (newSplitSpan) { // Split span, another one in tiptapUtils.toIParagraph
+      paragraphs.forEach(p => {
+        const newSpans = p.spans.flatMap(span =>
+          textUtils.splitter.splitGraphemes(span.text)
+            .map(t => ({ text: t, styles: cloneDeep(span.styles) }))
+        )
+        p.spans = newSpans.length !== 0 ? newSpans : p.spans
+      })
+    } else { // Merge span
+      paragraphs.forEach(p => {
+        for (let i = 0; i + 1 < p.spans.length;) {
+          const curr = p.spans[i]
+          const next = p.spans[i + 1]
+          if (isEqual(curr.styles, next.styles)) {
+            curr.text += next.text
+            p.spans.splice(i + 1, 1)
+          } else { i++ }
+        }
+      })
+    }
+
+    layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs }, subLayerIndex)
+    tiptapUtils.updateHtml() // Vuex config => tiptap
+
+    // When fixedWith true => false, this can force tiptap merge span that have same attrs.
+    if (document.querySelector('.ProseMirror') && !newSplitSpan) {
+      tiptapUtils.agent((editor: Editor) => {
+        editor.commands.selectAll()
+        editor.chain().updateAttributes('textStyle', { spanIndex: -1 }).run()
+      })
+    }
+  }
+
+  async resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
-    this.setTextBg(effectName, this.effects[effectName])
-    this.setExtraDefaultAttrs(effectName)
+    await this.setTextBg(effectName, this.effects[effectName])
+    await this.setExtraDefaultAttrs(effectName)
   }
 }
 
