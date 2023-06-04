@@ -124,14 +124,22 @@ div(:layer-index="`${layerIndex}`"
               @pointerdown.prevent.stop="scaleStart"
               @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
+            :style="lineControlPointWrapperStyles()"
             v-if="isLine()")
           template(v-if="$isTouchDevice()")
+            div(class="control-point__action shadow")
+              svg-icon(class="control-point__widget"
+                iconName="rotate2" iconWidth="20px"
+                iconColor="blue-2"
+                :style='lineControlPointStyles()'
+                @pointerdown.stop="lineRotateStart"
+                @touchstart="lineRotateStart")
             div(class="control-point__action shadow"
                 ref="moveStart-mover")
               svg-icon(class="control-point__action-svg"
                 iconName="move2" iconWidth="24px"
                 iconColor="blue-2"
-                :style='controlPointStyles()'
+                :style='lineControlPointStyles()'
                 @touchstart="disableTouchEvent")
           template(v-else)
             svg-icon(class="control-point__widget"
@@ -169,10 +177,24 @@ div(:layer-index="`${layerIndex}`"
               :style='controlPointStyles()'
               @touchstart="disableTouchEvent")
     div(v-if="isActive && isLocked() && (scaleRatio >20)"
-        class="nu-controller__lock-icon control-point__action shadow"
-        :style="lockIconStyles()"
+        class="nu-controller__bottom-right-icon control-point__action shadow"
+        :style="actionIconStyles()"
         @click="MappingUtils.mappingIconAction('lock')")
       svg-icon(iconName="lock" iconWidth="16px" iconColor="red")
+    template(v-if="$isTouchDevice() && isActive && !isLine()")
+      div(class="nu-controller__top-left-icon control-point__action border"
+          :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'pointer' })"
+          @pointerdown.prevent.stop="MappingUtils.mappingIconAction('trash')")
+        svg-icon(iconName="close" iconWidth="18px" iconColor="blue-2")
+      div(class="nu-controller__bottom-left-icon control-point__action border"
+          :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
+          @pointerdown.prevent.stop="rotateStart")
+        svg-icon(iconName="rotate2" iconWidth="24px" iconColor="blue-2")
+      div(v-if="!tooSmall"
+          class="nu-controller__bottom-right-icon control-point__action border"
+          :style="ctrlPointerStyles(actionIconStyles(), cursorStyles(4, getLayerRotate()))"
+          @pointerdown.prevent.stop="scaleStart($event)")
+        svg-icon(iconName="scale" iconWidth="24px" iconColor="blue-2")
 </template>
 
 <script lang="ts">
@@ -431,6 +453,10 @@ export default defineComponent({
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
+    tooSmall(): boolean {
+      const { tooShort, tooNarrow } = this.checkLimits()
+      return tooShort || tooNarrow
+    }
   },
   watch: {
     scaleRatio() {
@@ -482,11 +508,8 @@ export default defineComponent({
       setImgConfig: 'imgControl/SET_CONFIG',
       setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
-    getDefaultSizeLimit(): number {
-      return (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-    },
-    checkLimits(limit?: number): { tooShort: boolean, tooNarrow: boolean } {
-      limit = limit ?? this.getDefaultSizeLimit()
+    checkLimits(): { tooShort: boolean, tooNarrow: boolean } {
+      const limit = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const totalScaleRatio = this.scaleRatio * this.contentScaleRatio
       return {
         tooShort: this.getLayerHeight() * totalScaleRatio < limit,
@@ -632,7 +655,7 @@ export default defineComponent({
 
       if (this.getLayerType !== 'text') {
         if (isMobile) {
-          if (tooShort || tooNarrow) {
+          if (this.tooSmall) {
             resizers = []
           }
         } else {
@@ -647,12 +670,11 @@ export default defineComponent({
       return resizers
     },
     getScaler(scalers: any) {
-      const { tooShort, tooNarrow } = this.checkLimits()
-      return this.$isTouchDevice() ? scalers.slice(1, 2) : ((tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers)
+      return this.tooSmall ? scalers.slice(2, 3)
+        : (this.$isTouchDevice() ? scalers.slice(1, 2) : scalers)
     },
     getCornerRotaters(scalers: any) {
-      const { tooShort, tooNarrow } = this.checkLimits()
-      return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
+      return (this.tooSmall) ? scalers.slice(2, 3) : scalers
     },
     textWrapperStyle() {
       return {
@@ -683,6 +705,12 @@ export default defineComponent({
       return {
         transform: `rotate(${-degree}deg)`
       }
+    },
+    lineControlPointWrapperStyles() {
+      return this.$isTouchDevice() ? {
+        display: 'flex',
+        gap: '20px',
+      } : {}
     },
     controlPointStyles() {
       return {
@@ -736,8 +764,7 @@ export default defineComponent({
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
       this.initTranslate = this.getLayerPos()
-      const { tooShort, tooNarrow } = this.checkLimits()
-      if (tooShort || tooNarrow) {
+      if (this.tooSmall) {
         this.control.xSign = 1
         this.control.ySign = 1
       } else {
@@ -1232,9 +1259,7 @@ export default defineComponent({
         return
       }
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
-      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
-      if (tooShort || tooNarrow) {
+      if (this.tooSmall) {
         index = 2
       }
       this.initCornerRotate = index * 2
@@ -1399,9 +1424,7 @@ export default defineComponent({
       if (this.isControlling) return { cursor: 'initial' }
       if (typeof index === 'number') {
         if (type === 'cornerRotaters') {
-          const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-          const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
-          if (tooShort || tooNarrow) {
+          if (this.tooSmall) {
             index = 2
           }
           index = index * 2
@@ -1647,7 +1670,7 @@ export default defineComponent({
     isDragging(): boolean {
       return this.config.dragging
     },
-    lockIconStyles(): { [index: string]: string } {
+    actionIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
       return {
         transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px)`
@@ -1727,7 +1750,25 @@ export default defineComponent({
     align-items: center;
   }
 
-  &__lock-icon {
+  &__top-left-icon {
+    position: absolute;
+    left: -12px;
+    top: -12px;
+  }
+
+  &__top-right-icon {
+    position: absolute;
+    right: -12px;
+    top: -12px;
+  }
+
+  &__bottom-left-icon {
+    position: absolute;
+    left: -12px;
+    bottom: -12px;
+  }
+
+  &__bottom-right-icon {
     position: absolute;
     right: -12px;
     bottom: -12px;
@@ -1784,6 +1825,7 @@ export default defineComponent({
   }
   &__line-controller-wrapper {
     @include widget-point-wrapper;
+    width: max-content;
   }
   &__move-bar {
     cursor: move;
@@ -1852,6 +1894,11 @@ export default defineComponent({
   &:hover {
     cursor: pointer;
   }
+}
+
+.border {
+  border: 1.5px solid setColor(blue-2);
+  box-sizing: border-box;
 }
 
 .shadow {
