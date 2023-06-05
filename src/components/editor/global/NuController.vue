@@ -124,57 +124,36 @@ div(:layer-index="`${layerIndex}`"
               @pointerdown.prevent.stop="scaleStart"
               @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
-            :style="lineControlPointWrapperStyles()"
             v-if="isLine()")
-          template(v-if="$isTouchDevice()")
-            div(class="control-point__action shadow")
-              svg-icon(class="control-point__widget"
-                iconName="rotate2" iconWidth="20px"
-                iconColor="blue-2"
-                :style='lineControlPointStyles()'
-                @pointerdown.stop="lineRotateStart"
-                @touchstart="lineRotateStart")
-            div(class="control-point__action shadow"
-                ref="moveStart-mover")
-              svg-icon(class="control-point__action-svg"
-                iconName="move2" iconWidth="24px"
-                iconColor="blue-2"
-                :style='lineControlPointStyles()'
-                @touchstart="disableTouchEvent")
-          template(v-else)
-            svg-icon(class="control-point__widget"
-              iconName="rotate" iconWidth="20px"
-              iconColor="blue-1"
-              :style='lineControlPointStyles()'
+          div(class="control-point__action shadow")
+            svg-icon(class="control-point__action-svg"
+              iconName="rotate2" iconWidth="20px"
+              iconColor="blue-2"
+              :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
               @pointerdown.stop="lineRotateStart"
               @touchstart="lineRotateStart")
-            svg-icon(class="control-point__widget"
-              ref="moveStart-mover"
-              iconName="move" iconWidth="20px"
-              iconColor="blue-1"
-              :style='lineControlPointStyles()'
+          div(class="control-point__action shadow"
+              ref="moveStart-mover")
+            svg-icon(class="control-point__action-svg"
+              iconName="move2" iconWidth="24px"
+              iconColor="blue-2"
+              :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
               @touchstart="disableTouchEvent")
         div(v-else class="control-point__controller-wrapper")
-          template(v-if="$isTouchDevice()")
-            div(class="control-point__action shadow"
-                ref="moveStart-mover")
+          template(v-if="!$isTouchDevice()")
+            div(class="control-point__action shadow")
               svg-icon(class="control-point__action-svg"
-                iconName="move2" iconWidth="24px"
+                iconName="rotate2" iconWidth="20px"
                 iconColor="blue-2"
-                :style='controlPointStyles()'
+                :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
+                @pointerdown.stop="rotateStart"
                 @touchstart="disableTouchEvent")
-          template(v-else)
-            svg-icon(class="control-point__widget"
-              iconName="rotate" iconWidth="20px"
-              iconColor="blue-1"
-              :style='controlPointStyles()'
-              @pointerdown.stop="rotateStart"
-              @touchstart="disableTouchEvent")
-            svg-icon(class="control-point__widget"
-              ref="moveStart-mover"
-              iconName="move" iconWidth="20px"
-              iconColor="blue-1"
-              :style='controlPointStyles()'
+          div(class="control-point__action shadow"
+              ref="moveStart-mover")
+            svg-icon(class="control-point__action-svg"
+              iconName="move2" iconWidth="24px"
+              iconColor="blue-2"
+              :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
               @touchstart="disableTouchEvent")
     div(v-if="isActive && isLocked() && (scaleRatio >20)"
         class="nu-controller__bottom-right-icon control-point__action shadow"
@@ -273,9 +252,7 @@ export default defineComponent({
     return {
       MappingUtils,
       FrameUtils,
-      controlPoints: (this.$isTouchDevice()
-        ? ControlUtils.getControlPoints(4, 17)
-        : ControlUtils.getControlPoints(4, 25)) as ICP,
+      controlPoints: ControlUtils.getControlPoints(8, 20) as ICP,
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -706,12 +683,6 @@ export default defineComponent({
         transform: `rotate(${-degree}deg)`
       }
     },
-    lineControlPointWrapperStyles() {
-      return this.$isTouchDevice() ? {
-        display: 'flex',
-        gap: '20px',
-      } : {}
-    },
     controlPointStyles() {
       return {
         transform: `rotate(${-this.config.styles.rotate}deg)`
@@ -734,16 +705,16 @@ export default defineComponent({
         outline = 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          outline = `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
+          outline = `2px solid ${outlineColor}`
         } else {
-          outline = `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
+          outline = `2px solid ${outlineColor}`
         }
       } else {
         outline = 'none'
       }
       return {
         outline,
-        outlineOffset: `${this.$isTouchDevice() ? -0.25 : -1}px`
+        outlineOffset: '-1px'
       }
     },
     hintStyles() {
@@ -1781,6 +1752,8 @@ export default defineComponent({
   padding: 24px;
   box-sizing: border-box;
   transform-origin: top;
+  display: flex;
+  gap: 20px;
 }
 
 @mixin widget-point {
@@ -1796,15 +1769,14 @@ export default defineComponent({
   pointer-events: auto;
   position: absolute;
   background-color: setColor(white);
-  border: 1px solid setColor(blue-2);
-  @media screen and (max-width: 976px) {
-    border-width: 1.5px;
-  }
+  border: 2px solid setColor(blue-2);
+  box-sizing: border-box;
 
   &__resize-bar {
     position: absolute;
     pointer-events: auto;
     border: 2px solid #00000000;
+    box-sizing: border-box;
     color: "#00000000";
     &-wrapper {
       position: absolute;
@@ -1897,7 +1869,7 @@ export default defineComponent({
 }
 
 .border {
-  border: 1.5px solid setColor(blue-2);
+  border: 2px solid setColor(blue-2);
   box-sizing: border-box;
 }
 
