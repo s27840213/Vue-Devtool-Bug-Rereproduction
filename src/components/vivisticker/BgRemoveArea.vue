@@ -97,12 +97,15 @@ export default defineComponent({
     logUtils.setLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
-    if (this.inVivisticker) {
-      this.canvasWidth = width
-      this.canvasHeight = height
-    } else {
-      this.canvasHeight = 1600 / aspectRatio
-    }
+    // if (this.inVivisticker) {
+    //   this.canvasWidth = width
+    //   this.canvasHeight = height
+    // } else {
+    //   this.canvasHeight = 1600 / aspectRatio
+    // }
+    this.canvasHeight = 1600 / aspectRatio
+    console.log(this.canvasWidth, this.canvasHeight)
+
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
     logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)

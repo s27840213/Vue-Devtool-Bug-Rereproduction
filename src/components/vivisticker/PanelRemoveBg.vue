@@ -2,7 +2,7 @@
 div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
   div(v-if="inBgRemoveMode || isProcessing" class="panel-remove-bg__rm-section" ref="rmSection")
     div(v-if="isProcessing" class="panel-remove-bg__preview-section")
-      img(:src="previewImage.src")
+      img(:src="previewImage.src ? previewImage.src  : require('@/assets/img/svg/image-preview.svg')")
       div(class="gray-mask")
       img(class="loading" :src="require('@/assets/img/gif/gray-loading.gif')")
     bg-remove-area(v-else :editorViewCanvas="panelRemoveBg"
