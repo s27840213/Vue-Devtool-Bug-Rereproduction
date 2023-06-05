@@ -175,8 +175,9 @@ class TextFill {
     }
 
     const spanExpandRatio = 1
-    const isTextShape = config.styles.textShape.name !== 'none'
+    const isTextShape = textShape.name !== 'none'
     const isTextShapeFocus = isTextShape && textFill.focus
+    const isPositiveBend = +textShape.bend >= 0
     const isFixedWidth = textBgUtils.isFixedWidth(config.styles)
     // If not TextShape, need add maxFontSize to top/left to fix its position.
     const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
@@ -215,17 +216,18 @@ class TextFill {
         position: 'absolute',
         padding: `${spanHeight * spanExpandRatio}px ${spanWidth * spanExpandRatio}px`,
         ...isTextShapeFocus ? {
-          top: `${y - spanHeight * spanExpandRatio}px`,
+          [isPositiveBend ? 'top' : 'bottom']: `${y * (isPositiveBend ? 1 : -1) - spanHeight * spanExpandRatio}px`,
           left: `${x - spanWidth * spanExpandRatio}px`,
           transform: 'none',
-          lineHeight: 'initial',
+          // Use line-height here for overwrite textStylesRaw result. Use lineHeight will cause bug.
+          'line-height': 'initial',
         } : isTextShape ? {
-          top: `${-spanHeight * spanExpandRatio}px`,
-          lineHeight: 'initial',
+          [isPositiveBend ? 'top' : 'bottom']: `${-spanHeight * spanExpandRatio}px`,
+          // 'line-height': 'initial',
         } : {
           top: `${y - spanHeight * spanExpandRatio + maxFontSize}px`,
           left: `${x - spanWidth * spanExpandRatio + maxFontSize}px`,
-          ...!isFixedWidth ? { lineHeight: 'initial' } : {},
+          ...!isFixedWidth ? { 'line-height': 'initial' } : {},
         },
         // To fix Safari PDF reader bug: https://bit.ly/3IPcS8o
         ...store.getters['user/getUserId'] === 'backendRendering' ? { filter: 'opacity(1)' } : {},
