@@ -480,7 +480,7 @@ export default defineComponent({
         layers.forEach((layer, index) => {
           let layerPolygonConfig
           if (shapeUtils.isLine(layer)) {
-            const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(layer.point ?? [], layer.styles, true, layer.size?.[0])
+            const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(layer.point ?? [], layer.styles, true, this.$isTouchDevice(), layer.size?.[0])
             layerPolygonConfig = {
               x,
               y,
