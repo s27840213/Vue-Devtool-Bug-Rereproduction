@@ -400,7 +400,7 @@ export default defineComponent({
     },
     lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
-      const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.$isTouchDevice(), this.config.size?.[0])
       const { x: layerX, y: layerY } = this.config.styles
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)

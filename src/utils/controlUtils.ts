@@ -330,12 +330,12 @@ class Controller {
     return this.getAbsPointWithRespectToReferencePoint(referencePoint, newPoint, styles, scale, newQuadrantByMarkerIndex)
   }
 
-  getControllerStyleParameters(point: number[], styles: { x: number, y: number, width: number, height: number, initWidth: number, rotate: number }, isLine: boolean, scale?: number): { x: number, y: number, width: number, height: number, rotate: number } {
+  getControllerStyleParameters(point: number[], styles: { x: number, y: number, width: number, height: number, initWidth: number, rotate: number }, isLine: boolean, isMobile: boolean, scale?: number): { x: number, y: number, width: number, height: number, rotate: number } {
     if (isLine) {
       scale = scale ?? 1
       const { x, y, width, height } = styles
       const ratio = styles.width / styles.initWidth
-      const moverHeight = Math.max(scale, generalUtils.fixSize(16)) * ratio
+      const moverHeight = Math.max(scale, generalUtils.fixSize((isMobile ? 32 : 16) / store.getters.getContentScaleRatio)) * ratio
       const { xDiff, yDiff } = shapeUtils.lineDimension(point)
       const moverWidth = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) * ratio
       const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
