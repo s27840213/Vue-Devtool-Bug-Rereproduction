@@ -71,13 +71,22 @@ div(:layer-index="`${layerIndex}`"
               :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
               @pointerdown.stop="rotateStart($event, index)"
               @touchstart="disableTouchEvent")
-        div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
-            class="control-point"
-            :key="index"
-            :marker-index="index"
-            :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
-            @pointerdown.stop="lineEndMoveStart"
-            @touchstart="disableTouchEvent")
+        template(v-if="isLine()")
+          div(v-for="(end, index) in controlPoints.lineEnds"
+              class="control-point"
+              :key="index"
+              :marker-index="index"
+              :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
+              @pointerdown.stop="!$isTouchDevice() ? lineEndMoveStart : null"
+              @touchstart="!$isTouchDevice() ? disableTouchEvent : null")
+          template(v-if="$isTouchDevice()")
+            div(v-for="(end, index) in controlPoints.lineEndTouchAreas"
+                class="control-point"
+                :key="index"
+                :marker-index="index"
+                :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
+                @pointerdown.stop="lineEndMoveStart"
+                @touchstart="disableTouchEvent")
         div(v-for="(resizer, index) in getResizer(controlPoints)"
             :key="index"
             class="control-point__resize-bar-wrapper")
@@ -125,13 +134,14 @@ div(:layer-index="`${layerIndex}`"
               @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine()")
-          div(class="control-point__action shadow")
-            svg-icon(class="control-point__action-svg"
-              iconName="rotate2" iconWidth="20px"
-              iconColor="blue-2"
-              :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
-              @pointerdown.stop="lineRotateStart"
-              @touchstart="lineRotateStart")
+          template(v-if="!$isTouchDevice()")
+            div(class="control-point__action shadow")
+              svg-icon(class="control-point__action-svg"
+                iconName="rotate2" iconWidth="20px"
+                iconColor="blue-2"
+                :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
+                @pointerdown.stop="lineRotateStart"
+                @touchstart="lineRotateStart")
           div(class="control-point__action shadow"
               ref="moveStart-mover")
             svg-icon(class="control-point__action-svg"
@@ -160,16 +170,20 @@ div(:layer-index="`${layerIndex}`"
         :style="actionIconStyles()"
         @click="MappingUtils.mappingIconAction('lock')")
       svg-icon(iconName="lock" iconWidth="16px" iconColor="red")
-    template(v-if="$isTouchDevice() && isActive && !isLine()")
+    template(v-if="$isTouchDevice() && isActive")
       div(class="nu-controller__top-left-icon control-point__action border"
           :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'pointer' })"
           @pointerdown.prevent.stop="MappingUtils.mappingIconAction('trash')")
         svg-icon(iconName="close" iconWidth="18px" iconColor="blue-2")
-      div(class="nu-controller__bottom-left-icon control-point__action border"
+      div(v-if="isLine()" class="nu-controller__bottom-left-icon control-point__action border"
+          :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
+          @pointerdown.prevent.stop="lineRotateStart")
+        svg-icon(iconName="rotate2" iconWidth="24px" iconColor="blue-2")
+      div(v-else class="nu-controller__bottom-left-icon control-point__action border"
           :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
           @pointerdown.prevent.stop="rotateStart")
         svg-icon(iconName="rotate2" iconWidth="24px" iconColor="blue-2")
-      div(v-if="!tooSmall"
+      div(v-if="!tooSmall && !isLine()"
           class="nu-controller__bottom-right-icon control-point__action border"
           :style="ctrlPointerStyles(actionIconStyles(), cursorStyles(4, getLayerRotate()))"
           @pointerdown.prevent.stop="scaleStart($event)")
@@ -701,14 +715,10 @@ export default defineComponent({
 
       let outline = ''
 
-      if (this.isLine() || (this.isMoving && this.currSelectedInfo.index !== this.layerIndex)) {
+      if ((this.isLine() && !this.$isTouchDevice()) || (this.isMoving && this.currSelectedInfo.index !== this.layerIndex)) {
         outline = 'none'
       } else if (this.isShown() || this.isActive) {
-        if (this.config.type === 'tmp' || this.isControlling) {
-          outline = `2px solid ${outlineColor}`
-        } else {
-          outline = `2px solid ${outlineColor}`
-        }
+        outline = `2px solid ${outlineColor}`
       } else {
         outline = 'none'
       }

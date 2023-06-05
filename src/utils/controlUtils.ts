@@ -110,8 +110,6 @@ class Controller {
   }
 
   private getScalers = (scalerSize: number, isTouchArea = false) => {
-    const contentScaleRatio = editorUtils.contentScaleRatio
-    const scaleRatio = store.getters.getPageScaleRatio
     return [
       {
         cursor: 0,
@@ -120,7 +118,6 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '0',
-          // transform: `translate(-50%,-50%) scale(${contentScaleRatio})`,
           transform: 'translate(-50%,-50%)',
           borderRadius: '50%',
           opacity: isTouchArea ? '0' : '1'
@@ -132,7 +129,6 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          // transform: `translate(50%,-50%) scale(${contentScaleRatio})`,
           transform: 'translate(50%,-50%)',
           right: '0',
           top: '0',
@@ -146,7 +142,6 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          // transform: `translate(50%,50%) scale(${contentScaleRatio})`,
           transform: 'translate(50%,50%)',
           right: '0',
           bottom: '0',
@@ -160,7 +155,6 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          // transform: `translate(-50%,50%) scale(${contentScaleRatio})`,
           transform: 'translate(-50%,50%)',
           left: '0',
           bottom: '0',
@@ -176,7 +170,30 @@ class Controller {
     }[]
   }
 
-  private getResizers = (resizerShort: number, resizerLong: number, contentScaleRatio: number, isTouchArea = false) => {
+  private getLineEnds = (scalerSize: number, isTouchArea = false) => {
+    return [
+      {
+        width: `${scalerSize}px`,
+        height: `${scalerSize}px`,
+        transform: 'translate(-50%,-50%)',
+        left: '0',
+        top: '50%',
+        borderRadius: '50%',
+        opacity: isTouchArea ? '0' : '1'
+      },
+      {
+        width: `${scalerSize}px`,
+        height: `${scalerSize}px`,
+        transform: 'translate(50%,-50%)',
+        right: '0',
+        top: '50%',
+        borderRadius: '50%',
+        opacity: isTouchArea ? '0' : '1'
+      }
+    ]
+  }
+
+  private getResizers = (resizerShort: number, resizerLong: number, isTouchArea = false) => {
     return [
       {
         type: 'H',
@@ -185,7 +202,6 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           left: '0',
-          // transform: isTouchArea ? `translate(-75%, 0%) scale(${contentScaleRatio})` : `translate(-50%, 0%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(-75%, 0%)' : 'translate(-50%, 0%)',
           opacity: isTouchArea ? '0' : '1',
           borderRadius: `${resizerShort / 2}px`
@@ -198,7 +214,6 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           right: '0',
-          // transform: isTouchArea ? `translate(75%, 0%) scale(${contentScaleRatio})` : `translate(50%, 0%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(75%, 0%)' : 'translate(50%, 0%)',
           opacity: isTouchArea ? '0' : '1',
           borderRadius: `${resizerShort / 2}px`
@@ -211,7 +226,6 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           bottom: '0',
-          // transform: isTouchArea ? `translate(0%, 75%) scale(${contentScaleRatio})` : `translate(0%, 50%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(0%, 75%)' : 'translate(0%, 50%)',
           opacity: isTouchArea ? '0' : '1',
           borderRadius: `${resizerShort / 2}px`
@@ -224,7 +238,6 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           top: '0',
-          // transform: isTouchArea ? `translate(0%, -75%) scale(${contentScaleRatio})` : `translate(0%, -50%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(0%, -75%)' : 'translate(0%, -50%)',
           opacity: isTouchArea ? '0' : '1',
           borderRadius: `${resizerShort / 2}px`
@@ -238,33 +251,16 @@ class Controller {
   }
 
   getControlPoints = (resizerShort: number, resizerLong: number, scaleRatio = 1) => {
-    const scale = editorUtils.contentScaleRatio * scaleRatio
     const scalerSize = 12
 
     return {
       scalers: this.getScalers(scalerSize * scaleRatio),
       scalerTouchAreas: this.getScalers(scalerSize * 3 * scaleRatio, true),
       cornerRotaters: this.getCornerRatater(scalerSize * 4 * scaleRatio),
-      lineEnds: [
-        {
-          width: `${scalerSize}px`,
-          height: `${scalerSize}px`,
-          left: '0',
-          top: '50%',
-          transform: 'translate(-50%,-50%)',
-          borderRadius: '50%'
-        },
-        {
-          width: `${scalerSize}px`,
-          height: `${scalerSize}px`,
-          transform: 'translate(50%,-50%)',
-          right: '0',
-          top: '50%',
-          borderRadius: '50%'
-        }
-      ],
-      resizers: this.getResizers(resizerShort, resizerLong, scale),
-      resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, scale, true),
+      lineEnds: this.getLineEnds(scalerSize * scaleRatio),
+      lineEndTouchAreas: this.getLineEnds(scalerSize * 3 * scaleRatio, true),
+      resizers: this.getResizers(resizerShort, resizerLong),
+      resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, true),
       cursors: [
         'nwse-resize',
         'ns-resize',
@@ -338,7 +334,7 @@ class Controller {
       scale = scale ?? 1
       const { x, y, width, height } = styles
       const ratio = styles.width / styles.initWidth
-      const moverHeight = Math.max(scale, generalUtils.fixSize((isMobile ? 32 : 16) / store.getters.getContentScaleRatio)) * ratio
+      const moverHeight = Math.max(scale, generalUtils.fixSize((isMobile ? 60 : 16) / store.getters.getContentScaleRatio)) * ratio
       const { xDiff, yDiff } = shapeUtils.lineDimension(point)
       const moverWidth = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) * ratio
       const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
