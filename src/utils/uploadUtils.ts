@@ -174,6 +174,9 @@ class UploadUtils {
       if (type === 'logo') {
         params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
+      if (type === 'stk-bg-remove') {
+        store.commit('bgRemove/SET_isProcessing', true)
+      }
       this.uploadAsset(type, files as FileList, params)
       document.body.removeChild(inputNode)
     }, false)
