@@ -124,8 +124,7 @@ div(:layer-index="`${layerIndex}`"
               @pointerdown.prevent.stop="scaleStart"
               @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
-            v-if="isLine()"
-            :style="`transform: scale(${contentScaleRatio})`")
+            v-if="isLine()")
           svg-icon(class="control-point__rotater"
             iconName="rotate" iconWidth="20px"
             iconColor="blue-1"
@@ -188,7 +187,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -320,7 +319,7 @@ export default defineComponent({
       return undefined
     },
     sizeStyles(): { transform: string, width: string, height: string } {
-      const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
+      const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.$isTouchDevice(), this.config.size?.[0])
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
@@ -682,16 +681,16 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `2px solid ${outlineColor}`
+          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         } else {
-          return `2px solid ${outlineColor}`
+          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         }
       } else {
         return 'none'
       }
     },
     hintStyles() {
-      return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${this.contentScaleRatio})`
+      return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px)`
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
@@ -957,7 +956,7 @@ export default defineComponent({
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      const [dx, dy] = [diff.offsetX, diff.offsetY]
+      const [dx, dy] = [diff.offsetX / this.contentScaleRatio, diff.offsetY / this.contentScaleRatio]
       const markerIndex = this.initMarkerIndex
 
       const copiedPoint: number[] = Array.from(this.config.point)
