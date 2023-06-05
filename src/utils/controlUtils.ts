@@ -248,13 +248,13 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '50%',
-          transform: `translate(-50%,-50%) scale(${scale})`,
+          transform: 'translate(-50%,-50%)',
           borderRadius: '50%'
         },
         {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate(50%,-50%) scale(${scale})`,
+          transform: 'translate(50%,-50%)',
           right: '0',
           top: '50%',
           borderRadius: '50%'

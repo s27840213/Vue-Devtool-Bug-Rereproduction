@@ -124,8 +124,7 @@ div(:layer-index="`${layerIndex}`"
               @pointerdown.prevent.stop="scaleStart"
               @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
-            v-if="isLine()"
-            :style="`transform: scale(${contentScaleRatio})`")
+            v-if="isLine()")
           svg-icon(class="control-point__rotater"
             iconName="rotate" iconWidth="20px"
             iconColor="blue-1"
@@ -693,16 +692,16 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isControllerShown) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `2px solid ${outlineColor}`
+          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         } else {
-          return `2px solid ${outlineColor}`
+          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         }
       } else {
         return 'none'
       }
     },
     hintStyles() {
-      return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${this.contentScaleRatio})`
+      return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px)`
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
@@ -972,7 +971,7 @@ export default defineComponent({
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      const [dx, dy] = [diff.offsetX, diff.offsetY]
+      const [dx, dy] = [diff.offsetX / this.contentScaleRatio, diff.offsetY / this.contentScaleRatio]
       const markerIndex = this.initMarkerIndex
 
       const copiedPoint: number[] = Array.from(this.config.point)
