@@ -18,6 +18,7 @@ div(class="panel-add-template")
 <script lang="ts">
 import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
+import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -52,21 +53,25 @@ export default defineComponent({
               },
               vivistickerUtils.getEmptyCallback()
             )
-            backgroundUtils.setBgImage({
-              pageIndex: pageUtils.currFocusPageIndex,
-              config: layerFactary.newImage({
-                srcObj: {
-                  type: 'ios',
-                  assetId: images[0],
-                  userId: ''
-                },
-                styles: {
-                  width: 0,
-                  height: 0,
-                  zindex: -1,
-                  opacity: 100
-                }
+            imageUtils.imgLoadHandler(`vvstk://${images[0]}`, (img: HTMLImageElement) => {
+              const { naturalWidth, naturalHeight } = img
+              backgroundUtils.setBgImage({
+                pageIndex: pageUtils.currFocusPageIndex,
+                config: layerFactary.newImage({
+                  srcObj: {
+                    type: 'ios',
+                    assetId: images[0],
+                    userId: ''
+                  },
+                  styles: {
+                    width: naturalWidth,
+                    height: naturalHeight,
+                    zindex: -1,
+                    opacity: 100
+                  }
+                })
               })
+              backgroundUtils.fitPageBackground(0)
             })
           })
       } else {
