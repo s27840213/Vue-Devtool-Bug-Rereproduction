@@ -1,8 +1,8 @@
 <template lang="pug">
 div(class="panel-font-size")
   font-size-selector
-  input(class="panel-font-size__range-input"
-    :style="progressStyles()"
+  input(class="panel-font-size__range-input input__slider--range"
+    v-progress
     v-model.number="fontSize"
     :max="fieldRange.fontSize.max"
     :min="fieldRange.fontSize.min"
@@ -51,12 +51,6 @@ export default defineComponent({
     }
   },
   methods: {
-    progressStyles() {
-      const finalFontSize = this.fontSize as number
-      return {
-        '--progress': (this.fontSize === '--') ? '50%' : `${(finalFontSize - 1) / (143) * 100}%`
-      }
-    },
     handleChangeStop() {
       stepsUtils.record()
     }
@@ -72,21 +66,6 @@ export default defineComponent({
   grid-template-columns: 3fr 7fr;
   column-gap: 20px;
   align-items: center;
-
-  &__range-input {
-    margin: 0;
-    --lower-color: #{setColor(black-5)};
-    --upper-color: #{setColor(black-6)};
-    @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
-    &::-webkit-slider-thumb {
-      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-      position: relative;
-    }
-    &::-moz-range-thumb {
-      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-      position: relative;
-    }
-  }
 
   &__range-input-button {
     width: fit-content;

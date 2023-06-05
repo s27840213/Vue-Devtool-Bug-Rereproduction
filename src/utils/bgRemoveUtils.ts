@@ -7,6 +7,7 @@ import { IUploadAssetResponse } from '@/interfaces/upload'
 import store from '@/store'
 import { LayerProcessType, LayerType, SidebarPanelType } from '@/store/types'
 import logUtils from '@/utils/logUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
@@ -285,6 +286,26 @@ class BgRemoveUtils {
     const src = this.canvas.toDataURL('image/png;base64')
 
     generalUtils.downloadImage(src, `vivistiker-${generalUtils.generateRandomString}.png`)
+  }
+
+  getBgRemoveResultSrc() {
+    return this.canvas.toDataURL('image/png;base64')
+  }
+
+  screenshot() {
+    const src = this.canvas.toDataURL('image/png;base64')
+    vivistickerUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
+      type: 'png',
+      url: src
+    })
+  }
+
+  saveToIOS() {
+    const src = this.canvas.toDataURL('image/png;base64')
+    vivistickerUtils.sendToIOS('SAVE_IMAGE_FROM_URL', {
+      type: 'png',
+      url: src
+    })
   }
 }
 

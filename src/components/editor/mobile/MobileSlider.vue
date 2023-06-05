@@ -1,17 +1,18 @@
 <template lang="pug">
 div(class="mobile-slider" :style="containerStyles")
-  div
-    span(class="mobile-slider__name no-wrap" :class="theme === 'dark' ? 'text-gray-2' : 'text-white'") {{title}}
-    div(class="mobile-slider__text")
-      input(:class="theme === 'dark' ? 'text-gray-2' : 'text-white'"
-        type="number"
-        v-model.number="propsVal"
-        :name="name"
-        @change="handleChangeStop")
-  div(class="mobile-slider__range-input-wrapper")
-    input(class="mobile-slider__range-input"
+  div(class="mobile-slider__top" :class="theme")
+    span(class="mobile-slider__name no-wrap") {{title}}
+    input(class="mobile-slider__number"
       :class="theme"
-      :style="progressStyles()"
+      type="number"
+      v-model.number="propsVal"
+      :name="name"
+      @change="handleChangeStop")
+  div(class="mobile-slider__range-input-wrapper")
+    input(class="mobile-slider__range-input input__slider--range"
+      :class="theme"
+      v-progress
+      :style="{ 'pointer-events': borderTouchArea ? 'none' : 'auto' }"
       v-model.number="propsVal"
       :name="name"
       :max="max"
@@ -19,10 +20,11 @@ div(class="mobile-slider" :style="containerStyles")
       :step="step"
       v-ratio-change
       type="range"
+      :disabled="disabled"
       @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
       @pointerup="!borderTouchArea ? handlePointerup : null")
     input(v-if="borderTouchArea"
-      class="mobile-slider__range-input mobile-slider__range-input-top"
+      class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
       :class="theme"
       v-model.number="propsVal"
       :name="name"
@@ -31,6 +33,7 @@ div(class="mobile-slider" :style="containerStyles")
       :step="step"
       v-ratio-change
       type="range"
+      :disabled="disabled"
       @pointerdown="$emit('pointerdown', $event)"
       @pointerup="handlePointerup")
 </template>
@@ -40,6 +43,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: ['pointerdown', 'update'],
   data() {
     return {
     }
@@ -72,13 +76,6 @@ export default defineComponent({
       default: 1,
       type: Number
     },
-    /**
-     * @param key - use to identify the target we want to update
-     */
-    propKey: {
-      type: String,
-      default: ''
-    },
     theme: {
       type: String,
       default: 'dark'
@@ -87,6 +84,14 @@ export default defineComponent({
       type: Boolean,
       default: true
     },
+    autoRecord: {
+      type: Boolean,
+      default: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    }
   },
   computed: {
     propsVal: {
@@ -94,11 +99,7 @@ export default defineComponent({
         return this.value
       },
       set(val: number): void {
-        if (this.propKey !== '') {
-          this.$emit(`update:${this.propKey}`, val)
-        } else {
-          this.$emit('update', val, this.name)
-        }
+        this.$emit('update', val, this.name)
         // The below line is necessary for value that would be rounded.
         // If a value is rounded and not changed compared to previous value after rounded,
         // the value in this component will not be synced with the rounded value (since not change happens).
@@ -112,17 +113,10 @@ export default defineComponent({
     }
   },
   methods: {
-    progressStyles(): {[key: string]: string} {
-      return {
-        '--progress': (typeof this.value === 'string') ? '50%' : `${(this.value - this.min) / (this.max - this.min) * 100}%`,
-        'pointer-events': this.borderTouchArea ? 'none' : 'auto'
-      }
-    },
     handleChangeStop() {
-      stepsUtils.record()
+      if (this.autoRecord)stepsUtils.record()
     },
-    handlePointerup(e: Event) {
-      this.$emit('pointerup', e)
+    handlePointerup() {
       this.handleChangeStop()
     }
   }
@@ -131,62 +125,37 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .mobile-slider {
+  @include body-SM;
   width: 100%;
   display: grid;
   grid-template-rows: auto auto;
   grid-template-columns: 1fr;
-  row-gap: 20px;
+  row-gap: 10px;
   box-sizing: border-box;
-  overflow-y: hidden;
+  color: setColor(gray-2);
 
-  > div:nth-child(1) {
+  &__top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-
-  &__name {
-    @include body-SM;
-  }
-
-  &__text {
-    border: 1px solid setColor(gray-4);
-    border-radius: 4px;
-    width: 54px;
-    height: 24px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    & > input {
-      background: transparent;
-      padding: 0;
-      margin: 0;
-      border-radius: 0;
-      text-align: center;
-      width: 100%;
-      height: 22px;
-      @include body-SM;
-      line-height: 22px;
-    }
-  }
-
-  &__range-input {
-    margin: 0;
-    --lower-color: #{setColor(black-5)};
-    --upper-color: #{setColor(black-6)};
-    @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
-    &::-webkit-slider-thumb {
-      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-      position: relative;
-    }
-    &::-moz-range-thumb {
-      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-      position: relative;
-    }
     &.light {
-      --lower-color: #{setColor(gray-6)};
-      --upper-color: #{setColor(gray-2)};
+      color: setColor(white);
+    }
+  }
+
+  &__number {
+    @include body-XS;
+    box-sizing: border-box;
+    width: 30px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid setColor(gray-4);
+    color: setColor(gray-2);
+    text-align: center;
+    border-radius: 0.25rem;
+    background: transparent;
+    &.light {
+      color: setColor(white);
     }
   }
 
@@ -194,9 +163,22 @@ export default defineComponent({
     position: relative;
   }
 
+  &__range-input.light {
+    --lower-color: #{setColor(gray-6)};
+    --upper-color: #{setColor(gray-2)};
+    &::-webkit-slider-thumb {
+      border-color: setColor(white);
+    }
+    &::-moz-range-thumb {
+      border-color: setColor(white);
+    }
+  }
+
   &__range-input-top {
-    @include progressSlider($height: 3px, $thumbSize: 40px, $marginTop: -20px);
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     opacity: 0;
   }
 }

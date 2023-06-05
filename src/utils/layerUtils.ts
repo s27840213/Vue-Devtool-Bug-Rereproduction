@@ -25,10 +25,10 @@ class LayerUtils {
   get pageIndex(): number { return pageUtils.currFocusPageIndex }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
-  get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame | ITmp { return this.getLayer(this.pageIndex, this.layerIndex) }
+  get getCurrLayer(): AllLayerTypes { return this.getLayer(this.pageIndex, this.layerIndex) }
   get getPage(): (pageInde: number) => IPage { return store.getters.getPage }
   get getCurrPage(): IPage { return this.getPage(this.pageIndex) }
-  get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame | ITmp {
+  get getLayer(): (pageIndex: number, layerIndex: number) => AllLayerTypes {
     return store.getters.getLayer
   }
 
@@ -75,8 +75,8 @@ class LayerUtils {
     return -1
   }
 
-  get getCurrConfig(): ILayer {
-    return this.subLayerIdx === -1 ? this.getCurrLayer as IText | IImage | IShape : (() => {
+  get getCurrConfig(): AllLayerTypes {
+    return this.subLayerIdx === -1 ? this.getCurrLayer : (() => {
       if (this.getCurrLayer.type === 'group') {
         return (this.getCurrLayer as IGroup).layers[this.subLayerIdx]
       }
@@ -573,7 +573,7 @@ class LayerUtils {
 
   getSubLayerIndexById(pageIndex: number, layerIndex: number, id: string, pages?: IPage[]) {
     const primaryLayer = pages ? pages[pageIndex].layers[layerIndex] : this.getLayer(pageIndex, layerIndex)
-    if (primaryLayer.type === LayerType.group) {
+    if ([LayerType.group, LayerType.tmp].includes(primaryLayer.type as LayerType)) {
       return (primaryLayer as IGroup).layers
         .findIndex(l => l.id === id)
     }
@@ -612,7 +612,7 @@ class LayerUtils {
     /**  If the layerIndex === -1 means the layer is grouped or deleted */
     if (layerIndex === -1) {
       layerIndex = (pages ? pages[pageIndex] : pageUtils.getPage(pageIndex)).layers
-        .findIndex(l => l.type === LayerType.group && (l as IGroup).layers.find(subLayer => subLayer.id === layerId))
+        .findIndex(l => [LayerType.group, LayerType.tmp].includes(l.type as LayerType) && (l as IGroup).layers.find(subLayer => subLayer.id === layerId))
       subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, layerId, pages)
     } else {
       subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, subLayerId, pages)
@@ -744,7 +744,7 @@ export default layerUtils
 export const DELETE_subLayer = function (state: IEditorState, layerInfo: ILayerInfo) {
   const { pageIndex, layerIndex, subLayerIdx } = layerInfo
   const primaryL = state.pages[pageIndex].config.layers[layerIndex] as IGroup
-  if (primaryL.type !== LayerType.group || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
+  if ((primaryL.type !== LayerType.group && primaryL.type !== LayerType.tmp) || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
     return
   }
   primaryL.layers.splice(subLayerIdx, 1)
@@ -754,7 +754,7 @@ export const ADD_subLayer = function (state: IEditorState, payload: { layerInfo:
   const { layerInfo, config } = payload
   const { pageIndex, layerIndex, subLayerIdx } = layerInfo
   const primaryL = state.pages[pageIndex].config.layers[layerIndex] as IGroup
-  if (primaryL.type !== LayerType.group || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
+  if ((primaryL.type !== LayerType.group && primaryL.type !== LayerType.tmp) || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
     return
   }
   primaryL.layers.splice(subLayerIdx, 0, config)

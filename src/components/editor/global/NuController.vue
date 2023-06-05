@@ -34,7 +34,7 @@ div(:layer-index="`${layerIndex}`"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
         div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
+          nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
             class="text__body"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
@@ -124,31 +124,32 @@ div(:layer-index="`${layerIndex}`"
               @pointerdown.prevent.stop="scaleStart"
               @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
-            v-if="isLine()"
-            :style="`transform: scale(${contentScaleRatio})`")
+            v-if="isLine()")
           svg-icon(class="control-point__rotater"
-            :iconName="'rotate'" :iconWidth="`${20}px`"
-            :src="require('@/assets/img/svg/rotate.svg')"
+            iconName="rotate" iconWidth="20px"
+            iconColor="blue-1"
             :style='lineControlPointStyles()'
             @pointerdown.stop="lineRotateStart"
             @touchstart="lineRotateStart")
-          img(class="control-point__mover"
+          svg-icon(class="control-point__mover"
             ref="moveStart-mover"
-            :src="require('@/assets/img/svg/move.svg')"
+            iconName="move" iconWidth="20px"
+            iconColor="blue-1"
             :style='lineControlPointStyles()'
             @touchstart="disableTouchEvent")
         template(v-else)
           div(class="control-point__controller-wrapper"
               ref="rotater")
             svg-icon(class="control-point__rotater"
-              :iconName="'rotate'" :iconWidth="`${20}px`"
-              :src="require('@/assets/img/svg/rotate.svg')"
+              iconName="rotate" iconWidth="20px"
+              iconColor="blue-1"
               :style='controlPointStyles()'
               @pointerdown.stop="rotateStart"
               @touchstart="disableTouchEvent")
-            img(class="control-point__mover"
+            svg-icon(class="control-point__mover"
               ref="moveStart-mover"
-              :src="require('@/assets/img/svg/move.svg')"
+              iconName="move" iconWidth="20px"
+              iconColor="blue-1"
               :style='controlPointStyles()'
               @touchstart="disableTouchEvent")
     div(v-if="isControllerShown && isLocked() && (scaleRatio >20)"
@@ -161,6 +162,7 @@ div(:layer-index="`${layerIndex}`"
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import { IResizer } from '@/interfaces/controller'
+import { isTextFill } from '@/interfaces/format'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
@@ -181,7 +183,6 @@ import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import textBgUtils from '@/utils/textBgUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
@@ -322,7 +323,7 @@ export default defineComponent({
       return undefined
     },
     sizeStyles(): { transform: string, width: string, height: string } {
-      const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
+      const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.$isTouchDevice(), this.config.size?.[0])
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
@@ -351,7 +352,6 @@ export default defineComponent({
       }
     },
     contentStyles(): any {
-      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
@@ -365,7 +365,6 @@ export default defineComponent({
          * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
          */
         // touchAction: this.isActive ? 'none' : 'initial',
-        ...textBgStyles,
       }
     },
     isImgControl(): boolean {
@@ -419,7 +418,10 @@ export default defineComponent({
     },
     needAutoRescale(): boolean {
       return this.config.inAutoRescaleMode && this.getLayerRotate() === 0
-    }
+    },
+    textHtml(): any {
+      return tiptapUtils.toJSON(this.config.paragraphs)
+    },
   },
   watch: {
     scaleRatio() {
@@ -524,9 +526,18 @@ export default defineComponent({
           if (k.includes('moveStart')) {
             const ref = this.$refs[k]
             if (ref instanceof Array) {
-              ref[0].addEventListener('pointerdown', this.moveStart)
+              if (ref[0].$el) {
+                ref[0].$el.addEventListener('pointerdown', this.moveStart)
+              } else {
+                ref[0].addEventListener('pointerdown', this.moveStart)
+              }
             } else {
-              (ref as HTMLElement).addEventListener('pointerdown', this.moveStart)
+              const refElement = ref as any
+              if (refElement.$el) {
+                refElement.$el.addEventListener('pointerdown', this.moveStart)
+              } else {
+                refElement.addEventListener('pointerdown', this.moveStart)
+              }
             }
           }
         })
@@ -643,19 +654,12 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const textstyles = {
+      const checkTextFill = isTextFill(this.config.styles.textFill)
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) && !this.contentEditable ? 0 : 1
+      return {
         width: '100%',
         height: '100%',
-        userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: 1
-      }
-      return !(this.isCurveText || this.isFlipped || this.isFlipping) ? textstyles : {
-        width: 'auto',
-        height: 'auto',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        opacity: this.contentEditable ? 1 : 0
+        opacity,
       }
     },
     primaryLayerZindex() {
@@ -688,16 +692,16 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isControllerShown) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `2px solid ${outlineColor}`
+          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         } else {
-          return `2px solid ${outlineColor}`
+          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
         }
       } else {
         return 'none'
       }
     },
     hintStyles() {
-      return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${this.contentScaleRatio})`
+      return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px)`
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
@@ -967,7 +971,7 @@ export default defineComponent({
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      const [dx, dy] = [diff.offsetX, diff.offsetY]
+      const [dx, dy] = [diff.offsetX / this.contentScaleRatio, diff.offsetY / this.contentScaleRatio]
       const markerIndex = this.initMarkerIndex
 
       const copiedPoint: number[] = Array.from(this.config.point)
@@ -1682,9 +1686,6 @@ export default defineComponent({
         transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px) scale(${this.contentScaleRatio})`
           : `translate(0px, 0px) scale(${this.contentScaleRatio})`
       }
-    },
-    textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
     },
   }
 })

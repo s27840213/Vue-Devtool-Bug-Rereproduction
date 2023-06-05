@@ -73,6 +73,7 @@ declare module '@vue/runtime-core' {
   }
   function provide<T>(key: InjectionKey<T> | string | number, value: T | ComputedRef<T>): void
 }
+// app.config.unwrapInjectedRef = true
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 app.config.globalProperties.$isTablet = () => generalUtils.isTablet()
 app.config.globalProperties.$eventBus = eventBus
@@ -259,6 +260,27 @@ app.directive('custom-swipe', {
 })
 
 app.directive('press', longpress)
+
+function setProgressStyle(el: HTMLInputElement) {
+  nextTick(() => {
+    if (el.disabled) {
+      el.style.setProperty('--base', '0')
+      el.style.setProperty('--progress', '50%')
+    } else {
+      el.style.setProperty('--base', `${(Math.min(+el.value, 0) - (+el.min)) / (+el.max - (+el.min)) * 100}%`)
+      el.style.setProperty('--progress', `${(Math.max(+el.value, 0) - (+el.min)) / (+el.max - (+el.min)) * 100}%`)
+    }
+  })
+}
+
+app.directive('progress', {
+  mounted: (el) => {
+    setProgressStyle(el)
+  },
+  updated: (el) => {
+    setProgressStyle(el)
+  }
+})
 
 /**
  * move to the SvgIcon.vue component

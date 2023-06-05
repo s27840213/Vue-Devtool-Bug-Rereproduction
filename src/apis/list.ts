@@ -47,6 +47,7 @@ class ListService {
       locale: localeUtils.currLocale(),
       cache: true,
       platform: window.location.host,
+      ver: store.getters['user/getVerApi'],
       app: 1
     }
 

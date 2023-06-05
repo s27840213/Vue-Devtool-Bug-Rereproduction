@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { IAdjustJsonProps } from './adjust'
-import { IParagraphStyle, ISpanStyle } from './layer'
+import { IAdjustJsonProps } from '@/interfaces/adjust'
+import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
+import { IParagraphStyle, ISpanStyle } from '@/interfaces/layer'
 
 export interface ITextEffect {
   name: string
@@ -60,29 +61,64 @@ export interface ITextLetterBg {
   color: string
 }
 
-export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
+export type ITextBg = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
 
-export function isITextBox(object: ITextBgEffect): object is ITextBox {
+export function isITextBox(object: ITextBg): object is ITextBox {
   return object && object.name &&
     ['square-borderless', 'rounded-borderless', 'square-hollow',
       'rounded-hollow', 'square-both', 'rounded-both'].includes(object.name)
 }
-export function isITextUnderline(object: ITextBgEffect): object is ITextUnderline {
+export function isITextUnderline(object: ITextBg): object is ITextUnderline {
   return object && object.name && object.name === 'underline'
 }
-export function isITextGooey(object: ITextBgEffect): object is ITextGooey {
+export function isITextGooey(object: ITextBg): object is ITextGooey {
   return object && object.name && ['gooey'].includes(object.name)
 }
-export function isITextLetterBg(object: ITextBgEffect): object is ITextLetterBg {
+export function isITextLetterBg(object: ITextBg): object is ITextLetterBg {
   return object && object.name &&
     (textLetterBgName as unknown as string[]).includes(object.name)
 }
 
+export interface ITextFillConfig {
+  name: 'custom-fill-img'
+  customImg: IAssetPhoto | IPhotoItem | null
+  xOffset200: number
+  yOffset200: number
+  size: number
+  opacity: number
+  focus: boolean
+}
+
+export interface ITextFillCustom {
+  name: '0' | '1' | '2' // ....
+  customImg: IAssetPhoto | IPhotoItem | null
+  img: IAssetPhoto & {
+    key: string
+    teamId: string
+  }
+  xOffset200: number
+  yOffset200: number
+  size: number
+  opacity: number
+  focus: boolean
+}
+
+export type ITextFill = ITextFillConfig | ITextFillCustom | { name: 'none', customImg: IAssetPhoto | IPhotoItem | null }
+
+export function isTextFill(object: ITextFill): object is ITextFillConfig | ITextFillCustom {
+  return object && !!object.name && object.name !== 'none'
+}
+
+export function isITextFillCustom(object: ITextFill): object is ITextFillCustom {
+  return object && !!object.name && !['none', 'custom-fill-img'].includes(object.name)
+}
+
 export interface ITextFormat {
   textEffect: ITextEffect
-  textBg: ITextBgEffect,
+  textBg: ITextBg
   textShape: ITextShape
-  scale: number,
+  textFill: ITextFill
+  scale: number
   paragraphStyle: IParagraphStyle,
   spanStyle: ISpanStyle,
   writingMode: string
