@@ -24,6 +24,7 @@ import i18n from '@/i18n'
 import { IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
+import backgroundUtils from '@/utils/backgroundUtils'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils from '@/utils/eventUtils'
 import formatUtils from '@/utils/formatUtils'
@@ -33,6 +34,7 @@ import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -41,7 +43,7 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { isEqual, startCase } from 'lodash'
 import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -76,6 +78,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
       isInEditor: 'vivisticker/getIsInEditor',
       editorType: 'vivisticker/getEditorType',
@@ -150,7 +153,8 @@ export default defineComponent({
       return [
         { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        ...this.genearlLayerTabs
+        ...this.genearlLayerTabs,
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
       ]
     },
     photoTabs(): Array<IFooterTab> {
@@ -159,6 +163,7 @@ export default defineComponent({
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...this.genearlLayerTabs,
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         // hide copy-style for vivisticker for now
         // { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
@@ -208,6 +213,26 @@ export default defineComponent({
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
         { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
+      ]
+    },
+    bgSettingTab(): Array<IFooterTab> {
+      const { hasBgImage } = backgroundUtils
+      return [
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          hidden: this.globalSelectedColor === 'none',
+          props: {
+            currColorEvent: ColorEventType.background
+          },
+          disabled: this.backgroundLocked
+        },
+        { icon: 'bg-separate', text: `${this.$t('NN0708')}`, hidden: !hasBgImage, disabled: this.backgroundLocked }
       ]
     },
     multiPhotoTabs(): Array<IFooterTab> {
@@ -360,6 +385,8 @@ export default defineComponent({
         return res
       } else if (this.showShapeSetting) {
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
+      } else if (this.inBgSettingMode) {
+        return this.bgSettingTab
       } else if (this.showInGroupFrame) {
         return [...this.frameTabs, ...this.genearlLayerTabs]
       } else if (this.showGeneralTabs) {
@@ -499,6 +526,13 @@ export default defineComponent({
     },
     selectMultiple(): boolean {
       return this.selectedLayerNum > 1
+    },
+    backgroundImgControl(): boolean {
+      return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
+    },
+    backgroundLocked(): boolean {
+      const { locked } = pageUtils.currFocusPage.backgroundImage.config
+      return locked
     }
   },
   watch: {
@@ -528,6 +562,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      setBgImageControl: 'SET_backgroundImageControl'
+    }),
     updateContainerOverflow() {
       const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.container as HTMLElement
       this.leftOverflow = scrollLeft > 0
@@ -562,6 +599,12 @@ export default defineComponent({
                   break
               }
             }
+          } else if (this.inBgSettingMode) {
+            if (this.backgroundLocked) return this.handleLockedNotify()
+            this.setBgImageControl({
+              pageIndex: pageUtils.currFocusPageIndex,
+              imgControl: !this.backgroundImgControl
+            })
           }
           break
         }
@@ -615,6 +658,14 @@ export default defineComponent({
         case 'ungroup': {
           this.disableTabScroll = true
           mappingUtils.mappingIconAction(tab.icon)
+          break
+        }
+        case 'bg-separate': {
+          if (this.inBgSettingMode) {
+            backgroundUtils.detachBgImage()
+          } else {
+            backgroundUtils.setBgImageSrc()
+          }
           break
         }
         case 'copy': {
@@ -770,6 +821,9 @@ export default defineComponent({
         }
       }
     },
+    handleLockedNotify() {
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+    }
   }
 })
 </script>

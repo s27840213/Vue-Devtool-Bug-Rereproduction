@@ -99,6 +99,7 @@ import PanelPageManagement from '@/components/vivisticker/PanelPageManagement.vu
 import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
+import i18n from '@/i18n'
 
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
@@ -115,6 +116,7 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -202,6 +204,7 @@ export default defineComponent({
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
@@ -521,6 +524,12 @@ export default defineComponent({
                     break
                 }
               }
+            } else if (this.inBgSettingMode) {
+              if (this.backgroundLocked) return this.handleLockedNotify()
+              this.setBgImageControl({
+                pageIndex: pageUtils.currFocusPageIndex,
+                imgControl: false
+              })
             }
             break
           }
@@ -554,7 +563,11 @@ export default defineComponent({
         }
         this.closeMobilePanel()
       }
-    }
+    },
+    backgroundLocked(): boolean {
+      const { locked } = pageUtils.currFocusPage.backgroundImage.config
+      return locked
+    },
   },
   watch: {
     selectedLayerNum(newVal: number) {
@@ -600,7 +613,8 @@ export default defineComponent({
     ...mapMutations({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
       setIsInCategory: 'vivisticker/SET_isInCategory',
-      setShowAllRecently: 'vivisticker/SET_showAllRecently'
+      setShowAllRecently: 'vivisticker/SET_showAllRecently',
+      setBgImageControl: 'SET_backgroundImageControl'
     }),
     ...mapActions({
       initRecentlyColors: 'color/initRecentlyColors',
@@ -610,7 +624,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: () => {
-          if (!(this.bgRemoveMode || this.isInPagePreview)) {
+          if (!(this.bgRemoveMode || this.isInPagePreview || this.isBgImgCtrl)) {
             this.closeMobilePanel()
           }
         },
@@ -689,6 +703,9 @@ export default defineComponent({
       this.$nextTick(() => {
         pageUtils.fitPage()
       })
+    },
+    handleLockedNotify() {
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     }
   }
 })

@@ -32,10 +32,12 @@ div(class="header-bar relative" @pointerdown.stop)
 </template>
 
 <script lang="ts">
+import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
 import modalUtils from '@/utils/modalUtils'
+import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -100,7 +102,8 @@ export default defineComponent({
       userSettings: 'vivisticker/getUserSettings',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      inBgRemoveLastStep: 'bgRemove/inLastStep'
+      inBgRemoveLastStep: 'bgRemove/inLastStep',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     templateKeyword() {
       return this.$store.state.templates[this.templatesIgLayout].keyword
@@ -380,6 +383,8 @@ export default defineComponent({
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
       }
+      if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
+      if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
       const copyCallback = (flag: string) => {
         if (flag === '1') {
           modalUtils.setModalInfo(

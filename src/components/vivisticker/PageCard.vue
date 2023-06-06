@@ -1,9 +1,9 @@
 <template lang="pug">
 div(class="page-card" :id="`page-card-${pageIndex}`" :style="styles('card')")
-  div(:class="`page-card__pseudo-page`" :style="styles('page')")
+  div(:id="`nu-page-wrapper_${pageIndex}`" :class="`page-card__pseudo-page`" :style="styles('page')")
     div(class="page-card__scale-container" :style="styles('scale')")
-      page-content(:id="`vvstk-page-${pageIndex}`" :config="config" :pageIndex="pageIndex" :noBg="noBg" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
-      dim-background(v-if="isImgCtrl" :config="config" :contentScaleRatio="contentScaleRatio")
+      page-content(:id="`vvstk-page-${pageIndex}`" class="page-content" :config="config" :pageIndex="pageIndex" :noBg="noBg" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+      dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
     div(class="page-control" :style="styles('control')")
       nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
         :key="`controller-${currLayer.id}`"
@@ -20,6 +20,7 @@ import DimBackground from '@/components/editor/page/DimBackground.vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { ILayer } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
+import backgroundUtils from '@/utils/backgroundUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
@@ -132,10 +133,13 @@ export default defineComponent({
             height: `${this.config.height}px`,
             backgroundColor: this.isPageDuringCopy ? 'transparent' : this.editorBg,
             marginTop: `${this.marginTop}px`,
-            ...(this.isPageDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {})
+            ...(this.isPageDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {}),
+            ...(backgroundUtils.inBgSettingMode && { boxShadow: '0 0 0 2px #7190CC' })
           }
         case 'scale':
           return {
+            width: `${this.config.width}px`,
+            height: `${this.config.height}px`,
             transform: `scale(${1 / this.contentScaleRatio})`
           }
       }
@@ -154,7 +158,6 @@ export default defineComponent({
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     border-radius: 10px;
     margin: 0 auto;
-    overflow: hidden;
   }
   &__scale-container {
     width: 0px;
@@ -163,6 +166,11 @@ export default defineComponent({
     box-sizing: border-box;
     transform-origin: 0 0;
   }
+}
+
+.page-content {
+  overflow: hidden;
+  border-radius: 10px;
 }
 
 .page-control {

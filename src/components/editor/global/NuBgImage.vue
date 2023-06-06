@@ -211,7 +211,7 @@ export default defineComponent({
     },
     imageSize(): { width: number, height: number, x: number, y: number } {
       const { image } = this
-      const offset = 1
+      const offset = 0 // no need to scale bg image in vivisticker
       const aspectRatio = image.config.styles.imgWidth / image.config.styles.imgHeight
       const width = image.config.styles.imgWidth + (aspectRatio < 1 ? offset * 2 : offset * 2 * aspectRatio)
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
@@ -312,6 +312,7 @@ export default defineComponent({
       }
     },
     dblTap(e: PointerEvent) {
+      this.setInBgSettingMode()
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
@@ -445,6 +446,7 @@ export default defineComponent({
   right: 0;
   bottom: 0;
   left: 0;
+  border-radius: 10px;
   &__picture {
     object-fit: cover;
     width: 100%;

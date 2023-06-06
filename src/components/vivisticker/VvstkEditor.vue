@@ -9,7 +9,8 @@ div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectSt
                 :cardWidth="cardWidth"
                 :cardHeight="cardHeight"
                 :marginTop="marginTop"
-                :no-bg="!editorTypeTemplate")
+                :no-bg="!editorTypeTemplate"
+                @click.self.prevent="outerClick")
   div(v-if="editorTypeTemplate && !isDuringCopy" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
@@ -18,6 +19,7 @@ div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectSt
 
 <script lang="ts">
 import PageCard from '@/components/vivisticker/PageCard.vue'
+import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
 import { IPageState } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
@@ -28,7 +30,6 @@ import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -70,6 +71,9 @@ export default defineComponent({
         })
       },
       deep: true
+    },
+    currFocusPageIndex() {
+      editorUtils.setInBgSettingMode(false)
     },
   },
   computed: {
@@ -116,6 +120,10 @@ export default defineComponent({
     },
     containerStyles() {
       return this.isInEditor ? { transform: `translateY(-${this.marginBottom}px)` } : {}
+    },
+    outerClick() {
+      editorUtils.setInBgSettingMode(false)
+      pageUtils.setBackgroundImageControlDefault()
     },
     selectStart(e: PointerEvent) {
       if (e.pointerType === 'mouse' && e.button !== 0) return
@@ -178,10 +186,12 @@ export default defineComponent({
       this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0) })
     },
     handleSwipeRight() {
+      if (this.isBgImgCtrl) return
       this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
       this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
     },
     handleSwipeLeft() {
+      if (this.isBgImgCtrl) return
       this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
       this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
     },

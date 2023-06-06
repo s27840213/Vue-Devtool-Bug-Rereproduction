@@ -60,9 +60,7 @@ export default defineComponent({
                       },
                       styles: {
                         width: naturalWidth,
-                        height: naturalHeight,
-                        zindex: -1,
-                        opacity: 100
+                        height: naturalHeight
                       }
                     })
                   })
