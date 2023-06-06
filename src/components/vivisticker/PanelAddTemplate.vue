@@ -48,31 +48,30 @@ export default defineComponent({
               this.igLayout,
               { plan: 0, assetId: '' },
               async () => {
-                console.log('start editing template', this.igLayout)
+                await imageUtils.imgLoadHandler(`vvstk://${images[0]}`, (img: HTMLImageElement) => {
+                  const { naturalWidth, naturalHeight } = img
+                  backgroundUtils.setBgImage({
+                    pageIndex: pageUtils.currFocusPageIndex,
+                    config: layerFactary.newImage({
+                      srcObj: {
+                        type: 'ios',
+                        assetId: images[0],
+                        userId: ''
+                      },
+                      styles: {
+                        width: naturalWidth,
+                        height: naturalHeight,
+                        zindex: -1,
+                        opacity: 100
+                      }
+                    })
+                  })
+                  backgroundUtils.fitPageBackground(0)
+                })
                 return true
               },
               vivistickerUtils.getEmptyCallback()
             )
-            imageUtils.imgLoadHandler(`vvstk://${images[0]}`, (img: HTMLImageElement) => {
-              const { naturalWidth, naturalHeight } = img
-              backgroundUtils.setBgImage({
-                pageIndex: pageUtils.currFocusPageIndex,
-                config: layerFactary.newImage({
-                  srcObj: {
-                    type: 'ios',
-                    assetId: images[0],
-                    userId: ''
-                  },
-                  styles: {
-                    width: naturalWidth,
-                    height: naturalHeight,
-                    zindex: -1,
-                    opacity: 100
-                  }
-                })
-              })
-              backgroundUtils.fitPageBackground(0)
-            })
           })
       } else {
         vivistickerUtils.startEditing(
