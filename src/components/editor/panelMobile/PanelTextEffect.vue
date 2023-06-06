@@ -223,7 +223,6 @@ export default defineComponent({
     gap: 16px;
     margin: 0 15px 15px 15px;
     overflow: auto;
-    overflow-x: hidden;
     > div {
       display: flex;
       justify-content: center;
