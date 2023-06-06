@@ -165,7 +165,6 @@ class AssetUtils {
   }
 
   async addTemplate(json: any, attrs?: { pageIndex?: number, width?: number, height?: number, physicalWidth?: number, physicalHeight?: number, unit?: string }, recordStep = true) {
-    console.log('addTemplate')
     const targetPageIndex = attrs?.pageIndex ?? pageUtils.addAssetTargetPageIndex
     const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(generalUtils.deepCopy(json))
@@ -638,7 +637,6 @@ class AssetUtils {
   }
 
   addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
-    console.log('add group template ')
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
     const isDetailPage = groupType === 1 || currGroupType === 1

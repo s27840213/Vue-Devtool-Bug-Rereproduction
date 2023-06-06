@@ -103,7 +103,6 @@ const actions: ActionTree<IShadowState, unknown> = {
         const url_map = data.data.url_map[assetIndices[i]]
         if (store.getters['user/getUserId'] === 'backendRendering') {
           const token = store.getters['user/getToken']
-          console.log(url_map)
           const full = url_map.full as string
           const user = full.substring('https://asset.vivipic.com/'.length, full.indexOf('/asset/image/'))
           const id = full.substring(full.indexOf('/asset/image/') + '/asset/image/'.length, full.indexOf('/full?'))
