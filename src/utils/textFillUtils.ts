@@ -126,7 +126,9 @@ class TextFill {
     const pageScale = store.getters.getPageScaleRatio * 0.01
     const layerSize = Math.max(config.styles.height, config.styles.width) * pageScale
     const sizeMap = store.getters['user/getImgSizeMap'] as Array<{ key: string, size: number }>
-    const targetSize = findLast(sizeMap, s => layerSize < s.size) ?? sizeMap[0]
+    // Get target resolution, use the largest for backend rendering.
+    const targetSize = store.getters['user/getUserId'] === 'backendRendering' ? sizeMap[0]
+      : findLast(sizeMap, s => layerSize < s.size) ?? sizeMap[0]
 
     return isIAssetPhoto(img)
       ? img.urls[targetSize.key as keyof typeof img.urls] ?? img.urls.original
