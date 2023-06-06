@@ -1,9 +1,12 @@
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
-import { IShape } from '@/interfaces/layer'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { AllLayerTypes, IShape } from '@/interfaces/layer'
 import store from '@/store'
+import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import { svg1, svg2, svg3, svg4, svg5, svg6, svg7, svg8 } from './cornerRotate'
 import editorUtils from './editorUtils'
 import layerUtils from './layerUtils'
@@ -250,7 +253,7 @@ class Controller {
     }[]
   }
 
-  getControlPoints = (resizerShort: number, resizerLong: number, scaleRatio = 1) => {
+  getControlPoints(resizerShort: number, resizerLong: number, scaleRatio = 1) {
     const scalerSize = 12
 
     return {
@@ -272,6 +275,55 @@ class Controller {
         'ew-resize'
       ]
     }
+  }
+
+  getResizerProfile(config: AllLayerTypes): { start: number, end: number, hasHorizontal: boolean, hasVertical: boolean } {
+    const profile = {
+      start: -1,
+      end: -1,
+      hasHorizontal: false,
+      hasVertical: false
+    }
+    switch (config.type) {
+      case 'image':
+        if (config.styles.shadow.currentEffect === ShadowEffectType.none) {
+          profile.hasHorizontal = true
+          profile.hasVertical = true
+        }
+        break
+      case 'text':
+        if (!textShapeUtils.isCurvedText(config.styles.textShape)) {
+          if (config.styles.writingMode.includes('vertical')) {
+            profile.hasVertical = true
+          } else {
+            profile.hasHorizontal = true
+          }
+        }
+        break
+      case 'shape':
+        Object.assign(profile, this.shapeCategorySorter(config.category, config.scaleType ?? 1))
+        break
+      case 'tmp':
+      case 'group':
+        break
+      case 'frame':
+        if (frameUtils.isImageFrame(config)) {
+          const shadow = config.styles.shadow
+          if (!shadow || !shadow.srcObj?.type) {
+            profile.hasHorizontal = true
+            profile.hasVertical = true
+          }
+        }
+    }
+    if (profile.hasHorizontal) {
+      profile.start = 0
+      profile.end = 2
+    }
+    if (profile.hasVertical) {
+      profile.start = profile.start === -1 ? 2 : profile.start
+      profile.end = 4
+    }
+    return profile
   }
 
   getTranslateCompensation(initData: { xSign: number, ySign: number, x: number, y: number, angle: number },
@@ -368,11 +420,11 @@ class Controller {
     return percentage * maxCorRad / 100
   }
 
-  shapeCategorySorter(resizers: any, category: string, scaleType: number) {
+  shapeCategorySorter(category: string, scaleType: number): { hasHorizontal: boolean, hasVertical: boolean } {
     switch (category) {
       // category: A => 只能被等比例縮放
       case 'A':
-        return []
+        return { hasHorizontal: false, hasVertical: false }
       // category: B => 等比例/非等比例縮放
       // category: C => 可被等比例縮放，也可沿着水平/垂直方向伸縮，伸縮時四個角落的形狀固定不變
       case 'B':
@@ -381,13 +433,15 @@ class Controller {
       case 'G':
         switch (scaleType) {
           case 1:
-            return resizers
+            return { hasHorizontal: true, hasVertical: true }
           case 2:
-            return resizers.slice(0, 2)
+            return { hasHorizontal: true, hasVertical: false }
           case 3:
-            return resizers.slice(2, 4)
+            return { hasHorizontal: false, hasVertical: true }
         }
-        return []
+        return { hasHorizontal: false, hasVertical: false }
+      default:
+        return { hasHorizontal: false, hasVertical: false }
     }
   }
 

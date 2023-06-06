@@ -125,8 +125,8 @@ div(:layer-index="`${layerIndex}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
             @pointerdown.prevent.stop="!$isTouchDevice() ? scaleStart($event) : null"
             @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        template(v-if="$isTouchDevice()" )
-          div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
+        template(v-if="$isTouchDevice()")
+          div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalerTouchAreas) : []"
               class="control-point scaler"
               :key="`scaler-touch-${index}`"
               :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
@@ -165,7 +165,7 @@ div(:layer-index="`${layerIndex}`"
               iconColor="blue-2"
               :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
               @touchstart="disableTouchEvent")
-    div(v-if="isActive && isLocked() && (scaleRatio >20)"
+    div(v-if="isActive && isLocked() && (scaleRatio > 20)"
         class="nu-controller__bottom-right-icon control-point__action shadow"
         :style="actionIconStyles()"
         @click="MappingUtils.mappingIconAction('lock')")
@@ -195,7 +195,6 @@ import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import { IResizer } from '@/interfaces/controller'
 import { isTextFill } from '@/interfaces/format'
 import { ICoordinate } from '@/interfaces/frame'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
@@ -267,6 +266,7 @@ export default defineComponent({
       MappingUtils,
       FrameUtils,
       controlPoints: ControlUtils.getControlPoints(8, 20) as ICP,
+      resizerProfile: ControlUtils.getResizerProfile(this.config as AllLayerTypes),
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -445,14 +445,11 @@ export default defineComponent({
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
     tooSmall(): boolean {
-      const { tooShort, tooNarrow } = this.checkLimits()
+      const { tooShort, tooNarrow } = this.checkLimits(this.$isTouchDevice(), !this.resizerProfile.hasHorizontal && !this.resizerProfile.hasVertical)
       return tooShort || tooNarrow
     }
   },
   watch: {
-    scaleRatio() {
-      this.controlPoints = ControlUtils.getControlPoints(4, 25)
-    },
     contentEditable(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
@@ -499,8 +496,23 @@ export default defineComponent({
       setImgConfig: 'imgControl/SET_CONFIG',
       setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
-    checkLimits(): { tooShort: boolean, tooNarrow: boolean } {
-      const limit = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+    checkLimits(hasActionIcon = false, noResizer = false): { tooShort: boolean, tooNarrow: boolean } {
+      const ACTION_ICON_WIDTH = 24
+      const RESCALER_WIDTH = 12
+      let limit
+      if (noResizer) {
+        if (hasActionIcon) {
+          limit = 3000 // defined in Figma
+        } else {
+          limit = RESCALER_WIDTH * 100
+        }
+      } else {
+        if (hasActionIcon) {
+          limit = RESIZER_SHOWN_MIN
+        } else {
+          limit = RESIZER_SHOWN_MIN - (ACTION_ICON_WIDTH - RESCALER_WIDTH) * 100
+        }
+      }
       const totalScaleRatio = this.scaleRatio * this.contentScaleRatio
       return {
         tooShort: this.getLayerHeight() * totalScaleRatio < limit,
@@ -596,66 +608,31 @@ export default defineComponent({
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: isHorizon && tooSmall ? `${sizeForWidth * scale}px`
-          : (tooSmall ? `${sizeForHeight * aspectRatio * scale}px` : resizerStyle.width),
+          : resizerStyle.width,
         height: !isHorizon && tooSmall ? `${sizeForHeight * scale}px`
-          : (tooSmall ? `${sizeForWidth * aspectRatio * scale}px` : resizerStyle.height)
+          : resizerStyle.height
       }
       return Object.assign(resizerStyle, HW)
     },
     getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
       let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
-      const { tooShort, tooNarrow } = this.checkLimits()
+      resizers = resizers.slice(this.resizerProfile.start, this.resizerProfile.end)
       const isMobile = this.$isTouchDevice()
-      switch (this.getLayerType) {
-        case 'image':
-          resizers = this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
-          break
-        case 'text':
-          if (textMoveBar) {
-            resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
-              : resizers.slice(2, 4)
-          } else if (this.config.styles.textShape?.name && this.config.styles.textShape.name !== 'none') {
-            resizers = []
-          } else {
-            resizers = this.config.styles.writingMode.includes('vertical') ? (
-              tooNarrow ? (isMobile ? [] : resizers.slice(3, 4)) : resizers.slice(2, 4)
-            ) : (
-              tooShort ? (isMobile ? [] : resizers.slice(0, 1)) : resizers.slice(0, 2)
-            )
-          }
-          break
-        case 'shape':
-          resizers = ControlUtils.shapeCategorySorter(resizers, this.config.category, this.config.scaleType)
-          break
-        case 'tmp':
-        case 'group':
-          resizers = []
-          break
-        case 'frame':
-          if (!FrameUtils.isImageFrame(this.config as IFrame)) {
-            resizers = []
-          } else {
-            const shadow = this.config.styles.shadow
-            if (shadow && shadow.srcObj?.type) {
-              resizers = []
-            }
-          }
-      }
-
-      resizers = resizers ?? []
-
-      if (this.getLayerType !== 'text') {
-        if (isMobile) {
-          if (this.tooSmall) {
-            resizers = []
-          }
-        } else {
-          if (tooShort) {
-            resizers = resizers.filter(r => r.type !== 'H')
-          }
-          if (tooNarrow) {
-            resizers = resizers.filter(r => r.type !== 'V')
-          }
+      const { tooShort, tooNarrow } = this.checkLimits(isMobile)
+      if (this.getLayerType === 'text') {
+        if (!textMoveBar && !textShapeUtils.isCurvedText(this.config.styles.textShape)) {
+          resizers = this.config.styles.writingMode.includes('vertical') ? (
+            tooNarrow ? (isMobile ? [] : resizers.slice(1, 2)) : resizers
+          ) : (
+            tooShort ? (isMobile ? [] : resizers.slice(0, 1)) : resizers
+          )
+        }
+      } else {
+        if (tooShort) {
+          resizers = resizers.filter(r => r.type !== 'H')
+        }
+        if (tooNarrow) {
+          resizers = resizers.filter(r => r.type !== 'V')
         }
       }
       return resizers
@@ -1764,6 +1741,7 @@ export default defineComponent({
   transform-origin: top;
   display: flex;
   gap: 20px;
+  pointer-events: none;
 }
 
 @mixin widget-point {
