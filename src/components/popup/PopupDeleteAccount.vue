@@ -14,8 +14,9 @@ div(class="popup-window")
     input(class="popup-del-acc__input" v-model="userInput")
     div(class="popup-del-acc__buttons")
       nubtn(theme="secondary" size="sm-full" @click="closePopup") {{$t('NN0203')}}
-      nubtn(theme="danger" size="sm-full" @click="deleteAccount"
-            :status="allowDelete ? 'default' : 'disabled'") {{$t('NN0317')}}
+      nubtn(theme="danger" size="sm-full"
+            :disabled="!allowDelete"
+            @click="deleteAccount") {{$t('NN0317')}}
   spinner(v-if="loading")
 </template>
 

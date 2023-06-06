@@ -185,9 +185,9 @@ export default defineComponent({
     }
     &.brandkit-theme:not(:hover).selected {
       .brand-kit-tab__tab-name {
-        border-bottom: 6px solid setColor(bu);
+        border-bottom: 6px solid setColor(blue-1);
         & > span {
-          color: setColor(bu);
+          color: setColor(blue-1);
         }
       }
     }

@@ -118,13 +118,10 @@ div(class="my-design-pc")
               :level="0")
           div(class="my-design-pc__change-folder__footer")
             div(class="my-design-pc__change-folder__buttons")
-              div(class="my-design-pc__change-folder__cancel"
-                  @click="isMoveToFolderPanelOpen = false")
-                span {{$t('NN0203')}}
-              div(class="my-design-pc__change-folder__confirm"
-                  :class="{'disabled': moveToFolderSelectInfo === ''}"
-                  @click="handleMoveToFolder")
-                span {{$t('NN0206')}}
+              nubtn(theme="secondary"
+                  @click="isMoveToFolderPanelOpen = false") {{$t('NN0203')}}
+              nubtn(:disabled="moveToFolderSelectInfo === ''"
+                  @click="handleMoveToFolder") {{$t('NN0206')}}
   transition(name="scale-fade")
     div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
       div(class="delete-all-message" @click.stop)
@@ -133,10 +130,8 @@ div(class="my-design-pc")
         div(class="delete-all-message__text")
           span {{$t('NN0244')}}
         div(class="delete-all-message__buttons")
-          div(class="delete-all-message__cancel" @click.stop="closeConfirmMessage")
-            span {{$t('NN0203')}}
-          div(class="delete-all-message__confirm" @click.stop="confirmAction(deleteAllConfirmed)")
-            span {{$t('NN0034')}}
+          nubtn(theme="secondary" @click.stop="closeConfirmMessage") {{$t('NN0203')}}
+          nubtn(theme="danger" click.stop="confirmAction(deleteAllConfirmed)")  {{$t('NN0034')}}
     div(v-else-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
       div(class="delete-folder-message" @click.stop)
         div(class="delete-folder-message__img")
@@ -146,9 +141,8 @@ div(class="my-design-pc")
             span(class="first-line") {{$t('NN0245')}}
             span {{$t('NN0246')}}
           div(class="delete-folder-message__buttons")
-            div(class="delete-folder-message__cancel" @click.stop="closeConfirmMessage")
-              span {{$t('NN0203')}}
-            div(class="delete-folder-message__confirm" @click.stop="confirmAction(() => deleteFolder(pathedFolderBuffer))")
+            nubtn(theme="secondary" @click.stop="closeConfirmMessage") {{$t('NN0203')}}
+            nubtn(theme="danger" @click.stop="confirmAction(() => deleteFolder(pathedFolderBuffer))")
               span {{$t('NN0034')}}
     div(v-else-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
       div(class="delete-forever-message" @click.stop)
@@ -159,10 +153,8 @@ div(class="my-design-pc")
         div(class="delete-forever-message__description")
           span {{$tc('NN0201', isMultiSelected ? 2 : 1)}}
         div(class="delete-forever-message__buttons")
-          div(class="delete-forever-message__cancel" @click.stop="closeConfirmMessage")
-            span {{$t('NN0203')}}
-          div(class="delete-forever-message__confirm" @click.stop="confirmAction(deleteForeverConfirmed)")
-            span {{$t('NN0200')}}
+          nubtn(theme="secondary" @click.stop="closeConfirmMessage") {{$t('NN0203')}}
+          nubtn(theme="danger" @click.stop="confirmAction(deleteForeverConfirmed)")  {{$t('NN0200')}}
   div(v-if="isMoveToFolderPanelOpen && isMovingSingleToFolder" class="dim-background")
 </template>
 
@@ -785,45 +777,6 @@ export default defineComponent({
       justify-content: center;
       gap: 7px;
     }
-    &__cancel {
-      height: 25px;
-      padding: 0 12px;
-      background-color: setColor(gray-4);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      > span {
-        font-size: 12px;
-        line-height: 25px;
-        display: block;
-        color: setColor(gray-2);
-      }
-    }
-    &__confirm {
-      height: 25px;
-      padding: 0 12px;
-      background-color: setColor(blue-1);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      > span {
-        font-size: 12px;
-        line-height: 25px;
-        display: block;
-        color: white;
-      }
-      &.disabled {
-        background-color: setColor(gray-4);
-        cursor: not-allowed;
-        > span {
-          color: setColor(gray-2);
-        }
-      }
-    }
   }
   &__info {
     display: flex;
@@ -932,35 +885,6 @@ $messageTypes: delete-all, delete-folder, delete-forever;
           font-size: 12px;
           line-height: 25px;
         }
-      }
-    }
-    &__cancel {
-      background-color: setColor(gray-4);
-      &:hover {
-        background-color: setColor(red-2);
-        > span {
-          color: white;
-        }
-        & ~ div {
-          background-color: setColor(gray-4);
-          > span {
-            color: white;
-          }
-        }
-      }
-      > span {
-        display: block;
-        color: black;
-      }
-    }
-    &__confirm {
-      background-color: setColor(red-1);
-      &:hover {
-        background-color: setColor(red-2);
-      }
-      > span {
-        display: block;
-        color: white;
       }
     }
   }

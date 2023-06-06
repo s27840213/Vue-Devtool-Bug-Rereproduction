@@ -18,8 +18,7 @@ div(class="popup-verify"
         class="invalid-message")
         span {{ vcodeErrorMessage }}
       div(class="my-10")
-        div(class="popup-verify__btn btn-blue full-width"
-          @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
+        nubtn(size="mid-full" @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
       div(v-if="resendAvailable"
         class="popup-verify__vcode-bottom")
         span {{$t('NN0288')}}
@@ -49,10 +48,8 @@ div(class="popup-verify"
           class="pt-5 body-2"
           @click="onForgotClicked()") {{$t('NN0181')}}
       div(class="popup-verify__btns my-15")
-        div(class="popup-verify__btn btn-gray"
-          @click="closePopup()") {{$t('NN0203')}}
-        div(class="popup-verify__btn btn-blue"
-          @click="onCheckPasswordClicked()") {{$t('NN0338')}}
+        nubtn(theme="secondary" size="mid-full" @click="closePopup()") {{$t('NN0203')}}
+        nubtn(size="mid-full" @click="onCheckPasswordClicked()") {{$t('NN0338')}}
   div(v-if="currentPage === 'newPass'")
     div(class="popup-verify__close")
       svg-icon(class="pointer" iconName="page-close"
@@ -94,17 +91,13 @@ div(class="popup-verify"
           span(class="ml-5 body-3"
             :class="{'text-green-1': passwordContainNum}") {{$t('NN0295')}}
       div(class="popup-verify__btns my-15")
-        div(class="popup-verify__btn btn-gray"
-          @click="closePopup()") {{$t('NN0203')}}
-        div(class="popup-verify__btn btn-blue"
-          @click="onConfirmPasswordClicked()") {{$tc('NN0164', 2)}}
+        nubtn(theme="secondary" size="mid-full" @click="closePopup()") {{$t('NN0203')}}
+        nubtn(size="mid-full" @click="onConfirmPasswordClicked()") {{$tc('NN0164', 2)}}
   div(v-if="currentPage === 'removeAvatar'")
     div(class="label-lg pb-20 text-center") {{$t('NN0339')}}
     div(class="popup-verify__btns my-15")
-      div(class="popup-verify__btn btn-gray"
-        @click="closePopup()") {{$t('NN0203')}}
-      div(class="popup-verify__btn btn-red"
-        @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
+      nubtn(theme="secondary" size="mid-full" @click="closePopup()") {{$t('NN0203')}}
+      nubtn(theme="danger" size="mid-full" @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
   spinner(v-if="isLoading")
 </template>
 
@@ -437,32 +430,7 @@ export default defineComponent({
   &__btns {
     display: flex;
     justify-content: space-between;
-    > div {
-      width: 45%;
-    }
-  }
-  &__btn {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 40px;
-    font-size: 16px;
-    font-weight: 700;
-    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    &.btn-blue {
-      color: setColor(white);
-      background-color: setColor(blue-1);
-    }
-    &.btn-gray {
-      color: black;
-      background-color: setColor(gray-4);
-    }
-    &.btn-red {
-      color: setColor(white);
-      background-color: setColor(red-1);
-    }
+    gap: 10%;
   }
 }
 
