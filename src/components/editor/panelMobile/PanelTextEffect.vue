@@ -221,7 +221,7 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     gap: 15px;
-    margin: 0 13px 13px 13px;
+    margin: 0 15px 15px 15px;
     overflow: auto;
     > div {
       display: flex;
