@@ -16,8 +16,12 @@ div(class="btnList" :style="BGstyle")
       span {{status}}
       nubtn(v-for="btn in btns"
         :key="btn.theme"
-        :theme="btn.theme" :size="`${btn.size}${full?'-full':''}`"
-        :status="status" :icon="btnIcon" :hint="btnText") {{btnText}}
+        :theme="btn.theme"
+        :size="`${full ? btn.size.replace('center', 'full') as INubtnSize : btn.size}`"
+        :active="status==='active'"
+        :disabled="status==='disabled'"
+        :icon="btnIcon"
+        :hint="btnText") {{btnText}}
   hr(style="width: 50%")
   div(class="btnList-options")
     div 邏輯測試區塊
@@ -28,9 +32,13 @@ div(class="btnList" :style="BGstyle")
     div(class="flex-center")
       span 邏輯測試按鈕的主題：
       options(:options="themes" v-model="testBtnTheme")
-    nubtn(:theme="testBtnTheme" size="sm-center" v-model="testBtnStatus"
+    nubtn(:theme="testBtnTheme" size="sm-center"
+          v-model:active="testBtnActive"
+          :disabled="testBtnDisabled"
           icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕會切換active)
-    nubtn(:theme="testBtnTheme" size="sm-center" :status="testBtnStatus"
+    nubtn(:theme="testBtnTheme" size="sm-center"
+          :active="testBtnActive"
+          :disabled="testBtnDisabled"
           icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕不會active)
     nubtn(:theme="testBtnTheme" size="sm-center"
           icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，此按鈕狀態沒有連動，僅hover
@@ -38,6 +46,7 @@ div(class="btnList" :style="BGstyle")
 
 <script lang="ts">
 import Checkbox from '@/components/global/Checkbox.vue'
+import { INubtnSize, INubtnThemes } from '@/components/global/Nubtn.vue'
 import Options from '@/components/global/Options.vue'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
@@ -89,16 +98,19 @@ export default defineComponent({
       }, {
         theme: 'secondary',
         size: 'sm-center'
-      }],
-      statuses: ['default', 'hover', 'disabled', 'active'],
+      }] as {
+        theme: INubtnThemes
+        size: INubtnSize
+      }[],
+      statuses: ['default', 'disabled', 'active'],
       themes: ['primary', 'outline', 'text', 'icon_text', 'icon', 'icon2',
         'ghost', 'ghost_outline', 'danger', 'secondary'],
       full: false,
       darkBG: true,
-      btnText: 'button',
+      btnText: 'Button',
       btnIcon: 'download',
       testBtnStatus: 'default',
-      testBtnTheme: 'primary'
+      testBtnTheme: 'primary' as INubtnThemes
     }
   },
   computed: {
@@ -113,7 +125,14 @@ export default defineComponent({
     },
     tableRowsAmount(): number {
       return this.btns.length + 1
-    }
+    },
+    testBtnDisabled(): boolean {
+      return this.testBtnStatus === 'disabled'
+    },
+    testBtnActive: {
+      get: function(): boolean { return this.testBtnStatus === 'active' },
+      set: function(newVal: boolean) { this.testBtnStatus = newVal ? 'active' : 'default' }
+    },
   },
   methods: {
     click() {

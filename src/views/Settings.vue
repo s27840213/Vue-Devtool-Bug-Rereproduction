@@ -54,12 +54,11 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
           template(v-else)
             hr
             div(class="body-MD my-5") {{ $t('NN0859') }}
-            nubtn(theme="primary" icon="trash" size="mid-full"
-                @click="buy") {{$t('NN0545')}}
+            nubtn(size="mid-full" @click="buy") {{$t('NN0545')}}
         div(v-else)
-          nubtn(v-if="!isLogin" theme="primary" icon="trash" size="mid-full"
+          nubtn(v-if="!isLogin" size="mid-full"
                 @click="goToPage('SignUp')") {{$tc('NN0169',2)}}
-          nubtn(v-if="!isLogin" theme="text" icon="trash" size="mid-full"
+          nubtn(v-if="!isLogin" theme="text" size="mid-full"
                 @click="goToPage('Login')") {{$tc('NN0168',2)}}
       div(class="settings-mobile__row my-10")
         div(class="text-H4")
@@ -111,9 +110,9 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
 
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
-import NuHeader from '@/components/NuHeader.vue'
 import MobileJumpBtn from '@/components/editor/mobile/MobileJumpBtn.vue'
 import Url from '@/components/global/Url.vue'
+import NuHeader from '@/components/NuHeader.vue'
 import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'

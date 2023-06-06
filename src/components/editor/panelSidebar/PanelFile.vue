@@ -6,7 +6,7 @@ div(class="panel-file"
   div(class="panel-file__topbtn")
     nubtn(size="mid-full" @click="uploadImage()") {{$t('NN0014')}}
     nubtn(v-if="$isTouchDevice()" theme="icon2" icon="trash" size="mid"
-          :status="inMultiSelectMode === 'on' ? 'active': 'default'"
+          :active="inMultiSelectMode === 'on'"
           @click="toggleMultiSelect()")
   image-gallery(
     ref="mainContent"

@@ -5,15 +5,12 @@ div(class="tour-guide")
     div(class="tour-guide__title") {{ stepInfo.title }}
     div {{ stepInfo.content }}
     div(class="tour-guide__actions mt-15")
-      btn(v-if="stepInfo.skip"
-        class="skip"
-        @click="handleSkip") {{ stepInfo.skip.text }}
-      btn(v-if="stepInfo.next"
-        class="next"
-        @click="handleNextStep") {{ stepInfo.next.text }}
-      btn(v-if="stepInfo.finish"
-        class="finish"
-        @click="handleFinish") {{ stepInfo.finish.text }}
+      nubtn(v-if="stepInfo.skip" theme="ghost_outline"
+          @click="handleSkip") {{ stepInfo.skip.text }}
+      nubtn(v-if="stepInfo.next" theme="ghost"
+          @click="handleNextStep") {{ stepInfo.next.text }}
+      nubtn(v-if="stepInfo.finish" theme="ghost"
+          @click="handleFinish") {{ stepInfo.finish.text }}
   div(class="tour-guide__arrow" ref="arrow")
 </template>
 
@@ -64,7 +61,7 @@ export default defineComponent({
           next: { text: this.$t('NN0272') }
         },
         {
-          target: '.btn-download',
+          target: '.download-btn',
           placement: 'bottom-end',
           title: this.$t('NN0269'),
           offset: { y: 15 },
@@ -183,6 +180,7 @@ export default defineComponent({
     &__actions {
       display: flex;
       justify-content: flex-end;
+      gap: 16px;
     }
     &__arrow {
       position: absolute;
@@ -197,31 +195,6 @@ export default defineComponent({
         position: absolute;
         transform: rotate(45deg);
       }
-    }
-  }
-  .btn.skip,
-  .btn.finish,
-  .btn.next {
-    border-radius: 16px;
-    padding: 5px 32px;
-    margin-left: 16px;
-  }
-  .btn.skip,
-  .btn.finish {
-    border: 1px solid setColor(blue-3);
-    background-color: transparent;
-    color: setColor(blue-3);
-    &:hover {
-      border-color: setColor(white);
-      color: setColor(white);
-    }
-  }
-  .btn.next {
-    border: 1px solid setColor(blue-4);
-    background-color: setColor(blue-4);
-    color: setColor(blue-1);
-    &:hover {
-      background-color: setColor(white);
     }
   }
 </style>

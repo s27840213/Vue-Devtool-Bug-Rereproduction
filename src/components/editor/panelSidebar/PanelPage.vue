@@ -1,11 +1,7 @@
 <template lang="pug">
 div(class="panel-page")
-  btn(:hasIcon="true"
-      :iconName="'new-page'"
-      :iconWidth="'15px'"
-      :type="'gray-sm'"
-      class="rounded my-20 mx-25"
-      style="padding: 5px 0;"
+  nubtn(class="mt-10" theme="icon_text"
+      size="sm-full" icon="new-page"
       @click="addPage(currFocusPageIndex+1)") {{$t('NN0139')}}
   div(class="panel-page-items")
     template(v-for="(page, idx) in getPages" :key="idx")
@@ -76,14 +72,10 @@ export default defineComponent({
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
 
-  > button:hover {
-    background: setColor(gray-4);
-  }
-
   &-items {
     @include hover-scrollbar(dark);
     @include push-scrollbar10;
-    padding: 0 10px 20px 20px; // padding-right: 20 - 10(scrollbar width)
+    padding: 0 15px 20px 15px;
   }
   &__plus {
     z-index: 2;

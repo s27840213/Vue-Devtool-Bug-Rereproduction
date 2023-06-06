@@ -12,8 +12,7 @@ div(class="download-page-selection")
             class="mb-10" v-model="preSelected[idx]")
           span {{ $t('NN0134', { num:`${idx + 1}` }) }}
         div
-          btn(class="full-width body-3 rounded"
-            @click="handleSubmit") {{$tc('NN0133', 2)}}
+          nubtn(size="sm-full" @click="handleSubmit") {{$tc('NN0133', 2)}}
 </template>
 
 <script lang="ts">
@@ -98,11 +97,5 @@ export default defineComponent({
     flex-direction: column;
     cursor: default;
   }
-}
-.btn {
-  padding: 3px 10px;
-  font-size: 12px;
-  line-height: 22px;
-  min-width: 100px;
 }
 </style>

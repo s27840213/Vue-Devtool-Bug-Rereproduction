@@ -2,25 +2,20 @@
 div(class="popup-theme text-left"
   v-click-outside="vcoConfig")
   div(class="popup-theme__recommend")
-    btn(class="full-width body-3 rounded mb-10"
-      @click="handleRecommend")
-      span(v-html="$t('NN0322')")
+    nubtn(size="mid-full"  @click="handleRecommend") {{$t('NN0322')}}
   div(class="popup-theme-items")
     div(class="caption-LG body-2 mb-5") {{ $t('NN0321') }}
     checkbox(v-model="all"
-            class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{$t('NN0324')}}
+            class="popup-theme-items__checkbox body-3 pl-5") {{$t('NN0324')}}
     checkbox(v-for="theme in themes"
       :key="theme.id"
       v-model="selected[theme.id]"
-      class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{theme.title}}
+      class="popup-theme-items__checkbox body-3 pl-5") {{theme.title}}
   div(class="popup-theme-buttons")
-    btn(class="popup-theme-buttons__btn popup-theme-buttons__btn--cancel rounded"
-      type="primary-sm"
-      @click="handleCancel") {{$t('NN0203')}}
-    btn(class="popup-theme-buttons__btn rounded"
-      type="primary-sm"
-      :disabled="isConfirmDisabled"
-      @click="handleSubmit") {{$tc('NN0164', 1)}}
+    nubtn(theme="secondary" size="sm-full" @click="handleCancel") {{$t('NN0203')}}
+    nubtn(size="sm-full"
+        :disabled="isConfirmDisabled"
+        @click="handleSubmit") {{$tc('NN0164', 1)}}
 </template>
 
 <script lang="ts">
@@ -106,12 +101,13 @@ export default defineComponent({
   padding: 16px 20px 20px;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 47px 1fr 24px;
+  grid-template-rows: 51px 1fr 24px;
   row-gap: 10px;
   box-sizing: border-box;
   border-radius: 5px;
   box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
   background-color: setColor(white);
+  color: setColor(gray-2);
   &__recommend {
     border-bottom: 1px solid #e0e0e0;
   }
@@ -129,17 +125,6 @@ export default defineComponent({
 .popup-theme-buttons {
   display: flex;
   justify-content: space-around;
-  &__btn.btn-inactive-sm,
-  &__btn.btn-primary-sm {
-    width: 80px;
-    padding: 4px 10px;
-    &:disabled {
-      background-color: setColor(gray-3);
-    }
-  }
-  &__btn--cancel.btn-primary-sm {
-    color: setColor(gray-2);
-    background-color: setColor(gray-5);
-  }
+  gap: 20px;
 }
 </style>
