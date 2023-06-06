@@ -1,11 +1,11 @@
+import authToken from '@/apis/auth-token'
 import user from '@/apis/user'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
-import { GetterTree, MutationTree, ActionTree } from 'vuex'
-import { IEditorState } from '../types'
-import authToken from '@/apis/auth-token'
 import apiUtils from '@/utils/apiUtils'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 import store from '..'
+import { IEditorState } from '../types'
 
 const SET_UPLOAD_ID = 'SET_UPLOAD_ID' as const
 const SET_PROCESS_ID = 'SET_PROCESS_ID' as const
@@ -99,7 +99,20 @@ const actions: ActionTree<IShadowState, unknown> = {
         asset_list: assetIndices.join(',')
       })
     }).then((data) => {
-      state.shadowImgs.set(assetIndices[0], { urls: data.data.url_map[assetIndices[0]] })
+      for (let i = 0; i < assetIndices.length; i++) {
+        const url_map = data.data.url_map[assetIndices[i]]
+        if (store.getters['user/getUserId'] === 'backendRendering') {
+          const token = store.getters['user/getToken']
+          console.log(url_map)
+          const full = url_map.full as string
+          const user = full.substring('https://asset.vivipic.com/'.length, full.indexOf('/asset/image/'))
+          const id = full.substring(full.indexOf('/asset/image/') + '/asset/image/'.length, full.indexOf('/full?'))
+          url_map.ext1 = `https://template.vivipic.com/pdf/${user}/asset/image/${id}/ext1?token=${token}`
+          url_map.ext2 = `https://template.vivipic.com/pdf/${user}/asset/image/${id}/ext2?token=${token}`
+          url_map.ext3 = `https://template.vivipic.com/pdf/${user}/asset/image/${id}/ext3?token=${token}`
+        }
+        state.shadowImgs.set(assetIndices[i], { urls: data.data.url_map[assetIndices[i]] })
+      }
     }).catch((e) => {
       console.error(e)
     })
