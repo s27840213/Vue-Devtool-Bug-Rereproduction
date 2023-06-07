@@ -352,14 +352,18 @@ export default defineComponent({
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
-      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f}px)`
+      const finalWidth = width * _f
+      const finalHeight = height * _f
+      const offsetX = (30 - Math.min(finalWidth, 30)) / 2
+      const offsetY = (30 - Math.min(finalHeight, 30)) / 2
+      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f - offsetX}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f - offsetY}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
       return {
         transform,
-        width: `${width * _f}px`,
-        height: `${height * _f}px`
+        width: `${Math.max(30, finalWidth)}px`,
+        height: `${Math.max(30, finalHeight)}px`
       }
     },
     subContentStyles(): any {
@@ -755,6 +759,7 @@ export default defineComponent({
         event.preventDefault()
       }
       const altPressed = generalUtils.exact([event.altKey])
+      const isCenterBased = altPressed || this.$isTouchDevice()
 
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
@@ -773,7 +778,7 @@ export default defineComponent({
       /**
        * @param {number} offsetMultiplier - if we press alt, we need to scale from center, and then make offsetWidth and offsetHeight become twice large
        */
-      const offsetMultiplier = altPressed ? 2 : 1
+      const offsetMultiplier = isCenterBased ? 2 : 1
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * offsetMultiplier
       if ((offsetWidth === 0 || offsetHeight === 0)) {
@@ -897,7 +902,7 @@ export default defineComponent({
       textPropUtils.updateTextPropState('fontSize', true)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // scale from center
-      if (altPressed) {
+      if (isCenterBased) {
         const currCenter = mathUtils.getCenter(this.config.styles)
         const initCenter = mathUtils.getCenter(Object.assign({}, this.initSize, this.initTranslate))
         const scaleOffset = {
@@ -1088,6 +1093,7 @@ export default defineComponent({
       }
       event.preventDefault()
       const altPressed = generalUtils.exact([event.altKey])
+      const isCenterBased = altPressed || this.$isTouchDevice()
 
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
@@ -1104,7 +1110,7 @@ export default defineComponent({
       const _f = (this.$isTouchDevice() ? 1 / this.contentScaleRatio : 1 / (this.scaleRatio * 0.01))
       const [dx, dy] = [diff.x * _f, diff.y * _f]
 
-      const offsetMultiplier = altPressed ? 2 : 1
+      const offsetMultiplier = isCenterBased ? 2 : 1
       let offsetWidth = this.control.isHorizon ? this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier : 0
       let offsetHeight = this.control.isHorizon ? 0 : this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * offsetMultiplier
       if (offsetWidth === 0 && offsetHeight === 0) return
@@ -1178,7 +1184,7 @@ export default defineComponent({
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
-      if (altPressed) {
+      if (isCenterBased) {
         const currCenter = mathUtils.getCenter(this.config.styles)
         const initCenter = mathUtils.getCenter(Object.assign({}, this.initSize, this.initTranslate))
         const scaleOffset = {
