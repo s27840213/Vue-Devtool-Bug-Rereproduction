@@ -4,7 +4,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
-import { IBleed, IPage, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
+import { IBleed, IPage, IPageSize, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import { LayerType } from '@/store/types'
 import { floor, round, throttle } from 'lodash'
@@ -296,7 +296,8 @@ class PageUtils {
 
   setPageSize(index: number, width: number, height: number, physicalWidth = width, physicalHeight = height, unit = 'px') {
     store.commit('SET_pageSize', { index, width, height, physicalWidth, physicalHeight, unit })
-    if (!this.getPage(index).isEnableBleed) this.resetBleeds(index)
+    const page = this.getPage(index)
+    if (!page.isEnableBleed) this.resetBleeds(page, index)
   }
 
   resizePage(format: { width: number, height: number }) {
@@ -747,19 +748,22 @@ class PageUtils {
     store.commit('SET_bleeds', { pageIndex, bleeds: newBleeds, physicalBleeds: newPhysicalBleeds })
   }
 
-  resetBleeds(pageIndex: number) {
-    const page = this.getPage(pageIndex)
+  resetBleeds(page: IPage, pageIndex = -1) {
+    const isDetailPage = pageIndex !== -1 && this.isDetailPage
     const defaultBleeds = this.getPageDefaultBleeds(page, 'px')
     const unit = page.unit ?? 'px'
     const pagesLength = store.getters.getPagesLength
-    defaultBleeds.top = this.isDetailPage && pageIndex !== 0 ? 0 : defaultBleeds.top
-    defaultBleeds.bottom = this.isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultBleeds.bottom
+    defaultBleeds.top = isDetailPage && pageIndex !== 0 ? 0 : defaultBleeds.top
+    defaultBleeds.bottom = isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultBleeds.bottom
     const defaultPhysicalBleeds = unit === 'px' ? defaultBleeds : this.getPageDefaultBleeds(page)
     if (unit !== 'px') {
-      defaultPhysicalBleeds.top = this.isDetailPage && pageIndex !== 0 ? 0 : defaultPhysicalBleeds.top
-      defaultPhysicalBleeds.bottom = this.isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultPhysicalBleeds.bottom
+      defaultPhysicalBleeds.top = isDetailPage && pageIndex !== 0 ? 0 : defaultPhysicalBleeds.top
+      defaultPhysicalBleeds.bottom = isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultPhysicalBleeds.bottom
     }
-    store.commit('SET_bleeds', { pageIndex, bleeds: defaultBleeds, physicalBleeds: defaultPhysicalBleeds })
+    if (pageIndex === -1) {
+      page.bleeds = defaultBleeds
+      page.physicalBleeds = defaultPhysicalBleeds
+    } else store.commit('SET_bleeds', { pageIndex, bleeds: defaultBleeds, physicalBleeds: defaultPhysicalBleeds })
   }
 
   /**
@@ -885,16 +889,17 @@ class PageUtils {
     } as IBleed
   }
 
-  getDefaultBleedMap(pageIndex: number) {
+  getDefaultBleedMap(pageSize: IPageSize, pageIndex = -1) {
+    const isDetailPage = pageIndex !== -1 && this.isDetailPage
     const defaultBleed = this.defaultBleed
     const toBleed = (val: number) => ({
-      top: this.isDetailPage && pageIndex !== 0 ? 0 : val,
-      bottom: this.isDetailPage && pageIndex !== store.getters.getPagesLength - 1 ? 0 : val,
+      top: isDetailPage && pageIndex !== 0 ? 0 : val,
+      bottom: isDetailPage && pageIndex !== store.getters.getPagesLength - 1 ? 0 : val,
       left: val,
       right: val
     } as IBleed)
-    const defaultPxBleed = this.getPageDefaultBleeds(this.getPageSize(pageIndex), 'px')
-    if (this.isDetailPage) {
+    const defaultPxBleed = this.getPageDefaultBleeds(pageSize, 'px')
+    if (isDetailPage) {
       if (pageIndex !== 0) defaultPxBleed.top = 0
       if (pageIndex !== store.getters.getPagesLength - 1) defaultPxBleed.bottom = 0
     }

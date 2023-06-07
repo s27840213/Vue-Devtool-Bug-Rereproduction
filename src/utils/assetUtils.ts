@@ -732,18 +732,11 @@ class AssetUtils {
         }
 
         // pageUtils.setAutoResizeNeededForPages(jsonDataList, true)
+        if (resize) jsonDataList.forEach((page: IPage) => { resizeUtils.resizePage(-1, page, resize) }) // resize template json data before adding to the store
         layerUtils.setAutoResizeNeededForLayersInPages(jsonDataList, true)
         pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         nextTick(() => {
           pageUtils.scrollIntoPage(targetIndex)
-          // @TODO: resize page/layer before adding to the store.
-          // if (resize) resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
-          if (resize) {
-            for (let pageOffset = 0; pageOffset < jsonDataList.length; pageOffset++) {
-              const pageIndex = targetIndex + pageOffset
-              resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), resize)
-            }
-          }
           if (isDetailPage && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
             const { width: pageWidth = 1000, physicalWidth: pagePhysicalWidth = pageWidth, unit: pageUnit = 'px' } = this.getPage(pageUtils.currFocusPageIndex)
