@@ -653,7 +653,7 @@ export default defineComponent({
         width: `${this.getLayerWidth() / this.getLayerScale()}px`,
         height: `${this.getLayerHeight() / this.getLayerScale()}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01})`,
+        transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) translate(-50%, -50%)`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
         ...(this.isDraggingCursor ? { zIndex: 100 } : {})
@@ -1727,8 +1727,8 @@ export default defineComponent({
   }
   &__wrapper {
     position: absolute;
-    left: 0;
-    top: 0;
+    left: 50%;
+    top: 50%;
     transform-origin: 0 0;
   }
   &__body {
