@@ -222,6 +222,7 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
+const CONTROLLER_SIZE_MIN = 30
 const RESIZER_SHOWN_MIN = 4000
 
 type ICP = ReturnType<typeof ControlUtils.getControlPoints>
@@ -354,16 +355,16 @@ export default defineComponent({
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       const finalWidth = width * _f
       const finalHeight = height * _f
-      const offsetX = (30 - Math.min(finalWidth, 30)) / 2
-      const offsetY = (30 - Math.min(finalHeight, 30)) / 2
+      const offsetX = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalWidth, CONTROLLER_SIZE_MIN)) / 2 : 0
+      const offsetY = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalHeight, CONTROLLER_SIZE_MIN)) / 2 : 0
       let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f - offsetX}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f - offsetY}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
       return {
         transform,
-        width: `${Math.max(30, finalWidth)}px`,
-        height: `${Math.max(30, finalHeight)}px`
+        width: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalWidth) : finalWidth}px`,
+        height: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalHeight) : finalHeight}px`
       }
     },
     subContentStyles(): any {
