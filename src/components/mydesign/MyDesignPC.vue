@@ -131,7 +131,7 @@ div(class="my-design-pc")
           span {{$t('NN0244')}}
         div(class="delete-all-message__buttons")
           nubtn(theme="secondary" @click.stop="closeConfirmMessage") {{$t('NN0203')}}
-          nubtn(theme="danger" click.stop="confirmAction(deleteAllConfirmed)")  {{$t('NN0034')}}
+          nubtn(theme="danger" @click.stop="confirmAction(deleteAllConfirmed)")  {{$t('NN0034')}}
     div(v-else-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
       div(class="delete-folder-message" @click.stop)
         div(class="delete-folder-message__img")
