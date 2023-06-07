@@ -8,7 +8,7 @@ div(class="popup-window")
     div(class="panel-replace__top")
       tabs(:tabs="[$t('NN0006'), $tc('NN0002', 2)]"
           v-model="tableIndex" theme="light")
-      nubtn(v-if="inMyfile" theme="primary" @click="handleUploadLogo") {{$t('NN0014')}}
+      nubtn(v-if="inMyfile" @click="handleUploadLogo") {{$t('NN0014')}}
       search-bar(v-else
           :clear="true"
           :defaultKeyword="keyword"

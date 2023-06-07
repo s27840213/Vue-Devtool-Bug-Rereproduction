@@ -36,6 +36,9 @@ div(class="panel-more")
     div(v-if="isAdmin" class="panel-more__item"
         @click="toggleDebugTool")
       span Toggle admin tool
+    div(v-if="isAdmin" class="panel-more__item"
+        @click="toggleShowTouchPoint")
+      span Toggle show touch point
     div(class="body-2 panel-more__item" @pointerdown.prevent="handleDebugMode")
       span(class="text-gray-3") Version: {{buildNumber}}{{appVersion}}{{domain}}
   template(v-if="lastHistory === 'domain-list'")
@@ -53,6 +56,7 @@ import pageUtils from '@/utils/pageUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import testUtils from '@/utils/testUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -169,6 +173,9 @@ export default defineComponent({
     },
     toggleDebugTool() {
       this.setUserState({ enableAdminView: !this.enableAdminView })
+    },
+    toggleShowTouchPoint() {
+      testUtils.toggleShowingTouchPoint()
     },
     toggleBleed() {
       const isEnableBleed = !this.hasBleed

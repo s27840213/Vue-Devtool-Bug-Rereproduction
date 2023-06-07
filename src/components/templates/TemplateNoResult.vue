@@ -4,7 +4,7 @@ div(class="template-no-result")
     :src="require('@/assets/img/svg/templates/templates-not-found.svg')")
   div(class="template-no-result__title") {{ $t('NN0810') }}
   div(class="template-no-result__description") {{ $t('NN0811', { keyword }) }}
-  nubtn(theme="primary" size="mid-center" @click="handlePrimaryBtn") {{ allHashTagAll ? templateRequestText : $t('NN0812') }}
+  nubtn(size="mid-center" @click="handlePrimaryBtn") {{ allHashTagAll ? templateRequestText : $t('NN0812') }}
   nubtn(v-if="!allHashTagAll" theme="text" size="mid-center" @click="handleTextBtn") {{ templateRequestText }}
 </template>
 

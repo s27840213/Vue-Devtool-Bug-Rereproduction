@@ -3,6 +3,7 @@ import generalUtils from '@/utils/generalUtils'
 import { notify } from '@kyvg/vue3-notification'
 
 class TestUtils {
+  toShowTouchPoint: boolean
   timer: Record<string, {
     start: number
     notify: boolean
@@ -10,6 +11,7 @@ class TestUtils {
 
   constructor() {
     this.timer = {}
+    this.toShowTouchPoint = false
   }
 
   start(key: string, notify = true) {
@@ -65,6 +67,42 @@ class TestUtils {
 
   setDoneFlag(pageIndex: number, layerIndex: number, subLayerIndex?: number) {
     generalUtils.setDoneFlag(pageIndex, layerIndex, subLayerIndex)
+  }
+
+  showTouchPoint(e: TouchEvent) {
+    const pointSize = 20
+    const pointColor = 'rgba(255, 0, 0, 0.5)'
+    document.querySelectorAll('.touch-point').forEach((e) => { e.remove() })
+    const touchPoint = document.createElement('div')
+    touchPoint.classList.add('touch-point')
+    touchPoint.style.position = 'fixed'
+    touchPoint.style.left = `${e.touches[0].clientX - pointSize / 2}px`
+    touchPoint.style.top = `${e.touches[0].clientY - pointSize / 2}px`
+    touchPoint.style.width = `${pointSize}px`
+    touchPoint.style.height = `${pointSize}px`
+    touchPoint.style.background = pointColor
+    touchPoint.style.borderRadius = '50%'
+    touchPoint.style.zIndex = '1000'
+    touchPoint.style.pointerEvents = 'none'
+    document.body.appendChild(touchPoint)
+  }
+
+  startShowingTouchPoint() {
+    window.addEventListener('touchstart', this.showTouchPoint, { capture: true })
+    this.toShowTouchPoint = true
+  }
+
+  stopShowingTouchPoint() {
+    window.removeEventListener('touchstart', this.showTouchPoint, { capture: true })
+    this.toShowTouchPoint = false
+  }
+
+  toggleShowingTouchPoint() {
+    if (this.toShowTouchPoint) {
+      this.stopShowingTouchPoint()
+    } else {
+      this.startShowingTouchPoint()
+    }
   }
 }
 
