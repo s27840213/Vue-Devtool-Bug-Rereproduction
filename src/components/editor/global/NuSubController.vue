@@ -47,7 +47,6 @@ import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/inter
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -112,7 +111,6 @@ export default defineComponent({
   data() {
     return {
       subLayerCtrlUtils: null as unknown as SubCtrlUtils,
-      controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isComposing: false,
       layerSizeBuff: -1,
@@ -257,9 +255,6 @@ export default defineComponent({
     }
   },
   watch: {
-    scaleRatio() {
-      this.controlPoints = ControlUtils.getControlPoints(4, 25)
-    },
     isTextEditing(editing) {
       if (this.config.type === 'text') {
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })

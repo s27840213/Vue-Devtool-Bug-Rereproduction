@@ -253,15 +253,17 @@ class Controller {
     }[]
   }
 
-  getControlPoints(resizerShort: number, resizerLong: number, scaleRatio = 1) {
+  getControlPoints() {
+    const resizerShort = 8
+    const resizerLong = 20
     const scalerSize = 12
 
     return {
-      scalers: this.getScalers(scalerSize * scaleRatio),
-      scalerTouchAreas: this.getScalers(scalerSize * 3 * scaleRatio, true),
-      cornerRotaters: this.getCornerRatater(scalerSize * 4 * scaleRatio),
-      lineEnds: this.getLineEnds(scalerSize * scaleRatio),
-      lineEndTouchAreas: this.getLineEnds(scalerSize * 3 * scaleRatio, true),
+      scalers: this.getScalers(scalerSize),
+      scalerTouchAreas: this.getScalers(scalerSize * 3, true),
+      cornerRotaters: this.getCornerRatater(scalerSize * 4),
+      lineEnds: this.getLineEnds(scalerSize),
+      lineEndTouchAreas: this.getLineEnds(scalerSize * 3, true),
       resizers: this.getResizers(resizerShort, resizerLong),
       resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, true),
       cursors: [
