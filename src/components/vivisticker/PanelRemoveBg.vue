@@ -46,7 +46,7 @@ export default defineComponent({
       panelRemoveBgAt: null as unknown as AnyTouch,
       tmpScaleRatio: 1,
       minRatio: 0.1,
-      maxRatio: 5,
+      maxRatio: 2,
       isPanning: false,
       startScrollTop: 0,
       startScrollLeft: 0,
