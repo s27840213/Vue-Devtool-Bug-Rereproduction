@@ -340,38 +340,55 @@ class LetterBGData {
       },
       bear: {
         ...letterBgDefault,
+        yOffset200: -4,
+        size: 150,
       },
       'bear-custom': {
         ...letterBgDefault,
+        yOffset200: -4,
+        size: 150,
         color: '#D2B29A',
       },
       cat: {
         ...letterBgDefault,
+        yOffset200: -8,
+        size: 155,
       },
       'cat-custom': {
         ...letterBgDefault,
+        yOffset200: -8,
+        size: 155,
         color: '#EADAD0',
       },
       rabbit: {
         ...letterBgDefault,
+        yOffset200: -15,
+        size: 150,
       },
       'rabbit-custom': {
         ...letterBgDefault,
+        yOffset200: -15,
+        size: 150,
         color: '#F2D7D1',
       },
       dog: {
         ...letterBgDefault,
+        size: 160,
       },
       'dog-custom': {
         ...letterBgDefault,
+        size: 160,
         color: '#CCA08F',
       },
       star: {
         ...letterBgDefault,
+        size: 170,
         color: '#FFD95F',
       },
       baby: {
         ...letterBgDefault,
+        yOffset200: -3,
+        size: 160,
       }
     }
   }
@@ -436,34 +453,34 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 1200
       },
       bear: {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1300
       },
       'bear-custom': {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1300
       },
       cat: {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1300
       },
       'cat-custom': {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1300
       },
       rabbit: {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1200
       },
       'rabbit-custom': {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1200
       },
       dog: {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1350
       },
       'dog-custom': {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1350
       },
       star: {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1350
       },
       baby: {
-        lineHeight: 1.96, fontSpacing: 950
+        lineHeight: 1.96, fontSpacing: 1300
       },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
