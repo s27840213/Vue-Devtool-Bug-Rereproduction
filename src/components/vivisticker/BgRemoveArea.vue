@@ -104,7 +104,6 @@ export default defineComponent({
     //   this.canvasHeight = 1600 / aspectRatio
     // }
     this.canvasHeight = 1600 / aspectRatio
-    console.log(this.canvasWidth, this.canvasHeight)
 
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg

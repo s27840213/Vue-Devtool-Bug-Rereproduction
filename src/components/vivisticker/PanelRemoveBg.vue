@@ -10,22 +10,23 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
       :inVivisticker="true"
       :fitScaleRatio="bgRemoveScaleRatio")
   nubtn(v-else theme="primary" size="mid-center" @click="removeBg") {{ $t('NN0043') }}
-  teleport(to="body")
-    div(class="panel-remove-bg__test-input")
-      mobile-slider(
-        :title="'scale'"
-        :borderTouchArea="true"
-        :name="'scale'"
-        :value="bgRemoveScaleRatio"
-        :min="minRatio"
-        :max="maxRatio"
-        :step="0.01"
-        @update="setScaleRatio")
+  //- teleport(to="body")
+  //-   div(class="panel-remove-bg__test-input")
+  //-     mobile-slider(
+  //-       :title="'scale'"
+  //-       :borderTouchArea="true"
+  //-       :name="'scale'"
+  //-       :value="bgRemoveScaleRatio"
+  //-       :min="minRatio"
+  //-       :max="maxRatio"
+  //-       :step="0.01"
+  //-       @update="setScaleRatio")
 </template>
 
 <script lang="ts">
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+// import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
+import { IBgRemoveInfo } from '@/interfaces/image'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
@@ -34,7 +35,7 @@ import { mapGetters, mapMutations } from 'vuex'
 export default defineComponent({
   components: {
     BgRemoveArea,
-    MobileSlider
+    // MobileSlider
   },
   data() {
     return {
@@ -52,6 +53,8 @@ export default defineComponent({
       initPinchPos: null as null | { x: number, y: number },
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
+      imgAspectRatio: 1,
+      distanceBetweenFingers: -1
       // p1StartClientY: 0,
       // p1StartClientX: 0,
       // p2StartClientY: 0,
@@ -86,8 +89,9 @@ export default defineComponent({
     fitScaleRatio(): number {
       const { width, height } = this.containerWH
       const { width: imgWidth, height: imgHeight } = this.previewImage
+      const aspectRatio = imgWidth / imgHeight
       if (width === 0 || height === 0 || imgWidth === 0 || imgHeight === 0) return 1
-      const ratio = Math.min(width / imgWidth, height / imgHeight) * 0.9
+      const ratio = Math.min(width / 1600, height / 1600 * aspectRatio) * 0.9
 
       return ratio
     },
@@ -103,10 +107,22 @@ export default defineComponent({
     removeBg() {
       uploadUtils.chooseAssets('stk-bg-remove')
     },
-    setScaleRatio(val: number) {
-      this.bgRemoveScaleRatio = val
-    },
+    // setScaleRatio(val: number) {
+    //   this.bgRemoveScaleRatio = val
+    // },
     pinchHandler(event: AnyTouchEvent) {
+      let deltaDistance = 0
+      if (event.pointLength === 2) {
+        // calculate the distance between two fingers
+        const tmpDistance = this.distanceBetweenFingers
+        this.distanceBetweenFingers = Math.sqrt(
+          Math.pow(event.points[0].clientX - event.points[1].clientX, 2) +
+          Math.pow(event.points[0].clientY - event.points[1].clientY, 2)
+        )
+
+        deltaDistance = Math.abs(this.distanceBetweenFingers - tmpDistance)
+      }
+
       switch (event.phase) {
         /**
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
@@ -119,51 +135,90 @@ export default defineComponent({
           this.startScrollTop = this.rmSection.scrollTop
           this.startScrollLeft = this.rmSection.scrollLeft
 
+          const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
+          this.imgAspectRatio = width / height
+
+          const imgHeight = 1600 / this.imgAspectRatio
+
           this.initImgSize = {
-            width: this.autoRemoveResult.width * this.bgRemoveScaleRatio,
-            height: this.autoRemoveResult.height * this.bgRemoveScaleRatio
+            width: 1600 * this.bgRemoveScaleRatio,
+            height: imgHeight * this.bgRemoveScaleRatio
           }
           break
         }
         case 'move': {
+          console.log(this.distanceBetweenFingers)
           this.isPanning = true
 
           if (!this.initPinchPos) {
             this.initPinchPos = { x: event.x, y: event.y }
           }
 
-          const movingTraslate = {
-            x: (event.x - this.initPinchPos.x),
-            y: (event.y - this.initPinchPos.y)
+          // const sizeDiff = {
+          //   width: this.bgRemoveScaleRatio * (this.initImgSize.width) * (event.scale - 1) * 0.5,
+          //   height: this.bgRemoveScaleRatio * (this.initImgSize.height) * (event.scale - 1) * 0.5
+          // }
+          if (event.pointLength === 2) {
+            if (deltaDistance > 1) {
+              const ratio = this.tmpScaleRatio * event.scale
+
+              if (ratio <= this.minRatio) {
+                this.bgRemoveScaleRatio = this.minRatio
+              } else if (ratio >= this.maxRatio) {
+                this.bgRemoveScaleRatio = this.maxRatio
+              } else {
+                this.bgRemoveScaleRatio = ratio
+              }
+
+              /**
+           * for center scroll caculation
+           */
+              const scrollCenterX = (2 * this.rmSection.scrollLeft + this.rmSection.clientWidth)
+              const scrollCenterY = (2 * this.rmSection.scrollTop + this.rmSection.clientHeight)
+              const oldScrollWidth = this.rmSection.scrollWidth
+              const oldScrollHeight = this.rmSection.scrollHeight
+
+              this.$nextTick(() => {
+                this.rmSection.scrollLeft = (scrollCenterX * this.rmSection.scrollWidth / oldScrollWidth - this.rmSection.clientWidth) / 2
+                this.rmSection.scrollTop = (scrollCenterY * this.rmSection.scrollHeight / oldScrollHeight - this.rmSection.clientHeight) / 2
+              })
+            } else {
+              console.log(`moving translate: ${event.deltaX}, ${event.deltaY}`)
+              const sizeDiff = {
+                width: (this.initImgSize.width - 1600 * this.bgRemoveScaleRatio) * 0.5,
+                height: (this.initImgSize.height - (1600 * this.imgAspectRatio) * this.bgRemoveScaleRatio) * 0.5
+              }
+
+              this.$nextTick(() => {
+                this.rmSection.scrollLeft = this.rmSection.scrollLeft - event.deltaX * 2
+                this.rmSection.scrollTop = this.rmSection.scrollTop - event.deltaY * 2
+              })
+            }
           }
 
-          const sizeDiff = {
-            width: this.initImgSize.width * (event.scale - 1) * 0.5,
-            height: this.initImgSize.height * (event.scale - 1) * 0.5
-          }
+          // console.log(`size diff: ${sizeDiff.width}, ${sizeDiff.height}`)
 
-          // Set the new scrollTop position based on the initial position and the finger movement
+          // // Set the new scrollTop position based on the initial position and the finger movement
           // this.rmSection.scrollLeft = this.startScrollLeft - movingTraslate.x
           // this.rmSection.scrollTop = this.startScrollTop - movingTraslate.y
-          this.rmSection.scrollLeft = this.startScrollLeft + sizeDiff.width - movingTraslate.x
-          this.rmSection.scrollTop = this.startScrollTop + sizeDiff.height - movingTraslate.y
+          // console.log(`init scroll left: ${this.rmSection.scrollLeft}, init scroll top: ${this.rmSection.scrollTop}`)
+          // this.rmSection.scrollLeft = this.startScrollLeft - sizeDiff.width - movingTraslate.x
+          // this.rmSection.scrollTop = this.startScrollTop - sizeDiff.height - movingTraslate.y
 
-          // const scrollCenterX = (2 * this.rmSection.scrollLeft + this.rmSection.clientWidth)
-          // const scrollCenterY = (2 * this.rmSection.scrollTop + this.rmSection.clientHeight)
-          // const oldScrollWidth = this.rmSection.scrollWidth
-          // const oldScrollHeight = this.rmSection.scrollHeight
+          // console.log(`scroll left: ${this.rmSection.scrollLeft}, scroll top: ${this.rmSection.scrollTop}`)
 
-          // this.rmSection.scrollLeft = (scrollCenterX * this.rmSection.scrollWidth / oldScrollWidth - this.rmSection.clientWidth) / 2
-          // this.rmSection.scrollTop = (scrollCenterY * this.rmSection.scrollHeight / oldScrollHeight - this.rmSection.clientHeight) / 2
+          // console.log(`scrollWidth: ${this.rmSection.scrollWidth}, scrollHeight: ${this.rmSection.scrollHeight}`)
 
-          const ratio = this.tmpScaleRatio * event.scale
-          if (ratio <= this.minRatio) {
-            this.bgRemoveScaleRatio = this.minRatio
-          } else if (ratio >= this.maxRatio) {
-            this.bgRemoveScaleRatio = this.maxRatio
-          } else {
-            this.bgRemoveScaleRatio = ratio
-          }
+          // this.initImgSize = {
+          //   width: 1600 * this.bgRemoveScaleRatio,
+          //   height: 1600 * this.imgAspectRatio * this.bgRemoveScaleRatio
+          // }
+
+          // this.startScrollLeft = this.rmSection.scrollLeft
+          // this.startScrollTop = this.rmSection.scrollTop
+          // console.log(this.bgRemoveScaleRatio)
+
+          // console.log('------------------')
 
           break
         }
