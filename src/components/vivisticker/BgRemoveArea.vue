@@ -123,6 +123,8 @@ export default defineComponent({
       this.initClearModeCanvas()
       this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
+
+      console.log('on load trigger')
     }
     this.imageElement.onerror = (ev) => {
       logUtils.setLog('imageElement onerror triggered')
