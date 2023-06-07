@@ -12,9 +12,7 @@ div(class="brand-kit-color-palette")
         :title="paletteName"
         @click="handleNameClick") {{ paletteName }}
     div(class="brand-kit-color-palette__right")
-      div(class="brand-kit-color-palette__trash pointer"
-          @click="handleDeletePalette(colorPalette)")
-        svg-icon(iconName="trash" iconWidth="16px" iconColor="gray-2")
+      nubtn(theme="icon" icon="trash" @click="handleDeletePalette(colorPalette)")
   transition-group(class="brand-kit-color-palette__colors" name="color-list" tag="div")
     template(v-for="(color) in colors" :key="color")
       div(v-if="color === 'add'"
@@ -48,7 +46,7 @@ import { IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   data() {

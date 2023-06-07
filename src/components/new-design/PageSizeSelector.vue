@@ -96,13 +96,10 @@ div(class="page-size-selector")
     div(class="page-size-selector__submit")
       div(class="page-size-selector__submit__option body-SM mb-10")
         checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
-      nubtn(class="page-size-selector__button"
-          size="mid-full"
-          :theme="'icon_text'"
-          :icon="'pro'"
-          :iconColor="'alarm'"
-          :showIcon="!inReviewMode"
-          :status="isFormatApplicable ? 'default' : 'disabled'"
+      nubtn(size="mid-full"
+          :theme="inReviewMode ? 'primary' : 'icon_text'"
+          :icon="['pro', 'alarm']"
+          :disabled="!isFormatApplicable"
           @click="submit") {{$t('NN0022')}}
 </template>
 
@@ -826,19 +823,6 @@ export type CPageSizeSelector = InstanceType<typeof component>
       margin-top: 29px;
       margin-bottom: 17.43px;
       gap: 11px;
-    }
-    &__button {
-      flex-grow: 1;
-      border-radius: 3px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 4px;
-      text-align: center;
-      &__text {
-        font-weight: 700;
-        font-size: 12px;
-      }
     }
 }
 .horizontal-rule {

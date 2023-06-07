@@ -54,10 +54,8 @@ div(class="my-design-mobile")
       div(class="message__description")
         span(v-html="getMessageDescription()")
       div(class="message__buttons")
-        div(class="message__cancel" @click.stop="closeConfirmMessage")
-          span {{$t('NN0203')}}
-        div(class="message__confirm" @click.stop="confirmAction")
-          span {{$t('NN0034')}}
+        nubtn(theme="secondary" size="sm-full" @click.stop="closeConfirmMessage") {{$t('NN0203')}}
+        nubtn(theme="danger" size="sm-full" @click.stop="confirmAction") {{$t('NN0034')}}
   div(v-if="isErrorShowing" class="dim-background" @click.stop="closeErrorMessage")
     div(class="message" @click.stop)
       div(class="message__close-minimal pointer"
@@ -779,20 +777,6 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
       > span {
         @include btn-SM;
       }
-    }
-  }
-  &__cancel {
-    background-color: setColor(gray-4);
-    > span {
-      display: block;
-      color: black;
-    }
-  }
-  &__confirm {
-    background-color: setColor(red-1);
-    > span {
-      display: block;
-      color: white;
     }
   }
   &__ok {
