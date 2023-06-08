@@ -164,7 +164,9 @@ class UploadUtils {
     inputNode.setAttribute('class', 'inputNode')
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptHash[type])
-    inputNode.setAttribute('multiple', `${type === 'image'}`)
+    if (type === 'image') {
+      inputNode.setAttribute('multiple', `${type === 'image'}`)
+    }
     inputNode.id = 'upload'
     inputNode.click()
 
@@ -327,7 +329,7 @@ class UploadUtils {
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
       const assetId = id ?? generalUtils.generateAssetId()
-      const uuid = store.getters['vivisticker/getUuid']
+      const uuid = store.getters['vivisticker/getUuid'] ? store.getters['vivisticker/getUuid'] : generalUtils.generateAssetId()
 
       // for horizontal image test
       // const assetId = '230511154035471yNJGiW58'

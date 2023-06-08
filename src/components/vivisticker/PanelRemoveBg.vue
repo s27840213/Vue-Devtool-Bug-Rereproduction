@@ -55,7 +55,7 @@ export default defineComponent({
   data() {
     return {
       panelRemoveBg: null as unknown as HTMLElement,
-      rmSection: null as unknown as HTMLElement,
+      rmSection: null as unknown as HTMLElement | null,
       mobilePanelHeight: 0,
       bgRemoveScaleRatio: 1,
       panelRemoveBgAt: null as unknown as AnyTouch,
@@ -63,8 +63,6 @@ export default defineComponent({
       minRatio: 0.1,
       maxRatio: 2,
       isPanning: false,
-      startScrollTop: 0,
-      startScrollLeft: 0,
       initPinchPos: null as null | { x: number, y: number },
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
@@ -129,6 +127,7 @@ export default defineComponent({
     //   this.bgRemoveScaleRatio = val
     // },
     pinchHandler(event: AnyTouchEvent) {
+      if (!this.inBgRemoveMode) return
       let deltaDistance = 0
       if (event.pointLength === 2) {
         // calculate the distance between two fingers
@@ -150,8 +149,6 @@ export default defineComponent({
           this.setInGestureMode(true)
 
           this.isPanning = true
-          this.startScrollTop = this.rmSection.scrollTop
-          this.startScrollLeft = this.rmSection.scrollLeft
 
           const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
           this.imgAspectRatio = width / height
@@ -165,7 +162,6 @@ export default defineComponent({
           break
         }
         case 'move': {
-          console.log(this.distanceBetweenFingers)
           this.isPanning = true
 
           if (!this.initPinchPos) {
@@ -189,61 +185,43 @@ export default defineComponent({
               }
 
               /**
-           * for center scroll caculation
-           */
-              const scrollCenterX = (2 * this.rmSection.scrollLeft + this.rmSection.clientWidth)
-              const scrollCenterY = (2 * this.rmSection.scrollTop + this.rmSection.clientHeight)
-              const oldScrollWidth = this.rmSection.scrollWidth
-              const oldScrollHeight = this.rmSection.scrollHeight
+               * for center scroll caculation
+               */
 
-              this.$nextTick(() => {
-                this.rmSection.scrollLeft = (scrollCenterX * this.rmSection.scrollWidth / oldScrollWidth - this.rmSection.clientWidth) / 2
-                this.rmSection.scrollTop = (scrollCenterY * this.rmSection.scrollHeight / oldScrollHeight - this.rmSection.clientHeight) / 2
-              })
+              if (this.rmSection) {
+                const scrollCenterX = (2 * this.rmSection.scrollLeft + this.rmSection.clientWidth)
+                const scrollCenterY = (2 * this.rmSection.scrollTop + this.rmSection.clientHeight)
+                const oldScrollWidth = this.rmSection.scrollWidth
+                const oldScrollHeight = this.rmSection.scrollHeight
+                this.$nextTick(() => {
+                  if (this.rmSection) {
+                    const rmSecton = this.$refs.rmSection as HTMLElement
+                    rmSecton.scrollLeft = (scrollCenterX * rmSecton.scrollWidth / oldScrollWidth - rmSecton.clientWidth) / 2
+                    rmSecton.scrollTop = (scrollCenterY * rmSecton.scrollHeight / oldScrollHeight - rmSecton.clientHeight) / 2
+                  }
+                })
+              }
             } else {
-              console.log(`moving translate: ${event.deltaX}, ${event.deltaY}`)
               const sizeDiff = {
                 width: (this.initImgSize.width - 1600 * this.bgRemoveScaleRatio) * 0.5,
                 height: (this.initImgSize.height - (1600 * this.imgAspectRatio) * this.bgRemoveScaleRatio) * 0.5
               }
 
               this.$nextTick(() => {
-                this.rmSection.scrollLeft = this.rmSection.scrollLeft - event.deltaX * 2
-                this.rmSection.scrollTop = this.rmSection.scrollTop - event.deltaY * 2
+                if (this.rmSection) {
+                  this.rmSection.scrollLeft = this.rmSection.scrollLeft - event.deltaX * 2
+                  this.rmSection.scrollTop = this.rmSection.scrollTop - event.deltaY * 2
+                }
               })
             }
           }
-
-          // console.log(`size diff: ${sizeDiff.width}, ${sizeDiff.height}`)
-
-          // // Set the new scrollTop position based on the initial position and the finger movement
-          // this.rmSection.scrollLeft = this.startScrollLeft - movingTraslate.x
-          // this.rmSection.scrollTop = this.startScrollTop - movingTraslate.y
-          // console.log(`init scroll left: ${this.rmSection.scrollLeft}, init scroll top: ${this.rmSection.scrollTop}`)
-          // this.rmSection.scrollLeft = this.startScrollLeft - sizeDiff.width - movingTraslate.x
-          // this.rmSection.scrollTop = this.startScrollTop - sizeDiff.height - movingTraslate.y
-
-          // console.log(`scroll left: ${this.rmSection.scrollLeft}, scroll top: ${this.rmSection.scrollTop}`)
-
-          // console.log(`scrollWidth: ${this.rmSection.scrollWidth}, scrollHeight: ${this.rmSection.scrollHeight}`)
-
-          // this.initImgSize = {
-          //   width: 1600 * this.bgRemoveScaleRatio,
-          //   height: 1600 * this.imgAspectRatio * this.bgRemoveScaleRatio
-          // }
-
-          // this.startScrollLeft = this.rmSection.scrollLeft
-          // this.startScrollTop = this.rmSection.scrollTop
-          // console.log(this.bgRemoveScaleRatio)
-
-          // console.log('------------------')
-
           break
         }
 
         case 'end': {
           this.isPanning = false
           this.initPinchPos = null
+          this.rmSection = null
           this.setInGestureMode(false)
           break
         }
@@ -256,6 +234,8 @@ export default defineComponent({
         this.$nextTick(() => {
           this.$emit('setBgRemoveMode', false)
         })
+      } else {
+        this.rmSection = null
       }
     },
     showMobilePanel(val) {

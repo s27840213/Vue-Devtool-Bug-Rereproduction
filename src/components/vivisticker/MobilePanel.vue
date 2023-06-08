@@ -193,7 +193,8 @@ export default defineComponent({
       isInCategory: 'vivisticker/getIsInCategory',
       isShowAllRecently: 'vivisticker/getShowAllRecently',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
-      bgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      bgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isProcessing: 'bgRemove/getIsProcessing',
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
@@ -508,7 +509,7 @@ export default defineComponent({
           }
 
           case 'remove-bg': {
-            if (this.bgRemoveMode) {
+            if (this.bgRemoveMode && !this.isProcessing) {
               bgRemoveUtils.setInBgRemoveMode(false)
             }
             break
@@ -589,7 +590,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: () => {
-          if (!this.bgRemoveMode) {
+          if (!this.bgRemoveMode && !this.isProcessing) {
             this.closeMobilePanel()
           }
         },
