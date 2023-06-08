@@ -1,22 +1,49 @@
 <template lang="pug">
 div(class="footer-tabs" ref="tabs")
-  div(class="footer-tabs__container" :class="{main: !isInEditor}" :style="containerStyles"
-      @scroll.passive="updateContainerOverflow" ref="container")
-    template(v-for="tab in tabs" :key="tab.icon")
-      div(v-if="!tab.hidden" :key="tab.icon"
-          class="footer-tabs__item"
-          :class="{'click-disabled': (tab.disabled || isLocked)}"
-          @click="handleTabAction(tab)")
-        color-btn(v-if="tab.icon === 'color'" size="22px"
-                  class="click-disabled"
-                  :color="globalSelectedColor")
-        svg-icon(v-else class="click-disabled"
-          :iconName="tab.icon"
-          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'white' :'black-4'"
-          :iconWidth="'24px'"
-          :style="textIconStyle")
-        span(class="no-wrap click-disabled"
-          :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-white' : 'text-black-4'") {{tab.text}}
+  div(class="footer-tabs__content")
+    div(class="footer-tabs__container" :class="{main: !isInEditor}" :style="containerStyles()"
+        @scroll.passive="updateContainerOverflow" ref="container")
+      template(v-for="tab in editorTypeTemplate ? templateTabs : tabs" :key="tab.icon")
+        div(v-if="!tab.hidden" :key="tab.icon"
+            class="footer-tabs__item"
+            :class="{'click-disabled': (tab.disabled || isLocked)}"
+            @click="handleTabAction(tab)")
+          color-btn(v-if="tab.icon === 'color'" size="22px"
+                    class="click-disabled"
+                    :color="globalSelectedColor")
+          svg-icon(v-else class="click-disabled"
+            :iconName="tab.icon"
+            :iconColor="tabColor(tab)"
+            :iconWidth="'24px'"
+            :style="textIconStyle")
+          span(class="no-wrap click-disabled"
+            :class="`text-${tabColor(tab)}`") {{tab.text}}
+    transition(name="panel-up")
+      div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs" :style="subTabStyles()")
+        div(class="footer-tabs__unfold"
+            @click="handleTabAction(mainMenu)")
+          svg-icon(class="click-disabled"
+            :iconName="mainMenu.icon"
+            :iconColor="'black-4'"
+            :iconWidth="'24px'"
+            :style="textIconStyle")
+        div(class="footer-tabs__container" :style="containerStyles(true)"
+            @scroll.passive="updateContainerOverflow" ref="sub-container")
+          template(v-for="(tab) in tabs")
+            div(v-if="!tab.hidden" :key="tab.icon"
+                class="footer-tabs__item"
+                :class="{'click-disabled': (tab.disabled || isLocked)}"
+                @click="handleTabAction(tab)")
+              color-btn(v-if="tab.icon === 'color'" size="22px"
+                        class="click-disabled"
+                        :color="globalSelectedColor")
+              svg-icon(v-else class="click-disabled"
+                :iconName="tab.icon"
+                :iconColor="tabColor(tab)"
+                :iconWidth="'24px'"
+                :style="textIconStyle")
+              span(class="no-wrap click-disabled"
+                :class="`text-${tabColor(tab)}`") {{tab.text}}
 </template>
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
@@ -26,6 +53,7 @@ import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfa
 import { ColorEventType, LayerType } from '@/store/types'
 import backgroundUtils from '@/utils/backgroundUtils'
 import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -56,8 +84,9 @@ export default defineComponent({
     },
   },
   data() {
-    // const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
+    const mainMenu = { icon: 'vivisticker_unfold' }
     return {
+      mainMenu,
       isFontsPanelOpened: false,
       disableTabScroll: false,
       leftOverflow: false,
@@ -87,8 +116,12 @@ export default defineComponent({
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       controllerHidden: 'vivisticker/getControllerHidden',
       hasCopiedFormat: 'getHasCopiedFormat',
-      debugMode: 'vivisticker/getDebugMode'
+      debugMode: 'vivisticker/getDebugMode',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
     }),
+    isSettingTabsOpen(): boolean {
+      return this.editorTypeTemplate && this.tabs.length > 0
+    },
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
     },
@@ -395,8 +428,6 @@ export default defineComponent({
         return this.homeTabs
       } else if (this.editorTypeTextLike) {
         return [{ icon: 'plus-square', text: `${this.$t('STK0006')}`, panelType: 'text' }]
-      } else if (this.editorTypeTemplate) {
-        return this.templateTabs
       } else {
         return []
       }
@@ -500,18 +531,6 @@ export default defineComponent({
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable
     },
-    containerStyles(): { [index: string]: string } {
-      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
-      return {
-        transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
-        opacity: `${this.contentEditable ? 0 : 1}`,
-        maskImage: this.contentEditable ? 'none'
-          : `linear-gradient(to right,
-          transparent 0, black ${this.leftOverflow ? '56px' : 0},
-          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`,
-        ...(this.isTablet && this.isInEditor && { height: '80px', justifyContent: 'center' })
-      }
-    },
     currLayer(): ILayer {
       return layerUtils.getCurrLayer
     },
@@ -547,8 +566,8 @@ export default defineComponent({
           this.disableTabScroll = false
           return
         }
-        const container = this.$refs.container as HTMLElement
-        container.scrollTo(0, 0)
+        const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
+        if (elContainer) elContainer.scrollTo(0, 0)
         this.$nextTick(() => {
           this.updateContainerOverflow()
         })
@@ -566,7 +585,9 @@ export default defineComponent({
       setBgImageControl: 'SET_backgroundImageControl'
     }),
     updateContainerOverflow() {
-      const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.container as HTMLElement
+      const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
+      if (!elContainer) return
+      const { scrollLeft, scrollWidth, offsetWidth } = elContainer
       this.leftOverflow = scrollLeft > 0
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
@@ -576,6 +597,13 @@ export default defineComponent({
       }
 
       switch (tab.icon) {
+        case 'vivisticker_unfold': {
+          groupUtils.deselect()
+          this.$emit('switchTab', 'none')
+          if (this.inBgSettingMode) editorUtils.setInBgSettingMode(false)
+          if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
+          break
+        }
         case 'crop': {
           if (this.selectedLayerNum > 0) {
             if (this.isCropping) {
@@ -823,6 +851,29 @@ export default defineComponent({
     },
     handleLockedNotify() {
       notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+    },
+    tabColor(tab: IFooterTab): string {
+      return (tab.disabled || this.isLocked) ? 'gray-2' : this.tabActive(tab) ? 'white' : 'black-4'
+    },
+    containerStyles(isSubContainer = false): { [index: string]: string } {
+      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
+      return {
+        transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
+        opacity: `${this.contentEditable ? 0 : 1}`,
+        ...(this.isSettingTabsOpen === isSubContainer && {
+          maskImage: this.contentEditable ? 'none'
+            : `linear-gradient(to right,
+          transparent 0, black ${this.leftOverflow ? '56px' : 0},
+          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
+        }),
+        ...(this.isTablet && this.isInEditor && { height: '80px', justifyContent: 'center' }),
+        ...(isSubContainer && { paddingLeft: '0px' })
+      }
+    },
+    subTabStyles(): { [index: string]: string } {
+      return {
+        ...(this.isTablet && { justifyContent: 'center', gridTemplateColumns: 'auto auto' })
+      }
     }
   }
 })
@@ -832,6 +883,22 @@ export default defineComponent({
 .footer-tabs {
   overflow: hidden;
   background-color: setColor(black-1);
+
+  &__content {
+    display: grid;
+    transition: transform 0.3s, opacity 0.4s;
+  }
+
+  &__unfold {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 12px 0px 24px;
+    background-color: setColor(black-1);
+    z-index: 1;
+  }
+
   &__container {
     height: 57px;
     overflow: scroll;
@@ -867,6 +934,14 @@ export default defineComponent({
       transform: scale(0.8);
       line-height: 20px;
     }
+  }
+
+  &__sub-tabs {
+    width: 100%;
+    position: absolute;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    background-color: setColor(black-1);
   }
 }
 </style>
