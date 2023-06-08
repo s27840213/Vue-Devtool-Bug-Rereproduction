@@ -148,7 +148,7 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove') {
+  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove' | 'stk-bg-remove-face') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
@@ -156,7 +156,8 @@ class UploadUtils {
       font: '.ttf,.ttc,.otf,.woff2',
       avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
-      'stk-bg-remove': '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
+      'stk-bg-remove': '.jpg,.jpeg,.png,.tiff,.tif,.heic',
+      'stk-bg-remove-face': '.jpg,.jpeg,.png,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
     document.body.appendChild(inputNode)
@@ -174,7 +175,7 @@ class UploadUtils {
       if (type === 'logo') {
         params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
-      if (type === 'stk-bg-remove') {
+      if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
         store.commit('bgRemove/SET_isProcessing', true)
       }
       this.uploadAsset(type, files as FileList, params)
@@ -285,7 +286,7 @@ class UploadUtils {
   //
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false, pollingJsonName = 'result.json' }: {
+  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove' | 'stk-bg-remove-face', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false, pollingJsonName = 'result.json' }: {
     addToPage?: boolean,
     id?: string,
     pollingCallback?: (json: IUploadAssetResponse) => void,
@@ -332,7 +333,7 @@ class UploadUtils {
       // const assetId = '230511154035471yNJGiW58'
       // const uuid = '230511154035471qUvA6TTT'
       const formData = new FormData()
-      if (type === 'stk-bg-remove') {
+      if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
         Object.keys(this.loginOutput.ul_removebg_map.fields).forEach(key => {
           formData.append(key, this.loginOutput.ul_removebg_map.fields[key])
         })
@@ -347,6 +348,8 @@ class UploadUtils {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.global.locale}_original`)
       } else if (type === 'stk-bg-remove') {
         formData.append('key', `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bg`)
+      } else if (type === 'stk-bg-remove-face') {
+        formData.append('key', `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bgf`)
       } else if (type === 'logo') {
         if (!brandId) return
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`)
@@ -548,13 +551,13 @@ class UploadUtils {
               })
             }, 2000)
           }
-        } else if (type === 'stk-bg-remove') {
+        } else if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
           xhr.open('POST', this.loginOutput.ul_removebg_map.url, true)
           xhr.send(formData)
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             imageUtils.getImageSize(src, 0, 0).then(({ width, height }) => {
-              bgRemoveUtils.removeBgStk(uuid, assetId, src, width, height)
+              bgRemoveUtils.removeBgStk(uuid, assetId, src, width, height, type)
             })
           }
         }
