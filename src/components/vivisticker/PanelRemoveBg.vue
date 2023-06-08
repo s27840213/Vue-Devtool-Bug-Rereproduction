@@ -9,7 +9,22 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
       :teleportTarget="'.panel-remove-bg__rm-section'"
       :inVivisticker="true"
       :fitScaleRatio="bgRemoveScaleRatio")
-  nubtn(v-else theme="primary" size="mid-center" @click="removeBg") {{ $t('NN0043') }}
+  div(v-else class="btn-section")
+    div(class="btn" @click="removeBg")
+      div(class="btn__content-section")
+        img(class="img-object-cutout" :src="require('@/assets/img/png/bgRemove/object-cutout.png')")
+      div(class="btn__text-section")
+        span(class="text-H6") {{ $t('STK0060') }}
+        span(class="text-black-5 body-XXS") {{ $t('STK0061') }}
+    div(class="btn btn--bgf" @click="removeBgf")
+      div(class="btn__content-section btn__content-section--bgf")
+        img(:src="require('@/assets/img/png/bgRemove/face-cutout-body.png')")
+        img(:src="require('@/assets/img/png/bgRemove/face-cutout.png')")
+      div(class="btn__text-section")
+        span(class="text-H6") {{ $t('STK0059') }}
+        span(class="text-black-5 body-XXS") {{ $t('STK0062') }}
+    //- nubtn(theme="primary" size="mid-center" @click="removeBgf") {{ $t('STK0059') }}
+    //- nubtn(theme="primary" size="mid-center" ) {{ $t('STK0060') }}
   //- teleport(to="body")
   //-   div(class="panel-remove-bg__test-input")
   //-     mobile-slider(
@@ -106,6 +121,9 @@ export default defineComponent({
     }),
     removeBg() {
       uploadUtils.chooseAssets('stk-bg-remove')
+    },
+    removeBgf() {
+      uploadUtils.chooseAssets('stk-bg-remove-face')
     },
     // setScaleRatio(val: number) {
     //   this.bgRemoveScaleRatio = val
@@ -300,6 +318,113 @@ export default defineComponent({
     top: 10%;
     left: 0;
     z-index: 999;
+  }
+}
+
+.btn-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 12px 24px;
+}
+
+.btn {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-columns: 1fr;
+  width: 50%;
+  height: 290px;
+  border-radius: 8px;
+  overflow: hidden;
+  &__content-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-image: linear-gradient(
+      45deg,
+      setColor(black-3) 25%,
+      rgba(0, 0, 0, 0) 25%,
+      rgba(0, 0, 0, 0) 75%,
+      setColor(black-3) 75%,
+      setColor(black-3)
+    ),
+      linear-gradient(
+        45deg,
+        setColor(black-3) 25%,
+        rgba(0, 0, 0, 0) 25%,
+        rgba(0, 0, 0, 0) 75%,
+        setColor(black-3) 75%,
+        setColor(black-3)
+      ),
+      linear-gradient(
+        45deg,
+        setColor(black-3) 25%,
+        rgba(0, 0, 0, 0) 25%,
+        rgba(0, 0, 0, 0) 75%,
+        setColor(black-3) 75%,
+        setColor(black-3)
+      );
+    // background-repeat: no-repeat;
+    background-color: #474747;
+    background-position: 0px 0px, 11px 11px;
+    background-size: 22px 22px;
+    background-position: 0px 0px, 10px 10px;
+    background-size: 20px 20px;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      background-color: #F5D5A0;
+    }
+    > img {
+      width: 110px;
+      object-fit: contain;
+      z-index: 10;
+    }
+    &--bgf {
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50%;
+        height: 100%;
+        background-color: setColor(blue-3);
+      }
+
+      > img:nth-child(1) {
+        position: absolute;
+        right: 50%;
+        bottom: 0;
+      }
+
+      > img:nth-child(2) {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform: translate(-10%, 12%);
+        width: 110%;
+        object-fit: contain;
+        z-index: 10;
+      }
+    }
+  }
+  &__text-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #474747;
+    color: white;
+    padding: 16px 0px;
   }
 }
 

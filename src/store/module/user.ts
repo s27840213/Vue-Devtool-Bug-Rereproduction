@@ -480,9 +480,9 @@ const actions: ActionTree<IUserModule, unknown> = {
       logUtils.setLogForError(error as Error)
     }
   },
-  async removeBgStk({ state }, { uuid, assetId }) {
+  async removeBgStk({ state }, { uuid, assetId, type }) {
     try {
-      const { data } = await userApis.removeBgStk(uuid, assetId)
+      const { data } = await userApis.removeBgStk(uuid, assetId, type)
       return data
     } catch (error) {
       console.log(error)

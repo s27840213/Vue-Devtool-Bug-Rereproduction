@@ -11,7 +11,7 @@ class MagnifyUtils {
   private posInMagnifierCanvas = { x: 0, y: 0 };
   private raf: number | undefined;
   SCALE_RATIO = 0.4
-  MAGNIFY_RADIUS =30
+  MAGNIFY_RADIUS = 45
 
   constructor(magnifyCanvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, contentCanvas: HTMLCanvasElement, targetEl: HTMLElement, fitScaleRatio: number) {
     this.magnifyCanvas = magnifyCanvas
@@ -39,7 +39,7 @@ class MagnifyUtils {
     // this.context.save()
 
     // Why I multiply 1.2? Because I want to make the preview size a little bit bigger
-    const scale = this.brushSize / (this.MAGNIFY_RADIUS * 2) * 1.5
+    const scale = this.brushSize / (this.MAGNIFY_RADIUS * 2) * 1.8
 
     // use save and restore to avoid the influence of the following draw content(which will be clip if we didn't used save and restore)
     this.magnifyContext.save()

@@ -697,8 +697,8 @@ export default defineComponent({
 
 .magnify-area {
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 90px;
+  height: 90px;
   overflow:hidden;
   transform-origin: top left;
   border: 1px solid setColor(gray-2);
@@ -709,8 +709,8 @@ export default defineComponent({
 
   &__brush {
     position: absolute;
-    width: calc(100% *  (2/3) + 3px);
-    height: calc(100% *  (2/3) + 3px);
+    width: calc(100% *  (5/9) + 3px);
+    height: calc(100% *  (5/9) + 3px);
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);
