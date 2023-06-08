@@ -207,6 +207,7 @@ export default defineComponent({
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
         ...this.transformStyle,
         outline: this.outlineStyles(),
+        outlineOffset: `-${1 / this.primaryLayer.styles.scale}px`,
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
           const { styles: { width, height }, clipPath } = this.config
