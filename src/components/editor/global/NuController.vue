@@ -63,114 +63,115 @@ div(:layer-index="`${layerIndex}`"
             @keydown.meta.shift.z.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
-        template(v-if="!$isTouchDevice()" )
-          div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-              class="control-point__corner-rotate"
-              :ref="`corner-rotate-${index}`"
-              :key="`corner-rotate-${index}`"
-              :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-              @pointerdown.stop="rotateStart($event, index)"
-              @touchstart="disableTouchEvent")
-        template(v-if="isLine()")
-          div(v-for="(end, index) in controlPoints.lineEnds"
-              class="control-point"
-              :key="index"
-              :marker-index="index"
-              :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
-              @pointerdown.stop="!$isTouchDevice() ? lineEndMoveStart($event) : null"
-              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-          template(v-if="$isTouchDevice()")
-            div(v-for="(end, index) in controlPoints.lineEndTouchAreas"
+        template(v-if="!isMoving")
+          template(v-if="!$isTouchDevice()")
+            div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+                class="control-point__corner-rotate"
+                :ref="`corner-rotate-${index}`"
+                :key="`corner-rotate-${index}`"
+                :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+                @pointerdown.stop="rotateStart($event, index)"
+                @touchstart="disableTouchEvent")
+          template(v-if="isLine()")
+            div(v-for="(end, index) in controlPoints.lineEnds"
                 class="control-point"
                 :key="index"
                 :marker-index="index"
                 :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
-                @pointerdown.stop="lineEndMoveStart"
-                @touchstart="disableTouchEvent")
-        div(v-for="(resizer, index) in getResizer(controlPoints)"
-            :key="index"
-            class="control-point__resize-bar-wrapper")
-          div(class="control-point"
-              :key="`resizer-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-          div(class="control-point"
-              :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        template(v-if="$isTouchDevice()" )
-          div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
+                @pointerdown.stop="!$isTouchDevice() ? lineEndMoveStart($event) : null"
+                @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+            template(v-if="$isTouchDevice()")
+              div(v-for="(end, index) in controlPoints.lineEndTouchAreas"
+                  class="control-point"
+                  :key="index"
+                  :marker-index="index"
+                  :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
+                  @pointerdown.stop="lineEndMoveStart"
+                  @touchstart="disableTouchEvent")
+          div(v-for="(resizer, index) in getResizer(controlPoints)"
               :key="index"
               class="control-point__resize-bar-wrapper")
             div(class="control-point"
-                :key="`resizer-touch-${index}`"
+                :key="`resizer-${index}`"
                 :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-                @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
-                @touchstart="disableTouchEvent")
+                @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+                @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
             div(class="control-point"
-                :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
-                @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
-                @touchstart="disableTouchEvent")
-        div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice()"
-            class="control-point__resize-bar-wrapper")
-          div(v-for="(resizer, index) in getResizer(controlPoints, true)"
-              class="control-point control-point__move-bar"
-              :key="`resizer-text-${index}`"
-              :ref="`moveStart-bar_${index}`"
-              :style="resizerBarStyles(resizer.styles)")
-        div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalers) : []"
-            class="control-point"
-            :key="`scaler-${index}`"
-            :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-            @pointerdown.prevent.stop="!$isTouchDevice() ? scaleStart($event) : null"
-            @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        template(v-if="$isTouchDevice()")
-          div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalerTouchAreas) : []"
+                :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+                @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+          template(v-if="$isTouchDevice()" )
+            div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
+                :key="index"
+                class="control-point__resize-bar-wrapper")
+              div(class="control-point"
+                  :key="`resizer-touch-${index}`"
+                  :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                  @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
+                  @touchstart="disableTouchEvent")
+              div(class="control-point"
+                  :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
+                  @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
+                  @touchstart="disableTouchEvent")
+          div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice()"
+              class="control-point__resize-bar-wrapper")
+            div(v-for="(resizer, index) in getResizer(controlPoints, true)"
+                class="control-point control-point__move-bar"
+                :key="`resizer-text-${index}`"
+                :ref="`moveStart-bar_${index}`"
+                :style="resizerBarStyles(resizer.styles)")
+          div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalers) : []"
               class="control-point"
-              :key="`scaler-touch-${index}`"
+              :key="`scaler-${index}`"
               :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="scaleStart"
-              @touchstart="disableTouchEvent")
-        div(class="control-point__controller-wrapper"
-            v-if="isLine()")
-          template(v-if="!$isTouchDevice()")
-            div(class="control-point__action shadow")
+              @pointerdown.prevent.stop="!$isTouchDevice() ? scaleStart($event) : null"
+              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+          template(v-if="$isTouchDevice()")
+            div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalerTouchAreas) : []"
+                class="control-point"
+                :key="`scaler-touch-${index}`"
+                :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="scaleStart"
+                @touchstart="disableTouchEvent")
+          div(class="control-point__controller-wrapper"
+              v-if="isLine()")
+            template(v-if="!$isTouchDevice()")
+              div(class="control-point__action shadow")
+                svg-icon(class="control-point__action-svg"
+                  iconName="rotate2" iconWidth="20px"
+                  iconColor="blue-2"
+                  :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
+                  @pointerdown.stop="lineRotateStart"
+                  @touchstart="lineRotateStart")
+            div(class="control-point__action shadow"
+                ref="moveStart-mover")
               svg-icon(class="control-point__action-svg"
-                iconName="rotate2" iconWidth="20px"
+                iconName="move2" iconWidth="24px"
                 iconColor="blue-2"
                 :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
-                @pointerdown.stop="lineRotateStart"
-                @touchstart="lineRotateStart")
-          div(class="control-point__action shadow"
-              ref="moveStart-mover")
-            svg-icon(class="control-point__action-svg"
-              iconName="move2" iconWidth="24px"
-              iconColor="blue-2"
-              :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
-              @touchstart="disableTouchEvent")
-        div(v-else class="control-point__controller-wrapper")
-          template(v-if="!$isTouchDevice()")
-            div(class="control-point__action shadow")
+                @touchstart="disableTouchEvent")
+          div(v-else class="control-point__controller-wrapper")
+            template(v-if="!$isTouchDevice()")
+              div(class="control-point__action shadow")
+                svg-icon(class="control-point__action-svg"
+                  iconName="rotate2" iconWidth="20px"
+                  iconColor="blue-2"
+                  :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
+                  @pointerdown.stop="rotateStart"
+                  @touchstart="disableTouchEvent")
+            div(class="control-point__action shadow"
+                ref="moveStart-mover")
               svg-icon(class="control-point__action-svg"
-                iconName="rotate2" iconWidth="20px"
+                iconName="move2" iconWidth="24px"
                 iconColor="blue-2"
                 :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
-                @pointerdown.stop="rotateStart"
                 @touchstart="disableTouchEvent")
-          div(class="control-point__action shadow"
-              ref="moveStart-mover")
-            svg-icon(class="control-point__action-svg"
-              iconName="move2" iconWidth="24px"
-              iconColor="blue-2"
-              :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
-              @touchstart="disableTouchEvent")
     div(v-if="isActive && isLocked() && (scaleRatio > 20)"
         class="control-point__bottom-right-icon control-point__action shadow"
         :style="actionIconStyles()"
         @click="MappingUtils.mappingIconAction('lock')")
       svg-icon(iconName="lock" iconWidth="16px" iconColor="red")
-    template(v-if="$isTouchDevice() && isActive")
+    template(v-if="$isTouchDevice() && isActive && !isMoving")
       div(class="control-point__top-left-icon control-point__action border"
           :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'pointer' })"
           @pointerdown.prevent.stop="MappingUtils.mappingIconAction('trash')")
@@ -315,7 +316,7 @@ export default defineComponent({
   computed: {
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId']),
-    ...mapState(['currDraggedPhoto']),
+    ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -433,9 +434,6 @@ export default defineComponent({
     },
     isDraggingCursor(): boolean {
       return this.config.isDraggingCursor
-    },
-    isMoving(): boolean {
-      return this.config.moving
     },
     isActive(): boolean {
       return this.config.active
