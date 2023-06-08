@@ -51,6 +51,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
@@ -426,6 +427,18 @@ export default defineComponent({
           this.imgNaturalSize.height = img.height
         }
       })
+      // detect if SVG image rendered
+      const rendering = () => {
+        const elImg = this.$refs.img as SVGImageElement
+        if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
+          // Render complete
+          vivistickerUtils.setLoadingFlag(-1)
+        } else {
+          // Rendering
+          window.requestAnimationFrame(rendering)
+        }
+      }
+      window.requestAnimationFrame(rendering)
     },
     onLoad(e: Event) {
       const img = e.target as HTMLImageElement
@@ -433,6 +446,7 @@ export default defineComponent({
         this.imgNaturalSize.width = img.width
         this.imgNaturalSize.height = img.height
       }
+      vivistickerUtils.setLoadingFlag(-1)
     }
   }
 })

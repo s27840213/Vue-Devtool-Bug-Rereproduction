@@ -285,7 +285,8 @@ export default defineComponent({
           }
           case 'json': {
             const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
-            if (page.layers.length === 0) {
+            const hasBg = !noBg && page.backgroundImage.config.srcObj?.assetId !== ''
+            if (page.layers.length === 0 && !hasBg) {
               this.JSONcontentSize = {
                 width: page.width,
                 height: page.height
@@ -297,7 +298,7 @@ export default defineComponent({
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
-            })
+            }, noBg)
             pageUtils.setPages([page])
             if (vivistickerUtils.checkVersion('1.31')) {
               const newSize = {
@@ -314,6 +315,32 @@ export default defineComponent({
               }
               this.usingJSON = true
             }
+            break
+          }
+          case 'gen-thumb': {
+            const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
+            vivistickerUtils.initLoadingFlags(page, () => {
+              vivistickerUtils.callIOSAsAPI('GEN_THUMB', {
+                type: 'mydesign',
+                id: designId,
+                width: page.width,
+                height: page.height,
+                x: 0,
+                y: 0,
+                needCrop: 0
+              }, 'gen-thumb', { timeout: -1 }).then(data => {
+                vivistickerUtils.sendToIOS('INFORM_WEB', {
+                  info: {
+                    event: 'gen-thumb-done',
+                    flag: data?.flag ?? '1',
+                    id: designId
+                  },
+                  to: 'UI'
+                })
+              })
+            }, false)
+            pageUtils.setPages([page])
+            this.usingJSON = true
             break
           }
         }

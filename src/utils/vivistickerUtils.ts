@@ -2,6 +2,7 @@ import listApis from '@/apis/list'
 import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
+import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
@@ -30,6 +31,8 @@ import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
 
 export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template'
+
+declare let window: CustomWindow
 
 /**
  * shown prop indicates if the user-setting-config is shown in the setting page
@@ -518,15 +521,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     store.commit('vivisticker/SET_editorType', 'none')
   }
 
-  initLoadingFlags(page: IPage | { layers: ILayer[] }, callback?: () => void) {
+  initLoadingFlags(page: IPage | { layers: ILayer[] }, callback?: () => void, noBg = true) {
     this.loadingFlags = {}
     this.loadingCallback = callback
     for (const [index, layer] of page.layers.entries()) {
       this.initLoadingFlagsForLayer(layer, index)
     }
+    if (!noBg && 'backgroundImage' in page && page.backgroundImage.config.srcObj?.assetId !== '') {
+      this.loadingFlags[this.makeFlagKey(-1)] = false
+    }
   }
 
   makeFlagKey(layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
+    if (layerIndex === -1) return 'bg'
     return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}` + (typeof clipIndex !== 'undefined' ? `_c${clipIndex}` : ''))
   }
 
@@ -647,7 +654,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
     if (store.getters['text/getIsFontLoading']) {
       this.sendToIOS('SHOW_LOADING', this.getEmptyMessage())
-      textUtils.untilFontLoadedForPage(pageUtils.getPage(0)).then(() => {
+      textUtils.untilFontLoadedForPage(pageUtils.currFocusPage).then(() => {
         setTimeout(executor, 200) // in case the render slightly delays after font loading
       })
     } else {
@@ -984,8 +991,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async saveAsMyDesign(): Promise<void> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
-    const flag = await this.genThumbnail(id)
-    if (flag === '1') return
+    if (store.getters['vivisticker/getEditorTypeTemplate']) {
+      const resGenThumb = await this.callIOSAsAPI('INFORM_WEB', {
+        info: {
+          event: 'gen-thumb',
+          id
+        },
+        to: 'Shot'
+      }, `gen-thumb-${id}`, { timeout: 10000 }) as any
+      if (resGenThumb.flag === '1') return
+    } else {
+      const flag = await this.genThumbnail(id)
+      if (flag === '1') return
+    }
     await this.saveDesignJson(id)
   }
 
@@ -1127,6 +1145,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     switch (event) {
       case 'missing-image':
         this.handleMissingImage(info)
+        break
+      case 'gen-thumb':
+        this.fetchDesign().then((design) => {
+          if (!design || !design.pages.length) return
+          const url = `type=gen-thumb&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(design.pages[0]))).replace(/'/g, '\\\'')}&noBg=false&designId=${info.id}`
+          window.fetchDesign(url)
+        })
+        break
+      case 'gen-thumb-done':
+        this.handleCallback(`gen-thumb-${info.id}`, info)
         break
     }
   }

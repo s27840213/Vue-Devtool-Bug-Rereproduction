@@ -12,6 +12,7 @@ div(class="my-design-text-item" @click="editTemplate")
   div(v-else class="my-design-text-item__more" @click.stop.prevent="handleMoreActions")
     svg-icon(iconName="more" iconColor="white" iconWidth="24px")
   div(v-if="item.assetInfo.pageNum" class="my-design-text-item__index")
+    //- svg-icon(iconName="all-pages" iconColor="black-5" iconWidth="12px")
     span(class="text-black-5") {{ strPageIndex }}
 </template>
 
@@ -38,7 +39,7 @@ export default defineComponent({
       return vivistickerUtils.getThumbSrc('mydesign', this.item.id, this.item.ver)
     },
     strPageIndex(): string {
-      return `1/${this.item.assetInfo.pageNum}`
+      return `${this.item.assetInfo.pageNum}`
     }
   },
   methods: {
@@ -155,6 +156,7 @@ export default defineComponent({
     bottom: 4px;
     background: rgba(setColor(gray-1), 0.3);
     border-radius: 100px;
+    column-gap: 4px;
     &>span {
       display: flex;
       align-items: center;
