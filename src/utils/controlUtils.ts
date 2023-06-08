@@ -279,10 +279,12 @@ class Controller {
     }
   }
 
-  getResizerProfile(config: AllLayerTypes): { start: number, end: number, hasHorizontal: boolean, hasVertical: boolean } {
+  getResizerProfile(config: AllLayerTypes): { start: number, end: number, moveBarStart: number, moveBarEnd: number, hasHorizontal: boolean, hasVertical: boolean } {
     const profile = {
       start: -1,
       end: -1,
+      moveBarStart: -1,
+      moveBarEnd: -1,
       hasHorizontal: false,
       hasVertical: false
     }
@@ -320,10 +322,14 @@ class Controller {
     if (profile.hasHorizontal) {
       profile.start = 0
       profile.end = 2
+      profile.moveBarStart = 2
+      profile.moveBarEnd = 4
     }
     if (profile.hasVertical) {
       profile.start = profile.start === -1 ? 2 : profile.start
       profile.end = 4
+      profile.moveBarStart = 0
+      profile.moveBarEnd = profile.moveBarStart === -1 ? 2 : profile.moveBarStart
     }
     return profile
   }
