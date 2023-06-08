@@ -150,14 +150,14 @@ div(:layer-index="`${layerIndex}`"
                   @touchstart="disableTouchEvent")
                 svg-icon(class="control-point__action-svg"
                   iconName="rotate2" iconWidth="20px"
-                  iconColor="blue-2")
+                  iconColor="black-1")
             div(class="control-point__action shadow control-point__mover"
                 ref="moveStart-mover"
                 :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
                 @touchstart="disableTouchEvent")
               svg-icon(class="control-point__action-svg"
                 iconName="move2" iconWidth="24px"
-                iconColor="blue-2")
+                iconColor="black-1")
           template(v-else)
             template(v-if="!$isTouchDevice()")
               div(class="control-point__action shadow"
@@ -166,14 +166,14 @@ div(:layer-index="`${layerIndex}`"
                   @touchstart="disableTouchEvent")
                 svg-icon(class="control-point__action-svg"
                   iconName="rotate2" iconWidth="20px"
-                  iconColor="blue-2")
+                  iconColor="black-1")
             div(class="control-point__action shadow control-point__mover"
                 ref="moveStart-mover"
                 :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
                 @touchstart="disableTouchEvent")
               svg-icon(class="control-point__action-svg"
                 iconName="move2" iconWidth="24px"
-                iconColor="blue-2")
+                iconColor="black-1")
     div(v-if="isControllerShown && isLocked() && (scaleRatio > 20)"
         class="control-point__bottom-right-icon control-point__action shadow"
         :style="actionIconStyles()"
@@ -181,23 +181,24 @@ div(:layer-index="`${layerIndex}`"
       svg-icon(iconName="lock" iconWidth="16px" iconColor="red")
     template(v-if="$isTouchDevice() && isActive")
       div(v-show="!isMoving")
-        div(class="control-point__top-left-icon control-point__action border"
+        div(v-if="editorTypeTextLike"
+            class="control-point__top-left-icon control-point__action border"
             :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'pointer' })"
             @pointerdown.prevent.stop="MappingUtils.mappingIconAction('trash')")
-          svg-icon(iconName="close" iconWidth="18px" iconColor="blue-2")
+          svg-icon(iconName="close" iconWidth="18px" iconColor="black-1")
         div(v-if="isLine()" class="control-point__bottom-left-icon control-point__action border"
             :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
             @pointerdown.prevent.stop="lineRotateStart")
-          svg-icon(iconName="rotate2" iconWidth="24px" iconColor="blue-2")
+          svg-icon(iconName="rotate2" iconWidth="24px" iconColor="black-1")
         div(v-else class="control-point__bottom-left-icon control-point__action border"
             :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
             @pointerdown.prevent.stop="rotateStart")
-          svg-icon(iconName="rotate2" iconWidth="24px" iconColor="blue-2")
+          svg-icon(iconName="rotate2" iconWidth="24px" iconColor="black-1")
         div(v-if="!tooSmall && !isLine()"
             class="control-point__bottom-right-icon control-point__action border"
             :style="ctrlPointerStyles(actionIconStyles(), cursorStyles(4, getLayerRotate()))"
             @pointerdown.prevent.stop="scaleStart($event)")
-          svg-icon(iconName="scale" iconWidth="24px" iconColor="blue-2")
+          svg-icon(iconName="scale" iconWidth="24px" iconColor="black-1")
 </template>
 
 <script lang="ts">
@@ -339,6 +340,7 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       controllerHidden: 'vivisticker/getControllerHidden',
+      editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       useMobileEditor: 'getUseMobileEditor'
     }),
     isControllerShown(): boolean {
@@ -663,7 +665,9 @@ export default defineComponent({
     },
     getScaler(scalers: any) {
       return this.tooSmall ? scalers.slice(2, 3)
-        : (this.$isTouchDevice() ? scalers.slice(1, 2) : scalers)
+        : (this.$isTouchDevice()
+            ? (this.editorTypeTextLike ? scalers.slice(1, 2) : scalers.slice(0, 2))
+            : scalers)
     },
     getCornerRotaters(scalers: any) {
       return (this.tooSmall) ? scalers.slice(2, 3) : scalers
@@ -710,7 +714,7 @@ export default defineComponent({
         } else if (this.isLocked()) {
           return '#EB5757'
         } else {
-          return '#7190CC'
+          return '#9C9C9C'
         }
       })()
 

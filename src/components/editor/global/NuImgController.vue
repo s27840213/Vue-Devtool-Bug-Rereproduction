@@ -124,7 +124,7 @@ export default defineComponent({
         transform: `translate(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`,
+        outline: `${2 * (100 / this.scaleRatio)}px solid #9C9C9C`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
@@ -177,7 +177,7 @@ export default defineComponent({
         // transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width * this.contentScaleRatio}px`,
         height: `${this.config.styles.height * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`
+        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #9C9C9C`
       }
     },
     scalerStyles(scaler: { [key: string]: string }) {

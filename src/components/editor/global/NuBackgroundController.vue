@@ -119,7 +119,7 @@ export default defineComponent({
       return {
         width: `${this.config.styles.imgWidth * this.getPageScale * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
+        outline: `${2 * (100 / this.scaleRatio)}px solid #9C9C9C`
       }
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {

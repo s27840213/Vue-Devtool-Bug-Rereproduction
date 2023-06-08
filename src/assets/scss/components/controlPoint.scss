@@ -4,7 +4,7 @@
   pointer-events: auto;
   position: absolute;
   background-color: setColor(white);
-  border: 2px solid setColor(blue-2);
+  border: 2px solid setColor(black-5);
   box-sizing: border-box;
 
   &__resize-bar-wrapper {
@@ -48,7 +48,7 @@
     background-color: setColor(white);
 
     &.border {
-      border: 2px solid setColor(blue-2);
+      border: 2px solid setColor(black-5);
       box-sizing: border-box;
     }
 

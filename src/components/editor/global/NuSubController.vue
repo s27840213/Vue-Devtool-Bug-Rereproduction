@@ -377,7 +377,7 @@ export default defineComponent({
       return { width, height }
     },
     outlineStyles() {
-      const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
+      const outlineColor = this.config.locked ? '#EB5757' : '#9C9C9C'
       if (this.isControllerShown && layerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
           return `${2 / this.primaryLayer.styles.scale}px solid ${outlineColor}`

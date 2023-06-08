@@ -418,7 +418,7 @@ export default defineComponent({
     },
     outlineStyles() {
       if (this.primaryLayer && this.primaryLayer.type === 'tmp') {
-        return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
+        return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #9C9C9C`
       } else {
         return ''
       }
