@@ -40,13 +40,11 @@ div(ref="body"
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-      div(class="template-center__mobile-search__options"
-          :class="{'active': isShowOptions}"
+      nubtn(class="template-center__mobile-search__options"
+          theme="icon2" size="mid"
+          :icon="['advanced', 'none']"
+          :active="isShowOptions"
           @click="isShowOptions = !isShowOptions")
-        svg-icon(iconName="advanced"
-                iconWidth="22px"
-                iconHeight="18.36px"
-                iconColor="white")
       transition(name="slide-up")
         img(v-if="!mobileSnapToTop" class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
       transition(name="slide-up")
@@ -844,23 +842,7 @@ export default defineComponent({
       margin-right: 10px;
     }
     &__options {
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid setColor(gray-4);
-      border-radius: 5px;
-      box-sizing: border-box;
-      flex-grow: 0;
-      flex-basis: 44px;
-      transition: background-color 0.2s;
-      &.active {
-        background-color: setColor(gray-4);
-        > svg {
-          color: setColor(gray-4);
-        }
-      }
+      color: transparent;
     }
   }
   &__to-top {

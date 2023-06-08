@@ -226,7 +226,7 @@ export default defineComponent({
     }
     &.brandkit-theme {
       max-width: 260px;
-      color: setColor(bu);
+      color: setColor(blue-1);
     }
     &.editor-theme {
       max-width: calc(100% - 80px);
@@ -332,7 +332,7 @@ export default defineComponent({
       color: setColor(gray-2);
     }
     &.brandkit-theme > svg {
-      color: setColor(bu);
+      color: setColor(blue-1);
     }
     &.editor-theme:not(.mobile):hover > svg,
     &.panel-theme:not(.mobile):hover > svg {

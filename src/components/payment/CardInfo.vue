@@ -12,14 +12,14 @@ div(class="card")
         template(#paymentMethod)
           span(class="overline-LG") {{$t('NN0624')}}
       div(class="card-popup-button")
-        btn(type="gray-mid" @click="closePopup()") {{$t('NN0203')}}
-        btn(type="red-mid" @click="deleteCard()") {{$t('NN0625')}}
+        nubtn(theme="secondary" @click="closePopup()") {{$t('NN0203')}}
+        nubtn(theme="danger" @click="deleteCard()") {{$t('NN0625')}}
 </template>
 
 <script lang="ts">
+import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
 
 export default defineComponent({
   emits: [],
@@ -74,7 +74,7 @@ export default defineComponent({
   background-color: setColor(white);
   &-button {
     display: flex;
-    button + button { margin-left: 40px; }
+    gap: 40px;
   }
 }
 

@@ -203,6 +203,10 @@ export default class SubControllerUtils {
         layers = (this.primaryLayer as IGroup).layers
         break
       case 'frame':
+        if (layerUtils.getCurrLayer.type === 'group') {
+          // @TODO: this means the frame is in the group and the sub-clip is clicked
+          return
+        }
         updateSubLayerProps = frameUtils.updateFrameLayerProps
         layers = (this.primaryLayer as IFrame).clips
     }

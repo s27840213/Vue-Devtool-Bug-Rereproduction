@@ -21,7 +21,8 @@ div(class="panel-template" ref="panel")
         clear
         :defaultKeyword="keywordLabel"
         @search="handleSearch")
-        nubtn(theme="icon" icon="sliders" :status="!allThemesChecked?'active':'default'"
+        nubtn(theme="icon" icon="sliders"
+            :active="!allThemesChecked"
             @click="onAdvancedClicked()" :hint="$t('NN0795')")
       popup-theme(v-if="showTheme"
         class="panel-template__theme"

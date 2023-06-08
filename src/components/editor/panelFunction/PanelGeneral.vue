@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="panel-group mb-10")
   div(class="panel-group__group-ctrl")
-    btn(class="full-width mr-10 rounded"
-      :type="'primary-mid'"
-      :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
-      @click="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup? $t('NN0212'):$t('NN0029')}}
+    nubtn(size="mid-full" class="mr-10"
+        :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
+        @click="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()")
+      span {{isGroup? $t('NN0212'):$t('NN0029')}}
     div(class="border-gray-4 p-5 btn-opacity"
       v-hint="$t('NN0030')"
     )

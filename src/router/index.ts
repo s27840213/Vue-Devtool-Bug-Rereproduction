@@ -1,3 +1,4 @@
+import appJson from '@/assets/json/app.json'
 import i18n from '@/i18n'
 import { CustomWindow } from '@/interfaces/customWindow'
 import store from '@/store'
@@ -181,8 +182,9 @@ router.beforeEach(async (to, from, next) => {
     const response = await fetch(`https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
     const json = await response.json()
 
-    console.log(json)
-    // const json = appJson
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    const appJsonHardcode = appJson // Keep this line to prevent import disappear.
+    // const json = appJson as any
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 
