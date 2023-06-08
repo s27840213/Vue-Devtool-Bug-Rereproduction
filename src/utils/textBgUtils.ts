@@ -139,6 +139,7 @@ export class Rect {
     Object.assign(div.style, safariStyle)
     div.style.writingMode = config.styles.writingMode
     let { widthLimit } = config
+    if (config.styles.textShape.name !== 'none') widthLimit = -1
     const { scale, height } = config.styles
     if (this.vertical) {
       div.style.width = 'max-content'

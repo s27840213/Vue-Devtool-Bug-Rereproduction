@@ -102,7 +102,7 @@ import paymentUtils from '@/utils/paymentUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
+import textEffectUtils, { isFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
@@ -305,10 +305,10 @@ export default defineComponent({
       this.setEffect({ effect: newVal })
     },
     async setEffectFocus(focus: boolean) {
-      if (this.currentStyle.name === 'curve' ||
-        (this.currCategoryName === 'fill' && this.currentStyle.name !== 'none')) {
-        await this.setEffect({ effect: { focus } })
-        if (!focus) this.recordChange()
+      if (focus && isFocusState(this.currCategoryName)) {
+        textEffectUtils.setFocus(this.currCategoryName)
+      } else if (!focus) {
+        textEffectUtils.setFocus('none')
       }
     },
     replaceImg(key: string) {

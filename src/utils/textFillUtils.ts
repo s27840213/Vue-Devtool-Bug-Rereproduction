@@ -178,7 +178,7 @@ class TextFill {
 
     const spanExpandRatio = 1
     const isTextShape = textShape.name !== 'none'
-    const isTextShapeFocus = isTextShape && textFill.focus
+    const isTextShapeFocus = isTextShape && textEffectUtils.focus === 'fill'
     const isPositiveBend = +textShape.bend >= 0
     const isFixedWidth = textBgUtils.isFixedWidth(config.styles)
     // If not TextShape, need add maxFontSize to top/left to fix its position.
@@ -194,25 +194,31 @@ class TextFill {
       }
       const bgSizeBy = textFill.size * (scaleByWidth ? divWidth / spanWidth : divHeight / spanHeight)
       return {
-        // About span BG
-        backgroundImage: `url("${imgSrc}")`,
-        backgroundSize: scaleByWidth ? `${bgSizeBy}% auto` : `auto ${bgSizeBy}%`,
-        // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
-        // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position#regarding_percentages
-        backgroundPosition: `
-          ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200)) * -1}px
-          ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200)) * -1}px`,
-        backgroundOrigin: 'content-box',
-        backgroundRepeat: 'no-repeat',
-        webkitBackgroundClip: 'text',
-        // To fix a Safari bug that the element border of BG text clip will appear abnormally,
-        // make border of element to be transparent.
-        maskImage: `url(${require('@/assets/img/svg/text-fill-mask-image.svg')})`,
-        maskSize: '100% 100%',
-        // About span color
-        opacity: textFill.opacity / 100,
+        ...textEffectUtils.focus === 'fill' ? {
+          backgroundColor: 'transparent',
+          webkitTextStrokeColor: 'black',
+          '-webkit-text-stroke-width': '1px', // Use dash-case for overwrite textStylesRaw result.
+        } : {
+          // About span BG
+          backgroundImage: `url("${imgSrc}")`,
+          backgroundSize: scaleByWidth ? `${bgSizeBy}% auto` : `auto ${bgSizeBy}%`,
+          // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
+          // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position#regarding_percentages
+          backgroundPosition: `
+            ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200)) * -1}px
+            ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200)) * -1}px`,
+          backgroundOrigin: 'content-box',
+          backgroundRepeat: 'no-repeat',
+          webkitBackgroundClip: 'text',
+          // To fix a Safari bug that the element border of BG text clip will appear abnormally,
+          // make border of element to be transparent.
+          maskImage: `url(${require('@/assets/img/svg/text-fill-mask-image.svg')})`,
+          maskSize: '100% 100%',
+          // About span color
+          opacity: textFill.opacity / 100,
+          webkitTextStrokeColor: 'transparent',
+        },
         webkitTextFillColor: 'transparent',
-        webkitTextStrokeColor: 'transparent',
         textDecorationColor: 'transparent',
         // About span position
         position: 'absolute',
@@ -221,8 +227,7 @@ class TextFill {
           [isPositiveBend ? 'top' : 'bottom']: `${y * (isPositiveBend ? 1 : -1) - spanHeight * spanExpandRatio}px`,
           left: `${x - spanWidth * spanExpandRatio}px`,
           transform: 'none',
-          // Use line-height here for overwrite textStylesRaw result. Use lineHeight will cause bug.
-          'line-height': 'initial',
+          'line-height': 'initial', // Use dash-case for overwrite textStylesRaw result.
         } : isTextShape ? {
           [isPositiveBend ? 'top' : 'bottom']: `${-spanHeight * spanExpandRatio}px`,
           // 'line-height': 'initial',
@@ -239,7 +244,7 @@ class TextFill {
 
   drawTextFill(config: IText): CustomElementConfig | null {
     const textFill = config.styles.textFill
-    if (textFill.name === 'none' || !textFill.focus) return null
+    if (textFill.name === 'none' || !(textEffectUtils.focus === 'fill')) return null
 
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
     if (!imgSrc) return null
@@ -253,7 +258,7 @@ class TextFill {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
         left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200) * -1}px`,
         top: `${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200) * -1}px`,
-        opacity: textFill.opacity / 200,
+        opacity: textFill.opacity / 100,
       }
     }
   }

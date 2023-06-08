@@ -1,6 +1,6 @@
 <template lang="pug">
 p(class="nu-curve-text__p" :style="pStyle()")
-  span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
+  span(v-if="focus === 'shape'"  class="nu-curve-text__circle" :style="circleStyle()")
     svg-icon(iconName="curve-center" :style="curveIconStyle")
   span(v-for="(span, sIndex) in spans()"
     class="nu-curve-text__span"
@@ -13,12 +13,13 @@ p(class="nu-curve-text__p" :style="pStyle()")
 import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
+import textEffectUtils, { IFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { isEqual } from 'lodash'
+import { computed, defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -39,16 +40,22 @@ export default defineComponent({
     subLayerIndex: {
       type: Number
     },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    },
     extraSpanStyle: {
       type: Object as PropType<Record<string, string|number>>,
     },
   },
   data () {
     return {
+      focus: computed(() => textEffectUtils.focus),
       textWidth: [] as number[],
       textHeight: [] as number[],
       minHeight: 0,
       isDestroyed: false,
+      textFillVersion: 0,
       textFillSpanStyle: [] as Record<string, string | number>[][]
     }
   },
@@ -61,11 +68,11 @@ export default defineComponent({
     this.isDestroyed = true
   },
   async mounted() {
-    this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+    this.drawTextFill()
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(async () => {
         await this.resizeCallback()
-        this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+        await this.drawTextFill()
         generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
       }, 100) // for the delay between font loading and dom rendering
     })
@@ -86,24 +93,28 @@ export default defineComponent({
       },
       deep: true
     },
-    async 'config.styles.textFill'() {
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+    focus(newVal: IFocusState, oldVal: IFocusState) {
+      if (newVal !== oldVal && (this.config.active || this.primaryLayer?.active)) this.drawTextFill()
     },
-    async 'config.styles.textShape'() {
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+    async 'config.styles.textFill'() {
+      if (this.focus === 'none') this.drawTextFill()
     },
   },
   methods: {
-    focus(): boolean {
-      const { textShape } = this.config.styles
-      return textShape.focus
-    },
     bend(): number {
       const { textShape } = this.config.styles
       return +textShape.bend
     },
     spans(): ISpan[] {
       return TextShapeUtils.flattenSpans(this.config)
+    },
+    async drawTextFill() {
+      // Prevent earlier result overwrite later result
+      const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
+      const newSpanStyle = await textFillUtils.convertTextEffect(this.config)
+      if (newTextFillVersion === this.textFillVersion && !isEqual(newSpanStyle, this.textFillSpanStyle)) {
+        this.textFillSpanStyle = newSpanStyle
+      }
     },
     pStyle(): Record<string, string | number> {
       const { height, width, scale } = this.config.styles
@@ -154,6 +165,7 @@ export default defineComponent({
       const baseline = `${(minHeight - textHeight[sIndex]) / 2 - fontSize}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
       const textFillStyle = this.textFillSpanStyle[0]?.[sIndex] ?? {}
+      const textShadowStrokeColor = textEffectUtils.convertTextEffect(this.config).webkitTextStrokeColor
       return Object.assign(
         fontStyles,
         {
@@ -162,7 +174,8 @@ export default defineComponent({
           padding: `${fontSize}px`,
         },
         bend >= 0 ? { top: baseline } : { bottom: baseline },
-        textFillStyle,
+        ['none', 'fill'].includes(this.focus) ? textFillStyle : null,
+        textShadowStrokeColor ? { webkitTextStrokeColor: textShadowStrokeColor } : {},
       )
     },
     async computeDimensions(spans: ISpan[]) {

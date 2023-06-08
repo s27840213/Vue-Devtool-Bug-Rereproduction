@@ -24,7 +24,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
         :key="`span${sIndex}`"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(sIndex, pIndex, config), text.extraSpanStyle)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, pIndex), text.extraSpanStyle)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
@@ -39,13 +39,13 @@ import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textBgUtils from '@/utils/textBgUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
+import textEffectUtils, { IFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { max, omit } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { isEqual, max, omit } from 'lodash'
+import { computed, defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   components: {
@@ -85,6 +85,7 @@ export default defineComponent({
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
+      focus: computed(() => textEffectUtils.focus),
       isDestroyed: false,
       initSize: {
         width: this.config.styles.width,
@@ -155,6 +156,11 @@ export default defineComponent({
       this.drawTextBg()
       this.drawTextFill()
     },
+    focus(newVal: IFocusState, oldVal: IFocusState) {
+      if (newVal !== oldVal && (this.config.active || this.primaryLayer?.active)) {
+        this.drawTextFill()
+      }
+    },
     'config.styles.textBg'() { this.drawTextBg() },
     'config.styles.textFill'() { this.drawTextFill() },
   },
@@ -181,9 +187,15 @@ export default defineComponent({
     async drawTextFill() {
       // Prevent earlier result overwrite later result
       const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
-      this.textFillBg = textFillUtils.drawTextFill(this.config)
-      const result = await textFillUtils.convertTextEffect(this.config)
-      if (newTextFillVersion === this.textFillVersion) this.textFillSpanStyle = result
+      const newFillBg = textFillUtils.drawTextFill(this.config)
+      if (!isEqual(newFillBg, this.textFillBg)) { // Prevent unnecessary update
+        this.textFillBg = newFillBg
+      }
+      if (this.isCurveText) return
+      const newSpanStyle = await textFillUtils.convertTextEffect(this.config)
+      if (newTextFillVersion === this.textFillVersion && !isEqual(newSpanStyle, this.textFillSpanStyle)) {
+        this.textFillSpanStyle = newSpanStyle
+      }
     },
     isLayerAutoResizeNeeded(): boolean {
       return this.config.isAutoResizeNeeded
@@ -218,17 +230,17 @@ export default defineComponent({
         top: `${maxFontSize * -1}px`,
       }
     },
-    spanStyle(sIndex: number, pIndex: number, config: IText): Record<string, string> {
-      const p = config.paragraphs[pIndex]
+    spanStyle(sIndex: number, pIndex: number): Record<string, string> {
+      const p = this.config.paragraphs[pIndex]
       const span = p.spans[sIndex]
       const textFillStyle = this.textFillSpanStyle[pIndex]?.[sIndex] ?? {}
-      const textShadowStrokeColor = textEffectUtils.convertTextEffect(config).webkitTextStrokeColor
+      const textShadowStrokeColor = textEffectUtils.convertTextEffect(this.config).webkitTextStrokeColor
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        textFillStyle,
+        ['none', 'fill'].includes(this.focus) ? textFillStyle : null,
         // Overwrite stroke color
         textShadowStrokeColor ? { webkitTextStrokeColor: textShadowStrokeColor } : {},
-        textBgUtils.fixedWidthStyle(span.styles, p.styles, config),
+        textBgUtils.fixedWidthStyle(span.styles, p.styles, this.config),
       )
     },
     pStyle(styles: IParagraphStyle) {
