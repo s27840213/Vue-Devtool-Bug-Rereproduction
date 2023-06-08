@@ -54,11 +54,12 @@ div(class="popup-window")
             input(class="payment-left-content-cancel__other"
                   v-model="otherReason" :placeholder="$t('NN0584')")
         div(class="payment-left-button")
-          btn(v-for="button in buttons"
-            :key="button.label"
-            :type="button.type || 'primary-lg'"
-            :disabled="button.disabled ? button.disabled() : false"
-            @click="button.func()") {{button.label}}
+          nubtn(v-for="button in buttons"
+              :key="button.label"
+              size="mid-full"
+              :theme="button.type ?? 'primary'"
+              :disabled="button.disabled ? button.disabled() : false"
+              @click="button.func()") {{button.label}}
       div(class="payment-right")
         img(class="payment-right-bg" loading="lazy"
             :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
@@ -68,11 +69,12 @@ div(class="popup-window")
         div(class="payment-finish-content")
           animation(path="/lottie/pro.json")
           span {{$t('NN0562')}}
-          btn(type="primary-mid" @click="closePopup()") {{$t('NN0563')}}
+          nubtn(size="mid" @click="closePopup()") {{$t('NN0563')}}
 </template>
 
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
+import { INubtnThemes } from '@/components/global/Nubtn.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
 import CouponInput from '@/components/payment/CouponInput.vue'
@@ -111,7 +113,7 @@ export default defineComponent({
       totalStep: 0,
       title: '',
       description: '',
-      buttons: [{}] as { type?: string, disabled?: () => boolean, label: string, func: () => void }[],
+      buttons: [{}] as { type?: INubtnThemes, disabled?: () => boolean, label: string, func: () => void }[],
       img: 'remover.jpg',
       // View constant
       periodInput: paymentData.periodOptions(),
@@ -294,7 +296,7 @@ export default defineComponent({
             label: this.$tc('NN0575'),
             func: () => this.closePopup()
           }, {
-            type: 'light-lg',
+            type: 'text',
             label: this.$tc('NN0574'),
             func: () => this.changeView('cancel2')
           }]
@@ -393,8 +395,7 @@ input {
   flex-direction: column;
   padding: 95px 30px;
   &-top,
-  &-content,
-  &-button {
+  &-content {
     width: 100%;
   }
   &-top {
@@ -422,24 +423,8 @@ input {
     }
   }
   &-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    > button {
-      @include btn-LG;
-      width: 100%;
-      border-radius: 4px;
-      margin-top: 2px;
-    }
-    > button:nth-child(1) {
+    > .nubtn:nth-child(1) {
       margin-top: 30px;
-    }
-    > button:nth-child(2) {
-      border: none;
-      &.btn-inactive-lg {
-        background-color: white;
-        color: setColor(gray-3);
-      }
     }
   }
 }
@@ -533,9 +518,6 @@ input {
     color: setColor(gray-2);
     width: 560px;
     height: 310px;
-    > button {
-      @include btn-LG;
-    }
   }
 }
 
