@@ -168,6 +168,7 @@ export default defineComponent({
       pageUtils.setPagesName(value)
     },
     toggleDebugTool() {
+      localStorage.setItem('enableAdminView', `${!this.enableAdminView}`)
       this.setUserState({ enableAdminView: !this.enableAdminView })
     },
     toggleBleed() {
