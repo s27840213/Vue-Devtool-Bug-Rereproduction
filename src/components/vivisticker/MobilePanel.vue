@@ -646,13 +646,15 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(false)
     },
     initPanelHeight() {
-      // 40 = HeaderTabs height
-      return ((this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)) * (this.halfSizeInInitState ? 0.5 : 1.0)
+      const parentElementHeight = this.panelParentHeight()
+      if (this.halfSizeInInitState) return parentElementHeight * 0.5
+      return parentElementHeight - 40
     },
     currPanelHeight() {
       return (this.$refs.panel as HTMLElement).clientHeight
     },
     panelParentHeight() {
+      // 40 = HeaderTabs height
       if (!this.$el) return window.innerHeight
       return (this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)
     },
@@ -676,7 +678,7 @@ export default defineComponent({
       if (this.panelDragHeight < panelParentHeight * 0.25) {
         this.closeMobilePanel()
       } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
-        this.panelDragHeight = panelParentHeight
+        this.panelDragHeight = panelParentHeight - 40
         this.$emit('panelHeight', this.panelDragHeight + 30) // 30 = 15 padding * 2
       } else {
         this.panelDragHeight = panelParentHeight * 0.5
