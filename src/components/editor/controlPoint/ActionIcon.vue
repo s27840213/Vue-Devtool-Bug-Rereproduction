@@ -25,7 +25,7 @@ defineProps({
   },
   iconColor: {
     type: String,
-    default: () => 'blue-2',
+    default: () => 'black-1',
   },
   theme: {
     type: String as PropType<'border' | 'shadow'>,
