@@ -33,7 +33,6 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
             :item="item"
             :style="itemStyles"
-            noCarousel
             @clickGroupItem="handleShowGroup")
     template(v-slot:category-template-item="{ list, title }")
       div(v-if="title" class="panel-template-content__header") {{ title }}
@@ -44,7 +43,6 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
           :item="item"
           :key="item.group_id"
           :style="itemStyles"
-          noCarousel
           @clickGroupItem="handleShowGroup"
           :groupItem="currentGroup")
     template(#after)

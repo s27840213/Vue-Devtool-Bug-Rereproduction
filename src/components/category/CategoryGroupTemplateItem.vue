@@ -1,19 +1,15 @@
 <template lang="pug">
 div(class="category-template-item" @click="handleClickGroup")
-  div(class="relative pointer"
-    @mouseover="() => !noCarousel && handleCarouse()"
-    @mouseleave="!noCarousel && stopCarouse()")
-    image-carousel(v-if="!noCarousel && showCarousel"
-      :imgs="groupImages"
-      @change="handleCarouselIdx")
-      template(v-slot="{ url }")
-        img(:src="url" class="category-template-item__img")
-    img(v-else
-      class="category-template-item__img pointer"
-      :src="fallbackSrc || previewImage"
-      @error="handleNotFound")
-    span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
-    pro-item(v-if="item.plan")
+  image-carousel(
+    :imgs="groupImages"
+    :speed="2000"
+    @change="handleCarouselIdx")
+    template(v-slot="{ url }")
+      img(class="category-template-item__img"
+          :src="fallbackSrc || url"
+          @error="handleNotFound")
+  span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
@@ -31,10 +27,6 @@ export default defineComponent({
     item: {
       type: Object,
       required: true
-    },
-    noCarousel: {
-      type: Boolean,
-      default: false
     }
   },
   data () {
@@ -43,20 +35,19 @@ export default defineComponent({
       carouselIdx: 0,
       fallbackSrc: '',
       isHover: false,
-      waitTimer: 0 as number
+      waitTimer: 0 as number,
+      renderedWidth: 120,
+      renderedHeight: 120
     }
   },
   mounted () {
     const preImg = new Image()
     preImg.src = this.groupImages[0]
+    this.handleCarouse()
   },
   computed: {
     groupImages (): string[] {
       return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev_2x?ver=${content.ver}`)
-    },
-    previewImage (): string {
-      const { match_cover: cover, ver, id } = this.item
-      return `https://template.vivipic.com/template/${cover.id ?? id}/prev_2x?ver=${ver}`
     }
   },
   methods: {
@@ -69,7 +60,8 @@ export default defineComponent({
     handleClickGroup () {
       this.$emit('clickGroupItem', this.item)
     },
-    handleCarouse () {
+    handleCarouse() {
+      this.getRenderedSize()
       this.isHover = true
       this.waitTimer = window.setInterval(() => {
         if (this.isHover) {
@@ -77,10 +69,12 @@ export default defineComponent({
         }
       }, 100)
     },
-    stopCarouse () {
-      this.isHover = false
-      this.showCarousel = false
-      window.clearInterval(this.waitTimer)
+    getRenderedSize(): boolean {
+      const elContainer = this.$el as HTMLElement
+      if (!elContainer) return false
+      this.renderedWidth = elContainer.clientWidth
+      this.renderedHeight = elContainer.clientHeight
+      return true
     }
   }
 })
@@ -88,12 +82,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
   .category-template-item {
+    @include size(100%);
+    position: relative;
+    border-radius: 5px;
+    overflow: hidden;
     &__img {
-      @include size(100%);
+      @include size(v-bind("`${renderedWidth}px`"), v-bind("`${renderedHeight}px`"));
       object-fit: contain;
       vertical-align: top;
       pointer-events: none;
-      border-radius: 5px;
     }
     &__index {
       position: absolute;
