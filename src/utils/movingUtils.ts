@@ -168,10 +168,11 @@ export class MovingUtils {
             /**
              * This is the dbl-click callback block
              */
-            if (this.getLayerType === LayerType.image) {
-              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-              eventUtils.emit(PanelEvent.switchTab, 'crop')
-            }
+            // vivisticker can only crop frame
+            // if (this.getLayerType === LayerType.image) {
+            //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+            //   eventUtils.emit(PanelEvent.switchTab, 'crop')
+            // }
             this.dblTabsFlag = true
           }
         }
