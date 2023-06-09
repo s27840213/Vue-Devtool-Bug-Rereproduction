@@ -29,6 +29,7 @@ import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -182,6 +183,9 @@ export default defineComponent({
       const elEditor = this.$el as HTMLElement
       this.cardWidth = elEditor.clientWidth
       this.cardHeight = elEditor.clientHeight
+
+      // reset initial step to prevent wrong size of page when undo
+      if (stepsUtils.steps.length === 1) stepsUtils.reset()
 
       this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0) })
     },
