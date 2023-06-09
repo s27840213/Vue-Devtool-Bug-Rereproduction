@@ -89,7 +89,9 @@ Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
   return cy.wrap(subject)
 })
 
-Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCrop: 'button' | 'dblclick') => {
+Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCrop, isMobile) => {
+  const cropOffset = isMobile ? 31 : 28.5
+
   cy.wrap(subject).click()
     .then(() => {
       if (enterCrop === 'button') {
@@ -101,9 +103,9 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
       }
     })
     .snapshotTest('Crop init')
-    .get('.dim-background .nu-controller__body .controller-point').eq(1)
+    .get('.dim-background .nu-controller__body .control-point').eq(1)
     .realMouseDown()
-    .realMouseMove(30, -30)
+    .realMouseMove(cropOffset, -cropOffset)
     .realMouseUp()
     .snapshotTest('Crop scale top right').then(() => {
       const moves = [
@@ -124,7 +126,7 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
     .realMouseDown()
     .realMouseMove(100, -100, { position: 'center' })
     .realMouseUp()
-    .get('.dim-background .nu-controller__body .controller-point').eq(1)
+    .get('.dim-background .nu-controller__body .control-point').eq(1)
     .realMouseDown()
     .realMouseMove(-100, 100)
     .realMouseUp()
