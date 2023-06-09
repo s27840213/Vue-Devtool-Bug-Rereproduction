@@ -319,7 +319,8 @@ export default defineComponent({
           }
           case 'gen-thumb': {
             const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
-            vivistickerUtils.initLoadingFlags(page, () => {
+            const hasBg = !noBg && page.backgroundImage.config.srcObj?.assetId !== ''
+            const genThumb = () => {
               vivistickerUtils.callIOSAsAPI('GEN_THUMB', {
                 type: 'mydesign',
                 id: designId,
@@ -338,7 +339,18 @@ export default defineComponent({
                   to: 'UI'
                 })
               })
-            }, false)
+            }
+            if (page.layers.length === 0 && !hasBg) {
+              this.JSONcontentSize = {
+                width: page.width,
+                height: page.height
+              }
+              this.usingJSON = true
+              genThumb()
+              return
+            }
+            layerUtils.setAutoResizeNeededForLayersInPage(page, true)
+            vivistickerUtils.initLoadingFlags(page, genThumb, false)
             pageUtils.setPages([page])
             this.usingJSON = true
             break
