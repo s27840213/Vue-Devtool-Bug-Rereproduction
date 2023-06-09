@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="page-card" :id="`page-card-${pageIndex}`" :style="styles('card')")
-  div(:id="`nu-page-wrapper_${pageIndex}`" :class="`page-card__pseudo-page`" :style="styles('page')")
+  div(v-if="!isOutOfBound" :id="`nu-page-wrapper_${pageIndex}`" :class="`page-card__pseudo-page`" :style="styles('page')")
     div(class="page-card__scale-container" :style="styles('scale')")
       page-content(:id="`vvstk-page-${pageIndex}`" class="page-content" :config="config" :pageIndex="pageIndex" :noBg="noBg" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
       dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
@@ -103,6 +103,9 @@ export default defineComponent({
     },
     isPageDuringCopy(): boolean {
       return this.isDuringCopy && this.pageIndex === pageUtils.currFocusPageIndex
+    },
+    isOutOfBound(): boolean {
+      return this.pageIndex <= pageUtils.currFocusPageIndex - 2 || this.pageIndex >= pageUtils.currFocusPageIndex + 2
     }
   },
   components: {
