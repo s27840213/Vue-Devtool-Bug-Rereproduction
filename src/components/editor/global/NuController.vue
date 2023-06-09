@@ -144,63 +144,71 @@ div(:layer-index="`${layerIndex}`"
             class="control-point__controller-wrapper")
           template(v-if="isLine()")
             template(v-if="!$isTouchDevice()")
-              div(class="control-point__action shadow"
+              action-icon(iconName="rotate2"
+                          iconWidth="20px"
+                          theme="shadow"
+                          :extraStyle="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
+                          @action="lineRotateStart")
+            div(class="control-point__action-icon")
+              div(v-if="$isTouchDevice()"
+                  class="control-point__touch-area control-point__mover"
+                  ref="moveStart-moverArea")
+              div(class="control-point__action shadow control-point__mover"
+                  ref="moveStart-mover"
                   :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
-                  @pointerdown.stop="lineRotateStart"
                   @touchstart="disableTouchEvent")
                 svg-icon(class="control-point__action-svg"
-                  iconName="rotate2" iconWidth="20px"
+                  iconName="move2" iconWidth="24px"
                   iconColor="blue-2")
-            div(class="control-point__action shadow control-point__mover"
-                ref="moveStart-mover"
-                :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
-                @touchstart="disableTouchEvent")
-              svg-icon(class="control-point__action-svg"
-                iconName="move2" iconWidth="24px"
-                iconColor="blue-2")
           template(v-else)
             template(v-if="!$isTouchDevice()")
-              div(class="control-point__action shadow"
+              action-icon(iconName="rotate2"
+                          iconWidth="20px"
+                          theme="shadow"
+                          :extraStyle="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
+                          @action="rotateStart")
+            div(class="control-point__action-icon")
+              div(v-if="$isTouchDevice()"
+                  class="control-point__touch-area control-point__mover"
+                  ref="moveStart-moverArea")
+              div(class="control-point__action shadow control-point__mover"
+                  ref="moveStart-mover"
                   :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
-                  @pointerdown.stop="rotateStart"
                   @touchstart="disableTouchEvent")
                 svg-icon(class="control-point__action-svg"
-                  iconName="rotate2" iconWidth="20px"
+                  iconName="move2" iconWidth="24px"
                   iconColor="blue-2")
-            div(class="control-point__action shadow control-point__mover"
-                ref="moveStart-mover"
-                :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
-                @touchstart="disableTouchEvent")
-              svg-icon(class="control-point__action-svg"
-                iconName="move2" iconWidth="24px"
-                iconColor="blue-2")
-    div(v-if="isActive && isLocked() && (scaleRatio > 20)"
-        class="control-point__bottom-right-icon control-point__action shadow"
-        :style="actionIconStyles()"
-        @click="MappingUtils.mappingIconAction('lock')")
-      svg-icon(iconName="lock" iconWidth="16px" iconColor="red")
-    template(v-if="$isTouchDevice() && isActive")
+    action-icon(v-if="isActive && isLocked() && (scaleRatio > 20)"
+                class="control-point__bottom-right-icon"
+                iconName="lock"
+                iconSize="16px"
+                iconColor="red"
+                theme="shadow"
+                :extraStyle="actionIconStyles()"
+                @action="MappingUtils.mappingIconAction('lock')")
+    template(v-if="$isTouchDevice() && isActive && !isLocked()")
       div(v-show="!isMoving")
-        div(class="control-point__top-left-icon control-point__action border"
-            :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'pointer' })"
-            @pointerdown.prevent.stop="MappingUtils.mappingIconAction('trash')")
-          svg-icon(iconName="close" iconWidth="18px" iconColor="blue-2")
-        div(v-if="isLine()" class="control-point__bottom-left-icon control-point__action border"
-            :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
-            @pointerdown.prevent.stop="lineRotateStart")
-          svg-icon(iconName="rotate2" iconWidth="24px" iconColor="blue-2")
-        div(v-else class="control-point__bottom-left-icon control-point__action border"
-            :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
-            @pointerdown.prevent.stop="rotateStart")
-          svg-icon(iconName="rotate2" iconWidth="24px" iconColor="blue-2")
-        div(v-if="!tooSmall && !isLine()"
-            class="control-point__bottom-right-icon control-point__action border"
-            :style="ctrlPointerStyles(actionIconStyles(), cursorStyles(4, getLayerRotate()))"
-            @pointerdown.prevent.stop="scaleStart($event)")
-          svg-icon(iconName="scale" iconWidth="24px" iconColor="blue-2")
+        action-icon(class="control-point__top-left-icon"
+                    iconName="close"
+                    iconSize="18px"
+                    theme="border"
+                    :extraStyle="ctrlPointerStyles(actionIconStyles(), { cursor: 'pointer' })"
+                    @action="MappingUtils.mappingIconAction('trash')")
+        action-icon(class="control-point__bottom-left-icon"
+                    iconName="rotate2"
+                    theme="border"
+                    :extraStyle="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
+                    @action="(e) => isLine() ? lineRotateStart(e) : rotateStart(e)")
+        action-icon(v-if="!tooSmall && !isLine()"
+                    class="control-point__bottom-right-icon"
+                    iconName="scale"
+                    theme="border"
+                    :extraStyle="ctrlPointerStyles(actionIconStyles(), cursorStyles(4, getLayerRotate()))"
+                    @action="scaleStart")
 </template>
 
 <script lang="ts">
+import ActionIcon from '@/components/editor/controlPoint/ActionIcon.vue'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import { IResizer } from '@/interfaces/controller'
 import { isTextFill } from '@/interfaces/format'
@@ -266,7 +274,8 @@ export default defineComponent({
   },
   emits: ['isDragging', 'setFocus'],
   components: {
-    NuTextEditor
+    NuTextEditor,
+    ActionIcon
   },
   created() {
     this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
