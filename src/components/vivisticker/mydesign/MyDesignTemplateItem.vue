@@ -12,8 +12,9 @@ div(class="my-design-text-item" @click="editTemplate")
   div(v-else class="my-design-text-item__more" @click.stop.prevent="handleMoreActions")
     svg-icon(iconName="more" iconColor="white" iconWidth="24px")
   div(v-if="item.assetInfo.pageNum" class="my-design-text-item__index")
-    //- svg-icon(iconName="all-pages" iconColor="black-5" iconWidth="12px")
-    span(class="text-black-5") {{ strPageIndex }}
+    svg-icon(iconName="pages" iconColor="black-5" iconWidth="20px")
+    div(class="my-design-text-item__index__text")
+      span(class="text-black-5 body-XS") {{ strPageIndex }}
 </template>
 
 <script lang="ts">
@@ -148,7 +149,7 @@ export default defineComponent({
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding: 4px 6px;
+    padding: 4px 4px 4px 8px;
     position: absolute;
     width: 40px;
     height: 16px;
@@ -156,16 +157,11 @@ export default defineComponent({
     bottom: 4px;
     background: rgba(setColor(gray-1), 0.3);
     border-radius: 100px;
-    column-gap: 4px;
-    &>span {
+    &__text {
+      width: 24px;
       display: flex;
       align-items: center;
-      text-align: center;
-      font-style: normal;
-      font-weight: 400;
-      font-size: 12px;
-      line-height: 180%;
-      transform: scale(0.83); // scale font size to 10px
+      justify-content: center;
     }
   }
 }
