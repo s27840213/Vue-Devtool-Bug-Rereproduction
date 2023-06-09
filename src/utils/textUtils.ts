@@ -776,7 +776,7 @@ class TextUtils {
       prevDiff = currDiff
       if (autoDimension - originDimension > 5 * scale) {
         if (direction < 0) break
-        if (direction >= 200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
+        if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
         widthLimit += scale
         direction += 1
         autoSize = this.getTextHW(config, widthLimit)
@@ -784,7 +784,7 @@ class TextUtils {
       }
       if (originDimension - autoDimension > 5 * scale) {
         if (direction > 0) break
-        if (direction <= -200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
+        if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
         widthLimit -= scale
         direction -= 1
         autoSize = this.getTextHW(config, widthLimit)
@@ -843,7 +843,7 @@ class TextUtils {
       prevDiff = currDiff
       if (autoDimension - originDimension > 5 * scale) {
         if (direction < 0) break
-        if (direction >= 200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
+        if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
         widthLimit += scale
         direction += 1
         autoSize = await this.getTextHWAsync(config, widthLimit)
@@ -851,7 +851,7 @@ class TextUtils {
       }
       if (originDimension - autoDimension > 5 * scale) {
         if (direction > 0) break
-        if (direction <= -200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
+        if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
         widthLimit -= scale
         direction -= 1
         autoSize = await this.getTextHWAsync(config, widthLimit)
