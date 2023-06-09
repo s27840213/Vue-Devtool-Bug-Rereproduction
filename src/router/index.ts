@@ -1,3 +1,4 @@
+import appJson from '@/assets/json/app.json'
 import i18n from '@/i18n'
 import store from '@/store'
 import { LayerType } from '@/store/types'
@@ -7,9 +8,10 @@ import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import picWVUtils from '@/utils/picWVUtils'
+import textFillUtils from '@/utils/textFillUtils'
 import Home from '@/views/Home.vue'
-import { defineAsyncComponent, h, resolveComponent } from 'vue'
-import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
+import { h, resolveComponent } from 'vue'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { editorRouteHandler } from './handler'
 
 const MOBILE_ROUTES = [
@@ -34,14 +36,14 @@ const routes: Array<RouteRecordRaw> = [
       try {
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
   {
     path: 'editor',
     name: 'Editor',
-    component: defineAsyncComponent(() => import('@/views/Editor.vue')),
+    component: () => import('@/views/Editor.vue'),
     beforeEnter: editorRouteHandler
   },
   // {
@@ -54,7 +56,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'preview',
     name: 'Preview',
-    component: defineAsyncComponent(() => import('@/views/Preview.vue')),
+    component: () => import('@/views/Preview.vue'),
     beforeEnter: async (to, from, next) => {
       try {
         const urlParams = new URLSearchParams(window.location.search)
@@ -67,6 +69,10 @@ const routes: Array<RouteRecordRaw> = [
         const margin = urlParams.get('margin')
         const margins = margin ? margin.split(',') : []
         const renderForPDF = urlParams.get('renderForPDF')
+        const unitScale = urlParams.get('unit_scale')
+
+        store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
+        store.commit('user/SET_STATE', { unitScale: unitScale === '1' })
 
         const informBackend = () => {
           console.log('all resize done')
@@ -88,7 +94,6 @@ const routes: Array<RouteRecordRaw> = [
           generalUtils.initializeFlags(LayerType.text, [response], informBackend)
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
         } else if (url) {
           // for old version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
@@ -117,11 +122,10 @@ const routes: Array<RouteRecordRaw> = [
           generalUtils.initializeFlags(LayerType.text, [response], informBackend)
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
         }
         next()
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -129,7 +133,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'signup',
     name: 'SignUp',
     props: route => ({ redirect: route.query.redirect }),
-    component: defineAsyncComponent(() => import('@/views/Login/SignUp.vue')),
+    component: () => import('@/views/Login/SignUp.vue'),
     beforeEnter: async (to, from, next) => {
       try {
         if (store.getters['user/isLogin']) {
@@ -138,7 +142,7 @@ const routes: Array<RouteRecordRaw> = [
           next()
         }
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
@@ -146,7 +150,7 @@ const routes: Array<RouteRecordRaw> = [
     path: 'login',
     name: 'Login',
     props: route => ({ redirect: route.query.redirect }),
-    component: defineAsyncComponent(() => import('@/views/Login/Login.vue')),
+    component: () => import('@/views/Login/Login.vue'),
     beforeEnter: async (to, from, next) => {
       try {
         if (to.query.type) {
@@ -159,41 +163,41 @@ const routes: Array<RouteRecordRaw> = [
           }
         }
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
   {
     path: 'mydesign/:view?',
     name: 'MyDesign',
-    component: defineAsyncComponent(() => import('@/views/MyDesign.vue')),
+    component: () => import('@/views/MyDesign.vue'),
     props: true
   },
   {
     path: 'templates',
     name: 'TemplateCenter',
-    component: defineAsyncComponent(() => import('@/views/TemplateCenter.vue'))
+    component: () => import('@/views/TemplateCenter.vue')
   },
   {
     path: 'settings/:view?',
     name: 'Settings',
-    component: defineAsyncComponent(() => import('@/views/Settings.vue')),
+    component: () => import('@/views/Settings.vue'),
     props: true
   },
   {
     path: 'mobilewarning',
     name: 'MobileWarning',
-    component: defineAsyncComponent(() => import('@/views/MobileWarning.vue'))
+    component: () => import('@/views/MobileWarning.vue')
   },
   {
     path: 'browserwarning',
     name: 'BrowserWarning',
-    component: defineAsyncComponent(() => import('@/views/BrowserWarning.vue'))
+    component: () => import('@/views/BrowserWarning.vue')
   },
   {
     path: 'brandkit',
     name: 'BrandKit',
-    component: defineAsyncComponent(() => import('@/views/BrandKit.vue')),
+    component: () => import('@/views/BrandKit.vue'),
     beforeEnter: async (to, from, next) => {
       try {
         if (!brandkitUtils.isBrandkitAvailable) {
@@ -202,14 +206,14 @@ const routes: Array<RouteRecordRaw> = [
           next()
         }
       } catch (error) {
-        console.log(error)
+        logUtils.setLogForError(error as Error)
       }
     }
   },
   {
     path: 'pricing',
     name: 'Pricing',
-    component: defineAsyncComponent(() => import('@/views/Pricing.vue'))
+    component: () => import('@/views/Pricing.vue')
   }
 ]
 
@@ -217,17 +221,17 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: defineAsyncComponent(() => import('@/views/SvgIconView.vue'))
+    component: () => import('@/views/SvgIconView.vue')
   })
   routes.push({
     path: 'copytool',
     name: 'CopyTool',
-    component: defineAsyncComponent(() => import('@/views/CopyTool.vue'))
+    component: () => import('@/views/CopyTool.vue')
   })
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: defineAsyncComponent(() => import('@/views/NubtnList.vue'))
+    component: () => import('@/views/NubtnList.vue')
   })
 }
 
@@ -242,14 +246,28 @@ const router = createRouter({
         render() { return h(resolveComponent('router-view')) }
       },
       async beforeEnter(to, from, next) {
-        if (!picWVUtils.inBrowserMode) {
-          picWVUtils.registerCallbacks('router')
-        }
-        await picWVUtils.getUserInfo()
         if (logUtils.getLog()) {
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
+        if (!picWVUtils.inBrowserMode) {
+          picWVUtils.registerCallbacks('router')
+        }
+        await picWVUtils.getUserInfo()
+        let argoError = false
+        try {
+          const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
+          if (status !== 200) {
+            argoError = true
+            logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
+          }
+        } catch (error) {
+          argoError = true
+          logUtils.setLogForError(error as Error)
+          logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
+        } finally {
+          store.commit('text/SET_isArgoAvailable', !argoError)
+        }
         let locale = localStorage.getItem('locale') as '' | 'tw' | 'us' | 'jp'
         // if local storage is empty
         if (locale === '' || !locale) {
@@ -295,7 +313,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Force login in these page
-  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
+  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) && !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode'])) {
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
       if (token === '' || !token) {
@@ -321,9 +339,13 @@ router.beforeEach(async (to, from, next) => {
     const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
     const json = await response.json()
 
-    // const json = appJson
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    const appJsonHardcode = appJson // Keep this line to prevent import disappear.
+    // const json = appJson as any
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
 
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
@@ -332,6 +354,7 @@ router.beforeEach(async (to, from, next) => {
       imgSizeMapExtra: json.image_size_map_extra,
       dimensionMap: json.dimension_map
     })
+    textFillUtils.updateFillCategory(json.text_effect, json.text_effect_admin)
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 
     // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.

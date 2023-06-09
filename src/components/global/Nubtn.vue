@@ -3,7 +3,7 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice()?'mobile':'
     v-hint="hint"
     @click="click")
   svg-icon(v-if="theme.includes('icon')"
-          :iconName="icon" :iconWidth="iconSize" :iconColor="iconColor")
+          :iconName="iconName" :iconWidth="iconSize" :iconColor="iconColor")
   span(v-if="!theme.includes('icon') || theme === 'icon_text'")
     slot
 </template>
@@ -11,74 +11,82 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice()?'mobile':'
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 
-export default defineComponent({
+declare module '@vue/runtime-core' {
+  export interface GlobalComponents {
+    nubtn: typeof component
+  }
+}
+
+export type INubtnThemes = 'primary' | 'outline' | 'text' | 'icon_text' | 'icon' | 'icon2' |
+  'ghost' | 'ghost_outline' | 'danger' | 'secondary'
+export type INubtnSize = 'sm' | 'sm-full' | 'sm-center' | 'mid' | 'mid-full' | 'mid-center'
+
+const component = defineComponent({
   name: 'Nubtn',
-  // Let status prop and @status will be the target of v-model, https://bit.ly/3ukz2Yq
-  model: {
-    prop: 'status',
-    event: 'status'
-  },
+  emits: ['click', 'update:active'],
   props: {
     theme: {
-      type: String as PropType<
-        'primary'|'outline'|'text'|'icon_text'|'icon'|'icon2'|
-        'ghost'|'ghost_outline'|'danger'|'secondary'
-      >,
+      type: String as PropType<INubtnThemes>,
       default: 'primary'
     },
     // *-full mean button will occupy all width.
     // *-center mean button have ml/mr: auto
     size: {
-      type: String as PropType<'sm'|'sm-full'|'sm-center'|'mid'|'mid-full'|'mid-center'>,
+      type: String as PropType<INubtnSize>,
       default: 'sm'
     },
-    // Use v-model if you want Nubtn switch between active/default.
-    // Use :status if you want to control state from parent, not from Nubtn itself.
-    // Vale: default, active, hover, disabled
-    status: {
-      type: String as PropType<'default'|'active'|'hover'|'disabled'>,
-      default: 'default'
+    // Use v-model:active if you want Nubtn modify active for you.
+    // Use :active if you want to control active only from parent, not from Nubtn itself.
+    active: {
+      type: Boolean,
+      default: false,
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    // Case 1: Only specify iconName, ex: icon="sliders"
+    // Case 2: Specify iconName and iconColor, ex :icon="['pro', 'alarm']"
     icon: {
-      type: String,
-      default: 'none'
+      type: [String, Array] as PropType<string | string[]>,
     },
     hint: {
       type: String,
       default: ''
     },
   },
-  data() {
-    return {
-      active: false
-    }
-  },
   computed: {
+    status(): 'default' | 'active' | 'disabled' {
+      return this.disabled ? 'disabled'
+        : this.active ? 'active' : 'default'
+    },
     sizeClass(): string {
       return this.size.replace('-', ' ')
     },
-    iconColor(): string {
-      return this.theme === 'icon_text' ? 'white'
-        : this.status === 'disabled' ? 'gray-4' : 'gray-2'
+    iconName(): string | undefined {
+      return Array.isArray(this.icon) ? this.icon[0] : this.icon
     },
     iconSize(): string {
-      return this.size.startsWith('sm') ? '18px' : '24px'
-    }
+      return '24px'
+    },
+    iconColor(): string {
+      if (Array.isArray(this.icon) && this.icon[1]) { // Case 2
+        return this.icon[1]
+      } else if (this.theme === 'icon_text') return 'white'
+      else return this.status === 'disabled' ? 'gray-4' : 'gray-2'
+    },
   },
   methods: {
-    updateStatus() {
-      const newStatus = this.status === 'disabled' ? 'disabled'
-        : this.active ? 'active'
-          : 'default'
-      this.$emit('status', newStatus)
-    },
-    click() {
+    click(e: MouseEvent) {
+      // Will not trigger @click when disabled
       if (this.status === 'disabled') return
-      this.active = !this.active
-      this.updateStatus()
+      this.$emit('update:active', !this.active)
+      this.$emit('click', e)
     }
   }
 })
+
+export default component
 </script>
 
 <style lang="scss" scoped>
@@ -106,11 +114,13 @@ export default defineComponent({
 @mixin default-size {
   &.sm {
     @include btn-SM;
+    font-weight: 600;
     height: 32px;
     padding: 4px 16px;
   }
   &.mid {
     @include btn-LG;
+    font-weight: 600;
     height: 44px;
     padding: 10px 24px;
   }
@@ -151,10 +161,14 @@ export default defineComponent({
     margin-right: 8px;
   }
   &.sm {
+    @include btn-SM;
+    font-weight: 600;
     height: 36px;
     padding: 6px 16px 6px 12px;
   }
   &.mid {
+    @include btn-LG;
+    font-weight: 600;
     height: 44px;
     padding: 10px 20px 10px 12px;
   }
@@ -162,14 +176,8 @@ export default defineComponent({
   background-color: var(--blue);
 }
 .nubtn.icon {
-  &.sm {
-    width: 24px;
-    height: 24px;
-  }
-  &.mid {
-    width: 32px;
-    height: 32px;
-  }
+  width: 32px;
+  height: 32px;
   &.active {
     background-color: setColor(blue-3);
   }
@@ -202,6 +210,8 @@ export default defineComponent({
   }
 }
 .nubtn.ghost {
+  @include btn-SM;
+  font-weight: 600;
   height: 36px;
   padding: 6px 24px;
   border-radius: 50px;
@@ -219,6 +229,8 @@ export default defineComponent({
   }
 }
 .nubtn.ghost_outline {
+  @include btn-SM;
+  font-weight: 600;
   height: 36px;
   padding: 6px 24px;
   border-radius: 50px;

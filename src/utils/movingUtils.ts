@@ -529,7 +529,7 @@ export class MovingUtils {
       x: Math.abs(pageUtils.getCurrPage.x - initPageTranslate.x),
       y: Math.abs(pageUtils.getCurrPage.y - initPageTranslate.y)
     }
-    const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
+    const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
 
     if (this.isActive) {

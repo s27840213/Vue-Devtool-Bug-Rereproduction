@@ -8,17 +8,16 @@ div(class="nu-img-controller")
       @pointerdown.stop="moveStart"
       @touchstart="disableTouchEvent")
     div(v-for="(scaler, index) in controlPoints.scalers"
-        class="controller-point"
+        class="control-point"
         :key="`scaler-${index}`"
-        :style="_cursorStyles(scaler, index)"
+        :style="(Object.assign(scalerStyles(scaler.styles), cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
         @pointerdown.prevent.stop="$isTouchDevice() ? null : scaleStart($event)"
         @touchstart="$isTouchDevice() ? null : disableTouchEvent($event)")
-        //- :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
-    template(v-if="$isTouchDevice()" )
+    template(v-if="$isTouchDevice()")
       div(v-for="(scaler, index) in controlPoints.scalerTouchAreas"
-          class="controller-point"
+          class="control-point"
           :key="`scaler-touch-${index}`"
-          :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
+          :style="(Object.assign(scalerStyles(scaler.styles), cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
           @pointerdown.prevent.stop="scaleStart"
           @touchstart="disableTouchEvent")
 </template>
@@ -76,7 +75,7 @@ export default defineComponent({
   },
   data() {
     return {
-      controlPoints: ControlUtils.getControlPoints(4, 25, (100 / this.$store.getters.getPageScaleRatio)),
+      controlPoints: ControlUtils.getControlPoints(),
       initialPos: { x: 0, y: 0 },
       initImgPos: { imgX: 0, imgY: 0 },
       initialWH: { width: 0, height: 0 },
@@ -184,6 +183,11 @@ export default defineComponent({
         // outline: '2px solid #7190CC'
         outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
       }
+    },
+    scalerStyles(scaler: { [key: string]: string }) {
+      const scalerStyle = { ...scaler }
+      scalerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      return scalerStyle
     },
     imgControllerPosHandler(): ICoordinate {
       const angleInRad = this.getLayerRotate * Math.PI / 180
@@ -408,18 +412,6 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointerup', this.scaleEnd)
       eventUtils.removePointerEvent('pointermove', this.scaling)
     },
-    _cursorStyles(scaler: any, index: number) {
-      const cursorIndex = this.getLayerRotate >= 0 ? (index + Math.floor(this.getLayerRotate / 45)) % 8
-        : (index + Math.ceil(this.getLayerRotate / 45) + 8) % 8
-      const _f = this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1
-      return {
-        ...scaler.styles,
-        width: `${scaler.styles.w * _f}px`,
-        height: `${scaler.styles.h * _f}px`,
-        cursor: this.controlPoints.cursors[cursorIndex],
-        pointerEvents: this.forRender ? 'none' : 'initial'
-      }
-    },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
@@ -445,16 +437,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.controller-point {
-  pointer-events: auto;
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: setColor(white);
-  border: 1.5px solid setColor(blue-2);
-  border-radius: 30%;
-}
-
 .nu-controller {
   display: flex;
   justify-content: center;

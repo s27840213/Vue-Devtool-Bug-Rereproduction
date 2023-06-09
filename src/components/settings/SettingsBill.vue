@@ -54,6 +54,7 @@ div(class="bill")
 
 <script lang="ts">
 import * as type from '@/interfaces/payment'
+import generalUtils from '@/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
 // import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -123,7 +124,7 @@ export default defineComponent({
         jsPDF: { format: [160, 226.42] }
       }
       // html2pdf will freeze page, so sleep 100ms for showing loading spinner.
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await generalUtils.sleep(100)
       await html2pdf().set(opt).from(invoice).toPdf().save(this.curInvoice.id)
       this.setIsLoading(false)
     }

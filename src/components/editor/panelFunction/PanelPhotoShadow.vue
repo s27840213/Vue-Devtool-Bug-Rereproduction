@@ -146,9 +146,6 @@ export default defineComponent({
     ...mapActions({
       removeBg: 'user/removeBg'
     }),
-    ...mapActions('shadow', {
-      addShadowImg: 'ADD_SHADOW_IMG'
-    }),
     handleColorModal() {
       editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.photoShadow)

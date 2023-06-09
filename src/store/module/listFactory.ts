@@ -6,7 +6,7 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import themeUtils from '@/utils/themeUtils'
 import { captureException } from '@sentry/browser'
-import { find } from 'lodash'
+import { cloneDeep, find } from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 export default function (this: any) {
@@ -80,7 +80,7 @@ export default function (this: any) {
         if (writeBack) commit('SET_RECENTLY', data.data)
         else return data.data
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -110,7 +110,7 @@ export default function (this: any) {
           dispatch('getMoreContent')
         }
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -122,8 +122,9 @@ export default function (this: any) {
         dispatch('getRecently', false),
         dispatch('getCategories', false)
       ]).then(([recently, category]) => {
-        category.content = recently.content.concat(category.content)
-        commit('SET_CATEGORIES', category)
+        const result = cloneDeep(category)
+        result.content = recently.content.concat(category.content)
+        commit('SET_CATEGORIES', result)
         if (category.content.length === 0) {
           dispatch('getMoreContent')
         }
@@ -153,7 +154,7 @@ export default function (this: any) {
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -177,7 +178,7 @@ export default function (this: any) {
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -205,7 +206,7 @@ export default function (this: any) {
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_CONTENT', { objects: data.data, isSearch: true })
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -231,7 +232,7 @@ export default function (this: any) {
         logUtils.setLog(`api(${JSON.stringify(nextParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
         commit('SET_MORE_CONTENT', data.data)
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     },
@@ -274,7 +275,7 @@ export default function (this: any) {
         })
         commit('SET_STATE', { sum: data.data.sum })
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         captureException(error)
       }
     }

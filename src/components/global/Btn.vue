@@ -16,7 +16,13 @@ button(class="btn"
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 
-export default defineComponent({
+declare module '@vue/runtime-core' {
+  export interface GlobalComponents {
+    btn: typeof component
+  }
+}
+
+const component = defineComponent({
   emits: [],
   name: 'Btn',
   components: {
@@ -71,16 +77,18 @@ export default defineComponent({
     },
     btnStyles(): {[index: string]: string} {
       return {
-        display: this.flexDir === 'row' ? 'initial' : 'flex',
+        display: 'flex',
         'flex-direction': this.flexDir
       }
     }
   }
 })
+export default component
 </script>
 
 <style lang="scss" scoped>
 .btn {
+  box-sizing: border-box;
   transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
   &__text {
     white-space: nowrap;

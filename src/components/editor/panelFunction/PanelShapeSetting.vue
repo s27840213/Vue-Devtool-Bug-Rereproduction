@@ -20,14 +20,14 @@ div(class="shape-setting")
                     itemMinWidth="70",
                     buttonHeight="20")
         template(v-slot:g0i0)
-          svg-icon(iconName="no-dash pointer" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+          svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
         template(v-slot:g0i1)
-          svg-icon(iconName="dash-1 pointer" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+          svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
         template(v-slot:g1i0)
-          svg-icon(iconName="butt pointer" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+          svg-icon(iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
           div(class="shape-setting__value-selector__button-text") {{$t('NN0084')}}
         template(v-slot:g1i1)
-          svg-icon(iconName="round pointer" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+          svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
           div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
     div(class="vertical-rule bg-gray-4")
     div(class="shape-setting__line-action-wrapper pointer feature-button"
@@ -123,16 +123,16 @@ div(class="shape-setting")
                     itemMinWidth="64",
                     buttonHeight="26")
           template(v-slot:g0i0)
-            svg-icon(iconName="non-filled pointer" iconWidth="17px" iconColor="gray-2")
+            svg-icon(iconName="non-filled" iconWidth="17px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") {{$t('NN0088')}}
           template(v-slot:g0i1)
-            svg-icon(iconName="filled pointer" iconWidth="17px" iconColor="gray-2")
+            svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") {{$t('NN0087')}}
     label-with-range(:value="corRadPercentage" :min="0" :max="100"
                     @update="handleBasicShapeCorRadPercentUpdate"
                     :event="corRadEvent"
                     :disabled="corRadDisabled")
-      template
+      template(v-slot)
         div(class="shape-setting__basic-shape-corner-radius flex-evenly")
           svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
           div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}

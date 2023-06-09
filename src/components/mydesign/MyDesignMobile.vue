@@ -1,11 +1,14 @@
 <template lang="pug">
 div(class="my-design-mobile")
-  div(class="my-design-mobile__nav-bar-wrapper" :style="headerStyles")
+  div(class="my-design-mobile__tab-bar"  :style="headerStyles")
+    div(v-for="(tabButton,index) in tabButtons"
+        :key="`${tabButton.text}-${index}`"
+        class="my-design-mobile__tab-button pointer"
+        :class="{active: tabButton.condition(currLocation)}"
+        @click="handleGoTo(tabButton.tab)")
+      div(class="my-design-mobile__tab-button__text text-H6 text-gray-3") {{ tabButton.text }}
+  div(v-if="menuButtons.length !== 0" class="my-design-mobile__nav-bar-wrapper")
     div(class="my-design-mobile__nav-bar relative")
-      div(class="my-design-mobile__nav-bar__prev pointer"
-          @click="handlePrevPage")
-        svg-icon(iconName="chevron-left" iconColor="gray-1" iconWidth="24px")
-      div(class="my-design-mobile__nav-bar__title" :title="title") {{ title }}
       div(class="my-design-mobile__nav-bar__menu")
         div(v-for="(button,index) in menuButtons"
             :key="index"
@@ -27,16 +30,6 @@ div(class="my-design-mobile")
                   iconColor="white"
                   iconWidth="24px")
         div(class="my-design-mobile__message__text") {{ messageItemText(messageQueue[0]) }}
-  div(class="my-design-mobile__tab-bar" :style="footerStyles")
-    div(v-for="(tabButton,index) in tabButtons"
-        :key="`${tabButton.text}-${index}`"
-        class="my-design-mobile__tab-button pointer"
-        :class="{active: tabButton.condition(currLocation)}"
-        @click="handleGoTo(tabButton.tab)")
-      svg-icon(:iconName="tabButton.icon"
-                iconColor="gray-2"
-                iconWidth="24px")
-      div(class="my-design-mobile__tab-button__text") {{ tabButton.text }}
   div(v-if="confirmMessage !== '' || bottomMenu !== ''" class="dim-background"
       @click.stop.prevent="setBottomMenu('')")
   transition(name="slide-full")
@@ -61,10 +54,8 @@ div(class="my-design-mobile")
       div(class="message__description")
         span(v-html="getMessageDescription()")
       div(class="message__buttons")
-        div(class="message__cancel" @click.stop="closeConfirmMessage")
-          span {{$t('NN0203')}}
-        div(class="message__confirm" @click.stop="confirmAction")
-          span {{$t('NN0034')}}
+        nubtn(theme="secondary" size="sm-full" @click.stop="closeConfirmMessage") {{$t('NN0203')}}
+        nubtn(theme="danger" size="sm-full" @click.stop="confirmAction") {{$t('NN0034')}}
   div(v-if="isErrorShowing" class="dim-background" @click.stop="closeErrorMessage")
     div(class="message" @click.stop)
       div(class="message__close-minimal pointer"
@@ -85,7 +76,7 @@ import MobileFavoriteDesignView from '@/components/mydesign/design-views/MobileF
 import MobileFolderDesignView from '@/components/mydesign/design-views/MobileFolderDesignView.vue'
 import MobileListDesignView from '@/components/mydesign/design-views/MobileListDesignView.vue'
 import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTrashDesignView.vue'
-import { IDesign, IFolder, IMobileMessageItem, IPathedFolder } from '@/interfaces/design'
+import { IDesign, IMobileMessageItem, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import picWVUtils from '@/utils/picWVUtils'
@@ -227,16 +218,6 @@ export default defineComponent({
     ...mapGetters({
       userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
-    headerStyles(): {[key: string]: string} {
-      return {
-        paddingTop: `${this.userInfo.statusBarHeight}px`
-      }
-    },
-    footerStyles(): {[key: string]: string} {
-      return {
-        paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
-      }
-    },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
     },
@@ -245,23 +226,6 @@ export default defineComponent({
     },
     path(): string[] {
       return this.currLocation.startsWith('f:') ? designUtils.makePath(this.currLocation) : []
-    },
-    folder(): IFolder | undefined {
-      return designUtils.search(this.folders, this.path)
-    },
-    title(): string {
-      switch (this.currLocation) {
-        case 'a':
-          return generalUtils.capitalizeFirstWord(`${this.$t('NN0080')}`)
-        case 'h':
-          return `${this.$t('NN0188')}`
-        case 't':
-          return `${this.$t('NN0189')}`
-        case 'l':
-          return `${this.$tc('NN0253', 2)}`
-        default:
-          return this.folder?.name ?? ''
-      }
     },
     menuButtons(): IMenuButton[] {
       switch (this.currLocation) {
@@ -306,6 +270,11 @@ export default defineComponent({
         default:
           return 'mobile-all-design-view'
       }
+    },
+    headerStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${this.userInfo.statusBarHeight}px`
+      }
     }
   },
   methods: {
@@ -324,18 +293,7 @@ export default defineComponent({
       setDesignBuffer: 'SET_mobileDesignBuffer',
       setPathBuffer: 'SET_mobilePathBuffer'
     }),
-    handlePrevPage() {
-      if (['a', 'h', 'l', 't'].includes(this.currLocation)) {
-        this.$router.push({ name: 'Home' })
-      } else {
-        if (this.path.length === 2) {
-          this.setCurrLocation('l')
-        } else {
-          const selectedParents = this.path.slice(0, this.path.length - 1)
-          this.setCurrLocation(`f:${selectedParents.join('/')}`)
-        }
-      }
-    },
+
     handleGoTo(tab: string) {
       this.setCurrLocation(tab)
     },
@@ -635,11 +593,7 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
   &__tab-bar {
     width: 100%;
     height: $tab-bar-height;
-    position: fixed;
-    left: 0;
-    bottom: 0;
     background: #FFFFFF;
-    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     display: flex;
     align-items: center;
     justify-content: space-evenly;
@@ -653,15 +607,39 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
       margin-left: 4px;
     }
     &__text {
-      font-weight: 400;
-      font-size: 10px;
-      line-height: 20px;
-      color: setColor(gray-2);
       transition: color 0.2s;
     }
+
+    & {
+      & > div {
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -4px;
+          left: 0px;
+          width: 100%;
+          height: 2px;
+          background-color: setColor(gray-3);
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+        }
+      }
+    }
     &.active {
-      & > svg, & > div {
+      & > div {
+        position: relative;
         color: setColor(blue-1);
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -4px;
+          left: 0px;
+          width: 100%;
+          height: 2px;
+          transform: scale(1);
+          background-color: setColor(blue-1);
+        }
       }
     }
   }
@@ -799,20 +777,6 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
       > span {
         @include btn-SM;
       }
-    }
-  }
-  &__cancel {
-    background-color: setColor(gray-4);
-    > span {
-      display: block;
-      color: black;
-    }
-  }
-  &__confirm {
-    background-color: setColor(red-1);
-    > span {
-      display: block;
-      color: white;
     }
   }
   &__ok {

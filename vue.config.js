@@ -47,7 +47,6 @@ function resolve (dir) {
 module.exports = defineConfig({
     transpileDependencies: true,
     chainWebpack: (config) => {
-        // config.cache(true)
         /**
          * use esbuild-loader to replace babel-loader
          */
@@ -118,7 +117,16 @@ module.exports = defineConfig({
             .end()
             .use('svg-sprite-loader')
             .loader('svg-sprite-loader')
-            .options({ symbolId: '[name]' })
+            .options({
+                symbolId: '[name]',
+                // extract: true,
+                // outputPath: 'static/img/',
+                // publicPath: 'static/img/',
+                // spriteFilename: 'main.svg'
+             })
+
+        // config.plugin('svg-sprite') // extract: true 才需要
+        // .use(require('svg-sprite-loader/plugin'))
         /**
              * 由於上面的代碼會讓 'src/assets/icon' 資料夾以外的svg全都不能用，
              * 但並不是所有svg圖檔都要拿來當icon，故設定另外一個loader來處理其他svg

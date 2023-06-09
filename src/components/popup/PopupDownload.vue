@@ -46,6 +46,7 @@ div(class="popup-download text-left"
               type="text"
               v-model.number="selectedTypeQuality")
         input(class="popup-download__range-input input__slider--range"
+          v-progress
           v-model.number="selected.quality"
           max="100"
           min="1"
@@ -150,15 +151,9 @@ div(class="popup-download text-left"
                   :options="devs"
                   @select="handleDevSelect") {{ selectedDevLabel }}
         div
-          btn(class="full-width body-3 rounded"
-            :disabled="isButtonDisabled"
-            @click="handleSubmit(true)")
-            svg-icon(v-if="polling"
-              class="align-middle"
-              iconName="loading"
-              iconColor="white"
-              iconWidth="20px")
-            span(v-else) {{`${$t('NN0010')} (${$t('NN0460')})`}}
+          nubtn(size="sm-full"
+              :disabled="isButtonDisabled"
+              @click="handleSubmit(true)") {{`${$t('NN0010')} (${$t('NN0460')})`}}
       hr(class="popup-download__hr my-15")
       download-check-button(type="checkbox"
         class="mb-20"
@@ -166,18 +161,11 @@ div(class="popup-download text-left"
         :default-checked="saveSubmission"
         @change="({ checked }) => handleSubmission(checked)")
     div
-      btn(class="full-width body-3 rounded"
-        :disabled="isButtonDisabled"
-        @click="handleSubmit()")
-        svg-icon(v-if="polling"
-          class="align-middle"
-          iconName="loading"
-          iconColor="white"
-          iconWidth="20px")
-        span(v-else class="popup-download__btn")
-          svg-icon(v-if="selectedTypeVal === 'pdf_print' && !inReviewMode"
-                  iconName="pro" iconWidth="22px" iconColor="alarm")
-          span {{$t('NN0010')}}
+      nubtn(:theme="selectedTypeVal === 'pdf_print' && !inReviewMode ? 'icon_text' : 'primary'"
+          size="sm-full"
+          :icon="['pro', 'alarm']"
+          :disabled="isButtonDisabled"
+          @click="handleSubmit()") {{$t('NN0010')}}
 </template>
 
 <!-- eslint-disable vue/no-unused-properties -->
@@ -230,7 +218,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .popup-download {
-  width: 100%;
+  // width: 100%;
+  width: 210px;
   display: grid;
   grid-template-columns: 1fr;
   box-sizing: border-box;
@@ -290,19 +279,10 @@ export default defineComponent({
     border-radius: 4px;
     background-color: setColor(blue-1);
   }
-  &__btn{
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
   .property-bar,
-  .btn {
-    padding: 3px 10px;
-  }
   .property-bar {
     box-sizing: border-box;
   }
-  .btn,
   .property-bar,
   input {
     font-size: 12px;

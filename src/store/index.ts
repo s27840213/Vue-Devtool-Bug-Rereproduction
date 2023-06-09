@@ -115,6 +115,8 @@ const getDefaultState = (): IEditorState => ({
   lockGuideline: false,
   isDraggingGuideline: false,
   themes: [],
+  homeTags: [],
+  shuffledThemesIds: [],
   hasCopiedFormat: false,
   inGestureToolMode: false,
   isMobile: generalUtils.getWidth() <= 768,
@@ -127,7 +129,8 @@ const getDefaultState = (): IEditorState => ({
   inScreenshotPreviewRoute: false,
   cursor: '',
   isPageScaling: false,
-  isGettingDesign: false
+  isGettingDesign: false,
+  showGlobalErrorModal: false,
 })
 
 const state = getDefaultState()
@@ -285,10 +288,21 @@ const getters: GetterTree<IEditorState, unknown> = {
   getThemes(state: IEditorState) {
     return state.themes
   },
+  getMainHiddenThemes(state: IEditorState) {
+    return state.themes.filter(theme => {
+      return theme.mainHidden === 0
+    })
+  },
   getEditThemes(state: IEditorState) {
     return state.themes.filter(theme => {
       return theme.editHidden === 0
     })
+  },
+  getHomeTags(state: IEditorState) {
+    return state.homeTags
+  },
+  getShuffledThemesIds(state: IEditorState) {
+    return state.shuffledThemesIds
   },
   getHasCopiedFormat(state: IEditorState) {
     return state.hasCopiedFormat
@@ -316,7 +330,10 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getHasBleed(state: IEditorState) {
     return state.pages.some((page: IPageState) => page.config.isEnableBleed)
-  }
+  },
+  getShowGlobalErrorModal(state: IEditorState) {
+    return state.showGlobalErrorModal
+  },
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -604,7 +621,7 @@ const mutations: MutationTree<IEditorState> = {
     // currSelectedInfo.layers.splice(subIndex, 1)
     // currSelectedInfo.types = groupUtils.calcType(currSelectedInfo.layers)
   },
-  REPLACE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, layer: IShape | IGroup | IImage | IText }) {
+  REPLACE_layer(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, layer: IShape | IGroup | IImage | IText | ITmp }) {
     const { pageIndex, layerIndex, layer } = updateInfo
     state.pages[pageIndex].config.layers.splice(layerIndex, 1, layer)
   },
@@ -1008,6 +1025,12 @@ const mutations: MutationTree<IEditorState> = {
   SET_themes(state: IEditorState, themes: Itheme[]) {
     state.themes = themes
   },
+  SET_homeTags(state: IEditorState, homeTags: string[]) {
+    state.homeTags = homeTags
+  },
+  SET_shuffledThemesIds(state: IEditorState, themeIds: number[]) {
+    state.shuffledThemesIds = themeIds
+  },
   UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].config.layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
@@ -1095,7 +1118,10 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   ...imgShadowMutations,
-  ADD_subLayer
+  ADD_subLayer,
+  SET_showGlobalErrorModal(state: IEditorState, showGlobalErrorModal: boolean) {
+    state.showGlobalErrorModal = showGlobalErrorModal
+  },
 }
 const handleResize = throttle(() => {
   state.isMobile = generalUtils.getWidth() <= 768

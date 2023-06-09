@@ -10,7 +10,7 @@ div(class="nu-layer flex-center"
   //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
   //- ref="body"
   div(class="full-size pos-left"
-      :class="{'preserve3D': !isTouchDevice}"
+      :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
       :style="layerStyles()"
       @pointerdown="onPointerDown($event)"
       @tap="dblTap"
@@ -20,12 +20,12 @@ div(class="nu-layer flex-center"
       @dragenter="dragEnter($event)"
       @dblclick="dblClick($event)")
     div(class="nu-layer__scale full-size pos-left"
-        :class="{'preserve3D': !isTouchDevice}" ref="scale"
+        :class="{'preserve3D': !isTouchDevice && isMultipleSelect}" ref="scale"
         :style="scaleStyles()")
-      div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
+      div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice && isMultipleSelect}" :style="flipStyles")
           component(:is="`nu-${config.type}`"
             class="transition-none"
-            :class="{'preserve3D': !isTouchDevice}"
+            :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
             :config="config"
             :imgControl="imgControl"
             :contentScaleRatio="contentScaleRatio"
@@ -41,6 +41,7 @@ div(class="nu-layer flex-center"
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
   div(v-if="isLine" class="nu-layer__line-mover"
+    :class="[inAllPagesMode ? 'click-disabled' : 'clickable']"
     :style="lineMoverStyles()"
     ref="lineMover"
     :id="inPreview ? '' : `nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`"
@@ -52,6 +53,7 @@ div(class="nu-layer flex-center"
 import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -286,6 +288,7 @@ export default defineComponent({
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, _f),
         {
           outline,
+          outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
           willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
           pointerEvents,
           clipPath,
@@ -368,6 +371,9 @@ export default defineComponent({
     },
     isTouchDevice(): boolean {
       return generalUtils.isTouchDevice()
+    },
+    isMultipleSelect(): boolean {
+      return (this.currSelectedInfo as ICurrSelectedInfo).layers.length > 1
     }
   },
   methods: {
@@ -395,7 +401,7 @@ export default defineComponent({
     },
     lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
-      const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.$isTouchDevice(), this.config.size?.[0])
       const { x: layerX, y: layerY } = this.config.styles
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
@@ -836,7 +842,7 @@ export default defineComponent({
     justify-content: center;
     width: 0;
     height: 0;
-    pointer-events: initial;
+    // pointer-events: initial;
   }
   &__BG {
     position: absolute;

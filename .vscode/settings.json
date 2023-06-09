@@ -8,7 +8,6 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.preferences.quoteStyle": "single",
   "editor.tabSize": 2,
-
   // Format file when save file
   "editor.formatOnSave": true,
   // When save file, do
@@ -22,9 +21,13 @@
     // Prevent volar or prettier format vue file
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
-
+  "[svg]": {
+    "editor.formatOnSave": false,
+  },
   "files.insertFinalNewline": true,
-  "i18n-ally.localesPaths": ["src/locales"],
+  "i18n-ally.localesPaths": [
+    "src/locales"
+  ],
   "i18n-ally.keystyle": "nested",
-  "i18n-ally.sourceLanguage": "tw"
+  "i18n-ally.sourceLanguage": "us"
 }

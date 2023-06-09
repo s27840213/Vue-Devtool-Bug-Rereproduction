@@ -5,12 +5,24 @@ div(class="nu-background-controller")
       :style="styles"
       @pointerdown.stop="moveStart"
       @pinch="pinchHandler")
-    //- @touchstart="disableTouchEvent"
     div(v-for="(scaler, index) in controlPoints.scalers"
         class="controller-point"
         :key="index"
         :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getPageRotate))"
         @pointerdown.stop="scaleStart")
+    div(v-for="(scaler, index) in controlPoints.scalers"
+        class="control-point"
+        :key="`scaler-${index}`"
+        :style="Object.assign(scalerStyles(scaler.styles), cursorStyles(scaler.cursor, getPageRotate))"
+        @pointerdown.prevent.stop="$isTouchDevice() ? null : scaleStart($event)"
+        @touchstart="$isTouchDevice() ? null : disableTouchEvent($event)")
+    template(v-if="$isTouchDevice()")
+      div(v-for="(scaler, index) in controlPoints.scalerTouchAreas"
+          class="control-point"
+          :key="`scaler-touch-${index}`"
+          :style="Object.assign(scalerStyles(scaler.styles), cursorStyles(scaler.cursor, getPageRotate))"
+          @pointerdown.prevent.stop="scaleStart"
+          @touchstart="disableTouchEvent")
   //- div(class="nu-controller"
   //-     :style="controllerStyles()")
 </template>
@@ -53,7 +65,7 @@ export default defineComponent({
   },
   data() {
     return {
-      controlPoints: ControlUtils.getControlPoints(4, 25, 100 / this.$store.getters.getPageScaleRatio),
+      controlPoints: ControlUtils.getControlPoints(),
       isControlling: false,
       initialPos: { x: 0, y: 0 } as null | ICoordinate,
       initImgPos: { x: 0, y: 0 },
@@ -113,6 +125,11 @@ export default defineComponent({
     ...mapMutations({
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
+    scalerStyles(scaler: { [key: string]: string }) {
+      const scalerStyle = { ...scaler }
+      scalerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      return scalerStyle
+    },
     pinchHandler(event: AnyTouchEvent) {
       switch (event.phase) {
         case 'start': {
@@ -467,6 +484,12 @@ export default defineComponent({
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
     },
+    disableTouchEvent(e: TouchEvent) {
+      if (this.$isTouchDevice()) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
   }
 })
 </script>
@@ -475,15 +498,6 @@ export default defineComponent({
 .nu-background-controller {
   position: absolute;
   top:0;
-}
-.controller-point {
-  pointer-events: auto;
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: setColor(white);
-  border: 1.5px solid setColor(blue-2);
-  border-radius: 30%;
 }
 
 .nu-controller {

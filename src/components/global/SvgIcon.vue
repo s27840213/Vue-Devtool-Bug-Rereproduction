@@ -11,7 +11,28 @@ svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
 </template>
 
 <script lang="ts">
+import svgIconUtils from '@/utils/svgIconUtils'
 import { defineComponent } from 'vue'
+
+// eslint-disable-next-line no-undef
+const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
+const req = require.context('@/assets/icon', true, /\.svg$/, 'lazy-once')
+
+if (window.location.host !== 'vivipic.com') {
+  requireAll(req).forEach((promise: any) => {
+    promise.then((context: any) => {
+      svgIconUtils.pushIcon(context.default?.id)
+    })
+  })
+} else {
+  requireAll(req)
+}
+
+declare module '@vue/runtime-core' {
+  export interface GlobalComponents {
+    SvgIcon: typeof component
+  }
+}
 
 /**
  * 這個 Components 我把它註冊在全域，使用時可以用不Import
@@ -25,7 +46,7 @@ import { defineComponent } from 'vue'
  * 2021.9.24 更新: 如果說圖片是 svg 格式，但沒有顏色切換需求，其實也可以用這個元件，就只是改顏色不會影響到他而已
  */
 
-export default defineComponent({
+const component = defineComponent({
   emits: [],
   name: 'SvgIcon',
   props: {
@@ -90,6 +111,7 @@ export default defineComponent({
     }
   }
 })
+export default component
 </script>
 
 <style lang="scss" scoped>

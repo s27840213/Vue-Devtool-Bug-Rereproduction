@@ -5,6 +5,7 @@ import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IStyle, IText, ITmp } 
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
 import store from '@/store'
+import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
 import { round } from 'lodash'
@@ -26,7 +27,7 @@ import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import textShapeUtils from './textShapeUtils'
-import TextUtils from './textUtils'
+import textUtils from './textUtils'
 import unitUtils, { PRECISION } from './unitUtils'
 import ZindexUtils from './zindexUtils'
 
@@ -169,9 +170,10 @@ class AssetUtils {
     json = await this.updateBackground(generalUtils.deepCopy(json))
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
-    const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-    pageUtils.updateSpecPage(targetPageIndex, newLayer)
-    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
+    const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+    // console.log(generalUtils.deepCopy(newPage)) // remove unneccessary use of deepCopy(...) for performance
+    pageUtils.updateSpecPage(targetPageIndex, newPage)
+    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
     if (store.getters['user/getUserId'] === 'backendRendering') {
       const { isBleed, isTrim } = store.getters['user/getBackendRenderParams']
@@ -213,10 +215,10 @@ class AssetUtils {
     for (let i = 0; i < pageNum; i++) {
       json = await this.updateBackground(generalUtils.deepCopy(json))
       layerUtils.setAutoResizeNeededForLayersInPage(json, true)
-      const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
-      pageUtils.updateSpecPage(i, newLayer)
+      const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+      pageUtils.updateSpecPage(i, newPage)
       if (width && height) {
-        resizeUtils.resizePage(i, newLayer, { width, height })
+        resizeUtils.resizePage(i, newPage, { width, height })
       }
     }
 
@@ -473,12 +475,13 @@ class AssetUtils {
     if (config.type === 'text') {
       Object.assign(config, {
         widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
-        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
+        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles.textShape),
       })
     } else if (config.type === 'group') {
       for (const subLayer of config.layers) {
+        if (subLayer.type !== 'text') continue
         Object.assign(subLayer, {
-          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles)
+          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles.textShape)
         })
       }
     }
@@ -486,13 +489,13 @@ class AssetUtils {
     Object.assign(
       config.styles,
       typeof y === 'undefined' || typeof x === 'undefined'
-        ? TextUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
+        ? textUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
         : { x, y }
     )
     const newLayer = config.type === 'group'
       ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
-    layerUtils.addLayers(targetPageIndex, [newLayer])
+    layerUtils.addLayers(targetPageIndex, [textUtils.resetScaleForLayer(newLayer, true)])
   }
 
   async addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
@@ -520,7 +523,7 @@ class AssetUtils {
         Object.assign(textLayer.paragraphs[0].spans[0].styles, spanStyles)
       }
 
-      TextUtils.resetTextField(textLayer, targetPageIndex, field)
+      textUtils.resetTextField(textLayer, targetPageIndex, field)
       layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, {
         editing: false,
         contentEditable: !generalUtils.isTouchDevice(),
@@ -528,7 +531,7 @@ class AssetUtils {
       }))])
       editorUtils.setCloseMobilePanelFlag(true)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogForError(error as Error)
       console.log('Cannot find the file')
     }
   }
@@ -634,7 +637,6 @@ class AssetUtils {
   }
 
   addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
-    console.log('add group template ')
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
     const isDetailPage = groupType === 1 || currGroupType === 1
@@ -810,10 +812,11 @@ class AssetUtils {
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
-      editorUtils.setCloseMobilePanelFlag(true)
+      // Prevent close panel only for panelBG
+      if (asset.type !== 1) editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset)
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       captureException(error)
     }
   }

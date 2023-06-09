@@ -3,12 +3,11 @@ div(class="settings-account")
   avatar(class="mt-30 settings-account__avatar"
     :textSize="30" :avatarSize="75")
   div(class="settings-account__buttons")
-    div(v-if="hasAvatar"
-      class="settings-account__button mr-30 pointer"
-      @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
-    div(class="settings-account__button pointer"
-      @click="chooseAvatar()")
-      span(v-if="hasAvatar") {{$t('NN0171')}}
+    nubtn(v-if="hasAvatar && !isMobile"
+        theme="secondary"
+        @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
+    nubtn(theme="secondary" @click="chooseAvatar()")
+      span(v-if="!isMobile") {{$t('NN0171')}}
       span(v-else) {{$t('NN0309')}}
   div(class="settings-account__info")
     div(class="settings-account__label space-between my-10")
@@ -45,10 +44,8 @@ div(class="settings-account")
         div(class="settings-account__subscribe__switch")
         div(class="settings-account__subscribe__circle")
       div(class="settings-account__subscribe__text") {{$t('NN0175')}}
-    div(class="settings-account__buttons mt-10")
-      btn(class="pointer"
-        :disabled="!isChanged"
-        @click="onConfirmClicked()") {{$t('NN0176')}}
+    div(class="settings-account__save-button mt-10")
+      nubtn(:disabled="!isChanged" @click="onConfirmClicked()") {{$t('NN0176')}}
   div(v-if="showVerifyPopup"
     class="settings-account__popup popup-window")
     popup-verify(type="vcode"
@@ -96,6 +93,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState({
+      isMobile: 'isMobile'
+    }),
     ...mapState('user', [
       'uname']),
     ...mapGetters('user', {
@@ -278,22 +278,12 @@ export default defineComponent({
   &__buttons {
     display: flex;
     justify-content: center;
-  }
-  &__button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: setColor(gray-2);
-    border-radius: 5px;
-    border: 2px solid setColor(gray-3);
-    padding: 5px 20px;
-    margin-top: 20px;
-    margin-bottom: 50px;
-    @include layout-mobile {
-      margin-bottom: 20px;
-    }
-    &:hover {
-      background: setColor(gray-5);
+    gap: 30px;
+    .nubtn {
+      margin: 20px 0 50px 0;
+      @include layout-mobile {
+        margin-bottom: 20px;
+      }
     }
   }
   &__info {
@@ -378,23 +368,15 @@ export default defineComponent({
       }
     }
   }
-  &__buttons {
+  &__save-button {
     display: flex;
     justify-content: flex-end;
     @include layout-mobile {
       padding-bottom: 30px;
     }
-    > button {
-      color: setColor(white);
-      border-radius: 5px;
-      background: setColor(blue-1);
-      padding: 5px 50px;
+    > div.nubtn {
       @media (max-width: 650px) {
         width: 100%;
-        padding: 5px 0;
-      }
-      &:disabled {
-        background: setColor(gray-4);
       }
     }
   }

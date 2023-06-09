@@ -11,6 +11,8 @@ declare global {
         }
       }
     }
+    consoleLog: () => void,
+    consoleLogBuffer: () => void,
   }
   interface Performance {
     // Deprecated, https://developer.mozilla.org/en-US/docs/Web/API/Performance/memory

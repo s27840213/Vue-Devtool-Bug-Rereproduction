@@ -1,8 +1,10 @@
 import App from '@/App.vue'
-import svgIconUtils from '@/utils/svgIconUtils'
+import PropertyBar from '@/components/global/PropertyBar.vue'
+import SvgIcon from '@/components/global/SvgIcon.vue'
+import modalUtils from '@/utils/modalUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
-import Notifications from '@kyvg/vue3-notification'
+import Notifications, { notify } from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
@@ -20,13 +22,36 @@ import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
 
 const eventBus = mitt()
-window.onerror = function (msg, url, line) {
+window.onerror = function (msg, url, line, colno, error) {
+  const errorId = generalUtils.generateRandomString(6)
   const message = [
+    'Error ID:' + errorId,
     'Message: ' + msg,
     'URL: ' + url,
     'Line: ' + line,
+    'Col: ' + colno,
+    'Stack: ' + error?.stack
   ].join(' - ')
-  logUtils.setLog(message)
+  logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
+  logUtils.uploadLog().then(() => {
+    console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
+    // if (store.getters['user/isAdmin'] && (window.location.hostname !== 'vivipic.com' || store.getters.getShowGlobalErrorModal))
+    if (store.getters['user/isAdmin']) {
+      const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+      modalUtils.setModalInfo(
+        i18n.global.t('NN0866'),
+        hint,
+        {
+          msg: i18n.global.t('NN0032'),
+          action() {
+            generalUtils.copyText(hint).then(() => {
+              notify({ group: 'copy', text: '已複製' })
+            })
+          }
+        }
+      )
+    }
+  })
 }
 
 const app = createApp(App).use(i18n).use(router).use(store)
@@ -47,6 +72,7 @@ declare module '@vue/runtime-core' {
   }
   function provide<T>(key: InjectionKey<T> | string | number, value: T | ComputedRef<T>): void
 }
+// app.config.unwrapInjectedRef = true
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 app.config.globalProperties.$isTablet = () => generalUtils.isTablet()
 app.config.globalProperties.$eventBus = eventBus
@@ -73,15 +99,15 @@ app.use(FloatingVue, {
 
 app.component('RecycleScroller', RecycleScroller)
 
-app.component('svg-icon', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/SvgIcon.vue')
-))
+app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))
-app.component('property-bar', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/PropertyBar.vue')
-))
+/**
+ * bcz this components use slot, and some components need to get its ref in mounted,
+ * so we can't use async component
+ */
+app.component('property-bar', PropertyBar)
 app.component('dropdown', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Dropdown.vue')
 ))
@@ -228,18 +254,42 @@ app.directive('custom-swipe', {
 
 app.directive('press', longpress)
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-  const req = require.context('@/assets/icon', true, /\.svg$/)
+function setProgressStyle(el: HTMLInputElement) {
+  nextTick(() => {
+    if (el.disabled) {
+      el.style.setProperty('--base', '0')
+      el.style.setProperty('--progress', '50%')
+    } else {
+      el.style.setProperty('--base', `${(Math.min(+el.value, 0) - (+el.min)) / (+el.max - (+el.min)) * 100}%`)
+      el.style.setProperty('--progress', `${(Math.max(+el.value, 0) - (+el.min)) / (+el.max - (+el.min)) * 100}%`)
+    }
+  })
+}
 
-  if (window.location.host !== 'vivipic.com') {
-    svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-      return context.default?.id ?? ''
-    }))
-  } else {
-    requireAll(req)
+app.directive('progress', {
+  mounted: (el) => {
+    setProgressStyle(el)
+  },
+  updated: (el) => {
+    setProgressStyle(el)
   }
-}, false)
+})
+
+/**
+ * move to the SvgIcon.vue component
+ */
+// document.addEventListener('DOMContentLoaded', async () => {
+//   const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
+//   const req = require.context('@/assets/icon', true, /\.svg$/)
+
+//   if (window.location.host !== 'vivipic.com') {
+//     svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+//       return context.default?.id ?? ''
+//     }))
+//   } else {
+//     requireAll(req)
+//   }
+// }, false)
 
 // add temporarily for testing
 if (window.location.href.indexOf('logout') > -1) {

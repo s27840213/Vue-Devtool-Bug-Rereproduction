@@ -9,10 +9,10 @@ interface SwipeOptions {
 }
 
 export default class SwipeDetector {
-  private touchStartX = 0;
-  private touchStartY = 0;
-  private touchEndX = 0;
-  private touchEndY = 0;
+  private touchStartX = 0
+  private touchStartY = 0
+  private touchEndX = 0
+  private touchEndY = 0
   private swipeOptions: SwipeOptions
   private startTime = 0
   private movedFlag = false

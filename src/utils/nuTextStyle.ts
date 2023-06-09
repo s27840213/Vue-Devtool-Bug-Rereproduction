@@ -1,10 +1,11 @@
-import { isITextLetterBg, ITextBgEffect } from '@/interfaces/format'
+import { isITextLetterBg, ITextBg } from '@/interfaces/format'
 import { IGroup, IText } from '@/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import { Extension } from '@tiptap/core'
 import { Editor as CoreEditor } from '@tiptap/core/dist/packages/core/src/'
 import { Editor } from '@tiptap/vue-3'
 import { filter, find, minBy } from 'lodash'
+import { ResolvedPos } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import { nextTick } from 'vue'
 import { GapCursor } from './GapCursor'
@@ -70,7 +71,7 @@ function arrow(axis: 'vert' | 'horiz', dir: 1 | -1) {
     const dispatch = editor.view.dispatch
     const view = editor.view
 
-    const textBg = layerUtils.getCurrLayer.styles.textBg as ITextBgEffect
+    const textBg = layerUtils.getCurrLayer.styles.textBg as ITextBg
     const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
     if (fixedWidth) {
       const nextCursor = findCursor(dirStr, editor.state.selection.anchor, view.dom)
@@ -87,7 +88,7 @@ function arrow(axis: 'vert' | 'horiz', dir: 1 | -1) {
     }
     const $found = GapCursor.findGapCursorFrom($start, dir, mustMove)
     if (!$found) { return false }
-    if (dispatch) { dispatch(state.tr.setSelection(new GapCursor($found as any))) }
+    if (dispatch) { dispatch(state.tr.setSelection(new GapCursor($found as unknown as ResolvedPos))) }
     return true
   }
 }
@@ -275,21 +276,27 @@ export default Extension.create({
               }
             }
           },
-          randomId: {
+          spanIndex: {
             default: undefined,
             parseHTML: element => {
               return element.getAttribute('random-id')
             },
             renderHTML: attributes => {
-              if (!attributes.randomId) return {}
+              if (!attributes.spanIndex) return {}
               return {
-                randomId: attributes.randomId
+                spanIndex: attributes.spanIndex
               }
             }
           },
           'min-width': cssBaseAttr('min-width'),
           'min-height': cssBaseAttr('min-height'),
+          backgroundImage: cssBaseAttr('backgroundImage'),
+          backgroundSize: cssBaseAttr('backgroundSize'),
+          backgroundPosition: cssBaseAttr('backgroundPosition'),
+          webkitBackgroundClip: cssBaseAttr('-webkit-background-clip'),
+          opacity: cssBaseAttr('opacity'),
           filter: cssBaseAttr('filter'),
+          willChange: cssBaseAttr('will-change'),
           '--base-stroke': cssBaseAttr('--base-stroke'),
           webkitTextFillColor: cssBaseAttr('-webkit-text-fill-color'),
           webkitTextStrokeColor: cssBaseAttr('-webkit-text-stroke-color'),

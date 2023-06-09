@@ -15,17 +15,24 @@ div(class="page-setting")
     svg-icon(v-if="!inReviewMode" class="mr-10"
             iconName="pro" iconWidth="22px" iconColor="alarm")
     span(class="page-setting__apply__text") {{$t('NN0022')}}
-  transition(name="slide-fade")
-    div(v-if="isPanelOpen"
-      class="page-setting__suggestion-panel")
-      img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
-      div(class="page-setting__suggestion-panel__body")
-        div(class="page-setting__suggestion-panel__body__close pointer"
-            @click="setSuggestionPanel(false)")
-          svg-icon(class="page-setting__suggestion-panel__body__close"
-                  iconName="close" iconWidth="19px" iconColor="white")
+  teleport(to="body")
+    div(v-if="isPanelOpen" class="popup-window")
+      div(class="size-selector" v-click-outside="()=> {setSuggestionPanel(false)}")
+        svg-icon(class="size-selector__icon pointer" iconName="close" iconColor="gray-2" iconWidth="24px" @click="setSuggestionPanel(false)")
+        div(class="text-H5 text-center mb-10") {{$t('NN0022')}}
         keep-alive
-          page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)")
+          page-size-selector(:forEditor="true" @close="setSuggestionPanel(false)")
+  //- transition(name="slide-fade")
+  //-   div(v-if="isPanelOpen"
+  //-     class="page-setting__suggestion-panel")
+  //-     img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
+  //-     div(class="page-setting__suggestion-panel__body")
+  //-       div(class="page-setting__suggestion-panel__body__close pointer"
+  //-           @click="setSuggestionPanel(false)")
+  //-         svg-icon(class="page-setting__suggestion-panel__body__close"
+  //-                 iconName="close" iconWidth="19px" iconColor="white")
+  //-       keep-alive
+  //-         page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)")
   div(v-if="hasBleed" class="page-setting__bleed")
     div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
       span(class="text-gray-2 label-mid") {{$t('NN0780')}}
@@ -221,7 +228,7 @@ div(class="page-setting")
 <script lang="ts">
 import designApis from '@/apis/design-info'
 import BleedSettings from '@/components/editor/BleedSettings.vue'
-import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
+import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 import { IPage } from '@/interfaces/page'
 import { ICoverTheme, Itheme, IThemeTemplate } from '@/interfaces/theme'
 import GeneralUtils from '@/utils/generalUtils'
@@ -230,6 +237,7 @@ import picWVUtils from '@/utils/picWVUtils'
 import { PRECISION } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
 import { round } from 'lodash'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -237,8 +245,11 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    PageSizeSelector,
-    BleedSettings
+    BleedSettings,
+    PageSizeSelector
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {
@@ -621,7 +632,7 @@ export default defineComponent({
     },
     isDisabled(idx: number, themeWidth: number, themeHeight: number) {
       const themeAspectRatio = themeWidth / themeHeight
-      const templateAspectRatio = parseInt(this.templateInfo.width) / parseInt(this.templateInfo.height)
+      const templateAspectRatio = parseFloat(this.templateInfo.width) / parseFloat(this.templateInfo.height)
       if (themeHeight === 0) { // 詳情頁模板
         return false
       } else if (themeAspectRatio === templateAspectRatio) {
@@ -904,6 +915,25 @@ export default defineComponent({
   }
   .bg-blue {
     background: setColor(blue-4);
+  }
+}
+
+.size-selector {
+  position: relative;
+  width: 440px;
+  max-height: 60%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  border-radius: 5px;
+  box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
+  background-color: setColor(white);
+  padding: 40px 24px 24px 24px;
+
+  &__icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
   }
 }
 

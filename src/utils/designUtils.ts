@@ -2,20 +2,19 @@ import designApis from '@/apis/design'
 import i18n from '@/i18n'
 import { IAssetDesignParams, IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
+import { IBleed } from '@/interfaces/page'
 import router from '@/router'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
 import { EventEmitter } from 'events'
-import _ from 'lodash'
-import { nextTick } from 'vue'
+import _, { floor } from 'lodash'
 import assetUtils from './assetUtils'
 import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
-import resizeUtils from './resizeUtils'
 import stepsUtils from './stepsUtils'
 import themeUtils from './themeUtils'
-import unitUtils from './unitUtils'
+import unitUtils, { PRECISION } from './unitUtils'
 import uploadUtils from './uploadUtils'
 
 interface Item {
@@ -816,7 +815,11 @@ class DesignUtils {
     return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
   }
 
-  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, unit = 'px', id: number | string | undefined = undefined, path?: string, folderName?: string) {
+  convertBleedsToQuery(bleeds: IBleed) {
+    return `${bleeds.top},${bleeds.right},${bleeds.bottom},${bleeds.left}`
+  }
+
+  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, unit = 'px', id: number | string | undefined = undefined, path?: string, folderName?: string, bleeds?: IBleed) {
     // Redirect user to editor and create new design, will be use by login redirect.
     const query = {
       type: 'new-design-size',
@@ -825,60 +828,72 @@ class DesignUtils {
       unit,
       themeId: id ? id.toString() : undefined,
       path,
-      folderName
+      folderName,
+      ...(bleeds !== undefined && { bleeds: this.convertBleedsToQuery(bleeds) })
     }
     router.push({ name: 'Editor', query })
   }
 
   // Below function is used to update the page
-  async newDesign(width = 1080, height = 1080, unit = 'px') {
+  newDesign(width = 1080, height = 1080, unit = 'px', bleeds?: IBleed) {
     store.commit('file/SET_setLayersDone')
     const pxSize = unitUtils.convertSize(width, height, unit, 'px')
-    const bleeds = pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }, 'px')
+    const pxDefaultBleeds = pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }, 'px')
 
     pageUtils.setPages([pageUtils.newPage({
       width: pxSize.width,
       height: pxSize.height,
       physicalWidth: width,
       physicalHeight: height,
-      bleeds,
-      physicalBleeds: unit === 'px' ? bleeds : pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }),
+      bleeds: pxDefaultBleeds,
+      physicalBleeds: unit === 'px' ? pxDefaultBleeds : pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }),
       unit
     })])
+    if (bleeds) {
+      const precision = unit === 'px' ? 0 : PRECISION
+      const maxBleed = unit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', unit), precision)
+      Object.keys(bleeds).forEach(key => {
+        bleeds[key] = Math.min(bleeds[key], maxBleed)
+      })
+      pageUtils.setBleeds(0, bleeds)
+      pageUtils.setIsEnableBleed(true, 0)
+    }
     pageUtils.clearPagesInfo()
     editorUtils.handleContentScaleRatio(0)
     // Set default url query 'unit' in Editor.vue
   }
 
-  newDesignWithTemplae(width: number, height: number, json: any, templateId: string, groupId: string) {
+  newDesignWithTemplate(width: number, height: number, json: any, templateId: string, unit: string, bleeds?: IBleed) {
     console.log(json)
-    assetUtils.addTemplateToRecentlyUsedPure(templateId).then(() => {
-      assetUtils.addTemplate(json, {}, false).then(() => {
-        stepsUtils.reset()
-        pageUtils.clearPagesInfo()
-        nextTick(() => {
-          resizeUtils.resizePage(0, json, { width, height })
-          store.commit('UPDATE_pageProps', {
-            pageIndex: 0,
-            props: { width, height }
-          })
-          if (this.isLogin) {
-            /**
-             * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
-             */
-            store.commit('SET_assetId', generalUtils.generateAssetId())
-            // eslint-disable-next-line camelcase
-            const query = _.omit(router.currentRoute.value.query,
-              ['width', 'height'])
-            query.type = 'design'
-            query.design_id = uploadUtils.assetId
-            query.team_id = uploadUtils.teamId
 
-            router.replace({ query }).then(() => {
-              uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-            })
-          }
-        })
+    const pxSize = unitUtils.convertSize(width, height, unit, 'px')
+    this.newDesign(width, height, unit, bleeds)
+
+    assetUtils.addTemplateToRecentlyUsedPure(templateId).then(() => {
+      assetUtils.addTemplate(json, {
+        width: pxSize.width,
+        height: pxSize.height,
+        physicalWidth: width,
+        physicalHeight: height,
+        unit
+      }, false).then(() => {
+        stepsUtils.reset()
+        if (this.isLogin) {
+          /**
+           * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
+           */
+          store.commit('SET_assetId', generalUtils.generateAssetId())
+          // eslint-disable-next-line camelcase
+          const query = _.omit(router.currentRoute.value.query,
+            ['width', 'height'])
+          query.type = 'design'
+          query.design_id = uploadUtils.assetId
+          query.team_id = uploadUtils.teamId
+
+          router.replace({ query }).then(() => {
+            uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          })
+        }
       })
     })
   }

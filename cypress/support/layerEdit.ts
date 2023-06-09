@@ -128,18 +128,20 @@ Cypress.Commands.add('layerScale', { prevSubject: 'element' }, (subject) => {
 
 // Special text for some layer
 
-Cypress.Commands.add('layerRotateAndResize', { prevSubject: 'element' }, (subject) => {
+Cypress.Commands.add('layerRotateAndResize', { prevSubject: 'element' }, (subject, isMobile) => {
   const resizeDir = [
     { i: 0, x: -1, y: -1 },
     { i: 1, x: 1, y: 1 },
     { i: 2, x: -1, y: 1 },
     { i: 3, x: 1, y: -1 },
   ]
+  const restoreOffset = isMobile ? 158 : 210
 
   cy.wrap(subject).click()
+    // Rotate 60 degrees, counter-clockwise
     .get('.svg-rotate')
     .realMouseDown()
-    .realMouseMove(-158, -158, { position: 'center' }) // Rotate 60 degrees, counter-clockwise
+    .realMouseMove(-158, -158, { position: 'center' })
     .realMouseUp()
     .snapshotTest('RotateAndResize before resize')
     .then(() => {
@@ -152,7 +154,32 @@ Cypress.Commands.add('layerRotateAndResize', { prevSubject: 'element' }, (subjec
     })
     .snapshotTest('RotateAndResize after resize')
     // Restore layer to original state
-    .get('.svg-undo').click().click()
+    // Resize layer
+    .then(() => {
+      for (const { i, x, y } of resizeDir.reverse()) {
+        cy.get('.control-point__resize-bar-wrapper').eq(i).children().eq(1)
+          .realMouseDown()
+          .realMouseMove(x * -30, y * -30, { position: 'center' })
+          .realMouseUp()
+      }
+    })
+    // Rotate 60 degrees, clockwise
+    .get('.svg-rotate')
+    .realMouseDown()
+    .realMouseMove(restoreOffset, restoreOffset, { position: 'center' })
+    .realMouseUp()
+    // Cancel crop effect
+    .togglePanel('裁切')
+    .get('.dim-background .nu-controller__body .controller-point').eq(0) // top-left
+    .realMouseDown()
+    .realMouseMove(100, 100)
+    .realMouseUp()
+    .get('.dim-background .nu-controller__body .controller-point').eq(2) // bottom right
+    .realMouseDown()
+    .realMouseMove(-100, -100)
+    .realMouseUp()
+    .isMobile(() => { cy.togglePanel('裁切') })
+    .notMobile(() => { cy.togglePanel('完成') })
   return cy.wrap(subject)
 })
 

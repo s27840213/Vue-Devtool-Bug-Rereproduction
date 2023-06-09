@@ -1,6 +1,8 @@
 import i18n from '@/i18n'
 import { Itheme } from '@/interfaces/theme'
+import router from '@/router'
 import store from '@/store'
+import textFillUtils from '@/utils/textFillUtils'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
 import picWVUtils from './picWVUtils'
@@ -13,11 +15,21 @@ interface BillingInfoInput {
   optional?: boolean
   error?: string
 }
+export interface IEffectOptionImg {
+  key: string
+  label: string
+  type: 'img'
+}
 export interface IEffectOptionSelect {
   key: string
   label: string
   type: 'select'
-  select: { key: string, label: string }[]
+  select: {
+    key: string
+    img: string
+    label: string
+    attrs: Record<string, unknown>
+  }[]
 }
 export interface IEffectOptionColor {
   key: string
@@ -32,15 +44,16 @@ export interface IEffectOptionRange {
   max: number
   isPStyle?: boolean
 }
-export type IEffectOption = IEffectOptionSelect | IEffectOptionColor | IEffectOptionRange
+export type IEffectOption = IEffectOptionImg | IEffectOptionSelect | IEffectOptionColor | IEffectOptionRange
 export interface IEffect {
   key: string
   label: string
   plan: 0 | 1
+  img?: string
   options: IEffectOption[]
 }
 export interface IEffectCategory {
-  name: 'shadow' | 'bg' | 'shape'
+  name: 'shadow' | 'bg' | 'shape' | 'fill'
   label: string
   effects2d: IEffect[][]
 }
@@ -316,7 +329,7 @@ class ConstantData {
       content: templateType
     }, {
       name: 'TemplateCenter',
-      url: `${base}/templates`,
+      url: router.currentRoute.value.name === 'TemplateCenter' ? `${base}/templates` : '/templates',
       label: i18n.global.t('NN0145')
     }, {
       label: i18n.global.t('NN0670'),
@@ -340,6 +353,86 @@ class ConstantData {
   }
 
   // For TextEffectSetting
+  toOptions(array: string[], effectName = '') {
+    const effectI18nMap = {
+      distance: i18n.global.tc('NN0063'),
+      angle: i18n.global.tc('NN0064'),
+      blur: i18n.global.tc('NN0065'),
+      opacity: i18n.global.tc('NN0066'),
+      color: i18n.global.tc('NN0067'),
+      spread: i18n.global.tc('NN0068'),
+      stroke: i18n.global.tc('NN0069'),
+      shape: i18n.global.tc('NN0070'),
+      bend: i18n.global.tc('NN0071'),
+      bStroke: i18n.global.tc('NN0733'),
+      bColor: i18n.global.tc('NN0734'),
+      bRadius: i18n.global.tc('NN0086'),
+      pStrokeY: i18n.global.tc('NN0319'),
+      pColor: i18n.global.tc('NN0735'),
+      height: i18n.global.tc('NN0319'),
+      yOffset: i18n.global.tc('NN0424'), // For value 0~100, 0 initial
+      xOffset200: i18n.global.tc('NN0425'), // For value -100~100, 0 initial
+      yOffset200: i18n.global.tc('NN0424'), // For value -100~100, 0 initial
+      distanceInverse: i18n.global.tc('NN0737'),
+      textStrokeColor: i18n.global.tc('NN0739'),
+      shadowStrokeColor: i18n.global.tc('NN0740'),
+      endpoint: i18n.global.tc('NN0738'),
+      size: i18n.global.tc('NN0815'),
+      lineHeight: i18n.global.tc('NN0110'),
+      fontSpacing: i18n.global.tc('NN0109'),
+      img: i18n.global.t('NN0870'),
+      customImg: i18n.global.t('NN0871'),
+    }
+
+    return array.map((name: string) => {
+      const option = {
+        key: name,
+        label: effectI18nMap[name as keyof typeof effectI18nMap]
+      } as IEffectOption
+
+      option.type = 'range'
+      if (name.toLocaleLowerCase().endsWith('color')) {
+        option.type = 'color'
+      }
+      if (name === 'customImg') option.type = 'img'
+      switch (name) {
+        case 'endpoint':
+          option.type = 'select';
+          (option as IEffectOptionSelect).select = ['triangle', 'rounded', 'square'].map((key, i) => ({
+            key,
+            img: require(`@/assets/img/svg/text-effect/endpoint/endpoint-${key}.svg`),
+            label: i18n.global.tc(`NN073${i}`),
+            attrs: { endpoint: key },
+          }))
+          break
+        case 'angle':
+          Object.assign(option, { min: -180, max: 180 })
+          break
+        case 'bend': // For curve
+        case 'xOffset200':
+        case 'yOffset200':
+          Object.assign(option, { min: -100, max: 100 })
+          break
+        case 'size':
+          if (effectName === 'fill-img') Object.assign(option, { min: 100, max: 200 })
+          else Object.assign(option, { min: 50, max: 200 })
+          break
+        case 'lineHeight':
+          Object.assign(option, { min: 0.5, max: 2.5, isPStyle: true })
+          break
+        case 'fontSpacing':
+          Object.assign(option, { min: -200, max: 1600, isPStyle: true })
+          break
+        default:
+          /* distance, blur, opacity, spread, stroke,
+           * bStroke, pStrokeY, bRadius, height */
+          Object.assign(option, { min: 0, max: 100 })
+          break
+      }
+      return option
+    })
+  }
+
   textEffects(): IEffectCategory[] {
     function arrTo2darr(arr: Array<Omit<IEffect, 'plan'> & { plan?: number }>): IEffect[][] {
       const newArr = []
@@ -347,86 +440,7 @@ class ConstantData {
       while (arr.length) newArr.push(arr.splice(0, 3) as IEffect[])
       return newArr
     }
-
-    function toOptions(array: string[]) {
-      const effectI18nMap = {
-        distance: i18n.global.tc('NN0063'),
-        angle: i18n.global.tc('NN0064'),
-        blur: i18n.global.tc('NN0065'),
-        opacity: i18n.global.tc('NN0066'),
-        color: i18n.global.tc('NN0067'),
-        spread: i18n.global.tc('NN0068'),
-        stroke: i18n.global.tc('NN0069'),
-        shape: i18n.global.tc('NN0070'),
-        bend: i18n.global.tc('NN0071'),
-        bStroke: i18n.global.tc('NN0733'),
-        bColor: i18n.global.tc('NN0734'),
-        bRadius: i18n.global.tc('NN0086'),
-        pStrokeY: i18n.global.tc('NN0319'),
-        pColor: i18n.global.tc('NN0735'),
-        height: i18n.global.tc('NN0319'),
-        yOffset: i18n.global.tc('NN0424'), // For value 0~100, 0 initial
-        xOffset200: i18n.global.tc('NN0425'), // For value -100~100, 0 initial
-        yOffset200: i18n.global.tc('NN0424'), // For value -100~100, 0 initial
-        distanceInverse: i18n.global.tc('NN0737'),
-        textStrokeColor: i18n.global.tc('NN0739'),
-        shadowStrokeColor: i18n.global.tc('NN0740'),
-        endpoint: i18n.global.tc('NN0738'),
-        size: i18n.global.tc('NN0815'),
-        lineHeight: i18n.global.tc('NN0110'),
-        fontSpacing: i18n.global.tc('NN0109'),
-      }
-
-      return array.map((name: string) => {
-        const option = {
-          key: name,
-          label: effectI18nMap[name as keyof typeof effectI18nMap]
-        } as IEffectOption
-
-        option.type = 'range'
-        if (name.toLocaleLowerCase().endsWith('color')) {
-          option.type = 'color'
-        }
-        switch (name) {
-          case 'endpoint':
-            option.type = 'select';
-            (option as IEffectOptionSelect).select = [{
-              key: 'triangle',
-              label: i18n.global.tc('NN0730')
-            }, {
-              key: 'rounded',
-              label: i18n.global.tc('NN0731')
-            }, {
-              key: 'square',
-              label: i18n.global.tc('NN0732')
-            }]
-            break
-          case 'angle':
-            Object.assign(option, { min: -180, max: 180 })
-            break
-          case 'bend': // For curve
-          case 'xOffset200':
-          case 'yOffset200':
-            Object.assign(option, { min: -100, max: 100 })
-            break
-          case 'size':
-            Object.assign(option, { min: 50, max: 200 })
-            break
-          case 'lineHeight':
-            Object.assign(option, { min: 0.5, max: 2.5, isPStyle: true })
-            break
-          case 'fontSpacing':
-            Object.assign(option, { min: -200, max: 800, isPStyle: true })
-            break
-          default:
-            /* distance, blur, opacity, spread, stroke,
-             * bStroke, pStrokeY, bRadius, height */
-            Object.assign(option, { min: 0, max: 100 })
-            break
-        }
-        return option
-      })
-    }
+    const toOptions = this.toOptions
 
     const categories = [{
       name: 'shadow' as const,
@@ -434,7 +448,7 @@ class ConstantData {
       effects2d: arrTo2darr([{
         key: 'none',
         label: i18n.global.t('NN0111'),
-        options: toOptions([])
+        options: [],
       }, {
         key: 'shadow',
         label: i18n.global.t('NN0112'),
@@ -470,7 +484,7 @@ class ConstantData {
       effects2d: arrTo2darr([{
         key: 'none',
         label: i18n.global.t('NN0117'),
-        options: toOptions([])
+        options: [],
       }, {
         key: 'curve',
         label: i18n.global.t('NN0118'),
@@ -482,7 +496,7 @@ class ConstantData {
       effects2d: arrTo2darr([{
         key: 'none',
         label: i18n.global.t('NN0111'),
-        options: toOptions([])
+        options: [],
       }, {
         key: 'square-borderless',
         label: i18n.global.tc('NN0720'),
@@ -574,9 +588,55 @@ class ConstantData {
         label: i18n.global.tc('NN0850'),
         plan: 1,
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'butter-flower',
+        label: i18n.global.tc('NN0852'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'flower-frame',
+        label: i18n.global.tc('NN0853'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'flower-frame-custom',
+        label: i18n.global.tc('NN0854'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'vintage-flower',
+        label: i18n.global.tc('NN0855'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'vintage-flower-custom',
+        label: i18n.global.tc('NN0856'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'cat-paw',
+        label: i18n.global.tc('NN0864'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'bread',
+        label: i18n.global.tc('NN0865'),
+        plan: 1,
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }])
+    }, {
+      name: 'fill' as const,
+      label: i18n.global.t('NN0868'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.global.t('NN0111'),
+        options: [],
+      }, {
+        key: 'custom-fill-img',
+        label: i18n.global.t('NN0869'),
+        plan: 1,
+        options: [...toOptions(['customImg', 'xOffset200', 'yOffset200', 'size', 'opacity'])]
+      }, ...textFillUtils.fillCategories])
     }]
-    return categories
+    return categories.filter(c => store.getters['user/isAdmin'] ? true : c.name !== 'fill')
   }
 
   // For Settings

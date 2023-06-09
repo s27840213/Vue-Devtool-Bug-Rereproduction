@@ -1,11 +1,8 @@
 <template lang="pug">
 div(class="nu-text" :style="textWrapperStyle()" draggable="false")
-  //- Svg BG for text effex gooey.
-  svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
-    component(v-for="(elm, idx) in svgBG.content"
-              :key="`textSvgBg${idx}`"
-              :is="elm.tag"
-              v-bind="elm.attrs")
+  //- NuText BGs.
+  template(v-for="(bgConfig, idx) in [textBg, textFillBg]")
+    custom-element(v-if="bgConfig" class="nu-text__BG" :config="bgConfig" :key="`textSvgBg${idx}`")
   div(v-for="text, idx in duplicatedText"
       :key="`text${duplicatedText.length - idx}`"
       class="nu-text__body"
@@ -27,29 +24,33 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
         :key="`span${sIndex}`"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpanStyle)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, pIndex, config), text.extraSpanStyle)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
 <script lang="ts">
+import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
-import { isITextLetterBg } from '@/interfaces/format'
-import { IGroup, IParagraph, IText } from '@/interfaces/layer'
+import { CustomElementConfig } from '@/interfaces/editor'
+import { isTextFill } from '@/interfaces/format'
+import { IGroup, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
-import textBgUtils, { textBgSvg } from '@/utils/textBgUtils'
+import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import _ from 'lodash'
+import _, { max, omit } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
     NuCurveText,
+    CustomElement,
   },
   props: {
     config: {
@@ -90,7 +91,11 @@ export default defineComponent({
         height: this.config.styles.height,
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
-      svgBG: {} as textBgSvg|null,
+      textBgVersion: 0,
+      textBg: {} as CustomElementConfig | null,
+      textFillVersion: 0,
+      textFillBg: {} as CustomElementConfig | null,
+      textFillSpanStyle: [] as Record<string, string | number>[][]
     }
   },
   created() {
@@ -103,9 +108,8 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
-    isCurveText(): any {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
+    isCurveText(): boolean {
+      return textShapeUtils.isCurvedText(this.config.styles.textShape)
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
@@ -117,16 +121,14 @@ export default defineComponent({
       return this.config.locked
     },
     // Use duplicated of text to do some text effect, define their difference css here.
-    duplicatedText(): (Partial<Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>>)[] {
+    duplicatedText() {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
-        top: '0px',
         width: '100%',
         height: '100%',
         opacity: 1
       }
-      const duplicatedTexts = textEffectUtils.convertTextEffect(this.config).duplicatedTexts as
-        Record<'extraBodyStyle' | 'extraSpanStyle', Record<string, string>>[] | undefined
+      const duplicatedTexts = textEffectUtils.convertTextEffect(this.config).duplicatedTexts
       return [
         ...duplicatedTexts ? duplicatedTexts.map(d => {
           d.extraBodyStyle = Object.assign({}, duplicatedBodyBasicCss, d.extraBodyStyle) // Set extra body default style
@@ -137,18 +139,24 @@ export default defineComponent({
     }
   },
   watch: {
-    'config.paragraphs': {
-      handler(newVal) {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
-        this.drawSvgBG()
-        textUtils.untilFontLoaded(newVal).then(() => {
-          this.drawSvgBG()
-        })
-      }
+    'config.paragraphs'(newVal) {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
+      this.drawTextBg()
+      textUtils.untilFontLoaded(newVal).then(async () => {
+        this.drawTextBg()
+        this.drawTextFill()
+      })
     },
-    'config.styles.width'() { this.drawSvgBG() },
-    'config.styles.height'() { this.drawSvgBG() },
-    'config.styles.textBg'() { this.drawSvgBG() },
+    async 'config.styles.width'() {
+      this.drawTextBg()
+      this.drawTextFill()
+    },
+    async 'config.styles.height'() {
+      this.drawTextBg()
+      this.drawTextFill()
+    },
+    'config.styles.textBg'() { this.drawTextBg() },
+    'config.styles.textFill'() { this.drawTextFill() },
   },
   methods: {
     textWrapperStyle(): Record<string, string> {
@@ -159,24 +167,34 @@ export default defineComponent({
         // height: `${this.config.styles.height / this.config.styles.scale}px`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
-        ...(this.config.styles.opacity !== 100 && { opacity: `${this.config.styles.opacity * 0.01}` })
       }
     },
-    drawSvgBG(): Promise<void> {
+    drawTextBg(): Promise<void> {
       return new Promise(resolve => {
         this.$nextTick(async () => {
-          this.svgBG = await textBgUtils.drawSvgBg(this.config)
+          // Prevent earlier result overwrite later result
+          const newTextBgVersion = this.textBgVersion = this.textBgVersion + 1
+          const result = await textBgUtils.drawTextBg(this.config)
+          if (newTextBgVersion === this.textBgVersion) this.textBg = result
           resolve()
         })
       })
+    },
+    async drawTextFill() {
+      // Prevent earlier result overwrite later result
+      const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
+      this.textFillBg = textFillUtils.drawTextFill(this.config)
+      const result = await textFillUtils.convertTextEffect(this.config)
+      if (newTextFillVersion === this.textFillVersion) this.textFillSpanStyle = result
     },
     isLayerAutoResizeNeeded(): boolean {
       return this.config.isAutoResizeNeeded
     },
     getOpacity() {
       const { active, contentEditable } = this.config
+      const checkTextFill = isTextFill(this.config.styles.textFill)
       if (active && !this.isLocked && !this.inPreview) {
-        if (this.isCurveText || this.isFlipped || this.isFlipping) {
+        if (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) {
           return contentEditable ? 0.2 : 1
         } else {
           return 0
@@ -188,21 +206,31 @@ export default defineComponent({
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
+      const textEffectStyles = omit(textEffectUtils.convertTextEffect(this.config), ['duplicatedTexts'])
+      const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
       return {
-        width: isVertical ? 'auto' : '',
+        width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        opacity
+        opacity,
+        ...textEffectStyles,
+        // Add padding at body to prevent Safari bug that overflow text of drop-shadow/opacity<1 will be cliped
+        padding: `${maxFontSize}px`,
+        left: `${maxFontSize * -1}px`,
+        top: `${maxFontSize * -1}px`,
       }
     },
-    spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
-      const textBg = this.config.styles.textBg
+    spanStyle(sIndex: number, pIndex: number, config: IText): Record<string, string> {
+      const p = config.paragraphs[pIndex]
       const span = p.spans[sIndex]
-      const textEffectStyles = textEffectUtils.convertTextEffect(this.config)
+      const textFillStyle = this.textFillSpanStyle[pIndex]?.[sIndex] ?? {}
+      const textShadowStrokeColor = textEffectUtils.convertTextEffect(config).webkitTextStrokeColor
       return Object.assign(tiptapUtils.textStylesRaw(span.styles, this.page.contentScaleRatio),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        textEffectStyles,
-        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},
+        textFillStyle,
+        // Overwrite stroke color
+        textShadowStrokeColor ? { webkitTextStrokeColor: textShadowStrokeColor } : {},
+        textBgUtils.fixedWidthStyle(span.styles, p.styles, config),
       )
     },
     pStyle(styles: any) {
@@ -212,7 +240,7 @@ export default defineComponent({
     },
     async resizeCallback() {
       const config = generalUtils.deepCopy(this.config) as IText
-      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
+      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles.textShape)) return
 
       let widthLimit
       if (this.isLayerAutoResizeNeeded()) {
@@ -243,9 +271,10 @@ export default defineComponent({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      await this.drawSvgBG()
+      await this.drawTextBg()
+      await this.drawTextFill()
     },
-    resizeAfterFontLoaded() {
+    async resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(async () => {
@@ -255,11 +284,21 @@ export default defineComponent({
           }
         }, 100) // for the delay between font loading and dom rendering
       })
-      this.drawSvgBG()
+      this.drawTextBg()
+      this.drawTextFill()
     }
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.nu-text {
+  &__body {
+    width: 100%;
+    height: 100%;
+  }
+}
+</style>
 
 <style lang="scss">
 .nu-text {
@@ -290,7 +329,9 @@ export default defineComponent({
   &__span {
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    position: relative;
+    // Should no have position: relative here, or Safari bug that
+    // overflow text of drop-shadow/opacity<1 will be cliped will happen
+    // position: relative;
   }
   &__curve-text-in-editing {
     pointer-events: none;

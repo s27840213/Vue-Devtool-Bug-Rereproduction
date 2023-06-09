@@ -6,21 +6,19 @@ div(class="settings-security")
       div(class="settings-security__item")
         span(v-if="showUpdatePassword") {{$t('NN0311')}} {{lastUpdateText}}
         span(v-else) {{$t('NN0177')}}
-        div(v-if="showUpdatePassword"
-          class="settings-security__button"
-          @click="onChangeClicked()") {{$t('NN0313')}}
+        nubtn(v-if="showUpdatePassword" theme="secondary"
+            @click="onChangeClicked()")  {{$t('NN0313')}}
       div(class="settings-security__divider")
     //- div(class="settings-security__title") {{$t('NN0314')}}
     //- div(class="settings-security__item")
     //-   span {{$t('NN0315')}}
-    //-   div(class="settings-security__button") {{$t('NN0316')}}
+    //-   nubtn(theme="secondary")  {{$t('NN0316')}}
     //- div(class="settings-security__divider")
     div(v-if="!isAdmin")
       div(class="settings-security__title") {{$tc('NN0317',1)}}
       div(class="settings-security__item")
         span {{$t('NN0318')}}
-        div(class="settings-security__button"
-            @click="deleteAccount()") {{$tc('NN0317',2)}}
+        nubtn(theme="secondary" @click="deleteAccount()")  {{$tc('NN0317',2)}}
       div(class="settings-security__divider")
   spinner(v-if="isLoading")
   div(v-if="showVerifyPopup"
@@ -96,6 +94,10 @@ export default defineComponent({
       width: 80%;
       padding-left: 0;
     }
+    @media (max-width: 541px) {
+      width: 100%;
+      padding-top: 0;
+    }
   }
   &__title {
     text-align: left;
@@ -114,27 +116,6 @@ export default defineComponent({
       align-items: flex-start;
       justify-content: center;
       line-height: 22px;
-    }
-  }
-  &__button {
-    cursor: pointer;
-    border-radius: 7px;
-    white-space: nowrap;
-    color: setColor(gray-2);
-    background-color: setColor(gray-6);
-    border: 1px solid setColor(gray-3);
-    margin-left: 20px;
-    padding: 8px 30px;
-    @include layout-mobile {
-      width: 100%;
-      text-align: center;
-      margin-top: 20px;
-      margin-left: 0;
-      padding: 8px 0;
-    }
-    &:hover {
-      color: setColor(blue-1);
-      border: 1px solid setColor(blue-1);
     }
   }
   &__divider {

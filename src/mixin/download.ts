@@ -69,7 +69,8 @@ export default defineComponent({
       pageRange: rangeType === 'spec' ? pageRange : [],
       selectedDev
     }
-    const currentPageIndex = this.pageIndex || 0
+    console.log(prevInfo)
+    const currentPageIndex: number = this.pageIndex || 0
     const host = window.location.hostname
     return {
       ...prevInfo,
@@ -108,7 +109,7 @@ export default defineComponent({
         { value: 998, label: 'qa' },
         { value: 999, label: 'rd' }
       ],
-      onDev: host.startsWith('qa') || host.startsWith('rd') || host.startsWith('dev') || host.startsWith('localhost')
+      onDev: host !== 'vivipic.com'
     }
   },
   computed: {

@@ -17,6 +17,9 @@ div(class="nu-sub-controller")
               :config="(config as IText)"
               :primaryLayer="primaryLayer"
               :subLayerIndex="layerIndex"
+              :pageId="page.id"
+              :layerId="primaryLayer.id"
+              :subLayerId="config.id"
               @keydown.arrow-left.stop
               @keydown.arrow-up.stop
               @keydown.arrow-right.stop
@@ -39,11 +42,11 @@ div(class="nu-sub-controller")
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import { isTextFill } from '@/interfaces/format'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -108,7 +111,6 @@ export default defineComponent({
   data() {
     return {
       subLayerCtrlUtils: null as unknown as SubCtrlUtils,
-      controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isComposing: false,
       layerSizeBuff: -1,
@@ -210,6 +212,7 @@ export default defineComponent({
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
         ...this.transformStyle,
         outline: this.outlineStyles(),
+        outlineOffset: `-${1 / this.primaryLayer.styles.scale}px`,
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
           const { styles: { width, height }, clipPath } = this.config
@@ -242,6 +245,9 @@ export default defineComponent({
     isTextEditing(): boolean {
       return !this.isControlling && this.config?.active
     },
+    isDraggingCursor(): boolean {
+      return this.config.isDraggingCursor
+    },
     getPrimaryLayerSubLayerNum(): number {
       return (this.primaryLayer as IGroup | ITmp).layers.length
     },
@@ -255,9 +261,6 @@ export default defineComponent({
     }
   },
   watch: {
-    scaleRatio() {
-      this.controlPoints = ControlUtils.getControlPoints(4, 25)
-    },
     isTextEditing(editing) {
       if (this.config.type === 'text') {
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
@@ -325,30 +328,18 @@ export default defineComponent({
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.config.styles.scale * _f}) scaleY(${this.config.styles.scale * _f})`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode
+        writingMode: this.config.styles.writingMode,
+        ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
     textBodyStyle() {
-      // const isVertical = this.config.styles.writingMode.includes('vertical')
-      // return {
-      //   width: `${this.config.styles.width / this.config.styles.scale}px`,
-      //   height: `${this.config.styles.height / this.config.styles.scale}px`,
-      //   userSelect: this.config.contentEditable ? 'text' : 'none',
-      //   opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
-      // }
-      const textstyles = {
+      const checkTextFill = isTextFill(this.config.styles.textFill)
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
+        !this.config.contentEditable ? 0 : 1
+      return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
-        userSelect: this.config.contentEditable ? 'text' : 'none',
-        opacity: 1
-      }
-      return !(this.isCurveText || this.isFlipped || this.isFlipping) ? textstyles : {
-        width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        opacity: this.config.contentEditable ? 1 : 0
+        opacity,
       }
     },
     onPointerdown(e: PointerEvent) {
@@ -453,8 +444,7 @@ export default defineComponent({
       })
     },
     checkIfCurve(config: IText): boolean {
-      const { textShape } = config.styles
-      return textShape && textShape.name === 'curve'
+      return textShapeUtils.isCurvedText(config.styles.textShape)
     },
     calcSize(config: IText) {
       this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)

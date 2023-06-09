@@ -21,16 +21,9 @@ div(class="popup-brand-settings")
                           @click="addNewBrand")
           div(class="brand-kit__tab")
             brand-kit-tab(@deleteItem="handleDeleteItem")
-        div(v-if="isOverlayed" class="dim-background"
-          :style="isDraggedOver ? { pointerEvents: 'none' } : {}")
-          template(v-if="isDraggedOver")
-            div(class="upload-large")
-              svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
-              span {{ $t(hintText) }}
-            div(class="upload-small")
-                span {{ `・${$t('NN0414', { element: $t(elementType) })}： ${fileTypesString}` }}
-          div(v-if="isMessageShowing" class="delete-confirm"
-              v-click-outside="handleClearDeletion")
+        drag-hover(v-if="isDraggedOver" :text="dragHoverText")
+        div(v-if="isMessageShowing" class="dim-background")
+          div(class="delete-confirm" v-click-outside="handleClearDeletion")
             div(class="delete-confirm__title")
               span {{ $t('NN0433') }}
             div(class="delete-confirm__description")
@@ -44,18 +37,16 @@ div(class="popup-brand-settings")
             div(v-else class="delete-confirm__description")
               span {{ $t('NN0459') }}
             div(class="delete-confirm__buttons")
-              div(class="delete-confirm__buttons__cancel pointer"
-                @click="handleClearDeletion")
-                span {{ $t('NN0203') }}
-              div(class="delete-confirm__buttons__confirm pointer"
-                @click="handleConfirmDeletion")
-                span {{ $t('NN0437') }}
+              nubtn(theme="secondary" @click="handleClearDeletion") {{$t('NN0203')}}
+              nubtn(theme="danger" @click="handleConfirmDeletion")  {{$t('NN0200')}}
 </template>
 
 <script lang="ts">
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
+import DragHover from '@/components/image-gallery/DragHover.vue'
+import i18n from '@/i18n'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -69,7 +60,8 @@ export default defineComponent({
   components: {
     BrandSelector,
     BrandKitTab,
-    BrandKitAddBtn
+    BrandKitAddBtn,
+    DragHover,
   },
   mounted() {
     // brandkitUtils.fetchBrands(this.fetchBrands)
@@ -85,14 +77,14 @@ export default defineComponent({
       deleteBuffer: undefined as IDeletingItem | undefined,
       uploadHint: {
         logo: {
-          text: 'NN0413',
-          fileTypes: ['jpg', 'png'],
-          elementTypeText: 'NN0416'
+          hintText: i18n.global.t('NN0413'),
+          elementType: i18n.global.t('NN0416'),
+          fileTypes: ['jpg', 'png'].join('、'),
         },
         text: {
-          text: 'NN0415',
-          fileTypes: ['otf', 'otc', 'ttf', 'ttc'],
-          elementTypeText: 'NN0417'
+          hintText: i18n.global.t('NN0415'),
+          elementType: i18n.global.t('NN0417'),
+          fileTypes: ['otf', 'otc', 'ttf', 'ttc'].join('、'),
         }
       }
     }
@@ -104,17 +96,9 @@ export default defineComponent({
       selectedTab: 'getSelectedTab',
       brands: 'getBrands'
     }),
-    hintText(): string {
-      return this.uploadHint[this.selectedTab as 'logo' | 'text']?.text ?? ''
-    },
-    fileTypesString(): string {
-      return (this.uploadHint[this.selectedTab as 'logo' | 'text']?.fileTypes ?? []).join('、')
-    },
-    elementType(): string {
-      return this.uploadHint[this.selectedTab as 'logo' | 'text']?.elementTypeText ?? ''
-    },
-    isOverlayed(): boolean {
-      return this.isDraggedOver || this.isMessageShowing
+    dragHoverText() {
+      return this.uploadHint[this.selectedTab as 'logo' | 'text'] ??
+        { hintText: '', elementType: '', fileTypes: '' }
     }
   },
   methods: {
@@ -219,9 +203,12 @@ export default defineComponent({
   @include size(100%, 100%);
   @include hover-scrollbar();
   &__main {
-    padding-top: 30px;
-    padding-left: 24px;
-    padding-right: 24px;
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    box-sizing: border-box;
+    height: 100%;
+    padding: 30px 24px 0 24px;
   }
   &__header {
     width: 100%;
@@ -230,7 +217,7 @@ export default defineComponent({
     align-items: center;
   }
   &__tab {
-    margin: 28px 0px;
+    margin: 28px 0 0 0;
   }
 }
 
@@ -249,33 +236,6 @@ export default defineComponent({
   gap: 45px;
   &.under {
     z-index: 99;
-  }
-}
-
-.upload-large {
-  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  & > span {
-    font-style: normal;
-    font-weight: bold;
-    font-size: 40px;
-    line-height: 40px;
-    color: white;
-  }
-}
-
-.upload-small {
-  & > span {
-    font-style: normal;
-    font-weight: bold;
-    font-size: 16px;
-    line-height: 28px;
-    color: white;
-    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   }
 }
 
@@ -304,24 +264,6 @@ export default defineComponent({
     gap: 40px;
     align-items: center;
     justify-content: center;
-    &__cancel {
-      background: setColor(gray-4);
-      border-radius: 5px;
-      padding: 4px 23px;
-      & > span {
-        @include btn-SM;
-        color: setColor(gray-2);
-      }
-    }
-    &__confirm {
-      background: #ec5858;
-      border-radius: 5px;
-      padding: 4px 23px;
-      & > span {
-        @include btn-SM;
-        color: setColor(gray-7);
-      }
-    }
   }
 }
 </style>

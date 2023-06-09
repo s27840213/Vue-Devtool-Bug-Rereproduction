@@ -14,9 +14,7 @@ div(class="browser-warning")
       span {{  $t('NN0836') }}
     a(class="body-SM" href="https://www.microsoft.com/en-us/edge/download?form=MA13FJ" target="_blank")
       span {{  $t('NN0837') }}
-  nubtn(size="mid"
-        :status="'default'"
-        @click="goHome()") {{ $t('NN0838') }}
+  nubtn(size="mid" @click="goHome()") {{ $t('NN0838') }}
 </template>
 
 <script lang="ts">

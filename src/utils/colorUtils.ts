@@ -1,10 +1,10 @@
-import store from '@/store'
 import { IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
-import { EventEmitter } from 'events'
 import { IPage } from '@/interfaces/page'
-import pageUtils from './pageUtils'
+import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
+import { EventEmitter } from 'events'
 import { clamp, filter, flatten, uniq } from 'lodash'
+import pageUtils from './pageUtils'
 
 const STOP_POSTFIX = '_st'
 
@@ -180,9 +180,9 @@ export function checkAndConvertToHex(color: string): string {
 }
 
 export function hex2Rgb(hex: string): number[] {
-  const splited = hex.replace('#', '').toUpperCase().match(/[0-9A-F]{2}/g)
-  if (splited?.length !== 3) return [255, 255, 255]
-  return splited.map((color) => parseInt(color, 16))
+  const split = hex.replace('#', '').toUpperCase().match(/[0-9A-F]{2}/g)
+  if (split?.length !== 3) return [255, 255, 255]
+  return split.map((color) => parseInt(color, 16))
 }
 
 export function rgb2xyz(sRGB: string): number[] {

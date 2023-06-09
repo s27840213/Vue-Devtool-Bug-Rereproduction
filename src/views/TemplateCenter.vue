@@ -40,13 +40,11 @@ div(ref="body"
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-      div(class="template-center__mobile-search__options"
-          :class="{'active': isShowOptions}"
+      nubtn(class="template-center__mobile-search__options"
+          theme="icon2" size="mid"
+          :icon="['advanced', 'none']"
+          :active="isShowOptions"
           @click="isShowOptions = !isShowOptions")
-        svg-icon(iconName="advanced"
-                iconWidth="22px"
-                iconHeight="18.36px"
-                iconColor="white")
       transition(name="slide-up")
         img(v-if="!mobileSnapToTop" class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
       transition(name="slide-up")
@@ -55,14 +53,18 @@ div(ref="body"
         :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0', 'pointer-events': isShowOptions ? 'initial' : 'none'}")
       hashtag-category-row(v-for="hashtag in hashtags"
         :key="hashtag.title"
-        :list="hashtag"
+        :list="hashtag.list"
+        :type="hashtag.type"
+        :title="hashtag.title"
         :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
         @select="handleHashtagSelect")
   div(class="template-center__content")
     div(class="template-center__filter non-mobile-show")
       hashtag-category-row(v-for="hashtag in hashtags"
         :key="hashtag.title"
-        :list="hashtag"
+        :list="hashtag.list"
+        :type="hashtag.type"
+        :title="hashtag.title"
         :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
         @select="handleHashtagSelect")
     div(class="template-center__hr non-mobile-show")
@@ -81,8 +83,8 @@ div(ref="body"
                       @updateHashTagsAll="handleSelectAll")
     template-waterfall(:waterfallTemplates="waterfallTemplates"
                       :isTemplateReady="isTemplateReady"
-                      :useScrollablePreview="!isMobile"
-                      :useScrollSpace="isMobile"
+                      :useScrollablePreview="!isMobileSize"
+                      :useScrollSpace="isMobileSize"
                       :themes="themes"
                       @loadMore="handleLoadMore"
                       @clickWaterfall="handleClickWaterfall")
@@ -144,7 +146,7 @@ div(ref="body"
             div(class="template-center__multi__themes__title")
               span {{ theme.title }}
             div(class="template-center__multi__themes__description")
-              span {{ `${theme.width}x${theme.height}` }}
+              span {{ `${theme.width}x${theme.height} ${theme.unit}` }}
         div(class="template-center__multi__button"
             :class="selectedTheme ? '' : 'disabled'"
             @click="handleThemeSubmit")
@@ -162,6 +164,7 @@ import TemplateWaterfall from '@/components/templates/TemplateWaterfall.vue'
 import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
 import hashtag from '@/store/module/hashtag'
+import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
@@ -220,7 +223,7 @@ export default defineComponent({
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
-      isMobile: false,
+      isMobileSize: false,
       isPC: false
     }
   },
@@ -308,7 +311,7 @@ export default defineComponent({
         }
         this.hashtagSelections[hashtag.title] = {
           type: hashtag.type,
-          selection
+          selection: selection.slice(0, 1) // limit querystring selection as single selection
         }
       }
       this.composeKeyword()
@@ -344,10 +347,16 @@ export default defineComponent({
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
     }),
+    ...mapGetters({
+      userInfo: picWVUtils.appendModuleName('getUserInfo')
+    }),
+    statusbarHeight (): string {
+      return `${this.userInfo.statusBarHeight ?? 0}px`
+    },
     waterfallTemplates(): ITemplate[][] {
       if (this.isPC) {
         return this.waterfallTemplatesPC
-      } else if (this.isMobile) {
+      } else if (this.isMobileSize) {
         return this.waterfallTemplatesMOBILE
       } else {
         return this.waterfallTemplatesTAB
@@ -445,10 +454,13 @@ export default defineComponent({
         const matchedTheme = this.themes.find(theme => theme.id.toString() === template.theme_id)
         const format = matchedTheme ? {
           width: matchedTheme.width.toString(),
-          height: matchedTheme.height.toString()
+          height: matchedTheme.height.toString(),
+          unit: matchedTheme.unit,
+          bleed: matchedTheme.bleed
         } : {
           width: template.width.toString(),
-          height: template.height.toString()
+          height: template.height.toString(),
+          unit: template.unit,
         }
         const route = this.$router.resolve({
           name: 'Editor',
@@ -457,7 +469,9 @@ export default defineComponent({
             design_id: template.id,
             themeId: template.content_ids[0].themes.join(','),
             width: format.width,
-            height: format.height
+            height: format.height,
+            unit: format.unit,
+            ...(format.unit !== 'px' && format.bleed !== undefined ? { bleeds: designUtils.convertBleedsToQuery(format.bleed) } : {})
           }
         })
         this.openTemplate(route.href)
@@ -468,7 +482,7 @@ export default defineComponent({
         this.groupId = template.group_id ?? ''
         this.contentIds = template.content_ids
         this.modalTemplate = template
-        if (this.isMobile) {
+        if (this.isMobileSize) {
           this.modal = 'mobile-pages'
         } else {
           this.modal = 'pages'
@@ -542,15 +556,18 @@ export default defineComponent({
         return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
       }, [true, undefined, undefined])[0]
       if (content.themes.length > 1 && !allSameSize) {
-        if (this.isMobile) {
+        if (this.isMobileSize) {
+          const usedTheme = this.matchedThemes[0]
           const route = this.$router.resolve({
             name: 'Editor',
             query: {
               type: 'new-design-template',
               design_id: content.id,
-              width: this.matchedThemes[0].width.toString(),
-              height: this.matchedThemes[0].height.toString(),
-              group_id: this.groupId
+              width: usedTheme.width.toString(),
+              height: usedTheme.height.toString(),
+              group_id: this.groupId,
+              unit: usedTheme.unit,
+              ...(usedTheme.unit !== 'px' ? { bleeds: designUtils.convertBleedsToQuery(usedTheme.bleed) } : {})
             }
           })
           this.openTemplate(route.href)
@@ -566,10 +583,13 @@ export default defineComponent({
         const matchedTheme = this.themes.find(theme => theme.id.toString() === content.themes[0])
         const format = matchedTheme ? {
           width: matchedTheme.width.toString(),
-          height: matchedTheme.height.toString()
+          height: matchedTheme.height.toString(),
+          unit: matchedTheme.unit,
+          bleed: matchedTheme.bleed
         } : {
           width: content.width.toString(),
-          height: content.height.toString()
+          height: content.height.toString(),
+          unit: content.unit
         }
         const route = this.$router.resolve({
           name: 'Editor',
@@ -578,7 +598,9 @@ export default defineComponent({
             design_id: content.id,
             width: format.width,
             height: format.height,
-            group_id: this.groupId
+            group_id: this.groupId,
+            unit: format.unit,
+            ...(format.unit !== 'px' && format.bleed !== undefined ? { bleeds: designUtils.convertBleedsToQuery(format.bleed) } : {})
           }
         })
         this.openTemplate(route.href)
@@ -599,7 +621,9 @@ export default defineComponent({
           design_id: this.contentBuffer.id,
           width: this.selectedTheme.width.toString(),
           height: this.selectedTheme.height.toString(),
-          group_id: this.groupId
+          group_id: this.groupId,
+          unit: this.selectedTheme.unit,
+          ...(this.selectedTheme.unit !== 'px' ? { bleeds: designUtils.convertBleedsToQuery(this.selectedTheme.bleed) } : {})
         }
       })
       this.openTemplate(route.href)
@@ -608,7 +632,7 @@ export default defineComponent({
       })
     },
     handleResize() {
-      this.isMobile = generalUtils.getWidth() <= 540
+      this.isMobileSize = generalUtils.getWidth() <= 540
       this.isPC = generalUtils.getWidth() >= 976
     },
     getPrevUrl(content?: IContentTemplate, scale?: number): string {
@@ -626,6 +650,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use "@/assets/scss/base/transition.scss";
+
 .template-center {
   @include size(100%, 100%);
   @include hover-scrollbar();
@@ -667,20 +693,21 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: center;
-      @media screen and (max-width: 540px) {
-        position: static;
-        transform: none;
-        margin: auto;
-        margin-top: 24px;
-        margin-bottom: 38px;
-        > span {
-          text-align: left;
-        }
-      }
       > span {
         @include text-H2;
         display: block;
         color: setColor(nav);
+      }
+      @media screen and (max-width: 540px) {
+        position: static;
+        transform: none;
+        margin: auto;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        > span {
+          text-align: left;
+          @include text-H3
+        }
       }
     }
     &__text {
@@ -802,7 +829,7 @@ export default defineComponent({
       background-color: white;
       position: -webkit-sticky;
       position: sticky;
-      top: $header-height;
+      top: calc(#{$header-height} + v-bind(statusbarHeight));
     }
     &__searchbar {
       height: 44px;
@@ -815,23 +842,7 @@ export default defineComponent({
       margin-right: 10px;
     }
     &__options {
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid setColor(gray-4);
-      border-radius: 5px;
-      box-sizing: border-box;
-      flex-grow: 0;
-      flex-basis: 44px;
-      transition: background-color 0.2s;
-      &.active {
-        background-color: setColor(gray-4);
-        > svg {
-          color: setColor(gray-4);
-        }
-      }
+      color: transparent;
     }
   }
   &__to-top {
@@ -1012,7 +1023,7 @@ export default defineComponent({
   }
   &__mobile-multi {
     position: fixed;
-    top: $header-height;
+    top: calc(#{$header-height} + v-bind(statusbarHeight));
     left: 0;
     width: 100vw;
     height: 100vh;
@@ -1023,7 +1034,7 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: center;
-      top: calc(#{$header-height} / 2);
+      top: calc((#{($header-height)}  + v-bind(statusbarHeight)) / 2);
       right: 55px;
       width: 25px;
       height: 25px;
@@ -1034,7 +1045,7 @@ export default defineComponent({
     &__content {
       overflow-y: auto;
       width: 100%;
-      height: calc(100vh - #{$header-height});
+      height: calc(100vh - #{($header-height)} + v-bind(statusbarHeight));
     }
     &__gallery {
       display: grid;

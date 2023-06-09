@@ -1,9 +1,12 @@
+import { ITextBg, ITextEffect, ITextShape } from '@/interfaces/format'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText, ITmp, jsonVer as latestJsonVer } from '@/interfaces/layer'
 import { LayerProcessType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textUtils from '@/utils/textUtils'
 import { isEqual } from 'lodash'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import localeUtils from './localeUtils'
@@ -11,7 +14,7 @@ import mouseUtils from './mouseUtils'
 import textPropUtils from './textPropUtils'
 import ZindexUtils from './zindexUtils'
 class LayerFactary {
-  newImage(config: any, parentLayer?: any): IImage {
+  newImage(config: any): IImage {
     const {
       width = 0, height = 0, initWidth = 0, initHeight = 0, imgWidth = 0, imgHeight = 0, imgX = 0, imgY = 0, zindex = 0, opacity = 0, scale = 1
     } = config.styles
@@ -122,7 +125,7 @@ class LayerFactary {
             userId: ''
           }
         }
-        Object.assign(img, this.newImage(imgConfig, config))
+        Object.assign(img, this.newImage(imgConfig))
       })
     } else if (clips.length) {
       // Template frame with image, need to copy the info of the image
@@ -154,7 +157,7 @@ class LayerFactary {
           userId: ''
         },
         isFrameImg: true
-      }, config))
+      }))
     }
     if (clips.some(img => img.styles.rotate !== 0)) {
       const img = clips.find(img => img.styles.rotate !== 0) as IImage
@@ -226,14 +229,16 @@ class LayerFactary {
     } as IFrame
     frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
     if (frame.decoration && !frame.decoration.svg) {
-      (frame as any).needFetch = true
+      frame.needFetch = true
     } else if (frame.decorationTop && !frame.decorationTop.svg) {
-      (frame as any).needFetch = true
+      frame.needFetch = true
+    } else if (clips.some(c => !c.clipPath && !c.isFrameImg)) {
+      frame.needFetch = true
     }
     return frame
   }
 
-  newText(config: Partial<IText>): IText {
+  newText(config: Partial<IText>, jsonVer = latestJsonVer): IText {
     const basicConfig = {
       type: 'text',
       id: config.id || generalUtils.generateRandomString(8),
@@ -267,7 +272,8 @@ class LayerFactary {
         verticalFlip: false,
         textEffect: { name: 'none' },
         textBg: { name: 'none' },
-        textShape: { name: 'none' }
+        textShape: { name: 'none' },
+        textFill: { name: 'none', customImg: null },
       },
       paragraphs: [
         {
@@ -319,6 +325,7 @@ class LayerFactary {
      * 7: span has no font
      * 8: span contains invalid unicode characters (which breaks emoji)
      * 9: replace textShape and textEffect value {} to {name: none}
+     * 10: Fix problem that some text effect and text shape will not scale with font-size
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -408,10 +415,39 @@ class LayerFactary {
     for (const key of ['textShape', 'textEffect'] as const) {
       if (isEqual(basicConfig.styles[key], {})) basicConfig.styles[key] = { name: 'none' }
     }
+    // 10: Fix problem that some text effect and text shape will not scale with font-size
+    if (generalUtils.versionCheck({ version: jsonVer, lessThan: '1.0.7' })) {
+      const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs as any) / 60
+      const isTextBox = /(square-borderless|rounded-borderless|square-hollow|rounded-hollow|square-both|rounded-both)/
+      const target = [
+        { category: 'textEffect', effect: /(funky3d|bold3d)/, option: 'distance' },
+        { category: 'textEffect', effect: /funky3d/, option: 'distanceInverse' },
+        { category: 'textBg', effect: /gooey/, option: 'distance' },
+        { category: 'textBg', effect: isTextBox, option: 'bStroke' },
+        { category: 'textBg', effect: isTextBox, option: 'pStrokeY' },
+        { category: 'textBg', effect: isTextBox, option: 'pStrokeX' },
+        {
+          category: 'textShape',
+          effect: /curve/,
+          option: 'bend',
+          modFunc: (val) => {
+            return val * Math.pow(fontSizeModifier, 1 / 0.6)
+          }
+        }
+      ] as { category: 'textEffect' | 'textBg' | 'textShape', effect: RegExp, option: string, modFunc?: (val: number) => number }[]
+      for (const t of target) {
+        const effect = basicConfig.styles[t.category] as ITextEffect | ITextShape | ITextBg
+        if (t.effect.test(effect.name)) {
+          const effect_ = effect as Record<string, number>
+          const modFunc = t.modFunc ?? ((val) => val / fontSizeModifier)
+          effect_[t.option] = modFunc(effect_[t.option])
+        }
+      }
+    }
     return Object.assign(basicConfig, config)
   }
 
-  newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IFrame>): IGroup {
+  newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IFrame>, jsonVer = latestJsonVer): IGroup {
     const group: IGroup = {
       type: 'group',
       id: config.id || generalUtils.generateRandomString(8),
@@ -451,7 +487,7 @@ class LayerFactary {
             }
             !shape.designId && console.warn('layer in group at index:', idx, 'has no designId!')
           }
-          return [this.newByLayerType(l) as IShape | IText | IImage]
+          return [this.newByLayerType(l, jsonVer) as IShape | IText | IImage]
         })
     }
     group.layers.forEach(l => {
@@ -566,48 +602,55 @@ class LayerFactary {
 
     if (config.layers === undefined) return config
     for (const layerIndex in config.layers) {
-      config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+      config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex], config.jsonVer)
 
       /* If the designId and the svg is empty,
       /* delete the layer */
       if (config.layers[layerIndex].type === LayerType.shape) {
         const shape = config.layers[layerIndex] as IShape
-        if (!shape.designId && !shape.svg && !['D', 'E'].includes(shape.category)) {
+        if (!shape.designId && !['D', 'E'].includes(shape.category) && !shape.svg) {
           config.layers.splice(+layerIndex, 1)
           console.warn('layer:', layerIndex, 'has no designId and empty svg, it has been removed!')
           continue
         }
-        !shape.designId && console.warn('layer:', layerIndex, 'has no designId!')
+        !shape.designId && !['D', 'E'].includes(shape.category) && console.warn('layer:', layerIndex, 'has no designId!')
       }
       init(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     const bgImgConfig = config.backgroundImage.config
+    // the following code used to solve the error/bug template json.config
+    // which it's background.config.styles.imgHeight gets a string type instead of a number type
+    config.backgroundImage.config.styles.imgWidth = +config.backgroundImage.config.styles.imgWidth
+    config.backgroundImage.config.styles.imgHeight = +config.backgroundImage.config.styles.imgHeight
     bgImgConfig.id = generalUtils.generateRandomString(8)
     if (bgImgConfig.srcObj.type) {
       if (!bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
         config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
       }
     }
+    config.backgroundImage.config = this.newImage(config.backgroundImage.config)
+    config.jsonVer = latestJsonVer
+    textUtils.resetScale(config, true)
     return config
   }
 
-  newByLayerType(config: any, parentLayer?: any): IShape | IText | IImage | IFrame | IGroup | ITmp {
+  newByLayerType(config: any, jsonVer: string): IShape | IText | IImage | IFrame | IGroup | ITmp {
     this.paramsExaminer(config)
     switch (config.type) {
       case 'shape':
         return this.newShape(config)
       case 'text':
-        return this.newText(config)
+        return this.newText(config, jsonVer)
       case 'image':
-        return this.newImage(config, parentLayer)
+        return this.newImage(config)
       case 'frame':
         return this.newFrame(config)
       case 'group':
-        return this.newGroup(config, config.layers)
+        return this.newGroup(config, config.layers, jsonVer)
       case 'tmp':
         for (const layerIndex in config.layers) {
-          config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex], config)
+          config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex], jsonVer)
         }
         console.error('Basically, the template should not have the layer type of tmp')
         return this.newTmp(config.styles, config.layers)

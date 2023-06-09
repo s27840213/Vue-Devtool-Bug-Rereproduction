@@ -30,6 +30,7 @@ import ValueSelector from '@/components/ValueSelector.vue'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
+import logUtils from '@/utils/logUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -109,7 +110,7 @@ export default defineComponent({
             textPropUtils.fontSizeStepping(step)
             textEffectUtils.refreshSize()
           } catch (error) {
-            console.error(error)
+            logUtils.setLogForError(error as Error)
             eventUtils.removePointerEvent('pointerup', onmouseup)
             clearInterval(interval)
           }
@@ -142,7 +143,7 @@ export default defineComponent({
   user-select: none;
   &__number {
     border: 1px solid setColor(gray-4);
-    border-radius: 3px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
 

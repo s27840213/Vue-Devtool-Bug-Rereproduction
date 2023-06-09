@@ -4,6 +4,7 @@ import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import router from '@/router'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 interface IDesignState {
@@ -134,7 +135,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       const { data } = await designApis.getDesign(teamId, assetId)
       return data
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async fetchDesigns({ commit, getters }, { path }) {
@@ -147,7 +148,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       })
       commit('SET_allDesigns', designs)
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async fetchMoreDesigns({ commit, getters }, { path }) {
@@ -164,7 +165,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       })
       commit('SET_allDesigns', getters.getAllDesigns.concat(designs))
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async fetchPageFolders({ getters }, { path, pageIndex }) {
@@ -185,7 +186,7 @@ const actions: ActionTree<IDesignState, unknown> = {
         }))
         nextPage = data.next_page
       } catch (error) {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         nextPage = -1
       }
     }
@@ -203,7 +204,7 @@ const actions: ActionTree<IDesignState, unknown> = {
         folderCount: data.data.design.folder_count
       })
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
     }
   },
   async fetchStructuralFolders({ commit, dispatch }, { path }) {
@@ -321,7 +322,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           design: designUtils.apiDesign2IDesign(response.data.data)
         })
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         commit('UPDATE_deleteDesign', newDesign)
         commit('SET_isErrorShowing', true)
       })
@@ -337,7 +338,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         design.favorite = false
         commit('SET_isErrorShowing', true)
       })
@@ -355,7 +356,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         for (const design of designs) {
           design.favorite = false
         }
@@ -378,7 +379,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         design.favorite = true
         if (getters.getCurrLocation === 'h') {
           commit('UPDATE_addDesign', design)
@@ -406,7 +407,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         const inFavoriteView = getters.getCurrLocation === 'h'
         for (const design of designs) {
           design.favorite = true
@@ -439,7 +440,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         design.name = originalName
         design.lastUpdatedTime = originalUpdateTime
         commit('UPDATE_deleteDesign', design)
@@ -461,7 +462,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         commit('UPDATE_addDesign', design)
         commit('SET_isErrorShowing', true)
       })
@@ -479,7 +480,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         for (const design of designs) {
           commit('UPDATE_addDesign', design)
         }
@@ -526,7 +527,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       }
       return response.data.data.msg
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       if (deletionLocation !== undefined) {
         if (getters.getCurrLocation === deletionLocation) {
           commit('UPDATE_deleteDesign', design)
@@ -578,7 +579,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       }
       return response.data.data.msg
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       switch (getters.getCurrLocation) {
         case 't': // currently the only possible one
           for (const design of designs) {
@@ -603,7 +604,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         commit('UPDATE_addDesign', design)
         commit('SET_isErrorShowing', true)
       })
@@ -624,7 +625,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         for (const design of designs) {
           commit('UPDATE_addDesign', design)
         }
@@ -652,7 +653,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation !== `f:${destination.join('/')}`) {
           commit('UPDATE_addDesign', design)
         }
@@ -676,7 +677,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation !== `f:${destination.join('/')}`) {
           for (const design of designs) {
             commit('UPDATE_addDesign', design)
@@ -698,7 +699,7 @@ const actions: ActionTree<IDesignState, unknown> = {
         'create', null, name, path)
       newFolder = response.data.data
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       newFolder = undefined
     }
     const nodes = path === '' ? [] : path.split(',')
@@ -741,7 +742,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         commit('UPDATE_setFolderName', {
           parents,
           folder,
@@ -777,7 +778,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         if (getters.getCurrLocation === `f:${destination.join('/')}`) {
           commit('UPDATE_deleteFolder', folder)
         } else if (getters.getCurrLocation === `f:${originalPath.join('/')}` || (getters.getCurrLocation === 'l' && originalPath.length === 1)) {
@@ -828,7 +829,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         if (
           (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation === `f:${pathedFolder.parents.join('/')}`) ||
           (getters.getCurrLocation === 'l' && pathedFolder.parents.length === 1)
@@ -890,7 +891,7 @@ const actions: ActionTree<IDesignState, unknown> = {
       dispatch('fetchAllExpandedFolders')
       return response.data.data.msg
     } catch (error) {
-      console.error(error)
+      logUtils.setLogForError(error as Error)
       if (deletionLocation !== undefined) {
         if (getters.getCurrLocation === deletionLocation) {
           commit('UPDATE_deleteFolder', folder)
@@ -918,7 +919,7 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('SET_isErrorShowing', true)
         }
       }).catch((error) => {
-        console.error(error)
+        logUtils.setLogForError(error as Error)
         commit('UPDATE_addFolder', folder)
         commit('SET_isErrorShowing', true)
       })

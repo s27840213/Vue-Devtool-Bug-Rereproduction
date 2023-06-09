@@ -469,7 +469,6 @@ class ImageShadowUtils {
     } else {
       this.shadowHandler(canvas_s, img, config, params)
     }
-    console.log('end drawing')
   }
 
   shadowHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
@@ -510,7 +509,6 @@ class ImageShadowUtils {
     const _imageData = new ImageData(this.dilate(spread * spreadF), canvasT.width, canvasT.height)
     ctxT.putImageData(_imageData, 0, 0)
     setMark('shadow', 2)
-    console.log(canvasMaxSize.width, canvasMaxSize.height)
 
     ctxMax.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
     const imageData = ctxMax.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
@@ -548,7 +546,6 @@ class ImageShadowUtils {
     cb && cb()
     setMark('shadow', 4)
     logMark('shadow')
-    console.log('end drawing in handling', Date.now() - stime)
   }
 
   clearHandler() {

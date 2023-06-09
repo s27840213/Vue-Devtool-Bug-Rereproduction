@@ -417,8 +417,8 @@ export default defineComponent({
     },
     filterId(): string {
       const browserInfo = this.$store.getters['user/getBrowserInfo'] as IBrowserInfo
-      const browserIsSafari = browserInfo.name === 'Safari' && browserInfo.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3' })
-      const osIsIos = browserInfo.os.family === 'iOS' && browserInfo.os.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3', version: browserInfo.os.version })
+      const browserIsSafari = browserInfo.name === 'Safari' && browserInfo.version !== '16.3' && generalUtils.versionCheck({ greaterThan: '16.0', lessThan: '16.3' })
+      const osIsIos = browserInfo.os.family === 'iOS' && browserInfo.os.version !== '16.3' && generalUtils.versionCheck({ greaterThan: '16.0', lessThan: '16.3', version: browserInfo.os.version })
       if (browserIsSafari || osIsIos) {
         const { styles: { adjust }, id: layerId } = this.config
         const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
@@ -1071,7 +1071,7 @@ export default defineComponent({
     getPreviewSize(): number | string {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return imageUtils
-        .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
+        .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 320)
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config
@@ -1144,6 +1144,7 @@ export default defineComponent({
 
   &__img {
     object-fit: cover;
+    display: block;
   }
 
   &__picture {

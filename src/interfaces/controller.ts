@@ -22,6 +22,7 @@ export interface IResizer {
   transform: string
   cursor: string
   opacity: string
+  borderRadius: string
 }
 
 export interface IControlPoints {

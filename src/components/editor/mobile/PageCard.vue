@@ -72,7 +72,8 @@ export default defineComponent({
     ...mapGetters({
       groupType: 'getGroupType',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
-      hasBleed: 'getHasBleed'
+      hasBleed: 'getHasBleed',
+      currActivePanel: 'mobileEditor/getCurrActivePanel',
     }),
     cardStyle(): { [index: string]: string | number } {
       return {
@@ -99,6 +100,11 @@ export default defineComponent({
     },
     hasBleed() {
       this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
+    },
+    currActivePanel(newVal, oldVal) {
+      if (oldVal === 'bleed') {
+        this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
+      }
     }
   }
 })

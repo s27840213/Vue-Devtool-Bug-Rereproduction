@@ -126,9 +126,7 @@ div(style="position:relative;")
           class="invalid-message")
           span {{ vcodeErrorMessage }}
       div(style="margin-bottom: 15px;")
-        btn(:type="'primary-mid'"
-          class="btn-shadow full-width"
-          @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
+        nubtn(size="mid-full" @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
       div(class="page-close")
         button(@click="onCloseClicked")
           svg-icon(class="pointer"
