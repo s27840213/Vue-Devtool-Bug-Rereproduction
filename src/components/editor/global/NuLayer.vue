@@ -338,7 +338,7 @@ export default defineComponent({
     frameClipStyles(): any {
       return {
         fill: '#00000000',
-        stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
+        stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#9C9C9C') : 'none',
         strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
       }
     },
