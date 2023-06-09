@@ -12,7 +12,7 @@ div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectSt
                 :no-bg="!editorTypeTemplate"
                 @click.self.prevent="outerClick")
   div(v-if="editorTypeTemplate && !isDuringCopy" class="page-pill" @click="showPanelPageManagement")
-    svg-icon(iconName="all-pages" iconWidth="16px" iconColor="black-5")
+    svg-icon(iconName="pages" iconWidth="20px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
   page-preivew(v-if="isInPagePreview" :pagesState="pagesState")
 </template>
