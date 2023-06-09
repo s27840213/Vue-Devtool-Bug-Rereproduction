@@ -82,9 +82,10 @@ export default class SubControllerUtils {
              */
             if (this.config.type === LayerType.image) {
               switch (this.primaryLayer.type) {
-                case LayerType.group:
-                  layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIdx)
-                  break
+                // vivisticker can only crop frame
+                // case LayerType.group:
+                //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIdx)
+                //   break
                 case LayerType.frame:
                   if ((this.config as IImage).srcObj.type !== 'frame') {
                     frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { imgControl: true })
@@ -203,6 +204,10 @@ export default class SubControllerUtils {
         layers = (this.primaryLayer as IGroup).layers
         break
       case 'frame':
+        if (layerUtils.getCurrLayer.type === 'group') {
+          // @TODO: this means the frame is in the group and the sub-clip is clicked
+          return
+        }
         updateSubLayerProps = frameUtils.updateFrameLayerProps
         layers = (this.primaryLayer as IFrame).clips
     }

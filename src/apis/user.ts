@@ -173,11 +173,15 @@ export default {
       }
     }))
   },
-  async removeBgStk(uuid: string, assetId?: number): Promise<any> {
+  async removeBgStk(uuid: string, assetId?: number, type = 'stk-bg-remove'): Promise<any> {
+    const typeMap: {[index: string]: string} = {
+      'stk-bg-remove': 'bg',
+      'stk-bg-remove-face': 'bgf'
+    }
     return await apiUtils.requestWithRetry(() => axios('/remove-bg-sticker', {
       method: 'POST',
       data: {
-        path: `removebg/${uuid}/${assetId}/bg`,
+        path: `removebg/${uuid}/${assetId}/${typeMap[type]}`,
         locale: this.getLocale(),
       }
     }))

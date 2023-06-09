@@ -44,12 +44,8 @@ div(class="brand-kit relative"
           template(#itemName)
             span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
       div(class="delete-confirm__buttons")
-        div(class="delete-confirm__buttons__cancel pointer"
-          @click="handleClearDeletion")
-          span {{ $t('NN0203') }}
-        div(class="delete-confirm__buttons__confirm pointer"
-          @click="handleConfirmDeletion")
-          span {{ $t('NN0437') }}
+        nubtn(theme="secondary" @click="handleClearDeletion") {{$t('NN0203')}}
+        nubtn(theme="danger" @click="handleConfirmDeletion")  {{$t('NN0437')}}
 </template>
 
 <script lang="ts">
@@ -279,24 +275,6 @@ export default defineComponent({
     gap: 40px;
     align-items: center;
     justify-content: center;
-    &__cancel {
-      background: setColor(gray-4);
-      border-radius: 5px;
-      padding: 4px 23px;
-      & > span {
-        @include btn-SM;
-        color: setColor(gray-2);
-      }
-    }
-    &__confirm {
-      background: #ec5858;
-      border-radius: 5px;
-      padding: 4px 23px;
-      & > span {
-        @include btn-SM;
-        color: setColor(gray-7);
-      }
-    }
   }
 }
 </style>

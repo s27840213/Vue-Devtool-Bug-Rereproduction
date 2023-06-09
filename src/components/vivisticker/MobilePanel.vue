@@ -62,7 +62,6 @@ div(class="mobile-panel"
       @close="closeMobilePanel")
 </template>
 <script lang="ts">
-import Tabs from '@/components/Tabs.vue'
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
@@ -84,9 +83,9 @@ import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.v
 import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
+import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
-import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
@@ -94,6 +93,7 @@ import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
+import Tabs from '@/components/Tabs.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 
@@ -113,7 +113,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import vClickOutside from 'click-outside-vue3'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -193,7 +193,8 @@ export default defineComponent({
       isInCategory: 'vivisticker/getIsInCategory',
       isShowAllRecently: 'vivisticker/getShowAllRecently',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
-      bgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      bgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isProcessing: 'bgRemove/getIsProcessing',
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
@@ -508,7 +509,7 @@ export default defineComponent({
           }
 
           case 'remove-bg': {
-            if (this.bgRemoveMode) {
+            if (this.bgRemoveMode && !this.isProcessing) {
               bgRemoveUtils.setInBgRemoveMode(false)
             }
             break
@@ -589,7 +590,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: () => {
-          if (!this.bgRemoveMode) {
+          if (!this.bgRemoveMode && !this.isProcessing) {
             this.closeMobilePanel()
           }
         },
@@ -772,10 +773,17 @@ export default defineComponent({
   }
 
   &__bottom-section {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-auto-columns: minmax(0, 1fr);
     width: 100%;
     height: 100%;
     overflow-y: scroll;
+    overflow-x: hidden;
     @include no-scrollbar;
+    > *:last-child { // panel-* always take minmax(0, 1fr) grid layout.
+      grid-row: 2 / 3;
+    }
   }
 
   &__title {

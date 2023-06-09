@@ -46,7 +46,6 @@ import { isTextFill } from '@/interfaces/format'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
-import ControlUtils from '@/utils/controlUtils'
 import FrameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -110,7 +109,6 @@ export default defineComponent({
   data() {
     return {
       subLayerCtrlUtils: null as unknown as SubCtrlUtils,
-      controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isComposing: false,
       layerSizeBuff: -1,
@@ -209,6 +207,7 @@ export default defineComponent({
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
         ...this.transformStyle,
         outline: this.outlineStyles(),
+        outlineOffset: `-${1 / this.primaryLayer.styles.scale}px`,
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
           const { styles: { width, height }, clipPath } = this.config
@@ -257,9 +256,6 @@ export default defineComponent({
     }
   },
   watch: {
-    scaleRatio() {
-      this.controlPoints = ControlUtils.getControlPoints(4, 25)
-    },
     isTextEditing(editing) {
       if (this.config.type === 'text') {
         layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
@@ -381,7 +377,7 @@ export default defineComponent({
       return { width, height }
     },
     outlineStyles() {
-      const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
+      const outlineColor = this.config.locked ? '#EB5757' : '#9C9C9C'
       if (this.isControllerShown && layerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
           return `${2 / this.primaryLayer.styles.scale}px solid ${outlineColor}`

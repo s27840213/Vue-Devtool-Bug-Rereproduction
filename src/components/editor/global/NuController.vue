@@ -63,108 +63,156 @@ div(:layer-index="`${layerIndex}`"
             @keydown.meta.shift.z.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
-        template(v-if="!$isTouchDevice()" )
+        template(v-if="!$isTouchDevice()")
           div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-              class="control-point__corner-rotate scaler"
+              v-show="!isMoving"
+              class="control-point__corner-rotate"
               :ref="`corner-rotate-${index}`"
               :key="`corner-rotate-${index}`"
               :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
               @pointerdown.stop="rotateStart($event, index)"
               @touchstart="disableTouchEvent")
-        div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
-            class="control-point"
-            :key="index"
-            :marker-index="index"
-            :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
-            @pointerdown.stop="lineEndMoveStart"
-            @touchstart="disableTouchEvent")
+        template(v-if="isLine()")
+          div(v-for="(end, index) in controlPoints.lineEnds"
+              v-show="!isMoving"
+              class="control-point"
+              :key="index"
+              :marker-index="index"
+              :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
+              @pointerdown.stop="!$isTouchDevice() ? lineEndMoveStart($event) : null"
+              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+          template(v-if="$isTouchDevice()")
+            div(v-for="(end, index) in controlPoints.lineEndTouchAreas"
+                v-show="!isMoving"
+                class="control-point"
+                :key="index"
+                :marker-index="index"
+                :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
+                @pointerdown.stop="lineEndMoveStart"
+                @touchstart="disableTouchEvent")
         div(v-for="(resizer, index) in getResizer(controlPoints)"
+            v-show="!isMoving"
             :key="index"
             class="control-point__resize-bar-wrapper")
-          div(class="control-point resizer"
+          div(class="control-point"
               :key="`resizer-${index}`"
               :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-          div(class="control-point resizer"
+          div(class="control-point"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
         template(v-if="$isTouchDevice()" )
           div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
+              v-show="!isMoving"
               :key="index"
               class="control-point__resize-bar-wrapper")
-            div(class="control-point resizer"
+            div(class="control-point"
                 :key="`resizer-touch-${index}`"
                 :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
                 @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
                 @touchstart="disableTouchEvent")
-            div(class="control-point resizer"
+            div(class="control-point"
                 :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
                 @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
                 @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice()"
+            v-show="!isMoving"
             class="control-point__resize-bar-wrapper")
           div(v-for="(resizer, index) in getResizer(controlPoints, true)"
-              class="control-point resizer control-point__move-bar"
+              class="control-point control-point__move-bar"
               :key="`resizer-text-${index}`"
               :ref="`moveStart-bar_${index}`"
               :style="resizerBarStyles(resizer.styles)")
         div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalers) : []"
-            class="control-point scaler"
+            v-show="!isMoving"
+            class="control-point"
             :key="`scaler-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
             @pointerdown.prevent.stop="!$isTouchDevice() ? scaleStart($event) : null"
             @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-        template(v-if="$isTouchDevice()" )
-          div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
-              class="control-point scaler"
+        template(v-if="$isTouchDevice()")
+          div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalerTouchAreas) : []"
+              v-show="!isMoving"
+              class="control-point"
               :key="`scaler-touch-${index}`"
               :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="scaleStart"
               @touchstart="disableTouchEvent")
-        div(class="control-point__line-controller-wrapper"
-            v-if="isLine()")
-          svg-icon(class="control-point__rotater"
-            iconName="rotate" iconWidth="20px"
-            iconColor="blue-1"
-            :style='lineControlPointStyles()'
-            @pointerdown.stop="lineRotateStart"
-            @touchstart="lineRotateStart")
-          svg-icon(class="control-point__mover"
-            ref="moveStart-mover"
-            iconName="move" iconWidth="20px"
-            iconColor="blue-1"
-            :style='lineControlPointStyles()'
-            @touchstart="disableTouchEvent")
-        template(v-else)
-          div(class="control-point__controller-wrapper"
-              ref="rotater")
-            svg-icon(class="control-point__rotater"
-              iconName="rotate" iconWidth="20px"
-              iconColor="blue-1"
-              :style='controlPointStyles()'
-              @pointerdown.stop="rotateStart"
-              @touchstart="disableTouchEvent")
-            svg-icon(class="control-point__mover"
-              ref="moveStart-mover"
-              iconName="move" iconWidth="20px"
-              iconColor="blue-1"
-              :style='controlPointStyles()'
-              @touchstart="disableTouchEvent")
-    div(v-if="isControllerShown && isLocked() && (scaleRatio >20)"
-        class="nu-controller__lock-icon"
-        :style="lockIconStyles()"
-        @click="MappingUtils.mappingIconAction('lock')")
-      svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'")
+        div(v-show="!isMoving"
+            class="control-point__controller-wrapper")
+          template(v-if="isLine()")
+            template(v-if="!$isTouchDevice()")
+              action-icon(iconName="rotate2"
+                          iconWidth="20px"
+                          theme="shadow"
+                          :extraStyle="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
+                          @action="lineRotateStart")
+            div(class="control-point__action-icon")
+              div(v-if="$isTouchDevice()"
+                  class="control-point__touch-area control-point__mover"
+                  ref="moveStart-moverArea")
+              div(class="control-point__action shadow control-point__mover"
+                  ref="moveStart-mover"
+                  :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
+                  @touchstart="disableTouchEvent")
+                svg-icon(class="control-point__action-svg"
+                  iconName="move2" iconWidth="24px"
+                  iconColor="black-1")
+          template(v-else)
+            template(v-if="!$isTouchDevice()")
+              action-icon(iconName="rotate2"
+                          iconWidth="20px"
+                          theme="shadow"
+                          :extraStyle="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
+                          @action="rotateStart")
+            div(class="control-point__action-icon")
+              div(v-if="$isTouchDevice()"
+                  class="control-point__touch-area control-point__mover"
+                  ref="moveStart-moverArea")
+              div(class="control-point__action shadow control-point__mover"
+                  ref="moveStart-mover"
+                  :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
+                  @touchstart="disableTouchEvent")
+                svg-icon(class="control-point__action-svg"
+                  iconName="move2" iconWidth="24px"
+                  iconColor="black-1")
+    action-icon(v-if="isActive && isLocked() && (scaleRatio > 20)"
+                class="control-point__bottom-right-icon"
+                iconName="lock"
+                iconSize="16px"
+                iconColor="red"
+                theme="shadow"
+                :extraStyle="actionIconStyles()"
+                @action="MappingUtils.mappingIconAction('lock')")
+    template(v-if="$isTouchDevice() && isActive && !isLocked()")
+      div(v-show="!isMoving")
+        action-icon(class="control-point__top-left-icon"
+                    iconName="close"
+                    iconSize="18px"
+                    theme="border"
+                    :extraStyle="ctrlPointerStyles(actionIconStyles(), { cursor: 'pointer' })"
+                    @action="MappingUtils.mappingIconAction('trash')")
+        action-icon(class="control-point__bottom-left-icon"
+                    iconName="rotate2"
+                    theme="border"
+                    :extraStyle="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
+                    @action="(e) => isLine() ? lineRotateStart(e) : rotateStart(e)")
+        action-icon(v-if="!tooSmall && !isLine()"
+                    class="control-point__bottom-right-icon"
+                    iconName="scale"
+                    theme="border"
+                    :extraStyle="ctrlPointerStyles(actionIconStyles(), cursorStyles(4, getLayerRotate()))"
+                    @action="scaleStart")
 </template>
 
 <script lang="ts">
+import ActionIcon from '@/components/editor/controlPoint/ActionIcon.vue'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import { IResizer } from '@/interfaces/controller'
 import { isTextFill } from '@/interfaces/format'
 import { ICoordinate } from '@/interfaces/frame'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
@@ -192,6 +240,7 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
+const CONTROLLER_SIZE_MIN = 30
 const RESIZER_SHOWN_MIN = 4000
 
 type ICP = ReturnType<typeof ControlUtils.getControlPoints>
@@ -225,7 +274,8 @@ export default defineComponent({
   },
   emits: ['isDragging', 'setFocus'],
   components: {
-    NuTextEditor
+    NuTextEditor,
+    ActionIcon
   },
   created() {
     this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
@@ -235,9 +285,8 @@ export default defineComponent({
     return {
       MappingUtils,
       FrameUtils,
-      controlPoints: (this.$isTouchDevice()
-        ? ControlUtils.getControlPoints(6, 25)
-        : ControlUtils.getControlPoints(4, 25)) as ICP,
+      controlPoints: ControlUtils.getControlPoints() as ICP,
+      resizerProfile: ControlUtils.getResizerProfile(this.config as AllLayerTypes),
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -285,7 +334,7 @@ export default defineComponent({
   computed: {
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId']),
-    ...mapState(['currDraggedPhoto']),
+    ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -299,6 +348,7 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       controllerHidden: 'vivisticker/getControllerHidden',
+      editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       useMobileEditor: 'getUseMobileEditor'
     }),
     isControllerShown(): boolean {
@@ -327,14 +377,18 @@ export default defineComponent({
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
-      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f}px)`
+      const finalWidth = width * _f
+      const finalHeight = height * _f
+      const offsetX = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalWidth, CONTROLLER_SIZE_MIN)) / 2 : 0
+      const offsetY = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalHeight, CONTROLLER_SIZE_MIN)) / 2 : 0
+      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f - offsetX}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f - offsetY}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
       return {
         transform,
-        width: `${width * _f}px`,
-        height: `${height * _f}px`
+        width: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalWidth) : finalWidth}px`,
+        height: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalHeight) : finalHeight}px`
       }
     },
     subContentStyles(): any {
@@ -356,7 +410,7 @@ export default defineComponent({
       return {
         ...this.sizeStyles,
         willChange: this.isDragging() && !this.useMobileEditor ? 'transform' : '',
-        outline: this.outlineStyles(),
+        ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
         /**
@@ -404,9 +458,6 @@ export default defineComponent({
     isDraggingCursor(): boolean {
       return this.config.isDraggingCursor
     },
-    isMoving(): boolean {
-      return this.config.moving
-    },
     isActive(): boolean {
       return this.config.active
     },
@@ -422,11 +473,12 @@ export default defineComponent({
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
+    tooSmall(): boolean {
+      const { tooShort, tooNarrow } = this.checkLimits(this.$isTouchDevice(), !this.resizerProfile.hasHorizontal && !this.resizerProfile.hasVertical)
+      return tooShort || tooNarrow
+    }
   },
   watch: {
-    scaleRatio() {
-      this.controlPoints = ControlUtils.getControlPoints(4, 25)
-    },
     contentEditable(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
@@ -473,11 +525,23 @@ export default defineComponent({
       setImgConfig: 'imgControl/SET_CONFIG',
       setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
-    getDefaultSizeLimit(): number {
-      return (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-    },
-    checkLimits(limit?: number): { tooShort: boolean, tooNarrow: boolean } {
-      limit = limit ?? this.getDefaultSizeLimit()
+    checkLimits(hasActionIcon = false, noResizer = false): { tooShort: boolean, tooNarrow: boolean } {
+      const ACTION_ICON_WIDTH = 24
+      const RESCALER_WIDTH = 12
+      let limit
+      if (noResizer) {
+        if (hasActionIcon) {
+          limit = 3000 // defined in Figma
+        } else {
+          limit = RESCALER_WIDTH * 100
+        }
+      } else {
+        if (hasActionIcon) {
+          limit = RESIZER_SHOWN_MIN
+        } else {
+          limit = RESIZER_SHOWN_MIN - (ACTION_ICON_WIDTH - RESCALER_WIDTH) * 100
+        }
+      }
       const totalScaleRatio = this.scaleRatio * this.contentScaleRatio
       return {
         tooShort: this.getLayerHeight() * totalScaleRatio < limit,
@@ -568,7 +632,6 @@ export default defineComponent({
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
       const scale = isTouchArea ? 2 : 1
-      const aspectRatio = this.$isTouchDevice() ? 0.24 : 0.16
 
       const isHorizon = width > height
       const sizeForWidth = this.getLayerWidth() * this.scaleRatio / 100 * this.contentScaleRatio - 10
@@ -577,54 +640,28 @@ export default defineComponent({
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: isHorizon && tooSmall ? `${sizeForWidth * scale}px`
-          : (tooSmall ? `${sizeForHeight * aspectRatio * scale}px` : resizerStyle.width),
+          : resizerStyle.width,
         height: !isHorizon && tooSmall ? `${sizeForHeight * scale}px`
-          : (tooSmall ? `${sizeForWidth * aspectRatio * scale}px` : resizerStyle.height)
+          : resizerStyle.height
       }
       return Object.assign(resizerStyle, HW)
     },
     getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
       let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
-      const { tooShort, tooNarrow } = this.checkLimits()
-      switch (this.getLayerType) {
-        case 'image':
-          resizers = this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
-          break
-        case 'text':
-          if (textMoveBar) {
-            resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
-              : resizers.slice(2, 4)
-          } else if (this.config.styles.textShape?.name && this.config.styles.textShape.name !== 'none') {
-            resizers = []
-          } else {
-            resizers = this.config.styles.writingMode.includes('vertical') ? (
-              tooNarrow ? resizers.slice(3, 4) : resizers.slice(2, 4)
-            ) : (
-              tooShort ? resizers.slice(0, 1) : resizers.slice(0, 2)
-            )
-          }
-          break
-        case 'shape':
-          resizers = ControlUtils.shapeCategorySorter(resizers, this.config.category, this.config.scaleType)
-          break
-        case 'tmp':
-        case 'group':
-          resizers = []
-          break
-        case 'frame':
-          if (!FrameUtils.isImageFrame(this.config as IFrame)) {
-            resizers = []
-          } else {
-            const shadow = this.config.styles.shadow
-            if (shadow && shadow.srcObj?.type) {
-              resizers = []
-            }
-          }
-      }
-
-      resizers = resizers ?? []
-
-      if (this.getLayerType !== 'text') {
+      resizers = textMoveBar
+        ? resizers.slice(this.resizerProfile.moveBarStart, this.resizerProfile.moveBarEnd)
+        : resizers.slice(this.resizerProfile.start, this.resizerProfile.end)
+      const isMobile = this.$isTouchDevice()
+      const { tooShort, tooNarrow } = this.checkLimits(isMobile)
+      if (this.getLayerType === 'text') {
+        if (!textMoveBar && !textShapeUtils.isCurvedText(this.config.styles.textShape)) {
+          resizers = this.config.styles.writingMode.includes('vertical') ? (
+            tooNarrow ? (isMobile ? [] : resizers.slice(1, 2)) : resizers
+          ) : (
+            tooShort ? (isMobile ? [] : resizers.slice(0, 1)) : resizers
+          )
+        }
+      } else {
         if (tooShort) {
           resizers = resizers.filter(r => r.type !== 'H')
         }
@@ -635,19 +672,20 @@ export default defineComponent({
       return resizers
     },
     getScaler(scalers: any) {
-      const { tooShort, tooNarrow } = this.checkLimits()
-      return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
+      return this.tooSmall ? scalers.slice(2, 3)
+        : (this.$isTouchDevice()
+            ? (this.editorTypeTextLike ? scalers.slice(1, 2) : scalers.slice(0, 2))
+            : scalers)
     },
     getCornerRotaters(scalers: any) {
-      const { tooShort, tooNarrow } = this.checkLimits()
-      return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
+      return (this.tooSmall) ? scalers.slice(2, 3) : scalers
     },
     textWrapperStyle() {
       return {
         width: `${this.getLayerWidth() / this.getLayerScale()}px`,
         height: `${this.getLayerHeight() / this.getLayerScale()}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01})`,
+        transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) translate(-50%, -50%)`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode,
         ...(this.isDraggingCursor ? { zIndex: 100 } : {})
@@ -677,27 +715,29 @@ export default defineComponent({
         transform: `rotate(${-this.config.styles.rotate}deg)`
       }
     },
-    outlineStyles() {
+    outlineStyles(): { outline: string, outlineOffset: string } {
       const outlineColor = (() => {
         if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
           return '#F10994'
         } else if (this.isLocked()) {
           return '#EB5757'
         } else {
-          return '#7190CC'
+          return '#9C9C9C'
         }
       })()
 
-      if (this.isLine() || (this.isMoving && this.currSelectedInfo.index !== this.layerIndex)) {
-        return 'none'
+      let outline = ''
+
+      if ((this.isLine() && !this.$isTouchDevice()) || (this.isMoving && this.currSelectedInfo.index !== this.layerIndex)) {
+        outline = 'none'
       } else if (this.isShown() || this.isControllerShown) {
-        if (this.config.type === 'tmp' || this.isControlling) {
-          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
-        } else {
-          return `${this.$isTouchDevice() ? 1.5 : 2}px solid ${outlineColor}`
-        }
+        outline = `2px solid ${outlineColor}`
       } else {
-        return 'none'
+        outline = 'none'
+      }
+      return {
+        outline,
+        outlineOffset: '-1px'
       }
     },
     hintStyles() {
@@ -718,8 +758,7 @@ export default defineComponent({
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
       this.initTranslate = this.getLayerPos()
-      const { tooShort, tooNarrow } = this.checkLimits()
-      if (tooShort || tooNarrow) {
+      if (this.tooSmall) {
         this.control.xSign = 1
         this.control.ySign = 1
       } else {
@@ -752,6 +791,7 @@ export default defineComponent({
         event.preventDefault()
       }
       const altPressed = generalUtils.exact([event.altKey])
+      const isCenterBased = altPressed || this.$isTouchDevice()
 
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
@@ -774,7 +814,7 @@ export default defineComponent({
       /**
        * @param {number} offsetMultiplier - if we press alt, we need to scale from center, and then make offsetWidth and offsetHeight become twice large
        */
-      const offsetMultiplier = altPressed ? 2 : 1
+      const offsetMultiplier = isCenterBased ? 2 : 1
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * offsetMultiplier
       if ((offsetWidth === 0 || offsetHeight === 0)) {
@@ -898,7 +938,7 @@ export default defineComponent({
       textPropUtils.updateTextPropState('fontSize', true)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // scale from center
-      if (altPressed) {
+      if (isCenterBased) {
         const currCenter = mathUtils.getCenter(this.config.styles)
         const initCenter = mathUtils.getCenter(Object.assign({}, this.initSize, this.initTranslate))
         const scaleOffset = {
@@ -1089,6 +1129,7 @@ export default defineComponent({
       }
       event.preventDefault()
       const altPressed = generalUtils.exact([event.altKey])
+      const isCenterBased = altPressed || this.$isTouchDevice()
 
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
@@ -1110,7 +1151,7 @@ export default defineComponent({
       const _f = (this.$isTouchDevice() ? 1 / this.contentScaleRatio : 1 / (this.scaleRatio * 0.01))
       const [dx, dy] = [diff.x * _f, diff.y * _f]
 
-      const offsetMultiplier = altPressed ? 2 : 1
+      const offsetMultiplier = isCenterBased ? 2 : 1
       let offsetWidth = this.control.isHorizon ? this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier : 0
       let offsetHeight = this.control.isHorizon ? 0 : this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * offsetMultiplier
       if (offsetWidth === 0 && offsetHeight === 0) return
@@ -1184,7 +1225,7 @@ export default defineComponent({
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
-      if (altPressed) {
+      if (isCenterBased) {
         const currCenter = mathUtils.getCenter(this.config.styles)
         const initCenter = mathUtils.getCenter(Object.assign({}, this.initSize, this.initTranslate))
         const scaleOffset = {
@@ -1223,9 +1264,7 @@ export default defineComponent({
         return
       }
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
-      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-      const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
-      if (tooShort || tooNarrow) {
+      if (this.tooSmall) {
         index = 2
       }
       this.initCornerRotate = index * 2
@@ -1388,9 +1427,7 @@ export default defineComponent({
       if (this.isControlling) return { cursor: 'initial' }
       if (typeof index === 'number') {
         if (type === 'cornerRotaters') {
-          const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
-          const { tooShort, tooNarrow } = this.checkLimits(LIMIT)
-          if (tooShort || tooNarrow) {
+          if (this.tooSmall) {
             index = 2
           }
           index = index * 2
@@ -1680,11 +1717,11 @@ export default defineComponent({
     isDragging(): boolean {
       return this.config.dragging
     },
-    lockIconStyles(): { [index: string]: string } {
+    actionIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
       return {
-        transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px) scale(${this.contentScaleRatio})`
-          : `translate(0px, 0px) scale(${this.contentScaleRatio})`
+        transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px)`
+          : 'translate(0px, 0px)'
       }
     },
   }
@@ -1696,7 +1733,7 @@ export default defineComponent({
   pointer-events: initial;
   &__line-hint {
     position: absolute;
-    z-index: 9;
+    z-index: 10001;
     background-color: setColor(gray-1);
     border-radius: 5px;
     color: white;
@@ -1705,7 +1742,7 @@ export default defineComponent({
   }
   &__object-hint {
     position: absolute;
-    z-index: 9;
+    z-index: 10001;
     background-color: white;
     width: 56px;
     height: 20px;
@@ -1759,87 +1796,6 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
   }
-
-  &__lock-icon {
-    @include size(30px, 30px);
-    @include flexCenter;
-    pointer-events: initial;
-    position: absolute;
-    right: -15px;
-    bottom: -15px;
-    border: 1px solid setColor(red);
-    border-radius: 50%;
-    background-color: setColor(white);
-  }
-}
-
-@mixin widget-point-wrapper {
-  position: absolute;
-  top: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-  transform-origin: top;
-}
-
-@mixin widget-point {
-  @include size(20px, 20px);
-  position: relative;
-  left: 0;
-  top: 0;
-  pointer-events: auto;
-  cursor: move;
-}
-
-.control-point {
-  pointer-events: auto;
-  position: absolute;
-  background-color: setColor(white);
-  border: 1px solid setColor(blue-2);
-
-  &__resize-bar {
-    position: absolute;
-    pointer-events: auto;
-    border: 2px solid #00000000;
-    color: "#00000000";
-    &-wrapper {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      pointer-events: none;
-    }
-  }
-  &__rotater-wrapper {
-    @include widget-point-wrapper;
-  }
-  &__rotater {
-    @include widget-point;
-  }
-  &__controller-wrapper {
-    @include widget-point-wrapper;
-    width: max-content;
-  }
-  &__line-controller-wrapper {
-    @include widget-point-wrapper;
-  }
-  &__mover {
-    @include widget-point;
-  }
-  &__move-bar {
-    cursor: move;
-  }
-  &__corner-rotate {
-    background-color: none;
-    border: none;
-    pointer-events: auto;
-    position: absolute;
-  }
-}
-
-.baffle {
-  cursor: default;
 }
 
 .text {
@@ -1854,8 +1810,8 @@ export default defineComponent({
   }
   &__wrapper {
     position: absolute;
-    left: 0;
-    top: 0;
+    left: 50%;
+    top: 50%;
     transform-origin: 0 0;
   }
   &__body {
@@ -1869,12 +1825,6 @@ export default defineComponent({
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }
-}
-
-.sub-controller {
-  position: absolute;
-  top: 0;
-  left: 0;
 }
 
 .hover {

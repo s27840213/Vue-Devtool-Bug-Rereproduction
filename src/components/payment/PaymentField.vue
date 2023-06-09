@@ -30,8 +30,10 @@ div(class="field")
         class="field-invoice__input")
       input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
       span(v-if="biv[inv.key]" class="text-red") {{inv.error}}
-  btn(class="btn-LG mt-30 rounded" type="primary-lg"
-      :disabled="disableSubmit" @click="submit()") {{submitText}}
+  nubtn(class="mt-10"
+      size="mid-full"
+      :disabled="disableSubmit"
+      @click="submit()") {{submitText}}
 </template>
 
 <script lang="ts">

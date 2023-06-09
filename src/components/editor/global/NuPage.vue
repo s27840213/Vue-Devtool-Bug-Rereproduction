@@ -303,8 +303,6 @@ export default defineComponent({
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     contentScaleRatio(): number {
-      // return this.pageState.config.contentScaleRatio
-      // if (this.$isTouchDevice()) {
       if (this.$isTouchDevice()) {
         return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this.pageState.config.contentScaleRatio
       } else {
