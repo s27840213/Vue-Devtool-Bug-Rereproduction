@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-template-content" ref="panel" :class="{'in-category': isInCategory, 'in-group-template': isInGroupTemplate, 'with-search-bar': isInMainContent}")
+div(class="panel-template-content" ref="panel" :class="{'in-category': isInCategory, 'in-group-template': isInGroupTemplate, 'with-search-bar': isInMainContent, 'rwd-container': isInEditor}")
   search-bar(v-if="isInMainContent"
     class="panel-template-content__searchbar"
     :placeholder="$t('NN0092', { target: $tc('NN0001', 1) })"

@@ -9,6 +9,7 @@ interface IViviStickerState {
   userInfo: IUserInfo,
   userSettings: IUserSettings,
   currActiveTab: string,
+  currActiveObjectFavTab: string,
   isInCategoryDict: { [key: string]: boolean },
   showAllRecentlyDict: { [key: string]: boolean },
   isInBgShare: boolean,
@@ -54,6 +55,7 @@ const getDefaultState = (): IViviStickerState => ({
   userInfo: vivistickerUtils.getDefaultUserInfo(),
   userSettings: vivistickerUtils.getDefaultUserSettings(),
   currActiveTab: 'object',
+  currActiveObjectFavTab: '',
   isInCategoryDict: {
     object: false,
     background: false,
@@ -129,6 +131,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getCurrActiveTab(state: IViviStickerState): string {
     return state.currActiveTab
+  },
+  getCurrActiveObjectFavTab(state: IViviStickerState): string {
+    return state.currActiveObjectFavTab
   },
   getIsInEditor(state: IViviStickerState): boolean {
     return state.editorType !== 'none'
@@ -278,6 +283,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_currActiveTab(state: IViviStickerState, panel: string) {
     state.currActiveTab = panel
+  },
+  SET_currActiveObjectFavTab(state: IViviStickerState, tab: string) {
+    state.currActiveObjectFavTab = tab
   },
   SET_isInCategory(state: IViviStickerState, updateInfo: { tab: string, bool: boolean }) {
     state.isInCategoryDict[updateInfo.tab] = updateInfo.bool

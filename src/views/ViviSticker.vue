@@ -251,7 +251,7 @@ export default defineComponent({
       return this.getPage(pageUtils.currFocusPageIndex)
     },
     showHeaderTabs(): boolean {
-      return !['text', 'template-content'].includes(this.currActivePanel)
+      return !['text', 'object', 'template-content'].includes(this.currActivePanel)
     },
     showFooterTabs(): boolean {
       return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview)

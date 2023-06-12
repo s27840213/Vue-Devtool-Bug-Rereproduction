@@ -113,6 +113,9 @@ export default defineComponent({
       isSearchBarExpanded: false,
     }
   },
+  created() {
+    this.isSearchBarExpanded = !this.showFav && !!this.keyword
+  },
   computed: {
     ...mapGetters({
       isTabInCategory: 'vivisticker/getIsInCategory',
@@ -140,6 +143,9 @@ export default defineComponent({
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
+    },
+    isInCategoryOrShowFav(): boolean {
+      return this.isInCategory || this.showFav
     },
     showSearchBar(): boolean {
       return !this.isInCategory && !this.showFav
@@ -273,6 +279,7 @@ export default defineComponent({
     }
   },
   mounted() {
+    if (this.rawCategories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
     generalUtils.panelInit('object',
       this.handleSearch,
       this.handleCategorySearch,
@@ -307,12 +314,12 @@ export default defineComponent({
       this.$nextTick(() => {
         const ref = this.$refs as Record<string, CCategoryList[]>
         for (const name of this.targets) {
-          ref[name][0].$el.scrollTop = this.scrollTop[name]
+          if (ref[name].length) ref[name][0].$el.scrollTop = this.scrollTop[name]
         }
       })
     },
-    isInCategory() {
-      // skip transitions when entering of leaving category
+    isInCategoryOrShowFav() {
+      // skip transitions when entering of leaving category or favorites
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)

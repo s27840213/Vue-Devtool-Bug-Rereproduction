@@ -23,7 +23,7 @@ import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: ['dbclick4in1', 'click4in1', 'dbclick'],
@@ -37,15 +37,14 @@ export default defineComponent({
     item: {
       type: Object as PropType<IAsset>,
       required: true
-    },
-    isHideEditor: {
-      type: Boolean,
-      default: false
     }
   },
   computed: {
+    ...mapGetters({
+      isInEditor: 'vivisticker/getIsInEditor'
+    }),
     showEditor(): boolean {
-      return !this.isHideEditor && ![8, 16].includes(this.item.type) && !this.item.has_frame
+      return !this.isInEditor && ![8, 16].includes(this.item.type) && !this.item.has_frame
     }
   },
   methods: {
@@ -71,13 +70,12 @@ export default defineComponent({
         })
         assetUtils.addAssetToRecentlyUsed(this.item, 'giphy')
         vivistickerUtils.handleIos16Video()
-      } else {
+      } else if (!this.isInEditor) {
         if (!vivistickerUtils.checkPro(this.item, 'object')) return
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
         assetUtils.addAssetToRecentlyUsed(this.item, 'objects', 'svg')
         vivistickerUtils.handleIos16Video()
-      }
-      if (this.isHideEditor) this.handleEditObject()
+      } else vivistickerUtils.checkPro(this.item, 'object') && this.handleEditObject()
     },
     click4in1(event: Event) {
       doubleTapUtils.click(event, {
@@ -94,6 +92,7 @@ export default defineComponent({
     handleEditObject() {
       if (!vivistickerUtils.checkPro(this.item, 'object')) return
       if (this.item.type === 7 || this.item.has_frame) {
+        if (this.isInEditor) return assetUtils.addAsset(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects')
         vivistickerUtils.startEditing('objectGroup', {
           plan: this.item.plan,
           assetId: this.item.id,
@@ -101,6 +100,7 @@ export default defineComponent({
           fit: this.item.fit ?? 0,
         }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects'), vivistickerUtils.getAssetCallback(this.item))
       } else {
+        if (this.isInEditor) return assetUtils.addAsset(this.item, { db: 'svg' })
         vivistickerUtils.startEditing('object', {
           plan: this.item.plan,
           isFrame: this.item.type === 8,

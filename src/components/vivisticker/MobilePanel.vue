@@ -88,13 +88,13 @@ import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
-import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
+import PanelObject from '@/components/vivisticker/PanelObject.vue'
 import PanelPageManagement from '@/components/vivisticker/PanelPageManagement.vue'
 import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
@@ -205,13 +205,17 @@ export default defineComponent({
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
-      isBgImgCtrl: 'imgControl/isBgImgCtrl'
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
     },
     isTextInCategory(): boolean {
       return this.isInCategory('text')
+    },
+    isObjectInCategory(): boolean {
+      return this.isInCategory('object')
     },
     isTextShowAllRecently(): boolean {
       return this.isShowAllRecently('text')
@@ -280,13 +284,16 @@ export default defineComponent({
       }
     },
     insertTheme(): boolean {
-      return ['text', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
+      return ['text', 'object', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     showRightBtn(): boolean {
       return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
-      return (this.whiteTheme && (this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
+      if (this.whiteTheme) return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel
+      if (this.currActivePanel === 'text' && this.isTextInCategory) return true
+      if (this.currActivePanel === 'object' && this.isObjectInCategory) return true
+      return false
     },
     hideDynamicComp(): boolean {
       return ['crop', 'copy-style'].includes(this.currActivePanel)
@@ -472,11 +479,19 @@ export default defineComponent({
           }
         }
       }
-      if (this.insertTheme && this.isTextInCategory) {
+      if (this.currActivePanel === 'text' && this.isTextInCategory) {
         return () => {
           this.setIsInCategory({ tab: 'text', bool: false })
           this.setShowAllRecently({ tab: 'text', bool: false })
           this.resetTextsSearch()
+        }
+      }
+      if (this.currActivePanel === 'object' && this.isObjectInCategory) {
+        return () => {
+          this.setIsInCategory({ tab: 'object', bool: false })
+          this.setShowAllRecently({ tab: 'object', bool: false })
+          if (this.currActiveObjectFavTab) this.resetObjectsFavSearch()
+          else this.resetObjectsSearch({ resetCategoryInfo: true })
         }
       }
       if (this.showExtraColorPanel) {
@@ -620,7 +635,9 @@ export default defineComponent({
     ...mapActions({
       initRecentlyColors: 'color/initRecentlyColors',
       addRecentlyColors: 'color/addRecentlyColors',
-      resetTextsSearch: 'textStock/resetSearch'
+      resetTextsSearch: 'textStock/resetSearch',
+      resetObjectsSearch: 'objects/resetSearch',
+      resetObjectsFavSearch: 'objects/resetFavoritesSearch'
     }),
     vcoConfig() {
       return {
