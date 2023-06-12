@@ -64,6 +64,7 @@ export class Rect {
       letterSpacing: number
       pIndex: number
       sIndex: number
+      lineHeight: number
     }[]
   }[] = []
 
@@ -206,6 +207,7 @@ export class Rect {
               letterSpacing,
               pIndex,
               sIndex,
+              lineHeight,
             }]
           })
         }

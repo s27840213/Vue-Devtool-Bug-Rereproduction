@@ -164,21 +164,27 @@ class TextFill {
     await myRect.init(config)
     myRect.preprocess({ skipMergeLine: true })
     const { vertical, rows } = myRect.get()
-    const div = [] as DOMRect[][][]
+    const isTextShape = textShape.name !== 'none'
+    const isTextShapeFocus = isTextShape && textEffectUtils.focus === 'fill'
+
+    // Because rows is a 1D-array, convert it to 2D-array as 'div' variable so that I can return 2D CSS.
+    const div = [] as DOMRect[][]
     for (const [index, row] of rows.entries()) {
       if (row.spanData.length === 0) continue
       let { pIndex, sIndex } = row.spanData[0]
-      // TextShape only have one line, fix its p/sIndex
-      if (textShape.name !== 'none') [pIndex, sIndex] = [0, index]
+      if (isTextShape) {
+        // TextShape only have one line, fix its p/sIndex
+        [pIndex, sIndex] = [0, index]
+        // Because TextShape has display： inline-block, its height is affected by the lineHeight.
+        // To justify its position, multiply the height by the lineHeight.
+        row.rect[vertical ? 'width' : 'height'] *= row.spanData[0].lineHeight
+      }
 
       while (div.length - 1 < pIndex) div.push([])
-      while (div[pIndex].length - 1 < sIndex) div[pIndex].push([])
-      div[pIndex][sIndex].push(row.rect)
+      div[pIndex][sIndex] = row.rect
     }
 
     const spanExpandRatio = 1
-    const isTextShape = textShape.name !== 'none'
-    const isTextShapeFocus = isTextShape && textEffectUtils.focus === 'fill'
     const isPositiveBend = +textShape.bend >= 0
     const isFixedWidth = textBgUtils.isFixedWidth(config.styles)
     // If not TextShape, need add maxFontSize to top/left to fix its position.
@@ -186,8 +192,7 @@ class TextFill {
     const leftDir = imgWidth - divWidth < 0 ? -1 : 1
     const topDir = imgHeight - divHeight < 0 ? -1 : 1
     return div.map(p => p.map(span => {
-      const rect = span[0]
-      let { width: spanWidth, height: spanHeight, x, y } = rect
+      let { width: spanWidth, height: spanHeight, x, y } = span
       if (vertical) {
         [spanWidth, spanHeight] = [spanHeight, spanWidth];
         [x, y] = [y, x]
@@ -227,10 +232,8 @@ class TextFill {
           [isPositiveBend ? 'top' : 'bottom']: `${y * (isPositiveBend ? 1 : -1) - spanHeight * spanExpandRatio}px`,
           left: `${x - spanWidth * spanExpandRatio}px`,
           transform: 'none',
-          'line-height': 'initial', // Use dash-case for overwrite textStylesRaw result.
         } : isTextShape ? {
           [isPositiveBend ? 'top' : 'bottom']: `${-spanHeight * spanExpandRatio}px`,
-          // 'line-height': 'initial',
         } : {
           top: `${y - spanHeight * spanExpandRatio + maxFontSize}px`,
           left: `${x - spanWidth * spanExpandRatio + maxFontSize}px`,
