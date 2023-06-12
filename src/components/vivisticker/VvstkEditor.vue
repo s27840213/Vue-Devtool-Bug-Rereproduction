@@ -258,17 +258,17 @@ export default defineComponent({
 
 .scale-in-fade-out {
   &-move {
-    transition: v-bind("animated ? 'transform 300ms ease-in-out' : 'none'");
+    transition: v-bind("animated ? 'transform 500ms ease-in-out' : 'none'");
   }
   &-enter-active {
-    transition: transform 300ms ease-in-out;
+    transition: transform 500ms ease-in-out;
     transform: scale(1);
   }
   &-enter-from {
     transform: scale(0.75);
   }
   &-leave-active {
-    transition: opacity 300ms ease-in-out;
+    transition: opacity 500ms ease-in-out;
     position: absolute;
   }
   &-leave-to {

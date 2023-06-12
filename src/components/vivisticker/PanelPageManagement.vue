@@ -165,7 +165,7 @@ export default defineComponent({
       }
       this.$nextTick(() => {
         pageUtils.deletePage(pageIndex)
-        vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300)
+        vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 500)
         stepsUtils.record()
       })
     },
