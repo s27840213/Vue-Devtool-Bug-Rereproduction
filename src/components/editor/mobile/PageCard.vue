@@ -60,6 +60,7 @@ export default defineComponent({
   },
   mounted() {
     this.minContentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
+    this.$store.commit('SET_contentScaleRatio4Page', { pageIndex: this.pageIndex, contentScaleRatio: this.minContentScaleRatio })
     // let card = this.$refs.card as HTMLElement | HTMLElement[]
     // if (Array.isArray(card)) card = card[0]
     // const cardRect = card.getBoundingClientRect()

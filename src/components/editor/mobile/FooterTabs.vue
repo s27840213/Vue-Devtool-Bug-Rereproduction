@@ -49,7 +49,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
-import { IFooterTab } from '@/interfaces/editor'
+import { ICurrSelectedInfo, IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import backgroundUtils from '@/utils/backgroundUtils'
@@ -61,6 +61,7 @@ import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
@@ -100,7 +101,8 @@ export default defineComponent({
       leftOverflow: false,
       rightOverflow: false,
       clickedTab: '',
-      clickedTabTimer: -1
+      clickedTabTimer: -1,
+      isSvgImage: false,
     }
   },
   computed: {
@@ -109,6 +111,7 @@ export default defineComponent({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      currSelectedLayers: 'getCurrSelectedLayers',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
@@ -238,7 +241,7 @@ export default defineComponent({
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
-        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame }] : []
+        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame, disabled: this.isSvgImage }] : []
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -534,6 +537,19 @@ export default defineComponent({
     }
   },
   watch: {
+    currSelectedLayers: {
+      immediate: true,
+      async handler() {
+        const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+        if (types.has('image') && layers.length === 1) {
+          const src = imageUtils.getSrc(layers[0] as IImage, 'tiny')
+          const isSvg = await imageShadowPanelUtils.isSVG(src, layers[0] as IImage)
+          this.isSvgImage = isSvg
+        } else {
+          this.isSvgImage = false
+        }
+      }
+    },
     selectedLayerNum(newVal) {
       if (newVal === 0) {
         this.$emit('switchTab', 'none')
