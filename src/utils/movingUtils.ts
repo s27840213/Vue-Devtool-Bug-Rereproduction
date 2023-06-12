@@ -168,10 +168,11 @@ export class MovingUtils {
             /**
              * This is the dbl-click callback block
              */
-            if (this.getLayerType === LayerType.image) {
-              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-              eventUtils.emit(PanelEvent.switchTab, 'crop')
-            }
+            // vivisticker can only crop frame
+            // if (this.getLayerType === LayerType.image) {
+            //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+            //   eventUtils.emit(PanelEvent.switchTab, 'crop')
+            // }
             this.dblTabsFlag = true
           }
         }
@@ -508,8 +509,7 @@ export class MovingUtils {
       x: Math.abs(pageUtils.getCurrPage.x - this.initPageTranslate.x),
       y: Math.abs(pageUtils.getCurrPage.y - this.initPageTranslate.y)
     }
-    const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
-
+    const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
 
     if (this.isControllerShown) {

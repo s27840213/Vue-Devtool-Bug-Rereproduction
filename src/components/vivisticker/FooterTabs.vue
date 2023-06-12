@@ -185,7 +185,7 @@ export default defineComponent({
     photoInGroupTabs(): Array<IFooterTab> {
       return [
         { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
+        // { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage }, // vivisticker can only crop frame
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
       ]
@@ -193,7 +193,7 @@ export default defineComponent({
     photoTabs(): Array<IFooterTab> {
       const tabs = [
         { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage },
+        // { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage }, // vivisticker can only crop frame
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },

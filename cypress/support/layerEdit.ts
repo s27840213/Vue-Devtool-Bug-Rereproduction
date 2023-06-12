@@ -131,17 +131,18 @@ Cypress.Commands.add('layerScale', { prevSubject: 'element' }, (subject) => {
 Cypress.Commands.add('layerRotateAndResize', { prevSubject: 'element' }, (subject, isMobile) => {
   const resizeDir = [
     { i: 0, x: -1, y: -1 },
-    { i: 1, x: 1, y: 1 },
+    ...!isMobile ? [{ i: 1, x: 1, y: 1 }] : [],
     { i: 2, x: -1, y: 1 },
-    { i: 3, x: 1, y: -1 },
+    ...!isMobile ? [{ i: 3, x: 1, y: -1 }] : [],
   ]
-  const restoreOffset = isMobile ? 158 : 210
+  const rotateOffset = isMobile ? -50 : -170
+  const restoreOffset = isMobile ? 125 : 210
 
   cy.wrap(subject).click()
     // Rotate 60 degrees, counter-clockwise
-    .get('.svg-rotate')
+    .get('.svg-rotate2')
     .realMouseDown()
-    .realMouseMove(-158, -158, { position: 'center' })
+    .realMouseMove(rotateOffset, rotateOffset, { position: 'center' })
     .realMouseUp()
     .snapshotTest('RotateAndResize before resize')
     .then(() => {
@@ -164,19 +165,22 @@ Cypress.Commands.add('layerRotateAndResize', { prevSubject: 'element' }, (subjec
       }
     })
     // Rotate 60 degrees, clockwise
-    .get('.svg-rotate')
+    .get('.svg-rotate2')
     .realMouseDown()
     .realMouseMove(restoreOffset, restoreOffset, { position: 'center' })
     .realMouseUp()
     // Cancel crop effect
     .togglePanel('裁切')
-    .get('.dim-background .nu-controller__body .controller-point').eq(0) // top-left
+    .get('.dim-background .nu-controller__body .control-point').eq(0) // top-left
     .realMouseDown()
     .realMouseMove(100, 100)
     .realMouseUp()
-    .get('.dim-background .nu-controller__body .controller-point').eq(2) // bottom right
+    .get('.dim-background .nu-controller__body .control-point').eq(2) // bottom right
     .realMouseDown()
     .realMouseMove(-100, -100)
+    .get('.dim-background .nu-controller__body .control-point').eq(3) // bottom left
+    .realMouseDown()
+    .realMouseMove(100, -100)
     .realMouseUp()
     .isMobile(() => { cy.togglePanel('裁切') })
     .notMobile(() => { cy.togglePanel('完成') })

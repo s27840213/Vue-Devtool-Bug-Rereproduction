@@ -43,6 +43,7 @@ div(class="nu-layer flex-center"
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
   div(v-if="isLine" class="nu-layer__line-mover"
+    :class="[inAllPagesMode ? 'click-disabled' : 'clickable']"
     :style="lineMoverStyles()"
     ref="lineMover"
     :id="inPreview ? '' : `nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`"
@@ -296,6 +297,7 @@ export default defineComponent({
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
           outline,
+          outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
           willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
           pointerEvents,
           clipPath,
@@ -336,7 +338,7 @@ export default defineComponent({
     frameClipStyles(): any {
       return {
         fill: '#00000000',
-        stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
+        stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#9C9C9C') : 'none',
         strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
       }
     },
@@ -400,7 +402,7 @@ export default defineComponent({
     },
     lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
-      const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.$isTouchDevice(), this.config.size?.[0])
       const { x: layerX, y: layerY } = this.config.styles
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
@@ -416,7 +418,7 @@ export default defineComponent({
     },
     outlineStyles() {
       if (this.primaryLayer && this.primaryLayer.type === 'tmp') {
-        return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
+        return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #9C9C9C`
       } else {
         return ''
       }
@@ -813,7 +815,7 @@ export default defineComponent({
     justify-content: center;
     width: 0;
     height: 0;
-    pointer-events: initial;
+    // pointer-events: initial;
   }
   &__BG {
     position: absolute;

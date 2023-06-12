@@ -8,16 +8,16 @@ div(class="nu-img-controller")
       @pointerdown.stop="moveStart"
       @touchstart="disableTouchEvent")
     div(v-for="(scaler, index) in controlPoints.scalers"
-        class="controller-point"
+        class="control-point"
         :key="`scaler-${index}`"
-        :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
+        :style="(Object.assign(scalerStyles(scaler.styles), cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
         @pointerdown.prevent.stop="$isTouchDevice() ? null : scaleStart($event)"
         @touchstart="$isTouchDevice() ? null : disableTouchEvent($event)")
-    template(v-if="$isTouchDevice()" )
+    template(v-if="$isTouchDevice()")
       div(v-for="(scaler, index) in controlPoints.scalerTouchAreas"
-          class="controller-point"
+          class="control-point"
           :key="`scaler-touch-${index}`"
-          :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
+          :style="(Object.assign(scalerStyles(scaler.styles), cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
           @pointerdown.prevent.stop="scaleStart"
           @touchstart="disableTouchEvent")
 </template>
@@ -75,7 +75,7 @@ export default defineComponent({
   },
   data() {
     return {
-      controlPoints: ControlUtils.getControlPoints(4, 25, (100 / this.$store.getters.getPageScaleRatio)),
+      controlPoints: ControlUtils.getControlPoints(),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
       initImgPos: { imgX: 0, imgY: 0 },
@@ -124,7 +124,7 @@ export default defineComponent({
         transform: `translate(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`,
+        outline: `${2 * (100 / this.scaleRatio)}px solid #9C9C9C`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
@@ -177,8 +177,13 @@ export default defineComponent({
         // transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width * this.contentScaleRatio}px`,
         height: `${this.config.styles.height * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`
+        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #9C9C9C`
       }
+    },
+    scalerStyles(scaler: { [key: string]: string }) {
+      const scalerStyle = { ...scaler }
+      scalerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      return scalerStyle
     },
     imgControllerPosHandler(): ICoordinate {
       const angleInRad = this.getLayerRotate * Math.PI / 180
@@ -442,16 +447,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.controller-point {
-  pointer-events: auto;
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: setColor(white);
-  border: 1.5px solid setColor(blue-2);
-  border-radius: 30%;
-}
-
 .nu-controller {
   display: flex;
   justify-content: center;

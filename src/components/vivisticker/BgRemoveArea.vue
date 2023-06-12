@@ -97,12 +97,14 @@ export default defineComponent({
     logUtils.setLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
-    if (this.inVivisticker) {
-      this.canvasWidth = width
-      this.canvasHeight = height
-    } else {
-      this.canvasHeight = 1600 / aspectRatio
-    }
+    // if (this.inVivisticker) {
+    //   this.canvasWidth = width
+    //   this.canvasHeight = height
+    // } else {
+    //   this.canvasHeight = 1600 / aspectRatio
+    // }
+    this.canvasHeight = 1600 / aspectRatio
+
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
     logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)
@@ -121,6 +123,8 @@ export default defineComponent({
       this.initClearModeCanvas()
       this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
+
+      console.log('on load trigger')
     }
     this.imageElement.onerror = (ev) => {
       logUtils.setLog('imageElement onerror triggered')
@@ -693,8 +697,8 @@ export default defineComponent({
 
 .magnify-area {
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 90px;
+  height: 90px;
   overflow:hidden;
   transform-origin: top left;
   border: 1px solid setColor(gray-2);
@@ -705,8 +709,8 @@ export default defineComponent({
 
   &__brush {
     position: absolute;
-    width: calc(100% *  (2/3) + 3px);
-    height: calc(100% *  (2/3) + 3px);
+    width: calc(100% *  (5/9) + 3px);
+    height: calc(100% *  (5/9) + 3px);
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);

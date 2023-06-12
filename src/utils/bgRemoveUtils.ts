@@ -160,19 +160,25 @@ class BgRemoveUtils {
     })
   }
 
-  async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number): Promise<void> {
+  async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string): Promise<void> {
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
     logUtils.setLog('start removing bg')
-    const data = await store.dispatch('user/removeBgStk', { uuid, assetId })
+    const data = await store.dispatch('user/removeBgStk', { uuid, assetId, type })
     logUtils.setLog('finish removing bg')
     logUtils.setLog(`remove bg result: ${JSON.stringify(data)}`)
-    editorUtils.setCurrActivePanel('remove-bg')
-    const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
-    logUtils.setLog(`autoRemoveResult: ${JSON.stringify(autoRemoveResult)}`)
-    this.setAutoRemoveResult(autoRemoveResult)
-    this.setInBgRemoveMode(true)
-    this.setIsProcessing(false)
+
+    if (data.flag === 0) {
+      editorUtils.setCurrActivePanel('remove-bg')
+      const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
+      logUtils.setLog(`autoRemoveResult: ${JSON.stringify(autoRemoveResult)}`)
+      this.setAutoRemoveResult(autoRemoveResult)
+      this.setInBgRemoveMode(true)
+      this.setIsProcessing(false)
+    } else {
+      notify({ group: 'error', text: data.msg })
+      this.setIsProcessing(false)
+    }
 
     // return data
   }

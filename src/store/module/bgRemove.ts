@@ -137,7 +137,12 @@ const mutations: MutationTree<IBgRemoveState> = {
         modifiedFlag: false,
         loading: false,
         step: [],
-        currStep: -1
+        currStep: -1,
+        previewImage: {
+          src: '',
+          width: 0,
+          height: 0
+        }
       })
     }
     state.inBgRemoveMode = bool
@@ -190,6 +195,11 @@ const mutations: MutationTree<IBgRemoveState> = {
       preScrollPos: {
         top: -1,
         left: -1
+      },
+      previewImage: {
+        src: '',
+        width: 0,
+        height: 0
       }
     })
   },

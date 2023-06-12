@@ -203,6 +203,7 @@ export default defineComponent({
       isShowAllRecently: 'vivisticker/getShowAllRecently',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isProcessing: 'bgRemove/getIsProcessing',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
@@ -535,7 +536,7 @@ export default defineComponent({
           }
 
           case 'remove-bg': {
-            if (this.bgRemoveMode) {
+            if (this.bgRemoveMode && !this.isProcessing) {
               bgRemoveUtils.setInBgRemoveMode(false)
             }
             break
@@ -567,7 +568,7 @@ export default defineComponent({
     backgroundLocked(): boolean {
       const { locked } = pageUtils.currFocusPage.backgroundImage.config
       return locked
-    },
+    }
   },
   watch: {
     selectedLayerNum(newVal: number) {
@@ -624,7 +625,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: () => {
-          if (!(this.bgRemoveMode || this.isInPagePreview || this.isBgImgCtrl)) {
+          if (!(this.bgRemoveMode || this.isInPagePreview || this.isBgImgCtrl || this.isProcessing)) {
             this.closeMobilePanel()
           }
         },
@@ -816,10 +817,17 @@ export default defineComponent({
   }
 
   &__bottom-section {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-auto-columns: minmax(0, 1fr);
     width: 100%;
     height: 100%;
     overflow-y: scroll;
+    overflow-x: hidden;
     @include no-scrollbar;
+    > *:last-child { // panel-* always take minmax(0, 1fr) grid layout.
+      grid-row: 2 / 3;
+    }
   }
 
   &__title {
