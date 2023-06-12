@@ -540,7 +540,6 @@ export default defineComponent({
     currSelectedLayers: {
       immediate: true,
       async handler() {
-        console.log('hi')
         const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
         if (types.has('image') && layers.length === 1) {
           const src = imageUtils.getSrc(layers[0] as IImage, 'tiny')
@@ -549,7 +548,6 @@ export default defineComponent({
         } else {
           this.isSvgImage = false
         }
-        console.log(this.isSvgImage)
       }
     },
     selectedLayerNum(newVal) {
