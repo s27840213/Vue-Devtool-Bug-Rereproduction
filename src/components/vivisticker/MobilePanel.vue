@@ -252,7 +252,7 @@ export default defineComponent({
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
     },
     trueWholeSize(): boolean {
-      return ['text', 'template-content'].includes(this.currActivePanel)
+      return false // ['text', 'template-content'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
@@ -664,6 +664,7 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(false)
     },
     initPanelHeight() {
+      // 40 = height of preserved gap
       const parentElementHeight = this.panelParentHeight()
       if (this.halfSizeInInitState) return parentElementHeight * 0.5
       return parentElementHeight - 40
@@ -672,7 +673,7 @@ export default defineComponent({
       return (this.$refs.panel as HTMLElement).clientHeight
     },
     panelParentHeight() {
-      // 40 = HeaderTabs height
+      // 40 = height of preserved gap
       if (!this.$el) return window.innerHeight
       return (this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)
     },

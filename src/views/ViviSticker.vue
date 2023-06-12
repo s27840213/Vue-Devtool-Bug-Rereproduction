@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="vivisticker" :style="copyingStyles()")
   div(class="vivisticker__top" :style="topStyles()")
-    header-tabs(v-show="showHeaderTabs" :style="headerStyles()")
+    header-tabs(:style="headerStyles()")
     div(ref="vivisticker__content"
         class="vivisticker__content"
         @click.self="outerClick")
@@ -249,9 +249,6 @@ export default defineComponent({
     }),
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
-    },
-    showHeaderTabs(): boolean {
-      return !['text', 'object', 'template-content'].includes(this.currActivePanel)
     },
     showFooterTabs(): boolean {
       return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview)
