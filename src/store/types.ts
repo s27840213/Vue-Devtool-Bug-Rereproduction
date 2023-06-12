@@ -93,6 +93,7 @@ export interface IEditorState {
   isPageScaling: boolean,
   isGettingDesign: boolean,
   showGlobalErrorModal: boolean,
+  newTemplateShownMode: boolean,
 }
 
 export enum SidebarPanelType {
