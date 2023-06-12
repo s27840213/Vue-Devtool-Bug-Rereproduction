@@ -310,6 +310,7 @@ export default defineComponent({
       } else if (!focus) {
         textEffectUtils.setFocus('none')
       }
+      if (!focus) this.recordChange()
     },
     replaceImg(key: string) {
       return (img: IAssetPhoto | IPhotoItem) => {
