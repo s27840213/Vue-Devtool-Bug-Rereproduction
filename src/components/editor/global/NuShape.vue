@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-shape" :style="styles")
-  svg(:view-box.camel="viewBoxFormatter")
+  svg(:view-box.camel="viewBoxFormatter" preserveAspectRatio="none")
     defs(v-if="config.category === 'E'" v-html="svgFormatter")
     defs
       filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
