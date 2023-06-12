@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="vvstk-editor" v-touch :style="copyingStyles()" @pointerdown="selectStart" @swiperight="handleSwipeRight" @swipeleft="handleSwipeLeft")
+div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown="selectStart")
   div(class="vvstk-editor__pages-container" :style="containerStyles()")
     transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" @before-leave="handleBeforePageLeave" :css="animated")
       page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
@@ -30,6 +30,7 @@ import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import SwipeDetector from '@/utils/SwipeDetector'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -50,8 +51,16 @@ export default defineComponent({
       marginTop: 44,
       cardWidth: 0,
       cardHeight: 0,
-      animated: false
+      animated: false,
+      swipeDetector: null as unknown as SwipeDetector
     }
+  },
+  mounted() {
+    const editorView = this.$refs.editorView as HTMLElement
+    this.swipeDetector = new SwipeDetector(editorView, { targetDirection: 'horizontal' }, this.handleSwipe)
+  },
+  beforeUnmount() {
+    this.swipeDetector.unbind()
   },
   watch: {
     isInEditor(newVal, oldVal): void {
@@ -189,14 +198,13 @@ export default defineComponent({
 
       this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0) })
     },
-    handleSwipeRight() {
+    handleSwipe(dir: string) {
       if (this.isBgImgCtrl) return
-      this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
-      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
-    },
-    handleSwipeLeft() {
-      if (this.isBgImgCtrl) return
-      this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
+      if (dir === 'right') {
+        this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
+      } else if (dir === 'left') {
+        this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
+      }
       this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
     },
     handleBeforePageLeave(el: Element) {

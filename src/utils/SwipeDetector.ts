@@ -55,7 +55,7 @@ export default class SwipeDetector {
       if (
         ['all', 'horizontal'].includes(this.swipeOptions.targetDirection) &&
         Math.abs(swipeX) > Math.abs(swipeY) &&
-        Math.abs(swipeY) > this.swipeOptions.tolerance &&
+        Math.abs(swipeX) > this.swipeOptions.tolerance &&
         vx > this.swipeOptions.velocityLimit
       ) {
         if (swipeX > 0) {
