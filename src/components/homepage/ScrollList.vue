@@ -403,7 +403,7 @@ export default defineComponent({
     position: relative;
     cursor: pointer;
     img {
-      border: 2px solid setColor(gray-5);
+      border: 1px solid setColor(gray-5);
       box-sizing: border-box;
     }
     &:hover {
