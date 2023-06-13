@@ -129,12 +129,10 @@ class LetterBGData {
     }, {
       key: 'rabbit',
       label: i18n.global.tc('NN0878'),
-      plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
     }, {
       key: 'rabbit-custom',
       label: i18n.global.tc('NN0879'),
-      plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }, {
       key: 'dog',
@@ -144,7 +142,6 @@ class LetterBGData {
     }, {
       key: 'dog-custom',
       label: i18n.global.tc('NN0881'),
-      plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }, {
       key: 'star',
@@ -154,7 +151,6 @@ class LetterBGData {
     }, {
       key: 'baby',
       label: i18n.global.tc('NN0883'),
-      plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
     }]
   }
