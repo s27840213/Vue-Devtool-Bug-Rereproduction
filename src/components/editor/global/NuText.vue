@@ -38,6 +38,7 @@ import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils, { IFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
@@ -76,6 +77,10 @@ export default defineComponent({
     primaryLayer: {
       type: Object,
       default: () => { return undefined }
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
     },
     inPreview: {
       default: false,
@@ -187,12 +192,15 @@ export default defineComponent({
     async drawTextFill() {
       // Prevent earlier result overwrite later result
       const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
-      const newFillBg = textFillUtils.drawTextFill(this.config)
+      const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
+
+      const newFillBg = textFillUtils.drawTextFill(this.config, ratio)
       if (!isEqual(newFillBg, this.textFillBg)) { // Prevent unnecessary update
         this.textFillBg = newFillBg
       }
       if (this.isCurveText) return
-      const newSpanStyle = await textFillUtils.convertTextEffect(this.config)
+
+      const newSpanStyle = await textFillUtils.convertTextEffect(this.config, ratio)
       if (newTextFillVersion === this.textFillVersion && !isEqual(newSpanStyle, this.textFillSpanStyle)) {
         this.textFillSpanStyle = newSpanStyle
       }

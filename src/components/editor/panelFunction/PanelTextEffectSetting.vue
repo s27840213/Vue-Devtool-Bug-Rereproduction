@@ -151,7 +151,8 @@ export default defineComponent({
         editorUtils.showColorSlips
     },
     getStyleImg(): string {
-      return textFillUtils.getTextFillImg(textEffectUtils.getCurrentLayer())
+      return textFillUtils.getTextFillImg(textEffectUtils.getCurrentLayer(),
+        { finalSize: (this.$el as HTMLElement | undefined)?.clientWidth ?? 320 })
     },
     adminTool() {
       if (this.isAdmin && this.currCategoryName === 'fill' && this.currentStyle.name !== 'none') {

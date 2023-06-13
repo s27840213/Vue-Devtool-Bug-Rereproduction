@@ -11,8 +11,10 @@ p(class="nu-curve-text__p" :style="pStyle()")
 
 <script lang="ts">
 import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import textEffectUtils, { IFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
@@ -37,12 +39,20 @@ export default defineComponent({
       type: Number,
       required: true
     },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
     subLayerIndex: {
       type: Number
     },
     primaryLayer: {
       type: Object,
       default: () => { return undefined }
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
     },
     extraSpanStyle: {
       type: Object as PropType<Record<string, string|number>>,
@@ -111,7 +121,9 @@ export default defineComponent({
     async drawTextFill() {
       // Prevent earlier result overwrite later result
       const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
-      const newSpanStyle = await textFillUtils.convertTextEffect(this.config)
+      const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
+
+      const newSpanStyle = await textFillUtils.convertTextEffect(this.config, ratio)
       if (newTextFillVersion === this.textFillVersion && !isEqual(newSpanStyle, this.textFillSpanStyle)) {
         this.textFillSpanStyle = newSpanStyle
       }

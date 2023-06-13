@@ -4,6 +4,7 @@ import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
 import { isITextFillCustom, ITextFill, ITextFillConfig } from '@/interfaces/format'
 import { AllLayerTypes, IText } from '@/interfaces/layer'
+import router from '@/router'
 import store from '@/store'
 import constantData, { IEffect, IEffectOptionSelect } from '@/utils/constantData'
 import generalUtils from '@/utils/generalUtils'
@@ -16,7 +17,7 @@ import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
-import { find, findLast, max, omit, pick } from 'lodash'
+import { find, max, omit, pick } from 'lodash'
 import { InjectionKey } from 'vue'
 
 interface ITextFillPresetRawImg {
@@ -120,26 +121,29 @@ class TextFill {
     return effect.img ?? effect.customImg ?? null
   }
 
-  getTextFillImg(config: IText): string {
-    const img = this.getImg(config.styles.textFill)
+  getTextFillImg(config: IText, { ratio = 1, finalSize }: { ratio?: number, finalSize?: number }): string {
+    const textFill = config.styles.textFill as ITextFillConfig
+    const img = this.getImg(textFill)
     if (!img) return ''
     const pageScale = store.getters.getPageScaleRatio * 0.01
-    const layerSize = Math.max(config.styles.height, config.styles.width) * pageScale
-    const sizeMap = store.getters['user/getImgSizeMap'] as Array<{ key: string, size: number }>
-    // Get target resolution, use the largest for backend rendering.
-    const targetSize = store.getters['user/getUserId'] === 'backendRendering' ? sizeMap[0]
-      : findLast(sizeMap, s => layerSize < s.size) ?? sizeMap[0]
+    // ratio = contentScaleRatio * dpiRatio
+    const layerSize = finalSize ?? Math.max(config.styles.height, config.styles.width) *
+      pageScale * ratio * (textFill.size * 0.01)
 
-    return isIAssetPhoto(img)
-      ? img.urls[targetSize.key as keyof typeof img.urls] ?? img.urls.original
-      : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, targetSize.size)
+    const srcObj = isIAssetPhoto(img)
+      ? img.id
+        ? { type: 'public', userId: imageUtils.getUserId(img.urls.full, 'public'), assetId: img.id } // TextFill preset img
+        : { type: 'private', userId: '', assetId: img.assetIndex as number } // non-admin myfile img
+      : { type: 'unsplash', userId: '', assetId: img.id } // custom unsplash img
+    let src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, layerSize))
+    if (router.currentRoute.value.name === 'Preview') src = imageUtils.appendCompQueryForVivipic(src)
+    return src
   }
 
   calcTextFillVar(config: IText) {
     const textFill = config.styles.textFill as ITextFillConfig
     const img = this.getImg(textFill)
     if (!img) return {}
-    const imgSrc = this.getTextFillImg(config)
     const layerScale = config.styles.scale
     const divWidth = config.styles.width / layerScale
     const divHeight = config.styles.height / layerScale
@@ -150,15 +154,16 @@ class TextFill {
     const imgRatio = textFill.size / 100 / (scaleByWidth ? widthRatio : heightRatio)
     const imgWidth = img.width * imgRatio
     const imgHeight = img.height * imgRatio
-    return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc }
+    return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth }
   }
 
-  async convertTextEffect(config: IText): Promise<Record<string, string | number>[][]> {
+  async convertTextEffect(config: IText, ratio: number): Promise<Record<string, string | number>[][]> {
     const { textFill, textShape } = config.styles
     if (textFill.name === 'none') return []
 
-    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
-    if (!imgSrc) return []
+    const imgSrc = this.getTextFillImg(config, { ratio })
+    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
+    if (!imgSrc || !divHeight) return []
 
     const myRect = new Rect()
     await myRect.init(config)
@@ -245,12 +250,13 @@ class TextFill {
     }))
   }
 
-  drawTextFill(config: IText): CustomElementConfig | null {
+  drawTextFill(config: IText, ratio: number): CustomElementConfig | null {
     const textFill = config.styles.textFill
     if (textFill.name === 'none' || !(textEffectUtils.focus === 'fill')) return null
 
-    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
-    if (!imgSrc) return null
+    const imgSrc = this.getTextFillImg(config, { ratio })
+    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
+    if (!imgSrc || !divHeight) return null
 
     const leftDir = imgWidth - divWidth < 0 ? -1 : 1
     const topDir = imgHeight - divHeight < 0 ? -1 : 1
