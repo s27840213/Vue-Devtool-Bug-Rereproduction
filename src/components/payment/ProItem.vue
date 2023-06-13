@@ -35,6 +35,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .pro {
   position: absolute;
+  width: 24px;
+  height: 24px;
   &.default {
     top: 4px;
     left: 4px;
