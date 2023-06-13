@@ -202,9 +202,9 @@ export default defineComponent({
   data() {
     return {
       btnInfo: [
-        { text: this.$t('NN0884'), icon: 'download', disabled: false },
-        { text: this.$t('NN0885'), icon: 'all-file', disabled: false },
-        { text: this.$t('NN0886'), icon: 'file', disabled: false }
+        { text: this.$t('NN0839'), icon: 'download', disabled: false },
+        { text: this.$t('NN0840'), icon: 'all-file', disabled: false },
+        { text: this.$t('NN0841'), icon: 'file', disabled: false }
         // { text: `${this.$t('NN0082')}`, icon: 'more', disabled: false }
       ]
     }

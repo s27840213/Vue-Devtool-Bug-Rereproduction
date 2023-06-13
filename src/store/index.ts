@@ -130,6 +130,7 @@ const getDefaultState = (): IEditorState => ({
   isPageScaling: false,
   isGettingDesign: false,
   showGlobalErrorModal: false,
+  newTemplateShownMode: true
 })
 
 const state = getDefaultState()
@@ -333,6 +334,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getShowGlobalErrorModal(state: IEditorState) {
     return state.showGlobalErrorModal
   },
+  getNewTemplateShownMode(state: IEditorState) {
+    return state.newTemplateShownMode
+  }
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -1158,6 +1162,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_showGlobalErrorModal(state: IEditorState, showGlobalErrorModal: boolean) {
     state.showGlobalErrorModal = showGlobalErrorModal
   },
+  SET_newTemplateShownMode(state: IEditorState, newTemplateShownMode: boolean) {
+    state.newTemplateShownMode = newTemplateShownMode
+  }
 }
 window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500))
 

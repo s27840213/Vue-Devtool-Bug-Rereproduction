@@ -3,6 +3,7 @@
 import { IAdjustJsonProps } from '@/interfaces/adjust'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { IParagraphStyle, ISpanStyle } from '@/interfaces/layer'
+import { textLetterBgName } from '@/utils/letterBgData'
 
 export interface ITextEffect {
   name: string
@@ -45,12 +46,6 @@ export interface ITextGooey {
   color: string
 }
 
-const textLetterBgName = [
-  'rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book', 'penguin',
-  'planet', 'heart', 'heart-warm', 'heart-custom', 'gummybear', 'leaf',
-  'butter-flower', 'flower-frame', 'flower-frame-custom', 'vintage-flower',
-  'vintage-flower-custom', 'cat-paw', 'bread',
-] as const
 export interface ITextLetterBg {
   name: typeof textLetterBgName[number]
   xOffset200: number

@@ -510,7 +510,7 @@ class AssetUtils {
         initScale: config.styles.scale,
         // contentEditable: true
       })
-      newLayer = LayerFactary.newText(config)
+      newLayer = LayerFactary.newText(config, '1.0.0') // For old text assets that don't have jsonVer, use 1.0.0 to trigger compensation
       const { x, y, width, height } = newLayer.styles
       const textHW = textUtils.getTextHW(newLayer, -1)
       Object.assign(newLayer.styles, {
@@ -526,7 +526,7 @@ class AssetUtils {
           isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles.textShape)
         })
       }
-      newLayer = LayerFactary.newGroup(config, (config as IGroup).layers)
+      newLayer = LayerFactary.newGroup(config, (config as IGroup).layers, '1.0.0') // For old text assets that don't have jsonVer, use 1.0.0 to trigger compensation
     }
 
     // if (isText) {
