@@ -493,8 +493,8 @@ class AssetUtils {
         : { x, y }
     )
     const newLayer = config.type === 'group'
-      ? LayerFactary.newGroup(config, (config as IGroup).layers)
-      : LayerFactary.newText(config)
+      ? LayerFactary.newGroup(config, (config as IGroup).layers, '1.0.0') // For old text assets that don't have jsonVer, use 1.0.0 to trigger compensation
+      : LayerFactary.newText(config, '1.0.0') // For old text assets that don't have jsonVer, use 1.0.0 to trigger compensation
     layerUtils.addLayers(targetPageIndex, [textUtils.resetScaleForLayer(newLayer, true)])
   }
 
