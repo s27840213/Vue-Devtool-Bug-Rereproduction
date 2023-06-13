@@ -56,7 +56,9 @@ export interface ILayer<T extends IStyle = IStyle> {
   dragging: boolean,
   designId: string,
   styles: T,
-  id: string
+  id: string,
+  jsonVer: string,
+  jsonVer_origin: string,
 }
 
 export interface ITextStyle extends IStyle {

@@ -2,7 +2,8 @@
 div(v-show="isShow" class="category-object-card" @click="$emit('cardClick', $event)")
   img(class="category-object-card__cover" :src="coverSrc" :style="coverStyles" @load="isShow = true" @error="imgOnerror")
   div(class="category-object-card__label")
-    div(class="category-object-card__label__title text-H6") {{ title }}
+    div(class="category-object-card__label__title text-H6")
+      link-or-text(:title="title" :url="url")
     svg-icon(v-if="isFavorite !== undefined"
       :iconName="isFavorite ? 'favorites-fill' : 'heart'"
       iconWidth="24px"
@@ -11,6 +12,7 @@ div(v-show="isShow" class="category-object-card" @click="$emit('cardClick', $eve
 </template>
 
 <script lang="ts">
+import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
 import { throttle } from 'lodash'
 import { defineComponent } from 'vue'
 export default defineComponent({
@@ -31,7 +33,14 @@ export default defineComponent({
     scrollTop: {
       type: Number,
       required: true
-    }
+    },
+    url: {
+      type: String,
+      default: ''
+    },
+  },
+  components: {
+    LinkOrText
   },
   data() {
     return {
@@ -89,7 +98,7 @@ export default defineComponent({
       const cardOffsetTop = this.elRecycleScrollerWrapper?.offsetTop ?? 0
       const scrollPos = this.translateY() - (this.scrollTop - cardOffsetTop)
       this.coverPos = (scrollPos / (this.elRecycleScroller.clientHeight - this.$el.clientHeight)) * 100
-    }
+    },
   }
 })
 </script>

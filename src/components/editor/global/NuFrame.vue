@@ -1,5 +1,5 @@
 <template lang="pug">
-div(:class="{ 'nu-frame__custom': !isFrameImg }"
+div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']"
     :style="styles")
   div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
     img(class="shadow__img"

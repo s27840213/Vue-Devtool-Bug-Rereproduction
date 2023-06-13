@@ -46,20 +46,22 @@ const EDITOR_BGS = [
   '#F4F5F7'
 ]
 
+const tabs = ['object', 'background', 'text']
+
+function getDefaultDict<T>(defaultValue: T): { [key: string]: T } {
+  const res = {} as { [key: string]: T }
+  for (const tab in tabs) {
+    res[tab] = defaultValue
+  }
+  return res
+} // T will be auto inferred from defaultValue without specifying in <T> when calling
+
 const getDefaultState = (): IViviStickerState => ({
   userInfo: vivistickerUtils.getDefaultUserInfo(),
   userSettings: vivistickerUtils.getDefaultUserSettings(),
   currActiveTab: 'object',
-  isInCategoryDict: {
-    object: false,
-    background: false,
-    text: false
-  },
-  showAllRecentlyDict: {
-    object: false,
-    background: false,
-    text: false
-  },
+  isInCategoryDict: getDefaultDict(false),
+  showAllRecentlyDict: getDefaultDict(false),
   isInBgShare: false,
   isInBgRemoveSection: false,
   shareItem: undefined,

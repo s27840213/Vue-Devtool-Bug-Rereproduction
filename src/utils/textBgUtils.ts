@@ -1,8 +1,9 @@
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, isTextFill, ITextBg, ITextGooey, ITextLetterBg } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, isTextFill, ITextBg, ITextGooey } from '@/interfaces/format'
 import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
+import letterBgData from '@/utils/letterBgData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -582,70 +583,6 @@ class Gooey {
   }
 }
 
-function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
-  let [href, color] = [textBg.name as string, textBg.color]
-  switch (textBg.name) {
-    case 'rainbow':
-      href = 'rainbow-circle'
-      color = ['#FFA19B', '#FFC89F', '#F7DE97', '#C5DFAE', '#B5D0F9', '#EDD4F6'][index % 6]
-      break
-    case 'rainbow-dark':
-      href = 'rainbow-circle'
-      color = ['#D0B0B1', '#DCC9BF', '#EBDEBB', '#BECBBC', '#B0BCC5', '#D1CADF'][index % 6]
-      break
-    case 'circle':
-      href = 'rainbow-circle'
-      break
-    case 'cloud':
-      href = `cloud${index % 4}`
-      break
-    case 'penguin':
-      href = `penguin${index % 5}`
-      break
-    case 'planet':
-      href = `planet${index % 5}`
-      break
-    case 'heart':
-      href = 'solid-heart'
-      color = ['#BFE29A', '#ABDAED', '#FFBDC5', '#FFE299', '#CDBFDD', '#9BBCDD', '#F2C3AF'][index % 7]
-      break
-    case 'heart-warm':
-      href = 'solid-heart'
-      color = ['#9B5642', '#E48479', '#F7C3B0', '#D6805B', '#D45847', '#FAAE9F', '#F7C3B0'][index % 7]
-      break
-    case 'heart-custom':
-      href = 'solid-heart'
-      break
-    case 'gummybear':
-      href = `gummybear${index % 5}`
-      break
-    case 'leaf':
-      href = `leaf${index % 5}`
-      break
-    case 'butter-flower':
-      href = `butter-flower${index % 5}`
-      break
-    case 'flower-frame':
-      href = `flower-frame${index % 5}`
-      color = ['#F4D0E0', '#BDDBD0', '#D9CCED', '#C7DAEF', '#F4CAC1'][index % 5]
-      break
-    case 'flower-frame-custom':
-      href = `flower-frame${index % 5}`
-      break
-    case 'vintage-flower':
-      color = ['#E8A98E', '#EE8854', '#F3B132', '#94A084', '#B17357'][index % 5]
-      break
-    case 'cat-paw':
-      href = `cat-paw${index % 5}`
-      break
-    case 'bread':
-      href = `bread${index % 5}`
-      break
-    default: // text-book
-  }
-  return { href, color }
-}
-
 class TextBg {
   private currColorKey = ''
   effects = this.getDefaultEffects() as Record<string, Record<string, string | number | boolean>>
@@ -654,15 +591,6 @@ class TextBg {
     textEffectUtils.convertColor2rgba(color, opacity)
 
   getDefaultEffects() {
-    const letterBGDefault = {
-      xOffset200: 0,
-      yOffset200: 0,
-      size: 100,
-      opacity: 100,
-      fixedWidth: true,
-      color: '', // no effect
-    } as const
-
     return {
       none: {},
       'square-borderless': {
@@ -733,119 +661,7 @@ class TextBg {
         color: 'fontColorL+-40/BC/00'
       },
       // A part of additional default ITextLetterBg setting is in setExtraDefaultAttrs func.
-      rainbow: letterBGDefault,
-      'rainbow-dark': letterBGDefault,
-      circle: {
-        ...letterBGDefault,
-        color: '#EEDFD1',
-      },
-      cloud: {
-        ...letterBGDefault,
-        size: 180,
-        fixedWidth: false, //!
-        color: '#D3E2E3',
-      },
-      'text-book': {
-        ...letterBGDefault,
-        size: 125,
-        color: '#93BAA6',
-      },
-      penguin: {
-        ...letterBGDefault,
-        yOffset200: -1,
-        size: 200,
-      },
-      planet: {
-        ...letterBGDefault,
-        size: 135,
-      },
-      heart: {
-        ...letterBGDefault,
-        yOffset200: -3,
-        size: 135,
-      },
-      'heart-warm': {
-        ...letterBGDefault,
-        yOffset200: -3,
-        size: 135,
-      },
-      'heart-custom': {
-        ...letterBGDefault,
-        yOffset200: -3,
-        size: 135,
-        color: '#FFB6C4',
-      },
-      gummybear: {
-        ...letterBGDefault,
-        yOffset200: -15,
-        size: 150,
-      },
-      leaf: {
-        ...letterBGDefault,
-        yOffset200: -7,
-        size: 165,
-      },
-      'butter-flower': {
-        ...letterBGDefault,
-        size: 140,
-        color: '#F4E4BD'
-      },
-      'flower-frame': {
-        ...letterBGDefault,
-        size: 140,
-      },
-      'flower-frame-custom': {
-        ...letterBGDefault,
-        size: 140,
-        color: '#BDDBD0'
-      },
-      'vintage-flower': {
-        ...letterBGDefault,
-        yOffset200: -3,
-        size: 160,
-      },
-      'vintage-flower-custom': {
-        ...letterBGDefault,
-        yOffset200: -3,
-        size: 130,
-        color: '#E8A98E'
-      },
-      'cat-paw': {
-        ...letterBGDefault,
-        size: 135,
-      },
-      bread: {
-        ...letterBGDefault,
-        size: 155,
-      },
-    }
-  }
-
-  async setExtraDefaultAttrs(name: string) {
-    const defaultAttrs = {
-      rainbow: { lineHeight: 1.78, fontSpacing: 585 },
-      'rainbow-dark': { lineHeight: 1.78, fontSpacing: 585 },
-      circle: { lineHeight: 1.78, fontSpacing: 585 },
-      cloud: { lineHeight: 1.54, fontSpacing: 186 },
-      'text-book': { lineHeight: 1.96, fontSpacing: 665 },
-      penguin: { lineHeight: 1.96, fontSpacing: 800 },
-      planet: { lineHeight: 1.96, fontSpacing: 410 },
-      heart: { lineHeight: 1.96, fontSpacing: 505 },
-      'heart-warm': { lineHeight: 1.96, fontSpacing: 505 },
-      'heart-custom': { lineHeight: 1.96, fontSpacing: 505 },
-      gummybear: { lineHeight: 1.96, fontSpacing: 800 },
-      leaf: { lineHeight: 1.96, fontSpacing: 800 },
-      'butter-flower': { lineHeight: 1.96, fontSpacing: 900 },
-      'flower-frame': { lineHeight: 1.96, fontSpacing: 950 },
-      'flower-frame-custom': { lineHeight: 1.96, fontSpacing: 950 },
-      'vintage-flower': { lineHeight: 1.96, fontSpacing: 1300 },
-      'vintage-flower-custom': { lineHeight: 1.96, fontSpacing: 950 },
-      'cat-paw': { lineHeight: 1.96, fontSpacing: 950 },
-      bread: { lineHeight: 1.96, fontSpacing: 1200 },
-    } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
-
-    for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
-      await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val)
+      ...letterBgData.getDeafultOptions()
     }
   }
 
@@ -1030,7 +846,7 @@ class TextBg {
           const { x, y, width, height, text } = span
           if (text !== ' ') {
             pos.push({
-              ...getLetterBgSetting(textBg, i),
+              ...letterBgData.getLetterBgSetting(textBg, i),
               // 1. Because all letter svg width = height, so need to -(h-w)/2
               // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
               // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
@@ -1054,7 +870,7 @@ class TextBg {
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
           let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
           if (vertical) [x, y] = [y, x]
-          const colorChangeable = /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower)/.test(p.href)
+          const colorChangeable = letterBgData.isColorChangeable(p.href)
           return {
             tag: colorChangeable ? 'use' : 'image',
             attrs: {
@@ -1155,7 +971,7 @@ class TextBg {
         this.syncShareAttrs(newTextBg, effect)
         const localAttrs = localStorageUtils.get('textEffectSetting', effect)
         Object.assign(newTextBg, defaultAttrs, localAttrs, attrs, { name: effect })
-        await this.setExtraDefaultAttrs(effect)
+        await letterBgData.setExtraDefaultAttrs(effect)
 
         // Sync setting between different name effect:
         // Bring original effect color to new effect.
@@ -1241,7 +1057,7 @@ class TextBg {
   async resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
     await this.setTextBg(effectName, this.effects[effectName])
-    await this.setExtraDefaultAttrs(effectName)
+    await letterBgData.setExtraDefaultAttrs(effectName)
   }
 }
 

@@ -19,10 +19,11 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
                 :list="item.content" @loadMore="handleLoadMore")
       template(#before)
         div(class="panel-bg__top-item")
-      template(v-slot:category-list-rows="{ list, title }")
+      template(v-slot:category-list-rows="{ list, title, url }")
         category-list-rows(
           :list="list"
           :title="title"
+          :url="url"
           @action="handleCategorySearch")
           template(v-slot:preview="{ item }")
             category-background-item(class="panel-bg__item"
@@ -198,7 +199,8 @@ export default defineComponent({
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.is_recent ? category.list.slice(0, 10) : category.list,
-          title: category.title
+          title: category.title,
+          url: category.url
         }))
     },
     listRecently(): ICategoryItem[] {
