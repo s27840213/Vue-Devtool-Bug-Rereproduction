@@ -67,6 +67,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
           :title="card.title"
           :isFavorite="card.isFavorite"
           :coverUrl="card.coverUrl"
+          :url="card.url"
           :scrollTop="mainContentScrollTop"
           :style="cardStyles"
           @cardClick="item.categorySearch && item.categorySearch(card.title)"
@@ -92,7 +93,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
 <script lang="ts">
 import { CCategoryList } from '@/components/category/CategoryList.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IAsset, isITag, ITagExtend } from '@/interfaces/module'
+import { IAsset, ITagExtend, isITag } from '@/interfaces/module'
 import generalUtils from '@/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
@@ -282,6 +283,7 @@ export default defineComponent({
               title: category.title,
               isFavorite: category.id === -1 ? undefined : this.checkCategoryFavorite(category.id),
               coverUrl: category.cover_url,
+              url: category.url,
             }))
           }
         })

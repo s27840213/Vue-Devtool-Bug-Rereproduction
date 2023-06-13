@@ -11,7 +11,7 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
   div(class="header-bar__center")
-    span(v-if="centerTitle") {{ centerTitle }}
+    link-or-text(:title="centerTitle" :url="isInCategory ? titleInfo.url : ''")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs"
         :key="tab.icon"
@@ -32,6 +32,7 @@ div(class="header-bar relative" @pointerdown.stop)
 </template>
 
 <script lang="ts">
+import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -41,7 +42,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
 import { computed, defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 type TabConfig = {
   icon: string,
@@ -63,21 +64,16 @@ export default defineComponent({
       isInLastStep
     }
   },
+  components: {
+    LinkOrText
+  },
   computed: {
-    ...mapGetters('objects', {
-      staticHeaderTab: 'headerTab'
-    }),
-    ...mapGetters('giphy', {
-      giphyKeyword: 'keyword',
-      gihpyHeaderTab: 'headerTab'
-    }),
-    ...mapState('background', {
-      backgroundKeyword: 'keyword'
-    }),
-    ...mapState('textStock', {
-      textKeyword: 'keyword'
-    }),
     ...mapGetters({
+      staticHeaderTab: 'objects/headerTab',
+      giphyKeyword: 'giphy/keyword',
+      gihpyHeaderTab: 'giphy/headerTab',
+      backgroundHeaderTab: 'background/headerTab',
+      textHeaderTab: 'textStock/headerTab',
       isInEditor: 'vivisticker/getIsInEditor',
       isCurrentInCategory: 'vivisticker/getIsInCategory',
       isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
@@ -152,16 +148,25 @@ export default defineComponent({
         ]
       }
     },
-    keyword(): string {
+    titleInfo(): { title: string, url: string } {
       switch (this.currActiveTab) {
         case 'object':
-          return this.staticHeaderTab.title || this.giphyKeyword
+          return {
+            title: this.staticHeaderTab.title || this.giphyKeyword,
+            url: this.staticHeaderTab.bulbUrl || ''
+          }
         case 'background':
-          return this.backgroundKeyword
+          return {
+            title: this.backgroundHeaderTab.title,
+            url: this.backgroundHeaderTab.bulbUrl
+          }
         case 'text':
-          return this.textKeyword
+          return {
+            title: this.textHeaderTab.title,
+            url: this.textHeaderTab.bulbUrl
+          }
       }
-      return ''
+      return { title: '', url: '' }
     },
     centerTitle(): string {
       if (this.isInEditor) {
@@ -174,7 +179,7 @@ export default defineComponent({
         if (this.showAllRecently) {
           return `${this.$t('NN0024')}`
         } else {
-          return this.keyword
+          return this.titleInfo.title
         }
       } else {
         return ''

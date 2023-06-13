@@ -175,6 +175,7 @@ export interface ICategoryItem {
   size: number
   type: string
   list: IListServiceContentDataItem[]
+  url?: string
   sentinel?: boolean
 }
 export interface ICategoryList {
@@ -193,6 +194,7 @@ export interface IListServiceContentData {
   is_recent?: number,
   cover_id?: string,
   cover_url?: string,
+  url?: string
 }
 
 export interface IListServiceData {
