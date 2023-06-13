@@ -71,10 +71,10 @@ export default defineComponent({
     subLayerIndex: {
       type: Number
     },
-    primaryLayerIndex: {
+    priPrimaryLayerIndex: {
       type: Number,
       default: -1
-    }
+    },
   },
   data() {
     return {
@@ -422,7 +422,12 @@ export default defineComponent({
       const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       this.updateStyleNode(styleText)
       this.paramsReady = true
-      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame | IGroup
+      let primaryLayer
+      if (this.priPrimaryLayerIndex !== -1) {
+        primaryLayer = (layerUtils.getLayer(this.pageIndex, this.priPrimaryLayerIndex) as IGroup).layers[this.layerIndex] as IFrame
+      } else {
+        primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame
+      }
       if (primaryLayer.type === LayerType.frame) {
         let subLayerIdx = -1
         if (primaryLayer.decoration && (primaryLayer.decoration as IShape).id === this.config.id) {
@@ -431,8 +436,8 @@ export default defineComponent({
         if (primaryLayer.decorationTop && (primaryLayer.decorationTop as IShape).id === this.config.id) {
           subLayerIdx = primaryLayer.clips.length + (primaryLayer.decoration ? 1 : 0)
         }
-        if (this.primaryLayerIndex !== -1) {
-          vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+        if (this.priPrimaryLayerIndex !== -1) {
+          vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
         } else {
           vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
         }

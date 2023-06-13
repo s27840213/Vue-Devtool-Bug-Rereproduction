@@ -200,7 +200,7 @@ const result = {
       'stk-hotfix': [{
         parallel: versionCheckAndBuild(false)
       }, {
-        parallel: stkAllDeploy(),
+        parallel: [...stkAllDeploy(), pullRequest()],
       }],
       'app/vivisticker': [{
         parallel: versionCheckAndBuild(false)
