@@ -358,7 +358,8 @@ export default defineComponent({
       return [
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template-content' },
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
-        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' }
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {

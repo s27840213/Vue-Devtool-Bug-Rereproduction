@@ -7,7 +7,7 @@ div(class="panel-bg__item"
     :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
     draggable="false"
     @error="handleNotFound")
-  div(class="panel-bg__share" @click.stop.prevent="handleShare")
+  div(v-if="!isInEditor" class="panel-bg__share" @click.stop.prevent="handleShare")
     svg-icon(iconName="share" iconColor="white" iconWidth="16px")
   pro-item(v-if="item.plan" draggable="false")
 </template>
@@ -15,7 +15,7 @@ div(class="panel-bg__item"
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
 import { IAsset } from '@/interfaces/module'
-import AssetUtils from '@/utils/assetUtils'
+import assetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
@@ -42,8 +42,9 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters('user', {
-      isAdmin: 'isAdmin'
+    ...mapGetters({
+      isAdmin: 'user/isAdmin',
+      isInEditor: 'vivisticker/getIsInEditor'
     })
   },
   methods: {
@@ -52,8 +53,9 @@ export default defineComponent({
     },
     addBackground() {
       if (!vivistickerUtils.checkPro(this.item, 'object')) return
+      if (this.isInEditor) return assetUtils.addAsset(this.item, undefined, 'background')
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
-      AssetUtils.addAssetToRecentlyUsed(this.item, 'background')
+      assetUtils.addAssetToRecentlyUsed(this.item, 'background')
     },
     handleShare() {
       if (!vivistickerUtils.checkPro(this.item, 'object')) return

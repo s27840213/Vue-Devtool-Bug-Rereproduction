@@ -86,7 +86,6 @@ import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
 import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
-import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
@@ -94,6 +93,7 @@ import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
+import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
 import PanelObject from '@/components/vivisticker/PanelObject.vue'
 import PanelPageManagement from '@/components/vivisticker/PanelPageManagement.vue'
 import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
@@ -217,6 +217,9 @@ export default defineComponent({
     isObjectInCategory(): boolean {
       return this.isInCategory('object')
     },
+    isBackgroundInCategory(): boolean {
+      return this.isInCategory('background')
+    },
     isTextShowAllRecently(): boolean {
       return this.isShowAllRecently('text')
     },
@@ -284,7 +287,7 @@ export default defineComponent({
       }
     },
     insertTheme(): boolean {
-      return ['text', 'object', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
+      return !this.showExtraColorPanel && ['text', 'object', 'background', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     showRightBtn(): boolean {
       return this.currActivePanel !== 'none'
@@ -293,6 +296,7 @@ export default defineComponent({
       if (this.whiteTheme) return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel
       if (this.currActivePanel === 'text' && this.isTextInCategory) return true
       if (this.currActivePanel === 'object' && this.isObjectInCategory) return true
+      if (this.currActivePanel === 'background' && this.isBackgroundInCategory) return true
       return false
     },
     hideDynamicComp(): boolean {
@@ -473,6 +477,7 @@ export default defineComponent({
     },
     leftButtonAction(): (e: PointerEvent) => void {
       const colorHandler = () => {
+        if (this.showExtraColorPanel && this.currActivePanel === 'background') return this.addRecentlyBgColor(colorUtils.currColor)
         if (this.showExtraColorPanel || this.currActivePanel === 'color') {
           if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
             this.addRecentlyColors(colorUtils.currColor)
@@ -492,6 +497,13 @@ export default defineComponent({
           this.setShowAllRecently({ tab: 'object', bool: false })
           if (this.currActiveObjectFavTab) this.resetObjectsFavSearch()
           else this.resetObjectsSearch({ resetCategoryInfo: true })
+        }
+      }
+      if (this.currActivePanel === 'background' && this.isBackgroundInCategory) {
+        return () => {
+          this.setIsInCategory({ tab: 'background', bool: false })
+          this.setShowAllRecently({ tab: 'background', bool: false })
+          this.resetBackgroundSearch()
         }
       }
       if (this.showExtraColorPanel) {
@@ -630,14 +642,16 @@ export default defineComponent({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
       setIsInCategory: 'vivisticker/SET_isInCategory',
       setShowAllRecently: 'vivisticker/SET_showAllRecently',
-      setBgImageControl: 'SET_backgroundImageControl'
+      setBgImageControl: 'SET_backgroundImageControl',
+      addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor'
     }),
     ...mapActions({
       initRecentlyColors: 'color/initRecentlyColors',
       addRecentlyColors: 'color/addRecentlyColors',
       resetTextsSearch: 'textStock/resetSearch',
       resetObjectsSearch: 'objects/resetSearch',
-      resetObjectsFavSearch: 'objects/resetFavoritesSearch'
+      resetObjectsFavSearch: 'objects/resetFavoritesSearch',
+      resetBackgroundSearch: 'background/resetSearch'
     }),
     vcoConfig() {
       return {

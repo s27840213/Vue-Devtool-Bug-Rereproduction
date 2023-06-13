@@ -84,7 +84,7 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
           :max="100"
           theme="light"
           @update="updateOpacity")
-        div(class="panel-bg__color-controller__hint")
+        div(v-if="!isInEditor" class="panel-bg__color-controller__hint")
           p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
           p(class="panel-bg__color-controller__hint-text") {{ $t('STK0003') }}
   div(v-if="isInBgShare" class="panel-bg__share")
@@ -111,12 +111,16 @@ import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IAsset } from '@/interfaces/module'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
+import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { round } from 'lodash'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -129,6 +133,12 @@ export default defineComponent({
     CategoryBackgroundItem,
     Tabs
   },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   data() {
     return {
       scrollTop: {
@@ -137,14 +147,13 @@ export default defineComponent({
       },
       tabIndex: 0,
       opacity: 100,
-      showAllRecentlyBgColors: false,
-      colorAreaHeight: 0,
-      bgSizeStyles: {}
+      showAllRecentlyBgColors: false
     }
   },
   computed: {
     ...mapState({
-      isTablet: 'isTablet'
+      isTablet: 'isTablet',
+      windowSize: 'windowSize'
     }),
     ...mapState('background', {
       categories: 'categories',
@@ -165,7 +174,9 @@ export default defineComponent({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       hasNewBgColor: 'vivisticker/getHasNewBgColor',
       currColor: 'color/currColor',
-      pending: 'background/pending'
+      pending: 'background/pending',
+      isInEditor: 'vivisticker/getIsInEditor',
+      currActiveBackgroundTab: 'vivisticker/getCurrActiveBackgroundTab'
     }),
     itemWidth(): number {
       return this.isTablet ? 120 : 80
@@ -265,11 +276,28 @@ export default defineComponent({
         width: this.itemWidth + 'px',
         height: this.itemHeight + 'px'
       }
-    }
+    },
+    bgSizeStyles() {
+      const height = (this.windowSize.height - 44) * 0.73
+      return {
+        width: `${height / 16 * 9}px`,
+        height: `${height}px`
+      }
+    },
+    colorAreaHeight() {
+      return this.windowSize.height - (this.isInEditor ? 295 : 176)
+    },
+    currentPageBackgroundLocked(): boolean {
+      const { backgroundImage } = this.currPage
+      return backgroundImage && backgroundImage.config.locked
+    },
+  },
+  created() {
+    if (this.currActiveBackgroundTab) this.tabIndex = this.currActiveBackgroundTab === 'photos' ? 0 : this.currActiveBackgroundTab === 'color' ? 1 : 0
   },
   mounted() {
     eventUtils.on(PanelEvent.scrollPanelBackgroundToTop, this.scrollToTop)
-
+    if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
     generalUtils.panelInit('bg',
       this.handleSearch,
       this.handleCategorySearch,
@@ -277,8 +305,6 @@ export default defineComponent({
         await this.getRecAndCate({ reset, key: 'background' })
         await vivistickerUtils.listAsset('backgroundColor')
       })
-
-    this.recalculateSize()
   },
   activated() {
     this.$nextTick(() => {
@@ -289,10 +315,6 @@ export default defineComponent({
       mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
       searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
     })
-    window.addEventListener('resize', this.recalculateSize)
-  },
-  deactivated() {
-    window.removeEventListener('resize', this.recalculateSize)
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelBackgroundToTop)
@@ -325,6 +347,9 @@ export default defineComponent({
           ref[name][0].$el.scrollTop = this.scrollTop[name as 'mainContent'|'searchResult']
         }
       })
+    },
+    tabIndex(newVal) {
+      this.setCurrActiveBackgroundTab(newVal === 1 ? 'color' : newVal === 0 ? 'photos' : '')
     }
   },
   methods: {
@@ -337,12 +362,14 @@ export default defineComponent({
       'resetSearch'
     ]),
     ...mapMutations({
+      _setBgColor: 'SET_backgroundColor',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor',
       addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor',
-      setHasNewBgColor: 'vivisticker/SET_hasNewBgColor'
+      setHasNewBgColor: 'vivisticker/SET_hasNewBgColor',
+      setCurrActiveBackgroundTab: 'vivisticker/SET_currActiveBackgroundTab'
     }),
     scrollToTop() {
       for (const list of this.categoryListArray) {
@@ -363,15 +390,6 @@ export default defineComponent({
         height: `${this.colorAreaHeight}px`
       }
     },
-    recalculateSize() {
-      const screenHeight = window.outerHeight
-      const height = (screenHeight - 44) * 0.73
-      this.bgSizeStyles = {
-        width: `${height / 16 * 9}px`,
-        height: `${height}px`
-      }
-      this.colorAreaHeight = window.outerHeight - 176
-    },
     shareBgStyles() {
       return this.shareItem ? {
         backgroundImage: `url(https://template.vivipic.com/background/${this.shareItem.id}/larg?ver=${this.shareItem.ver}})`
@@ -380,7 +398,15 @@ export default defineComponent({
       }
     },
     setBgColor(color: string) {
-      vivistickerUtils.sendScreenshotUrl(this.getColorUrl(color, false))
+      if (this.isInEditor) {
+        if (this.currentPageBackgroundLocked) {
+          return notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+        }
+        this._setBgColor({
+          pageIndex: pageUtils.currFocusPageIndex,
+          color: color
+        })
+      } else vivistickerUtils.sendScreenshotUrl(this.getColorUrl(color, false))
       vivistickerUtils.addAsset('backgroundColor', { id: color.replace('#', '') })
       this.addRecentlyBgColor(color)
     },
@@ -439,10 +465,12 @@ export default defineComponent({
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
     handleShareImage(item: IAsset) {
+      if (this.isInEditor) return
       this.setShareItem(item)
       this.setIsInBgShare(true)
     },
     handleShareColor(color: string) {
+      if (this.isInEditor) return
       this.setShareColor(color)
       this.setIsInBgShare(true)
     },
@@ -471,6 +499,7 @@ export default defineComponent({
       }
     },
     handleOpenColorPicker() {
+      if (this.isInEditor) return this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
       this.$emit('openColorPicker')
       vivistickerUtils.setHasNewBgColor(true)
     },
