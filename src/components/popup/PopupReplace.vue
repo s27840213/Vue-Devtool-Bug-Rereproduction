@@ -189,7 +189,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .panel-replace {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto 1fr;
   width: 80vw;
   height: 80vh;
   padding: 20px 24px 0 24px;
@@ -199,14 +199,19 @@ export default defineComponent({
   &__top {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 20px;
     .tabs {
       width: 200px;
-      margin-bottom: 26px;
+      height: 28px;
+      margin-bottom: 0;
     }
     .search-bar {
       width: 300px;
       height: 40px;
     }
+  }
+  :deep(.image-list) {
+    grid-row: 3 / 4;
   }
 }
 </style>

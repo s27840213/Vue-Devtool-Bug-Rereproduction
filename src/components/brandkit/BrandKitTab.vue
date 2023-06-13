@@ -144,7 +144,7 @@ export default defineComponent({
 .brand-kit-tab {
   @include size(100%, 100%);
   $tab-header: 54px;
-  $content-margin: 30px;
+  $content-margin: 20px;
 
   display: grid;
   grid-auto-columns: minmax(0, 1fr);
