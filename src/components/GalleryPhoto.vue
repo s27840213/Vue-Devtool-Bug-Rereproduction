@@ -103,7 +103,8 @@ export default defineComponent({
       return typeof this.photo.progress !== 'undefined' && this.photo.progress !== 100
     },
     hasCheckedAssets(): boolean {
-      return this.checkedAssets.length !== 0
+      return false
+      // return this.checkedAssets.length !== 0
     },
     previewSrc(): string {
       const { inFilePanel, inLogoPanel, photo, vendor } = this

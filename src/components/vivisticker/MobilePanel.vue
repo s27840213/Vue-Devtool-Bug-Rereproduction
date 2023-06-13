@@ -287,7 +287,7 @@ export default defineComponent({
       }
     },
     insertTheme(): boolean {
-      return !this.showExtraColorPanel && ['text', 'object', 'background', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
+      return !this.showExtraColorPanel && ['text', 'object', 'background', 'photo', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     showRightBtn(): boolean {
       return this.currActivePanel !== 'none'

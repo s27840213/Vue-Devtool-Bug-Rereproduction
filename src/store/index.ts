@@ -21,6 +21,7 @@ import popup from '@/store/module/popup'
 import shadow from '@/store/module/shadow'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
+import unsplash from '@/store/module/unsplash'
 import user from '@/store/module/user'
 import vivisticker from '@/store/module/vivisticker'
 import webView from '@/store/module/webView'
@@ -36,7 +37,7 @@ import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
-import { GetterTree, MutationTree, createStore } from 'vuex'
+import { createStore, GetterTree, MutationTree } from 'vuex'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
@@ -1168,6 +1169,7 @@ const store = createStore({
   mutations,
   modules: {
     user,
+    unsplash,
     photos,
     text,
     font,
