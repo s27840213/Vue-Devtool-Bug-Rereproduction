@@ -8,6 +8,7 @@ div(class="vivisticker" :style="copyingStyles()")
       my-design(v-show="isInMyDesign && !isInEditor")
       vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor" :currPage="currPage" :marginBottom="marginBottom")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
+      // TODO: move to editor
       share-template(v-if="isInTemplateShare" :config="currPage")
     teleport(v-if="mounted" to="#vivisticker__mobile-panel-bottom" :disabled="!isMobilePanelBottom")
       transition(name="panel-up"

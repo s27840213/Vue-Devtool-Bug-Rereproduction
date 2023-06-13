@@ -157,6 +157,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     screenshot: this.SCREENSHOT_CALLBACKS
   }
 
+  get MAX_PAGE_NUM(): number {
+    return 20
+  }
+
   get editorType(): string {
     return store.getters['vivisticker/getEditorType']
   }
@@ -1496,7 +1500,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
       container.style.transition = `transform ${duration}ms ease-in-out`
       container.style.transform = `translateX(-${targetPos}px)`
-      store.commit('SET_middlemostPageIndex', pageIndex)
+      if (pageIndex >= 0 && pageIndex < store.getters.getPageslength) store.commit('SET_middlemostPageIndex', pageIndex)
     }
   }
 }

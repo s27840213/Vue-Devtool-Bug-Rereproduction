@@ -11,6 +11,12 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
                 :marginTop="marginTop"
                 :no-bg="!editorTypeTemplate"
                 @click.self.prevent="outerClick")
+      div(class="page-add" :id="`page-card-${pagesState.length}`" key="page-add")
+        div(class="page-add__page body-SM flex-column flex-center")
+          div(class="page-add__text text-white") {{ "You have reached the last page.\nDo you want a new page?" /* TODO: translate */ }}
+          div(class="page-add__btn text-black-3 bg-white flex-center" @click="addPage")
+            svg-icon(class="page-add__btn__icon" iconName="add-page" iconWidth="24px" iconColor="gray-2")
+            div(class="page-add__btn__text") {{ "Add a new page" /* TODO: translate */ }}
   div(v-if="editorTypeTemplate && !isDuringCopy" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="pages" iconWidth="20px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
@@ -52,7 +58,8 @@ export default defineComponent({
       cardWidth: 0,
       cardHeight: 0,
       animated: false,
-      swipeDetector: null as unknown as SwipeDetector
+      swipeDetector: null as unknown as SwipeDetector,
+      isInPageAdd: false
     }
   },
   mounted() {
@@ -114,7 +121,16 @@ export default defineComponent({
       return pageUtils.currFocusPageIndex
     },
     strPagePill(): string {
-      return this.pagesState.length > 1 ? `${this.currFocusPageIndex + 1} / ${this.pagesState.length}` : 'Pages'
+      return this.pagesState.length > 1 ? `${this.currFocusPageIndex + 1} / ${this.pagesState.length}` : 'Pages' // TODO: translate
+    },
+    pageSize(): { width: number, height: number } {
+      return {
+        width: this.pagesState[this.pagesState.length - 1].config.width,
+        height: this.pagesState[this.pagesState.length - 1].config.height
+      }
+    },
+    isPageNumMax(): boolean {
+      return this.pagesState.length >= vivistickerUtils.MAX_PAGE_NUM
     }
   },
   components: {
@@ -201,11 +217,19 @@ export default defineComponent({
     handleSwipe(dir: string) {
       if (this.isBgImgCtrl) return
       if (dir === 'right') {
-        this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
+        if (!this.isInPageAdd) this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
+        this.isInPageAdd = false
+        this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
       } else if (dir === 'left') {
-        this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
+        if (pageUtils.currFocusPageIndex === this.pagesState.length - 1) {
+          if (this.isPageNumMax) return
+          this.isInPageAdd = true
+          vivistickerUtils.scrollIntoPage(this.pagesState.length, 300)
+        } else {
+          this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
+          this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+        }
       }
-      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
     },
     handleBeforePageLeave(el: Element) {
       const elTarget = el as HTMLElement
@@ -219,6 +243,23 @@ export default defineComponent({
       elTarget.style.width = width
       elTarget.style.height = height
       elTarget.style.margin = margin
+    },
+    addPage() {
+      const lastPage = this.pagesState[this.pagesState.length - 1].config
+      pageUtils.addPageToPos(pageUtils.newPage({
+        width: lastPage.width,
+        height: lastPage.height,
+        physicalWidth: lastPage.physicalWidth,
+        backgroundColor: lastPage.backgroundColor,
+        physicalHeight: lastPage.physicalHeight,
+        isEnableBleed: lastPage.isEnableBleed,
+        bleeds: lastPage.bleeds,
+        physicalBleeds: lastPage.physicalBleeds,
+        unit: lastPage.unit
+      }), this.pagesState.length)
+      this.setCurrActivePageIndex(this.pagesState.length - 1)
+      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(this.pagesState.length - 1, 500) })
+      stepsUtils.record()
     }
   }
 })
@@ -237,6 +278,29 @@ export default defineComponent({
     display: grid;
     grid-auto-flow: column;
     position: relative;
+  }
+}
+
+.page-add {
+  width: v-bind("`${cardWidth}px`");
+  height: v-bind("`${cardHeight}px`");
+  &__page {
+    margin: 0 auto;
+    width: v-bind("`${pageSize.width}px`");
+    height: v-bind("`${pageSize.height}px`");
+    margin-top: v-bind("`${marginTop}px`");
+    background-color: setColor(black-3);
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    border-radius: 10px;
+    row-gap: 20px;
+  }
+  &__text {
+    white-space: pre-wrap;
+  }
+  &__btn {
+    border-radius: 10px;
+    padding: 9px 16px;
+    column-gap: 8px;
   }
 }
 

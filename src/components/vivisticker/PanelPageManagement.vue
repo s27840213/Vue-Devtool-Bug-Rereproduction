@@ -8,6 +8,7 @@ div(class="panel-page-management")
   div(class="btn-close" @click="close")
     svg-icon(iconName="close" iconWidth="24px" iconColor="black-1")
     div(class="btn-close__text body-XS text-black-1")
+      // TODO: translate
       span Close
 </template>
 
@@ -57,25 +58,25 @@ export default defineComponent({
       return [
         {
           key: 'add-page',
-          title: 'Add page',
+          title: 'Add page', // TODO: translate
           iconName: 'add-page',
           action: this.addPage
         },
         {
           key: 'duplicate',
-          title: 'Duplicate',
+          title: 'Duplicate', // TODO: translate
           iconName: 'duplicate',
           action: this.duplicatePage
         },
         {
           key: 'preview',
-          title: 'Preview',
+          title: 'Preview', // TODO: translate
           iconName: 'grid',
           action: this.preview
         }
       ].concat(this.pages.length > 1 ? {
         key: 'delete',
-        title: 'Delete',
+        title: 'Delete', // TODO: translate
         iconName: 'delete',
         action: this.deletePage
       } : [])
@@ -177,7 +178,7 @@ export default defineComponent({
       else editorUtils.setShowMobilePanel(false)
     },
     checkMaxPageNum() {
-      if (this.pages.length >= 20) {
+      if (this.pages.length >= vivistickerUtils.MAX_PAGE_NUM) {
         modalUtils.setModalInfo(
           'Title', // TODO: translate
           'Your file has reached its maximum of 20 pages. To design more pages, please create a new file.', // TODO: translate
