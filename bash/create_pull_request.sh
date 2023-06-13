@@ -101,6 +101,45 @@ then
             }
           }
         }'
+elif [[ "$BITBUCKET_BRANCH" == "stk-hotfix" ]]
+then
+    echo "create pull request to app/vivisticker and app/vivisticker-develop"
+    curl --request POST \
+        --url "https://api.bitbucket.org/2.0/repositories/mingchi/nueditor/pullrequests" \
+        --header "Accept: application/json" \
+        --header "Content-Type: application/json" \
+        --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
+        --data '{
+          "title": "Pull request to vivisticker by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+          "source": {
+            "branch": {
+              "name": "'"${BITBUCKET_BRANCH}"'"
+            }
+          },
+          "destination": {
+            "branch": {
+              "name": "app/vivisticker"
+            }
+          }
+        }'
+    curl --request POST \
+        --url "https://api.bitbucket.org/2.0/repositories/mingchi/nueditor/pullrequests" \
+        --header "Accept: application/json" \
+        --header "Content-Type: application/json" \
+        --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
+        --data '{
+          "title": "Pull request to vivisticker-develop by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+          "source": {
+            "branch": {
+              "name": "'"${BITBUCKET_BRANCH}"'"
+            }
+          },
+          "destination": {
+            "branch": {
+              "name": "app/vivisticker-develop"
+            }
+          }
+        }'
 elif [[ "$BITBUCKET_BRANCH" == "qa" ]]
 then
     echo "create pull request to master"
