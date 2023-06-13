@@ -14,7 +14,7 @@ div(class="photo-setting")
     btn(v-if="isImage && !isFrame && !inReviewMode"
       class="full-width"
       type="gray-mid"
-      :disabled="isHandleShadow || show === 'panel-photo-shadow'"
+      :disabled="isHandleShadow || isSvgImage || show === 'panel-photo-shadow'"
       @click="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
   component(:is="show || 'div'"
     ref="popup"
@@ -34,6 +34,7 @@ import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -55,6 +56,7 @@ export default defineComponent({
   data() {
     return {
       show: '',
+      isSvgImage: false,
       btns: [
         {
           name: 'crop',
@@ -172,6 +174,21 @@ export default defineComponent({
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
     },
+  },
+  watch: {
+    currSelectedLayers: {
+      immediate: true,
+      async handler() {
+        const { layers, types, index } = this.currSelectedInfo as ICurrSelectedInfo
+        if (types.has('image') && layers.length === 1) {
+          const src = imageUtils.getSrc(layers[0] as IImage, 'tiny')
+          const isSvg = await imageShadowPanelUtils.isSVG(src, layers[0] as IImage)
+          this.isSvgImage = isSvg
+        } else {
+          this.isSvgImage = false
+        }
+      }
+    }
   },
   methods: {
     ...mapMutations({
