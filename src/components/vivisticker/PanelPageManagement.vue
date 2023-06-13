@@ -129,7 +129,7 @@ export default defineComponent({
         unit: this.currPage.unit
       }), pageUtils.currFocusPageIndex + 1)
       this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 500) })
       stepsUtils.record()
     },
     duplicatePage() {
@@ -152,7 +152,7 @@ export default defineComponent({
       page.id = generalUtils.generateRandomString(8)
       pageUtils.addPageToPos(page, pageUtils.currFocusPageIndex + 1)
       this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 500) })
       stepsUtils.record()
     },
     deletePage() {
