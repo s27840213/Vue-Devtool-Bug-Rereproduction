@@ -51,6 +51,7 @@ import i18n from '@/i18n'
 import { IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
+import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -357,6 +358,7 @@ export default defineComponent({
     templateTabs(): Array<IFooterTab> {
       return [
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template-content' },
+        { icon: 'camera', text: 'Camera', panelType: 'camera' }, // TODO: translate
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
@@ -763,6 +765,28 @@ export default defineComponent({
         case 'text-color-mobile':
           colorUtils.setCurrEvent(tab?.props?.currColorEvent as string)
           break
+        case 'camera': {
+          vivistickerUtils.getIosImg()
+            .then(async (images: Array<string>) => {
+              if (images.length) {
+                const src = imageUtils.getSrc({
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                })
+                imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+                  const { naturalWidth, naturalHeight } = img
+                  const photoAspectRatio = naturalWidth / naturalHeight
+                  assetUtils.addImage(
+                    src,
+                    photoAspectRatio
+                  )
+                })
+              }
+              this.$emit('switchTab', 'none')
+            })
+          break
+        }
         default: {
           break
         }
@@ -776,7 +800,8 @@ export default defineComponent({
 
       if (tab.panelType !== undefined) {
         if (this.isInEditor) {
-          this.$emit('switchTab', tab.panelType, tab.props)
+          const panelType = tab.panelType === 'camera' ? 'none' : tab.panelType
+          this.$emit('switchTab', panelType, tab.props)
         } else {
           this.$emit('switchMainTab', tab.panelType, tab.props)
           if (this.currTab === tab.panelType) {
