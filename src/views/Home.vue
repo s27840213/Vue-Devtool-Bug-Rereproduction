@@ -65,6 +65,7 @@ import Animation from '@/components/Animation.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
+import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
 import modalUtils from '@/utils/modalUtils'
@@ -285,6 +286,7 @@ export default defineComponent({
       })
     },
     handleClickWaterfall(template: ITemplate) {
+      // for product page
       if (template.group_type === 1) {
         if (this.$isTouchDevice()) {
           modalUtils.setModalInfo(
@@ -330,7 +332,9 @@ export default defineComponent({
             design_id: template.id,
             themeId: template.content_ids[0].themes.join(','),
             width: format.width,
-            height: format.height
+            height: format.height,
+            unit: matchedTheme?.unit ?? 'px',
+            ...(matchedTheme?.unit !== 'px' && matchedTheme?.bleed !== undefined ? { bleeds: designUtils.convertBleedsToQuery(matchedTheme.bleed) } : {})
           }
         })
         this.openTemplate(route.href)
