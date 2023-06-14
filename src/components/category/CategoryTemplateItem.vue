@@ -73,6 +73,7 @@ export default defineComponent({
       })
     },
     addTemplate() {
+      if (!vivistickerUtils.checkPro(this.item, 'template')) return
       const resize = vivistickerUtils.getPageSize(this.igLayout)
       const moduleKey = `templates/${this.igLayout}`
       const cb = this.groupItem ? async () => {
