@@ -219,6 +219,7 @@ export default defineComponent({
         if (this.isInPagePreview) return []
         if (this.editorTypeTemplate) {
           return [
+            ...(backgroundUtils.inBgSettingMode ? [{ icon: backgroundUtils.backgroundLocked ? 'lock' : 'unlock', width: 24, action: () => backgroundUtils.handleLockBackground() }] : []),
             { icon: 'copy', width: 24, action: this.handleCopy },
             { icon: 'trash', width: 24, action: shortcutUtils.del },
             { icon: 'share', width: 24, action: this.handleShareTemplate },

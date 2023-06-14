@@ -42,6 +42,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { IBrowserInfo } from '@/store/module/user'
+import backgroundUtils from '@/utils/backgroundUtils'
 import cssConverter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -318,6 +319,7 @@ export default defineComponent({
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
             console.warn(this.image.config.srcObj)
+            if (backgroundUtils.backgroundLocked) return backgroundUtils.handleLockedNotify()
             this.setBgImageControl({
               pageIndex: this.pageIndex,
               imgControl: true
