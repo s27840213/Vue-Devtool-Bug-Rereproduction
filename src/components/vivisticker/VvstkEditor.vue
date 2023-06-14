@@ -92,6 +92,9 @@ export default defineComponent({
     currFocusPageIndex() {
       editorUtils.setInBgSettingMode(false)
     },
+    currActivePageIndex(newVal) {
+      if (newVal === -1) this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+    }
   },
   computed: {
     ...mapState({
