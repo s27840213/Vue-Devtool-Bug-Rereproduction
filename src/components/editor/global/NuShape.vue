@@ -436,13 +436,17 @@ export default defineComponent({
         if (primaryLayer.decorationTop && (primaryLayer.decorationTop as IShape).id === this.config.id) {
           subLayerIdx = primaryLayer.clips.length + (primaryLayer.decoration ? 1 : 0)
         }
-        if (this.priPrimaryLayerIndex !== -1) {
-          vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
-        } else {
-          vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
-        }
+        this.$nextTick(() => {
+          if (this.priPrimaryLayerIndex !== -1) {
+            vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+          } else {
+            vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+          }
+        })
       } else {
-        vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+        this.$nextTick(() => {
+          vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+        })
       }
     },
     getFilterTemplate(): string {
