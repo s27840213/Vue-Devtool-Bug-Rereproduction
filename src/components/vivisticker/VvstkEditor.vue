@@ -21,11 +21,13 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
     svg-icon(iconName="pages" iconWidth="20px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
   page-preivew(v-if="isInPagePreview" :pagesState="pagesState")
+  share-template(v-if="isInTemplateShare" :isMultiPage="pagesState.length > 1")
 </template>
 
 <script lang="ts">
 import PageCard from '@/components/vivisticker/PageCard.vue'
 import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
+import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
 import { IPageState } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
@@ -141,7 +143,8 @@ export default defineComponent({
   },
   components: {
     PageCard,
-    PagePreivew
+    PagePreivew,
+    ShareTemplate
   },
   methods: {
     ...mapMutations({

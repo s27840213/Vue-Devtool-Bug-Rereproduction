@@ -14,6 +14,7 @@ div(class="share-template" :style="containerStyles")
         div(class="share-template__preview__page-item__checkbox checkbox" :class="{checked: selectedPages.has(index)}")
           svg-icon(v-if="selectedPages.has(index)" iconName="check" iconColor="white" iconWidth="20.7px")
     div(class="share-template__action")
+      // TODO: translate
       div(v-if="currAction?.key === 'post'" class="share-template__action__text text-black-5 body-SM") {{ 'In order to post directly to IG, please select up to ten pages.' }}
       div(v-else class="share-template__action__select" @click="handleSelectAll")
         div(class="share-template__action__select__checkbox checkbox" :class="{checked: selectedPages.size === pagesState.length}")
@@ -32,7 +33,7 @@ div(class="share-template" :style="containerStyles")
       :inPreview="true"
       :style="pageStyles()")
       div(class="share-template__preview__cover" @pointerdown="disableEvent")
-    tabs(class="share-template__tabs"
+    tabs(v-if="isMultiPage" class="share-template__tabs"
       :tabs="['This page', 'Multi pages']"
       v-model="tabIndex")
     div(class="share-template__actions")
@@ -45,6 +46,7 @@ div(class="share-template" :style="containerStyles")
       div(class="share-template__pending__spinner")
         svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
       div(class="share-template__pending__progress") {{ strDownloadProgress }}
+      // TODO: translate
       div(class="share-template__pending__text") Saving to Camera Roll
 </template>
 
@@ -52,8 +54,9 @@ div(class="share-template" :style="containerStyles")
 import PageContent from '@/components/editor/page/PageContent.vue'
 import Tabs from '@/components/Tabs.vue'
 import { IPage } from '@/interfaces/page'
+import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface IButton {
@@ -69,9 +72,9 @@ export default defineComponent({
     Tabs
   },
   props: {
-    config: {
-      type: Object as PropType<IPage>,
-      required: true
+    isMultiPage: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -123,6 +126,9 @@ export default defineComponent({
       pagesLength: 'getPagesLength',
       currFocusPageIndex: 'getCurrFocusPageIndex',
     }),
+    config(): IPage {
+      return pageUtils.currFocusPage
+    },
     buttons(): IButton[] {
       return [
         {
