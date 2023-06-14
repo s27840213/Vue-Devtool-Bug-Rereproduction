@@ -731,6 +731,7 @@ export default defineComponent({
         }
         case 'photo':
         case 'replace': {
+          if (tab.icon === 'photo' && this.editorTypeTemplate && !this.isSettingTabsOpen) break
           const { pageIndex, layerIndex, subLayerIdx = 0 } = layerUtils
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
