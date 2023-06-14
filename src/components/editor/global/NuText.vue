@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-text" :style="textWrapperStyle()" draggable="false")
+div(class="nu-text" draggable="false")
   //- NuText BGs.
   template(v-for="(bgConfig, idx) in [textBg, textFillBg]")
     custom-element(v-if="bgConfig" class="nu-text__BG" :config="bgConfig" :key="`textSvgBg${idx}`")
@@ -45,7 +45,7 @@ import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { isEqual, max, omit } from 'lodash'
+import { isEqual, max, omit, round } from 'lodash'
 import { computed, defineComponent, PropType } from 'vue'
 
 export default defineComponent({
@@ -126,6 +126,9 @@ export default defineComponent({
     isLocked(): boolean {
       return this.config.locked
     },
+    aspectRatio() {
+      return round(this.config.styles.width / this.config.styles.height, 2)
+    },
     // Use duplicated of text to do some text effect, define their difference css here.
     duplicatedText() {
       const duplicatedBodyBasicCss = {
@@ -153,11 +156,9 @@ export default defineComponent({
         this.drawTextFill()
       })
     },
-    async 'config.styles.width'() {
-      this.drawTextBg()
-      this.drawTextFill()
-    },
-    async 'config.styles.height'() {
+    aspectRatio() {
+      // To prevent NuText and NuCurveText update when scaling,
+      // don't use w/h in style method and watch aspectRatio instead w/h.
       this.drawTextBg()
       this.drawTextFill()
     },
@@ -170,14 +171,6 @@ export default defineComponent({
     'config.styles.textFill'() { this.drawTextFill() },
   },
   methods: {
-    textWrapperStyle(): Record<string, string> {
-      return {
-        width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`,
-        textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
-      }
-    },
     drawTextBg(): Promise<void> {
       return new Promise(resolve => {
         this.$nextTick(async () => {
@@ -230,6 +223,7 @@ export default defineComponent({
         width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
+        writingMode: this.config.styles.writingMode,
         opacity,
         ...textEffectStyles,
         // Add padding at body to prevent Safari bug that overflow text of drop-shadow/opacity<1 will be cliped

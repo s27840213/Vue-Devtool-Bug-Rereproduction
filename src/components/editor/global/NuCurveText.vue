@@ -1,5 +1,5 @@
 <template lang="pug">
-p(class="nu-curve-text__p" :style="pStyle()")
+p(class="nu-curve-text__p")
   span(v-if="focus === 'shape'"  class="nu-curve-text__circle" :style="circleStyle()")
     svg-icon(iconName="curve-center" :style="curveIconStyle")
   span(v-for="(span, sIndex) in spans()"
@@ -128,14 +128,6 @@ export default defineComponent({
         this.textFillSpanStyle = newSpanStyle
       }
     },
-    pStyle(): Record<string, string | number> {
-      const { height, width, scale } = this.config.styles
-      return {
-        margin: 0,
-        height: `${height / scale}px`,
-        width: `${width / scale}px`
-      }
-    },
     circleStyle(): Record<string, string> {
       const { minHeight, scaleRatio } = this
       const bend = this.bend()
@@ -224,6 +216,9 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     position: relative;
+    margin: 0;
+    width: 100%;
+    height: 100%;
   }
   &__circle {
     border: 1px solid rgba(212, 9, 70, 0.5);

@@ -239,6 +239,8 @@ class TextFill {
           transform: 'none',
         } : isTextShape ? {
           [isPositiveBend ? 'top' : 'bottom']: `${-spanHeight * spanExpandRatio}px`,
+          // Align center, this can prevent Safari lag when scaling TextFill layer with TextShape.
+          left: `${(divWidth - spanWidth * (1 + spanExpandRatio * 2)) / 2}px`,
         } : {
           top: `${y - spanHeight * spanExpandRatio + maxFontSize}px`,
           left: `${x - spanWidth * spanExpandRatio + maxFontSize}px`,
