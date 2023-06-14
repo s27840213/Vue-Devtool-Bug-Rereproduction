@@ -131,6 +131,9 @@ export default defineComponent({
     },
     isPageNumMax(): boolean {
       return this.pagesState.length >= vivistickerUtils.MAX_PAGE_NUM
+    },
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
     }
   },
   components: {
@@ -215,7 +218,7 @@ export default defineComponent({
       this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0) })
     },
     handleSwipe(dir: string) {
-      if (this.isBgImgCtrl) return
+      if (this.hasSelectedLayer || this.isBgImgCtrl || this.isImgCtrl) return
       if (dir === 'right') {
         if (!this.isInPageAdd) this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
         this.isInPageAdd = false
