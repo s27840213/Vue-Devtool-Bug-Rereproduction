@@ -130,7 +130,10 @@ export default defineComponent({
     currPage: {
       type: Object as PropType<IPage>,
       required: true
-    }
+    },
+    footerTabsRef: {
+      type: HTMLElement
+    },
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -279,7 +282,8 @@ export default defineComponent({
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
-      return Object.assign(
+      const footerTabsHeight = this.footerTabsRef?.clientHeight || 0
+      return Object.assign({ bottom: this.hideFooter ? -1 * footerTabsHeight + 'px' : '0' },
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
@@ -288,11 +292,28 @@ export default defineComponent({
             this.fixSize || this.extraFixSizeCondition
               ? '100%' : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px'
           ),
+          ...(this.hideFooter && { zIndex: '100' })
         },
         isSidebarPanel ? { height: '100%' } : {},
         this.isDuringCopy ? { padding: '0' } : {}
       )
     },
+    // panelStyle(): { [index: string]: string } {
+    //   const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
+    //   return Object.assign({ bottom: this.hideFooter ? -1 * footerTabsHeight + 'px' : '0' },
+    //   (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
+    //   {
+    //     'row-gap': this.noRowGap ? '0px' : '10px',
+    //     backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
+    //     maxHeight: this.fixSize || this.extraFixSizeCondition
+    //       ? '100%' : this.panelDragHeight + 'px',
+    //     ...(this.hideFooter && { zIndex: '100' }),
+    //     ...(this.hideFooter && { paddingBottom: `${this.userInfo.homeIndicatorHeight + 8}px` })
+    //   },
+    //   // Prevent MobilePanel collapse
+    //   isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
+    //   )
+    // },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
         // case 'replace':
@@ -311,6 +332,9 @@ export default defineComponent({
             key: ['']
           }
       }
+    },
+    hideFooter(): boolean {
+      return ['remove-bg'].includes(this.currActivePanel)
     },
     dynamicBindIs(): string {
       if (this.showExtraColorPanel) {

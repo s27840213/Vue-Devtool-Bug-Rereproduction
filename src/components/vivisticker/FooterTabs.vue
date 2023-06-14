@@ -76,6 +76,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isHandleShadow: 'shadow/isHandling',
       isInEditor: 'vivisticker/getIsInEditor',
       editorType: 'vivisticker/getEditorType',
@@ -83,7 +84,7 @@ export default defineComponent({
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       controllerHidden: 'vivisticker/getControllerHidden',
       hasCopiedFormat: 'getHasCopiedFormat',
-      debugMode: 'vivisticker/getDebugMode'
+      debugMode: 'vivisticker/getDebugMode',
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
@@ -153,9 +154,17 @@ export default defineComponent({
       ]
     },
     photoTabs(): Array<IFooterTab> {
+      console.log(this.inEffectEditingMode)
       const tabs = [
-        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage || this.inEffectEditingMode },
         // { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage }, // vivisticker can only crop frame
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          // hidden: this.isInFrame,
+          // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...this.genearlLayerTabs,
         ...this.copyPasteTabs,

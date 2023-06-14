@@ -363,7 +363,8 @@ export default defineComponent({
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel',
-      isProcessing: 'shadow/isProcessing'
+      isProcessing: 'shadow/isProcessing',
+      autoRemoveResult: 'bgRemove/getAutoRemoveResult'
     }),
     ...mapState('vivisticker', ['isDuringCopy']),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
@@ -616,7 +617,6 @@ export default defineComponent({
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        console.log(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
         if (this.priPrimaryLayerIndex !== -1) {
           vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
         } else {
@@ -799,10 +799,8 @@ export default defineComponent({
           break
         case 'upload':
           if (shadow.srcObj.assetId) {
-            console.log('handle shadowInit: upload')
             this.handleUploadShadowImg()
           } else {
-            console.log('handle shadowInit: upload')
             if (!this.isHandling && !this.isProcessing) {
               imageShadowUtils.updateEffectState(this.layerInfo(), ShadowEffectType.none)
             }
@@ -844,9 +842,16 @@ export default defineComponent({
 
       let img = new Image()
       if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
-        const res = await imageUtils.getImgSize(this.config.srcObj, false)
-        if (res) {
-          this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
+        // normally, we should get the image size from srcObj, but if in vivisticker bg removing, we didn't actually upload the bg remove result to the server
+        // Instead, we use previewSrc to show the image
+        // so here we need to give the size from the autoRemoveResult
+        if ((this.config as IImage).previewSrc) {
+          this.shadowBuff.MAXSIZE = Math.min(Math.max(this.autoRemoveResult.height, this.autoRemoveResult.width), CANVAS_MAX_SIZE)
+        } else {
+          const res = await imageUtils.getImgSize(this.config.srcObj, false)
+          if (res) {
+            this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
+          }
         }
       } else if (['unsplash', 'pixels'].includes(this.config.srcObj.type)) {
         this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
@@ -868,7 +873,6 @@ export default defineComponent({
               `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             await new Promise<void>((resolve) => {
               img.onerror = () => {
-                console.log('img load error')
                 notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
                 resolve()
               }
@@ -923,6 +927,7 @@ export default defineComponent({
        */
       // small size preview
       const { width, height, imgWidth, imgHeight, shadow } = this.config.styles
+
       const _mappingScale = shadow.middsize / shadow.maxsize
       let _drawCanvasW = 0
       let _drawCanvasH = 0
@@ -930,6 +935,7 @@ export default defineComponent({
       let _canvasH = 0
       const isStaticShadow = currentEffect === ShadowEffectType.floating ||
         (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
+
       if (isStaticShadow) {
         const ratio = currentEffect === ShadowEffectType.floating ? img.naturalWidth / img.naturalHeight : width / height
         _drawCanvasW = Math.round(ratio > 1 ? 1600 : 1600 * ratio)
@@ -989,7 +995,6 @@ export default defineComponent({
       const layerInfo = this.layerInfo()
       const { drawCanvasW, drawCanvasH } = shadowBuff
       if (!canvas || this.isUploadingShadowImg) {
-        console.log('can not get canvas')
         return
       }
 

@@ -637,7 +637,6 @@ class ImageShadowUtils {
       const layerInfo = { pageIndex, layerIndex, subLayerIdx }
 
       this.updateShadowOld(layerInfo)
-
       if (layer.styles.scale !== 1) {
         let { imgWidth, imgHeight, imgX, imgY } = layer.styles.shadow.styles
         imgWidth *= layer.styles.scale
