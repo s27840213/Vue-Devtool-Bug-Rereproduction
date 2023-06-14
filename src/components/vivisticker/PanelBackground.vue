@@ -176,7 +176,8 @@ export default defineComponent({
       currColor: 'color/currColor',
       pending: 'background/pending',
       isInEditor: 'vivisticker/getIsInEditor',
-      currActiveBackgroundTab: 'vivisticker/getCurrActiveBackgroundTab'
+      currActiveBackgroundTab: 'vivisticker/getCurrActiveBackgroundTab',
+      editorType: 'vivisticker/getEditorType'
     }),
     itemWidth(): number {
       return this.isTablet ? 120 : 80
@@ -184,7 +185,8 @@ export default defineComponent({
     itemHeight(): number {
       // const basicWidth = (window.outerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
       // return basicWidth < 145 ? basicWidth : 145 // 145px is the default width
-      return round(this.itemWidth / 9 * 16)
+      const aspectRatio = this.editorType === 'post' ? 1 : 9 / 16
+      return round(this.itemWidth / aspectRatio)
     },
     isInCategory(): boolean {
       return this.isTabInCategory('background')
