@@ -2,6 +2,7 @@ import i18n from '@/i18n'
 import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
 import store from '@/store'
+import letterBgData from '@/utils/letterBgData'
 import textFillUtils from '@/utils/textFillUtils'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
@@ -530,98 +531,9 @@ class ConstantData {
         label: i18n.global.tc('NN0727'),
         plan: 1,
         options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
-      }, {
-        key: 'rainbow',
-        label: i18n.global.tc('NN0816'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'rainbow-dark',
-        label: i18n.global.tc('NN0817'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'circle',
-        label: i18n.global.tc('NN0820'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'heart',
-        label: i18n.global.tc('NN0847'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'heart-warm',
-        label: i18n.global.tc('NN0848'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'heart-custom',
-        label: i18n.global.tc('NN0849'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'cloud',
-        label: i18n.global.tc('NN0818'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'text-book',
-        label: i18n.global.tc('NN0819'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'penguin',
-        label: i18n.global.tc('NN0821'),
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'planet',
-        label: i18n.global.tc('NN0822'),
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'leaf',
-        label: i18n.global.tc('NN0851'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'gummybear',
-        label: i18n.global.tc('NN0850'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'butter-flower',
-        label: i18n.global.tc('NN0852'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'flower-frame',
-        label: i18n.global.tc('NN0853'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'flower-frame-custom',
-        label: i18n.global.tc('NN0854'),
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'vintage-flower',
-        label: i18n.global.tc('NN0855'),
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'vintage-flower-custom',
-        label: i18n.global.tc('NN0856'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'cat-paw',
-        label: i18n.global.tc('NN0864'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'bread',
-        label: i18n.global.tc('NN0865'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }])
+      },
+      ...letterBgData.getEffects(),
+      ])
     }, {
       name: 'fill' as const,
       label: i18n.global.t('NN0868'),

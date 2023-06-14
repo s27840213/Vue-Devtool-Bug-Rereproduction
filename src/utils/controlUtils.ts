@@ -1,9 +1,12 @@
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
-import { IShape } from '@/interfaces/layer'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { AllLayerTypes, IShape } from '@/interfaces/layer'
 import store from '@/store'
+import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import { svg1, svg2, svg3, svg4, svg5, svg6, svg7, svg8 } from './cornerRotate'
 import editorUtils from './editorUtils'
 import layerUtils from './layerUtils'
@@ -110,8 +113,6 @@ class Controller {
   }
 
   private getScalers = (scalerSize: number, isTouchArea = false) => {
-    const contentScaleRatio = editorUtils.contentScaleRatio
-    const scaleRatio = store.getters.getPageScaleRatio
     return [
       {
         cursor: 0,
@@ -120,7 +121,6 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '0',
-          // transform: `translate(-50%,-50%) scale(${contentScaleRatio})`,
           transform: 'translate(-50%,-50%)',
           borderRadius: '50%',
           opacity: isTouchArea ? '0' : '1'
@@ -132,7 +132,6 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          // transform: `translate(50%,-50%) scale(${contentScaleRatio})`,
           transform: 'translate(50%,-50%)',
           right: '0',
           top: '0',
@@ -146,7 +145,6 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          // transform: `translate(50%,50%) scale(${contentScaleRatio})`,
           transform: 'translate(50%,50%)',
           right: '0',
           bottom: '0',
@@ -160,7 +158,6 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          // transform: `translate(-50%,50%) scale(${contentScaleRatio})`,
           transform: 'translate(-50%,50%)',
           left: '0',
           bottom: '0',
@@ -176,7 +173,30 @@ class Controller {
     }[]
   }
 
-  private getResizers = (resizerShort: number, resizerLong: number, contentScaleRatio: number, isTouchArea = false) => {
+  private getLineEnds = (scalerSize: number, isTouchArea = false) => {
+    return [
+      {
+        width: `${scalerSize}px`,
+        height: `${scalerSize}px`,
+        transform: 'translate(-50%,-50%)',
+        left: '0',
+        top: '50%',
+        borderRadius: '50%',
+        opacity: isTouchArea ? '0' : '1'
+      },
+      {
+        width: `${scalerSize}px`,
+        height: `${scalerSize}px`,
+        transform: 'translate(50%,-50%)',
+        right: '0',
+        top: '50%',
+        borderRadius: '50%',
+        opacity: isTouchArea ? '0' : '1'
+      }
+    ]
+  }
+
+  private getResizers = (resizerShort: number, resizerLong: number, isTouchArea = false) => {
     return [
       {
         type: 'H',
@@ -185,9 +205,9 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           left: '0',
-          // transform: isTouchArea ? `translate(-75%, 0%) scale(${contentScaleRatio})` : `translate(-50%, 0%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(-75%, 0%)' : 'translate(-50%, 0%)',
-          opacity: isTouchArea ? '0' : '1'
+          opacity: isTouchArea ? '0' : '1',
+          borderRadius: `${resizerShort / 2}px`
         }
       },
       {
@@ -197,9 +217,9 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           right: '0',
-          // transform: isTouchArea ? `translate(75%, 0%) scale(${contentScaleRatio})` : `translate(50%, 0%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(75%, 0%)' : 'translate(50%, 0%)',
-          opacity: isTouchArea ? '0' : '1'
+          opacity: isTouchArea ? '0' : '1',
+          borderRadius: `${resizerShort / 2}px`
         }
       },
       {
@@ -209,9 +229,9 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           bottom: '0',
-          // transform: isTouchArea ? `translate(0%, 75%) scale(${contentScaleRatio})` : `translate(0%, 50%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(0%, 75%)' : 'translate(0%, 50%)',
-          opacity: isTouchArea ? '0' : '1'
+          opacity: isTouchArea ? '0' : '1',
+          borderRadius: `${resizerShort / 2}px`
         }
       },
       {
@@ -221,9 +241,9 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           top: '0',
-          // transform: isTouchArea ? `translate(0%, -75%) scale(${contentScaleRatio})` : `translate(0%, -50%) scale(${contentScaleRatio})`,
           transform: isTouchArea ? 'translate(0%, -75%)' : 'translate(0%, -50%)',
-          opacity: isTouchArea ? '0' : '1'
+          opacity: isTouchArea ? '0' : '1',
+          borderRadius: `${resizerShort / 2}px`
         }
       }
     ] as {
@@ -233,35 +253,19 @@ class Controller {
     }[]
   }
 
-  getControlPoints = (resizerShort: number, resizerLong: number, scaleRatio = 1) => {
-    const scale = editorUtils.contentScaleRatio * scaleRatio
-    const isMobile = generalUtils.isTouchDevice()
-    const scalerSize = isMobile ? 12 : 8
+  getControlPoints() {
+    const resizerShort = 8
+    const resizerLong = 20
+    const scalerSize = 12
 
     return {
-      scalers: this.getScalers(scalerSize * scaleRatio),
-      scalerTouchAreas: this.getScalers(scalerSize * 3 * scaleRatio, true),
-      cornerRotaters: this.getCornerRatater(scalerSize * 4 * scaleRatio),
-      lineEnds: [
-        {
-          width: `${scalerSize}px`,
-          height: `${scalerSize}px`,
-          left: '0',
-          top: '50%',
-          transform: 'translate(-50%,-50%)',
-          borderRadius: '50%'
-        },
-        {
-          width: `${scalerSize}px`,
-          height: `${scalerSize}px`,
-          transform: 'translate(50%,-50%)',
-          right: '0',
-          top: '50%',
-          borderRadius: '50%'
-        }
-      ],
-      resizers: this.getResizers(resizerShort, resizerLong, scale),
-      resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, scale, true),
+      scalers: this.getScalers(scalerSize),
+      scalerTouchAreas: this.getScalers(scalerSize * 3, true),
+      cornerRotaters: this.getCornerRatater(scalerSize * 4),
+      lineEnds: this.getLineEnds(scalerSize),
+      lineEndTouchAreas: this.getLineEnds(scalerSize * 3, true),
+      resizers: this.getResizers(resizerShort, resizerLong),
+      resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, true),
       cursors: [
         'nwse-resize',
         'ns-resize',
@@ -273,6 +277,61 @@ class Controller {
         'ew-resize'
       ]
     }
+  }
+
+  getResizerProfile(config: AllLayerTypes): { start: number, end: number, moveBarStart: number, moveBarEnd: number, hasHorizontal: boolean, hasVertical: boolean } {
+    const profile = {
+      start: -1,
+      end: -1,
+      moveBarStart: -1,
+      moveBarEnd: -1,
+      hasHorizontal: false,
+      hasVertical: false
+    }
+    switch (config.type) {
+      case 'image':
+        if (config.styles.shadow.currentEffect === ShadowEffectType.none) {
+          profile.hasHorizontal = true
+          profile.hasVertical = true
+        }
+        break
+      case 'text':
+        if (!textShapeUtils.isCurvedText(config.styles.textShape)) {
+          if (config.styles.writingMode.includes('vertical')) {
+            profile.hasVertical = true
+          } else {
+            profile.hasHorizontal = true
+          }
+        }
+        break
+      case 'shape':
+        Object.assign(profile, this.shapeCategorySorter(config.category, config.scaleType ?? 1))
+        break
+      case 'tmp':
+      case 'group':
+        break
+      case 'frame':
+        if (frameUtils.isImageFrame(config)) {
+          const shadow = config.styles.shadow
+          if (!shadow || !shadow.srcObj?.type) {
+            profile.hasHorizontal = true
+            profile.hasVertical = true
+          }
+        }
+    }
+    if (profile.hasHorizontal) {
+      profile.start = 0
+      profile.end = 2
+      profile.moveBarStart = 2
+      profile.moveBarEnd = 4
+    }
+    if (profile.hasVertical) {
+      profile.start = profile.start === -1 ? 2 : profile.start
+      profile.end = 4
+      profile.moveBarStart = 0
+      profile.moveBarEnd = profile.moveBarStart === -1 ? 2 : profile.moveBarStart
+    }
+    return profile
   }
 
   getTranslateCompensation(initData: { xSign: number, ySign: number, x: number, y: number, angle: number },
@@ -335,7 +394,7 @@ class Controller {
       scale = scale ?? 1
       const { x, y, width, height } = styles
       const ratio = styles.width / styles.initWidth
-      const moverHeight = Math.max(scale, generalUtils.fixSize((isMobile ? 32 : 16) / store.getters.getContentScaleRatio)) * ratio
+      const moverHeight = Math.max(scale, generalUtils.fixSize((isMobile ? 60 : 16) / store.getters.getContentScaleRatio)) * ratio
       const { xDiff, yDiff } = shapeUtils.lineDimension(point)
       const moverWidth = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) * ratio
       const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180
@@ -369,11 +428,11 @@ class Controller {
     return percentage * maxCorRad / 100
   }
 
-  shapeCategorySorter(resizers: any, category: string, scaleType: number) {
+  shapeCategorySorter(category: string, scaleType: number): { hasHorizontal: boolean, hasVertical: boolean } {
     switch (category) {
       // category: A => 只能被等比例縮放
       case 'A':
-        return []
+        return { hasHorizontal: false, hasVertical: false }
       // category: B => 等比例/非等比例縮放
       // category: C => 可被等比例縮放，也可沿着水平/垂直方向伸縮，伸縮時四個角落的形狀固定不變
       case 'B':
@@ -382,13 +441,15 @@ class Controller {
       case 'G':
         switch (scaleType) {
           case 1:
-            return resizers
+            return { hasHorizontal: true, hasVertical: true }
           case 2:
-            return resizers.slice(0, 2)
+            return { hasHorizontal: true, hasVertical: false }
           case 3:
-            return resizers.slice(2, 4)
+            return { hasHorizontal: false, hasVertical: true }
         }
-        return []
+        return { hasHorizontal: false, hasVertical: false }
+      default:
+        return { hasHorizontal: false, hasVertical: false }
     }
   }
 

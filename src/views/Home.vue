@@ -230,6 +230,7 @@ export default defineComponent({
       if (this._themeList && this.$i18n.locale === 'us') {
         return this._themeList.filter((theme: string) => theme !== '7')
       }
+
       return this._themeList
     },
     // onlyShowInMobileApp() {

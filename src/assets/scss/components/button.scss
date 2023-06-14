@@ -42,16 +42,16 @@ $textColor: (
 );
 
 $borderColor: (
-	primary: none,
-	secondary: none,
-	tertiary: none,
-	gray: none,
+	primary: transparent,
+	secondary: transparent,
+	tertiary: transparent,
+	gray: transparent,
 	gray-active: setColor(blue-1),
 	inactive: setColor(white),
-	icon: none,
+	icon: transparent,
 	light: setColor(blue-1),
 	transparent: setColor(white),
-	red: none
+	red: transparent
 );
 
 $padding: (

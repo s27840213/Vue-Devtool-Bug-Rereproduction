@@ -41,6 +41,7 @@ div(class="nu-layer flex-center"
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
   div(v-if="isLine" class="nu-layer__line-mover"
+    :class="[inAllPagesMode ? 'click-disabled' : 'clickable']"
     :style="lineMoverStyles()"
     ref="lineMover"
     :id="inPreview ? '' : `nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`"
@@ -282,6 +283,7 @@ export default defineComponent({
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
           outline,
+          outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
           willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
           pointerEvents,
           clipPath,
@@ -799,7 +801,7 @@ export default defineComponent({
     justify-content: center;
     width: 0;
     height: 0;
-    pointer-events: initial;
+    // pointer-events: initial;
   }
   &__BG {
     position: absolute;

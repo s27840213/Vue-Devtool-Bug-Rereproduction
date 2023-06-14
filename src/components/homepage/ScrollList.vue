@@ -125,7 +125,8 @@ export default defineComponent({
     }),
     ...mapGetters({
       mydesignData: 'design/getAllDesigns',
-      inBrowserMode: 'webView/getInBrowserMode'
+      inBrowserMode: 'webView/getInBrowserMode',
+      _newTemplateShownMode: 'getNewTemplateShownMode'
     }),
     itemContainerStyles() {
       return this.gridMode ? {
@@ -235,16 +236,36 @@ export default defineComponent({
       picWVUtils.openOrGoto(this.templateUrl(item))
     },
     templateImgStyle(match_cover: IAssetTemplate['match_cover']): Record<string, string> {
-      let height = this.theme === '3' ? 284
-        : this.theme === '7' ? 320
-          : 160
-      if (this.$isTouchDevice()) {
-        height *= 2 / 3
-      }
-      const aspectRatio = match_cover.width / match_cover.height
-      return {
-        height: `${height}px`,
-        width: `${height * aspectRatio}px`
+      if (this._newTemplateShownMode) {
+        const aspectRatio = match_cover.width / match_cover.height
+        const widthLarger = aspectRatio >= 1
+        const rectSize = 160
+        // let height = this.theme === '3' ? 284
+        //   : this.theme === '7' ? 320
+        //     : 200
+        let shownHeight = widthLarger ? rectSize : rectSize / aspectRatio
+        let shownWidth = widthLarger ? rectSize * aspectRatio : rectSize
+        if (this.$isTouchDevice()) {
+          shownHeight *= 2 / 3
+          shownWidth *= 2 / 3
+        }
+
+        return {
+          height: `${shownHeight}px`,
+          width: `${shownWidth}px`
+        }
+      } else {
+        let height = this.theme === '3' ? 284
+          : this.theme === '7' ? 320
+            : 160
+        if (this.$isTouchDevice()) {
+          height *= 2 / 3
+        }
+        const aspectRatio = match_cover.width / match_cover.height
+        return {
+          height: `${height}px`,
+          width: `${height * aspectRatio}px`
+        }
       }
     },
     prevSize (match_cover: IAssetTemplate['match_cover']): string {
@@ -382,7 +403,7 @@ export default defineComponent({
     position: relative;
     cursor: pointer;
     img {
-      border: 2px solid setColor(gray-5);
+      border: 1px solid setColor(gray-5);
       box-sizing: border-box;
     }
     &:hover {
