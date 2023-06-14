@@ -82,10 +82,10 @@ export default class SubControllerUtils {
              */
             if (this.config.type === LayerType.image) {
               switch (this.primaryLayer.type) {
-                // vivisticker can only crop frame
-                // case LayerType.group:
-                //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIdx)
-                //   break
+                // vivisticker can only crop frame besides template editor
+                case LayerType.group:
+                  if (store.getters['vivisticker/getEditorTypeTemplate']) layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIdx)
+                  break
                 case LayerType.frame:
                   if ((this.config as IImage).srcObj.type !== 'frame') {
                     frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { imgControl: true })

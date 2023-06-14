@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown="selectStart")
+div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown="selectStart" v-touch)
   div(class="vvstk-editor__pages-container" :style="containerStyles()")
     transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" @before-leave="handleBeforePageLeave" :css="animated")
       page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
