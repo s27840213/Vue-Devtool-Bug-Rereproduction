@@ -22,17 +22,24 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconWidth="`${tab.width}px`"
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
-    div(v-if="isInEditor || inBgRemoveMode" class="header-bar__feature-icon body-XS text-black-1 btn-copy" @click.prevent.stop="handleCopy")
+    div(v-if="isInEditor" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleCopy")
         svg-icon(iconName="copy"
                   iconWidth="18px"
                   iconHeight="18px"
                   iconColor="black-1")
         span {{ $t('NN0032') }}
+    div(v-if="inBgRemoveMode" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleNext")
+        span(class="ml-5") {{ $t('NN0744') }}
+        svg-icon(iconName="chevron-right"
+                  iconWidth="18px"
+                  iconHeight="18px"
+                  iconColor="black-1")
     div(v-if="isInMyDesign && !isInEditor" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
 </template>
 
 <script lang="ts">
 import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
+import assetUtils from '@/utils/assetUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -88,7 +95,9 @@ export default defineComponent({
       userSettings: 'vivisticker/getUserSettings',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      inBgRemoveLastStep: 'bgRemove/inLastStep'
+      inBgRemoveLastStep: 'bgRemove/inLastStep',
+      autoRemoveResult: 'bgRemove/getAutoRemoveResult',
+      inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
     }),
     stepCount(): number {
       return stepsUtils.steps.length
@@ -235,7 +244,9 @@ export default defineComponent({
       switchBg: 'vivisticker/UPDATE_switchBg',
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
       setMyDesignTab: 'vivisticker/SET_myDesignTab',
-      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
+      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
+      setInEffectEditingMode: 'bgRemove/SET_inEffectEditingMode',
     }),
     handleTabAction(action?: () => void) {
       if (action) {
@@ -273,6 +284,9 @@ export default defineComponent({
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
       }
+      if (bgRemoveUtils.autoRemoveResult !== null) {
+        this.clearBgRemoveState()
+      }
       if (vivistickerUtils.checkVersion('1.13')) {
         if (vivistickerUtils.userSettings.autoSave) {
           vivistickerUtils.saveAsMyDesign().then(() => {
@@ -304,26 +318,33 @@ export default defineComponent({
               }
             }
           }
-          modalUtils.setModalInfo(
-            `${this.$t('STK0008')}`,
-            `${this.$t('STK0009')}`,
-            {
-              msg: `${this.$t('STK0004')}`,
-              action: () => {
-                vivistickerUtils.saveAsMyDesign().then(() => {
-                  vivistickerUtils.endEditing()
-                })
-              }
-            },
-            {
-              msg: `${this.$t('STK0011')}`,
-              action: () => { vivistickerUtils.endEditing() },
-              style: {
-                color: '#474A57',
-                backgroundColor: '#D9DBE1'
-              }
-            },
-            options)
+          /**
+           * @Note have not implement the save feature for bg remove result
+           */
+          if (!this.inEffectEditingMode) {
+            modalUtils.setModalInfo(
+              `${this.$t('STK0008')}`,
+              `${this.$t('STK0009')}`,
+              {
+                msg: `${this.$t('STK0004')}`,
+                action: () => {
+                  vivistickerUtils.saveAsMyDesign().then(() => {
+                    vivistickerUtils.endEditing()
+                  })
+                }
+              },
+              {
+                msg: `${this.$t('STK0011')}`,
+                action: () => { vivistickerUtils.endEditing() },
+                style: {
+                  color: '#474A57',
+                  backgroundColor: '#D9DBE1'
+                }
+              },
+              options)
+          } else {
+            vivistickerUtils.endEditing()
+          }
         }
       } else {
         vivistickerUtils.endEditing()
@@ -359,6 +380,65 @@ export default defineComponent({
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ source: 'editor' }))
       }
     },
+    // async addStandardText() {
+    //   let recentFont
+    //   if (vivistickerUtils.checkVersion('1.5')) {
+    //     recentFont = await vivistickerUtils.getState('recentFont')
+    //   }
+    //   const color = vivistickerUtils.getContrastColor(this.editorBg)
+    //   await assetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {
+    //     size: 21,
+    //     color,
+    //     weight: 'normal',
+    //     ...(recentFont ?? {})
+    //   })
+    // },
+    async addImage(src: string, aspectRatio: number) {
+      assetUtils.addImage(src, aspectRatio, {
+        pageIndex: 0,
+        // The following props is used for preview image during polling process
+        isPreview: true
+      })
+    },
+    handleNext() {
+      bgRemoveUtils.setInBgRemoveMode(false)
+      editorUtils.setShowMobilePanel(false)
+      this.setInEffectEditingMode(true)
+      vivistickerUtils.startEditing(
+        'image',
+        { plan: 0, assetId: '' },
+        async () => {
+          console.log('start editing standard image')
+          await this.addImage(this.autoRemoveResult.urls.prev, this.autoRemoveResult.width / this.autoRemoveResult.height)
+          return true
+        },
+        vivistickerUtils.getEmptyCallback()
+      )
+    },
+    // async addImage(src: string, aspectRatio: number, previewSrc: string) {
+    //   assetUtils.addImage(src, aspectRatio, {
+    //     pageIndex: 0,
+    //     // The following props is used for preview image during polling process
+    //     isPreview: true,
+    //     previewSrc
+    //   })
+    // },
+    // handleNext() {
+    //   bgRemoveUtils.setInBgRemoveMode(false)
+    //   editorUtils.setShowMobilePanel(false)
+    //   this.setInEffectEditingMode(true)
+    //   vivistickerUtils.startEditing(
+    //     'image',
+    //     { plan: 0, assetId: '' },
+    //     async () => {
+    //       const src = bgRemoveUtils.canvas.toDataURL('image/png;base64')
+    //       console.log(src)
+    //       await this.addImage(src, this.autoRemoveResult.width / this.autoRemoveResult.height, src)
+    //       return true
+    //     },
+    //     vivistickerUtils.getEmptyCallback()
+    //   )
+    // },
     handleMore() {
       editorUtils.setCurrActivePanel('vvstk-more')
       editorUtils.setShowMobilePanel(true)
@@ -441,7 +521,7 @@ export default defineComponent({
     &:active {
       background-color: setColor(gray-2);
     }
-    &.btn-copy{
+    &.btn-feature{
       display: flex;
       align-items: center;
       padding: 4px 8px;
