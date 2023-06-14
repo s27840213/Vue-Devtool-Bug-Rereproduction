@@ -518,6 +518,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   endEditing() {
     groupUtils.deselect()
+    imageUtils.setImgControlDefault(false)
+    editorUtils.setInBgSettingMode(false)
+    pageUtils.setBackgroundImageControlDefault()
     store.commit('SET_currActivePageIndex', 0)
     pageUtils.setPages()
     this.showController()
