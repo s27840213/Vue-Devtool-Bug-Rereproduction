@@ -225,13 +225,11 @@ export default defineComponent({
           return [
             ...this.lockIcon,
             { icon: 'copy', width: 24, action: this.handleCopy },
-            { icon: 'trash', width: 24, action: shortcutUtils.del, disabled: this.isLocked },
             { icon: 'share', width: 24, action: this.handleShareTemplate },
           ]
         }
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
-          ...(this.editorTypeTextLike ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
         ]
       } else if (this.isInMyDesign) {
         return []

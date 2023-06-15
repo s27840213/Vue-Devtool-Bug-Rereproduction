@@ -641,8 +641,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault(false)
       }
-      this.hideController()
     }
+    this.hideController()
   }
 
   copyEditor(callback?: (flag: string) => void) {
