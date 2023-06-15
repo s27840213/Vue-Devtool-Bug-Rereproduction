@@ -51,7 +51,7 @@ import i18n from '@/i18n'
 import { IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
-import assetUtils from '@/utils/assetUtils'
+import assetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -63,6 +63,7 @@ import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
+import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
@@ -733,31 +734,61 @@ export default defineComponent({
         }
         case 'photo':
         case 'replace': {
-          if (tab.icon === 'photo' && this.editorTypeTemplate && !this.isSettingTabsOpen) break
-          const { pageIndex, layerIndex, subLayerIdx = 0 } = layerUtils
+          if (tab.panelType !== 'replace') break
+          const { pageIndex, layerIndex, subLayerIdx = 0, getCurrLayer: layer } = layerUtils
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
               if (images.length) {
-                const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
-                  .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], imageUtils.getSrc({
-                    type: 'ios',
-                    assetId: images[0],
-                    userId: ''
-                  }))
-                frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
-                  imgWidth,
-                  imgHeight,
-                  imgX,
-                  imgY
-                })
-                frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
+                const isPrimaryLayerFrame = layer.type === LayerType.frame
+                const srcObj = {
                   type: 'ios',
                   assetId: images[0],
                   userId: ''
-                })
+                }
+                const src = imageUtils.getSrc(srcObj)
+                if (isPrimaryLayerFrame) {
+                  // replace frame
+                  const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                    .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], src)
+                  frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
+                    imgWidth,
+                    imgHeight,
+                    imgX,
+                    imgY
+                  })
+                  frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, srcObj)
+                } else {
+                  // replace image
+                  imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+                    const { naturalWidth, naturalHeight } = img
+                    const resizeRatio = RESIZE_RATIO_IMAGE
+                    const pageSize = pageUtils.getPageSize(pageIndex)
+                    const pageAspectRatio = pageSize.width / pageSize.height
+                    const photoAspectRatio = naturalWidth / naturalHeight
+                    const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+                    const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+                    const config = layerUtils.getCurrConfig as IImage
+                    const { imgWidth, imgHeight } = config.styles
+                    const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
+                    const styles = {
+                      ...config.styles,
+                      ...mouseUtils.clipperHandler({
+                        styles: {
+                          width: photoWidth,
+                          height: photoHeight
+                        }
+                      } as unknown as IImage, path, config.styles).styles,
+                      ...{
+                        initWidth: config.styles.initWidth,
+                        initHeight: config.styles.initHeight
+                      }
+                    }
+                    layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+                    layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+                  })
+                }
                 stepsUtils.record()
               }
-              this.$emit('switchTab', 'none')
             })
           break
         }
@@ -800,8 +831,8 @@ export default defineComponent({
 
       if (tab.panelType !== undefined) {
         if (this.isInEditor) {
-          const panelType = tab.panelType === 'camera' ? 'none' : tab.panelType
-          this.$emit('switchTab', panelType, tab.props)
+          const closePanel = ['camera', 'replace'].includes(tab.panelType) // show camera roll rather than mobile panel in vivisticker
+          this.$emit('switchTab', closePanel ? 'none' : tab.panelType, tab.props)
         } else {
           this.$emit('switchMainTab', tab.panelType, tab.props)
           if (this.currTab === tab.panelType) {
