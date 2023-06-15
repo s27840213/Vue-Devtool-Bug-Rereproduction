@@ -583,7 +583,7 @@ export default defineComponent({
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
       const previewSrc = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
-      imageUtils.imgLoadHandler(previewSrc, () => {
+      imageUtils.imgLoadHandler(previewSrc, (img) => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
@@ -657,7 +657,8 @@ export default defineComponent({
     handleIsTransparent() {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
       const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-      const src = imageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      const _src = imageUtils.getSrc(this.config, imgSize)
+      const src = _src + `${_src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       imageUtils.imgLoadHandler(src,
         (img) => {
           if (!this.hasDestroyed) {
