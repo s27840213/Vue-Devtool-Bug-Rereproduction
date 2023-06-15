@@ -14,7 +14,6 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textUtils from '@/utils/textUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
 import { find, max, omit, pick } from 'lodash'
@@ -286,6 +285,7 @@ class TextFill {
 
       const layer = layers[idx]
       if (layer.type !== 'text') continue
+      const currSubLayerIndex = targetLayer.layers ? +idx : subLayerIndex
       const oldTextFill = layer.styles.textFill
       const newTextFill = {} as ITextFill
 
@@ -319,19 +319,24 @@ class TextFill {
       const oldSplitSpan = textBgUtils.isSplitSpan({ ...layer.styles, textFill: oldTextFill })
       const newSplitSpan = textBgUtils.isSplitSpan({ ...layer.styles, textFill: newTextFill })
       textBgUtils.splitOrMergeSpan(oldSplitSpan, newSplitSpan, layer,
-        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+        pageIndex, layerIndex, currSubLayerIndex)
 
-      // Recalc width/height since split span will alter width slightly
-      if (oldSplitSpan !== newSplitSpan) {
-        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
-      }
-
-      tiptapUtils.updateHtml() // Vuex config => tiptap
-
-      // Update widthLimit for widthLimit !== -1 layers
+      // Update widthLimit for widthLimit !== -1 layers. Steps to Reproduce the Issue:
+      // 1. Multi-select a new text layer (widthLimit is -1) and other layers.
+      // 2. Cancel multi-select.
+      // 3. Apply TextFill to the text layer.
+      // 4. Enter contentEditable mode, text will have additional line
       if (layer.widthLimit !== -1) {
         const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, subLayerIndex)
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, currSubLayerIndex)
+      }
+
+      // Update w/h for layer in tmp/group, which don't have tiptap. Steps to Reproduce the Issue:
+      // 1. Multi-select a new text layer (widthLimit is -1) and other layers.
+      // 2. Apply TextFill.
+      // 3. Cancel multi-select, text will have additional line.
+      if (oldSplitSpan !== newSplitSpan) {
+        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, currSubLayerIndex)
       }
     }
   }
