@@ -36,6 +36,8 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
@@ -103,7 +105,9 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inBgRemoveFirstStep: 'bgRemove/inFirstStep',
       inBgRemoveLastStep: 'bgRemove/inLastStep',
-      isBgImgCtrl: 'imgControl/isBgImgCtrl'
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
+      currSelectedInfo: 'getCurrSelectedInfo',
     }),
     templateKeyword() {
       return this.$store.state.templates[this.templatesIgLayout].keyword
@@ -219,9 +223,9 @@ export default defineComponent({
         if (this.isInPagePreview) return []
         if (this.editorTypeTemplate) {
           return [
-            ...(backgroundUtils.inBgSettingMode ? [{ icon: backgroundUtils.backgroundLocked ? 'lock' : 'unlock', width: 24, action: () => backgroundUtils.handleLockBackground() }] : []),
+            ...this.lockIcon,
             { icon: 'copy', width: 24, action: this.handleCopy },
-            { icon: 'trash', width: 24, action: shortcutUtils.del },
+            { icon: 'trash', width: 24, action: shortcutUtils.del, disabled: this.isLocked },
             { icon: 'share', width: 24, action: this.handleShareTemplate },
           ]
         }
@@ -252,7 +256,25 @@ export default defineComponent({
           { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
         ]
       }
-    }
+    },
+    lockIcon(): TabConfig[] {
+      const icon = this.isLocked ? 'lock' : 'unlock'
+      if (this.inBgSettingMode || this.selectedLayerNum > 0) {
+        return [{
+          icon,
+          width: 24,
+          action: () => mappingUtils.mappingIconAction(icon)
+        }]
+      } else {
+        return []
+      }
+    },
+    selectedLayerNum(): number {
+      return this.currSelectedInfo.layers.length
+    },
+    isLocked(): boolean {
+      return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getSelectedLayer().locked
+    },
   },
   methods: {
     ...mapActions({
