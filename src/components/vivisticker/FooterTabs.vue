@@ -189,7 +189,7 @@ export default defineComponent({
         { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !this.editorTypeTemplate }, // vivisticker can only crop frame besides template editor
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame }
       ]
     },
     photoTabs(): Array<IFooterTab> {
@@ -198,7 +198,7 @@ export default defineComponent({
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
         ...this.copyPasteTabs,
         // hide copy-style for vivisticker for now
         // { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
