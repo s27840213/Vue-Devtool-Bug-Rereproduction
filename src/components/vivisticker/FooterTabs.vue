@@ -186,7 +186,7 @@ export default defineComponent({
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
-        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !this.editorTypeTemplate }, // vivisticker can only crop frame besides template editor
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame }
@@ -194,7 +194,7 @@ export default defineComponent({
     },
     photoTabs(): Array<IFooterTab> {
       const tabs = [
-        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...this.genearlLayerTabs,
@@ -343,7 +343,7 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace' }
+        { icon: 'photo', text: `${this.$t('NN0490')}` }
       ] as Array<IFooterTab>
     },
     genearlLayerTabs(): Array<IFooterTab> {
@@ -359,7 +359,7 @@ export default defineComponent({
     templateTabs(): Array<IFooterTab> {
       return [
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template-content' },
-        { icon: 'camera', text: 'Camera', panelType: 'camera' }, // TODO: translate
+        { icon: 'camera', text: 'Camera' }, // TODO: translate
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
@@ -734,7 +734,7 @@ export default defineComponent({
         }
         case 'photo':
         case 'replace': {
-          if (tab.panelType !== 'replace') break
+          if (tab.panelType !== undefined) break
           const { pageIndex, layerIndex, subLayerIdx = 0, getCurrLayer: layer } = layerUtils
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
@@ -831,8 +831,7 @@ export default defineComponent({
 
       if (tab.panelType !== undefined) {
         if (this.isInEditor) {
-          const closePanel = ['camera', 'replace'].includes(tab.panelType) // show camera roll rather than mobile panel in vivisticker
-          this.$emit('switchTab', closePanel ? 'none' : tab.panelType, tab.props)
+          this.$emit('switchTab', tab.panelType, tab.props)
         } else {
           this.$emit('switchMainTab', tab.panelType, tab.props)
           if (this.currTab === tab.panelType) {
