@@ -8,18 +8,20 @@ div(class="list")
       :to="moreLink")
       span {{$t('NN0082')}}
   div(class="list-content")
-    div(v-if="prevIcon"
-      class="list-content__lefticon"
-      @click="scroll(false)")
-      svg-icon(iconName="chevron-left"
-        iconWidth="25px"
-        iconColor="gray-3")
-    div(v-if="nextIcon"
-      class="list-content__righticon"
-      @click="scroll(true)")
-      svg-icon(iconName="chevron-right"
-        iconWidth="25px"
-        iconColor="gray-3")
+    transition(name="fade-in")
+      div(v-if="prevIcon"
+        class="list-content__lefticon"
+        @click="scroll(false)")
+        svg-icon(iconName="chevron-left"
+          iconWidth="25px"
+          iconColor="gray-3")
+    transition(name="fade-in")
+      div(v-if="nextIcon"
+        class="list-content__righticon"
+        @click="scroll(true)")
+        svg-icon(iconName="chevron-right"
+          iconWidth="25px"
+          iconColor="gray-3")
     div(class="list-content-items"
       :style="itemContainerStyles"
       @scroll.passive="updateIcon"
@@ -355,7 +357,7 @@ export default defineComponent({
       height: 100%;
       object-fit: contain;
       object-position: bottom;
-      transition: all 0.2s ease-in-out;
+      transition: transform 0.2s ease-in-out;
     }
 
     span {
@@ -403,6 +405,7 @@ export default defineComponent({
     margin: 8px 0px;
     position: relative;
     cursor: pointer;
+    transition: all 0.2s ease-in-out;
     img {
       border: 1px solid setColor(gray-5);
       border-radius: 4px;
@@ -410,7 +413,6 @@ export default defineComponent({
       box-sizing: border-box;
     }
     &:hover {
-      transition: all 0.2s ease-in-out;
       transform: translate(0, -5px);
     }
     img:hover {
