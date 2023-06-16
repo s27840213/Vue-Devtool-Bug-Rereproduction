@@ -206,6 +206,7 @@ export default defineComponent({
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
+        ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         {
           icon: 'effect',
           text: `${this.$t('NN0429')}`,
