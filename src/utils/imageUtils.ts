@@ -19,16 +19,12 @@ class ImageUtils {
     const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve) => {
       const image = new Image()
-      image.src = src
       if (crossOrigin) {
         image.crossOrigin = 'anoynous'
       }
-      if (image.complete) {
-        resolve(cb(image))
-      } else {
-        image.onload = () => resolve(cb(image))
-        error && (image.onerror = error)
-      }
+      image.onload = () => resolve(cb(image))
+      error && (image.onerror = error)
+      image.src = src
     })
   }
 

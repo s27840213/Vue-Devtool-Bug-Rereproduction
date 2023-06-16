@@ -13,15 +13,22 @@ div(class="home")
       iframe(title="Vivipic" class="home-top__yt"
         :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
         frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
-      router-link(v-if="inBrowserMode && !isMobileSize" :to="`/editor?type=new-design-size&width=1080&height=1080`"
+      router-link(v-if="inBrowserMode && !$isTouchDevice()" :to="`/editor?type=new-design-size&width=1080&height=1080`"
           class="home-top__button rounded btn-primary-sm btn-LG")
         span {{$t('NN0391')}}
     div(class="home-list")
       scroll-list(
         :gridMode="true"
         type="theme")
-      hashtag-category-row(v-if="!inBrowserMode || (isMobile && isLogin)"
+      scroll-list(v-if="isLogin && inBrowserMode && !isMobile"
+        class="mt-100 mb-80"
+        type="mydesign")
+      div(class="px-20"
+          :style="{boxSizing: 'border-box'}")
+        ta-block(v-if="!isLogin" class="tag-title mb-30 mt-100" :content="templateBlock" :desktop-max-width="'100%'")
+      hashtag-category-row(
         class="home-list__hashtag"
+        :style="{position: isMobile ? 'sticky' : 'relative'}"
         :type="'tag'"
         :title="''"
         :list="homeTags"
@@ -37,14 +44,11 @@ div(class="home")
           @loadMore="handleLoadMore"
           @clickWaterfall="handleClickWaterfall")
       template(v-else)
-        scroll-list(v-if="isLogin && inBrowserMode && !isMobile"
-          type="mydesign")
-        template(v-if="isLogin || !inBrowserMode")
-          scroll-list(v-for="theme in themeList"
-            type="template"
-            :theme="`${theme}`"
-            :key="theme"
-            :shuffle="true")
+        scroll-list(v-for="theme in themeList"
+          type="template"
+          :theme="`${theme}`"
+          :key="theme"
+          :shuffle="true")
     div(v-if="inBrowserMode && !(isMobile && isLogin)" class="home-block")
       ta-block(v-for="item in blocklist"
         :key="item.title"
@@ -203,7 +207,7 @@ export default defineComponent({
     },
     blocklist(): IHomeBlockData[] {
       const blocklist = blocklistData.data().filter((item) => {
-        return !(this.$i18n.locale === 'us' && item.img.name === 'e-commerce.json')
+        return !(this.$i18n.locale === 'us' && item.img?.name === 'e-commerce.json')
       })
       // Set align as row, row-reverse alternately.
       for (let i = 1; i < blocklist.length; i++) {
@@ -212,6 +216,24 @@ export default defineComponent({
         }
       }
       return blocklist
+    },
+    templateBlock(): IHomeBlockData {
+      return {
+        title: this.$t('NN0466'),
+        description: this.$t('NN0467'),
+        colorBlock: [
+          {
+            name: 'oval_lightblue1.svg',
+            top: -13,
+            left: 17
+          }, {
+            name: 'oval_pink1.svg',
+            top: -13,
+            left: 17
+          }
+        ],
+        align: 'column'
+      }
     },
     ytId() {
       return this.$i18n.locale === 'us' ? 'GRSlz37Njo0'
@@ -424,6 +446,19 @@ export default defineComponent({
   width: 100%;
   height: calc(100% - #{$header-height});
 }
+
+.home-block {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  &:deep(.block) {
+    margin: 150px 0;
+    @media (max-width: 768px) {
+      margin: 100px 0;
+    }
+  }
+}
 .home-top {
   display: flex;
   flex-direction: column;
@@ -475,9 +510,10 @@ export default defineComponent({
   width: 80%;
   position: relative;
   padding-bottom: calc(44 * 1px);
+  display: flex;
+  flex-direction: column;
   &__hashtag {
     z-index: 10;
-    position: sticky;
     top: -1px;
     left: 0;
     padding: 4px 12px;
@@ -532,6 +568,10 @@ export default defineComponent({
     background-repeat: no-repeat;
     background-position: center center;
   }
+}
+
+.tag-title {
+  align-self: center;
 }
 @media screen and (max-width: 768px) {
   .home-content {
