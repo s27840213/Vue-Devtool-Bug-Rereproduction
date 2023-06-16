@@ -14,6 +14,7 @@ div(class="nu-text" draggable="false")
       :page="page"
       :subLayerIndex="subLayerIndex"
       :primaryLayer="primaryLayer"
+      :contentScaleRatio="contentScaleRatio"
       :extraSpanStyle="text.extraSpanStyle")
     p(v-else
       v-for="(p, pIndex) in config.paragraphs"
