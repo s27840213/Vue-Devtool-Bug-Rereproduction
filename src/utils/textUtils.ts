@@ -357,7 +357,7 @@ class TextUtils {
     return {
       width: body.style.width !== 'max-content' ? widthLimit : size.width * scale,
       height: body.style.height !== 'max-content' ? widthLimit : size.height * scale,
-      spanDataList: Array.from(body.children).map(p => Array.from(p.children).map(span => Array.from(span.getClientRects())))
+      spanDataList: Array.from(body.children).map(p => Array.from(p.children).map(span => Array.from(span.getClientRects()).map(rect => rect.toJSON())))
     }
   }
 
@@ -888,7 +888,7 @@ class TextUtils {
 
       for (let j = 0; j < currSpans.length; j++) { // iterating <span>
         const currSpanRects = currSpans[j]
-        const targetSpanRects = targetSpans[j]
+        const targetSpanRects = generalUtils.unproxify(targetSpans[j])
 
         // if target has more lines, decrease widthLimit.
         if (currSpanRects.length < targetSpanRects.length) return { stop: false, offset: -1 }
