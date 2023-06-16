@@ -414,6 +414,11 @@ export default new class ImageShadowPanelUtils {
 
   async isSVG(src: string, config: IImage) {
     if (src.includes('https') && ['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
+      if (src.includes('?')) {
+        src += `&isSvgRand=${generalUtils.generateRandomString(6)}`
+      } else {
+        src += `?isSvgRand=${generalUtils.generateRandomString(6)}`
+      }
       const res = await new Promise<Response>((resolve) => resolve(fetch(src, { method: 'HEAD' })))
       return await res.headers.get('Content-Type') === 'image/svg+xml'
     } else return false
