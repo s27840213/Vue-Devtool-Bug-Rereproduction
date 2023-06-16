@@ -1165,11 +1165,13 @@ export default defineComponent({
            * use computed size given widthlimit instead of querying the DOM object property to achieve higher consistency.
            */
           if (this.config.styles.writingMode.includes('vertical')) {
-            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height })
-            width = TextUtils.getTextHW(this.config as IText, height).width
+            const textHW = TextUtils.getTextHW(this.config as IText, height)
+            width = textHW.width
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height, spanDataList: textHW.spanDataList })
           } else {
-            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width })
-            height = TextUtils.getTextHW(this.config as IText, width).height
+            const textHW = TextUtils.getTextHW(this.config as IText, width)
+            height = textHW.height
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width, spanDataList: textHW.spanDataList })
           }
           /**
            * below make the anchor-point always pinned at the top-left or top-right
@@ -1566,7 +1568,7 @@ export default defineComponent({
         textHW.height = TextUtils.getTextHW(config).height
       }
 
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
         width: textHW.width,
         height: textHW.height,

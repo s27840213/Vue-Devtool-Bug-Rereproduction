@@ -265,7 +265,7 @@ class TextUtils {
     }
   }
 
-  getTextHW(_content: IText, widthLimit = -1): { width: number, height: number } {
+  getTextHW(_content: IText, widthLimit = -1): { width: number, height: number, spanDataList: DOMRectList[][] } {
     const body = this.genTextDiv(_content, widthLimit)
     const scale = _content.styles.scale ?? 1
     document.body.appendChild(body)
@@ -274,7 +274,7 @@ class TextUtils {
     return textHW
   }
 
-  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<{ width: number, height: number }> {
+  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<{ width: number, height: number, spanDataList: DOMRectList[][] }> {
     const textId = generalUtils.generateRandomString(12)
     const body = this.genTextDiv(_content, widthLimit)
     body.setAttribute('id', textId)
@@ -349,14 +349,15 @@ class TextUtils {
     return body
   }
 
-  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number } {
+  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number, spanDataList: DOMRectList[][] } {
     return this.getHWBySize(body.getBoundingClientRect(), body, scale, widthLimit)
   }
 
-  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number } {
+  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number, spanDataList: DOMRectList[][] } {
     return {
       width: body.style.width !== 'max-content' ? widthLimit : size.width * scale,
-      height: body.style.height !== 'max-content' ? widthLimit : size.height * scale
+      height: body.style.height !== 'max-content' ? widthLimit : size.height * scale,
+      spanDataList: Array.from(body.children).map(p => Array.from(p.children).map(span => span.getClientRects()))
     }
   }
 
@@ -373,6 +374,7 @@ class TextUtils {
       } else {
         textHW = this.getTextHW(config, config.widthLimit)
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+        layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { spanDataList: textHW.spanDataList })
       }
       /**
        * Group layout height compensation
@@ -497,7 +499,7 @@ class TextUtils {
           y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
         layerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit })
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { spanDataList: textHW.spanDataList })
       }
     } else { // sub text layer in a group
       const group = targetLayer as IGroup
@@ -510,7 +512,7 @@ class TextUtils {
         const widthLimit = config.widthLimit
         const textHW = this.getTextHW(config, widthLimit)
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
-        layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { widthLimit })
+        layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { spanDataList: textHW.spanDataList })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
       }
@@ -588,13 +590,11 @@ class TextUtils {
       textLayer.paragraphs[i].styles.size = paragraphSizes[i]
     }
 
-    const size = {} as { [key: string]: number }
-    if (textLayer.styles && textLayer.styles.height && textLayer.styles.width) {
-      Object.assign(size, { width: textLayer.styles.width, height: textLayer.styles.height })
-    } else {
-      Object.assign(size, this.getTextHW(textLayer))
-    }
+    const textHW = this.getTextHW(textLayer)
+    const size = pick(textHW, ['width', 'height'])
     const position = {} as { [key: string]: number }
+
+    textLayer.spanDataList = textHW.spanDataList
 
     if (textLayer.styles && typeof textLayer.styles.x !== 'undefined' && typeof textLayer.styles.y !== 'undefined') {
       Object.assign(position, { x: textLayer.styles.x, y: textLayer.styles.y })
@@ -715,7 +715,7 @@ class TextUtils {
     }
   }
 
-  async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<number> {
+  async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRectList[][] }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
     const { widthLimit, otherDimension, loops } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
@@ -732,12 +732,13 @@ class TextUtils {
     }
   }
 
-  autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number }): {
+  autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRectList[][] }): {
     widthLimit: number,
     otherDimension: number,
     loops: number
   } {
-    const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+    const isVertical = config.styles.writingMode.includes('vertical')
+    const dimension = isVertical ? 'width' : 'height'
     const scale = config.styles.scale
     let direction = 0
     let shouldContinue = true
@@ -790,7 +791,10 @@ class TextUtils {
         autoSize = this.getTextHW(config, widthLimit)
         continue
       }
-      shouldContinue = false
+      const { stop, offset } = this.checkSpanDataList(autoSize.spanDataList, initSize.spanDataList, isVertical)
+      widthLimit += offset * scale
+      direction += offset
+      shouldContinue = !stop
     }
     return {
       widthLimit,
@@ -799,12 +803,13 @@ class TextUtils {
     }
   }
 
-  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<{
+  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRectList[][] }): Promise<{
     widthLimit: number,
     otherDimension: number,
     loops: number
   }> {
-    const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+    const isVertical = config.styles.writingMode.includes('vertical')
+    const dimension = isVertical ? 'width' : 'height'
     const scale = config.styles.scale
     let direction = 0
     let shouldContinue = true
@@ -857,13 +862,52 @@ class TextUtils {
         autoSize = await this.getTextHWAsync(config, widthLimit)
         continue
       }
-      shouldContinue = false
+      const { stop, offset } = this.checkSpanDataList(autoSize.spanDataList, initSize.spanDataList, isVertical)
+      widthLimit += offset * scale
+      direction += offset
+      shouldContinue = !stop
     }
     return {
       widthLimit,
       otherDimension: autoDimension,
       loops: Math.abs(direction)
     }
+  }
+
+  checkSpanDataList(currSpanDataList: DOMRectList[][], targetSpanDataList: DOMRectList[][] | undefined, isVertical: boolean): { stop: boolean, offset: number } {
+    if (targetSpanDataList === undefined) return { stop: true, offset: 0 }
+
+    // number of paragraphs doesn't match, unexpected situation, skip comparing by spanDataList
+    if (currSpanDataList.length !== targetSpanDataList.length) return { stop: true, offset: 0 }
+
+    for (let i = 0; i < currSpanDataList.length; i++) { // iterating <p>
+      // number of spans in some paragraph doesn't match, unexpected situation, skip comparing by spanDataList
+      const currSpans = currSpanDataList[i]
+      const targetSpans = targetSpanDataList[i]
+      if (currSpans.length !== targetSpans.length) return { stop: true, offset: 0 }
+
+      for (let j = 0; j < currSpans.length; j++) { // iterating <span>
+        const currSpanRects = currSpans[j]
+        const targetSpanRects = targetSpans[j]
+
+        // if target has more lines, decrease widthLimit.
+        if (currSpanRects.length < targetSpanRects.length) return { stop: false, offset: -1 }
+
+        // if target has less lines, increase widthLimit.
+        if (currSpanRects.length > targetSpanRects.length) return { stop: false, offset: 1 }
+
+        const dimension = isVertical ? 'height' : 'width'
+        const currLastLineSize = currSpanRects[currSpanRects.length - 1][dimension]
+        const targetLastLineSize = targetSpanRects[targetSpanRects.length - 1][dimension]
+
+        // if target last line is longer, decrease widthLimit to push more characters to last line.
+        if (targetLastLineSize - currLastLineSize > 5) return { stop: false, offset: -1 }
+
+        // if target last line is shorter, increase widthLimit to pull more characters from last line.
+        if (currLastLineSize - targetLastLineSize > 5) return { stop: false, offset: 1 }
+      }
+    }
+    return { stop: true, offset: 0 }
   }
 
   async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
@@ -1115,6 +1159,7 @@ class TextUtils {
               x: originHW.x + (newHW.width - originHW.width) / 2,
               y: originHW.y + (newHW.height - originHW.height) / 2
             })
+            layer.spanDataList = newHW.spanDataList
           }
         }
         if (layer.styles.textEffect.fontSize !== undefined) {

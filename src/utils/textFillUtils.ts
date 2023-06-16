@@ -269,7 +269,7 @@ class TextFill {
 
       if (oldTextFill && oldTextFill.name === effect) { // Adjust effect option.
         const localAttrs = !reset && attrs && Object.keys(attrs).includes('img')
-          ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as {img: {key:string}}).img.key}`) : null
+          ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as { img: { key: string } }).img.key}`) : null
         Object.assign(newTextFill, oldTextFill, attrs, localAttrs)
 
         // Only TextFill from appJSON need to store to localstorage
@@ -278,7 +278,7 @@ class TextFill {
         }
       } else { // Switch to other effect.
         const targetEffect = find(this.fillCategories, ['key', effect])
-        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as {img: {key:string}} | undefined
+        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as { img: { key: string } } | undefined
         const localAttrs = effectDefaultPreset?.img?.key ? localStorageUtils.get('textEffectSetting', `fill.${effectDefaultPreset.img.key}`) : null
         Object.assign(newTextFill, defaultAttrs, effectDefaultPreset, localAttrs,
           { name: effect, customImg: oldTextFill.customImg }
@@ -308,7 +308,7 @@ class TextFill {
 
       // Update widthLimit for widthLimit !== -1 layers
       if (layer.widthLimit !== -1) {
-        const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
+        const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit, spanDataList: layer.spanDataList })
         layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, subLayerIndex)
       }
     }

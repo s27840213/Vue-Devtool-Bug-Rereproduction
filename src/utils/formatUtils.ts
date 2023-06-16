@@ -145,9 +145,16 @@ class FormatUtils {
               layerIndex,
               idx,
               {
-                ...textHW,
+                width: textHW.width,
+                height: textHW.height,
                 ...textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(targetTextLayer, preParams, textHW))
               }
+            )
+            layerUtils.updateSubLayerProps(
+              pageIndex,
+              layerIndex,
+              idx,
+              { spanDataList: textHW.spanDataList }
             )
           }
         }
@@ -216,9 +223,11 @@ class FormatUtils {
         } else {
           const textHW = textUtils.getTextHW(text, text.widthLimit)
           layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-            ...textHW,
+            width: textHW.width,
+            height: textHW.height,
             ...textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(text, preParams, textHW))
           })
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { spanDataList: textHW.spanDataList })
         }
         stepsUtils.record()
       }
