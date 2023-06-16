@@ -17,7 +17,7 @@ div(class="home")
           class="home-top__button rounded btn-primary-sm btn-LG")
         span {{$t('NN0391')}}
     div(class="home-list"
-        :class="[isMobileSize ? 'mt-35' : ' mt-100']")
+        :class="[isMobileSize ? 'mt-10' : ' mt-100']")
       scroll-list(v-if="!(!isLogin && isMobile)"
         :gridMode="true"
         type="theme")
