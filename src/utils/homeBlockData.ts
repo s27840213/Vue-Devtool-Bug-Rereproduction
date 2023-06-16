@@ -3,7 +3,7 @@ import i18n from '@/i18n'
 export interface IHomeBlockData {
   title: string
   description: string
-  img: {
+  img?: {
     name: string
     width: number
     height?: number
@@ -24,26 +24,6 @@ export interface IHomeBlockData {
 class HomeBlockData {
   data(): IHomeBlockData[] {
     return [{
-      title: i18n.global.t('NN0466'),
-      description: i18n.global.t('NN0467'),
-      img: {
-        name: 'templateGallery.json',
-        width: 3000,
-        height: 600
-      },
-      colorBlock: [
-        {
-          name: 'oval_lightblue1.svg',
-          top: -13,
-          left: 17
-        }, {
-          name: 'oval_pink1.svg',
-          top: -13,
-          left: 17
-        }
-      ],
-      align: 'column'
-    }, {
       title: i18n.global.t('NN0480'),
       description: i18n.global.t('NN0481'),
       img: {

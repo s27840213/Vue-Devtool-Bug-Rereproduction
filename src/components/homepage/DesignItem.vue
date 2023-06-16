@@ -12,7 +12,7 @@ div(class="design-item")
         @click.self="handleClick")
   div(class="design-item__name")
     div(class="design-item__name__container")
-      span(:title="config.name") {{ config.name }}
+      span(:title="config.name") {{ config.name === '' ? `${$t("NN0079")}` : config.name }}
 </template>
 
 <script lang="ts">

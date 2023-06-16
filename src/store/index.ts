@@ -39,7 +39,6 @@ import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
-import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import brandkit from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
@@ -336,7 +335,13 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getNewTemplateShownMode(state: IEditorState) {
     return state.newTemplateShownMode
-  }
+  },
+  getIsMobile(state: IEditorState) {
+    return state.isMobile
+  },
+  getIsLargeDesktop(state: IEditorState) {
+    return state.isLargeDesktop
+  },
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -1120,15 +1125,14 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_newTemplateShownMode(state: IEditorState, newTemplateShownMode: boolean) {
     state.newTemplateShownMode = newTemplateShownMode
-  }
+  },
+  SET_isMobile(state: IEditorState, boolean: boolean) {
+    state.isMobile = boolean
+  },
+  SET_isLargeDesktop(state: IEditorState, boolean: boolean) {
+    state.isLargeDesktop = boolean
+  },
 }
-const handleResize = throttle(() => {
-  state.isMobile = generalUtils.getWidth() <= 768
-  state.isLargeDesktop = generalUtils.getWidth() >= 1440
-}, 500)
-
-window.addEventListener('resize', handleResize)
-handleResize()
 
 const store = createStore({
   state,
