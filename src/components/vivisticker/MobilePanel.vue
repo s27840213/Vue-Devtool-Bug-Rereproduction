@@ -207,6 +207,7 @@ export default defineComponent({
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
@@ -232,7 +233,8 @@ export default defineComponent({
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
-        'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design']
+        'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design',
+        'multiple-select']
 
       return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
@@ -252,7 +254,8 @@ export default defineComponent({
       return [
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
+        'font-spacing', 'download', 'more', 'object-adjust',
+        'brand-list', 'vvstk-more', 'select-design', 'multiple-select'].includes(this.currActivePanel)
     },
     trueWholeSize(): boolean {
       return false // ['text', 'template-content'].includes(this.currActivePanel)
@@ -274,6 +277,9 @@ export default defineComponent({
         }
         case 'copy-style': {
           return `${this.$t('NN0809')}`
+        }
+        case 'multiple-select': {
+          return `${this.$t('NN0657')}`
         }
         case 'text': {
           return this.isTextShowAllRecently && this.isUs ? `${this.$t('NN0024')}` : ''
@@ -300,10 +306,10 @@ export default defineComponent({
       return false
     },
     hideDynamicComp(): boolean {
-      return ['crop', 'copy-style'].includes(this.currActivePanel)
+      return ['crop', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
     },
     noRowGap(): boolean {
-      return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template'].includes(this.currActivePanel)
+      return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template', 'multiple-select'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts', 'template-content'].includes(this.currActivePanel)
@@ -574,6 +580,13 @@ export default defineComponent({
             break
           }
 
+          case 'multiple-select': {
+            if (this.inMultiSelectionMode) {
+              editorUtils.setInMultiSelectionMode(false)
+            }
+            break
+          }
+
           case 'color': {
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
@@ -656,7 +669,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: () => {
-          if (!(this.bgRemoveMode || this.isInPagePreview || this.isBgImgCtrl || this.isProcessing)) {
+          if (!(this.bgRemoveMode || this.isInPagePreview || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)) {
             this.closeMobilePanel()
           }
         },

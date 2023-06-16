@@ -120,6 +120,7 @@ export default defineComponent({
       hasCopiedFormat: 'getHasCopiedFormat',
       debugMode: 'vivisticker/getDebugMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
     }),
     isSettingTabsOpen(): boolean {
       return this.editorTypeTemplate && this.tabs.length > 0
@@ -188,6 +189,14 @@ export default defineComponent({
       return [
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !this.editorTypeTemplate }, // vivisticker can only crop frame besides template editor
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !this.editorTypeTemplate },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: !this.editorTypeTemplate || this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame }
       ]
@@ -197,11 +206,18 @@ export default defineComponent({
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: !this.editorTypeTemplate || this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
         ...this.copyPasteTabs,
-        // hide copy-style for vivisticker for now
-        // { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
+        { icon: 'set-as-frame', text: `${this.$t('NN0706')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: !this.editorTypeTemplate },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {
         tabs.unshift({
@@ -272,7 +288,8 @@ export default defineComponent({
     },
     multiPhotoTabs(): Array<IFooterTab> {
       return [
-        ...this.multiGeneralTabs
+        ...this.multiGeneralTabs,
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !this.editorTypeTemplate }
       ]
     },
     multiFontTabs(): Array<IFooterTab> {
@@ -348,7 +365,12 @@ export default defineComponent({
     },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
+        { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order', hidden: !this.editorTypeTemplate },
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        this.groupTab,
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position', hidden: !this.editorTypeTemplate },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !this.editorTypeTemplate },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select', hidden: !this.editorTypeTemplate }
       ]
     },
     bgRemoveTabs(): Array<IFooterTab> {
@@ -368,10 +390,11 @@ export default defineComponent({
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
-        this.groupTab,
-        // { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        // { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: !this.editorTypeTemplate || this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        this.groupTab,
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position', hidden: !this.editorTypeTemplate },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select', hidden: !this.editorTypeTemplate },
         ...this.copyPasteTabs
       ]
     },
@@ -598,6 +621,9 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
+      if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
+        editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+      }
       if (tab.icon !== 'crop' && this.isCropping) {
         imageUtils.setImgControlDefault()
       }
@@ -692,6 +718,10 @@ export default defineComponent({
         case 'ungroup': {
           this.disableTabScroll = true
           mappingUtils.mappingIconAction(tab.icon)
+          break
+        }
+        case 'multiple-select': {
+          editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
           break
         }
         case 'bg-separate': {
