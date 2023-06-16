@@ -31,7 +31,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -183,12 +183,12 @@ export default defineComponent({
   },
   mounted() {
     if (this.config.clips.length === 1) {
-      frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
+      if (!this.editorTypeTemplate) frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
       if (this.config.clips[0].srcObj.type === 'frame') {
         /**
-         * If the frame contain only one clip, and is not init from mydesign or in preview auto popping the photo-selector
+         * If the frame contain only one clip, and is not in template editor or init from mydesign or in preview auto popping the photo-selector
          */
-        if (!(this.config.initFromMydesign || this.inPreview)) {
+        if (!(this.editorTypeTemplate || this.config.initFromMydesign || this.inPreview)) {
           window.requestAnimationFrame(() => {
             if (this.primaryLayer) {
               frameUtils.iosPhotoSelect({
@@ -258,7 +258,7 @@ export default defineComponent({
     },
     controllerHidden(val) {
       if (!val) {
-        if (this.config.active && this.config.clips.length === 1) {
+        if (!this.editorTypeTemplate && this.config.active && this.config.clips.length === 1) {
           frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
         }
       }
@@ -270,6 +270,7 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       controllerHidden: 'vivisticker/getControllerHidden',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),
     layers() {
       const config = this.config as IFrame

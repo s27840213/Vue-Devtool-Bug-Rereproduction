@@ -18,6 +18,7 @@ div(class="my-design-text-item" @click="editTemplate")
 </template>
 
 <script lang="ts">
+import { IPage } from '@/interfaces/page'
 import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -68,17 +69,17 @@ export default defineComponent({
         return
       }
       vivistickerUtils.initWithMyDesign(this.item, {
-        // TODO: handle Dialog and File-selector for frames
-        // callback: (pages: Array<IPage>) => {
-        //   pages.forEach((page: IPage) => {
-        //     page.layers.forEach(l => {
-        //       l.initFromMydesign = true
-        //     })
-        //     vivistickerUtils.initLoadingFlags(page, () => {
-        //       vivistickerUtils.handleFrameClipError(page, true)
-        //     })
-        //   })
-        // }
+        callback: (pages: Array<IPage>) => {
+          pages.forEach((page: IPage) => {
+            page.layers.forEach(l => {
+              l.initFromMydesign = true
+            })
+            // TODO: handleFrameClipError
+            // vivistickerUtils.initLoadingFlags(page, () => {
+            //   vivistickerUtils.handleFrameClipError(page, true)
+            // })
+          })
+        }
       })
     },
     handleMoreActions() {
