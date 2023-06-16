@@ -868,7 +868,7 @@ $REULER_SIZE: 20px;
     position: absolute;
     background-color: setColor(blue-1);
     &--h {
-      writing-mode: vertical-lr;
+      writing-mode: vertical-rl;
       transform: rotate(180deg);
       border-radius: 50px;
       color: setColor(white);

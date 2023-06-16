@@ -136,7 +136,7 @@ export default defineComponent({
     left: 20%;
     font-size: 12px;
     transform: scale(0.8) rotate(180deg);
-    writing-mode: vertical-lr;
+    writing-mode: vertical-rl;
   }
 
   &__line {
