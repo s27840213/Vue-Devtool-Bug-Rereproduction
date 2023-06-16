@@ -2,7 +2,7 @@
 div(class="home")
   nu-header(:showCloseIcon="showTemplateList" @close="showTemplateList = false")
   div(class="home-content")
-    div(v-if="inBrowserMode && !(isMobile && isLogin)" class="home-top")
+    div(v-if="inBrowserMode && !isLogin" class="home-top")
       div(class="home-top-text")
         span(class="home-top-text__title" v-html="$t('NN0464')")
         span(class="home-top-text__description") {{$t('NN0465')}}
@@ -16,16 +16,19 @@ div(class="home")
       router-link(v-if="inBrowserMode && !$isTouchDevice()" :to="`/editor?type=new-design-size&width=1080&height=1080`"
           class="home-top__button rounded btn-primary-sm btn-LG")
         span {{$t('NN0391')}}
-    div(class="home-list")
-      scroll-list(
+    div(class="home-list"
+        :class="[isMobileSize ? 'mt-35' : ' mt-100']")
+      scroll-list(v-if="!(!isLogin && isMobile)"
         :gridMode="true"
         type="theme")
       scroll-list(v-if="isLogin && inBrowserMode && !isMobile"
-        class="mt-100 mb-80"
+        class="mt-100 mb-65"
         type="mydesign")
       div(class="px-20"
           :style="{boxSizing: 'border-box'}")
-        ta-block(v-if="!isLogin" class="tag-title mb-30 mt-100" :content="templateBlock" :desktop-max-width="'100%'")
+        ta-block(v-if="!isLogin" class="tag-title"
+          :class="[isMobileSize ? 'mt-35' : ' mt-100']"
+          :content="templateBlock" :desktop-max-width="'100%'")
       hashtag-category-row(
         class="home-list__hashtag"
         :style="{position: isMobile ? 'sticky' : 'relative'}"
@@ -455,7 +458,7 @@ export default defineComponent({
   &:deep(.block) {
     margin: 150px 0;
     @media (max-width: 768px) {
-      margin: 100px 0;
+      margin: 75px 0;
     }
   }
 }
@@ -509,15 +512,14 @@ export default defineComponent({
 .home-list {
   width: 80%;
   position: relative;
-  padding-bottom: calc(44 * 1px);
   display: flex;
   flex-direction: column;
   &__hashtag {
+    margin-top: 16px;
     z-index: 10;
     top: -1px;
     left: 0;
     padding: 4px 12px;
-    margin: 0px;
     background-color: white;
   }
 }
