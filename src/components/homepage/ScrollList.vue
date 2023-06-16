@@ -344,8 +344,9 @@ export default defineComponent({
   gap: 8px;
   &__theme-item {
     display: grid;
-    grid-template-rows: 1fr 46px;
+    grid-template-rows: 1fr 36px;
     grid-template-columns: 1fr;
+    row-gap: 4px;
     text-align: center;
     box-sizing: border-box;
     width: 100%;
@@ -404,6 +405,8 @@ export default defineComponent({
     cursor: pointer;
     img {
       border: 1px solid setColor(gray-5);
+      border-radius: 4px;
+      overflow: hidden;
       box-sizing: border-box;
     }
     &:hover {
