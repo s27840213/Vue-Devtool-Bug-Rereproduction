@@ -265,7 +265,7 @@ class TextUtils {
     }
   }
 
-  getTextHW(_content: IText, widthLimit = -1): { width: number, height: number, spanDataList: DOMRectList[][] } {
+  getTextHW(_content: IText, widthLimit = -1): { width: number, height: number, spanDataList: DOMRect[][][] } {
     const body = this.genTextDiv(_content, widthLimit)
     const scale = _content.styles.scale ?? 1
     document.body.appendChild(body)
@@ -274,7 +274,7 @@ class TextUtils {
     return textHW
   }
 
-  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<{ width: number, height: number, spanDataList: DOMRectList[][] }> {
+  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<{ width: number, height: number, spanDataList: DOMRect[][][] }> {
     const textId = generalUtils.generateRandomString(12)
     const body = this.genTextDiv(_content, widthLimit)
     body.setAttribute('id', textId)
@@ -349,15 +349,15 @@ class TextUtils {
     return body
   }
 
-  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number, spanDataList: DOMRectList[][] } {
+  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number, spanDataList: DOMRect[][][] } {
     return this.getHWBySize(body.getBoundingClientRect(), body, scale, widthLimit)
   }
 
-  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number, spanDataList: DOMRectList[][] } {
+  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number, spanDataList: DOMRect[][][] } {
     return {
       width: body.style.width !== 'max-content' ? widthLimit : size.width * scale,
       height: body.style.height !== 'max-content' ? widthLimit : size.height * scale,
-      spanDataList: Array.from(body.children).map(p => Array.from(p.children).map(span => span.getClientRects()))
+      spanDataList: Array.from(body.children).map(p => Array.from(p.children).map(span => Array.from(span.getClientRects())))
     }
   }
 
@@ -715,7 +715,7 @@ class TextUtils {
     }
   }
 
-  async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRectList[][] }): Promise<number> {
+  async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
     const { widthLimit, otherDimension, loops } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
@@ -732,7 +732,7 @@ class TextUtils {
     }
   }
 
-  autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRectList[][] }): {
+  autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): {
     widthLimit: number,
     otherDimension: number,
     loops: number
@@ -803,7 +803,7 @@ class TextUtils {
     }
   }
 
-  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRectList[][] }): Promise<{
+  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<{
     widthLimit: number,
     otherDimension: number,
     loops: number
@@ -874,7 +874,7 @@ class TextUtils {
     }
   }
 
-  checkSpanDataList(currSpanDataList: DOMRectList[][], targetSpanDataList: DOMRectList[][] | undefined, isVertical: boolean): { stop: boolean, offset: number } {
+  checkSpanDataList(currSpanDataList: DOMRect[][][], targetSpanDataList: DOMRect[][][] | undefined, isVertical: boolean): { stop: boolean, offset: number } {
     if (targetSpanDataList === undefined) return { stop: true, offset: 0 }
 
     // number of paragraphs doesn't match, unexpected situation, skip comparing by spanDataList

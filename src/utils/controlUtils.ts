@@ -615,7 +615,7 @@ class Controller {
     })
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: number | string | boolean | DOMRectList[][] }) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: { [key: string]: number | string | boolean | DOMRect[][][] }) {
     store.commit('UPDATE_layerProps', {
       pageIndex,
       layerIndex,

@@ -119,7 +119,7 @@ export interface IText extends ILayer<ITextStyle> {
   isCompensated?: boolean,
   isDraggingCursor: boolean,
   isFlipping: boolean,
-  spanDataList?: DOMRectList[][]
+  spanDataList?: DOMRect[][][]
 }
 
 export interface IShape extends ILayer<IStyle> {
