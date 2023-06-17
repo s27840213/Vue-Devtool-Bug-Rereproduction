@@ -8,8 +8,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
     vivisticker="dark"
     :color="{close: 'black-5', search: 'black-5'}"
     v-model:expanded="isSearchBarExpanded"
-    @search="handleSearch"
-    @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
+    @search="handleSearch")
   tags(v-show="tags && tags.length"
       class="panel-template-content__tags"
       :class="{collapsed: !isSearchBarExpanded}"
@@ -19,7 +18,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
       @search="handleSearch")
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
-                :class="{invisible: !item.show, collapsed: !isSearchBarExpanded}"
+                :class="{invisible: !item.show, collapsed: tags && tags.length && !isSearchBarExpanded}"
                 :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="handleLoadMore"
                 @scroll.passive="handleScrollTop($event, item.key as 'mainContent'|'searchResult')")
@@ -105,7 +104,6 @@ export default defineComponent({
         mainContent: 0,
         searchResult: 0
       },
-      tagScrollLeft: 0,
       isSearchBarExpanded: false,
       elMainContent: undefined as HTMLElement | undefined
     }

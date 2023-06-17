@@ -2,7 +2,7 @@
 div(class="main-menu"
     ref="panel")
   div(class="main-menu__bottom-section")
-    keep-alive(:include="['panel-object', 'panel-object-us', 'panel-background', 'panel-background-us', 'panel-text', 'panel-text-us', 'panel-template']")
+    keep-alive(:include="['panel-object', 'panel-object-us', 'panel-template-us', 'panel-background', 'panel-background-us', 'panel-text', 'panel-text-us', 'panel-template']")
       component(class="border-box"
                 :is="currTab"
                 @openColorPicker="handleOpenColorPicker")
@@ -17,6 +17,7 @@ import PanelBackgroundUs from '@/components/vivisticker/us/PanelBackground.vue'
 import PanelObjectUs from '@/components/vivisticker/us/PanelObject.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 import PanelTemplate from '@/components/vivisticker/PanelTemplate.vue'
+import PanelTemplateUs from '@/components/vivisticker/us/PanelTemplate.vue'
 
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
@@ -33,6 +34,7 @@ export default defineComponent({
     PanelText,
     PanelTextUs,
     PanelTemplate,
+    PanelTemplateUs,
     PanelRemoveBg
   },
   computed: {
