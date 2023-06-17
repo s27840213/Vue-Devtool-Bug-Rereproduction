@@ -87,9 +87,14 @@ import PanelObjectGifs from '../PanelObjectGifs.vue'
 export default defineComponent({
   extends: PanelObjectGifs,
   emits: ['search'],
+  data() {
+    return {
+      tagScrollLeft: 0,
+    }
+  },
   computed: {
     ...mapState('giphy', {
-      nextCategory: 'nextCategory'
+      nextCategory: 'nextCategory',
     }),
     hideCategoryIconList(): boolean {
       return !this.isInCategory || this.showFav
