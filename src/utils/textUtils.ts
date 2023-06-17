@@ -794,6 +794,7 @@ class TextUtils {
       const { stop, offset } = this.checkSpanDataList(autoSize.spanDataList, initSize.spanDataList, isVertical)
       widthLimit += offset * scale
       direction += offset
+      autoSize = this.getTextHW(config, widthLimit)
       shouldContinue = !stop
     }
     return {
@@ -865,6 +866,7 @@ class TextUtils {
       const { stop, offset } = this.checkSpanDataList(autoSize.spanDataList, initSize.spanDataList, isVertical)
       widthLimit += offset * scale
       direction += offset
+      autoSize = await this.getTextHWAsync(config, widthLimit)
       shouldContinue = !stop
     }
     return {
