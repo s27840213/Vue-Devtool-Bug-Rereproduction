@@ -254,10 +254,8 @@ export default defineComponent({
       if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         let x = config.styles.x
         let y = config.styles.y
-        if (config.widthLimit === -1) {
-          x = config.styles.x - (textHW.width - config.styles.width) / 2
-          y = config.styles.y - (textHW.height - config.styles.height) / 2
-        }
+        x = config.styles.x - (textHW.width - config.styles.width) / 2
+        y = config.styles.y - (textHW.height - config.styles.height) / 2
         // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
