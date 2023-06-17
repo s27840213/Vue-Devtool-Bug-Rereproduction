@@ -4,6 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
+import { AutoResizeByHeight, AutoResizeByHeightSync, AutoResizeBySpanDataList, IRunResult } from '@/utils/autoResizeUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -732,184 +733,14 @@ class TextUtils {
     }
   }
 
-  autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): {
-    widthLimit: number,
-    otherDimension: number,
-    loops: number
-  } {
-    const isVertical = config.styles.writingMode.includes('vertical')
-    const dimension = isVertical ? 'width' : 'height'
-    const scale = config.styles.scale
-    let direction = 0
-    let shouldContinue = true
-    let widthLimit = initSize.widthLimit
-    let autoDimension = -1
-    let autoSize = this.getTextHW(config, widthLimit)
-    const originDimension = initSize[dimension]
-    let prevDiff = Number.MAX_VALUE
-    let minDiff = Number.MAX_VALUE
-    let minDiffWidLimit = -1
-    let minDiffDimension = -1
-    while (shouldContinue) {
-      autoDimension = autoSize[dimension]
-      const currDiff = Math.abs(autoDimension - originDimension)
-      // console.log(autoDimension, originDimension, currDiff, widthLimit, config.widthLimit)
-      if (currDiff < minDiff) {
-        minDiff = currDiff
-        minDiffWidLimit = widthLimit
-        minDiffDimension = autoDimension
-      }
-      if (currDiff > prevDiff) {
-        if (minDiffWidLimit !== -1) {
-          return {
-            widthLimit: minDiffWidLimit,
-            otherDimension: minDiffDimension,
-            loops: Math.abs(direction)
-          }
-        } else {
-          return {
-            widthLimit: initSize.widthLimit,
-            otherDimension: originDimension,
-            loops: Math.abs(direction)
-          }
-        }
-      }
-      prevDiff = currDiff
-      if (autoDimension - originDimension > 5 * scale) {
-        if (direction < 0) break
-        if (direction >= 200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
-        widthLimit += scale
-        direction += 1
-        autoSize = this.getTextHW(config, widthLimit)
-        continue
-      }
-      if (originDimension - autoDimension > 5 * scale) {
-        if (direction > 0) break
-        if (direction <= -200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
-        widthLimit -= scale
-        direction -= 1
-        autoSize = this.getTextHW(config, widthLimit)
-        continue
-      }
-      const { stop, offset } = this.checkSpanDataList(autoSize.spanDataList, initSize.spanDataList, isVertical)
-      widthLimit += offset * scale
-      direction += offset
-      autoSize = this.getTextHW(config, widthLimit)
-      shouldContinue = !stop
-    }
-    return {
-      widthLimit,
-      otherDimension: autoDimension,
-      loops: Math.abs(direction)
-    }
+  autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): IRunResult {
+    const res = (new AutoResizeByHeightSync(config, initSize)).runSync()
+    return (new AutoResizeBySpanDataList(config, { ...initSize, widthLimit: res.widthLimit })).runSync()
   }
 
-  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<{
-    widthLimit: number,
-    otherDimension: number,
-    loops: number
-  }> {
-    const isVertical = config.styles.writingMode.includes('vertical')
-    const dimension = isVertical ? 'width' : 'height'
-    const scale = config.styles.scale
-    let direction = 0
-    let shouldContinue = true
-    let widthLimit = initSize.widthLimit
-    let autoDimension = -1
-    let autoSize = await this.getTextHWAsync(config, widthLimit)
-    const originDimension = initSize[dimension]
-    let prevDiff = Number.MAX_VALUE
-    let minDiff = Number.MAX_VALUE
-    let minDiffWidLimit = -1
-    let minDiffDimension = -1
-    while (shouldContinue) {
-      autoDimension = autoSize[dimension]
-      const currDiff = Math.abs(autoDimension - originDimension)
-      // console.log(autoDimension, originDimension, currDiff, widthLimit, config.widthLimit)
-      if (currDiff < minDiff) {
-        minDiff = currDiff
-        minDiffWidLimit = widthLimit
-        minDiffDimension = autoDimension
-      }
-      if (currDiff > prevDiff) {
-        if (minDiffWidLimit !== -1) {
-          return {
-            widthLimit: minDiffWidLimit,
-            otherDimension: minDiffDimension,
-            loops: Math.abs(direction)
-          }
-        } else {
-          return {
-            widthLimit: initSize.widthLimit,
-            otherDimension: originDimension,
-            loops: Math.abs(direction)
-          }
-        }
-      }
-      prevDiff = currDiff
-      if (autoDimension - originDimension > 5 * scale) {
-        if (direction < 0) break
-        if (direction >= 200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
-        widthLimit += scale
-        direction += 1
-        autoSize = await this.getTextHWAsync(config, widthLimit)
-        continue
-      }
-      if (originDimension - autoDimension > 5 * scale) {
-        if (direction > 0) break
-        if (direction <= -200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
-        widthLimit -= scale
-        direction -= 1
-        autoSize = await this.getTextHWAsync(config, widthLimit)
-        continue
-      }
-      const { stop, offset } = this.checkSpanDataList(autoSize.spanDataList, initSize.spanDataList, isVertical)
-      widthLimit += offset * scale
-      direction += offset
-      autoSize = await this.getTextHWAsync(config, widthLimit)
-      shouldContinue = !stop
-    }
-    return {
-      widthLimit,
-      otherDimension: autoDimension,
-      loops: Math.abs(direction)
-    }
-  }
-
-  checkSpanDataList(currSpanDataList: DOMRect[][][], targetSpanDataList: DOMRect[][][] | undefined, isVertical: boolean): { stop: boolean, offset: number } {
-    if (targetSpanDataList === undefined) return { stop: true, offset: 0 }
-
-    // number of paragraphs doesn't match, unexpected situation, skip comparing by spanDataList
-    if (currSpanDataList.length !== targetSpanDataList.length) return { stop: true, offset: 0 }
-
-    for (let i = 0; i < currSpanDataList.length; i++) { // iterating <p>
-      // number of spans in some paragraph doesn't match, unexpected situation, skip comparing by spanDataList
-      const currSpans = currSpanDataList[i]
-      const targetSpans = targetSpanDataList[i]
-      if (currSpans.length !== targetSpans.length) return { stop: true, offset: 0 }
-
-      for (let j = 0; j < currSpans.length; j++) { // iterating <span>
-        const currSpanRects = currSpans[j]
-        const targetSpanRects = targetSpans[j]
-
-        // if target has more lines, decrease widthLimit.
-        if (currSpanRects.length < targetSpanRects.length) return { stop: false, offset: -1 }
-
-        // if target has less lines, increase widthLimit.
-        if (currSpanRects.length > targetSpanRects.length) return { stop: false, offset: 1 }
-
-        const dimension = isVertical ? 'height' : 'width'
-        const currLastLineSize = currSpanRects[currSpanRects.length - 1][dimension]
-        const targetLastLineSize = targetSpanRects[targetSpanRects.length - 1][dimension]
-
-        // if target last line is longer, decrease widthLimit to push more characters to last line.
-        if (targetLastLineSize - currLastLineSize > 5) return { stop: false, offset: -1 }
-
-        // if target last line is shorter, increase widthLimit to pull more characters from last line.
-        if (currLastLineSize - targetLastLineSize > 5) return { stop: false, offset: 1 }
-      }
-    }
-    return { stop: true, offset: 0 }
+  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<IRunResult> {
+    const res = await (new AutoResizeByHeight(config, initSize)).run()
+    return await (new AutoResizeBySpanDataList(config, { ...initSize, widthLimit: res.widthLimit })).run()
   }
 
   async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {

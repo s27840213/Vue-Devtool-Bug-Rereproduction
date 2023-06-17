@@ -1,0 +1,265 @@
+import { IText } from '@/interfaces/layer'
+import textUtils from '@/utils/textUtils'
+
+export interface IRunResult {
+  widthLimit: number,
+  otherDimension: number,
+  loops: number
+}
+
+export class AutoResizeByHeight {
+  MAX_LOOP = 200
+  TOLERANCE = 5
+  config: IText
+  initSize: { width: number; height: number; widthLimit: number; spanDataList?: DOMRect[][][] | undefined }
+  isVertical: boolean
+  dimension: 'width' | 'height'
+  scale: number
+  direction: number
+  offset: number
+  prevOffset: number
+  shouldContinue: boolean
+  widthLimit: number
+  autoDimension: number
+  originDimension: any
+  prevDiff: number
+  minDiff: number
+  minDiffWidLimit: number
+  minDiffDimension: number
+  autoSize: { width: number; height: number; spanDataList: DOMRect[][][] }
+  runResult: IRunResult | undefined
+
+  constructor(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }) {
+    this.config = config
+    this.initSize = initSize
+    this.isVertical = config.styles.writingMode.includes('vertical')
+    this.dimension = this.isVertical ? 'width' : 'height'
+    this.scale = config.styles.scale
+    this.direction = 0
+    this.offset = 0
+    this.prevOffset = 0
+    this.shouldContinue = true
+    this.widthLimit = initSize.widthLimit
+    this.autoDimension = -1
+    this.originDimension = initSize[this.dimension]
+    this.prevDiff = Number.MAX_VALUE
+    this.minDiff = Number.MAX_VALUE
+    this.minDiffWidLimit = -1
+    this.minDiffDimension = -1
+    this.autoSize = { width: 0, height: 0, spanDataList: [] }
+  }
+
+  loopPrevCondition(): boolean {
+    this.autoDimension = this.autoSize[this.dimension]
+    const currDiff = Math.abs(this.autoDimension - this.originDimension)
+    // console.log(this.autoDimension, this.originDimension, currDiff, this.widthLimit, cthis.onfig.widthLimit)
+    if (currDiff < this.minDiff) {
+      this.minDiff = currDiff
+      this.minDiffWidLimit = this.widthLimit
+      this.minDiffDimension = this.autoDimension
+    }
+    if (currDiff > this.prevDiff) {
+      if (this.minDiffWidLimit !== -1) {
+        this.runResult = {
+          widthLimit: this.minDiffWidLimit,
+          otherDimension: this.minDiffDimension,
+          loops: Math.abs(this.direction)
+        }
+        return true
+      } else {
+        this.runResult = {
+          widthLimit: this.initSize.widthLimit,
+          otherDimension: this.originDimension,
+          loops: Math.abs(this.direction)
+        }
+        return true
+      }
+    }
+    this.prevDiff = currDiff
+    return false
+  }
+
+  loopComparision(): boolean {
+    if (Math.abs(this.direction) >= this.MAX_LOOP) {
+      this.runResult = {
+        widthLimit: this.minDiffWidLimit,
+        otherDimension: this.minDiffDimension,
+        loops: Math.abs(this.direction)
+      }
+      return true
+    }
+    this.shouldContinue = false
+    if (this.autoDimension - this.originDimension > this.TOLERANCE * this.scale) {
+      this.shouldContinue = true
+      this.offset = 1
+    }
+    if (this.originDimension - this.autoDimension > this.TOLERANCE * this.scale) {
+      this.shouldContinue = true
+      this.offset = -1
+    }
+    if (!this.shouldContinue) return false
+    if (this.direction * this.offset < 0 || this.prevOffset * this.offset < 0) {
+      this.shouldContinue = false
+      return false
+    }
+    this.widthLimit += this.offset * this.scale
+    this.direction += this.offset
+    this.prevOffset = this.offset
+    return false
+  }
+
+  async run(): Promise<IRunResult> {
+    this.autoSize = await textUtils.getTextHWAsync(this.config, this.widthLimit)
+    while (this.shouldContinue) {
+      if (this.loopPrevCondition()) return this.runResult!
+      if (this.loopComparision()) return this.runResult!
+      this.autoSize = await textUtils.getTextHWAsync(this.config, this.widthLimit)
+    }
+    return {
+      widthLimit: this.widthLimit,
+      otherDimension: this.autoDimension,
+      loops: Math.abs(this.direction)
+    }
+  }
+}
+
+export class AutoResizeByHeightSync extends AutoResizeByHeight {
+  runSync(): IRunResult {
+    this.autoSize = textUtils.getTextHW(this.config, this.widthLimit)
+    while (this.shouldContinue) {
+      if (this.loopPrevCondition()) return this.runResult!
+      if (this.loopComparision()) return this.runResult!
+      this.autoSize = textUtils.getTextHW(this.config, this.widthLimit)
+    }
+    return {
+      widthLimit: this.widthLimit,
+      otherDimension: this.autoDimension,
+      loops: Math.abs(this.direction)
+    }
+  }
+}
+
+export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
+  MAX_LOOP = 50
+  TOLERANCE = 10
+
+  checkStructMatch(currSpanDataList: DOMRect[][][], targetSpanDataList: DOMRect[][][] | undefined): boolean {
+    if (targetSpanDataList === undefined) return false
+
+    // number of paragraphs doesn't match, unexpected situation, skip comparing by spanDataList
+    if (currSpanDataList.length !== targetSpanDataList.length) return false
+
+    for (let i = 0; i < currSpanDataList.length; i++) { // iterating <p>
+      // number of spans in some paragraph doesn't match, unexpected situation, skip comparing by spanDataList
+      const currSpans = currSpanDataList[i]
+      const targetSpans = targetSpanDataList[i]
+      if (currSpans.length !== targetSpans.length) return false
+    }
+    return true
+  }
+
+  loopPrevCondition(): boolean {
+    this.autoDimension = this.autoSize[this.dimension]
+    if (!this.checkStructMatch(this.autoSize.spanDataList, this.initSize.spanDataList)) {
+      this.runResult = {
+        widthLimit: this.widthLimit,
+        otherDimension: this.autoDimension,
+        loops: Math.abs(this.direction)
+      }
+      return true
+    }
+    return false
+  }
+
+  loopComparision(): boolean {
+    if (Math.abs(this.direction) >= this.MAX_LOOP) {
+      this.runResult = {
+        widthLimit: this.minDiffWidLimit,
+        otherDimension: this.minDiffDimension,
+        loops: Math.abs(this.direction)
+      }
+      return true
+    }
+    const currSpanDataList = this.autoSize.spanDataList
+    const targetSpanDataList = this.initSize.spanDataList!
+
+    for (let i = 0; i < currSpanDataList.length; i++) { // iterating <p>
+      const currSpans = currSpanDataList[i]
+      const targetSpans = targetSpanDataList[i]
+
+      for (let j = 0; j < currSpans.length; j++) { // iterating <span>
+        const currSpanRects = currSpans[j]
+        const targetSpanRects = targetSpans[j]
+
+        let sameLines = true
+        // if target has more lines, decrease widthLimit.
+        if (currSpanRects.length < targetSpanRects.length) {
+          sameLines = false
+          this.offset = -1
+        }
+
+        // if target has less lines, increase widthLimit.
+        if (currSpanRects.length > targetSpanRects.length) {
+          sameLines = false
+          this.offset = 1
+        }
+
+        if (sameLines) {
+          const dimension = this.isVertical ? 'height' : 'width'
+          const currLastLineSize = currSpanRects[currSpanRects.length - 1][dimension]
+          const targetLastLineSize = targetSpanRects[targetSpanRects.length - 1][dimension]
+          console.log(currLastLineSize, targetLastLineSize)
+
+          this.shouldContinue = false
+
+          const currDiff = Math.abs(currLastLineSize - targetLastLineSize)
+          if (currDiff < this.minDiff) {
+            this.minDiff = currDiff
+            this.minDiffWidLimit = this.widthLimit
+            this.minDiffDimension = this.autoDimension
+          }
+          if (currDiff > this.prevDiff) {
+            if (this.minDiffWidLimit !== -1) {
+              this.runResult = {
+                widthLimit: this.minDiffWidLimit,
+                otherDimension: this.minDiffDimension,
+                loops: Math.abs(this.direction)
+              }
+              return true
+            } else {
+              this.runResult = {
+                widthLimit: this.initSize.widthLimit,
+                otherDimension: this.originDimension,
+                loops: Math.abs(this.direction)
+              }
+              return true
+            }
+          }
+          this.prevDiff = currDiff
+
+          // if target last line is longer, decrease widthLimit to push more characters to last line.
+          if (targetLastLineSize - currLastLineSize > this.TOLERANCE) {
+            this.shouldContinue = true
+            this.offset = -1
+          }
+
+          // if target last line is shorter, increase widthLimit to pull more characters from last line.
+          if (currLastLineSize - targetLastLineSize > this.TOLERANCE) {
+            this.shouldContinue = true
+            this.offset = 1
+          }
+        }
+
+        if (!this.shouldContinue) return false
+        if (this.direction * this.offset < 0 || this.prevOffset * this.offset < 0) {
+          this.shouldContinue = false
+          return false
+        }
+        this.widthLimit += this.offset * this.scale
+        this.direction += this.offset
+        this.prevOffset = this.offset
+      }
+    }
+    return false
+  }
+}
