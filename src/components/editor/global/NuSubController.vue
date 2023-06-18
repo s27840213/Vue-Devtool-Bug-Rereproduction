@@ -197,8 +197,7 @@ export default defineComponent({
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
-      isHandleShadow: 'shadow/isHandling',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
+      isHandleShadow: 'shadow/isHandling'
     }),
     wrapperStyles(): any {
       const scale = this.primaryLayer.styles.scale
