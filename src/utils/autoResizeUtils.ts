@@ -7,7 +7,17 @@ export interface IRunResult {
   loops: number
 }
 
+const DEBUG_HEIGHT = false
+// const DEBUG_HEIGHT = true
+const DEBUG_SPANDATALIST = false
+// const DEBUG_SPANDATALIST = true
+const DEBUG_LOG_FILTER = (by: string, identity: string) => {
+  // return identity.startsWith('Meanwhile')
+  return false
+}
+
 export class AutoResizeByHeight {
+  BY = 'height'
   MAX_LOOP = 200
   TOLERANCE = 5
   config: IText
@@ -29,6 +39,7 @@ export class AutoResizeByHeight {
   autoSize: { width: number; height: number; spanDataList: DOMRect[][][] }
   runResult: IRunResult | undefined
 
+  isDebugMode = DEBUG_HEIGHT // for debugging
   identity = '' // for debugging
 
   constructor(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }) {
@@ -54,13 +65,16 @@ export class AutoResizeByHeight {
   }
 
   log(...args: any[]) {
-    console.log(this.identity, ...args)
+    if (!this.isDebugMode) return
+    if (!DEBUG_LOG_FILTER(this.BY, this.identity)) return
+    console.log(this.BY, this.identity, ...args)
   }
 
   loopPrevCondition(): boolean {
+    this.log('loopPrevCondision')
     this.autoDimension = this.autoSize[this.dimension]
     const currDiff = Math.abs(this.autoDimension - this.originDimension)
-    // this.log(this.autoDimension, this.originDimension, currDiff, this.widthLimit, cthis.onfig.widthLimit)
+    this.log(this.autoDimension, this.originDimension, currDiff, this.widthLimit, this.config.widthLimit)
     if (currDiff < this.minDiff) {
       this.minDiff = currDiff
       this.minDiffWidLimit = this.widthLimit
@@ -88,6 +102,7 @@ export class AutoResizeByHeight {
   }
 
   loopComparison(): boolean {
+    this.log('loopComparison')
     if (Math.abs(this.direction) >= this.MAX_LOOP) {
       this.runResult = {
         widthLimit: this.minDiffWidLimit,
@@ -117,6 +132,7 @@ export class AutoResizeByHeight {
   }
 
   async run(): Promise<IRunResult> {
+    this.log('run start')
     this.autoSize = await textUtils.getTextHWAsync(this.config, this.widthLimit)
     while (this.shouldContinue) {
       if (this.loopPrevCondition()) return this.runResult!
@@ -133,6 +149,7 @@ export class AutoResizeByHeight {
 
 export class AutoResizeByHeightSync extends AutoResizeByHeight {
   runSync(): IRunResult {
+    this.log('runSync start')
     this.autoSize = textUtils.getTextHW(this.config, this.widthLimit)
     while (this.shouldContinue) {
       if (this.loopPrevCondition()) return this.runResult!
@@ -148,8 +165,11 @@ export class AutoResizeByHeightSync extends AutoResizeByHeight {
 }
 
 export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
+  BY = 'spanDataList'
   MAX_LOOP = 50
   TOLERANCE = 10
+
+  isDebugMode = DEBUG_SPANDATALIST // for debugging
 
   checkStructMatch(currSpanDataList: DOMRect[][][], targetSpanDataList: DOMRect[][][] | undefined): boolean {
     if (targetSpanDataList === undefined) return false
@@ -167,10 +187,10 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
   }
 
   loopPrevCondition(): boolean {
-    // this.log('loopPrevCondision')
+    this.log('loopPrevCondision')
     this.autoDimension = this.autoSize[this.dimension]
     if (!this.checkStructMatch(this.autoSize.spanDataList, this.initSize.spanDataList)) {
-      // this.log('spanData do not match')
+      this.log('spanData do not match')
       this.runResult = {
         widthLimit: this.widthLimit,
         otherDimension: this.autoDimension,
@@ -182,7 +202,7 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
   }
 
   loopComparison(): boolean {
-    // this.log('loopComparison')
+    this.log('loopComparison')
     if (Math.abs(this.direction) >= this.MAX_LOOP) {
       this.runResult = {
         widthLimit: this.minDiffWidLimit,
@@ -203,6 +223,7 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
         const targetSpanRects = targetSpans[j]
 
         let sameLines = true
+        this.log(currSpanRects.length, targetSpanRects.length)
         // if target has more lines, decrease widthLimit.
         if (currSpanRects.length < targetSpanRects.length) {
           sameLines = false
@@ -215,18 +236,18 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
           this.offset = 1
         }
 
-        // this.log(i, j)
+        this.log(i, j)
 
         if (sameLines) {
           const dimension = this.isVertical ? 'height' : 'width'
           const currLastLineSize = currSpanRects[currSpanRects.length - 1][dimension]
           const targetLastLineSize = targetSpanRects[targetSpanRects.length - 1][dimension]
-          // this.log(currLastLineSize, targetLastLineSize)
+          this.log(currLastLineSize, targetLastLineSize)
 
           this.shouldContinue = false
 
           const currDiff = Math.abs(currLastLineSize - targetLastLineSize)
-          // this.log(currDiff, this.prevDiff, this.minDiff, this.minDiffWidLimit, this.minDiffDimension)
+          this.log(currDiff, this.prevDiff, this.minDiff, this.minDiffWidLimit, this.minDiffDimension)
           if (currDiff < this.minDiff) {
             this.minDiff = currDiff
             this.minDiffWidLimit = this.widthLimit
@@ -265,7 +286,7 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
 
           if (!this.shouldContinue) continue // same lines and same last line length
         }
-        // this.log(this.shouldContinue, this.offset, this.direction, this.prevOffset, this.MAX_LOOP, this.TOLERANCE)
+        this.log(this.shouldContinue, this.offset, this.direction, this.prevOffset, this.MAX_LOOP, this.TOLERANCE)
         if (this.direction * this.offset < 0 || this.prevOffset * this.offset < 0) {
           this.shouldContinue = false
           return false
