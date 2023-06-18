@@ -355,11 +355,46 @@ class TextUtils {
   }
 
   getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number, spanDataList: DOMRect[][][] } {
+    const spanDataList = Array.from(body.children).map(
+      p => Array.from(p.children).map(
+        span => Array.from(span.getClientRects()).map(
+          rect => rect.toJSON()
+        )
+      )
+    )
+    this.mergeLines(spanDataList)
     return {
       width: body.style.width !== 'max-content' ? widthLimit : size.width * scale,
       height: body.style.height !== 'max-content' ? widthLimit : size.height * scale,
-      spanDataList: Array.from(body.children).map(p => Array.from(p.children).map(span => Array.from(span.getClientRects()).map(rect => rect.toJSON())))
+      spanDataList
     }
+  }
+
+  mergeLines(spanDataList: DOMRect[][][]) {
+    spanDataList.forEach(p => {
+      p.forEach(span => {
+        span.forEach((row, index) => {
+          const nextIndex = index + 1
+          while (nextIndex < span.length) {
+            const curr = row
+            const next = span[nextIndex]
+            const currTop = curr.y
+            const currBottom = curr.y + curr.height
+            const nextTop = next.y
+            const nextBottom = next.y + next.height
+            if (((nextTop <= currTop && currTop <= nextBottom &&
+              nextTop <= currBottom && currBottom <= nextBottom) ||
+              (currTop <= nextTop && nextTop <= currBottom &&
+                currTop <= nextBottom && nextBottom <= currBottom))) {
+              curr.y = Math.min(curr.y, next.y)
+              curr.width += next.width
+              curr.height = Math.max(curr.height, next.height)
+              span.splice(nextIndex, 1)
+            } else break
+          }
+        })
+      })
+    })
   }
 
   updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false, noPush = false) {
