@@ -9,11 +9,11 @@ export interface IRunResult {
 
 const DEBUG_HEIGHT = false
 // const DEBUG_HEIGHT = true
-const DEBUG_SPANDATALIST = false
-// const DEBUG_SPANDATALIST = true
+// const DEBUG_SPANDATALIST = false
+const DEBUG_SPANDATALIST = true
 const DEBUG_LOG_FILTER = (by: string, identity: string) => {
   // return identity.startsWith('Meanwhile')
-  return false
+  return true
 }
 
 export class AutoResizeByHeight {
@@ -67,7 +67,7 @@ export class AutoResizeByHeight {
   log(...args: any[]) {
     if (!this.isDebugMode) return
     if (!DEBUG_LOG_FILTER(this.BY, this.identity)) return
-    console.log(this.BY, this.identity, ...args)
+    console.log(this.BY, this.identity.substring(0, 50), ...args)
   }
 
   updateDiff(currDiff: number) {
@@ -115,6 +115,19 @@ export class AutoResizeByHeight {
     this.prevOffset = this.offset
   }
 
+  undoToMinDiff() {
+    if (this.minDiffWidLimit === -1) {
+      this.widthLimit = this.initSize.widthLimit
+      this.direction = 0
+      this.prevOffset = 0
+    } else {
+      const direction = Math.round((this.widthLimit - this.minDiffWidLimit) / this.scale)
+      this.widthLimit = this.minDiffWidLimit
+      this.direction = direction
+      this.prevOffset = this.direction === 0 ? 0 : (this.direction > 0 ? 1 : -1)
+    }
+  }
+
   compareByHeight(): boolean {
     this.shouldContinue = false
 
@@ -154,7 +167,7 @@ export class AutoResizeByHeight {
   currentResult(): IRunResult {
     return {
       widthLimit: this.widthLimit,
-      otherDimension: this.autoDimension,
+      otherDimension: this.autoDimension === -1 ? this.originDimension : this.autoDimension,
       loops: Math.abs(this.direction)
     }
   }
@@ -167,11 +180,7 @@ export class AutoResizeByHeight {
         loops: Math.abs(this.direction)
       }
     } else {
-      return {
-        widthLimit: this.initSize.widthLimit,
-        otherDimension: this.originDimension,
-        loops: Math.abs(this.direction)
-      }
+      return this.currentResult()
     }
   }
 
@@ -206,10 +215,24 @@ export class AutoResizeByHeightSync extends AutoResizeByHeight {
 
 export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
   BY = 'spanDataList'
-  MAX_LOOP = 50
-  TOLERANCE = 10
+  MAX_LOOP = 100
+  pIndex = 0
+  sIndex = 0
 
   isDebugMode = DEBUG_SPANDATALIST // for debugging
+
+  resetParamsForIJ() {
+    this.MAX_LOOP += Math.abs(this.direction)
+    // direction is an important information used in undoPrevOffset to decide whether to reset prevOffset to 0
+    // so instead of resetting direction, increase MAX_LOOP by direction count to achieve the same loop limit for new i, j
+
+    this.prevDiff = Number.MAX_VALUE
+    this.minDiff = Number.MAX_VALUE
+    // this.minDiffWidLimit = -1
+    // this.minDiffDimension = -1
+    // reset diff values to avoid comparing diff values between different i, j
+    // but widthLimit and dimension are kept in case bestResult is needed
+  }
 
   checkStructMatch(currSpanDataList: DOMRect[][][], targetSpanDataList: DOMRect[][][] | undefined): boolean {
     if (targetSpanDataList === undefined) return false
@@ -227,7 +250,9 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
   }
 
   compareByLineCount(currLines: number, targetLines: number): boolean {
-    this.log(currLines, targetLines)
+    // @return: whether line counts are the same
+
+    this.log('lineCount:', currLines, targetLines)
 
     // if target has more lines, decrease widthLimit.
     if (currLines < targetLines) {
@@ -244,61 +269,73 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
   }
 
   compareByLastLine(currLastLineSize: number, targetLastLineSize: number): boolean {
-    this.log(currLastLineSize, targetLastLineSize)
+    // @return: whether to go on to next span
 
-    this.shouldContinue = false
+    this.log('lastLineSize:', currLastLineSize, targetLastLineSize)
 
     const currDiff = Math.abs(currLastLineSize - targetLastLineSize)
     this.log(currDiff, this.prevDiff, this.minDiff, this.minDiffWidLimit, this.minDiffDimension)
-    if (this.checkDiff(currDiff)) return true
+    if (this.checkDiff(currDiff)) {
+      this.undoToMinDiff()
+      return true
+    }
 
     // if target last line is longer, decrease widthLimit to push more characters to last line.
     if (targetLastLineSize - currLastLineSize > this.TOLERANCE) {
-      this.shouldContinue = true
       this.offset = -1
+      return false
     }
 
     // if target last line is shorter, increase widthLimit to pull more characters from last line.
     if (currLastLineSize - targetLastLineSize > this.TOLERANCE) {
-      this.shouldContinue = true
       this.offset = 1
+      return false
     }
-    return false
+
+    return true // close enough, go on to next span
   }
 
   compareBySpanDataList(): boolean {
     const currSpanDataList = this.autoSize.spanDataList
     const targetSpanDataList = this.initSize.spanDataList!
 
-    for (let i = 0; i < currSpanDataList.length; i++) { // iterating <p>
-      const currSpans = currSpanDataList[i]
-      const targetSpans = targetSpanDataList[i]
+    const currSpans = currSpanDataList[this.pIndex]
+    const targetSpans = targetSpanDataList[this.pIndex]
 
-      for (let j = 0; j < currSpans.length; j++) { // iterating <span>
-        const currSpanRects = currSpans[j]
-        const targetSpanRects = targetSpans[j]
+    const currSpanRects = currSpans[this.sIndex]
+    const targetSpanRects = targetSpans[this.sIndex]
 
-        this.log(i, j)
+    this.log('i, j:', this.pIndex, this.sIndex)
 
-        const sameLines = this.compareByLineCount(currSpanRects.length, targetSpanRects.length)
+    const sameLines = this.compareByLineCount(currSpanRects.length, targetSpanRects.length)
 
-        if (sameLines) {
-          const dimension = this.isVertical ? 'height' : 'width'
-          const currLastLineSize = currSpanRects[currSpanRects.length - 1][dimension]
-          const targetLastLineSize = targetSpanRects[targetSpanRects.length - 1][dimension]
+    if (sameLines) {
+      const dimension = this.isVertical ? 'height' : 'width'
+      const currLastLineSize = currSpanRects[currSpanRects.length - 1][dimension]
+      const targetLastLineSize = targetSpanRects[targetSpanRects.length - 1][dimension]
 
-          if (this.compareByLastLine(currLastLineSize, targetLastLineSize)) return true
-
-          if (!this.shouldContinue) continue // same lines and same last line length, go on to next span
+      const goNextSpan = this.compareByLastLine(currLastLineSize, targetLastLineSize)
+      if (goNextSpan) {
+        if (this.sIndex === currSpans.length - 1) {
+          this.sIndex = 0
+          if (this.pIndex === currSpanDataList.length - 1) {
+            return true // all close enough, return currentResult
+          } else {
+            this.pIndex++
+          }
+        } else {
+          this.sIndex++
         }
-
-        this.log(this.shouldContinue, this.offset, this.direction, this.prevOffset, this.MAX_LOOP, this.TOLERANCE)
-        if (this.checkDirection()) return true
-        this.applyOffset()
-        return false // head to next loop
+        this.log('go on to next i, j')
+        this.resetParamsForIJ()
+        return false // head to next loop without applying any offset
       }
     }
-    return true // all close enough, return currentResult
+
+    this.log(this.offset, this.direction, this.prevOffset, this.MAX_LOOP, this.TOLERANCE)
+    if (this.checkDirection()) return true
+    this.applyOffset()
+    return false // head to next loop
   }
 
   loopPrevCondition(): boolean {
@@ -306,7 +343,7 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
     this.autoDimension = this.autoSize[this.dimension]
     if (!this.checkStructMatch(this.autoSize.spanDataList, this.initSize.spanDataList)) {
       this.log('spanData do not match')
-      return true // spanData structures do not match, return currentResult
+      return true // spanData structures do not match, return currentResult or bestResult if already set in previous loops
     }
     return false
   }
