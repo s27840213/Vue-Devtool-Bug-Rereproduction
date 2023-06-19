@@ -63,7 +63,7 @@ export default defineComponent({
         },
         {
           key: 'duplicate',
-          title: this.$t('STK0071'),
+          title: this.$t('NN0251'),
           iconName: 'duplicate',
           action: this.duplicatePage
         },

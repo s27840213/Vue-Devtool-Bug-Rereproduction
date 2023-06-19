@@ -386,11 +386,11 @@ export default defineComponent({
     templateTabs(): Array<IFooterTab> {
       return [
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template-content' },
-        { icon: 'camera', text: this.$t('STK0069') },
+        { icon: 'camera', text: this.$t('STK0067') },
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
-        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
+        { icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' },
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
