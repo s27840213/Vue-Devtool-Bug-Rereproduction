@@ -29,7 +29,6 @@ export interface ITextFIllPreset {
   id: string
   param: {
     img: ITextFillPresetRawImg
-    opacity: number
     size: number
     xOffset200: number
     yOffset200: number
@@ -80,7 +79,7 @@ class TextFill {
             img: `https://template.vivipic.com/admin/${eff.param.img.teamId}/asset/image/${eff.param.img.id}/tiny`,
             label: '',
             attrs: {
-              ...eff.param,
+              ...omit(eff.param, ['opacity']),
               img: {
                 ...eff.param.img,
                 preview: { width: eff.param.img.width, height: eff.param.img.height },
@@ -106,8 +105,6 @@ class TextFill {
       xOffset200: 0,
       yOffset200: 0,
       size: 100,
-      opacity: 100,
-      focus: false,
     } as const
 
     if (effectName === 'custom-fill-img') return defaultOptions
@@ -154,6 +151,7 @@ class TextFill {
     return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth }
   }
 
+  // TextFill is not support TextShape now, for code that supports TextShape, see https://bit.ly/3qP0y1O.
   convertTextEffect(config: IText, ratio: number): Record<string, string | number> {
     const { textFill } = config.styles
     if (textFill.name === 'none') return {}
@@ -196,7 +194,7 @@ class TextFill {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
         left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200) * -1}px`,
         top: `${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200) * -1}px`,
-        opacity: textFill.opacity / 200,
+        opacity: config.styles.opacity / 200,
       }
     }
   }
@@ -215,6 +213,14 @@ class TextFill {
       if (layer.type !== 'text') continue
       const oldTextFill = layer.styles.textFill
       const newTextFill = {} as ITextFill
+
+      // Set layer opacity.
+      for (const [key, val] of Object.entries(attrs ?? {})) {
+        if (key === 'opacity') {
+          layerUtils.updateLayerOpacity(val as number)
+          return
+        }
+      }
 
       if (oldTextFill && oldTextFill.name === effect) { // Adjust effect option.
         // If apply a different preset img in the effect, retrieve the previously adjusted options from the localStorage.
@@ -274,7 +280,7 @@ class TextFill {
     }
 
     let res: AxiosResponse<IPutTextEffectResponse>
-    const params = pick(fill, ['xOffset200', 'yOffset200', 'size', 'opacity']) as ITextFIllPreset['param']
+    const params = pick(fill, ['xOffset200', 'yOffset200', 'size']) as ITextFIllPreset['param']
     if (fill.name === 'custom-fill-img') {
       if (!isIAssetPhoto(fill.customImg) || !fill.customImg.assetIndex) {
         notify({ group: 'error', text: '當前文字填滿沒有圖片，或是圖片不是來自管理員上傳。' })

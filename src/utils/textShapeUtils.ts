@@ -51,7 +51,6 @@ class Controller {
       none: {},
       curve: {
         bend: 4,
-        focus: false
       }
     }
   }

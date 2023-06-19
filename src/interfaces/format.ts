@@ -80,8 +80,6 @@ export interface ITextFillConfig {
   xOffset200: number
   yOffset200: number
   size: number
-  opacity: number
-  focus: boolean
 }
 
 export interface ITextFillCustom {
@@ -94,8 +92,6 @@ export interface ITextFillCustom {
   xOffset200: number
   yOffset200: number
   size: number
-  opacity: number
-  focus: boolean
 }
 
 export type ITextFill = ITextFillConfig | ITextFillCustom | { name: 'none', customImg: IAssetPhoto | IPhotoItem | null }

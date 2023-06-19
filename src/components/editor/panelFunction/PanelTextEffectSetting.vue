@@ -97,6 +97,7 @@ import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOption, IEffectOptionRange } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
+import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -225,6 +226,8 @@ export default defineComponent({
     getInputValue(style: Record<string, unknown>, option: IEffectOptionRange) {
       if (['lineHeight', 'fontSpacing'].includes(option.key)) {
         return this.selectedTextProps[option.key]
+      } else if (option.key === 'opacity' && this.currCategoryName === 'fill') {
+        return layerUtils.getCurrOpacity
       } else {
         return style[option.key]
       }
