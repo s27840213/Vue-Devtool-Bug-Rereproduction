@@ -11,12 +11,10 @@ import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
-import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import textUtils from '@/utils/textUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
-import { find, max, omit, pick } from 'lodash'
+import { find, omit, pick } from 'lodash'
 import { InjectionKey } from 'vue'
 
 interface ITextFillPresetRawImg {
@@ -156,99 +154,29 @@ class TextFill {
     return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth }
   }
 
-  async convertTextEffect(config: IText, ratio: number): Promise<Record<string, string | number>[][]> {
-    const { textFill, textShape } = config.styles
-    if (textFill.name === 'none') return []
+  convertTextEffect(config: IText, ratio: number): Record<string, string | number> {
+    const { textFill } = config.styles
+    if (textFill.name === 'none') return {}
 
     const imgSrc = this.getTextFillImg(config, { ratio })
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
-    if (!imgSrc || !divHeight) return []
+    if (!imgSrc || !divHeight) return {}
 
-    const myRect = new Rect()
-    await myRect.init(config)
-    myRect.preprocess({ skipMergeLine: true })
-    const { vertical, rows } = myRect.get()
-    const isTextShape = textShape.name !== 'none'
-    const isTextShapeFocus = isTextShape && textEffectUtils.focus === 'fill'
-
-    // Because rows is a 1D-array, convert it to 2D-array as 'div' variable so that I can return 2D CSS.
-    const div = [] as DOMRect[][]
-    for (const [index, row] of rows.entries()) {
-      if (row.spanData.length === 0) continue
-      let { pIndex, sIndex } = row.spanData[0]
-      if (isTextShape) {
-        // TextShape only have one line, fix its p/sIndex
-        [pIndex, sIndex] = [0, index]
-        // Because TextShape has display： inline-block, its height is affected by the lineHeight.
-        // To justify its position, multiply the height by the lineHeight.
-        row.rect[vertical ? 'width' : 'height'] *= row.spanData[0].lineHeight
-      }
-
-      while (div.length - 1 < pIndex) div.push([])
-      div[pIndex][sIndex] = row.rect
-    }
-
-    const spanExpandRatio = 1
-    const isPositiveBend = +textShape.bend >= 0
-    const isFixedWidth = textBgUtils.isFixedWidth(config.styles)
-    // If not TextShape, need add maxFontSize to top/left to fix its position.
-    const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
-    const leftDir = imgWidth - divWidth < 0 ? -1 : 1
+    const leftDir = imgWidth - divWidth < 0 ? 1 : -1
     const topDir = imgHeight - divHeight < 0 ? -1 : 1
-    return div.map(p => p.map(span => {
-      let { width: spanWidth, height: spanHeight, x, y } = span
-      if (vertical) {
-        [spanWidth, spanHeight] = [spanHeight, spanWidth];
-        [x, y] = [y, x]
-      }
-      const bgSizeBy = textFill.size * (scaleByWidth ? divWidth / spanWidth : divHeight / spanHeight)
-      return {
-        ...textEffectUtils.focus === 'fill' ? {
-          backgroundColor: 'transparent',
-          webkitTextStrokeColor: 'black',
-          '-webkit-text-stroke-width': '1px', // Use dash-case for overwrite textStylesRaw result.
-        } : {
-          // About span BG
-          backgroundImage: `url("${imgSrc}")`,
-          backgroundSize: scaleByWidth ? `${bgSizeBy}% auto` : `auto ${bgSizeBy}%`,
-          // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
-          // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position#regarding_percentages
-          backgroundPosition: `
-            ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200)) * -1}px
-            ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200)) * -1}px`,
-          backgroundOrigin: 'content-box',
-          backgroundRepeat: 'no-repeat',
-          webkitBackgroundClip: 'text',
-          // To fix a Safari bug that the element border of BG text clip will appear abnormally,
-          // make border of element to be transparent.
-          maskImage: `url(${require('@/assets/img/svg/text-fill-mask-image.svg')})`,
-          maskSize: '100% 100%',
-          // About span color
-          opacity: textFill.opacity / 100,
-          webkitTextStrokeColor: 'transparent',
-        },
-        webkitTextFillColor: 'transparent',
-        textDecorationColor: 'transparent',
-        // About span position
-        position: 'absolute',
-        padding: `${spanHeight * spanExpandRatio}px ${spanWidth * spanExpandRatio}px`,
-        ...isTextShapeFocus ? {
-          [isPositiveBend ? 'top' : 'bottom']: `${y * (isPositiveBend ? 1 : -1) - spanHeight * spanExpandRatio}px`,
-          left: `${x - spanWidth * spanExpandRatio}px`,
-          transform: 'none',
-        } : isTextShape ? {
-          [isPositiveBend ? 'top' : 'bottom']: `${-spanHeight * spanExpandRatio}px`,
-          // Align center, this can prevent Safari lag when scaling TextFill layer with TextShape.
-          left: `${(divWidth - spanWidth * (1 + spanExpandRatio * 2)) / 2}px`,
-        } : {
-          top: `${y - spanHeight * spanExpandRatio + maxFontSize}px`,
-          left: `${x - spanWidth * spanExpandRatio + maxFontSize}px`,
-          ...!isFixedWidth ? { 'line-height': 'initial' } : {},
-        },
-        // To fix Safari PDF reader bug: https://bit.ly/3IPcS8o
-        ...store.getters['user/getUserId'] === 'backendRendering' ? { filter: 'opacity(1)' } : {},
-      }
-    }))
+    return {
+      backgroundImage: `url("${imgSrc}")`,
+      backgroundSize: scaleByWidth ? `${textFill.size}% auto` : `auto ${textFill.size}%`,
+      backgroundPosition: `${textFill.xOffset200 * leftDir / 2 + 50}% ${textFill.yOffset200 * topDir / 2 + 50}%`,
+      backgroundOrigin: 'content-box',
+      backgroundRepeat: 'no-repeat',
+      webkitBackgroundClip: 'text',
+      webkitTextFillColor: 'transparent',
+      webkitTextStrokeColor: 'transparent',
+      textDecorationColor: 'transparent',
+      // To fix Safari PDF reader bug: https://bit.ly/3IPcS8o
+      ...store.getters['user/getUserId'] === 'backendRendering' ? { filter: 'opacity(1)' } : {},
+    }
   }
 
   drawTextFill(config: IText, ratio: number): CustomElementConfig | null {
@@ -268,12 +196,12 @@ class TextFill {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
         left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200) * -1}px`,
         top: `${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200) * -1}px`,
-        opacity: textFill.opacity / 100,
+        opacity: textFill.opacity / 200,
       }
     }
   }
 
-  async setTextFill(effect: string, attrs?: Record<string, unknown>, reset = false) {
+  setTextFill(effect: string, attrs?: Record<string, unknown>, reset = false) {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
@@ -285,11 +213,11 @@ class TextFill {
 
       const layer = layers[idx]
       if (layer.type !== 'text') continue
-      const currSubLayerIndex = targetLayer.layers ? +idx : subLayerIndex
       const oldTextFill = layer.styles.textFill
       const newTextFill = {} as ITextFill
 
       if (oldTextFill && oldTextFill.name === effect) { // Adjust effect option.
+        // If apply a different preset img in the effect, retrieve the previously adjusted options from the localStorage.
         const localAttrs = !reset && attrs && Object.keys(attrs).includes('img')
           ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as {img: {key:string}}).img.key}`) : null
         Object.assign(newTextFill, oldTextFill, attrs, localAttrs)
@@ -299,6 +227,7 @@ class TextFill {
           localStorageUtils.set('textEffectSetting', `fill.${newTextFill.img.key}`, omit(newTextFill, ['customImg', 'name']))
         }
       } else { // Switch to other effect.
+        // Get default img and its preset options of the effect
         const targetEffect = find(this.fillCategories, ['key', effect])
         const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as {img: {key:string}} | undefined
         const localAttrs = effectDefaultPreset?.img?.key ? localStorageUtils.get('textEffectSetting', `fill.${effectDefaultPreset.img.key}`) : null
@@ -314,30 +243,6 @@ class TextFill {
         styles: { textFill: newTextFill },
         props: { contentEditable: false },
       })
-
-      // If SplitSpan setting changed, force split/unsplit span text
-      const oldSplitSpan = textBgUtils.isSplitSpan({ ...layer.styles, textFill: oldTextFill })
-      const newSplitSpan = textBgUtils.isSplitSpan({ ...layer.styles, textFill: newTextFill })
-      textBgUtils.splitOrMergeSpan(oldSplitSpan, newSplitSpan, layer,
-        pageIndex, layerIndex, currSubLayerIndex)
-
-      // Update widthLimit for widthLimit !== -1 layers. Steps to Reproduce the Issue:
-      // 1. Multi-select a new text layer (widthLimit is -1) and other layers.
-      // 2. Cancel multi-select.
-      // 3. Apply TextFill to the text layer.
-      // 4. Enter contentEditable mode, text will have additional line
-      if (layer.widthLimit !== -1) {
-        const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, currSubLayerIndex)
-      }
-
-      // Update w/h for layer in tmp/group, which don't have tiptap. Steps to Reproduce the Issue:
-      // 1. Multi-select a new text layer (widthLimit is -1) and other layers.
-      // 2. Apply TextFill.
-      // 3. Cancel multi-select, text will have additional line.
-      if (oldSplitSpan !== newSplitSpan) {
-        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, currSubLayerIndex)
-      }
     }
   }
 

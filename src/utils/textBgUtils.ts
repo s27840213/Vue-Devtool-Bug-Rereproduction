@@ -1,5 +1,5 @@
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, isTextFill, ITextBg, ITextGooey } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBg, ITextGooey } from '@/interfaces/format'
 import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
@@ -63,6 +63,7 @@ export class Rect {
       height: number
       text: string
       letterSpacing: number
+      // pIndex, sIndex, and lineHeight were originally used for TextFill, but are currently unused.
       pIndex: number
       sIndex: number
       lineHeight: number
@@ -301,10 +302,10 @@ export class Rect {
     })
   }
 
-  preprocess({ skipMergeLine } = { skipMergeLine: false }) {
+  preprocess() {
     const { vertical } = this
     if (vertical) this.xyExchange()
-    if (!skipMergeLine) this.mergeLine()
+    this.mergeLine()
     this.expandEmptyLine()
     this.coordinateInit()
   }
@@ -677,10 +678,10 @@ class TextBg {
     return {}
   }
 
+  // A fixedWith text must be splitSpan, but a splitSpan may not be fixedWidth.
+  // Originally, TextFill was also splitSpan, but it is no longer. So isSplitSpan just call isFixedWidth.
   isSplitSpan(styles: ITextStyle) {
-    const { textBg, textFill } = styles
-    return (isITextLetterBg(textBg) && textBg.fixedWidth) ||
-      (isTextFill(textFill))
+    return this.isFixedWidth(styles)
   }
 
   isFixedWidth(styles: ITextStyle) {

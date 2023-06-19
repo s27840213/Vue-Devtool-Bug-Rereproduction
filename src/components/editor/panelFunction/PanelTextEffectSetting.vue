@@ -104,7 +104,6 @@ import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils, { isFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
-import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
@@ -269,16 +268,18 @@ export default defineComponent({
           await textBgUtils.setTextBg(effectName, effect)
           if (textShape.name !== 'none') {
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
-            textPropUtils.updateTextPropsState()
           }
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName, effect)
-          textPropUtils.updateTextPropsState()
-          await textBgUtils.setTextBg('none') // Bg & shape are exclusive.
+          await textBgUtils.setTextBg('none') // (Bg, fill) & shape are exclusive.
+          textFillUtils.setTextFill('none')
           break
         case 'fill':
-          await textFillUtils.setTextFill(effectName, effect)
+          textFillUtils.setTextFill(effectName, effect)
+          if (textShape.name !== 'none') {
+            textShapeUtils.setTextShape('none') // fill & shape are exclusive.
+          }
           break
       }
     },

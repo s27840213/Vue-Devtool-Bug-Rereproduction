@@ -7,6 +7,7 @@ import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 
@@ -167,6 +168,8 @@ class Controller {
       textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, styles.height, heightOri)
       textUtils.fixGroupCoordinates(pageIndex, layerIndex)
     }
+    // Leave/apply TextShape need to update textProps writingMode.
+    textPropUtils.updateTextPropState('isVertical', true)
   }
 
   convertTextShape(textWidth: number[], bend: number, fontSize: number): string[] {
