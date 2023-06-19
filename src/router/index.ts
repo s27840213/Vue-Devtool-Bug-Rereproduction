@@ -235,6 +235,11 @@ if (window.location.host !== 'vivipic.com') {
     name: 'NubtnList',
     component: () => import('@/views/NubtnList.vue')
   })
+  routes.push({
+    path: 'iosevttest',
+    name: 'IOSEventTester',
+    component: () => import('@/views/IOSEventTester.vue')
+  })
 }
 
 const router = createRouter({
