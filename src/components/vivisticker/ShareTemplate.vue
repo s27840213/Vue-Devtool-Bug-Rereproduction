@@ -10,7 +10,7 @@ div(class="share-template")
         :inPreview="true"
         :style="previewPageStyles()")
         div(class="share-template__preview__page-item__index text-white") {{ index + 1 }}
-        div(class="share-template__preview__cover" @touchstart.prevent.stop="handleTogglePagesSelected(index)")
+        div(class="share-template__preview__cover" @click.prevent.stop="handleTogglePagesSelected(index)")
         div(class="share-template__preview__page-item__checkbox checkbox" :class="{checked: selectedPages.has(index)}")
           svg-icon(v-if="selectedPages.has(index)" iconName="check" iconColor="white" iconWidth="20.7px")
     div(class="share-template__action")
