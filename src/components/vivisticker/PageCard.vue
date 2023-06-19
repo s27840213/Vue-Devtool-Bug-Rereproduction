@@ -173,7 +173,7 @@ export default defineComponent({
 
 .page-content {
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: v-bind("isDuringCopy ? '0' : '10px'");
 }
 
 .page-control {
