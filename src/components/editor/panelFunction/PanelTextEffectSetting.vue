@@ -314,8 +314,8 @@ export default defineComponent({
       if (!focus) this.recordChange()
     },
     replaceImg(key: string) {
-      return (img: IAssetPhoto | IPhotoItem) => {
-        this.setEffect({ effect: { [key]: img } })
+      return async (img: IAssetPhoto | IPhotoItem) => {
+        await this.setEffect({ effect: { [key]: img } })
         this.recordChange()
       }
     },
