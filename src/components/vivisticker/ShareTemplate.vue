@@ -1,7 +1,7 @@
 <template lang="pug">
-div(class="share-template" :style="containerStyles")
+div(class="share-template")
   template(v-if="isInMultiPageShare")
-    div(class="share-template__preview multi-page" ref="preview")
+    div(class="share-template__preview multi-page" ref="preview" :style="previewStyles")
       div(class="share-template__preview__page-item" v-for="(page, index) in pagesState" :key="`preview-page-${page.config.id}`")
         page-content(class="share-template__preview__page-item__page"
         :config="page.config"
@@ -10,7 +10,7 @@ div(class="share-template" :style="containerStyles")
         :inPreview="true"
         :style="previewPageStyles()")
         div(class="share-template__preview__page-item__index text-white") {{ index + 1 }}
-        div(class="share-template__preview__cover" @click.prevent.stop="handleTogglePagesSelected(index)")
+        div(class="share-template__preview__cover" @touchstart.prevent.stop="handleTogglePagesSelected(index)")
         div(class="share-template__preview__page-item__checkbox checkbox" :class="{checked: selectedPages.has(index)}")
           svg-icon(v-if="selectedPages.has(index)" iconName="check" iconColor="white" iconWidth="20.7px")
     div(class="share-template__action")
@@ -149,9 +149,9 @@ export default defineComponent({
         } : []
       )
     },
-    containerStyles() {
+    previewStyles() {
       return {
-        padding: `0 ${this.isLandscape ? 28 : 10}% 24px`
+        margin: `0 ${this.isLandscape ? 28 : 10}%`
       }
     },
     previewOffset() {
@@ -253,7 +253,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   background-color: setColor(black-1);
-  padding: 0 10% 24px;
+  padding-bottom: 24px;
   &__preview {
     height: 100%;
     display: flex;
@@ -262,6 +262,7 @@ export default defineComponent({
     justify-content: center;
     box-sizing: border-box;
     position: relative;
+    margin: 0 10%;
     &.multi-page {
       @include no-scrollbar;
       display: grid;
@@ -311,6 +312,8 @@ export default defineComponent({
   }
   &__tabs {
     justify-content: space-between;
+    padding: 0 10%;
+    box-sizing: border-box;
     &::v-deep .tabs__item {
       width: 40% !important;
     }
@@ -321,6 +324,8 @@ export default defineComponent({
     justify-content: space-evenly;
     margin-top: 8px;
     align-items: normal;
+    padding: 0 10%;
+    box-sizing: border-box;
     &__action {
       display: flex;
       flex-direction: column;
@@ -337,7 +342,7 @@ export default defineComponent({
   &__action {
     display: flex;
     column-gap: 20px;
-    padding: 24px 0;
+    padding: 24px;
     border-top: 1px solid #474747;
     align-items: center;
     justify-content: space-between;
