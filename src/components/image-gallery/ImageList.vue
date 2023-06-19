@@ -1,5 +1,7 @@
 <template lang="pug">
-div(v-if="showUploadArea" class="upload-area") {{$t('NN0873')}}
+i18n-t(v-if="showUploadArea" class="upload-area" keypath="NN0873" tag="div")
+  template(#upload)
+    nubtn(theme="text" @click="$emit('addImage')") {{$t('NN0014')}}
 recycle-scroller(class="image-list" :items="images2d" :itemSize="140" ref="recycle")
   template(v-slot="{ item }: {item:{id: string, item: IImageListItem[]}}")
     div(class="image-list__row")
@@ -29,7 +31,7 @@ recycle-scroller(class="image-list" :items="images2d" :itemSize="140" ref="recyc
                           iconColor="gray-2")
                   span {{ $t('NN0010') }}
                 div(class="image-list__item__menu__row pointer"
-                  @click="$emit('handleDeleteLogo', img)")
+                  @click="$emit('handleDelete', img)")
                   svg-icon(iconName="trash"
                           iconWidth="24px"
                           iconColor="gray-2")
@@ -71,7 +73,7 @@ export default defineComponent({
     'addImage',
     'clickImage',
     'handleDownload',
-    'handleDeleteLogo',
+    'handleDelete',
     'handleOpenMenu',
     'handleCloseMenu',
     'loadMore',
@@ -143,8 +145,16 @@ export default defineComponent({
 <style lang="scss" scoped>
 .upload-area {
   @include body-XS;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: fit-content;
   color: setColor(gray-3);
   margin-bottom: 20px;
+  .nubtn.text.sm {
+    padding: 0;
+    height: fit-content;
+  }
 }
 .image-list {
   @include hover-scrollbar;

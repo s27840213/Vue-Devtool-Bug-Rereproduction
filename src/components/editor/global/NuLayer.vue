@@ -239,7 +239,6 @@ export default defineComponent({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isProcessImgShadow: 'shadow/isProcessing',
       currSelectedInfo: 'getCurrSelectedInfo',
       scaleRatio: 'getPageScaleRatio',

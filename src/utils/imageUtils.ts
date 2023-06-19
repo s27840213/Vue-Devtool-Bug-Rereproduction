@@ -8,6 +8,7 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IShadowAsset } from '@/store/module/shadow'
 import { AxiosPromise } from 'axios'
+import { findLastIndex } from 'lodash'
 import FrameUtils from './frameUtils'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
@@ -19,16 +20,12 @@ class ImageUtils {
     const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve) => {
       const image = new Image()
-      image.src = src
       if (crossOrigin) {
         image.crossOrigin = 'anoynous'
       }
-      if (image.complete) {
-        resolve(cb(image))
-      } else {
-        image.onload = () => resolve(cb(image))
-        error && (image.onerror = error)
-      }
+      image.onload = () => resolve(cb(image))
+      error && (image.onerror = error)
+      image.src = src
     })
   }
 
@@ -148,10 +145,8 @@ class ImageUtils {
     if (sizeMap?.length) {
       let i = 0
       if (typeof dimension === 'number') {
-        while (dimension <= sizeMap[i].size && i < sizeMap.length - 1) {
-          i++
-        }
-        i = Math.max(i - 1, 0)
+        i = findLastIndex(sizeMap, s => dimension <= s.size)
+        i = Math.max(i, 0) // For i === -1
       } else if (typeof dimension === 'string') {
         i = Math.max(sizeMap.findIndex(m => m[key] === dimension, 0))
       }

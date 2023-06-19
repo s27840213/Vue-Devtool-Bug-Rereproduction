@@ -21,7 +21,10 @@ import { mapGetters } from 'vuex'
 export default defineComponent({
   emits: [],
   props: {
-    canvasRect: DOMRect,
+    isSidebarPanelOpen: {
+      type: Boolean,
+      required: true
+    },
     editorView: HTMLElement
   },
   data() {
@@ -89,14 +92,15 @@ export default defineComponent({
     showPagePanel() {
       this.calcRulerBodyOffset()
     },
-    canvasRect() {
+    isSidebarPanelOpen() {
       this.calcRulerBodyOffset()
     }
   },
   methods: {
     calcRulerBodyOffset(): void {
       this.$nextTick(() => {
-        this.rulerBodyOffset = pageUtils.pageRect.left - this.canvasRect!.left + this.editorView!.scrollLeft
+        const contentMain = document.querySelector('.content__main')
+        this.rulerBodyOffset = pageUtils.pageRect.left - contentMain!.getBoundingClientRect().left - rulerUtils.RULER_SIZE + this.editorView!.scrollLeft
       })
     }
   }
