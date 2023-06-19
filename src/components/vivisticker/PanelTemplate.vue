@@ -2,7 +2,7 @@
 div(class="panel-template rwd-container")
   tabs(v-if="!isInCategory && !isInGroupTemplate"
       class="panel-template__tabs"
-      :tabs="['Story', 'Post']"
+      :tabs="[$t('STK0005'), $t('STK0063')]"
       v-model="tabIndex")
   keep-alive
     panel-template-content(v-if="isStory" initIgLayout="story" ref='story')

@@ -9,7 +9,7 @@ div(class="panel-template rwd-container")
           vivisticker="dark"
           :color="{close: 'black-5', search: 'black-5'}"
           @search="handleSearch")
-      div(class="panel-template__nav__btn-cancel body-SM" @click="handleCancel") {{ "Cancel" }}
+      div(class="panel-template__nav__btn-cancel body-SM" @click="handleCancel") {{ $t('NN0203') }}
     template(v-else)
       div(class="panel-template__nav__icon")
         svg-icon(class="pointer"
@@ -18,7 +18,7 @@ div(class="panel-template rwd-container")
           iconWidth="24px"
           @click="handleRecent")
       tabs(class="panel-template__nav__tabs"
-          :tabs="['Story', 'Post']"
+          :tabs="[$t('STK0005'), $t('STK0063')]"
           v-model="tabIndex"
           :style="{marginBottom: '0px'}")
       div(class="panel-template__nav__icon")

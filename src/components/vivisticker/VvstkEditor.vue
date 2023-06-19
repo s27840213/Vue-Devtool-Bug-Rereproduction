@@ -13,10 +13,10 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
                 @click.self.prevent="outerClick")
       div(class="page-add" :id="`page-card-${pagesState.length}`" key="page-add")
         div(class="page-add__page body-SM flex-column flex-center")
-          div(class="page-add__text text-white") {{ "You have reached the last page.\nDo you want a new page?" /* TODO: translate */ }}
+          div(class="page-add__text text-white" v-html="$t('STK0075')")
           div(class="page-add__btn text-black-3 bg-white flex-center" @click="addPage")
             svg-icon(class="page-add__btn__icon" iconName="add-page" iconWidth="24px" iconColor="gray-2")
-            div(class="page-add__btn__text") {{ "Add a new page" /* TODO: translate */ }}
+            div(class="page-add__btn__text") {{ $t('STK0076') }}
   div(v-if="editorTypeTemplate && !isDuringCopy" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="pages" iconWidth="20px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
@@ -126,7 +126,7 @@ export default defineComponent({
       return pageUtils.currFocusPageIndex
     },
     strPagePill(): string {
-      return this.pagesState.length > 1 ? `${this.currFocusPageIndex + 1} / ${this.pagesState.length}` : 'Pages' // TODO: translate
+      return this.pagesState.length > 1 ? `${this.currFocusPageIndex + 1} / ${this.pagesState.length}` : this.$t('STK0070')
     },
     pageSize(): { width: number, height: number } {
       return {

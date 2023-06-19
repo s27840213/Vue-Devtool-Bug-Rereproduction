@@ -198,11 +198,11 @@ export default defineComponent({
     },
     centerTitle(): string {
       if (this.isInMultiPageShare) {
-        return `${'Select pages'}` // TODO: translate
+        return `${this.$t('NN0124')}`
       } else if (this.isInBgShare || this.isInTemplateShare) {
         return `${this.$t('NN0214')}`
       } else if (this.isInEditor) {
-        if (this.isInPagePreview) return `${'Preview'}` // TODO: translate
+        if (this.isInPagePreview) return `${this.$t('STK0072')}`
         return ''
       } else if (this.isInMyDesign) {
         return `${this.$t('NN0080')}`

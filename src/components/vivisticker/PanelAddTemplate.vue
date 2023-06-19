@@ -1,18 +1,18 @@
 <template lang="pug">
 div(class="panel-add-template")
-  div(class="panel-add-template__title caption-LG text-white") Choose a background
+  div(class="panel-add-template__title caption-LG text-white") {{$t('STK0066')}}
   div(class="panel-add-template__content btn-SM text-white")
     div(class="panel-add-template__item" @click="addTemplate(true)")
       div(class="panel-add-template__bg")
         svg-icon(iconName="apple_photos"
           iconWidth="32px")
-      div(class="panel-add-template__text") Photo
+      div(class="panel-add-template__text") {{$t('STK0067')}}
     div(class="panel-add-template__item" @click="addTemplate()")
       div(class="panel-add-template__bg")
         svg-icon(iconName="add-page"
           iconWidth="32px"
           iconColor="white")
-      div(class="panel-add-template__text") Blank
+      div(class="panel-add-template__text") {{$t('STK0068')}}
 </template>
 
 <script lang="ts">

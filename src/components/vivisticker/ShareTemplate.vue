@@ -14,8 +14,7 @@ div(class="share-template" :style="containerStyles")
         div(class="share-template__preview__page-item__checkbox checkbox" :class="{checked: selectedPages.has(index)}")
           svg-icon(v-if="selectedPages.has(index)" iconName="check" iconColor="white" iconWidth="20.7px")
     div(class="share-template__action")
-      // TODO: translate
-      div(v-if="currAction?.key === 'post'" class="share-template__action__text text-black-5 body-SM") {{ 'In order to post directly to IG, please select up to ten pages.' }}
+      div(v-if="currAction?.key === 'post'" class="share-template__action__text text-black-5 body-SM text-left") {{ $t('STK0079') }}
       div(v-else class="share-template__action__select" @click="handleSelectAll")
         div(class="share-template__action__select__checkbox checkbox" :class="{checked: selectedPages.size === pagesState.length}")
           svg-icon(v-if="selectedPages.size === pagesState.length" iconName="check" iconColor="white" iconWidth="20.7px")
@@ -34,7 +33,7 @@ div(class="share-template" :style="containerStyles")
       :style="pageStyles()")
       div(class="share-template__preview__cover" @pointerdown="disableEvent")
     tabs(v-if="isMultiPage" class="share-template__tabs"
-      :tabs="['This page', 'Multi pages']"
+      :tabs="[$t('STK0077'), $t('STK0078')]"
       v-model="tabIndex")
     div(class="share-template__actions")
       div(v-for="button in buttons" :key="button.key" class="share-template__actions__action" @click="handleAction(button)")
@@ -46,8 +45,7 @@ div(class="share-template" :style="containerStyles")
       div(class="share-template__pending__spinner")
         svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
       div(class="share-template__pending__progress") {{ strDownloadProgress }}
-      // TODO: translate
-      div(class="share-template__pending__text") Saving to Camera Roll
+      div(class="share-template__pending__text") {{ $t('STK0080') }}
 </template>
 
 <script lang="ts">
@@ -133,19 +131,19 @@ export default defineComponent({
       return [
         {
           key: 'save',
-          title: 'Save', // TODO: translate
+          title: this.$t('STK0004'),
           iconName: 'download_flat',
           action: this.save
         }
       ].concat(
         this.templateShareType === 'post' ? {
           key: 'post',
-          title: 'Post', // TODO: translate
+          title: this.$t('STK0063'),
           iconName: 'ig_post',
           action: this.share
         } : this.templateShareType === 'story' && this.tabIndex === 0 ? {
           key: 'story',
-          title: 'Story', // TODO: translate
+          title: this.$t('STK0005'),
           iconName: 'ig_story',
           action: this.share
         } : []
@@ -160,7 +158,7 @@ export default defineComponent({
       return this.tabIndex === 1 ? 12 : 0
     },
     strToggleSelectAll() {
-      return this.selectedPages.size === this.pagesState.length ? 'Unselect all' : 'Select all' // TODO: translate
+      return this.selectedPages.size === this.pagesState.length ? this.$t('STK0016') : this.$t('STK0015')
     },
     strDownloadProgress() {
       return `${this.downloadProgress}/${this.selectedPages.size}`

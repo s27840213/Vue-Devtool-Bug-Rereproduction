@@ -50,7 +50,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
         svg-icon(iconName="loading"
           iconColor="white"
           iconWidth="20px")
-  btn-add(v-show="!isInCategory && !isInGroupTemplate && !keyword" :elScrollable="elMainContent" :text="'Create ' + igLayout" @click="addTemplate")
+  btn-add(v-show="!isInCategory && !isInGroupTemplate && !keyword" :elScrollable="elMainContent" :text="strBtnAdd" @click="addTemplate")
   div(v-if="isInGroupTemplate" class="panel-template-content__btn-add-group-template" @click="addGroupTemplate")
     svg-icon(class="panel-template-content__btn-add-group-template__icon"
             iconName="add-page"
@@ -275,6 +275,9 @@ export default defineComponent({
     tags(): ITag[] {
       return this.showAllRecently || this.isInGroupTemplate ? [] : this.tagsBar
     },
+    strBtnAdd(): string {
+      return this.$t('STK0064', { type: this.igLayout === 'post' ? this.$t('STK0063') : this.$t('STK0005') })
+    }
   },
   methods: {
     ...mapMutations('vivisticker', { setIsInGroupTemplate: 'SET_isInGroupTemplate' }),

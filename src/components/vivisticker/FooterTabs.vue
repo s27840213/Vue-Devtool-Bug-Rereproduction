@@ -386,7 +386,7 @@ export default defineComponent({
     templateTabs(): Array<IFooterTab> {
       return [
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template-content' },
-        { icon: 'camera', text: 'Camera' }, // TODO: translate
+        { icon: 'camera', text: this.$t('STK0069') },
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },

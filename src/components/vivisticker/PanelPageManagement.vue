@@ -7,9 +7,8 @@ div(class="panel-page-management")
         span {{ button.title }}
   div(class="btn-close" @click="close")
     svg-icon(iconName="close" iconWidth="24px" iconColor="black-1")
-    div(class="btn-close__text body-XS text-black-1")
-      // TODO: translate
-      span Close
+    div(class="btn-close__text body-XS text-black-1 no-wrap")
+      span {{ $t('NN0359') }}
 </template>
 
 <script lang="ts">
@@ -58,25 +57,25 @@ export default defineComponent({
       return [
         {
           key: 'add-page',
-          title: 'Add page', // TODO: translate
+          title: this.$t('NN0139'),
           iconName: 'add-page',
           action: this.addPage
         },
         {
           key: 'duplicate',
-          title: 'Duplicate', // TODO: translate
+          title: this.$t('STK0071'),
           iconName: 'duplicate',
           action: this.duplicatePage
         },
         {
           key: 'preview',
-          title: 'Preview', // TODO: translate
+          title: this.$t('STK0072'),
           iconName: 'grid',
           action: this.preview
         }
       ].concat(this.pages.length > 1 ? {
         key: 'delete',
-        title: 'Delete', // TODO: translate
+        title: this.$t('NN0034'),
         iconName: 'delete',
         action: this.deletePage
       } : [])
@@ -180,10 +179,10 @@ export default defineComponent({
     checkMaxPageNum() {
       if (this.pages.length >= vivistickerUtils.MAX_PAGE_NUM) {
         modalUtils.setModalInfo(
-          'Title', // TODO: translate
-          'Your file has reached its maximum of 20 pages. To design more pages, please create a new file.', // TODO: translate
+          this.$t('STK0073'),
+          this.$t('STK0074', { num: vivistickerUtils.MAX_PAGE_NUM }),
           {
-            msg: 'Okay, I got it!', // TODO: translate
+            msg: this.$t('NN0563'),
             class: 'btn-black-mid',
           }
         )
