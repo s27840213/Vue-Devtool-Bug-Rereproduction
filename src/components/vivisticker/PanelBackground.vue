@@ -295,7 +295,7 @@ export default defineComponent({
     },
   },
   created() {
-    if (this.currActiveBackgroundTab) this.tabIndex = this.currActiveBackgroundTab === 'photos' ? 0 : this.currActiveBackgroundTab === 'color' ? 1 : 0
+    if (this.currActiveBackgroundTab) this.tabIndex = this.currActiveBackgroundTab === 'color' ? 1 : 0
   },
   mounted() {
     eventUtils.on(PanelEvent.scrollPanelBackgroundToTop, this.scrollToTop)

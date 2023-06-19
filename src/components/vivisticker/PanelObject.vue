@@ -46,7 +46,7 @@ export default defineComponent({
     // load states of favorites tab from store
     if (this.currActiveObjectFavTab) {
       this.tabIndex = this.isInEditor ? 1 : 2
-      this.favoritesTabIndex = this.isInEditor ? 0 : this.currActiveObjectFavTab === 'static' ? 0 : this.currActiveObjectFavTab === 'gifs' ? 1 : 0
+      this.favoritesTabIndex = this.isInEditor ? 0 : this.currActiveObjectFavTab === 'gifs' ? 1 : 0
     }
   },
   mounted() {
