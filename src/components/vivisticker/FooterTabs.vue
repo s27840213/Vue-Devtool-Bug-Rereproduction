@@ -203,6 +203,7 @@ export default defineComponent({
     },
     photoTabs(): Array<IFooterTab> {
       const tabs = [
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
@@ -263,7 +264,7 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` },
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: this.editorTypeTemplate },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
@@ -333,6 +334,7 @@ export default defineComponent({
       const showAdjust = targetLayer.clips.some(i => !['frame', 'svg'].includes(i.srcObj.type))
       const showReplace = targetLayer.clips.length === 1 || targetLayer.clips.some(c => c.active)
       return [
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !this.editorTypeTemplate || !showReplace },
         { icon: 'set-as-frame', text: `${this.$t('NN0098')}`, hidden: !this.editorTypeTemplate || targetLayer.clips.length !== 1 },
         {
@@ -395,6 +397,7 @@ export default defineComponent({
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: !this.editorTypeTemplate || this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
@@ -447,11 +450,19 @@ export default defineComponent({
       } else if ((this.showPhotoTabs || targetType === LayerType.image) && !controllerHidden) {
         return this.photoTabs
       } else if (this.showFontTabs) {
-        const res = [...this.fontTabs]
+        const res = [
+          { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+          ...this.fontTabs
+        ]
         res.splice(this.fontTabs.length - 2, 0, ...this.genearlLayerTabs, ...this.copyPasteTabs)
         return res
       } else if (this.showShapeSetting) {
-        return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
+        return [
+          { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+          ...this.objectTabs,
+          ...this.genearlLayerTabs,
+          ...this.copyPasteTabs
+        ]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
       } else if (this.showInGroupFrame) {
