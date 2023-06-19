@@ -8,6 +8,7 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IShadowAsset } from '@/store/module/shadow'
 import { AxiosPromise } from 'axios'
+import { findLastIndex } from 'lodash'
 import FrameUtils from './frameUtils'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
@@ -148,10 +149,7 @@ class ImageUtils {
     if (sizeMap?.length) {
       let i = 0
       if (typeof dimension === 'number') {
-        while (dimension <= sizeMap[i].size && i < sizeMap.length - 1) {
-          i++
-        }
-        i = Math.max(i - 1, 0)
+        i = findLastIndex(sizeMap, s => dimension <= s.size) ?? 0
       } else if (typeof dimension === 'string') {
         i = Math.max(sizeMap.findIndex(m => m[key] === dimension, 0))
       }
