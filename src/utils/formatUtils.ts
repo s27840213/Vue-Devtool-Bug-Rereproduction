@@ -99,7 +99,7 @@ class FormatUtils {
         layers = subLayers
       }
       if (type === 'text') {
-        const { scale, textEffect, textBg, textShape, writingMode } = this.copiedFormat.content as ITextFormat
+        const { scale, textEffect, textBg, textShape, textFill, writingMode } = this.copiedFormat.content as ITextFormat
         for (const targetLayerIndex in layers) {
           const idx = subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex
           const targetLayer = layers[targetLayerIndex]
@@ -116,6 +116,7 @@ class FormatUtils {
               textEffect: { ...textEffect },
               textBg: { ...textBg },
               textShape: { ...textShape },
+              textFill,
               scale,
               writingMode
             },
@@ -191,7 +192,7 @@ class FormatUtils {
       if (!this.isApplicableType(type, layer.type)) return
       if (type === 'text') {
         const preParams = textShapeUtils.getPreParams(layer)
-        const { scale, textEffect, textBg, textShape, writingMode } = this.copiedFormat.content as ITextFormat
+        const { scale, textEffect, textBg, textShape, textFill, writingMode } = this.copiedFormat.content as ITextFormat
         const paragraphs = this.applyTextStyles(layer.paragraphs)
         layerUtils.updateSpecLayerData({
           pageIndex,
@@ -200,6 +201,7 @@ class FormatUtils {
             textEffect: { ...textEffect },
             textBg: { ...textBg },
             textShape: { ...textShape },
+            textFill,
             scale,
             writingMode
           },
