@@ -342,7 +342,6 @@ export default defineComponent({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',

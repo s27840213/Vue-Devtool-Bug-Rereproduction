@@ -148,7 +148,6 @@ export default defineComponent({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel'
     }),

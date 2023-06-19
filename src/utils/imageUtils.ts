@@ -145,7 +145,8 @@ class ImageUtils {
     if (sizeMap?.length) {
       let i = 0
       if (typeof dimension === 'number') {
-        i = findLastIndex(sizeMap, s => dimension <= s.size) ?? 0
+        i = findLastIndex(sizeMap, s => dimension <= s.size)
+        i = Math.max(i, 0) // For i === -1
       } else if (typeof dimension === 'string') {
         i = Math.max(sizeMap.findIndex(m => m[key] === dimension, 0))
       }
