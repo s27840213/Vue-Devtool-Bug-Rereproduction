@@ -5,7 +5,8 @@ import { lab2rgb, rgb2lab } from '@/utils/colorUtils'
 import LayerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
-import _, { max } from 'lodash'
+import { debounce, max, omit } from 'lodash'
+import { reactive } from 'vue'
 import tiptapUtils from './tiptapUtils'
 
 type ITextShadowCSS = {
@@ -20,11 +21,18 @@ type ITextShadowCSS = {
   }[]
 }
 
+const focusState = ['none' as const, 'shadow' as const, 'shape' as const, 'bg' as const, 'fill' as const]
+export type IFocusState = (typeof focusState)[number]
+export function isFocusState(obj: string): obj is IFocusState {
+  return !!obj && (focusState as string[]).includes(obj)
+}
+
 class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
   private currColorKey = ''
   effects = {} as Record<string, Record<string, string | number>>
+  focus = 'none' as IFocusState
   constructor() {
     this.effects = this.getDefaultEffects()
   }
@@ -331,7 +339,7 @@ class Controller {
       } else { // Switch to other effect.
         // this.syncShareAttrs(textEffect, effect)
         let localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
-        localAttrs = _.omit(localAttrs, ['color']) as ITextEffect
+        localAttrs = omit(localAttrs, ['color']) as ITextEffect
         Object.assign(newTextEffect, defaultAttrs, localAttrs, attrs, { name: effect })
       }
       const mainColor = this.getLayerMainColor(paragraphs)
@@ -350,6 +358,13 @@ class Controller {
       tiptapUtils.updateHtml()
     }
   }
+
+  _setFocus(focus: IFocusState) {
+    this.focus = focus
+  }
+
+  // Write debounce callback separately, or watch will not trigger.
+  setFocus = debounce(this._setFocus, 100)
 
   refreshSize() {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
@@ -375,4 +390,4 @@ class Controller {
   }
 }
 
-export default new Controller()
+export default reactive(new Controller())
