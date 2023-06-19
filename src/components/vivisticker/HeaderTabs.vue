@@ -404,12 +404,15 @@ export default defineComponent({
       bgRemoveUtils.setInBgRemoveMode(false)
       editorUtils.setShowMobilePanel(false)
       this.setInEffectEditingMode(true)
+
+      const bgRemoveResultSrc = bgRemoveUtils.getBgRemoveResultSrc()
+
       vivistickerUtils.startEditing(
         'image',
         { plan: 0, assetId: '' },
         async () => {
           console.log('start editing standard image')
-          await this.addImage(this.autoRemoveResult.urls.prev, this.autoRemoveResult.width / this.autoRemoveResult.height)
+          await this.addImage(bgRemoveResultSrc, this.autoRemoveResult.width / this.autoRemoveResult.height)
           return true
         },
         vivistickerUtils.getEmptyCallback()

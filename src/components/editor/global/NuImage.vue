@@ -382,7 +382,9 @@ export default defineComponent({
       if (this.$route.name === 'Preview') {
         return imageUtils.appendCompQueryForVivipic(this.src)
       }
-      src = imageUtils.appendQuery(src, `ver=${generalUtils.generateRandomString(4)}`)
+      if (!this.config.previewSrc) {
+        src = imageUtils.appendQuery(src, `ver=${generalUtils.generateRandomString(4)}`)
+      }
       return src
     },
     shadowSrc(): string {
@@ -764,7 +766,10 @@ export default defineComponent({
     handleIsTransparent() {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayer?.type ?? '')) return
       const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-      const src = imageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      let src = imageUtils.getSrc(this.config, imgSize)
+      if (!this.config.previewSrc) {
+        src = src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      }
       imageUtils.imgLoadHandler(src,
         (img) => {
           if (!this.hasDestroyed) {
