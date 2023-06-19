@@ -404,12 +404,10 @@ export default defineComponent({
       ]
     },
     copyPasteTabs(): Array<IFooterTab> {
-      // hide copy and paste for vivisticker for now
-      // return this.editorTypeTextLike ? [
-      //   { icon: 'copy', text: `${this.$t('NN0032')}` },
-      //   { icon: 'paste', text: `${this.$t('NN0230')}` }
-      // ] : []
-      return []
+      return this.editorTypeTemplate ? [
+        { icon: 'copy', text: `${this.$t('NN0032')}` },
+        { icon: 'paste', text: `${this.$t('NN0230')}` }
+      ] : []
     },
     tabs(): Array<IFooterTab> {
       const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
@@ -428,64 +426,46 @@ export default defineComponent({
         return this.bgRemoveTabs
       } else if (this.isGroupOrTmp && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
         /** tmp layer treated as group */
-        console.log('multiPhotoTabs')
         return this.multiPhotoTabs
       } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
-        console.log('photoInGroupTabs')
         return this.photoInGroupTabs
       // text + shape color
       } else if (this.isGroupOrTmp && this.targetIs('text') && this.showObjectColorAndFontTabs) {
-        console.log('multiObjectTabs', 'fontTabs')
         return [...this.multiObjectTabs, ...this.fontTabs]
       } else if (this.isGroupOrTmp && this.targetIs('text')) {
-        console.log('multiFontTabs')
         return this.multiFontTabs
       } else if (this.isGroupOrTmp && this.targetIs('shape') && this.singleTargetType()) {
-        console.log('multiObjectTabs')
         return this.multiObjectTabs
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
-        console.log('multiGeneralTabs')
         return this.multiGeneralTabs
       // When deselect in object editor with frame
       } else if (this.showFrame) {
-        console.log('frameTabs', 'genearlLayerTabs')
         return [...this.frameTabs, ...this.genearlLayerTabs]
       // When select empty frame in object editor
       } else if (this.showEmptyFrameTabs) {
-        console.log('emptyFrameTabs')
         return this.emptyFrameTabs
       } else if ((this.showPhotoTabs || targetType === LayerType.image) && !controllerHidden) {
-        console.log('photoTabs')
         return this.photoTabs
-      } else if (this.showFontTabs) { // TODO
-        console.log('fontTabs')
+      } else if (this.showFontTabs) {
         const res = [...this.fontTabs]
         res.splice(this.fontTabs.length - 2, 0, ...this.genearlLayerTabs, ...this.copyPasteTabs)
         return res
       } else if (this.showShapeSetting) {
-        console.log('objectTabs', 'genearlLayerTabs', 'copyPasteTabs')
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.inBgSettingMode) {
-        console.log('bgSettingTab')
         return this.bgSettingTab
-      } else if (this.showInGroupFrame) { // TODO
-        console.log('frameTabs', 'genearlLayerTabs')
+      } else if (this.showInGroupFrame) {
         return [...this.frameTabs, ...this.genearlLayerTabs]
       } else if (this.editorTypeTemplate ? this.isGroupOrTmp : this.showGeneralTabs) {
-        console.log('genearlLayerTabs')
         return [...this.genearlLayerTabs]
       } else if (this.showFrameTabs) {
         if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
-          console.log('photoTabs')
           return this.photoTabs
         }
-        console.log('frameTabs')
         return this.frameTabs
       } else if (!this.isInEditor) {
-        console.log('homeTabs')
         return this.homeTabs
       } else if (this.editorTypeTextLike) {
-        console.log('plus-square')
         return [{ icon: 'plus-square', text: `${this.$t('STK0006')}`, panelType: 'text' }]
       } else {
         return []
