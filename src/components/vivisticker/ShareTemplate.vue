@@ -123,6 +123,7 @@ export default defineComponent({
       pagesState: 'getPagesState',
       pagesLength: 'getPagesLength',
       currFocusPageIndex: 'getCurrFocusPageIndex',
+      fullPageType: 'vivisticker/getFullPageType'
     }),
     config(): IPage {
       return pageUtils.currFocusPage
@@ -211,6 +212,17 @@ export default defineComponent({
     },
     share() {
       if (this.isInMultiPageShare && this.templateShareType === 'post') {
+        // TODO: open tutorial video
+        // if (!vivistickerUtils.tutorialFlags.template) {
+        //   vivistickerUtils.openFullPageVideo('tutorial4', { delayedClose: 5000 })
+        //   vivistickerUtils.updateTutorialFlags({ template: true })
+        //   const unwatch = this.$watch('fullPageType', (newVal) => {
+        //     if (!newVal || newVal === 'none') {
+        //       unwatch()
+        //       this.multiPageScreenShot('IGPost')
+        //     }
+        //   })
+        // }
         this.multiPageScreenShot('IGPost')
       } else if (this.tabIndex === 0) {
         const mapAction = {
