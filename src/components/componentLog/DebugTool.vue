@@ -13,7 +13,7 @@ div(class="fps")
   div(class="fps__value")
     span(@click="showGraph") FPS: {{fps}}
     span(v-if="jsHeapSize !== -1") JS-Heap: {{jsHeapSize}}MB
-    mobile-props-toggle(class="py-5" :title="'切換模板顯示樣式'" v-model="newTemplateShownMode")
+    //- mobile-props-toggle(class="py-5" :title="'切換模板顯示樣式'" v-model="newTemplateShownMode")
 </template>
 
 <script lang="ts">
