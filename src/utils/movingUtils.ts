@@ -501,7 +501,10 @@ export class MovingUtils {
      * @Note the posDiff logic is different from the Vivipic version
      * Vivipic won't update the initialPos in moving, but Vivisticker will.
      */
-    const posDiff = {
+    const posDiff = this.isTouchDevice ? {
+      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
+      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+    } : {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }
