@@ -193,7 +193,7 @@ export default defineComponent({
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
     itemWidth(): number {
-      return this.isTablet ? 120 : 100
+      return this.isTablet ? 120 : this.isInEditor ? 80 : 100
     },
     itemHeight(): number {
       return this.igLayout === 'story' ? round(this.itemWidth / 9 * 16) : this.itemWidth
