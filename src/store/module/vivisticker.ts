@@ -52,11 +52,11 @@ const EDITOR_BGS = [
   '#F4F5F7'
 ]
 
-const tabs = ['object', 'background', 'text']
+const tabs = ['object', 'background', 'text', 'template']
 
 function getDefaultDict<T>(defaultValue: T): { [key: string]: T } {
   const res = {} as { [key: string]: T }
-  for (const tab in tabs) {
+  for (const tab of tabs) {
     res[tab] = defaultValue
   }
   return res

@@ -119,7 +119,7 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'mobile-panel',
@@ -197,6 +197,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState('templates', {
+      templatesIgLayout: 'igLayout'
+    }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
@@ -210,7 +213,8 @@ export default defineComponent({
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
@@ -309,7 +313,7 @@ export default defineComponent({
       if (this.currActivePanel === 'text' && this.isTextInCategory) return true
       if (this.currActivePanel === 'object' && this.isObjectInCategory) return true
       if (this.currActivePanel === 'background' && this.isBackgroundInCategory) return true
-      if (this.currActivePanel === 'template-content' && this.isTemplateInCategory) return true
+      if (this.currActivePanel === 'template-content' && (this.isTemplateInCategory || this.isInGroupTemplate)) return true
       return false
     },
     hideDynamicComp(): boolean {
@@ -540,11 +544,14 @@ export default defineComponent({
           this.resetBackgroundSearch()
         }
       }
-      if (this.currActivePanel === 'template-content' && this.isTemplateInCategory) {
-        return () => {
-          this.setIsInCategory({ tab: 'template', bool: false })
-          this.setShowAllRecently({ tab: 'template', bool: false })
-          this.resetTemplateSearch()
+      if (this.currActivePanel === 'template-content') {
+        if (this.isInGroupTemplate) return () => this.setIsInGroupTemplate(false)
+        if (this.isTemplateInCategory) {
+          return () => {
+            this.setIsInCategory({ tab: 'template', bool: false })
+            this.setShowAllRecently({ tab: 'template', bool: false })
+            this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, { resetCategoryInfo: true })
+          }
         }
       }
       if (this.showExtraColorPanel) {
@@ -691,7 +698,8 @@ export default defineComponent({
       setIsInCategory: 'vivisticker/SET_isInCategory',
       setShowAllRecently: 'vivisticker/SET_showAllRecently',
       setBgImageControl: 'SET_backgroundImageControl',
-      addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor'
+      addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor',
+      setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
     }),
     ...mapActions({
       initRecentlyColors: 'color/initRecentlyColors',
@@ -700,7 +708,6 @@ export default defineComponent({
       resetObjectsSearch: 'objects/resetSearch',
       resetObjectsFavSearch: 'objects/resetFavoritesSearch',
       resetBackgroundSearch: 'background/resetSearch',
-      resetTemplateSearch: 'template/resetSearch',
     }),
     vcoConfig() {
       return {

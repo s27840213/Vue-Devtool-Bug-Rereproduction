@@ -109,6 +109,7 @@ export default defineComponent({
     }
   },
   mounted() {
+    if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
     generalUtils.panelInit('template',
       this.handleSearch,
       this.handleCategorySearch,
