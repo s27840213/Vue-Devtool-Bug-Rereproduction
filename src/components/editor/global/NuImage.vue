@@ -869,11 +869,14 @@ export default defineComponent({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (!shadowBuff.canvasShadowImg) {
-            if (this.config.previewSrc && this.config.previewSrc.includes('data:image/png;base64')) {
-              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
-            }
+            /**
+             * @Note need to review with steve
+             */
+            // if (this.config.previewSrc && this.config.previewSrc.includes('data:image/png;base64')) {
+            //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
+            // }
             img.crossOrigin = 'anonymous'
-            img.src = imageUtils.getSrc(this.config,
+            img.src = this.config.previewSrc ? this.config.previewSrc : imageUtils.getSrc(this.config,
               ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
               `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             await new Promise<void>((resolve) => {
