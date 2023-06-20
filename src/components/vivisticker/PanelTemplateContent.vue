@@ -364,7 +364,7 @@ export default defineComponent({
       if (!this.currentGroup) return
       if (!vivistickerUtils.checkPro(this.currentGroup, 'template')) return
       const cb = async () => {
-        await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, vivistickerUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`)
+        await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, vivistickerUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`, !this.isInEditor)
         return true
       }
       if (this.isInEditor) {

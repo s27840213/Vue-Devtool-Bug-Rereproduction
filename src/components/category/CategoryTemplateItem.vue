@@ -16,6 +16,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
+import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
@@ -75,14 +76,16 @@ export default defineComponent({
     addTemplate() {
       if (this.groupItem && !vivistickerUtils.checkPro(this.groupItem, 'template')) return
       else if (!this.groupItem && !vivistickerUtils.checkPro(this.item, 'template')) return
-      const resize = vivistickerUtils.getPageSize(this.igLayout)
+      const currPageIndex = pageUtils.currFocusPageIndex
+      const attrs = { pageIndex: this.isInEditor ? currPageIndex + 1 : currPageIndex, ...vivistickerUtils.getPageSize(this.igLayout) }
       const moduleKey = `templates/${this.igLayout}`
       const cb = this.groupItem ? async () => {
-        await assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize, moduleKey)
+        await assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, attrs, moduleKey, !this.isInEditor)
         return true
-      } : vivistickerUtils.getAssetInitiator(this.item as IAsset, resize, moduleKey)
-      if (this.isInEditor) cb()
-      else {
+      } : vivistickerUtils.getAssetInitiator(this.item as IAsset, attrs, moduleKey)
+      if (this.isInEditor) {
+        cb()
+      } else {
         vivistickerUtils.startEditing(
           this.igLayout, {
             plan: this.item.plan,
