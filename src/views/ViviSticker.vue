@@ -56,6 +56,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { find } from 'lodash'
+import VConsole from 'vconsole'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -202,10 +203,10 @@ export default defineComponent({
     this.setDebugMode(debugMode)
     this.footerTabsRef = (this.$refs.footerTabs as any).$el as HTMLElement
 
-    // if (process.env.NODE_ENV === 'development' && debugMode) {
-    //   this.vConsole = new VConsole({ theme: 'dark' })
-    //   this.vConsole.setSwitchPosition(25, 80)
-    // }
+    if (process.env.NODE_ENV === 'development' && debugMode) {
+      this.vConsole = new VConsole({ theme: 'dark' })
+      this.vConsole.setSwitchPosition(25, 80)
+    }
   },
   unmounted() {
     document.removeEventListener('scroll', this.handleScroll)
