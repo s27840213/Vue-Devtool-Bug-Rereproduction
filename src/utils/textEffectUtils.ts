@@ -255,9 +255,9 @@ class Controller {
             extraBodyStyle: {
               left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
               top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
+              opacity,
             },
             extraSpanStyle: {
-              opacity,
               color,
               'text-decoration-color': color,
             },

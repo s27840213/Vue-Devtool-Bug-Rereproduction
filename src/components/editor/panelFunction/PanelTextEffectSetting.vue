@@ -71,6 +71,7 @@ div(class="text-effect-setting")
             color-btn(v-if="option.type === 'color' && getStyle(category)[option.key]" size="25px"
               :color="colorParser(getStyle(category)[option.key] as string)"
               :active="option.key === colorTarget && settingTextEffect"
+              :disable="optionDisabled(option)"
               @click="handleColorModal(option)")
             //- Option type img
             div(v-if="option.type === 'img'"
@@ -234,6 +235,7 @@ export default defineComponent({
     },
     optionDisabled(option: IEffectOption) {
       const config = textEffectUtils.getCurrentLayer()
+      const textShadow = config.styles.textEffect
       const textFill = config.styles.textFill
       if (this.currCategoryName === 'fill' && isTextFill(textFill) && textFill.size === 100) {
         const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } =
@@ -242,6 +244,10 @@ export default defineComponent({
           (option.key === 'yOffset200' && (imgHeight === divHeight || !scaleByWidth))) {
           return true
         }
+      }
+      if (this.currCategoryName === 'shadow' && isTextFill(textFill) &&
+        ['echo', 'bold3d'].includes(textShadow.name) && option.key === 'color') {
+        return true
       }
       return false
     },

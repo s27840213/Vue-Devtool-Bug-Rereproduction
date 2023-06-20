@@ -194,7 +194,7 @@ class TextFill {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
         left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200) * -1}px`,
         top: `${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200) * -1}px`,
-        opacity: config.styles.opacity / 200,
+        opacity: 0.5,
       }
     }
   }

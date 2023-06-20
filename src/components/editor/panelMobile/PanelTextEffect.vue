@@ -67,6 +67,7 @@ div(class="panel-text-effect")
         class="panel-text-effect__color")
         div {{option.label}}
         color-btn(:color="colorParser(currentStyle[option.key] as string)"
+                :disable="optionDisabled(option)"
                 size="30px" @click="openColorPanel(option.key)")
       //- Option type img
       div(v-if="option.type === 'img'"
