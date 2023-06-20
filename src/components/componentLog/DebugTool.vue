@@ -10,15 +10,18 @@ div(class="fps")
       div(v-for="valley in valleys"
         :key="valley.text"
         :style="{color: valley.color}") {{valley.text}}
-  div(class="fps__value" @click="showGraph")
-    span FPS: {{fps}}
+  div(class="fps__value")
+    span(@click="showGraph") FPS: {{fps}}
     span(v-if="jsHeapSize !== -1") JS-Heap: {{jsHeapSize}}MB
+    mobile-props-toggle(class="py-5" :title="'切換模板顯示樣式'" v-model="newTemplateShownMode")
 </template>
 
 <script lang="ts">
+import MobilePropsToggle from '@/components/editor/mobile/MobilePropsToggle.vue'
 import { Path, Point } from '@/utils/textBgUtils'
 import { filter, range } from 'lodash'
 import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 class Valley {
   min: number
@@ -64,6 +67,9 @@ interface IFpsGraph {
 
 export default defineComponent({
   name: 'DebugTool',
+  components: {
+    MobilePropsToggle
+  },
   data() {
     return {
       historySize: 30000,
@@ -76,10 +82,26 @@ export default defineComponent({
       jsHeapSize: 0
     }
   },
+  computed: {
+    ...mapGetters({
+      _newTemplateShownMode: 'getNewTemplateShownMode'
+    }),
+    newTemplateShownMode: {
+      get () {
+        return this._newTemplateShownMode
+      },
+      set (value: boolean) {
+        this.setNewTemplateShownMode(value)
+      }
+    }
+  },
   mounted() {
     this.showFps()
   },
   methods: {
+    ...mapMutations({
+      setNewTemplateShownMode: 'SET_newTemplateShownMode'
+    }),
     showFps() {
       window.requestAnimationFrame(() => {
         const now = performance.now()

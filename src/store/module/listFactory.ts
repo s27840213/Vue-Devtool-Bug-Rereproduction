@@ -936,15 +936,10 @@ export default function (this: any) {
         action = () => category && store.dispatch(`${namespace}/toggleFavorite`, { categories: { id: category.id } })
       } else return {}
 
-      const bulbIcon = bulbUrl ? [{
-        icon: 'inspiration',
-        width: 24,
-        action: () => { window.open(bulbUrl) }
-      }] : []
-
       return {
         title,
-        icons: [...bulbIcon, { // Only non-else will return icons
+        bulbUrl,
+        icons: [{ // Only non-else will return icons
           icon: isFavorite ? 'favorites-fill' : 'favorites',
           width: 24,
           action

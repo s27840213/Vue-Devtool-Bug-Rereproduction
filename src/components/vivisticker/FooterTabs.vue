@@ -109,6 +109,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
       isInEditor: 'vivisticker/getIsInEditor',
@@ -202,19 +203,20 @@ export default defineComponent({
       ]
     },
     photoTabs(): Array<IFooterTab> {
+      console.log(this.inEffectEditingMode)
       const tabs = [
         { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
-        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
-        ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         {
           icon: 'effect',
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
-          hidden: !this.editorTypeTemplate || this.isInFrame,
-          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+          // hidden: this.isInFrame,
+          // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
         },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
+        ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
         ...this.copyPasteTabs,

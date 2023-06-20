@@ -34,10 +34,11 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
         svg-icon(iconName="favorites-empty" iconWidth="42px" iconColor="white")
         span(class="panel-static__favorites-empty--title") {{$t('NN0765')}}
         span(class="text-black-5") {{$t('NN0764')}}
-    template(v-slot:category-list-rows="{ list, title, isFavorite }")
+    template(v-slot:category-list-rows="{ list, title, url, isFavorite }")
       category-list-rows(
         :list="list"
         :title="title"
+        :url="url"
         :isFavorite="isFavorite")
         template(v-slot:action)
           div(class="panel-static__list-rows-action")
@@ -421,7 +422,8 @@ export default defineComponent({
           list: category.is_recent ? category.list.slice(0, 10) : category.list,
           title: category.title,
           isFavorite: category.id === -1 || category.is_recent ? undefined
-            : this.checkCategoryFavorite(category.id)
+            : this.checkCategoryFavorite(category.id),
+          url: category.url,
         }))
     },
     processListResult(list = [] as IListServiceContentDataItem[]|ITagExtend[]): ICategoryItem[] {

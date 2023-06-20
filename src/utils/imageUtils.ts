@@ -87,6 +87,7 @@ class ImageUtils {
       size = maxSize
     }
 
+    console.log(type)
     switch (type) {
       case 'public': {
         if (typeof size === 'string' && (size as string).includes('ext')) {

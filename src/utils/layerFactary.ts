@@ -39,6 +39,8 @@ class LayerFactary {
       dragging: false,
       designId: '',
       categoryType: config.categoryType,
+      jsonVer: latestJsonVer,
+      jsonVer_origin: latestJsonVer,
       styles: {
         x: 0,
         y: 0,
@@ -98,7 +100,7 @@ class LayerFactary {
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
 
-    const image = Object.assign(basicConfig, config)
+    const image = Object.assign(basicConfig, config, { jsonVer: latestJsonVer })
     return image
   }
 
@@ -187,6 +189,8 @@ class LayerFactary {
       moving: false,
       dragging: false,
       designId: designId ?? '',
+      jsonVer: latestJsonVer,
+      jsonVer_origin: config.jsonVer_origin ?? latestJsonVer,
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,
@@ -254,6 +258,8 @@ class LayerFactary {
       designId: '',
       isEdited: false,
       contentEditable: config.contentEditable ?? false,
+      jsonVer: latestJsonVer,
+      jsonVer_origin: latestJsonVer,
       styles: {
         x: config.styles?.x,
         y: config.styles?.y,
@@ -418,7 +424,7 @@ class LayerFactary {
       if (isEqual(basicConfig.styles[key], {})) basicConfig.styles[key] = { name: 'none' }
     }
     // 10: Fix problem that some text effect and text shape will not scale with font-size
-    if (generalUtils.versionCheck({ version: jsonVer, lessThan: '1.0.7' })) {
+    if (generalUtils.versionCheck({ version: config.jsonVer ?? jsonVer, lessThan: '1.0.7' })) {
       const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs as any) / 60
       const isTextBox = /(square-borderless|rounded-borderless|square-hollow|rounded-hollow|square-both|rounded-both)/
       const target = [
@@ -446,7 +452,7 @@ class LayerFactary {
         }
       }
     }
-    return Object.assign(basicConfig, config)
+    return Object.assign(basicConfig, config, { jsonVer: latestJsonVer })
   }
 
   newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IFrame>, jsonVer = latestJsonVer): IGroup {
@@ -462,6 +468,8 @@ class LayerFactary {
       designId: config.designId,
       db: config.db,
       has_frame: config.has_frame,
+      jsonVer: latestJsonVer,
+      jsonVer_origin: config.jsonVer_origin ?? latestJsonVer,
       styles: {
         x: config.styles.x,
         y: config.styles.y,
@@ -510,6 +518,8 @@ class LayerFactary {
       moving: false,
       dragging: false,
       designId: '',
+      jsonVer: latestJsonVer,
+      jsonVer_origin: latestJsonVer,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -560,6 +570,8 @@ class LayerFactary {
       ...(config.category === 'E' && { filled: false }),
       ...(options && options.decoration && { decoration: true }),
       ...(options && options.decorationTop && { decorationTop: true }),
+      jsonVer: latestJsonVer,
+      jsonVer_origin: latestJsonVer,
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,
@@ -584,7 +596,7 @@ class LayerFactary {
     }
     delete config.styles
     // delete config.blendMode
-    return Object.assign(basicConfig, config)
+    return Object.assign(basicConfig, config, { jsonVer: latestJsonVer })
   }
 
   newTemplate(config: any): any {

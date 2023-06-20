@@ -11,7 +11,7 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
   div(class="header-bar__center")
-    span(v-if="centerTitle") {{ centerTitle }}
+    link-or-text(:title="centerTitle" :url="isInCategory ? titleInfo.url : ''")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs"
         :key="tab.icon"
@@ -22,16 +22,24 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconWidth="`${tab.width}px`"
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
-    div(v-if="(isInEditor || inBgRemoveMode) && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-copy" @click.prevent.stop="handleCopy")
+    div(v-if="isInEditor && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleCopy")
         svg-icon(iconName="copy"
                   iconWidth="18px"
                   iconHeight="18px"
                   iconColor="black-1")
         span {{ $t('NN0032') }}
+    div(v-if="inBgRemoveMode" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleNext")
+        span(class="ml-5") {{ $t('NN0744') }}
+        svg-icon(iconName="chevron-right"
+                  iconWidth="18px"
+                  iconHeight="18px"
+                  iconColor="black-1")
     div(v-if="isInMyDesign && !isInEditor" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
 </template>
 
 <script lang="ts">
+import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
+import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -67,24 +75,19 @@ export default defineComponent({
       isInLastStep
     }
   },
+  components: {
+    LinkOrText
+  },
   computed: {
-    ...mapGetters('objects', {
-      staticHeaderTab: 'headerTab'
-    }),
-    ...mapGetters('giphy', {
-      giphyKeyword: 'keyword',
-      gihpyHeaderTab: 'headerTab'
-    }),
-    ...mapState('background', {
-      backgroundKeyword: 'keyword'
-    }),
-    ...mapState('textStock', {
-      textKeyword: 'keyword'
-    }),
     ...mapState('templates', {
       templatesIgLayout: 'igLayout'
     }),
     ...mapGetters({
+      staticHeaderTab: 'objects/headerTab',
+      giphyKeyword: 'giphy/keyword',
+      gihpyHeaderTab: 'giphy/headerTab',
+      backgroundHeaderTab: 'background/headerTab',
+      textHeaderTab: 'textStock/headerTab',
       isInEditor: 'vivisticker/getIsInEditor',
       isCurrentInCategory: 'vivisticker/getIsInCategory',
       isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
@@ -105,6 +108,8 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inBgRemoveFirstStep: 'bgRemove/inFirstStep',
       inBgRemoveLastStep: 'bgRemove/inLastStep',
+      autoRemoveResult: 'bgRemove/getAutoRemoveResult',
+      inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -183,18 +188,27 @@ export default defineComponent({
         ]
       }
     },
-    keyword(): string {
+    titleInfo(): { title: string, url: string } {
       switch (this.currActiveTab) {
         case 'object':
-          return this.staticHeaderTab.title || this.giphyKeyword
+          return {
+            title: this.staticHeaderTab.title || this.giphyKeyword,
+            url: this.staticHeaderTab.bulbUrl || ''
+          }
         case 'background':
-          return this.backgroundKeyword
+          return {
+            title: this.backgroundHeaderTab.title,
+            url: this.backgroundHeaderTab.bulbUrl
+          }
         case 'text':
-          return this.textKeyword
+          return {
+            title: this.textHeaderTab.title,
+            url: this.textHeaderTab.bulbUrl
+          }
         case 'template':
           return this.templateKeyword
       }
-      return ''
+      return { title: '', url: '' }
     },
     centerTitle(): string {
       if (this.isInMultiPageShare) {
@@ -210,7 +224,7 @@ export default defineComponent({
         if (this.showAllRecently) {
           return `${this.$t('NN0024')}`
         } else {
-          return this.keyword
+          return this.titleInfo.title
         }
       } else {
         return ''
@@ -297,7 +311,9 @@ export default defineComponent({
       switchBg: 'vivisticker/UPDATE_switchBg',
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
       setMyDesignTab: 'vivisticker/SET_myDesignTab',
-      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
+      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
+      setInEffectEditingMode: 'bgRemove/SET_inEffectEditingMode',
     }),
     resetTemplatesSearch(params = {}) {
       this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
@@ -344,6 +360,9 @@ export default defineComponent({
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
       }
+      if (bgRemoveUtils.autoRemoveResult !== null) {
+        this.clearBgRemoveState()
+      }
       if (vivistickerUtils.checkVersion('1.13')) {
         if (vivistickerUtils.userSettings.autoSave) {
           vivistickerUtils.saveAsMyDesign().then(() => {
@@ -375,26 +394,33 @@ export default defineComponent({
               }
             }
           }
-          modalUtils.setModalInfo(
-            `${this.$t('STK0008')}`,
-            `${this.$t('STK0009')}`,
-            {
-              msg: `${this.$t('STK0004')}`,
-              action: () => {
-                vivistickerUtils.saveAsMyDesign().then(() => {
-                  vivistickerUtils.endEditing()
-                })
-              }
-            },
-            {
-              msg: `${this.$t('STK0011')}`,
-              action: () => { vivistickerUtils.endEditing() },
-              style: {
-                color: '#474A57',
-                backgroundColor: '#D9DBE1'
-              }
-            },
-            options)
+          /**
+           * @Note have not implement the save feature for bg remove result
+           */
+          if (!this.inEffectEditingMode) {
+            modalUtils.setModalInfo(
+              `${this.$t('STK0008')}`,
+              `${this.$t('STK0009')}`,
+              {
+                msg: `${this.$t('STK0004')}`,
+                action: () => {
+                  vivistickerUtils.saveAsMyDesign().then(() => {
+                    vivistickerUtils.endEditing()
+                  })
+                }
+              },
+              {
+                msg: `${this.$t('STK0011')}`,
+                action: () => { vivistickerUtils.endEditing() },
+                style: {
+                  color: '#474A57',
+                  backgroundColor: '#D9DBE1'
+                }
+              },
+              options)
+          } else {
+            vivistickerUtils.endEditing()
+          }
         }
       } else {
         vivistickerUtils.endEditing()
@@ -432,6 +458,68 @@ export default defineComponent({
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ source: 'editor' }))
       }
     },
+    // async addStandardText() {
+    //   let recentFont
+    //   if (vivistickerUtils.checkVersion('1.5')) {
+    //     recentFont = await vivistickerUtils.getState('recentFont')
+    //   }
+    //   const color = vivistickerUtils.getContrastColor(this.editorBg)
+    //   await assetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {
+    //     size: 21,
+    //     color,
+    //     weight: 'normal',
+    //     ...(recentFont ?? {})
+    //   })
+    // },
+    async addImage(src: string, aspectRatio: number) {
+      assetUtils.addImage(src, aspectRatio, {
+        pageIndex: 0,
+        // The following props is used for preview image during polling process
+        isPreview: true
+      })
+    },
+    handleNext() {
+      bgRemoveUtils.setInBgRemoveMode(false)
+      editorUtils.setShowMobilePanel(false)
+      this.setInEffectEditingMode(true)
+
+      const bgRemoveResultSrc = bgRemoveUtils.getBgRemoveResultSrc()
+
+      vivistickerUtils.startEditing(
+        'image',
+        { plan: 0, assetId: '' },
+        async () => {
+          console.log('start editing standard image')
+          await this.addImage(bgRemoveResultSrc, this.autoRemoveResult.width / this.autoRemoveResult.height)
+          return true
+        },
+        vivistickerUtils.getEmptyCallback()
+      )
+    },
+    // async addImage(src: string, aspectRatio: number, previewSrc: string) {
+    //   assetUtils.addImage(src, aspectRatio, {
+    //     pageIndex: 0,
+    //     // The following props is used for preview image during polling process
+    //     isPreview: true,
+    //     previewSrc
+    //   })
+    // },
+    // handleNext() {
+    //   bgRemoveUtils.setInBgRemoveMode(false)
+    //   editorUtils.setShowMobilePanel(false)
+    //   this.setInEffectEditingMode(true)
+    //   vivistickerUtils.startEditing(
+    //     'image',
+    //     { plan: 0, assetId: '' },
+    //     async () => {
+    //       const src = bgRemoveUtils.canvas.toDataURL('image/png;base64')
+    //       console.log(src)
+    //       await this.addImage(src, this.autoRemoveResult.width / this.autoRemoveResult.height, src)
+    //       return true
+    //     },
+    //     vivistickerUtils.getEmptyCallback()
+    //   )
+    // },
     handleMore() {
       editorUtils.setCurrActivePanel('vvstk-more')
       editorUtils.setShowMobilePanel(true)
@@ -517,7 +605,7 @@ export default defineComponent({
     &:active {
       background-color: setColor(gray-2);
     }
-    &.btn-copy{
+    &.btn-feature{
       display: flex;
       align-items: center;
       padding: 4px 8px;

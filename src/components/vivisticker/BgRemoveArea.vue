@@ -103,7 +103,13 @@ export default defineComponent({
     // } else {
     //   this.canvasHeight = 1600 / aspectRatio
     // }
-    this.canvasHeight = 1600 / aspectRatio
+    if (aspectRatio > 1) {
+      this.canvasWidth = 1600
+      this.canvasHeight = 1600 / aspectRatio
+    } else {
+      this.canvasWidth = 1600 * aspectRatio
+      this.canvasHeight = 1600
+    }
 
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg

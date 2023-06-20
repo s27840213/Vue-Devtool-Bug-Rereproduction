@@ -29,7 +29,8 @@ interface IBgRemoveState {
     src: string,
     width: number,
     height: number
-  }
+  },
+  inEffectEditingMode: boolean
 }
 
 const getDefaultState = (): IBgRemoveState => ({
@@ -59,13 +60,17 @@ const getDefaultState = (): IBgRemoveState => ({
     src: '',
     width: 0,
     height: 0
-  }
+  },
+  inEffectEditingMode: false
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IBgRemoveState, unknown> = {
   getInBgRemoveMode(state: IBgRemoveState) {
     return state.inBgRemoveMode
+  },
+  getInEffectEditingMode(state: IBgRemoveState) {
+    return state.inEffectEditingMode
   },
   getBrushSize(state: IBgRemoveState) {
     return state.brushSize
@@ -125,27 +130,33 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
 
 const mutations: MutationTree<IBgRemoveState> = {
   SET_inBgRemoveMode(state: IBgRemoveState, bool: boolean) {
-    if (!bool) {
-      Object.assign(state, {
-        inBgRemoveMode: false,
-        brushSize: 16,
-        showInitImage: false,
-        clearMode: true,
-        restoreInitState: false,
-        canvas: null as unknown as HTMLCanvasElement,
-        autoRemoveResult: null as unknown as IBgRemoveInfo,
-        modifiedFlag: false,
-        loading: false,
-        step: [],
-        currStep: -1,
-        previewImage: {
-          src: '',
-          width: 0,
-          height: 0
-        }
-      })
-    }
+    /**
+     * @Note bcz in vivisticker, we need the autoRemoveResult after we leave the bg remove mode, so comment the code below
+     */
+    // if (!bool) {
+    //   Object.assign(state, {
+    //     inBgRemoveMode: false,
+    //     brushSize: 16,
+    //     showInitImage: false,
+    //     clearMode: true,
+    //     restoreInitState: false,
+    //     canvas: null as unknown as HTMLCanvasElement,
+    //     autoRemoveResult: null as unknown as IBgRemoveInfo,
+    //     modifiedFlag: false,
+    //     loading: false,
+    //     step: [],
+    //     currStep: -1,
+    //     previewImage: {
+    //       src: '',
+    //       width: 0,
+    //       height: 0
+    //     }
+    //   })
+    // }
     state.inBgRemoveMode = bool
+  },
+  SET_inEffectEditingMode (state: IBgRemoveState, bool: boolean) {
+    state.inEffectEditingMode = bool
   },
   SET_brushSize(state: IBgRemoveState, size: number) {
     state.brushSize = size

@@ -1,7 +1,8 @@
 <template lang="pug">
 div(class="category-list-rows")
   div(class="category-list-rows__header py-10 text-bold text-white")
-    div {{title}}
+    div
+      link-or-text(:title="title" :url="url")
     div(class="category-list-rows__action pointer"
       @click="onAction(title)")
       slot(name="action") {{$t('NN0082')}}
@@ -12,6 +13,7 @@ div(class="category-list-rows")
 </template>
 
 <script lang="ts">
+import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
 import { ICategoryItem } from '@/interfaces/api'
 import { defineComponent, PropType } from 'vue'
 import CategoryListRow from './CategoryListRow.vue'
@@ -27,13 +29,18 @@ export default defineComponent({
       type: String,
       required: true
     },
+    url: {
+      type: String,
+      default: ''
+    },
     columnGap: {
       type: Number,
       default: 10
     }
   },
   components: {
-    CategoryListRow
+    CategoryListRow,
+    LinkOrText
   },
   methods: {
     onAction(title: string) {

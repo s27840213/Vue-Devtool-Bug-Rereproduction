@@ -41,10 +41,11 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
         div(v-if="showAllRecently && !item.content.length && !pending" class="panel-bg__recent-empty")
           svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
           div(class="panel-bg__recent-empty--title") No content in Recently Used
-      template(v-slot:category-list-rows="{ list, title }")
+      template(v-slot:category-list-rows="{ list, title, url }")
         category-list-rows(
           :list="list"
           :title="title"
+          :url="url"
           @action="handleCategorySearch")
           template(v-slot:preview="{ item }")
             category-background-item(class="panel-bg__item"
@@ -160,7 +161,8 @@ export default defineComponent({
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
-          title: category.title
+          title: category.title,
+          url: category.url
         }))
     },
   },
