@@ -371,6 +371,11 @@ class TextUtils {
   }
 
   mergeLines(spanDataList: DOMRect[][][]) {
+    /**
+     * The result of getClientRects may contain multiple DOMRects for a single line.
+     * This is typically observed when the whitespace immediately preceding a line wrap
+     * which is split and represented as a separate DOMRect.
+     */
     spanDataList.forEach(p => {
       p.forEach(span => {
         span.forEach((row, index) => {
