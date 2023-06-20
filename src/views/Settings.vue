@@ -40,21 +40,22 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
             :title="$t('NN0166')"
             :iconName="'chevron-right'"
             @click="goToSubSettingView('security')")
-          template(v-if="isPro")
-            hr
-            mobile-jump-btn(
-              :title="$t('NN0585')"
-              :iconName="'chevron-right'"
-              @click="goToSubSettingView('payment')")
-            hr
-            mobile-jump-btn(
-              :title="$t('NN0614')"
-              :iconName="'chevron-right'"
-              @click="goToSubSettingView('billing')")
-          template(v-else)
-            hr
-            div(class="body-MD my-5") {{ $t('NN0859') }}
-            nubtn(size="mid-full" @click="buy") {{$t('NN0545')}}
+          template(v-if="!inReviewMode")
+            template(v-if="isPro")
+              hr
+              mobile-jump-btn(
+                :title="$t('NN0585')"
+                :iconName="'chevron-right'"
+                @click="goToSubSettingView('payment')")
+              hr
+              mobile-jump-btn(
+                :title="$t('NN0614')"
+                :iconName="'chevron-right'"
+                @click="goToSubSettingView('billing')")
+            template(v-else)
+              hr
+              div(class="body-MD my-5") {{ $t('NN0859') }}
+              nubtn(size="mid-full" @click="buy") {{$t('NN0545')}}
         div(v-else)
           nubtn(v-if="!isLogin" size="mid-full"
                 @click="goToPage('SignUp')") {{$tc('NN0169',2)}}
@@ -171,6 +172,9 @@ export default defineComponent({
       email: 'user/getEmail',
       userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
+    inReviewMode(): boolean {
+      return picWVUtils.inReviewMode
+    },
     sidebarStyle(): Record<string, string> {
       return this.currentView === 'menu' ? { width: '100%', display: 'grid' } : {}
     },
