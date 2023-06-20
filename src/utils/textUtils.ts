@@ -7,6 +7,7 @@ import { LayerType } from '@/store/types'
 import { AutoResizeByHeight, AutoResizeByHeightSync, AutoResizeBySpanDataList, IRunResult } from '@/utils/autoResizeUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
+import testUtils from '@/utils/testUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import Graphemer from 'graphemer'
@@ -775,12 +776,12 @@ class TextUtils {
 
   autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): IRunResult {
     const res = (new AutoResizeByHeightSync(config, initSize)).runSync()
-    return (new AutoResizeBySpanDataList(config, { ...initSize, widthLimit: res.widthLimit })).runSync()
+    return (new AutoResizeBySpanDataList(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).runSync()
   }
 
   async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<IRunResult> {
     const res = await (new AutoResizeByHeight(config, initSize)).run()
-    return await (new AutoResizeBySpanDataList(config, { ...initSize, widthLimit: res.widthLimit })).run()
+    return await (new AutoResizeBySpanDataList(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).run()
   }
 
   async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
