@@ -40,22 +40,21 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
             :title="$t('NN0166')"
             :iconName="'chevron-right'"
             @click="goToSubSettingView('security')")
-          template(v-if="!inReviewMode")
-            template(v-if="isPro")
-              hr
-              mobile-jump-btn(
-                :title="$t('NN0585')"
-                :iconName="'chevron-right'"
-                @click="goToSubSettingView('payment')")
-              hr
-              mobile-jump-btn(
-                :title="$t('NN0614')"
-                :iconName="'chevron-right'"
-                @click="goToSubSettingView('billing')")
-            template(v-else)
-              hr
-              div(class="body-MD my-5") {{ $t('NN0859') }}
-              nubtn(size="mid-full" @click="buy") {{$t('NN0545')}}
+          template(v-if="isPro")
+            hr
+            mobile-jump-btn(
+              :title="$t('NN0585')"
+              :iconName="'chevron-right'"
+              @click="goToSubSettingView('payment')")
+            hr
+            mobile-jump-btn(
+              :title="$t('NN0614')"
+              :iconName="'chevron-right'"
+              @click="goToSubSettingView('billing')")
+          template(v-else)
+            hr
+            div(class="body-MD my-5") {{ $t('NN0859') }}
+            nubtn(size="mid-full" @click="buy") {{$t('NN0545')}}
         div(v-else)
           nubtn(v-if="!isLogin" size="mid-full"
                 @click="goToPage('SignUp')") {{$tc('NN0169',2)}}
@@ -64,15 +63,16 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
       div(class="settings-mobile__row my-10")
         div(class="text-H4")
           span {{$t('NN0670')}}
-        url(:url="'https://blog.vivipic.com/tw/tutorial/'")
+        url(:url="tutorialUrl")
           mobile-jump-btn(
             :title="$t('NN0146')"
             :iconName="'chevron-right'")
-        hr
-        url(:url="'https://blog.vivipic.com/tw/faq/'")
-          mobile-jump-btn(
-            :title="$t('NN0147')"
-            :iconName="'chevron-right'")
+        template(v-if="faqUrl !== ''")
+          hr
+          url(:url="faqUrl")
+            mobile-jump-btn(
+              :title="$t('NN0147')"
+              :iconName="'chevron-right'")
         hr
         url(:url="$t('NN0791')")
           mobile-jump-btn(
@@ -111,9 +111,9 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
 
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
+import NuHeader from '@/components/NuHeader.vue'
 import MobileJumpBtn from '@/components/editor/mobile/MobileJumpBtn.vue'
 import Url from '@/components/global/Url.vue'
-import NuHeader from '@/components/NuHeader.vue'
 import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'
@@ -172,9 +172,6 @@ export default defineComponent({
       email: 'user/getEmail',
       userInfo: picWVUtils.appendModuleName('getUserInfo')
     }),
-    inReviewMode(): boolean {
-      return picWVUtils.inReviewMode
-    },
     sidebarStyle(): Record<string, string> {
       return this.currentView === 'menu' ? { width: '100%', display: 'grid' } : {}
     },
@@ -196,6 +193,36 @@ export default defineComponent({
         default:
           return this.$t('NN0165', 2) as string
       }
+    },
+    tutorialUrl(): string {
+      switch (this.$i18n.locale) {
+        case 'tw': {
+          return 'https://blog.vivipic.com/tw/tutorial/'
+        }
+        case 'jp': {
+          return 'https://blog.vivipic.com/jp/4step/'
+        }
+        case 'us': {
+          return 'https://blog.vivipic.com/us/us-tutorial/'
+        }
+      }
+
+      return ''
+    },
+    faqUrl(): string {
+      switch (this.$i18n.locale) {
+        case 'tw': {
+          return 'https://blog.vivipic.com/tw/faq/'
+        }
+        case 'jp': {
+          return ''
+        }
+        case 'us': {
+          return 'https://blog.vivipic.com/us/us-faq/'
+        }
+      }
+
+      return ''
     }
   },
   created() {
