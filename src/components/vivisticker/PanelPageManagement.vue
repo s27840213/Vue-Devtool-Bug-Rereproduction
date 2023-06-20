@@ -214,7 +214,6 @@ export default defineComponent({
       border-radius: 5px;
       padding: 6px 0px;
       align-items: center;
-      overflow: hidden;
       &:active {
         background: rgba(255, 255, 255, 0.2);
       }
