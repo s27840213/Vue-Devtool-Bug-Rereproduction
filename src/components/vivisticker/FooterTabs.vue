@@ -393,6 +393,7 @@ export default defineComponent({
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' },
+        { icon: 'paste', text: `${this.$t('NN0230')}` }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
