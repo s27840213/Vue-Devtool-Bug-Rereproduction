@@ -12,7 +12,7 @@ const DEBUG_HEIGHT = false
 const DEBUG_SPANDATALIST = false
 // const DEBUG_SPANDATALIST = true
 const DEBUG_LOG_FILTER = (by: string, identity: string) => {
-  // return identity.startsWith('Meanwhile')
+  // return identity.startsWith('The cause')
   return true
 }
 
@@ -67,7 +67,7 @@ export class AutoResizeByHeight {
   log(...args: any[]) {
     if (!this.isDebugMode) return
     if (!DEBUG_LOG_FILTER(this.BY, this.identity)) return
-    console.log(this.BY, this.identity.substring(0, 50), ...args)
+    console.log(this.BY, this.identity.substring(0, 50), '::', ...args)
   }
 
   updateDiff(currDiff: number) {
@@ -295,47 +295,20 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
     return true // close enough, go on to next span
   }
 
-  compareBySpanDataList(): boolean {
-    const currSpanDataList = this.autoSize.spanDataList
-    const targetSpanDataList = this.initSize.spanDataList!
-
-    const currSpans = currSpanDataList[this.pIndex]
-    const targetSpans = targetSpanDataList[this.pIndex]
-
-    const currSpanRects = currSpans[this.sIndex]
-    const targetSpanRects = targetSpans[this.sIndex]
-
-    this.log('i, j:', this.pIndex, this.sIndex)
-
-    const sameLines = this.compareByLineCount(currSpanRects.length, targetSpanRects.length)
-
-    if (sameLines) {
-      const dimension = this.isVertical ? 'height' : 'width'
-      const currLastLineSize = currSpanRects[currSpanRects.length - 1][dimension]
-      const targetLastLineSize = targetSpanRects[targetSpanRects.length - 1][dimension]
-
-      const goNextSpan = this.compareByLastLine(currLastLineSize, targetLastLineSize)
-      if (goNextSpan) {
-        if (this.sIndex === currSpans.length - 1) {
-          this.sIndex = 0
-          if (this.pIndex === currSpanDataList.length - 1) {
-            return true // all close enough, return currentResult
-          } else {
-            this.pIndex++
-          }
-        } else {
-          this.sIndex++
-        }
-        this.log('go on to next i, j')
-        this.resetParamsForIJ()
-        return false // head to next loop without applying any offset
+  nextIJ(pCount: number, spanCount: number): boolean {
+    if (this.sIndex === spanCount - 1) {
+      this.sIndex = 0
+      if (this.pIndex === pCount - 1) {
+        return true // all close enough, return currentResult
+      } else {
+        this.pIndex++
       }
+    } else {
+      this.sIndex++
     }
-
-    this.log(this.offset, this.direction, this.prevOffset, this.MAX_LOOP, this.TOLERANCE)
-    if (this.checkDirection()) return true
-    this.applyOffset()
-    return false // head to next loop
+    this.log('go on to next i, j')
+    this.resetParamsForIJ()
+    return false // head to next loop without applying any offset
   }
 
   loopPrevCondition(): boolean {
@@ -350,7 +323,39 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
 
   loopComparison(): boolean {
     this.log('loopComparison')
-    if (this.checkLoop()) return true
-    return this.compareBySpanDataList()
+    const currSpanDataList = this.autoSize.spanDataList
+    const targetSpanDataList = this.initSize.spanDataList!
+
+    const currSpans = currSpanDataList[this.pIndex]
+    const targetSpans = targetSpanDataList[this.pIndex]
+
+    const currSpanRects = currSpans[this.sIndex]
+    const targetSpanRects = targetSpans[this.sIndex]
+
+    this.log('i, j:', this.pIndex, this.sIndex)
+
+    if (this.checkLoop()) {
+      this.log('MAX_LOOP reached')
+      this.undoToMinDiff()
+      return this.nextIJ(currSpanDataList.length, currSpans.length)
+    }
+
+    const sameLines = this.compareByLineCount(currSpanRects.length, targetSpanRects.length)
+
+    if (sameLines) {
+      const dimension = this.isVertical ? 'height' : 'width'
+      const currLastLineSize = currSpanRects[currSpanRects.length - 1][dimension]
+      const targetLastLineSize = targetSpanRects[targetSpanRects.length - 1][dimension]
+
+      const goNextSpan = this.compareByLastLine(currLastLineSize, targetLastLineSize)
+      if (goNextSpan) {
+        return this.nextIJ(currSpanDataList.length, currSpans.length)
+      }
+    }
+
+    this.log(this.offset, this.direction, this.prevOffset, this.MAX_LOOP, this.TOLERANCE)
+    if (this.checkDirection()) return true
+    this.applyOffset()
+    return false // head to next loop
   }
 }
