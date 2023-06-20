@@ -39,7 +39,6 @@ export default defineComponent({
   },
   methods: {
     addTemplate(photo = false) {
-      console.log('addTemplate', this.igLayout, photo)
       if (photo) {
         vivistickerUtils.getIosImg()
           .then(async (images: Array<string>) => {
@@ -76,7 +75,6 @@ export default defineComponent({
           this.igLayout,
           { plan: 0, assetId: '' },
           async () => {
-            console.log('start editing template', this.igLayout)
             return true
           },
           vivistickerUtils.getEmptyCallback()
