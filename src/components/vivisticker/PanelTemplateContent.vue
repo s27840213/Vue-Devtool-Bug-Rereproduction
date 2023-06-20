@@ -56,7 +56,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
             iconName="add-page"
             iconColor="gray-2"
             iconWidth="24px")
-    span(class="body-SM text-black-3") {{`Add all pages (${currentGroup?.content_ids.length ?? 0} pages)`}}
+    span(class="body-SM text-black-3") {{ $t('STK0065', {num: currentGroup?.content_ids.length ?? 0}) }}
 </template>
 
 <script lang="ts">
