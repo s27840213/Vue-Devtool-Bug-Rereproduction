@@ -136,7 +136,7 @@ export default defineComponent({
   props: {
     currPage: {
       type: Object as PropType<IPage>,
-      required: true
+      default: undefined
     }
   },
   data() {
@@ -290,6 +290,7 @@ export default defineComponent({
       return this.windowSize.height - (this.isInEditor ? 295 : 176)
     },
     currentPageBackgroundLocked(): boolean {
+      if (!this.currPage) return false
       const { backgroundImage } = this.currPage
       return backgroundImage && backgroundImage.config.locked
     },
