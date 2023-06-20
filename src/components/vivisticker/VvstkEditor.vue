@@ -11,7 +11,7 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
                 :marginTop="marginTop"
                 :no-bg="!editorTypeTemplate"
                 @click.self.prevent="outerClick")
-      div(class="page-add" :id="`page-card-${pagesState.length}`" key="page-add")
+      div(v-if="editorTypeTemplate" class="page-add" :id="`page-card-${pagesState.length}`" key="page-add")
         div(class="page-add__page body-SM flex-column flex-center")
           div(class="page-add__text text-white" v-html="$t('STK0075')")
           div(class="page-add__btn text-black-3 bg-white flex-center" @click="addPage")
@@ -231,7 +231,7 @@ export default defineComponent({
         this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
       } else if (dir === 'left') {
         if (pageUtils.currFocusPageIndex === this.pagesState.length - 1) {
-          if (this.isPageNumMax) return
+          if (!this.editorTypeTemplate || this.isPageNumMax) return
           this.isInPageAdd = true
           vivistickerUtils.scrollIntoPage(this.pagesState.length, 300)
         } else {
