@@ -114,8 +114,8 @@ export default defineComponent({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currSelectedInfo: 'getCurrSelectedInfo',
     }),
-    templateKeyword() {
-      return this.$store.state.templates[this.templatesIgLayout].keyword
+    templateHeaderTab() {
+      return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
     },
     stepCount(): number {
       return stepsUtils.steps.length
@@ -206,7 +206,10 @@ export default defineComponent({
             url: this.textHeaderTab.bulbUrl
           }
         case 'template':
-          return this.templateKeyword
+          return {
+            title: this.templateHeaderTab.title,
+            url: this.templateHeaderTab.bulbUrl
+          }
       }
       return { title: '', url: '' }
     },
