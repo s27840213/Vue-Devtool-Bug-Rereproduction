@@ -221,6 +221,9 @@ export default defineComponent({
     isBackgroundInCategory(): boolean {
       return this.isInCategory('background')
     },
+    isTemplateInCategory(): boolean {
+      return this.isInCategory('template')
+    },
     isTextShowAllRecently(): boolean {
       return this.isShowAllRecently('text')
     },
@@ -303,6 +306,7 @@ export default defineComponent({
       if (this.currActivePanel === 'text' && this.isTextInCategory) return true
       if (this.currActivePanel === 'object' && this.isObjectInCategory) return true
       if (this.currActivePanel === 'background' && this.isBackgroundInCategory) return true
+      if (this.currActivePanel === 'template-content' && this.isTemplateInCategory) return true
       return false
     },
     hideDynamicComp(): boolean {
@@ -512,6 +516,13 @@ export default defineComponent({
           this.resetBackgroundSearch()
         }
       }
+      if (this.currActivePanel === 'template-content' && this.isTemplateInCategory) {
+        return () => {
+          this.setIsInCategory({ tab: 'template', bool: false })
+          this.setShowAllRecently({ tab: 'template', bool: false })
+          this.resetTemplateSearch()
+        }
+      }
       if (this.showExtraColorPanel) {
         return () => {
           colorHandler()
@@ -664,7 +675,8 @@ export default defineComponent({
       resetTextsSearch: 'textStock/resetSearch',
       resetObjectsSearch: 'objects/resetSearch',
       resetObjectsFavSearch: 'objects/resetFavoritesSearch',
-      resetBackgroundSearch: 'background/resetSearch'
+      resetBackgroundSearch: 'background/resetSearch',
+      resetTemplateSearch: 'template/resetSearch',
     }),
     vcoConfig() {
       return {
