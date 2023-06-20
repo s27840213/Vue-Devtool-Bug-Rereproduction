@@ -112,7 +112,7 @@ export default defineComponent({
   grid-template-rows: auto auto 1fr;
   overflow: hidden;
   &__tabs {
-    margin-top: 24px;
+    margin-top: v-bind("isInEditor ? '0' : '24px'");
   }
   &__favorites-tabs {
     display: flex;

@@ -544,7 +544,7 @@ export default defineComponent({
   overflow: hidden;
   position: relative;
   &__tabs {
-    margin-top: 24px;
+    margin-top: v-bind("isInEditor ? '0' : '24px'");
   }
   &__searchbar {
     margin-bottom: 14px;
