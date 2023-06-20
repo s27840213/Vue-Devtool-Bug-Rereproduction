@@ -116,6 +116,11 @@ export default defineComponent({
           key: 'object',
           title: this.$t('STK0051'),
           img: require('@/assets/img/png/pricing/vivisticker_pro-object.png')
+        },
+        {
+          key: 'template',
+          title: this.$t('STK0071'),
+          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-template.png`)
         }
       ] as CarouselItem[],
       footerLinks: [
