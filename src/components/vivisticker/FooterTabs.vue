@@ -451,7 +451,7 @@ export default defineComponent({
         return this.photoTabs
       } else if (this.showFontTabs) {
         const res = [
-          { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+          ...(this.editorTypeTemplate ? [{ icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` }] : []), // conditional insert to prevent duplicate key
           ...this.fontTabs
         ]
         res.splice(this.fontTabs.length - 2, 0, ...this.genearlLayerTabs, ...this.copyPasteTabs)
