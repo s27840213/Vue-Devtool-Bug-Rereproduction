@@ -40,7 +40,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
         svg-icon(iconName="loading"
           iconColor="white"
           iconWidth="20px")
-  btn-add(v-show="!isInCategory && !isInGroupTemplate && !keyword" :elScrollable="elMainContent" :text="strBtnAdd" @click="addTemplate")
+  btn-add(class="text-H6" v-show="!isInCategory && !isInGroupTemplate && !keyword" :elScrollable="elMainContent" :text="strBtnAdd" @click="addTemplate")
   div(v-if="isInGroupTemplate" class="panel-template-content__btn-add-group-template" @click="addGroupTemplate")
     svg-icon(class="panel-template-content__btn-add-group-template__icon"
             iconName="add-page"

@@ -252,9 +252,6 @@ export default defineComponent({
   & > span {
     position: relative;
     left: -12px;
-    font-weight: 600;
-    font-size: 20px;
-    line-height: 28px;
     color: white;
   }
   &__icon {

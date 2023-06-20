@@ -30,7 +30,7 @@ div(class="panel-text" :class="{'in-category': isInCategory, 'in-editor': isInEd
               iconWidth="24px")
             div(class="overline-SM") RECENTLY USED
           CategoryTextPreview(v-else :item="item" @click="addText(item)")
-  btn-add(:elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
+  btn-add(class="btn-add" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
 </template>
 
 <script lang="ts">
@@ -224,5 +224,11 @@ export default defineComponent({
       color: white;
     }
   }
+}
+
+.btn-add {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 28px;
 }
 </style>
