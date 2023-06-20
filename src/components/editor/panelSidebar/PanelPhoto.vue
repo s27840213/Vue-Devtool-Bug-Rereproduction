@@ -4,6 +4,8 @@ div(class="panel-photo")
     :style="searchBarStyle()"
     :placeholder="$t('NN0092', {target: $tc('NN0002',1)})"
     clear
+    vivisticker="dark"
+    :color="{close: 'black-5', search: 'black-5'}"
     :defaultKeyword="keyword"
     @search="handleSearch")
   div(v-if="keyword && !pending && !searchResult.length"
