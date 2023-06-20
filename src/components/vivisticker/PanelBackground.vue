@@ -77,7 +77,7 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
               v-press="() => handleShareColor(color)"
               :style="colorStyles(color)"
               @click="setBgColor(color)")
-      div(class="panel-bg__color-controller")
+      div(v-if="!isInEditor" class="panel-bg__color-controller")
         mobile-slider(:title="`${$t('NN0030')}`"
           :borderTouchArea="true"
           :value="opacity"
