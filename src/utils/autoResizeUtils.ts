@@ -9,8 +9,8 @@ export interface IRunResult {
 
 const DEBUG_HEIGHT = false
 // const DEBUG_HEIGHT = true
-// const DEBUG_SPANDATALIST = false
-const DEBUG_SPANDATALIST = true
+const DEBUG_SPANDATALIST = false
+// const DEBUG_SPANDATALIST = true
 const DEBUG_LOG_FILTER = (by: string, identity: string) => {
   // return identity.startsWith('Meanwhile')
   return true
