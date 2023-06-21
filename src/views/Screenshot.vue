@@ -326,8 +326,6 @@ export default defineComponent({
           }
           case 'gen-thumb': {
             const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
-            console.log(page)
-
             const hasBg = !noBg && page.backgroundImage.config.srcObj?.assetId !== ''
             const genThumb = () => {
               vivistickerUtils.callIOSAsAPI('GEN_THUMB', {
