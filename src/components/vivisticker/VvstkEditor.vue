@@ -19,7 +19,7 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
             div(class="page-add__btn__text") {{ $t('STK0076') }}
   div(v-if="editorTypeTemplate && !isDuringCopy" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="pages" iconWidth="20px" iconColor="black-5")
-    span(class="page-pill__text body-XS text-black-5") {{ strPagePill }}
+    span(class="page-pill__text body-XS text-black-5 no-wrap") {{ strPagePill }}
   page-preivew(v-if="isInPagePreview" :pagesState="pagesState")
   share-template(v-if="isInTemplateShare" :isMultiPage="pagesState.length > 1")
 </template>
