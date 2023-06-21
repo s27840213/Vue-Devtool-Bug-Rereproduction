@@ -1363,6 +1363,20 @@ class UploadUtils {
       newPage.backgroundImage.config.imgControl = false
       newPage.width = parseInt(newPage.width.toString(), 10)
       newPage.height = parseInt(newPage.height.toString(), 10)
+
+      // remove NaN to prevent APP crash
+      Object.entries(newPage.backgroundImage).forEach(([key, value]) => {
+        if (typeof value !== 'number') return
+        if (isNaN(value)) {
+          (newPage.backgroundImage as { [key: string]: any })[key] = 0
+        }
+      })
+      Object.entries(newPage.backgroundImage.config.styles).forEach(([key, value]) => {
+        if (typeof value !== 'number') return
+        if (isNaN(value)) {
+          (newPage.backgroundImage.config.styles as { [key: string]: any })[key] = 0
+        }
+      })
       return newPage
     })
   }
