@@ -109,7 +109,7 @@ export default defineComponent({
 
       const newWidth = aspectRatio > 1 ? 1600 : 1600 * aspectRatio
       const newHeight = aspectRatio > 1 ? 1600 / aspectRatio : 1600
-      const ratio = Math.min(width / newWidth, height / newHeight * aspectRatio) * 0.9
+      const ratio = Math.min(width / newWidth, height / newHeight) * 0.9
 
       return ratio
     },
