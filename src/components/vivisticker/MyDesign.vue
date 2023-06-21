@@ -118,6 +118,22 @@ export default defineComponent({
                 moreType: 'object'
               }
             })
+          break
+        case 'image':
+          result = new Array(Math.ceil(this.list.length / 3))
+            .fill('')
+            .map((_, idx) => {
+              let rowItems = this.list.slice(idx * 3, idx * 3 + 3)
+              rowItems = rowItems.concat(Array(3 - rowItems.length).fill({}))
+              return {
+                id: `result_${rowItems.map(item => item.id).join('_')}`,
+                type: 'my-design-text-item',
+                list: rowItems,
+                size: this.itemHeight + (this.isTablet ? 30 : 24),
+                title: '',
+                moreType: 'image'
+              }
+            })
       }
       if (result.length !== 0) {
         Object.assign(result[result.length - 1], { sentinel: true })
