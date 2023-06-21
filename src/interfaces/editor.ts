@@ -23,7 +23,8 @@ export interface IFooterTab {
   panelType?: string,
   hidden?: boolean,
   disabled?: boolean,
-  props?: IFooterTabProps
+  props?: IFooterTabProps,
+  forPro?: boolean
 }
 
 export interface CustomElementConfig {
