@@ -148,6 +148,9 @@ class ConstantData {
           label: '喜帖',
           url: 'https://blog.vivipic.com/tw/wedding-invitation/'
         }, {
+          label: '結婚書約',
+          url: 'https://blog.vivipic.com/tw/marriage-contract/'
+        }, {
           label: '邀請卡',
           url: 'https://blog.vivipic.com/tw/invitation-card/'
         },
