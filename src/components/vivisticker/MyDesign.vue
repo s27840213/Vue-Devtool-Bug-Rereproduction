@@ -120,20 +120,20 @@ export default defineComponent({
             })
           break
         case 'image':
-          result = new Array(Math.ceil(this.list.length / 3))
+          result = new Array(Math.ceil(this.list.length / this.numTextColumns))
             .fill('')
             .map((_, idx) => {
-              let rowItems = this.list.slice(idx * 3, idx * 3 + 3)
-              rowItems = rowItems.concat(Array(3 - rowItems.length).fill({}))
+              const rowItems = this.list.slice(idx * this.numTextColumns, idx * this.numTextColumns + this.numTextColumns)
               return {
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-text-item',
                 list: rowItems,
-                size: this.itemHeight + (this.isTablet ? 30 : 24),
+                size: this.textItemWidth + this.textItemGap,
                 title: '',
                 moreType: 'image'
               }
             })
+          break
       }
       if (result.length !== 0) {
         Object.assign(result[result.length - 1], { sentinel: true })
