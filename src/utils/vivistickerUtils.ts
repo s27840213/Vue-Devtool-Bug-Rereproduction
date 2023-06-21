@@ -998,6 +998,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async saveAsMyDesign(): Promise<void> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
+    const onThumbError = async () => {
+      await this.saveDesignJson(id)
+      throw new Error('gen thumb failed')
+    }
     if (store.getters['vivisticker/getEditorTypeTemplate']) {
       const resGenThumb = await this.callIOSAsAPI('INFORM_WEB', {
         info: {
@@ -1006,10 +1010,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         },
         to: 'Shot'
       }, `gen-thumb-${id}`, { timeout: 10000 }) as any
-      if (resGenThumb.flag === '1') throw new Error('gen thumb failed')
+      if (!resGenThumb || resGenThumb.flag === '1') await onThumbError()
     } else {
       const flag = await this.genThumbnail(id)
-      if (flag === '1') throw new Error('gen thumb failed')
+      if (flag === '1') await onThumbError()
     }
     await this.saveDesignJson(id)
   }
@@ -1156,7 +1160,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       case 'gen-thumb':
         this.fetchDesign().then((design) => {
           if (!design || !design.pages.length) return
-          const url = `type=gen-thumb&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(design.pages[0]))).replace(/'/g, '\\\'')}&noBg=false&designId=${info.id}`
+          const url = `type=gen-thumb&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(design.pages[0])))}&noBg=false&designId=${info.id}`
           window.fetchDesign(url)
         })
         break
