@@ -714,17 +714,18 @@ class PageUtils {
    ** unit: unit of physical size for page and bleeds
    */
   removeBleedsFromPageSize(pageSize: IPageSizeWithBleeds): IPageSizeWithBleeds {
-    const { width, height, physicalWidth, physicalHeight, bleeds, physicalBleeds, unit } = pageSize
-    if (!(bleeds && physicalBleeds)) return pageSize
-    return {
-      width: width - bleeds.left - bleeds.right,
-      height: height - bleeds.top - bleeds.bottom,
-      physicalWidth: physicalWidth - physicalBleeds.left - physicalBleeds.right,
-      physicalHeight: physicalHeight - physicalBleeds.top - physicalBleeds.bottom,
-      bleeds,
-      physicalBleeds,
-      unit
-    }
+    return pageSize // bleeds are disabled in vivisticker
+    // const { width, height, physicalWidth, physicalHeight, bleeds, physicalBleeds, unit } = pageSize
+    // if (!(bleeds && physicalBleeds)) return pageSize
+    // return {
+    //   width: width - bleeds.left - bleeds.right,
+    //   height: height - bleeds.top - bleeds.bottom,
+    //   physicalWidth: physicalWidth - physicalBleeds.left - physicalBleeds.right,
+    //   physicalHeight: physicalHeight - physicalBleeds.top - physicalBleeds.bottom,
+    //   bleeds,
+    //   physicalBleeds,
+    //   unit
+    // }
   }
 
   /**
