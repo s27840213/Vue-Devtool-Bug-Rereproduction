@@ -336,7 +336,13 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getNewTemplateShownMode(state: IEditorState) {
     return state.newTemplateShownMode
-  }
+  },
+  getIsMobile(state: IEditorState) {
+    return state.isMobile
+  },
+  getIsLargeDesktop(state: IEditorState) {
+    return state.isLargeDesktop
+  },
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -515,12 +521,13 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
     state.pages[updateInfo.pageIndex].config.backgroundImage.config.styles.adjust.halation = 0
   },
-  SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
+  SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage, bgColorReset?: boolean }) {
     // state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
-    const { pageIndex, config } = updateInfo
+    const { pageIndex, config, bgColorReset = true } = updateInfo
     Object.assign(state.pages[pageIndex].config.backgroundImage.config, config)
-    state.pages[pageIndex].config.backgroundColor = '#ffffff'
-    // state.pages[pageIndex].backgroundColor = '#ffffff'
+    if (bgColorReset) {
+      state.pages[pageIndex].config.backgroundColor = '#ffffff'
+    }
   },
   SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '', panelPreviewSrc: '' }) {
     const { pageIndex, srcObj, previewSrc, panelPreviewSrc } = updateInfo
@@ -1164,7 +1171,13 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_newTemplateShownMode(state: IEditorState, newTemplateShownMode: boolean) {
     state.newTemplateShownMode = newTemplateShownMode
-  }
+  },
+  SET_isMobile(state: IEditorState, boolean: boolean) {
+    state.isMobile = boolean
+  },
+  SET_isLargeDesktop(state: IEditorState, boolean: boolean) {
+    state.isLargeDesktop = boolean
+  },
 }
 window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500))
 

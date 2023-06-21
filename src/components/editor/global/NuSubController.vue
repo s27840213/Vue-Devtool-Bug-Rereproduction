@@ -194,7 +194,6 @@ export default defineComponent({
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       controllerHidden: 'vivisticker/getControllerHidden'
     }),
     isControllerShown(): boolean {
@@ -328,7 +327,7 @@ export default defineComponent({
     textBodyStyle() {
       const checkTextFill = isTextFill(this.config.styles.textFill)
       const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
-        !this.config.contentEditable ? 0 : 1
+        !this.config.contentEditable ? 0.0001 : 1
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,

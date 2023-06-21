@@ -14,7 +14,7 @@ div(class="block" :style="blockStyle")
       class="block-text__link text-H5")
       router-link(:to="content.link.to")
         span {{content.link.text + ' →'}}
-  div(class="block-animation")
+  div(v-if="content.img" class="block-animation")
     animation(:path="`${dir}/${locale}/${toFile}`"
       :lottieName="content.img.name.replace('.json', '')"
       :width="content.img.width * rwdModifier"
@@ -30,7 +30,7 @@ div(class="block" :style="blockStyle")
 import Animation from '@/components/Animation.vue'
 import { IHomeBlockData } from '@/utils/homeBlockData'
 import { defineComponent, PropType } from 'vue'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -42,12 +42,18 @@ export default defineComponent({
     content: {
       type: Object as PropType<IHomeBlockData>,
       required: true
+    },
+    desktopMaxWidth: {
+      type: String,
+      default: '1200px'
     }
   },
   computed: {
     ...mapState({
-      isMobile: 'isMobile',
       isLargeDesktop: 'isLargeDesktop'
+    }),
+    ...mapGetters({
+      isMobile: 'getIsMobile',
     }),
     blockStyle(): Record<string, string> {
       return {
@@ -58,7 +64,7 @@ export default defineComponent({
       return {
         'align-items': this.content.align === 'column' ? 'center' : 'flex-start',
         'text-align': this.content.align === 'column' && !this.isMobile ? 'center' : 'left',
-        width: (this.content.align === 'column' && !this.isMobile) ? '100%'
+        width: (this.content.align === 'column') ? '100%'
           : this.isMobile ? '327px' : !this.isLargeDesktop ? '360px' : '500px'
       }
     },
@@ -69,14 +75,20 @@ export default defineComponent({
       return this.$i18n.locale
     },
     dir(): string {
-      return this.content.img.name.endsWith('json')
+      return this.content.img?.name.endsWith('json')
         ? '/lottie'
         : '@/assets/img/svg/homepage'
     },
     toFile(): string {
-      return this.content.img.name.endsWith('json')
-        ? `${this.content.img.name.replace('.json', '')}/${this.content.img.name}`
-        : `${this.content.img.name}`
+      return this.content.img?.name.endsWith('json')
+        ? `${this.content.img?.name.replace('.json', '')}/${this.content.img?.name}`
+        : `${this.content.img?.name}`
+    },
+    /**
+     * @Note we cannot directly used the prop in the media query, so we need to create a computed
+     */
+    desktopMaxWidthForCSS(): string {
+      return this.desktopMaxWidth
     }
   }
 })
@@ -117,8 +129,7 @@ export default defineComponent({
 }
 @media screen and (max-width: 768px) {
   .block {
-    width: 375px;
-    margin: 100px 0;
+    width: 100%;
   }
   .block-text {
     &__title {
@@ -131,8 +142,7 @@ export default defineComponent({
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
   .block {
-    width: 768px;
-    margin: 150px 0;
+    max-width: 768px;
   }
   .block-text {
     &__title {
@@ -145,8 +155,7 @@ export default defineComponent({
 }
 @media screen and (min-width: 1440.02px) {
   .block {
-    max-width: 1200px;
-    margin: 150px 0;
+    max-width: v-bind(desktopMaxWidthForCSS);
   }
   .block-text {
     &__title {

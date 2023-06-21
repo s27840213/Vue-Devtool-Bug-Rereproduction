@@ -84,7 +84,6 @@ import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import unitUtils from '@/utils/unitUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
@@ -367,7 +366,7 @@ export default defineComponent({
       autoRemoveResult: 'bgRemove/getAutoRemoveResult'
     }),
     ...mapState('vivisticker', ['isDuringCopy']),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     ...mapState('mobileEditor', {
       inAllPagesMode: 'mobileAllPageMode',
@@ -475,22 +474,10 @@ export default defineComponent({
         renderW *= scale
         renderH *= scale
       }
-      const { dpi } = this
-      if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSize
-        if (unit !== 'px' && physicalHeight && physicalWidth) {
-          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
-          renderW *= dpi / physicaldpi
-          renderH *= dpi / physicaldpi
-        } else {
-          renderW *= dpi / 96
-          renderH *= dpi / 96
-        }
-      }
+      const dpiRatio = pageUtils.getImageDpiRatio(this.page)
+      renderW *= dpiRatio
+      renderH *= dpiRatio
       return imageUtils.getSrcSize(srcObj, imageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
-    },
-    pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     isBlurImg(): boolean {
       return !!this.config.styles.adjust?.blur
@@ -670,7 +657,7 @@ export default defineComponent({
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
       const previewSrc = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
-      imageUtils.imgLoadHandler(previewSrc, () => {
+      imageUtils.imgLoadHandler(previewSrc, (img) => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
@@ -766,10 +753,8 @@ export default defineComponent({
     handleIsTransparent() {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayer?.type ?? '')) return
       const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-      let src = imageUtils.getSrc(this.config, imgSize)
-      if (!this.config.previewSrc) {
-        src = src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      }
+      const _src = imageUtils.getSrc(this.config, imgSize)
+      const src = _src + `${_src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       imageUtils.imgLoadHandler(src,
         (img) => {
           if (!this.hasDestroyed) {
