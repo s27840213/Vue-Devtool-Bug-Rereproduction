@@ -1,8 +1,8 @@
-import { IFormat, IImageFormat, ITextFormat, ITextShape } from '@/interfaces/format'
+import { IFormat, IImageFormat, ITextFormat, ITextShape, ITextStyleCopiedFormat, textCopiedStyleKeys } from '@/interfaces/format'
 import { IGroup, IImage, ILayer, IParagraph, IText } from '@/interfaces/layer'
 import store from '@/store'
+import { cloneDeep, pick } from 'lodash'
 import frameUtils from './frameUtils'
-import generalUtils from './generalUtils'
 import imageAdjustUtil from './imageAdjustUtil'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
@@ -30,20 +30,18 @@ class FormatUtils {
     const lastParagraph = paragraphs[paragraphs.length - 1]
     const spans = lastParagraph.spans
     const lastSpan = spans[spans.length - 1]
+    const textCopiedStyles = Object.fromEntries(
+      textCopiedStyleKeys.map(type => [type, cloneDeep(text.styles[type])])
+    ) as ITextStyleCopiedFormat
     return {
-      paragraphStyle: generalUtils.deepCopy(lastParagraph.styles),
-      spanStyle: generalUtils.deepCopy(lastSpan.styles),
-      scale: text.styles.scale,
-      textEffect: generalUtils.deepCopy(text.styles.textEffect),
-      textBg: generalUtils.deepCopy(text.styles.textBg),
-      textShape: generalUtils.deepCopy(text.styles.textShape),
-      textFill: generalUtils.deepCopy(text.styles.textFill),
-      writingMode: text.styles.writingMode
+      paragraphStyle: cloneDeep(lastParagraph.styles),
+      spanStyle: cloneDeep(lastSpan.styles),
+      ...textCopiedStyles
     }
   }
 
   extractImageFormat(image: IImage): IImageFormat {
-    return generalUtils.deepCopy(image.styles.adjust)
+    return cloneDeep(image.styles.adjust)
   }
 
   copyTextFormat(text: IText) {
@@ -70,14 +68,14 @@ class FormatUtils {
   applyTextStyles(oldParagraphs: IParagraph[]): IParagraph[] {
     if (!this.copiedFormat) return oldParagraphs
     const { paragraphStyle, spanStyle } = this.copiedFormat.content as ITextFormat
-    const paragraphs = generalUtils.deepCopy(oldParagraphs) as IParagraph[]
+    const paragraphs = cloneDeep(oldParagraphs) as IParagraph[]
     for (const paragraph of paragraphs) {
-      paragraph.styles = generalUtils.deepCopy(paragraphStyle)
+      paragraph.styles = cloneDeep(paragraphStyle)
       if (paragraph.spanStyle) {
         paragraph.spanStyle = tiptapUtils.textStyles(spanStyle)
       }
       for (const span of paragraph.spans) {
-        span.styles = generalUtils.deepCopy(spanStyle)
+        span.styles = cloneDeep(spanStyle)
       }
     }
     return paragraphs
@@ -99,7 +97,7 @@ class FormatUtils {
         layers = subLayers
       }
       if (type === 'text') {
-        const { scale, textEffect, textBg, textShape, writingMode } = this.copiedFormat.content as ITextFormat
+        const textCopiedStyles = pick(this.copiedFormat.content as ITextFormat, textCopiedStyleKeys) as ITextStyleCopiedFormat
         for (const targetLayerIndex in layers) {
           const idx = subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex
           const targetLayer = layers[targetLayerIndex]
@@ -112,16 +110,10 @@ class FormatUtils {
             layerIndex,
             subLayerIndex: idx,
             type: ['text'],
-            styles: {
-              textEffect: { ...textEffect },
-              textBg: { ...textBg },
-              textShape: { ...textShape },
-              scale,
-              writingMode
-            },
+            styles: textCopiedStyles,
             props: { paragraphs }
           })
-          if (this.isCurveText(textShape)) {
+          if (this.isCurveText(textCopiedStyles.textShape)) {
             const textProps = textShapeUtils.getCurveTextProps(targetTextLayer)
             if (preParams.wasCurveText) {
               Object.assign(textProps, textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(targetTextLayer, preParams, textProps)))
@@ -191,22 +183,16 @@ class FormatUtils {
       if (!this.isApplicableType(type, layer.type)) return
       if (type === 'text') {
         const preParams = textShapeUtils.getPreParams(layer)
-        const { scale, textEffect, textBg, textShape, writingMode } = this.copiedFormat.content as ITextFormat
+        const textCopiedStyles = pick(this.copiedFormat.content as ITextFormat, textCopiedStyleKeys) as ITextStyleCopiedFormat
         const paragraphs = this.applyTextStyles(layer.paragraphs)
         layerUtils.updateSpecLayerData({
           pageIndex,
           layerIndex,
-          styles: {
-            textEffect: { ...textEffect },
-            textBg: { ...textBg },
-            textShape: { ...textShape },
-            scale,
-            writingMode
-          },
+          styles: textCopiedStyles,
           props: { paragraphs }
         })
         const text = store.getters.getLayer(pageIndex, layerIndex)
-        if (this.isCurveText(textShape)) {
+        if (this.isCurveText(textCopiedStyles.textShape)) {
           const textProps = textShapeUtils.getCurveTextProps(text)
           if (preParams.wasCurveText) {
             Object.assign(textProps, textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(text, preParams, textProps)))
