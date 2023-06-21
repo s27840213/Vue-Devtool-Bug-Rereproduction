@@ -27,7 +27,7 @@ import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 declare let window: CustomWindow
 
@@ -68,6 +68,10 @@ export default defineComponent({
   },
   async mounted() {
     this.fetchDesign(window.location.search)
+    this.setInScreenshotPreview(true)
+  },
+  beforeUnmount() {
+    this.setInScreenshotPreview(false)
   },
   created() {
     window.fetchDesign = this.fetchDesign
@@ -99,6 +103,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      setInScreenshotPreview: 'SET_inScreenshotPreview',
+    }),
     fetchDesign(query: string, options = '') {
       this.clearBuffers()
       this.options = options
@@ -319,6 +326,8 @@ export default defineComponent({
           }
           case 'gen-thumb': {
             const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
+            console.log(page)
+
             const hasBg = !noBg && page.backgroundImage.config.srcObj?.assetId !== ''
             const genThumb = () => {
               vivistickerUtils.callIOSAsAPI('GEN_THUMB', {

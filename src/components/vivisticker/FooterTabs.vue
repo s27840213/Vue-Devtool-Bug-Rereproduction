@@ -822,7 +822,7 @@ export default defineComponent({
                   frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, srcObj)
                 } else {
                   // replace image
-                  imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+                  await imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
                     const { naturalWidth, naturalHeight } = img
                     const resizeRatio = RESIZE_RATIO_IMAGE
                     const pageSize = pageUtils.getPageSize(pageIndex)

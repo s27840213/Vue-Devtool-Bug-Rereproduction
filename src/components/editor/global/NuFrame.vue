@@ -188,7 +188,7 @@ export default defineComponent({
         /**
          * If the frame contain only one clip, and is not in template editor or init from mydesign or in preview auto popping the photo-selector
          */
-        if (!(this.editorTypeTemplate || this.config.initFromMydesign || this.inPreview)) {
+        if (!(this.editorTypeTemplate || this.config.initFromMydesign || this.inPreview || this.inScreenshotPreview)) {
           window.requestAnimationFrame(() => {
             if (this.primaryLayer) {
               frameUtils.iosPhotoSelect({
@@ -271,6 +271,7 @@ export default defineComponent({
       isShowPagePreview: 'page/getIsShowPagePreview',
       controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
+      inScreenshotPreview: 'getInScreenshotPreview',
     }),
     layers() {
       const config = this.config as IFrame
