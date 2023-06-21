@@ -153,8 +153,9 @@ class TextFill {
 
   // TextFill is not support TextShape now, for code that supports TextShape, see https://bit.ly/3qP0y1O.
   convertTextEffect(config: IText, ratio: number): Record<string, string | number> {
-    const { textFill } = config.styles
-    if (textFill.name === 'none') return {}
+    const { textFill, textShape } = config.styles
+    // If has textShape, skip TextFill effect.
+    if (textFill.name === 'none' || textShape.name !== 'none') return {}
 
     const imgSrc = this.getTextFillImg(config, { ratio })
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
@@ -172,14 +173,18 @@ class TextFill {
       webkitTextFillColor: 'transparent',
       webkitTextStrokeColor: 'transparent',
       textDecorationColor: 'transparent',
+      // To fix Safari BG-clip bug where background appear on its border, apply border-transparent mask on it.
+      maskImage: `url(${require('@/assets/img/svg/text-fill-mask-image.svg')})`,
+      maskSize: '100% 100%',
       // To fix Safari PDF reader bug: https://bit.ly/3IPcS8o
       ...store.getters['user/getUserId'] === 'backendRendering' ? { filter: 'opacity(1)' } : {},
     }
   }
 
   drawTextFill(config: IText, ratio: number): CustomElementConfig | null {
-    const textFill = config.styles.textFill
-    if (textFill.name === 'none' || !(textEffectUtils.focus === 'fill')) return null
+    const { textFill, textShape } = config.styles
+    // If has textShape, skip TextFill effect.
+    if (textFill.name === 'none' || textShape.name !== 'none' || !(textEffectUtils.focus === 'fill')) return null
 
     const imgSrc = this.getTextFillImg(config, { ratio })
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
