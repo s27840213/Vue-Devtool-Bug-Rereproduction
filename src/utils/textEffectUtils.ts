@@ -267,12 +267,17 @@ class Controller {
         return {
           '--base-stroke': '0px',
           duplicatedTexts: [{
-            extraBodyStyle: this.funky3d(
-              distance * fontSize / 60,
-              effect.distanceInverse * fontSize / 60,
-              effect.angle,
-              colorWithOpacity
-            ),
+            extraBodyStyle: {
+              ...this.funky3d(
+                distance * fontSize / 60,
+                effect.distanceInverse * fontSize / 60,
+                effect.angle,
+                colorWithOpacity
+              ),
+              // Prevent TextFIll maskImage clip shadow, and remove TextFill BG for shadow.
+              background: 'none',
+              maskImage: 'none',
+            },
           }]
         }
       case 'bold3d': {
