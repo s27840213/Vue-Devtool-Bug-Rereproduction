@@ -11,7 +11,7 @@ div(class="mobile-panel"
       @pointerdown.stop="dragPanelStart"
       @touchstart.stop="disableTouchEvent")
         div
-    div
+    div(v-if="showLeftBtn || showRightBtn")
       div(class="mobile-panel__btn mobile-panel__left-btn"
           :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn, 'insert': insertTheme, 'us': isUs}")
         svg-icon(
@@ -270,7 +270,7 @@ export default defineComponent({
       return this.currActivePanel === 'text'
     },
     showRightBtn(): boolean {
-      return this.currActivePanel !== 'none'
+      return this.currActivePanel !== 'none' && this.currActivePanel !== 'remove-bg'
     },
     showLeftBtn(): boolean {
       return (this.whiteTheme && (this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
