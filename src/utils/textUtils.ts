@@ -1152,6 +1152,7 @@ class TextUtils {
 
   resetScaleForLayer(layer: AllLayerTypes, preMount = false): AllLayerTypes {
     layer = generalUtils.deepCopy(layer)
+    let targetScale = 1
     let subLayers
     let newStyles
     let stylesBuffer = {} as { [key: string]: any }
@@ -1159,39 +1160,42 @@ class TextUtils {
     let newHW
     switch (layer.type) {
       case LayerType.text:
-        if (layer.styles.scale > 1) {
-          stylesBuffer = pick(layer.styles, ['scale'])
-          layer.styles.scale = 1
-          layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
-            return size * stylesBuffer.scale
-          })
-          if (!preMount) {
-            // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
-            // and let the mounted hook of NuText to deal with size and position
-            originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
-            if (textShapeUtils.isCurvedText(layer.styles.textShape)) {
-              newHW = textShapeUtils.getCurveTextProps(layer)
-              Object.assign(layer.styles, newHW)
-            } else {
-              if (layer.widthLimit !== -1) {
-                layer.widthLimit = this.autoResizeCoreSync(layer, {
-                  width: originHW.width,
-                  height: originHW.height,
-                  widthLimit: layer.widthLimit
-                }).widthLimit
-              }
-              newHW = this.getTextHW(layer, layer.widthLimit)
-              Object.assign(layer.styles, {
-                width: newHW.width,
-                height: newHW.height,
-                x: originHW.x + (newHW.width - originHW.width) / 2,
-                y: originHW.y + (newHW.height - originHW.height) / 2
-              })
+        stylesBuffer = pick(layer.styles, ['scale'])
+        if (layer.styles.scale < 1) {
+          const baseFontSize = textPropUtils.getBaseFontSizeOfLayer(layer)
+          const { scale } = textPropUtils.getScaleCompensation(baseFontSize * layer.styles.scale)
+          targetScale = scale
+        }
+        layer.styles.scale = targetScale
+        layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
+          return size * stylesBuffer.scale / targetScale
+        })
+        if (!preMount) {
+          // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
+          // and let the mounted hook of NuText to deal with size and position
+          originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
+          if (textShapeUtils.isCurvedText(layer.styles.textShape)) {
+            newHW = textShapeUtils.getCurveTextProps(layer)
+            Object.assign(layer.styles, newHW)
+          } else {
+            if (layer.widthLimit !== -1) {
+              layer.widthLimit = this.autoResizeCoreSync(layer, {
+                width: originHW.width,
+                height: originHW.height,
+                widthLimit: layer.widthLimit
+              }).widthLimit
             }
+            newHW = this.getTextHW(layer, layer.widthLimit)
+            Object.assign(layer.styles, {
+              width: newHW.width,
+              height: newHW.height,
+              x: originHW.x + (newHW.width - originHW.width) / 2,
+              y: originHW.y + (newHW.height - originHW.height) / 2
+            })
           }
-          if (layer.styles.textEffect.fontSize !== undefined) {
-            layer.styles.textEffect.fontSize = textEffectUtils.getLayerFontSize(layer.paragraphs)
-          }
+        }
+        if (layer.styles.textEffect.fontSize !== undefined) {
+          layer.styles.textEffect.fontSize = textEffectUtils.getLayerFontSize(layer.paragraphs)
         }
         break
       case LayerType.tmp:

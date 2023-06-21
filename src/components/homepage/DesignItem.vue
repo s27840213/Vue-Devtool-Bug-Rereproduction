@@ -12,7 +12,7 @@ div(class="design-item")
         @click.self="handleClick")
   div(class="design-item__name")
     div(class="design-item__name__container")
-      span(:title="config.name") {{ config.name }}
+      span(:title="config.name") {{ config.name === '' ? `${$t("NN0079")}` : config.name }}
 </template>
 
 <script lang="ts">
@@ -166,8 +166,8 @@ export default defineComponent({
     width: 100%;
     padding-top: 90%;
     position: relative;
+    transition: transform 0.2s ease-in-out;
     &:hover {
-      transition: all 0.2s ease-in-out;
       box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
       transform: translate(0, -5px);
     }
