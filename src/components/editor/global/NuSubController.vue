@@ -62,7 +62,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import SvgPath from 'svgpath'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -327,7 +327,7 @@ export default defineComponent({
     textBodyStyle() {
       const checkTextFill = isTextFill(this.config.styles.textFill)
       const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
-        !this.config.contentEditable ? 0 : 1
+        !this.config.contentEditable ? 0.0001 : 1
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
