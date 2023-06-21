@@ -987,9 +987,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       updateTime: new Date(Date.now()).toISOString(),
       assetInfo
     } as IMyDesign
+
     await this.addAsset(`mydesign-${this.mapEditorType2MyDesignKey(editorType)}`, json, 0, {
       config: { pages: uploadUtils.prepareJsonToUpload(pages) }
     })
+
     return json
   }
 

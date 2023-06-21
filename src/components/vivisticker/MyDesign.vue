@@ -73,6 +73,7 @@ export default defineComponent({
       isInSelectionMode: 'vivisticker/getIsInSelectionMode',
       editorType: 'vivisticker/getEditorType',
       myDesignTab: 'vivisticker/getMyDesignTab',
+      myDesignFiles: 'vivisticker/getMyDesignFiles',
       myDesignFileList: 'vivisticker/getMyDesignFileList',
       myDesignNextPage: 'vivisticker/getMyDesignNextPage'
     }),

@@ -199,6 +199,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getIsSlideShown(state: IViviStickerState): boolean {
     return state.slideType !== 'none'
   },
+  getMyDesignFiles(state: IViviStickerState): { [key: string]: IMyDesign[] } {
+    return state.myDesignFiles
+  },
   getMyDesignFileList(state: IViviStickerState): (tab: string) => IMyDesign[] {
     return (tab: string): IMyDesign[] => {
       return state.myDesignFiles[tab] ?? []
