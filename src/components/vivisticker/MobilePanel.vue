@@ -98,7 +98,6 @@ import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
@@ -109,7 +108,6 @@ import eventUtils from '@/utils/eventUtils'
 import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -579,16 +577,6 @@ export default defineComponent({
       // mounted not triggered, use watch to reset height.
       if ((oldVal === 'none' || newVal === 'text') || (newVal === 'photo-shadow' && this.inEffectEditingMode)) { // Prevent reset height when switch panel
         this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
-
-        if (this.inEffectEditingMode) {
-          const data = (imageShadowUtils.getDefaultEffect(ShadowEffectType.frame) as any).frame
-          /**
-           * Prevent setEffect not work
-           */
-          setTimeout(() => {
-            imageShadowUtils.setEffect(ShadowEffectType.frame, { frame: data, frameColor: '#EFCD56' })
-          }, 300)
-        }
       }
     },
     showMobilePanel(newVal) {

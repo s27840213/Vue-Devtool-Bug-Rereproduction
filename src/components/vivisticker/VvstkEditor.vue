@@ -18,12 +18,14 @@ div(class="vvstk-editor" :style="copyingStyles()" @pointerdown="selectStart")
 <script lang="ts">
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -61,6 +63,16 @@ export default defineComponent({
       if (newVal && this.inEffectEditingMode) {
         this.$nextTick(() => {
           editorUtils.setCurrActivePanel('photo-shadow')
+
+          if (this.inEffectEditingMode) {
+            const data = (imageShadowUtils.getDefaultEffect(ShadowEffectType.frame) as any).frame
+            /**
+           * Prevent setEffect not work
+           */
+            setTimeout(() => {
+              imageShadowUtils.setEffect(ShadowEffectType.frame, { frame: data, frameColor: '#EFCD56' })
+            }, 300)
+          }
         })
       }
     }
