@@ -370,7 +370,7 @@ export default defineComponent({
         if (vivistickerUtils.userSettings.autoSave) {
           vivistickerUtils.saveAsMyDesign().then(() => {
             vivistickerUtils.endEditing()
-          })
+          }).catch((err) => { console.warn(err.message) })
         } else {
           const options = {
             checkboxText: `${this.$t('STK0010')}`,
@@ -409,7 +409,7 @@ export default defineComponent({
                 action: () => {
                   vivistickerUtils.saveAsMyDesign().then(() => {
                     vivistickerUtils.endEditing()
-                  })
+                  }).catch((err) => { console.warn(err.message) })
                 }
               },
               {

@@ -1006,10 +1006,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         },
         to: 'Shot'
       }, `gen-thumb-${id}`, { timeout: 10000 }) as any
-      if (resGenThumb.flag === '1') return
+      if (resGenThumb.flag === '1') throw new Error('gen thumb failed')
     } else {
       const flag = await this.genThumbnail(id)
-      if (flag === '1') return
+      if (flag === '1') throw new Error('gen thumb failed')
     }
     await this.saveDesignJson(id)
   }
