@@ -93,6 +93,9 @@ const MYDESIGN_TAGS = [{
 }, {
   name: 'NN0003',
   tab: 'object'
+}, {
+  name: 'NN0002',
+  tab: 'image'
 }] as IMyDesignTag[]
 
 class ViviStickerUtils extends WebViewUtils<IUserInfo> {
@@ -327,7 +330,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   sendAppLoaded() {
     if (!this.appLoadedSent) {
-      this.sendToIOS('APP_LOADED', { hideReviewRequest: false })
+      this.sendToIOS('APP_LOADED', { hideReviewRequest: false, sendNotifyMail: false })
       this.appLoadedSent = true
     }
   }
@@ -913,6 +916,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
     const flag = await this.genThumbnail(id)
+    console.log(editingDesignId, id, flag)
     if (flag === '1') return
     await this.saveDesignJson(id)
   }
@@ -978,15 +982,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
     const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
+    console.log(editorType, assetInfo)
     const json = {
       type: editorType,
       id,
       updateTime: new Date(Date.now()).toISOString(),
       assetInfo
     } as IMyDesign
+
     await this.addAsset(`mydesign-${this.mapEditorType2MyDesignKey(editorType)}`, json, 0, {
       config: { pages: uploadUtils.prepareJsonToUpload(pages) }
     })
+
     return json
   }
 

@@ -342,7 +342,6 @@ export default defineComponent({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
@@ -693,7 +692,8 @@ export default defineComponent({
     },
     textBodyStyle() {
       const checkTextFill = isTextFill(this.config.styles.textFill)
-      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) && !this.contentEditable ? 0 : 1
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
+        !this.contentEditable ? 0.0001 : 1
       return {
         width: '100%',
         height: '100%',
@@ -959,6 +959,8 @@ export default defineComponent({
         LayerUtils.replaceLayer(this.pageIndex, this.layerIndex, newLayer)
         if (newLayer.type === 'tmp') {
           groupUtils.set(this.pageIndex, this.layerIndex, newLayer.layers)
+        } else {
+          groupUtils.set(this.pageIndex, this.layerIndex, [newLayer])
         }
         tiptapUtils.updateHtml()
       }

@@ -84,7 +84,6 @@ import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import unitUtils from '@/utils/unitUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
@@ -363,10 +362,11 @@ export default defineComponent({
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel',
-      isProcessing: 'shadow/isProcessing'
+      isProcessing: 'shadow/isProcessing',
+      autoRemoveResult: 'bgRemove/getAutoRemoveResult'
     }),
     ...mapState('vivisticker', ['isDuringCopy']),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     ...mapState('mobileEditor', {
       inAllPagesMode: 'mobileAllPageMode',
@@ -381,7 +381,9 @@ export default defineComponent({
       if (this.$route.name === 'Preview') {
         return imageUtils.appendCompQueryForVivipic(this.src)
       }
-      src = imageUtils.appendQuery(src, `ver=${generalUtils.generateRandomString(4)}`)
+      if (!this.config.previewSrc) {
+        src = imageUtils.appendQuery(src, `ver=${generalUtils.generateRandomString(4)}`)
+      }
       return src
     },
     shadowSrc(): string {
@@ -472,22 +474,10 @@ export default defineComponent({
         renderW *= scale
         renderH *= scale
       }
-      const { dpi } = this
-      if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSize
-        if (unit !== 'px' && physicalHeight && physicalWidth) {
-          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
-          renderW *= dpi / physicaldpi
-          renderH *= dpi / physicaldpi
-        } else {
-          renderW *= dpi / 96
-          renderH *= dpi / 96
-        }
-      }
+      const dpiRatio = pageUtils.getImageDpiRatio(this.page)
+      renderW *= dpiRatio
+      renderH *= dpiRatio
       return imageUtils.getSrcSize(srcObj, imageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
-    },
-    pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     isBlurImg(): boolean {
       return !!this.config.styles.adjust?.blur
@@ -616,7 +606,6 @@ export default defineComponent({
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        console.log(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
         if (this.priPrimaryLayerIndex !== -1) {
           vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
         } else {
@@ -668,7 +657,7 @@ export default defineComponent({
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
       const previewSrc = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
-      imageUtils.imgLoadHandler(previewSrc, () => {
+      imageUtils.imgLoadHandler(previewSrc, (img) => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
@@ -764,7 +753,8 @@ export default defineComponent({
     handleIsTransparent() {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayer?.type ?? '')) return
       const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-      const src = imageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      const _src = imageUtils.getSrc(this.config, imgSize)
+      const src = _src + `${_src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       imageUtils.imgLoadHandler(src,
         (img) => {
           if (!this.hasDestroyed) {
@@ -799,10 +789,8 @@ export default defineComponent({
           break
         case 'upload':
           if (shadow.srcObj.assetId) {
-            console.log('handle shadowInit: upload')
             this.handleUploadShadowImg()
           } else {
-            console.log('handle shadowInit: upload')
             if (!this.isHandling && !this.isProcessing) {
               imageShadowUtils.updateEffectState(this.layerInfo(), ShadowEffectType.none)
             }
@@ -844,9 +832,16 @@ export default defineComponent({
 
       let img = new Image()
       if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
-        const res = await imageUtils.getImgSize(this.config.srcObj, false)
-        if (res) {
-          this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
+        // normally, we should get the image size from srcObj, but if in vivisticker bg removing, we didn't actually upload the bg remove result to the server
+        // Instead, we use previewSrc to show the image
+        // so here we need to give the size from the autoRemoveResult
+        if ((this.config as IImage).previewSrc) {
+          this.shadowBuff.MAXSIZE = Math.min(Math.max(this.autoRemoveResult.height, this.autoRemoveResult.width), CANVAS_MAX_SIZE)
+        } else {
+          const res = await imageUtils.getImgSize(this.config.srcObj, false)
+          if (res) {
+            this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
+          }
         }
       } else if (['unsplash', 'pixels'].includes(this.config.srcObj.type)) {
         this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
@@ -859,16 +854,18 @@ export default defineComponent({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (!shadowBuff.canvasShadowImg) {
-            if (this.config.previewSrc && this.config.previewSrc.includes('data:image/png;base64')) {
-              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
-            }
+            /**
+             * @Note need to review with steve
+             */
+            // if (this.config.previewSrc && this.config.previewSrc.includes('data:image/png;base64')) {
+            //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
+            // }
             img.crossOrigin = 'anonymous'
-            img.src = imageUtils.getSrc(this.config,
+            img.src = this.config.previewSrc ? this.config.previewSrc : imageUtils.getSrc(this.config,
               ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
               `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             await new Promise<void>((resolve) => {
               img.onerror = () => {
-                console.log('img load error')
                 notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
                 resolve()
               }
@@ -923,6 +920,7 @@ export default defineComponent({
        */
       // small size preview
       const { width, height, imgWidth, imgHeight, shadow } = this.config.styles
+
       const _mappingScale = shadow.middsize / shadow.maxsize
       let _drawCanvasW = 0
       let _drawCanvasH = 0
@@ -930,6 +928,7 @@ export default defineComponent({
       let _canvasH = 0
       const isStaticShadow = currentEffect === ShadowEffectType.floating ||
         (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
+
       if (isStaticShadow) {
         const ratio = currentEffect === ShadowEffectType.floating ? img.naturalWidth / img.naturalHeight : width / height
         _drawCanvasW = Math.round(ratio > 1 ? 1600 : 1600 * ratio)
@@ -989,7 +988,6 @@ export default defineComponent({
       const layerInfo = this.layerInfo()
       const { drawCanvasW, drawCanvasH } = shadowBuff
       if (!canvas || this.isUploadingShadowImg) {
-        console.log('can not get canvas')
         return
       }
 

@@ -50,7 +50,7 @@ const tabs = ['object', 'background', 'text']
 
 function getDefaultDict<T>(defaultValue: T): { [key: string]: T } {
   const res = {} as { [key: string]: T }
-  for (const tab in tabs) {
+  for (const tab of tabs) {
     res[tab] = defaultValue
   }
   return res
@@ -198,6 +198,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsSlideShown(state: IViviStickerState): boolean {
     return state.slideType !== 'none'
+  },
+  getMyDesignFiles(state: IViviStickerState): { [key: string]: IMyDesign[] } {
+    return state.myDesignFiles
   },
   getMyDesignFileList(state: IViviStickerState): (tab: string) => IMyDesign[] {
     return (tab: string): IMyDesign[] => {

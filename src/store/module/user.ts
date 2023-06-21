@@ -95,7 +95,7 @@ const getDefaultState = (): IUserModule => ({
   role: -1,
   roleRaw: -1,
   adminMode: true,
-  enableAdminView: true,
+  enableAdminView: localStorage.getItem('enableAdminView') === 'true',
   isAuthenticated: false,
   account: '',
   email: '',

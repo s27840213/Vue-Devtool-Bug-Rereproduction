@@ -18,8 +18,10 @@ div(class="vivisticker" :style="copyingStyles()")
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
-        @panelHeight="setPanelHeight")
+        @panelHeight="setPanelHeight"
+        :footerTabsRef="footerTabsRef")
   footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
+    ref="footerTabs"
     @switchTab="switchTab"
     @switchMainTab="switchMainTab"
     :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
@@ -47,7 +49,6 @@ import { IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -55,6 +56,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { find } from 'lodash'
+import VConsole from 'vconsole'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -80,7 +82,8 @@ export default defineComponent({
       isKeyboardAnimation: 0,
       showMobilePanelAfterTransitoin: false,
       marginBottom: 0,
-      vConsole: null as any
+      vConsole: null as any,
+      footerTabsRef: undefined as unknown as HTMLElement,
     }
   },
   created() {
@@ -198,11 +201,12 @@ export default defineComponent({
 
     const debugMode = process.env.NODE_ENV === 'development' ? true : (await vivistickerUtils.getState('debugMode'))?.value ?? false
     this.setDebugMode(debugMode)
+    this.footerTabsRef = (this.$refs.footerTabs as any).$el as HTMLElement
 
-    // if (process.env.NODE_ENV === 'development' && debugMode) {
-    //   this.vConsole = new VConsole({ theme: 'dark' })
-    //   this.vConsole.setSwitchPosition(25, 80)
-    // }
+    if (debugMode) {
+      this.vConsole = new VConsole({ theme: 'dark' })
+      this.vConsole.setSwitchPosition(25, 80)
+    }
   },
   unmounted() {
     document.removeEventListener('scroll', this.handleScroll)
@@ -253,11 +257,11 @@ export default defineComponent({
         editorUtils.setShowMobilePanel(false)
       }
     },
-    mobilePanel(newVal, oldVal) {
-      if (oldVal === 'photo-shadow') {
-        imageShadowPanelUtils.handleShadowUpload()
-      }
-    },
+    // mobilePanel(newVal, oldVal) {
+    //   if (oldVal === 'photo-shadow') {
+    //     imageShadowPanelUtils.handleShadowUpload()
+    //   }
+    // },
     // debugMode(newVal) {
     //   if (newVal && !this.vConsole) {
     //     this.vConsole = new VConsole({ theme: 'dark' })
@@ -321,13 +325,13 @@ export default defineComponent({
       if (this.$i18n.locale === 'us') {
         switch (panelType) {
           case 'text':
-            if (!vivistickerUtils.tutorialFlags.text) {
+            if (!vivistickerUtils.tutorialFlags.text && !this.debugMode) {
               vivistickerUtils.openFullPageVideo('tutorial2', { delayedClose: 5000 })
               vivistickerUtils.updateTutorialFlags({ text: true })
             }
             break
           case 'background':
-            if (!vivistickerUtils.tutorialFlags.background) {
+            if (!vivistickerUtils.tutorialFlags.background && !this.debugMode) {
               vivistickerUtils.openFullPageVideo('tutorial4', { delayedClose: 5000 })
               vivistickerUtils.updateTutorialFlags({ background: true })
             }

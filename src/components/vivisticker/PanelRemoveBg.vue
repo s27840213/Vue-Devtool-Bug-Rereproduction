@@ -15,31 +15,29 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
         img(class="img-object-cutout" :src="require('@/assets/img/png/bgRemove/object-cutout.png')")
       div(class="btn__text-section")
         span(class="text-H6") {{ $t('STK0060') }}
-        span(class="text-black-5 body-XXS") {{ $t('STK0061') }}
+        span(class="text-black-5 body-XXS btn__description") {{ $t('STK0061') }}
     div(class="btn btn--bgf" @click="removeBgf")
       div(class="btn__content-section btn__content-section--bgf")
         img(:src="require('@/assets/img/png/bgRemove/face-cutout-body.png')")
         img(:src="require('@/assets/img/png/bgRemove/face-cutout.png')")
       div(class="btn__text-section")
         span(class="text-H6") {{ $t('STK0059') }}
-        span(class="text-black-5 body-XXS") {{ $t('STK0062') }}
-    //- nubtn(theme="primary" size="mid-center" @click="removeBgf") {{ $t('STK0059') }}
-    //- nubtn(theme="primary" size="mid-center" ) {{ $t('STK0060') }}
-  //- teleport(to="body")
-  //-   div(class="panel-remove-bg__test-input")
-  //-     mobile-slider(
-  //-       :title="'scale'"
-  //-       :borderTouchArea="true"
-  //-       :name="'scale'"
-  //-       :value="bgRemoveScaleRatio"
-  //-       :min="minRatio"
-  //-       :max="maxRatio"
-  //-       :step="0.01"
-  //-       @update="setScaleRatio")
+        span(class="text-black-5 body-XXS btn__description") {{ $t('STK0062') }}
+  teleport(v-if="false" to="body")
+    div(class="panel-remove-bg__test-input")
+      mobile-slider(
+        :title="'scale'"
+        :borderTouchArea="true"
+        :name="'scale'"
+        :value="bgRemoveScaleRatio"
+        :min="minRatio"
+        :max="maxRatio"
+        :step="0.01"
+        @update="setScaleRatio")
 </template>
 
 <script lang="ts">
-// import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -50,7 +48,7 @@ import { mapGetters, mapMutations } from 'vuex'
 export default defineComponent({
   components: {
     BgRemoveArea,
-    // MobileSlider
+    MobileSlider
   },
   data() {
     return {
@@ -67,7 +65,8 @@ export default defineComponent({
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
       imgAspectRatio: 1,
-      distanceBetweenFingers: -1
+      distanceBetweenFingers: -1,
+      debugMode: false
       // p1StartClientY: 0,
       // p1StartClientX: 0,
       // p2StartClientY: 0,
@@ -96,6 +95,9 @@ export default defineComponent({
     containerWH() {
       return {
         width: this.panelRemoveBg ? this.panelRemoveBg.offsetWidth : 0,
+        /**
+         * @Note 60 is the height of the footer
+         */
         height: this.panelRemoveBg ? this.panelRemoveBg.offsetHeight - this.mobilePanelHeight : 0,
       }
     },
@@ -104,7 +106,10 @@ export default defineComponent({
       const { width: imgWidth, height: imgHeight } = this.previewImage
       const aspectRatio = imgWidth / imgHeight
       if (width === 0 || height === 0 || imgWidth === 0 || imgHeight === 0) return 1
-      const ratio = Math.min(width / 1600, height / 1600 * aspectRatio) * 0.9
+
+      const newWidth = aspectRatio > 1 ? 1600 : 1600 * aspectRatio
+      const newHeight = aspectRatio > 1 ? 1600 / aspectRatio : 1600
+      const ratio = Math.min(width / newWidth, height / newHeight) * 0.9
 
       return ratio
     },
@@ -118,14 +123,22 @@ export default defineComponent({
       setInGestureMode: 'SET_inGestureMode'
     }),
     removeBg() {
+      if (this.debugMode) {
+        bgRemoveUtils.removeBgStkDebug()
+        return
+      }
       uploadUtils.chooseAssets('stk-bg-remove')
     },
     removeBgf() {
+      if (this.debugMode) {
+        bgRemoveUtils.removeBgStkDebug()
+        return
+      }
       uploadUtils.chooseAssets('stk-bg-remove-face')
     },
-    // setScaleRatio(val: number) {
-    //   this.bgRemoveScaleRatio = val
-    // },
+    setScaleRatio(val: number) {
+      this.bgRemoveScaleRatio = val
+    },
     pinchHandler(event: AnyTouchEvent) {
       if (!this.inBgRemoveMode) return
       let deltaDistance = 0
@@ -243,7 +256,16 @@ export default defineComponent({
         this.$nextTick(() => {
           // to prevent the problems that the mobile panel is not fully expanded
           setTimeout(() => {
-            this.mobilePanelHeight = document.querySelector('.mobile-panel')?.clientHeight || 0
+            const panel = document.querySelector('.mobile-panel')
+            const footerTabs = document.querySelector('.footer-tabs') as HTMLElement
+            if (panel && panel.clientHeight) {
+              /**
+               * @Note 60 is the size of footer tab
+               */
+              this.mobilePanelHeight = panel.clientHeight - footerTabs.clientHeight
+            } else {
+              this.mobilePanelHeight = 0
+            }
           }, 500)
         })
       } else {
@@ -404,7 +426,11 @@ export default defineComponent({
     justify-content: center;
     background-color: #474747;
     color: white;
-    padding: 16px 0px;
+    padding: 16px 4px;
+  }
+
+  &__description {
+    height: 40px;
   }
 }
 

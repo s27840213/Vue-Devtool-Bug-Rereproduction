@@ -1,3 +1,4 @@
+import removeBgTestJSON from '@/assets/json/removeBgTest.json'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
@@ -158,6 +159,12 @@ class BgRemoveUtils {
         paymentUtils.errorHandler(data.msg)
       }
     })
+  }
+
+  removeBgStkDebug() {
+    editorUtils.setCurrActivePanel('remove-bg')
+    this.setAutoRemoveResult(removeBgTestJSON)
+    this.setInBgRemoveMode(true)
   }
 
   async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string): Promise<void> {

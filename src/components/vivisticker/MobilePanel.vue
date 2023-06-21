@@ -11,7 +11,7 @@ div(class="mobile-panel"
       @pointerdown.stop="dragPanelStart"
       @touchstart.stop="disableTouchEvent")
         div
-    div
+    div(v-if="showLeftBtn || showRightBtn")
       div(class="mobile-panel__btn mobile-panel__left-btn"
           :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn, 'insert': insertTheme, 'us': isUs}")
         svg-icon(
@@ -130,7 +130,10 @@ export default defineComponent({
     currPage: {
       type: Object as PropType<IPage>,
       required: true
-    }
+    },
+    footerTabsRef: {
+      type: HTMLElement
+    },
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -195,6 +198,7 @@ export default defineComponent({
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
+      inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
@@ -266,7 +270,7 @@ export default defineComponent({
       return this.currActivePanel === 'text'
     },
     showRightBtn(): boolean {
-      return this.currActivePanel !== 'none'
+      return this.currActivePanel !== 'none' && this.currActivePanel !== 'remove-bg'
     },
     showLeftBtn(): boolean {
       return (this.whiteTheme && (this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
@@ -279,7 +283,8 @@ export default defineComponent({
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
-      return Object.assign(
+      const footerTabsHeight = this.footerTabsRef?.clientHeight || 0
+      return Object.assign({ bottom: this.hideFooter ? -1 * footerTabsHeight + 'px' : '0' },
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
@@ -288,11 +293,28 @@ export default defineComponent({
             this.fixSize || this.extraFixSizeCondition
               ? '100%' : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px'
           ),
+          ...(this.hideFooter && { zIndex: '100' })
         },
         isSidebarPanel ? { height: '100%' } : {},
         this.isDuringCopy ? { padding: '0' } : {}
       )
     },
+    // panelStyle(): { [index: string]: string } {
+    //   const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
+    //   return Object.assign({ bottom: this.hideFooter ? -1 * footerTabsHeight + 'px' : '0' },
+    //   (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
+    //   {
+    //     'row-gap': this.noRowGap ? '0px' : '10px',
+    //     backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
+    //     maxHeight: this.fixSize || this.extraFixSizeCondition
+    //       ? '100%' : this.panelDragHeight + 'px',
+    //     ...(this.hideFooter && { zIndex: '100' }),
+    //     ...(this.hideFooter && { paddingBottom: `${this.userInfo.homeIndicatorHeight + 8}px` })
+    //   },
+    //   // Prevent MobilePanel collapse
+    //   isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
+    //   )
+    // },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
         // case 'replace':
@@ -311,6 +333,9 @@ export default defineComponent({
             key: ['']
           }
       }
+    },
+    hideFooter(): boolean {
+      return ['remove-bg'].includes(this.currActivePanel)
     },
     dynamicBindIs(): string {
       if (this.showExtraColorPanel) {
@@ -550,7 +575,7 @@ export default defineComponent({
       this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      if (oldVal === 'none' || newVal === 'text') { // Prevent reset height when switch panel
+      if ((oldVal === 'none' || newVal === 'text') || (newVal === 'photo-shadow' && this.inEffectEditingMode)) { // Prevent reset height when switch panel
         this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
       }
     },

@@ -17,9 +17,11 @@ div(class="footer-tabs" ref="tabs")
           :style="textIconStyle")
         span(class="no-wrap click-disabled"
           :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-white' : 'text-black-4'") {{tab.text}}
+        pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
 </template>
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
 import { IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
@@ -45,7 +47,8 @@ import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    ColorBtn
+    ColorBtn,
+    ProItem
   },
   props: {
     currTab: {
@@ -76,6 +79,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isHandleShadow: 'shadow/isHandling',
       isInEditor: 'vivisticker/getIsInEditor',
       editorType: 'vivisticker/getEditorType',
@@ -83,7 +87,7 @@ export default defineComponent({
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       controllerHidden: 'vivisticker/getControllerHidden',
       hasCopiedFormat: 'getHasCopiedFormat',
-      debugMode: 'vivisticker/getDebugMode'
+      debugMode: 'vivisticker/getDebugMode',
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
@@ -153,9 +157,17 @@ export default defineComponent({
       ]
     },
     photoTabs(): Array<IFooterTab> {
+      console.log(this.inEffectEditingMode)
       const tabs = [
-        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage || this.inEffectEditingMode },
         // { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage }, // vivisticker can only crop frame
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          // hidden: this.isInFrame,
+          // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...this.genearlLayerTabs,
         ...this.copyPasteTabs,
@@ -181,7 +193,7 @@ export default defineComponent({
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode, forPro: false }
       ]
     },
     homeTabsSize(): number {
@@ -521,6 +533,8 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
+      if (!vivistickerUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, 'text')) return
+
       if (tab.icon !== 'crop' && this.isCropping) {
         imageUtils.setImgControlDefault()
       }
@@ -785,6 +799,7 @@ export default defineComponent({
   }
 
   &__item {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
