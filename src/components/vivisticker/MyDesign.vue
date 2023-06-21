@@ -164,6 +164,7 @@ export default defineComponent({
         this.refreshDesigns(this.myDesignTab)
         const content = this.$refs.content as CCategoryList
         content.$el.scrollTop = 0
+        console.log(this.myDesignFiles)
       }
     },
     isInEditor(newVal) {

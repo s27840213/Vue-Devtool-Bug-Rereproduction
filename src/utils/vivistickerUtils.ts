@@ -916,6 +916,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
     const flag = await this.genThumbnail(id)
+    console.log(editingDesignId, id, flag)
     if (flag === '1') return
     await this.saveDesignJson(id)
   }
@@ -981,6 +982,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
     const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
+    console.log(editorType, assetInfo)
     const json = {
       type: editorType,
       id,
