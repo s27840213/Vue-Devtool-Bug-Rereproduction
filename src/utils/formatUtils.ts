@@ -110,7 +110,7 @@ class FormatUtils {
             layerIndex,
             subLayerIndex: idx,
             type: ['text'],
-            styles: textCopiedStyles,
+            styles: cloneDeep(textCopiedStyles),
             props: { paragraphs }
           })
           if (this.isCurveText(textCopiedStyles.textShape)) {
