@@ -220,7 +220,7 @@ export default defineComponent({
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
         ...this.copyPasteTabs,
-        { icon: 'set-as-frame', text: `${this.$t('NN0706')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
+        ...(this.editorTypeTemplate && !this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []), // conditional insert to prevent duplicate key
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: !this.editorTypeTemplate },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {
@@ -349,7 +349,7 @@ export default defineComponent({
           }
         },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.editorTypeTemplate || !showAdjust || this.isSvgImage },
-        ...this.editorTypeTemplate && this.genearlLayerTabs,
+        ...(this.editorTypeTemplate ? this.genearlLayerTabs : []),
         ...this.copyPasteTabs
       ]
     },
