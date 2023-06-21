@@ -321,30 +321,26 @@ export default defineComponent({
           /**
            * @Note have not implement the save feature for bg remove result
            */
-          if (!this.inEffectEditingMode) {
-            modalUtils.setModalInfo(
-              `${this.$t('STK0008')}`,
-              `${this.$t('STK0009')}`,
-              {
-                msg: `${this.$t('STK0004')}`,
-                action: () => {
-                  vivistickerUtils.saveAsMyDesign().then(() => {
-                    vivistickerUtils.endEditing()
-                  })
-                }
-              },
-              {
-                msg: `${this.$t('STK0011')}`,
-                action: () => { vivistickerUtils.endEditing() },
-                style: {
-                  color: '#474A57',
-                  backgroundColor: '#D9DBE1'
-                }
-              },
-              options)
-          } else {
-            vivistickerUtils.endEditing()
-          }
+          modalUtils.setModalInfo(
+            `${this.$t('STK0008')}`,
+            `${this.$t('STK0009')}`,
+            {
+              msg: `${this.$t('STK0004')}`,
+              action: () => {
+                vivistickerUtils.saveAsMyDesign().then(() => {
+                  vivistickerUtils.endEditing()
+                })
+              }
+            },
+            {
+              msg: `${this.$t('STK0011')}`,
+              action: () => { vivistickerUtils.endEditing() },
+              style: {
+                color: '#474A57',
+                backgroundColor: '#D9DBE1'
+              }
+            },
+            options)
         }
       } else {
         vivistickerUtils.endEditing()
@@ -418,30 +414,7 @@ export default defineComponent({
         vivistickerUtils.getEmptyCallback()
       )
     },
-    // async addImage(src: string, aspectRatio: number, previewSrc: string) {
-    //   assetUtils.addImage(src, aspectRatio, {
-    //     pageIndex: 0,
-    //     // The following props is used for preview image during polling process
-    //     isPreview: true,
-    //     previewSrc
-    //   })
-    // },
-    // handleNext() {
-    //   bgRemoveUtils.setInBgRemoveMode(false)
-    //   editorUtils.setShowMobilePanel(false)
-    //   this.setInEffectEditingMode(true)
-    //   vivistickerUtils.startEditing(
-    //     'image',
-    //     { plan: 0, assetId: '' },
-    //     async () => {
-    //       const src = bgRemoveUtils.canvas.toDataURL('image/png;base64')
-    //       console.log(src)
-    //       await this.addImage(src, this.autoRemoveResult.width / this.autoRemoveResult.height, src)
-    //       return true
-    //     },
-    //     vivistickerUtils.getEmptyCallback()
-    //   )
-    // },
+
     handleMore() {
       editorUtils.setCurrActivePanel('vvstk-more')
       editorUtils.setShowMobilePanel(true)

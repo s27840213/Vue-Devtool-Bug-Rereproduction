@@ -15,14 +15,14 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
         img(class="img-object-cutout" :src="require('@/assets/img/png/bgRemove/object-cutout.png')")
       div(class="btn__text-section")
         span(class="text-H6") {{ $t('STK0060') }}
-        span(class="text-black-5 body-XXS") {{ $t('STK0061') }}
+        span(class="text-black-5 body-XXS btn__description") {{ $t('STK0061') }}
     div(class="btn btn--bgf" @click="removeBgf")
       div(class="btn__content-section btn__content-section--bgf")
         img(:src="require('@/assets/img/png/bgRemove/face-cutout-body.png')")
         img(:src="require('@/assets/img/png/bgRemove/face-cutout.png')")
       div(class="btn__text-section")
         span(class="text-H6") {{ $t('STK0059') }}
-        span(class="text-black-5 body-XXS") {{ $t('STK0062') }}
+        span(class="text-black-5 body-XXS btn__description") {{ $t('STK0062') }}
   teleport(v-if="false" to="body")
     div(class="panel-remove-bg__test-input")
       mobile-slider(
@@ -106,7 +106,10 @@ export default defineComponent({
       const { width: imgWidth, height: imgHeight } = this.previewImage
       const aspectRatio = imgWidth / imgHeight
       if (width === 0 || height === 0 || imgWidth === 0 || imgHeight === 0) return 1
-      const ratio = Math.min(width / 1600, height / 1600 * aspectRatio) * 0.9
+
+      const newWidth = aspectRatio > 1 ? 1600 : 1600 * aspectRatio
+      const newHeight = aspectRatio > 1 ? 1600 / aspectRatio : 1600
+      const ratio = Math.min(width / newWidth, height / newHeight * aspectRatio) * 0.9
 
       return ratio
     },
@@ -423,7 +426,11 @@ export default defineComponent({
     justify-content: center;
     background-color: #474747;
     color: white;
-    padding: 16px 0px;
+    padding: 16px 4px;
+  }
+
+  &__description {
+    height: 40px;
   }
 }
 

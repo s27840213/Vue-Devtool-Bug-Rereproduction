@@ -22,6 +22,7 @@ import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
+import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
@@ -57,6 +58,11 @@ export default defineComponent({
   watch: {
     isInEditor(newVal, oldVal): void {
       if (newVal && !oldVal) this.handleResize()
+      if (newVal && this.inEffectEditingMode) {
+        this.$nextTick(() => {
+          editorUtils.setCurrActivePanel('photo-shadow')
+        })
+      }
     }
   },
   computed: {
@@ -74,7 +80,8 @@ export default defineComponent({
       contentScaleRatio: 'getContentScaleRatio',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isImgCtrl: 'imgControl/isImgCtrl',
-      isBgImgCtrl: 'imgControl/isBgImgCtrl'
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
     }),
     config(): IPage {
       return this.pagesState[this.pageIndex].config

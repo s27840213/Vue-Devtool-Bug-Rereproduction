@@ -93,6 +93,9 @@ const MYDESIGN_TAGS = [{
 }, {
   name: 'NN0003',
   tab: 'object'
+}, {
+  name: 'NN0002',
+  tab: 'image'
 }] as IMyDesignTag[]
 
 class ViviStickerUtils extends WebViewUtils<IUserInfo> {
