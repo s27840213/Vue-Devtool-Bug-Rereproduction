@@ -262,15 +262,15 @@ export default defineComponent({
     //     imageShadowPanelUtils.handleShadowUpload()
     //   }
     // },
-    // debugMode(newVal) {
-    //   if (newVal && !this.vConsole) {
-    //     this.vConsole = new VConsole({ theme: 'dark' })
-    //     this.vConsole.setSwitchPosition(25, 80)
-    //   } else if (!newVal && this.vConsole) {
-    //     this.vConsole.destroy()
-    //     this.vConsole = null
-    //   }
-    // }
+    debugMode(newVal) {
+      if (newVal && !this.vConsole) {
+        this.vConsole = new VConsole({ theme: 'dark' })
+        this.vConsole.setSwitchPosition(25, 80)
+      } else if (!newVal && this.vConsole) {
+        this.vConsole.destroy()
+        this.vConsole = null
+      }
+    }
   },
   methods: {
     ...mapMutations({
