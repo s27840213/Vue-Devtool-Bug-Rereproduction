@@ -15,13 +15,13 @@ import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import textEffectUtils, { IFocusState } from '@/utils/textEffectUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { isEqual } from 'lodash'
-import { computed, defineComponent, PropType } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -60,7 +60,6 @@ export default defineComponent({
   },
   data () {
     return {
-      focus: computed(() => textEffectUtils.focus),
       textWidth: [] as number[],
       textHeight: [] as number[],
       minHeight: 0,
@@ -92,6 +91,10 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
+    focus() {
+      if (!(this.config.active || this.primaryLayer?.active)) return 'none'
+      return textEffectUtils.focus
+    },
   },
   watch: {
     'config.paragraphs': {
@@ -103,9 +106,7 @@ export default defineComponent({
       },
       deep: true
     },
-    focus(newVal: IFocusState, oldVal: IFocusState) {
-      if (newVal !== oldVal && (this.config.active || this.primaryLayer?.active)) this.drawTextFill()
-    },
+    focus() { this.drawTextFill() },
     async 'config.styles.textFill'() {
       if (this.focus === 'none') this.drawTextFill()
     },
