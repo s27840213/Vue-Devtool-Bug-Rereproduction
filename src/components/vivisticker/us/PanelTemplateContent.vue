@@ -3,9 +3,11 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
   tags(v-show="tags && tags.length"
       class="panel-template-content__tags"
       :tags="tags"
+      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
       ref="tags"
       theme="dark"
-      @search="(keyword?: string) => $emit('search', keyword)")
+      @search="(keyword?: string) => $emit('search', keyword)"
+      @scroll="(scrollLeft: number) => tagScrollLeft = (isInCategory || isInGroupTemplate) ? tagScrollLeft : scrollLeft")
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
                 :class="{invisible: !item.show}"

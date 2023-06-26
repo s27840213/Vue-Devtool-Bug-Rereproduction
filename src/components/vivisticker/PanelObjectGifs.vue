@@ -16,9 +16,11 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
       class="panel-gifs__tags"
       :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"
+      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
       ref="tags"
       theme="dark"
-      @search="handleSearch")
+      @search="handleSearch"
+      @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
                 :class="{invisible: !item.show, collapsed: !isSearchBarExpanded}"
@@ -111,6 +113,7 @@ export default defineComponent({
         favoritesSearchResult: 0
       },
       isSearchBarExpanded: false,
+      tagScrollLeft: 0
     }
   },
   computed: {

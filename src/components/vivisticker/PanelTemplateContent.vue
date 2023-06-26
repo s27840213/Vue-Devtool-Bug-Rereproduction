@@ -13,9 +13,11 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
       class="panel-template-content__tags"
       :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"
+      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
       ref="tags"
       theme="dark"
-      @search="handleSearch")
+      @search="handleSearch"
+      @scroll="(scrollLeft: number) => tagScrollLeft = (isInCategory || isInGroupTemplate) ? tagScrollLeft : scrollLeft")
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
                 :class="{invisible: !item.show, collapsed: tags && tags.length && !isSearchBarExpanded}"
@@ -105,7 +107,8 @@ export default defineComponent({
         searchResult: 0
       },
       isSearchBarExpanded: false,
-      elMainContent: undefined as HTMLElement | undefined
+      elMainContent: undefined as HTMLElement | undefined,
+      tagScrollLeft: 0
     }
   },
   mounted() {
