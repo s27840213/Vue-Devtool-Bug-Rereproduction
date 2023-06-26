@@ -51,7 +51,6 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
-import unitUtils from '@/utils/unitUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -169,7 +168,7 @@ export default defineComponent({
     ...mapState('mobileEditor', {
       inAllPagesMode: 'mobileAllPageMode',
     }),
-    ...mapState('user', ['imgSizeMap', 'userId', 'dpi']),
+    ...mapState('user', ['imgSizeMap', 'userId']),
     imgStyles(): Record<string, string> {
       return this.stylesConverter()
     },
@@ -185,20 +184,11 @@ export default defineComponent({
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
-      const { dpi } = this
       let renderW = imgWidth
       let renderH = imgHeight
-      if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSize
-        if (unit !== 'px' && physicalHeight && physicalWidth) {
-          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
-          renderW *= dpi / physicaldpi
-          renderH *= dpi / physicaldpi
-        } else {
-          renderW *= dpi / 96
-          renderH *= dpi / 96
-        }
-      }
+      const dpiRatio = pageUtils.getImageDpiRatio(this.page)
+      renderW *= dpiRatio
+      renderH *= dpiRatio
       return imageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {

@@ -85,6 +85,8 @@
 
 @mixin body-XS {
   @include body();
+  // changethe line-height from 180% to 160% https://www.notion.so/vivipic/Vivipic-Design-for-14312be28c214566aacf865b5695a8dd
+  line-height: 160%;
   font-size: 12px;
 }
 

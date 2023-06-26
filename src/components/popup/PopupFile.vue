@@ -163,6 +163,7 @@ export default defineComponent({
       fileUtils.export()
     },
     toogleAdminView() {
+      localStorage.setItem('enableAdminView', `${!this.enableAdminView}`)
       this.setUserState({ enableAdminView: !this.enableAdminView })
     },
     addTwentyPage() {

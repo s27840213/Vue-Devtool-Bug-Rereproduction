@@ -243,14 +243,16 @@ export default defineComponent({
   },
   watch: {
     brushSize(newVal: number) {
-      this.contentCtx.lineWidth = newVal
-      this.blurCtx.lineWidth = newVal
-      this.clearModeCtx.lineWidth = newVal
-      this.brushStyle.width = `${newVal + this.blurPx}px`
-      this.brushStyle.height = `${newVal + this.blurPx}px`
-      if (this.clearMode) {
-        this.blurPx = 1
-        this.contentCtx.filter = `blur(${this.blurPx}px)`
+      if (this.contentCtx) {
+        this.contentCtx.lineWidth = newVal
+        this.blurCtx.lineWidth = newVal
+        this.clearModeCtx.lineWidth = newVal
+        this.brushStyle.width = `${newVal + this.blurPx}px`
+        this.brushStyle.height = `${newVal + this.blurPx}px`
+        if (this.clearMode) {
+          this.blurPx = 1
+          this.contentCtx.filter = `blur(${this.blurPx}px)`
+        }
       }
     },
     restoreInitState(newVal) {

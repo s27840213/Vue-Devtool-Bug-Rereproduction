@@ -11,7 +11,7 @@ div(class="mobile-panel"
       @pointerdown.stop="dragPanelStart"
       @touchstart.stop="disableTouchEvent")
         div
-    div
+    div(v-if="showLeftBtn || showRightBtn")
       div(class="mobile-panel__btn mobile-panel__left-btn"
           :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn, 'insert': insertTheme, 'us': isUs}")
         svg-icon(
@@ -210,6 +210,7 @@ export default defineComponent({
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
+      inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
@@ -306,7 +307,7 @@ export default defineComponent({
       return !this.showExtraColorPanel && ['text', 'object', 'background', 'photo', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     showRightBtn(): boolean {
-      return this.currActivePanel !== 'none'
+      return this.currActivePanel !== 'none' && this.currActivePanel !== 'remove-bg'
     },
     showLeftBtn(): boolean {
       if (this.whiteTheme) return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel
@@ -663,7 +664,7 @@ export default defineComponent({
       this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      if (oldVal === 'none' || newVal === 'text') { // Prevent reset height when switch panel
+      if ((oldVal === 'none' || newVal === 'text') || (newVal === 'photo-shadow' && this.inEffectEditingMode)) { // Prevent reset height when switch panel
         this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
       }
     },

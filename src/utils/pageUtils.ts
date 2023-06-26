@@ -680,6 +680,20 @@ class PageUtils {
     }
   }
 
+  getImageDpiRatio(page: IPage): number {
+    const dpi = (store.state as any).user.dpi as number
+    if (dpi === -1) return 1
+
+    const pageWithoutBleed = page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(page) : page
+    const { width, height, physicalHeight, physicalWidth, unit = 'px' } = pageWithoutBleed
+    if (unit !== 'px' && physicalHeight && physicalWidth) {
+      const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
+      return dpi / physicaldpi
+    } else {
+      return dpi / 96
+    }
+  }
+
   /**
    * Returns page size with bleeds and size of bleeds
    * @param pageSize Target page size, use size of current focused page if undefined

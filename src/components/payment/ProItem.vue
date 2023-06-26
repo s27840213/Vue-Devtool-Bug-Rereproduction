@@ -11,7 +11,7 @@ export default defineComponent({
   name: 'ProItem',
   props: {
     theme: {
-      type: String as PropType<'default' | 'roundedRect'>,
+      type: String as PropType<'default' | 'roundedRect' | 'top-right-corner'>,
       default: 'default',
     }
   },
@@ -40,6 +40,10 @@ export default defineComponent({
   &.default {
     top: -1px; // (2px - 3px). The img contains spaces (3px in top and bottom, so to compensate the space, the top should be reduced by 3px)
     left: 2px;
+  }
+  &.top-right-corner {
+    top: -1px;
+    right: 2px;
   }
 }
 </style>

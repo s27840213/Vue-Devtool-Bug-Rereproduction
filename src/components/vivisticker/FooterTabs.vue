@@ -18,6 +18,7 @@ div(class="footer-tabs" ref="tabs")
             :style="textIconStyle")
           span(class="no-wrap click-disabled"
             :class="`text-${tabColor(tab)}`") {{tab.text}}
+          pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
     transition(name="panel-up")
       div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs" :style="subTabStyles()")
         div(class="footer-tabs__unfold"
@@ -47,6 +48,7 @@ div(class="footer-tabs" ref="tabs")
 </template>
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
 import { IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
@@ -77,7 +79,8 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    ColorBtn
+    ColorBtn,
+    ProItem
   },
   props: {
     currTab: {
@@ -243,7 +246,7 @@ export default defineComponent({
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !this.debugMode && generalUtils.isIPadOS() },
         // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode, forPro: false }
       ]
     },
     homeTabsSize(): number {
@@ -654,6 +657,7 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
+      if (!vivistickerUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, 'text')) return
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
       }
@@ -1041,6 +1045,7 @@ export default defineComponent({
   }
 
   &__item {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;

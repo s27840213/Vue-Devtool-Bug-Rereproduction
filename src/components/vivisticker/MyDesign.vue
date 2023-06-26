@@ -83,6 +83,7 @@ export default defineComponent({
       isInSelectionMode: 'vivisticker/getIsInSelectionMode',
       editorType: 'vivisticker/getEditorType',
       myDesignTab: 'vivisticker/getMyDesignTab',
+      myDesignFiles: 'vivisticker/getMyDesignFiles',
       myDesignFileList: 'vivisticker/getMyDesignFileList',
       myDesignNextPage: 'vivisticker/getMyDesignNextPage',
       debugMode: 'vivisticker/getDebugMode'
@@ -146,6 +147,22 @@ export default defineComponent({
                 moreType: 'template'
               }
             })
+          break
+        case 'image':
+          result = new Array(Math.ceil(this.list.length / this.numTextColumns))
+            .fill('')
+            .map((_, idx) => {
+              const rowItems = this.list.slice(idx * this.numTextColumns, idx * this.numTextColumns + this.numTextColumns)
+              return {
+                id: `result_${rowItems.map(item => item.id).join('_')}`,
+                type: 'my-design-text-item',
+                list: rowItems,
+                size: this.textItemWidth + this.textItemGap,
+                title: '',
+                moreType: 'image'
+              }
+            })
+          break
       }
       if (result.length !== 0) {
         Object.assign(result[result.length - 1], { sentinel: true })
@@ -192,6 +209,7 @@ export default defineComponent({
         this.refreshDesigns(this.myDesignTab)
         const content = this.$refs.content as CCategoryList
         content.$el.scrollTop = 0
+        console.log(this.myDesignFiles)
       }
     },
     isInEditor(newVal) {

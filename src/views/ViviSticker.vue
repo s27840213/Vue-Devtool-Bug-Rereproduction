@@ -210,7 +210,7 @@ export default defineComponent({
     this.setDebugMode(debugMode)
     this.footerTabsRef = (this.$refs.footerTabs as any).$el as HTMLElement
 
-    if (process.env.NODE_ENV === 'development' && debugMode) {
+    if (debugMode) {
       this.vConsole = new VConsole({ theme: 'dark' })
       this.vConsole.setSwitchPosition(25, 80)
     }

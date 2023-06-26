@@ -88,9 +88,9 @@ export interface IAssetPhoto {
 export function isIAssetPhoto(object: unknown): object is IAssetPhoto {
   return typeof object === 'object' && !!object &&
     isEqual(
-      intersection(['width', 'height', 'id', 'preview', 'urls'], Object.keys(object)),
-      ['width', 'height', 'id', 'preview', 'urls']
-    )
+      intersection(['width', 'height', 'preview', 'urls'], Object.keys(object)),
+      ['width', 'height', 'preview', 'urls']
+    ) && (!!(object as Record<string, string>).id || !!(object as Record<string, string>).assetIndex)
 }
 
 export interface IPexelsSearchResponse {

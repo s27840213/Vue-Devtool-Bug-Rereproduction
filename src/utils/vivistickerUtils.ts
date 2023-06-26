@@ -101,6 +101,9 @@ const MYDESIGN_TAGS = [{
 }, {
   name: 'NN0001',
   tab: 'template'
+}, {
+  name: 'NN0002',
+  tab: 'image'
 }] as IMyDesignTag[]
 
 class ViviStickerUtils extends WebViewUtils<IUserInfo> {
@@ -1013,6 +1016,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (!resGenThumb || resGenThumb.flag === '1') await onThumbError()
     } else {
       const flag = await this.genThumbnail(id)
+      console.log(editingDesignId, id, flag)
       if (flag === '1') await onThumbError()
     }
     await this.saveDesignJson(id)
@@ -1080,6 +1084,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const editorType = store.getters['vivisticker/getEditorType']
     const editorTypeTemplate = store.getters['vivisticker/getEditorTypeTemplate']
     const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
+    console.log(editorType, assetInfo)
     const json = {
       type: editorType,
       id,
@@ -1091,9 +1096,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         })
       }
     } as IMyDesign
+
     await this.addAsset(`mydesign-${this.mapEditorType2MyDesignKey(editorType)}`, json, 0, {
       config: { pages: uploadUtils.prepareJsonToUpload(pages) }
     })
+
     return json
   }
 
