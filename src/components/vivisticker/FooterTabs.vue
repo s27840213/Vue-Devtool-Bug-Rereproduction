@@ -815,15 +815,16 @@ export default defineComponent({
                 const src = imageUtils.getSrc(srcObj)
                 if (isPrimaryLayerFrame) {
                   // replace frame
+                  const clipIndex = Math.max(subLayerIdx, 0)
                   const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
-                    .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], src)
-                  frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
+                    .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[clipIndex], src)
+                  frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, clipIndex, {
                     imgWidth,
                     imgHeight,
                     imgX,
                     imgY
                   })
-                  frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, srcObj)
+                  frameUtils.updateFrameClipSrc(pageIndex, layerIndex, clipIndex, srcObj)
                 } else {
                   // replace image
                   await imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
@@ -923,7 +924,7 @@ export default defineComponent({
           return this.groupTypes.has(type)
         }
       } else {
-        if (this.currSelectedInfo.types.has('frame') && type === 'image') {
+        if (!this.editorTypeTemplate && this.currSelectedInfo.types.has('frame') && type === 'image') {
           return this.isInFrame
         }
         return this.currSelectedInfo.types.has(type)
