@@ -235,7 +235,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -678,7 +678,9 @@ export default defineComponent({
     },
     textBodyStyle() {
       const checkTextFill = isTextFill(this.config.styles.textFill)
-      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) && !this.contentEditable ? 0 : 1
+      // To fix tiptap focus issue that opacity 0 need one more tap to focus, set opacity to 0.0001.
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
+        !this.contentEditable ? 0.0001 : 1
       return {
         width: '100%',
         height: '100%',
@@ -940,6 +942,8 @@ export default defineComponent({
         LayerUtils.replaceLayer(this.pageIndex, this.layerIndex, newLayer)
         if (newLayer.type === 'tmp') {
           groupUtils.set(this.pageIndex, this.layerIndex, newLayer.layers)
+        } else {
+          groupUtils.set(this.pageIndex, this.layerIndex, [newLayer])
         }
         tiptapUtils.updateHtml()
       }
