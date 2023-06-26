@@ -209,14 +209,13 @@ export default defineComponent({
       } else if (this.isInCategory || this.isInBgShare) {
         return []
       } else if (this.inBgRemoveMode) {
-        return []
-        // return [{
-        //   icon: 'download',
-        //   width: 24,
-        //   action: () => {
-        //     bgRemoveUtils.saveToIOS()
-        //   }
-        // }]
+        return [{
+          icon: 'download',
+          width: 24,
+          action: () => {
+            bgRemoveUtils.saveToIOS()
+          }
+        }]
       } else {
         return [
           ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
