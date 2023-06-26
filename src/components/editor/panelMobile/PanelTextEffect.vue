@@ -61,7 +61,8 @@ div(class="panel-text-effect")
         :disabled="optionDisabled(option)"
         @update="(val)=>handleRangeInput(val, option)"
         @pointerdown="setEffectFocus(true)"
-        @pointerup="setEffectFocus(false)")
+        @pointerup="setEffectFocus(false)"
+        @pointercancel="setEffectFocus(false)")
       //- Option type color
       div(v-if="option.type === 'color'"
         class="panel-text-effect__color")
