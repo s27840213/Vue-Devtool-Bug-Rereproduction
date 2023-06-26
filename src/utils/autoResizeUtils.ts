@@ -1,5 +1,5 @@
 import { IText } from '@/interfaces/layer'
-import textUtils from '@/utils/textUtils'
+import textUtils, { ITextHW } from '@/utils/textUtils'
 
 export interface IRunResult {
   widthLimit: number
@@ -23,12 +23,50 @@ const DEBUG_LOG_FILTER = (by: string, identity: string) => {
   return true
 }
 
-export class AutoResizeByHeight {
+abstract class AutoResize {
+  abstract BY: string
+  abstract MAX_LOOP: number
+  abstract TOLERANCE: number
+  config: IText
+  initSize: IInitSize
+  widthLimit: number
+  autoSize: ITextHW
+  runResult: IRunResult | undefined
+
+  isDebugMode = false // for debugging
+  identity = '' // for debugging
+
+  constructor(config: IText, initSize: IInitSize) {
+    this.config = config
+    this.initSize = initSize
+    this.widthLimit = initSize.widthLimit
+    this.autoSize = { width: 0, height: 0, spanDataList: [] }
+
+    this.identity = textUtils.getFirstPText(config) // for debugging
+  }
+
+  log(...args: any[]) {
+    if (!this.isDebugMode) return
+    if (!DEBUG_LOG_FILTER(this.BY, this.identity)) return
+    console.log(this.BY, this.identity.substring(0, 50), '::', ...args)
+  }
+
+  async updateSize(): Promise<void> {
+    this.autoSize = await textUtils.getTextHWAsync(this.config, this.widthLimit)
+  }
+
+  updateSizeSync(): void {
+    this.autoSize = textUtils.getTextHW(this.config, this.widthLimit)
+  }
+
+  abstract run(): Promise<IRunResult>
+  abstract runSync(): IRunResult
+}
+
+export class AutoResizeByHeight extends AutoResize {
   BY = 'height'
   MAX_LOOP = 200
   TOLERANCE = 5
-  config: IText
-  initSize: IInitSize
   isVertical: boolean
   dimension: 'width' | 'height'
   scale: number
@@ -36,22 +74,17 @@ export class AutoResizeByHeight {
   offset: number
   prevOffset: number
   shouldContinue: boolean
-  widthLimit: number
   autoDimension: number
   originDimension: any
   prevDiff: number
   minDiff: number
   minDiffWidLimit: number
   minDiffDimension: number
-  autoSize: { width: number, height: number, spanDataList: DOMRect[][][] }
-  runResult: IRunResult | undefined
 
   isDebugMode = DEBUG_HEIGHT // for debugging
-  identity = '' // for debugging
 
   constructor(config: IText, initSize: IInitSize) {
-    this.config = config
-    this.initSize = initSize
+    super(config, initSize)
     this.isVertical = config.styles.writingMode.includes('vertical')
     this.dimension = this.isVertical ? 'width' : 'height'
     this.scale = config.styles.scale
@@ -59,28 +92,18 @@ export class AutoResizeByHeight {
     this.offset = 0
     this.prevOffset = 0
     this.shouldContinue = true
-    this.widthLimit = initSize.widthLimit
     this.autoDimension = -1
     this.originDimension = initSize[this.dimension]
     this.prevDiff = Number.MAX_VALUE
     this.minDiff = Number.MAX_VALUE
     this.minDiffWidLimit = -1
     this.minDiffDimension = -1
-    this.autoSize = { width: 0, height: 0, spanDataList: [] }
-
-    this.identity = config.paragraphs[0].spans.map(span => span.text).join('') // for debugging
   }
 
   static getDiff(config: IText, result: IRunResult, initSize: IInitSize) {
     const isVertical = config.styles.writingMode.includes('vertical')
     const dimension = isVertical ? 'width' : 'height'
     return Math.abs(result.otherDimension - initSize[dimension])
-  }
-
-  log(...args: any[]) {
-    if (!this.isDebugMode) return
-    if (!DEBUG_LOG_FILTER(this.BY, this.identity)) return
-    console.log(this.BY, this.identity.substring(0, 50), '::', ...args)
   }
 
   updateDiff(currDiff: number) {
@@ -203,30 +226,28 @@ export class AutoResizeByHeight {
 
   async run(): Promise<IRunResult> {
     this.log('run start')
-    this.autoSize = await textUtils.getTextHWAsync(this.config, this.widthLimit)
+    await this.updateSize()
     while (this.shouldContinue) { // results are always returned inside the loop without breaking this while-loop
       if (this.loopPrevCondition()) return this.finalResult()
       if (this.loopComparison()) return this.finalResult()
-      this.autoSize = await textUtils.getTextHWAsync(this.config, this.widthLimit)
+      await this.updateSize()
     }
     return this.currentResult()
   }
-}
 
-export class AutoResizeByHeightSync extends AutoResizeByHeight {
   runSync(): IRunResult {
     this.log('runSync start')
-    this.autoSize = textUtils.getTextHW(this.config, this.widthLimit)
+    this.updateSizeSync()
     while (this.shouldContinue) { // results are always returned inside the loop without breaking this while-loop
       if (this.loopPrevCondition()) return this.finalResult()
       if (this.loopComparison()) return this.finalResult()
-      this.autoSize = textUtils.getTextHW(this.config, this.widthLimit)
+      this.updateSizeSync()
     }
     return this.currentResult()
   }
 }
 
-export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
+export class AutoResizeBySpanDataList extends AutoResizeByHeight {
   BY = 'spanDataList'
   MAX_LOOP = 100
   pIndex = 0
@@ -236,7 +257,7 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
 
   isDebugMode = DEBUG_SPANDATALIST // for debugging
 
-  constructor(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }, bound: number) {
+  constructor(config: IText, initSize: IInitSize, bound: number) {
     super(config, initSize)
     this.bound = bound
   }
@@ -389,10 +410,10 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
         return this.nextStep(targetSpanDataList.length, targetSpans.length, targetSpanRects.length)
       }
 
-      const currLastLineSize = currSpanRects[currSpanRects.length - 1 - this.lineOffset][dimension]
-      const targetLastLineSize = targetSpanRects[targetSpanRects.length - 1 - this.lineOffset][dimension]
+      const currLineSize = currSpanRects[currSpanRects.length - 1 - this.lineOffset][dimension]
+      const targetLineSize = targetSpanRects[targetSpanRects.length - 1 - this.lineOffset][dimension]
 
-      const goNextSpan = this.compareByLineSize(currLastLineSize, targetLastLineSize)
+      const goNextSpan = this.compareByLineSize(currLineSize, targetLineSize)
       if (goNextSpan) {
         return this.nextStep(targetSpanDataList.length, targetSpans.length, targetSpanRects.length)
       }
@@ -406,5 +427,158 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeightSync {
     }
     this.applyOffset()
     return false // head to next loop
+  }
+}
+
+export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
+  BY = 'spanDataList2'
+  MAX_LOOP = 200
+  TOLERANCE = 5
+
+  initDirection() {
+    // decide which direction to search
+    const widthLimitDiff = this.initSize.widthLimit - this.config.widthLimit
+    if (widthLimitDiff !== 0) {
+      // if widthLimit has been changed by previous stage, use same direction
+      this.offset = widthLimitDiff > 0 ? 1 : -1
+    } else {
+      if (!this.checkStructMatch(this.autoSize.spanDataList, this.initSize.spanDataList)) return this.bestResult()
+      // if widthLimit not changed by previous stage, decide direction by spanDataList
+      this.setDirectionBySpanDataList()
+    }
+  }
+
+  setDirectionBySpanDataList() {
+    const currSpanDataList = this.autoSize.spanDataList
+    const targetSpanDataList = this.initSize.spanDataList!
+
+    for (let i = 0; i < currSpanDataList.length; i++) {
+      const currSpans = currSpanDataList[i]
+      const targetSpans = targetSpanDataList[i]
+
+      for (let j = 0; j < currSpans.length; j++) {
+        const currSpanRects = currSpans[j]
+        const targetSpanRects = targetSpans[j]
+
+        const sameLines = this.compareByLineCount(currSpanRects.length, targetSpanRects.length)
+
+        if (sameLines) {
+          for (let k = 0; k < currSpanRects.length; k++) {
+            const TOLERANCE = this.config.paragraphs[i].spans[j].styles.size / 10
+
+            const dimension = this.isVertical ? 'height' : 'width'
+
+            const currLineSize = currSpanRects[currSpanRects.length - 1 - k][dimension]
+            const targetLineSize = targetSpanRects[targetSpanRects.length - 1 - k][dimension]
+
+            // if target last line is longer, decrease widthLimit to push more characters to last line.
+            if (targetLineSize - currLineSize > TOLERANCE) {
+              this.offset = -1
+              return
+            }
+
+            // if target last line is shorter, increase widthLimit to pull more characters from last line.
+            if (currLineSize - targetLineSize > TOLERANCE) {
+              this.offset = 1
+              return
+            }
+          }
+        }
+      }
+    }
+  }
+
+  calcDiff(): boolean {
+    // calc mean of width diffs of all lines.
+    // @Return if skip calculation when structures don't match
+    if (!this.checkStructMatch(this.autoSize.spanDataList, this.initSize.spanDataList)) return true
+    const currSpanDataList = this.autoSize.spanDataList
+    const targetSpanDataList = this.initSize.spanDataList!
+
+    let diffSum = 0
+    let diffCount = 0
+
+    for (let i = 0; i < currSpanDataList.length; i++) {
+      const currSpans = currSpanDataList[i]
+      const targetSpans = targetSpanDataList[i]
+
+      for (let j = 0; j < currSpans.length; j++) {
+        const currSpanRects = currSpans[j]
+        const targetSpanRects = targetSpans[j]
+
+        // if lines of some span don't match, skip calculation
+        if (currSpanRects.length !== targetSpanRects.length) return true
+
+        for (let k = 0; k < currSpanRects.length; k++) {
+          const dimension = this.isVertical ? 'height' : 'width'
+          diffSum += Math.abs(currSpanRects[k][dimension] - targetSpanRects[k][dimension])
+          diffCount++
+        }
+      }
+    }
+
+    const currDiff = diffSum / diffCount
+
+    this.updateDiff(currDiff)
+
+    return false
+  }
+
+  async run(): Promise<IRunResult> {
+    this.log('run start')
+    await this.updateSize()
+
+    this.initDirection()
+    if (this.offset === 0) { // everything is close enough
+      return this.bestResult()
+    }
+
+    while (this.shouldContinue) {
+      this.autoDimension = this.autoSize[this.dimension]
+      if (this.checkLoop()) return this.finalResult()
+      if (this.checkBound()) {
+        this.runResult = this.bestResult()
+        return this.finalResult()
+      }
+      const matched = this.calcDiff()
+      this.log(`line count of all spans matched: ${matched}`)
+      if (this.prevDiff < this.TOLERANCE) {
+        // if mean diff is small enough, return bestResult right away.
+        this.runResult = this.bestResult()
+        return this.finalResult()
+      }
+      this.applyOffset()
+      await this.updateSize()
+    }
+    return this.finalResult()
+  }
+
+  runSync(): IRunResult {
+    this.log('runSync start')
+    this.updateSizeSync()
+
+    this.initDirection()
+    if (this.offset === 0) { // everything is close enough
+      return this.bestResult()
+    }
+
+    while (this.shouldContinue) {
+      this.autoDimension = this.autoSize[this.dimension]
+      if (this.checkLoop()) return this.finalResult()
+      if (this.checkBound()) {
+        this.runResult = this.bestResult()
+        return this.finalResult()
+      }
+      const matched = this.calcDiff()
+      this.log(`line count of all spans matched: ${matched}`)
+      if (this.prevDiff < this.TOLERANCE) {
+        // if mean diff is small enough, return bestResult right away.
+        this.runResult = this.bestResult()
+        return this.finalResult()
+      }
+      this.applyOffset()
+      this.updateSizeSync()
+    }
+    return this.finalResult()
   }
 }

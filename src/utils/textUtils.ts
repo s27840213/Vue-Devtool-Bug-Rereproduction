@@ -4,7 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
-import { AutoResizeByHeight, AutoResizeByHeightSync, AutoResizeBySpanDataList, IRunResult } from '@/utils/autoResizeUtils'
+import { AutoResizeByHeight, AutoResizeBySpanDataList2, IInitSize, IRunResult } from '@/utils/autoResizeUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -21,6 +21,12 @@ import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
 import textShapeUtils from './textShapeUtils'
 import tiptapUtils from './tiptapUtils'
+
+export interface ITextHW {
+  width: number
+  height: number
+  spanDataList: DOMRect[][][]
+}
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -266,7 +272,7 @@ class TextUtils {
     }
   }
 
-  getTextHW(_content: IText, widthLimit = -1): { width: number, height: number, spanDataList: DOMRect[][][] } {
+  getTextHW(_content: IText, widthLimit = -1): ITextHW {
     const body = this.genTextDiv(_content, widthLimit)
     const scale = _content.styles.scale ?? 1
     document.body.appendChild(body)
@@ -275,7 +281,7 @@ class TextUtils {
     return textHW
   }
 
-  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<{ width: number, height: number, spanDataList: DOMRect[][][] }> {
+  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<ITextHW> {
     const textId = generalUtils.generateRandomString(12)
     const body = this.genTextDiv(_content, widthLimit)
     body.setAttribute('id', textId)
@@ -350,11 +356,11 @@ class TextUtils {
     return body
   }
 
-  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number, spanDataList: DOMRect[][][] } {
+  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): ITextHW {
     return this.getHWBySize(body.getBoundingClientRect(), body, scale, widthLimit)
   }
 
-  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number, spanDataList: DOMRect[][][] } {
+  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): ITextHW {
     const spanDataList = Array.from(body.children).map(
       p => Array.from(p.children).map(
         span => Array.from(span.getClientRects()).map(
@@ -756,12 +762,16 @@ class TextUtils {
     }
   }
 
+  getFirstPText(config: IText): string {
+    return config.paragraphs[0].spans.map(span => span.text).join('')
+  }
+
   async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
     const { widthLimit, otherDimension, loops } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
-    const firstPText = config.paragraphs[0].spans.map(span => span.text).join('')
+    const firstPText = this.getFirstPText(config)
     if (router.currentRoute.value.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
       console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText} loops: ${loops}`)
@@ -773,14 +783,14 @@ class TextUtils {
     }
   }
 
-  autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): IRunResult {
-    const res = (new AutoResizeByHeightSync(config, initSize)).runSync()
-    return (new AutoResizeBySpanDataList(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).runSync()
+  autoResizeCoreSync(config: IText, initSize: IInitSize): IRunResult {
+    const res = (new AutoResizeByHeight(config, initSize)).runSync()
+    return (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).runSync()
   }
 
-  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<IRunResult> {
+  async autoResizeCore(config: IText, initSize: IInitSize): Promise<IRunResult> {
     const res = await (new AutoResizeByHeight(config, initSize)).run()
-    return await (new AutoResizeBySpanDataList(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).run()
+    return await (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).run()
   }
 
   async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
