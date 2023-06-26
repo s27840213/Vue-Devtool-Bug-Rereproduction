@@ -137,7 +137,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'uploadImageURL',
     'informWebResult',
     'subscribeResult',
-    'screenshotDone'
+    'screenshotDone',
+    'saveDone'
   ]
 
   SCREENSHOT_CALLBACKS = [
