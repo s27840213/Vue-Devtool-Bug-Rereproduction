@@ -68,9 +68,11 @@ export default defineComponent({
     elContainer.onscroll = null
   },
   watch: {
-    scrollLeft() {
-      const elContainer = this.$refs.container as HTMLElement
-      if (this.scrollLeft >= 0 && this.scrollLeft <= elContainer.scrollWidth - elContainer.clientWidth) elContainer.scrollLeft = this.scrollLeft
+    tagsOrScrollLeftChange() {
+      this.$nextTick(() => {
+        const elContainer = this.$refs.container as HTMLElement
+        if (this.scrollLeft >= 0 && this.scrollLeft <= elContainer.scrollWidth - elContainer.clientWidth) elContainer.scrollLeft = this.scrollLeft
+      })
     }
   },
   computed: {
@@ -86,6 +88,10 @@ export default defineComponent({
         maxHeight: '43px',
         margin: '0 -5px 0 -5px'
       }
+    },
+    tagsOrScrollLeftChange() {
+      const { tags, scrollLeft } = this
+      return { tags, scrollLeft }
     }
   },
   methods: {

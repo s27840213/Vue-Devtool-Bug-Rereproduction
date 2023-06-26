@@ -109,7 +109,8 @@ export default defineComponent({
   data() {
     return {
       mainContentScrollTop: 0,
-      elCategoryCardList: undefined as HTMLElement | undefined
+      elCategoryCardList: undefined as HTMLElement | undefined,
+      tagScrollLeft: 0,
     }
   },
   activated() {

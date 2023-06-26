@@ -42,6 +42,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { IBrowserInfo } from '@/store/module/user'
+import backgroundUtils from '@/utils/backgroundUtils'
 import cssConverter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -50,6 +51,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
@@ -201,7 +203,7 @@ export default defineComponent({
     },
     imageSize(): { width: number, height: number, x: number, y: number } {
       const { image } = this
-      const offset = 1
+      const offset = 0 // no need to scale bg image in vivisticker
       const aspectRatio = image.config.styles.imgWidth / image.config.styles.imgHeight
       const width = image.config.styles.imgWidth + (aspectRatio < 1 ? offset * 2 : offset * 2 * aspectRatio)
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
@@ -302,10 +304,12 @@ export default defineComponent({
       }
     },
     dblTap(e: PointerEvent) {
+      this.setInBgSettingMode()
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
             console.warn(this.image.config.srcObj)
+            if (backgroundUtils.backgroundLocked) return backgroundUtils.handleLockedNotify()
             this.setBgImageControl({
               pageIndex: this.pageIndex,
               imgControl: true
@@ -415,6 +419,18 @@ export default defineComponent({
           this.imgNaturalSize.height = img.height
         }
       })
+      // detect if SVG image rendered
+      const rendering = () => {
+        const elImg = this.$refs.img as SVGImageElement
+        if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
+          // Render complete
+          vivistickerUtils.setLoadingFlag(-1)
+        } else {
+          // Rendering
+          window.requestAnimationFrame(rendering)
+        }
+      }
+      window.requestAnimationFrame(rendering)
     },
     onLoad(e: Event) {
       const img = e.target as HTMLImageElement
@@ -422,6 +438,7 @@ export default defineComponent({
         this.imgNaturalSize.width = img.width
         this.imgNaturalSize.height = img.height
       }
+      vivistickerUtils.setLoadingFlag(-1)
     }
   }
 })
@@ -435,6 +452,7 @@ export default defineComponent({
   right: 0;
   bottom: 0;
   left: 0;
+  border-radius: 10px;
   &__picture {
     object-fit: cover;
     width: 100%;

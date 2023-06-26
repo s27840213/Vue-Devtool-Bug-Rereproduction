@@ -11,7 +11,7 @@ div(class="panel-objects")
           :isFavorite="keywordIsFavaorites"
           @search="handleSearch"
           @favorite="toggleFavoritesTag")
-      div(class="panel-objects__nav__btn-cancel body-SM" @click="handleCancel") {{ "Cancel" }}
+      div(class="panel-objects__nav__btn-cancel body-SM" @click="handleCancel") {{ $t('NN0203') }}
     template(v-else)
       div(v-show="!isFavorites" class="panel-objects__nav__icon")
         svg-icon(class="pointer"

@@ -10,7 +10,7 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
           vivisticker="dark"
           :color="{close: 'black-5', search: 'black-5'}"
           @search="handleSearch")
-        div(class="panel-bg__nav__btn-cancel body-SM" @click="handleCancel") {{ "Cancel" }}
+        div(class="panel-bg__nav__btn-cancel body-SM" @click="handleCancel") {{ $t('NN0203')}}
       template(v-else)
         div(v-show="showImageTab" class="panel-bg__nav__icon")
           svg-icon(class="pointer"

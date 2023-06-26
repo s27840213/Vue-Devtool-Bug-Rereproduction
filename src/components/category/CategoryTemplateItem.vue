@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="category-template-item" :style="itemStyle")
+div(class="category-template-item")
   div(class="relative pointer"
       draggable="true"
       @click="addTemplate"
@@ -7,27 +7,20 @@ div(class="category-template-item" :style="itemStyle")
     img(class="category-template-item__img"
       ref="img"
       :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
-      :style="previewStyle"
       @error="handleNotFound")
     pro-item(v-if="item.plan" draggable="false")
-  div(v-if="showId"
-    class="category-template-item__id"
-    @click="copyId") {{ item.id }}
 </template>
 
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
+import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import { PRECISION } from '@/utils/unitUtils'
-import { notify } from '@kyvg/vue3-notification'
-import { round } from 'lodash'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 /**
  * @Todo - fix the any type problems -> TingAn
@@ -46,10 +39,6 @@ export default defineComponent({
       type: Object,
       required: true
     },
-    showId: {
-      type: Boolean,
-      required: true
-    },
     groupItem: {
       type: Object
     }
@@ -61,23 +50,13 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters({
-      useMobileEditor: 'getUseMobileEditor'
+    ...mapState('templates', {
+      igLayout: 'igLayout'
     }),
-    designGroupType(): number {
-      return this.$store.state.groupType
-    },
-    isDetailPage(): boolean {
-      return this.designGroupType === 1 || this.groupItem?.group_type === 1
-    },
-    previewStyle(): any {
-      const { width, height } = this.item.preview || { width: GeneralUtils.getListRowItemSize(), height: GeneralUtils.getListRowItemSize() }
-      return { width: `${width}px`, height: `${height}px` }
-    },
-    itemStyle(): any {
-      const { width } = this.item.preview || { width: GeneralUtils.getListRowItemSize() }
-      return { width: `${width}px` }
-    }
+    ...mapGetters({
+      useMobileEditor: 'getUseMobileEditor',
+      isInEditor: 'vivisticker/getIsInEditor'
+    }),
   },
   methods: {
     handleNotFound(event: Event) {
@@ -95,90 +74,25 @@ export default defineComponent({
       })
     },
     addTemplate() {
-      if (this.isDetailPage && this.useMobileEditor) {
-        modalUtils.setModalInfo(
-            `${this.$t('NN0808')}`,
-            [],
-            {
-              msg: `${this.$t('NN0358')}`,
-              class: 'btn-blue-mid',
-              action: () => { return false }
-            }
-        )
-        return
-      }
-      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
-      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
-      const { match_cover: matchCover = {} } = this.item
-      let { height, width, unit } = this.item
-
-      // in some cases (single page group template), there is no item.width/item.height (unknown reason), then we get them by match_cover
-      if (width === undefined || height === undefined || unit === undefined) {
-        width = this.item.match_cover.width
-        height = this.item.match_cover.height
-        unit = this.item.match_cover.unit
-      }
-      /*
-      const theme = themeUtils
-        .getThemesBySize(matchCover.width || width, matchCover.height || height)
-        .map(theme => theme.id).join(',')
-      const isSameTheme = themeUtils.compareThemesWithPage(theme)
-      */
-      const pageSize = pageUtils.currFocusPageSize
-      const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === unit
-      const cb = this.groupItem ? (resize?: any) => {
-        assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
-      } : (resize?: any) => {
-        assetUtils.addAsset(this.item as any, resize)
-        GeneralUtils.fbq('track', 'AddToWishlist', {
-          content_ids: [this.item.id]
-        })
-      }
-
-      /**
-       * @todo show the modal if the width,height are not the same in detailed page mode
-       */
-      if (this.isDetailPage) {
-        const { width: pageWidth = 1000 } = pageSize
-        const ratio = pageWidth / (matchCover.width || width)
-        const resize = { width: pageWidth, height: (matchCover.height || height) * ratio }
-        return cb(resize)
-      }
-
-      if (!isSameSize) {
-        let btnWidth = '120px'
-        if (this.$i18n.locale === 'tw') {
-          btnWidth = '120px'
-        } else if (this.$i18n.locale === 'us') {
-          btnWidth = '160px'
-        } else if (this.$i18n.locale === 'jp') {
-          btnWidth = '180px'
-        }
-        modalUtils.setModalInfo(
-          this.$t('NN0695') as string,
-          [`${this.$t('NN0209', { tsize: `${width}x${height} ${unit}`, psize: `${round(pageSize.physicalWidth, PRECISION)}x${round(pageSize.physicalHeight, PRECISION)} ${pageSize.unit}` })}`],
-          {
-            msg: `${this.$t('NN0021')}`,
-            class: 'btn-light-mid',
-            style: { border: '1px solid #4EABE6' },
-            action: () => {
-              cb(pageSize)
-            }
-          },
-          {
-            msg: `${this.$t('NN0208')}`,
-            action: cb
-          }
-        )
-      } else {
+      if (this.groupItem && !vivistickerUtils.checkPro(this.groupItem, 'template')) return
+      else if (!this.groupItem && !vivistickerUtils.checkPro(this.item, 'template')) return
+      const currPageIndex = pageUtils.currFocusPageIndex
+      const attrs = { pageIndex: this.isInEditor ? currPageIndex + 1 : currPageIndex, ...vivistickerUtils.getPageSize(this.igLayout) }
+      const moduleKey = `templates/${this.igLayout}`
+      const cb = this.groupItem ? async () => {
+        await assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, attrs, moduleKey, !this.isInEditor)
+        return true
+      } : vivistickerUtils.getAssetInitiator(this.item as IAsset, attrs, moduleKey)
+      if (this.isInEditor) {
         cb()
+      } else {
+        vivistickerUtils.startEditing(
+          this.igLayout, {
+            plan: this.item.plan,
+            assetId: this.item.id
+          }, cb, vivistickerUtils.getAssetCallback(this.item as IAsset)
+        )
       }
-    },
-    copyId() {
-      GeneralUtils.copyText(this.item.id)
-        .then(() => {
-          notify({ group: 'copy', text: `${this.item.id} 已複製` })
-        })
     }
   }
 })
@@ -187,19 +101,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 .category-template-item {
   &__img {
+    @include size(100%);
     object-fit: contain;
-    height: 145px;
-    width: 145px;
     vertical-align: top;
-  }
-  &__id {
-    color: #ffffff;
-    font-size: 20px;
-    line-height: 40px;
-    text-align: left;
-    transform: scale(0.5);
-    transform-origin: left top;
-    cursor: pointer;
+    border-radius: 5px;
   }
   &__index {
     position: absolute;

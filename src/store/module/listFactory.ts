@@ -154,6 +154,7 @@ export default function (this: any) {
           token: '1',
           locale,
           theme,
+          igLayout: this.igLayout,
           listAll: 0,
           listCategory: 1,
           pageIndex: state.nextCategory,
@@ -208,6 +209,7 @@ export default function (this: any) {
           locale,
           keyword,
           theme,
+          igLayout: this.igLayout,
           listAll: 1,
           listCategory: 0,
           cache: needCache,
@@ -249,7 +251,7 @@ export default function (this: any) {
 
     // For search result.
     getTagContent: async ({ commit, state }, params = {}) => {
-      let { theme } = state
+      const { theme } = state
       let { keyword } = params
       const locale = localeUtils.currLocale()
       // If $all:, do category search instead of tag search.
@@ -257,7 +259,7 @@ export default function (this: any) {
         : keyword.includes('::') ? keyword : `tag::${keyword}`
       commit('SET_STATE', { keyword, locale })
       commit('SET_pending', { content: true })
-      if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      // if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       const isAdmin = store.getters['user/isAdmin']
       try {
         // Search tags and set as active.
@@ -266,6 +268,7 @@ export default function (this: any) {
           token: isAdmin ? store.getters['user/getToken'] : '1',
           locale,
           theme,
+          igLayout: this.igLayout,
           keyword,
           listAll: 1,
           listCategory: 0,

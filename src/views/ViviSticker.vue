@@ -1,31 +1,33 @@
 <template lang="pug">
 div(class="vivisticker" :style="copyingStyles()")
   div(class="vivisticker__top" :style="topStyles()")
-    header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
+    header-tabs(:style="headerStyles()")
     div(ref="vivisticker__content"
         class="vivisticker__content"
-        :style="contentStyle"
         @click.self="outerClick")
       my-design(v-show="isInMyDesign && !isInEditor")
-      vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
+      vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor" :currPage="currPage" :marginBottom="marginBottom")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
-    transition(name="panel-up"
-              @before-enter="beforeEnter"
-              @after-enter="afterEnter"
-              @after-leave="afterLeave")
-      mobile-panel(v-show="showMobilePanel"
-        ref="mobilePanel"
-        :currActivePanel="currActivePanel"
-        :currPage="currPage"
-        @switchTab="switchTab"
-        @panelHeight="setPanelHeight"
-        :footerTabsRef="footerTabsRef")
-  footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
+    teleport(v-if="mounted" to="#vivisticker__mobile-panel-bottom" :disabled="!isMobilePanelBottom")
+      transition(name="panel-up"
+                @before-enter="beforeEnter"
+                @after-enter="afterEnter"
+                @after-leave="afterLeave")
+        mobile-panel(v-show="showMobilePanel"
+          ref="mobilePanel"
+          :currActivePanel="currActivePanel"
+          :currPage="currPage"
+          @switchTab="switchTab"
+          @panelHeight="setPanelHeight"
+          @bottomThemeChange="(val) => isMobilePanelBottom = val"
+          :footerTabsRef="footerTabsRef")
+  footer-tabs(v-if="showFooterTabs" class="vivisticker__bottom"
     ref="footerTabs"
     @switchTab="switchTab"
     @switchMainTab="switchMainTab"
     :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
     :inAllPagesMode="false")
+  div(id="vivisticker__mobile-panel-bottom")
   transition(name="slide-left")
     component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
   transition(name="panel-up")
@@ -41,9 +43,10 @@ import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import MainMenu from '@/components/vivisticker/MainMenu.vue'
 import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
+import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
+import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
-import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
@@ -73,7 +76,8 @@ export default defineComponent({
     FooterTabs,
     Tutorial,
     FullPage,
-    SlideUserSettings
+    SlideUserSettings,
+    ShareTemplate
   },
   data() {
     return {
@@ -84,6 +88,8 @@ export default defineComponent({
       marginBottom: 0,
       vConsole: null as any,
       footerTabsRef: undefined as unknown as HTMLElement,
+      mounted: false,
+      isMobilePanelBottom: false,
     }
   },
   created() {
@@ -99,6 +105,7 @@ export default defineComponent({
     }
   },
   async mounted() {
+    this.mounted = true
     const tempDesign = await vivistickerUtils.fetchDesign()
     if (tempDesign) {
       try {
@@ -231,6 +238,8 @@ export default defineComponent({
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInEditor: 'vivisticker/getIsInEditor',
       isInBgShare: 'vivisticker/getIsInBgShare',
+      isInTemplateShare: 'vivisticker/getIsInTemplateShare',
+      isInPagePreview: 'vivisticker/getIsInPagePreview',
       showTutorial: 'vivisticker/getShowTutorial',
       fullPageType: 'vivisticker/getFullPageType',
       userInfo: 'vivisticker/getUserInfo',
@@ -244,8 +253,8 @@ export default defineComponent({
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
     },
-    contentStyle(): Record<string, string> {
-      return this.isInEditor ? { transform: `translateY(-${this.marginBottom}px)` } : {}
+    showFooterTabs(): boolean {
+      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview)
     }
   },
   watch: {
@@ -297,7 +306,7 @@ export default defineComponent({
     topStyles() {
       return {
         ...this.isDuringCopy ? { background: 'transparent' } : {},
-        gridTemplateRows: this.currActivePanel === 'text' ? '1fr' : 'auto 1fr'
+        gridTemplateRows: ['text', 'template-content'].includes(this.currActivePanel) ? '1fr' : 'auto 1fr'
       }
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
@@ -360,7 +369,7 @@ export default defineComponent({
     setPanelHeight(height: number) {
       const content = this.$refs.vivisticker__content as HTMLElement
       const contentHeight = content?.clientHeight ?? 0
-      if (height === 0 || height > contentHeight) {
+      if (height === 0 || height > contentHeight || this.currActivePanel === 'page-management') {
         this.marginBottom = 0
         return
       }
@@ -374,7 +383,7 @@ export default defineComponent({
           activeLayer.styles.height / 2 - this.currPage.height / 2
         offset = layerMiddleY * this.contentScaleRatio
       }
-      const pseudoPage = document.querySelector('.vvstk-editor__pseudo-page') as HTMLElement | null
+      const pseudoPage = document.getElementById(`vvstk-page-${pageUtils.currFocusPageIndex}`) as HTMLElement | null
       if (pseudoPage) {
         pageOffset = contentHeight - pseudoPage.clientHeight
       }
@@ -426,7 +435,6 @@ export default defineComponent({
     width: 100%;
     overflow: hidden;
     z-index: setZindex("editor-view");
-    transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
   }
 
   &__slide {

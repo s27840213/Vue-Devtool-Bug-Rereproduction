@@ -19,6 +19,7 @@ export enum PanelEvent {
   scrollPanelObjectToTop = 'scrollPanelObjectToTop',
   scrollPanelTextToTop = 'scrollPanelTextToTop',
   scrollPanelBackgroundToTop = 'scrollPanelBackgroundToTop',
+  scrollPanelTemplateToTop = 'scrollPanelTemplateToTop',
 }
 
 export enum ImageEvent {

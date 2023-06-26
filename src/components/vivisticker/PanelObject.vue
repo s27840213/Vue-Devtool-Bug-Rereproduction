@@ -2,10 +2,10 @@
 div(class="panel-objects rwd-container")
   tabs(v-if="!isInCategory"
       class="panel-objects__tabs"
-      :tabs="[$t('NN0758'), 'GIFs', $t('NN0759')]"
+      :tabs="tabs"
       v-model="tabIndex")
   //- Favorites tabs
-  div(v-if="isFavorites && !isInCategory" class="panel-objects__favorites-tabs")
+  div(v-if="!isInEditor && isFavorites && !isInCategory" class="panel-objects__favorites-tabs")
     tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
         v-model="favoritesTabIndex")
     svg-icon(iconName="info-reverse" iconWidth="24px" iconColor="white"
@@ -26,7 +26,7 @@ import i18n from '@/i18n'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import modalUtils from '@/utils/modalUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { CCategoryList } from '../category/CategoryList.vue'
 
 export default defineComponent({
@@ -42,26 +42,49 @@ export default defineComponent({
       favoritesTabIndex: 0
     }
   },
+  created() {
+    // load states of favorites tab from store
+    if (this.currActiveObjectFavTab) {
+      this.tabIndex = this.isInEditor ? 1 : 2
+      this.favoritesTabIndex = this.isInEditor ? 0 : this.currActiveObjectFavTab === 'gifs' ? 1 : 0
+    }
+  },
   mounted() {
     eventUtils.on(PanelEvent.scrollPanelObjectToTop, this.scrollToTop)
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelObjectToTop)
   },
+  watch: {
+    currActiveFavTab(newVal) {
+      this.setCurrActiveObjectFavTab(newVal)
+    }
+  },
   computed: {
     ...mapGetters({
-      isTabInCategory: 'vivisticker/getIsInCategory'
+      isTabInCategory: 'vivisticker/getIsInCategory',
+      isInEditor: 'vivisticker/getIsInEditor',
+      currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
     }),
+    tabs() {
+      return this.isInEditor ? [this.$t('NN0758'), this.$t('NN0759')] : [this.$t('NN0758'), 'GIFs', this.$t('NN0759')]
+    },
     isInCategory(): boolean {
       return this.isTabInCategory('object')
     },
     isStatic(): boolean { return this.tabIndex === 0 },
-    isGifs(): boolean { return this.tabIndex === 1 },
-    isFavorites(): boolean { return this.tabIndex === 2 },
-    isFavoritesStatic(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 0 },
-    isFavoritesGifs(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 1 },
+    isGifs(): boolean { return this.isInEditor ? false : this.tabIndex === 1 },
+    isFavorites(): boolean { return this.isInEditor ? this.tabIndex === 1 : this.tabIndex === 2 },
+    isFavoritesStatic(): boolean { return this.isFavorites && this.favoritesTabIndex === 0 },
+    isFavoritesGifs(): boolean { return this.isInEditor ? false : this.isFavorites && this.favoritesTabIndex === 1 },
+    currActiveFavTab(): string {
+      return this.isFavoritesStatic ? 'static' : this.isFavoritesGifs ? 'gifs' : ''
+    }
   },
   methods: {
+    ...mapMutations({
+      setCurrActiveObjectFavTab: 'vivisticker/SET_currActiveObjectFavTab'
+    }),
     scrollToTop() {
       if (this.isStatic || this.isFavoritesStatic) {
         // @ts-expect-error: Call vue child component method
@@ -89,7 +112,7 @@ export default defineComponent({
   grid-template-rows: auto auto 1fr;
   overflow: hidden;
   &__tabs {
-    margin-top: 24px;
+    margin-top: v-bind("isInEditor ? '0' : '24px'");
   }
   &__favorites-tabs {
     display: flex;

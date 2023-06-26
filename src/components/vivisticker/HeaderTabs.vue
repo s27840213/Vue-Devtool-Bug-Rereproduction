@@ -22,7 +22,7 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconWidth="`${tab.width}px`"
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
-    div(v-if="isInEditor" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleCopy")
+    div(v-if="isInEditor && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleCopy")
         svg-icon(iconName="copy"
                   iconWidth="18px"
                   iconHeight="18px"
@@ -40,16 +40,20 @@ div(class="header-bar relative" @pointerdown.stop)
 <script lang="ts">
 import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
 import assetUtils from '@/utils/assetUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
 import modalUtils from '@/utils/modalUtils'
+import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
 import { computed, defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 type TabConfig = {
   icon: string,
@@ -75,6 +79,9 @@ export default defineComponent({
     LinkOrText
   },
   computed: {
+    ...mapState('templates', {
+      templatesIgLayout: 'igLayout'
+    }),
     ...mapGetters({
       staticHeaderTab: 'objects/headerTab',
       giphyKeyword: 'giphy/keyword',
@@ -86,8 +93,13 @@ export default defineComponent({
       isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
+      isInTemplateShare: 'vivisticker/getIsInTemplateShare',
+      isInMultiPageShare: 'vivisticker/getIsInMultiPageShare',
+      isInPagePreview: 'vivisticker/getIsInPagePreview',
+      isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       editorBg: 'vivisticker/getEditorBg',
       editingAssetInfo: 'vivisticker/getEditingAssetInfo',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
@@ -98,7 +110,13 @@ export default defineComponent({
       inBgRemoveLastStep: 'bgRemove/inLastStep',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
+      currSelectedInfo: 'getCurrSelectedInfo',
     }),
+    templateHeaderTab() {
+      return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
+    },
     stepCount(): number {
       return stepsUtils.steps.length
     },
@@ -112,7 +130,16 @@ export default defineComponent({
       return imageUtils.isImgControl()
     },
     leftTabs(): TabConfig[] {
-      if (this.isInEditor) {
+      if (this.isInMultiPageShare) {
+        return [
+          { icon: 'chevron-left', width: 24, action: () => this.setIsInMultiPageShare(false) }
+        ]
+      } else if (this.isInTemplateShare) {
+        return [
+          { icon: 'chevron-left', width: 24, action: this.clearTemplateShare }
+        ]
+      } else if (this.isInEditor) {
+        if (this.isInPagePreview) return [{ icon: 'chevron-left', width: 24, action: () => this.setIsInPagePreview(false) }]
         const retTabs = []
         const stepTabs = [
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: this.undo },
@@ -128,6 +155,10 @@ export default defineComponent({
       } else if (this.isInBgShare) {
         return [
           { icon: 'chevron-left', width: 24, action: this.clearBgShare }
+        ]
+      } else if (this.isInGroupTemplate) {
+        return [
+          { icon: 'chevron-left', width: 24, action: () => this.setIsInGroupTemplate(false) }
         ]
       } else if (this.isInCategory) {
         return [
@@ -174,16 +205,24 @@ export default defineComponent({
             title: this.textHeaderTab.title,
             url: this.textHeaderTab.bulbUrl
           }
+        case 'template':
+          return {
+            title: this.templateHeaderTab.title,
+            url: this.templateHeaderTab.bulbUrl
+          }
       }
       return { title: '', url: '' }
     },
     centerTitle(): string {
-      if (this.isInEditor) {
+      if (this.isInMultiPageShare) {
+        return `${this.$t('NN0124')}`
+      } else if (this.isInBgShare || this.isInTemplateShare) {
+        return `${this.$t('NN0214')}`
+      } else if (this.isInEditor) {
+        if (this.isInPagePreview) return `${this.$t('STK0072')}`
         return ''
       } else if (this.isInMyDesign) {
         return `${this.$t('NN0080')}`
-      } else if (this.isInBgShare) {
-        return `${this.$t('NN0214')}`
       } else if (this.isInCategory) {
         if (this.showAllRecently) {
           return `${this.$t('NN0024')}`
@@ -195,10 +234,19 @@ export default defineComponent({
       }
     },
     rightTabs(): TabConfig[] {
-      if (this.isInEditor) {
+      if (this.isInTemplateShare) {
+        return []
+      } else if (this.isInEditor) {
+        if (this.isInPagePreview) return []
+        if (this.editorTypeTemplate) {
+          return [
+            ...this.lockIcon,
+            { icon: 'copy', width: 24, action: this.handleCopy },
+            { icon: 'share', width: 24, action: this.handleShareTemplate },
+          ]
+        }
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
-          ...(this.editorTypeTextLike ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
         ]
       } else if (this.isInMyDesign) {
         return []
@@ -222,7 +270,25 @@ export default defineComponent({
           { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
         ]
       }
-    }
+    },
+    lockIcon(): TabConfig[] {
+      const icon = this.isLocked ? 'lock' : 'unlock'
+      if (this.inBgSettingMode || this.selectedLayerNum > 0) {
+        return [{
+          icon,
+          width: 24,
+          action: () => mappingUtils.mappingIconAction(icon)
+        }]
+      } else {
+        return []
+      }
+    },
+    selectedLayerNum(): number {
+      return this.currSelectedInfo.layers.length
+    },
+    isLocked(): boolean {
+      return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getSelectedLayer().locked
+    },
   },
   methods: {
     ...mapActions({
@@ -238,6 +304,10 @@ export default defineComponent({
       setIsInCategory: 'vivisticker/SET_isInCategory',
       setShowAllRecently: 'vivisticker/SET_showAllRecently',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
+      setIsInMultiPageShare: 'vivisticker/SET_isInMultiPageShare',
+      setTemplateShareType: 'vivisticker/SET_templateShareType',
+      setIsInPagePreview: 'vivisticker/SET_isInPagePreview',
+      setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor',
       switchBg: 'vivisticker/UPDATE_switchBg',
@@ -247,6 +317,9 @@ export default defineComponent({
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInEffectEditingMode: 'bgRemove/SET_inEffectEditingMode',
     }),
+    resetTemplatesSearch(params = {}) {
+      this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
+    },
     handleTabAction(action?: () => void) {
       if (action) {
         action()
@@ -268,12 +341,18 @@ export default defineComponent({
           break
         case 'text':
           this.resetTextsSearch()
+          break
+        case 'template':
+          this.resetTemplatesSearch({ resetCategoryInfo: true })
       }
     },
     clearBgShare() {
       this.setIsInBgShare(false)
       this.setShareItem(undefined)
       this.setShareColor('')
+    },
+    clearTemplateShare() {
+      this.setTemplateShareType('none')
     },
     handleSwitchBg() {
       this.switchBg()
@@ -288,7 +367,9 @@ export default defineComponent({
       }
       if (vivistickerUtils.checkVersion('1.13')) {
         if (vivistickerUtils.userSettings.autoSave) {
-          vivistickerUtils.saveAsMyDesign().then(() => {
+          vivistickerUtils.saveAsMyDesign().catch((err) => {
+            console.warn(err.message)
+          }).finally(() => {
             vivistickerUtils.endEditing()
           })
         } else {
@@ -326,7 +407,9 @@ export default defineComponent({
             {
               msg: `${this.$t('STK0004')}`,
               action: () => {
-                vivistickerUtils.saveAsMyDesign().then(() => {
+                vivistickerUtils.saveAsMyDesign().catch((err) => {
+                  console.warn(err.message)
+                }).finally(() => {
                   vivistickerUtils.endEditing()
                 })
               }
@@ -349,6 +432,8 @@ export default defineComponent({
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
       }
+      if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
+      if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
       const copyCallback = (flag: string) => {
         if (flag === '1') {
           modalUtils.setModalInfo(
@@ -473,6 +558,9 @@ export default defineComponent({
       } else {
         shortcutUtils.redo()
       }
+    },
+    handleShareTemplate() {
+      this.setTemplateShareType(this.editorType)
     }
   }
 })

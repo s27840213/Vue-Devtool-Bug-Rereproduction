@@ -87,7 +87,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -555,6 +555,24 @@ export default defineComponent({
                 vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
               }
             })
+          } else {
+            // replace error image
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              srcObj: {
+                type: 'frame',
+                assetId: '',
+                userId: ''
+              }
+            }, this.subLayerIndex)
+            layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+              imgWidth: (this.config as IImage).styles.width,
+              imgHeight: (this.config as IImage).styles.height,
+              imgX: 0,
+              imgY: 0,
+              opacity: 100,
+              adjust: {}
+            }, this.subLayerIndex)
+            this.src = imageUtils.getSrc(this.config)
           }
         }
       }
@@ -585,13 +603,20 @@ export default defineComponent({
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        window.setTimeout(() => {
-          if (this.priPrimaryLayerIndex !== -1) {
-            vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+
+        // detect if SVG image rendered
+        const rendering = () => {
+          const elImg = this.$refs.img as SVGImageElement
+          if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
+            // Render complete
+            if (this.priPrimaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+            else vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
           } else {
-            vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+            // Rendering
+            window.requestAnimationFrame(rendering)
           }
-        }, 100)
+        }
+        window.requestAnimationFrame(rendering)
       }
       imageUtils.imgLoadHandler(this.src, (img) => {
         if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
