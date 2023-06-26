@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="my-design")
   div(class="my-design__tags")
-    div(v-for="tag in tags" class="my-design__tag"
+    div(v-for="tag in tagsToShow" class="my-design__tag"
         :key="tag.tab"
         :class="{ selected: checkTagSelected(tag) }"
         @click.prevent.stop="selectTag(tag)")
@@ -46,6 +46,7 @@ import MyDesignTemplateItem from '@/components/vivisticker/mydesign/MyDesignTemp
 import MyDesignTextItem from '@/components/vivisticker/mydesign/MyDesignTextItem.vue'
 import { IMyDesign, IMyDesignTag } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -83,13 +84,17 @@ export default defineComponent({
       editorType: 'vivisticker/getEditorType',
       myDesignTab: 'vivisticker/getMyDesignTab',
       myDesignFileList: 'vivisticker/getMyDesignFileList',
-      myDesignNextPage: 'vivisticker/getMyDesignNextPage'
+      myDesignNextPage: 'vivisticker/getMyDesignNextPage',
+      debugMode: 'vivisticker/getDebugMode'
     }),
     ...mapState({
       isTablet: 'isTablet',
       isLandscape: 'isLandscape',
       windowSize: 'windowSize'
     }),
+    tagsToShow(): IMyDesignTag[] {
+      return this.tags.filter(tag => !(tag.tab === 'template' && !this.debugMode && generalUtils.isIPadOS()))
+    },
     list(): IMyDesign[] {
       return this.myDesignFileList(this.myDesignTab) as IMyDesign[]
     },

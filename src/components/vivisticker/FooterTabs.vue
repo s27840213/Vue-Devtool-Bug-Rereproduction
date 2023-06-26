@@ -241,7 +241,7 @@ export default defineComponent({
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
-        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template' },
+        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !this.debugMode && generalUtils.isIPadOS() },
         // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
         { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
       ]
