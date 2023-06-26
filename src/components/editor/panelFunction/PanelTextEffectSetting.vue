@@ -315,7 +315,7 @@ export default defineComponent({
       }
       this.setEffect({ effect: newVal })
     },
-    async setEffectFocus(focus: boolean) {
+    setEffectFocus(focus: boolean) {
       if (focus && isFocusState(this.currCategoryName)) {
         textEffectUtils.setFocus(this.currCategoryName)
       } else if (!focus) {

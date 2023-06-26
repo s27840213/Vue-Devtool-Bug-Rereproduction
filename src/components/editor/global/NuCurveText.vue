@@ -17,7 +17,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { computed, defineComponent, PropType } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -38,13 +38,16 @@ export default defineComponent({
     subLayerIndex: {
       type: Number
     },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    },
     extraSpanStyle: {
       type: Object as PropType<Record<string, string|number>>,
     },
   },
   data () {
     return {
-      focus: computed(() => textEffectUtils.focus),
       textWidth: [] as number[],
       textHeight: [] as number[],
       minHeight: 0,
@@ -72,6 +75,10 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
+    focus() {
+      if (!(this.config.active || this.primaryLayer?.active)) return 'none'
+      return textEffectUtils.focus
+    },
   },
   watch: {
     'config.paragraphs': {
