@@ -114,6 +114,7 @@ class FormatUtils {
         },
         subLayerIndex
       )
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { spanDataList: textHW.spanDataList }, subLayerIndex)
     }
   }
 
