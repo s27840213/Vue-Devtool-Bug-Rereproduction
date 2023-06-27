@@ -927,7 +927,7 @@ export default defineComponent({
   &__layer-num {
     @include size(20px);
     @include flexCenter();
-    background-color: setColor(blue-1);
+    background-color: setColor(black-5);
     border-radius: 50%;
   }
 
