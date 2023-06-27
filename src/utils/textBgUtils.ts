@@ -538,10 +538,7 @@ class Gooey {
       let curveTopStartMiddle = curr.top.middle(curveTopStart)
       const curveTopEndMiddle = curr.top.middle(curveTopEnd)
       let angle = Math.abs(Math.atan(radiusTop / radius) * (180 / Math.PI))
-      curveTopStartMiddle = obj2Point(mathUtils.getRotatedPoint(
-        (angle * 2 - 90) * dirTop,
-        curveTopStart, curveTopStartMiddle
-      ))
+      curveTopStartMiddle = curveTopStartMiddle.rotate((angle * 2 - 90) * dirTop, curveTopStart)
       path.L(curveTopStart)
       path.C(curveTopStartMiddle, curveTopEndMiddle, curveTopEnd)
 
@@ -552,10 +549,7 @@ class Gooey {
       const curveBottomStartMiddle = curr.bottom.middle(curveBottomStart)
       let curveBottomEndMiddle = curr.bottom.middle(curveBottomEnd)
       angle = Math.abs(Math.atan(radiusBottom / radius) * (180 / Math.PI))
-      curveBottomEndMiddle = obj2Point(mathUtils.getRotatedPoint(
-        (90 - angle * 2) * dirBottom,
-        curveBottomEnd, curveBottomEndMiddle
-      ))
+      curveBottomEndMiddle = curveBottomEndMiddle.rotate((90 - angle * 2) * dirBottom, curveBottomEnd)
       path.L(curveBottomStart)
       path.C(curveBottomStartMiddle, curveBottomEndMiddle, curveBottomEnd)
     }
@@ -575,10 +569,7 @@ class Gooey {
       let curveBottomStartMiddle = curr.bottom.middle(curveBottomStart)
       const curveBottomEndMiddle = curr.bottom.middle(curveBottomEnd)
       let angle = Math.abs(Math.atan(radiusBottom / radius) * (180 / Math.PI))
-      curveBottomStartMiddle = obj2Point(mathUtils.getRotatedPoint(
-        (90 - angle * 2) * dirBottom,
-        curveBottomStart, curveBottomStartMiddle
-      ))
+      curveBottomStartMiddle = curveBottomStartMiddle.rotate((90 - angle * 2) * dirBottom, curveBottomStart)
       path.L(curveBottomStart)
       path.C(curveBottomStartMiddle, curveBottomEndMiddle, curveBottomEnd)
 
@@ -589,10 +580,7 @@ class Gooey {
       const curveTopStartMiddle = curr.top.middle(curveTopStart)
       let curveTopEndMiddle = curr.top.middle(curveTopEnd)
       angle = Math.abs(Math.atan(radiusTop / radius) * (180 / Math.PI))
-      curveTopEndMiddle = obj2Point(mathUtils.getRotatedPoint(
-        (angle * 2 - 90) * dirTop,
-        curveTopEnd, curveTopEndMiddle
-      ))
+      curveTopEndMiddle = curveTopEndMiddle.rotate((angle * 2 - 90) * dirTop, curveTopEnd)
       path.L(curveTopStart)
       path.C(curveTopStartMiddle, curveTopEndMiddle, curveTopEnd)
     }
@@ -890,7 +878,7 @@ class TextBg {
           const tailEnd = tailBegin.rotate(30, center)
           let tailMid = tailBegin.middle(tailEnd)
           tailMid = tailMid.add(tailMid.sub(center).mul(0.7))
-          const arcEnd = obj2Point(tailEnd.rotate(60 * (1 - tailOffset), center))
+          const arcEnd = tailEnd.rotate(60 * (1 - tailOffset), center)
 
           path.a(boxRadius, boxRadius, 1, tailBegin)
           path.q(tailMid.middle(tailBegin).sub(tailBegin).add(cornerDir.mul(boxRadius * 0.1 * cornerDir.y)), tailMid.sub(tailBegin))
