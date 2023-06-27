@@ -44,8 +44,8 @@ div(class="share-template")
     div(v-if="pending" class="share-template__pending text-H6 text-white")
       div(class="share-template__pending__spinner")
         svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
-      div(class="share-template__pending__progress") {{ strDownloadProgress }}
-      div(class="share-template__pending__text") {{ $t('STK0080') }}
+      div(v-if="selectedPages.size" class="share-template__pending__progress") {{ strDownloadProgress }}
+      div(class="share-template__pending__text") {{ selectedPages.size ? $t('STK0080') : $t('STK0081') }}
 </template>
 
 <script lang="ts">
@@ -207,7 +207,8 @@ export default defineComponent({
       if (this.isInMultiPageShare) {
         this.multiPageScreenShot('download')
       } else if (this.tabIndex === 0) {
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ noBg: false }), 'download')
+        this.selectedPages = new Set([this.currFocusPageIndex])
+        this.multiPageScreenShot('download')
       } else this.setIsInMultiPageShare(true)
     },
     share() {
@@ -229,7 +230,12 @@ export default defineComponent({
           story: 'IGStory',
           post: 'IGPost'
         } as Record<string, string>
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ noBg: false }), mapAction[this.templateShareType])
+        const query = vivistickerUtils.createUrlForJSON({ noBg: false })
+        this.selectedPages = new Set()
+        this.pending = true
+        vivistickerUtils.callIOSAsAPI('SCREENSHOT', { params: vivistickerUtils.createUrlForJSON({ noBg: false }), action: mapAction[this.templateShareType] }, `screenshot-${query}`).then((data) => {
+          this.pending = false
+        })
       } else this.setIsInMultiPageShare(true)
     },
     multiPageScreenShot(action: 'IGPost' | 'download') {
