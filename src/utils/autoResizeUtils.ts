@@ -542,11 +542,6 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
       }
       const matched = this.calcDiff()
       this.log(`line count of all spans matched: ${matched}`)
-      if (this.prevDiff < this.TOLERANCE) {
-        // if mean diff is small enough, return bestResult right away.
-        this.runResult = this.bestResult()
-        return this.finalResult()
-      }
       this.applyOffset()
       await this.updateSize()
     }
@@ -571,11 +566,6 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
       }
       const matched = this.calcDiff()
       this.log(`line count of all spans matched: ${matched}`)
-      if (this.prevDiff < this.TOLERANCE) {
-        // if mean diff is small enough, return bestResult right away.
-        this.runResult = this.bestResult()
-        return this.finalResult()
-      }
       this.applyOffset()
       this.updateSizeSync()
     }
