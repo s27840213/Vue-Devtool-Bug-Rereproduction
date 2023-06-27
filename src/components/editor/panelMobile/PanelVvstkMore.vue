@@ -33,7 +33,6 @@ div(class="panel-vvstk-more")
 </template>
 
 <script lang="ts">
-import constantData from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
@@ -48,7 +47,6 @@ type OptionConfig = {
 
 export default defineComponent({
   data() {
-    const videoUrls = constantData.stickerVideoUrls()
     return {
       debugModeTimer: -1,
       debugModeCounter: 0,
