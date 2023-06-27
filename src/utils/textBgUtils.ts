@@ -639,7 +639,7 @@ class TextBg {
         bStroke: 0, // unadjustable
         bRadius: 0, // unadjustable
         bColor: 'transparent', // unadjustable
-        pStrokeX: 20, // unadjustable in all effects in all effects
+        pStrokeX: 20, // unadjustable in all effects
         pStrokeY: 20,
         pColor: 'fontColorL+-40/BC/00'
       },
@@ -691,7 +691,6 @@ class TextBg {
       'speech-bubble': {
         tailOffset: 50,
         tailPosition: 'left-top',
-        bStroke: 0, // unadjustable
         pStrokeX: 20, // unadjustable in all effects
         pStrokeY: 20,
         opacity: 100,
@@ -832,10 +831,10 @@ class TextBg {
         attrs: { width, height, fill },
         content: paths
       }
-    } else if (isITextBox(textBg)) {
+    } else if (isITextBox(textBg) || isITextSpeechBubble(textBg)) {
       const fill = textEffectUtils.colorParser(textBg.pColor, config)
-      const stroke = textEffectUtils.colorParser(textBg.bColor, config)
-      const bStroke = textBg.bStroke * fontSizeModifier
+      const stroke = isITextBox(textBg) ? textEffectUtils.colorParser(textBg.bColor, config) : ''
+      const bStroke = (isITextBox(textBg) ? textBg.bStroke : 0) * fontSizeModifier
       const pStrokeY = textBg.pStrokeY * fontSizeModifier
       const pStrokeX = textBg.pStrokeX * fontSizeModifier
       let boxWidth = (width + bStroke)
@@ -853,82 +852,33 @@ class TextBg {
         top -= pStrokeY
         left -= pStrokeX
       }
-      const boxRadius = Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
+      const boxRadius = isITextSpeechBubble(textBg) ? Math.max(...rows.map(r => r.rect.height)) / 2
+        : Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
 
+      // Start to draw Path.
       const path = new Path(new Point(bStroke / 2, bStroke / 2 + boxRadius))
-      path.a(boxRadius, boxRadius, 1, boxRadius, -boxRadius)
-      path.h(boxWidth - boxRadius * 2)
-      path.a(boxRadius, boxRadius, 1, boxRadius, boxRadius)
-      path.v(boxHeight - boxRadius * 2)
-      path.a(boxRadius, boxRadius, 1, -boxRadius, boxRadius)
-      path.h(-(boxWidth - boxRadius * 2))
-      path.a(boxRadius, boxRadius, 1, -boxRadius, -boxRadius)
-
-      return {
-        tag: 'svg',
-        attrs: {
-          width: boxWidth + bStroke,
-          height: boxHeight + bStroke,
-        },
-        style: {
-          left: `${left}px`,
-          top: `${top}px`
-        },
-        content: [{
-          tag: 'path',
-          attrs: {
-            'stroke-width': bStroke,
-            d: path.result()
-          },
-          style: { fill, stroke, opacity }
-        }]
-        // .concat(path.toCircle() as any) // Show control point
-      }
-    } else if (isITextSpeechBubble(textBg)) { // TODO: Need to merge with ITextBox
-      const { tailPosition } = textBg
-      const tailOffset = textBg.tailOffset * 0.01
-      const fill = textEffectUtils.colorParser(textBg.pColor, config)
-      const bStroke = textBg.bStroke * fontSizeModifier
-      const pStrokeY = textBg.pStrokeY * fontSizeModifier
-      const pStrokeX = textBg.pStrokeX * fontSizeModifier
-      let boxWidth = (width + bStroke)
-      let boxHeight = (height + bStroke)
-      let top = -bStroke
-      let left = -bStroke
-      if (vertical) {
-        boxWidth += pStrokeY * 2
-        boxHeight += pStrokeX * 2
-        top -= pStrokeX
-        left -= pStrokeY
-      } else {
-        boxWidth += pStrokeX * 2
-        boxHeight += pStrokeY * 2
-        top -= pStrokeY
-        left -= pStrokeX
-      }
-      const boxRadius = Math.max(...rows.map(r => r.rect.height)) / 2
-
-      const path = new Path(new Point(0, boxRadius))
-      const cornerDir = {
-        'left-top': [1, -1],
-        'right-top': [1, 1],
-        'right-bottom': [-1, 1],
-        'left-bottom': [-1, -1],
-      }
       for (const [i, section] of (['left-top', 'right-top', 'right-bottom', 'left-bottom'] as const).entries()) {
-        const corner = obj2Point({ x: cornerDir[section][0], y: cornerDir[section][1] })
-        if (section === tailPosition) {
-          const center = obj2Point(i % 2 ? { x: 0, y: corner.y } : { x: corner.x, y: 0 }).mul(boxRadius)
+        const corner = obj2Point({
+          'left-top': { x: 1, y: -1 },
+          'right-top': { x: 1, y: 1 },
+          'right-bottom': { x: -1, y: 1 },
+          'left-bottom': { x: -1, y: -1 },
+        }[section])
+        // Insert tail at corner for speech-bubble
+        if (isITextSpeechBubble(textBg) && section === textBg.tailPosition) {
+          const tailOffset = textBg.tailOffset * 0.01
+          const center = (i % 2 ? new Point(0, corner.y) : new Point(corner.x, 0)).mul(boxRadius)
           const tailBegin = obj2Point(mathUtils.getRotatedPoint(60 * tailOffset, center, { x: 0, y: 0 }))
           const tailEnd = obj2Point(mathUtils.getRotatedPoint(30, center, tailBegin))
           let tailMid = tailBegin.middle(tailEnd)
           tailMid = tailMid.add(tailMid.sub(center).mul(0.7))
           const arcEnd = obj2Point(mathUtils.getRotatedPoint(60 * (1 - tailOffset), center, tailEnd))
+
           path.a(boxRadius, boxRadius, 1, tailBegin)
           path.q(tailMid.middle(tailBegin).sub(tailBegin).add(corner.mul(boxRadius * 0.1 * corner.y)), tailMid.sub(tailBegin))
           path.q(tailEnd.middle(tailMid).sub(tailMid).add(corner.mul(boxRadius * 0.1 * corner.y)), tailEnd.sub(tailMid))
           path.a(boxRadius, boxRadius, 1, arcEnd.sub(tailEnd))
-        } else {
+        } else { // Normal corner
           path.a(boxRadius, boxRadius, 1, corner.mul(boxRadius))
         }
         switch (section) {
@@ -960,7 +910,7 @@ class TextBg {
             'stroke-width': bStroke,
             d: path.result()
           },
-          style: { fill, opacity }
+          style: { fill, stroke, opacity }
         }]
         // .concat(path.toCircle() as any) // Show control point
       }
