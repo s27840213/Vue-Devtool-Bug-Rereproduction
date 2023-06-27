@@ -1,5 +1,5 @@
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBg, ITextGooey } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextSpeechBubble, isITextUnderline, ITextBg, ITextGooey } from '@/interfaces/format'
 import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
@@ -33,6 +33,20 @@ export class Point {
     return new Point(
       this.x + p.x,
       this.y + p.y
+    )
+  }
+
+  sub(p: { x: number, y: number }): Point {
+    return new Point(
+      this.x - p.x,
+      this.y - p.y
+    )
+  }
+
+  mul(scale: number): Point {
+    return new Point(
+      this.x * scale,
+      this.y * scale,
     )
   }
 
@@ -360,16 +374,39 @@ export class Path {
     this.pathArray.push(`h${dist}`)
   }
 
-  l(x: number, y: number): void {
-    this.currPos = this.currPos.add(new Point(x, y))
+  l(p: Point): void
+  l(x: number, y: number): void
+  l(x: number | Point, y?: number): void {
+    if (x instanceof Point) {
+      [x, y] = [x.x, x.y]
+    }
+
+    this.currPos = this.currPos.add(new Point(x, y as number))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`l${x} ${y}`)
   }
 
-  a(rx: number, ry: number, sweepFlag: number, x: number, y: number): void {
-    this.currPos = this.currPos.add(new Point(x, y))
+  a(rx: number, ry: number, sweepFlag: number, p: Point): void
+  a(rx: number, ry: number, sweepFlag: number, x: number, y: number): void
+  a(rx: number, ry: number, sweepFlag: number, x: number | Point, y?: number): void {
+    if (x instanceof Point) {
+      [x, y] = [x.x, x.y]
+    }
+    this.currPos = this.currPos.add(new Point(x, y as number))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`a${rx} ${ry} 0 0${sweepFlag}${x} ${y}`)
+  }
+
+  q(dp1: Point, dp: Point): void
+  q(dx1: number, dy1: number, dx: number, dy: number): void
+  q(dx1: number | Point, dy1: number | Point, dx?: number, dy?: number): void {
+    if (dx1 instanceof Point && dy1 instanceof Point) {
+      [dx, dy] = [dy1.x, dy1.y];
+      [dx1, dy1] = [dx1.x, dx1.y]
+    }
+    this.currPos = this.currPos.add(new Point(dx as number, dy as number))
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`q${dx1} ${dy1} ${dx} ${dy}`)
   }
 
   result(): string {
@@ -651,6 +688,15 @@ class TextBg {
         pStrokeY: 10,
         pColor: 'fontColorL+-40/BC/00'
       },
+      'speech-bubble': {
+        tailOffset: 50,
+        tailPosition: 'left-top',
+        bStroke: 0, // unadjustable
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 20,
+        opacity: 100,
+        pColor: 'fontColorL+-40/BC/00'
+      },
       underline: {
         endpoint: 'rounded',
         height: 20,
@@ -835,6 +881,86 @@ class TextBg {
             d: path.result()
           },
           style: { fill, stroke, opacity }
+        }]
+        // .concat(path.toCircle() as any) // Show control point
+      }
+    } else if (isITextSpeechBubble(textBg)) { // TODO: Need to merge with ITextBox
+      const { tailPosition } = textBg
+      const tailOffset = textBg.tailOffset * 0.01
+      const fill = textEffectUtils.colorParser(textBg.pColor, config)
+      const bStroke = textBg.bStroke * fontSizeModifier
+      const pStrokeY = textBg.pStrokeY * fontSizeModifier
+      const pStrokeX = textBg.pStrokeX * fontSizeModifier
+      let boxWidth = (width + bStroke)
+      let boxHeight = (height + bStroke)
+      let top = -bStroke
+      let left = -bStroke
+      if (vertical) {
+        boxWidth += pStrokeY * 2
+        boxHeight += pStrokeX * 2
+        top -= pStrokeX
+        left -= pStrokeY
+      } else {
+        boxWidth += pStrokeX * 2
+        boxHeight += pStrokeY * 2
+        top -= pStrokeY
+        left -= pStrokeX
+      }
+      const boxRadius = Math.max(...rows.map(r => r.rect.height)) / 2
+
+      const path = new Path(new Point(0, boxRadius))
+      const cornerDir = {
+        'left-top': [1, -1],
+        'right-top': [1, 1],
+        'right-bottom': [-1, 1],
+        'left-bottom': [-1, -1],
+      }
+      for (const [i, section] of (['left-top', 'right-top', 'right-bottom', 'left-bottom'] as const).entries()) {
+        const corner = obj2Point({ x: cornerDir[section][0], y: cornerDir[section][1] })
+        if (section === tailPosition) {
+          const center = obj2Point(i % 2 ? { x: 0, y: corner.y } : { x: corner.x, y: 0 }).mul(boxRadius)
+          const tailBegin = obj2Point(mathUtils.getRotatedPoint(60 * tailOffset, center, { x: 0, y: 0 }))
+          const tailEnd = obj2Point(mathUtils.getRotatedPoint(30, center, tailBegin))
+          let tailMid = tailBegin.middle(tailEnd)
+          tailMid = tailMid.add(tailMid.sub(center).mul(0.7))
+          const arcEnd = obj2Point(mathUtils.getRotatedPoint(60 * (1 - tailOffset), center, tailEnd))
+          path.a(boxRadius, boxRadius, 1, tailBegin)
+          path.q(tailMid.middle(tailBegin).sub(tailBegin).add(corner.mul(boxRadius * 0.1 * corner.y)), tailMid.sub(tailBegin))
+          path.q(tailEnd.middle(tailMid).sub(tailMid).add(corner.mul(boxRadius * 0.1 * corner.y)), tailEnd.sub(tailMid))
+          path.a(boxRadius, boxRadius, 1, arcEnd.sub(tailEnd))
+        } else {
+          path.a(boxRadius, boxRadius, 1, corner.mul(boxRadius))
+        }
+        switch (section) {
+          case 'left-top':
+            path.h(boxWidth - boxRadius * 2)
+            break
+          case 'right-top':
+            path.v(boxHeight - boxRadius * 2)
+            break
+          case 'right-bottom':
+            path.h(-(boxWidth - boxRadius * 2))
+            break
+        }
+      }
+
+      return {
+        tag: 'svg',
+        attrs: {
+          width: boxWidth + bStroke,
+          height: boxHeight + bStroke,
+        },
+        style: {
+          left: `${left}px`,
+          top: `${top}px`
+        },
+        content: [{
+          tag: 'path',
+          attrs: {
+            'stroke-width': bStroke,
+            d: path.result()
+          },
+          style: { fill, opacity }
         }]
         // .concat(path.toCircle() as any) // Show control point
       }

@@ -29,6 +29,18 @@ export interface ITextBox {
   pColor: string
 }
 
+export type ITailPosition = 'left-top' | 'right-top' | 'right-bottom' | 'left-bottom'
+export interface ITextSpeechBubble {
+  name: 'speech-bubble' | 'speech-bubble2'
+  tailOffset: number
+  tailPosition: ITailPosition
+  bStroke: number
+  pStrokeX: number
+  pStrokeY: number
+  opacity: number
+  pColor: string
+}
+
 export interface ITextUnderline {
   name: 'underline'
   endpoint: string
@@ -56,12 +68,15 @@ export interface ITextLetterBg {
   color: string
 }
 
-export type ITextBg = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
+export type ITextBg = ITextBox | ITextSpeechBubble | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
 
 export function isITextBox(object: ITextBg): object is ITextBox {
   return object && object.name &&
     ['square-borderless', 'rounded-borderless', 'square-hollow',
       'rounded-hollow', 'square-both', 'rounded-both'].includes(object.name)
+}
+export function isITextSpeechBubble(object: ITextBg): object is ITextSpeechBubble {
+  return object && object.name && ['speech-bubble', 'speech-bubble2'].includes(object.name)
 }
 export function isITextUnderline(object: ITextBg): object is ITextUnderline {
   return object && object.name && object.name === 'underline'
