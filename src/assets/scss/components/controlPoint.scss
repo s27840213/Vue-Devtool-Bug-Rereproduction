@@ -41,7 +41,7 @@
   }
 
   &__action-icon {
-    @include size(32px);
+    @include size(24px);
     @include flexCenter;
   }
 
@@ -51,8 +51,9 @@
     pointer-events: initial;
     border-radius: 50%;
     opacity: 0;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   &__action {

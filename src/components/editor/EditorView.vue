@@ -25,11 +25,10 @@ div(class="editor-view bg-gray-5"
           :style="{zIndex: pageNum+3}")
       bg-remove-area(v-else :editorViewCanvas="editorViewCanvas")
     template(v-if="showRuler && !isShowPagePreview")
-      ruler-hr(:canvasRect="canvasRect"
+      ruler-hr(:isSidebarPanelOpen="isSidebarPanelOpen"
         :editorView="editorView"
         @pointerdown.stop="dragStartH($event)")
-      ruler-vr(:canvasRect="canvasRect"
-        :editorView="editorView"
+      ruler-vr(:editorView="editorView"
         @pointerdown.stop="dragStartV($event)")
       div(class="corner-block")
   div(v-if="!inBgRemoveMode"
@@ -105,7 +104,6 @@ export default defineComponent({
       editorViewCanvas: null as unknown as HTMLElement,
       guidelinesArea: null as unknown as HTMLElement,
       backgroundControllingPageIndex: -1,
-      canvasRect: null as unknown as DOMRect,
       rulerVPos: 0,
       rulerHPos: 0,
       lastMappedVPos: 0,
@@ -190,7 +188,6 @@ export default defineComponent({
     this.editorView = this.$refs.editorView as HTMLElement
     this.editorViewCanvas = this.$refs.canvas as HTMLElement
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
-    this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
     pageUtils.fitPage()
     this.$nextTick(() => {
       pageUtils.findCentralPageIndexInfo()
@@ -256,16 +253,6 @@ export default defineComponent({
     screenHeight() {
       pageUtils.findCentralPageIndexInfo()
     },
-    isSidebarPanelOpen() {
-      this.$nextTick(() => {
-        this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
-      })
-    },
-    showPagePanel() {
-      this.$nextTick(() => {
-        this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
-      })
-    }
   },
   props: {
     currPage: {

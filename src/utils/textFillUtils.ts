@@ -2,8 +2,9 @@ import textEffect, { IPutTextEffectResponse } from '@/apis/textEffect'
 import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextFillCustom, ITextFill, ITextFillConfig } from '@/interfaces/format'
+import { ITextFill, ITextFillConfig, isITextFillCustom } from '@/interfaces/format'
 import { AllLayerTypes, IText } from '@/interfaces/layer'
+import router from '@/router'
 import store from '@/store'
 import constantData, { IEffect, IEffectOptionSelect } from '@/utils/constantData'
 import generalUtils from '@/utils/generalUtils'
@@ -13,10 +14,9 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils, { Rect } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textUtils from '@/utils/textUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
-import { find, findLast, max, omit, pick } from 'lodash'
+import { find, max, omit, pick } from 'lodash'
 import { InjectionKey } from 'vue'
 
 interface ITextFillPresetRawImg {
@@ -120,24 +120,29 @@ class TextFill {
     return effect.img ?? effect.customImg ?? null
   }
 
-  getTextFillImg(config: IText): string {
-    const img = this.getImg(config.styles.textFill)
+  getTextFillImg(config: IText, { ratio = 1, finalSize }: { ratio?: number, finalSize?: number }): string {
+    const textFill = config.styles.textFill as ITextFillConfig
+    const img = this.getImg(textFill)
     if (!img) return ''
     const pageScale = store.getters.getPageScaleRatio * 0.01
-    const layerSize = Math.max(config.styles.height, config.styles.width) * pageScale
-    const sizeMap = store.getters['user/getImgSizeMap'] as Array<{ key: string, size: number }>
-    const targetSize = findLast(sizeMap, s => layerSize < s.size) ?? sizeMap[0]
+    // ratio = contentScaleRatio * dpiRatio
+    const layerSize = finalSize ?? Math.max(config.styles.height, config.styles.width) *
+      pageScale * ratio * (textFill.size * 0.01)
 
-    return isIAssetPhoto(img)
-      ? img.urls[targetSize.key as keyof typeof img.urls] ?? img.urls.original
-      : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, targetSize.size)
+    const srcObj = isIAssetPhoto(img)
+      ? img.id
+        ? { type: 'public', userId: imageUtils.getUserId(img.urls.full, 'public'), assetId: img.id } // TextFill preset img
+        : { type: 'private', userId: '', assetId: img.assetIndex as number } // non-admin myfile img
+      : { type: 'unsplash', userId: '', assetId: img.id } // custom unsplash img
+    let src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, layerSize))
+    if (router.currentRoute.value.name === 'Preview') src = imageUtils.appendCompQueryForVivipic(src)
+    return src
   }
 
   calcTextFillVar(config: IText) {
     const textFill = config.styles.textFill as ITextFillConfig
     const img = this.getImg(textFill)
     if (!img) return {}
-    const imgSrc = this.getTextFillImg(config)
     const layerScale = config.styles.scale
     const divWidth = config.styles.width / layerScale
     const divHeight = config.styles.height / layerScale
@@ -148,95 +153,111 @@ class TextFill {
     const imgRatio = textFill.size / 100 / (scaleByWidth ? widthRatio : heightRatio)
     const imgWidth = img.width * imgRatio
     const imgHeight = img.height * imgRatio
-    return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc }
+    return { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth }
   }
 
-  async convertTextEffect(config: IText): Promise<Record<string, string | number>[][]> {
+  async convertTextEffect(config: IText, ratio: number): Promise<Record<string, string | number>[][]> {
     const { textFill, textShape } = config.styles
     if (textFill.name === 'none') return []
 
-    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
-    if (!imgSrc) return []
+    const imgSrc = this.getTextFillImg(config, { ratio })
+    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
+    if (!imgSrc || !divHeight) return []
 
     const myRect = new Rect()
     await myRect.init(config)
     myRect.preprocess({ skipMergeLine: true })
     const { vertical, rows } = myRect.get()
-    const div = [] as DOMRect[][][]
+    const isTextShape = textShape.name !== 'none'
+    const isTextShapeFocus = isTextShape && textEffectUtils.focus === 'fill'
+
+    // Because rows is a 1D-array, convert it to 2D-array as 'div' variable so that I can return 2D CSS.
+    const div = [] as DOMRect[][]
     for (const [index, row] of rows.entries()) {
       if (row.spanData.length === 0) continue
       let { pIndex, sIndex } = row.spanData[0]
-      // TextShape only have one line, fix its p/sIndex
-      if (textShape.name !== 'none') [pIndex, sIndex] = [0, index]
+      if (isTextShape) {
+        // TextShape only have one line, fix its p/sIndex
+        [pIndex, sIndex] = [0, index]
+        // Because TextShape has display： inline-block, its height is affected by the lineHeight.
+        // To justify its position, multiply the height by the lineHeight.
+        row.rect[vertical ? 'width' : 'height'] *= row.spanData[0].lineHeight
+      }
 
       while (div.length - 1 < pIndex) div.push([])
-      while (div[pIndex].length - 1 < sIndex) div[pIndex].push([])
-      div[pIndex][sIndex].push(row.rect)
+      div[pIndex][sIndex] = row.rect
     }
 
     const spanExpandRatio = 1
-    const isTextShape = config.styles.textShape.name !== 'none'
-    const isTextShapeFocus = isTextShape && textFill.focus
+    const isPositiveBend = +textShape.bend >= 0
     const isFixedWidth = textBgUtils.isFixedWidth(config.styles)
     // If not TextShape, need add maxFontSize to top/left to fix its position.
     const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
     const leftDir = imgWidth - divWidth < 0 ? -1 : 1
     const topDir = imgHeight - divHeight < 0 ? -1 : 1
     return div.map(p => p.map(span => {
-      const rect = span[0]
-      let { width: spanWidth, height: spanHeight, x, y } = rect
+      let { width: spanWidth, height: spanHeight, x, y } = span
       if (vertical) {
         [spanWidth, spanHeight] = [spanHeight, spanWidth];
         [x, y] = [y, x]
       }
       const bgSizeBy = textFill.size * (scaleByWidth ? divWidth / spanWidth : divHeight / spanHeight)
       return {
-        // About span BG
-        backgroundImage: `url("${imgSrc}")`,
-        backgroundSize: scaleByWidth ? `${bgSizeBy}% auto` : `auto ${bgSizeBy}%`,
-        // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
-        // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position#regarding_percentages
-        backgroundPosition: `
-          ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200)) * -1}px
-          ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200)) * -1}px`,
-        backgroundOrigin: 'content-box',
-        backgroundRepeat: 'no-repeat',
-        webkitBackgroundClip: 'text',
-        // To fix a Safari bug that the element border of BG text clip will appear abnormally,
-        // make border of element to be transparent.
-        maskImage: `url(${require('@/assets/img/svg/text-fill-mask-image.svg')})`,
-        maskSize: '100% 100%',
-        // About span color
-        opacity: textFill.opacity / 100,
+        ...textEffectUtils.focus === 'fill' ? {
+          backgroundColor: 'transparent',
+          webkitTextStrokeColor: 'black',
+          '-webkit-text-stroke-width': '1px', // Use dash-case for overwrite textStylesRaw result.
+        } : {
+          // About span BG
+          backgroundImage: `url("${imgSrc}")`,
+          backgroundSize: scaleByWidth ? `${bgSizeBy}% auto` : `auto ${bgSizeBy}%`,
+          // (img - div) * position%, calc like BG-pos %, but use div as container size and map -100~100 to 0~100%
+          // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position#regarding_percentages
+          backgroundPosition: `
+            ${(x + (imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200)) * -1}px
+            ${(y + (imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200)) * -1}px`,
+          backgroundOrigin: 'content-box',
+          backgroundRepeat: 'no-repeat',
+          webkitBackgroundClip: 'text',
+          // To fix a Safari bug that the element border of BG text clip will appear abnormally,
+          // make border of element to be transparent.
+          maskImage: `url(${require('@/assets/img/svg/text-fill-mask-image.svg')})`,
+          maskSize: '100% 100%',
+          // About span color
+          opacity: textFill.opacity / 100,
+          webkitTextStrokeColor: 'transparent',
+        },
         webkitTextFillColor: 'transparent',
-        webkitTextStrokeColor: 'transparent',
         textDecorationColor: 'transparent',
         // About span position
         position: 'absolute',
         padding: `${spanHeight * spanExpandRatio}px ${spanWidth * spanExpandRatio}px`,
         ...isTextShapeFocus ? {
-          top: `${y - spanHeight * spanExpandRatio}px`,
+          [isPositiveBend ? 'top' : 'bottom']: `${y * (isPositiveBend ? 1 : -1) - spanHeight * spanExpandRatio}px`,
           left: `${x - spanWidth * spanExpandRatio}px`,
           transform: 'none',
-          lineHeight: 'initial',
         } : isTextShape ? {
-          top: `${-spanHeight * spanExpandRatio}px`,
-          lineHeight: 'initial',
+          [isPositiveBend ? 'top' : 'bottom']: `${-spanHeight * spanExpandRatio}px`,
+          // Align center, this can prevent Safari lag when scaling TextFill layer with TextShape.
+          left: `${(divWidth - spanWidth * (1 + spanExpandRatio * 2)) / 2}px`,
         } : {
           top: `${y - spanHeight * spanExpandRatio + maxFontSize}px`,
           left: `${x - spanWidth * spanExpandRatio + maxFontSize}px`,
-          ...!isFixedWidth ? { lineHeight: 'initial' } : {},
-        }
+          ...!isFixedWidth ? { 'line-height': 'initial' } : {},
+        },
+        // To fix Safari PDF reader bug: https://bit.ly/3IPcS8o
+        ...store.getters['user/getUserId'] === 'backendRendering' ? { filter: 'opacity(1)' } : {},
       }
     }))
   }
 
-  drawTextFill(config: IText): CustomElementConfig | null {
+  drawTextFill(config: IText, ratio: number): CustomElementConfig | null {
     const textFill = config.styles.textFill
-    if (textFill.name === 'none' || !textFill.focus) return null
+    if (textFill.name === 'none' || !(textEffectUtils.focus === 'fill')) return null
 
-    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth, imgSrc } = this.calcTextFillVar(config)
-    if (!imgSrc) return null
+    const imgSrc = this.getTextFillImg(config, { ratio })
+    const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
+    if (!imgSrc || !divHeight) return null
 
     const leftDir = imgWidth - divWidth < 0 ? -1 : 1
     const topDir = imgHeight - divHeight < 0 ? -1 : 1
@@ -247,7 +268,7 @@ class TextFill {
         [scaleByWidth ? 'width' : 'height']: `${textFill.size}%`,
         left: `${(imgWidth - divWidth) * (0.5 - textFill.xOffset200 * leftDir / 200) * -1}px`,
         top: `${(imgHeight - divHeight) * (0.5 + textFill.yOffset200 * topDir / 200) * -1}px`,
-        opacity: textFill.opacity / 200,
+        opacity: textFill.opacity / 100,
       }
     }
   }
@@ -264,12 +285,13 @@ class TextFill {
 
       const layer = layers[idx]
       if (layer.type !== 'text') continue
+      const currSubLayerIndex = targetLayer.layers ? +idx : subLayerIndex
       const oldTextFill = layer.styles.textFill
       const newTextFill = {} as ITextFill
 
       if (oldTextFill && oldTextFill.name === effect) { // Adjust effect option.
         const localAttrs = !reset && attrs && Object.keys(attrs).includes('img')
-          ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as {img: {key:string}}).img.key}`) : null
+          ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as { img: { key: string } }).img.key}`) : null
         Object.assign(newTextFill, oldTextFill, attrs, localAttrs)
 
         // Only TextFill from appJSON need to store to localstorage
@@ -278,7 +300,7 @@ class TextFill {
         }
       } else { // Switch to other effect.
         const targetEffect = find(this.fillCategories, ['key', effect])
-        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as {img: {key:string}} | undefined
+        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as { img: { key: string } } | undefined
         const localAttrs = effectDefaultPreset?.img?.key ? localStorageUtils.get('textEffectSetting', `fill.${effectDefaultPreset.img.key}`) : null
         Object.assign(newTextFill, defaultAttrs, effectDefaultPreset, localAttrs,
           { name: effect, customImg: oldTextFill.customImg }
@@ -297,19 +319,24 @@ class TextFill {
       const oldSplitSpan = textBgUtils.isSplitSpan({ ...layer.styles, textFill: oldTextFill })
       const newSplitSpan = textBgUtils.isSplitSpan({ ...layer.styles, textFill: newTextFill })
       textBgUtils.splitOrMergeSpan(oldSplitSpan, newSplitSpan, layer,
-        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+        pageIndex, layerIndex, currSubLayerIndex)
 
-      // Recalc width/height since split span will alter width slightly
-      if (oldSplitSpan !== newSplitSpan) {
-        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
+      // Update widthLimit for widthLimit !== -1 layers. Steps to Reproduce the Issue:
+      // 1. Multi-select a new text layer (widthLimit is -1) and other layers.
+      // 2. Cancel multi-select.
+      // 3. Apply TextFill to the text layer.
+      // 4. Enter contentEditable mode, text will have additional line
+      if (layer.widthLimit !== -1) {
+        const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit, spanDataList: layer.spanDataList })
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, currSubLayerIndex)
       }
 
-      tiptapUtils.updateHtml() // Vuex config => tiptap
-
-      // Update widthLimit for widthLimit !== -1 layers
-      if (layer.widthLimit !== -1) {
-        const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, subLayerIndex)
+      // Update w/h for layer in tmp/group, which don't have tiptap. Steps to Reproduce the Issue:
+      // 1. Multi-select a new text layer (widthLimit is -1) and other layers.
+      // 2. Apply TextFill.
+      // 3. Cancel multi-select, text will have additional line.
+      if (oldSplitSpan !== newSplitSpan) {
+        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, currSubLayerIndex)
       }
     }
   }

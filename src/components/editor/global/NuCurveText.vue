@@ -1,6 +1,6 @@
 <template lang="pug">
-p(class="nu-curve-text__p" :style="pStyle()")
-  span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
+p(class="nu-curve-text__p")
+  span(v-if="focus === 'shape'"  class="nu-curve-text__circle" :style="circleStyle()")
     svg-icon(iconName="curve-center" :style="curveIconStyle")
   span(v-for="(span, sIndex) in spans()"
     class="nu-curve-text__span"
@@ -11,13 +11,16 @@ p(class="nu-curve-text__p" :style="pStyle()")
 
 <script lang="ts">
 import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import { isEqual } from 'lodash'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
@@ -36,7 +39,19 @@ export default defineComponent({
       type: Number,
       required: true
     },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
     subLayerIndex: {
+      type: Number
+    },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    },
+    contentScaleRatio: {
+      default: 1,
       type: Number
     },
     extraSpanStyle: {
@@ -49,6 +64,7 @@ export default defineComponent({
       textHeight: [] as number[],
       minHeight: 0,
       isDestroyed: false,
+      textFillVersion: 0,
       textFillSpanStyle: [] as Record<string, string | number>[][]
     }
   },
@@ -61,11 +77,11 @@ export default defineComponent({
     this.isDestroyed = true
   },
   async mounted() {
-    this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+    this.drawTextFill()
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(async () => {
         await this.resizeCallback()
-        this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+        await this.drawTextFill()
         generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
       }, 100) // for the delay between font loading and dom rendering
     })
@@ -75,6 +91,10 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
+    focus() {
+      if (!(this.config.active || this.primaryLayer?.active)) return 'none'
+      return textEffectUtils.focus
+    },
   },
   watch: {
     'config.paragraphs': {
@@ -86,18 +106,12 @@ export default defineComponent({
       },
       deep: true
     },
+    focus() { this.drawTextFill() },
     async 'config.styles.textFill'() {
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
-    },
-    async 'config.styles.textShape'() {
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
+      if (this.focus === 'none') this.drawTextFill()
     },
   },
   methods: {
-    focus(): boolean {
-      const { textShape } = this.config.styles
-      return textShape.focus
-    },
     bend(): number {
       const { textShape } = this.config.styles
       return +textShape.bend
@@ -105,12 +119,14 @@ export default defineComponent({
     spans(): ISpan[] {
       return TextShapeUtils.flattenSpans(this.config)
     },
-    pStyle(): Record<string, string | number> {
-      const { height, width, scale } = this.config.styles
-      return {
-        margin: 0,
-        height: `${height / scale}px`,
-        width: `${width / scale}px`
+    async drawTextFill() {
+      // Prevent earlier result overwrite later result
+      const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
+      const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
+
+      const newSpanStyle = await textFillUtils.convertTextEffect(this.config, ratio)
+      if (newTextFillVersion === this.textFillVersion && !isEqual(newSpanStyle, this.textFillSpanStyle)) {
+        this.textFillSpanStyle = newSpanStyle
       }
     },
     circleStyle(): Record<string, string> {
@@ -154,6 +170,7 @@ export default defineComponent({
       const baseline = `${(minHeight - textHeight[sIndex]) / 2 - fontSize}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
       const textFillStyle = this.textFillSpanStyle[0]?.[sIndex] ?? {}
+      const textShadowStrokeColor = textEffectUtils.convertTextEffect(this.config).webkitTextStrokeColor
       return Object.assign(
         fontStyles,
         {
@@ -162,7 +179,8 @@ export default defineComponent({
           padding: `${fontSize}px`,
         },
         bend >= 0 ? { top: baseline } : { bottom: baseline },
-        textFillStyle,
+        ['none', 'fill'].includes(this.focus) ? textFillStyle : null,
+        textShadowStrokeColor ? { webkitTextStrokeColor: textShadowStrokeColor } : {},
       )
     },
     async computeDimensions(spans: ISpan[]) {
@@ -199,6 +217,9 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     position: relative;
+    margin: 0;
+    width: 100%;
+    height: 100%;
   }
   &__circle {
     border: 1px solid rgba(212, 9, 70, 0.5);

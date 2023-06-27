@@ -7,7 +7,7 @@ div(class="brand-kit-tab-logo")
     :sentinel="!isLogosLoading && logosPageIndex >= 0"
     @addImage="handleUploadLogo"
     @handleDownload="handleDownload"
-    @handleDeleteLogo="handleDeleteLogo"
+    @handleDelete="handleDeleteLogo"
     @handleOpenMenu="handleOpenMenu"
     @handleCloseMenu="handleCloseMenu"
     @loadMore="handleLoadMore")
@@ -140,6 +140,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .brand-kit-tab-logo {
   display: grid;
+  grid-template-rows: auto 1fr;
   height: 100%;
 }
 </style>

@@ -1,8 +1,8 @@
-import { IFormat, IImageFormat, ITextFormat, ITextShape } from '@/interfaces/format'
-import { IGroup, IImage, ILayer, IParagraph, IText } from '@/interfaces/layer'
+import { IFormat, IImageFormat, ITextFormat, ITextShape, ITextStyleCopiedFormat, textStyleCopiedFormatKeys } from '@/interfaces/format'
+import { AllLayerTypes, IGroup, IImage, IParagraph, IText } from '@/interfaces/layer'
 import store from '@/store'
+import { cloneDeep, pick } from 'lodash'
 import frameUtils from './frameUtils'
-import generalUtils from './generalUtils'
 import imageAdjustUtil from './imageAdjustUtil'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
@@ -30,20 +30,18 @@ class FormatUtils {
     const lastParagraph = paragraphs[paragraphs.length - 1]
     const spans = lastParagraph.spans
     const lastSpan = spans[spans.length - 1]
+    const textStyleCopiedFormat = Object.fromEntries(
+      textStyleCopiedFormatKeys.map(type => [type, cloneDeep(text.styles[type])])
+    ) as ITextStyleCopiedFormat
     return {
-      paragraphStyle: generalUtils.deepCopy(lastParagraph.styles),
-      spanStyle: generalUtils.deepCopy(lastSpan.styles),
-      scale: text.styles.scale,
-      textEffect: generalUtils.deepCopy(text.styles.textEffect),
-      textBg: generalUtils.deepCopy(text.styles.textBg),
-      textShape: generalUtils.deepCopy(text.styles.textShape),
-      textFill: generalUtils.deepCopy(text.styles.textFill),
-      writingMode: text.styles.writingMode
+      paragraphStyle: cloneDeep(lastParagraph.styles),
+      spanStyle: cloneDeep(lastSpan.styles),
+      ...textStyleCopiedFormat
     }
   }
 
   extractImageFormat(image: IImage): IImageFormat {
-    return generalUtils.deepCopy(image.styles.adjust)
+    return cloneDeep(image.styles.adjust)
   }
 
   copyTextFormat(text: IText) {
@@ -67,20 +65,75 @@ class FormatUtils {
     this.copiedFormat = format
   }
 
-  applyTextStyles(oldParagraphs: IParagraph[]): IParagraph[] {
-    if (!this.copiedFormat) return oldParagraphs
-    const { paragraphStyle, spanStyle } = this.copiedFormat.content as ITextFormat
-    const paragraphs = generalUtils.deepCopy(oldParagraphs) as IParagraph[]
+  applyTextParagraphsStyles(textParagraphsCopiedFormat: Pick<ITextFormat, 'paragraphStyle' | 'spanStyle'>, oldParagraphs: IParagraph[]): IParagraph[] {
+    const { paragraphStyle, spanStyle } = textParagraphsCopiedFormat
+    const paragraphs = cloneDeep(oldParagraphs) as IParagraph[]
     for (const paragraph of paragraphs) {
-      paragraph.styles = generalUtils.deepCopy(paragraphStyle)
+      paragraph.styles = cloneDeep(paragraphStyle)
       if (paragraph.spanStyle) {
         paragraph.spanStyle = tiptapUtils.textStyles(spanStyle)
       }
       for (const span of paragraph.spans) {
-        span.styles = generalUtils.deepCopy(spanStyle)
+        span.styles = cloneDeep(spanStyle)
       }
     }
     return paragraphs
+  }
+
+  applyTextStyles(textFormat: ITextFormat, layer: IText, pageIndex: number, layerIndex: number, subLayerIndex = -1) {
+    const textStyleCopiedFormat = pick(textFormat, textStyleCopiedFormatKeys) as ITextStyleCopiedFormat
+    const paragraphs = this.applyTextParagraphsStyles(pick(textFormat, ['paragraphStyle', 'spanStyle']), layer.paragraphs)
+    const preParams = textShapeUtils.getPreParams(layer)
+    const isSubLayer = subLayerIndex !== -1
+    layerUtils.updateSpecLayerData({
+      pageIndex,
+      layerIndex,
+      styles: cloneDeep(textStyleCopiedFormat),
+      props: { paragraphs },
+      ...isSubLayer ? {
+        subLayerIndex,
+        type: ['text'],
+      } : {}
+    })
+    if (this.isCurveText(textStyleCopiedFormat.textShape)) {
+      const textProps = textShapeUtils.getCurveTextProps(layer)
+      if (preParams.wasCurveText) {
+        Object.assign(textProps, textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(layer, preParams, textProps)))
+      }
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, textProps, subLayerIndex)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit: -1 }, subLayerIndex)
+    } else {
+      const textHW = textUtils.getTextHW(layer, layer.widthLimit)
+      layerUtils.updateLayerStyles(
+        pageIndex,
+        layerIndex,
+        {
+          width: textHW.width,
+          height: textHW.height,
+          ...textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(layer, preParams, textHW))
+        },
+        subLayerIndex
+      )
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { spanDataList: textHW.spanDataList }, subLayerIndex)
+    }
+  }
+
+  applyImageStylesToFrame(adjust: IImageFormat, pageIndex: number, layerIndex: number, subLayerIndex = -1, isInGroup = false) {
+    if (isInGroup || subLayerIndex === -1) { // frame in group or single frame without any clip selected
+      frameUtils.updateFrameLayerAllClipsStyles(
+        pageIndex,
+        layerIndex,
+        { adjust: cloneDeep(adjust) },
+        subLayerIndex, // -1 if single frame without any clip selected, > 0 if frame in group
+      )
+    } else {
+      frameUtils.updateFrameLayerStyles(
+        pageIndex,
+        layerIndex,
+        subLayerIndex, // clipIndex
+        { adjust: cloneDeep(adjust) }
+      )
+    }
   }
 
   applyFormatIfCopied(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
@@ -90,137 +143,47 @@ class FormatUtils {
     if (layer.type === 'group') { // subController or whole-group controller
       const subLayers = (layer as IGroup).layers
       const isSubController = subLayerIndex >= 0
-      let layers: ILayer[]
+      let layers: AllLayerTypes[]
       if (isSubController) {
-        const subLayer = subLayers[subLayerIndex] as ILayer
+        const subLayer = subLayers[subLayerIndex]
         if (!this.isApplicableType(type, subLayer.type)) return
         layers = [subLayer]
       } else {
         layers = subLayers
       }
       if (type === 'text') {
-        const { scale, textEffect, textBg, textShape, writingMode } = this.copiedFormat.content as ITextFormat
+        const textFormat = this.copiedFormat.content as ITextFormat
         for (const targetLayerIndex in layers) {
           const idx = subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex
           const targetLayer = layers[targetLayerIndex]
           if (targetLayer.type !== 'text') continue
-          const targetTextLayer = targetLayer as any
-          const preParams = textShapeUtils.getPreParams(targetTextLayer)
-          const paragraphs = this.applyTextStyles(targetTextLayer.paragraphs)
-          layerUtils.updateSpecLayerData({
-            pageIndex,
-            layerIndex,
-            subLayerIndex: idx,
-            type: ['text'],
-            styles: {
-              textEffect: { ...textEffect },
-              textBg: { ...textBg },
-              textShape: { ...textShape },
-              scale,
-              writingMode
-            },
-            props: { paragraphs }
-          })
-          if (this.isCurveText(textShape)) {
-            const textProps = textShapeUtils.getCurveTextProps(targetTextLayer)
-            if (preParams.wasCurveText) {
-              Object.assign(textProps, textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(targetTextLayer, preParams, textProps)))
-            }
-            layerUtils.updateSubLayerStyles(
-              pageIndex,
-              layerIndex,
-              idx,
-              textProps
-            )
-            layerUtils.updateSubLayerProps(
-              pageIndex,
-              layerIndex,
-              idx,
-              { widthLimit: -1 }
-            )
-          } else {
-            const textHW = textUtils.getTextHW(targetTextLayer, targetTextLayer.widthLimit)
-            layerUtils.updateSubLayerStyles(
-              pageIndex,
-              layerIndex,
-              idx,
-              {
-                ...textHW,
-                ...textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(targetTextLayer, preParams, textHW))
-              }
-            )
-          }
+          this.applyTextStyles(textFormat, targetLayer, pageIndex, layerIndex, idx)
         }
         textUtils.updateGroupLayerSize(pageIndex, layerIndex)
         textUtils.fixGroupCoordinates(pageIndex, layerIndex)
-        stepsUtils.record()
       }
       if (type === 'image') {
         const adjust = this.copiedFormat.content as IImageFormat
-        if (isSubController) {
-          if (layers[0].type === 'frame') {
-            frameUtils.updateSubFrameLayerAllClipsStyles(
-              pageIndex,
-              layerIndex,
-              subLayerIndex,
-              { adjust: { ...adjust } }
-            )
-          }
-        } else {
-          for (const targetLayerIndex in layers) {
-            const targetLayer = layers[targetLayerIndex]
-            if (targetLayer.type !== 'frame') continue
-            frameUtils.updateSubFrameLayerAllClipsStyles(
-              pageIndex,
-              layerIndex,
-              +targetLayerIndex,
-              { adjust: { ...adjust } }
-            )
-          }
-        }
         layerUtils.updateSpecLayerData({
           pageIndex,
           layerIndex,
           subLayerIndex: subLayerIndex >= 0 ? subLayerIndex : undefined,
           type: ['image'],
-          styles: { adjust: { ...adjust } }
+          styles: { adjust: cloneDeep(adjust) }
         })
-        stepsUtils.record()
+        for (const targetLayerIndex in layers) {
+          const idx = subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex
+          const targetLayer = layers[targetLayerIndex]
+          if (targetLayer.type !== 'frame') continue
+          this.applyImageStylesToFrame(adjust, pageIndex, layerIndex, idx, true)
+        }
       }
+      stepsUtils.record()
     } else { // non-group controller
       if (!this.isApplicableType(type, layer.type)) return
       if (type === 'text') {
-        const preParams = textShapeUtils.getPreParams(layer)
-        const { scale, textEffect, textBg, textShape, writingMode } = this.copiedFormat.content as ITextFormat
-        const paragraphs = this.applyTextStyles(layer.paragraphs)
-        layerUtils.updateSpecLayerData({
-          pageIndex,
-          layerIndex,
-          styles: {
-            textEffect: { ...textEffect },
-            textBg: { ...textBg },
-            textShape: { ...textShape },
-            scale,
-            writingMode
-          },
-          props: { paragraphs }
-        })
-        const text = store.getters.getLayer(pageIndex, layerIndex)
-        if (this.isCurveText(textShape)) {
-          const textProps = textShapeUtils.getCurveTextProps(text)
-          if (preParams.wasCurveText) {
-            Object.assign(textProps, textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(text, preParams, textProps)))
-          }
-          layerUtils.updateLayerStyles(pageIndex, layerIndex, textProps)
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit: -1 })
-        } else {
-          const textHW = textUtils.getTextHW(text, text.widthLimit)
-          layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-            ...textHW,
-            ...textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(text, preParams, textHW))
-          })
-        }
-        stepsUtils.record()
+        const textFormat = this.copiedFormat.content as ITextFormat
+        this.applyTextStyles(textFormat, layer, pageIndex, layerIndex)
       }
       if (type === 'image') {
         const adjust = this.copiedFormat.content as IImageFormat
@@ -228,26 +191,13 @@ class FormatUtils {
           imageAdjustUtil.setAdjust({
             pageIndex,
             layerIndex,
-            adjust: { ...adjust }
+            adjust: cloneDeep(adjust)
           })
         } else { // frame
-          if (subLayerIndex >= 0) { // a clip is selected
-            frameUtils.updateFrameLayerStyles(
-              pageIndex,
-              layerIndex,
-              subLayerIndex,
-              { adjust: { ...adjust } }
-            )
-          } else {
-            frameUtils.updateFrameLayerAllClipsStyles(
-              pageIndex,
-              layerIndex,
-              { adjust: { ...adjust } }
-            )
-          }
+          this.applyImageStylesToFrame(adjust, pageIndex, layerIndex, subLayerIndex, false)
         }
-        stepsUtils.record()
       }
+      stepsUtils.record()
     }
   }
 

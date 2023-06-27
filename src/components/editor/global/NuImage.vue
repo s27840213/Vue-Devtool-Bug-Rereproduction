@@ -54,6 +54,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         :class="{'layer-flip': flippedAnimation() }"
         :src="finalSrc"
         draggable="false"
+        crossOrigin="anonymous"
         @error="onError"
         @load="onLoad")
   template(v-if="hasHalation()")
@@ -84,7 +85,6 @@ import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import unitUtils from '@/utils/unitUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
@@ -328,7 +328,7 @@ export default defineComponent({
       const src = imageUtils.getSrc(this.config, val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       imageUtils.imgLoadHandler(src, () => {
         this.src = src
-      })
+      }, { crossOrigin: true })
     }
   },
   components: { NuAdjustImage },
@@ -341,7 +341,7 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing'
     }),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     ...mapState('mobileEditor', {
       inAllPagesMode: 'mobileAllPageMode',
@@ -444,22 +444,10 @@ export default defineComponent({
         renderW *= scale
         renderH *= scale
       }
-      const { dpi } = this
-      if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSize
-        if (unit !== 'px' && physicalHeight && physicalWidth) {
-          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
-          renderW *= dpi / physicaldpi
-          renderH *= dpi / physicaldpi
-        } else {
-          renderW *= dpi / 96
-          renderH *= dpi / 96
-        }
-      }
+      const dpiRatio = pageUtils.getImageDpiRatio(this.page)
+      renderW *= dpiRatio
+      renderH *= dpiRatio
       return imageUtils.getSrcSize(srcObj, imageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
-    },
-    pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     isBlurImg(): boolean {
       return !!this.config.styles.adjust?.blur
@@ -587,7 +575,7 @@ export default defineComponent({
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
-      })
+      }, { crossOrigin: true })
 
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
@@ -611,7 +599,8 @@ export default defineComponent({
                   this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
                 }
               })
-          }
+          },
+          crossOrigin: true
         })
       })
     },
@@ -633,25 +622,42 @@ export default defineComponent({
               this.preLoadImg('next', this.getImgDimension)
             }
           }
-        })
+        }, { crossOrigin: true })
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
       return new Promise<void>((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => resolve()
-        img.onerror = (error) => {
-          reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-          fetch(img.src)
-            .then(res => {
-              const { status, statusText } = res
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
-            })
-            .catch((e) => {
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
-            })
-        }
-        img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
+      //   const img = new Image()
+      //   img.onload = () => resolve()
+      //   img.onerror = (error) => {
+      //     reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+      //     fetch(img.src)
+      //       .then(res => {
+      //         const { status, statusText } = res
+      //         this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
+      //       })
+      //       .catch((e) => {
+      //         this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
+      //       })
+      //   }
+      //   img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
+      // })
+        const size = imageUtils.getSrcSize(this.config.adjustSrcObj?.srcObj?.type ? this.config.adjustSrcObj?.srcObj : this.config.srcObj, val, preLoadType)
+        const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, size))
+        imageUtils.imgLoadHandler(src, () => resolve(), {
+          error: () => {
+            reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+            fetch(src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError('img src:', src, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                this.logImgError('img src:', src, 'fetch result: ' + e)
+              })
+          },
+          crossOrigin: true
+        })
       })
     },
     handleIsTransparent() {

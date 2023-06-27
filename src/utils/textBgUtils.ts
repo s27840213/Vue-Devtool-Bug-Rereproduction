@@ -65,6 +65,7 @@ export class Rect {
       letterSpacing: number
       pIndex: number
       sIndex: number
+      lineHeight: number
     }[]
   }[] = []
 
@@ -140,6 +141,7 @@ export class Rect {
     Object.assign(div.style, safariStyle)
     div.style.writingMode = config.styles.writingMode
     let { widthLimit } = config
+    if (config.styles.textShape.name !== 'none') widthLimit = -1
     const { scale, height } = config.styles
     if (this.vertical) {
       div.style.width = 'max-content'
@@ -206,6 +208,7 @@ export class Rect {
               letterSpacing,
               pIndex,
               sIndex,
+              lineHeight,
             }]
           })
         }
@@ -952,6 +955,7 @@ class TextBg {
 
       const layer = layers[idx]
       if (layer.type !== 'text') continue
+      const currSubLayerIndex = targetLayer.layers ? +idx : subLayerIndex
       const oldTextBg = layer.styles.textBg
       const newTextBg = {} as ITextBg
 
@@ -999,13 +1003,13 @@ class TextBg {
       const oldSplitSpan = this.isSplitSpan({ ...layer.styles, textBg: oldTextBg })
       const newSplitSpan = this.isSplitSpan({ ...layer.styles, textBg: newTextBg })
       this.splitOrMergeSpan(oldSplitSpan, newSplitSpan, layer,
-        pageIndex, layerIndex, targetLayer.layers ? +idx : subLayerIndex)
+        pageIndex, layerIndex, currSubLayerIndex)
 
-      // Update width for tiptap layer
+      // Update w/h for layer in tmp/group, which don't have tiptap. For English letter in tmp/group.
       const oldFixedWidth = isITextLetterBg(oldTextBg) && oldTextBg.fixedWidth
       const newFixedWidth = isITextLetterBg(newTextBg) && newTextBg.fixedWidth
       if (oldFixedWidth !== newFixedWidth) {
-        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIndex)
+        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, currSubLayerIndex)
       }
 
       // If user leave LetterBg, reset lineHeight and fontSpacing

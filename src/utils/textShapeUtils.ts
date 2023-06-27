@@ -88,7 +88,8 @@ class Controller {
       const { bend } = styleTextShape as any
       const textHW = textUtils.getTextHW(layer, -1)
       Object.assign(styles, {
-        ...textHW,
+        width: textHW.width,
+        height: textHW.height,
         x: x + ((width - textHW.width) / 2),
         y: +bend < 0 ? y + height - textHW.height : y
       })
@@ -97,10 +98,12 @@ class Controller {
       } else {
         props.widthLimit = -1
       }
+      props.spanDataList = textHW.spanDataList
     } else { // curve
       const { bend } = styles.textShape as any
       Object.assign(styles, this.getCurveTextProps(layer, +bend))
       props.widthLimit = -1
+      props.spanDataList = undefined
     }
     return { styles, props }
   }

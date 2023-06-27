@@ -130,7 +130,9 @@ class TextPropUtils {
         }
         handler({ writingMode: targetWritingMode })
         if (typeof tmpLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
-          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textUtils.getTextHW(config, config.widthLimit))
+          const textHW = textUtils.getTextHW(config, config.widthLimit)
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height })
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { spanDataList: textHW.spanDataList })
           // @TODO: need to reallocate position of each layer
         }
         this.updateTextPropsState({ isVertical: targetIsVertical, decoration: 'none', style: 'normal' })
@@ -699,7 +701,7 @@ class TextPropUtils {
         let tempEndSIndex
         for (let i = startPIndex; i <= endPIndex; i++) {
           if (['fontSpacing', 'lineHeight', 'align'].includes(prop)) { // paragraph props
-            if (origin !== (paragraphs[i].attrs ?? {})[prop]) {
+            if (!this.propCompare(_prop, origin, (paragraphs[i].attrs ?? {})[prop])) {
               isMulti = true
               break
             }
@@ -714,13 +716,13 @@ class TextPropUtils {
           }
           if (spans.length > 0) {
             for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
-              if (origin !== (spans[j].marks?.[0]?.attrs ?? {})[prop]) {
+              if (!this.propCompare(_prop, origin, (spans[j].marks?.[0]?.attrs ?? {})[prop])) {
                 isMulti = true
                 break
               }
             }
           } else {
-            if (origin !== (paragraphs[i].attrs ?? {})[prop]) {
+            if (!this.propCompare(_prop, origin, (paragraphs[i].attrs ?? {})[prop])) {
               isMulti = true
               break
             }
