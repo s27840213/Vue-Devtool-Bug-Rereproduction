@@ -540,10 +540,10 @@ class ConstantData {
         key: 'speech-bubble',
         label: '對話框',
         options: toOptions(['tailPosition', 'tailOffset', 'pStrokeY', 'opacity', 'pColor'])
-      // }, {
-      //   key: 'speech-bubble',
-      //   label: '對話框',
-      //   options: toOptions(['tailPosition', 'tailOffset', 'pStrokeY', 'opacity', 'pColor'])
+      }, {
+        key: 'speech-bubble2',
+        label: '對話框2',
+        options: toOptions(['tailPosition', 'tailOffset', 'bRadius', 'pStrokeY', 'opacity', 'pColor'])
       }] : [], {
         key: 'gooey',
         label: i18n.global.tc('NN0726'),

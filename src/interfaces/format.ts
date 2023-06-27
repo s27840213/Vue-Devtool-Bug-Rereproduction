@@ -34,6 +34,7 @@ export interface ITextSpeechBubble {
   name: 'speech-bubble' | 'speech-bubble2'
   tailOffset: number
   tailPosition: ITailPosition
+  bRadius: number
   pStrokeX: number
   pStrokeY: number
   opacity: number

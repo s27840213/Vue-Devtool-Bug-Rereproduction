@@ -17,7 +17,7 @@ import textUtils from './textUtils'
 export class Point {
   x: number
   y: number
-  constructor(x: number, y: number) {
+  constructor(x = 0, y = 0) {
     this.x = x
     this.y = y
   }
@@ -52,6 +52,11 @@ export class Point {
 
   dist(p: Point): number {
     return Math.pow(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2), 0.5)
+  }
+
+  // Rotate clockwise
+  rotate(angle: number, origin = new Point()) {
+    return obj2Point(mathUtils.getRotatedPoint(angle, origin, this))
   }
 
   toString(): string {
@@ -413,7 +418,7 @@ export class Path {
     return this.pathArray.join('') + 'z'
   }
 
-  toCircle(): { tag: string, attrs: { cx: number, cy: number, r: string, fill: string } }[] {
+  toCircle(): CustomElementConfig[] {
     return this.pointArray.map(p => {
       return {
         tag: 'circle',
@@ -691,6 +696,16 @@ class TextBg {
       'speech-bubble': {
         tailOffset: 50,
         tailPosition: 'left-top',
+        bRadius: 100, // unadjustable
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 20,
+        opacity: 100,
+        pColor: 'fontColorL+-40/BC/00'
+      },
+      'speech-bubble2': {
+        tailOffset: 50,
+        tailPosition: 'left-top',
+        bRadius: 100,
         pStrokeX: 20, // unadjustable in all effects
         pStrokeY: 20,
         opacity: 100,
@@ -832,6 +847,7 @@ class TextBg {
         content: paths
       }
     } else if (isITextBox(textBg) || isITextSpeechBubble(textBg)) {
+      const tailOffset = isITextSpeechBubble(textBg) ? textBg.tailOffset * 0.01 : 0
       const fill = textEffectUtils.colorParser(textBg.pColor, config)
       const stroke = isITextBox(textBg) ? textEffectUtils.colorParser(textBg.bColor, config) : ''
       const bStroke = (isITextBox(textBg) ? textBg.bStroke : 0) * fontSizeModifier
@@ -852,45 +868,53 @@ class TextBg {
         top -= pStrokeY
         left -= pStrokeX
       }
-      const boxRadius = isITextSpeechBubble(textBg) ? Math.max(...rows.map(r => r.rect.height)) / 2
+      const maxRowHeight = Math.max(...rows.map(r => r.rect.height))
+      const boxRadius = isITextSpeechBubble(textBg) ? maxRowHeight * (textBg.bRadius / 100) / 2
         : Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
 
       // Start to draw Path.
       const path = new Path(new Point(bStroke / 2, bStroke / 2 + boxRadius))
       for (const [i, section] of (['left-top', 'right-top', 'right-bottom', 'left-bottom'] as const).entries()) {
-        const corner = obj2Point({
+        const cornerDir = obj2Point({
           'left-top': { x: 1, y: -1 },
           'right-top': { x: 1, y: 1 },
           'right-bottom': { x: -1, y: 1 },
           'left-bottom': { x: -1, y: -1 },
         }[section])
-        // Insert tail at corner for speech-bubble
-        if (isITextSpeechBubble(textBg) && section === textBg.tailPosition) {
-          const tailOffset = textBg.tailOffset * 0.01
-          const center = (i % 2 ? new Point(0, corner.y) : new Point(corner.x, 0)).mul(boxRadius)
-          const tailBegin = obj2Point(mathUtils.getRotatedPoint(60 * tailOffset, center, { x: 0, y: 0 }))
-          const tailEnd = obj2Point(mathUtils.getRotatedPoint(30, center, tailBegin))
+        const centerDir = i % 2 ? new Point(0, cornerDir.y) : new Point(cornerDir.x)
+        const center = centerDir.mul(boxRadius)
+
+        // Draw corner, insert tail at corner for speech-bubble.
+        if (textBg.name === 'speech-bubble' && section === textBg.tailPosition) {
+          const tailBegin = new Point().rotate(60 * tailOffset, center)
+          const tailEnd = tailBegin.rotate(30, center)
           let tailMid = tailBegin.middle(tailEnd)
           tailMid = tailMid.add(tailMid.sub(center).mul(0.7))
-          const arcEnd = obj2Point(mathUtils.getRotatedPoint(60 * (1 - tailOffset), center, tailEnd))
+          const arcEnd = obj2Point(tailEnd.rotate(60 * (1 - tailOffset), center))
 
           path.a(boxRadius, boxRadius, 1, tailBegin)
-          path.q(tailMid.middle(tailBegin).sub(tailBegin).add(corner.mul(boxRadius * 0.1 * corner.y)), tailMid.sub(tailBegin))
-          path.q(tailEnd.middle(tailMid).sub(tailMid).add(corner.mul(boxRadius * 0.1 * corner.y)), tailEnd.sub(tailMid))
+          path.q(tailMid.middle(tailBegin).sub(tailBegin).add(cornerDir.mul(boxRadius * 0.1 * cornerDir.y)), tailMid.sub(tailBegin))
+          path.q(tailEnd.middle(tailMid).sub(tailMid).add(cornerDir.mul(boxRadius * 0.1 * cornerDir.y)), tailEnd.sub(tailMid))
           path.a(boxRadius, boxRadius, 1, arcEnd.sub(tailEnd))
         } else { // Normal corner
-          path.a(boxRadius, boxRadius, 1, corner.mul(boxRadius))
+          path.a(boxRadius, boxRadius, 1, cornerDir.mul(boxRadius))
         }
-        switch (section) {
-          case 'left-top':
-            path.h(boxWidth - boxRadius * 2)
-            break
-          case 'right-top':
-            path.v(boxHeight - boxRadius * 2)
-            break
-          case 'right-bottom':
-            path.h(-(boxWidth - boxRadius * 2))
-            break
+
+        // Draw line, insert tail for speech-bubble2.
+        const lineDist = (['left-top', 'right-bottom'].includes(section) ? boxWidth : boxHeight) - boxRadius * 2
+        const lineEnd = centerDir.mul(lineDist)
+        if (textBg.name === 'speech-bubble2' && section === textBg.tailPosition) {
+          const tailLength = Math.max(Math.min(maxRowHeight * 0.25, lineDist), 0)
+          const tailBegin = centerDir.mul((lineDist - tailLength) * tailOffset)
+          const tailEnd = tailBegin.add(centerDir.mul(tailLength))
+          const tailMid = tailBegin.middle(tailEnd).add(centerDir.rotate(-90).mul(tailLength * 1.5))
+
+          path.l(tailBegin)
+          path.l(tailMid.sub(tailBegin))
+          path.l(tailEnd.sub(tailMid))
+          path.l(lineEnd.sub(tailEnd))
+        } else {
+          path.l(lineEnd)
         }
       }
 
