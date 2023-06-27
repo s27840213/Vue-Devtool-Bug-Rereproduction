@@ -108,7 +108,8 @@ class FormatUtils {
         pageIndex,
         layerIndex,
         {
-          ...textHW,
+          width: textHW.width,
+          height: textHW.height,
           ...textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(layer, preParams, textHW))
         },
         subLayerIndex

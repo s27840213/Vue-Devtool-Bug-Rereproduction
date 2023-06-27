@@ -130,7 +130,9 @@ class TextPropUtils {
         }
         handler({ writingMode: targetWritingMode })
         if (typeof tmpLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
-          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textUtils.getTextHW(config, config.widthLimit))
+          const textHW = textUtils.getTextHW(config, config.widthLimit)
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height })
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { spanDataList: textHW.spanDataList })
           // @TODO: need to reallocate position of each layer
         }
         this.updateTextPropsState({ isVertical: targetIsVertical, decoration: 'none', style: 'normal' })
