@@ -701,7 +701,7 @@ class TextPropUtils {
         let tempEndSIndex
         for (let i = startPIndex; i <= endPIndex; i++) {
           if (['fontSpacing', 'lineHeight', 'align'].includes(prop)) { // paragraph props
-            if (origin !== (paragraphs[i].attrs ?? {})[prop]) {
+            if (!this.propCompare(_prop, origin, (paragraphs[i].attrs ?? {})[prop])) {
               isMulti = true
               break
             }
@@ -716,13 +716,13 @@ class TextPropUtils {
           }
           if (spans.length > 0) {
             for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
-              if (origin !== (spans[j].marks?.[0]?.attrs ?? {})[prop]) {
+              if (!this.propCompare(_prop, origin, (spans[j].marks?.[0]?.attrs ?? {})[prop])) {
                 isMulti = true
                 break
               }
             }
           } else {
-            if (origin !== (paragraphs[i].attrs ?? {})[prop]) {
+            if (!this.propCompare(_prop, origin, (paragraphs[i].attrs ?? {})[prop])) {
               isMulti = true
               break
             }

@@ -41,13 +41,13 @@ import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textBgUtils from '@/utils/textBgUtils'
-import textEffectUtils, { IFocusState } from '@/utils/textEffectUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { isEqual, max, omit, round } from 'lodash'
-import { PropType, computed, defineComponent } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -91,7 +91,6 @@ export default defineComponent({
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
-      focus: computed(() => textEffectUtils.focus),
       isDestroyed: false,
       initSize: {
         width: this.config.styles.width,
@@ -127,6 +126,10 @@ export default defineComponent({
     },
     isLocked(): boolean {
       return this.config.locked
+    },
+    focus() {
+      if (!(this.config.active || this.primaryLayer?.active)) return 'none'
+      return textEffectUtils.focus
     },
     aspectRatio() {
       return round(this.config.styles.width / this.config.styles.height, 2)
@@ -164,11 +167,7 @@ export default defineComponent({
       this.drawTextBg()
       this.drawTextFill()
     },
-    focus(newVal: IFocusState, oldVal: IFocusState) {
-      if (newVal !== oldVal && (this.config.active || this.primaryLayer?.active)) {
-        this.drawTextFill()
-      }
-    },
+    focus() { this.drawTextFill() },
     'config.styles.textBg'() { this.drawTextBg() },
     'config.styles.textFill'() { this.drawTextFill() },
   },
