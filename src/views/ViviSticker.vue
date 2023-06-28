@@ -59,6 +59,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { find } from 'lodash'
+import VConsole from 'vconsole'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -85,7 +86,7 @@ export default defineComponent({
       isKeyboardAnimation: 0,
       showMobilePanelAfterTransitoin: false,
       marginBottom: 0,
-      // vConsole: null as any,
+      vConsole: null as any,
       footerTabsRef: undefined as unknown as HTMLElement,
       mounted: false,
       isMobilePanelBottom: false,
@@ -210,13 +211,13 @@ export default defineComponent({
     this.footerTabsRef = (this.$refs.footerTabs as any).$el as HTMLElement
 
     if (debugMode) {
-      // this.vConsole = new VConsole({ theme: 'dark' })
-      // this.vConsole.setSwitchPosition(25, 80)
+      this.vConsole = new VConsole({ theme: 'dark' })
+      this.vConsole.setSwitchPosition(25, 80)
     }
   },
   unmounted() {
     document.removeEventListener('scroll', this.handleScroll)
-    // this.vConsole && this.vConsole.destroy()
+    this.vConsole && this.vConsole.destroy()
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -270,15 +271,15 @@ export default defineComponent({
     //     imageShadowPanelUtils.handleShadowUpload()
     //   }
     // },
-    // debugMode(newVal) {
-    //   if (newVal && !this.vConsole) {
-    //     this.vConsole = new VConsole({ theme: 'dark' })
-    //     this.vConsole.setSwitchPosition(25, 80)
-    //   } else if (!newVal && this.vConsole) {
-    //     this.vConsole.destroy()
-    //     this.vConsole = null
-    //   }
-    // }
+    debugMode(newVal) {
+      if (newVal && !this.vConsole) {
+        this.vConsole = new VConsole({ theme: 'dark' })
+        this.vConsole.setSwitchPosition(25, 80)
+      } else if (!newVal && this.vConsole) {
+        this.vConsole.destroy()
+        this.vConsole = null
+      }
+    }
   },
   methods: {
     ...mapMutations({

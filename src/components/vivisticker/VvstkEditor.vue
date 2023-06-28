@@ -27,14 +27,12 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
 <script lang="ts">
 import PageCard from '@/components/vivisticker/PageCard.vue'
 import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
 import { IPageState } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -83,21 +81,21 @@ export default defineComponent({
       } else {
         this.animated = false
       }
-      if (newVal && this.inEffectEditingMode) {
-        this.$nextTick(() => {
-          editorUtils.setCurrActivePanel('photo-shadow')
+      // if (newVal && this.inEffectEditingMode) {
+      //   this.$nextTick(() => {
+      //     editorUtils.setCurrActivePanel('photo-shadow')
 
-          if (this.inEffectEditingMode) {
-            const data = (imageShadowUtils.getDefaultEffect(ShadowEffectType.frame) as any).frame
-            /**
-           * Prevent setEffect not work
-           */
-            setTimeout(() => {
-              imageShadowUtils.setEffect(ShadowEffectType.frame, { frame: data, frameColor: '#EFCD56' })
-            }, 300)
-          }
-        })
-      }
+      //     if (this.inEffectEditingMode) {
+      //       const data = (imageShadowUtils.getDefaultEffect(ShadowEffectType.frame) as any).frame
+      //       /**
+      //      * Prevent setEffect not work
+      //      */
+      //       setTimeout(() => {
+      //         imageShadowUtils.setEffect(ShadowEffectType.frame, { frame: data, frameColor: '#EFCD56' })
+      //       }, 300)
+      //     }
+      //   })
+      // }
     },
     windowSize: {
       handler(): void {
