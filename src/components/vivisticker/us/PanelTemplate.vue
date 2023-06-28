@@ -3,7 +3,7 @@ div(class="panel-template rwd-container")
   div(v-show="!isInCategory && !isInGroupTemplate" class="panel-template__nav" :style="navStyles")
     template(v-if="isShowSearchBar")
       search-bar(class="panel-template__nav__searchbar" ref="searchbar"
-          :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
+          :placeholder="$t('NN0092', { target: $tc('NN0001', 1) })"
           clear
           :defaultKeyword="keywordLabel"
           vivisticker="dark"
