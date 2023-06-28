@@ -67,6 +67,11 @@ export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  metaInfo() {
+    return {
+      title: `${this.$t('SE0001')}`
+    }
+  },
   data() {
     return {
       coordinate: null as unknown as HTMLElement,
