@@ -36,7 +36,7 @@ export default defineComponent({
       selectedDetailPage,
       selectedDev = 1,
       ...prevSubmission
-    } = JSON.parse(this.$isTouchDevice() ? '{}' : localStorage.getItem(submission) || '{}')
+    } = JSON.parse(localStorage.getItem(submission) || '{}')
 
     const typeOptions = [
       { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },

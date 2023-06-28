@@ -148,7 +148,7 @@ const router = createRouter({
         picWVUtils.updateLocale(locale)
         vivistickerUtils.setDefaultPrices(locale)
 
-        document.title = to.meta?.title as string || i18n.global.t('SE0001')
+        // document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
         if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
           // Delete locale in url, will be ignore by prerender.
@@ -162,10 +162,13 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if ((window as any).__PRERENDER_INJECTED !== undefined) {
-    next()
-    return
-  }
+  /**
+   * @Note the following commented codes will cause prerender render error.
+   */
+  // if ((window as any).__PRERENDER_INJECTED !== undefined) {
+  //   next()
+  //   return
+  // }
   picWVUtils.detectIfInApp()
   await picWVUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.

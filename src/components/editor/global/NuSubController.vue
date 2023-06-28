@@ -326,6 +326,7 @@ export default defineComponent({
     },
     textBodyStyle() {
       const checkTextFill = isTextFill(this.config.styles.textFill)
+      // To fix tiptap focus issue that opacity 0 need one more tap to focus, set opacity to 0.0001.
       const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
         !this.config.contentEditable ? 0.0001 : 1
       return {

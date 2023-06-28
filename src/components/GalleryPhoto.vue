@@ -20,6 +20,7 @@ div(class="gallery-photo" :class="{border: deletable}")
     ref='img'
     draggable="true",
     class="gallery-photo__img pointer"
+    crossOrigin="anonymous"
     @dragstart="dragStart($event, photo)"
     @dragend="dragEnd"
     @click="onClick($event, photo as IAssetPhoto)")
@@ -46,7 +47,7 @@ import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { replaceImgInject } from '@/utils/textFillUtils'
-import { defineComponent, inject, PropType } from 'vue'
+import { PropType, defineComponent, inject } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
