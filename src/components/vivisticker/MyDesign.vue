@@ -94,7 +94,7 @@ export default defineComponent({
       windowSize: 'windowSize'
     }),
     tagsToShow(): IMyDesignTag[] {
-      return this.tags.filter(tag => !(tag.tab === 'template' && !this.debugMode && generalUtils.isIPadOS()))
+      return this.tags.filter(tag => !(tag.tab === 'template' && !vivistickerUtils.isTemplateSupported))
     },
     list(): IMyDesign[] {
       return this.myDesignFileList(this.myDesignTab) as IMyDesign[]
