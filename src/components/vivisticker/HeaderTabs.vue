@@ -39,6 +39,7 @@ div(class="header-bar relative" @pointerdown.stop)
 
 <script lang="ts">
 import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
+import i18n from '@/i18n'
 import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -51,6 +52,7 @@ import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { notify } from '@kyvg/vue3-notification'
 import _ from 'lodash'
 import { computed, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -113,6 +115,7 @@ export default defineComponent({
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currSelectedInfo: 'getCurrSelectedInfo',
+      isUploadingShadowImg: 'shadow/isUploading'
     }),
     templateHeaderTab() {
       return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
@@ -359,6 +362,11 @@ export default defineComponent({
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     handleEndEditing() {
+      console.log('this.isUploadingShadowImg', this.isUploadingShadowImg)
+      if (this.isUploadingShadowImg) {
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        return
+      }
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
       }

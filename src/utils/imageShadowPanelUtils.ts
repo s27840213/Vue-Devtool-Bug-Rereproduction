@@ -2,6 +2,7 @@ import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, Shado
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import store from '@/store'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import colorUtils from './colorUtils'
 import generalUtils from './generalUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SPACE, fieldRange, setMark } from './imageShadowUtils'
@@ -641,6 +642,12 @@ export default new class ImageShadowPanelUtils {
             imgY: config.styles.imgY
           }
         })
+        vivistickerUtils.saveDesign()
+        imageShadowUtils.clearLayerData()
+        imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+        imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+        imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+        imageShadowUtils.setUploadProcess(false)
       })
       // uploadUtils.uploadAsset('image', uploadImg, {
       //   addToPage: false,
