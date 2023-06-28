@@ -140,10 +140,6 @@ export default defineComponent({
     inPreview: {
       default: false,
       type: Boolean
-    },
-    screenShot: {
-      default: false,
-      type: Boolean
     }
   },
   async created() {
@@ -456,7 +452,7 @@ export default defineComponent({
           return this.config.id === handleId.layerId
         }
       })()
-      return (isCurrShadowEffectApplied && isHandling) || (this.screenShot && this.config.styles.shadow.currentEffect !== 'none' && this.config.styles.shadow.srcObj.type === 'upload')
+      return isCurrShadowEffectApplied && isHandling
     },
     containerStyles(): any {
       const { width, height } = this.scaledConfig()

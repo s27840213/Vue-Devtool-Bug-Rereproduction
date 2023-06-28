@@ -59,7 +59,9 @@ export default defineComponent({
     imageShadowPanelUtils.mount()
   },
   beforeUnmount() {
-    imageShadowPanelUtils.handleShadowUpload()
+    if (colorUtils.currEvent !== ColorEventType.photoShadow) {
+      imageShadowPanelUtils.handleShadowUpload()
+    }
   },
   computed: {
     ...mapGetters({
