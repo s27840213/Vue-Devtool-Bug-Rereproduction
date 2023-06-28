@@ -1580,13 +1580,14 @@ class UploadUtils {
       }
       case 'text': {
         const text = layer as IText
-        const { type, widthLimit, isEdited, paragraphs, styles, isCompensated, jsonVer, jsonVer_origin } = text
+        const { type, widthLimit, isEdited, paragraphs, styles, isCompensated, spanDataList, jsonVer, jsonVer_origin } = text
         return {
           type,
           widthLimit,
           isEdited,
           isCompensated,
-          paragraphs: paragraphs,
+          paragraphs,
+          spanDataList,
           jsonVer,
           jsonVer_origin,
           styles: this.styleFilter(styles, 'text')
@@ -1611,7 +1612,7 @@ class UploadUtils {
       }
       case 'tmp': {
         const tmp = layer as ITmp
-        const { type, layers, styles, jsonVer, jsonVer_origin } = tmp
+        const { layers, styles, jsonVer, jsonVer_origin } = tmp
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)

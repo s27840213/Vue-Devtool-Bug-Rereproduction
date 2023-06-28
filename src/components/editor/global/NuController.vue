@@ -235,7 +235,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -692,6 +692,7 @@ export default defineComponent({
     },
     textBodyStyle() {
       const checkTextFill = isTextFill(this.config.styles.textFill)
+      // To fix tiptap focus issue that opacity 0 need one more tap to focus, set opacity to 0.0001.
       const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
         !this.contentEditable ? 0.0001 : 1
       return {
@@ -1190,11 +1191,13 @@ export default defineComponent({
            * use computed size given widthlimit instead of querying the DOM object property to achieve higher consistency.
            */
           if (this.config.styles.writingMode.includes('vertical')) {
-            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height })
-            width = TextUtils.getTextHW(this.config as IText, height).width
+            const textHW = TextUtils.getTextHW(this.config as IText, height)
+            width = textHW.width
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height, spanDataList: textHW.spanDataList })
           } else {
-            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width })
-            height = TextUtils.getTextHW(this.config as IText, width).height
+            const textHW = TextUtils.getTextHW(this.config as IText, width)
+            height = textHW.height
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width, spanDataList: textHW.spanDataList })
           }
           /**
            * below make the anchor-point always pinned at the top-left or top-right
@@ -1605,7 +1608,7 @@ export default defineComponent({
         textHW.height = TextUtils.getTextHW(config).height
       }
 
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
 
       if (this.needAutoRescale) {
         const { textHW: newTextHW, x: newX, y: newY, scale } = TextUtils.getAutoRescaleResult(text, textHW, layerX, layerY, undefined, this.pageIndex)

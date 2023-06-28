@@ -121,6 +121,7 @@ export interface IText extends ILayer<ITextStyle> {
   initScale: number,
   isDraggingCursor: boolean,
   isFlipping: boolean,
+  spanDataList?: DOMRect[][][]
 }
 
 export interface IShape extends ILayer<IStyle> {

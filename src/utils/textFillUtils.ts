@@ -2,7 +2,7 @@ import textEffect, { IPutTextEffectResponse } from '@/apis/textEffect'
 import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextFillCustom, ITextFill, ITextFillConfig } from '@/interfaces/format'
+import { ITextFill, ITextFillConfig, isITextFillCustom } from '@/interfaces/format'
 import { AllLayerTypes, IText } from '@/interfaces/layer'
 import router from '@/router'
 import store from '@/store'
@@ -291,7 +291,7 @@ class TextFill {
 
       if (oldTextFill && oldTextFill.name === effect) { // Adjust effect option.
         const localAttrs = !reset && attrs && Object.keys(attrs).includes('img')
-          ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as {img: {key:string}}).img.key}`) : null
+          ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as { img: { key: string } }).img.key}`) : null
         Object.assign(newTextFill, oldTextFill, attrs, localAttrs)
 
         // Only TextFill from appJSON need to store to localstorage
@@ -300,7 +300,7 @@ class TextFill {
         }
       } else { // Switch to other effect.
         const targetEffect = find(this.fillCategories, ['key', effect])
-        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as {img: {key:string}} | undefined
+        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as { img: { key: string } } | undefined
         const localAttrs = effectDefaultPreset?.img?.key ? localStorageUtils.get('textEffectSetting', `fill.${effectDefaultPreset.img.key}`) : null
         Object.assign(newTextFill, defaultAttrs, effectDefaultPreset, localAttrs,
           { name: effect, customImg: oldTextFill.customImg }
@@ -327,7 +327,7 @@ class TextFill {
       // 3. Apply TextFill to the text layer.
       // 4. Enter contentEditable mode, text will have additional line
       if (layer.widthLimit !== -1) {
-        const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit })
+        const widthLimit = await textUtils.autoResize(layer, { ...layer.styles, widthLimit: layer.widthLimit, spanDataList: layer.spanDataList })
         layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit }, currSubLayerIndex)
       }
 

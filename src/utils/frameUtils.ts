@@ -212,12 +212,16 @@ class FrameUtils {
     })
   }
 
-  updateFrameLayerAllClipsStyles(pageIndex: number, primaryLayerIndex: number, styles: { [key: string]: number | IAdjustJsonProps }) {
-    store.commit('SET_frameLayerAllClipsStyles', {
-      pageIndex,
-      primaryLayerIndex,
-      styles
-    })
+  updateFrameLayerAllClipsStyles(pageIndex: number, primaryLayerIndex: number, styles: { [key: string]: number | IAdjustJsonProps }, subLayerIndex = -1) {
+    if (subLayerIndex === -1 || typeof subLayerIndex === 'undefined') {
+      store.commit('SET_frameLayerAllClipsStyles', {
+        pageIndex,
+        primaryLayerIndex,
+        styles
+      })
+    } else {
+      this.updateSubFrameLayerAllClipsStyles(pageIndex, primaryLayerIndex, subLayerIndex, styles)
+    }
   }
 
   updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | SrcObj }, preprimaryLayerIndex = -1) {

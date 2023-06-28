@@ -92,8 +92,17 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   async callIOSAsAPI(...args: Parameters<typeof WebViewUtils.prototype.callIOSAsAPICore>):
     ReturnType<typeof WebViewUtils.prototype.callIOSAsAPICore> {
     const event = args[2]
+    const { cancelOnConfict = false } = args[3] ?? {}
     const eventId = generalUtils.generateRandomString(12)
     if (this.apiQueueMap[event] === undefined) { this.apiQueueMap[event] = [] }
+    if (cancelOnConfict) {
+      if (this.callbackMap[event] !== undefined) {
+        this.callbackMap[event]({
+          data: null,
+          isTimeouted: false
+        })
+      }
+    }
     this.apiQueueMap[event].push({
       eventId,
       args
@@ -119,7 +128,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   }
 
   async callIOSAsAPICore(type: string, message: any, event: string, {
-    timeout = 5000, retry = false, retryTimes = 0
+    timeout = 5000, retry = false, retryTimes = 0, cancelOnConfict = false
   } = {}): Promise<WEBVIEW_API_RESULT> {
     let result: WEBVIEW_API_RESULT
     try {
