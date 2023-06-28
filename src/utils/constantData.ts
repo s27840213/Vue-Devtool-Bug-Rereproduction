@@ -1,4 +1,5 @@
 import i18n from '@/i18n'
+import { tailPositions } from '@/interfaces/format'
 import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
 import store from '@/store'
@@ -386,8 +387,8 @@ class ConstantData {
       fontSpacing: i18n.global.tc('NN0109'),
       img: i18n.global.t('NN0870'),
       customImg: i18n.global.t('NN0871'),
-      tailOffset: '尾巴偏移',
-      tailPosition: '尾巴位置',
+      tailOffset: i18n.global.tc('NN0886'),
+      tailPosition: i18n.global.tc('NN0887'),
     }
 
     return array.map((name: string) => {
@@ -413,7 +414,7 @@ class ConstantData {
           break
         case 'tailPosition':
           option.type = 'select';
-          (option as IEffectOptionSelect).select = ['left-top', 'right-top', 'right-bottom', 'left-bottom'].map((key) => ({
+          (option as IEffectOptionSelect).select = tailPositions.map((key) => ({
             key,
             img: require('@/assets/img/svg/text-effect/endpoint/endpoint-triangle.svg'),
             label: key,
@@ -538,11 +539,11 @@ class ConstantData {
         options: toOptions(['opacity', 'bRadius', 'bStroke', 'pStrokeY', 'bColor', 'pColor'])
       }, ...store.getters['user/isAdmin'] ? [{
         key: 'speech-bubble',
-        label: '對話框',
+        label: i18n.global.tc('NN0884'),
         options: toOptions(['tailPosition', 'tailOffset', 'pStrokeY', 'opacity', 'pColor'])
       }, {
         key: 'speech-bubble2',
-        label: '對話框2',
+        label: i18n.global.tc('NN0885'),
         options: toOptions(['tailPosition', 'tailOffset', 'bRadius', 'pStrokeY', 'opacity', 'pColor'])
       }] : [], {
         key: 'gooey',

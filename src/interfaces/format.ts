@@ -29,7 +29,8 @@ export interface ITextBox {
   pColor: string
 }
 
-export type ITailPosition = 'left-top' | 'right-top' | 'right-bottom' | 'left-bottom'
+export const tailPositions = ['top', 'right', 'bottom', 'left'] as const
+export type ITailPosition = typeof tailPositions[number]
 export interface ITextSpeechBubble {
   name: 'speech-bubble' | 'speech-bubble2'
   tailOffset: number

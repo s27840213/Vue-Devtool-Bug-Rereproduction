@@ -1,5 +1,5 @@
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextBox, isITextGooey, isITextLetterBg, isITextSpeechBubble, isITextUnderline, ITextBg, ITextGooey } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextSpeechBubble, isITextUnderline, ITextBg, ITextGooey, tailPositions } from '@/interfaces/format'
 import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
@@ -683,7 +683,7 @@ class TextBg {
       },
       'speech-bubble': {
         tailOffset: 50,
-        tailPosition: 'left-top',
+        tailPosition: 'top',
         bRadius: 100, // unadjustable
         pStrokeX: 20, // unadjustable in all effects
         pStrokeY: 20,
@@ -692,7 +692,7 @@ class TextBg {
       },
       'speech-bubble2': {
         tailOffset: 50,
-        tailPosition: 'left-top',
+        tailPosition: 'top',
         bRadius: 100,
         pStrokeX: 20, // unadjustable in all effects
         pStrokeY: 20,
@@ -835,7 +835,10 @@ class TextBg {
         content: paths
       }
     } else if (isITextBox(textBg) || isITextSpeechBubble(textBg)) {
-      const tailOffset = isITextSpeechBubble(textBg) ? textBg.tailOffset * 0.01 : 0
+      // Tail in bottom or left need inverse offset direction.
+      const tailOffset = isITextSpeechBubble(textBg)
+        ? ['bottom', 'left'].includes(textBg.tailPosition) ? 1 - textBg.tailOffset * 0.01
+            : textBg.tailOffset * 0.01 : 0
       const fill = textEffectUtils.colorParser(textBg.pColor, config)
       const stroke = isITextBox(textBg) ? textEffectUtils.colorParser(textBg.bColor, config) : ''
       const bStroke = (isITextBox(textBg) ? textBg.bStroke : 0) * fontSizeModifier
@@ -862,12 +865,12 @@ class TextBg {
 
       // Start to draw Path.
       const path = new Path(new Point(bStroke / 2, bStroke / 2 + boxRadius))
-      for (const [i, section] of (['left-top', 'right-top', 'right-bottom', 'left-bottom'] as const).entries()) {
+      for (const [i, section] of tailPositions.entries()) {
         const cornerDir = obj2Point({
-          'left-top': { x: 1, y: -1 },
-          'right-top': { x: 1, y: 1 },
-          'right-bottom': { x: -1, y: 1 },
-          'left-bottom': { x: -1, y: -1 },
+          top: { x: 1, y: -1 },
+          right: { x: 1, y: 1 },
+          bottom: { x: -1, y: 1 },
+          left: { x: -1, y: -1 },
         }[section])
         const centerDir = i % 2 ? new Point(0, cornerDir.y) : new Point(cornerDir.x)
         const center = centerDir.mul(boxRadius)
@@ -889,7 +892,7 @@ class TextBg {
         }
 
         // Draw line, insert tail for speech-bubble2.
-        const lineDist = (['left-top', 'right-bottom'].includes(section) ? boxWidth : boxHeight) - boxRadius * 2
+        const lineDist = (['top', 'bottom'].includes(section) ? boxWidth : boxHeight) - boxRadius * 2
         const lineEnd = centerDir.mul(lineDist)
         if (textBg.name === 'speech-bubble2' && section === textBg.tailPosition) {
           const tailLength = Math.max(Math.min(maxRowHeight * 0.25, lineDist), 0)
@@ -901,7 +904,7 @@ class TextBg {
           path.l(tailMid.sub(tailBegin))
           path.l(tailEnd.sub(tailMid))
           path.l(lineEnd.sub(tailEnd))
-        } else {
+        } else { // Normal line
           path.l(lineEnd)
         }
       }
