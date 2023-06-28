@@ -220,7 +220,7 @@ module.exports = defineConfig({
                     // Tell the Pre-SPA plugin not to use index.html as its template file.
                     indexPath: path.join(__dirname, 'dist', 'app.html'),
                     staticDir: path.join(__dirname, 'dist'),
-                    routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates', '/editor', '/pricing', '/brandkit'],
+                    routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates', '/pricing', '/tw/pricing', '/us/pricing', '/jp/pricing'],
                     minify: {
                         minifyCSS: true,
                         removeComments: true
