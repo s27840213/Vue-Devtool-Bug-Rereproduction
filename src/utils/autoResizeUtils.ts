@@ -443,7 +443,7 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeight {
 export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
   BY = 'spanDataList2'
   MAX_LOOP = 200
-  TOLERANCE = 5
+  TOLERANCE = 0.1
 
   initDirection() {
     // decide which direction to search
@@ -515,13 +515,14 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
       for (let j = 0; j < currSpans.length; j++) {
         const currSpanRects = currSpans[j]
         const targetSpanRects = targetSpans[j]
+        const fontSize = this.config.paragraphs[i].spans[j].styles.size
 
         // if lines of some span don't match, skip calculation
         if (currSpanRects.length !== targetSpanRects.length) return true
 
         for (let k = 0; k < currSpanRects.length; k++) {
           const dimension = this.isVertical ? 'height' : 'width'
-          diffSum += Math.abs(currSpanRects[k][dimension] - targetSpanRects[k][dimension])
+          diffSum += Math.abs(currSpanRects[k][dimension] - targetSpanRects[k][dimension]) / fontSize
           diffCount++
         }
       }
@@ -549,6 +550,7 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
       if (this.checkLoop()) return this.bestResult()
       if (this.checkBound()) return this.bestResult()
       const matched = this.calcDiff()
+      if (this.prevDiff < this.TOLERANCE) return this.bestResult()
       this.log(`line count of all spans matched: ${matched}`)
       this.applyOffset()
       await this.updateSize()
@@ -571,6 +573,7 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
       if (this.checkLoop()) return this.bestResult()
       if (this.checkBound()) return this.bestResult()
       const matched = this.calcDiff()
+      if (this.prevDiff < this.TOLERANCE) return this.bestResult()
       this.log(`line count of all spans matched: ${matched}`)
       this.applyOffset()
       this.updateSizeSync()
