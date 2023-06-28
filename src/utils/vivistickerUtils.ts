@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, isV1_26, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -147,7 +147,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'subscribeResult',
     'screenshotDone',
     'cloneImageDone',
-    'saveDone'
+    'saveImageDone'
   ]
 
   SCREENSHOT_CALLBACKS = [
@@ -1060,6 +1060,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   thumbDone(data: { flag: string }) {
     this.handleCallback('gen-thumb', data)
+  }
+
+  saveImageDone(data: { imageId: string, flag: string, msg?: string }) {
+    this.handleCallback('save-image-from-url', data)
   }
 
   async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {

@@ -58,6 +58,9 @@ export default defineComponent({
   mounted() {
     imageShadowPanelUtils.mount()
   },
+  beforeUnmount() {
+    imageShadowPanelUtils.handleShadowUpload()
+  },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',

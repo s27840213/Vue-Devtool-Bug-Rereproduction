@@ -87,7 +87,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -140,6 +140,10 @@ export default defineComponent({
     inPreview: {
       default: false,
       type: Boolean
+    },
+    screenShot: {
+      default: false,
+      type: Boolean
     }
   },
   async created() {
@@ -184,8 +188,16 @@ export default defineComponent({
         stepsUtils.record()
       }
     })
-
-    // this.canvas = this.$refs.canvas as HTMLCanvasElement | undefined
+    /**
+     * The shadow effect is set, but the img is not uploaded and fetched
+     */
+    const config = this.config as IImage
+    console.log(config.styles.shadow.currentEffect !== 'none', config.styles.shadow.srcObj)
+    // if (config.styles.shadow.currentEffect !== 'none' && !config.styles.shadow.srcObj.assetId) {
+    if (config.styles.shadow.currentEffect !== 'none' && config.styles.shadow.srcObj.type === 'upload') {
+      console.log(' mounted handle shadow')
+      this.handleNewShadowEffect()
+    }
   },
   beforeUnmount() {
     if (!this.isBgImgControl) {
@@ -444,7 +456,7 @@ export default defineComponent({
           return this.config.id === handleId.layerId
         }
       })()
-      return isCurrShadowEffectApplied && isHandling
+      return (isCurrShadowEffectApplied && isHandling) || (this.screenShot && this.config.styles.shadow.currentEffect !== 'none' && this.config.styles.shadow.srcObj.type === 'upload')
     },
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
@@ -838,6 +850,8 @@ export default defineComponent({
       const { layerInfo, shadowBuff } = this
       const canvas = this.$refs.canvas as HTMLCanvasElement
 
+      console.warn('handleNewShadowEffect', canvas)
+      console.warn('this.showCanvas', this.showCanvas)
       if (!canvas || this.isUploadingShadowImg) {
         if (!canvas) {
           imageShadowUtils.setIsProcess(this.layerInfo(), false)
