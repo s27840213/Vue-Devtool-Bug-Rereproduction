@@ -162,7 +162,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get MAX_PAGE_NUM(): number {
-    return 20
+    return 40
   }
 
   get editorType(): string {
