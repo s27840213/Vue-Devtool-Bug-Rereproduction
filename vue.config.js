@@ -34,7 +34,7 @@
 const path = require('path')
 // const webpack = require('webpack')
 // const SentryWebpackPlugin = require('@sentry/webpack-plugin')
-const PrerenderSPAPlugin = require('prerender-spa-plugin-next')
+const PrerenderSPAPlugin = require('@dreysolano/prerender-spa-plugin')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const { argv } = require('yargs')
@@ -205,7 +205,7 @@ module.exports = defineConfig({
                 if (err) console.error(err)
             })
         }
-
+        console.log(argv.PRERENDER)
         if (argv.PRERENDER) {
             console.log('start prerender')
             // Tell Vue (CLI 3) to provide this file to Pre-SPA:
@@ -218,20 +218,21 @@ module.exports = defineConfig({
             config.plugin('prerender')
                 .use(PrerenderSPAPlugin, [{
                     // Tell the Pre-SPA plugin not to use index.html as its template file.
-                    routes: ['/', '/tw', '/us', '/jp'],
+                    indexPath: path.join(__dirname, 'dist', 'app.html'),
+                    staticDir: path.join(__dirname, 'dist'),
+                    routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates', '/editor', '/pricing', '/brandkit'],
                     minify: {
                         minifyCSS: true,
                         removeComments: true
                     },
-                    renderer: require('@prerenderer/renderer-puppeteer'),
-                    rendererOptions: {
+                    renderer: new Renderer({
+                        // The name of the property
                         injectProperty: '__PRERENDER_INJECTED',
                         // The values to have access to via `window.injectProperty` (the above property )
                         inject: { PRERENDER: 1 },
                         renderAfterDocumentEvent: 'render-event',
-                        headless: true,
-                        timeout: 20000
-                    }
+                        headless: true
+                    })
                 }])
         }
 
