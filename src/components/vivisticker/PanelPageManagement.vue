@@ -21,7 +21,6 @@ import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
-import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -178,14 +177,7 @@ export default defineComponent({
     },
     checkMaxPageNum() {
       if (this.pages.length >= vivistickerUtils.MAX_PAGE_NUM) {
-        modalUtils.setModalInfo(
-          this.$t('STK0073'),
-          this.$t('STK0074', { num: vivistickerUtils.MAX_PAGE_NUM }),
-          {
-            msg: this.$t('NN0563'),
-            class: 'btn-black-mid',
-          }
-        )
+        vivistickerUtils.showMaxPageNumModal()
         return false
       }
       return true
