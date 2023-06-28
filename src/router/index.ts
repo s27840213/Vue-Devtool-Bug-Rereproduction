@@ -316,7 +316,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Force login in these page
-  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) && !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode'])) {
+  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) && !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode']) && (window as any).__PRERENDER_INJECTED === undefined) {
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
       if (token === '' || !token) {
