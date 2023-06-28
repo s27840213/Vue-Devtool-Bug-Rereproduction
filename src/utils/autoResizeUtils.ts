@@ -7,6 +7,12 @@ export interface IRunResult {
   loops: number
 }
 
+export interface IMultiStageRunResult {
+  widthLimit: number
+  otherDimension: number
+  stageLoops: number[]
+}
+
 export interface IInitSize {
   width: number
   height: number
@@ -216,7 +222,11 @@ export class AutoResizeByHeight extends AutoResize {
         loops: Math.abs(this.direction)
       }
     } else {
-      return this.currentResult()
+      return {
+        widthLimit: this.initSize.widthLimit,
+        otherDimension: this.originDimension,
+        loops: Math.abs(this.direction)
+      }
     }
   }
 
@@ -526,6 +536,7 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
 
   async run(): Promise<IRunResult> {
     this.log('run start')
+    if (this.initSize.spanDataList === undefined) return this.bestResult()
     await this.updateSize()
 
     this.initDirection()
@@ -535,11 +546,8 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
 
     while (this.shouldContinue) {
       this.autoDimension = this.autoSize[this.dimension]
-      if (this.checkLoop()) return this.finalResult()
-      if (this.checkBound()) {
-        this.runResult = this.bestResult()
-        return this.finalResult()
-      }
+      if (this.checkLoop()) return this.bestResult()
+      if (this.checkBound()) return this.bestResult()
       const matched = this.calcDiff()
       this.log(`line count of all spans matched: ${matched}`)
       this.applyOffset()
@@ -550,6 +558,7 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
 
   runSync(): IRunResult {
     this.log('runSync start')
+    if (this.initSize.spanDataList === undefined) return this.bestResult()
     this.updateSizeSync()
 
     this.initDirection()
@@ -559,11 +568,8 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
 
     while (this.shouldContinue) {
       this.autoDimension = this.autoSize[this.dimension]
-      if (this.checkLoop()) return this.finalResult()
-      if (this.checkBound()) {
-        this.runResult = this.bestResult()
-        return this.finalResult()
-      }
+      if (this.checkLoop()) return this.bestResult()
+      if (this.checkBound()) return this.bestResult()
       const matched = this.calcDiff()
       this.log(`line count of all spans matched: ${matched}`)
       this.applyOffset()

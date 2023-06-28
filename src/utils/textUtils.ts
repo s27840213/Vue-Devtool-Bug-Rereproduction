@@ -4,7 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
-import { AutoResizeByHeight, AutoResizeBySpanDataList2, IInitSize, IRunResult } from '@/utils/autoResizeUtils'
+import { AutoResizeByHeight, AutoResizeBySpanDataList2, IInitSize, IMultiStageRunResult } from '@/utils/autoResizeUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -768,13 +768,13 @@ class TextUtils {
 
   async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
-    const { widthLimit, otherDimension, loops } = await this.autoResizeCore(config, initSize)
+    const { widthLimit, otherDimension, stageLoops } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
     const firstPText = this.getFirstPText(config)
     if (router.currentRoute.value.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
-      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText} loops: ${loops}`)
+      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText} loops: ${stageLoops}`)
     }
     if (limitDiff / initSize.widthLimit > 0.20) {
       return initSize.widthLimit
@@ -783,14 +783,22 @@ class TextUtils {
     }
   }
 
-  autoResizeCoreSync(config: IText, initSize: IInitSize): IRunResult {
+  autoResizeCoreSync(config: IText, initSize: IInitSize): IMultiStageRunResult {
+    const stageLoops = []
     const res = (new AutoResizeByHeight(config, initSize)).runSync()
-    return (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).runSync()
+    stageLoops.push(res.loops)
+    const res2 = (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).runSync()
+    stageLoops.push(res2.loops)
+    return { widthLimit: res2.widthLimit, otherDimension: res2.otherDimension, stageLoops }
   }
 
-  async autoResizeCore(config: IText, initSize: IInitSize): Promise<IRunResult> {
+  async autoResizeCore(config: IText, initSize: IInitSize): Promise<IMultiStageRunResult> {
+    const stageLoops = []
     const res = await (new AutoResizeByHeight(config, initSize)).run()
-    return await (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).run()
+    stageLoops.push(res.loops)
+    const res2 = await (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).run()
+    stageLoops.push(res2.loops)
+    return { widthLimit: res2.widthLimit, otherDimension: res2.otherDimension, stageLoops }
   }
 
   async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
