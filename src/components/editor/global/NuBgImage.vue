@@ -422,6 +422,7 @@ export default defineComponent({
       // detect if SVG image rendered
       const rendering = () => {
         const elImg = this.$refs.img as SVGImageElement
+        if (!elImg) return
         if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
           // Render complete
           vivistickerUtils.setLoadingFlag(-1)
