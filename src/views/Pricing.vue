@@ -77,6 +77,44 @@ export default defineComponent({
     NuFooter,
     SlideToggle
   },
+  metaInfo() {
+    return {
+      title: `${this.$t('SE0001')}`,
+      meta: [{
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      }, {
+        property: 'og:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'og:title'
+      }, {
+        property: 'og:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'og:image'
+      }, {
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      }, {
+        property: 'twitter:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'twitter:title'
+      }, {
+        property: 'twitter:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'twitter:image'
+      }, {
+        property: 'twitter:description',
+        content: `${this.$t('OG0002')}`,
+        vmid: 'twitter:description'
+      }, {
+        property: 'og:url',
+        content: `${this.$t('OG0005')}`,
+        vmid: 'og:url'
+      }]
+    }
+  },
   data() {
     return {
       colorBlock: paymentData.pricingColorBlock(),
