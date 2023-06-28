@@ -5,7 +5,7 @@ div(class="mobile-panel"
     v-click-outside="vcoConfig()"
     ref="panel")
   div(v-if="!noHeaderTheme" class="mobile-panel__top-section"
-    :class="{'self-padding': noPaddingTheme, 'insert-us': insertTheme && isUs }")
+    :class="{'self-padding': noPaddingTheme }")
     div(class="mobile-panel__drag-bar"
       :class="{'visible-hidden': (!insertTheme && !isUs && panelTitle !== '') || fixSize || extraFixSizeCondition}"
       @pointerdown.stop="dragPanelStart"
@@ -250,7 +250,7 @@ export default defineComponent({
       return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'].includes(this.currActivePanel)
+      return ['brand-list', 'text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     noHeaderTheme(): boolean {
       return ['select-design', 'page-management'].includes(this.currActivePanel)
@@ -848,9 +848,6 @@ export default defineComponent({
       justify-content: space-between;
       align-items: center;
     }
-    &.insert-us {
-      padding-top: 25px;
-    }
   }
 
   &__btn {
@@ -911,7 +908,7 @@ export default defineComponent({
     grid-auto-columns: minmax(0, 1fr);
     width: 100%;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: v-bind("insertTheme ? 'hidden' : 'scroll'");
     overflow-x: hidden;
     @include no-scrollbar;
     > *:last-child { // panel-* always take minmax(0, 1fr) grid layout.

@@ -75,6 +75,7 @@ import { IContentTemplate } from '@/interfaces/template'
 import assetUtils from '@/utils/assetUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
@@ -366,6 +367,7 @@ export default defineComponent({
     addGroupTemplate() {
       if (!this.currentGroup) return
       if (!vivistickerUtils.checkPro(this.currentGroup, 'template')) return
+      if (pageUtils.getPages.length + this.currentGroup.content_ids.length > vivistickerUtils.MAX_PAGE_NUM) return vivistickerUtils.showMaxPageNumModal()
       const cb = async () => {
         await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, vivistickerUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`, !this.isInEditor)
         return true
@@ -405,7 +407,7 @@ export default defineComponent({
   color: white;
   text-align: left;
   &__tags {
-    margin-top: 14px;
+    margin: 14px 0 10px;
     color: setColor(black-5);
   }
   &__item {

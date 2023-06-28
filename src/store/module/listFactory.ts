@@ -768,6 +768,7 @@ export default function (this: any) {
         locale,
         keyword,
         theme,
+        igLayout: this.igLayout,
         listAll: 1,
         listCategory: 0,
         pageIndex: keyword ? nextSearch : nextPage,
