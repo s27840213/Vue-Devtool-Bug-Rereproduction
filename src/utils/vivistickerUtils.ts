@@ -1512,6 +1512,17 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     )
   }
 
+  showMaxPageNumModal() {
+    modalUtils.setModalInfo(
+      i18n.global.t('STK0073'),
+      i18n.global.t('STK0074', { num: this.MAX_PAGE_NUM }),
+      {
+        msg: i18n.global.t('NN0563'),
+        class: 'btn-black-mid',
+      }
+    )
+  }
+
   scrollIntoPage(pageIndex: number, duration: number): void {
     const currentPage = document.getElementById(`page-card-${pageIndex}`) as HTMLElement
     const container = currentPage && currentPage.parentElement

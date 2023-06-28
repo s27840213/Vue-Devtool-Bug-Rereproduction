@@ -242,7 +242,7 @@ export default defineComponent({
       this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0) })
     },
     handleSwipe(dir: string) {
-      if (this.hasSelectedLayer || this.isBgImgCtrl || this.isImgCtrl) return
+      if (this.hasSelectedLayer || this.isBgImgCtrl || this.isImgCtrl || this.isInTemplateShare) return
       if (dir === 'right') {
         if (!this.isInPageAdd) this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
         this.isInPageAdd = false

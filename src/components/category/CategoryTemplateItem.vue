@@ -76,6 +76,7 @@ export default defineComponent({
     addTemplate() {
       if (this.groupItem && !vivistickerUtils.checkPro(this.groupItem, 'template')) return
       else if (!this.groupItem && !vivistickerUtils.checkPro(this.item, 'template')) return
+      if (pageUtils.getPages.length + (this.groupItem ? this.groupItem.content_ids.length : 1) > vivistickerUtils.MAX_PAGE_NUM) return vivistickerUtils.showMaxPageNumModal()
       const currPageIndex = pageUtils.currFocusPageIndex
       const attrs = { pageIndex: this.isInEditor ? currPageIndex + 1 : currPageIndex, ...vivistickerUtils.getPageSize(this.igLayout) }
       const moduleKey = `templates/${this.igLayout}`

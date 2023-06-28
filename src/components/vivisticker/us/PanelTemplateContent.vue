@@ -94,7 +94,7 @@ export default defineComponent({
   color: white;
   text-align: left;
   &__tags {
-    margin-top: 14px;
+    margin: 14px 0 10px;
     color: setColor(black-5);
   }
   &__item {
