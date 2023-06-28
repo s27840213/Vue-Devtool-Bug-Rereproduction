@@ -415,7 +415,6 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
-      console.log(`in gesture mode: ${this.inGestureMode}`)
       if (!this.inGestureMode && !this.movingMode) {
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
         this.pointerStartX = e.clientX
@@ -435,7 +434,7 @@ export default defineComponent({
         if (this.$isTouchDevice()) {
           this.showBrush = true
           this.setBrushPos(e)
-          this.magnifyUtils.render(e)
+          this.magnifyUtils && this.magnifyUtils.render(e)
         }
         window.addEventListener('pointerup', this.drawEnd)
         window.addEventListener('pointermove', this.drawing)

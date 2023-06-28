@@ -313,11 +313,11 @@ class BgRemoveUtils {
     })
   }
 
-  saveToIOS() {
+  saveToIOS(callback?: (data: { flag: string, msg: string, imageId: string }) => void) {
     const src = this.canvas.toDataURL('image/png;base64')
-    vivistickerUtils.sendToIOS('SAVE_IMAGE_FROM_URL', {
-      type: 'png',
-      url: src
+    vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src }, 'save-image-done__bgRemove').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      callback && callback(_data)
     })
   }
 }

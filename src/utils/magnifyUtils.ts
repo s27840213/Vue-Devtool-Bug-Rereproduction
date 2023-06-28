@@ -34,6 +34,7 @@ class MagnifyUtils {
   }
 
   render(event: PointerEvent): void {
+    if (!this.magnifyContext) return
     this.posInMagnifierCanvas = mouseUtils.getMousePosInTarget(event, this.targetEl, this.fitScaleRatio)
     this.clear()
     // this.context.save()

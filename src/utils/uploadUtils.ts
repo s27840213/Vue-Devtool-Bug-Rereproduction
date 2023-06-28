@@ -3,10 +3,27 @@ import designApis from '@/apis/design'
 import designInfoApis from '@/apis/design-info'
 import listService from '@/apis/list'
 import i18n from '@/i18n'
-import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentData } from '@/interfaces/api'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp, jsonVer } from '@/interfaces/layer'
+import {
+  IAssetPhoto,
+  IGroupDesignInputParams,
+  IListServiceContentData,
+} from '@/interfaces/api'
+import {
+  IFrame,
+  IGroup,
+  IImage,
+  ILayer,
+  IShape,
+  IText,
+  ITmp,
+  jsonVer,
+} from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { IUploadAssetFontResponse, IUploadAssetLogoResponse, IUploadAssetResponse } from '@/interfaces/upload'
+import {
+  IUploadAssetFontResponse,
+  IUploadAssetLogoResponse,
+  IUploadAssetResponse,
+} from '@/interfaces/upload'
 import router from '@/router'
 import store from '@/store'
 import { SidebarPanelType } from '@/store/types'
@@ -36,14 +53,14 @@ import themeUtils from './themeUtils'
 enum PutAssetDesignType {
   UPDATE_DB,
   UPDATE_PREV,
-  UPDATE_BOTH
+  UPDATE_BOTH,
 }
 
 // 0 for upload new one, 1 for update prev
 enum GroupDesignUpdateFlag {
   UPLOAD,
   UPDATE_GROUP,
-  UPDATE_COVER
+  UPDATE_COVER,
 }
 
 enum GetDesignType {
@@ -51,20 +68,20 @@ enum GetDesignType {
   TEXT = 'text',
   ASSET_DESIGN = 'design',
   NEW_DESIGN_TEMPLATE = 'new-design-template',
-  PRODUCT_PAGE_TEMPLATE = 'product-page-template'
+  PRODUCT_PAGE_TEMPLATE = 'product-page-template',
 }
 /**
  * @todo do the house keeping for upload and update logic
  */
 
 class UploadUtils {
-  static readonly PutAssetDesignType = PutAssetDesignType
-  readonly PutAssetDesignType = UploadUtils.PutAssetDesignType
-  static readonly GroupDesignUpdateFlag = GroupDesignUpdateFlag
-  readonly GroupDesignUpdateFlag = UploadUtils.GroupDesignUpdateFlag
-  static readonly GetDesignType = GetDesignType
-  readonly GetDesignType = UploadUtils.GetDesignType
-  loginOutput: any
+  static readonly PutAssetDesignType = PutAssetDesignType;
+  readonly PutAssetDesignType = UploadUtils.PutAssetDesignType;
+  static readonly GroupDesignUpdateFlag = GroupDesignUpdateFlag;
+  readonly GroupDesignUpdateFlag = UploadUtils.GroupDesignUpdateFlag;
+  static readonly GetDesignType = GetDesignType;
+  readonly GetDesignType = UploadUtils.GetDesignType;
+  loginOutput: any;
   /**
    * @param getDesignInfo
    *  - the reason why we need this param is that if  the url contain the infomation of type=design, and design_id, we need to get the design "after" logining
@@ -73,35 +90,67 @@ class UploadUtils {
    */
 
   getDesignInfo: {
-    flag: number,
-    type: string,
-    id: string,
-    teamId: string
+    flag: number;
+    type: string;
+    id: string;
+    teamId: string;
+  };
+
+  event: any;
+  eventHash: { [index: string]: (param: any) => void };
+  designStatusTimer: number;
+  DEFAULT_POLLING_RETRY_LIMIT = 15;
+
+  get token(): string {
+    return store.getters['user/getToken']
   }
 
-  event: any
-  eventHash: { [index: string]: (param: any) => void }
-  designStatusTimer: number
-  DEFAULT_POLLING_RETRY_LIMIT = 15
+  get userId(): string {
+    return store.getters['user/getUserId']
+  }
 
-  get token(): string { return store.getters['user/getToken'] }
-  get userId(): string { return store.getters['user/getUserId'] }
-  get hostId(): string { return store.getters['vivisticker/getUserInfo'].hostId }
-  get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
-  get groupId(): string { return store.getters.getGroupId }
-  get assetId(): string { return store.getters.getAssetId }
-  get exportIds(): string { return store.state.exportIds }
-  get images(): Array<IAssetPhoto> { return store.getters['file/getImages'] }
-  get isAdmin(): boolean { return store.getters['user/isAdmin'] }
-  get isOutsourcer(): boolean { return store.getters['user/isOutsourcer'] }
-  get isLogin(): boolean { return store.getters['user/isLogin'] }
+  get hostId(): string {
+    return store.getters['vivisticker/getUserInfo'].hostId
+  }
+
+  get teamId(): string {
+    return store.getters['user/getTeamId'] || this.userId
+  }
+
+  get groupId(): string {
+    return store.getters.getGroupId
+  }
+
+  get assetId(): string {
+    return store.getters.getAssetId
+  }
+
+  get exportIds(): string {
+    return store.state.exportIds
+  }
+
+  get images(): Array<IAssetPhoto> {
+    return store.getters['file/getImages']
+  }
+
+  get isAdmin(): boolean {
+    return store.getters['user/isAdmin']
+  }
+
+  get isOutsourcer(): boolean {
+    return store.getters['user/isOutsourcer']
+  }
+
+  get isLogin(): boolean {
+    return store.getters['user/isLogin']
+  }
 
   constructor() {
     this.getDesignInfo = {
       flag: 0,
       type: GetDesignType.ASSET_DESIGN,
       id: '',
-      teamId: ''
+      teamId: '',
     }
     this.event = new EventEmitter()
     this.eventHash = {}
@@ -115,7 +164,9 @@ class UploadUtils {
     // }
   }
 
-  onFontUploadStatus(callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void) {
+  onFontUploadStatus(
+    callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void
+  ) {
     if (this.eventHash.fontUploadStatus) {
       delete this.eventHash.fontUploadStatus
     }
@@ -131,7 +182,9 @@ class UploadUtils {
     this.event.off('fontUploadStatus', this.eventHash.fontUploadStatus)
   }
 
-  onDesignUploadStatus(callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void) {
+  onDesignUploadStatus(
+    callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void
+  ) {
     if (this.eventHash.designUploadStatus) {
       delete this.eventHash.designUploadStatus
     }
@@ -148,7 +201,15 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove' | 'stk-bg-remove-face') {
+  chooseAssets(
+    type:
+      | 'image'
+      | 'font'
+      | 'avatar'
+      | 'logo'
+      | 'stk-bg-remove'
+      | 'stk-bg-remove-face'
+  ) {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
@@ -157,7 +218,7 @@ class UploadUtils {
       avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       'stk-bg-remove': '.jpg,.jpeg,.png,.tiff,.tif,.heic',
-      'stk-bg-remove-face': '.jpg,.jpeg,.png,.tiff,.tif,.heic'
+      'stk-bg-remove-face': '.jpg,.jpeg,.png,.tiff,.tif,.heic',
     }
     const inputNode = document.createElement('input')
     document.body.appendChild(inputNode)
@@ -170,19 +231,23 @@ class UploadUtils {
     inputNode.id = 'upload'
     inputNode.click()
 
-    inputNode.addEventListener('change', (evt: Event) => {
-      // const files = (<HTMLInputElement>evt.target).files
-      const files = inputNode.files
-      const params: { brandId?: string } = {}
-      if (type === 'logo') {
-        params.brandId = store.getters['brandkit/getCurrentBrandId']
-      }
-      if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
-        store.commit('bgRemove/SET_isProcessing', true)
-      }
-      this.uploadAsset(type, files as FileList, params)
-      document.body.removeChild(inputNode)
-    }, false)
+    inputNode.addEventListener(
+      'change',
+      (evt: Event) => {
+        // const files = (<HTMLInputElement>evt.target).files
+        const files = inputNode.files
+        const params: { brandId?: string } = {}
+        if (type === 'logo') {
+          params.brandId = store.getters['brandkit/getCurrentBrandId']
+        }
+        if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
+          store.commit('bgRemove/SET_isProcessing', true)
+        }
+        this.uploadAsset(type, files as FileList, params)
+        document.body.removeChild(inputNode)
+      },
+      false
+    )
   }
 
   uploadScreenShotImage(blob: Blob) {
@@ -192,11 +257,17 @@ class UploadUtils {
     const fileName = `${generalUtils.generateRandomString(8)}.png`
     const formData = new FormData()
 
-    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+    Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
       formData.append(key, this.loginOutput.upload_map.fields[key])
     })
-    formData.append('key', `${this.loginOutput.upload_map.path}asset/image/${assetId}/original`)
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(`${fileName}`)}`)
+    formData.append(
+      'key',
+      `${this.loginOutput.upload_map.path}asset/image/${assetId}/original`
+    )
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(`${fileName}`)}`
+    )
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
@@ -220,21 +291,21 @@ class UploadUtils {
           width: img.width,
           height: img.height,
           src: img.src,
-          assetId: assetId
+          assetId: assetId,
         })
         assetUtils.addImage(img.src, img.width / img.height, {
           pageIndex: pageUtils.currFocusPageIndex,
           // The following props is used for preview image during polling process
           isPreview: true,
-          assetId
+          assetId,
         })
         xhr.open('POST', this.loginOutput.upload_map.url, true)
         let increaseInterval = undefined as any
         xhr.upload.onprogress = (event) => {
-          const uploadProgress = Math.floor(event.loaded / event.total * 100)
+          const uploadProgress = Math.floor((event.loaded / event.total) * 100)
           store.commit('file/UPDATE_PROGRESS', {
             assetId: assetId,
-            progress: uploadProgress / 2
+            progress: uploadProgress / 2,
           })
           if (uploadProgress === 100) {
             increaseInterval = window.setInterval(() => {
@@ -252,7 +323,11 @@ class UploadUtils {
         xhr.onload = () => {
           // polling the JSON file of uploaded image
           const interval = window.setInterval(() => {
-            const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
+            const pollingTargetSrc = `https://template.vivipic.com/export/${
+              this.teamId
+            }/${assetId}/result.json?ver=${generalUtils.generateRandomString(
+              6
+            )}`
             fetch(pollingTargetSrc).then((response) => {
               if (response.status === 200) {
                 clearInterval(interval)
@@ -263,11 +338,25 @@ class UploadUtils {
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
                       assetId: assetId,
-                      progress: 100
+                      progress: 100,
                     })
-                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, width, height })
-                    store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
-                    store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
+                    store.commit('file/UPDATE_IMAGE_URLS', {
+                      assetId,
+                      urls: json.url,
+                      assetIndex: asset_index,
+                      width,
+                      height,
+                    })
+                    store.commit('DELETE_previewSrc', {
+                      type: this.isAdmin ? 'public' : 'private',
+                      userId: this.userId,
+                      assetId,
+                      assetIndex: json.data.asset_index,
+                    })
+                    store.commit('file/SET_UPLOADING_IMGS', {
+                      id: assetId,
+                      adding: false,
+                    })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
                     this.uploadDesign()
@@ -288,39 +377,60 @@ class UploadUtils {
   //
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo' | 'stk-bg-remove' | 'stk-bg-remove-face', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false, pollingJsonName = 'result.json' }: {
-    addToPage?: boolean,
-    id?: string,
-    pollingCallback?: (json: IUploadAssetResponse) => void,
-    needCompressed?: boolean,
-    brandId?: string
-    isShadow?: boolean,
-    pollingJsonName?: string
-  } = {}) {
+  uploadAsset(
+    type:
+      | 'image'
+      | 'font'
+      | 'avatar'
+      | 'logo'
+      | 'stk-bg-remove'
+      | 'stk-bg-remove-face',
+    files: FileList | Array<string>,
+    {
+      addToPage = false,
+      id,
+      pollingCallback,
+      needCompressed = true,
+      brandId,
+      isShadow = false,
+      pollingJsonName = 'result.json',
+    }: {
+      addToPage?: boolean;
+      id?: string;
+      pollingCallback?: (json: IUploadAssetResponse) => void;
+      needCompressed?: boolean;
+      brandId?: string;
+      isShadow?: boolean;
+      pollingJsonName?: string;
+    } = {}
+  ) {
+    console.log(type, files)
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
 
     // Check if file size over limit.
     for (let i = 0; i < files.length; i++) {
-      const fileSize = (typeof files[i] === 'string'
-        ? (files[i] as string).length / 4 * 3
-        : (files[i] as File).size) / 1024 / 1024
+      const fileSize =
+        (typeof files[i] === 'string'
+          ? ((files[i] as string).length / 4) * 3
+          : (files[i] as File).size) /
+        1024 /
+        1024
       const fileSizeLimit = // 50 for font, BGremove and shadow.
-        (typeof files[i] === 'string' || type === 'font') ? 50 : 25
-      const modalDesc = typeof files[i] === 'string'
-        ? i18n.global.t('NN0705',
-          { size: fileSizeLimit }
-        )
-        : i18n.global.t('NN0696',
-          { file: (files[i] as File)?.name, size: fileSizeLimit }
-        )
+        typeof files[i] === 'string' || type === 'font' ? 50 : 25
+      const modalDesc =
+        typeof files[i] === 'string'
+          ? i18n.global.t('NN0705', { size: fileSizeLimit })
+          : i18n.global.t('NN0696', {
+              file: (files[i] as File)?.name,
+              size: fileSizeLimit,
+            })
 
       if (fileSize > fileSizeLimit) {
-        modalUtils.setModalInfo(
-          i18n.global.t('NN0137') as string,
-          [modalDesc as string]
-        )
+        modalUtils.setModalInfo(i18n.global.t('NN0137') as string, [
+          modalDesc as string,
+        ])
         return
       }
     }
@@ -329,40 +439,74 @@ class UploadUtils {
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
       const assetId = id ?? generalUtils.generateAssetId()
-      const uuid = store.getters['vivisticker/getUuid'] ? store.getters['vivisticker/getUuid'] : generalUtils.generateAssetId()
+      const uuid = store.getters['vivisticker/getUuid']
+        ? store.getters['vivisticker/getUuid']
+        : generalUtils.generateAssetId()
 
       // for horizontal image test
       // const assetId = '230511154035471yNJGiW58'
       // const uuid = '230511154035471qUvA6TTT'
       const formData = new FormData()
       if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
-        Object.keys(this.loginOutput.ul_removebg_map.fields).forEach(key => {
+        Object.keys(this.loginOutput.ul_removebg_map.fields).forEach((key) => {
           formData.append(key, this.loginOutput.ul_removebg_map.fields[key])
         })
       } else {
-        Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+        Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
           formData.append(key, this.loginOutput.upload_map.fields[key])
         })
       }
       if (type === 'avatar') {
-        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
+        formData.append(
+          'key',
+          `${this.loginOutput.upload_map.path}asset/${type}/original`
+        )
       } else if (type === 'font') {
-        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.global.locale}_original`)
+        formData.append(
+          'key',
+          `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.global.locale}_original`
+        )
       } else if (type === 'stk-bg-remove') {
-        formData.append('key', `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bg`)
+        formData.append(
+          'key',
+          `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bg`
+        )
       } else if (type === 'stk-bg-remove-face') {
-        formData.append('key', `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bgf`)
+        formData.append(
+          'key',
+          `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bgf`
+        )
       } else if (type === 'logo') {
         if (!brandId) return
-        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`)
+        formData.append(
+          'key',
+          `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`
+        )
       } else {
-        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
+        formData.append(
+          'key',
+          `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`
+        )
       }
-      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original')}`)
-      formData.append('x-amz-meta-tn', needCompressed ? this.userId : (isShadow ? `${this.userId},2` : `${this.userId},1`))
+      formData.append(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent(
+          isFile ? (files[i] as File).name : 'original'
+        )}`
+      )
+      formData.append(
+        'x-amz-meta-tn',
+        needCompressed
+          ? this.userId
+          : isShadow
+          ? `${this.userId},2`
+          : `${this.userId},1`
+      )
       const xhr = new XMLHttpRequest()
 
-      const file = isFile ? files[i] : generalUtils.dataURLtoBlob(files[i] as string)
+      const file = isFile
+        ? files[i]
+        : generalUtils.dataURLtoBlob(files[i] as string)
       if (formData.has('file')) {
         formData.set('file', file)
       } else {
@@ -378,14 +522,14 @@ class UploadUtils {
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
-              pageIndex: pageUtils.currFocusPageIndex
+              pageIndex: pageUtils.currFocusPageIndex,
             })
             if (addToPage) {
               assetUtils.addImage(src, isUnknown ? 1 : img.width / img.height, {
                 pageIndex: pageUtils.currFocusPageIndex,
                 // The following props is used for preview image during polling process
                 isPreview: true,
-                assetId
+                assetId,
               })
             }
             xhr.open('POST', this.loginOutput.upload_map.url, true)
@@ -395,19 +539,23 @@ class UploadUtils {
                 width: isUnknown ? 250 : img.width,
                 height: isUnknown ? 250 : img.height,
                 src,
-                assetId: assetId
+                assetId: assetId,
               })
               xhr.upload.onprogress = (event) => {
-                const uploadProgress = Math.floor(event.loaded / event.total * 100)
+                const uploadProgress = Math.floor(
+                  (event.loaded / event.total) * 100
+                )
                 store.commit('file/UPDATE_PROGRESS', {
                   assetId: assetId,
-                  progress: uploadProgress / 2
+                  progress: uploadProgress / 2,
                 })
                 if (uploadProgress === 100) {
                   increaseInterval = window.setInterval(() => {
-                    const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
-                      return img.id === assetId
-                    })
+                    const targetIndex = this.images.findIndex(
+                      (img: IAssetPhoto) => {
+                        return img.id === assetId
+                      }
+                    )
                     const curr = this.images[targetIndex].progress as number
                     const increaseNum = (90 - curr) * 0.05
                     this.images[targetIndex].progress = curr + increaseNum
@@ -420,7 +568,11 @@ class UploadUtils {
             xhr.onload = () => {
               // polling the JSON file of uploaded image
               const interval = window.setInterval(() => {
-                const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
+                const pollingTargetSrc = `https://template.vivipic.com/export/${
+                  this.teamId
+                }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+                  6
+                )}`
                 fetch(pollingTargetSrc).then((response) => {
                   if (response.status === 200) {
                     clearInterval(interval)
@@ -432,12 +584,25 @@ class UploadUtils {
                           if (!isShadow) {
                             store.commit('file/UPDATE_PROGRESS', {
                               assetId: assetId,
-                              progress: 100
+                              progress: 100,
                             })
-                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, ...(isUnknown && { width, height }) })
+                            store.commit('file/UPDATE_IMAGE_URLS', {
+                              assetId,
+                              urls: json.url,
+                              assetIndex: asset_index,
+                              ...(isUnknown && { width, height }),
+                            })
                           }
-                          store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
-                          store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
+                          store.commit('DELETE_previewSrc', {
+                            type: this.isAdmin ? 'public' : 'private',
+                            userId: this.userId,
+                            assetId,
+                            assetIndex: json.data.asset_index,
+                          })
+                          store.commit('file/SET_UPLOADING_IMGS', {
+                            id: assetId,
+                            adding: false,
+                          })
                           if (pollingCallback) {
                             pollingCallback(json)
                           }
@@ -468,7 +633,11 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${
+                this.teamId
+              }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+                6
+              )}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -498,20 +667,32 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/avatar/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${
+                this.teamId
+              }/avatar/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+                6
+              )}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
                   response.json().then((json: IUploadAssetResponse) => {
                     if (json.flag === 0) {
                       console.log('Successfully upload the file')
-                      const targetUrls = this.isAdmin ? {
-                        prev: `https://template.vivipic.com/admin/${this.teamId || this.userId}/asset/avatar/prev`,
-                        prev_2x: `https://template.vivipic.com/admin/${this.teamId || this.userId}/asset/avatar/prev_2x`,
-                        prev_4x: `https://template.vivipic.com/admin/${this.teamId || this.userId}/asset/avatar/prev_4x`
-                      } : json.url
+                      const targetUrls = this.isAdmin
+                        ? {
+                            prev: `https://template.vivipic.com/admin/${
+                              this.teamId || this.userId
+                            }/asset/avatar/prev`,
+                            prev_2x: `https://template.vivipic.com/admin/${
+                              this.teamId || this.userId
+                            }/asset/avatar/prev_2x`,
+                            prev_4x: `https://template.vivipic.com/admin/${
+                              this.teamId || this.userId
+                            }/asset/avatar/prev_4x`,
+                          }
+                        : json.url
                       store.commit('user/SET_STATE', {
-                        avatar: targetUrls
+                        avatar: targetUrls,
                       })
                       modalUtils.setModalInfo(`${i18n.global.t('NN0224')}`, [])
                     } else {
@@ -532,7 +713,11 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(6)}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${
+                this.teamId
+              }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+                6
+              )}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -540,7 +725,7 @@ class UploadUtils {
                     if (json.flag === 0) {
                       notify({
                         group: 'copy',
-                        text: `${i18n.global.t('NN0135')}`
+                        text: `${i18n.global.t('NN0135')}`,
                       })
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceLogo(tempId, json.data, brandId)
@@ -559,18 +744,27 @@ class UploadUtils {
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             imageUtils.getImageSize(src, 0, 0).then(({ width, height }) => {
-              bgRemoveUtils.removeBgStk(uuid, assetId, src, width, height, type)
+              bgRemoveUtils.removeBgStk(
+                uuid,
+                assetId,
+                src,
+                width,
+                height,
+                type
+              )
             })
           }
         }
       }
       if (isFile) {
-        generalUtils.getFileImageTypeByByte(files[i] as File).then((imgType: string) => {
-          reader.onload = (evt) => {
-            assetHandler(evt.target?.result as string, imgType)
-          }
-          reader.readAsDataURL(files[i] as File)
-        })
+        generalUtils
+          .getFileImageTypeByByte(files[i] as File)
+          .then((imgType: string) => {
+            reader.onload = (evt) => {
+              assetHandler(evt.target?.result as string, imgType)
+            }
+            reader.readAsDataURL(files[i] as File)
+          })
       } else {
         assetHandler(files[i] as string)
       }
@@ -580,14 +774,20 @@ class UploadUtils {
   async uploadLog(logContent: string) {
     await this.checkIfUrlExpires()
     const formData = new FormData()
-    Object.keys(this.loginOutput.upload_log_map.fields).forEach(key => {
+    Object.keys(this.loginOutput.upload_log_map.fields).forEach((key) => {
       formData.append(key, this.loginOutput.upload_log_map.fields[key])
     })
 
     const logName = `log-${generalUtils.generateTimeStamp()}.txt`
-    formData.append('key', `${this.loginOutput.upload_log_map.path}${this.hostId}/${logName}`)
+    formData.append(
+      'key',
+      `${this.loginOutput.upload_log_map.path}${this.hostId}/${logName}`
+    )
     console.log(formData.get('key'))
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`)
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`
+    )
     formData.append('x-amz-meta-tn', this.hostId)
     const xhr = new XMLHttpRequest()
 
@@ -608,14 +808,18 @@ class UploadUtils {
     })
   }
 
-  async uploadDesign(putAssetDesignType?: PutAssetDesignType, params?: { clonedPages?: Array<IPage> }) {
+  async uploadDesign(
+    putAssetDesignType?: PutAssetDesignType,
+    params?: { clonedPages?: Array<IPage> }
+  ) {
     const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
     let type = router.currentRoute.value.query.type
     let designId = router.currentRoute.value.query.design_id
     let teamId = router.currentRoute.value.query.team_id
     let isNewDesign = false
     // const exportIds = router.currentRoute.value.query.export_ids
-    const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
+    const assetId =
+      this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
     if (store.state.isGettingDesign) {
       return
@@ -634,13 +838,21 @@ class UploadUtils {
       type = 'design'
       designId = assetId
       teamId = this.teamId
-      router.replace({ query: Object.assign({}, router.currentRoute.value.query, { type, design_id: designId, team_id: teamId }) })
+      router.replace({
+        query: Object.assign({}, router.currentRoute.value.query, {
+          type,
+          design_id: designId,
+          team_id: teamId,
+        }),
+      })
       isNewDesign = true
     }
 
     store.commit('SET_assetId', assetId)
     const { clonedPages } = params || {}
-    const pages = clonedPages ?? generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    const pages =
+      clonedPages ??
+      (generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>)
     // const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
     logUtils.setLog(`Upload Design:
@@ -652,7 +864,10 @@ class UploadUtils {
     const pagesJSON = pages.map((page: IPage) => {
       const newPage = this.default(page, false)
       for (const [i, layer] of newPage.layers.entries()) {
-        if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+        if (
+          layer.type === 'shape' &&
+          (layer.designId || layer.category === 'D' || layer.category === 'E')
+        ) {
           newPage.layers[i] = this.layerInfoFilter(layer)
         } else if (layer.type !== 'shape') {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -661,16 +876,25 @@ class UploadUtils {
       newPage.backgroundImage.config.imgControl = false
       newPage.width = _.round(newPage.width)
       newPage.height = _.round(newPage.height)
-      newPage.bleeds && Object.keys(newPage.bleeds).forEach(key => {
-        newPage.bleeds[key] = _.round(newPage.bleeds[key])
-      })
+      newPage.bleeds &&
+        Object.keys(newPage.bleeds).forEach((key) => {
+          newPage.bleeds[key] = _.round(newPage.bleeds[key])
+        })
 
       const precision = newPage.unit === 'px' ? 0 : PRECISION
-      if (newPage.physicalWidth) newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
-      if (newPage.physicalHeight) newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
-      newPage.physicalBleeds && Object.keys(newPage.physicalBleeds).forEach(key => {
-        newPage.physicalBleeds[key] = _.round(newPage.physicalBleeds[key], precision)
-      })
+      if (newPage.physicalWidth) {
+        newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
+      }
+      if (newPage.physicalHeight) {
+        newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
+      }
+      newPage.physicalBleeds &&
+        Object.keys(newPage.physicalBleeds).forEach((key) => {
+          newPage.physicalBleeds[key] = _.round(
+            newPage.physicalBleeds[key],
+            precision
+          )
+        })
       return newPage
     })
 
@@ -678,19 +902,24 @@ class UploadUtils {
       pages: pagesJSON,
       groupId: store.state.groupId,
       groupType: store.state.groupType,
-      exportIds: this.exportIds
+      exportIds: this.exportIds,
     }
 
     const formData = new FormData()
-    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+    Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
       formData.append(key, this.loginOutput.upload_map.fields[key])
     })
 
-    formData.append('key', `${this.loginOutput.upload_map.path}asset/design/${assetId}/config.json`)
+    formData.append(
+      'key',
+      `${this.loginOutput.upload_map.path}asset/design/${assetId}/config.json`
+    )
     formData.append('Content-Disposition', 'inline')
     formData.append('x-amz-meta-tn', this.userId)
 
-    const blob = new Blob([JSON.stringify(resultJSON)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(resultJSON)], {
+      type: 'application/json',
+    })
     if (formData.has('file')) {
       formData.set('file', blob)
     } else {
@@ -706,12 +935,17 @@ class UploadUtils {
           this.emitDesignUploadEvent('success')
         }, 300)
         if (putAssetDesignType !== undefined) {
-          logUtils.setLog(`Put asset design (Type: ${typeMap[putAssetDesignType]})`)
-          const resPutAssetDesign = await store.dispatch('user/putAssetDesign', {
-            assetId,
-            type: putAssetDesignType,
-            wait: 1
-          })
+          logUtils.setLog(
+            `Put asset design (Type: ${typeMap[putAssetDesignType]})`
+          )
+          const resPutAssetDesign = await store.dispatch(
+            'user/putAssetDesign',
+            {
+              assetId,
+              type: putAssetDesignType,
+              wait: 1,
+            }
+          )
           const { flag } = resPutAssetDesign
           if (flag !== 0) {
             notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
@@ -723,20 +957,43 @@ class UploadUtils {
           if (isNewDesign) {
             // move design to path
             if (path) {
-              const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
+              const designAssetIndex = (
+                await store.dispatch('design/fetchDesign', { teamId, assetId })
+              ).asset_index?.toString()
               if (!designAssetIndex) {
                 notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
                 return
               }
-              await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-                'move', designAssetIndex, null, path).catch(async err => {
+              await designApis
+                .updateDesigns(
+                  designApis.getToken(),
+                  designApis.getLocale(),
+                  designApis.getUserId(),
+                  'move',
+                  designAssetIndex,
+                  null,
+                  path
+                )
+                .catch(async (err) => {
                   // remove design if move failed
                   console.error(err)
-                  await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-                    'delete', designAssetIndex, null, '2').catch(err => {
+                  await designApis
+                    .updateDesigns(
+                      designApis.getToken(),
+                      designApis.getLocale(),
+                      designApis.getUserId(),
+                      'delete',
+                      designAssetIndex,
+                      null,
+                      '2'
+                    )
+                    .catch((err) => {
                       console.error(err)
                     })
-                  notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
+                  notify({
+                    group: 'error',
+                    text: `${i18n.global.t('NN0360')}`,
+                  })
                 })
               // update design info
               designUtils.fetchDesign(teamId as string, assetId)
@@ -765,17 +1022,22 @@ class UploadUtils {
   uploadTmpJSON() {
     const assetId = generalUtils.generateAssetId()
     const formData = new FormData()
-    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+    Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
       formData.append(key, this.loginOutput.upload_map.fields[key])
     })
 
     formData.append('key', `${this.loginOutput.upload_map.path}edit/temp.json`)
     // only for template
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('temp.json')}`)
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent('temp.json')}`
+    )
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
     const pagesJSON = store.getters.getPages
-    const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(pagesJSON)], {
+      type: 'application/json',
+    })
     if (formData.has('file')) {
       formData.set('file', blob)
     } else {
@@ -792,7 +1054,9 @@ class UploadUtils {
 
   async getTmpJSON() {
     const fetchTarget = `https://template.vivipic.com/admin/${this.teamId}/edit/temp.json`
-    const response = await fetch(`${fetchTarget}?ver=${generalUtils.generateRandomString(6)}`)
+    const response = await fetch(
+      `${fetchTarget}?ver=${generalUtils.generateRandomString(6)}`
+    )
     stepsUtils.reset()
     response.json().then((json: Array<IPage>) => {
       store.commit('SET_pages', json)
@@ -800,13 +1064,20 @@ class UploadUtils {
        * @todo need to disable sub controller if we have
        */
       const hasTmp = json.some((page: IPage, pageIndex: number) => {
-        return page.layers.some((layer: IText | IImage | IShape | IGroup | ITmp | IFrame, layerIndex: number) => {
-          if (layer.active) {
-            layer.type === 'tmp' ? groupUtils.set(pageIndex, layerIndex, (layer as ITmp).layers) : groupUtils.set(pageIndex, layerIndex, [layer])
-            return true
+        return page.layers.some(
+          (
+            layer: IText | IImage | IShape | IGroup | ITmp | IFrame,
+            layerIndex: number
+          ) => {
+            if (layer.active) {
+              layer.type === 'tmp'
+                ? groupUtils.set(pageIndex, layerIndex, (layer as ITmp).layers)
+                : groupUtils.set(pageIndex, layerIndex, [layer])
+              return true
+            }
+            return false
           }
-          return false
-        })
+        )
       })
       stepsUtils.record()
     })
@@ -817,27 +1088,41 @@ class UploadUtils {
     const designId = id ?? generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
 
-    layerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
-      designId: designId
-    })
+    layerUtils.updateLayerProps(
+      currSelectedInfo.pageIndex,
+      currSelectedInfo.index,
+      {
+        designId: designId,
+      }
+    )
 
     const formData = new FormData()
-    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+    Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
 
-    formData.append('key', `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/config.json`)
+    formData.append(
+      'key',
+      `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/config.json`
+    )
     // only for template
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`
+    )
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
     // const layerInfo = generalUtils.deepCopy(currSelectedInfo.layers[0])
     // Object.assign(layerInfo, { active: false })
     // this.removeComputableInfo(layerInfo)
-    const layerInfo = this.layerInfoFilter(generalUtils.deepCopy(currSelectedInfo.layers[0]))
+    const layerInfo = this.layerInfoFilter(
+      generalUtils.deepCopy(currSelectedInfo.layers[0])
+    )
 
-    const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(layerInfo)], {
+      type: 'application/json',
+    })
     if (formData.has('file')) {
       formData.set('file', blob)
     } else {
@@ -849,8 +1134,15 @@ class UploadUtils {
     xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = () => {
       const currSelectedInfo = store.getters.getCurrSelectedInfo
-      const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
-      const targetLayer = this.layerInfoFilter(pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0])
+      const pageJSON = generalUtils.deepCopy(
+        store.getters.getPage(currSelectedInfo.pageIndex)
+      ) as IPage
+      const targetLayer = this.layerInfoFilter(
+        pageJSON.layers.slice(
+          currSelectedInfo.index,
+          currSelectedInfo.index + 1
+        )[0]
+      )
       // const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
       // targetLayer.active = false
       // targetLayer.isTyping = false
@@ -861,26 +1153,42 @@ class UploadUtils {
 
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
-      pageJSON.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+      pageJSON.backgroundImage.config.srcObj = {
+        type: '',
+        userId: '',
+        assetId: '',
+      }
 
       const formData = new FormData()
-      Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
+      Object.keys(this.loginOutput.upload_admin_map.fields).forEach((key) => {
         formData.append(key, this.loginOutput.upload_admin_map.fields[key])
       })
 
-      formData.append('key', `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/page.json`)
-      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
+      formData.append(
+        'key',
+        `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/page.json`
+      )
+      formData.append(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`
+      )
       formData.append('x-amz-meta-tn', this.userId)
       const xhrReq = new XMLHttpRequest()
 
-      const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
+      const blob = new Blob([JSON.stringify(pageJSON)], {
+        type: 'application/json',
+      })
       formData.append('file', blob)
 
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
         navigator.clipboard.writeText(designId)
-        modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
+        modalUtils.setModalInfo('上傳成功', [
+          `Design ID: ${designId}`,
+          `Status code: ${xhr.status}`,
+          '已複製 Design ID 到剪貼簿',
+        ])
       }
     }
   }
@@ -891,17 +1199,25 @@ class UploadUtils {
     const designId = currSelectedInfo.layers[0].designId
 
     const formData = new FormData()
-    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+    Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
 
-    formData.append('key', `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/config.json`)
+    formData.append(
+      'key',
+      `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/config.json`
+    )
     // only for template
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`
+    )
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const layerInfo = this.layerInfoFilter(generalUtils.deepCopy(currSelectedInfo.layers[0]))
+    const layerInfo = this.layerInfoFilter(
+      generalUtils.deepCopy(currSelectedInfo.layers[0])
+    )
     // layerInfo.active = false
     // layerInfo.isTyping = false
     // layerInfo.locked = false
@@ -909,7 +1225,9 @@ class UploadUtils {
     // layerInfo.editing = false
     // this.layerInfoFilter(layerInfo)
 
-    const blob = new Blob([JSON.stringify(layerInfo)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(layerInfo)], {
+      type: 'application/json',
+    })
     if (formData.has('file')) {
       formData.set('file', blob)
     } else {
@@ -921,52 +1239,89 @@ class UploadUtils {
     xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = () => {
       const currSelectedInfo = store.getters.getCurrSelectedInfo
-      const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
+      const pageJSON = generalUtils.deepCopy(
+        store.getters.getPage(currSelectedInfo.pageIndex)
+      ) as IPage
       // const targetLayer = pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0]
       // targetLayer.active = false
       // this.layerInfoFilter(targetLayer)
-      const targetLayer = this.layerInfoFilter(pageJSON.layers.slice(currSelectedInfo.index, currSelectedInfo.index + 1)[0])
+      const targetLayer = this.layerInfoFilter(
+        pageJSON.layers.slice(
+          currSelectedInfo.index,
+          currSelectedInfo.index + 1
+        )[0]
+      )
       pageJSON.layers = [targetLayer]
       pageJSON.backgroundColor = 'transparent'
-      pageJSON.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+      pageJSON.backgroundImage.config.srcObj = {
+        type: '',
+        userId: '',
+        assetId: '',
+      }
 
       // console.log(pageJSON)
       const formData = new FormData()
-      Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
+      Object.keys(this.loginOutput.upload_admin_map.fields).forEach((key) => {
         formData.append(key, this.loginOutput.upload_admin_map.fields[key])
       })
 
-      formData.append('key', `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/page.json`)
+      formData.append(
+        'key',
+        `${this.loginOutput.upload_admin_map.path}${targetBucket}/${designId}/page.json`
+      )
       // only for template
-      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
+      formData.append(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`
+      )
       formData.append('x-amz-meta-tn', this.userId)
       const xhrReq = new XMLHttpRequest()
 
-      const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
+      const blob = new Blob([JSON.stringify(pageJSON)], {
+        type: 'application/json',
+      })
       formData.append('file', blob)
 
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
         navigator.clipboard.writeText(designId)
-        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
+        modalUtils.setModalInfo('更新成功', [
+          `Design ID: ${designId}`,
+          `Status code: ${xhr.status}`,
+          '已複製 Design ID 到剪貼簿',
+        ])
       }
     }
   }
 
-  uploadGroupDesign(update: GroupDesignUpdateFlag, ecomm: 0 | 1, deleteGroup = false as boolean, coverId?: string) {
-    const groupId = (update === this.GroupDesignUpdateFlag.UPLOAD) ? '' : this.groupId
+  uploadGroupDesign(
+    update: GroupDesignUpdateFlag,
+    ecomm: 0 | 1,
+    deleteGroup = false as boolean,
+    coverId?: string
+  ) {
+    const groupId =
+      update === this.GroupDesignUpdateFlag.UPLOAD ? '' : this.groupId
     // store.commit('SET_groupId', groupId)
     const pages = pageUtils.getPages
     /**
      * @param {string} list - template id list (separate by comma)
      */
-    if (update === GroupDesignUpdateFlag.UPLOAD || update === GroupDesignUpdateFlag.UPDATE_GROUP) {
+    if (
+      update === GroupDesignUpdateFlag.UPLOAD ||
+      update === GroupDesignUpdateFlag.UPDATE_GROUP
+    ) {
       // Could only delete group when updating group
-      const list = deleteGroup && update === GroupDesignUpdateFlag.UPDATE_GROUP ? '' : pages.map((page: IPage) => page.designId).join(',')
+      const list =
+        deleteGroup && update === GroupDesignUpdateFlag.UPDATE_GROUP
+          ? ''
+          : pages.map((page: IPage) => page.designId).join(',')
       if (ecomm) {
         if (!pageUtils.isAllPageSizeEqual()) {
-          modalUtils.setModalInfo('上傳 or 更新詳情頁失敗', ['Page 寬度不一致'])
+          modalUtils.setModalInfo('上傳 or 更新詳情頁失敗', [
+            'Page 寬度不一致',
+          ])
           return
         }
       }
@@ -975,21 +1330,23 @@ class UploadUtils {
         update,
         list,
         group_id: groupId,
-        ecomm
+        ecomm,
       } as IGroupDesignInputParams)
     }
 
     if (update === GroupDesignUpdateFlag.UPDATE_COVER) {
       const coverType = 'Idontknow'
       const cover = `${coverType}:${coverId}`
-      store.dispatch('user/groupDesign', {
-        token: this.token,
-        update,
-        group_id: groupId,
-        cover
-      } as IGroupDesignInputParams).then(() => {
-        // console.log(groupId)
-      })
+      store
+        .dispatch('user/groupDesign', {
+          token: this.token,
+          update,
+          group_id: groupId,
+          cover,
+        } as IGroupDesignInputParams)
+        .then(() => {
+          // console.log(groupId)
+        })
     }
   }
 
@@ -1005,13 +1362,16 @@ class UploadUtils {
     const parentId = page.designId ?? ''
     store.commit('SET_pageDesignId', {
       pageIndex: pageIndex,
-      designId: designId
+      designId: designId,
     })
 
     const pageJSON = this.default(page)
     pageJSON.parentId = parentId
     for (const [i, layer] of pageJSON.layers.entries()) {
-      if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+      if (
+        layer.type === 'shape' &&
+        (layer.designId || layer.category === 'D' || layer.category === 'E')
+      ) {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
       } else if (layer.type !== 'shape') {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
@@ -1022,17 +1382,25 @@ class UploadUtils {
     pageJSON.height = parseInt(pageJSON.height.toString(), 10)
 
     const formData = new FormData()
-    Object.keys(this.loginOutput.upload_admin_map.fields).forEach(key => {
+    Object.keys(this.loginOutput.upload_admin_map.fields).forEach((key) => {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
 
-    formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
+    formData.append(
+      'key',
+      `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`
+    )
     // only for template
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`
+    )
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(pageJSON)], {
+      type: 'application/json',
+    })
     if (formData.has('file')) {
       formData.set('file', blob)
     } else {
@@ -1048,7 +1416,11 @@ class UploadUtils {
     xhr.onload = () => {
       navigator.clipboard.writeText(designId)
       modalUtils.setIsPending(false)
-      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
+      modalUtils.setModalInfo('上傳成功', [
+        `Design ID: ${designId}`,
+        `Status code: ${xhr.status}`,
+        '已複製 Design ID 到剪貼簿',
+      ])
     }
   }
 
@@ -1056,7 +1428,13 @@ class UploadUtils {
     const pageIndex = pageUtils.currFocusPageIndex
     const designId = store.getters.getPage(pageIndex).designId
     if (this.isOutsourcer) {
-      const res = await designInfoApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
+      const res = await designInfoApis.getDesignInfo(
+        this.token,
+        'template',
+        designId,
+        'select',
+        JSON.stringify({})
+      )
       const { creator_id: creatorId } = res.data
       if (creatorId !== this.userId) {
         modalUtils.setModalInfo('更新失敗', ['無法更新他人模板'])
@@ -1066,7 +1444,10 @@ class UploadUtils {
 
     const pageJSON = this.default(store.getters.getPage(pageIndex))
     for (const [i, layer] of pageJSON.layers.entries()) {
-      if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+      if (
+        layer.type === 'shape' &&
+        (layer.designId || layer.category === 'D' || layer.category === 'E')
+      ) {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
       } else if (layer.type !== 'shape') {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
@@ -1077,17 +1458,25 @@ class UploadUtils {
     pageJSON.height = parseInt(pageJSON.height.toString(), 10)
 
     const formData = new FormData()
-    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+    Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
       formData.append(key, this.loginOutput.upload_admin_map.fields[key])
     })
 
-    formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
+    formData.append(
+      'key',
+      `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`
+    )
     // only for template
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`
+    )
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
 
-    const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(pageJSON)], {
+      type: 'application/json',
+    })
     if (formData.has('file')) {
       formData.set('file', blob)
     } else {
@@ -1103,18 +1492,40 @@ class UploadUtils {
       modalUtils.setIsPending(false)
       const status = xhr.status
       if (status >= 200 && status < 300) {
-        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`])
+        modalUtils.setModalInfo('更新成功', [
+          `Design ID: ${designId}`,
+          `Status code: ${xhr.status}`,
+        ])
       } else if (status >= 400 && status < 500) {
-        modalUtils.setModalInfo('更新失敗', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`, '已複製錯誤訊息至剪貼簿，麻煩將錯誤訊息貼至群組'])
-        navigator.clipboard.writeText([`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`].join('\n'))
+        modalUtils.setModalInfo('更新失敗', [
+          `Design ID: ${designId}`,
+          `Status code: ${xhr.status}`,
+          `Status Text: ${xhr.statusText}`,
+          `Response Text: ${xhr.responseText}`,
+          '已複製錯誤訊息至剪貼簿，麻煩將錯誤訊息貼至群組',
+        ])
+        navigator.clipboard.writeText(
+          [
+            `Design ID: ${designId}`,
+            `Status code: ${xhr.status}`,
+            `Status Text: ${xhr.statusText}`,
+            `Response Text: ${xhr.responseText}`,
+          ].join('\n')
+        )
       }
     }
   }
 
   async checkIfUrlExpires() {
-    const expire = new Date(Date.parse(this.loginOutput.upload_log_map.expire + 'Z'))
+    const expire = new Date(
+      Date.parse(this.loginOutput.upload_log_map.expire + 'Z')
+    )
     if (new Date() >= expire) {
-      const response = await fetch(`https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
+      const response = await fetch(
+        `https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(
+          6
+        )}`
+      )
       const json = await response.json()
       this.setLoginOutput({ upload_log_map: json.ul_log_map })
     }
@@ -1135,12 +1546,14 @@ class UploadUtils {
 
     if (page.backgroundImage.config.src) {
       const src = page.backgroundImage.config.src as string
-      const type = imageUtils.getSrcType(page.backgroundImage.config.src as any)
+      const type = imageUtils.getSrcType(
+        page.backgroundImage.config.src as any
+      )
       page.backgroundImage.config.srcObj = {
         type,
         userId: imageUtils.getUserId(src, type),
         assetId: imageUtils.getAssetId(src, type),
-        brandId: imageUtils.getBrandId(src, type)
+        brandId: imageUtils.getBrandId(src, type),
       }
       delete page.backgroundImage.config.src
     }
@@ -1156,8 +1569,13 @@ class UploadUtils {
         case 'image':
           layer.imgControl = false
           break
-        case 'tmp': { // If there is group layer in tmp layer, cancel tmp layer.
-          page.layers.splice(index, 1, ...groupUtils.mapLayersToPage((layer as ITmp).layers, layer as ITmp))
+        case 'tmp': {
+          // If there is group layer in tmp layer, cancel tmp layer.
+          page.layers.splice(
+            index,
+            1,
+            ...groupUtils.mapLayersToPage((layer as ITmp).layers, layer as ITmp)
+          )
         }
       }
       basicDefault(layer)
@@ -1174,7 +1592,16 @@ class UploadUtils {
     return page
   }
 
-  async getDesign(type: string, designParams: { designId?: string, teamId?: string, signedUrl?: string, fetchTarget?: string }, params: { [index: string]: any } = {}) {
+  async getDesign(
+    type: string,
+    designParams: {
+      designId?: string;
+      teamId?: string;
+      signedUrl?: string;
+      fetchTarget?: string;
+    },
+    params: { [index: string]: any } = {}
+  ) {
     let jsonName = ''
     let fetchTarget = ''
     const designId = designParams.designId ?? ''
@@ -1187,8 +1614,11 @@ class UploadUtils {
     switch (type) {
       case GetDesignType.TEMPLATE:
       case GetDesignType.TEXT: {
-        jsonName = type === GetDesignType.TEMPLATE ? 'config.json' : 'page.json'
-        fetchTarget = `https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+        jsonName =
+          type === GetDesignType.TEMPLATE ? 'config.json' : 'page.json'
+        fetchTarget = `https://template.vivipic.com/${type}/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(
+          6
+        )}`
         break
       }
       case GetDesignType.ASSET_DESIGN: {
@@ -1207,40 +1637,48 @@ class UploadUtils {
           throw new Error('design url is not provided')
         }
         // ? `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}` : `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
-        fetchTarget = `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}`
+        fetchTarget = `${
+          designParams.fetchTarget
+        }&ver=${generalUtils.generateRandomString(6)}`
         break
       }
 
       case GetDesignType.PRODUCT_PAGE_TEMPLATE: {
-        return listService.getList({ type: 'group', groupId: designId, cache: true })
-          .then(result => {
+        return listService
+          .getList({ type: 'group', groupId: designId, cache: true })
+          .then((result) => {
             const { content } = result.data.data
             return new Promise<IListServiceContentData[]>((resolve) => {
-              assetUtils.addTemplateToRecentlyUsedPure(content[0].list[0].id)
+              assetUtils
+                .addTemplateToRecentlyUsedPure(content[0].list[0].id)
                 .then(() => resolve(content))
             })
           })
-          .then(content => {
+          .then((content) => {
             store.commit('SET_groupType', 1)
             return assetUtils.addGroupTemplate({
               id: '',
               type: 6,
               ver: 0,
               content_ids: content[0].list,
-              group_id: designId
+              group_id: designId,
             })
           })
           .then(() => {
             // Reference from designUtils.newDesignWithTemplae
             store.commit('SET_assetId', generalUtils.generateAssetId())
-            const query = _.omit(router.currentRoute.value.query,
-              ['width', 'height'])
+            const query = _.omit(router.currentRoute.value.query, [
+              'width',
+              'height',
+            ])
             query.type = 'design'
             query.design_id = uploadUtils.assetId
             query.team_id = uploadUtils.teamId
 
             router.replace({ query }).then(() => {
-              uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+              uploadUtils.uploadDesign(
+                uploadUtils.PutAssetDesignType.UPDATE_BOTH
+              )
             })
             themeUtils.refreshTemplateState()
             stepsUtils.reset()
@@ -1248,7 +1686,9 @@ class UploadUtils {
           })
       }
       case GetDesignType.NEW_DESIGN_TEMPLATE: {
-        fetchTarget = `https://template.vivipic.com/template/${designId}/config.json?ver=${generalUtils.generateRandomString(6)}`
+        fetchTarget = `https://template.vivipic.com/template/${designId}/config.json?ver=${generalUtils.generateRandomString(
+          6
+        )}`
         break
       }
     }
@@ -1264,59 +1704,90 @@ class UploadUtils {
           router.replace({ query: Object.assign({}) })
           store.commit('SET_isGettingDesign', false)
         } else {
-          return response.json().then(async (json) => {
-            switch (type) {
-              case GetDesignType.TEMPLATE: {
-                assetUtils.addTemplate(json)
-                logUtils.setLog('Successfully get template design')
-                break
-              }
-              case GetDesignType.TEXT: {
-                await ShapeUtils.addComputableInfo(json.layers[0])
-                store.commit('SET_pages', [json])
-                logUtils.setLog('Successfully get text design')
-                break
-              }
-              case GetDesignType.ASSET_DESIGN: {
-                /**
-                 * @Todo add computableInfo if we need
-                 */
-                // await ShapeUtils.addComputableInfo(json.layers[0])
-                const currentQuery = generalUtils.deepCopy(router.currentRoute.value.query)
-                if (currentQuery.team_id === this.teamId) {
-                  store.commit('SET_assetId', designId)
-                } else {
-                  const id = generalUtils.generateAssetId()
-                  store.commit('SET_assetId', id)
-                  router.replace({ query: Object.assign(currentQuery, { design_id: id, team_id: this.teamId }) })
+          return response
+            .json()
+            .then(async (json) => {
+              switch (type) {
+                case GetDesignType.TEMPLATE: {
+                  assetUtils.addTemplate(json)
+                  logUtils.setLog('Successfully get template design')
+                  break
                 }
-                /**
-                 * @todo fix the filter function below
-                 */
-                // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
-                router.replace({ query: Object.assign(currentQuery, { export_ids: json.exportIds }) })
-                layerUtils.setAutoResizeNeededForLayersInPages(json.pages, true)
-                store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
-                stepsUtils.reset() // make sure to record and upload json right away after json fetched, so that no temp state is uploaded.
-                store.commit('file/SET_setLayersDone')
-                logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
-                themeUtils.refreshTemplateState()
-                break
+                case GetDesignType.TEXT: {
+                  await ShapeUtils.addComputableInfo(json.layers[0])
+                  store.commit('SET_pages', [json])
+                  logUtils.setLog('Successfully get text design')
+                  break
+                }
+                case GetDesignType.ASSET_DESIGN: {
+                  /**
+                   * @Todo add computableInfo if we need
+                   */
+                  // await ShapeUtils.addComputableInfo(json.layers[0])
+                  const currentQuery = generalUtils.deepCopy(
+                    router.currentRoute.value.query
+                  )
+                  if (currentQuery.team_id === this.teamId) {
+                    store.commit('SET_assetId', designId)
+                  } else {
+                    const id = generalUtils.generateAssetId()
+                    store.commit('SET_assetId', id)
+                    router.replace({
+                      query: Object.assign(currentQuery, {
+                        design_id: id,
+                        team_id: this.teamId,
+                      }),
+                    })
+                  }
+                  /**
+                   * @todo fix the filter function below
+                   */
+                  // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
+                  router.replace({
+                    query: Object.assign(currentQuery, {
+                      export_ids: json.exportIds,
+                    }),
+                  })
+                  layerUtils.setAutoResizeNeededForLayersInPages(
+                    json.pages,
+                    true
+                  )
+                  store.commit(
+                    'SET_pages',
+                    Object.assign(json, { loadDesign: true })
+                  )
+                  stepsUtils.reset() // make sure to record and upload json right away after json fetched, so that no temp state is uploaded.
+                  store.commit('file/SET_setLayersDone')
+                  logUtils.setLog(
+                    `Successfully get asset design (pageNum: ${json.pages.length})`
+                  )
+                  themeUtils.refreshTemplateState()
+                  break
+                }
+                case GetDesignType.NEW_DESIGN_TEMPLATE: {
+                  designUtils.newDesignWithTemplate(
+                    Number(params.width),
+                    Number(params.height),
+                    json,
+                    designId,
+                    params.unit,
+                    params.bleeds
+                  )
+                  logUtils.setLog('Successfully get new design template')
+                  break
+                }
               }
-              case GetDesignType.NEW_DESIGN_TEMPLATE: {
-                designUtils.newDesignWithTemplate(Number(params.width), Number(params.height), json, designId, params.unit, params.bleeds)
-                logUtils.setLog('Successfully get new design template')
-                break
+            })
+            .then(() => {
+              store.commit('SET_isGettingDesign', false)
+              const editorView = document.querySelector(
+                '.editor-view'
+              ) as HTMLElement
+              if (editorUtils) {
+                pageUtils.fitPage()
+                generalUtils.scrollToCenter(editorView, false)
               }
-            }
-          }).then(() => {
-            store.commit('SET_isGettingDesign', false)
-            const editorView = document.querySelector('.editor-view') as HTMLElement
-            if (editorUtils) {
-              pageUtils.fitPage()
-              generalUtils.scrollToCenter(editorView, false)
-            }
-          })
+            })
         }
       })
       .catch((err) => {
@@ -1338,12 +1809,15 @@ class UploadUtils {
     const teamId = params.get('team_id') || ''
     const background = params.get('background') || '0'
     const index = params.get('index') ? `_${params.get('index')}` : ''
-    const fileName = background === '0' ? `page${index}.json` : `page_trans${index}.json`
+    const fileName =
+      background === '0' ? `page${index}.json` : `page_trans${index}.json`
 
     // if one of them is missing
     if (![designId, teamId].every(Boolean)) return
 
-    const response = await fetch(`https://template.vivipic.com/admin/${teamId}/export/${designId}/${fileName}`)
+    const response = await fetch(
+      `https://template.vivipic.com/admin/${teamId}/export/${designId}/${fileName}`
+    )
     response.json().then(async (json) => {
       const pages = Array.isArray(json) ? json : json.pages
       store.commit('SET_pages', pages)
@@ -1352,9 +1826,14 @@ class UploadUtils {
 
   prepareJsonToUpload(pages: IPage[], noCopy = false): IPage[] {
     return pages.map((page: IPage) => {
-      const newPage = this.default(noCopy ? page : generalUtils.deepCopy(page)) as IPage
+      const newPage = this.default(
+        noCopy ? page : generalUtils.deepCopy(page)
+      ) as IPage
       for (const [i, layer] of newPage.layers.entries()) {
-        if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+        if (
+          layer.type === 'shape' &&
+          (layer.designId || layer.category === 'D' || layer.category === 'E')
+        ) {
           newPage.layers[i] = this.layerInfoFilter(layer)
         } else if (layer.type !== 'shape') {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -1363,6 +1842,24 @@ class UploadUtils {
       newPage.backgroundImage.config.imgControl = false
       newPage.width = parseInt(newPage.width.toString(), 10)
       newPage.height = parseInt(newPage.height.toString(), 10)
+
+      // remove NaN to prevent APP crash
+      Object.entries(newPage.backgroundImage).forEach(([key, value]) => {
+        if (typeof value !== 'number') return
+        if (isNaN(value)) {
+          (newPage.backgroundImage as { [key: string]: any })[key] = 0
+        }
+      })
+      Object.entries(newPage.backgroundImage.config.styles).forEach(
+        ([key, value]) => {
+          if (typeof value !== 'number') return
+          if (isNaN(value)) {
+            (newPage.backgroundImage.config.styles as { [key: string]: any })[
+              key
+            ] = 0
+          }
+        }
+      )
       return newPage
     })
   }
@@ -1410,7 +1907,7 @@ class UploadUtils {
       zindex: styles.zindex,
       opacity: styles.opacity,
       horizontalFlip: styles.horizontalFlip,
-      verticalFlip: styles.verticalFlip
+      verticalFlip: styles.verticalFlip,
     }
     switch (type) {
       case 'image':
@@ -1422,7 +1919,9 @@ class UploadUtils {
           imgWidth: styles.imgWidth,
           imgHeight: styles.imgHeight,
           shadow: styles.shadow,
-          ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } })
+          ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && {
+            adjust: { ...styles.adjust },
+          }),
         }
       case 'text':
         return {
@@ -1434,18 +1933,22 @@ class UploadUtils {
           textFill: styles.textFill,
           textShape: styles.textShape,
           type: styles.type,
-          userId: styles.userId
+          userId: styles.userId,
         }
       case 'frame':
         return {
           ...general,
-          ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } }),
-          ...(Object.prototype.hasOwnProperty.call(styles, 'shadow') && { shadow: { ...styles.shadow } })
+          ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && {
+            adjust: { ...styles.adjust },
+          }),
+          ...(Object.prototype.hasOwnProperty.call(styles, 'shadow') && {
+            shadow: { ...styles.shadow },
+          }),
         }
       case 'shape': {
         return {
           ...general,
-          blendMode: styles.blendMode
+          blendMode: styles.blendMode,
         }
       }
       default:
@@ -1464,12 +1967,21 @@ class UploadUtils {
           trace,
           jsonVer,
           jsonVer_origin,
-          styles: this.styleFilter(styles, 'image')
+          styles: this.styleFilter(styles, 'image'),
         }
       }
       case 'shape': {
         const shape = layer as IShape
-        const { type, designId, ratio, color, styles, category, jsonVer, jsonVer_origin } = shape
+        const {
+          type,
+          designId,
+          ratio,
+          color,
+          styles,
+          category,
+          jsonVer,
+          jsonVer_origin,
+        } = shape
         switch (shape.category) {
           case 'D': {
             return {
@@ -1485,7 +1997,7 @@ class UploadUtils {
               point: shape.point,
               jsonVer,
               jsonVer_origin,
-              styles: this.styleFilter(styles)
+              styles: this.styleFilter(styles),
             }
           }
           case 'E':
@@ -1506,7 +2018,7 @@ class UploadUtils {
               filled: shape.filled,
               jsonVer,
               jsonVer_origin,
-              styles: this.styleFilter(styles)
+              styles: this.styleFilter(styles),
             }
           default: {
             if (designId) {
@@ -1519,12 +2031,12 @@ class UploadUtils {
                 pDiff: shape.pDiff,
                 jsonVer,
                 jsonVer_origin,
-                styles: this.styleFilter(styles)
+                styles: this.styleFilter(styles),
               }
             } else {
               // for downward compatible reason record the entire shape info
               return {
-                ...shape
+                ...shape,
               }
             }
           }
@@ -1532,36 +2044,48 @@ class UploadUtils {
       }
       case 'frame': {
         const frame = layer as IFrame
-        const { type, designId, clips, decoration, decorationTop, styles, blendLayers, jsonVer, jsonVer_origin } = frame
+        const {
+          type,
+          designId,
+          clips,
+          decoration,
+          decorationTop,
+          styles,
+          blendLayers,
+          jsonVer,
+          jsonVer_origin,
+        } = frame
         return {
           type,
           designId,
           clips: [
-            ...clips.map(img => {
+            ...clips.map((img) => {
               const { isFrameImg } = img
               return {
                 ...this.layerInfoFilter(img),
                 isFrameImg,
-                styles: this.styleFilter(img.styles, 'image')
+                styles: this.styleFilter(img.styles, 'image'),
               }
-            })
+            }),
           ],
           ...(decoration && {
             decoration: {
-              color: decoration.color
-            }
+              color: decoration.color,
+            },
           }),
           ...(decorationTop && {
             decorationTop: {
-              color: decorationTop.color
-            }
+              color: decorationTop.color,
+            },
           }),
           ...(blendLayers && {
-            blendLayers: blendLayers.map(function (l) { return { color: l.color } })
+            blendLayers: blendLayers.map(function (l) {
+              return { color: l.color }
+            }),
           }),
           jsonVer,
           jsonVer_origin,
-          styles: this.styleFilter(styles, 'frame')
+          styles: this.styleFilter(styles, 'frame'),
         }
       }
       case 'text': {
@@ -1576,16 +2100,16 @@ class UploadUtils {
           spanDataList,
           jsonVer,
           jsonVer_origin,
-          styles: this.styleFilter(styles, 'text')
+          styles: this.styleFilter(styles, 'text'),
         }
       }
       case 'group': {
         const group = layer as IGroup
-        const { type, layers, styles, designId, db, jsonVer, jsonVer_origin } = group
-        const filteredLayers = layers
-          .map(layer => {
-            return this.layerInfoFilter(layer)
-          })
+        const { type, layers, styles, designId, db, jsonVer, jsonVer_origin } =
+          group
+        const filteredLayers = layers.map((layer) => {
+          return this.layerInfoFilter(layer)
+        })
         return {
           type,
           designId,
@@ -1593,7 +2117,7 @@ class UploadUtils {
           layers: filteredLayers,
           jsonVer,
           jsonVer_origin,
-          styles: this.styleFilter(styles)
+          styles: this.styleFilter(styles),
         }
       }
       case 'tmp': {
@@ -1608,8 +2132,7 @@ class UploadUtils {
           layers: filteredLayers,
           jsonVer,
           jsonVer_origin,
-          styles: this.styleFilter(styles)
-
+          styles: this.styleFilter(styles),
         }
       }
     }
@@ -1618,12 +2141,18 @@ class UploadUtils {
   uploadExportJSON(exportId: string, json?: any | string) {
     return new Promise((resolve) => {
       const formData = new FormData()
-      Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+      Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
       })
 
-      formData.append('key', `${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
-      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`)
+      formData.append(
+        'key',
+        `${this.loginOutput.upload_map.path}export/${exportId}/page.json`
+      )
+      formData.append(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent('page.json')}`
+      )
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
       // console.log(this.loginOutput)
@@ -1638,9 +2167,11 @@ class UploadUtils {
       const resultJSON = {
         pages: pagesJSON,
         groupId: store.state.groupId,
-        groupType: store.state.groupType
+        groupType: store.state.groupType,
       }
-      const blob = new Blob([JSON.stringify(resultJSON)], { type: 'application/json' })
+      const blob = new Blob([JSON.stringify(resultJSON)], {
+        type: 'application/json',
+      })
       if (formData.has('file')) {
         formData.set('file', blob)
       } else {
@@ -1654,29 +2185,39 @@ class UploadUtils {
 
   getPageJson(json?: any): any {
     // ref: uploadUtils.ts:L466
-    const pagesJSON = (generalUtils.deepCopy(json || store.getters.getPages)).map((page: IPage) => {
-      const newPage = this.default(page)
-      for (const [i, layer] of newPage.layers.entries()) {
-        if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
-          newPage.layers[i] = this.layerInfoFilter(layer)
-        } else if (layer.type !== 'shape') {
-          newPage.layers[i] = this.layerInfoFilter(layer)
+    const pagesJSON = generalUtils
+      .deepCopy(json || store.getters.getPages)
+      .map((page: IPage) => {
+        const newPage = this.default(page)
+        for (const [i, layer] of newPage.layers.entries()) {
+          if (
+            layer.type === 'shape' &&
+            (layer.designId || layer.category === 'D' || layer.category === 'E')
+          ) {
+            newPage.layers[i] = this.layerInfoFilter(layer)
+          } else if (layer.type !== 'shape') {
+            newPage.layers[i] = this.layerInfoFilter(layer)
+          }
         }
-      }
-      newPage.backgroundImage.config.imgControl = false
-      newPage.width = _.round(newPage.width)
-      newPage.height = _.round(newPage.height)
-      newPage.bleeds && Object.keys(newPage.bleeds).forEach(key => {
-        newPage.bleeds[key] = _.round(newPage.bleeds[key])
+        newPage.backgroundImage.config.imgControl = false
+        newPage.width = _.round(newPage.width)
+        newPage.height = _.round(newPage.height)
+        newPage.bleeds &&
+          Object.keys(newPage.bleeds).forEach((key) => {
+            newPage.bleeds[key] = _.round(newPage.bleeds[key])
+          })
+        const precision = newPage.unit === 'px' ? 0 : PRECISION
+        newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
+        newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
+        newPage.physicalBleeds &&
+          Object.keys(newPage.physicalBleeds).forEach((key) => {
+            newPage.physicalBleeds[key] = _.round(
+              newPage.physicalBleeds[key],
+              precision
+            )
+          })
+        return newPage
       })
-      const precision = newPage.unit === 'px' ? 0 : PRECISION
-      newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
-      newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
-      newPage.physicalBleeds && Object.keys(newPage.physicalBleeds).forEach(key => {
-        newPage.physicalBleeds[key] = _.round(newPage.physicalBleeds[key], precision)
-      })
-      return newPage
-    })
     return pagesJSON
   }
 
@@ -1703,7 +2244,12 @@ class UploadUtils {
     })
   }
 
-  polling(targetSrc: string, callback: (json: any) => boolean, retryLimit = this.DEFAULT_POLLING_RETRY_LIMIT, retryTime = 0) {
+  polling(
+    targetSrc: string,
+    callback: (json: any) => boolean,
+    retryLimit = this.DEFAULT_POLLING_RETRY_LIMIT,
+    retryTime = 0
+  ) {
     const interval = window.setInterval(() => {
       if (retryTime === retryLimit) {
         clearInterval(interval)
@@ -1711,15 +2257,17 @@ class UploadUtils {
         return
       }
       retryTime += 1
-      fetch(`${targetSrc}?ver=${generalUtils.generateRandomString(6)}`).then((response) => {
-        if (response.status === 200) {
-          response.json().then((json: IUploadAssetResponse) => {
-            if (callback(json)) {
-              clearInterval(interval)
-            }
-          })
+      fetch(`${targetSrc}?ver=${generalUtils.generateRandomString(6)}`).then(
+        (response) => {
+          if (response.status === 200) {
+            response.json().then((json: IUploadAssetResponse) => {
+              if (callback(json)) {
+                clearInterval(interval)
+              }
+            })
+          }
         }
-      })
+      )
     }, 2000)
   }
 

@@ -39,6 +39,7 @@ div(class="header-bar relative" @pointerdown.stop)
 
 <script lang="ts">
 import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
+import { SrcObj } from '@/interfaces/gallery'
 import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -257,13 +258,14 @@ export default defineComponent({
       } else if (this.isInCategory || this.isInBgShare) {
         return []
       } else if (this.inBgRemoveMode) {
-        return [{
-          icon: 'download',
-          width: 24,
-          action: () => {
-            bgRemoveUtils.saveToIOS()
-          }
-        }]
+        return []
+        // return [{
+        //   icon: 'download',
+        //   width: 24,
+        //   action: () => {
+        //     // bgRemoveUtils.saveToIOS()
+        //   }
+        // }]
       } else {
         return [
           ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
@@ -316,6 +318,7 @@ export default defineComponent({
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInEffectEditingMode: 'bgRemove/SET_inEffectEditingMode',
+      deletePreviewSrc: 'DELETE_previewSrc'
     }),
     resetTemplatesSearch(params = {}) {
       this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
@@ -473,11 +476,9 @@ export default defineComponent({
     //     ...(recentFont ?? {})
     //   })
     // },
-    async addImage(src: string, aspectRatio: number) {
-      assetUtils.addImage(src, aspectRatio, {
+    async addImage(srcObj: SrcObj, aspectRatio: number) {
+      assetUtils.addImage(srcObj, aspectRatio, {
         pageIndex: 0,
-        // The following props is used for preview image during polling process
-        isPreview: true
       })
     },
     handleNext() {
@@ -492,7 +493,14 @@ export default defineComponent({
         { plan: 0, assetId: '' },
         async () => {
           console.log('start editing standard image')
-          await this.addImage(bgRemoveResultSrc, this.autoRemoveResult.width / this.autoRemoveResult.height)
+          bgRemoveUtils.saveToIOS(async (data) => {
+            console.log(`saveToIOS: ${data}`)
+            await this.addImage({
+              type: 'ios',
+              userId: '',
+              assetId: data.imageId
+            }, this.autoRemoveResult.width / this.autoRemoveResult.height)
+          })
           return true
         },
         vivistickerUtils.getEmptyCallback()
