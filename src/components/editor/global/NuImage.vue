@@ -185,8 +185,16 @@ export default defineComponent({
         stepsUtils.record()
       }
     })
-
-    // this.canvas = this.$refs.canvas as HTMLCanvasElement | undefined
+    /**
+     * The shadow effect is set, but the img is not uploaded and fetched
+     */
+    const config = this.config as IImage
+    console.log(config.styles.shadow.currentEffect !== 'none', config.styles.shadow.srcObj)
+    // if (config.styles.shadow.currentEffect !== 'none' && !config.styles.shadow.srcObj.assetId) {
+    if (config.styles.shadow.currentEffect !== 'none' && config.styles.shadow.srcObj.type === 'upload') {
+      console.log(' mounted handle shadow')
+      this.handleNewShadowEffect()
+    }
   },
   beforeUnmount() {
     if (!this.isBgImgControl) {
@@ -858,6 +866,8 @@ export default defineComponent({
       const { layerInfo, shadowBuff } = this
       const canvas = this.$refs.canvas as HTMLCanvasElement
 
+      console.warn('handleNewShadowEffect', canvas)
+      console.warn('this.showCanvas', this.showCanvas)
       if (!canvas || this.isUploadingShadowImg) {
         if (!canvas) {
           imageShadowUtils.setIsProcess(this.layerInfo(), false)

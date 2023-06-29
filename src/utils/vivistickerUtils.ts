@@ -372,10 +372,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback(`screenshot-${data.params}`, data)
   }
 
-  saveImageDone(data: { flag: string, msg: string, imageId: string }) {
-    this.handleCallback('save-image-done__bgRemove', data)
-  }
-
   cloneImageDone(data: any) {
     this.handleCallback(`screenshot-${data.type}-${data.srcId}-${data.desId}`, data)
   }
@@ -1068,6 +1064,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   thumbDone(data: { flag: string }) {
     this.handleCallback('gen-thumb', data)
+  }
+
+  saveImageDone(data: { imageId: string, flag: string, msg?: string }) {
+    this.handleCallback('save-image-from-url', data)
   }
 
   async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {

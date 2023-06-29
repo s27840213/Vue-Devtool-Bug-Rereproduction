@@ -11,7 +11,7 @@ div(class="screenshot")
   div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
     img(:src="backgroundImage" @load="onload")
   div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
-  page-content(v-if="usingJSON" :config="page" :pageIndex="0" :noBg="extraData.noBg" :style="pageTransforms()")
+  page-content(v-if="usingJSON" :config="page" :pageIndex="0" :screenShot="true" :noBg="extraData.noBg" :style="pageTransforms()")
 </template>
 
 <script lang="ts">

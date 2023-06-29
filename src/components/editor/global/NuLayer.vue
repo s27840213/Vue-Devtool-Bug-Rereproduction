@@ -34,6 +34,7 @@ div(class="nu-layer flex-center"
             :primaryLayer="primaryLayer"
             :priPrimaryLayerIndex="priPrimaryLayerIndex"
             :forRender="forRender"
+            :screenShot="screenShot"
             :inPreview="inPreview")
           svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !controllerHidden && !forRender"
             class="clip-contour full-size"
@@ -145,6 +146,10 @@ export default defineComponent({
       type: Number
     },
     inPreview: {
+      default: false,
+      type: Boolean
+    },
+    screenShot: {
       default: false,
       type: Boolean
     }

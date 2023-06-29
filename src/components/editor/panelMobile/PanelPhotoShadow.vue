@@ -58,6 +58,11 @@ export default defineComponent({
   mounted() {
     imageShadowPanelUtils.mount()
   },
+  beforeUnmount() {
+    if (colorUtils.currEvent !== ColorEventType.photoShadow) {
+      imageShadowPanelUtils.handleShadowUpload()
+    }
+  },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
