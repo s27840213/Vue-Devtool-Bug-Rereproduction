@@ -1,9 +1,14 @@
 <template lang="pug">
-div(class="toggle" :style="outsideStyle")
+div(class="toggle"
+    :class="`bg-${bgColor}`"
+    :style="outsideStyle")
   div(v-for="op, idx in options" class="toggle-text"
+    :class="textSize"
     :key="op.label"
     :style="textStyle(idx)" @click="setValue(idx)") {{op.label}}
-  div(class="toggle-inside" :style="insideStyle")
+  div(class="toggle-inside"
+    :class="`bg-${switchColor}`"
+    :style="insideStyle")
 </template>
 
 <script lang="ts">
@@ -62,11 +67,15 @@ export default defineComponent({
     },
     bgColor: {
       type: String,
-      default: '#1EABE6'
+      default: 'blue-1'
     },
     switchColor: {
       type: String,
-      default: '#fff'
+      default: 'white'
+    },
+    textSize: {
+      type: String,
+      default: 'body-XS'
     }
   },
   emits: ['update:modelValue'],
@@ -76,14 +85,12 @@ export default defineComponent({
     },
     outsideStyle():Record<string, string> {
       return {
-        'background-color': this.bgColor,
         width: `calc(${this.optionWidth} * ${this.options.length})`,
         height: this.optionHeight
       }
     },
     insideStyle():Record<string, string> {
       return {
-        'background-color': this.switchColor,
         width: `calc(${this.optionWidth} - ${this.margin} * 2)`,
         height: `calc(${this.optionHeight} - ${this.margin} * 2)`,
         margin: this.margin,
