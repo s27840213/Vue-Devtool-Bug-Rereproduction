@@ -683,16 +683,16 @@ class TextBg {
       },
       'speech-bubble': {
         tailOffset: 50,
-        tailPosition: 'top',
+        tailPosition: 'right',
         bRadius: 100, // unadjustable
         pStrokeX: 20, // unadjustable in all effects
         pStrokeY: 20,
         opacity: 100,
         pColor: 'fontColorL+-40/BC/00'
       },
-      'speech-bubble2': {
+      'speech-bubble-triangle': {
         tailOffset: 50,
-        tailPosition: 'top',
+        tailPosition: 'bottom',
         bRadius: 100,
         pStrokeX: 20, // unadjustable in all effects
         pStrokeY: 20,
@@ -891,10 +891,10 @@ class TextBg {
           path.a(boxRadius, boxRadius, 1, cornerDir.mul(boxRadius))
         }
 
-        // Draw line, insert tail for speech-bubble2.
+        // Draw line, insert tail for speech-bubble-triangle.
         const lineDist = (['top', 'bottom'].includes(section) ? boxWidth : boxHeight) - boxRadius * 2
         const lineEnd = centerDir.mul(lineDist)
-        if (textBg.name === 'speech-bubble2' && section === textBg.tailPosition) {
+        if (textBg.name === 'speech-bubble-triangle' && section === textBg.tailPosition) {
           const tailLength = Math.max(Math.min(maxRowHeight * 0.25, lineDist), 0)
           const tailBegin = centerDir.mul((lineDist - tailLength) * tailOffset)
           const tailEnd = tailBegin.add(centerDir.mul(tailLength))

@@ -407,7 +407,7 @@ class ConstantData {
           option.type = 'select';
           (option as IEffectOptionSelect).select = ['triangle', 'rounded', 'square'].map((key, i) => ({
             key,
-            img: require(`@/assets/img/svg/text-effect/endpoint/endpoint-${key}.svg`),
+            img: require(`@/assets/img/svg/text-effect/select/endpoint-${key}.svg`),
             label: i18n.global.tc(`NN073${i}`),
             attrs: { endpoint: key },
           }))
@@ -416,7 +416,7 @@ class ConstantData {
           option.type = 'select';
           (option as IEffectOptionSelect).select = tailPositions.map((key) => ({
             key,
-            img: require('@/assets/img/svg/text-effect/endpoint/endpoint-triangle.svg'),
+            img: require(`@/assets/img/svg/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
             label: key,
             attrs: { tailPosition: key },
           }))
@@ -540,11 +540,11 @@ class ConstantData {
       }, ...store.getters['user/isAdmin'] ? [{
         key: 'speech-bubble',
         label: i18n.global.tc('NN0884'),
-        options: toOptions(['tailPosition', 'tailOffset', 'pStrokeY', 'opacity', 'pColor'])
+        options: toOptions(['tailPosition', 'tailOffset', 'pStrokeY', 'opacity', 'pColor'], 'speech-bubble')
       }, {
-        key: 'speech-bubble2',
+        key: 'speech-bubble-triangle',
         label: i18n.global.tc('NN0885'),
-        options: toOptions(['tailPosition', 'tailOffset', 'bRadius', 'pStrokeY', 'opacity', 'pColor'])
+        options: toOptions(['tailPosition', 'tailOffset', 'bRadius', 'pStrokeY', 'opacity', 'pColor'], 'speech-bubble-triangle')
       }] : [], {
         key: 'gooey',
         label: i18n.global.tc('NN0726'),

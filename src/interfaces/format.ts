@@ -32,7 +32,7 @@ export interface ITextBox {
 export const tailPositions = ['top', 'right', 'bottom', 'left'] as const
 export type ITailPosition = typeof tailPositions[number]
 export interface ITextSpeechBubble {
-  name: 'speech-bubble' | 'speech-bubble2'
+  name: 'speech-bubble' | 'speech-bubble-triangle'
   tailOffset: number
   tailPosition: ITailPosition
   bRadius: number
@@ -77,7 +77,7 @@ export function isITextBox(object: ITextBg): object is ITextBox {
       'rounded-hollow', 'square-both', 'rounded-both'].includes(object.name)
 }
 export function isITextSpeechBubble(object: ITextBg): object is ITextSpeechBubble {
-  return object && object.name && ['speech-bubble', 'speech-bubble2'].includes(object.name)
+  return object && object.name && ['speech-bubble', 'speech-bubble-triangle'].includes(object.name)
 }
 export function isITextUnderline(object: ITextBg): object is ITextUnderline {
   return object && object.name && object.name === 'underline'
