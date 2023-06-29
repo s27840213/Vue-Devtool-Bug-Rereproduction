@@ -254,6 +254,7 @@ app.directive('custom-swipe', {
 })
 
 let changeColor: (e: Event) => void
+let resetColor: (e: Event) => void
 app.directive('tap-animation', {
   mounted(el: HTMLElement, binding) {
     const { initColor, color, initBgColor, bgColor, disabled, animationDuration = 0.2 } = binding.value
@@ -265,6 +266,7 @@ app.directive('tap-animation', {
 
     // console.log()
     // Add a click event listener to the element
+
     changeColor = () => {
       if (disabled) return
       // Change the color to the second argument passed to the directive
@@ -277,17 +279,21 @@ app.directive('tap-animation', {
         el.style.backgroundColor = colorUtils.colorMap.get(bgColor as string) as string
         el.classList.add(`bg-${bgColor}`)
       }
+    }
 
+    resetColor = () => {
       // After 0.4 seconds, revert the color back to the original color
       setTimeout(() => {
         el.style.color = el.dataset.initColor as string
         el.style.backgroundColor = el.dataset.initBgColor as string
-      }, 300)
+      }, animationDuration)
     }
-    el.addEventListener('click', changeColor)
+    el.addEventListener('pointerdown', changeColor)
+    el.addEventListener('pointerup', resetColor)
   },
   unmounted(el: HTMLElement) {
-    el.removeEventListener('click', changeColor)
+    el.removeEventListener('pointerdown', changeColor)
+    el.removeEventListener('pointerup', resetColor)
   }
 })
 
