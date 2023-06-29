@@ -368,10 +368,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback(`screenshot-${data.params}`, data)
   }
 
-  saveImageDone(data: { flag: string, msg: string, imageId: string }) {
-    this.handleCallback('save-image-done__bgRemove', data)
-  }
-
   cloneImageDone(data: any) {
     this.handleCallback(`screenshot-${data.type}-${data.srcId}-${data.desId}`, data)
   }
