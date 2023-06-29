@@ -1000,7 +1000,7 @@ class TextBg {
     if (isITextBox(effect) &&
       ['square-hollow', 'rounded-hollow'].includes(effect.name)) {
       return ['bColor', effect.bColor]
-    } else if (isITextBox(effect)) { // Non-hollow text box
+    } else if (isITextBox(effect) || isITextSpeechBubble(effect)) { // Non-hollow text box
       return ['pColor', effect.pColor]
     } else if (isITextGooey(effect) || isITextUnderline(effect)) {
       return ['color', effect.color]
