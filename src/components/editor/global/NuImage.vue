@@ -866,8 +866,6 @@ export default defineComponent({
       const { layerInfo, shadowBuff } = this
       const canvas = this.$refs.canvas as HTMLCanvasElement
 
-      console.warn('handleNewShadowEffect', canvas)
-      console.warn('this.showCanvas', this.showCanvas)
       if (!canvas || this.isUploadingShadowImg) {
         if (!canvas) {
           imageShadowUtils.setIsProcess(this.layerInfo(), false)
@@ -888,15 +886,10 @@ export default defineComponent({
       let img = new Image()
       if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
         // normally, we should get the image size from srcObj, but if in vivisticker bg removing, we didn't actually upload the bg remove result to the server
-        // Instead, we use previewSrc to show the image
-        // so here we need to give the size from the autoRemoveResult
-        if ((this.config as IImage).previewSrc) {
-          this.shadowBuff.MAXSIZE = Math.min(Math.max(this.autoRemoveResult.height, this.autoRemoveResult.width), CANVAS_MAX_SIZE)
-        } else {
-          const res = await imageUtils.getImgSize(this.config.srcObj, false)
-          if (res) {
-            this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
-          }
+        if ((this.config as IImage).srcObj.type === 'ios') {
+          await imageUtils.imgLoadHandler(imageUtils.getSrc(this.config as IImage), (img) => {
+            this.shadowBuff.MAXSIZE = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
+          })
         }
       } else if (['unsplash', 'pixels'].includes(this.config.srcObj.type)) {
         this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE

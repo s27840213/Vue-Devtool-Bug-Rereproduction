@@ -471,19 +471,6 @@ export default defineComponent({
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ source: 'editor' }))
       }
     },
-    // async addStandardText() {
-    //   let recentFont
-    //   if (vivistickerUtils.checkVersion('1.5')) {
-    //     recentFont = await vivistickerUtils.getState('recentFont')
-    //   }
-    //   const color = vivistickerUtils.getContrastColor(this.editorBg)
-    //   await assetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {
-    //     size: 21,
-    //     color,
-    //     weight: 'normal',
-    //     ...(recentFont ?? {})
-    //   })
-    // },
     async addImage(srcObj: SrcObj, aspectRatio: number) {
       assetUtils.addImage(srcObj, aspectRatio, {
         pageIndex: 0,
@@ -494,15 +481,11 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(false)
       this.setInEffectEditingMode(true)
 
-      const bgRemoveResultSrc = bgRemoveUtils.getBgRemoveResultSrc()
-
       vivistickerUtils.startEditing(
         'image',
         { plan: 0, assetId: '' },
         async () => {
-          console.log('start editing standard image')
           bgRemoveUtils.saveToIOS(async (data) => {
-            console.log(`saveToIOS: ${data}`)
             await this.addImage({
               type: 'ios',
               userId: '',
@@ -514,7 +497,6 @@ export default defineComponent({
         vivistickerUtils.getEmptyCallback()
       )
     },
-
     handleMore() {
       editorUtils.setCurrActivePanel('vvstk-more')
       editorUtils.setShowMobilePanel(true)
