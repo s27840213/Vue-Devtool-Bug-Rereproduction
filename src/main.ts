@@ -1,6 +1,7 @@
 import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import SvgIcon from '@/components/global/SvgIcon.vue'
+import colorUtils from '@/utils/colorUtils'
 import modalUtils from '@/utils/modalUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
@@ -249,6 +250,44 @@ app.directive('custom-swipe', {
       (anyTouchWeakMap.get(el) as Core).off('swipe')
       anyTouchWeakMap.delete(el)
     }
+  }
+})
+
+let changeColor: (e: Event) => void
+app.directive('tap-animation', {
+  mounted(el: HTMLElement, binding) {
+    const { initColor, color, initBgColor, bgColor, disabled, animationDuration = 0.2 } = binding.value
+
+    // Store the original color of the element
+    el.dataset.initColor = initColor ?? el.style.color
+    el.dataset.initBgColor = initBgColor ?? el.style.backgroundColor
+    el.style.transition = `background-color ${animationDuration}s ease-in, color ${animationDuration}s ease`
+
+    // console.log()
+    // Add a click event listener to the element
+    changeColor = () => {
+      if (disabled) return
+      // Change the color to the second argument passed to the directive
+      if (color) {
+        el.style.color = 'none'
+        el.classList.add(color)
+      }
+
+      if (bgColor) {
+        el.style.backgroundColor = colorUtils.colorMap.get(bgColor as string) as string
+        el.classList.add(`bg-${bgColor}`)
+      }
+
+      // After 0.4 seconds, revert the color back to the original color
+      setTimeout(() => {
+        el.style.color = el.dataset.initColor as string
+        el.style.backgroundColor = el.dataset.initBgColor as string
+      }, 300)
+    }
+    el.addEventListener('click', changeColor)
+  },
+  unmounted(el: HTMLElement) {
+    el.removeEventListener('click', changeColor)
   }
 })
 

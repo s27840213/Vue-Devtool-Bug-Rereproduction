@@ -11,7 +11,9 @@ const STOP_POSTFIX = '_st'
 class ColorUtils {
   event: EventEmitter
   eventHash: { [index: string]: (color: string) => void }
+  colorMap: Map<string, string>
 
+  // Acces
   get currPageBackgroundColor() {
     return pageUtils.currFocusPage.backgroundColor
   }
@@ -19,6 +21,44 @@ class ColorUtils {
   constructor() {
     this.event = new EventEmitter()
     this.eventHash = {}
+    this.colorMap = new Map([
+      ['blue-1', '#4EABE6'],
+      ['blue-2', '#7190CC'],
+      ['blue-3', '#C9DBFF'],
+      ['blue-4', '#E7EFFF'],
+      ['blue-5', '#ebf4fa'],
+      ['blue-hover', '#2DB3FF'],
+      ['blue-active', '#4279CC'],
+      ['dark-blue', '#113251'],
+      ['dark-blue-2', '#09467E'],
+      ['bu', '#3C64B1'],
+      ['gray-0', '#000000'],
+      ['gray-1', '#18191F'],
+      ['gray-1-5', '#2C2F43'],
+      ['gray-2-7', '#828282'],
+      ['gray-2-5', '#7f8186'],
+      ['gray-2', '#474A57'],
+      ['gray-3', '#969BAB'],
+      ['gray-4', '#D9DBE1'],
+      ['gray-5', '#EEEFF4'],
+      ['gray-6', '#F4F5F7'],
+      ['gray-7', '#F8F8F8'],
+      ['light-gray', '#C3CBCD'],
+      ['white', '#FFFFFF'],
+      ['nav', '#14182A'],
+      ['nav-design', '#373B53'],
+      ['nav-active', '#2C2F43'],
+      ['nav-input', '#2D3143'],
+      ['sidebar-panel', '#2C2F43'],
+      ['red', '#EB5757'],
+      ['red-1', '#C74848'],
+      ['red-2', '#F05B5B'],
+      ['green-1', '#4DB433'],
+      ['green-2', '#27ae60'],
+      ['yellow', '#FFECA8'],
+      ['orange', '#F28606'],
+      ['alarm', '#FFBA49']
+    ])
   }
 
   get currEvent(): string { return store.getters['color/currEvent'] }
