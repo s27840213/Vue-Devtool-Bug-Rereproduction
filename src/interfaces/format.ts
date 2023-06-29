@@ -108,15 +108,20 @@ export function isITextFillCustom(object: ITextFill): object is ITextFillCustom 
   return object && !!object.name && !['none', 'custom-fill-img'].includes(object.name)
 }
 
-export interface ITextFormat {
-  textEffect: ITextEffect
-  textBg: ITextBg
-  textShape: ITextShape
-  textFill: ITextFill
-  scale: number
-  paragraphStyle: IParagraphStyle,
-  spanStyle: ISpanStyle,
-  writingMode: string
+class TextStyleCopiedFormatClass {
+  textEffect?: ITextEffect
+  textBg?: ITextBg
+  textShape?: ITextShape
+  textFill?: ITextFill
+  scale?: number
+  writingMode?: string
+}
+const textStyleCopiedFormat = new TextStyleCopiedFormatClass()
+export const textStyleCopiedFormatKeys = Object.keys(textStyleCopiedFormat)
+export type ITextStyleCopiedFormat = Required<TextStyleCopiedFormatClass>
+export type ITextFormat = ITextStyleCopiedFormat & {
+  paragraphStyle: IParagraphStyle
+  spanStyle: ISpanStyle
 }
 
 export interface IImageFormat extends IAdjustJsonProps { }

@@ -1,6 +1,6 @@
 <template lang="pug">
 metainfo
-  template(v-slot:title ="{ content }") {{ content ? `${content}` : `SITE_NAME` }}
+  template(v-slot:title ="{ content }") {{ content ? `${content}` : `${$t('SE0001')}` }}
 div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.googleapis.com")
   link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
@@ -67,6 +67,11 @@ export default defineComponent({
   },
   directives: {
     clickOutside: vClickOutside.directive
+  },
+  metaInfo() {
+    return {
+      title: `${this.$t('SE0001')}`
+    }
   },
   data() {
     return {

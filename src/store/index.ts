@@ -37,7 +37,7 @@ import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
-import { createStore, GetterTree, MutationTree } from 'vuex'
+import { GetterTree, MutationTree, createStore } from 'vuex'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
@@ -936,7 +936,7 @@ const mutations: MutationTree<IEditorState> = {
       styles && Object.assign(targetLayer.styles, styles)
     }
   },
-  DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
+  DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex, forSticker = false }) {
     // check every pages background image
     for (const page of state.pages) {
       const bgImg = page.config.backgroundImage
@@ -955,7 +955,7 @@ const mutations: MutationTree<IEditorState> = {
     const handler = (l: IShape | IText | IImage | IGroup | IFrame | ITmp) => {
       switch (l.type) {
         case LayerType.image:
-          if ((l as IImage).srcObj.assetId === assetId && l.previewSrc) {
+          if (((l as IImage).srcObj.assetId === assetId || forSticker) && l.previewSrc) {
             /**
              * @Vue3Update
              */
@@ -966,7 +966,10 @@ const mutations: MutationTree<IEditorState> = {
               userId,
               assetId: uploadUtils.isAdmin ? assetId : assetIndex
             })
-            uploadUtils.uploadDesign()
+
+            if (!forSticker) {
+              uploadUtils.uploadDesign()
+            }
           }
           break
         case LayerType.tmp:

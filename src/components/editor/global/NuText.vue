@@ -41,14 +41,14 @@ import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textBgUtils from '@/utils/textBgUtils'
-import textEffectUtils, { IFocusState } from '@/utils/textEffectUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { isEqual, max, omit, round } from 'lodash'
-import { PropType, computed, defineComponent } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
@@ -93,12 +93,12 @@ export default defineComponent({
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
-      focus: computed(() => textEffectUtils.focus),
       isDestroyed: false,
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
-        widthLimit: this.config.widthLimit === -1 ? -1 : dimension
+        widthLimit: this.config.widthLimit === -1 ? -1 : dimension,
+        spanDataList: this.config.spanDataList
       },
       textBgVersion: 0,
       textBg: {} as CustomElementConfig | null,
@@ -131,6 +131,10 @@ export default defineComponent({
     },
     isLocked(): boolean {
       return this.config.locked
+    },
+    focus() {
+      if (!(this.config.active || this.primaryLayer?.active)) return 'none'
+      return textEffectUtils.focus
     },
     aspectRatio() {
       return round(this.config.styles.width / this.config.styles.height, 2)
@@ -168,11 +172,7 @@ export default defineComponent({
       this.drawTextBg()
       this.drawTextFill()
     },
-    focus(newVal: IFocusState, oldVal: IFocusState) {
-      if (newVal !== oldVal && (this.config.active || this.primaryLayer?.active)) {
-        this.drawTextFill()
-      }
-    },
+    focus() { this.drawTextFill() },
     'config.styles.textBg'() { this.drawTextBg() },
     'config.styles.textFill'() { this.drawTextFill() },
   },
@@ -275,13 +275,11 @@ export default defineComponent({
         // TODO: consider rotation
         let x = config.styles.x
         let y = config.styles.y
-        if (config.widthLimit === -1) {
-          x = config.styles.x - (textHW.width - config.styles.width) / 2
-          y = config.styles.y - (textHW.height - config.styles.height) / 2
-        }
+        x = config.styles.x - (textHW.width - config.styles.width) / 2
+        y = config.styles.y - (textHW.height - config.styles.height) / 2
         // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
       } else {
         /**
          * use LayerUtils.getLayer and not use this.primaryLayer is bcz the tmp layer may contain the group layer,
@@ -290,7 +288,7 @@ export default defineComponent({
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit, spanDataList: textHW.spanDataList })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }

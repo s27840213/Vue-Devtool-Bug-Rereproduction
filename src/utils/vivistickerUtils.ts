@@ -162,7 +162,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get MAX_PAGE_NUM(): number {
-    return 20
+    return 40
   }
 
   get editorType(): string {
@@ -366,6 +366,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   screenshotDone(data: { flag: string, params: string, action: string }) {
     this.handleCallback(`screenshot-${data.params}`, data)
+  }
+
+  saveImageDone(data: { flag: string, msg: string, imageId: string }) {
+    this.handleCallback('save-image-done__bgRemove', data)
   }
 
   cloneImageDone(data: any) {
@@ -1154,7 +1158,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getIosImg(limit = 1): Promise<Array<string>> {
-    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', { timeout: 60000 }) as IIosImgData
+    const { images } = ((await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', { timeout: 60000, cancelOnConfict: true })) ?? { images: [] }) as IIosImgData
     return images
   }
 

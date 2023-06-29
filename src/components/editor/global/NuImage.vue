@@ -54,6 +54,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         :class="{'layer-flip': flippedAnimation() }"
         :src="finalSrc"
         draggable="false"
+        crossOrigin="anonymous"
         @error="onError"
         @load="onLoad($event, 'main')")
   template(v-if="hasHalation()")
@@ -359,7 +360,7 @@ export default defineComponent({
       const src = imageUtils.getSrc(this.config, val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       imageUtils.imgLoadHandler(src, () => {
         this.src = src
-      })
+      }, { crossOrigin: true })
     }
   },
   components: { NuAdjustImage },
@@ -695,7 +696,7 @@ export default defineComponent({
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
-      })
+      }, { crossOrigin: true })
 
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
@@ -740,7 +741,8 @@ export default defineComponent({
                   }
                 })
             }
-          }
+          },
+          crossOrigin: true
         })
       })
     },
@@ -763,25 +765,42 @@ export default defineComponent({
               this.preLoadImg('next', this.getImgDimension)
             }
           }
-        })
+        }, { crossOrigin: true })
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
       return new Promise<void>((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => resolve()
-        img.onerror = (error) => {
-          reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-          fetch(img.src)
-            .then(res => {
-              const { status, statusText } = res
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
-            })
-            .catch((e) => {
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
-            })
-        }
-        img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
+      //   const img = new Image()
+      //   img.onload = () => resolve()
+      //   img.onerror = (error) => {
+      //     reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+      //     fetch(img.src)
+      //       .then(res => {
+      //         const { status, statusText } = res
+      //         this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
+      //       })
+      //       .catch((e) => {
+      //         this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
+      //       })
+      //   }
+      //   img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
+      // })
+        const size = imageUtils.getSrcSize(this.config.adjustSrcObj?.srcObj?.type ? this.config.adjustSrcObj?.srcObj : this.config.srcObj, val, preLoadType)
+        const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, size))
+        imageUtils.imgLoadHandler(src, () => resolve(), {
+          error: () => {
+            reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+            fetch(src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError('img src:', src, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                this.logImgError('img src:', src, 'fetch result: ' + e)
+              })
+          },
+          crossOrigin: true
+        })
       })
     },
     handleIsTransparent() {
