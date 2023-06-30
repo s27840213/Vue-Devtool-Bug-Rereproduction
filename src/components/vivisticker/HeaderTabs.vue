@@ -519,7 +519,10 @@ export default defineComponent({
     handleMyDesign() {
       if (this.currActiveTab === 'background') {
         this.setMyDesignTab('text')
+      } else if (this.currActiveTab === 'remove-bg') {
+        this.setMyDesignTab('image')
       } else {
+        console.log(this.currActiveTab)
         this.setMyDesignTab(this.currActiveTab)
       }
       this.setIsInMyDesign(true)
