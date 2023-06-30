@@ -493,32 +493,32 @@ class ShortcutUtils {
     store.commit('SET_pageScaleRatio', Math.max(this.scaleRatio - 10, 10))
   }
 
-  up(pressShift = false) {
-    const moveOffset = pressShift ? 10 : 1
+  up(longMove = false) {
+    const moveOffset = longMove ? 10 : 1
     layerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       y: this.currSelectedLayerStyles.y - (moveOffset * (100 / this.scaleRatio))
     })
     StepsUtils.record()
   }
 
-  down(pressShift = false) {
-    const moveOffset = pressShift ? 10 : 1
+  down(longMove = false) {
+    const moveOffset = longMove ? 10 : 1
     layerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       y: this.currSelectedLayerStyles.y + (moveOffset * (100 / this.scaleRatio))
     })
     StepsUtils.record()
   }
 
-  left(pressShift = false) {
-    const moveOffset = pressShift ? 10 : 1
+  left(longMove = false) {
+    const moveOffset = longMove ? 10 : 1
     layerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       x: this.currSelectedLayerStyles.x - (moveOffset * (100 / this.scaleRatio))
     })
     StepsUtils.record()
   }
 
-  right(pressShift = false) {
-    const moveOffset = pressShift ? 10 : 1
+  right(longMove = false) {
+    const moveOffset = longMove ? 10 : 1
     layerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       x: this.currSelectedLayerStyles.x + (moveOffset * (100 / this.scaleRatio))
     })

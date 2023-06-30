@@ -23,8 +23,10 @@ div(class="pricing")
             span {{$t(item)}}
       div(class="pricing-plan-right")
         div(class="relative")
-          slide-toggle(class="body-XS" :options="periods"
-                      v-model="periodUi" bgColor="#F4F5F7")
+          slide-toggle(:options="periods"
+                      v-model="periodUi"
+                      bgColor="gray-6"
+                      textSize="body-XS")
           img(class="pricing-plan-right__off"
               :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
         div(class="pricing-plan-right-price")
