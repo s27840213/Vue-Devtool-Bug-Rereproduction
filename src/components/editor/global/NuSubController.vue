@@ -179,15 +179,11 @@ export default defineComponent({
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           editing: true
         })
-        TextUtils.setCurrTextInfo({
-          config: this.config as IText,
-          subLayerIndex: this.layerIndex
-        })
       }
     }
   },
   computed: {
-    ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId', 'uploadId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
@@ -207,14 +203,6 @@ export default defineComponent({
         outline: this.outlineStyles(),
         outlineOffset: `-${1 / this.primaryLayer.styles.scale}px`,
         ...this.sizeStyle()
-        // ...(this.type === 'frame' && (() => {
-        //   const { styles: { width, height }, clipPath } = this.config
-        //   if (this.config.isFrameImg) {
-        //     return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
-        //   } else {
-        //     return { clipPath: clipPath !== undefined ? `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` : clipPath }
-        //   }
-        // })())
       }
     },
     styles(): any {
@@ -290,13 +278,6 @@ export default defineComponent({
         contentEditable: false
       })
       this.isControlling = false
-
-      if (this.currTextInfo.subLayerIndex === this.layerIndex) {
-        TextUtils.setCurrTextInfo({
-          config: this.primaryLayer as IGroup,
-          subLayerIndex: undefined
-        })
-      }
     }
     popupUtils.closePopup()
   },

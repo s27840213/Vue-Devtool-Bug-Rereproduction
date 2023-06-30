@@ -283,7 +283,7 @@ export default defineComponent({
         {
           outline,
           outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
-          willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
+          willChange: this.config.active ? 'transform' : '',
           pointerEvents,
           clipPath,
           'mix-blend-mode': this.config.styles.blendMode,
@@ -302,9 +302,6 @@ export default defineComponent({
       const isHandleShadow = config.inProcess === 'imgShadow' && !hasShadowSrc
       const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
-    },
-    isDragging(): boolean {
-      return (this.config as ILayer).dragging
     },
     transformStyle(): { [index: string]: string } {
       return {
