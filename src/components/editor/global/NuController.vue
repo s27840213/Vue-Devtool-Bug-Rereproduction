@@ -403,7 +403,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.isDragging() && !this.useMobileEditor ? 'transform' : '',
+        willChange: this.config.active ? 'transform' : '',
         ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -1653,9 +1653,6 @@ export default defineComponent({
     },
     getLayerScale(): number {
       return this.config.styles.scale
-    },
-    isDragging(): boolean {
-      return this.config.dragging
     },
     actionIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
