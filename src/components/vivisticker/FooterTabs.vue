@@ -63,6 +63,7 @@ import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import mouseUtils from '@/utils/mouseUtils'
@@ -277,6 +278,7 @@ export default defineComponent({
       const { hasBgImage } = backgroundUtils
       return [
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
@@ -826,33 +828,48 @@ export default defineComponent({
                   })
                   frameUtils.updateFrameClipSrc(pageIndex, layerIndex, clipIndex, srcObj)
                 } else {
-                  // replace image
                   await imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
                     const { naturalWidth, naturalHeight } = img
-                    const resizeRatio = RESIZE_RATIO_IMAGE
-                    const pageSize = pageUtils.getPageSize(pageIndex)
-                    const pageAspectRatio = pageSize.width / pageSize.height
-                    const photoAspectRatio = naturalWidth / naturalHeight
-                    const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
-                    const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
-                    const config = layerUtils.getCurrConfig as IImage
-                    const { imgWidth, imgHeight } = config.styles
-                    const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
-                    const styles = {
-                      ...config.styles,
-                      ...mouseUtils.clipperHandler({
-                        styles: {
-                          width: photoWidth,
-                          height: photoHeight
+                    if (this.inBgSettingMode) {
+                      // replace background
+                      backgroundUtils.setBgImage({
+                        pageIndex: pageUtils.currFocusPageIndex,
+                        config: layerFactary.newImage({
+                          srcObj,
+                          styles: {
+                            width: naturalWidth,
+                            height: naturalHeight
+                          }
+                        })
+                      })
+                      backgroundUtils.fitPageBackground(pageUtils.currFocusPageIndex)
+                    } else {
+                      // replace image
+                      const resizeRatio = RESIZE_RATIO_IMAGE
+                      const pageSize = pageUtils.getPageSize(pageIndex)
+                      const pageAspectRatio = pageSize.width / pageSize.height
+                      const photoAspectRatio = naturalWidth / naturalHeight
+                      const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+                      const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+                      const config = layerUtils.getCurrConfig as IImage
+                      const { imgWidth, imgHeight } = config.styles
+                      const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
+                      const styles = {
+                        ...config.styles,
+                        ...mouseUtils.clipperHandler({
+                          styles: {
+                            width: photoWidth,
+                            height: photoHeight
+                          }
+                        } as unknown as IImage, path, config.styles).styles,
+                        ...{
+                          initWidth: config.styles.initWidth,
+                          initHeight: config.styles.initHeight
                         }
-                      } as unknown as IImage, path, config.styles).styles,
-                      ...{
-                        initWidth: config.styles.initWidth,
-                        initHeight: config.styles.initHeight
                       }
+                      layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+                      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
                     }
-                    layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-                    layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
                   })
                 }
                 stepsUtils.record()
