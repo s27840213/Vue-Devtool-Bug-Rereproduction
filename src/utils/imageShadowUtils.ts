@@ -671,7 +671,7 @@ class ImageShadowUtils {
     const src = canvas.toDataURL('image/png;base64')
     const assetId = generalUtils.generateAssetId()
 
-    vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, dir: 'shadow', name: assetId }, 'save-image-from-url')
+    vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'shadow', name: assetId }, 'save-image-from-url')
       .then((data) => {
         callback && callback(data, assetId)
       })
