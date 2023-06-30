@@ -667,11 +667,13 @@ class ImageShadowUtils {
     }
   }
 
-  saveToIOS(canvas: HTMLCanvasElement, callback?: (data: WEBVIEW_API_RESULT) => void) {
+  saveToIOS(canvas: HTMLCanvasElement, callback?: (data: WEBVIEW_API_RESULT, assetId: string) => void) {
     const src = canvas.toDataURL('image/png;base64')
-    vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src }, 'save-image-from-url')
+    const assetId = generalUtils.generateAssetId()
+
+    vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, dir: 'shadow', name: assetId }, 'save-image-from-url')
       .then((data) => {
-        callback && callback(data)
+        callback && callback(data, assetId)
       })
   }
 
