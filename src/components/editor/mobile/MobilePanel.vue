@@ -241,7 +241,7 @@ export default defineComponent({
       return [
         'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'more', 'object-adjust', 'brand-list', 'multiple-select'].includes(this.currActivePanel)
+        'font-spacing', 'more', 'object-adjust', 'brand-list', 'multiple-select', 'remove-bg'].includes(this.currActivePanel)
     },
     hideFooter(): boolean {
       return ['download'].includes(this.currActivePanel)
