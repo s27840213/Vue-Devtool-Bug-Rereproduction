@@ -181,6 +181,7 @@ export default defineComponent({
           action: () => {
             bgRemoveUtils.setInBgRemoveMode(false)
             editorUtils.setCurrActivePanel('none')
+            this.setInEffectEditingMode(false)
           }
         })
         retTabs.push(...stepTabs)
@@ -242,6 +243,15 @@ export default defineComponent({
         return []
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
+        if (this.inEffectEditingMode) {
+          return [{
+            icon: 'download',
+            width: 24,
+            action: () => {
+              vivistickerUtils.saveToIOS(bgRemoveUtils.getBgRemoveResultSrc())
+            }
+          }]
+        }
         if (this.editorTypeTemplate) {
           return [
             ...this.lockIcon,
@@ -261,13 +271,7 @@ export default defineComponent({
       } else if (this.isInCategory || this.isInBgShare) {
         return []
       } else if (this.inBgRemoveMode) {
-        return [{
-          icon: 'download',
-          width: 24,
-          action: () => {
-            vivistickerUtils.saveToIOS(bgRemoveUtils.getBgRemoveResultSrc())
-          }
-        }]
+        return []
       } else {
         return [
           ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
