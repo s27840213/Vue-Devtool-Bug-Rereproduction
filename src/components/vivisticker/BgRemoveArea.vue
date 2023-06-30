@@ -16,16 +16,15 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-teleport(v-if="useMobileEditor || inVivisticker" :to="teleportTarget")
-  div(class="magnify-area" :style="magnifyAreaStyle")
-    canvas(class="magnify-area__canvas"  ref="magnify")
-    div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
+//- teleport(v-if="useMobileEditor || inVivisticker" :to="teleportTarget")
+//-   div(class="magnify-area" :style="magnifyAreaStyle")
+//-     canvas(class="magnify-area__canvas"  ref="magnify")
+//-     div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
 </template>
 
 <script lang="ts">
 import { IBgRemoveInfo } from '@/interfaces/image'
 import logUtils from '@/utils/logUtils'
-import MagnifyUtils from '@/utils/magnifyUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
@@ -39,18 +38,18 @@ export default defineComponent({
       type: HTMLElement,
       required: true
     },
-    inVivisticker: {
-      default: false,
-      type: Boolean
-    },
+    // inVivisticker: {
+    //   default: false,
+    //   type: Boolean
+    // },
     fitScaleRatio: {
       default: 1,
       type: Number
     },
-    teleportTarget: {
-      default: '.header-bar',
-      type: String
-    }
+    // teleportTarget: {
+    //   default: '.header-bar',
+    //   type: String
+    // }
   },
   data() {
     return {
@@ -67,8 +66,8 @@ export default defineComponent({
       blurCtx: undefined as unknown as CanvasRenderingContext2D,
       clearModeCanvas: undefined as unknown as HTMLCanvasElement,
       clearModeCtx: undefined as unknown as CanvasRenderingContext2D,
-      magnifyCanvas: undefined as unknown as HTMLCanvasElement,
-      magnifyCtx: undefined as unknown as CanvasRenderingContext2D,
+      // magnifyCanvas: undefined as unknown as HTMLCanvasElement,
+      // magnifyCtx: undefined as unknown as CanvasRenderingContext2D,
       initImageElement: undefined as unknown as HTMLImageElement,
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
@@ -85,8 +84,8 @@ export default defineComponent({
       stepsQueue: [] as Array<Promise<unknown>>,
       isProcessingStepsQueue: false,
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
-      magnifyUtils: null as unknown as MagnifyUtils,
-      showMagnifyAtRight: false,
+      // magnifyUtils: null as unknown as MagnifyUtils,
+      // showMagnifyAtRight: false,
       clearModeShift: 4,
       pointerStartX: 0,
       pointerStartY: 0,
@@ -127,7 +126,7 @@ export default defineComponent({
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
-      this.$isTouchDevice() && this.initMagnifyCanvas()
+      // this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
 
       console.log('on load trigger')
@@ -229,17 +228,17 @@ export default defineComponent({
     brushColor(): string {
       return this.clearMode ? '#fcaea9' : '#fdd033'
     },
-    magnifyAreaStyle(): { [index: string]: string } {
-      return !this.$isTouchDevice() ? {
-        bottom: '10px',
-        left: '80px'
-      } : {
-        bottom: this.inVivisticker ? 'none' : '-70px',
-        top: this.inVivisticker ? '20px' : 'none',
-        ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
-        visibility: this.showBrush ? 'visible' : 'hidden'
-      }
-    }
+    // magnifyAreaStyle(): { [index: string]: string } {
+    //   return !this.$isTouchDevice() ? {
+    //     bottom: '10px',
+    //     left: '80px'
+    //   } : {
+    //     bottom: this.inVivisticker ? 'none' : '-70px',
+    //     top: this.inVivisticker ? '20px' : 'none',
+    //     ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
+    //     visibility: this.showBrush ? 'visible' : 'hidden'
+    //   }
+    // }
   },
   watch: {
     brushSize(newVal: number) {
@@ -271,7 +270,7 @@ export default defineComponent({
         this.setRestoreInitState(false)
         this.setModifiedFlag(false)
         this.pushStep()
-        this.$isTouchDevice() && this.magnifyUtils.reset()
+        // this.$isTouchDevice() && this.magnifyUtils.reset()
         this.currCanvasImageElement = undefined as unknown as HTMLImageElement
       }
     },
@@ -313,11 +312,11 @@ export default defineComponent({
       },
       deep: true
     },
-    fitScaleRatio(newVal) {
-      if (this.magnifyUtils) {
-        this.magnifyUtils.updateFitScaleRatio(newVal)
-      }
-    },
+    // fitScaleRatio(newVal) {
+    //   if (this.magnifyUtils) {
+    //     this.magnifyUtils.updateFitScaleRatio(newVal)
+    //   }
+    // },
   },
   methods: {
     ...mapMutations({
@@ -376,14 +375,14 @@ export default defineComponent({
 
       this.clearModeCtx = ctx
     },
-    initMagnifyCanvas() {
-      this.magnifyCanvas = this.$refs.magnify as HTMLCanvasElement
-      const ctx = this.magnifyCanvas.getContext('2d') as CanvasRenderingContext2D
+    // initMagnifyCanvas() {
+    //   this.magnifyCanvas = this.$refs.magnify as HTMLCanvasElement
+    //   const ctx = this.magnifyCanvas.getContext('2d') as CanvasRenderingContext2D
 
-      this.magnifyCtx = ctx
+    //   this.magnifyCtx = ctx
 
-      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
-    },
+    //   this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
+    // },
     createInitImageCtx() {
       logUtils.setLog('createInitImageCtx')
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
@@ -403,7 +402,7 @@ export default defineComponent({
       ctx.beginPath()
       ctx.moveTo(this.initPos.x + shift, this.initPos.y + shift)
       const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
-      this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
+      // this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
       ctx.lineTo(x + shift, y + shift)
       ctx.stroke()
       Object.assign(this.initPos, {
@@ -434,7 +433,7 @@ export default defineComponent({
         if (this.$isTouchDevice()) {
           this.showBrush = true
           this.setBrushPos(e)
-          this.magnifyUtils && this.magnifyUtils.render(e)
+          // this.magnifyUtils && this.magnifyUtils.render(e)
         }
         window.addEventListener('pointerup', this.drawEnd)
         window.addEventListener('pointermove', this.drawing)
