@@ -365,7 +365,6 @@ export default defineComponent({
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     handleEndEditing() {
-      console.log('this.isUploadingShadowImg', this.isUploadingShadowImg)
       if (this.isUploadingShadowImg) {
         notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
@@ -442,6 +441,10 @@ export default defineComponent({
     handleCopy() {
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
+      }
+      if (this.isUploadingShadowImg) {
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        return
       }
       if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
       if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
@@ -558,6 +561,10 @@ export default defineComponent({
       }
     },
     handleShareTemplate() {
+      if (this.isUploadingShadowImg) {
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        return
+      }
       this.setTemplateShareType(this.editorType)
     }
   }
