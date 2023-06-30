@@ -384,6 +384,7 @@ export default defineComponent({
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position', hidden: !this.editorTypeTemplate },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !this.editorTypeTemplate },
+        { icon: 'nudge', text: `${this.$t('NN0872')}`, panelType: 'nudge' },
         { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select', hidden: !this.editorTypeTemplate }
       ]
     },
