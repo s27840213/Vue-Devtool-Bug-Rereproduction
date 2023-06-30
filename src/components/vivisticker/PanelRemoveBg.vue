@@ -14,14 +14,14 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
       div(class="btn__content-section")
         img(class="img-object-cutout" :src="require('@/assets/img/png/bgRemove/object-cutout.png')")
       div(class="btn__text-section")
-        span(class="text-H6") {{ $t('STK0060') }}
+        span(class="text-H7") {{ $t('STK0060') }}
         span(class="text-black-5 body-XXS btn__description") {{ $t('STK0061') }}
     div(class="btn btn--bgf" @click="removeBgf")
       div(class="btn__content-section btn__content-section--bgf")
         img(:src="require('@/assets/img/png/bgRemove/face-cutout-body.png')")
         img(:src="require('@/assets/img/png/bgRemove/face-cutout.png')")
       div(class="btn__text-section")
-        span(class="text-H6") {{ $t('STK0059') }}
+        span(class="text-H7 no-wrap") {{ $t('STK0059') }}
         span(class="text-black-5 body-XXS btn__description") {{ $t('STK0062') }}
   teleport(v-if="false" to="body")
     div(class="panel-remove-bg__test-input")
@@ -331,7 +331,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  padding: 12px 24px;
+  padding: 8px 16px;
 }
 
 .btn {
@@ -410,10 +410,10 @@ export default defineComponent({
 
       > img:nth-child(2) {
         position: absolute;
-        top: 0;
-        left: 0;
-        transform: translate(-10%, 12%);
-        width: 110%;
+        bottom: 0;
+        left: 50%;
+        width: 190px;
+        transform: translate(-55%, 0%);
         object-fit: contain;
         z-index: 10;
       }
@@ -430,7 +430,7 @@ export default defineComponent({
   }
 
   &__description {
-    height: 40px;
+    height: 48px;
   }
 }
 

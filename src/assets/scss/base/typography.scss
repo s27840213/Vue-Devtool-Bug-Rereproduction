@@ -196,84 +196,102 @@
 
 // CSS Class from formatStyle.scss
 .text {
-  &-H1 {
-    @include text-H1
-  }
-  &-H2 {
-    @include text-H2
-  }
-  &-H3 {
-    @include text-H3
-  }
-  &-H4 {
-    @include text-H4
-  }
-  &-H5 {
-    @include text-H5
-  }
-  &-H6 {
-    @include text-H6
-  }
+	&-H1 {
+		@include text-H1
+	}
+
+	&-H2 {
+		@include text-H2
+	}
+
+	&-H3 {
+		@include text-H3
+	}
+
+	&-H4 {
+		@include text-H4
+	}
+
+	&-H5 {
+		@include text-H5
+	}
+
+	&-H6 {
+		@include text-H6
+	}
+
+	&-H7 {
+		@include text-H7
+	}
 }
 
 .body {
-  &-XL {
-    @include body-XL;
-  }
-  &-LG {
-    @include body-LG;
-  }
-  &-MD {
-    @include body-MD
-  }
-  &-SM {
-    @include body-SM
-  }
-  &-XS {
-    @include body-XS
-  }
-  &-XXS {
-    @include body-XXS
-  }
+	&-XL {
+		@include body-XL;
+	}
+
+	&-LG {
+		@include body-LG;
+	}
+
+	&-MD {
+		@include body-MD
+	}
+
+	&-SM {
+		@include body-SM
+	}
+
+	&-XS {
+		@include body-XS
+	}
+
+	&-XXS {
+		@include body-XXS
+	}
 }
 
 .caption {
-  &-LG {
-    @include caption-LG
-  }
-  &-MD {
-    @include caption-MD
-  }
-  &-SM {
-    @include caption-SM
-  }
+	&-LG {
+		@include caption-LG
+	}
+
+	&-MD {
+		@include caption-MD
+	}
+
+	&-SM {
+		@include caption-SM
+	}
 }
 
 .btn {
-  &-LG {
-    @include btn-LG;
-  }
-  &-SM {
-    @include btn-SM;
-  }
+	&-LG {
+		@include btn-LG;
+	}
+
+	&-SM {
+		@include btn-SM;
+	}
 }
 
 .overline {
-  &-LG {
-    @include overline-LG;
-  }
-  &-SM {
-    @include overline-SM;
-  }
+	&-LG {
+		@include overline-LG;
+	}
+
+	&-SM {
+		@include overline-SM;
+	}
 }
 
 // CSS Class from mixin.scss
 .popup-window {
-  @include popup-window;
+	@include popup-window;
 }
 
 .default-input {
-  @include default-input;
+	@include default-input;
 }
 
 .rwd-container {
