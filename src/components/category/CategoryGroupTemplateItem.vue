@@ -7,6 +7,7 @@ div(class="category-template-item" @click="handleClickGroup")
     template(v-slot="{ url }")
       img(class="category-template-item__img"
           :src="fallbackSrc || url"
+          @load="getRenderedSize"
           @error="handleNotFound")
   span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
   pro-item(v-if="item.plan")
@@ -69,7 +70,7 @@ export default defineComponent({
         }
       }, 100)
     },
-    getRenderedSize(): boolean {
+    getRenderedSize() {
       const elContainer = this.$el as HTMLElement
       if (!elContainer) return false
       this.renderedWidth = elContainer.clientWidth
