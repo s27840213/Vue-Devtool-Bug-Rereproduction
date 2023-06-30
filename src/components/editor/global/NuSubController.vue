@@ -62,7 +62,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import SvgPath from 'svgpath'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -180,15 +180,11 @@ export default defineComponent({
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           editing: true
         })
-        TextUtils.setCurrTextInfo({
-          config: this.config as IText,
-          subLayerIndex: this.layerIndex
-        })
       }
     }
   },
   computed: {
-    ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId', 'uploadId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
@@ -291,13 +287,6 @@ export default defineComponent({
         contentEditable: false
       })
       this.isControlling = false
-
-      if (this.currTextInfo.subLayerIndex === this.layerIndex) {
-        TextUtils.setCurrTextInfo({
-          config: this.primaryLayer as IGroup,
-          subLayerIndex: undefined
-        })
-      }
     }
     popupUtils.closePopup()
   },
