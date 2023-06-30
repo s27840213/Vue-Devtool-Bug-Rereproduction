@@ -596,12 +596,12 @@ export default new class ImageShadowPanelUtils {
       // const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 1)]
       setMark('upload', 5)
       console.log(' imageShadowUtils.saveToIOSimageShadowUtils.saveToIOS')
-      imageShadowUtils.saveToIOS(uploadCanvas, (data) => {
+      imageShadowUtils.saveToIOS(uploadCanvas, (data, assetId) => {
         console.log('imageShadowUtils.saveToIOS', data)
         const srcObj = {
           type: 'ios',
           userId: '',
-          assetId: data?.imageId || ''
+          assetId: 'shadow/' + assetId,
         }
         const _width = config.styles.width / config.styles.scale
         const _height = config.styles.height / config.styles.scale

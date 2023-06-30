@@ -465,6 +465,11 @@ export default defineComponent({
             panelHistory: this.panelHistory
           }
         }
+        case 'nudge': {
+          return {
+            forVivisticker: true
+          }
+        }
         default: {
           return {}
         }

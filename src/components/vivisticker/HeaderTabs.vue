@@ -488,11 +488,11 @@ export default defineComponent({
         'image',
         { plan: 0, assetId: '' },
         async () => {
-          bgRemoveUtils.saveToIOS(async (data) => {
+          bgRemoveUtils.saveToIOS(async (data, assetId) => {
             await this.addImage({
               type: 'ios',
               userId: '',
-              assetId: data.imageId
+              assetId: 'bgRemove/' + assetId,
             }, this.autoRemoveResult.width / this.autoRemoveResult.height)
           })
           return true
