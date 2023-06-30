@@ -289,11 +289,10 @@ app.directive('tap-animation', {
     }
 
     resetColor = () => {
-      // After 0.4 seconds, revert the color back to the original color
       setTimeout(() => {
         el.style.color = el.dataset.initColor as string
         el.style.backgroundColor = el.dataset.initBgColor as string
-      }, animationDuration)
+      }, animationDuration * 1000)
     }
     el.addEventListener('pointerdown', changeColor)
     el.addEventListener('pointerup', resetColor)
