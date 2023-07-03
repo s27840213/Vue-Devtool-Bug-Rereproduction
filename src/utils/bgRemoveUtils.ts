@@ -185,6 +185,7 @@ class BgRemoveUtils {
     } else {
       notify({ group: 'error', text: data.msg })
       this.setIsProcessing(false)
+      this.setPreviewImage({ src: '', width: 0, height: 0 })
     }
 
     // return data
