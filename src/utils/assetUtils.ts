@@ -520,8 +520,10 @@ class AssetUtils {
       newLayer = LayerFactary.newText(config, '1.0.0') // For old text assets that don't have jsonVer, use 1.0.0 to trigger compensation
       const { x, y, width, height } = newLayer.styles
       const textHW = textUtils.getTextHW(newLayer, -1)
+      // don't write spanDataList because the font is not guaranteed to be completely loaded here.
       Object.assign(newLayer.styles, {
-        ...textHW,
+        width: textHW.width,
+        height: textHW.height,
         x: x + (width - textHW.width) / 2,
         y: y + (height - textHW.height) / 2,
       })
