@@ -272,22 +272,6 @@ export default defineComponent({
         if (config.widthLimit === -1) {
           x = config.styles.x - (textHW.width - config.styles.width) / 2
           y = config.styles.y - (textHW.height - config.styles.height) / 2
-        } else {
-          const isVertical = config.styles.writingMode.includes('vertical')
-          const initData = {
-            xSign: isVertical ? -1 : 1,
-            ySign: 1,
-            x,
-            y,
-            angle: config.styles.rotate * Math.PI / 180
-          }
-          const offsetSize = {
-            width: isVertical ? textHW.width - config.styles.width : 0,
-            height: isVertical ? 0 : textHW.height - config.styles.height
-          }
-          const trans = controlUtils.getTranslateCompensation(initData, offsetSize)
-          x = trans.x
-          y = trans.y
         }
         // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
