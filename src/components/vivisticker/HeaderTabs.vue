@@ -73,9 +73,11 @@ export default defineComponent({
   setup() {
     const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
     const isInLastStep = computed(() => stepsUtils.isInLastStep)
+    const isSavingAsMyDesign = false
     return {
       isInFirstStep,
-      isInLastStep
+      isInLastStep,
+      isSavingAsMyDesign
     }
   },
   components: {
@@ -380,10 +382,13 @@ export default defineComponent({
       }
       if (vivistickerUtils.checkVersion('1.13')) {
         if (vivistickerUtils.userSettings.autoSave) {
+          if (this.isSavingAsMyDesign) return
+          this.isSavingAsMyDesign = true
           vivistickerUtils.saveAsMyDesign().catch((err) => {
             console.warn(err.message)
           }).finally(() => {
             vivistickerUtils.endEditing()
+            this.isSavingAsMyDesign = false
           })
         } else {
           const options = {
@@ -420,10 +425,13 @@ export default defineComponent({
             {
               msg: `${this.$t('STK0004')}`,
               action: () => {
+                if (this.isSavingAsMyDesign) return
+                this.isSavingAsMyDesign = true
                 vivistickerUtils.saveAsMyDesign().catch((err) => {
                   console.warn(err.message)
                 }).finally(() => {
                   vivistickerUtils.endEditing()
+                  this.isSavingAsMyDesign = false
                 })
               }
             },
@@ -498,6 +506,7 @@ export default defineComponent({
               assetId: 'bgRemove/' + assetId,
             }, this.autoRemoveResult.width / this.autoRemoveResult.height)
           })
+
           return true
         },
         vivistickerUtils.getEmptyCallback()

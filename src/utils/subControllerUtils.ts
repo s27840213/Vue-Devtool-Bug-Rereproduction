@@ -170,8 +170,8 @@ export default class SubControllerUtils {
     }
     const isEmptClipInFrame = this.primaryLayer.type === LayerType.frame && (this.config as IImage).srcObj.type === 'frame' &&
       !hasActualMove && !store.getters['vivisticker/getControllerHidden']
-    const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.image && this.primaryLayer.layers[this.layerIndex].type === 'frame' &&
-      this.primaryLayer.active && (this.primaryLayer.layers[this.layerIndex] as IFrame).clips.length === 1 && (this.config as IImage).srcObj.type === 'frame'
+    const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.image && this.primaryLayer.layers[this.subLayerIdx].type === 'frame' &&
+      this.primaryLayer.active && (this.primaryLayer.layers[this.subLayerIdx] as IFrame).clips.length === 1 && (this.config as IImage).srcObj.type === 'frame'
     if (!hasActualMove && (isEmptClipInFrame || isEmptClipInGroup)) {
       let image
       if (isEmptClipInGroup) {

@@ -909,9 +909,6 @@ export default defineComponent({
             //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
             // }
             img.crossOrigin = 'anonymous'
-            img.src = this.config.previewSrc ? this.config.previewSrc : imageUtils.getSrc(this.config,
-              ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
-              `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
@@ -931,6 +928,12 @@ export default defineComponent({
                 } else {
                   resolve()
                 }
+              }
+              if (this.config.previewSrc) {
+                img.src = this.config.previewSrc
+              } else {
+                const src = imageUtils.getSrc(this.config, ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal')
+                img.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
               }
             })
           } else {
