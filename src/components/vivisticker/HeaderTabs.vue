@@ -506,6 +506,7 @@ export default defineComponent({
               assetId: 'bgRemove/' + assetId,
             }, this.autoRemoveResult.width / this.autoRemoveResult.height)
           })
+
           return true
         },
         vivistickerUtils.getEmptyCallback()
