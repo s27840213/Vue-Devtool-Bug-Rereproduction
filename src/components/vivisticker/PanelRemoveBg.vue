@@ -248,6 +248,7 @@ export default defineComponent({
           this.$emit('setBgRemoveMode', false)
         })
       } else {
+        bgRemoveUtils.setPreviewImage({ src: '', width: 0, height: 0 })
         this.rmSection = null
       }
     },
