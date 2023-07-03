@@ -373,7 +373,7 @@ class TiptapUtils {
         result.push({ spans, styles: pStyles })
       }
     }
-    console.log(generalUtils.deepCopy(result), isSetContentRequired)
+    console.trace(generalUtils.deepCopy(result), isSetContentRequired)
     return { paragraphs: result, isSetContentRequired }
   }
 

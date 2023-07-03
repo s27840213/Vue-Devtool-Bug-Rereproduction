@@ -4,6 +4,7 @@ editor-content(:editor="(editor as Editor)")
 
 <script lang="ts">
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
+import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -128,6 +129,7 @@ export default defineComponent({
           if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
             toRecord = true
           }
+          console.log(generalUtils.deepCopy(editor.getJSON()))
           this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()) })
           this.$emit('compositionend', toRecord)
           tiptapUtils.agent(editor => {
