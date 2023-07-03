@@ -1,6 +1,7 @@
 import { isITextLetterBg, ITextBg } from '@/interfaces/format'
 import { IGroup, IText } from '@/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
+import generalUtils from '@/utils/generalUtils'
 import { Extension } from '@tiptap/core'
 import { Editor as CoreEditor } from '@tiptap/core/dist/packages/core/src/'
 import { Editor } from '@tiptap/vue-3'
@@ -105,11 +106,17 @@ export default Extension.create({
   },
   onSelectionUpdate() {
     const spanAttrs = this.editor.getAttributes('textStyle')
+    console.log('spanAttrs @ onSelectionUpdate', generalUtils.deepCopy(spanAttrs))
     if (Object.keys(spanAttrs).length) {
+      console.log('storage.spanStyle =', tiptapUtils.textStyles(spanAttrs))
       this.storage.spanStyle = tiptapUtils.textStyles(spanAttrs)
     } else {
       const spanStyle = this.editor.getAttributes('paragraph').spanStyle
+      console.log('paragraph.spanStyle =', spanStyle)
       if (spanStyle) {
+        console.log('storage.spanStyle =', tiptapUtils.textStyles(
+          tiptapUtils.makeSpanStyle(this.editor.getAttributes('paragraph'))
+        ))
         this.storage.spanStyle = tiptapUtils.textStyles(
           tiptapUtils.makeSpanStyle(this.editor.getAttributes('paragraph'))
         )
