@@ -160,7 +160,6 @@ class FormatUtils {
           this.applyTextStyles(textFormat, targetLayer, pageIndex, layerIndex, idx)
         }
         textUtils.updateGroupLayerSize(pageIndex, layerIndex)
-        textUtils.fixGroupCoordinates(pageIndex, layerIndex)
       }
       if (type === 'image') {
         const adjust = this.copiedFormat.content as IImageFormat

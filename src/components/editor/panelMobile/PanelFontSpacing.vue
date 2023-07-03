@@ -39,7 +39,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    ...mapState('text', ['sel', 'props']),
     lineHeight(): number {
       return this.props.lineHeight === '--' ? this.props.lineHeight : parseFloat(this.props.lineHeight)
     },

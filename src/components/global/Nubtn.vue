@@ -18,7 +18,7 @@ declare module '@vue/runtime-core' {
 }
 
 export type INubtnThemes = 'primary' | 'outline' | 'text' | 'icon_text' | 'icon' | 'icon2' |
-  'ghost' | 'ghost_outline' | 'danger' | 'secondary'
+  'ghost' | 'ghost_outline' | 'danger' | 'secondary' | 'edit'
 export type INubtnSize = 'sm' | 'sm-full' | 'sm-center' | 'mid' | 'mid-full' | 'mid-center'
 
 const component = defineComponent({
@@ -155,6 +155,21 @@ export default component
 .nubtn.text {
   @include default-size;
   color: var(--blue);
+}
+.nubtn.edit {
+  @include default-size;
+  background-color: setColor(gray-6);
+  color: setColor(gray-2);
+  &.active {
+    color: setColor(blue-1);
+    border: 2px solid setColor(blue-1);
+  }
+  &.desktop:hover, &.hover {
+    color: setColor(blue-hover);
+  }
+  &.desktop.disabled, &.mobile.disabled {
+    color: setColor(gray-4);
+  }
 }
 .nubtn.icon_text {
   svg {
