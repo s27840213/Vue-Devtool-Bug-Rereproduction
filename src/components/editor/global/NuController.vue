@@ -482,6 +482,9 @@ export default defineComponent({
         })
       }
       !this.$isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
+    },
+    'config.styles.writingMode'() {
+      this.resizerProfile = ControlUtils.getResizerProfile(this.config as AllLayerTypes)
     }
   },
   unmounted() {
@@ -1181,7 +1184,7 @@ export default defineComponent({
            * below make the anchor-point always pinned at the top-left or top-right
            */
           if (this.config.styles.writingMode.includes('vertical')) {
-            this.control.xSign = 1
+            this.control.xSign = -1
           } else {
             this.control.ySign = 1
           }
@@ -1544,11 +1547,11 @@ export default defineComponent({
           textHW = TextUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
-        layerX = isVertical ? layerX : layerPos
+        layerX = isVertical ? layerX - textHW.width + this.getLayerWidth() : layerPos
         layerY = isVertical ? layerPos : layerY
       } else {
         const initData = {
-          xSign: 1,
+          xSign: isVertical ? -1 : 1,
           ySign: 1,
           x: this.getLayerPos().x,
           y: this.getLayerPos().y,
