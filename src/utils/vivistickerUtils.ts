@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, isV1_26, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -1017,7 +1017,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           id
         },
         to: 'Shot'
-      }, `gen-thumb-${id}`, { timeout: 10000 }) as any
+      }, 'gen-thumb', { timeout: 10000 }) as any
       if (!resGenThumb || resGenThumb.flag === '1') await onThumbError()
     } else {
       const flag = await this.genThumbnail(id)
@@ -1181,7 +1181,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         })
         break
       case 'gen-thumb-done':
-        this.handleCallback(`gen-thumb-${info.id}`, info)
+        this.handleCallback('gen-thumb', info)
         break
     }
   }
