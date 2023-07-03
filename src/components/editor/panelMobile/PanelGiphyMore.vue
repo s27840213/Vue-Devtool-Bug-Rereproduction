@@ -1,8 +1,12 @@
 <template lang="pug">
 div(class="p-giphy" v-click-outside="vcoConfig")
-  div(class="p-giphy__favorite" @pointerdown="toggleFavoritesItem()")
-    svg-icon(:iconName="content.iconName" iconWidth="16px" iconColor="gray-2")
-    span(class="p-giphy__favorite--desc") {{content.desc}}
+  div(class="p-giphy__actions")
+    div(class="p-giphy__action" @pointerdown="toggleFavoritesItem()")
+      svg-icon(:iconName="content.iconName" iconWidth="16px" iconColor="gray-2")
+      span(class="p-giphy__action--desc") {{content.desc}}
+    div(class="p-giphy__action" @pointerdown="download()")
+      svg-icon(iconName="download_flat" iconWidth="16px" iconColor="gray-2")
+      span(class="p-giphy__action--desc") {{$t('NN0889')}}
   div(class="p-giphy__hr")
   div(class="p-giphy__tips") {{`${$t('NN0763')} : ${$t('NN0764')}`}}
   img(class="p-giphy__logo" src="@/assets/img/svg/power-by-giphy.svg")
@@ -12,6 +16,7 @@ div(class="p-giphy" v-click-outside="vcoConfig")
 import i18n from '@/i18n'
 import { IGif } from '@/interfaces/giphy'
 import editorUtils from '@/utils/editorUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -52,6 +57,9 @@ export default defineComponent({
     }),
     toggleFavoritesItem() {
       this.toggleFavorite({ items: this.selectedGif })
+    },
+    download() {
+      vivistickerUtils.saveToIOS(this.selectedGif.src, undefined, 'gif')
     }
   }
 })
@@ -60,10 +68,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 .p-giphy {
   padding: 0 16px 0 16px;
-  &__favorite {
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px 16px 12px;
+    gap: 16px;
+  }
+  &__action {
     display: flex;
     align-items: center;
-    padding: 10px 12px 16px 12px;
     color: setColor(gray-2);
     &--desc {
       padding-left: 20px;

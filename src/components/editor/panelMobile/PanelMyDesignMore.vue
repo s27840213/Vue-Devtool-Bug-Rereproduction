@@ -15,6 +15,13 @@ div(class="panel-my-design-more")
                   iconWidth="18px"
                   iconColor="gray-2")
       div(class="panel-my-design-more__option-title") {{ $t('NN0251') }}
+    div(v-if="showDownload" class="panel-my-design-more__option"
+        @click.prevent.stop="handleDownload")
+      div(class="panel-my-design-more__option-icon")
+        svg-icon(iconName="download_flat"
+                  iconWidth="18px"
+                  iconColor="gray-2")
+      div(class="panel-my-design-more__option-title") {{ $t('NN0889') }}
     div(class="panel-my-design-more__option"
         @click.prevent.stop="handleDelete")
       div(class="panel-my-design-more__option-icon")
@@ -49,6 +56,9 @@ export default defineComponent({
     }),
     isTemplate() {
       return vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type) === 'template'
+    },
+    showDownload() {
+      return vivistickerUtils.checkVersion('1.34') && !this.isTemplate
     }
   },
   methods: {
@@ -94,6 +104,12 @@ export default defineComponent({
             editorUtils.setCloseMobilePanelFlag(true)
           })
         })
+      })
+    },
+    handleDownload() {
+      vivistickerUtils.fetchMyDesign(this.myDesignBuffer).then(data => {
+        const pages = generalUtils.deepCopy(data.pages)
+        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign' }), 'download')
       })
     },
     handleDelete() {

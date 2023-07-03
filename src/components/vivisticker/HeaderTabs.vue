@@ -239,13 +239,14 @@ export default defineComponent({
       }
     },
     rightTabs(): TabConfig[] {
+      const downloadTab = vivistickerUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
       if (this.isInTemplateShare) {
         return []
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
         if (this.inEffectEditingMode) {
           return [{
-            icon: 'download',
+            icon: 'download_flat',
             width: 24,
             action: () => {
               vivistickerUtils.saveToIOS(bgRemoveUtils.getBgRemoveResultSrc())
@@ -261,6 +262,7 @@ export default defineComponent({
         }
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
+          ...downloadTab,
         ]
       } else if (this.isInMyDesign) {
         return []
@@ -441,6 +443,21 @@ export default defineComponent({
         vivistickerUtils.endEditing()
       }
     },
+    getCopyCallback(modalText: string, onSuccess?: () => void): (flag: string) => void {
+      return (flag: string) => {
+        if (flag === '1') {
+          modalUtils.setModalInfo(
+            `${this.$t('STK0017')}`,
+            [modalText],
+            {
+              msg: `${this.$t('STK0019')}`
+            }
+          )
+        } else {
+          onSuccess && onSuccess()
+        }
+      }
+    },
     handleCopy() {
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
@@ -451,19 +468,14 @@ export default defineComponent({
       }
       if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
       if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
-      const copyCallback = (flag: string) => {
-        if (flag === '1') {
-          modalUtils.setModalInfo(
-            `${this.$t('STK0017')}`,
-            [`${this.$t('STK0018')}`],
-            {
-              msg: `${this.$t('STK0019')}`
-            }
-          )
-        } else if (['object', 'objectGroup'].includes(this.editorType)) {
-          vivistickerUtils.handleIos16Video()
+      const copyCallback = this.getCopyCallback(
+        `${this.$t('STK0018')}`,
+        () => {
+          if (['object', 'objectGroup'].includes(this.editorType)) {
+            vivistickerUtils.handleIos16Video()
+          }
         }
-      }
+      )
       if (this.inBgRemoveMode) {
         bgRemoveUtils.screenshot()
       } else if (vivistickerUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
@@ -475,6 +487,27 @@ export default defineComponent({
         vivistickerUtils.copyEditor(copyCallback)
       } else {
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ source: 'editor' }))
+      }
+    },
+    handleDownload() {
+      if (!vivistickerUtils.checkVersion('1.34')) return
+      if (imageUtils.isImgControl()) {
+        imageUtils.setImgControlDefault()
+      }
+      if (this.isUploadingShadowImg) {
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        return
+      }
+      if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
+      if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
+      const downloadCallback = this.getCopyCallback(`${this.$t('STK0082')}`)
+      if (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1) {
+        vivistickerUtils.downloadWithScreenshotUrl(
+          vivistickerUtils.createUrlForJSON({ source: 'editor' }),
+          downloadCallback
+        )
+      } else {
+        vivistickerUtils.downloadEditor(downloadCallback)
       }
     },
     async addImage(srcObj: SrcObj, aspectRatio: number) {
