@@ -33,7 +33,7 @@ div(class="nu-layer flex-center"
             :scaleRatio="scaleRatio"
             :primaryLayer="primaryLayer"
             :forRender="forRender")
-          svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
+          svg(v-if="showSvgContour"
             class="clip-contour full-size"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
             g(v-html="frameClipFormatter(config.clipPath)"
@@ -318,10 +318,12 @@ export default defineComponent({
       return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     frameClipStyles(): any {
+      const isRectFrameClip = this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
       return {
         fill: '#00000000',
         stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
-        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
+        strokeWidth: `${7 / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
+        // strokeWidth: `${(this.$isTouchDevice() ? 14 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
       }
     },
     getPointerEvents(): string {
@@ -357,6 +359,10 @@ export default defineComponent({
     },
     isMultipleSelect(): boolean {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length > 1
+    },
+    showSvgContour(): boolean {
+      const { config } = this
+      return config.active && config.isFrame && !config.isFrameImg && config.type === 'image' && !this.forRender && !frameUtils.checkIsRect(this.config.clipPath)
     }
   },
   methods: {

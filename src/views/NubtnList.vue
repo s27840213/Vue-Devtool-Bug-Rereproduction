@@ -72,6 +72,9 @@ export default defineComponent({
         theme: 'icon_text',
         size: 'mid-center'
       }, {
+        theme: 'edit',
+        size: 'mid-center'
+      }, {
         theme: 'outline',
         size: 'sm-center'
       }, {

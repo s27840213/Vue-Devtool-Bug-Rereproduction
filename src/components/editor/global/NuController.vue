@@ -235,7 +235,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -356,7 +356,7 @@ export default defineComponent({
             config: (this.config as IGroup).layers[subLayerIdx],
             subLayerIdx
           }
-        } else if ((this.config.type === LayerType.group)) {
+        } else if ((this.config.type === LayerType.frame)) {
           const subLayerIdx = (this.config as IFrame).clips.findIndex(l => l.active)
           return {
             config: (this.config as IFrame).clips[subLayerIdx],
@@ -386,6 +386,7 @@ export default defineComponent({
       }
     },
     subContentStyles(): any {
+      if (this.config.type === 'frame') return
       const transform = `scale(${this.config.styles.scale})`
       return {
         transform

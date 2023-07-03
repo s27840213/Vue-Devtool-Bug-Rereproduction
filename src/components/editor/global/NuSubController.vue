@@ -48,7 +48,7 @@ import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils from '@/utils/eventUtils'
-import FrameUtils from '@/utils/frameUtils'
+import frameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -61,7 +61,6 @@ import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import SvgPath from 'svgpath'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -199,19 +198,11 @@ export default defineComponent({
       const scale = this.primaryLayer.styles.scale
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
+        transform: `scale(${this.type === 'frame' && !frameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
         ...this.transformStyle,
         outline: this.outlineStyles(),
         outlineOffset: `-${1 / this.primaryLayer.styles.scale}px`,
-        ...this.sizeStyle(),
-        ...(this.type === 'frame' && (() => {
-          const { styles: { width, height }, clipPath } = this.config
-          if (this.config.isFrameImg) {
-            return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
-          } else {
-            return { clipPath: clipPath !== undefined ? `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` : clipPath }
-          }
-        })())
+        ...this.sizeStyle()
       }
     },
     styles(): any {
@@ -391,11 +382,15 @@ export default defineComponent({
     },
     outlineStyles() {
       const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
-      if (this.config?.active && LayerUtils.getCurrLayer.type !== 'frame') {
+      // if (this.config?.active && LayerUtils.getCurrLayer.type !== 'frame') {
+      const isRectFrameClip = LayerUtils.getCurrLayer.type !== 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
+      if (isRectFrameClip) return 'none'
+
+      if (this.config?.active) {
         if (this.isControlling) {
-          return `${2 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
+          return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
         } else {
-          return `${2 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
+          return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
         }
       } else {
         return 'none'
@@ -502,7 +497,7 @@ export default defineComponent({
           }
         })
 
-        FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        frameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...currLayer.srcObj },
           ...((currLayer as IImage).panelPreviewSrc && { panelPreviewSrc: (currLayer as IImage).panelPreviewSrc as string })
         })
@@ -512,7 +507,7 @@ export default defineComponent({
         const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
           .clipperHandler(LayerUtils.getCurrLayer as IImage, clip.clipPath, clip.styles).styles
 
-        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        frameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           adjust: { ...currLayer.styles.adjust },
           imgWidth,
           imgHeight,
@@ -534,11 +529,11 @@ export default defineComponent({
       if (currLayer && currLayer.type === LayerType.image && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
         LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: false })
-        FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        frameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...this.imgBuff.srcObj }
         })
 
-        FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        frameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           ...this.imgBuff.styles
         })
       }
@@ -553,7 +548,7 @@ export default defineComponent({
         LayerUtils.deleteLayer(LayerUtils.pageIndex, LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer as IFrame])
-        FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
+        frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
         StepsUtils.record()
       }
       const body = this.$refs.body as HTMLElement

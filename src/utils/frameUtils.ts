@@ -4,7 +4,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
 import store from '@/store'
-import { ILayerInfo } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import { notify } from '@kyvg/vue3-notification'
 import generalUtils from './generalUtils'
 import ImageUtils from './imageUtils'
@@ -15,7 +15,7 @@ import zindexUtils from './zindexUtils'
 
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
-    return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
+    return config.type === LayerType.frame && config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
   }
 
   frameClipFormatter(path: string | undefined) {
@@ -229,6 +229,16 @@ class FrameUtils {
       subLayerIdx,
       payload
     })
+  }
+
+  checkIsRect(clipPath: string) {
+    if (clipPath.length > 50) return false
+    for (const s of clipPath) {
+      if (Number.isNaN(+s) && ![',', '-', '.'].includes(s)) {
+        if (!['M', 'h', 'v', 'z'].includes(s)) return false
+      }
+    }
+    return true
   }
 }
 

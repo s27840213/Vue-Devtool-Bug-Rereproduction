@@ -113,11 +113,11 @@ export default defineComponent({
     getHalation(): ReturnType<typeof imageAdjustUtil.getHalation> {
       const { styles: { adjust } } = this.config.backgroundImage.config as IImage
       if (!adjust) return []
-      const { width, height } = pageUtils.getPage(this.imgControlPageIdx)
+      const { width, height } = pageUtils.removeBleedsFromPageSize(pageUtils.getPage(this.imgControlPageIdx))
       const position = {
         width: width / 2 * this.contentScaleRatio,
-        x: (width / 2) * this.contentScaleRatio,
-        y: (height / 2) * this.contentScaleRatio
+        x: width / 2 * this.contentScaleRatio,
+        y: height / 2 * this.contentScaleRatio
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },
