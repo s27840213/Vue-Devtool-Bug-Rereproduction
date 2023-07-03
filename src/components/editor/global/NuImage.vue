@@ -890,6 +890,12 @@ export default defineComponent({
           await imageUtils.imgLoadHandler(imageUtils.getSrc(this.config as IImage), (img) => {
             this.shadowBuff.MAXSIZE = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
           })
+        } else {
+          const res = await imageUtils.getImgSize(this.config.srcObj, false)
+          if (res) {
+            this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
+            console.log('this.shadowBuff.MAXSIZE', res, this.shadowBuff.MAXSIZE)
+          }
         }
       } else if (['unsplash', 'pixels'].includes(this.config.srcObj.type)) {
         this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
@@ -994,6 +1000,9 @@ export default defineComponent({
       }
       this.shadowBuff.canvasSize.width = _canvasW * width / _drawCanvasW
       this.shadowBuff.canvasSize.height = _canvasH * height / _drawCanvasH
+      console.log('_mappingScale = shadow.middsize / shadow.maxsize', _mappingScale, shadow.middsize, shadow.maxsize)
+      console.log('_canvasW * width / _drawCanvasW', _canvasW, width, _drawCanvasW)
+      console.log('_canvasH * height / _drawCanvasH', _canvasH, height, _drawCanvasH)
       this.shadowBuff.drawCanvasW = _drawCanvasW
       this.shadowBuff.drawCanvasH = _drawCanvasH
       canvas.setAttribute('width', `${_canvasW}`)
