@@ -93,10 +93,12 @@ export default defineComponent({
           const selectionRanges = editor.view.state.selection.ranges
           if (selectionRanges.length > 0) {
             const to = selectionRanges[0].$to.pos
+            console.log('select', generalUtils.deepCopy(selectionRanges), to)
             editor.commands.setTextSelection({ from: to, to })
           }
         })
       }
+      console.log('update::toIParagraph')
       this.$emit('update', { ...tiptapUtils.toIParagraph(newJSON), toRecord })
       if (!isEqual(newJSON, tiptapUtils.prevJSON)) {
         this.updateLayerProps({ isEdited: true })
@@ -130,6 +132,7 @@ export default defineComponent({
             toRecord = true
           }
           console.log(generalUtils.deepCopy(editor.getJSON()))
+          console.log('compositionend::toIParagraph')
           this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()) })
           this.$emit('compositionend', toRecord)
           tiptapUtils.agent(editor => {
