@@ -1,5 +1,5 @@
 const fs = require('fs')
-const open = require('open')
+const { openApp, apps } = require('open')
 
 const config = JSON.parse(fs.readFileSync('./preview.json'))
 
@@ -25,7 +25,7 @@ for (const pageIndex of config.page_index.split(',')) {
   for (const exportId of config.export_id.split(',')) {
     const url = `${usedHost}/preview?url=template.vivipic.com%2Fexport%2F${config.team_id}%2F${exportId}%2Fpage_${pageIndex}.json&ver=vKIHd0sC&token=QT0z7B3D3ZuXVp6R&team_id=PUPPET`
 
-    open(url)
+    openApp(apps.chrome, { arguments: ['-incognito', url], newInstance: true })
   }
 }
 

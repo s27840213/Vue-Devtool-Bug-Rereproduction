@@ -1,6 +1,5 @@
 <template lang="pug">
-div(class="text-setting" ref='body'
-    @mousedown.capture="textInfoRecorder()")
+div(class="text-setting" ref='body')
   span(class="text-setting__title text-blue-1 text-H6") {{$t('NN0062')}}
   div(class="text-setting__row1")
     property-bar(class="pointer record-selection" @click="openFontsPanel")
@@ -134,7 +133,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    ...mapState('text', ['sel', 'props']),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
@@ -168,7 +167,7 @@ export default defineComponent({
       if (currLayer.type === 'text') {
         return (currLayer as IText).styles.textFill.name !== 'none'
       }
-      return !(currLayer as IGroup).layers.some(l => l.type === 'text' && (l as IText).styles.textFill.name !== 'none')
+      return (currLayer as IGroup).layers.some(l => l.type === 'text' && (l as IText).styles.textFill.name !== 'none')
     },
   },
   watch: {
@@ -179,9 +178,6 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType'
-    }),
-    ...mapMutations('text', {
-      setCurrTextInfo: 'SET_textInfo'
     }),
     ...mapActions('brandkit', {
       refreshFontAsset: 'refreshFontAsset'
@@ -271,20 +267,6 @@ export default defineComponent({
           break
       }
       return false
-    },
-    textInfoRecorder() {
-      const currLayer = LayerUtils.getCurrLayer
-      let config = currLayer
-      let subLayerIndex
-      if (currLayer.type === 'group') {
-        subLayerIndex = (currLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active)
-        if (subLayerIndex !== -1) {
-          config = (currLayer as IGroup).layers[subLayerIndex] as IText
-        } else {
-          subLayerIndex = undefined
-        }
-      }
-      this.setCurrTextInfo({ config, layerIndex: LayerUtils.layerIndex, subLayerIndex })
     },
     onPropertyClick(iconName: string) {
       if (iconName === 'font-vertical') {

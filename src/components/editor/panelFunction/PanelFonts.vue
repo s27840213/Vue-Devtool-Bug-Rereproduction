@@ -80,7 +80,6 @@ export default defineComponent({
   },
   unmounted() {
     this.setShowMore(false)
-    TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
   computed: {
     ...mapState('font', {

@@ -134,7 +134,12 @@ export default defineComponent({
   },
   // setup() {
   //   useMeta({
-  //     title: 'Home'
+  //     title: 'Home',
+  //     meta: [{
+  //       name: 'description',
+  //       content: 'aaaaaa',
+  //       vmid: 'description'
+  //     }]
   //   })
   // },
   metaInfo() {

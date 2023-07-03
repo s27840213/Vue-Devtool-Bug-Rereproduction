@@ -356,7 +356,7 @@ export default defineComponent({
             config: (this.config as IGroup).layers[subLayerIdx],
             subLayerIdx
           }
-        } else if ((this.config.type === LayerType.group)) {
+        } else if ((this.config.type === LayerType.frame)) {
           const subLayerIdx = (this.config as IFrame).clips.findIndex(l => l.active)
           return {
             config: (this.config as IFrame).clips[subLayerIdx],
@@ -386,6 +386,7 @@ export default defineComponent({
       }
     },
     subContentStyles(): any {
+      if (this.config.type === 'frame') return
       const transform = `scale(${this.config.styles.scale})`
       return {
         transform
@@ -403,7 +404,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.isDragging() && !this.useMobileEditor ? 'transform' : '',
+        willChange: this.config.active ? 'transform' : '',
         ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -1656,9 +1657,6 @@ export default defineComponent({
     },
     getLayerScale(): number {
       return this.config.styles.scale
-    },
-    isDragging(): boolean {
-      return this.config.dragging
     },
     actionIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100

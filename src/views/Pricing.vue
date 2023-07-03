@@ -23,8 +23,10 @@ div(class="pricing")
             span {{$t(item)}}
       div(class="pricing-plan-right")
         div(class="relative")
-          slide-toggle(class="body-XS" :options="periods"
-                      v-model="periodUi" bgColor="#F4F5F7")
+          slide-toggle(:options="periods"
+                      v-model="periodUi"
+                      bgColor="gray-6"
+                      textSize="body-XS")
           img(class="pricing-plan-right__off"
               :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
         div(class="pricing-plan-right-price")
@@ -76,6 +78,44 @@ export default defineComponent({
     NuHeader,
     NuFooter,
     SlideToggle
+  },
+  metaInfo() {
+    return {
+      title: `${this.$t('SE0001')}`,
+      meta: [{
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      }, {
+        property: 'og:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'og:title'
+      }, {
+        property: 'og:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'og:image'
+      }, {
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      }, {
+        property: 'twitter:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'twitter:title'
+      }, {
+        property: 'twitter:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'twitter:image'
+      }, {
+        property: 'twitter:description',
+        content: `${this.$t('OG0002')}`,
+        vmid: 'twitter:description'
+      }, {
+        property: 'og:url',
+        content: `${this.$t('OG0005')}`,
+        vmid: 'og:url'
+      }]
+    }
   },
   data() {
     return {

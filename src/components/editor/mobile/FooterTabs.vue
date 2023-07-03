@@ -360,6 +360,7 @@ export default defineComponent({
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'nudge', text: `${this.$t('NN0872')}`, panelType: 'nudge' },
         { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' }
         // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]

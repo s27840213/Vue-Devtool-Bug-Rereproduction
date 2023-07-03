@@ -44,6 +44,7 @@ div(ref="body"
           theme="icon2" size="mid"
           :icon="['advanced', 'none']"
           :active="isShowOptions"
+          style="border-color: #d9dbe1"
           @click="isShowOptions = !isShowOptions")
       transition(name="slide-up")
         img(v-if="!mobileSnapToTop" class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")

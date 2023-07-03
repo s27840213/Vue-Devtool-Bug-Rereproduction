@@ -4,7 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
-import { AutoResizeByHeight, AutoResizeBySpanDataList2, IInitSize, IRunResult } from '@/utils/autoResizeUtils'
+import { IInitSize, IMultiStageRunResult, autoResizePipeLine, autoResizePipeLineSync } from '@/utils/autoResizeUtils'
 import controlUtils from '@/utils/controlUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
@@ -721,10 +721,6 @@ class TextUtils {
     })
   }
 
-  setCurrTextInfo(data: { config?: IText | IGroup, layerIndex?: number, subLayerIndex?: number }) {
-    store.commit('text/SET_textInfo', data)
-  }
-
   loadDefaultFonts(extraFonts: { type: string, face: string, url: string, userId: string, assetId: string, ver: string }[] = []) {
     for (const defaultFont of store.getters['text/getDefaultFontsList']) {
       store.dispatch('text/addFont', defaultFont).catch(e => console.error(e))
@@ -791,13 +787,13 @@ class TextUtils {
 
   async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
-    const { widthLimit, otherDimension, loops } = await this.autoResizeCore(config, initSize)
+    const { widthLimit, otherDimension, stageLoops } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
     const firstPText = this.getFirstPText(config)
     if (router.currentRoute.value.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
-      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText} loops: ${loops}`)
+      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText} loops: ${stageLoops}`)
     }
     if (limitDiff / initSize.widthLimit > 0.20) {
       return initSize.widthLimit
@@ -806,14 +802,12 @@ class TextUtils {
     }
   }
 
-  autoResizeCoreSync(config: IText, initSize: IInitSize): IRunResult {
-    const res = (new AutoResizeByHeight(config, initSize)).runSync()
-    return (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).runSync()
+  autoResizeCoreSync(config: IText, initSize: IInitSize): IMultiStageRunResult {
+    return autoResizePipeLineSync(config, initSize, ['height', 'spanDataList2'])
   }
 
-  async autoResizeCore(config: IText, initSize: IInitSize): Promise<IRunResult> {
-    const res = await (new AutoResizeByHeight(config, initSize)).run()
-    return await (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).run()
+  async autoResizeCore(config: IText, initSize: IInitSize): Promise<IMultiStageRunResult> {
+    return await autoResizePipeLine(config, initSize, ['height', 'spanDataList2'])
   }
 
   async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {

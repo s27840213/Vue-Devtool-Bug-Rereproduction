@@ -43,9 +43,9 @@ div(class="panel-group mb-10")
       v-hint="$t('NN0035')"
     )
   div(class="panel-group__adjust")
-    btn(class="btn-align full-width" :type="'gray-mid'" :disabled="isLocked"
+    nubtn(class="btn-align" theme="edit" size="mid-full" :disabled="isLocked"
       @click="openAlignPopup") {{$tc('NN0044',1)}}
-    btn(class="btn-flip full-width" :type="'gray-mid'" :disabled="isLocked || isFlipDisabled"
+    nubtn(class="btn-flip" theme="edit" size="mid-full" :disabled="isLocked || isFlipDisabled"
       @click="openFlipPopup") {{$t('NN0038')}}
 </template>
 

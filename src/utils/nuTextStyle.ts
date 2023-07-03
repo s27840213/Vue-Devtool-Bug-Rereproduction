@@ -105,7 +105,7 @@ export default Extension.create({
   },
   onSelectionUpdate() {
     const spanAttrs = this.editor.getAttributes('textStyle')
-    if (Object.keys(spanAttrs).length) {
+    if (Object.keys(spanAttrs).length && spanAttrs.font !== 'undefined') {
       this.storage.spanStyle = tiptapUtils.textStyles(spanAttrs)
     } else {
       const spanStyle = this.editor.getAttributes('paragraph').spanStyle

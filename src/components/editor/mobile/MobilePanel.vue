@@ -61,6 +61,7 @@ div(class="mobile-panel"
 </template>
 
 <script lang="ts">
+import Tabs from '@/components/Tabs.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
 import PanelBleed from '@/components/editor/panelMobile/PanelBleed.vue'
@@ -73,6 +74,7 @@ import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue
 import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
 import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
 import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
+import PanelNudge from '@/components/editor/panelMobile/PanelNudge.vue'
 import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelOpacity from '@/components/editor/panelMobile/PanelOpacity.vue'
 import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
@@ -89,7 +91,6 @@ import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
-import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
@@ -109,7 +110,7 @@ import picWVUtils from '@/utils/picWVUtils'
 import { replaceImgInject } from '@/utils/textFillUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
-import { computed, defineComponent, PropType, provide } from 'vue'
+import { PropType, computed, defineComponent, provide } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 type IExtraPanelName = '' | 'color' | 'replace'
@@ -162,6 +163,7 @@ export default defineComponent({
     PanelAdjust,
     PanelTextEffect,
     PanelDownload,
+    PanelNudge,
     PanelPhotoShadow,
     PanelObjectAdjust,
     PanelBrandList,
@@ -230,7 +232,7 @@ export default defineComponent({
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
-        'multiple-select', 'remove-bg']
+        'multiple-select', 'remove-bg', 'nudge']
       return this.extraPanel !== '' || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
@@ -241,10 +243,10 @@ export default defineComponent({
       return [
         'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'more', 'object-adjust', 'brand-list', 'multiple-select'].includes(this.currActivePanel)
+        'font-spacing', 'more', 'object-adjust', 'brand-list', 'multiple-select', 'nudge'].includes(this.currActivePanel)
     },
     hideFooter(): boolean {
-      return ['download'].includes(this.currActivePanel)
+      return ['download', 'remove-bg'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean { // For panel that fix in some condition
       switch (this.currActivePanel) {

@@ -25,20 +25,16 @@ div(class="bg-setting")
       v-hint="$t('NN0034')"
     )
   div(class="mb-10")
-    btn(class="full-width"
-      :class="backgroundImgControl ? 'active' : ''"
-      type="gray-mid"
+    nubtn(theme="edit" size="mid-full"
       :disabled="!isShowImage || backgroundLocked"
-      @click="() => handleControlBgImage()") {{$t('NN0040')}}
+      @click="handleControlBgImage") {{$t('NN0040')}}
   div(class="bg-setting__grid mb-10")
-    btn(class="full-width"
-      :class="show === 'popup-flip' ? 'active' : ''"
-      type="gray-mid"
+    nubtn(theme="edit" size="mid-full"
+      :active="show === 'popup-flip'"
       :disabled="!isShowImage || backgroundLocked"
-      @click="() => handleShow('popup-flip')") {{$t('NN0038')}}
-    btn(class="full-width"
-      :class="show === 'popup-adjust' ? 'active' : ''"
-      type="gray-mid"
+      @click="handleShow('popup-flip')") {{$t('NN0038')}}
+    nubtn(theme="edit" size="mid-full"
+      :active="show === 'popup-adjust'"
       :disabled="!isShowImage || backgroundLocked"
       @click="handleShow('popup-adjust')") {{$t('NN0042')}}
   div(class="mb-10 text-left")
@@ -256,13 +252,6 @@ export default defineComponent({
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;
     &.lock { opacity: 0.3; }
-  }
-  .btn {
-    &.active {
-      border: 2px solid setColor(blue-1);
-      color: setColor(blue-1);
-      padding: 8px 20px;
-    }
   }
 }
 
