@@ -365,8 +365,12 @@ class ConstantData {
       blur: i18n.global.tc('NN0065'),
       opacity: i18n.global.tc('NN0066'),
       color: i18n.global.tc('NN0067'),
+      colorOut: '外顏色',
+      colorIn: '內顏色',
       spread: i18n.global.tc('NN0068'),
       stroke: i18n.global.tc('NN0069'),
+      strokeOut: '外描邊粗細',
+      strokeIn: '內描邊粗細',
       shape: i18n.global.tc('NN0070'),
       bend: i18n.global.tc('NN0071'),
       bStroke: i18n.global.tc('NN0733'),
@@ -398,7 +402,7 @@ class ConstantData {
       } as IEffectOption
 
       option.type = 'range'
-      if (name.toLocaleLowerCase().endsWith('color')) {
+      if (name.toLocaleLowerCase().includes('color')) {
         option.type = 'color'
       }
       if (name === 'customImg') option.type = 'img'
@@ -493,7 +497,11 @@ class ConstantData {
         key: 'bold3d',
         label: i18n.global.tc('NN0729'),
         options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
-      }])
+      }, ...store.getters['user/isAdmin'] && [{
+        key: 'outline',
+        label: 'outline',
+        options: toOptions(['strokeOut', 'strokeIn', 'opacity', 'colorOut', 'colorIn'])
+      }]])
     }, {
       name: 'shape' as const,
       label: i18n.global.t('NN0070'),

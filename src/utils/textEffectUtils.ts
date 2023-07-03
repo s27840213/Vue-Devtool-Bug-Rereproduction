@@ -79,7 +79,14 @@ class Controller {
         textStrokeColor: 'fontColorL+-40/BC/00',
         shadowStrokeColor: 'fontColor',
         color: 'fontColorL+-40/BC/00'
-      }
+      },
+      outline: {
+        strokeOut: 20,
+        strokeIn: 20,
+        opacity: 100,
+        colorOut: 'fontColor',
+        colorIn: 'fontColorL+-40/BC/00'
+      },
     }
   }
 
@@ -296,6 +303,23 @@ class Controller {
               webkitTextStrokeColor: `${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`,
             },
           }]
+        }
+      }
+      case 'outline': {
+        const colorOut = this.colorParser(effect.colorOut, config)
+        const colorIn = this.colorParser(effect.colorIn, config)
+        return {
+          duplicatedTexts: [{
+            extraBodyStyle: {
+              '--base-stroke': `${((effect.strokeOut + effect.strokeIn) * this.strokeScale * 2) * (fontSize / 60)}px`,
+              webkitTextStrokeColor: this.convertColor2rgba(colorOut, effectOpacity),
+            },
+          }, {
+            extraBodyStyle: {
+              '--base-stroke': `${(effect.strokeIn * this.strokeScale * 2) * (fontSize / 60)}px`,
+              webkitTextStrokeColor: this.convertColor2rgba(colorIn, effectOpacity),
+            },
+          }],
         }
       }
       default:
