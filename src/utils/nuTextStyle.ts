@@ -107,7 +107,7 @@ export default Extension.create({
   onSelectionUpdate() {
     const spanAttrs = this.editor.getAttributes('textStyle')
     console.log('spanAttrs @ onSelectionUpdate', generalUtils.deepCopy(spanAttrs))
-    if (Object.keys(spanAttrs).length) {
+    if (Object.keys(spanAttrs).length && spanAttrs.font !== 'undefined') {
       console.log('storage.spanStyle =', tiptapUtils.textStyles(spanAttrs))
       this.storage.spanStyle = tiptapUtils.textStyles(spanAttrs)
     } else {
