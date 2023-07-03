@@ -9,7 +9,8 @@ export const textLetterBgName = [
   'butter-flower', 'flower-frame', 'flower-frame-custom', 'vintage-flower',
   'vintage-flower-custom', 'cat-paw', 'bread', 'bear', 'bear-custom',
   'cat', 'cat-custom', 'rabbit', 'rabbit-custom', 'dog', 'dog-custom',
-  'star', 'baby',
+  'star', 'baby', 'paper-tap', 'paper-tap-point', 'paper-tap-stripe',
+  'paper-tap-grid'
 ] as const
 
 class LetterBGData {
@@ -152,10 +153,26 @@ class LetterBGData {
       key: 'baby',
       label: i18n.global.tc('NN0883'),
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+    }, {
+      key: 'paper-tap',
+      label: '紙膠帶',
+      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+    }, {
+      key: 'paper-tap-point',
+      label: '紙膠帶',
+      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+    }, {
+      key: 'paper-tap-stripe',
+      label: '紙膠帶',
+      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+    }, {
+      key: 'paper-tap-grid',
+      label: '紙膠帶',
+      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }]
   }
 
-  getLetterBgSetting(textBg: ITextLetterBg, index: number) {
+  getLetterBgSetting(textBg: ITextLetterBg, index: number, head: boolean, tail: boolean) {
     let [href, color] = [textBg.name as string, textBg.color]
     switch (textBg.name) {
       case 'rainbow':
@@ -231,6 +248,12 @@ class LetterBGData {
         break
       case 'baby':
         href = `baby${index % 5}`
+        break
+      case 'paper-tap':
+      case 'paper-tap-point':
+      case 'paper-tap-stripe':
+      case 'paper-tap-grid':
+        href += head ? '-head' : tail ? '-tail' : '0'
         break
       // text-book, vintage-flower-custom, bear-custom, cat-custom, rabbit-custom, dog-custom
       default:
@@ -385,7 +408,23 @@ class LetterBGData {
         ...letterBgDefault,
         yOffset200: -3,
         size: 160,
-      }
+      },
+      'paper-tap': {
+        ...letterBgDefault,
+        color: '#F9DDC5',
+      },
+      'paper-tap-point': {
+        ...letterBgDefault,
+        color: '#FFCFCF',
+      },
+      'paper-tap-stripe': {
+        ...letterBgDefault,
+        color: '#D3DDAC',
+      },
+      'paper-tap-grid': {
+        ...letterBgDefault,
+        color: '#C7DDD8',
+      },
     }
   }
 
@@ -478,6 +517,18 @@ class LetterBGData {
       baby: {
         lineHeight: 1.96, fontSpacing: 1300
       },
+      'paper-tap': {
+        lineHeight: 1.96, fontSpacing: 380
+      },
+      'paper-tap-point': {
+        lineHeight: 1.96, fontSpacing: 390
+      },
+      'paper-tap-stripe': {
+        lineHeight: 1.96, fontSpacing: 400
+      },
+      'paper-tap-grid': {
+        lineHeight: 1.96, fontSpacing: 380
+      },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
@@ -486,7 +537,7 @@ class LetterBGData {
   }
 
   isColorChangeable(href: string) {
-    return /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower|-custom|star)/
+    return /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower|-custom|star|paper-tap)/
       .test(href)
   }
 }

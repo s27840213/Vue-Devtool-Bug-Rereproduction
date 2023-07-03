@@ -937,11 +937,11 @@ class TextBg {
       const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
       let i = 0
       rows.forEach((row) => {
-        row.spanData.forEach((span) => {
+        row.spanData.forEach((span, spanIndex) => {
           const { x, y, width, height, text } = span
           if (text !== ' ') {
             pos.push({
-              ...letterBgData.getLetterBgSetting(textBg, i),
+              ...letterBgData.getLetterBgSetting(textBg, i, spanIndex === 0, spanIndex === row.spanData.length - 1),
               // 1. Because all letter svg width = height, so need to -(h-w)/2
               // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
               // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
