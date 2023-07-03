@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="mobile-panel"
-    :class="{'panel-padding': !noPaddingTheme, 'not-rounded': insertTheme, 'at-bottom': bottomTheme}"
+    :class="{'panel-padding': !noPaddingTheme, 'not-rounded': noRoundTheme, 'at-bottom': bottomTheme}"
     :style="panelStyle"
     v-click-outside="vcoConfig()"
     ref="panel")
@@ -263,6 +263,9 @@ export default defineComponent({
     glassTheme(): boolean {
       return ['page-management'].includes(this.currActivePanel)
     },
+    noRoundTheme(): boolean {
+      return ['add-template', 'page-management'].includes(this.currActivePanel)
+    },
     fixSize(): boolean {
       return [
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
@@ -334,8 +337,7 @@ export default defineComponent({
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white'
             : this.glassTheme ? 'rgba(20, 20, 20, 0.8)'
-              : this.bottomTheme ? '#141414'
-                : '#1F1F1F',
+              : '#141414',
           backdropFilter: this.glassTheme ? 'blur(5px)' : 'none',
           maxHeight: this.isDuringCopy ? '0' : (
             this.fixSize || this.extraFixSizeCondition
