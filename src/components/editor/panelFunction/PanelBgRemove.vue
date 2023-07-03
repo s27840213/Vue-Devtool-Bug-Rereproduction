@@ -33,14 +33,12 @@ div(class="panel-background-remove")
         :iconWidth="'16px'"
         @click="toggleShowInitImage(showInitImage)")
       span(class="label-mid") {{$t('NN0388')}}
-    btn(class="btn-recover full-width"
-      type="gray-mid"
+    nubtn(theme="edit" size="mid-full"
       @click="restoreInitState()") {{$t('NN0389')}}
-    btn( class="full-width"
-      type="gray-mid"
+    //- Cannot use mid-full size here, because class full has grid-column: 1 / 3 CSS.
+    nubtn(theme="edit" size="mid" style="width: 100%"
       @click="cancel()") {{ $t('NN0203') }}
-    btn( class="full-width"
-      type="primary-mid"
+    nubtn(theme="edit" size="mid" style="width: 100%"
       @click="save()") {{ $tc('NN0133',1) }}
 </template>
 
@@ -135,10 +133,6 @@ export default defineComponent({
 }
 
 .full {
-  grid-column: 1 / 3;
-}
-
-.btn-recover {
   grid-column: 1 / 3;
 }
 </style>
