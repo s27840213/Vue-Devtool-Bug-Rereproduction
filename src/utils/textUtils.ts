@@ -546,10 +546,10 @@ class TextUtils {
         let y = config.styles.y
         if (config.widthLimit === -1 && config.styles.rotate === 0) {
           if (isVertical) {
-            x = config.styles.x - (textHW.width - config.styles.width) / 2
-          } else {
             x = config.styles.x - (textHW.width - config.styles.width)
             y = config.styles.y - (textHW.height - config.styles.height) / 2
+          } else {
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
           }
         } else {
           const initData = {
