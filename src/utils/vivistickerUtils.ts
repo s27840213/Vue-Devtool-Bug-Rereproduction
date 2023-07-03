@@ -1527,6 +1527,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     )
   }
 
+  async saveToIOS(src: string, callback?: (data: { flag: string, msg: string, imageId: string }) => void) {
+    await this.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      callback && callback(_data)
+    })
+  }
+
   scrollIntoPage(pageIndex: number, duration: number): void {
     const currentPage = document.getElementById(`page-card-${pageIndex}`) as HTMLElement
     const container = currentPage && currentPage.parentElement

@@ -181,6 +181,7 @@ export default defineComponent({
           action: () => {
             bgRemoveUtils.setInBgRemoveMode(false)
             editorUtils.setCurrActivePanel('none')
+            this.setInEffectEditingMode(false)
           }
         })
         retTabs.push(...stepTabs)
@@ -242,6 +243,15 @@ export default defineComponent({
         return []
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
+        if (this.inEffectEditingMode) {
+          return [{
+            icon: 'download',
+            width: 24,
+            action: () => {
+              vivistickerUtils.saveToIOS(bgRemoveUtils.getBgRemoveResultSrc())
+            }
+          }]
+        }
         if (this.editorTypeTemplate) {
           return [
             ...this.lockIcon,
@@ -262,13 +272,6 @@ export default defineComponent({
         return []
       } else if (this.inBgRemoveMode) {
         return []
-        // return [{
-        //   icon: 'download',
-        //   width: 24,
-        //   action: () => {
-        //     // bgRemoveUtils.saveToIOS()
-        //   }
-        // }]
       } else {
         return [
           ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
@@ -488,11 +491,11 @@ export default defineComponent({
         'image',
         { plan: 0, assetId: '' },
         async () => {
-          bgRemoveUtils.saveToIOS(async (data) => {
+          bgRemoveUtils.saveToIOS(async (data, assetId) => {
             await this.addImage({
               type: 'ios',
               userId: '',
-              assetId: data.imageId
+              assetId: 'bgRemove/' + assetId,
             }, this.autoRemoveResult.width / this.autoRemoveResult.height)
           })
           return true
@@ -519,7 +522,10 @@ export default defineComponent({
     handleMyDesign() {
       if (this.currActiveTab === 'background') {
         this.setMyDesignTab('text')
+      } else if (this.currActiveTab === 'remove-bg') {
+        this.setMyDesignTab('image')
       } else {
+        console.log(this.currActiveTab)
         this.setMyDesignTab(this.currActiveTab)
       }
       this.setIsInMyDesign(true)

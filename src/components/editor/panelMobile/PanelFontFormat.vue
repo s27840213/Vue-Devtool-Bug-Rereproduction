@@ -59,7 +59,7 @@ export default defineComponent({
       if (currLayer.type === 'text') {
         return (currLayer as IText).styles.textFill.name !== 'none'
       }
-      return !(currLayer as IGroup).layers.some(l => l.type === 'text' && (l as IText).styles.textFill.name !== 'none')
+      return (currLayer as IGroup).layers.some(l => l.type === 'text' && (l as IText).styles.textFill.name !== 'none')
     },
   },
   methods: {

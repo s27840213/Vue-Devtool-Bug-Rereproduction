@@ -1,9 +1,14 @@
 <template lang="pug">
-div(class="toggle" :style="outsideStyle")
+div(class="toggle"
+    :class="`bg-${bgColor}`"
+    :style="outsideStyle")
   div(v-for="op, idx in options" class="toggle-text"
+    :class="`text-${insideIndex === idx ? activeColor : inActiveColor} ${textSize}`"
     :key="op.label"
-    :style="textStyle(idx)" @click="setValue(idx)") {{op.label}}
-  div(class="toggle-inside" :style="insideStyle")
+    :style="textStyle" @click="setValue(idx)") {{op.label}}
+  div(class="toggle-inside"
+    :class="`bg-${switchColor}`"
+    :style="insideStyle")
 </template>
 
 <script lang="ts">
@@ -62,11 +67,23 @@ export default defineComponent({
     },
     bgColor: {
       type: String,
-      default: '#1EABE6'
+      default: 'blue-1'
     },
     switchColor: {
       type: String,
-      default: '#fff'
+      default: 'white'
+    },
+    textSize: {
+      type: String,
+      default: 'body-XS'
+    },
+    activeColor: {
+      type: String,
+      default: 'blue-1'
+    },
+    inActiveColor: {
+      type: String,
+      default: 'gray-2'
     }
   },
   emits: ['update:modelValue'],
@@ -76,18 +93,23 @@ export default defineComponent({
     },
     outsideStyle():Record<string, string> {
       return {
-        'background-color': this.bgColor,
         width: `calc(${this.optionWidth} * ${this.options.length})`,
         height: this.optionHeight
       }
     },
     insideStyle():Record<string, string> {
       return {
-        'background-color': this.switchColor,
         width: `calc(${this.optionWidth} - ${this.margin} * 2)`,
         height: `calc(${this.optionHeight} - ${this.margin} * 2)`,
         margin: this.margin,
         left: `calc(${this.optionWidth} * ${this.insideIndex})`
+      }
+    },
+    textStyle():Record<string, string> {
+      return {
+        width: `calc(${this.optionWidth} - ${this.margin} * 2)`,
+        height: `calc(${this.optionHeight} - ${this.margin} * 2)`,
+        margin: this.margin
       }
     }
   },
@@ -98,14 +120,6 @@ export default defineComponent({
     setValue(index: number) {
       this.$emit('update:modelValue', this.options[index].value)
     },
-    textStyle(idx: number):Record<string, string> {
-      return {
-        color: this.insideIndex === idx ? '#4EABE6' : '#474A57',
-        width: `calc(${this.optionWidth} - ${this.margin} * 2)`,
-        height: `calc(${this.optionHeight} - ${this.margin} * 2)`,
-        margin: this.margin
-      }
-    }
   }
 })
 </script>

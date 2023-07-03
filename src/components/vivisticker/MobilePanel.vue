@@ -62,6 +62,7 @@ div(class="mobile-panel"
       @close="closeMobilePanel")
 </template>
 <script lang="ts">
+import Tabs from '@/components/Tabs.vue'
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
@@ -76,6 +77,7 @@ import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.v
 import PanelGiphyMore from '@/components/editor/panelMobile/PanelGiphyMore.vue'
 import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
 import PanelMyDesignMore from '@/components/editor/panelMobile/PanelMyDesignMore.vue'
+import PanelNudge from '@/components/editor/panelMobile/PanelNudge.vue'
 import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelOpacity from '@/components/editor/panelMobile/PanelOpacity.vue'
 import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
@@ -83,15 +85,14 @@ import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.v
 import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
-import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
+import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
-import Tabs from '@/components/Tabs.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
 import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
 import PanelObject from '@/components/vivisticker/PanelObject.vue'
@@ -118,7 +119,7 @@ import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -163,6 +164,7 @@ export default defineComponent({
     PanelFontSize,
     PanelFontFormat,
     PanelFontSpacing,
+    PanelNudge,
     PanelResize,
     PopupDownload,
     PanelMore,
@@ -245,7 +247,7 @@ export default defineComponent({
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
         'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design',
-        'multiple-select']
+        'multiple-select', 'nudge']
 
       return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
@@ -461,6 +463,11 @@ export default defineComponent({
         case 'vvstk-more': {
           return {
             panelHistory: this.panelHistory
+          }
+        }
+        case 'nudge': {
+          return {
+            forVivisticker: true
           }
         }
         default: {

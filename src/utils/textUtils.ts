@@ -4,7 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
-import { AutoResizeByHeight, AutoResizeBySpanDataList2, IInitSize, IMultiStageRunResult } from '@/utils/autoResizeUtils'
+import { IInitSize, IMultiStageRunResult, autoResizePipeLine, autoResizePipeLineSync } from '@/utils/autoResizeUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -861,21 +861,11 @@ class TextUtils {
   }
 
   autoResizeCoreSync(config: IText, initSize: IInitSize): IMultiStageRunResult {
-    const stageLoops = []
-    const res = (new AutoResizeByHeight(config, initSize)).runSync()
-    stageLoops.push(res.loops)
-    const res2 = (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).runSync()
-    stageLoops.push(res2.loops)
-    return { widthLimit: res2.widthLimit, otherDimension: res2.otherDimension, stageLoops }
+    return autoResizePipeLineSync(config, initSize, ['height', 'spanDataList2'])
   }
 
   async autoResizeCore(config: IText, initSize: IInitSize): Promise<IMultiStageRunResult> {
-    const stageLoops = []
-    const res = await (new AutoResizeByHeight(config, initSize)).run()
-    stageLoops.push(res.loops)
-    const res2 = await (new AutoResizeBySpanDataList2(config, { ...initSize, widthLimit: res.widthLimit }, AutoResizeByHeight.getDiff(config, res, initSize))).run()
-    stageLoops.push(res2.loops)
-    return { widthLimit: res2.widthLimit, otherDimension: res2.otherDimension, stageLoops }
+    return await autoResizePipeLine(config, initSize, ['height', 'spanDataList2'])
   }
 
   async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {

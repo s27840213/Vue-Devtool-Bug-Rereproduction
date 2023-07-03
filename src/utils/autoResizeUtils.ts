@@ -581,3 +581,50 @@ export class AutoResizeBySpanDataList2 extends AutoResizeBySpanDataList {
     return this.finalResult()
   }
 }
+
+type METHOD = 'height' | 'spanDataList' | 'spanDataList2'
+
+function createAutoResizeObjByMethod(config: IText, initSize: IInitSize, method: METHOD, prevStageRes: IRunResult): AutoResize {
+  switch (method) {
+    case 'height':
+      return new AutoResizeByHeight(config, initSize)
+    case 'spanDataList':
+      return new AutoResizeBySpanDataList(config, initSize, AutoResizeByHeight.getDiff(config, prevStageRes, initSize))
+    case 'spanDataList2':
+      return new AutoResizeBySpanDataList2(config, initSize, AutoResizeByHeight.getDiff(config, prevStageRes, initSize))
+  }
+}
+
+function getPipeLineParams(config: IText, initSize: IInitSize) {
+  const stageLoops: number[] = []
+  const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+  const res: IRunResult = { widthLimit: initSize.widthLimit, otherDimension: initSize[dimension], loops: 0 }
+  const widthLimit = initSize.widthLimit
+  return { stageLoops, dimension, res, widthLimit }
+}
+
+function updateParams(params: ReturnType<typeof getPipeLineParams>, res: IRunResult) {
+  params.res = res
+  params.stageLoops.push(res.loops)
+  params.widthLimit = res.widthLimit
+}
+
+function getPipeLineResult(params: ReturnType<typeof getPipeLineParams>): IMultiStageRunResult {
+  return { widthLimit: params.widthLimit, otherDimension: params.res.otherDimension, stageLoops: params.stageLoops }
+}
+
+export function autoResizePipeLineSync(config: IText, initSize: IInitSize, methods: METHOD[]): IMultiStageRunResult {
+  const params = getPipeLineParams(config, initSize)
+  for (const method of methods) {
+    updateParams(params, createAutoResizeObjByMethod(config, { ...initSize, widthLimit: params.widthLimit }, method, params.res).runSync())
+  }
+  return getPipeLineResult(params)
+}
+
+export async function autoResizePipeLine(config: IText, initSize: IInitSize, methods: METHOD[]): Promise<IMultiStageRunResult> {
+  const params = getPipeLineParams(config, initSize)
+  for (const method of methods) {
+    updateParams(params, await createAutoResizeObjByMethod(config, { ...initSize, widthLimit: params.widthLimit }, method, params.res).run())
+  }
+  return getPipeLineResult(params)
+}
