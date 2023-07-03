@@ -186,15 +186,6 @@ class LetterBGData {
       case 'circle':
         href = 'rainbow-circle'
         break
-      case 'cloud':
-        href = `cloud${index % 4}`
-        break
-      case 'penguin':
-        href = `penguin${index % 5}`
-        break
-      case 'planet':
-        href = `planet${index % 5}`
-        break
       case 'heart':
         href = 'solid-heart'
         color = ['#BFE29A', '#ABDAED', '#FFBDC5', '#FFE299', '#CDBFDD', '#9BBCDD', '#F2C3AF'][index % 7]
@@ -206,15 +197,6 @@ class LetterBGData {
       case 'heart-custom':
         href = 'solid-heart'
         break
-      case 'gummybear':
-        href = `gummybear${index % 5}`
-        break
-      case 'leaf':
-        href = `leaf${index % 5}`
-        break
-      case 'butter-flower':
-        href = `butter-flower${index % 5}`
-        break
       case 'flower-frame':
         href = `flower-frame${index % 5}`
         color = ['#F4D0E0', '#BDDBD0', '#D9CCED', '#C7DAEF', '#F4CAC1'][index % 5]
@@ -225,30 +207,28 @@ class LetterBGData {
       case 'vintage-flower':
         color = ['#E8A98E', '#EE8854', '#F3B132', '#94A084', '#B17357'][index % 5]
         break
-      case 'cat-paw':
-        href = `cat-paw${index % 5}`
-        break
-      case 'bread':
-        href = `bread${index % 5}`
-        break
+      // LetterBg that has loop N.
       case 'bear':
-        href = `bear${index % 3}`
-        break
-      case 'cat':
-        href = `cat${index % 5}`
-        break
       case 'rabbit':
-        href = `rabbit${index % 3}`
-        break
       case 'dog':
-        href = `dog${index % 3}`
-        break
       case 'star':
-        href = `star${index % 3}`
+        href += index % 3
         break
+      case 'cloud':
+        href += index % 4
+        break
+      case 'penguin':
+      case 'planet':
+      case 'gummybear':
+      case 'leaf':
+      case 'butter-flower':
+      case 'cat-paw':
+      case 'bread':
+      case 'cat':
       case 'baby':
-        href = `baby${index % 5}`
+        href += index % 5
         break
+      // LetterBg that has head/tail.
       case 'paper-tap':
       case 'paper-tap-point':
       case 'paper-tap-stripe':
@@ -524,7 +504,7 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 390
       },
       'paper-tap-stripe': {
-        lineHeight: 1.96, fontSpacing: 400
+        lineHeight: 1.96, fontSpacing: 385
       },
       'paper-tap-grid': {
         lineHeight: 1.96, fontSpacing: 380
