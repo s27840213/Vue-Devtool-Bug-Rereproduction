@@ -89,6 +89,9 @@ export default defineComponent({
     this.$nextTick(() => {
       this.handleResize()
     })
+    window.onblur = () => {
+      this.pending = false
+    }
   },
   watch: {
     windowSize: {
