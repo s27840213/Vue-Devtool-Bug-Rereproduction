@@ -650,6 +650,9 @@ export default defineComponent({
       return Object.assign(resizerStyle, HW)
     },
     getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
+      if (this.config.type === LayerType.image && (this.config as IImage).styles.shadow.currentEffect !== 'none') {
+        return []
+      }
       let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
       resizers = textMoveBar
         ? resizers.slice(this.resizerProfile.moveBarStart, this.resizerProfile.moveBarEnd)

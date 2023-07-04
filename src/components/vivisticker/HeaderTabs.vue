@@ -530,7 +530,7 @@ export default defineComponent({
           })
           imageShadowUtils.setEffect(ShadowEffectType.frame, {
             frame: {
-              spread: 10,
+              spread: 30,
               radius: 0,
               opacity: 100
             },
