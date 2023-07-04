@@ -151,7 +151,17 @@ export default defineComponent({
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: this.undo },
           { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: this.redo }
         ]
-        retTabs.push({ icon: 'vivisticker_close', disabled: false, width: 24, action: this.handleEndEditing })
+        retTabs.push({
+          icon: 'vivisticker_close',
+          disabled: false,
+          width: 24,
+          action: () => {
+            if (this.inEffectEditingMode) {
+              this.setInEffectEditingMode(false)
+            }
+            this.handleEndEditing()
+          }
+        })
         if (this.stepCount > 1) retTabs.push(...stepTabs)
         return retTabs
       } else if (this.isInMyDesign) {
