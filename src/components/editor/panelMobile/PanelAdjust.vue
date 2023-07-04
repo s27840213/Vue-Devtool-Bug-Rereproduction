@@ -21,6 +21,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
+
 export default defineComponent({
   emits: [],
   components: {

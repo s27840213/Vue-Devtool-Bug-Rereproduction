@@ -2,9 +2,9 @@
 div(class="panel-group mb-10")
   span(class="text-blue-1 subtitle-1") {{$t('NN0416') + $t('NN0036')}}
   div(class="panel-group__adjust")
-    btn(class="btn-align full-width" :type="'gray-mid'"
+    nubtn(theme="edit" size="mid-full"
       @click="handleCancel") {{$t('NN0203')}}
-    btn(class="btn-flip full-width" :type="'primary-mid'"
+    nubtn(size="mid-full"
       @click="handleFinish") {{$tc('NN0133', 1)}}
 </template>
 
@@ -58,12 +58,6 @@ export default defineComponent({
 .panel-group {
   display: flex;
   flex-direction: column;
-  > div {
-    margin-top: 15px;
-    &:nth-child(1) {
-      margin-top: 0px;
-    }
-  }
 
   &__adjust {
     display: grid;

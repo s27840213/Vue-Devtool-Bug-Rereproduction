@@ -44,7 +44,6 @@ import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceCont
 import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
-import TextUtils from '@/utils/textUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -80,7 +79,6 @@ export default defineComponent({
   },
   unmounted() {
     this.setShowMore(false)
-    TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
   computed: {
     ...mapState('font', {
