@@ -230,10 +230,11 @@ export default defineComponent({
           story: 'IGStory',
           post: 'IGPost'
         } as Record<string, string>
+        const action = mapAction[this.templateShareType]
         const query = vivistickerUtils.createUrlForJSON({ noBg: false })
         this.selectedPages = new Set()
         this.pending = true
-        vivistickerUtils.callIOSAsAPI('SCREENSHOT', { params: vivistickerUtils.createUrlForJSON({ noBg: false }), action: mapAction[this.templateShareType] }, `screenshot-${query}`).then((data) => {
+        vivistickerUtils.callIOSAsAPI('SCREENSHOT', { params: query, action, finalAction: action }, `screenshot-${query}`, { timeout: -1 }).then((data) => {
           this.pending = false
         })
       } else this.setIsInMultiPageShare(true)
