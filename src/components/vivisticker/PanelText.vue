@@ -10,12 +10,6 @@ div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
     :color="{close: 'black-5', search: 'black-5'}"
     @search="handleSearch")
   div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-  template(v-if="!keyword && !showAllRecently")
-    div(class="panel-text__text-button-wrapper"
-        :style="`font-family: ${localeFont()}`"
-        @click="handleAddText")
-      span {{ $t('STK0001') }}
-      svg-icon(iconName="plus-square" iconWidth="22px" iconColor="white")
   category-list(v-for="item in categoryListArray"
     v-show="item.show" :ref="item.key" :key="item.key"
     :list="item.content" @loadMore="handleLoadMore")
@@ -47,6 +41,7 @@ div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
           :item="item"
           :itemWidth="itemWidth"
           :style="{margin: isTablet ? 0 : '0 auto'}")
+  btn-add(v-if="!keyword && !showAllRecently" class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
 </template>
 
 <script lang="ts">
@@ -55,6 +50,7 @@ import CategoryList, { CCategoryList } from '@/components/category/CategoryList.
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import SearchBar from '@/components/SearchBar.vue'
+import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
@@ -70,10 +66,12 @@ export default defineComponent({
     SearchBar,
     CategoryList,
     CategoryListRows,
-    CategoryTextItem
+    CategoryTextItem,
+    BtnAdd
   },
   data() {
     return {
+      elMainContent: undefined as HTMLElement | undefined,
       scrollTop: {
         mainContent: 0,
         searchResult: 0
@@ -201,6 +199,7 @@ export default defineComponent({
       async ({ reset }: {reset: boolean}) => {
         await this.getRecAndCate({ reset, key: 'textStock' })
       })
+    this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelTextToTop)
@@ -296,9 +295,6 @@ export default defineComponent({
           vivistickerUtils.getEmptyCallback()
         )
       }
-    },
-    localeFont() {
-      return AssetUtils.getFontMap()[i18n.global.locale]
     },
     handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
