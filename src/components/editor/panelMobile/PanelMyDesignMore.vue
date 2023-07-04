@@ -33,6 +33,7 @@ div(class="panel-my-design-more")
 
 <script lang="ts">
 import { IPage } from '@/interfaces/page'
+import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
@@ -53,7 +54,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       myDesignBuffer: 'vivisticker/getMyDesignBuffer'
-    }),
+    }) as { myDesignBuffer: () => IMyDesign },
     isTemplate() {
       return vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type) === 'template'
     },
@@ -108,8 +109,25 @@ export default defineComponent({
     },
     handleDownload() {
       vivistickerUtils.fetchMyDesign(this.myDesignBuffer).then(data => {
-        const pages = generalUtils.deepCopy(data.pages)
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign' }), 'download')
+        if (['object', 'objectGroup'].includes(this.myDesignBuffer.type) && vivistickerUtils.checkForEmptyFrame(data.pages)) {
+          editorUtils.setCloseMobilePanelFlag(true)
+          // handle Dialog and File-selector
+          vivistickerUtils.initWithMyDesign(this.myDesignBuffer, {
+            callback: (pages: Array<IPage>) => {
+              const page = pages[0]
+              page.layers.forEach(l => {
+                l.initFromMydesign = true
+              })
+              vivistickerUtils.initLoadingFlags(page, () => {
+                vivistickerUtils.handleFrameClipError(page, true)
+              })
+            },
+            tab: ''
+          })
+        } else {
+          const pages = generalUtils.deepCopy(data.pages)
+          vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign', asset: this.myDesignBuffer }), 'download')
+        }
       })
     },
     handleDelete() {
