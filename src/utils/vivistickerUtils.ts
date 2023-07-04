@@ -354,7 +354,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const _action = isLast && action === 'IGPost' ? 'IGPost' : 'download'
       const toast = action === 'download' ? isLast : false
       const query = this.createUrlForJSON({ page: pageUtils.getPage(pageIndex[idx]), noBg: false, toast })
-      const data = await this.callIOSAsAPI('SCREENSHOT', { params: query, action: _action, finalAction: action }, `screenshot-${query}`, { timeout: 10000 })
+      const data = await this.callIOSAsAPI('SCREENSHOT', { params: query, action: _action, finalAction: action }, `screenshot-${query}`, { timeout: -1 })
       const succeeded = data?.flag === '0'
       if (succeeded) cbProgress(idx + 1)
       else return false
@@ -1017,7 +1017,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           id
         },
         to: 'Shot'
-      }, 'gen-thumb', { timeout: 10000 }) as any
+      }, 'gen-thumb', { timeout: -1 }) as any
       if (!resGenThumb || resGenThumb.flag === '1') await onThumbError()
     } else {
       const flag = await this.genThumbnail(id)

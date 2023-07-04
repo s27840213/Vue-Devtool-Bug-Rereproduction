@@ -233,7 +233,7 @@ export default defineComponent({
         const query = vivistickerUtils.createUrlForJSON({ noBg: false })
         this.selectedPages = new Set()
         this.pending = true
-        vivistickerUtils.callIOSAsAPI('SCREENSHOT', { params: vivistickerUtils.createUrlForJSON({ noBg: false }), action: mapAction[this.templateShareType] }, `screenshot-${query}`).then((data) => {
+        vivistickerUtils.callIOSAsAPI('SCREENSHOT', { params: vivistickerUtils.createUrlForJSON({ noBg: false }), action: mapAction[this.templateShareType] }, `screenshot-${query}`, { timeout: -1 }).then((data) => {
           this.pending = false
         })
       } else this.setIsInMultiPageShare(true)
