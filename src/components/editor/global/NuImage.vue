@@ -1000,9 +1000,6 @@ export default defineComponent({
       }
       this.shadowBuff.canvasSize.width = _canvasW * width / _drawCanvasW
       this.shadowBuff.canvasSize.height = _canvasH * height / _drawCanvasH
-      console.log('_mappingScale = shadow.middsize / shadow.maxsize', _mappingScale, shadow.middsize, shadow.maxsize)
-      console.log('_canvasW * width / _drawCanvasW', _canvasW, width, _drawCanvasW)
-      console.log('_canvasH * height / _drawCanvasH', _canvasH, height, _drawCanvasH)
       this.shadowBuff.drawCanvasW = _drawCanvasW
       this.shadowBuff.drawCanvasH = _drawCanvasH
       canvas.setAttribute('width', `${_canvasW}`)
