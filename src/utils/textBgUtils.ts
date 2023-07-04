@@ -83,7 +83,7 @@ export class Rect {
   }
 
   async init(config: IText, { splitSpan } = { splitSpan: false }) {
-    this.vertical = config.styles.writingMode === 'vertical-lr'
+    this.vertical = config.styles.writingMode.includes('vertical')
 
     let div = document.createElement('div')
     div.classList.add('nu-text__body')
@@ -692,7 +692,7 @@ class TextBg {
     if (!this.isFixedWidth(config.styles)) return null
 
     let [w, h] = ['min-width', 'min-height']
-    if (config.styles.writingMode === 'vertical-lr') [w, h] = [h, w]
+    if (config.styles.writingMode.includes('vertical')) [w, h] = [h, w]
     // If tiptap attr have min-w/h, convertFontStyle() in cssConverter.ts will add some style to tiptap.
     return {
       [w]: `${spanStyle.size * 1.333333 * (pStyle.fontSpacing + 1)}px`,

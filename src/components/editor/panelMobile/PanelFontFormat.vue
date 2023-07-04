@@ -30,7 +30,7 @@ import { mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   computed: {
-    ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    ...mapState('text', ['sel', 'props']),
     hasCurveText(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
       if (subLayerIdx !== -1) {

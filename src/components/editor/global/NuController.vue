@@ -235,7 +235,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -361,7 +361,7 @@ export default defineComponent({
             config: (this.config as IGroup).layers[subLayerIdx],
             subLayerIdx
           }
-        } else if ((this.config.type === LayerType.group)) {
+        } else if ((this.config.type === LayerType.frame)) {
           const subLayerIdx = (this.config as IFrame).clips.findIndex(l => l.active)
           return {
             config: (this.config as IFrame).clips[subLayerIdx],
@@ -391,6 +391,7 @@ export default defineComponent({
       }
     },
     subContentStyles(): any {
+      if (this.config.type === 'frame') return
       const transform = `scale(${this.config.styles.scale})`
       return {
         transform
@@ -408,7 +409,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.isDragging() && !this.useMobileEditor ? 'transform' : '',
+        willChange: this.config.active ? 'transform' : '',
         ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -489,6 +490,9 @@ export default defineComponent({
         })
       }
       !this.$isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
+    },
+    'config.styles.writingMode'() {
+      this.resizerProfile = ControlUtils.getResizerProfile(this.config as AllLayerTypes)
     }
   },
   unmounted() {
@@ -1203,7 +1207,7 @@ export default defineComponent({
            * below make the anchor-point always pinned at the top-left or top-right
            */
           if (this.config.styles.writingMode.includes('vertical')) {
-            this.control.xSign = 1
+            this.control.xSign = -1
           } else {
             this.control.ySign = 1
           }
@@ -1579,12 +1583,11 @@ export default defineComponent({
           textHW = TextUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
-
-        layerX = isVertical ? layerX : layerPos
+        layerX = isVertical ? layerX - textHW.width + this.getLayerWidth() : layerPos
         layerY = isVertical ? layerPos : layerY
       } else {
         const initData = {
-          xSign: 1,
+          xSign: isVertical ? -1 : 1,
           ySign: 1,
           x: this.getLayerPos().x,
           y: this.getLayerPos().y,
@@ -1718,9 +1721,6 @@ export default defineComponent({
     },
     getLayerScale(): number {
       return this.config.styles.scale
-    },
-    isDragging(): boolean {
-      return this.config.dragging
     },
     actionIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
