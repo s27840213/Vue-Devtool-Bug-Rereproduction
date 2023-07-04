@@ -41,10 +41,13 @@ div(class="header-bar relative" @pointerdown.stop)
 import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
 import i18n from '@/i18n'
 import { SrcObj } from '@/interfaces/gallery'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
@@ -151,7 +154,17 @@ export default defineComponent({
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: this.undo },
           { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: this.redo }
         ]
-        retTabs.push({ icon: 'vivisticker_close', disabled: false, width: 24, action: this.handleEndEditing })
+        retTabs.push({
+          icon: 'vivisticker_close',
+          disabled: false,
+          width: 24,
+          action: () => {
+            if (this.inEffectEditingMode) {
+              this.setInEffectEditingMode(false)
+            }
+            this.handleEndEditing()
+          }
+        })
         if (this.stepCount > 1) retTabs.push(...stepTabs)
         return retTabs
       } else if (this.isInMyDesign) {
@@ -499,17 +512,33 @@ export default defineComponent({
         'image',
         { plan: 0, assetId: '' },
         async () => {
-          bgRemoveUtils.saveToIOS(async (data, assetId) => {
-            await this.addImage({
+          return await bgRemoveUtils.saveToIOS(async (data, assetId) => {
+            const srcObj = {
               type: 'ios',
               userId: '',
               assetId: 'bgRemove/' + assetId,
-            }, this.autoRemoveResult.width / this.autoRemoveResult.height)
+            }
+            this.addImage(srcObj, this.autoRemoveResult.width / this.autoRemoveResult.height)
+            return srcObj
           })
-
-          return true
         },
-        vivistickerUtils.getEmptyCallback()
+        (data) => {
+          imageShadowUtils.setHandleId({
+            pageId: pageUtils.currFocusPage.id,
+            layerId: layerUtils.getCurrLayer.id,
+            subLayerId: ''
+          })
+          imageShadowUtils.setEffect(ShadowEffectType.frame, {
+            frame: {
+              spread: 10,
+              radius: 0,
+              opacity: 100
+            },
+            frameColor: '#FECD56'
+          })
+          imageShadowPanelUtils.handleShadowUpload(undefined, true)
+        }
+        // vivistickerUtils.getEmptyCallback()
       )
     },
     handleMore() {
