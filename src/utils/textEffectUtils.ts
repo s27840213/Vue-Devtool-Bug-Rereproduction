@@ -245,6 +245,9 @@ class Controller {
             extraBodyStyle: {
               left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) - maxFontSize}px`,
               top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) - maxFontSize}px`,
+              // Prevent TextFIll
+              backgroundImage: 'none',
+              webkitBackgroundClip: 'initial',
             },
             extraSpanStyle: {
               color,
@@ -282,7 +285,8 @@ class Controller {
                 colorWithOpacity
               ),
               // Prevent TextFIll maskImage clip shadow, and remove TextFill BG for shadow.
-              background: 'none',
+              backgroundImage: 'none',
+              webkitBackgroundClip: 'initial',
               maskImage: 'none',
             },
           }]
@@ -313,11 +317,17 @@ class Controller {
             extraBodyStyle: {
               '--base-stroke': `${((effect.strokeOut + effect.strokeIn) * this.strokeScale * 2) * (fontSize / 60)}px`,
               webkitTextStrokeColor: this.convertColor2rgba(colorOut, effectOpacity),
+              // Prevent TextFIll
+              backgroundImage: 'none',
+              webkitBackgroundClip: 'initial',
             },
           }, {
             extraBodyStyle: {
               '--base-stroke': `${(effect.strokeIn * this.strokeScale * 2) * (fontSize / 60)}px`,
               webkitTextStrokeColor: this.convertColor2rgba(colorIn, effectOpacity),
+              // Prevent TextFIll
+              backgroundImage: 'none',
+              webkitBackgroundClip: 'initial',
             },
           }],
         }

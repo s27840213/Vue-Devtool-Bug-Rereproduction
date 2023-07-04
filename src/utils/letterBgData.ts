@@ -399,11 +399,11 @@ class LetterBGData {
       },
       'paper-tap-stripe': {
         ...letterBgDefault,
-        color: '#D3DDAC',
+        color: '#C7DDD8',
       },
       'paper-tap-grid': {
         ...letterBgDefault,
-        color: '#C7DDD8',
+        color: '#D3DDAC',
       },
     }
   }
@@ -504,7 +504,7 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 390
       },
       'paper-tap-stripe': {
-        lineHeight: 1.96, fontSpacing: 385
+        lineHeight: 1.96, fontSpacing: 200
       },
       'paper-tap-grid': {
         lineHeight: 1.96, fontSpacing: 380
