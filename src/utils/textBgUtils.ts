@@ -931,6 +931,7 @@ class TextBg {
       }
     } else if (isITextLetterBg(textBg)) {
       const scale = textBg.size / 100
+      const neddRotate = letterBgData.bgNeedRotate(textBg.name)
       let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
@@ -964,11 +965,12 @@ class TextBg {
           // So -(scale-1)*p.height/2 to justify it to center.
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
           let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
-          if (vertical) [x, y] = [y, x]
+          if (vertical && !neddRotate) [x, y] = [y, x]
           const colorChangeable = letterBgData.isColorChangeable(p.href)
           return {
             tag: colorChangeable ? 'use' : 'image',
             attrs: {
+              ...neddRotate && { transform }, // If neddRotate cancel xy exchange and add transform on it.
               href: colorChangeable ? `#${p.href}`
                 : require(`@/assets/img/svg/LetterBG/${p.href}.svg`),
               width: p.height * scale,

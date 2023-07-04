@@ -391,18 +391,22 @@ class LetterBGData {
       },
       'paper-tap': {
         ...letterBgDefault,
+        size: 150,
         color: '#F9DDC5',
       },
       'paper-tap-point': {
         ...letterBgDefault,
+        size: 150,
         color: '#FFCFCF',
       },
       'paper-tap-stripe': {
         ...letterBgDefault,
+        size: 150,
         color: '#C7DDD8',
       },
       'paper-tap-grid': {
         ...letterBgDefault,
+        size: 150,
         color: '#D3DDAC',
       },
     }
@@ -498,16 +502,16 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 1300
       },
       'paper-tap': {
-        lineHeight: 1.96, fontSpacing: 380
+        lineHeight: 1.96, fontSpacing: 350
       },
       'paper-tap-point': {
-        lineHeight: 1.96, fontSpacing: 390
+        lineHeight: 1.96, fontSpacing: 430
       },
       'paper-tap-stripe': {
-        lineHeight: 1.96, fontSpacing: 200
+        lineHeight: 1.96, fontSpacing: 85
       },
       'paper-tap-grid': {
-        lineHeight: 1.96, fontSpacing: 380
+        lineHeight: 1.96, fontSpacing: 240
       },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
@@ -519,6 +523,10 @@ class LetterBGData {
   isColorChangeable(href: string) {
     return /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower|-custom|star|paper-tap)/
       .test(href)
+  }
+
+  bgNeedRotate(name: typeof textLetterBgName[number]) {
+    return /(paper)/.test(name)
   }
 }
 export default new LetterBGData()

@@ -226,7 +226,11 @@ export default defineComponent({
     spanStyle(sIndex: number, pIndex: number): Record<string, string> {
       const p = this.config.paragraphs[pIndex]
       const span = p.spans[sIndex]
-      return Object.assign(tiptapUtils.textStylesRaw(span.styles),
+      let baseCSS = tiptapUtils.textStylesRaw(span.styles)
+      if (this.config.styles.textFill.name !== 'none') { // Cancel underline if TextFill enabled.
+        baseCSS = omit(baseCSS, ['text-decoration-line', '-webkit-text-decoration-line'])
+      }
+      return Object.assign(baseCSS,
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
         textBgUtils.fixedWidthStyle(span.styles, p.styles, this.config),
       )
