@@ -370,6 +370,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     })
   }
 
+  downloadWithScreenshotUrl(query: string, afterDownload?: (flag: string) => void) {
+    this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'editorResizeDownload' }, `screenshot-${query}`).then((data) => {
+      afterDownload && afterDownload(data?.flag ?? '0')
+    })
+  }
+
   screenshotDone(data: { flag: string, params: string, action: string }) {
     this.handleCallback(`screenshot-${data.params}`, data)
   }
@@ -667,13 +673,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.hideController()
   }
 
-  copyEditor(callback?: (flag: string) => void) {
+  copyEditorCore(sender: () => Promise<string>, callback?: (flag: string) => void) {
     const executor = () => {
       nextTick(() => {
         this.preCopyEditor()
         nextTick(() => {
           setTimeout(() => {
-            this.sendCopyEditor().then((flag) => {
+            sender().then((flag) => {
               this.postCopyEditor()
               callback && callback(flag)
             })
@@ -689,6 +695,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     } else {
       executor()
     }
+  }
+
+  copyEditor(callback?: (flag: string) => void) {
+    this.copyEditorCore(this.sendCopyEditor.bind(this), callback)
+  }
+
+  downloadEditor(callback?: (flag: string) => void) {
+    this.copyEditorCore(this.sendDownloadEditor.bind(this), callback)
   }
 
   preCopyEditor(toResize = true) {
@@ -914,7 +928,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback(`getState-${data.key}`, data.value ? JSON.parse(data.value) : undefined)
   }
 
-  async sendCopyEditor(): Promise<string> {
+  async sendCopyEditorCore(action: string): Promise<string> {
     if (this.isStandaloneMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return '0'
@@ -922,7 +936,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const { x, y, width, height } = this.getEditorDimensions()
     const data = await this.callIOSAsAPI('SCREENSHOT', {
       params: '',
-      action: 'editorCopy',
+      action,
       width,
       height,
       x,
@@ -930,6 +944,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       bgColor: store.getters['vivisticker/getEditorBg'] // for older app
     }, 'copy-editor', { timeout: -1 })
     return (data?.flag as string) ?? '0'
+  }
+
+  async sendCopyEditor(): Promise<string> {
+    return await this.sendCopyEditorCore('editorCopy')
+  }
+
+  async sendDownloadEditor(): Promise<string> {
+    return await this.sendCopyEditorCore('editorDownload')
   }
 
   copyDone(data: { flag: string }) {
@@ -1543,8 +1565,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     )
   }
 
-  async saveToIOS(src: string, callback?: (data: { flag: string, msg: string, imageId: string }) => void) {
-    await this.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src }, 'save-image-from-url').then((data) => {
+  async saveToIOS(src: string, callback?: (data: { flag: string, msg: string, imageId: string }) => void, type = 'png') {
+    await this.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type, url: src }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
       callback && callback(_data)
     })
