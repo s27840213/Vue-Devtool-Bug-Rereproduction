@@ -155,19 +155,19 @@ class LetterBGData {
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
     }, {
       key: 'paper-tap',
-      label: '紙膠帶',
+      label: i18n.global.tc('NN0895'),
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }, {
       key: 'paper-tap-point',
-      label: '紙膠帶',
+      label: i18n.global.tc('NN0896'),
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }, {
       key: 'paper-tap-stripe',
-      label: '紙膠帶',
+      label: i18n.global.tc('NN0897'),
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }, {
       key: 'paper-tap-grid',
-      label: '紙膠帶',
+      label: i18n.global.tc('NN0898'),
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }]
   }
