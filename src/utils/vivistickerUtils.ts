@@ -111,9 +111,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
   hasCopied = false
   everEntersDebugMode = false
+  loadingTimeout = 0
   tutorialFlags = {} as { [key: string]: boolean }
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
+  timeoutCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
 
   STANDALONE_USER_INFO: IUserInfo = {
@@ -536,9 +538,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     store.commit('vivisticker/SET_editorType', 'none')
   }
 
-  initLoadingFlags(page: IPage | { layers: ILayer[] }, callback?: () => void, noBg = true) {
+  initLoadingFlags(page: IPage | { layers: ILayer[] }, cbLoad?: () => void, cbTimeout?: () => void, noBg = true) {
+    window.clearTimeout(this.loadingTimeout)
     this.loadingFlags = {}
-    this.loadingCallback = callback
+    this.loadingCallback = cbLoad
+    this.timeoutCallback = cbTimeout
+    if (this.timeoutCallback) {
+      this.loadingTimeout = window.setTimeout(() => {
+        this.loadingCallback = undefined
+        this.timeoutCallback && this.timeoutCallback()
+        this.timeoutCallback = undefined
+      }, 30000)
+    }
     for (const [index, layer] of page.layers.entries()) {
       this.initLoadingFlagsForLayer(layer, index)
     }
@@ -598,9 +609,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.loadingFlags[key] = true
     }
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
+      window.clearTimeout(this.loadingTimeout)
       this.loadingCallback()
       this.loadingFlags = {}
+      this.loadingTimeout = 0
       this.loadingCallback = undefined
+      this.timeoutCallback = undefined
     }
   }
 
@@ -1183,6 +1197,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       case 'gen-thumb-done':
         this.handleCallback('gen-thumb', info)
         break
+      case 'sreenshot-timeout':
+        this.handleCallback(info.srcEvent, { flag: '1' })
     }
   }
 

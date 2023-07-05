@@ -235,6 +235,7 @@ export default defineComponent({
         this.selectedPages = new Set()
         this.pending = true
         vivistickerUtils.callIOSAsAPI('SCREENSHOT', { params: query, action, finalAction: action }, `screenshot-${query}`, { timeout: -1 }).then((data) => {
+          if (data?.flag !== '0') vivistickerUtils.appToast('share failed')
           this.pending = false
         })
       } else this.setIsInMultiPageShare(true)
@@ -242,6 +243,7 @@ export default defineComponent({
     multiPageScreenShot(action: 'IGPost' | 'download') {
       this.pending = true
       vivistickerUtils.multiPageDownload(action, this.selectedPageIndexes, (progress: number) => { this.downloadProgress = progress }).then((success) => {
+        if (!success) vivistickerUtils.appToast(`${action === 'download' ? 'save' : 'share'} failed`)
         this.pending = false
         this.downloadProgress = 0
       })
