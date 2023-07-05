@@ -217,6 +217,7 @@ import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, ITex
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
+import cssConverter from '@/utils/cssConverter'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -675,7 +676,7 @@ export default defineComponent({
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) translate(-50%, -50%)`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
