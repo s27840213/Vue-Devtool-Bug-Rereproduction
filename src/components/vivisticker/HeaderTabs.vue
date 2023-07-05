@@ -364,7 +364,7 @@ export default defineComponent({
           this.resetBackgroundsSearch()
           break
         case 'text':
-          this.resetTextsSearch()
+          this.resetTextsSearch({ resetCategoryInfo: true })
           break
         case 'template':
           this.resetTemplatesSearch({ resetCategoryInfo: true })
