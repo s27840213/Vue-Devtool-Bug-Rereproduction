@@ -260,13 +260,7 @@ export default defineComponent({
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
         if (this.inEffectEditingMode) {
-          return [{
-            icon: 'download_flat',
-            width: 24,
-            action: () => {
-              vivistickerUtils.saveToIOS(bgRemoveUtils.getBgRemoveResultSrc())
-            }
-          }]
+          return downloadTab
         }
         if (this.editorTypeTemplate) {
           return [
