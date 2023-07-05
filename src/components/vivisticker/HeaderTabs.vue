@@ -519,15 +519,21 @@ export default defineComponent({
               assetId: 'bgRemove/' + assetId,
             }
             this.addImage(srcObj, this.autoRemoveResult.width / this.autoRemoveResult.height)
+            imageShadowUtils.setHandleId({
+              pageId: pageUtils.currFocusPage.id,
+              layerId: layerUtils.getCurrLayer.id,
+              subLayerId: ''
+            })
+            imageShadowUtils.updateEffectProps({
+              pageIndex: layerUtils.pageIndex,
+              layerIndex: layerUtils.layerIndex,
+              subLayerIdx: -1
+            }, { isTransparent: true })
             return srcObj
           })
         },
-        (data) => {
-          imageShadowUtils.setHandleId({
-            pageId: pageUtils.currFocusPage.id,
-            layerId: layerUtils.getCurrLayer.id,
-            subLayerId: ''
-          })
+        () => {
+          // setTimeout(() => {
           imageShadowUtils.setEffect(ShadowEffectType.frame, {
             frame: {
               spread: 30,
@@ -537,6 +543,8 @@ export default defineComponent({
             frameColor: '#FECD56'
           })
           imageShadowPanelUtils.handleShadowUpload(undefined, true)
+          //   console.warn(6000)
+          // }, 6000)
         }
         // vivistickerUtils.getEmptyCallback()
       )
