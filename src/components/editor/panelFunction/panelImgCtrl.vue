@@ -58,6 +58,12 @@ export default defineComponent({
 .panel-group {
   display: flex;
   flex-direction: column;
+  > div {
+    margin-top: 15px;
+    &:nth-child(1) {
+      margin-top: 0px;
+    }
+  }
 
   &__adjust {
     display: grid;
