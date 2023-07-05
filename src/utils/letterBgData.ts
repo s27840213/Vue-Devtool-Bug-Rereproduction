@@ -502,16 +502,16 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 1300
       },
       'paper-tap': {
-        lineHeight: 1.96, fontSpacing: 350
+        lineHeight: 2.4, fontSpacing: 350
       },
       'paper-tap-point': {
-        lineHeight: 1.96, fontSpacing: 430
+        lineHeight: 2.4, fontSpacing: 430
       },
       'paper-tap-stripe': {
-        lineHeight: 1.96, fontSpacing: 85
+        lineHeight: 2, fontSpacing: 85
       },
       'paper-tap-grid': {
-        lineHeight: 1.96, fontSpacing: 240
+        lineHeight: 2.4, fontSpacing: 240
       },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
@@ -526,7 +526,7 @@ class LetterBGData {
   }
 
   bgNeedRotate(name: typeof textLetterBgName[number]) {
-    return /(paper)/.test(name)
+    return /(paper-tap)/.test(name)
   }
 }
 export default new LetterBGData()
