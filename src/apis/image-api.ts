@@ -1,9 +1,9 @@
 
 import axios from '@/apis'
-import authToken from './auth-token'
-import { AxiosPromise } from 'axios'
+import authToken from '@/apis/auth-token'
 import { IGetImageSize } from '@/interfaces/api'
 import store from '@/store'
+import { AxiosPromise } from 'axios'
 
 export default new class {
   getImgSize(params: IGetImageSize): AxiosPromise {

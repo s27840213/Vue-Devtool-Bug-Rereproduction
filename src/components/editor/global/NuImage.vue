@@ -890,6 +890,12 @@ export default defineComponent({
           await imageUtils.imgLoadHandler(imageUtils.getSrc(this.config as IImage), (img) => {
             this.shadowBuff.MAXSIZE = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
           })
+        } else {
+          const res = await imageUtils.getImgSize(this.config.srcObj, false)
+          if (res) {
+            this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
+            console.log('this.shadowBuff.MAXSIZE', res, this.shadowBuff.MAXSIZE)
+          }
         }
       } else if (['unsplash', 'pixels'].includes(this.config.srcObj.type)) {
         this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE

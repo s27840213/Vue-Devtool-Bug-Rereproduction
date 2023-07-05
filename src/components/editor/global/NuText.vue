@@ -36,6 +36,7 @@ import { CustomElementConfig } from '@/interfaces/editor'
 import { isTextFill } from '@/interfaces/format'
 import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -230,7 +231,7 @@ export default defineComponent({
         width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         opacity,
         ...textEffectStyles,
         // Add padding at body to prevent Safari bug that overflow text of drop-shadow/opacity<1 will be cliped

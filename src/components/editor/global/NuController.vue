@@ -217,6 +217,7 @@ import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, ITex
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
+import cssConverter from '@/utils/cssConverter'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -286,7 +287,6 @@ export default defineComponent({
       MappingUtils,
       FrameUtils,
       controlPoints: ControlUtils.getControlPoints() as ICP,
-      resizerProfile: ControlUtils.getResizerProfile(this.config as AllLayerTypes),
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -353,6 +353,9 @@ export default defineComponent({
     isControllerShown(): boolean {
       return this.isActive && !this.controllerHidden
     },
+    resizerProfile() {
+      return ControlUtils.getResizerProfile(this.config as AllLayerTypes)
+    },
     subLayer(): any {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
@@ -409,7 +412,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.config.active ? 'transform' : '',
+        willChange: this.isControllerShown ? 'transform' : '',
         ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -490,9 +493,6 @@ export default defineComponent({
         })
       }
       !this.$isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
-    },
-    'config.styles.writingMode'() {
-      this.resizerProfile = ControlUtils.getResizerProfile(this.config as AllLayerTypes)
     }
   },
   unmounted() {
@@ -650,6 +650,9 @@ export default defineComponent({
       return Object.assign(resizerStyle, HW)
     },
     getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
+      if (this.config.type === LayerType.image && (this.config as IImage).styles.shadow.currentEffect !== 'none') {
+        return []
+      }
       let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
       resizers = textMoveBar
         ? resizers.slice(this.resizerProfile.moveBarStart, this.resizerProfile.moveBarEnd)
@@ -690,7 +693,7 @@ export default defineComponent({
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) translate(-50%, -50%)`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },

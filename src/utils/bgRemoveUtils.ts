@@ -314,12 +314,14 @@ class BgRemoveUtils {
     })
   }
 
-  saveToIOS(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string) => void) {
+  saveToIOS(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string) => any) {
     const src = this.canvas.toDataURL('image/png;base64')
     const assetId = generalUtils.generateAssetId()
-    vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'bgRemove', name: assetId, toast: false }, 'save-image-from-url').then((data) => {
+    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'bgRemove', name: assetId, toast: false }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
-      callback && callback(_data, assetId)
+      if (callback) {
+        return callback(_data, assetId)
+      }
     })
   }
 }
