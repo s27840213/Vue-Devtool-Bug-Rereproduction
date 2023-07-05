@@ -286,7 +286,6 @@ export default defineComponent({
       MappingUtils,
       FrameUtils,
       controlPoints: ControlUtils.getControlPoints() as ICP,
-      resizerProfile: ControlUtils.getResizerProfile(this.config as AllLayerTypes),
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -353,6 +352,9 @@ export default defineComponent({
     isControllerShown(): boolean {
       return this.isActive && !this.controllerHidden
     },
+    resizerProfile() {
+      return ControlUtils.getResizerProfile(this.config as AllLayerTypes)
+    },
     subLayer(): any {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
@@ -409,7 +411,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.config.active ? 'transform' : '',
+        willChange: this.isControllerShown ? 'transform' : '',
         ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -490,9 +492,6 @@ export default defineComponent({
         })
       }
       !this.$isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
-    },
-    'config.styles.writingMode'() {
-      this.resizerProfile = ControlUtils.getResizerProfile(this.config as AllLayerTypes)
     }
   },
   unmounted() {
