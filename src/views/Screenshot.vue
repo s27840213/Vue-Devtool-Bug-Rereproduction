@@ -305,7 +305,7 @@ export default defineComponent({
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
-            }, noBg)
+            }, () => this.onTimeout(`screenshot-${query}`), noBg)
             pageUtils.setPages([page])
             if (vivistickerUtils.checkVersion('1.31')) {
               const newSize = {
@@ -362,7 +362,7 @@ export default defineComponent({
               return
             }
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-            vivistickerUtils.initLoadingFlags(page, genThumb, false)
+            vivistickerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false)
             pageUtils.setPages([page])
             this.usingJSON = true
             break
@@ -432,6 +432,15 @@ export default defineComponent({
       } else {
         vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params, this.toast)
       }
+    },
+    onTimeout(srcEvent: string) {
+      vivistickerUtils.sendToIOS('INFORM_WEB', {
+        info: {
+          event: 'sreenshot-timeout',
+          srcEvent
+        },
+        to: 'UI'
+      })
     },
     setConfig(layer: AllLayerTypes) {
       layerUtils.addLayersToPos(0, [layer], 0)

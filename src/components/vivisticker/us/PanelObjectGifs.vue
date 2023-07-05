@@ -18,16 +18,21 @@ div(class="panel-gifs" :class="{'in-category': isInCategory}")
         :ref="!hideCategoryIconList && item.title === keyword ? 'selectedCategoryIcon' : undefined"
         @click="handleCategorySearch(item.title)")
           div(class="panel-gifs__categorys__category__icon" :style="iconStyles(item.list)")
-  Tags(v-if="isInCategory && tags && tags.length" class="panel-gifs__tags"
-      :tags="tags" theme="dark" @search="handleSearch")
+  Tags(v-show="tags && tags.length"
+      class="panel-gifs__tags"
+      :class="{fav: showFav, 'in-category': isInCategory}"
+      :tags="tags"
+      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+      ref="tags"
+      theme="dark"
+      @search="handleSearch"
+      @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray" :class="{invisible: !item.show}"
                 :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="item.loadMore")
     template(#before)
       div(class="panel-gifs__top-item")
-      Tags(v-if="!isInCategory && tags && tags.length" class="panel-gifs__tags" style="margin-top: 0"
-          :tags="tags" :scrollLeft="tagScrollLeft" theme="dark" @search="handleSearch" @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
       //- Search result empty msg
       div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
       //- Empty favorites view
@@ -244,8 +249,11 @@ export default defineComponent({
     }
   }
   &__tags {
-    margin: 10px 0 10px 0;
+    margin-bottom: 10px;
     color: setColor(black-5);
+    &.fav {
+      margin-top: 10px;
+    }
   }
   &__item {
     width: 80px;

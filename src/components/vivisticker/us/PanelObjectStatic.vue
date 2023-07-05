@@ -18,8 +18,15 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
         :ref="!hideCategoryIconList && item.title === keyword ? 'selectedCategoryIcon' : undefined"
         @click="handleCategorySearch(item.title)")
           div(class="panel-static__categorys__category__icon" :style="iconStyles(item.list, item.coverId)")
-  Tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
-      :tags="tags" theme="dark" @search="handleSearch")
+  Tags(v-show="tags && tags.length"
+      class="panel-static__tags"
+      :class="{fav: showFav}"
+      :tags="tags"
+      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+      ref="tags"
+      theme="dark"
+      @search="handleSearch"
+      @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray" :class="{invisible: !item.show}"
                 :ref="item.key" :key="item.key"
@@ -27,8 +34,6 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
                 @loadMore="item.loadMore")
     template(#before)
       div(class="panel-static__top-item")
-      Tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
-          :tags="tags" :scrollLeft="tagScrollLeft" theme="dark" @search="handleSearch" @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
       //- Search result empty msg
       div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
       //- Empty favorites view
@@ -93,7 +98,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
 <script lang="ts">
 import { CCategoryList } from '@/components/category/CategoryList.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IAsset, ITagExtend, isITag } from '@/interfaces/module'
+import { IAsset, isITag, ITagExtend } from '@/interfaces/module'
 import generalUtils from '@/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
@@ -383,8 +388,11 @@ export default defineComponent({
     }
   }
   &__tags {
-    margin: 10px 0 10px 0;
+    margin-bottom: 10px;
     color: setColor(black-5);
+    &.fav{
+      margin-top: 10px;
+    }
   }
   &__item {
     width: 80px;
