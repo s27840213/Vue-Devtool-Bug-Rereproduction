@@ -12,6 +12,7 @@ import { Editor } from '@tiptap/vue-3'
 import _, { cloneDeep, isEqual, omit } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
+import cssConverter from '@/utils/cssConverter'
 
 // For text effect gooey
 export class Point {
@@ -103,7 +104,7 @@ export class Rect {
   }
 
   async init(config: IText, { splitSpan } = { splitSpan: false }) {
-    this.vertical = config.styles.writingMode === 'vertical-lr'
+    this.vertical = config.styles.writingMode.includes('vertical')
 
     let div = document.createElement('div')
     div.classList.add('nu-text__body')
@@ -159,7 +160,7 @@ export class Rect {
     const safariStyle = generalUtils.safariLike ? { lineBreak: 'normal' } : {}
     // const safariStyle = platform.name === 'Safari' ? { lineBreak: 'strict' } : {}
     Object.assign(div.style, safariStyle)
-    div.style.writingMode = config.styles.writingMode
+    div.style.writingMode = cssConverter.convertVerticalStyle(config.styles.writingMode).writingMode
     let { widthLimit } = config
     if (config.styles.textShape.name !== 'none') widthLimit = -1
     const { scale, height } = config.styles
@@ -741,7 +742,7 @@ class TextBg {
     if (!this.isFixedWidth(config.styles)) return null
 
     let [w, h] = ['min-width', 'min-height']
-    if (config.styles.writingMode === 'vertical-lr') [w, h] = [h, w]
+    if (config.styles.writingMode.includes('vertical')) [w, h] = [h, w]
     // If tiptap attr have min-w/h, convertFontStyle() in cssConverter.ts will add some style to tiptap.
     return {
       [w]: `${spanStyle.size * 1.333333 * (pStyle.fontSpacing + 1)}px`,

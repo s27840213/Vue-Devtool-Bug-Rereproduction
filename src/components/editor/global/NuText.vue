@@ -36,6 +36,7 @@ import { CustomElementConfig } from '@/interfaces/editor'
 import { isTextFill } from '@/interfaces/format'
 import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -47,7 +48,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { isEqual, max, omit, round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -95,7 +96,8 @@ export default defineComponent({
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
-        widthLimit: this.config.widthLimit === -1 ? -1 : dimension
+        widthLimit: this.config.widthLimit === -1 ? -1 : dimension,
+        spanDataList: this.config.spanDataList
       },
       textBgVersion: 0,
       textBg: {} as CustomElementConfig | null,
@@ -213,7 +215,7 @@ export default defineComponent({
         width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         opacity,
         ...textFillStyle,
         ...textEffectStyles,
@@ -263,7 +265,7 @@ export default defineComponent({
         }
         // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
       } else {
         /**
          * use LayerUtils.getLayer and not use this.primaryLayer is bcz the tmp layer may contain the group layer,
@@ -272,7 +274,7 @@ export default defineComponent({
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit, spanDataList: textHW.spanDataList })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }

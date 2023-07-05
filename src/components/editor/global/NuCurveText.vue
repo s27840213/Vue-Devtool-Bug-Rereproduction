@@ -167,7 +167,6 @@ export default defineComponent({
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-        textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
       }
 
       await this.computeDimensions(this.spans())

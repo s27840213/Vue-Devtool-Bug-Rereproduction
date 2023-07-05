@@ -120,9 +120,7 @@ export function isITextFillCustom(object: ITextFill): object is ITextFillCustom 
   return object && !!object.name && !['none', 'custom-fill-img'].includes(object.name)
 }
 
-// export const textAdjustTypes = ['textEffect', 'textBg', 'textShape', 'textFill']
-
-class TextStyleClass {
+class TextStyleCopiedFormatClass {
   textEffect?: ITextEffect
   textBg?: ITextBg
   textShape?: ITextShape
@@ -130,9 +128,9 @@ class TextStyleClass {
   scale?: number
   writingMode?: string
 }
-const textCopiedStyles = new TextStyleClass()
-export const textCopiedStyleKeys = Object.keys(textCopiedStyles)
-export type ITextStyleCopiedFormat = Required<TextStyleClass>
+const textStyleCopiedFormat = new TextStyleCopiedFormatClass()
+export const textStyleCopiedFormatKeys = Object.keys(textStyleCopiedFormat)
+export type ITextStyleCopiedFormat = Required<TextStyleCopiedFormatClass>
 export type ITextFormat = ITextStyleCopiedFormat & {
   paragraphStyle: IParagraphStyle
   spanStyle: ISpanStyle

@@ -293,7 +293,7 @@ class TiptapUtils {
           .map(t => Object.assign({}, span, { text: t })))
         : paragraph.content
       for (const span of pContent ?? []) {
-        if (span.marks && span.marks.length > 0) {
+        if (span.marks && span.marks.length > 0 && span.marks[0].attrs.font !== 'undefined') {
           const sStyles = this.makeSpanStyle(span.marks[0].attrs)
           if (sStyles.size > largestSize) largestSize = sStyles.size
           if (sStyles.pre && !span.text.match(/^ +$/)) {

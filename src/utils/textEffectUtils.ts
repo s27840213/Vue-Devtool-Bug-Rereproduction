@@ -12,7 +12,6 @@ import tiptapUtils from './tiptapUtils'
 type ITextShadowCSS = {
   '--base-stroke'?: string
   filter?: string
-  willChange?: string
   webkitTextStrokeColor?: string
   webkitTextFillColor?: string
   duplicatedTexts?: {
@@ -217,7 +216,6 @@ class Controller {
             ${effectShadowOffset * Math.cos(angle * Math.PI / 180)}px
             ${effectShadowOffset * Math.sin(angle * Math.PI / 180)}px
             ${effectBlur / 2}px)`,
-          willChange: 'filter',
         }
       case 'lift':
         return {
@@ -227,7 +225,6 @@ class Controller {
             ${0}px
             ${0.3 * unit}px
             ${((0.3 * unit) + effectSpreadBlur) / 2}px)`,
-          willChange: 'filter',
         }
       case 'hollow':
         return {
@@ -282,8 +279,9 @@ class Controller {
                 distance * fontSize / 60,
                 effect.distanceInverse * fontSize / 60,
                 effect.angle,
-                colorWithOpacity
+                color,
               ),
+              opacity: effectOpacity,
               // Prevent TextFIll maskImage clip shadow, and remove TextFill BG for shadow.
               backgroundImage: 'none',
               webkitBackgroundClip: 'initial',

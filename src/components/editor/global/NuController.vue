@@ -217,6 +217,7 @@ import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, ITex
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
+import cssConverter from '@/utils/cssConverter'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -235,7 +236,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -286,7 +287,6 @@ export default defineComponent({
       MappingUtils,
       FrameUtils,
       controlPoints: ControlUtils.getControlPoints() as ICP,
-      resizerProfile: ControlUtils.getResizerProfile(this.config as AllLayerTypes),
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -348,6 +348,9 @@ export default defineComponent({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor'
     }),
+    resizerProfile() {
+      return ControlUtils.getResizerProfile(this.config as AllLayerTypes)
+    },
     subLayer(): any {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
@@ -356,7 +359,7 @@ export default defineComponent({
             config: (this.config as IGroup).layers[subLayerIdx],
             subLayerIdx
           }
-        } else if ((this.config.type === LayerType.group)) {
+        } else if ((this.config.type === LayerType.frame)) {
           const subLayerIdx = (this.config as IFrame).clips.findIndex(l => l.active)
           return {
             config: (this.config as IFrame).clips[subLayerIdx],
@@ -386,6 +389,7 @@ export default defineComponent({
       }
     },
     subContentStyles(): any {
+      if (this.config.type === 'frame') return
       const transform = `scale(${this.config.styles.scale})`
       return {
         transform
@@ -403,7 +407,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.isDragging() && !this.useMobileEditor ? 'transform' : '',
+        willChange: this.config.active ? 'transform' : '',
         ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -672,7 +676,7 @@ export default defineComponent({
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) translate(-50%, -50%)`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
@@ -1168,17 +1172,19 @@ export default defineComponent({
            * use computed size given widthlimit instead of querying the DOM object property to achieve higher consistency.
            */
           if (this.config.styles.writingMode.includes('vertical')) {
-            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height })
-            width = TextUtils.getTextHW(this.config as IText, height).width
+            const textHW = TextUtils.getTextHW(this.config as IText, height)
+            width = textHW.width
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height, spanDataList: textHW.spanDataList })
           } else {
-            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width })
-            height = TextUtils.getTextHW(this.config as IText, width).height
+            const textHW = TextUtils.getTextHW(this.config as IText, width)
+            height = textHW.height
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width, spanDataList: textHW.spanDataList })
           }
           /**
            * below make the anchor-point always pinned at the top-left or top-right
            */
           if (this.config.styles.writingMode.includes('vertical')) {
-            this.control.xSign = 1
+            this.control.xSign = -1
           } else {
             this.control.ySign = 1
           }
@@ -1541,11 +1547,11 @@ export default defineComponent({
           textHW = TextUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
-        layerX = isVertical ? layerX : layerPos
+        layerX = isVertical ? layerX - textHW.width + this.getLayerWidth() : layerPos
         layerY = isVertical ? layerPos : layerY
       } else {
         const initData = {
-          xSign: 1,
+          xSign: isVertical ? -1 : 1,
           ySign: 1,
           x: this.getLayerPos().x,
           y: this.getLayerPos().y,
@@ -1569,7 +1575,7 @@ export default defineComponent({
         textHW.height = TextUtils.getTextHW(config).height
       }
 
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
         width: textHW.width,
         height: textHW.height,
@@ -1651,9 +1657,6 @@ export default defineComponent({
     },
     getLayerScale(): number {
       return this.config.styles.scale
-    },
-    isDragging(): boolean {
-      return this.config.dragging
     },
     actionIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100

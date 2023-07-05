@@ -230,7 +230,7 @@ class TextFill {
       if (oldTextFill && oldTextFill.name === effect) { // Adjust effect option.
         // If apply a different preset img in the effect, retrieve the previously adjusted options from the localStorage.
         const localAttrs = !reset && attrs && Object.keys(attrs).includes('img')
-          ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as {img: {key:string}}).img.key}`) : null
+          ? localStorageUtils.get('textEffectSetting', `fill.${(attrs as { img: { key: string } }).img.key}`) : null
         Object.assign(newTextFill, oldTextFill, attrs, localAttrs)
 
         // Only TextFill from appJSON need to store to localstorage
@@ -240,7 +240,7 @@ class TextFill {
       } else { // Switch to other effect.
         // Get default img and its preset options of the effect
         const targetEffect = find(this.fillCategories, ['key', effect])
-        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as {img: {key:string}} | undefined
+        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as { img: { key: string } } | undefined
         const localAttrs = effectDefaultPreset?.img?.key ? localStorageUtils.get('textEffectSetting', `fill.${effectDefaultPreset.img.key}`) : null
         Object.assign(newTextFill, defaultAttrs, effectDefaultPreset, localAttrs,
           { name: effect, customImg: oldTextFill.customImg }

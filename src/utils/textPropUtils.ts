@@ -42,9 +42,6 @@ class TextPropUtils {
   get getCurrSel(): { start: ISelection, end: ISelection } { return (text.state as any).sel }
   get getTextState() { return text.state as ITextState }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
-  get getTextInfo(): { config: IText | IGroup, layerIndex: number, subLayerIndex?: number } {
-    return (text.state as any).currTextInfo
-  }
 
   propTypeSorter(propName: string): textPropType {
     if (propName.includes('vertical')) {
@@ -58,14 +55,15 @@ class TextPropUtils {
 
   onPropertyClick(propName: string, value?: string | number, selStart = this.getCurrSel.start, selEnd = this.getCurrSel.end) {
     const currLayer = this.getCurrLayer
-    const { layerIndex, subLayerIndex, config } = this.getTextInfo
     if (!currLayer) return
+
+    const { layerIndex, subLayerIdx: subLayerIndex } = layerUtils
 
     if (currLayer.type === 'group' || currLayer.type === 'tmp') {
       switch (this.propTypeSorter(propName)) {
         case textPropType.block: {
           const groupLayer = currLayer
-          if (typeof subLayerIndex === 'undefined') {
+          if (subLayerIndex === -1) {
             for (let i = 0; i < groupLayer.layers.length; i++) {
               if (groupLayer.layers[i].type === 'text') {
                 this.blockPropertyHandler(propName, value, i)
@@ -90,7 +88,7 @@ class TextPropUtils {
           break
         case textPropType.span: {
           const prop = this.propIndicator(selStart, selEnd, propName, value || '')
-          const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, config as IText)
+          const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, currLayer as IText)
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
           if (textUtils.isSel(selEnd)) {
             nextTick(() => textUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
@@ -120,9 +118,9 @@ class TextPropUtils {
     switch (propName) {
       case 'font-vertical': {
         const targetIsVertical = !!value
-        const targetWritingMode = targetIsVertical ? 'vertical-lr' : 'initial'
+        const targetWritingMode = targetIsVertical ? 'vertical' : 'initial'
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
-        const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
+        const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical' : 'initial'
         if (targetIsVertical) {
           const paragraphs = generalUtils.deepCopy(config.paragraphs)
           this.removeInvalidStyles(paragraphs, targetIsVertical, config.isCompensated)
@@ -130,7 +128,9 @@ class TextPropUtils {
         }
         handler({ writingMode: targetWritingMode })
         if (typeof tmpLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
-          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textUtils.getTextHW(config, config.widthLimit))
+          const textHW = textUtils.getTextHW(config, config.widthLimit)
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height })
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { spanDataList: textHW.spanDataList })
           // @TODO: need to reallocate position of each layer
         }
         this.updateTextPropsState({ isVertical: targetIsVertical, decoration: 'none', style: 'normal' })

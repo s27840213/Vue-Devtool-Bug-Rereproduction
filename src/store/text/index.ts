@@ -1,4 +1,4 @@
-import { IGroup, IParagraph, IText } from '@/interfaces/layer'
+import { IParagraph } from '@/interfaces/layer'
 import { IFont, ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
@@ -32,11 +32,6 @@ export interface ITextState {
   pending: string,
   fontStore: Array<IFont>,
   defaultFonts: Array<IFont>,
-  currTextInfo: {
-    config: IText | IGroup,
-    layerIndex: number,
-    subLayerIndex?: number
-  },
   paragraphs: Array<IParagraph>,
   firstLoad: boolean,
   isFontLoading: boolean,
@@ -70,11 +65,6 @@ const getDefaultState = (): ITextState => ({
     type: 'public',
     assetId: '',
     userId: ''
-  },
-  currTextInfo: {
-    config: {} as IText,
-    layerIndex: -1,
-    subLayerIndex: undefined
   },
   pending: '',
   fontStore: [],
@@ -151,14 +141,6 @@ const mutations: MutationTree<ITextState> = {
     }
     Object.assign(state.sel.start, nan)
     Object.assign(state.sel.end, nan)
-  },
-  SET_textInfo(state: ITextState, data: { config?: IText, layerIndex?: number, subLayerIndex?: number }) {
-    Object.entries(data)
-      .forEach(([k, v]) => {
-        if (Object.keys(state.currTextInfo).includes(k)) {
-          Object.assign(state.currTextInfo, { [k]: v })
-        }
-      })
   },
   SET_firstLoad(state: ITextState, firstLoad: boolean) {
     state.firstLoad = firstLoad
