@@ -217,6 +217,7 @@ import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, ITex
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
+import cssConverter from '@/utils/cssConverter'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -286,7 +287,6 @@ export default defineComponent({
       MappingUtils,
       FrameUtils,
       controlPoints: ControlUtils.getControlPoints() as ICP,
-      resizerProfile: ControlUtils.getResizerProfile(this.config as AllLayerTypes),
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -348,6 +348,9 @@ export default defineComponent({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor'
     }),
+    resizerProfile() {
+      return ControlUtils.getResizerProfile(this.config as AllLayerTypes)
+    },
     subLayer(): any {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
@@ -673,7 +676,7 @@ export default defineComponent({
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) translate(-50%, -50%)`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
@@ -1181,7 +1184,7 @@ export default defineComponent({
            * below make the anchor-point always pinned at the top-left or top-right
            */
           if (this.config.styles.writingMode.includes('vertical')) {
-            this.control.xSign = 1
+            this.control.xSign = -1
           } else {
             this.control.ySign = 1
           }
@@ -1544,11 +1547,11 @@ export default defineComponent({
           textHW = TextUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
-        layerX = isVertical ? layerX : layerPos
+        layerX = isVertical ? layerX - textHW.width + this.getLayerWidth() : layerPos
         layerY = isVertical ? layerPos : layerY
       } else {
         const initData = {
-          xSign: 1,
+          xSign: isVertical ? -1 : 1,
           ySign: 1,
           x: this.getLayerPos().x,
           y: this.getLayerPos().y,

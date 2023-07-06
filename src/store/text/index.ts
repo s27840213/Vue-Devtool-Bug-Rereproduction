@@ -1,4 +1,4 @@
-import { IGroup, IParagraph, IText } from '@/interfaces/layer'
+import { IParagraph } from '@/interfaces/layer'
 import { IFont, ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'

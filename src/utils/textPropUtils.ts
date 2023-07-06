@@ -118,9 +118,9 @@ class TextPropUtils {
     switch (propName) {
       case 'font-vertical': {
         const targetIsVertical = !!value
-        const targetWritingMode = targetIsVertical ? 'vertical-lr' : 'initial'
+        const targetWritingMode = targetIsVertical ? 'vertical' : 'initial'
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
-        const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
+        const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical' : 'initial'
         if (targetIsVertical) {
           const paragraphs = generalUtils.deepCopy(config.paragraphs)
           this.removeInvalidStyles(paragraphs, targetIsVertical, config.isCompensated)

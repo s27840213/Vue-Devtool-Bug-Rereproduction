@@ -22,6 +22,9 @@ const snapshotStyles = `
   .nu-page .page-highlighter {
     outline: none;
   }
+  .nu-layer {
+    will-change: auto !important;
+  }
   .page-control {
     display: none;
   }
