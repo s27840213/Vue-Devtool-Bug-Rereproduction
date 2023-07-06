@@ -139,8 +139,8 @@ export default defineComponent({
         })
       }
     },
-    isInMainContent() {
-      // skip transitions when entering of leaving main content
+    tags() {
+      // skip transitions when showing or hiding tags
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)

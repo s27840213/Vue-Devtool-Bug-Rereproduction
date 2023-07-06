@@ -310,8 +310,8 @@ export default defineComponent({
         }
       })
     },
-    isInCategory() {
-      // skip transitions when entering of leaving category
+    tags() {
+      // skip transitions when showing or hiding tags
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)

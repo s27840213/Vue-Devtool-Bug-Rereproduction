@@ -1,36 +1,56 @@
 <template lang="pug">
-div(class="panel-text" :class="{'in-category': isInCategory, 'in-editor': isInEditor}")
-  category-list(v-for="item in categoryListArray"
-    v-show="item.show" :ref="item.key" :key="item.key"
-    :list="item.content" @loadMore="handleLoadMore")
-    template(#before)
-      div(class="panel-text__top-item")
-      //- Empty recently used view
-      div(v-if="showAllRecently && !item.content.length && !pending" class="panel-text__recent-empty")
-        svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
-        div(class="panel-text__recent-empty--title") No content in Recently Used
-    template(v-if="pending" #after)
-      div(class="text-center")
-        svg-icon(iconName="loading"
-          iconColor="white"
-          iconWidth="20px")
-          div(class="panel-text__item" :style="itemStyles")
-    template(v-slot:category-text-item="{ list }")
-      div(class="panel-text__items" :style="itemsStyles")
-        div(v-for="item in list"
-            class="panel-text__card"
-            :class="{recent: item.id === 'recent'}"
-            :key="item.id"
-            :style="itemStyles()")
-          div(v-if="item.id === 'recent'" class="panel-text__card__recent"
-                @click="handleCategorySearch($t('NN0024'))")
-            svg-icon(class="pointer"
-              iconName="clock"
-              iconColor="balck-1"
-              iconWidth="24px")
-            div(class="overline-SM") RECENTLY USED
-          CategoryTextPreview(v-else :item="item" @click="addText(item)")
-  btn-add(class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
+div(class="full-size overflow-hidden rwd-container")
+  div(class="panel-text" :class="{'in-category': isInCategory, 'with-search-bar': !isInCategory, 'in-editor': isInEditor}")
+    search-bar(v-if="!isInCategory"
+      class="panel-text__searchbar"
+      :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
+      clear
+      :defaultKeyword="keywordLabel"
+      vivisticker="dark"
+      :color="{close: 'black-5', search: 'black-5'}"
+      v-model:expanded="isSearchBarExpanded"
+      @search="handleSearch")
+    Tags(v-show="tags && tags.length"
+        class="panel-text__tags"
+        :class="{collapsed: !isSearchBarExpanded, 'in-category': isInCategory}"
+        :tags="tags"
+        :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+        ref="tags"
+        theme="dark"
+        @search="handleSearch"
+        @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
+    category-list(v-for="item in categoryListArray"
+      :class="{collapsed: tags && tags.length && !isSearchBarExpanded}"
+      v-show="item.show" :ref="item.key" :key="item.key"
+      :list="item.content" @loadMore="handleLoadMore")
+      template(#before)
+        div(class="panel-text__top-item")
+        //- Empty recently used view
+        div(v-if="showAllRecently && !item.content.length && !pending" class="panel-text__recent-empty")
+          svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+          div(class="panel-text__recent-empty--title") No content in Recently Used
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+            div(class="panel-text__item" :style="itemStyles")
+      template(v-slot:category-text-item="{ list }")
+        div(class="panel-text__items" :style="itemsStyles")
+          div(v-for="item in list"
+              class="panel-text__card"
+              :class="{recent: item.id === 'recent'}"
+              :key="item.id"
+              :style="itemStyles()")
+            div(v-if="item.id === 'recent'" class="panel-text__card__recent"
+                  @click="handleCategorySearch($t('NN0024'))")
+              svg-icon(class="pointer"
+                iconName="clock"
+                iconColor="balck-1"
+                iconWidth="24px")
+              div(class="overline-SM") RECENTLY USED
+            CategoryTextPreview(v-else :item="item" @click="addText(item)")
+    btn-add(class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
 </template>
 
 <script lang="ts">
@@ -42,7 +62,7 @@ import generalUtils from '@/utils/generalUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import PanelText from '../PanelText.vue'
 
 export default defineComponent({
@@ -56,9 +76,14 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
+        await this.getCategories({ writeBack: false, key: 'textStock' })
         await this.getRecently({ writeBack: true, key: 'textStock' })
         await this.getContent()
       })
+    this.toggleTransitions(false)
+    window.requestAnimationFrame(() => {
+      this.toggleTransitions(true)
+    })
     this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
   },
   computed: {
@@ -114,6 +139,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapActions('textStock', [
+      'getCategories',
+    ]),
     // extends: PanelText
     // eslint-disable-next-line vue/no-unused-properties
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
@@ -122,7 +150,7 @@ export default defineComponent({
         type: NaN,
         ver: NaN
       } as IListServiceContentDataItem
-      if (list.length > 0) list = [recentItem].concat(list)
+      if (!this.keyword && list.length > 0) list = [recentItem].concat(list)
       return new Array(Math.ceil(list.length / this.numTextColumns))
         .fill('')
         .map((_, idx) => {
@@ -164,8 +192,16 @@ export default defineComponent({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow: hidden;
   padding-top: 10px;
+  color: white;
+  &__searchbar {
+    margin-bottom: v-bind("tags && tags.length ? '0' : '10px'");
+  }
+  &__tags {
+    margin: 10px 0;
+    color: setColor(black-5);
+  }
   &__card {
     width: 80px;
     height: 80px;
@@ -197,8 +233,32 @@ export default defineComponent({
     column-gap: 30px;
     justify-content: center;
   }
-  &.in-category:deep(.vue-recycle-scroller__item-wrapper) {
-    margin-top: 24px;
+  &.with-search-bar {
+    height: calc(100% + 52px); // 42px (serach bar height) + 10px (margin-top of tags) = 52px
+    .panel-text__tags {
+      clip-path: inset(0 0 0 0);
+      transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
+      &.collapsed {
+        transform: translateY(-52px);
+        clip-path: inset(0 42px 0 0);
+      }
+    }
+    .category-list {
+      transition: transform 200ms 100ms ease-in-out;
+      &.collapsed{
+        transform: translateY(-52px) translateZ(0);
+      }
+    }
+    &:deep(.vue-recycle-scroller__item-wrapper) {
+      margin-bottom: 52px;
+    }
+    &:deep(.tags__flex-container-mobile) {
+      width: max-content;
+      padding-right: 42px;
+    }
+  }
+  &:deep(.vue-recycle-scroller__item-wrapper) {
+    margin-top: 10px;
   }
   &.in-editor {
     padding-top: 0;
