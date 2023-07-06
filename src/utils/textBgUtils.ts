@@ -963,12 +963,15 @@ class TextBg {
               // 1. Because all letter svg width = height, so need to -(h-w)/2
               // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
               // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
-              ...textShape.name !== 'none' ? {
-                x: (layerWidth - height) / 2,
-                y: maxHeightSpan.y + (maxHeightSpan.height - height) / 2,
-              } : {
+              ...textShape.name === 'none' ? {
                 x: x - (height - width) / 2 - (!textBg.fixedWidth ? span.letterSpacing / 2 : 0),
                 y,
+              } : {
+                x: (layerWidth - height) / 2, // Align horizontal center.
+                y: (textShape.bend < 0 // Align heighest letter to top/bottom.
+                  ? layerHeight - maxHeightSpan.height - maxHeightSpan.y // bend < 0, align from bottom.
+                  : maxHeightSpan.y) + // bend >= 0, align from top.
+                  (maxHeightSpan.height - height) / 2, // Height correction according to highest letter.
               },
               width,
               height,

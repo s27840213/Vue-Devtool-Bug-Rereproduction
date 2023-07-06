@@ -165,6 +165,11 @@ export default defineComponent({
       this.drawTextBg()
     },
     focus() { this.drawTextFill() },
+    'config.styles.textShape'() {
+      if (this.config.styles.textBg.name !== 'none') {
+        this.drawTextBg()
+      }
+    },
     'config.styles.textBg'() { this.drawTextBg() },
     'config.styles.textFill'() { this.drawTextFill() },
   },
