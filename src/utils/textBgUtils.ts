@@ -2,17 +2,18 @@ import { CustomElementConfig } from '@/interfaces/editor'
 import { isITextBox, isITextGooey, isITextLetterBg, isITextSpeechBubble, isITextUnderline, ITextBg, ITextGooey, tailPositions } from '@/interfaces/format'
 import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
+import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
 import letterBgData from '@/utils/letterBgData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
-import _, { cloneDeep, isEqual, omit } from 'lodash'
+import _, { cloneDeep, isEqual, maxBy, omit } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
-import cssConverter from '@/utils/cssConverter'
 
 // For text effect gooey
 export class Point {
@@ -193,7 +194,7 @@ export class Rect {
     this.bodyRect = div.getClientRects()[0]
     this.width = this.bodyRect.width
     this.height = this.bodyRect.height
-    this.transform = this.vertical ? 'rotate(90) scale(1,-1)' : ''
+    this.transform = this.vertical ? 'rotate(90deg) scale(1,-1)' : ''
     this.rows = []
 
     for (let pIndex = 0; pIndex < div.children.length; pIndex++) {
@@ -753,13 +754,25 @@ class TextBg {
   }
 
   async drawTextBg(config: IText): Promise<CustomElementConfig | null> {
-    const textBg = config.styles.textBg
+    const { textBg, textShape } = config.styles
     if (textBg.name === 'none') return null
 
+    let { width: layerWidth, height: layerHeight, scale: layerScale } = config.styles
+    layerWidth = layerWidth / layerScale /** contentScaleRatio */
+    layerHeight = layerHeight / layerScale /** contentScaleRatio */
     const opacity = textBg.opacity * 0.01
     const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
+
     const myRect = new Rect()
-    await myRect.init(config, { splitSpan: isITextLetterBg(textBg) })
+    let textShapeData = { textWidth: [] as number[], textHeight: [] as number[], minHeight: -1 }
+    await Promise.all([
+      myRect.init(config, { splitSpan: isITextLetterBg(textBg) }),
+      textShape.name !== 'none' && isITextLetterBg(textBg)
+        ? textShapeUtils.getTextHWsBySpansAsync(textShapeUtils.flattenSpans(config))
+        : { textWidth: [], textHeight: [], minHeight: -1 }
+    ]).then(result => {
+      textShapeData = result[1]
+    })
     myRect.preprocess()
     const { vertical, width, height, transform, rects, rows } = myRect.get()
 
@@ -787,8 +800,8 @@ class TextBg {
           tag: 'path',
           attrs: {
             d,
-            transform
-          }
+          },
+          style: { transform },
         }]
         // .concat(cps.toCircle() as any) // Show control point
       }
@@ -824,8 +837,8 @@ class TextBg {
           tag: 'path',
           attrs: {
             d: path.result(),
-            transform
-          }
+          },
+          style: { transform },
         })
         // paths.push(...path.toCircle()) // Show control point
       })
@@ -845,8 +858,8 @@ class TextBg {
       const bStroke = (isITextBox(textBg) ? textBg.bStroke : 0) * fontSizeModifier
       const pStrokeY = textBg.pStrokeY * fontSizeModifier
       const pStrokeX = textBg.pStrokeX * fontSizeModifier
-      let boxWidth = (width + bStroke)
-      let boxHeight = (height + bStroke)
+      let boxWidth = (layerWidth + bStroke)
+      let boxHeight = (layerHeight + bStroke)
       let top = -bStroke
       let left = -bStroke
       if (vertical) {
@@ -933,6 +946,9 @@ class TextBg {
     } else if (isITextLetterBg(textBg)) {
       const scale = textBg.size / 100
       const needRotate = letterBgData.bgNeedRotate(textBg.name)
+      const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
+      const textShapeStyle = textShapeUtils.convertTextShape(textShapeData.textWidth, +textShape.bend, mainFontSize)
+      const maxHeightSpan = maxBy(rows.flatMap(row => row.spanData), (span) => span.height) ?? { height: 0, y: 0 }
       let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
@@ -947,8 +963,13 @@ class TextBg {
               // 1. Because all letter svg width = height, so need to -(h-w)/2
               // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
               // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
-              x: x - (height - width) / 2 - (!textBg.fixedWidth ? span.letterSpacing / 2 : 0),
-              y,
+              ...textShape.name !== 'none' ? {
+                x: (layerWidth - height) / 2,
+                y: maxHeightSpan.y + (maxHeightSpan.height - height) / 2,
+              } : {
+                x: x - (height - width) / 2 - (!textBg.fixedWidth ? span.letterSpacing / 2 : 0),
+                y,
+              },
               width,
               height,
             })
@@ -957,11 +978,13 @@ class TextBg {
         })
       })
 
+      i = -1
       return {
         tag: 'svg',
         attrs: { width, height },
         style: { opacity },
         content: pos.map(p => {
+          i += 1
           // Scale will let width be (scale-1)*p.height times larger than before,
           // So -(scale-1)*p.height/2 to justify it to center.
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
@@ -971,15 +994,21 @@ class TextBg {
           return {
             tag: colorChangeable ? 'use' : 'image',
             attrs: {
-              ...needRotate && { transform }, // If neddRotate cancel xy exchange and add transform on it.
               href: colorChangeable ? `#${p.href}`
                 : require(`@/assets/img/svg/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
-              x,
-              y,
+              ...textShape.name === 'none' && { x, y },
             },
-            style: { color: p.color }
+            style: {
+              color: p.color,
+              ...textShape.name !== 'none' ? { // Transform for TextShape
+                transform: `translate(${x}px, ${y}px) ` + textShapeStyle[i],
+                // For rotate svg component against its center.
+                transformOrigin: `${p.height * scale / 2}px ${p.height * scale / 2}px 0`,
+              } : needRotate ? { transform } // If needRotate cancel xy exchange and add transform on it.
+                : {},
+            }
           }
         })
       }
