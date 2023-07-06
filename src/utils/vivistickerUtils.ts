@@ -554,7 +554,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         this.loadingCallback = undefined
         this.timeoutCallback && this.timeoutCallback()
         this.timeoutCallback = undefined
-      }, 30000)
+      }, 60000)
     }
     for (const [index, layer] of page.layers.entries()) {
       this.initLoadingFlagsForLayer(layer, index)
