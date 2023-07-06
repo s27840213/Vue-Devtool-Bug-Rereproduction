@@ -31,7 +31,8 @@ const routes: Array<RouteRecordRaw> = [
           // set default tab to show when first update to target app version
           const appVer = vivistickerUtils.getUserInfoFromStore().appVer
           const lastAppVer = (await vivistickerUtils.getState('lastAppVer'))?.value ?? '0.0'
-          if (vivistickerUtils.isTemplateSupported && generalUtils.versionCheck({ lessThan: '1.33', version: lastAppVer })) await vivistickerUtils.setState('recentPanel', { value: 'template' })
+          const targetVer = '1.34'
+          if (vivistickerUtils.checkVersion(targetVer) && generalUtils.versionCheck({ lessThan: targetVer, version: lastAppVer })) await vivistickerUtils.setState('recentPanel', { value: 'template' })
           if (appVer !== lastAppVer) await vivistickerUtils.setState('lastAppVer', { value: appVer })
 
           const recentPanel = await vivistickerUtils.getState('recentPanel')
