@@ -113,6 +113,14 @@ export default defineComponent({
     }
   },
   mounted() {
+    // skip transitions after tags load
+    const unwatch = this.$watch('tags.length', () => {
+      this.toggleTransitions(false)
+      window.requestAnimationFrame(() => {
+        this.toggleTransitions(true)
+      })
+      unwatch()
+    })
     if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
     generalUtils.panelInit('template',
       this.handleSearch,
@@ -140,7 +148,7 @@ export default defineComponent({
       }
     },
     isInMainContent() {
-      // skip transitions when entering of leaving main content
+      // skip transitions when entering or leaving main content
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)

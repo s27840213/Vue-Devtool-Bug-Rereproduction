@@ -273,6 +273,14 @@ export default defineComponent({
     }
   },
   mounted() {
+    // skip transitions after tags load
+    const unwatch = this.$watch('tags.length', () => {
+      this.toggleTransitions(false)
+      window.requestAnimationFrame(() => {
+        this.toggleTransitions(true)
+      })
+      unwatch()
+    })
     generalUtils.panelInit('giphy',
       this.handleSearch,
       this.handleCategorySearch,
@@ -311,7 +319,7 @@ export default defineComponent({
       })
     },
     isInCategory() {
-      // skip transitions when entering of leaving category
+      // skip transitions when entering or leaving category
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)

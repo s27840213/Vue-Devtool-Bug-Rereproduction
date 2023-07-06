@@ -217,6 +217,14 @@ export default defineComponent({
     },
   },
   mounted() {
+    // skip transitions after tags load
+    const unwatch = this.$watch('tags.length', () => {
+      this.toggleTransitions(false)
+      window.requestAnimationFrame(() => {
+        this.toggleTransitions(true)
+      })
+      unwatch()
+    })
     eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
     if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending || this.$options.name === 'panel-text-us') return
     generalUtils.panelInit('text',
@@ -253,8 +261,8 @@ export default defineComponent({
         })
       }
     },
-    tags() {
-      // skip transitions when showing or hiding tags
+    isInCategory() {
+      // skip transitions when entering or leaving category
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
