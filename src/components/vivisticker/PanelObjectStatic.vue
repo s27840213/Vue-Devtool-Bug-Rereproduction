@@ -148,6 +148,9 @@ export default defineComponent({
     isInCategory(): boolean {
       return this.isTabInCategory('object')
     },
+    isInCategoryOrShowFav(): boolean {
+      return this.isInCategory || this.showFav
+    },
     showSearchBar(): boolean {
       return !this.isInCategory && !this.showFav
     },
@@ -319,8 +322,8 @@ export default defineComponent({
         }
       })
     },
-    tags() {
-      // skip transitions when showing or hiding tags
+    isInCategoryOrShowFav() {
+      // skip transitions when entering of leaving category or favorites
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
