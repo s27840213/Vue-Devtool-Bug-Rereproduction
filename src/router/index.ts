@@ -32,7 +32,7 @@ const routes: Array<RouteRecordRaw> = [
           const appVer = vivistickerUtils.getUserInfoFromStore().appVer
           const lastAppVer = (await vivistickerUtils.getState('lastAppVer'))?.value ?? '0.0'
           const targetVer = '1.34'
-          if (vivistickerUtils.checkVersion(targetVer) && generalUtils.versionCheck({ lessThan: targetVer, version: lastAppVer })) await vivistickerUtils.setState('recentPanel', { value: 'template' })
+          if (vivistickerUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) await vivistickerUtils.setState('recentPanel', { value: 'template' })
           if (appVer !== lastAppVer) await vivistickerUtils.setState('lastAppVer', { value: appVer })
 
           const recentPanel = await vivistickerUtils.getState('recentPanel')
