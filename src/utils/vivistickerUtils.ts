@@ -196,7 +196,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get isTemplateSupported(): boolean {
-    return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.33') && !generalUtils.isIPadOS())
+    return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.34') && !generalUtils.isIPadOS())
   }
 
   getUserInfoFromStore(): IUserInfo {
