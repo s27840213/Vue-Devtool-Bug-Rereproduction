@@ -396,7 +396,7 @@ export default defineComponent({
     }
   }
   &__tags {
-    margin: 10px 0;
+    margin: 7px 0 10px;
     color: setColor(black-5);
   }
   &__brand-header {
@@ -425,23 +425,23 @@ export default defineComponent({
     column-gap: 10px;
   }
   &.with-search-bar {
-    height: calc(100% + 52px); // 42px (serach bar height) + 10px (margin-top of tags) = 52px
+    height: calc(100% + 49px); // 42px (serach bar height) + 7px (margin-top of tags) = 49px
     .panel-text__tags {
       clip-path: inset(0 0 0 0);
       transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
       &.collapsed {
-        transform: translateY(-52px);
+        transform: translateY(-49px);
         clip-path: inset(0 42px 0 0);
       }
     }
     .category-list {
       transition: transform 200ms 100ms ease-in-out;
       &.collapsed{
-        transform: translateY(-52px) translateZ(0);
+        transform: translateY(-49px) translateZ(0);
       }
     }
     &:deep(.vue-recycle-scroller__item-wrapper) {
-      margin-bottom: 52px;
+      margin-bottom: 49px;
     }
     &:deep(.tags__flex-container-mobile) {
       width: max-content;

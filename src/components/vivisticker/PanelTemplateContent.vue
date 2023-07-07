@@ -415,7 +415,7 @@ export default defineComponent({
   color: white;
   text-align: left;
   &__tags {
-    margin: 14px 0 10px;
+    margin: 7px 0 10px;
     color: setColor(black-5);
   }
   &__item {
@@ -433,23 +433,23 @@ export default defineComponent({
     grid-template-columns: repeat(3, 1fr);
   }
   &.with-search-bar {
-    height: calc(100% + 56px); // 42px (serach bar height) + 14px (margin-top of tags) = 56px
+    height: calc(100% + 49px); // 42px (serach bar height) + 7px (margin-top of tags) = 49px
     .panel-template-content__tags {
       clip-path: inset(0 0 0 0);
       transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
       &.collapsed {
-        transform: translateY(-56px);
+        transform: translateY(-49px);
         clip-path: inset(0 42px 0 0);
       }
     }
     .category-list {
       transition: transform 200ms 100ms ease-in-out;
       &.collapsed{
-        transform: translateY(-56px) translateZ(0);
+        transform: translateY(-49px) translateZ(0);
       }
     }
     &::v-deep .vue-recycle-scroller__item-wrapper {
-      margin-bottom: 56px;
+      margin-bottom: 49px;
     }
     &::v-deep .tags__flex-container-mobile {
       width: max-content;
