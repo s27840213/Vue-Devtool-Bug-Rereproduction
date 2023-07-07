@@ -104,7 +104,8 @@ export default defineComponent({
       const bend = this.bend()
       const borderWidth = `${1 / (scaleRatio * 0.01)}px`
       const style = {} as Record<string, string|number>
-      const radius = 1000 / Math.pow(Math.abs(bend), 0.6)
+      const mainFontSize = textEffectUtils.getLayerFontSize(this.config.paragraphs)
+      const radius = 1000 / Math.pow(Math.abs(bend), 0.6) * mainFontSize / 60
       if (bend >= 0) {
         style.top = `${minHeight / 2}px`
       } else {

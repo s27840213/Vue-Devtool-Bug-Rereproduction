@@ -11,7 +11,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
-import _, { cloneDeep, isEqual, maxBy, omit } from 'lodash'
+import _, { cloneDeep, isEqual, maxBy, omit, sum } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
 
@@ -381,27 +381,31 @@ export class Path {
     this.pathArray.push(`h${dist}`)
   }
 
-  l(p: Point): void
-  l(x: number, y: number): void
-  l(x: number | Point, y?: number): void {
-    if (x instanceof Point) {
-      [x, y] = [x.x, x.y]
-    }
-
-    this.currPos = this.currPos.add(new Point(x, y as number))
+  l(p: Point): void {
+    this.currPos = this.currPos.add(p)
     this.pointArray.push(this.currPos)
-    this.pathArray.push(`l${x} ${y}`)
+    this.pathArray.push(`l${p.x} ${p.y}`)
   }
 
-  a(rx: number, ry: number, sweepFlag: number, p: Point): void
-  a(rx: number, ry: number, sweepFlag: number, x: number, y: number): void
-  a(rx: number, ry: number, sweepFlag: number, x: number | Point, y?: number): void {
-    if (x instanceof Point) {
-      [x, y] = [x.x, x.y]
-    }
-    this.currPos = this.currPos.add(new Point(x, y as number))
+  a(p: Point, { rx = 1, ry = 1, largeArcFlac = 0, sweepFlag = 1, radius = 1 } = {}): void {
+    if (radius !== 1) [rx, ry] = [radius, radius]
+    this.currPos = this.currPos.add(p)
     this.pointArray.push(this.currPos)
-    this.pathArray.push(`a${rx} ${ry} 0 0${sweepFlag}${x} ${y}`)
+    this.pathArray.push(`a${rx} ${ry} 0 ${largeArcFlac}${sweepFlag}${p.x} ${p.y}`)
+  }
+
+  largeArc(totalAngles: number, origin = new Point()): void { // For arc that angle > 360
+    const clockwise = totalAngles > 0
+    const rotateDir = (clockwise ? 1 : -1)
+    const radius = this.currPos.dist(origin)
+    let angleAcc = 0
+    totalAngles = Math.abs(totalAngles)
+    while (angleAcc < totalAngles) {
+      const currAngle = Math.min(totalAngles - angleAcc, 180)
+      const arcEnd = this.currPos.rotate(currAngle * rotateDir, origin)
+      this.a(arcEnd.sub(this.currPos), { sweepFlag: +clockwise, radius })
+      angleAcc += currAngle
+    }
   }
 
   q(dp1: Point, dp: Point): void
@@ -762,12 +766,13 @@ class TextBg {
     layerHeight = layerHeight / layerScale /** contentScaleRatio */
     const opacity = textBg.opacity * 0.01
     const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
+    const withShape = textShape.name !== 'none'
 
     const myRect = new Rect()
     let textShapeData = { textWidth: [] as number[], textHeight: [] as number[], minHeight: -1 }
     await Promise.all([
       myRect.init(config, { splitSpan: isITextLetterBg(textBg) }),
-      textShape.name !== 'none' && isITextLetterBg(textBg)
+      withShape && (isITextLetterBg(textBg) || isITextUnderline(textBg))
         ? textShapeUtils.getTextHWsBySpansAsync(textShapeUtils.flattenSpans(config))
         : { textWidth: [], textHeight: [], minHeight: -1 }
     ]).then(result => {
@@ -775,6 +780,11 @@ class TextBg {
     })
     myRect.preprocess()
     const { vertical, width, height, transform, rects, rows } = myRect.get()
+    const maxHeightSpan = maxBy( // y is accrodding to its row, not entire svg.
+      rows.flatMap(row => row.spanData.map(span => ({ height: span.height, y: span.y - row.rect.y }))),
+      (data) => data.height
+    ) ?? { height: 0, y: 0 }
+    const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
 
     if (isITextGooey(textBg)) {
       const padding = textBg.distance * fontSizeModifier
@@ -809,27 +819,65 @@ class TextBg {
       const color = textEffectUtils.colorParser(textBg.color, config)
       const fill = this.rgba(color, opacity)
       const paths = [] as CustomElementConfig[]
-      rects.forEach(rect => {
-        const capWidth = rect.height * 0.005 * textBg.height
-        const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
-        const path = new Path(new Point(rect.x + capWidth, rect.y + yOffset))
 
+      // Variable for TextShape version
+      const shapeCapWidth = maxHeightSpan.height * 0.005 * textBg.height
+      const yOffset = (maxHeightSpan.height - shapeCapWidth * 2) * 0.01 * (100 - textBg.yOffset)
+      const radius = textShapeUtils.getRadiusByBend(+textShape.bend) * mainFontSize / 60
+      const textAngles = textShapeData.textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
+      const totalAngles = withShape ? sum(textAngles) - shapeCapWidth * 2 * 360 / (radius * 2 * Math.PI) : 0 // Will be 0 for non-TextShape
+      const middle = new Point(layerWidth / 2, maxHeightSpan.y + yOffset)
+      const center = new Point(layerWidth / 2, maxHeightSpan.height / 2 + radius)
+      const begin = middle.rotate(-totalAngles / 2, center)
+
+      for (const rect of rects) {
+        const capWidth = withShape ? shapeCapWidth : rect.height * 0.005 * textBg.height
+        const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
+        const path = withShape ? new Path(begin)
+          : new Path(new Point(rect.x + capWidth, rect.y + yOffset))
+
+        // Step 1: top line
+        if (withShape) {
+          path.largeArc(totalAngles, center)
+        } else {
+          path.h(rect.width - capWidth * 2)
+        }
+
+        // Step 2: right endpoint
         switch (textBg.endpoint) {
           case 'triangle':
-            path.h(rect.width - capWidth)
-            path.l(-capWidth, capWidth * 2)
-            path.h(-(rect.width - capWidth))
+            // If !withShape, all rotate in step 2, 4 take no effect.
+            path.l(new Point(capWidth, 0).rotate(totalAngles / 2))
+            path.l(new Point(-capWidth, capWidth * 2).rotate(totalAngles / 2))
             break
           case 'rounded':
-            path.a(1, 1, 0, 0, capWidth * 2)
-            path.h(rect.width - capWidth * 2)
-            path.a(1, 1, 0, 0, -capWidth * 2)
+            path.a(new Point(0, capWidth * 2).rotate(totalAngles / 2))
             break
           case 'square':
-            path.h(rect.width - capWidth)
-            path.v(capWidth * 2)
-            path.h(-rect.width)
-            path.v(-capWidth * 2)
+            path.l(new Point(capWidth, 0).rotate(totalAngles / 2))
+            path.l(new Point(0, capWidth * 2).rotate(totalAngles / 2))
+            path.l(new Point(-capWidth, 0).rotate(totalAngles / 2))
+            break
+        }
+
+        // Step 3: bottom line
+        if (withShape) {
+          path.largeArc(-totalAngles, center)
+        } else {
+          path.h(-(rect.width - capWidth * 2))
+        }
+
+        // Step 4: left endpoint
+        switch (textBg.endpoint) {
+          case 'triangle':
+            path.l(new Point(-capWidth, 0).rotate(-totalAngles / 2))
+            break
+          case 'rounded':
+            path.a(new Point(0, -capWidth * 2).rotate(-totalAngles / 2))
+            break
+          case 'square':
+            path.l(new Point(-capWidth, 0).rotate(-totalAngles / 2))
+            path.l(new Point(0, -capWidth * 2).rotate(-totalAngles / 2))
             break
         }
 
@@ -841,7 +889,8 @@ class TextBg {
           style: { transform },
         })
         // paths.push(...path.toCircle()) // Show control point
-      })
+        if (withShape) break // TextShape only have one line.
+      }
 
       return {
         tag: 'svg',
@@ -897,12 +946,12 @@ class TextBg {
           tailMid = tailMid.add(tailMid.sub(center).mul(0.7))
           const arcEnd = tailEnd.rotate(60 * (1 - tailOffset), center)
 
-          path.a(boxRadius, boxRadius, 1, tailBegin)
+          path.a(tailBegin, { radius: boxRadius })
           path.q(tailMid.middle(tailBegin).sub(tailBegin).add(cornerDir.mul(boxRadius * 0.1 * cornerDir.y)), tailMid.sub(tailBegin))
           path.q(tailEnd.middle(tailMid).sub(tailMid).add(cornerDir.mul(boxRadius * 0.1 * cornerDir.y)), tailEnd.sub(tailMid))
-          path.a(boxRadius, boxRadius, 1, arcEnd.sub(tailEnd))
+          path.a(arcEnd.sub(tailEnd), { radius: boxRadius })
         } else { // Normal corner
-          path.a(boxRadius, boxRadius, 1, cornerDir.mul(boxRadius))
+          path.a(cornerDir.mul(boxRadius), { radius: boxRadius })
         }
 
         // Draw line, insert tail for speech-bubble-triangle.
@@ -948,7 +997,6 @@ class TextBg {
       const needRotate = letterBgData.bgNeedRotate(textBg.name)
       const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
       const textShapeStyle = textShapeUtils.convertTextShape(textShapeData.textWidth, +textShape.bend, mainFontSize)
-      const maxHeightSpan = maxBy(rows.flatMap(row => row.spanData), (span) => span.height) ?? { height: 0, y: 0 }
       let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
@@ -963,7 +1011,7 @@ class TextBg {
               // 1. Because all letter svg width = height, so need to -(h-w)/2
               // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
               // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
-              ...textShape.name === 'none' ? {
+              ...!withShape ? {
                 x: x - (height - width) / 2 - (!textBg.fixedWidth ? span.letterSpacing / 2 : 0),
                 y,
               } : {
@@ -1001,11 +1049,11 @@ class TextBg {
                 : require(`@/assets/img/svg/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
-              ...textShape.name === 'none' && { x, y },
+              ...!withShape && { x, y },
             },
             style: {
               color: p.color,
-              ...textShape.name !== 'none' ? { // Transform for TextShape
+              ...withShape ? { // Transform for TextShape
                 transform: `translate(${x}px, ${y}px) ` + textShapeStyle[i],
                 // For rotate svg component against its center.
                 transformOrigin: `${p.height * scale / 2}px ${p.height * scale / 2}px 0`,
