@@ -29,10 +29,11 @@ const routes: Array<RouteRecordRaw> = [
           await vivistickerUtils.fetchTutorialFlags()
 
           // set default tab to show when first update to target app version
+          const isTargetLocale = ['us', 'jp'].includes(vivistickerUtils.getUserInfoFromStore().locale)
           const appVer = vivistickerUtils.getUserInfoFromStore().appVer
           const lastAppVer = (await vivistickerUtils.getState('lastAppVer'))?.value ?? '0.0'
           const targetVer = '1.34'
-          if (vivistickerUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) await vivistickerUtils.setState('recentPanel', { value: 'template' })
+          if (isTargetLocale && vivistickerUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) await vivistickerUtils.setState('recentPanel', { value: 'template' })
           if (appVer !== lastAppVer) await vivistickerUtils.setState('lastAppVer', { value: appVer })
 
           const recentPanel = await vivistickerUtils.getState('recentPanel')
