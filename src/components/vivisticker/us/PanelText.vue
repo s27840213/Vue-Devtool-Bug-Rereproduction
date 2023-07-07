@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="full-size overflow-hidden rwd-container")
+div(class="overflow-container full-size rwd-container")
   div(class="panel-text" :class="{'in-category': isInCategory, 'with-search-bar': !isInCategory, 'in-editor': isInEditor}")
     search-bar(v-if="!isInCategory"
       class="panel-text__searchbar"
@@ -188,6 +188,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.overflow-container {
+  overflow: clip;
+}
 .panel-text {
   @include size(100%, 100%);
   display: flex;
