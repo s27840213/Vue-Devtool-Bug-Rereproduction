@@ -291,7 +291,7 @@ export default defineComponent({
       }
     },
     async handleSearch(keyword: string) {
-      this.resetSearch()
+      this.resetSearch({ keepSearchResult: true })
       if (keyword) {
         this.getTagContent({ keyword })
         this.isSearchBarExpanded = true
