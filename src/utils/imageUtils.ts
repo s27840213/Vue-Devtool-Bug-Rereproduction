@@ -156,7 +156,7 @@ class ImageUtils {
      * the cache img of the users would keep catching this error
      * use a universe query version can solve this problem
      */
-    return this.appendQuery(res, 'appver', 'v7090')
+    return this.appendQuery(res, 'appver', 'v7097')
   }
 
   getSrcSize(srcObj: SrcObj, dimension: number | string, preload = '') {

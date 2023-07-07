@@ -4,6 +4,7 @@ div(class="panel-bg__item"
     @click.right.prevent="openUpdateDesignPopup()")
   img(class="panel-bg__img"
     ref="img"
+    crossOrigin="anonymous"
     :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
     draggable="false"
     @error="handleNotFound")
