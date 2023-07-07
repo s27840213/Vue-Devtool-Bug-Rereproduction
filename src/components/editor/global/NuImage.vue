@@ -92,7 +92,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
 export default defineComponent({
-  emits: [],
+  emits: ['onload'],
   props: {
     config: {
       type: Object,
@@ -549,6 +549,7 @@ export default defineComponent({
           }, this.subLayerIndex)
         }
       }
+      this.$emit('onload')
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return
@@ -627,21 +628,6 @@ export default defineComponent({
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
       return new Promise<void>((resolve, reject) => {
-      //   const img = new Image()
-      //   img.onload = () => resolve()
-      //   img.onerror = (error) => {
-      //     reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-      //     fetch(img.src)
-      //       .then(res => {
-      //         const { status, statusText } = res
-      //         this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
-      //       })
-      //       .catch((e) => {
-      //         this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
-      //       })
-      //   }
-      //   img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
-      // })
         const size = imageUtils.getSrcSize(this.config.adjustSrcObj?.srcObj?.type ? this.config.adjustSrcObj?.srcObj : this.config.srcObj, val, preLoadType)
         const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, size))
         imageUtils.imgLoadHandler(src, () => resolve(), {

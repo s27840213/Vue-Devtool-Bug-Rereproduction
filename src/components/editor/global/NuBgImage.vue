@@ -1,6 +1,6 @@
 <template lang="pug">
-//- div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
-div(class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
+//- div(class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
+div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
   //- div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
     svg(v-if="isAdjustImage"
@@ -167,7 +167,8 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio',
       getEditorViewImages: 'file/getEditorViewImages',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
-      isBgImgCtrl: 'imgControl/isBgImgCtrl'
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isBgCtrlImgLoaded: 'imgControl/isBgCtrlImgLoaded',
     }),
     ...mapState('mobileEditor', {
       inAllPagesMode: 'mobileAllPageMode',
