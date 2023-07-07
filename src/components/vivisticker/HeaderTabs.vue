@@ -159,6 +159,10 @@ export default defineComponent({
           disabled: false,
           width: 24,
           action: () => {
+            if (this.isUploadingShadowImg) {
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              return
+            }
             if (this.inEffectEditingMode) {
               this.setInEffectEditingMode(false)
             }
