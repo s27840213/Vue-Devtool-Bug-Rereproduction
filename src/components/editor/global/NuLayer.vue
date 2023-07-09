@@ -337,7 +337,7 @@ export default defineComponent({
       return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     frameClipStyles(): any {
-      const isRectFrameClip = this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
+      const isRectFrameClip = this.config.type === 'image' && this.config.clipPath && frameUtils.checkIsRect(this.config.clipPath)
       return {
         fill: '#00000000',
         stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#9C9C9C') : 'none',
@@ -381,7 +381,7 @@ export default defineComponent({
     },
     showSvgContour(): boolean {
       const { config } = this
-      return config.active && config.isFrame && !config.isFrameImg && config.type === 'image' && !this.forRender && !frameUtils.checkIsRect(this.config.clipPath)
+      return config.active && config.isFrame && !config.isFrameImg && config.type === 'image' && !this.forRender && this.config.clipPath && !frameUtils.checkIsRect(this.config.clipPath)
     }
   },
   methods: {

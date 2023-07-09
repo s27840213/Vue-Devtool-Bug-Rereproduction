@@ -46,9 +46,7 @@ import { isTextFill } from '@/interfaces/format'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
 import cssConverter from '@/utils/cssConverter'
-import eventUtils from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -362,7 +360,7 @@ export default defineComponent({
     outlineStyles() {
       const outlineColor = this.config.locked ? '#EB5757' : '#9C9C9C'
       // if (this.isControllerShown && layerUtils.getCurrLayer.type !== 'frame') {
-      const isRectFrameClip = layerUtils.getCurrLayer.type !== 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
+      const isRectFrameClip = layerUtils.getCurrLayer.type !== 'frame' && this.config.type === 'image' && this.config.clipPath && frameUtils.checkIsRect(this.config.clipPath)
       if (isRectFrameClip) return 'none'
 
       if (this.isControllerShown) {

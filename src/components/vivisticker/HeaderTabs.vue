@@ -198,6 +198,10 @@ export default defineComponent({
           disabled: false,
           width: 24,
           action: () => {
+            if (this.isUploadingShadowImg) {
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              return
+            }
             bgRemoveUtils.setInBgRemoveMode(false)
             editorUtils.setCurrActivePanel('none')
             this.setInEffectEditingMode(false)
