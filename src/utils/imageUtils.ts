@@ -15,6 +15,8 @@ import LayerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 
+const APP_VER_FOR_REFRESH_CACHE = 'v7097'
+
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
     const { error, crossOrigin = false } = options || {}
@@ -76,7 +78,7 @@ class ImageUtils {
     } else {
       if (!config.srcObj && !config.src_obj) return ''
       if (config.previewSrc) {
-        return config.previewSrc
+        return this.appendRefreshAppver(config.previewSrc)
       }
       const srcObj = config.srcObj || config.src_obj as SrcObj
       ({ type, userId, assetId, brandId, updateQuery, maxSize } = srcObj)
@@ -156,7 +158,7 @@ class ImageUtils {
      * the cache img of the users would keep catching this error
      * use a universe query version can solve this problem
      */
-    return this.appendQuery(res, 'appver', 'v7097')
+    return this.appendRefreshAppver(res)
   }
 
   getSrcSize(srcObj: SrcObj, dimension: number | string, preload = '') {
@@ -609,6 +611,10 @@ class ImageUtils {
     } else {
       return `${src}?rand_ver=${generalUtils.generateRandomString(6)}`
     }
+  }
+
+  appendRefreshAppver(src: string) {
+    return this.appendQuery(src, 'appver', APP_VER_FOR_REFRESH_CACHE)
   }
 
   appendCompQuery(src: string): string {
