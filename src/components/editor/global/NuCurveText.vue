@@ -55,7 +55,7 @@ export default defineComponent({
     }
   },
   async created () {
-    await this.computeDimensions(this.spans())
+    await this.computeDimensions()
     // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
@@ -83,9 +83,9 @@ export default defineComponent({
   watch: {
     'config.paragraphs': {
       handler(newVal) {
-        this.computeDimensions(this.spans())
+        this.computeDimensions()
         textUtils.untilFontLoaded(newVal).then(() => {
-          this.computeDimensions(this.spans())
+          this.computeDimensions()
         })
       },
       deep: true
@@ -150,8 +150,8 @@ export default defineComponent({
         bend >= 0 ? { top: baseline } : { bottom: baseline },
       )
     },
-    async computeDimensions(spans: ISpan[]) {
-      const { textWidth, textHeight, minHeight } = await TextShapeUtils.getTextHWsBySpansAsync(spans)
+    async computeDimensions() {
+      const { textWidth, textHeight, minHeight } = await TextShapeUtils.getTextHWsAsync(this.config)
       this.textWidth = textWidth
       this.textHeight = textHeight
       this.minHeight = minHeight
@@ -170,7 +170,7 @@ export default defineComponent({
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
       }
 
-      await this.computeDimensions(this.spans())
+      await this.computeDimensions()
     }
   }
 })

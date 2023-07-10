@@ -774,7 +774,7 @@ class TextBg {
     await Promise.all([
       myRect.init(config, { splitSpan: isITextLetterBg(textBg) }),
       withShape && (isITextLetterBg(textBg) || isITextUnderline(textBg))
-        ? textShapeUtils.getTextHWsBySpansAsync(textShapeUtils.flattenSpans(config))
+        ? textShapeUtils.getTextHWsAsync(config)
         : { textWidth: [], textHeight: [], minHeight: -1 }
     ]).then(result => {
       textShapeData = result[1]

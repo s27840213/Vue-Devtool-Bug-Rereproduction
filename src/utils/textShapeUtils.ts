@@ -6,6 +6,7 @@ import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
+import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textUtils from '@/utils/textUtils'
@@ -203,17 +204,17 @@ class Controller {
     )
   }
 
-  getTextHWsBySpans(spans: ISpan[]): { textWidth: number[], textHeight: number[], minHeight: number } {
-    const { body, p } = this.genTextDivP(spans)
+  getTextHWs(config: IText): { textWidth: number[], textHeight: number[], minHeight: number } {
+    const { body, p } = this.genTextDivP(config)
     document.body.appendChild(body)
     const textHWs = this.getHWsByOffset(p)
     document.body.removeChild(body)
     return textHWs
   }
 
-  async getTextHWsBySpansAsync(spans: ISpan[]): Promise<{ textWidth: number[]; textHeight: number[]; minHeight: number }> {
+  async getTextHWsAsync(config: IText): Promise<{ textWidth: number[]; textHeight: number[]; minHeight: number }> {
     const textId = generalUtils.generateRandomString(12)
-    const { body, p } = this.genTextDivP(spans)
+    const { body, p } = this.genTextDivP(config)
     body.setAttribute('id', textId)
     return new Promise(resolve => {
       this.observerCallbackMap[textId] = () => {
@@ -226,13 +227,14 @@ class Controller {
     })
   }
 
-  genTextDivP(spans: ISpan[]): {
+  genTextDivP(config: IText): {
     body: HTMLDivElement,
     p: HTMLParagraphElement
   } {
     const body = document.createElement('div')
     const p = document.createElement('p')
 
+    const spans = this.flattenSpans(config)
     spans.forEach(spanData => {
       const span = document.createElement('span')
       if (spanData.text === ' ') {
@@ -243,7 +245,8 @@ class Controller {
 
       const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
       spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
-      Object.assign(span.style, spanStyleObject)
+      const fixedWidthStyle = textBgUtils.fixedWidthStyle(spanData.styles, config.paragraphs[0].styles, config)
+      Object.assign(span.style, spanStyleObject, fixedWidthStyle)
 
       span.classList.add('nu-curve-text__span')
       p.appendChild(span)
@@ -280,14 +283,6 @@ class Controller {
       minHeight = Math.max(minHeight, offsetHeight)
     }
     return { textWidth, textHeight, minHeight }
-  }
-
-  getTextHWs(_content: IText): { textWidth: number[], textHeight: number[], minHeight: number } {
-    return this.getTextHWsBySpans(this.flattenSpans(generalUtils.deepCopy(_content)))
-  }
-
-  async getTextHWsAsync(_content: IText): Promise<{ textWidth: number[]; textHeight: number[]; minHeight: number }> {
-    return await this.getTextHWsBySpansAsync(this.flattenSpans(generalUtils.deepCopy(_content)))
   }
 
   calcArea(transforms: string[], minHeight: number, scale: number, config: IText): { areaWidth: number, areaHeight: number } {
