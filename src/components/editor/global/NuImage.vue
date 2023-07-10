@@ -22,7 +22,16 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
     //- :style="imgWrapperstyle()")
     div(class='nu-image__picture'
       :style="imgStyles()")
-      svg(v-if="isAdjustImage()"
+      img(ref="img"
+        :style="flipStyles"
+        class="nu-image__img full-size"
+        :class="{'layer-flip': flippedAnimation() }"
+        :src="finalSrc"
+        draggable="false"
+        crossOrigin="anonymous"
+        @error="onError"
+        @load="onLoad")
+      svg(v-if="isAdjustImage"
         :style="flipStyles"
         class="nu-image__svg"
         :class="{'layer-flip': flippedAnimation() }"
@@ -45,18 +54,10 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
+          crossOrigin="anonymous"
           draggable="false"
           @error="onError"
           @load="onAdjustImgLoad")
-      img(v-else ref="img"
-        :style="flipStyles"
-        class="nu-image__img full-size"
-        :class="{'layer-flip': flippedAnimation() }"
-        :src="finalSrc"
-        draggable="false"
-        crossOrigin="anonymous"
-        @error="onError"
-        @load="onLoad")
   template(v-if="hasHalation()")
     component(v-for="(elm, idx) in cssFilterElms()"
       class="nu-image__adjust"
@@ -211,7 +212,7 @@ export default defineComponent({
         width: 0,
         height: 0
       },
-      initialized: false,
+      initialized: false
     }
   },
   watch: {
@@ -351,6 +352,11 @@ export default defineComponent({
       if (this.src.startsWith('data:image') || !this.initialized) return false
       return true
     },
+    isAdjustImage(): boolean {
+      const { styles: { adjust = {} } } = this.config
+      const arr = Object.entries(adjust).filter(([, v]) => typeof v === 'number' && v !== 0)
+      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
+    },
     finalSrc(): string {
       if (this.$route.name === 'Preview') {
         return imageUtils.appendCompQueryForVivipic(this.src)
@@ -420,7 +426,7 @@ export default defineComponent({
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
       const styles = {
-        ...(this.isAdjustImage() && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        ...(this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -668,7 +674,7 @@ export default defineComponent({
         this.handleIsTransparent()
         await this.previewAsLoading()
       } else {
-        if (this.isAdjustImage()) {
+        if (this.isAdjustImage) {
           this.handleIsTransparent()
         }
         const { imgWidth, imgHeight } = this.config.styles
@@ -1062,11 +1068,6 @@ export default defineComponent({
       return imageUtils
         .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 320)
     },
-    isAdjustImage(): boolean {
-      const { styles: { adjust = {} } } = this.config
-      const arr = Object.entries(adjust).filter(([, v]) => typeof v === 'number' && v !== 0)
-      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
-    },
     hasHalation(): boolean {
       return this.config.styles.adjust?.halation
     },
@@ -1160,6 +1161,8 @@ export default defineComponent({
 
   &__svg {
     display: block;
+    position: absolute;
+    top: 0;
   }
 
   &__adjust {
