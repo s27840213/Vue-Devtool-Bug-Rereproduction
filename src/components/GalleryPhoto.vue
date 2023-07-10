@@ -108,7 +108,14 @@ export default defineComponent({
     },
     previewSrc(): string {
       const { inFilePanel, inLogoPanel, photo, vendor } = this
-      if (inFilePanel || inLogoPanel || photo.urls) return imageUtils.appendRefreshAppver(photo.urls.tiny || photo.urls.thumb)
+      if (inFilePanel || inLogoPanel || photo.urls) {
+        const res = photo.urls.tiny || photo.urls.thumb
+        if (res.includes('data:image/')) {
+          return res
+        } else {
+          return imageUtils.appendRefreshAppver(res)
+        }
+      }
       const data = {
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
