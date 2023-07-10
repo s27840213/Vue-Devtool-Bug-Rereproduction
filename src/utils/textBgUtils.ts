@@ -826,13 +826,14 @@ class TextBg {
       const yOffset = (maxHeightSpan.height - shapeCapWidth * 2) * 0.01 * (100 - textBg.yOffset)
       const radius = textShapeUtils.getRadiusByBend(bend) * mainFontSize / 60
       const textAngles = textShapeData.textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
-      const totalAngles = withShape ? sum(textAngles) - shapeCapWidth * 2 * 360 / (radius * 2 * Math.PI) : 0 // Will be 0 for non-TextShape
+      const totalAngles = !withShape ? 0 // Will be 0 for non-TextShape
+        : (sum(textAngles) - shapeCapWidth * 2 * 360 / (radius * 2 * Math.PI)) * (bend >= 0 ? 1 : -1)
+
       const middle = new Point(layerWidth / 2,
-        (bend > 0 ? maxHeightSpan.y : layerHeight - maxHeightSpan.height - maxHeightSpan.y) + yOffset)
+        (bend >= 0 ? maxHeightSpan.y : layerHeight - maxHeightSpan.height - maxHeightSpan.y) + yOffset)
       const center = new Point(layerWidth / 2,
-        (bend > 0 ? maxHeightSpan.height / 2 + radius : layerHeight - maxHeightSpan.height / 2 - radius))
+        (bend >= 0 ? maxHeightSpan.height / 2 + radius : layerHeight - maxHeightSpan.height / 2 - radius))
       const begin = middle.rotate(-totalAngles / 2, center)
-      const sweepFlag = withShape ? +(bend > 0) : 1
 
       for (const rect of rects) {
         const capWidth = withShape ? shapeCapWidth : rect.height * 0.005 * textBg.height
@@ -855,7 +856,7 @@ class TextBg {
             path.l(new Point(-capWidth, capWidth * 2).rotate(totalAngles / 2))
             break
           case 'rounded':
-            path.a(new Point(0, capWidth * 2).rotate(totalAngles / 2), { sweepFlag })
+            path.a(new Point(0, capWidth * 2).rotate(totalAngles / 2))
             break
           case 'square':
             path.l(new Point(capWidth, 0).rotate(totalAngles / 2))
@@ -877,7 +878,7 @@ class TextBg {
             path.l(new Point(-capWidth, 0).rotate(-totalAngles / 2))
             break
           case 'rounded':
-            path.a(new Point(0, -capWidth * 2).rotate(-totalAngles / 2), { sweepFlag })
+            path.a(new Point(0, -capWidth * 2).rotate(-totalAngles / 2))
             break
           case 'square':
             path.l(new Point(-capWidth, 0).rotate(-totalAngles / 2))
@@ -1024,9 +1025,9 @@ class TextBg {
                 y,
               } : {
                 x: (layerWidth - height) / 2, // Align horizontal center.
-                y: (bend < 0 // Align heighest letter to top/bottom.
-                  ? layerHeight - maxHeightSpan.height - maxHeightSpan.y // bend < 0, align from bottom.
-                  : maxHeightSpan.y) + // bend >= 0, align from top.
+                y: (bend >= 0 // Align heighest letter to top/bottom.
+                  ? maxHeightSpan.y // bend >= 0, align from top.
+                  : layerHeight - maxHeightSpan.height - maxHeightSpan.y) + // bend < 0, align from bottom.
                   (maxHeightSpan.height - height) / 2, // Height correction according to highest letter.
               },
               width,
