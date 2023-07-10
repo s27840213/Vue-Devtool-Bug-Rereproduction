@@ -767,6 +767,7 @@ class TextBg {
     const opacity = textBg.opacity * 0.01
     const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
     const withShape = textShape.name !== 'none'
+    const bend = +textShape.bend
 
     const myRect = new Rect()
     let textShapeData = { textWidth: [] as number[], textHeight: [] as number[], minHeight: -1 }
@@ -823,12 +824,15 @@ class TextBg {
       // Variable for TextShape version
       const shapeCapWidth = maxHeightSpan.height * 0.005 * textBg.height
       const yOffset = (maxHeightSpan.height - shapeCapWidth * 2) * 0.01 * (100 - textBg.yOffset)
-      const radius = textShapeUtils.getRadiusByBend(+textShape.bend) * mainFontSize / 60
+      const radius = textShapeUtils.getRadiusByBend(bend) * mainFontSize / 60
       const textAngles = textShapeData.textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
       const totalAngles = withShape ? sum(textAngles) - shapeCapWidth * 2 * 360 / (radius * 2 * Math.PI) : 0 // Will be 0 for non-TextShape
-      const middle = new Point(layerWidth / 2, maxHeightSpan.y + yOffset)
-      const center = new Point(layerWidth / 2, maxHeightSpan.height / 2 + radius)
+      const middle = new Point(layerWidth / 2,
+        (bend > 0 ? maxHeightSpan.y : layerHeight - maxHeightSpan.height - maxHeightSpan.y) + yOffset)
+      const center = new Point(layerWidth / 2,
+        (bend > 0 ? maxHeightSpan.height / 2 + radius : layerHeight - maxHeightSpan.height / 2 - radius))
       const begin = middle.rotate(-totalAngles / 2, center)
+      const sweepFlag = withShape ? +(bend > 0) : 1
 
       for (const rect of rects) {
         const capWidth = withShape ? shapeCapWidth : rect.height * 0.005 * textBg.height
@@ -851,7 +855,7 @@ class TextBg {
             path.l(new Point(-capWidth, capWidth * 2).rotate(totalAngles / 2))
             break
           case 'rounded':
-            path.a(new Point(0, capWidth * 2).rotate(totalAngles / 2))
+            path.a(new Point(0, capWidth * 2).rotate(totalAngles / 2), { sweepFlag })
             break
           case 'square':
             path.l(new Point(capWidth, 0).rotate(totalAngles / 2))
@@ -873,7 +877,7 @@ class TextBg {
             path.l(new Point(-capWidth, 0).rotate(-totalAngles / 2))
             break
           case 'rounded':
-            path.a(new Point(0, -capWidth * 2).rotate(-totalAngles / 2))
+            path.a(new Point(0, -capWidth * 2).rotate(-totalAngles / 2), { sweepFlag })
             break
           case 'square':
             path.l(new Point(-capWidth, 0).rotate(-totalAngles / 2))
@@ -894,7 +898,11 @@ class TextBg {
 
       return {
         tag: 'svg',
-        attrs: { width, height, fill },
+        attrs: {
+          width: layerWidth,
+          height: layerHeight,
+          fill
+        },
         content: paths
       }
     } else if (isITextBox(textBg) || isITextSpeechBubble(textBg)) {
@@ -996,7 +1004,7 @@ class TextBg {
       const scale = textBg.size / 100
       const needRotate = letterBgData.bgNeedRotate(textBg.name)
       const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
-      const textShapeStyle = textShapeUtils.convertTextShape(textShapeData.textWidth, +textShape.bend, mainFontSize)
+      const textShapeStyle = textShapeUtils.convertTextShape(textShapeData.textWidth, bend, mainFontSize)
       let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
@@ -1016,7 +1024,7 @@ class TextBg {
                 y,
               } : {
                 x: (layerWidth - height) / 2, // Align horizontal center.
-                y: (textShape.bend < 0 // Align heighest letter to top/bottom.
+                y: (bend < 0 // Align heighest letter to top/bottom.
                   ? layerHeight - maxHeightSpan.height - maxHeightSpan.y // bend < 0, align from bottom.
                   : maxHeightSpan.y) + // bend >= 0, align from top.
                   (maxHeightSpan.height - height) / 2, // Height correction according to highest letter.
