@@ -1017,14 +1017,15 @@ class TextBg {
       let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
-      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
-      let i = 0
+      const pos = [] as (Record<'i' | 'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
+      let [i, spaceCount] = [0, 0]
       rows.forEach((row) => {
         row.spanData.forEach((span, spanIndex) => {
           const { x, y, width, height, text } = span
-          if (text !== ' ') {
+          if (text === ' ') spaceCount += 1
+          else {
             pos.push({
-              ...letterBgData.getLetterBgSetting(textBg, i, spanIndex === 0, spanIndex === row.spanData.length - 1),
+              ...letterBgData.getLetterBgSetting(textBg, i - spaceCount, spanIndex === 0, spanIndex === row.spanData.length - 1),
               // 1. Because all letter svg width = height, so need to -(h-w)/2
               // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
               // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
@@ -1040,19 +1041,18 @@ class TextBg {
               },
               width,
               height,
+              i,
             })
-            i += 1
           }
+          i += 1
         })
       })
 
-      i = -1
       return {
         tag: 'svg',
         attrs: { width, height },
         style: { opacity },
         content: pos.map(p => {
-          i += 1
           // Scale will let width be (scale-1)*p.height times larger than before,
           // So -(scale-1)*p.height/2 to justify it to center.
           let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
@@ -1071,7 +1071,7 @@ class TextBg {
             style: {
               color: p.color,
               ...withShape ? { // Transform for TextShape
-                transform: `translate(${x}px, ${y}px) ` + textShapeStyle[i],
+                transform: `translate(${x}px, ${y}px) ` + textShapeStyle[p.i],
                 // For rotate svg component against its center.
                 transformOrigin: `${p.height * scale / 2}px ${p.height * scale / 2}px 0`,
               } : needRotate ? { transform } // If needRotate cancel xy exchange and add transform on it.
