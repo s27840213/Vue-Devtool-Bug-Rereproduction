@@ -283,6 +283,14 @@ export default defineComponent({
     }
   },
   mounted() {
+    // skip transitions after tags load
+    const unwatch = this.$watch('tags.length', () => {
+      this.toggleTransitions(false)
+      window.requestAnimationFrame(() => {
+        this.toggleTransitions(true)
+      })
+      unwatch()
+    })
     if (this.rawCategories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
     generalUtils.panelInit('object',
       this.handleSearch,
@@ -323,7 +331,7 @@ export default defineComponent({
       })
     },
     isInCategoryOrShowFav() {
-      // skip transitions when entering of leaving category or favorites
+      // skip transitions when entering or leaving category or favorites
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
@@ -466,7 +474,7 @@ export default defineComponent({
   color: setColor(white);
   overflow: hidden;
   &__tags {
-    margin: 14px 0 10px;
+    margin: 7px 0 10px;
     color: setColor(black-5);
   }
   &__item {
@@ -479,23 +487,23 @@ export default defineComponent({
     grid-template-columns: repeat(3, 1fr);
   }
   &.with-search-bar {
-    height: calc(100% + 56px); // 42px (serach bar height) + 14px (margin-top of tags) = 56px
+    height: calc(100% + 49px); // 42px (serach bar height) + 7px (margin-top of tags) = 49px
     .panel-static__tags {
       clip-path: inset(0 0 0 0);
       transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
       &.collapsed {
-        transform: translateY(-56px);
+        transform: translateY(-49px);
         clip-path: inset(0 42px 0 0);
       }
     }
     .category-list {
       transition: transform 200ms 100ms ease-in-out;
       &.collapsed{
-        transform: translateY(-56px);
+        transform: translateY(-49px);
       }
     }
     &:deep(.vue-recycle-scroller__item-wrapper) {
-      margin-bottom: 56px;
+      margin-bottom: 49px;
     }
     &:deep(.tags__flex-container-mobile) {
       width: max-content;

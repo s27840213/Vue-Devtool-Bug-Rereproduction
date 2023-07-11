@@ -54,7 +54,7 @@ export interface IShadowEffects {
   blur?: IBlurEffect,
   frame?: IFrameEffect,
   imageMatched?: IImageMatchedEffect,
-  floating?: IFloatingEffect
+  floating?: IFloatingEffect,
 }
 
 export interface IShadowStyles {
@@ -85,5 +85,6 @@ export interface IShadowProps {
   old?: {
     currentEffect: ShadowEffectType,
     effects: IShadowEffects
-  }
+  },
+  cb?: () => void
 }

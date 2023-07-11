@@ -216,7 +216,7 @@ export default defineComponent({
           icon: 'effect',
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
-          // hidden: this.isInFrame,
+          hidden: layerUtils.getCurrLayer.type === LayerType.frame,
           // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
         },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },

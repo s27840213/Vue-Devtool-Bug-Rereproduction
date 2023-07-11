@@ -47,7 +47,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
+import imageShadowUtils, { CANVAS_MAX_SIZE } from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
@@ -159,6 +159,10 @@ export default defineComponent({
           disabled: false,
           width: 24,
           action: () => {
+            if (this.isUploadingShadowImg) {
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              return
+            }
             if (this.inEffectEditingMode) {
               this.setInEffectEditingMode(false)
             }
@@ -194,6 +198,10 @@ export default defineComponent({
           disabled: false,
           width: 24,
           action: () => {
+            if (this.isUploadingShadowImg) {
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              return
+            }
             bgRemoveUtils.setInBgRemoveMode(false)
             editorUtils.setCurrActivePanel('none')
             this.setInEffectEditingMode(false)
@@ -260,13 +268,7 @@ export default defineComponent({
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
         if (this.inEffectEditingMode) {
-          return [{
-            icon: 'download_flat',
-            width: 24,
-            action: () => {
-              vivistickerUtils.saveToIOS(bgRemoveUtils.getBgRemoveResultSrc())
-            }
-          }]
+          return downloadTab
         }
         if (this.editorTypeTemplate) {
           return [
@@ -366,7 +368,7 @@ export default defineComponent({
           this.resetBackgroundsSearch()
           break
         case 'text':
-          this.resetTextsSearch()
+          this.resetTextsSearch({ resetCategoryInfo: true })
           break
         case 'template':
           this.resetTemplatesSearch({ resetCategoryInfo: true })
@@ -565,21 +567,31 @@ export default defineComponent({
             return srcObj
           })
         },
-        () => {
-          // setTimeout(() => {
-          imageShadowUtils.setEffect(ShadowEffectType.frame, {
-            frame: {
-              spread: 30,
-              radius: 0,
-              opacity: 100
-            },
-            frameColor: '#FECD56'
-          })
-          imageShadowPanelUtils.handleShadowUpload(undefined, true)
-          //   console.warn(6000)
-          // }, 6000)
+        (srcObj: SrcObj) => {
+          setTimeout(() => {
+            imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj), (img) => {
+              console.log('inside img handle cb', img.src)
+              const maxsize = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
+              imageShadowUtils.updateEffectProps({
+                pageIndex: layerUtils.pageIndex,
+                layerIndex: layerUtils.layerIndex,
+                subLayerIdx: -1
+              }, {
+                maxsize,
+                middsize: Math.max(img.naturalWidth, img.naturalHeight)
+              })
+              imageShadowUtils.setEffect(ShadowEffectType.frame, {
+                frame: {
+                  spread: 30,
+                  radius: 0,
+                  opacity: 100
+                },
+                frameColor: '#FECD56',
+              }, undefined)
+              imageShadowPanelUtils.handleShadowUpload(undefined)
+            })
+          }, 0)
         }
-        // vivistickerUtils.getEmptyCallback()
       )
     },
     handleMore() {

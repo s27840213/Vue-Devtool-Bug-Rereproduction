@@ -882,7 +882,6 @@ export default defineComponent({
         imageShadowUtils.setProcessId(this.id())
         !hasShadowSrc && imageShadowUtils.setIsProcess(layerInfo(), true)
       }
-
       let img = new Image()
       if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
         // normally, we should get the image size from srcObj, but if in vivisticker bg removing, we didn't actually upload the bg remove result to the server
@@ -894,7 +893,6 @@ export default defineComponent({
           const res = await imageUtils.getImgSize(this.config.srcObj, false)
           if (res) {
             this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
-            console.log('this.shadowBuff.MAXSIZE', res, this.shadowBuff.MAXSIZE)
           }
         }
       } else if (['unsplash', 'pixels'].includes(this.config.srcObj.type)) {
@@ -951,6 +949,7 @@ export default defineComponent({
           imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
           imageShadowUtils.setProcessId()
           imageShadowUtils.clearLayerData()
+          console.log('ShadowEffectType.none')
           return
       }
 
@@ -1020,9 +1019,14 @@ export default defineComponent({
         drawCanvasH: _drawCanvasH,
         layerInfo: layerInfo(),
         cb: () => {
+          if (this.config.styles.shadow.cb) {
+            this.config.styles.shadow.cb()
+            this.$store.commit('SET_shadowCallback', { layerInfo: this.layerInfo(), cb: undefined })
+          }
           this.clearShadowSrc()
         }
       }
+      console.warn('handleNewShadowEffect end', params)
       imageShadowUtils.drawingInit(canvas, img, this.config as IImage, params)
       switch (currentEffect) {
         case ShadowEffectType.shadow:
@@ -1040,6 +1044,7 @@ export default defineComponent({
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
+      console.warn('updateShadowEffect')
       const { shadowBuff } = this
       const canvas = this.$refs.canvas as HTMLCanvasElement
       const layerInfo = this.layerInfo()

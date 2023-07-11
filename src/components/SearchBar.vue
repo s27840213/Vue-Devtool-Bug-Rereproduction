@@ -46,7 +46,7 @@ div(class="search-bar" :class="{vivisticker: vivisticker !== 'none'}")
       svg-icon(class="pointer"
             iconName="search"
             iconColor="white"
-            iconWidth="20px")
+            :iconWidth="searchIconWidth")
 </template>
 
 <script lang="ts">
@@ -119,6 +119,10 @@ export default defineComponent({
     collapsed(): boolean {
       if (this.expanded === undefined) return false
       return !this.expanded
+    },
+    searchIconWidth(): string {
+      if (this.$i18n.locale === 'us') return '24px'
+      return '20px'
     }
   },
   methods: {

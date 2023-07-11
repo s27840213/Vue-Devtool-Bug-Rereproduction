@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="panel-template-content" ref="panel" :class="{'in-category': isInCategory, 'in-group-template': isInGroupTemplate, 'with-search-bar': isInMainContent, 'rwd-container': isInEditor}")
-  tags(v-show="tags && tags.length"
+  Tags(v-show="tags && tags.length"
       class="panel-template-content__tags"
       :tags="tags"
       :scrollLeft="isInCategory ? 0 : tagScrollLeft"
@@ -94,7 +94,7 @@ export default defineComponent({
   color: white;
   text-align: left;
   &__tags {
-    margin: 14px 0 10px;
+    margin-bottom: 10px;
     color: setColor(black-5);
   }
   &__item {

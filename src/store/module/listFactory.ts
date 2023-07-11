@@ -272,7 +272,8 @@ export default function (this: any) {
           keyword,
           listAll: 1,
           listCategory: 0,
-          cache: !isAdmin
+          cache: !isAdmin,
+          colNum: store.state.isTablet ? 3 : 2
         }
         const { data } = await this.api(apiParams)
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)

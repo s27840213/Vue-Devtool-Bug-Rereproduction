@@ -543,6 +543,7 @@ class ImageShadowUtils {
     if (layerInfo) {
       timeout && this.setIsProcess(layerInfo, false)
     }
+    console.log('finish draw shadow')
     this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
     const stime = Date.now()
     cb && cb()

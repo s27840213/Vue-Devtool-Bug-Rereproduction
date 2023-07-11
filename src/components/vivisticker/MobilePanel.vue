@@ -62,7 +62,6 @@ div(class="mobile-panel"
       @close="closeMobilePanel")
 </template>
 <script lang="ts">
-import Tabs from '@/components/Tabs.vue'
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
@@ -85,14 +84,15 @@ import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.v
 import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
+import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
-import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
+import Tabs from '@/components/Tabs.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
 import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
 import PanelObject from '@/components/vivisticker/PanelObject.vue'
@@ -119,7 +119,7 @@ import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -536,7 +536,7 @@ export default defineComponent({
         return () => {
           this.setIsInCategory({ tab: 'text', bool: false })
           this.setShowAllRecently({ tab: 'text', bool: false })
-          this.resetTextsSearch()
+          this.resetTextsSearch({ resetCategoryInfo: true })
         }
       }
       if (this.currActivePanel === 'object' && this.isObjectInCategory) {
