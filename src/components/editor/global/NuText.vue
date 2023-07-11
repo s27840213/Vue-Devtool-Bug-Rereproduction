@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-text" draggable="false")
+div(class="nu-text" draggable="false" :style="textWrapperStyle()")
   //- NuText BGs.
   template(v-for="(bgConfig, idx) in [textBg, textFillBg]")
     custom-element(v-if="bgConfig" class="nu-text__BG" :config="bgConfig" :key="`textSvgBg${idx}`")
@@ -36,6 +36,7 @@ import { CustomElementConfig } from '@/interfaces/editor'
 import { isTextFill } from '@/interfaces/format'
 import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -47,7 +48,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { isEqual, max, omit, round } from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   components: {
@@ -215,6 +216,11 @@ export default defineComponent({
         return 1
       }
     },
+    textWrapperStyle(): Record<string, string|number> {
+      return {
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
+      }
+    },
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
@@ -224,12 +230,11 @@ export default defineComponent({
         width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
         opacity,
         ...textEffectStyles,
         // Add padding at body to prevent Safari bug that overflow text of drop-shadow/opacity<1 will be cliped
         padding: `${maxFontSize}px`,
-        left: `${maxFontSize * -1}px`,
+        [isVertical ? 'right' : 'left']: `${maxFontSize * -1}px`, // When writingMode: vertical-rl, left and right will be exchange.
         top: `${maxFontSize * -1}px`,
       }
     },
@@ -268,8 +273,10 @@ export default defineComponent({
       if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         let x = config.styles.x
         let y = config.styles.y
-        x = config.styles.x - (textHW.width - config.styles.width) / 2
-        y = config.styles.y - (textHW.height - config.styles.height) / 2
+        if (config.widthLimit === -1) {
+          x = config.styles.x - (textHW.width - config.styles.width) / 2
+          y = config.styles.y - (textHW.height - config.styles.height) / 2
+        }
         // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })

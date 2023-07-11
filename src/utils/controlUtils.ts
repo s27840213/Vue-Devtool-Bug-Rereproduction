@@ -65,7 +65,8 @@ class Controller {
           left: '0',
           top: '0',
           transform: `translate(-50%,-50%) scale(${contentScaleRatio})`,
-          borderRadius: '50%'
+          borderRadius: '50%',
+          clipPath: 'path("M 0 0 v 48 h 24 v -24 h 24 v -24 z")'
           // background: 'red'
         },
         scalerSize
@@ -78,7 +79,8 @@ class Controller {
           transform: `translate(50%,-50%) scale(${contentScaleRatio})`,
           right: '0',
           top: '0',
-          borderRadius: '50%'
+          borderRadius: '50%',
+          clipPath: 'path("M 0 0 v 24 h 24 v 24 h 24 v -48 z")'
           // background: 'red'
         },
         scalerSize
@@ -91,7 +93,8 @@ class Controller {
           transform: `translate(50%,50%) scale(${contentScaleRatio})`,
           right: '0',
           bottom: '0',
-          borderRadius: '50%'
+          borderRadius: '50%',
+          clipPath: 'path("M 0 24 v 24 h 48 v -48 h -24 v 24 z")'
           // background: 'red'
         },
         scalerSize
@@ -104,7 +107,8 @@ class Controller {
           transform: `translate(-50%,50%) scale(${contentScaleRatio})`,
           left: '0',
           bottom: '0',
-          borderRadius: '50%'
+          borderRadius: '50%',
+          clipPath: 'path("M 0 0 v 48 h 48 v -24 h -24 v -24 z")'
           // background: 'red'
         },
         scalerSize

@@ -18,7 +18,7 @@ declare module '@vue/runtime-core' {
 }
 
 export type INubtnThemes = 'primary' | 'outline' | 'text' | 'icon_text' | 'icon' | 'icon2' |
-  'ghost' | 'ghost_outline' | 'danger' | 'secondary'
+  'ghost' | 'ghost_outline' | 'danger' | 'secondary' | 'edit'
 export type INubtnSize = 'sm' | 'sm-full' | 'sm-center' | 'mid' | 'mid-full' | 'mid-center'
 
 const component = defineComponent({
@@ -97,6 +97,7 @@ export default component
   border-radius: 4px;
   box-sizing: border-box;
   cursor: pointer;
+  white-space: nowrap;
   user-select: none;
   &.full {
     width: 100%;
@@ -116,13 +117,17 @@ export default component
     @include btn-SM;
     font-weight: 600;
     height: 32px;
-    padding: 4px 16px;
+    &:not(.full) {
+      padding: 4px 16px;
+    }
   }
   &.mid {
     @include btn-LG;
     font-weight: 600;
     height: 44px;
-    padding: 10px 24px;
+    &:not(.full) {
+      padding: 10px 24px;
+    }
   }
 }
 
@@ -156,6 +161,21 @@ export default component
   @include default-size;
   color: var(--blue);
 }
+.nubtn.edit {
+  @include default-size;
+  background-color: setColor(gray-6);
+  color: setColor(gray-2);
+  &.active {
+    color: setColor(blue-1);
+    border: 2px solid setColor(blue-1);
+  }
+  &.desktop:hover, &.hover {
+    color: setColor(blue-hover);
+  }
+  &.desktop.disabled, &.mobile.disabled {
+    color: setColor(gray-4);
+  }
+}
 .nubtn.icon_text {
   svg {
     margin-right: 8px;
@@ -164,13 +184,17 @@ export default component
     @include btn-SM;
     font-weight: 600;
     height: 36px;
-    padding: 6px 16px 6px 12px;
+    &:not(.full) {
+      padding: 6px 16px 6px 12px;
+    }
   }
   &.mid {
     @include btn-LG;
     font-weight: 600;
     height: 44px;
-    padding: 10px 20px 10px 12px;
+    &:not(.full) {
+      padding: 10px 20px 10px 12px;
+    }
   }
   color: setColor(white);
   background-color: var(--blue);
@@ -213,8 +237,10 @@ export default component
   @include btn-SM;
   font-weight: 600;
   height: 36px;
-  padding: 6px 24px;
   border-radius: 50px;
+  &:not(.full) {
+    padding: 6px 24px;
+  }
   &.default, &.active {
     color: setColor(blue-1);
     background-color: setColor(blue-4);
@@ -232,8 +258,10 @@ export default component
   @include btn-SM;
   font-weight: 600;
   height: 36px;
-  padding: 6px 24px;
   border-radius: 50px;
+  &:not(.full) {
+    padding: 6px 24px;
+  }
   &.default, &.active {
     color: setColor(blue-3);
     border: 1px solid setColor(blue-3);

@@ -382,17 +382,18 @@ router.beforeEach(async (to, from, next) => {
     logUtils.setLog(`Read device width: ${window.screen.width}`)
     logUtils.setLog(`User agent: ${userAgent}`)
     if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
-      // is Desktop
+      // is Desktop or iPad
       if (userAgent.indexOf('Mac OS X') > 0) {
-        // is Mac (could be iPad)
-        if (window.screen.width <= 1024) {
-          // less than iPad Pro width
+        // is Mac or iPad
+        if (navigator.maxTouchPoints && navigator.maxTouchPoints > 2) {
+          // has more than 2 touch points available (iPad) => mobile
           isMobile = true
-        } // wider
+        }
+        // real Mac => desktop
       }
-      // not Mac
+      // not Mac => desktop
     } else {
-      // is Mobile
+      // is Mobile => mobile
       isMobile = true
     }
     if (isMobile) {

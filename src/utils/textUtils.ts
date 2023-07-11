@@ -5,6 +5,7 @@ import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
 import { IInitSize, IMultiStageRunResult, autoResizePipeLine, autoResizePipeLineSync } from '@/utils/autoResizeUtils'
+import controlUtils from '@/utils/controlUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -348,7 +349,7 @@ class TextUtils {
       body.style.height = 'max-content'
     }
     body.classList.add('nu-text')
-    body.style.writingMode = content.styles.writingMode
+    body.style.writingMode = cssConverter.convertVerticalStyle(content.styles.writingMode).writingMode
     body.style.position = 'fixed'
     body.style.top = '100%'
     body.style.left = '100%'
@@ -408,7 +409,7 @@ class TextUtils {
     })
   }
 
-  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false, noPush = false) {
+  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, noPush = false) {
     const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     if (subLayerIndex !== -1) {
@@ -422,6 +423,23 @@ class TextUtils {
         textHW = this.getTextHW(config, config.widthLimit)
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
         layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { spanDataList: textHW.spanDataList })
+        const isVertical = config.styles.writingMode.includes('vertical')
+        const initData = {
+          xSign: isVertical ? -1 : 1,
+          ySign: 1,
+          x: config.styles.x,
+          y: config.styles.y,
+          angle: config.styles.rotate * Math.PI / 180
+        }
+        const offsetSize = {
+          width: isVertical ? textHW.width - originSize.width : 0,
+          height: isVertical ? 0 : textHW.height - originSize.height
+        }
+        const trans = controlUtils.getTranslateCompensation(initData, offsetSize)
+        layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, {
+          x: trans.x,
+          y: trans.y
+        })
       }
       /**
        * Group layout height compensation
@@ -454,23 +472,7 @@ class TextUtils {
     height *= group.styles.scale
     layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
 
-    /**
-     * Compensate the offset difference to the left-edge of group layer
-     */
-    if (compensateX) {
-      let minX = Number.MAX_SAFE_INTEGER
-      group.layers
-        .forEach(l => {
-          minX = Math.min(minX, l.styles.x)
-        })
-      if (minX > 0) {
-        for (const [idx, layer] of Object.entries(group.layers)) {
-          layerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
-            x: layer.styles.x - minX
-          })
-        }
-      }
-    }
+    this.fixGroupCoordinates(pageIndex, layerIndex)
   }
 
   asSubLayerSizeRefresh(pageIndex: number, layerIndex: number, subLayerIndex: number, height: number, heightOri: number, noPush = false) {
@@ -526,7 +528,7 @@ class TextUtils {
       this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri, noPush)
       this.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
-      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, false, noPush)
+      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, noPush)
     }
   }
 
@@ -539,11 +541,31 @@ class TextUtils {
       } else {
         const widthLimit = config.widthLimit
         const textHW = this.getTextHW(config, widthLimit)
+        const isVertical = config.styles.writingMode.includes('vertical')
         let x = config.styles.x
         let y = config.styles.y
-        if (config.widthLimit === -1) {
-          x = config.styles.x - (textHW.width - config.styles.width) / 2
-          y = config.styles.y - (textHW.height - config.styles.height) / 2
+        if (config.widthLimit === -1 && config.styles.rotate === 0) {
+          if (isVertical) {
+            x = config.styles.x - (textHW.width - config.styles.width)
+            y = config.styles.y - (textHW.height - config.styles.height) / 2
+          } else {
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
+          }
+        } else {
+          const initData = {
+            xSign: isVertical ? -1 : 1,
+            ySign: 1,
+            x,
+            y,
+            angle: config.styles.rotate * Math.PI / 180
+          }
+          const offsetSize = {
+            width: isVertical ? textHW.width - config.styles.width : 0,
+            height: isVertical ? 0 : textHW.height - config.styles.height
+          }
+          const trans = controlUtils.getTranslateCompensation(initData, offsetSize)
+          x = trans.x
+          y = trans.y
         }
         layerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
         layerUtils.updateLayerProps(pageIndex, layerIndex, { spanDataList: textHW.spanDataList })
@@ -554,7 +576,6 @@ class TextUtils {
       if (textShapeUtils.isCurvedText(config.styles.textShape)) {
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textShapeUtils.getCurveTextProps(config))
         this.updateGroupLayerSize(pageIndex, layerIndex)
-        this.fixGroupCoordinates(pageIndex, layerIndex)
       } else {
         const widthLimit = config.widthLimit
         const textHW = this.getTextHW(config, widthLimit)
@@ -574,6 +595,7 @@ class TextUtils {
       .forEach(l => {
         minX = Math.min(minX, mathUtils.getBounding(l.styles).x)
       })
+    if (minX === 0) return
     for (const [idx, layer] of Object.entries(group.layers)) {
       layerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
         x: layer.styles.x - minX
@@ -592,6 +614,7 @@ class TextUtils {
       .forEach(l => {
         minY = Math.min(minY, mathUtils.getBounding(l.styles).y)
       })
+    if (minY === 0) return
     for (const [idx, layer] of Object.entries(group.layers)) {
       layerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
         y: layer.styles.y - minY
@@ -696,10 +719,6 @@ class TextUtils {
       start,
       end
     })
-  }
-
-  setCurrTextInfo(data: { config?: IText | IGroup, layerIndex?: number, subLayerIndex?: number }) {
-    store.commit('text/SET_textInfo', data)
   }
 
   loadDefaultFonts(extraFonts: { type: string, face: string, url: string, userId: string, assetId: string, ver: string }[] = []) {

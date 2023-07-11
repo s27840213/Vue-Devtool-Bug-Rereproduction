@@ -332,7 +332,12 @@ class LayerFactary {
      * 8: span contains invalid unicode characters (which breaks emoji)
      * 9: replace textShape and textEffect value {} to {name: none}
      * 10: Fix problem that some text effect and text shape will not scale with font-size
+     * 11: use 'vertical' instead of truly used value for css to represent vetical text in json for flexibility
      */
+    // 11: use 'vertical' instead of truly used value for css to represent vetical text in json for flexibility
+    if (basicConfig.styles.writingMode.includes('vertical-')) {
+      basicConfig.styles.writingMode = 'vertical'
+    }
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
       // some paragraphs contain empty spans.

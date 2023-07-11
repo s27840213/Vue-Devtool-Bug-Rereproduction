@@ -1,5 +1,5 @@
 import i18n from '@/i18n'
-import { IGroup, IParagraph, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
 import store from '@/store'
 import text, { ITextState } from '@/store/text/index'
@@ -118,9 +118,9 @@ class TextPropUtils {
     switch (propName) {
       case 'font-vertical': {
         const targetIsVertical = !!value
-        const targetWritingMode = targetIsVertical ? 'vertical-lr' : 'initial'
+        const targetWritingMode = targetIsVertical ? 'vertical' : 'initial'
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
-        const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
+        const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical' : 'initial'
         if (targetIsVertical) {
           const paragraphs = generalUtils.deepCopy(config.paragraphs)
           this.removeInvalidStyles(paragraphs, targetIsVertical, config.isCompensated)
@@ -1057,18 +1057,23 @@ class TextPropUtils {
 
   propAppliedParagraphs(paragraphs: IParagraph[], prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number, modifier?: (propValue: number) => number): IParagraph[] {
     paragraphs = generalUtils.deepCopy(paragraphs) as IParagraph[]
-    paragraphs.forEach(p => {
-      if (modifier) {
-        Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = modifier((p.styles[prop] as number)))
-      } else {
-        Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
+    const changer = (oldValue: number) => {
+      return modifier ? modifier(oldValue) : payload
+    }
+    const checkAndChange = (styles: IParagraphStyle | ISpanStyle) => {
+      if (Object.prototype.hasOwnProperty.call(styles, prop) && typeof styles[prop] === 'number') {
+        styles[prop] = changer(styles[prop] as number)
       }
+    }
+    paragraphs.forEach(p => {
+      if (p.spanStyle) {
+        const sStyles = tiptapUtils.generateSpanStyle(p.spanStyle)
+        sStyles.size = changer(sStyles.size)
+        p.spanStyle = tiptapUtils.textStyles(sStyles)
+      }
+      checkAndChange(p.styles)
       p.spans.forEach(s => {
-        if (modifier) {
-          Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = modifier((s.styles[prop] as number)))
-        } else {
-          Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = payload)
-        }
+        checkAndChange(s.styles)
       })
     })
     return paragraphs
