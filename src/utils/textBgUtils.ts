@@ -421,7 +421,7 @@ export class Path {
   }
 
   result(): string {
-    return this.pathArray.join('') + 'z'
+    return this.pathArray.join('\n') + 'z'
   }
 
   toCircle(): CustomElementConfig[] {
@@ -826,14 +826,16 @@ class TextBg {
       const yOffset = (maxHeightSpan.height - shapeCapWidth * 2) * 0.01 * (100 - textBg.yOffset)
       const radius = textShapeUtils.getRadiusByBend(bend) * mainFontSize / 60
       const textAngles = textShapeData.textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
-      const totalAngles = !withShape ? 0 // Will be 0 for non-TextShape
-        : (sum(textAngles) - shapeCapWidth * 2 * 360 / (radius * 2 * Math.PI)) * (bend >= 0 ? 1 : -1)
+      const totalAngle = sum(textAngles) * (bend >= 0 ? 1 : -1)
+      const endpointAngle = !withShape ? 0 // Will be 0 for non-TextShape
+        : shapeCapWidth * 360 / (radius * 2 * Math.PI) * (bend >= 0 ? 1 : -1)
+      const bodyAngle = totalAngle - endpointAngle * 2
 
       const middle = new Point(layerWidth / 2,
         (bend >= 0 ? maxHeightSpan.y : layerHeight - maxHeightSpan.height - maxHeightSpan.y) + yOffset)
       const center = new Point(layerWidth / 2,
         (bend >= 0 ? maxHeightSpan.height / 2 + radius : layerHeight - maxHeightSpan.height / 2 - radius))
-      const begin = middle.rotate(-totalAngles / 2, center)
+      const begin = middle.rotate(-bodyAngle / 2, center)
 
       for (const rect of rects) {
         const capWidth = withShape ? shapeCapWidth : rect.height * 0.005 * textBg.height
@@ -843,7 +845,7 @@ class TextBg {
 
         // Step 1: top line
         if (withShape) {
-          path.largeArc(totalAngles, center)
+          path.largeArc(bodyAngle, center)
         } else {
           path.h(rect.width - capWidth * 2)
         }
@@ -851,23 +853,26 @@ class TextBg {
         // Step 2: right endpoint
         switch (textBg.endpoint) {
           case 'triangle':
+            withShape ? path.largeArc(endpointAngle, center)
+              : path.l(new Point(capWidth, 0))
             // If !withShape, all rotate in step 2, 4 take no effect.
-            path.l(new Point(capWidth, 0).rotate(totalAngles / 2))
-            path.l(new Point(-capWidth, capWidth * 2).rotate(totalAngles / 2))
+            path.l(new Point(-capWidth, capWidth * 2).rotate((totalAngle - endpointAngle) / 2))
             break
           case 'rounded':
-            path.a(new Point(0, capWidth * 2).rotate(totalAngles / 2))
+            path.a(new Point(0, capWidth * 2).rotate(bodyAngle / 2))
             break
           case 'square':
-            path.l(new Point(capWidth, 0).rotate(totalAngles / 2))
-            path.l(new Point(0, capWidth * 2).rotate(totalAngles / 2))
-            path.l(new Point(-capWidth, 0).rotate(totalAngles / 2))
+            withShape ? path.largeArc(endpointAngle, center)
+              : path.l(new Point(capWidth, 0))
+            path.l(new Point(0, capWidth * 2).rotate(totalAngle / 2))
+            withShape ? path.largeArc(-endpointAngle, center)
+              : path.l(new Point(-capWidth, 0))
             break
         }
 
         // Step 3: bottom line
         if (withShape) {
-          path.largeArc(-totalAngles, center)
+          path.largeArc(-bodyAngle, center)
         } else {
           path.h(-(rect.width - capWidth * 2))
         }
@@ -875,14 +880,17 @@ class TextBg {
         // Step 4: left endpoint
         switch (textBg.endpoint) {
           case 'triangle':
-            path.l(new Point(-capWidth, 0).rotate(-totalAngles / 2))
+            withShape ? path.largeArc(-endpointAngle, center)
+              : path.l(new Point(-capWidth, 0))
             break
           case 'rounded':
-            path.a(new Point(0, -capWidth * 2).rotate(-totalAngles / 2))
+            path.a(new Point(0, -capWidth * 2).rotate(-bodyAngle / 2))
             break
           case 'square':
-            path.l(new Point(-capWidth, 0).rotate(-totalAngles / 2))
-            path.l(new Point(0, -capWidth * 2).rotate(-totalAngles / 2))
+            withShape ? path.largeArc(-endpointAngle, center)
+              : path.l(new Point(-capWidth, 0))
+            path.l(new Point(0, -capWidth * 2).rotate(-totalAngle / 2))
+            withShape && path.largeArc(endpointAngle, center)
             break
         }
 
