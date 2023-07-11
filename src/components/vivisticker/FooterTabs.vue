@@ -247,7 +247,7 @@ export default defineComponent({
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !vivistickerUtils.isTemplateSupported },
         // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode, forPro: false }
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove' }
       ]
     },
     homeTabsSize(): number {
@@ -660,7 +660,8 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
-      if (!vivistickerUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, 'text')) return
+      console.log(tab.plan)
+      if (!vivistickerUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, tab.plan)) return
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
       }
