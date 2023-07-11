@@ -4,6 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import store from '@/store'
 import text, { ITextState } from '@/store/text/index'
 import { LayerType } from '@/store/types'
+import controlUtils from '@/utils/controlUtils'
 import logUtils from '@/utils/logUtils'
 import _ from 'lodash'
 import { nextTick } from 'vue'
@@ -67,12 +68,12 @@ class TextPropUtils {
             for (let i = 0; i < groupLayer.layers.length; i++) {
               if (groupLayer.layers[i].type === 'text') {
                 this.blockPropertyHandler(propName, value, i)
-                textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex, i)
+                textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex, i, { keepCorner: true })
               }
             }
           } else {
             this.blockPropertyHandler(propName, value, subLayerIndex)
-            textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex, subLayerIndex)
+            textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex, subLayerIndex, { keepCorner: true })
           }
           break
         }
@@ -100,7 +101,7 @@ class TextPropUtils {
     }
   }
 
-  blockPropertyHandler(propName: string, value?: string | number, tmpLayerIndex?: number) {
+  blockPropertyHandler(propName: string, value?: string | number, subLayerIndex?: number) {
     const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
       layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
     }
@@ -108,18 +109,18 @@ class TextPropUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
     }
     const updateSelectedLayersStyles = (styles: { [key: string]: string | number | boolean }) => {
-      this.updateSelectedLayersStyles(styles, tmpLayerIndex ?? NaN)
+      this.updateSelectedLayersStyles(styles, subLayerIndex ?? NaN)
     }
     const updateSelectedLayersParagraphs = (paragraphs: IParagraph[]) => {
-      this.updateSelectedLayersParagraphs(paragraphs, tmpLayerIndex ?? NaN)
+      this.updateSelectedLayersParagraphs(paragraphs, subLayerIndex ?? NaN)
     }
-    const handler = typeof tmpLayerIndex === 'undefined' ? updateTextStyles : updateSelectedLayersStyles
-    const paragraphHandler = typeof tmpLayerIndex === 'undefined' ? updateTextParagraphs : updateSelectedLayersParagraphs
+    const handler = typeof subLayerIndex === 'undefined' ? updateTextStyles : updateSelectedLayersStyles
+    const paragraphHandler = typeof subLayerIndex === 'undefined' ? updateTextParagraphs : updateSelectedLayersParagraphs
     switch (propName) {
       case 'font-vertical': {
         const targetIsVertical = !!value
         const targetWritingMode = targetIsVertical ? 'vertical' : 'initial'
-        const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
+        const config = (typeof subLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[subLayerIndex]) as IText
         const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical' : 'initial'
         if (targetIsVertical) {
           const paragraphs = generalUtils.deepCopy(config.paragraphs)
@@ -127,11 +128,28 @@ class TextPropUtils {
           paragraphHandler(paragraphs)
         }
         handler({ writingMode: targetWritingMode })
-        if (typeof tmpLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
+        if (typeof subLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
+          const { x, y, width, height, rotate } = config.styles
           const textHW = textUtils.getTextHW(config, config.widthLimit)
-          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height })
+          const initData = {
+            xSign: targetWritingMode ? -1 : 1,
+            ySign: 1,
+            x,
+            y,
+            angle: rotate * Math.PI / 180
+          }
+          const offsetSize = {
+            width: targetWritingMode ? textHW.width - width : 0,
+            height: targetWritingMode ? 0 : textHW.height - height
+          }
+          const trans = controlUtils.getTranslateCompensation(initData, offsetSize)
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+            x: trans.x,
+            y: trans.y,
+            width: textHW.width,
+            height: textHW.height
+          })
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { spanDataList: textHW.spanDataList })
-          // @TODO: need to reallocate position of each layer
         }
         this.updateTextPropsState({ isVertical: targetIsVertical, decoration: 'none', style: 'normal' })
         tiptapUtils.updateHtml()
