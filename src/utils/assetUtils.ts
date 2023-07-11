@@ -277,7 +277,7 @@ class AssetUtils {
     const oldPoint = json.point
     const { width, height } = ShapeUtils.lineDimension(oldPoint)
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = width / height
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -324,7 +324,7 @@ class AssetUtils {
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize[0] / vSize[1]
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -366,7 +366,7 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = 300 / (Math.max(json.width, json.height))
+    const resizeRatio = attrs.fit === 1 ? Math.min(currentPage.width / json.width, currentPage.height / json.height) : 300 / (Math.max(json.width, json.height))
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
 
@@ -595,6 +595,7 @@ class AssetUtils {
     store.commit('SET_mobileSidebarPanelOpen', false)
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, panelPreviewSrc, previewSrc } = attrs
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_IMAGE
 
     let newStyles = {
       width: 0,
@@ -611,8 +612,8 @@ class AssetUtils {
       const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding(styles as IStyle)
       photoAspectRatio = boundingWidth / boundingHeight
 
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * RESIZE_RATIO_IMAGE : (this.pageSize.height * RESIZE_RATIO_IMAGE) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * RESIZE_RATIO_IMAGE) / photoAspectRatio : this.pageSize.height * RESIZE_RATIO_IMAGE
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
       const { width = photoWidth, height = photoHeight, imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
 
@@ -629,8 +630,8 @@ class AssetUtils {
         imgY: imgY * scaleRatio
       }
     } else {
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * RESIZE_RATIO_IMAGE : (this.pageSize.height * RESIZE_RATIO_IMAGE) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * RESIZE_RATIO_IMAGE) / photoAspectRatio : this.pageSize.height * RESIZE_RATIO_IMAGE
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
       newStyles = {
         width: photoWidth,
@@ -861,7 +862,7 @@ class AssetUtils {
           switch ((asset.jsonData as any).type) {
             case 'image': {
               const { srcObj, styles } = asset.jsonData as IImage
-              this.addImage(srcObj, styles.width / styles.height, { styles }, 14)
+              this.addImage(srcObj, styles.width / styles.height, { styles, fit: attrs.fit }, 14)
               key = 'objects'
               break
             }
@@ -872,7 +873,7 @@ class AssetUtils {
           break
         }
         case 15: {
-          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1), {}, 15)
+          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1), { fit: attrs.fit }, 15)
           key = 'objects'
           break
         }
