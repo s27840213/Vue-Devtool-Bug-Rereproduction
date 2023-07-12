@@ -148,7 +148,7 @@ class Controller {
             styles,
             props
           })
-          textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, +idx, styles.height, heightOri)
+          textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, +idx, styles.height, heightOri, true)
         }
       }
       textUtils.fixGroupCoordinates(pageIndex, layerIndex)
@@ -167,7 +167,7 @@ class Controller {
         styles,
         props
       })
-      textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, styles.height, heightOri)
+      textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, styles.height, heightOri, true)
       textUtils.fixGroupCoordinates(pageIndex, layerIndex)
     }
   }
