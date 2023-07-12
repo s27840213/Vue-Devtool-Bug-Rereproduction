@@ -11,7 +11,7 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
   div(class="header-bar__center")
-    link-or-text(:title="centerTitle" :url="isInCategory ? titleInfo.url : ''")
+    link-or-text(:title="centerTitle" :url="isInCategory && !isInEditor ? titleInfo.url : ''")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs"
         :key="tab.icon"
