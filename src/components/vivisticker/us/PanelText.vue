@@ -175,6 +175,7 @@ export default defineComponent({
       }
     },
     addText(item: any) {
+      if (!vivistickerUtils.checkPro(item, 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(item).then(() => {
           textPropUtils.updateTextPropsState()
