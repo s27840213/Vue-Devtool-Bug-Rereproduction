@@ -274,7 +274,7 @@ class FrameUtils {
   }
 
   checkIsRect(clipPath: string) {
-    if (clipPath.length > 50) return false
+    if (clipPath.length > 200) return false
     for (const s of clipPath) {
       if (Number.isNaN(+s) && ![',', '-', '.'].includes(s)) {
         if (!['M', 'h', 'v', 'z'].includes(s)) return false

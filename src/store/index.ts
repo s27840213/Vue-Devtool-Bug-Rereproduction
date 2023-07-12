@@ -31,7 +31,7 @@ import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
-import { ADD_subLayer } from '@/utils/layerUtils'
+import layerUtils, { ADD_subLayer } from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -124,7 +124,6 @@ const getDefaultState = (): IEditorState => ({
   },
   isGlobalLoading: false,
   useMobileEditor: false,
-  contentScaleRatio: 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
@@ -319,7 +318,8 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.useMobileEditor
   },
   getContentScaleRatio(state: IEditorState) {
-    return state.contentScaleRatio
+    const pageIndex = layerUtils.pageIndex === -1 ? 0 : layerUtils.pageIndex
+    return state.pages[pageIndex].config.contentScaleRatio
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state.useMobileEditor ? -1 : state._3dEnabledPageIndex
@@ -1117,9 +1117,6 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isGettingDesign(state: IEditorState, bool: boolean) {
     state.isGettingDesign = bool
-  },
-  SET_contentScaleRatio(state: IEditorState, ratio: number) {
-    state.contentScaleRatio = ratio
   },
   UPDATE_pagePos(state: IEditorState, data: { pageIndex: number, styles: { [key: string]: number } }) {
     const { pageIndex, styles } = data
