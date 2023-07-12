@@ -397,7 +397,7 @@ export default defineComponent({
         return imageUtils.appendCompQueryForVivipic(this.src)
       }
       if (!this.config.previewSrc) {
-        src = imageUtils.appendQuery(src, `ver=${generalUtils.generateRandomString(4)}`)
+        src = imageUtils.appendQuery(src, 'ver', generalUtils.generateRandomString(4))
       }
       return src
     },

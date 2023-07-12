@@ -665,14 +665,6 @@ class ImageUtils {
     }
     return src
   }
-
-  appendQuery(src: string, query: string) {
-    if (src.includes('?')) {
-      return src + '&' + query
-    } else {
-      return src + '?' + query
-    }
-  }
 }
 
 export default new ImageUtils()
