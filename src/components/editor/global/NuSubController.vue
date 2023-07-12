@@ -62,7 +62,7 @@ import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -387,11 +387,7 @@ export default defineComponent({
       if (LayerUtils.getCurrLayer.type === 'frame' && !isRectFrameClip) return 'none'
 
       if (this.config?.active) {
-        if (this.isControlling) {
-          return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
-        } else {
-          return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
-        }
+        return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
       } else {
         return 'none'
       }

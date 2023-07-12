@@ -9,7 +9,7 @@ div(class="nu-layer flex-center"
   //- class="nu-layer"
   //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
   //- ref="body"
-  div(class="full-size pos-left"
+  div(class="nu-layer__event-center full-size pos-left"
       :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
       :style="layerStyles()"
       @pointerdown="onPointerDown($event)"
@@ -820,6 +820,9 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  &__event-center {
+    z-index: -1; // To keep outline/border above the content.
   }
   &__scale {
     transform-origin: top left;
