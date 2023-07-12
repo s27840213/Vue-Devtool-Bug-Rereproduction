@@ -383,9 +383,8 @@ export default defineComponent({
     },
     outlineStyles() {
       const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
-      // if (this.config?.active && LayerUtils.getCurrLayer.type !== 'frame') {
-      const isRectFrameClip = LayerUtils.getCurrLayer.type !== 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
-      if (isRectFrameClip) return 'none'
+      const isRectFrameClip = LayerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
+      if (LayerUtils.getCurrLayer.type === 'frame' && !isRectFrameClip) return 'none'
 
       if (this.config?.active) {
         if (this.isControlling) {
