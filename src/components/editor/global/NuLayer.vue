@@ -268,7 +268,8 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor',
-      showPcPagePreivew: 'page/getIsShowPagePreview'
+      showPcPagePreivew: 'page/getIsShowPagePreview',
+      isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
     inAllPagesMode(): boolean {
       return this.mobilePagePreview || this.showPcPagePreivew
@@ -381,7 +382,7 @@ export default defineComponent({
     },
     showSvgContour(): boolean {
       const { config } = this
-      return config.active && config.isFrame && !config.isFrameImg && config.type === 'image' && !this.forRender && this.config.clipPath && !frameUtils.checkIsRect(this.config.clipPath)
+      return config.active && config.isFrame && !config.isFrameImg && config.type === 'image' && !this.forRender && this.config.clipPath && !frameUtils.checkIsRect(this.config.clipPath) && !this.isDuringCopy
     }
   },
   methods: {
