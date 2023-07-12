@@ -39,7 +39,6 @@ div(class="overflow-container"
             :contentScaleRatio="contentScaleRatio"
             :forceRender="forceRender"
             :lazyLoadTarget="lazyLoadTarget"
-            :screenShot="screenShot"
             :inPreview="inPreview")
       div(v-if="isShowBleed" class="bleed-line" :style="bleedLineStyles")
       div(v-if="userId === 'backendRendering' && backendRenderParams.isTrim" class="trim")
@@ -102,10 +101,6 @@ export default defineComponent({
       default: '.editor-view'
     },
     inPreview: {
-      default: false,
-      type: Boolean
-    },
-    screenShot: {
       default: false,
       type: Boolean
     }
