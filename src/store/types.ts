@@ -84,7 +84,6 @@ export interface IEditorState {
   isLargeDesktop: boolean,
   isGlobalLoading: boolean,
   useMobileEditor: boolean,
-  contentScaleRatio: number,
   _3dEnabledPageIndex: number,
   currFocusPageIndex: number,
   enalbleComponentLog: boolean,
