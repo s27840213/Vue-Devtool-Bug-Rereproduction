@@ -1,3 +1,4 @@
+import { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { IFrame, IGroup, IImage, IShape, IText } from './layer'
 
 export interface ICurrSelectedInfo {
@@ -24,7 +25,8 @@ export interface IFooterTab {
   hidden?: boolean,
   disabled?: boolean,
   props?: IFooterTabProps,
-  forPro?: boolean
+  forPro?: boolean,
+  plan?: IViviStickerProFeatures
 }
 
 export interface CustomElementConfig {

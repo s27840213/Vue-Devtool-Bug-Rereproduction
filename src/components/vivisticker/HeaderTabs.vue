@@ -46,7 +46,6 @@ import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE } from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -554,23 +553,18 @@ export default defineComponent({
               assetId: 'bgRemove/' + assetId,
             }
             this.addImage(srcObj, this.autoRemoveResult.width / this.autoRemoveResult.height)
-            imageShadowUtils.setHandleId({
-              pageId: pageUtils.currFocusPage.id,
-              layerId: layerUtils.getCurrLayer.id,
-              subLayerId: ''
-            })
             imageShadowUtils.updateEffectProps({
               pageIndex: layerUtils.pageIndex,
               layerIndex: layerUtils.layerIndex,
               subLayerIdx: -1
             }, { isTransparent: true })
+            editorUtils.setCurrActivePanel('photo-shadow')
             return srcObj
           })
         },
         (srcObj: SrcObj) => {
           setTimeout(() => {
             imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj), (img) => {
-              console.log('inside img handle cb', img.src)
               const maxsize = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
               imageShadowUtils.updateEffectProps({
                 pageIndex: layerUtils.pageIndex,
@@ -588,7 +582,7 @@ export default defineComponent({
                 },
                 frameColor: '#FECD56',
               }, undefined)
-              imageShadowPanelUtils.handleShadowUpload(undefined)
+              // imageShadowPanelUtils.handleShadowUpload(undefined)
             })
           }, 0)
         }

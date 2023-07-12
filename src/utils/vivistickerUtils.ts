@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, isV1_26, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -30,7 +30,7 @@ import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
 
-export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template'
+export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template' | 'bg-remove'
 
 declare let window: CustomWindow
 
