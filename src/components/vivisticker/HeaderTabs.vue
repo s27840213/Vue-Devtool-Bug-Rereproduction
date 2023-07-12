@@ -589,6 +589,7 @@ export default defineComponent({
                 frameColor: '#FECD56',
               }, undefined)
               imageShadowPanelUtils.handleShadowUpload(undefined)
+              editorUtils.setCurrActivePanel('photo-shadow')
             })
           }, 0)
         }
