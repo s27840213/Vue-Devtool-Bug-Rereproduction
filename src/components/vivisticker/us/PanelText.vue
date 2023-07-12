@@ -50,11 +50,13 @@ div(class="overflow-container full-size rwd-container")
                 iconWidth="24px")
               div(class="overline-SM") RECENTLY USED
             CategoryTextPreview(v-else :item="item" @click="addText(item)")
+            pro-item(v-if="item.plan" draggable="false" :style="{top: '1px', left: '4px'}")
     btn-add(class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
 </template>
 
 <script lang="ts">
 import { CCategoryList } from '@/components/category/CategoryList.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import CategoryTextPreview from '@/components/vivisticker/us/CategoryTextPreview.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
@@ -69,7 +71,8 @@ export default defineComponent({
   name: 'panel-text-us',
   extends: PanelText,
   components: {
-    CategoryTextPreview: CategoryTextPreview
+    CategoryTextPreview,
+    ProItem
   },
   mounted() {
     generalUtils.panelInit('text',
