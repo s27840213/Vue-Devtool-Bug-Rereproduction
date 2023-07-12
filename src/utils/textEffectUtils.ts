@@ -5,7 +5,7 @@ import { lab2rgb, rgb2lab } from '@/utils/colorUtils'
 import LayerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
-import { debounce, max, omit } from 'lodash'
+import { debounce, max } from 'lodash'
 import { reactive } from 'vue'
 import tiptapUtils from './tiptapUtils'
 
@@ -338,11 +338,8 @@ class Controller {
       if (oldTextEffect && oldTextEffect.name === effect) { // Adjust effect option.
         Object.assign(newTextEffect, oldTextEffect, attrs)
         localStorageUtils.set('textEffectSetting', effect, newTextEffect)
-        // this.syncShareAttrs(textEffect, null)
       } else { // Switch to other effect.
-        // this.syncShareAttrs(textEffect, effect)
-        let localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
-        localAttrs = omit(localAttrs, ['color']) as ITextEffect
+        const localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
         Object.assign(newTextEffect, defaultAttrs, localAttrs, attrs, { name: effect })
       }
       const mainColor = this.getLayerMainColor(paragraphs)

@@ -1,6 +1,6 @@
 <template lang="pug">
-//- div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
-div(class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
+//- div(class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
+div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
   //- div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
     svg(v-if="isAdjustImage"
@@ -21,6 +21,7 @@ div(class="nu-background-image" draggable="false" :style="mainStyles"  @click="s
               v-bind="child.attrs")
               //- class="nu-background-image__adjust-picture"
       image(:xlink:href="finalSrc" ref="img"
+        crossOrigin="anonymous"
         class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
         :width="imgNaturalSize.width"
@@ -28,6 +29,7 @@ div(class="nu-background-image" draggable="false" :style="mainStyles"  @click="s
         @error="onError"
         @load="onAdjustImgLoad")
     img(v-else-if="src" ref="img"
+      crossOrigin="anonymous"
       :src="finalSrc"
       draggable="false"
       @error="onError"
@@ -52,8 +54,10 @@ import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
+import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { AxiosError } from 'axios'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
@@ -122,7 +126,7 @@ export default defineComponent({
       const src = imageUtils.getSrc(this.image.config, val ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       imageUtils.imgLoadHandler(src, () => {
         this.src = src
-      })
+      }, { crossOrigin: true })
     }
   },
   async created() {
@@ -138,19 +142,19 @@ export default defineComponent({
         const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
         imageUtils.imgLoadHandler(src, () => {
           this.src = src
-        })
+        }, { crossOrigin: true })
       }
     }
 
     if (this.userId !== 'backendRendering') {
       this.handleIsTransparent()
       this.previewAsLoading()
-      const nextImg = new Image()
-      nextImg.onload = () => {
-        const preImg = new Image()
-        preImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
-      }
-      nextImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
+      // const nextImg = new Image()
+      // nextImg.onload = () => {
+      //   const preImg = new Image()
+      //   preImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
+      // }
+      // nextImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
     } else {
       if (this.isAdjustImage) {
         this.handleIsTransparent()
@@ -165,7 +169,8 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio',
       getEditorViewImages: 'file/getEditorViewImages',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
-      isBgImgCtrl: 'imgControl/isBgImgCtrl'
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isBgCtrlImgLoaded: 'imgControl/isBgCtrlImgLoaded',
     }),
     ...mapState('mobileEditor', {
       inAllPagesMode: 'mobileAllPageMode',
@@ -299,7 +304,7 @@ export default defineComponent({
             const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? Math.max(imgWidth, imgHeight) : this.getImgDimension))
             imageUtils.imgLoadHandler(src, () => {
               this.src = src
-            })
+            }, { crossOrigin: true })
           })
         } catch (error) {
         }
@@ -350,14 +355,14 @@ export default defineComponent({
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
             this.src = previewSrc
           }
-        })
+        }, { crossOrigin: true })
       } else if (config.panelPreviewSrc) {
         const panelPreviewSrc = this.image.config.panelPreviewSrc
         imageUtils.imgLoadHandler(panelPreviewSrc, () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
             this.src = panelPreviewSrc
           }
-        })
+        }, { crossOrigin: true })
       }
       const { imgWidth, imgHeight } = this.image.config.styles
       const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
@@ -371,7 +376,8 @@ export default defineComponent({
         }, {
           error: () => {
             reject(new Error('cannot load the current image'))
-          }
+          },
+          crossOrigin: true
         })
       })
     },
@@ -401,17 +407,39 @@ export default defineComponent({
               this.preLoadImg('next', newVal)
             }
           }
-        })
+        }, { crossOrigin: true })
       }
     },
-    async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
+    logImgError(error: unknown, ...infos: Array<string>) {
+      if (this.src.indexOf('data:image/png;base64') !== 0) return
+      const { srcObj: { type, assetId, userId } } = this.image.config as IImage
+      const e = error as Error | AxiosError
+      let log =
+        'bg-image error' +
+        `srcObj: { type: ${type}, assetId: ${assetId}, userId: ${userId} }\n` +
+        `Error config src: ${this.src}`
+      infos.forEach(info => { log += `\n${info}` })
+      console.warn(log)
+      logUtils.setLog(log)
+    },
+    async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
       return new Promise<void>((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => resolve()
-        img.onerror = () => {
-          reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-        }
-        img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(this.image.config.srcObj, val, preLoadType)))
+        const size = imageUtils.getSrcSize(this.image.config.adjustSrcObj?.srcObj?.type ? this.image.config.adjustSrcObj?.srcObj : this.image.config.srcObj, val, preLoadType)
+        const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, size))
+        imageUtils.imgLoadHandler(src, () => resolve(), {
+          error: () => {
+            reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+            fetch(src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError('img src:', src, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                this.logImgError('img src:', src, 'fetch result: ' + e)
+              })
+          },
+          crossOrigin: true
+        })
       })
     },
     onAdjustImgLoad(e: Event) {
@@ -420,7 +448,7 @@ export default defineComponent({
           this.imgNaturalSize.width = img.width
           this.imgNaturalSize.height = img.height
         }
-      })
+      }, { crossOrigin: true })
       // detect if SVG image rendered
       const rendering = () => {
         const elImg = this.$refs.img as SVGImageElement

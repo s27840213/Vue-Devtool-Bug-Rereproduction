@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-text" draggable="false")
+div(class="nu-text" draggable="false" :style="textWrapperStyle()")
   //- NuText BGs.
   template(v-for="(bgConfig, idx) in [textBg, textFillBg]")
     custom-element(v-if="bgConfig" class="nu-text__BG" :config="bgConfig" :key="`textSvgBg${idx}`")
@@ -222,6 +222,11 @@ export default defineComponent({
         return 1
       }
     },
+    textWrapperStyle(): Record<string, string|number> {
+      return {
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
+      }
+    },
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
@@ -231,12 +236,11 @@ export default defineComponent({
         width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         opacity,
         ...textEffectStyles,
         // Add padding at body to prevent Safari bug that overflow text of drop-shadow/opacity<1 will be cliped
         padding: `${maxFontSize}px`,
-        left: `${maxFontSize * -1}px`,
+        [isVertical ? 'right' : 'left']: `${maxFontSize * -1}px`, // When writingMode: vertical-rl, left and right will be exchange.
         top: `${maxFontSize * -1}px`,
       }
     },

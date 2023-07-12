@@ -204,10 +204,10 @@ export default defineComponent({
             if (subLayerIdx === -1) {
               (layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup).layers.forEach((l, index) => {
                 if (l.type !== 'text') return
-                TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, index, true)
+                TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, index, { noPush: true })
               })
             } else {
-              TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, subLayerIdx, true)
+              TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, subLayerIdx, { noPush: true })
             }
           })
 
