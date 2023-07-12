@@ -52,7 +52,7 @@ export class Point {
     )
   }
 
-  dist(p: Point): number {
+  dist(p = new Point()): number {
     return Math.pow(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2), 0.5)
   }
 
@@ -591,21 +591,87 @@ class Gooey {
       path.C(curveTopStartMiddle, curveTopEndMiddle, curveTopEnd)
     }
 
-    return path.result()
+    return path
+  }
+
+  processWithShape(config: IText, maxHeightSpan: Record<'height' | 'y', number>, textWidth: number[], contentScaleRatio: number) {
+    let { width: layerWidth, height: layerHeight, scale: layerScale } = config.styles
+    layerWidth = layerWidth / layerScale * contentScaleRatio
+    layerHeight = layerHeight / layerScale * contentScaleRatio
+    const bend = +config.styles.textShape.bend
+
+    const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
+    const padding = (config.styles.textBg as ITextGooey).distance * fontSizeModifier
+    const maxHeightCp = maxBy(this.controlPoints[0].slice(1, -1), cp => cp.oldHeight)!
+    const borderHeight = maxHeightCp.top.dist(maxHeightCp.bottom)
+    const radius = Math.min(maxHeightCp.oldHeight * this.bRadius * 0.005, borderHeight / 2)
+    const shapeRadius = textShapeUtils.getRadiusByBend(bend) * fontSizeModifier
+
+    const textAngles = [...textWidth, padding, padding].map(w => (360 * w) / (shapeRadius * 2 * Math.PI))
+    const totalAngle = sum(textAngles) * (bend >= 0 ? 1 : -1)
+    const endpointAngle = radius * 360 / (shapeRadius * 2 * Math.PI) * (bend >= 0 ? 1 : -1)
+    const bodyAngle = totalAngle - endpointAngle * 2
+
+    const center = new Point(layerWidth / 2,
+      bend >= 0 ? maxHeightSpan.height / 2 + shapeRadius : layerHeight - maxHeightSpan.height / 2 - shapeRadius)
+    maxHeightSpan.height += padding * 2
+    maxHeightSpan.y -= padding
+    const middle = new Point(layerWidth / 2,
+      bend >= 0 ? maxHeightSpan.y : layerHeight - maxHeightSpan.height - maxHeightSpan.y)
+    const begin = middle.rotate(-bodyAngle / 2, center)
+
+    // Index 0 ~ 3 mean: right-top, right-bottom, left-bottom, left-top.
+    const corner = [
+      middle.rotate(totalAngle / 2, center),
+      middle.add(new Point(0, 1).mul(borderHeight)).rotate(totalAngle / 2, center),
+      middle.add(new Point(0, 1).mul(borderHeight)).rotate(-totalAngle / 2, center),
+      middle.rotate(-totalAngle / 2, center)
+    ]
+    const rightBorderDir = new Point(0, 1).rotate(totalAngle / 2)
+    const leftBorderDir = new Point(0, 1).rotate(-totalAngle / 2)
+    const curveBegin = [
+      corner[0].rotate(-endpointAngle, center),
+      corner[1].add(rightBorderDir.mul(-radius)),
+      corner[2].rotate(endpointAngle, center),
+      corner[3].add(leftBorderDir.mul(radius)),
+    ]
+    const curveEnd = [
+      corner[0].add(rightBorderDir.mul(radius)),
+      corner[1].rotate(-endpointAngle, center),
+      corner[2].add(leftBorderDir.mul(-radius)),
+      corner[3].rotate(endpointAngle, center),
+    ]
+
+    const path = new Path(begin)
+    path.largeArc(bodyAngle, center)
+    path.C(curveBegin[0].middle(corner[0]), corner[0].middle(curveEnd[0]), curveEnd[0])
+    path.L(curveBegin[1])
+    path.C(curveBegin[1].middle(corner[1]), corner[1].middle(curveEnd[1]), curveEnd[1])
+    path.largeArc(-bodyAngle, center)
+    path.C(curveBegin[2].middle(corner[2]), corner[2].middle(curveEnd[2]), curveEnd[2])
+    path.L(curveBegin[3])
+    path.C(curveBegin[3].middle(corner[3]), corner[3].middle(curveEnd[3]), curveEnd[3])
+
+    this.controlPoints = [
+      Array(3).fill({ top: corner[3], bottom: corner[2], oldHeight: 0 }),
+      Array(3).fill({ top: corner[0], bottom: corner[1], oldHeight: 0 }),
+    ]
+
+    return path
   }
 
   // For debug
   toCircle() {
-    const circle = [] as Record<string, unknown>[]
+    const circle = [] as CustomElementConfig[]
     this.controlPoints.forEach(side => {
-      side.forEach(cps => {
+      side.slice(1, -1).forEach(cps => {
         circle.push({
           tag: 'circle',
           attrs: {
             cx: cps.top.x,
             cy: cps.top.y,
             r: '5',
-            fill: 'red'
+            fill: 'green'
           }
         })
         circle.push({
@@ -758,12 +824,13 @@ class TextBg {
   }
 
   async drawTextBg(config: IText): Promise<CustomElementConfig | null> {
+    const contentScaleRatio = 1
     const { textBg, textShape } = config.styles
     if (textBg.name === 'none') return null
 
     let { width: layerWidth, height: layerHeight, scale: layerScale } = config.styles
-    layerWidth = layerWidth / layerScale /** contentScaleRatio */
-    layerHeight = layerHeight / layerScale /** contentScaleRatio */
+    layerWidth = layerWidth / layerScale * contentScaleRatio
+    layerHeight = layerHeight / layerScale * contentScaleRatio
     const opacity = textBg.opacity * 0.01
     const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
     const withShape = textShape.name !== 'none'
@@ -773,7 +840,7 @@ class TextBg {
     let textShapeData = { textWidth: [] as number[], textHeight: [] as number[], minHeight: -1 }
     await Promise.all([
       myRect.init(config, { splitSpan: isITextLetterBg(textBg) }),
-      withShape && (isITextLetterBg(textBg) || isITextUnderline(textBg))
+      withShape && (isITextLetterBg(textBg) || isITextUnderline(textBg) || isITextGooey(textBg))
         ? textShapeUtils.getTextHWsAsync(config)
         : { textWidth: [], textHeight: [], minHeight: -1 }
     ]).then(result => {
@@ -783,9 +850,8 @@ class TextBg {
     const { vertical, width, height, transform, rects, rows } = myRect.get()
     const maxHeightSpan = maxBy( // y is accrodding to its row, not entire svg.
       rows.flatMap(row => row.spanData.map(span => ({ height: span.height, y: span.y - row.rect.y }))),
-      (data) => data.height
+      data => data.height
     ) ?? { height: 0, y: 0 }
-    const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
 
     if (isITextGooey(textBg)) {
       const padding = textBg.distance * fontSizeModifier
@@ -801,8 +867,9 @@ class TextBg {
       })
 
       const cps = new Gooey(textBg, rects)
-      cps.preprocess()
-      const d = cps.process()
+      !withShape && cps.preprocess()
+      const resultPath = !withShape ? cps.process()
+        : cps.processWithShape(config, maxHeightSpan, textShapeData.textWidth, contentScaleRatio)
 
       return {
         tag: 'svg',
@@ -810,11 +877,12 @@ class TextBg {
         content: [{
           tag: 'path',
           attrs: {
-            d,
+            d: resultPath.result(),
           },
           style: { transform },
         }]
         // .concat(cps.toCircle() as any) // Show control point
+        // .concat(resultPath.toCircle() as any)
       }
     } else if (isITextUnderline(textBg)) {
       const color = textEffectUtils.colorParser(textBg.color, config)
@@ -824,7 +892,7 @@ class TextBg {
       // Variable for TextShape version
       const shapeCapWidth = maxHeightSpan.height * 0.005 * textBg.height
       const yOffset = (maxHeightSpan.height - shapeCapWidth * 2) * 0.01 * (100 - textBg.yOffset)
-      const radius = textShapeUtils.getRadiusByBend(bend) * mainFontSize / 60
+      const radius = textShapeUtils.getRadiusByBend(bend) * fontSizeModifier
       const textAngles = textShapeData.textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
       const totalAngle = sum(textAngles) * (bend >= 0 ? 1 : -1)
       const endpointAngle = !withShape ? 0 // Will be 0 for non-TextShape
@@ -834,7 +902,7 @@ class TextBg {
       const middle = new Point(layerWidth / 2,
         (bend >= 0 ? maxHeightSpan.y : layerHeight - maxHeightSpan.height - maxHeightSpan.y) + yOffset)
       const center = new Point(layerWidth / 2,
-        (bend >= 0 ? maxHeightSpan.height / 2 + radius : layerHeight - maxHeightSpan.height / 2 - radius))
+        bend >= 0 ? maxHeightSpan.height / 2 + radius : layerHeight - maxHeightSpan.height / 2 - radius)
       const begin = middle.rotate(-bodyAngle / 2, center)
 
       for (const rect of rects) {
