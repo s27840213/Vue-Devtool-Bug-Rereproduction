@@ -217,6 +217,7 @@ export default defineComponent({
     border-radius: 10px;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.1);
+    position: relative;
     &__recent {
       @include size(100%, 100%);
       display: flex;
