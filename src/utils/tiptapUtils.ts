@@ -146,7 +146,7 @@ class TiptapUtils {
         // If p is empty, no span exist, so need to store span style in p.spanStyle
         if (p.spanStyle) {
           attrs.spanStyle = true
-          const sStyles = this.generateSpanStyle(p.spanStyle as string)
+          const sStyles = this.generateSpanStyle(p.spanStyle)
           Object.assign(attrs, this.extractSpanStyleForParagraph(sStyles))
         }
         pObj.attrs = attrs

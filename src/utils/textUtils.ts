@@ -349,7 +349,7 @@ class TextUtils {
       body.style.height = 'max-content'
     }
     body.classList.add('nu-text')
-    body.style.writingMode = content.styles.writingMode
+    body.style.writingMode = cssConverter.convertVerticalStyle(content.styles.writingMode).writingMode
     body.style.position = 'fixed'
     body.style.top = '100%'
     body.style.left = '100%'
@@ -409,7 +409,7 @@ class TextUtils {
     })
   }
 
-  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, noPush = false) {
+  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, { noPush = false, keepCorner = false } = {}) {
     const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     if (subLayerIndex !== -1) {
@@ -425,15 +425,15 @@ class TextUtils {
         layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { spanDataList: textHW.spanDataList })
         const isVertical = config.styles.writingMode.includes('vertical')
         const initData = {
-          xSign: isVertical ? -1 : 1,
+          xSign: (isVertical || keepCorner) ? -1 : 1,
           ySign: 1,
           x: config.styles.x,
           y: config.styles.y,
           angle: config.styles.rotate * Math.PI / 180
         }
         const offsetSize = {
-          width: isVertical ? textHW.width - originSize.width : 0,
-          height: isVertical ? 0 : textHW.height - originSize.height
+          width: (isVertical || keepCorner) ? textHW.width - originSize.width : 0,
+          height: (isVertical || keepCorner) ? 0 : textHW.height - originSize.height
         }
         const trans = controlUtils.getTranslateCompensation(initData, offsetSize)
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, {
@@ -516,7 +516,7 @@ class TextUtils {
     this.updateGroupLayerSize(pageIndex, layerIndex)
   }
 
-  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, noPush = false) {
+  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, { noPush = false, keepCorner = false } = {}) {
     const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     const config = group.layers[subLayerIndex]
@@ -528,7 +528,7 @@ class TextUtils {
       this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri, noPush)
       this.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
-      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, noPush)
+      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, { noPush, keepCorner })
     }
   }
 

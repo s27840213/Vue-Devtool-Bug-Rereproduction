@@ -12,6 +12,7 @@ import { Editor } from '@tiptap/vue-3'
 import _, { cloneDeep, isEqual, omit } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
+import cssConverter from '@/utils/cssConverter'
 
 // For text effect gooey
 export class Point {
@@ -139,7 +140,7 @@ export class Rect {
     const safariStyle = generalUtils.safariLike ? { lineBreak: 'normal' } : {}
     // const safariStyle = platform.name === 'Safari' ? { lineBreak: 'strict' } : {}
     Object.assign(div.style, safariStyle)
-    div.style.writingMode = config.styles.writingMode
+    div.style.writingMode = cssConverter.convertVerticalStyle(config.styles.writingMode).writingMode
     let { widthLimit } = config
     if (config.styles.textShape.name !== 'none') widthLimit = -1
     const { scale, height } = config.styles
