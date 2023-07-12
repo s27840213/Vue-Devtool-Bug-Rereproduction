@@ -31,7 +31,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -183,7 +183,7 @@ export default defineComponent({
   },
   mounted() {
     if (this.config.clips.length === 1) {
-      if (!this.editorTypeTemplate) frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
+      if (!this.editorTypeTemplate && this.$route.name !== 'Screenshot') frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
       if (this.config.clips[0].srcObj.type === 'frame') {
         /**
          * If the frame contain only one clip, and is not in template editor or init from mydesign or in preview auto popping the photo-selector
