@@ -1123,8 +1123,11 @@ class TextBg {
         content: pos.map(p => {
           // Scale will let width be (scale-1)*p.height times larger than before,
           // So -(scale-1)*p.height/2 to justify it to center.
-          let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
-          let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
+          let x = p.x - (scale - 1) * p.height / 2
+          let y = p.y - (scale - 1) * p.height / 2
+          const offset = (vertical && !needRotate)
+            ? `translate(${p.height * yOffset / 100}px, ${p.width * xOffset / 100}px)`
+            : `translate(${p.width * xOffset / 100}px, ${p.height * yOffset / 100}px)`
           if (vertical && !needRotate) [x, y] = [y, x]
           const colorChangeable = letterBgData.isColorChangeable(p.href)
           return {
@@ -1139,11 +1142,11 @@ class TextBg {
             style: {
               color: p.color,
               ...withShape ? { // Transform for TextShape
-                transform: `translate(${x}px, ${y}px) ` + textShapeStyle[p.i],
+                transform: `translate(${x}px, ${y}px) ` + textShapeStyle[p.i] + offset,
                 // For rotate svg component against its center.
                 transformOrigin: `${p.height * scale / 2}px ${p.height * scale / 2}px 0`,
-              } : needRotate ? { transform } // If needRotate cancel xy exchange and add transform on it.
-                : {},
+              } : needRotate ? { transform: transform + offset } // If needRotate cancel xy exchange and add transform on it.
+                : { transform: offset },
             }
           }
         })
