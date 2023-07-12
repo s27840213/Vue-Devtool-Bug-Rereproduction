@@ -2,14 +2,12 @@ import list from '@/apis/list'
 import i18n from '@/i18n'
 import { IListServiceContentData, IListServiceData } from '@/interfaces/api'
 import {
-  IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, IPending,
-  ITag, ITagExtend,
-  isICategory,
-  isITag
+  IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, IPending, isICategory,
+  isITag, ITag, ITagExtend
 } from '@/interfaces/module'
 import store from '@/store'
-import localStorageUtils from '@/utils/localStorageUtils'
 import localeUtils from '@/utils/localeUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
 import logUtils from '@/utils/logUtils'
 import popupUtils from '@/utils/popupUtils'
 import themeUtils from '@/utils/themeUtils'
@@ -96,6 +94,12 @@ export default function (this: any) {
       searchTarget: ''
     }
   })
+
+  const isTextUs = (): boolean => this.namespace === 'text' && localeUtils.currLocale() === 'us'
+  const getColNum = (): number | undefined => {
+    if (isTextUs()) return store.state.isTablet ? 3 : 2
+    return undefined
+  }
 
   const actions: ActionTree<IListModuleState, unknown> = {
     // For panel template, object, bg, text, only get recently used.
@@ -213,7 +217,7 @@ export default function (this: any) {
           listAll: 1,
           listCategory: 0,
           cache: needCache,
-          colNum: store.state.isTablet ? 3 : 2
+          colNum: getColNum()
         }
         const { data } = await this.api(apiParams)
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
@@ -273,7 +277,7 @@ export default function (this: any) {
           listAll: 1,
           listCategory: 0,
           cache: !isAdmin,
-          colNum: store.state.isTablet ? 3 : 2
+          colNum: getColNum()
         }
         const { data } = await this.api(apiParams)
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
@@ -289,7 +293,7 @@ export default function (this: any) {
       const { nextParams, hasNextPage } = getters
       const { keyword } = state
       if (!hasNextPage || state.pending.content || state.pending.categories) return
-      if (!keyword && state.categories.length > 0 && state.nextCategory !== -1) {
+      if (!isTextUs() && !keyword && state.categories.length > 0 && state.nextCategory !== -1) {
         // Get more categories
         dispatch('getCategories')
         return
@@ -773,12 +777,13 @@ export default function (this: any) {
         listAll: 1,
         listCategory: 0,
         pageIndex: keyword ? nextSearch : nextPage,
-        cache: needCache
+        cache: needCache,
+        colNum: getColNum()
       }
     },
     hasNextPage(state) {
       if (state.keyword) return state.nextSearch > 0
-      else return (state.nextPage !== undefined && state.nextPage >= 0) || state.nextCategory > 0
+      else return (state.nextPage !== undefined && state.nextPage >= 0) || (!isTextUs() && state.nextCategory > 0)
     },
     // TagsBar
     tagsBar(state, getters) {
