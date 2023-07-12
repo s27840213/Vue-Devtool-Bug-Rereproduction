@@ -284,7 +284,7 @@ export default defineComponent({
         {
           outline,
           outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
-          willChange: this.config.active ? 'transform' : '',
+          willChange: this.config.active && !this.isSubLayer ? 'transform' : '',
           pointerEvents,
           clipPath,
           'mix-blend-mode': this.config.styles.blendMode,
