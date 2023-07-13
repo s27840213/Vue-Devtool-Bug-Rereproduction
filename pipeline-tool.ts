@@ -41,8 +41,8 @@ const e2e = () => ({
     script: [
       'npx cypress install',
       'yarn serve & npx wait-on http://localhost:8080',
-      // '|| true' will let pipeline always pass, no failed
-      'npx cypress run --record --browser chrome || true'
+      // Add '|| true' will keep pipeline always pass, never failed.
+      'npx cypress run --record --browser chrome'
     ],
     artifacts: [
       'cypress-visual-report/**',
