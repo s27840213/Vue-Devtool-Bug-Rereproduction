@@ -15,7 +15,7 @@ import LayerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v7097'
+const APP_VER_FOR_REFRESH_CACHE = 'v7155'
 
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
@@ -23,7 +23,7 @@ class ImageUtils {
     return new Promise<T>((resolve) => {
       const image = new Image()
       if (crossOrigin) {
-        image.crossOrigin = 'anoynous'
+        image.crossOrigin = 'anonymous'
       }
       image.onload = () => resolve(cb(image))
       error && (image.onerror = error)
@@ -142,6 +142,7 @@ class ImageUtils {
         if (typeof assetId === 'number') {
           if (shadowImgs.has(assetId)) {
             res = (shadowImgs as Map<any, any>).get(assetId)?.urls[size as string || 'midd'] || ''
+            break
           }
         }
         res = ''
@@ -154,7 +155,7 @@ class ImageUtils {
         res = ''
     }
     /**
-     * to solve the cross origin error cause by add crossOrigin='anoynous'
+     * to solve the cross origin error cause by add crossOrigin='anonymous'
      * the cache img of the users would keep catching this error
      * use a universe query version can solve this problem
      */

@@ -326,7 +326,7 @@ export default defineComponent({
       const img = new Image()
       const imgSize = imageUtils.getSrcSize(this.image.config.srcObj, 100)
       img.src = imageUtils.getSrc(this.image.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      img.crossOrigin = 'anoynous'
+      img.crossOrigin = 'anonymous'
       img.onload = () => {
         this.$store.commit('SET_backgroundImageStyles', {
           pageIndex: this.pageIndex,
