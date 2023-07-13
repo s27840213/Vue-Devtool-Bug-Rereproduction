@@ -41,7 +41,9 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import imageUtils from '@/utils/imageUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -120,21 +122,53 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setInGestureMode: 'SET_inGestureMode'
+      setInGestureMode: 'SET_inGestureMode',
+      setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     removeBg() {
       if (this.debugMode) {
         bgRemoveUtils.removeBgStkDebug()
         return
       }
-      uploadUtils.chooseAssets('stk-bg-remove')
+
+      this.handleIOSImage('stk-bg-remove')
+      /**
+       * @Note the below codes is for old version
+       */
+      // uploadUtils.chooseAssets('stk-bg-remove')
     },
     removeBgf() {
       if (this.debugMode) {
         bgRemoveUtils.removeBgStkDebug()
         return
       }
-      uploadUtils.chooseAssets('stk-bg-remove-face')
+      /**
+       * @Note the below codes is for old version
+       */
+      this.handleIOSImage('stk-bg-remove-face')
+    },
+    handleIOSImage(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
+      vivistickerUtils.getIosImg()
+        .then(async (images: Array<string>) => {
+          if (images.length) {
+            const src = imageUtils.getSrc({
+              type: 'ios',
+              assetId: images[0],
+              userId: ''
+            })
+            fetch(src)
+              .then((res) => res.blob())
+              .then((blob) => {
+                // Read the Blob as DataURL using the FileReader API
+                const reader = new FileReader()
+                reader.onloadend = () => {
+                  this.setIsProcessing(true)
+                  uploadUtils.uploadAsset(type, [reader.result as string])
+                }
+                reader.readAsDataURL(blob)
+              })
+          }
+        })
     },
     setScaleRatio(val: number) {
       this.bgRemoveScaleRatio = val
