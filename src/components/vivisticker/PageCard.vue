@@ -24,7 +24,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -60,6 +60,10 @@ export default defineComponent({
   },
   created() {
     this.updateSnapUtilsIndex(this.pageIndex)
+  },
+  mounted() {
+    // console.warn('mounted')
+    // editorUtils.handleContentScaleRatio(this.pageIndex)
   },
   watch: {
     pageIndex(val) {

@@ -359,16 +359,11 @@ export default defineComponent({
     },
     outlineStyles() {
       const outlineColor = this.config.locked ? '#EB5757' : '#9C9C9C'
-      // if (this.isControllerShown && layerUtils.getCurrLayer.type !== 'frame') {
-      const isRectFrameClip = layerUtils.getCurrLayer.type !== 'frame' && this.config.type === 'image' && this.config.clipPath && frameUtils.checkIsRect(this.config.clipPath)
-      if (isRectFrameClip) return 'none'
+      const isRectFrameClip = layerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
+      if (layerUtils.getCurrLayer.type === 'frame' && !isRectFrameClip) return 'none'
 
-      if (this.isControllerShown) {
-        if (this.isControlling) {
-          return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
-        } else {
-          return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
-        }
+      if (this.config?.active) {
+        return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
       } else {
         return 'none'
       }

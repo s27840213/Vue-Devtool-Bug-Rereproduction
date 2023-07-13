@@ -61,12 +61,6 @@ export default defineComponent({
   mounted() {
     this.minContentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
     this.$store.commit('SET_contentScaleRatio4Page', { pageIndex: this.pageIndex, contentScaleRatio: this.minContentScaleRatio })
-    // let card = this.$refs.card as HTMLElement | HTMLElement[]
-    // if (Array.isArray(card)) card = card[0]
-    // const cardRect = card.getBoundingClientRect()
-    // const padding = +card.style.padding.slice(0, -2)
-    // pageUtils.pageEventPosOffset.x = cardRect.x + padding
-    // pageUtils.pageEventPosOffset.y = cardRect.y + padding
   },
   computed: {
     ...mapGetters({
@@ -79,10 +73,7 @@ export default defineComponent({
       return {
         width: `${this.cardWidth}px`,
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        // padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
-        flexDirection: this.isDetailPage ? 'column' : 'initial',
-        // 'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
-        // overflow: this.isDetailPage ? 'initial' : 'scroll'
+        flexDirection: this.isDetailPage ? 'column' : 'initial'
       }
     },
     isDetailPage(): boolean {
