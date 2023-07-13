@@ -167,6 +167,9 @@ export default defineComponent({
                 }
                 reader.readAsDataURL(blob)
               })
+              .catch((err) => {
+                console.log(err)
+              })
           }
         })
     },
