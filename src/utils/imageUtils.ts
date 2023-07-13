@@ -15,7 +15,7 @@ import LayerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v7097'
+const APP_VER_FOR_REFRESH_CACHE = 'v7155'
 
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
