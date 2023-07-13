@@ -142,6 +142,7 @@ class ImageUtils {
         if (typeof assetId === 'number') {
           if (shadowImgs.has(assetId)) {
             res = (shadowImgs as Map<any, any>).get(assetId)?.urls[size as string || 'midd'] || ''
+            break
           }
         }
         res = ''
