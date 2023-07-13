@@ -30,7 +30,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         draggable="false"
         crossOrigin="anonymous"
         @error="onError"
-        @load="onLoad")
+        @load="onLoad($event, 'main')")
       svg(v-if="isAdjustImage"
         :style="flipStyles"
         class="nu-image__svg"
@@ -642,7 +642,7 @@ export default defineComponent({
       })
     },
     onLoad(e: Event, type?: string) {
-      if (type === 'main') {
+      if (type === 'main' && !this.isAdjustImage) {
         let subLayerIdx = this.subLayerIndex
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
