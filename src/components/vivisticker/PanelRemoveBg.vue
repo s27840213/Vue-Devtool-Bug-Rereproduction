@@ -156,9 +156,11 @@ export default defineComponent({
               assetId: images[0],
               userId: ''
             })
-            fetch(src)
-              .then((res) => res.blob())
-              .then((blob) => {
+            console.log(src)
+            try {
+              const response = await fetch(src)
+              try {
+                const blob = await response.blob()
                 // Read the Blob as DataURL using the FileReader API
                 const reader = new FileReader()
                 reader.onloadend = () => {
@@ -166,10 +168,14 @@ export default defineComponent({
                   uploadUtils.uploadAsset(type, [reader.result as string])
                 }
                 reader.readAsDataURL(blob)
-              })
-              .catch((err) => {
-                console.log(err)
-              })
+              } catch (error) {
+                console.log('to blob error')
+                console.log(error)
+              }
+            } catch (error) {
+              console.log('fetch error')
+              console.log(error)
+            }
           }
         })
     },
