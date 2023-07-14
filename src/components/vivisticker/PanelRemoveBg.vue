@@ -187,7 +187,6 @@ export default defineComponent({
         })
     },
     toDataURL(src: string, callback: (dataUrl: string)=> void) {
-      console.log('to dataUrl')
       const image = new Image()
       image.crossOrigin = 'Anonymous'
       image.onload = () => {
@@ -196,7 +195,7 @@ export default defineComponent({
         canvas.height = image.naturalHeight
         canvas.width = image.naturalWidth
         context?.drawImage(image, 0, 0)
-        const dataURL = canvas.toDataURL('image/jpeg')
+        const dataURL = canvas.toDataURL('image/png')
         callback(dataURL)
       }
       image.src = src
