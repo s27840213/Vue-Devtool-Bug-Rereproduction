@@ -15,7 +15,7 @@ import LayerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v7155'
+const APP_VER_FOR_REFRESH_CACHE = 'v7169'
 
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
@@ -61,7 +61,7 @@ class ImageUtils {
   }
 
   appendQuery(src: string, name: string, value: string) {
-    if (src === '') return ''
+    if (src === '' || src.includes('data:image/')) return ''
     if (src.includes('?')) {
       return src + `&${name}=${value}`
     } else {

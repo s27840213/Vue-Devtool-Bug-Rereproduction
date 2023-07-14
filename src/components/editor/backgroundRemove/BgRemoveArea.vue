@@ -86,7 +86,6 @@ export default defineComponent({
     this.root = this.$refs.bgRemoveArea as HTMLElement
 
     this.imageElement = new Image()
-    this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     this.imageElement.onload = () => {
       this.initCanvas()
@@ -95,13 +94,15 @@ export default defineComponent({
       this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
     }
+    this.imageElement.src = this.imgSrc
 
     this.initImageElement = new Image()
-    this.initImageElement.src = this.initImgSrc
     this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
     this.initImageElement.onload = () => {
       this.createInitImageCtx()
     }
+    this.initImageElement.src = this.initImgSrc
+
     this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
     if (this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('touchstart', this.disableTouchEvent)
