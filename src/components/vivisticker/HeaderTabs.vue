@@ -718,6 +718,7 @@ export default defineComponent({
     font-size: 18px;
     line-height: 140%;
     color: white;
+    white-space: nowrap;
   }
 
   &__right {
