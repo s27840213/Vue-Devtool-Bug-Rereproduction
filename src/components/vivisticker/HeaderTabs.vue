@@ -538,14 +538,13 @@ export default defineComponent({
       })
     },
     handleNext() {
-      bgRemoveUtils.setInBgRemoveMode(false)
-      editorUtils.setShowMobilePanel(false)
-      this.setInEffectEditingMode(true)
-
       vivistickerUtils.startEditing(
         'image',
         { plan: 0, assetId: '' },
         async () => {
+          bgRemoveUtils.setInBgRemoveMode(false)
+          editorUtils.setShowMobilePanel(false)
+          this.setInEffectEditingMode(true)
           return await bgRemoveUtils.saveToIOS(async (data, assetId) => {
             const srcObj = {
               type: 'ios',
@@ -719,6 +718,7 @@ export default defineComponent({
     font-size: 18px;
     line-height: 140%;
     color: white;
+    white-space: nowrap;
   }
 
   &__right {

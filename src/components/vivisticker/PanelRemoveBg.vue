@@ -2,7 +2,7 @@
 div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
   div(v-if="inBgRemoveMode || isProcessing" class="panel-remove-bg__rm-section" ref="rmSection")
     div(v-if="isProcessing" class="panel-remove-bg__preview-section")
-      img(:src="previewImage.src ? previewImage.src  : require('@/assets/img/svg/image-preview.svg')")
+      img(:src="previewImage.src ? previewImage.src  : previewSrc")
       div(class="gray-mask")
       img(class="loading" :src="require('@/assets/img/gif/gray-loading.gif')")
     bg-remove-area(v-else :editorViewCanvas="panelRemoveBg"
@@ -41,7 +41,9 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import imageUtils from '@/utils/imageUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -66,7 +68,8 @@ export default defineComponent({
       initImgSize: { width: 0, height: 0 },
       imgAspectRatio: 1,
       distanceBetweenFingers: -1,
-      debugMode: false
+      debugMode: false,
+      previewSrc: ''
       // p1StartClientY: 0,
       // p1StartClientX: 0,
       // p2StartClientY: 0,
@@ -120,21 +123,85 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setInGestureMode: 'SET_inGestureMode'
+      setInGestureMode: 'SET_inGestureMode',
+      setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     removeBg() {
       if (this.debugMode) {
         bgRemoveUtils.removeBgStkDebug()
         return
       }
-      uploadUtils.chooseAssets('stk-bg-remove')
+
+      this.handleIOSImage('stk-bg-remove')
+      /**
+       * @Note the below codes is for old version
+       */
+      // uploadUtils.chooseAssets('stk-bg-remove')
     },
     removeBgf() {
       if (this.debugMode) {
         bgRemoveUtils.removeBgStkDebug()
         return
       }
-      uploadUtils.chooseAssets('stk-bg-remove-face')
+      /**
+       * @Note the below codes is for old version
+       */
+      this.handleIOSImage('stk-bg-remove-face')
+    },
+    handleIOSImage(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
+      vivistickerUtils.getIosImg()
+        .then(async (images: Array<string>) => {
+          if (images.length) {
+            const src = imageUtils.getSrc({
+              type: 'ios',
+              assetId: images[0],
+              userId: ''
+            })
+
+            this.previewSrc = src
+
+            this.toDataURL(src, (dataUrl: string) => {
+              this.setIsProcessing(true)
+              uploadUtils.uploadAsset(type, [dataUrl])
+            })
+
+            console.log(src)
+            // try {
+            //   const response = await fetch(src)
+            //   console.log(response.headers)
+            //   try {
+            //     const blob = await response.blob()
+            //     // Read the Blob as DataURL using the FileReader API
+            //     const reader = new FileReader()
+            //     reader.onloadend = () => {
+            //       this.setIsProcessing(true)
+            //       uploadUtils.uploadAsset(type, [reader.result as string])
+            //     }
+            //     reader.readAsDataURL(blob)
+            //   } catch (error) {
+            //     console.log('to blob error')
+            //     console.log(error)
+            //   }
+            // } catch (error) {
+            //   console.log('fetch error')
+            //   console.log(error)
+            // }
+          }
+        })
+    },
+    toDataURL(src: string, callback: (dataUrl: string)=> void) {
+      const image = new Image()
+      image.crossOrigin = 'Anonymous'
+      image.onload = () => {
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        canvas.height = image.naturalHeight
+        canvas.width = image.naturalWidth
+        context?.drawImage(image, 0, 0)
+        const dataURL = canvas.toDataURL('image/png')
+        callback(dataURL)
+      }
+      image.src = src
     },
     setScaleRatio(val: number) {
       this.bgRemoveScaleRatio = val

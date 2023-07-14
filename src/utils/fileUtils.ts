@@ -35,6 +35,22 @@ class FileUtils {
     downloadAnchorNode.click()
   }
 
+  downloadImageFromFile(file: File, fileName: string) {
+    // Create a temporary anchor element
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(file)
+    link.download = fileName
+
+    // Programmatically trigger the download
+    link.click()
+
+    // Clean up
+    setTimeout(() => {
+      URL.revokeObjectURL(link.href)
+      link.remove()
+    }, 0)
+  }
+
   importFont(callback: (this: HTMLInputElement, ev: Event) => any) {
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
