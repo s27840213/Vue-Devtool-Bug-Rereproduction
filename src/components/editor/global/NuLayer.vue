@@ -305,6 +305,7 @@ export default defineComponent({
           ...this.transformStyle
         }
       )
+      styles.willChange = 'initial'
       if (!this.isImgCtrl && !this.inFrame && !this.$isTouchDevice() && !this.useMobileEditor) {
         styles.transform += `translateZ(${this.config.styles.zindex}px)`
       }

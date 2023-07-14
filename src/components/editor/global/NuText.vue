@@ -49,7 +49,7 @@ import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { isEqual, max, omit, round } from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
@@ -231,6 +231,9 @@ export default defineComponent({
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const textEffectStyles = omit(textEffectUtils.convertTextEffect(this.config), ['duplicatedTexts'])
+      if (['shadow', 'lift'].includes(this.config.styles.textEffect.name)) {
+        Object.assign(textEffectStyles, { willChange: 'filter' })
+      }
       const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
       return {
         width: isVertical ? '100%' : '',
