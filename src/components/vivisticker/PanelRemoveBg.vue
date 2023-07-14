@@ -156,28 +156,50 @@ export default defineComponent({
               assetId: images[0],
               userId: ''
             })
+
+            this.toDataURL(src, (dataUrl: string) => {
+              this.setIsProcessing(true)
+              uploadUtils.uploadAsset(type, [dataUrl])
+            })
+
             console.log(src)
-            try {
-              const response = await fetch(src)
-              try {
-                const blob = await response.blob()
-                // Read the Blob as DataURL using the FileReader API
-                const reader = new FileReader()
-                reader.onloadend = () => {
-                  this.setIsProcessing(true)
-                  uploadUtils.uploadAsset(type, [reader.result as string])
-                }
-                reader.readAsDataURL(blob)
-              } catch (error) {
-                console.log('to blob error')
-                console.log(error)
-              }
-            } catch (error) {
-              console.log('fetch error')
-              console.log(error)
-            }
+            // try {
+            //   const response = await fetch(src)
+            //   console.log(response.headers)
+            //   try {
+            //     const blob = await response.blob()
+            //     // Read the Blob as DataURL using the FileReader API
+            //     const reader = new FileReader()
+            //     reader.onloadend = () => {
+            //       this.setIsProcessing(true)
+            //       uploadUtils.uploadAsset(type, [reader.result as string])
+            //     }
+            //     reader.readAsDataURL(blob)
+            //   } catch (error) {
+            //     console.log('to blob error')
+            //     console.log(error)
+            //   }
+            // } catch (error) {
+            //   console.log('fetch error')
+            //   console.log(error)
+            // }
           }
         })
+    },
+    toDataURL(src: string, callback: (dataUrl: string)=> void) {
+      console.log('to dataUrl')
+      const image = new Image()
+      image.crossOrigin = 'Anonymous'
+      image.onload = () => {
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        canvas.height = image.naturalHeight
+        canvas.width = image.naturalWidth
+        context?.drawImage(image, 0, 0)
+        const dataURL = canvas.toDataURL('image/jpeg')
+        callback(dataURL)
+      }
+      image.src = src
     },
     setScaleRatio(val: number) {
       this.bgRemoveScaleRatio = val
