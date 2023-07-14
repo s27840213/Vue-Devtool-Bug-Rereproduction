@@ -2,7 +2,7 @@
 div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
   div(v-if="inBgRemoveMode || isProcessing" class="panel-remove-bg__rm-section" ref="rmSection")
     div(v-if="isProcessing" class="panel-remove-bg__preview-section")
-      img(:src="previewImage.src ? previewImage.src  : require('@/assets/img/svg/image-preview.svg')")
+      img(:src="previewImage.src ? previewImage.src  : previewSrc")
       div(class="gray-mask")
       img(class="loading" :src="require('@/assets/img/gif/gray-loading.gif')")
     bg-remove-area(v-else :editorViewCanvas="panelRemoveBg"
@@ -68,7 +68,8 @@ export default defineComponent({
       initImgSize: { width: 0, height: 0 },
       imgAspectRatio: 1,
       distanceBetweenFingers: -1,
-      debugMode: false
+      debugMode: false,
+      previewSrc: ''
       // p1StartClientY: 0,
       // p1StartClientX: 0,
       // p2StartClientY: 0,
@@ -156,6 +157,8 @@ export default defineComponent({
               assetId: images[0],
               userId: ''
             })
+
+            this.previewSrc = src
 
             this.toDataURL(src, (dataUrl: string) => {
               this.setIsProcessing(true)
