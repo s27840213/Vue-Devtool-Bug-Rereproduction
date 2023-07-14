@@ -220,9 +220,10 @@ export default defineComponent({
   &__effects {
     @include no-scrollbar;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
     gap: 15px;
     margin: 0 13px 13px 13px;
+    padding: 2px 0; // For first/last rows icon border space.
     overflow: auto;
     > div {
       display: flex;
@@ -233,8 +234,10 @@ export default defineComponent({
       height: 56px;
       margin: 0px auto;
       border-radius: 5px;
-      border: 2px solid transparent;
       overflow: hidden;
+      &.selected {
+        @include selection-border(2px);
+      }
       .panel-text-effect__effects--icon {
         background-color: setColor(gray-5);
         border-radius: 5px;
@@ -243,9 +246,6 @@ export default defineComponent({
         &.svg-icon {
           padding: 16px;
         }
-      }
-      &.selected {
-        border: 2px solid setColor(blue-1);
       }
       > .pro {
         left: 1px;
@@ -305,11 +305,10 @@ export default defineComponent({
       align-items: center;
       box-sizing: border-box;
       height: 42px;
-      border: 2px solid transparent;
       border-radius: 5px;
       background-color: setColor(gray-5);
       &.selected {
-        border-color: setColor(blue-1);
+        @include selection-border(2px);
       }
       > img {
         margin-right: 8px;
