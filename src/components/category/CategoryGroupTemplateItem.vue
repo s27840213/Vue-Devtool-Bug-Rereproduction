@@ -1,30 +1,21 @@
 <template lang="pug">
-div(class="category-template-item" :style="itemStyle" @click="handleClickGroup")
-  div(class="relative pointer"
-    @mouseover="() => handleCarouse()"
-    @mouseleave="stopCarouse()")
-    image-carousel(v-if="showCarousel"
-      :imgs="groupImages"
-      @change="handleCarouselIdx")
-      template(v-slot="{ url }")
-        img(:src="url" :style="previewStyle" class="category-template-item__img")
-    img(v-else
-      class="category-template-item__img pointer"
-      :src="fallbackSrc || previewImage"
-      :style="previewStyle"
-      @error="handleNotFound")
-    span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
-    pro-item(v-if="item.plan")
-  div(v-if="showId"
-    class="category-template-item__id"
-    @click.self.stop="copyId") {{ item.id }}
+div(class="category-template-item" @click="handleClickGroup")
+  image-carousel(
+    :imgs="groupImages"
+    :speed="2000"
+    @change="handleCarouselIdx")
+    template(v-slot="{ url }")
+      img(class="category-template-item__img"
+          :src="fallbackSrc || url"
+          @load="getRenderedSize"
+          @error="handleNotFound")
+  span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import GeneralUtils from '@/utils/generalUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -37,10 +28,6 @@ export default defineComponent({
     item: {
       type: Object,
       required: true
-    },
-    showId: {
-      type: Boolean,
-      required: true
     }
   },
   data () {
@@ -49,39 +36,24 @@ export default defineComponent({
       carouselIdx: 0,
       fallbackSrc: '',
       isHover: false,
-      waitTimer: 0 as number
+      waitTimer: 0 as number,
+      renderedWidth: 120,
+      renderedHeight: 120
     }
   },
   mounted () {
     const preImg = new Image()
     preImg.src = this.groupImages[0]
+    this.handleCarouse()
   },
   computed: {
     groupImages (): string[] {
-      return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev_4x?ver=${content.ver}`)
-    },
-    previewImage (): string {
-      const { match_cover: cover, ver, id } = this.item
-      return `https://template.vivipic.com/template/${cover.id ?? id}/prev_4x?ver=${ver}`
-    },
-    previewStyle(): any {
-      const { width, height } = this.item.preview || { width: GeneralUtils.getListRowItemSize(), height: GeneralUtils.getListRowItemSize() }
-      return { width: `${width}px`, height: `${height}px` }
-    },
-    itemStyle(): any {
-      const { width } = this.item.preview || { width: GeneralUtils.getListRowItemSize() }
-      return { width: `${width}px` }
+      return this.item.content_ids.map((content: any) => `https://template.vivipic.com/template/${content.id}/prev_2x?ver=${content.ver}`)
     }
   },
   methods: {
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
-    },
-    copyId() {
-      GeneralUtils.copyText(this.item.id)
-        .then(() => {
-          notify({ group: 'copy', text: `${this.item.id} 已複製` })
-        })
     },
     handleCarouselIdx (idx: number) {
       this.carouselIdx = idx
@@ -89,7 +61,8 @@ export default defineComponent({
     handleClickGroup () {
       this.$emit('clickGroupItem', this.item)
     },
-    handleCarouse () {
+    handleCarouse() {
+      this.getRenderedSize()
       this.isHover = true
       this.waitTimer = window.setInterval(() => {
         if (this.isHover) {
@@ -97,10 +70,12 @@ export default defineComponent({
         }
       }, 100)
     },
-    stopCarouse () {
-      this.isHover = false
-      this.showCarousel = false
-      window.clearInterval(this.waitTimer)
+    getRenderedSize() {
+      const elContainer = this.$el as HTMLElement
+      if (!elContainer) return false
+      this.renderedWidth = elContainer.clientWidth
+      this.renderedHeight = elContainer.clientHeight
+      return true
     }
   }
 })
@@ -108,21 +83,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
   .category-template-item {
+    @include size(100%);
+    position: relative;
+    border-radius: 5px;
+    overflow: hidden;
     &__img {
+      @include size(v-bind("`${renderedWidth}px`"), v-bind("`${renderedHeight}px`"));
       object-fit: contain;
-      height: 145px;
-      width: 145px;
       vertical-align: top;
       pointer-events: none;
-    }
-    &__id {
-      color: #ffffff;
-      font-size: 20px;
-      line-height: 40px;
-      text-align: left;
-      transform: scale(.5);
-      transform-origin: left top;
-      cursor: pointer;
     }
     &__index {
       position: absolute;

@@ -70,7 +70,7 @@ import networkUtils from '@/utils/networkUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface CarouselItem {
@@ -116,6 +116,16 @@ export default defineComponent({
           key: 'object',
           title: this.$t('STK0051'),
           img: require('@/assets/img/png/pricing/vivisticker_pro-object.png')
+        },
+        {
+          key: 'template',
+          title: this.$t('STK0071'),
+          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-template.png`)
+        },
+        {
+          key: 'bg-remove',
+          title: this.$t('STK0083'),
+          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-bg-remove.png`)
         }
       ] as CarouselItem[],
       footerLinks: [

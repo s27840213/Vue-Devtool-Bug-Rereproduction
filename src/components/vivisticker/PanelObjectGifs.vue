@@ -16,9 +16,11 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
       class="panel-gifs__tags"
       :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"
+      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
       ref="tags"
       theme="dark"
-      @search="handleSearch")
+      @search="handleSearch"
+      @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
                 :class="{invisible: !item.show, collapsed: !isSearchBarExpanded}"
@@ -111,6 +113,7 @@ export default defineComponent({
         favoritesSearchResult: 0
       },
       isSearchBarExpanded: false,
+      tagScrollLeft: 0
     }
   },
   computed: {
@@ -270,6 +273,14 @@ export default defineComponent({
     }
   },
   mounted() {
+    // skip transitions after tags load
+    const unwatch = this.$watch('tags.length', () => {
+      this.toggleTransitions(false)
+      window.requestAnimationFrame(() => {
+        this.toggleTransitions(true)
+      })
+      unwatch()
+    })
     generalUtils.panelInit('giphy',
       this.handleSearch,
       this.handleCategorySearch,
@@ -308,9 +319,9 @@ export default defineComponent({
       })
     },
     isInCategory() {
-      // skip transitions when entering of leaving category
+      // skip transitions when entering or leaving category
       this.toggleTransitions(false)
-      this.$nextTick(() => {
+      window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
       })
     }
@@ -458,7 +469,7 @@ export default defineComponent({
   color: setColor(white);
   overflow: hidden;
   &__tags {
-    margin-top: 14px;
+    margin: 7px 0 10px;
     color: setColor(black-5);
   }
   &__item {
@@ -471,13 +482,13 @@ export default defineComponent({
     grid-template-columns: repeat(3, 1fr);
   }
   &.with-search-bar {
-    height: calc(100% + 56px); // 42px (serach bar height) + 14px (margin-top of tags) = 56px
+    height: calc(100% + 49px); // 42px (serach bar height) + 7px (margin-top of tags) = 49px
     .panel-gifs__tags {
       clip-path: inset(0 0 0 0);
       transform: translateZ(0);
       transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
       &.collapsed {
-        transform: translateY(-56px) translateZ(0);
+        transform: translateY(-49px) translateZ(0);
         clip-path: inset(0 42px 0 0);
       }
     }
@@ -485,11 +496,11 @@ export default defineComponent({
       transition: transform 200ms 100ms ease-in-out;
       transform: translateZ(0);
       &.collapsed{
-        transform: translateY(-56px) translateZ(0);
+        transform: translateY(-49px) translateZ(0);
       }
     }
     &:deep(.vue-recycle-scroller__item-wrapper) {
-      margin-bottom: 56px;
+      margin-bottom: 49px;
     }
     &:deep(.tags__flex-container-mobile) {
       width: max-content;

@@ -38,6 +38,7 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
       :forRender="true"
       :pageIndex="pageIndex"
       :page="config"
+      @onload="bgImgOnload"
       :layerIndex="layerIndex")
     div(class="dim-background__content-area hollow" :style="contentAreaStyles")
       component(v-for="(elm, idx) in getHalation"
@@ -113,11 +114,11 @@ export default defineComponent({
     getHalation(): ReturnType<typeof imageAdjustUtil.getHalation> {
       const { styles: { adjust } } = this.config.backgroundImage.config as IImage
       if (!adjust) return []
-      const { width, height } = pageUtils.getPage(this.imgControlPageIdx)
+      const { width, height } = pageUtils.removeBleedsFromPageSize(pageUtils.getPage(this.imgControlPageIdx))
       const position = {
         width: width / 2 * this.contentScaleRatio,
-        x: (width / 2) * this.contentScaleRatio,
-        y: (height / 2) * this.contentScaleRatio
+        x: width / 2 * this.contentScaleRatio,
+        y: height / 2 * this.contentScaleRatio
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },
@@ -129,6 +130,11 @@ export default defineComponent({
         left: this.config.bleeds.left * this.contentScaleRatio + 'px',
         right: this.config.bleeds.right * this.contentScaleRatio + 'px'
       }
+    }
+  },
+  methods: {
+    bgImgOnload() {
+      this.$store.commit('imgControl/SET_IsBgCtrlImgLoaded', true)
     }
   }
 })

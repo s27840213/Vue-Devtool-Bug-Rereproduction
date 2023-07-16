@@ -63,6 +63,12 @@
   font-size: 16px;
 }
 
+@mixin text-H7 {
+  @include header();
+  font-weight: 600;
+  font-size: 14px;
+}
+
 @mixin body-XL {
   @include body();
   font-size: 20px;

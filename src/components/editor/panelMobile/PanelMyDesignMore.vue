@@ -8,6 +8,20 @@ div(class="panel-my-design-more")
                   iconWidth="18px"
                   iconColor="gray-2")
       div(class="panel-my-design-more__option-title") {{ $t('NN0504') }}
+    div(v-if="isTemplate" class="panel-my-design-more__option"
+        @click.prevent.stop="handleDuplicate")
+      div(class="panel-my-design-more__option-icon")
+        svg-icon(iconName="duplicate"
+                  iconWidth="18px"
+                  iconColor="gray-2")
+      div(class="panel-my-design-more__option-title") {{ $t('NN0251') }}
+    div(v-if="showDownload" class="panel-my-design-more__option"
+        @click.prevent.stop="handleDownload")
+      div(class="panel-my-design-more__option-icon")
+        svg-icon(iconName="download_flat"
+                  iconWidth="18px"
+                  iconColor="gray-2")
+      div(class="panel-my-design-more__option-title") {{ $t('NN0889') }}
     div(class="panel-my-design-more__option"
         @click.prevent.stop="handleDelete")
       div(class="panel-my-design-more__option-icon")
@@ -19,6 +33,7 @@ div(class="panel-my-design-more")
 
 <script lang="ts">
 import { IPage } from '@/interfaces/page'
+import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
@@ -39,11 +54,18 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       myDesignBuffer: 'vivisticker/getMyDesignBuffer'
-    })
+    }) as { myDesignBuffer: () => IMyDesign },
+    isTemplate() {
+      return vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type) === 'template'
+    },
+    showDownload() {
+      return vivistickerUtils.checkVersion('1.34') && !this.isTemplate
+    }
   },
   methods: {
     ...mapMutations({
-      setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
+      setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer',
+      addDesign: 'vivisticker/UPDATE_addDesign'
     }),
     handleEdit() {
       if (this.myDesignBuffer.type === 'object' && !vivistickerUtils.checkPro(this.myDesignBuffer.assetInfo, this.myDesignBuffer.assetInfo.isFrame ? 'frame' : 'object')) return
@@ -64,6 +86,49 @@ export default defineComponent({
           }
         })
       }, 300)
+    },
+    handleDuplicate() {
+      vivistickerUtils.fetchMyDesign(this.myDesignBuffer).then((data) => {
+        const json = {
+          ...this.myDesignBuffer,
+          id: generalUtils.generateAssetId(),
+          updateTime: new Date(Date.now()).toISOString()
+        }
+        vivistickerUtils.addAsset(`mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type)}`, json, 0, {
+          config: { pages: data.pages }
+        }).then(() => {
+          vivistickerUtils.callIOSAsAPI('CLONE_IMAGE', { type: 'mydesign', srcId: this.myDesignBuffer.id, desId: json.id }, `screenshot-mydesign-${this.myDesignBuffer.id}-${json.id}`).then((data) => {
+            this.addDesign({
+              tab: 'template',
+              list: [json]
+            })
+            editorUtils.setCloseMobilePanelFlag(true)
+          })
+        })
+      })
+    },
+    handleDownload() {
+      vivistickerUtils.fetchMyDesign(this.myDesignBuffer).then(data => {
+        if (['object', 'objectGroup'].includes(this.myDesignBuffer.type) && vivistickerUtils.checkForEmptyFrame(data.pages)) {
+          editorUtils.setCloseMobilePanelFlag(true)
+          // handle Dialog and File-selector
+          vivistickerUtils.initWithMyDesign(this.myDesignBuffer, {
+            callback: (pages: Array<IPage>) => {
+              const page = pages[0]
+              page.layers.forEach(l => {
+                l.initFromMydesign = true
+              })
+              vivistickerUtils.initLoadingFlags(page, () => {
+                vivistickerUtils.handleFrameClipError(page, true)
+              })
+            },
+            tab: ''
+          })
+        } else {
+          const pages = generalUtils.deepCopy(data.pages)
+          vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign', asset: this.myDesignBuffer }), 'download')
+        }
+      })
     },
     handleDelete() {
       modalUtils.setModalInfo(

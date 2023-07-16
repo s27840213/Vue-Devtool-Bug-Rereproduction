@@ -22,7 +22,16 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
     //- :style="imgWrapperstyle()")
     div(class='nu-image__picture'
       :style="imgStyles()")
-      svg(v-if="isAdjustImage()"
+      img(ref="img"
+        :style="flipStyles"
+        class="nu-image__img full-size"
+        :class="{'layer-flip': flippedAnimation() }"
+        :src="finalSrc"
+        draggable="false"
+        crossOrigin="anonymous"
+        @error="onError"
+        @load="onLoad($event, 'main')")
+      svg(v-if="isAdjustImage"
         :style="flipStyles"
         class="nu-image__svg"
         :class="{'layer-flip': flippedAnimation() }"
@@ -45,17 +54,10 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
+          crossOrigin="anonymous"
           draggable="false"
           @error="onError"
           @load="onAdjustImgLoad($event, 'main')")
-      img(v-else ref="img"
-        :style="flipStyles"
-        class="nu-image__img full-size"
-        :class="{'layer-flip': flippedAnimation() }"
-        :src="finalSrc"
-        draggable="false"
-        @error="onError"
-        @load="onLoad($event, 'main')")
   template(v-if="hasHalation()")
     component(v-for="(elm, idx) in cssFilterElms()"
       class="nu-image__adjust"
@@ -92,7 +94,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
 export default defineComponent({
-  emits: [],
+  emits: ['onload'],
   props: {
     config: {
       type: Object,
@@ -184,8 +186,16 @@ export default defineComponent({
         stepsUtils.record()
       }
     })
-
-    // this.canvas = this.$refs.canvas as HTMLCanvasElement | undefined
+    /**
+     * The shadow effect is set, but the img is not uploaded and fetched
+     */
+    const config = this.config as IImage
+    console.log(config.styles.shadow.currentEffect !== 'none', config.styles.shadow.srcObj)
+    // if (config.styles.shadow.currentEffect !== 'none' && !config.styles.shadow.srcObj.assetId) {
+    if (config.styles.shadow.currentEffect !== 'none' && config.styles.shadow.srcObj.type === 'upload') {
+      console.log(' mounted handle shadow')
+      this.handleNewShadowEffect()
+    }
   },
   beforeUnmount() {
     if (!this.isBgImgControl) {
@@ -218,7 +228,7 @@ export default defineComponent({
         width: 0,
         height: 0
       },
-      initialized: false,
+      initialized: false
     }
   },
   watch: {
@@ -351,7 +361,7 @@ export default defineComponent({
       const src = imageUtils.getSrc(this.config, val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       imageUtils.imgLoadHandler(src, () => {
         this.src = src
-      })
+      }, { crossOrigin: true })
     }
   },
   components: { NuAdjustImage },
@@ -376,13 +386,18 @@ export default defineComponent({
       if (this.src.startsWith('data:image') || !this.initialized) return false
       return true
     },
+    isAdjustImage(): boolean {
+      const { styles: { adjust = {} } } = this.config
+      const arr = Object.entries(adjust).filter(([, v]) => typeof v === 'number' && v !== 0)
+      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
+    },
     finalSrc(): string {
       let src = this.src
       if (this.$route.name === 'Preview') {
         return imageUtils.appendCompQueryForVivipic(this.src)
       }
       if (!this.config.previewSrc) {
-        src = imageUtils.appendQuery(src, `ver=${generalUtils.generateRandomString(4)}`)
+        src = imageUtils.appendQuery(src, 'ver', generalUtils.generateRandomString(4))
       }
       return src
     },
@@ -450,7 +465,7 @@ export default defineComponent({
       const { width, height } = this.scaledConfig()
       const styles = {
         // in vivisticker the following code would lead the non-fluent UX
-        // ...(this.isAdjustImage() && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        // ...(this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -555,6 +570,24 @@ export default defineComponent({
                 vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
               }
             })
+          } else {
+            // replace error image
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              srcObj: {
+                type: 'frame',
+                assetId: '',
+                userId: ''
+              }
+            }, this.subLayerIndex)
+            layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+              imgWidth: (this.config as IImage).styles.width,
+              imgHeight: (this.config as IImage).styles.height,
+              imgX: 0,
+              imgY: 0,
+              opacity: 100,
+              adjust: {}
+            }, this.subLayerIndex)
+            this.src = imageUtils.getSrc(this.config)
           }
         }
       }
@@ -585,13 +618,21 @@ export default defineComponent({
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        window.setTimeout(() => {
-          if (this.priPrimaryLayerIndex !== -1) {
-            vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+
+        // detect if SVG image rendered
+        const rendering = () => {
+          const elImg = this.$refs.img as SVGImageElement
+          if (!elImg) return
+          if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
+            // Render complete
+            if (this.priPrimaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+            else vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
           } else {
-            vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+            // Rendering
+            window.requestAnimationFrame(rendering)
           }
-        }, 100)
+        }
+        window.requestAnimationFrame(rendering)
       }
       imageUtils.imgLoadHandler(this.src, (img) => {
         if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
@@ -601,7 +642,7 @@ export default defineComponent({
       })
     },
     onLoad(e: Event, type?: string) {
-      if (type === 'main') {
+      if (type === 'main' && !this.isAdjustImage) {
         let subLayerIdx = this.subLayerIndex
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
@@ -635,6 +676,7 @@ export default defineComponent({
           }, this.subLayerIndex)
         }
       }
+      this.$emit('onload')
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return
@@ -661,7 +703,7 @@ export default defineComponent({
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
-      })
+      }, { crossOrigin: true })
 
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
@@ -706,7 +748,8 @@ export default defineComponent({
                   }
                 })
             }
-          }
+          },
+          crossOrigin: true
         })
       })
     },
@@ -729,25 +772,27 @@ export default defineComponent({
               this.preLoadImg('next', this.getImgDimension)
             }
           }
-        })
+        }, { crossOrigin: true })
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
       return new Promise<void>((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => resolve()
-        img.onerror = (error) => {
-          reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-          fetch(img.src)
-            .then(res => {
-              const { status, statusText } = res
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
-            })
-            .catch((e) => {
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
-            })
-        }
-        img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
+        const size = imageUtils.getSrcSize(this.config.adjustSrcObj?.srcObj?.type ? this.config.adjustSrcObj?.srcObj : this.config.srcObj, val, preLoadType)
+        const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, size))
+        imageUtils.imgLoadHandler(src, () => resolve(), {
+          error: () => {
+            reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+            fetch(src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError('img src:', src, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                this.logImgError('img src:', src, 'fetch result: ' + e)
+              })
+          },
+          crossOrigin: true
+        })
       })
     },
     handleIsTransparent() {
@@ -772,7 +817,7 @@ export default defineComponent({
         this.handleIsTransparent()
         await this.previewAsLoading()
       } else {
-        if (this.isAdjustImage()) {
+        if (this.isAdjustImage) {
           this.handleIsTransparent()
         }
         const { imgWidth, imgHeight } = this.config.styles
@@ -829,14 +874,13 @@ export default defineComponent({
         imageShadowUtils.setProcessId(this.id())
         !hasShadowSrc && imageShadowUtils.setIsProcess(layerInfo(), true)
       }
-
       let img = new Image()
       if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
         // normally, we should get the image size from srcObj, but if in vivisticker bg removing, we didn't actually upload the bg remove result to the server
-        // Instead, we use previewSrc to show the image
-        // so here we need to give the size from the autoRemoveResult
-        if ((this.config as IImage).previewSrc) {
-          this.shadowBuff.MAXSIZE = Math.min(Math.max(this.autoRemoveResult.height, this.autoRemoveResult.width), CANVAS_MAX_SIZE)
+        if ((this.config as IImage).srcObj.type === 'ios') {
+          await imageUtils.imgLoadHandler(imageUtils.getSrc(this.config as IImage), (img) => {
+            this.shadowBuff.MAXSIZE = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
+          })
         } else {
           const res = await imageUtils.getImgSize(this.config.srcObj, false)
           if (res) {
@@ -861,9 +905,6 @@ export default defineComponent({
             //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
             // }
             img.crossOrigin = 'anonymous'
-            img.src = this.config.previewSrc ? this.config.previewSrc : imageUtils.getSrc(this.config,
-              ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
-              `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
@@ -884,6 +925,12 @@ export default defineComponent({
                   resolve()
                 }
               }
+              if (this.config.previewSrc) {
+                img.src = this.config.previewSrc
+              } else {
+                const src = imageUtils.getSrc(this.config, ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal')
+                img.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+              }
             })
           } else {
             img = shadowBuff.canvasShadowImg as HTMLImageElement
@@ -894,6 +941,7 @@ export default defineComponent({
           imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
           imageShadowUtils.setProcessId()
           imageShadowUtils.clearLayerData()
+          console.log('ShadowEffectType.none')
           return
       }
 
@@ -963,9 +1011,14 @@ export default defineComponent({
         drawCanvasH: _drawCanvasH,
         layerInfo: layerInfo(),
         cb: () => {
+          if (this.config.styles.shadow.cb) {
+            this.config.styles.shadow.cb()
+            this.$store.commit('SET_shadowCallback', { layerInfo: this.layerInfo(), cb: undefined })
+          }
           this.clearShadowSrc()
         }
       }
+      console.warn('handleNewShadowEffect end', params)
       imageShadowUtils.drawingInit(canvas, img, this.config as IImage, params)
       switch (currentEffect) {
         case ShadowEffectType.shadow:
@@ -983,6 +1036,7 @@ export default defineComponent({
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
+      console.warn('updateShadowEffect')
       const { shadowBuff } = this
       const canvas = this.$refs.canvas as HTMLCanvasElement
       const layerInfo = this.layerInfo()
@@ -1174,11 +1228,6 @@ export default defineComponent({
       return imageUtils
         .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 320)
     },
-    isAdjustImage(): boolean {
-      const { styles: { adjust = {} } } = this.config
-      const arr = Object.entries(adjust).filter(([, v]) => typeof v === 'number' && v !== 0)
-      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
-    },
     hasHalation(): boolean {
       return this.config.styles.adjust?.halation
     },
@@ -1268,6 +1317,8 @@ export default defineComponent({
 
   &__svg {
     display: block;
+    position: absolute;
+    top: 0;
   }
 
   &__adjust {

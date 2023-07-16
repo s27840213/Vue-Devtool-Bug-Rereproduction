@@ -185,6 +185,7 @@ class BgRemoveUtils {
     } else {
       notify({ group: 'error', text: data.msg })
       this.setIsProcessing(false)
+      this.setPreviewImage({ src: '', width: 0, height: 0 })
     }
 
     // return data
@@ -313,11 +314,14 @@ class BgRemoveUtils {
     })
   }
 
-  saveToIOS() {
+  saveToIOS(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string) => any) {
     const src = this.canvas.toDataURL('image/png;base64')
-    vivistickerUtils.sendToIOS('SAVE_IMAGE_FROM_URL', {
-      type: 'png',
-      url: src
+    const assetId = generalUtils.generateAssetId()
+    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'bgRemove', name: assetId, toast: false }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      if (callback) {
+        return callback(_data, assetId)
+      }
     })
   }
 }

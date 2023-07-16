@@ -98,9 +98,10 @@ export interface ISpan {
   styles: ISpanStyle
 }
 export interface IParagraph {
-  [key: string]: string | number | Array<ISpan> | IParagraphStyle,
+  [key: string]: string | number | Array<ISpan> | IParagraphStyle | undefined,
   spans: Array<ISpan>,
-  styles: IParagraphStyle
+  styles: IParagraphStyle,
+  spanStyle?: string
 }
 
 export interface IText extends ILayer<ITextStyle> {
@@ -121,6 +122,7 @@ export interface IText extends ILayer<ITextStyle> {
   initScale: number,
   isDraggingCursor: boolean,
   isFlipping: boolean,
+  spanDataList?: DOMRect[][][]
 }
 
 export interface IShape extends ILayer<IStyle> {

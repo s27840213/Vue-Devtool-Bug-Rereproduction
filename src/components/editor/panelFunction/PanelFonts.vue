@@ -43,7 +43,6 @@ import FontTag from '@/components/global/Tags.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import generalUtils from '@/utils/generalUtils'
-import TextUtils from '@/utils/textUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -76,7 +75,6 @@ export default defineComponent({
   },
   unmounted() {
     this.setShowMore(false)
-    TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
   computed: {
     ...mapState('font', {

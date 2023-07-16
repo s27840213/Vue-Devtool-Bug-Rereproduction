@@ -28,8 +28,10 @@ class ListService {
       ...(params.shuffle === 1 && { shuffle: params.shuffle }),
       // app: 0: vivipic (default), 1: vivisticker
       app: 1,
-      // for text panel of US version
+      // for vivisticker text panel of US version
       col_num: params.colNum,
+      // for vivisticker template
+      ig_layout: params.igLayout
     }
 
     return axios.request<IListServiceResponse>({
@@ -39,7 +41,7 @@ class ListService {
     })
   }
 
-  getInfoList(type: string, designIds: string[]) {
+  getInfoList(type: string, designIds: string[], igLayout?: 'story' | 'post') {
     const searchParams = {
       token: '1',
       type,
@@ -48,9 +50,10 @@ class ListService {
       cache: true,
       platform: window.location.host,
       ver: store.getters['user/getVerApi'],
-      app: 1
+      app: 1,
+      // for vivisticker template
+      ...(igLayout && { ig_layout: igLayout })
     }
-
     return axios.request<IListServiceResponse>({
       url: '/list-design',
       method: 'GET',

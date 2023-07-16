@@ -1,11 +1,11 @@
 <template lang="pug">
 div(class="mobile-panel"
-    :class="{'panel-padding': !noPaddingTheme, 'not-rounded': insertTheme}"
+    :class="{'panel-padding': !noPaddingTheme, 'not-rounded': noRoundTheme, 'at-bottom': bottomTheme}"
     :style="panelStyle"
     v-click-outside="vcoConfig()"
     ref="panel")
   div(v-if="!noHeaderTheme" class="mobile-panel__top-section"
-    :class="{'self-padding': noPaddingTheme, 'insert-us': insertTheme && isUs }")
+    :class="{'self-padding': noPaddingTheme }")
     div(class="mobile-panel__drag-bar"
       :class="{'visible-hidden': (!insertTheme && !isUs && panelTitle !== '') || fixSize || extraFixSizeCondition}"
       @pointerdown.stop="dragPanelStart"
@@ -76,6 +76,7 @@ import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.v
 import PanelGiphyMore from '@/components/editor/panelMobile/PanelGiphyMore.vue'
 import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
 import PanelMyDesignMore from '@/components/editor/panelMobile/PanelMyDesignMore.vue'
+import PanelNudge from '@/components/editor/panelMobile/PanelNudge.vue'
 import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelOpacity from '@/components/editor/panelMobile/PanelOpacity.vue'
 import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
@@ -86,16 +87,20 @@ import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
 import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
-import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
-import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
+import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
+import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
+import PanelObject from '@/components/vivisticker/PanelObject.vue'
+import PanelPageManagement from '@/components/vivisticker/PanelPageManagement.vue'
+import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
+import i18n from '@/i18n'
 
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
@@ -112,12 +117,14 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'mobile-panel',
+  emits: ['switchTab', 'panelHeight', 'bottomThemeChange'],
   props: {
     currActivePanel: {
       default: 'none',
@@ -157,6 +164,7 @@ export default defineComponent({
     PanelFontSize,
     PanelFontFormat,
     PanelFontSpacing,
+    PanelNudge,
     PanelResize,
     PopupDownload,
     PanelMore,
@@ -171,8 +179,11 @@ export default defineComponent({
     PanelColorPicker,
     PanelMyDesignMore,
     panelSelectDesign,
+    PanelAddTemplate,
     Tabs,
-    PanelRemoveBg
+    PanelRemoveBg,
+    PanelPageManagement,
+    PanelTemplateContent
   },
   data() {
     return {
@@ -188,6 +199,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState('templates', {
+      templatesIgLayout: 'igLayout'
+    }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
@@ -199,12 +213,26 @@ export default defineComponent({
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
+      isInPagePreview: 'vivisticker/getIsInPagePreview',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
     isUs(): boolean {
       return this.$i18n.locale === 'us'
     },
     isTextInCategory(): boolean {
       return this.isInCategory('text')
+    },
+    isObjectInCategory(): boolean {
+      return this.isInCategory('object')
+    },
+    isBackgroundInCategory(): boolean {
+      return this.isInCategory('background')
+    },
+    isTemplateInCategory(): boolean {
+      return this.isInCategory('template')
     },
     isTextShowAllRecently(): boolean {
       return this.isShowAllRecently('text')
@@ -218,24 +246,35 @@ export default defineComponent({
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
-        'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design']
+        'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design',
+        'multiple-select', 'nudge']
 
       return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect'].includes(this.currActivePanel)
+      return ['brand-list', 'text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     noHeaderTheme(): boolean {
-      return ['select-design'].includes(this.currActivePanel)
+      return ['select-design', 'page-management'].includes(this.currActivePanel)
+    },
+    bottomTheme(): boolean {
+      return ['add-template', 'page-management'].includes(this.currActivePanel)
+    },
+    glassTheme(): boolean {
+      return ['page-management'].includes(this.currActivePanel)
+    },
+    noRoundTheme(): boolean {
+      return ['add-template', 'page-management'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return [
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
+        'font-spacing', 'download', 'more', 'object-adjust',
+        'brand-list', 'vvstk-more', 'select-design', 'multiple-select'].includes(this.currActivePanel)
     },
     trueWholeSize(): boolean {
-      return ['text'].includes(this.currActivePanel)
+      return false // ['text', 'template-content'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
@@ -255,6 +294,9 @@ export default defineComponent({
         case 'copy-style': {
           return `${this.$t('NN0809')}`
         }
+        case 'multiple-select': {
+          return `${this.$t('NN0657')}`
+        }
         case 'text': {
           return this.isTextShowAllRecently && this.isUs ? `${this.$t('NN0024')}` : ''
         }
@@ -267,28 +309,36 @@ export default defineComponent({
       }
     },
     insertTheme(): boolean {
-      return this.currActivePanel === 'text'
+      return !this.showExtraColorPanel && ['text', 'object', 'background', 'photo', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     showRightBtn(): boolean {
       return this.currActivePanel !== 'none' && this.currActivePanel !== 'remove-bg'
     },
     showLeftBtn(): boolean {
-      return (this.whiteTheme && (this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
+      if (this.whiteTheme) return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel
+      if (this.currActivePanel === 'text' && this.isTextInCategory) return true
+      if (this.currActivePanel === 'object' && this.isObjectInCategory) return true
+      if (this.currActivePanel === 'background' && this.isBackgroundInCategory) return true
+      if (this.currActivePanel === 'template-content' && (this.isTemplateInCategory || this.isInGroupTemplate)) return true
+      return false
     },
     hideDynamicComp(): boolean {
-      return ['crop', 'copy-style'].includes(this.currActivePanel)
+      return ['crop', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
     },
     noRowGap(): boolean {
-      return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
+      return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template', 'multiple-select'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
-      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
+      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts', 'template-content'].includes(this.currActivePanel)
       const footerTabsHeight = this.footerTabsRef?.clientHeight || 0
       return Object.assign({ bottom: this.hideFooter ? -1 * footerTabsHeight + 'px' : '0' },
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
-          backgroundColor: this.whiteTheme ? 'white' : '#1F1F1F',
+          backgroundColor: this.whiteTheme ? 'white'
+            : this.glassTheme ? 'rgba(20, 20, 20, 0.8)'
+              : '#141414',
+          backdropFilter: this.glassTheme ? 'blur(5px)' : 'none',
           maxHeight: this.isDuringCopy ? '0' : (
             this.fixSize || this.extraFixSizeCondition
               ? '100%' : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px'
@@ -417,6 +467,11 @@ export default defineComponent({
             panelHistory: this.panelHistory
           }
         }
+        case 'nudge': {
+          return {
+            forVivisticker: true
+          }
+        }
         default: {
           return {}
         }
@@ -470,17 +525,43 @@ export default defineComponent({
     },
     leftButtonAction(): (e: PointerEvent) => void {
       const colorHandler = () => {
+        if (this.showExtraColorPanel && this.currActivePanel === 'background') return this.addRecentlyBgColor(colorUtils.currColor)
         if (this.showExtraColorPanel || this.currActivePanel === 'color') {
           if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
             this.addRecentlyColors(colorUtils.currColor)
           }
         }
       }
-      if (this.insertTheme && this.isTextInCategory) {
+      if (this.currActivePanel === 'text' && this.isTextInCategory) {
         return () => {
           this.setIsInCategory({ tab: 'text', bool: false })
           this.setShowAllRecently({ tab: 'text', bool: false })
-          this.resetTextsSearch()
+          this.resetTextsSearch({ resetCategoryInfo: true })
+        }
+      }
+      if (this.currActivePanel === 'object' && this.isObjectInCategory) {
+        return () => {
+          this.setIsInCategory({ tab: 'object', bool: false })
+          this.setShowAllRecently({ tab: 'object', bool: false })
+          if (this.currActiveObjectFavTab) this.resetObjectsFavSearch()
+          else this.resetObjectsSearch({ resetCategoryInfo: true })
+        }
+      }
+      if (this.currActivePanel === 'background' && this.isBackgroundInCategory) {
+        return () => {
+          this.setIsInCategory({ tab: 'background', bool: false })
+          this.setShowAllRecently({ tab: 'background', bool: false })
+          this.resetBackgroundSearch()
+        }
+      }
+      if (this.currActivePanel === 'template-content') {
+        if (this.isInGroupTemplate) return () => this.setIsInGroupTemplate(false)
+        if (this.isTemplateInCategory) {
+          return () => {
+            this.setIsInCategory({ tab: 'template', bool: false })
+            this.setShowAllRecently({ tab: 'template', bool: false })
+            this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, { resetCategoryInfo: true })
+          }
         }
       }
       if (this.showExtraColorPanel) {
@@ -529,6 +610,12 @@ export default defineComponent({
                     break
                 }
               }
+            } else if (this.inBgSettingMode) {
+              if (this.backgroundLocked) return this.handleLockedNotify()
+              this.setBgImageControl({
+                pageIndex: pageUtils.currFocusPageIndex,
+                imgControl: false
+              })
             }
             break
           }
@@ -542,6 +629,13 @@ export default defineComponent({
 
           case 'copy-style': {
             formatUtils.clearCopiedFormat()
+            break
+          }
+
+          case 'multiple-select': {
+            if (this.inMultiSelectionMode) {
+              editorUtils.setInMultiSelectionMode(false)
+            }
             break
           }
 
@@ -562,6 +656,10 @@ export default defineComponent({
         }
         this.closeMobilePanel()
       }
+    },
+    backgroundLocked(): boolean {
+      const { locked } = pageUtils.currFocusPage.backgroundImage.config
+      return locked
     }
   },
   watch: {
@@ -583,6 +681,9 @@ export default defineComponent({
       if (!newVal) {
         this.showExtraColorPanel = false
       }
+    },
+    bottomTheme(newVal) {
+      this.$emit('bottomThemeChange', newVal)
     }
   },
   mounted() {
@@ -605,17 +706,23 @@ export default defineComponent({
     ...mapMutations({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
       setIsInCategory: 'vivisticker/SET_isInCategory',
-      setShowAllRecently: 'vivisticker/SET_showAllRecently'
+      setShowAllRecently: 'vivisticker/SET_showAllRecently',
+      setBgImageControl: 'SET_backgroundImageControl',
+      addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor',
+      setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
     }),
     ...mapActions({
       initRecentlyColors: 'color/initRecentlyColors',
       addRecentlyColors: 'color/addRecentlyColors',
-      resetTextsSearch: 'textStock/resetSearch'
+      resetTextsSearch: 'textStock/resetSearch',
+      resetObjectsSearch: 'objects/resetSearch',
+      resetObjectsFavSearch: 'objects/resetFavoritesSearch',
+      resetBackgroundSearch: 'background/resetSearch',
     }),
     vcoConfig() {
       return {
         handler: () => {
-          if (!this.bgRemoveMode && !this.isProcessing) {
+          if (!(this.bgRemoveMode || this.isInPagePreview || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)) {
             this.closeMobilePanel()
           }
         },
@@ -637,13 +744,16 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(false)
     },
     initPanelHeight() {
-      // 40 = HeaderTabs height
-      return ((this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)) * (this.halfSizeInInitState ? 0.5 : 1.0)
+      // 40 = height of preserved gap
+      const parentElementHeight = this.panelParentHeight()
+      if (this.halfSizeInInitState) return parentElementHeight * 0.5
+      return parentElementHeight - 40
     },
     currPanelHeight() {
       return (this.$refs.panel as HTMLElement).clientHeight
     },
     panelParentHeight() {
+      // 40 = height of preserved gap
       if (!this.$el) return window.innerHeight
       return (this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)
     },
@@ -667,7 +777,7 @@ export default defineComponent({
       if (this.panelDragHeight < panelParentHeight * 0.25) {
         this.closeMobilePanel()
       } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
-        this.panelDragHeight = panelParentHeight
+        this.panelDragHeight = panelParentHeight - 40
         this.$emit('panelHeight', this.panelDragHeight + 30) // 30 = 15 padding * 2
       } else {
         this.panelDragHeight = panelParentHeight * 0.5
@@ -694,6 +804,9 @@ export default defineComponent({
       this.$nextTick(() => {
         pageUtils.fitPage()
       })
+    },
+    handleLockedNotify() {
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     }
   }
 })
@@ -723,6 +836,10 @@ export default defineComponent({
     padding: 16px;
   }
 
+  &.at-bottom {
+    z-index: setZindex(mobile-panel-bottom);
+  }
+
   &__top-section {
     display: flex;
     flex-direction: column;
@@ -739,9 +856,6 @@ export default defineComponent({
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-    &.insert-us {
-      padding-top: 25px;
     }
   }
 
@@ -803,7 +917,7 @@ export default defineComponent({
     grid-auto-columns: minmax(0, 1fr);
     width: 100%;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: v-bind("insertTheme ? 'hidden' : 'scroll'");
     overflow-x: hidden;
     @include no-scrollbar;
     > *:last-child { // panel-* always take minmax(0, 1fr) grid layout.
@@ -819,7 +933,7 @@ export default defineComponent({
   &__layer-num {
     @include size(20px);
     @include flexCenter();
-    background-color: setColor(blue-1);
+    background-color: setColor(black-5);
     border-radius: 50%;
   }
 

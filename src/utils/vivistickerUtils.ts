@@ -2,6 +2,7 @@ import listApis from '@/apis/list'
 import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
+import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
@@ -29,7 +30,9 @@ import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
 
-export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template'
+export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template' | 'bg-remove'
+
+declare let window: CustomWindow
 
 /**
  * shown prop indicates if the user-setting-config is shown in the setting page
@@ -84,7 +87,9 @@ export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
   textStock: 'text',
   background: 'background',
-  font: 'font'
+  font: 'font',
+  'templates/story': 'template',
+  'templates/post': 'template'
 }
 
 const MYDESIGN_TAGS = [{
@@ -93,6 +98,9 @@ const MYDESIGN_TAGS = [{
 }, {
   name: 'NN0003',
   tab: 'object'
+}, {
+  name: 'NN0001',
+  tab: 'template'
 }, {
   name: 'NN0002',
   tab: 'image'
@@ -103,9 +111,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
   hasCopied = false
   everEntersDebugMode = false
+  loadingTimeout = 0
   tutorialFlags = {} as { [key: string]: boolean }
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
+  timeoutCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
 
   STANDALONE_USER_INFO: IUserInfo = {
@@ -137,7 +147,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'uploadImageURL',
     'informWebResult',
     'subscribeResult',
-    'screenshotDone'
+    'screenshotDone',
+    'cloneImageDone',
+    'saveImageDone'
   ]
 
   SCREENSHOT_CALLBACKS = [
@@ -151,12 +163,20 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     screenshot: this.SCREENSHOT_CALLBACKS
   }
 
+  get MAX_PAGE_NUM(): number {
+    return 40
+  }
+
   get editorType(): string {
     return store.getters['vivisticker/getEditorType']
   }
 
   get editorTypeTextLike(): string {
     return store.getters['vivisticker/getEditorTypeTextLike']
+  }
+
+  get editorTypeTemplate(): string {
+    return store.getters['vivisticker/getEditorTypeTemplate']
   }
 
   get controllerHidden(): boolean {
@@ -173,6 +193,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   get isPaymentDisabled(): boolean {
     return !this.checkVersion('1.26')
+  }
+
+  get isTemplateSupported(): boolean {
+    return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.34') && !generalUtils.isIPadOS())
   }
 
   getUserInfoFromStore(): IUserInfo {
@@ -306,8 +330,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.sendToIOS('SHOW_TOAST', { msg })
   }
 
-  sendDoneLoading(width: number, height: number, options: string, params: string) {
-    this.sendToIOS('DONE_LOADING', { width, height, options, params })
+  sendDoneLoading(width: number, height: number, options: string, params: string, toast?: boolean) {
+    this.sendToIOS('DONE_LOADING', { width, height, options, params, ...(toast !== undefined && { toast }) })
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
@@ -318,14 +342,46 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
+  /**
+   * Sequentially download multiple pages, and returns whether the operation succeeded or not.
+   *
+   * @param action - Either 'download' to download pages or 'IGPost' to open IG post after download.
+   * @param pageIndex - An array of target page index.
+   * @param cbProgress - A callback function called when each download succeeded.
+   * @return A boolean indicating whether the operation succeeded or not.
+   */
+  async multiPageDownload(action: 'download' | 'IGPost', pageIndex: number[], cbProgress: (progress: number) => void): Promise<boolean> {
+    for (let idx = 0; idx < pageIndex.length; idx++) {
+      const isLast = idx === pageIndex.length - 1
+      const _action = isLast && action === 'IGPost' ? 'IGPost' : 'download'
+      const toast = action === 'download' ? isLast : false
+      const query = this.createUrlForJSON({ page: pageUtils.getPage(pageIndex[idx]), noBg: false, toast })
+      const data = await this.callIOSAsAPI('SCREENSHOT', { params: query, action: _action, finalAction: action }, `screenshot-${query}`, { timeout: -1 })
+      const succeeded = data?.flag === '0'
+      if (succeeded) cbProgress(idx + 1)
+      else return false
+    }
+    return true
+  }
+
   copyWithScreenshotUrl(query: string, afterCopy?: (flag: string) => void) {
     this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'editorResizeCopy' }, `screenshot-${query}`).then((data) => {
       afterCopy && afterCopy(data?.flag ?? '0')
     })
   }
 
+  downloadWithScreenshotUrl(query: string, afterDownload?: (flag: string) => void) {
+    this.callIOSAsAPI('SCREENSHOT', { params: query, action: 'editorResizeDownload' }, `screenshot-${query}`).then((data) => {
+      afterDownload && afterDownload(data?.flag ?? '0')
+    })
+  }
+
   screenshotDone(data: { flag: string, params: string, action: string }) {
     this.handleCallback(`screenshot-${data.params}`, data)
+  }
+
+  cloneImageDone(data: any) {
+    this.handleCallback(`screenshot-${data.type}-${data.srcId}-${data.desId}`, data)
   }
 
   sendAppLoaded() {
@@ -354,16 +410,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  createUrlForJSON({ page = undefined, asset = undefined, source = undefined }: { page?: IPage, asset?: IMyDesign, source?: string } = {}): string {
-    page = page ?? pageUtils.getPage(0)
+  createUrlForJSON({ page = undefined, asset = undefined, source = undefined, noBg = true, toast = undefined }: { page?: IPage, asset?: IMyDesign, source?: string, noBg?: boolean, toast?: boolean } = {}): string {
+    page = page ?? pageUtils.currFocusPage
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
-    let res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
+    let res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
     if (asset) {
       const key = this.mapEditorType2MyDesignKey(asset.type)
       res += `&thumbType=mydesign&designId=${asset.id}&key=${key}`
     }
     if (source) {
       res += `&source=${source}`
+    }
+    if (toast !== undefined) {
+      res += `&toast=${toast}`
     }
     return res
   }
@@ -407,6 +466,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (asset.type === 7) {
         textPropUtils.updateTextPropsState()
       }
+      if (asset.type === 6) {
+        store.commit('vivisticker/SET_isInGroupTemplate', false)
+      }
     }
   }
 
@@ -421,14 +483,41 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return (jsonData: any) => { }
   }
 
-  startEditing(editorType: string, assetInfo: { [key: string]: any }, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
+  getPageSize(editorType: string) {
     const elTop = document.getElementsByClassName('vivisticker__top')[0]
     const headerHeight = 44
-    const shortEdge = Math.min(elTop.clientWidth, elTop.clientHeight - headerHeight)
+    const editorWidth = elTop.clientWidth
+    const editorHeight = (elTop.clientHeight - headerHeight)
+    const shortEdge = Math.min(editorWidth, editorHeight)
+    if (editorType === 'story') {
+      const targetAspectRatio = 9 / 16
+      const footerHeight = 60
+      const maxPageWidth = Math.round(editorWidth * 0.9)
+      const maxPageHeight = Math.round(editorHeight - shortEdge * 0.05 - footerHeight)
+      const aspectRatio = maxPageWidth / maxPageHeight
+      if (aspectRatio > targetAspectRatio) {
+        return {
+          width: Math.round(maxPageHeight * targetAspectRatio),
+          height: maxPageHeight,
+        }
+      } else {
+        return {
+          width: maxPageWidth,
+          height: Math.round(maxPageWidth / targetAspectRatio),
+        }
+      }
+    }
+
     const pageSize = Math.round(shortEdge * 0.9)
-    pageUtils.setPages([pageUtils.newPage({
+    return {
       width: pageSize,
       height: pageSize,
+    }
+  }
+
+  startEditing(editorType: string, assetInfo: { [key: string]: any }, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
+    pageUtils.setPages([pageUtils.newPage({
+      ...this.getPageSize(editorType),
       backgroundColor: '#F8F8F8'
     })])
     store.commit('vivisticker/SET_editingDesignId', designId ?? '')
@@ -445,21 +534,38 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   endEditing() {
     groupUtils.deselect()
+    imageUtils.setImgControlDefault(false)
+    editorUtils.setInBgSettingMode(false)
+    pageUtils.setBackgroundImageControlDefault()
+    store.commit('SET_currActivePageIndex', 0)
     pageUtils.setPages()
     this.showController()
     this.setState('tempDesign', { design: 'none' })
     store.commit('vivisticker/SET_editorType', 'none')
   }
 
-  initLoadingFlags(page: IPage | { layers: ILayer[] }, callback?: () => void) {
+  initLoadingFlags(page: IPage | { layers: ILayer[] }, cbLoad?: () => void, cbTimeout?: () => void, noBg = true) {
+    window.clearTimeout(this.loadingTimeout)
     this.loadingFlags = {}
-    this.loadingCallback = callback
+    this.loadingCallback = cbLoad
+    this.timeoutCallback = cbTimeout
+    if (this.timeoutCallback) {
+      this.loadingTimeout = window.setTimeout(() => {
+        this.loadingCallback = undefined
+        this.timeoutCallback && this.timeoutCallback()
+        this.timeoutCallback = undefined
+      }, 60000)
+    }
     for (const [index, layer] of page.layers.entries()) {
       this.initLoadingFlagsForLayer(layer, index)
+    }
+    if (!noBg && 'backgroundImage' in page && page.backgroundImage.config.srcObj?.assetId !== '') {
+      this.loadingFlags[this.makeFlagKey(-1)] = false
     }
   }
 
   makeFlagKey(layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
+    if (layerIndex === -1) return 'bg'
     return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}` + (typeof clipIndex !== 'undefined' ? `_c${clipIndex}` : ''))
   }
 
@@ -509,9 +615,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.loadingFlags[key] = true
     }
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
+      window.clearTimeout(this.loadingTimeout)
       this.loadingCallback()
       this.loadingFlags = {}
+      this.loadingTimeout = 0
       this.loadingCallback = undefined
+      this.timeoutCallback = undefined
     }
   }
 
@@ -528,10 +637,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   deselect() {
-    if (this.editorTypeTextLike) {
+    if (this.editorTypeTextLike || this.editorTypeTemplate) {
       groupUtils.deselect()
       editorUtils.setInMultiSelectionMode(false)
-      store.commit('SET_currActivePageIndex', 0)
+      // store.commit('SET_currActivePageIndex', 0)
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault(false)
       }
@@ -560,17 +669,17 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault(false)
       }
-      this.hideController()
     }
+    this.hideController()
   }
 
-  copyEditor(callback?: (flag: string) => void) {
+  copyEditorCore(sender: () => Promise<string>, callback?: (flag: string) => void) {
     const executor = () => {
       nextTick(() => {
         this.preCopyEditor()
         nextTick(() => {
           setTimeout(() => {
-            this.sendCopyEditor().then((flag) => {
+            sender().then((flag) => {
               this.postCopyEditor()
               callback && callback(flag)
             })
@@ -580,12 +689,20 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
     if (store.getters['text/getIsFontLoading']) {
       this.sendToIOS('SHOW_LOADING', this.getEmptyMessage())
-      textUtils.untilFontLoadedForPage(pageUtils.getPage(0)).then(() => {
+      textUtils.untilFontLoadedForPage(pageUtils.currFocusPage).then(() => {
         setTimeout(executor, 200) // in case the render slightly delays after font loading
       })
     } else {
       executor()
     }
+  }
+
+  copyEditor(callback?: (flag: string) => void) {
+    this.copyEditorCore(this.sendCopyEditor.bind(this), callback)
+  }
+
+  downloadEditor(callback?: (flag: string) => void) {
+    this.copyEditorCore(this.sendDownloadEditor.bind(this), callback)
   }
 
   preCopyEditor(toResize = true) {
@@ -711,8 +828,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.handleCallback(`list-asset-${data.key}`)
       return
     }
+    let igLayout
+    if (data.key.startsWith('templates')) igLayout = data.key.split('/')[1] as 'story' | 'post' | undefined
     const designIds = data.assets.map(asset => asset.id)
-    listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds).then((response) => {
+    listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds, igLayout).then((response) => {
       if (response.data.data.content.length !== 0) {
         const updateList = response.data.data.content[0].list
         data.assets = this.updateAssetContent(data.assets, updateList)
@@ -809,7 +928,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback(`getState-${data.key}`, data.value ? JSON.parse(data.value) : undefined)
   }
 
-  async sendCopyEditor(): Promise<string> {
+  async sendCopyEditorCore(action: string): Promise<string> {
     if (this.isStandaloneMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return '0'
@@ -817,7 +936,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const { x, y, width, height } = this.getEditorDimensions()
     const data = await this.callIOSAsAPI('SCREENSHOT', {
       params: '',
-      action: 'editorCopy',
+      action,
       width,
       height,
       x,
@@ -825,6 +944,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       bgColor: store.getters['vivisticker/getEditorBg'] // for older app
     }, 'copy-editor', { timeout: -1 })
     return (data?.flag as string) ?? '0'
+  }
+
+  async sendCopyEditor(): Promise<string> {
+    return await this.sendCopyEditorCore('editorCopy')
+  }
+
+  async sendDownloadEditor(): Promise<string> {
+    return await this.sendCopyEditorCore('editorDownload')
   }
 
   copyDone(data: { flag: string }) {
@@ -915,9 +1042,24 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async saveAsMyDesign(): Promise<void> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
-    const flag = await this.genThumbnail(id)
-    console.log(editingDesignId, id, flag)
-    if (flag === '1') return
+    const onThumbError = async () => {
+      await this.saveDesignJson(id)
+      throw new Error('gen thumb failed')
+    }
+    if (store.getters['vivisticker/getEditorTypeTemplate']) {
+      const resGenThumb = await this.callIOSAsAPI('INFORM_WEB', {
+        info: {
+          event: 'gen-thumb',
+          id
+        },
+        to: 'Shot'
+      }, 'gen-thumb', { timeout: -1 }) as any
+      if (!resGenThumb || resGenThumb.flag === '1') await onThumbError()
+    } else {
+      const flag = await this.genThumbnail(id)
+      console.log(editingDesignId, id, flag)
+      if (flag === '1') await onThumbError()
+    }
     await this.saveDesignJson(id)
   }
 
@@ -960,6 +1102,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('gen-thumb', data)
   }
 
+  saveImageDone(data: { imageId: string, flag: string, msg?: string }) {
+    this.handleCallback('save-image-from-url', data)
+  }
+
   async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {
     if (this.checkVersion('1.27')) {
       await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, `delete-asset-${key}-${id}`)
@@ -981,13 +1127,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (this.isStandaloneMode) return
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
+    const editorTypeTemplate = store.getters['vivisticker/getEditorTypeTemplate']
     const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
     console.log(editorType, assetInfo)
     const json = {
       type: editorType,
       id,
       updateTime: new Date(Date.now()).toISOString(),
-      assetInfo
+      assetInfo: {
+        ...assetInfo,
+        ...(editorTypeTemplate && {
+          pageNum: pages.length
+        })
+      }
     } as IMyDesign
 
     await this.addAsset(`mydesign-${this.mapEditorType2MyDesignKey(editorType)}`, json, 0, {
@@ -1006,8 +1158,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   getEditorDimensions(): { x: number, y: number, width: number, height: number } {
-    const { width: pageWidth, height: pageHeight } = pageUtils.getPageSize(0)
-    const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
+    const { width: pageWidth, height: pageHeight } = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
+    const editorEle = document.getElementById(`vvstk-page-${pageUtils.currFocusPageIndex}`) as HTMLElement
     const defaultDimensions = {
       x: 16,
       y: 60,
@@ -1042,7 +1194,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getIosImg(limit = 1): Promise<Array<string>> {
-    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', { timeout: 60000 }) as IIosImgData
+    const { images } = ((await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', { timeout: 60000, cancelOnConfict: true })) ?? { images: [] }) as IIosImgData
     return images
   }
 
@@ -1057,6 +1209,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       case 'missing-image':
         this.handleMissingImage(info)
         break
+      case 'gen-thumb':
+        this.fetchDesign().then((design) => {
+          if (!design || !design.pages.length) return
+          const url = `type=gen-thumb&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(design.pages[0])))}&noBg=false&designId=${info.id}`
+          window.fetchDesign(url)
+        })
+        break
+      case 'gen-thumb-done':
+        this.handleCallback('gen-thumb', info)
+        break
+      case 'sreenshot-timeout':
+        this.handleCallback(info.srcEvent, { flag: '1' })
     }
   }
 
@@ -1170,11 +1334,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   mapEditorType2MyDesignKey(editorType: string): string {
-    if (editorType === 'objectGroup') {
-      return 'object'
-    } else {
-      return editorType
+    switch (editorType) {
+      case 'objectGroup':
+        return 'object'
+      case 'story':
+      case 'post':
+        return 'template'
     }
+    return editorType
   }
 
   async fetchDebugModeEntrance() {
@@ -1385,6 +1552,35 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       },
       options
     )
+  }
+
+  showMaxPageNumModal() {
+    modalUtils.setModalInfo(
+      i18n.global.t('STK0073'),
+      i18n.global.t('STK0074', { num: this.MAX_PAGE_NUM }),
+      {
+        msg: i18n.global.t('NN0563'),
+        class: 'btn-black-mid',
+      }
+    )
+  }
+
+  async saveToIOS(src: string, callback?: (data: { flag: string, msg: string, imageId: string }) => void, type = 'png') {
+    await this.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type, url: src }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      callback && callback(_data)
+    })
+  }
+
+  scrollIntoPage(pageIndex: number, duration: number): void {
+    const currentPage = document.getElementById(`page-card-${pageIndex}`) as HTMLElement
+    const container = currentPage && currentPage.parentElement
+    if (currentPage && container) {
+      const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
+      container.style.transition = `transform ${duration}ms ease-in-out`
+      container.style.transform = `translateX(-${targetPos}px)`
+      if (pageIndex >= 0 && pageIndex < store.getters.getPageslength) store.commit('SET_middlemostPageIndex', pageIndex)
+    }
   }
 }
 

@@ -138,7 +138,11 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
 
   async getState(key: string): Promise<any> {
     if (this.inBrowserMode) return
-    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
+    if (this.checkVersion('1.0.3')) {
+      return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
+    } else {
+      return undefined
+    }
   }
 
   getStateResult(data: { key: string, value: string }) {

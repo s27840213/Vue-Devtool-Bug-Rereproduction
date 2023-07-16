@@ -49,7 +49,7 @@ const pointerDown = (e: PointerEvent) => {
 const disableTouchEvent = (e: TouchEvent) => {
   if (generalUtils.isTouchDevice()) {
     e.preventDefault()
-    e.stopPropagation()
+    // e.stopPropagation()
   }
 }
 </script>

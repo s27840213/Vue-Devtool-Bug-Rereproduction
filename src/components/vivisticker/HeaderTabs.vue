@@ -11,7 +11,7 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
   div(class="header-bar__center")
-    link-or-text(:title="centerTitle" :url="isInCategory ? titleInfo.url : ''")
+    link-or-text(:title="centerTitle" :url="isInCategory && !isInEditor ? titleInfo.url : ''")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs"
         :key="tab.icon"
@@ -22,7 +22,7 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconWidth="`${tab.width}px`"
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
-    div(v-if="isInEditor" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleCopy")
+    div(v-if="isInEditor && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleCopy")
         svg-icon(iconName="copy"
                   iconWidth="18px"
                   iconHeight="18px"
@@ -39,17 +39,26 @@ div(class="header-bar relative" @pointerdown.stop)
 
 <script lang="ts">
 import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
+import i18n from '@/i18n'
+import { SrcObj } from '@/interfaces/gallery'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 import assetUtils from '@/utils/assetUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
+import imageShadowUtils, { CANVAS_MAX_SIZE } from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
 import modalUtils from '@/utils/modalUtils'
+import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { notify } from '@kyvg/vue3-notification'
 import _ from 'lodash'
 import { computed, defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 type TabConfig = {
   icon: string,
@@ -66,15 +75,20 @@ export default defineComponent({
   setup() {
     const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
     const isInLastStep = computed(() => stepsUtils.isInLastStep)
+    const isSavingAsMyDesign = false
     return {
       isInFirstStep,
-      isInLastStep
+      isInLastStep,
+      isSavingAsMyDesign
     }
   },
   components: {
     LinkOrText
   },
   computed: {
+    ...mapState('templates', {
+      templatesIgLayout: 'igLayout'
+    }),
     ...mapGetters({
       staticHeaderTab: 'objects/headerTab',
       giphyKeyword: 'giphy/keyword',
@@ -86,8 +100,13 @@ export default defineComponent({
       isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
+      isInTemplateShare: 'vivisticker/getIsInTemplateShare',
+      isInMultiPageShare: 'vivisticker/getIsInMultiPageShare',
+      isInPagePreview: 'vivisticker/getIsInPagePreview',
+      isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       editorBg: 'vivisticker/getEditorBg',
       editingAssetInfo: 'vivisticker/getEditingAssetInfo',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
@@ -98,7 +117,14 @@ export default defineComponent({
       inBgRemoveLastStep: 'bgRemove/inLastStep',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      isUploadingShadowImg: 'shadow/isUploading'
     }),
+    templateHeaderTab() {
+      return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
+    },
     stepCount(): number {
       return stepsUtils.steps.length
     },
@@ -112,13 +138,36 @@ export default defineComponent({
       return imageUtils.isImgControl()
     },
     leftTabs(): TabConfig[] {
-      if (this.isInEditor) {
+      if (this.isInMultiPageShare) {
+        return [
+          { icon: 'chevron-left', width: 24, action: () => this.setIsInMultiPageShare(false) }
+        ]
+      } else if (this.isInTemplateShare) {
+        return [
+          { icon: 'chevron-left', width: 24, action: this.clearTemplateShare }
+        ]
+      } else if (this.isInEditor) {
+        if (this.isInPagePreview) return [{ icon: 'chevron-left', width: 24, action: () => this.setIsInPagePreview(false) }]
         const retTabs = []
         const stepTabs = [
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: this.undo },
           { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: this.redo }
         ]
-        retTabs.push({ icon: 'vivisticker_close', disabled: false, width: 24, action: this.handleEndEditing })
+        retTabs.push({
+          icon: 'vivisticker_close',
+          disabled: false,
+          width: 24,
+          action: () => {
+            if (this.isUploadingShadowImg) {
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              return
+            }
+            if (this.inEffectEditingMode) {
+              this.setInEffectEditingMode(false)
+            }
+            this.handleEndEditing()
+          }
+        })
         if (this.stepCount > 1) retTabs.push(...stepTabs)
         return retTabs
       } else if (this.isInMyDesign) {
@@ -128,6 +177,10 @@ export default defineComponent({
       } else if (this.isInBgShare) {
         return [
           { icon: 'chevron-left', width: 24, action: this.clearBgShare }
+        ]
+      } else if (this.isInGroupTemplate) {
+        return [
+          { icon: 'chevron-left', width: 24, action: () => this.setIsInGroupTemplate(false) }
         ]
       } else if (this.isInCategory) {
         return [
@@ -144,8 +197,13 @@ export default defineComponent({
           disabled: false,
           width: 24,
           action: () => {
+            if (this.isUploadingShadowImg) {
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              return
+            }
             bgRemoveUtils.setInBgRemoveMode(false)
             editorUtils.setCurrActivePanel('none')
+            this.setInEffectEditingMode(false)
           }
         })
         retTabs.push(...stepTabs)
@@ -174,16 +232,24 @@ export default defineComponent({
             title: this.textHeaderTab.title,
             url: this.textHeaderTab.bulbUrl
           }
+        case 'template':
+          return {
+            title: this.templateHeaderTab.title,
+            url: this.templateHeaderTab.bulbUrl
+          }
       }
       return { title: '', url: '' }
     },
     centerTitle(): string {
-      if (this.isInEditor) {
+      if (this.isInMultiPageShare) {
+        return `${this.$t('NN0124')}`
+      } else if (this.isInBgShare || this.isInTemplateShare) {
+        return `${this.$t('NN0214')}`
+      } else if (this.isInEditor) {
+        if (this.isInPagePreview) return `${this.$t('STK0072')}`
         return ''
       } else if (this.isInMyDesign) {
         return `${this.$t('NN0080')}`
-      } else if (this.isInBgShare) {
-        return `${this.$t('NN0214')}`
       } else if (this.isInCategory) {
         if (this.showAllRecently) {
           return `${this.$t('NN0024')}`
@@ -195,10 +261,24 @@ export default defineComponent({
       }
     },
     rightTabs(): TabConfig[] {
-      if (this.isInEditor) {
+      const downloadTab = vivistickerUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
+      if (this.isInTemplateShare) {
+        return []
+      } else if (this.isInEditor) {
+        if (this.isInPagePreview) return []
+        if (this.inEffectEditingMode) {
+          return downloadTab
+        }
+        if (this.editorTypeTemplate) {
+          return [
+            ...this.lockIcon,
+            { icon: 'copy', width: 24, action: this.handleCopy },
+            { icon: 'share', width: 24, action: this.handleShareTemplate },
+          ]
+        }
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
-          ...(this.editorTypeTextLike ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
+          ...downloadTab,
         ]
       } else if (this.isInMyDesign) {
         return []
@@ -210,20 +290,31 @@ export default defineComponent({
         return []
       } else if (this.inBgRemoveMode) {
         return []
-        // return [{
-        //   icon: 'download',
-        //   width: 24,
-        //   action: () => {
-        //     bgRemoveUtils.saveToIOS()
-        //   }
-        // }]
       } else {
         return [
           ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
           { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
         ]
       }
-    }
+    },
+    lockIcon(): TabConfig[] {
+      const icon = this.isLocked ? 'lock' : 'unlock'
+      if (this.inBgSettingMode || this.selectedLayerNum > 0) {
+        return [{
+          icon,
+          width: 24,
+          action: () => mappingUtils.mappingIconAction(icon)
+        }]
+      } else {
+        return []
+      }
+    },
+    selectedLayerNum(): number {
+      return this.currSelectedInfo.layers.length
+    },
+    isLocked(): boolean {
+      return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getSelectedLayer().locked
+    },
   },
   methods: {
     ...mapActions({
@@ -239,6 +330,10 @@ export default defineComponent({
       setIsInCategory: 'vivisticker/SET_isInCategory',
       setShowAllRecently: 'vivisticker/SET_showAllRecently',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
+      setIsInMultiPageShare: 'vivisticker/SET_isInMultiPageShare',
+      setTemplateShareType: 'vivisticker/SET_templateShareType',
+      setIsInPagePreview: 'vivisticker/SET_isInPagePreview',
+      setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor',
       switchBg: 'vivisticker/UPDATE_switchBg',
@@ -247,7 +342,11 @@ export default defineComponent({
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInEffectEditingMode: 'bgRemove/SET_inEffectEditingMode',
+      deletePreviewSrc: 'DELETE_previewSrc'
     }),
+    resetTemplatesSearch(params = {}) {
+      this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
+    },
     handleTabAction(action?: () => void) {
       if (action) {
         action()
@@ -268,7 +367,10 @@ export default defineComponent({
           this.resetBackgroundsSearch()
           break
         case 'text':
-          this.resetTextsSearch()
+          this.resetTextsSearch({ resetCategoryInfo: true })
+          break
+        case 'template':
+          this.resetTemplatesSearch({ resetCategoryInfo: true })
       }
     },
     clearBgShare() {
@@ -276,11 +378,18 @@ export default defineComponent({
       this.setShareItem(undefined)
       this.setShareColor('')
     },
+    clearTemplateShare() {
+      this.setTemplateShareType('none')
+    },
     handleSwitchBg() {
       this.switchBg()
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     handleEndEditing() {
+      if (this.isUploadingShadowImg) {
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        return
+      }
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault()
       }
@@ -289,8 +398,13 @@ export default defineComponent({
       }
       if (vivistickerUtils.checkVersion('1.13')) {
         if (vivistickerUtils.userSettings.autoSave) {
-          vivistickerUtils.saveAsMyDesign().then(() => {
+          if (this.isSavingAsMyDesign) return
+          this.isSavingAsMyDesign = true
+          vivistickerUtils.saveAsMyDesign().catch((err) => {
+            console.warn(err.message)
+          }).finally(() => {
             vivistickerUtils.endEditing()
+            this.isSavingAsMyDesign = false
           })
         } else {
           const options = {
@@ -327,8 +441,13 @@ export default defineComponent({
             {
               msg: `${this.$t('STK0004')}`,
               action: () => {
-                vivistickerUtils.saveAsMyDesign().then(() => {
+                if (this.isSavingAsMyDesign) return
+                this.isSavingAsMyDesign = true
+                vivistickerUtils.saveAsMyDesign().catch((err) => {
+                  console.warn(err.message)
+                }).finally(() => {
                   vivistickerUtils.endEditing()
+                  this.isSavingAsMyDesign = false
                 })
               }
             },
@@ -346,23 +465,39 @@ export default defineComponent({
         vivistickerUtils.endEditing()
       }
     },
-    handleCopy() {
-      if (imageUtils.isImgControl()) {
-        imageUtils.setImgControlDefault()
-      }
-      const copyCallback = (flag: string) => {
+    getCopyCallback(modalText: string, onSuccess?: () => void): (flag: string) => void {
+      return (flag: string) => {
         if (flag === '1') {
           modalUtils.setModalInfo(
             `${this.$t('STK0017')}`,
-            [`${this.$t('STK0018')}`],
+            [modalText],
             {
               msg: `${this.$t('STK0019')}`
             }
           )
-        } else if (['object', 'objectGroup'].includes(this.editorType)) {
-          vivistickerUtils.handleIos16Video()
+        } else {
+          onSuccess && onSuccess()
         }
       }
+    },
+    handleCopy() {
+      if (imageUtils.isImgControl()) {
+        imageUtils.setImgControlDefault()
+      }
+      if (this.isUploadingShadowImg) {
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        return
+      }
+      if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
+      if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
+      const copyCallback = this.getCopyCallback(
+        `${this.$t('STK0018')}`,
+        () => {
+          if (['object', 'objectGroup'].includes(this.editorType)) {
+            vivistickerUtils.handleIos16Video()
+          }
+        }
+      )
       if (this.inBgRemoveMode) {
         bgRemoveUtils.screenshot()
       } else if (vivistickerUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
@@ -376,45 +511,82 @@ export default defineComponent({
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ source: 'editor' }))
       }
     },
-    // async addStandardText() {
-    //   let recentFont
-    //   if (vivistickerUtils.checkVersion('1.5')) {
-    //     recentFont = await vivistickerUtils.getState('recentFont')
-    //   }
-    //   const color = vivistickerUtils.getContrastColor(this.editorBg)
-    //   await assetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {
-    //     size: 21,
-    //     color,
-    //     weight: 'normal',
-    //     ...(recentFont ?? {})
-    //   })
-    // },
-    async addImage(src: string, aspectRatio: number) {
-      assetUtils.addImage(src, aspectRatio, {
+    handleDownload() {
+      if (!vivistickerUtils.checkVersion('1.34')) return
+      if (imageUtils.isImgControl()) {
+        imageUtils.setImgControlDefault()
+      }
+      if (this.isUploadingShadowImg) {
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        return
+      }
+      if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
+      if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
+      const downloadCallback = this.getCopyCallback(`${this.$t('STK0082')}`)
+      if (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1) {
+        vivistickerUtils.downloadWithScreenshotUrl(
+          vivistickerUtils.createUrlForJSON({ source: 'editor' }),
+          downloadCallback
+        )
+      } else {
+        vivistickerUtils.downloadEditor(downloadCallback)
+      }
+    },
+    async addImage(srcObj: SrcObj, aspectRatio: number) {
+      assetUtils.addImage(srcObj, aspectRatio, {
         pageIndex: 0,
-        // The following props is used for preview image during polling process
-        isPreview: true
       })
     },
     handleNext() {
-      bgRemoveUtils.setInBgRemoveMode(false)
-      editorUtils.setShowMobilePanel(false)
-      this.setInEffectEditingMode(true)
-
-      const bgRemoveResultSrc = bgRemoveUtils.getBgRemoveResultSrc()
-
       vivistickerUtils.startEditing(
         'image',
         { plan: 0, assetId: '' },
         async () => {
-          console.log('start editing standard image')
-          await this.addImage(bgRemoveResultSrc, this.autoRemoveResult.width / this.autoRemoveResult.height)
-          return true
+          bgRemoveUtils.setInBgRemoveMode(false)
+          editorUtils.setShowMobilePanel(false)
+          this.setInEffectEditingMode(true)
+          return await bgRemoveUtils.saveToIOS(async (data, assetId) => {
+            const srcObj = {
+              type: 'ios',
+              userId: '',
+              assetId: 'bgRemove/' + assetId,
+            }
+            this.addImage(srcObj, this.autoRemoveResult.width / this.autoRemoveResult.height)
+            imageShadowUtils.updateEffectProps({
+              pageIndex: layerUtils.pageIndex,
+              layerIndex: layerUtils.layerIndex,
+              subLayerIdx: -1
+            }, { isTransparent: true })
+            editorUtils.setCurrActivePanel('photo-shadow')
+            return srcObj
+          })
         },
-        vivistickerUtils.getEmptyCallback()
+        (srcObj: SrcObj) => {
+          setTimeout(() => {
+            imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj), (img) => {
+              const maxsize = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
+              imageShadowUtils.updateEffectProps({
+                pageIndex: layerUtils.pageIndex,
+                layerIndex: layerUtils.layerIndex,
+                subLayerIdx: -1
+              }, {
+                maxsize,
+                middsize: Math.max(img.naturalWidth, img.naturalHeight)
+              })
+              imageShadowUtils.setEffect(ShadowEffectType.frame, {
+                frame: {
+                  spread: 30,
+                  radius: 0,
+                  opacity: 100
+                },
+                frameColor: '#FECD56',
+              }, undefined)
+              // imageShadowPanelUtils.handleShadowUpload(undefined)
+            })
+          }, 0)
+        }
       )
     },
-
     handleMore() {
       editorUtils.setCurrActivePanel('vvstk-more')
       editorUtils.setShowMobilePanel(true)
@@ -434,7 +606,10 @@ export default defineComponent({
     handleMyDesign() {
       if (this.currActiveTab === 'background') {
         this.setMyDesignTab('text')
+      } else if (this.currActiveTab === 'remove-bg') {
+        this.setMyDesignTab('image')
       } else {
+        console.log(this.currActiveTab)
         this.setMyDesignTab(this.currActiveTab)
       }
       this.setIsInMyDesign(true)
@@ -474,6 +649,13 @@ export default defineComponent({
       } else {
         shortcutUtils.redo()
       }
+    },
+    handleShareTemplate() {
+      if (this.isUploadingShadowImg) {
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        return
+      }
+      this.setTemplateShareType(this.editorType)
     }
   }
 })
@@ -536,6 +718,7 @@ export default defineComponent({
     font-size: 18px;
     line-height: 140%;
     color: white;
+    white-space: nowrap;
   }
 
   &__right {

@@ -78,12 +78,18 @@ export type IHeaderL1 = {
   content?: IHeaderL2[]
 }
 
+export interface IStickerVideoUrl {
+  video: string
+  thumbnail: string
+}
+
 export interface IStickerVideoUrls {
-  iOS: { video: string, thumbnail: string },
-  tutorial1: { video: string, thumbnail: string },
-  tutorial2: { video: string, thumbnail: string },
-  tutorial3: { video: string, thumbnail: string },
-  tutorial4: { video: string, thumbnail: string },
+  iOS: IStickerVideoUrl
+  tutorial1: IStickerVideoUrl
+  tutorial2: IStickerVideoUrl
+  tutorial3: IStickerVideoUrl
+  tutorial4: IStickerVideoUrl
+  tutorial5: IStickerVideoUrl
 }
 
 export enum DeviceType {
@@ -136,7 +142,11 @@ class ConstantData {
           label: 'IG 貼文',
           url: 'https://blog.vivipic.com/tw/ig-post-design/'
         },
-        ...[3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        ...[3, 9, 4].map((id) => themeItem(id)), {
+          label: 'LINE 圖文選單',
+          url: 'https://blog.vivipic.com/tw/line-official-account/'
+        },
+        ...[21].map((id) => themeItem(id)),
         ]
       }, {
         label: i18n.global.t('NN0668'),
@@ -1180,6 +1190,7 @@ class ConstantData {
       tutorial2: `${path}${tutorialPostFix}-02-text`,
       tutorial3: `${path}${tutorialPostFix}-03-objects`,
       tutorial4: `${path}${tutorialPostFix}-04-background`,
+      tutorial5: `${path}${tutorialPostFix}-05-carousel_post`
     }
     const res = {} as IStickerVideoUrls
     for (const [key, value] of Object.entries(seeds) as [keyof typeof seeds, string][]) {

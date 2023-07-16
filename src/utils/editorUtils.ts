@@ -64,11 +64,14 @@ class EditorUtils {
       height = width / aspectRatio
     }
 
-    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
+    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight || 0
 
     if (!this.mobileHeight || this.mobileWidth) {
-      const mobileEditor = document.getElementById('mobile-editor__content')
+      const mobileEditor = document.getElementById('vivisticker__content')
+      // const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
+        console.log(mobileEditor.clientWidth, mobileEditor.clientHeight, mobilePanelHeight)
+        console.log('width', width, 'height', height)
         this.setMobileHW({
           width: mobileEditor.clientWidth,
           height: mobileEditor.clientHeight - mobilePanelHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
@@ -89,7 +92,7 @@ class EditorUtils {
     if (generalUtils.isTouchDevice()) {
       const page = pageUtils.getPage(pageIndex)
       const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
-      this.setContentScaleRatio(contentScaleRatio)
+      console.warn('contentScaleRatio', contentScaleRatio)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
       return contentScaleRatio
     }
@@ -161,12 +164,6 @@ class EditorUtils {
   setShowMobileSubPanel(bool: boolean): void {
     if (generalUtils.isTouchDevice()) {
       store.commit('mobileEditor/SET_showMobileSubPanel', bool)
-    }
-  }
-
-  setContentScaleRatio(ratio: number): void {
-    if (generalUtils.isTouchDevice()) {
-      store.commit('SET_contentScaleRatio', ratio)
     }
   }
 }

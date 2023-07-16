@@ -64,7 +64,7 @@ export default defineComponent({
       currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex'
     }),
-    ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    ...mapState('text', ['sel', 'props']),
     fontSize(): number | string {
       return this.props.fontSize === '--' ? this.props.fontSize : _.round(this.props.fontSize, 2)
       // return this.props.fontSize

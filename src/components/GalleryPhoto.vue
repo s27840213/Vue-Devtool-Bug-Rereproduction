@@ -20,6 +20,7 @@ div(class="gallery-photo" :class="{border: deletable}")
     ref='img'
     draggable="true",
     class="gallery-photo__img pointer"
+    crossOrigin="anonymous"
     @dragstart="dragStart($event, photo)"
     @dragend="dragEnd"
     @click="onClick($event, photo as IAssetPhoto)")
@@ -46,7 +47,7 @@ import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { replaceImgInject } from '@/utils/textFillUtils'
-import { defineComponent, inject, PropType } from 'vue'
+import { PropType, defineComponent, inject } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -103,11 +104,19 @@ export default defineComponent({
       return typeof this.photo.progress !== 'undefined' && this.photo.progress !== 100
     },
     hasCheckedAssets(): boolean {
-      return this.checkedAssets.length !== 0
+      return false
+      // return this.checkedAssets.length !== 0
     },
     previewSrc(): string {
       const { inFilePanel, inLogoPanel, photo, vendor } = this
-      if (inFilePanel || inLogoPanel || photo.urls) return photo.urls.tiny || photo.urls.thumb
+      if (inFilePanel || inLogoPanel || photo.urls) {
+        const res = photo.urls.tiny || photo.urls.thumb
+        if (res.includes('data:image/')) {
+          return res
+        } else {
+          return imageUtils.appendRefreshAppver(res)
+        }
+      }
       const data = {
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage

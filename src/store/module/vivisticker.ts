@@ -9,10 +9,15 @@ interface IViviStickerState {
   userInfo: IUserInfo,
   userSettings: IUserSettings,
   currActiveTab: string,
+  currActiveObjectFavTab: string,
+  currActiveBackgroundTab: string,
   isInCategoryDict: { [key: string]: boolean },
   showAllRecentlyDict: { [key: string]: boolean },
   isInBgShare: boolean,
+  isInMultiPageShare: boolean,
+  isInGroupTemplate: boolean,
   isInBgRemoveSection: boolean,
+  isInPagePreview: boolean,
   shareItem: IAsset | undefined,
   shareColor: string,
   editorBgIndex: number,
@@ -38,7 +43,8 @@ interface IViviStickerState {
   modalInfo: { [key: string]: any },
   payment: IPayment,
   uuid: string,
-  loadedFonts: { [key: string]: true }
+  loadedFonts: { [key: string]: true },
+  templateShareType: 'none' | 'story' | 'post',
 }
 
 const EDITOR_BGS = [
@@ -46,7 +52,7 @@ const EDITOR_BGS = [
   '#F4F5F7'
 ]
 
-const tabs = ['object', 'background', 'text']
+const tabs = ['object', 'background', 'text', 'template']
 
 function getDefaultDict<T>(defaultValue: T): { [key: string]: T } {
   const res = {} as { [key: string]: T }
@@ -60,10 +66,15 @@ const getDefaultState = (): IViviStickerState => ({
   userInfo: vivistickerUtils.getDefaultUserInfo(),
   userSettings: vivistickerUtils.getDefaultUserSettings(),
   currActiveTab: 'object',
+  currActiveObjectFavTab: '',
+  currActiveBackgroundTab: '',
   isInCategoryDict: getDefaultDict(false),
   showAllRecentlyDict: getDefaultDict(false),
   isInBgShare: false,
+  isInMultiPageShare: false,
+  isInGroupTemplate: false,
   isInBgRemoveSection: false,
+  isInPagePreview: false,
   shareItem: undefined,
   shareColor: '',
   editorBgIndex: 0,
@@ -110,7 +121,8 @@ const getDefaultState = (): IViviStickerState => ({
   },
   uuid: '',
   loadedFonts: {},
-  debugMode: process.env.NODE_ENV === 'development'
+  debugMode: process.env.NODE_ENV === 'development',
+  templateShareType: 'none'
 })
 
 const state = getDefaultState()
@@ -124,11 +136,20 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getCurrActiveTab(state: IViviStickerState): string {
     return state.currActiveTab
   },
+  getCurrActiveObjectFavTab(state: IViviStickerState): string {
+    return state.currActiveObjectFavTab
+  },
+  getCurrActiveBackgroundTab(state: IViviStickerState): string {
+    return state.currActiveBackgroundTab
+  },
   getIsInEditor(state: IViviStickerState): boolean {
     return state.editorType !== 'none'
   },
   getEditorTypeTextLike(state: IViviStickerState): boolean {
     return ['objectGroup', 'text'].includes(state.editorType)
+  },
+  getEditorTypeTemplate(state: IViviStickerState): boolean {
+    return ['story', 'post'].includes(state.editorType)
   },
   getIsInCategory(state: IViviStickerState): (tab: string) => boolean {
     return (tab: string): boolean => state.isInCategoryDict[tab] ?? false
@@ -138,6 +159,18 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsInBgShare(state: IViviStickerState): boolean {
     return state.isInBgShare
+  },
+  getIsInTemplateShare(state: IViviStickerState): boolean {
+    return state.templateShareType !== 'none'
+  },
+  getIsInMultiPageShare(state: IViviStickerState): boolean {
+    return state.isInMultiPageShare
+  },
+  getIsInPagePreview(state: IViviStickerState): boolean {
+    return state.isInPagePreview
+  },
+  getIsInGroupTemplate(state: IViviStickerState): boolean {
+    return state.isInGroupTemplate
   },
   getShareItem(state: IViviStickerState): IAsset | undefined {
     return state.shareItem
@@ -261,6 +294,12 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_currActiveTab(state: IViviStickerState, panel: string) {
     state.currActiveTab = panel
   },
+  SET_currActiveObjectFavTab(state: IViviStickerState, tab: string) {
+    state.currActiveObjectFavTab = tab
+  },
+  SET_currActiveBackgroundTab(state: IViviStickerState, tab: string) {
+    state.currActiveBackgroundTab = tab
+  },
   SET_isInCategory(state: IViviStickerState, updateInfo: { tab: string, bool: boolean }) {
     state.isInCategoryDict[updateInfo.tab] = updateInfo.bool
   },
@@ -269,6 +308,15 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_isInBgShare(state: IViviStickerState, bool: boolean) {
     state.isInBgShare = bool
+  },
+  SET_isInMultiPageShare(state: IViviStickerState, bool: boolean) {
+    state.isInMultiPageShare = bool
+  },
+  SET_isInGroupTemplate(state: IViviStickerState, bool: boolean) {
+    state.isInGroupTemplate = bool
+  },
+  SET_isInPagePreview(state: IViviStickerState, bool: boolean) {
+    state.isInPagePreview = bool
   },
   SET_shareItem(state: IViviStickerState, shareItem: IAsset | undefined) {
     state.shareItem = shareItem
@@ -392,6 +440,9 @@ const mutations: MutationTree<IViviStickerState> = {
     state.myDesignFiles[tab] = []
     state.myDesignNextPages[tab] = -1
   },
+  UPDATE_addDesign(state: IViviStickerState, updateInfo: { tab: string, list: IMyDesign[] }) {
+    state.myDesignFiles[updateInfo.tab] = updateInfo.list.concat(state.myDesignFiles[updateInfo.tab])
+  },
   UPDATE_deleteDesign(state: IViviStickerState, updateInfo: { tab: string, id: string }) {
     const list = state.myDesignFiles[updateInfo.tab]
     if (!list) return
@@ -444,7 +495,10 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   UPDATE_addLoadedFont(state: IViviStickerState, font: string) {
     state.loadedFonts[font] = true
-  }
+  },
+  SET_templateShareType(state: IViviStickerState, type: 'none' | 'story' | 'post') {
+    state.templateShareType = type
+  },
 }
 
 export default {

@@ -11,7 +11,7 @@ div(class="screenshot")
   div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
     img(:src="backgroundImage" @load="onload")
   div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
-  page-content(v-if="usingJSON" :config="page" :pageIndex="0" :noBg="true" :style="pageTransforms()")
+  page-content(v-if="usingJSON" :config="page" :pageIndex="0" :noBg="extraData.noBg" :style="pageTransforms()")
 </template>
 
 <script lang="ts">
@@ -27,7 +27,7 @@ import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 declare let window: CustomWindow
 
@@ -59,7 +59,8 @@ export default defineComponent({
       },
       extraData: undefined as any,
       options: '',
-      params: ''
+      params: '',
+      toast: undefined as boolean | undefined
     }
   },
   components: {
@@ -67,6 +68,10 @@ export default defineComponent({
   },
   async mounted() {
     this.fetchDesign(window.location.search)
+    this.setInScreenshotPreview(true)
+  },
+  beforeUnmount() {
+    this.setInScreenshotPreview(false)
   },
   created() {
     window.fetchDesign = this.fetchDesign
@@ -98,6 +103,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      setInScreenshotPreview: 'SET_inScreenshotPreview',
+    }),
     fetchDesign(query: string, options = '') {
       this.clearBuffers()
       this.options = options
@@ -114,7 +122,12 @@ export default defineComponent({
         const key = urlParams.get('key')
         const source = urlParams.get('source')
         const src = urlParams.get('src')
-        this.extraData = { thumbType, designId, key }
+        const noBg = urlParams.get('noBg') === 'true'
+        const toast = urlParams.get('toast')
+        if (toast !== null) {
+          this.toast = toast === 'true'
+        }
+        this.extraData = { thumbType, designId, key, noBg }
         switch (type) {
           case 'svg': {
             const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json() as ILayer
@@ -279,7 +292,8 @@ export default defineComponent({
           }
           case 'json': {
             const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
-            if (page.layers.length === 0) {
+            const hasBg = !noBg && page.backgroundImage.config.srcObj?.assetId !== ''
+            if (page.layers.length === 0 && !hasBg) {
               this.JSONcontentSize = {
                 width: page.width,
                 height: page.height
@@ -291,7 +305,7 @@ export default defineComponent({
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
-            })
+            }, () => this.onTimeout(`screenshot-${query}`), noBg)
             pageUtils.setPages([page])
             if (vivistickerUtils.checkVersion('1.31')) {
               const newSize = {
@@ -308,6 +322,49 @@ export default defineComponent({
               }
               this.usingJSON = true
             }
+            break
+          }
+          case 'gen-thumb': {
+            const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
+            const hasBg = !noBg && page.backgroundImage.config.srcObj?.assetId !== ''
+            const newSize = {
+              width: Math.round(page.width / 2),
+              height: Math.round(page.height / 2)
+            }
+            resizeUtils.resizePage(-1, page, newSize)
+            const genThumb = () => {
+              vivistickerUtils.callIOSAsAPI('GEN_THUMB', {
+                type: 'mydesign',
+                id: designId,
+                width: page.width,
+                height: page.height,
+                x: 0,
+                y: 0,
+                needCrop: 0
+              }, 'gen-thumb', { timeout: -1 }).then(data => {
+                vivistickerUtils.sendToIOS('INFORM_WEB', {
+                  info: {
+                    event: 'gen-thumb-done',
+                    flag: data?.flag ?? '1',
+                    id: designId
+                  },
+                  to: 'UI'
+                })
+              })
+            }
+            if (page.layers.length === 0 && !hasBg) {
+              this.JSONcontentSize = {
+                width: page.width,
+                height: page.height
+              }
+              this.usingJSON = true
+              genThumb()
+              return
+            }
+            layerUtils.setAutoResizeNeededForLayersInPage(page, true)
+            vivistickerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false)
+            pageUtils.setPages([page])
+            this.usingJSON = true
             break
           }
         }
@@ -365,16 +422,25 @@ export default defineComponent({
             to: 'UI'
           })
         } else {
-          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, this.params)
+          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, this.params, this.toast)
         }
       } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
         const element = this.$refs.target
         const target: HTMLElement = (element as any).$el ? (element as any).$el : element
         const { width, height } = target.getBoundingClientRect()
-        vivistickerUtils.sendDoneLoading(width, height, this.options, this.params)
+        vivistickerUtils.sendDoneLoading(width, height, this.options, this.params, this.toast)
       } else {
-        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params)
+        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params, this.toast)
       }
+    },
+    onTimeout(srcEvent: string) {
+      vivistickerUtils.sendToIOS('INFORM_WEB', {
+        info: {
+          event: 'sreenshot-timeout',
+          srcEvent
+        },
+        to: 'UI'
+      })
     },
     setConfig(layer: AllLayerTypes) {
       layerUtils.addLayersToPos(0, [layer], 0)

@@ -9,7 +9,7 @@ div(class="nu-layer flex-center"
   //- class="nu-layer"
   //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
   //- ref="body"
-  div(class="full-size pos-left"
+  div(class="nu-layer__event-center full-size pos-left"
       :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
       :style="layerStyles()"
       @pointerdown="onPointerDown($event)"
@@ -35,7 +35,7 @@ div(class="nu-layer flex-center"
             :priPrimaryLayerIndex="priPrimaryLayerIndex"
             :forRender="forRender"
             :inPreview="inPreview")
-          svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !controllerHidden && !forRender"
+          svg(v-if="showSvgContour"
             class="clip-contour full-size"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
             g(v-html="frameClipFormatter(config.clipPath)"
@@ -263,7 +263,8 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor',
-      showPcPagePreivew: 'page/getIsShowPagePreview'
+      showPcPagePreivew: 'page/getIsShowPagePreview',
+      isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
     inAllPagesMode(): boolean {
       return this.mobilePagePreview || this.showPcPagePreivew
@@ -297,13 +298,14 @@ export default defineComponent({
         {
           outline,
           outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
-          willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
+          willChange: this.config.active && !this.isSubLayer ? 'transform' : '',
           pointerEvents,
           clipPath,
           'mix-blend-mode': this.config.styles.blendMode,
           ...this.transformStyle
         }
       )
+      styles.willChange = 'initial'
       if (!this.isImgCtrl && !this.inFrame && !this.$isTouchDevice() && !this.useMobileEditor) {
         styles.transform += `translateZ(${this.config.styles.zindex}px)`
       }
@@ -316,9 +318,6 @@ export default defineComponent({
       const isHandleShadow = config.inProcess === 'imgShadow' && !hasShadowSrc
       const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
-    },
-    isDragging(): boolean {
-      return (this.config as ILayer).dragging
     },
     transformStyle(): { [index: string]: string } {
       return {
@@ -335,10 +334,12 @@ export default defineComponent({
       return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     frameClipStyles(): any {
+      const isRectFrameClip = this.config.type === 'image' && this.config.clipPath && frameUtils.checkIsRect(this.config.clipPath)
       return {
         fill: '#00000000',
         stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#9C9C9C') : 'none',
-        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
+        strokeWidth: `${7 / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
+        // strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
       }
     },
     getPointerEvents(): string {
@@ -374,6 +375,10 @@ export default defineComponent({
     },
     isMultipleSelect(): boolean {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length > 1
+    },
+    showSvgContour(): boolean {
+      const { config } = this
+      return config.active && config.isFrame && !config.isFrameImg && config.type === 'image' && !this.forRender && this.config.clipPath && !frameUtils.checkIsRect(this.config.clipPath) && !this.isDuringCopy
     }
   },
   methods: {
@@ -830,6 +835,9 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  &__event-center {
+    z-index: -1; // To keep outline/border above the content.
   }
   &__scale {
     transform-origin: top left;

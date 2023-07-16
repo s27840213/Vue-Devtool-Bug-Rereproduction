@@ -8,7 +8,7 @@ import store from '@/store'
 import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
-import { round } from 'lodash'
+import { get, round } from 'lodash'
 import { nextTick } from 'vue'
 import backgroundUtils from './backgroundUtils'
 import ControlUtils from './controlUtils'
@@ -166,36 +166,42 @@ class AssetUtils {
   }
 
   async addTemplate(json: any, attrs?: { pageIndex?: number, width?: number, height?: number, physicalWidth?: number, physicalHeight?: number, unit?: string }, recordStep = true) {
-    const targetPageIndex = attrs?.pageIndex ?? pageUtils.addAssetTargetPageIndex
-    const targetPage: IPage = this.getPage(targetPageIndex)
+    /**
+     * @Note always append new pages when add template from in-editor-template-panel in vivisticker
+     */
+    const refPageIndex = pageUtils.currFocusPageIndex
+    const refPage: IPage = this.getPage(refPageIndex)
+    const targetPageIndex = attrs?.pageIndex ?? refPageIndex
     json = await this.updateBackground(generalUtils.deepCopy(json))
     // pageUtils.setAutoResizeNeededForPage(json, true)
     layerUtils.setAutoResizeNeededForLayersInPage(json, true)
     const newPage = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     // console.log(generalUtils.deepCopy(newPage)) // remove unneccessary use of deepCopy(...) for performance
-    pageUtils.updateSpecPage(targetPageIndex, newPage)
+    if (attrs?.pageIndex) pageUtils.appendPagesTo([newPage], targetPageIndex) // append new page after current page
+    else pageUtils.updateSpecPage(targetPageIndex, newPage) // replace current page
+
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newPage, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
     if (store.getters['user/getUserId'] === 'backendRendering') {
       const { isBleed, isTrim } = store.getters['user/getBackendRenderParams']
       if (isBleed || isTrim) {
-        pageUtils.setIsEnableBleed(true, targetPageIndex)
-        if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(targetPageIndex, json.physicalBleeds, json.bleeds) // use bleeds of page if it has
-      } else pageUtils.setIsEnableBleed(false, targetPageIndex)
+        pageUtils.setIsEnableBleed(true, refPageIndex)
+        if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(refPageIndex, json.physicalBleeds, json.bleeds) // use bleeds of page if it has
+      } else pageUtils.setIsEnableBleed(false, refPageIndex)
     } else if (attrs && attrs.width && attrs.height) { // use page size
       let physicalBleeds
-      if (targetPage.bleeds && targetPage.physicalBleeds) {
+      if (refPage.bleeds && refPage.physicalBleeds) {
         const resizedPage = this.getPage(targetPageIndex)
 
         // convert bleeds to template unit
         const dpi = pageUtils.getPageDPI(resizedPage)
-        physicalBleeds = resizedPage.unit === 'px' ? targetPage.bleeds
-          : targetPage.unit === attrs?.unit ? targetPage.physicalBleeds
-            : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, resizedPage.unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+        physicalBleeds = resizedPage.unit === 'px' ? refPage.bleeds
+          : refPage.unit === attrs?.unit ? refPage.physicalBleeds
+            : Object.fromEntries(Object.entries(refPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, refPage.unit, resizedPage.unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
       }
 
       // apply bleeds of targetPage
-      pageUtils.setIsEnableBleed(!!targetPage.isEnableBleed, targetPageIndex)
+      pageUtils.setIsEnableBleed(!!refPage.isEnableBleed, targetPageIndex)
       if (physicalBleeds) pageUtils.setBleeds(targetPageIndex, physicalBleeds)
 
       // fit page background if the template has background image
@@ -203,6 +209,7 @@ class AssetUtils {
     }
     GroupUtils.deselect()
     store.commit('SET_currActivePageIndex', targetPageIndex)
+    vivistickerUtils.scrollIntoPage(targetPageIndex, 300)
     if (recordStep) {
       stepsUtils.record()
     }
@@ -270,7 +277,7 @@ class AssetUtils {
     const oldPoint = json.point
     const { width, height } = ShapeUtils.lineDimension(oldPoint)
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = width / height
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -317,7 +324,7 @@ class AssetUtils {
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize[0] / vSize[1]
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
@@ -359,7 +366,7 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = 300 / (Math.max(json.width, json.height))
+    const resizeRatio = attrs.fit === 1 ? Math.min(currentPage.width / json.width, currentPage.height / json.height) : 300 / (Math.max(json.width, json.height))
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
 
@@ -513,8 +520,10 @@ class AssetUtils {
       newLayer = LayerFactary.newText(config, '1.0.0') // For old text assets that don't have jsonVer, use 1.0.0 to trigger compensation
       const { x, y, width, height } = newLayer.styles
       const textHW = textUtils.getTextHW(newLayer, -1)
+      // don't write spanDataList because the font is not guaranteed to be completely loaded here.
       Object.assign(newLayer.styles, {
-        ...textHW,
+        width: textHW.width,
+        height: textHW.height,
         x: x + (width - textHW.width) / 2,
         y: y + (height - textHW.height) / 2,
       })
@@ -586,6 +595,7 @@ class AssetUtils {
     store.commit('SET_mobileSidebarPanelOpen', false)
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, panelPreviewSrc, previewSrc } = attrs
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
+    const resizeRatio = attrs.fit === 1 ? 1 : RESIZE_RATIO_IMAGE
 
     let newStyles = {
       width: 0,
@@ -602,8 +612,8 @@ class AssetUtils {
       const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding(styles as IStyle)
       photoAspectRatio = boundingWidth / boundingHeight
 
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * RESIZE_RATIO_IMAGE : (this.pageSize.height * RESIZE_RATIO_IMAGE) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * RESIZE_RATIO_IMAGE) / photoAspectRatio : this.pageSize.height * RESIZE_RATIO_IMAGE
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
       const { width = photoWidth, height = photoHeight, imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
 
@@ -620,8 +630,8 @@ class AssetUtils {
         imgY: imgY * scaleRatio
       }
     } else {
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * RESIZE_RATIO_IMAGE : (this.pageSize.height * RESIZE_RATIO_IMAGE) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * RESIZE_RATIO_IMAGE) / photoAspectRatio : this.pageSize.height * RESIZE_RATIO_IMAGE
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
       newStyles = {
         width: photoWidth,
@@ -682,7 +692,7 @@ class AssetUtils {
     stepsUtils.record()
   }
 
-  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
+  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }, moduleKey?: string, replace = false) {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
     const isDetailPage = groupType === 1 || currGroupType === 1
@@ -697,7 +707,7 @@ class AssetUtils {
     }
     const promises = contents?.filter(content => childId ? content.id === childId : true)
       .map(content => this.get({ ...content, type }))
-    this.addAssetToRecentlyUsed(item as any)
+    this.addAssetToRecentlyUsed(item as any, moduleKey ?? `templates/${(store.state as any).templates.igLayout}`)
     return Promise.all(promises)
       .then(assets => {
         const updatePromise = assets.map(asset =>
@@ -707,15 +717,19 @@ class AssetUtils {
         return Promise.all(updatePromise)
       })
       .then((jsonDataList: IPage[]) => {
-        // 單頁: 取代, 多頁: 空白取代/加入後面
+        /**
+         * @Note always append new pages when add template from in-editor-template-panel in vivisticker
+         */
         const currFocusPage: IPage = this.getPage(pageUtils.currFocusPageIndex)
-        let targetIndex = pageUtils.currFocusPageIndex
-        let replace = true
-        if (!childId && currFocusPage && currFocusPage.layers.length) {
-          // 多頁且當前頁面非空白 => 加入在最後頁面
-          targetIndex = this.getPages.length
-          replace = false
-        }
+        const targetIndex = pageUtils.currFocusPageIndex + (replace ? 0 : 1)
+
+        // let targetIndex = pageUtils.currFocusPageIndex
+        // let replace = true
+        // if (!childId && currFocusPage && currFocusPage.layers.length) {
+        //   // 多頁且當前頁面非空白 => 加入在最後頁面
+        //   targetIndex = this.getPages.length
+        //   replace = false
+        // }
 
         // get bleeds of detail page
         let detailPageBleeds: IBleed
@@ -730,12 +744,11 @@ class AssetUtils {
         }
 
         // pageUtils.setAutoResizeNeededForPages(jsonDataList, true)
+        if (resize) jsonDataList.forEach((page: IPage) => { resizeUtils.resizePage(-1, page, resize) }) // resize template json data before adding to the store
         layerUtils.setAutoResizeNeededForLayersInPages(jsonDataList, true)
         pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         nextTick(() => {
-          pageUtils.scrollIntoPage(targetIndex)
-          // @TODO: resize page/layer before adding to the store.
-          if (resize) resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
+          vivistickerUtils.scrollIntoPage(targetIndex, 300)
           if (isDetailPage && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
             const { width: pageWidth = 1000, physicalWidth: pagePhysicalWidth = pageWidth, unit: pageUnit = 'px' } = this.getPage(pageUtils.currFocusPageIndex)
@@ -849,7 +862,7 @@ class AssetUtils {
           switch ((asset.jsonData as any).type) {
             case 'image': {
               const { srcObj, styles } = asset.jsonData as IImage
-              this.addImage(srcObj, styles.width / styles.height, { styles }, 14)
+              this.addImage(srcObj, styles.width / styles.height, { styles, fit: attrs.fit }, 14)
               key = 'objects'
               break
             }
@@ -860,7 +873,7 @@ class AssetUtils {
           break
         }
         case 15: {
-          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1), {}, 15)
+          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1), { fit: attrs.fit }, 15)
           key = 'objects'
           break
         }
@@ -904,7 +917,7 @@ class AssetUtils {
     const typeModule = key ?? this.getTypeModule(type)
     if (typeCategory && typeModule) {
       // @TODO 手動加入最近使用
-      const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
+      const categories = generalUtils.deepCopy(get(store.state, typeModule.split('/').concat('categories')))
       const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
       if (recentlyUsed) {
         const assetIndex = recentlyUsed.list.findIndex((asset: IListServiceContentDataItem) => asset.id === id)
@@ -935,7 +948,7 @@ class AssetUtils {
       const recently = recentlyUsedList.map(({ id }: { id: string }) => `#${id}`)
       store.commit('vivisticker/SET_recentlyBgColors', recently)
     } else {
-      const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
+      const categories = generalUtils.deepCopy(get(store.state, typeModule.split('/').concat('categories')))
       const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
       if (recentlyUsed) {
         recentlyUsed.list = recentlyUsedList

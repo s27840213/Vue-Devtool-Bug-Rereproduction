@@ -168,11 +168,11 @@ export class MovingUtils {
             /**
              * This is the dbl-click callback block
              */
-            // vivisticker can only crop frame
-            // if (this.getLayerType === LayerType.image) {
-            //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-            //   eventUtils.emit(PanelEvent.switchTab, 'crop')
-            // }
+            // vivisticker can only crop frame besides template editor
+            if (store.getters['vivisticker/getEditorTypeTemplate'] && this.getLayerType === LayerType.image) {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+              eventUtils.emit(PanelEvent.switchTab, 'crop')
+            }
             this.dblTabsFlag = true
           }
         }
@@ -396,13 +396,21 @@ export class MovingUtils {
   }
 
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    const config = this.layerIndex === layerUtils.layerIndex ? this.config : layerUtils.getCurrLayer
+    if (Object.values(config).length === 0) {
+      /**
+       * if the layer is deleted the config will be empty object
+       */
+      eventUtils.removePointerEvent('pointerup', this._moveEnd)
+      eventUtils.removePointerEvent('pointermove', this._moving)
+      return
+    }
     if (!this.config.moved) {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
-    const offsetRatio = generalUtils.isTouchDevice() ? 1 / store.state.contentScaleRatio : 100 / store.getters.getPageScaleRatio
+    const offsetRatio = generalUtils.isTouchDevice() ? 1 / store.getters.getContentScaleRatio : 100 / store.getters.getPageScaleRatio
     const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, offsetRatio)
-    const config = this.layerIndex === layerUtils.layerIndex ? this.config : layerUtils.getCurrLayer
 
     const isLine = config.type === 'shape' && config.category === 'D'
     const _updateStyles = {
@@ -501,7 +509,10 @@ export class MovingUtils {
      * @Note the posDiff logic is different from the Vivipic version
      * Vivipic won't update the initialPos in moving, but Vivisticker will.
      */
-    const posDiff = {
+    const posDiff = this.isTouchDevice ? {
+      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
+      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+    } : {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }

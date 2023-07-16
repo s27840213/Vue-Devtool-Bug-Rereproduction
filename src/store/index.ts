@@ -19,7 +19,9 @@ import objects from '@/store/module/objects'
 import page from '@/store/module/page'
 import popup from '@/store/module/popup'
 import shadow from '@/store/module/shadow'
+import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
+import unsplash from '@/store/module/unsplash'
 import user from '@/store/module/user'
 import vivisticker from '@/store/module/vivisticker'
 import webView from '@/store/module/webView'
@@ -29,7 +31,7 @@ import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
-import { ADD_subLayer } from '@/utils/layerUtils'
+import layerUtils, { ADD_subLayer } from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -122,7 +124,6 @@ const getDefaultState = (): IEditorState => ({
   },
   isGlobalLoading: false,
   useMobileEditor: false,
-  contentScaleRatio: 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
@@ -317,7 +318,8 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.useMobileEditor
   },
   getContentScaleRatio(state: IEditorState) {
-    return state.contentScaleRatio
+    const pageIndex = layerUtils.pageIndex === -1 ? 0 : layerUtils.pageIndex
+    return state.pages[pageIndex].config.contentScaleRatio
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state.useMobileEditor ? -1 : state._3dEnabledPageIndex
@@ -934,7 +936,7 @@ const mutations: MutationTree<IEditorState> = {
       styles && Object.assign(targetLayer.styles, styles)
     }
   },
-  DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
+  DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex, forSticker = false }) {
     // check every pages background image
     for (const page of state.pages) {
       const bgImg = page.config.backgroundImage
@@ -953,7 +955,7 @@ const mutations: MutationTree<IEditorState> = {
     const handler = (l: IShape | IText | IImage | IGroup | IFrame | ITmp) => {
       switch (l.type) {
         case LayerType.image:
-          if ((l as IImage).srcObj.assetId === assetId && l.previewSrc) {
+          if (((l as IImage).srcObj.assetId === assetId || forSticker) && l.previewSrc) {
             /**
              * @Vue3Update
              */
@@ -964,7 +966,10 @@ const mutations: MutationTree<IEditorState> = {
               userId,
               assetId: uploadUtils.isAdmin ? assetId : assetIndex
             })
-            uploadUtils.uploadDesign()
+
+            if (!forSticker) {
+              uploadUtils.uploadDesign()
+            }
           }
           break
         case LayerType.tmp:
@@ -1113,9 +1118,6 @@ const mutations: MutationTree<IEditorState> = {
   SET_isGettingDesign(state: IEditorState, bool: boolean) {
     state.isGettingDesign = bool
   },
-  SET_contentScaleRatio(state: IEditorState, ratio: number) {
-    state.contentScaleRatio = ratio
-  },
   UPDATE_pagePos(state: IEditorState, data: { pageIndex: number, styles: { [key: string]: number } }) {
     const { pageIndex, styles } = data
     const page = state.pages[pageIndex]
@@ -1187,6 +1189,7 @@ const store = createStore({
   mutations,
   modules: {
     user,
+    unsplash,
     photos,
     text,
     font,
@@ -1195,6 +1198,7 @@ const store = createStore({
     giphy,
     textStock,
     background,
+    templates,
     mobileEditor,
     modal,
     popup,

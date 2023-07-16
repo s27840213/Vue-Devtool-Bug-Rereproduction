@@ -14,6 +14,7 @@ import rulerUtils from './rulerUtils'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
+    const modifySourceLayer = pageIndex === -1
     if (!targetLayer.moved) {
       targetLayer.moved = true
     }
@@ -28,6 +29,13 @@ class ResizeUtils {
       case 'image': {
         layer = targetLayer as IImage
         const { imgWidth, imgHeight, imgX, imgY } = (layer as IImage).styles
+        if (modifySourceLayer) {
+          layer.styles.imgWidth = imgWidth * targetScale
+          layer.styles.imgHeight = imgHeight * targetScale
+          layer.styles.imgX = imgX * targetScale
+          layer.styles.imgY = imgY * targetScale
+          break
+        }
         imageUtils.updateImgSize(pageIndex, layerIndex, imgWidth * targetScale, imgHeight * targetScale)
         imageUtils.updateImgPos(pageIndex, layerIndex, imgX * targetScale, imgY * targetScale)
         // scale = 1
@@ -36,6 +44,10 @@ class ResizeUtils {
       case 'text':
         layer = targetLayer as IText
         if (layer.widthLimit !== -1) {
+          if (modifySourceLayer) {
+            layer.widthLimit = layer.styles.writingMode.includes('vertical') ? height : width
+            break
+          }
           controlUtils.updateLayerProps(pageIndex, layerIndex, {
             widthLimit: layer.styles.writingMode.includes('vertical') ? height : width
           })
@@ -50,6 +62,19 @@ class ResizeUtils {
           imgY *= targetScale
           imgX *= targetScale
 
+          if (modifySourceLayer) {
+            layer.styles.initWidth = width
+            layer.styles.initHeight = height
+            Object.assign(layer.clips[0].styles, {
+              width: width,
+              height: height,
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+            break
+          }
           layerUtils.updateLayerStyles(pageIndex, layerIndex, {
             initWidth: width,
             initHeight: height
@@ -79,14 +104,21 @@ class ResizeUtils {
           const strokeWidth = size[0]
           const newStrokeWidth = round(strokeWidth * targetScale, 2)
           const { point, realWidth, realHeight } = shapeUtils.computePointForDimensions(quadrant, newStrokeWidth, lineWidth * targetScale, lineHeight * targetScale)
-          controlUtils.updateShapeLinePoint(pageIndex, layerIndex, point)
           width = realWidth
           height = realHeight
+          scale = layer.styles.scale
+          if (modifySourceLayer) {
+            layer.point = point
+            layer.styles.initWidth = width
+            layer.styles.initHeight = height
+            layer.size = [newStrokeWidth]
+            break
+          }
+          controlUtils.updateShapeLinePoint(pageIndex, layerIndex, point)
           layerUtils.updateLayerStyles(pageIndex, layerIndex, {
             initWidth: width,
             initHeight: height
           })
-          scale = layer.styles.scale
           layerUtils.updateLayerProps(pageIndex, layerIndex, {
             size: [newStrokeWidth]
           })
@@ -98,6 +130,11 @@ class ResizeUtils {
           const newStrokeWidth = round(strokeWidth * targetScale, 2)
           scale = 1
           const corRad = controlUtils.getCorRadValue([width, height], controlUtils.getCorRadPercentage(layer.vSize, size, layer.shapeType ?? ''), layer.shapeType ?? '')
+          if (modifySourceLayer) {
+            layer.vSize = [width, height]
+            layer.size = [newStrokeWidth, corRad]
+            break
+          }
           controlUtils.updateShapeVSize(pageIndex, layerIndex, [width, height])
           layerUtils.updateLayerProps(pageIndex, layerIndex, {
             size: [newStrokeWidth, corRad]
@@ -112,6 +149,14 @@ class ResizeUtils {
       y: targetLayer.styles.y * targetScale + yOffset
     }
 
+    if (modifySourceLayer) {
+      targetLayer.styles.width = width
+      targetLayer.styles.height = height
+      targetLayer.styles.scale = scale
+      targetLayer.styles.x = trans.x
+      targetLayer.styles.y = trans.y
+      return
+    }
     controlUtils.updateLayerSize(pageIndex, layerIndex, width, height, scale)
     controlUtils.updateLayerPos(pageIndex, layerIndex, trans.x, trans.y)
   }
@@ -122,8 +167,10 @@ class ResizeUtils {
   }
 
   scaleAndMoveLayers(pageIndex: number, page: IPage, scale: number, xOffset: number, yOffset: number): IPage {
+    const modifySourcePage = pageIndex === -1
     page.layers.forEach((layer, index) => {
       this.scaleAndMoveLayer(pageIndex, index, layer, scale, xOffset, yOffset)
+      if (modifySourcePage) page.layers[index] = layer
     })
     if (page.guidelines) {
       this.scaleAndMoveGuideLines(page.guidelines, scale, xOffset, yOffset)
@@ -132,9 +179,21 @@ class ResizeUtils {
   }
 
   scaleBackground(pageIndex: number, page: IPage, scale: number) {
-    pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX * scale, page.backgroundImage.posY * scale)
+    const modifySourcePage = pageIndex === -1
     const width = page.backgroundImage.config.styles.imgWidth * scale
     const height = page.backgroundImage.config.styles.imgHeight * scale
+    if (modifySourcePage) {
+      page.backgroundImage.posX = page.backgroundImage.posX * scale
+      page.backgroundImage.posY = page.backgroundImage.posY * scale
+      Object.assign(page.backgroundImage.config.styles, {
+        width,
+        height,
+        imgWidth: width,
+        imgHeight: height
+      })
+      return
+    }
+    pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX * scale, page.backgroundImage.posY * scale)
     pageUtils.updateBackgroundImageStyles(
       pageIndex, {
       width,
@@ -157,6 +216,8 @@ class ResizeUtils {
    * @param format.unit Unit of new size, will be set to px if any of physical format unspecified
    */
   resizePage(pageIndex: number, page: IPage, format: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
+    const modifySourcePage = pageIndex === -1
+
     // set physical size to px size if not exist
     if (!(format.physicalWidth && format.physicalHeight && format.unit)) {
       format.physicalWidth = format.width
@@ -189,7 +250,7 @@ class ResizeUtils {
         const precision = newUnit === 'px' ? 0 : PRECISION
         const bleedDPI = (key: string): number => (key === 'left' || key === 'right') ? dpi.width : dpi.height
         const maxBleed = newUnit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', newUnit), precision)
-        const defaultBleedMap = pageUtils.getDefaultBleedMap(pageIndex)
+        const defaultBleedMap = pageUtils.getDefaultBleedMap(page, pageIndex)
         const isDefaultBleed = isEqual(defaultBleedMap[page.unit], physicalBleeds)
         const isFixPxSize = pageUtils.isDetailPage && newUnit !== 'px'
 
@@ -216,7 +277,10 @@ class ResizeUtils {
           const pxMaxBleed = floor(unitUtils.convert(maxBleed, newUnit, 'px', bleedDPI(key)))
           bleeds[key] = Math.min(bleeds[key], pxMaxBleed)
         })
-        store.commit('SET_bleeds', { pageIndex, bleeds, physicalBleeds })
+        if (modifySourcePage) {
+          page.bleeds = { ...bleeds }
+          page.physicalBleeds = { ...physicalBleeds }
+        } else store.commit('SET_bleeds', { pageIndex, bleeds, physicalBleeds })
       }
     }
 
@@ -257,18 +321,43 @@ class ResizeUtils {
         posX -= page.bleeds.left
         posY -= page.bleeds.top
       }
-      pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
-      pageUtils.updateBackgroundImageStyles(
-        pageIndex, {
-        width,
-        height,
-        imgWidth: width,
-        imgHeight: height
-      })
+      if (modifySourcePage) {
+        page.backgroundImage.posX = posX
+        page.backgroundImage.posY = posY
+        Object.assign(page.backgroundImage.config.styles, {
+          width,
+          height,
+          imgWidth: width,
+          imgHeight: height
+        })
+      } else {
+        pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
+        pageUtils.updateBackgroundImageStyles(
+          pageIndex, {
+          width,
+          height,
+          imgWidth: width,
+          imgHeight: height
+        })
+      }
     }
 
-    rulerUtils.removeInvalidGuides(pageIndex, format)
-    pageUtils.setPageSize(pageIndex, format.width, format.height, format.physicalWidth, format.physicalHeight, format.unit)
+    if (modifySourcePage) {
+      const { guidelines } = page
+      page.guidelines = {
+        v: guidelines.v.filter((line) => line <= format.width),
+        h: guidelines.h.filter((line) => line <= format.height)
+      }
+      page.width = format.width
+      page.height = format.height
+      page.physicalWidth = format.physicalWidth
+      page.physicalHeight = format.physicalHeight
+      page.unit = format.unit
+      if (!page.isEnableBleed) pageUtils.resetBleeds(page)
+    } else {
+      rulerUtils.removeInvalidGuides(pageIndex, format)
+      pageUtils.setPageSize(pageIndex, format.width, format.height, format.physicalWidth, format.physicalHeight, format.unit)
+    }
   }
 
   testResizeAllPages() {

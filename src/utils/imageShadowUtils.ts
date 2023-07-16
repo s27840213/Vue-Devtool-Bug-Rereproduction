@@ -1,9 +1,11 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { getDilate } from './canvasAlgorithms'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
@@ -541,6 +543,7 @@ class ImageShadowUtils {
     if (layerInfo) {
       timeout && this.setIsProcess(layerInfo, false)
     }
+    console.log('finish draw shadow')
     this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
     const stime = Date.now()
     cb && cb()
@@ -663,6 +666,16 @@ class ImageShadowUtils {
       })
       this.storeEffectsAttrs(layer)
     }
+  }
+
+  saveToIOS(canvas: HTMLCanvasElement, callback?: (data: WEBVIEW_API_RESULT, assetId: string) => void) {
+    const src = canvas.toDataURL('image/png;base64')
+    const assetId = generalUtils.generateAssetId()
+
+    vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'shadow', name: assetId, toast: false }, 'save-image-from-url')
+      .then((data) => {
+        callback && callback(data, assetId)
+      })
   }
 
   getImgEdgeWidth(canvas: HTMLCanvasElement) {

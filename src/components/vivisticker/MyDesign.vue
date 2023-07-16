@@ -1,11 +1,11 @@
 <template lang="pug">
 div(class="my-design")
   div(class="my-design__tags")
-    div(v-for="tag in tags" class="my-design__tag"
+    div(v-for="tag in tagsToShow" class="my-design__tag"
         :key="tag.tab"
         :class="{ selected: checkTagSelected(tag) }"
         @click.prevent.stop="selectTag(tag)")
-      span(class="my-design__tag-name") {{ $tc(tag.name, 2) }}
+      span(class="my-design__tag-name") {{ $tc(tag.name, tag.name === 'NN0001' ? 1 : 2) }}
   div(v-show="list.length === 0" class="my-design__content center")
     div(class="my-design__empty-icon")
       svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
@@ -30,11 +30,19 @@ div(class="my-design")
             :key="item.id"
             :item="item"
             :style="itemStyles")
+      template(v-slot:my-design-template-item="{ list }")
+        div(class="my-design__templates__items" :style="textItemsStyles")
+          my-design-template-item(v-for="item in list"
+            class="my-design__templates__item"
+            :key="item.id"
+            :item="item"
+            :style="textItemStyles")
 </template>
 
 <script lang="ts">
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import MyDesignObjectItem from '@/components/vivisticker/mydesign/MyDesignObjectItem.vue'
+import MyDesignTemplateItem from '@/components/vivisticker/mydesign/MyDesignTemplateItem.vue'
 import MyDesignTextItem from '@/components/vivisticker/mydesign/MyDesignTextItem.vue'
 import { IMyDesign, IMyDesignTag } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
@@ -54,7 +62,8 @@ export default defineComponent({
   components: {
     CategoryList,
     MyDesignObjectItem,
-    MyDesignTextItem
+    MyDesignTextItem,
+    MyDesignTemplateItem
   },
   mounted() {
     const content = this.$refs.content as CCategoryList
@@ -75,13 +84,17 @@ export default defineComponent({
       myDesignTab: 'vivisticker/getMyDesignTab',
       myDesignFiles: 'vivisticker/getMyDesignFiles',
       myDesignFileList: 'vivisticker/getMyDesignFileList',
-      myDesignNextPage: 'vivisticker/getMyDesignNextPage'
+      myDesignNextPage: 'vivisticker/getMyDesignNextPage',
+      debugMode: 'vivisticker/getDebugMode'
     }),
     ...mapState({
       isTablet: 'isTablet',
       isLandscape: 'isLandscape',
       windowSize: 'windowSize'
     }),
+    tagsToShow(): IMyDesignTag[] {
+      return this.tags.filter(tag => !(tag.tab === 'template' && !vivistickerUtils.isTemplateSupported))
+    },
     list(): IMyDesign[] {
       return this.myDesignFileList(this.myDesignTab) as IMyDesign[]
     },
@@ -116,6 +129,21 @@ export default defineComponent({
                 size: this.itemHeight + (this.isTablet ? 30 : 24),
                 title: '',
                 moreType: 'object'
+              }
+            })
+          break
+        case 'template':
+          result = new Array(Math.ceil(this.list.length / this.numTextColumns))
+            .fill('')
+            .map((_, idx) => {
+              const rowItems = this.list.slice(idx * this.numTextColumns, idx * this.numTextColumns + this.numTextColumns)
+              return {
+                id: `result_${rowItems.map(item => item.id).join('_')}`,
+                type: 'my-design-template-item',
+                list: rowItems,
+                size: this.textItemWidth + this.textItemGap,
+                title: '',
+                moreType: 'template'
               }
             })
           break
@@ -276,6 +304,7 @@ export default defineComponent({
     align-content: center;
     justify-content: center;
     border-radius: 10px;
+    text-transform: capitalize;
     &-name {
       @include body-SM;
       display: block;
@@ -326,7 +355,7 @@ export default defineComponent({
     text-align: center;
   }
 
-  &__texts {
+  &__texts, &__templates {
     &__item {
       width: calc(50vw - 32px);
       height: calc(50vw - 32px);

@@ -2,14 +2,12 @@ import list from '@/apis/list'
 import i18n from '@/i18n'
 import { IListServiceContentData, IListServiceData } from '@/interfaces/api'
 import {
-  IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, IPending,
-  ITag, ITagExtend,
-  isICategory,
-  isITag
+  IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, IPending, isICategory,
+  isITag, ITag, ITagExtend
 } from '@/interfaces/module'
 import store from '@/store'
-import localStorageUtils from '@/utils/localStorageUtils'
 import localeUtils from '@/utils/localeUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
 import logUtils from '@/utils/logUtils'
 import popupUtils from '@/utils/popupUtils'
 import themeUtils from '@/utils/themeUtils'
@@ -97,6 +95,12 @@ export default function (this: any) {
     }
   })
 
+  const isTextUs = (): boolean => this.namespace === 'text' && localeUtils.currLocale() === 'us'
+  const getColNum = (): number | undefined => {
+    if (isTextUs()) return store.state.isTablet ? 3 : 2
+    return undefined
+  }
+
   const actions: ActionTree<IListModuleState, unknown> = {
     // For panel template, object, bg, text, only get recently used.
     // For others, get recently used and categories.
@@ -154,6 +158,7 @@ export default function (this: any) {
           token: '1',
           locale,
           theme,
+          igLayout: this.igLayout,
           listAll: 0,
           listCategory: 1,
           pageIndex: state.nextCategory,
@@ -208,10 +213,11 @@ export default function (this: any) {
           locale,
           keyword,
           theme,
+          igLayout: this.igLayout,
           listAll: 1,
           listCategory: 0,
           cache: needCache,
-          colNum: store.state.isTablet ? 3 : 2
+          colNum: getColNum()
         }
         const { data } = await this.api(apiParams)
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
@@ -249,7 +255,7 @@ export default function (this: any) {
 
     // For search result.
     getTagContent: async ({ commit, state }, params = {}) => {
-      let { theme } = state
+      const { theme } = state
       let { keyword } = params
       const locale = localeUtils.currLocale()
       // If $all:, do category search instead of tag search.
@@ -257,7 +263,7 @@ export default function (this: any) {
         : keyword.includes('::') ? keyword : `tag::${keyword}`
       commit('SET_STATE', { keyword, locale })
       commit('SET_pending', { content: true })
-      if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      // if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       const isAdmin = store.getters['user/isAdmin']
       try {
         // Search tags and set as active.
@@ -266,10 +272,12 @@ export default function (this: any) {
           token: isAdmin ? store.getters['user/getToken'] : '1',
           locale,
           theme,
+          igLayout: this.igLayout,
           keyword,
           listAll: 1,
           listCategory: 0,
-          cache: !isAdmin
+          cache: !isAdmin,
+          colNum: getColNum()
         }
         const { data } = await this.api(apiParams)
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
@@ -285,7 +293,7 @@ export default function (this: any) {
       const { nextParams, hasNextPage } = getters
       const { keyword } = state
       if (!hasNextPage || state.pending.content || state.pending.categories) return
-      if (!keyword && state.categories.length > 0 && state.nextCategory !== -1) {
+      if (!isTextUs() && !keyword && state.categories.length > 0 && state.nextCategory !== -1) {
         // Get more categories
         dispatch('getCategories')
         return
@@ -765,15 +773,17 @@ export default function (this: any) {
         locale,
         keyword,
         theme,
+        igLayout: this.igLayout,
         listAll: 1,
         listCategory: 0,
         pageIndex: keyword ? nextSearch : nextPage,
-        cache: needCache
+        cache: needCache,
+        colNum: getColNum()
       }
     },
     hasNextPage(state) {
       if (state.keyword) return state.nextSearch > 0
-      else return (state.nextPage !== undefined && state.nextPage >= 0) || state.nextCategory > 0
+      else return (state.nextPage !== undefined && state.nextPage >= 0) || (!isTextUs() && state.nextCategory > 0)
     },
     // TagsBar
     tagsBar(state, getters) {

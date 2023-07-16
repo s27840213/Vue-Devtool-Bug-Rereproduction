@@ -10,7 +10,7 @@ import textFillUtils from '@/utils/textFillUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { h, resolveComponent } from 'vue'
-import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import ViviSticker from '../views/ViviSticker.vue'
 
@@ -27,6 +27,15 @@ const routes: Array<RouteRecordRaw> = [
           await vivistickerUtils.fetchDebugModeEntrance()
           await vivistickerUtils.fetchLoadedFonts()
           await vivistickerUtils.fetchTutorialFlags()
+
+          // set default tab to show when first update to target app version
+          const isTargetLocale = ['us', 'jp'].includes(vivistickerUtils.getUserInfoFromStore().locale)
+          const appVer = vivistickerUtils.getUserInfoFromStore().appVer
+          const lastAppVer = (await vivistickerUtils.getState('lastAppVer'))?.value ?? '0.0'
+          const targetVer = '1.34'
+          if (isTargetLocale && vivistickerUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) await vivistickerUtils.setState('recentPanel', { value: 'template' })
+          if (appVer !== lastAppVer) await vivistickerUtils.setState('lastAppVer', { value: appVer })
+
           const recentPanel = await vivistickerUtils.getState('recentPanel')
           const userSettings = await vivistickerUtils.getState('userSettings')
           if (userSettings) {
@@ -148,7 +157,7 @@ const router = createRouter({
         picWVUtils.updateLocale(locale)
         vivistickerUtils.setDefaultPrices(locale)
 
-        document.title = to.meta?.title as string || i18n.global.t('SE0001')
+        // document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
         if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
           // Delete locale in url, will be ignore by prerender.
@@ -162,10 +171,13 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if ((window as any).__PRERENDER_INJECTED !== undefined) {
-    next()
-    return
-  }
+  /**
+   * @Note the following commented codes will cause prerender render error.
+   */
+  // if ((window as any).__PRERENDER_INJECTED !== undefined) {
+  //   next()
+  //   return
+  // }
   picWVUtils.detectIfInApp()
   await picWVUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.

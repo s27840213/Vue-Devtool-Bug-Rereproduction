@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-text" draggable="false")
+div(class="nu-text" draggable="false" :style="textWrapperStyle()")
   //- NuText BGs.
   template(v-for="(bgConfig, idx) in [textBg, textFillBg]")
     custom-element(v-if="bgConfig" class="nu-text__BG" :config="bgConfig" :key="`textSvgBg${idx}`")
@@ -36,19 +36,20 @@ import { CustomElementConfig } from '@/interfaces/editor'
 import { isTextFill } from '@/interfaces/format'
 import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textBgUtils from '@/utils/textBgUtils'
-import textEffectUtils, { IFocusState } from '@/utils/textEffectUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { isEqual, max, omit, round } from 'lodash'
-import { PropType, computed, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
@@ -93,12 +94,12 @@ export default defineComponent({
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
-      focus: computed(() => textEffectUtils.focus),
       isDestroyed: false,
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
-        widthLimit: this.config.widthLimit === -1 ? -1 : dimension
+        widthLimit: this.config.widthLimit === -1 ? -1 : dimension,
+        spanDataList: this.config.spanDataList
       },
       textBgVersion: 0,
       textBg: {} as CustomElementConfig | null,
@@ -131,6 +132,10 @@ export default defineComponent({
     },
     isLocked(): boolean {
       return this.config.locked
+    },
+    focus() {
+      if (!(this.config.active || this.primaryLayer?.active)) return 'none'
+      return textEffectUtils.focus
     },
     aspectRatio() {
       return round(this.config.styles.width / this.config.styles.height, 2)
@@ -168,11 +173,7 @@ export default defineComponent({
       this.drawTextBg()
       this.drawTextFill()
     },
-    focus(newVal: IFocusState, oldVal: IFocusState) {
-      if (newVal !== oldVal && (this.config.active || this.primaryLayer?.active)) {
-        this.drawTextFill()
-      }
-    },
+    focus() { this.drawTextFill() },
     'config.styles.textBg'() { this.drawTextBg() },
     'config.styles.textFill'() { this.drawTextFill() },
   },
@@ -221,21 +222,28 @@ export default defineComponent({
         return 1
       }
     },
+    textWrapperStyle(): Record<string, string|number> {
+      return {
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
+      }
+    },
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const textEffectStyles = omit(textEffectUtils.convertTextEffect(this.config), ['duplicatedTexts'])
+      if (['shadow', 'lift'].includes(this.config.styles.textEffect.name)) {
+        Object.assign(textEffectStyles, { willChange: 'filter' })
+      }
       const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
       return {
         width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
         opacity,
         ...textEffectStyles,
         // Add padding at body to prevent Safari bug that overflow text of drop-shadow/opacity<1 will be cliped
         padding: `${maxFontSize}px`,
-        left: `${maxFontSize * -1}px`,
+        [isVertical ? 'right' : 'left']: `${maxFontSize * -1}px`, // When writingMode: vertical-rl, left and right will be exchange.
         top: `${maxFontSize * -1}px`,
       }
     },
@@ -281,7 +289,7 @@ export default defineComponent({
         }
         // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
       } else {
         /**
          * use LayerUtils.getLayer and not use this.primaryLayer is bcz the tmp layer may contain the group layer,
@@ -290,7 +298,7 @@ export default defineComponent({
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit, spanDataList: textHW.spanDataList })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }

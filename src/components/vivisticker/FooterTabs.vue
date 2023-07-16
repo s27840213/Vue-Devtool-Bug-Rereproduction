@@ -1,23 +1,50 @@
 <template lang="pug">
 div(class="footer-tabs" ref="tabs")
-  div(class="footer-tabs__container" :class="{main: !isInEditor}" :style="containerStyles"
-      @scroll.passive="updateContainerOverflow" ref="container")
-    template(v-for="tab in tabs" :key="tab.icon")
-      div(v-if="!tab.hidden" :key="tab.icon"
-          class="footer-tabs__item"
-          :class="{'click-disabled': (tab.disabled || isLocked)}"
-          @click="handleTabAction(tab)")
-        color-btn(v-if="tab.icon === 'color'" size="22px"
-                  class="click-disabled"
-                  :color="globalSelectedColor")
-        svg-icon(v-else class="click-disabled"
-          :iconName="tab.icon"
-          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'white' :'black-4'"
-          :iconWidth="'24px'"
-          :style="textIconStyle")
-        span(class="no-wrap click-disabled"
-          :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-white' : 'text-black-4'") {{tab.text}}
-        pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
+  div(class="footer-tabs__content")
+    div(class="footer-tabs__container" :class="{main: !isInEditor}" :style="containerStyles()"
+        @scroll.passive="updateContainerOverflow" ref="container")
+      template(v-for="tab in editorTypeTemplate ? templateTabs : tabs" :key="tab.icon")
+        div(v-if="!tab.hidden" :key="tab.icon"
+            class="footer-tabs__item"
+            :class="{'click-disabled': (tab.disabled || isLocked)}"
+            @click="handleTabAction(tab)")
+          color-btn(v-if="tab.icon === 'color'" size="22px"
+                    class="click-disabled"
+                    :color="globalSelectedColor")
+          svg-icon(v-else class="click-disabled"
+            :iconName="tab.icon"
+            :iconColor="tabColor(tab)"
+            :iconWidth="'24px'"
+            :style="textIconStyle")
+          span(class="no-wrap click-disabled"
+            :class="`text-${tabColor(tab)}`") {{tab.text}}
+          pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
+    transition(name="panel-up")
+      div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs" :style="subTabStyles()")
+        div(class="footer-tabs__unfold"
+            @click="handleTabAction(mainMenu)")
+          svg-icon(class="click-disabled"
+            :iconName="mainMenu.icon"
+            :iconColor="'black-4'"
+            :iconWidth="'24px'"
+            :style="textIconStyle")
+        div(class="footer-tabs__container" :style="containerStyles(true)"
+            @scroll.passive="updateContainerOverflow" ref="sub-container")
+          template(v-for="(tab) in tabs")
+            div(v-if="!tab.hidden" :key="tab.icon"
+                class="footer-tabs__item"
+                :class="{'click-disabled': (tab.disabled || isLocked)}"
+                @click="handleTabAction(tab)")
+              color-btn(v-if="tab.icon === 'color'" size="22px"
+                        class="click-disabled"
+                        :color="globalSelectedColor")
+              svg-icon(v-else class="click-disabled"
+                :iconName="tab.icon"
+                :iconColor="tabColor(tab)"
+                :iconWidth="'24px'"
+                :style="textIconStyle")
+              span(class="no-wrap click-disabled"
+                :class="`text-${tabColor(tab)}`") {{tab.text}}
 </template>
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
@@ -26,15 +53,21 @@ import i18n from '@/i18n'
 import { IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
+import assetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
 import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import pageUtils from '@/utils/pageUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -43,7 +76,7 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { isEqual, startCase } from 'lodash'
 import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -57,8 +90,9 @@ export default defineComponent({
     },
   },
   data() {
-    // const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
+    const mainMenu = { icon: 'vivisticker_unfold' }
     return {
+      mainMenu,
       isFontsPanelOpened: false,
       disableTabScroll: false,
       leftOverflow: false,
@@ -80,15 +114,22 @@ export default defineComponent({
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
       isInEditor: 'vivisticker/getIsInEditor',
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       controllerHidden: 'vivisticker/getControllerHidden',
       hasCopiedFormat: 'getHasCopiedFormat',
       debugMode: 'vivisticker/getDebugMode',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
     }),
+    isSettingTabsOpen(): boolean {
+      return this.editorTypeTemplate && this.tabs.length > 0
+    },
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
     },
@@ -151,28 +192,40 @@ export default defineComponent({
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
-        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
-        // { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage }, // vivisticker can only crop frame
-        ...this.genearlLayerTabs
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isInFrame },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !this.editorTypeTemplate }, // vivisticker can only crop frame besides template editor
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !this.editorTypeTemplate },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: !this.editorTypeTemplate || this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
+        ...this.genearlLayerTabs,
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame }
       ]
     },
     photoTabs(): Array<IFooterTab> {
       console.log(this.inEffectEditingMode)
       const tabs = [
-        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage || this.inEffectEditingMode },
-        // { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage }, // vivisticker can only crop frame
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
         {
           icon: 'effect',
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
-          // hidden: this.isInFrame,
+          hidden: layerUtils.getCurrLayer.type === LayerType.frame,
           // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
         },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
+        ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         ...this.genearlLayerTabs,
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
         ...this.copyPasteTabs,
-        // hide copy-style for vivisticker for now
-        // { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
+        ...(this.editorTypeTemplate && !this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []), // conditional insert to prevent duplicate key
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: !this.editorTypeTemplate },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {
         tabs.unshift({
@@ -192,8 +245,9 @@ export default defineComponent({
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
+        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !vivistickerUtils.isTemplateSupported },
         // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode, forPro: false }
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove' }
       ]
     },
     homeTabsSize(): number {
@@ -216,13 +270,35 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` },
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: this.editorTypeTemplate },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
+      ]
+    },
+    bgSettingTab(): Array<IFooterTab> {
+      const { hasBgImage } = backgroundUtils
+      return [
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          hidden: this.globalSelectedColor === 'none',
+          props: {
+            currColorEvent: ColorEventType.background
+          },
+          disabled: this.backgroundLocked
+        },
+        { icon: 'bg-separate', text: `${this.$t('NN0708')}`, hidden: !hasBgImage, disabled: this.backgroundLocked }
       ]
     },
     multiPhotoTabs(): Array<IFooterTab> {
       return [
-        ...this.multiGeneralTabs
+        ...this.multiGeneralTabs,
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !this.editorTypeTemplate }
       ]
     },
     multiFontTabs(): Array<IFooterTab> {
@@ -263,7 +339,11 @@ export default defineComponent({
       const targetLayer = layerUtils.getCurrConfig as IFrame
       if (targetLayer.type !== 'frame') return []
       const showAdjust = targetLayer.clips.some(i => !['frame', 'svg'].includes(i.srcObj.type))
+      const showReplace = targetLayer.clips.length === 1 || targetLayer.clips.some(c => c.active)
       return [
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !this.editorTypeTemplate || !showReplace },
+        { icon: 'set-as-frame', text: `${this.$t('NN0098')}`, hidden: !this.editorTypeTemplate || targetLayer.clips.length !== 1 },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -273,7 +353,8 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        ...showAdjust ? [{ icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage }] : [],
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.editorTypeTemplate || !showAdjust || this.isSvgImage },
+        ...(this.editorTypeTemplate ? this.genearlLayerTabs : []),
         ...this.copyPasteTabs
       ]
     },
@@ -293,12 +374,18 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace' }
+        { icon: 'photo', text: `${this.$t('NN0490')}` }
       ] as Array<IFooterTab>
     },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
+        { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order', hidden: !this.editorTypeTemplate },
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        this.groupTab,
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position', hidden: !this.editorTypeTemplate },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !this.editorTypeTemplate },
+        { icon: 'nudge', text: `${this.$t('NN0872')}`, panelType: 'nudge', hidden: !this.editorTypeTemplate },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select', hidden: !this.editorTypeTemplate }
       ]
     },
     bgRemoveTabs(): Array<IFooterTab> {
@@ -306,22 +393,33 @@ export default defineComponent({
         { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
       ]
     },
+    templateTabs(): Array<IFooterTab> {
+      return [
+        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template-content' },
+        { icon: 'camera', text: this.$t('STK0067') },
+        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
+        { icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' },
+        { icon: 'paste', text: `${this.$t('NN0230')}` }
+      ]
+    },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
-        this.groupTab,
-        // { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        // { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
+        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: !this.editorTypeTemplate || this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        this.groupTab,
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position', hidden: !this.editorTypeTemplate },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select', hidden: !this.editorTypeTemplate },
         ...this.copyPasteTabs
       ]
     },
     copyPasteTabs(): Array<IFooterTab> {
-      // hide copy and paste for vivisticker for now
-      // return this.editorTypeTextLike ? [
-      //   { icon: 'copy', text: `${this.$t('NN0032')}` },
-      //   { icon: 'paste', text: `${this.$t('NN0230')}` }
-      // ] : []
-      return []
+      return this.editorTypeTemplate ? [
+        { icon: 'copy', text: `${this.$t('NN0032')}` },
+        { icon: 'paste', text: `${this.$t('NN0230')}` }
+      ] : []
     },
     tabs(): Array<IFooterTab> {
       const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
@@ -352,22 +450,39 @@ export default defineComponent({
         return this.multiObjectTabs
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
         return this.multiGeneralTabs
+      // When deselect in object editor with frame
       } else if (this.showFrame) {
         return [...this.frameTabs, ...this.genearlLayerTabs]
+      // When select empty frame in object editor
       } else if (this.showEmptyFrameTabs) {
         return this.emptyFrameTabs
       } else if ((this.showPhotoTabs || targetType === LayerType.image) && !controllerHidden) {
         return this.photoTabs
       } else if (this.showFontTabs) {
-        const res = [...this.fontTabs]
+        const res = [
+          ...(this.editorTypeTemplate ? [{ icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` }] : []), // conditional insert to prevent duplicate key
+          ...this.fontTabs
+        ]
         res.splice(this.fontTabs.length - 2, 0, ...this.genearlLayerTabs, ...this.copyPasteTabs)
         return res
       } else if (this.showShapeSetting) {
-        return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
+        return [
+          { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+          ...this.objectTabs,
+          ...this.genearlLayerTabs,
+          ...this.copyPasteTabs
+        ]
+      } else if (this.inBgSettingMode) {
+        return this.bgSettingTab
       } else if (this.showInGroupFrame) {
         return [...this.frameTabs, ...this.genearlLayerTabs]
-      } else if (this.showGeneralTabs) {
+      } else if (this.editorTypeTemplate ? this.isGroupOrTmp : this.showGeneralTabs) {
         return [...this.genearlLayerTabs]
+      } else if (this.showFrameTabs) {
+        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
+          return this.photoTabs
+        }
+        return this.frameTabs
       } else if (!this.isInEditor) {
         return this.homeTabs
       } else if (this.editorTypeTextLike) {
@@ -434,8 +549,8 @@ export default defineComponent({
       }
     },
     showPhotoTabs(): boolean {
-      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.targetIs('image') && this.singleTargetType()
+      if (this.inBgRemoveMode) return false
+      return (!this.isFontsPanelOpened && this.targetIs('image') && this.singleTargetType()) || (this.editorTypeTemplate && this.hasFrameClipActive)
     },
     showObjectColorAndFontTabs(): boolean {
       const { subLayerIdx } = layerUtils
@@ -446,6 +561,12 @@ export default defineComponent({
       const hasImages = (currLayer.layers.filter(l => l.type === 'image') as IImage[]).length !== 0
       if (hasImages || (singleColorShapes.length === 0 && multiColorShapes.length !== 1)) return false
       else return true
+    },
+    hasFrameClipActive(): boolean {
+      const layer = layerUtils.getCurrLayer
+      if (layer.type === LayerType.frame) {
+        return (layer as IFrame).clips.some(c => c.active)
+      } else return false
     },
     showFontTabs(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
@@ -472,20 +593,11 @@ export default defineComponent({
         (getCurrConfig.type === LayerType.frame && (getCurrConfig as IFrame).clips.length !== 1)
       return stateCondition && typeConditon
     },
+    showFrameTabs(): boolean {
+      return this.targetIs('frame') && this.singleTargetType() && !(layerUtils.getCurrLayer as IFrame).clips.some(c => c.active)
+    },
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable
-    },
-    containerStyles(): { [index: string]: string } {
-      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
-      return {
-        transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
-        opacity: `${this.contentEditable ? 0 : 1}`,
-        maskImage: this.contentEditable ? 'none'
-          : `linear-gradient(to right,
-          transparent 0, black ${this.leftOverflow ? '56px' : 0},
-          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`,
-        ...(this.isTablet && this.isInEditor && { height: '80px', justifyContent: 'center' })
-      }
     },
     currLayer(): ILayer {
       return layerUtils.getCurrLayer
@@ -501,6 +613,13 @@ export default defineComponent({
     },
     selectMultiple(): boolean {
       return this.selectedLayerNum > 1
+    },
+    backgroundImgControl(): boolean {
+      return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
+    },
+    backgroundLocked(): boolean {
+      const { locked } = pageUtils.currFocusPage.backgroundImage.config
+      return locked
     }
   },
   watch: {
@@ -515,8 +634,11 @@ export default defineComponent({
           this.disableTabScroll = false
           return
         }
-        const container = this.$refs.container as HTMLElement
-        container.scrollTo(0, 0)
+        const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
+        if (elContainer) elContainer.scrollTo(0, 0)
+        this.$nextTick(() => {
+          this.updateContainerOverflow()
+        })
       },
       deep: true
     },
@@ -527,19 +649,34 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      setBgImageControl: 'SET_backgroundImageControl'
+    }),
     updateContainerOverflow() {
-      const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.container as HTMLElement
+      const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
+      if (!elContainer) return
+      const { scrollLeft, scrollWidth, offsetWidth } = elContainer
       this.leftOverflow = scrollLeft > 0
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
-      if (!vivistickerUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, 'text')) return
-
+      console.log(tab.plan)
+      if (!vivistickerUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, tab.plan)) return
+      if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
+        editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+      }
       if (tab.icon !== 'crop' && this.isCropping) {
         imageUtils.setImgControlDefault()
       }
 
       switch (tab.icon) {
+        case 'vivisticker_unfold': {
+          groupUtils.deselect()
+          this.$emit('switchTab', 'none')
+          if (this.inBgSettingMode) editorUtils.setInBgSettingMode(false)
+          if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
+          break
+        }
         case 'crop': {
           if (this.selectedLayerNum > 0) {
             if (this.isCropping) {
@@ -563,6 +700,12 @@ export default defineComponent({
                   break
               }
             }
+          } else if (this.inBgSettingMode) {
+            if (this.backgroundLocked) return this.handleLockedNotify()
+            this.setBgImageControl({
+              pageIndex: pageUtils.currFocusPageIndex,
+              imgControl: !this.backgroundImgControl
+            })
           }
           break
         }
@@ -618,6 +761,18 @@ export default defineComponent({
           mappingUtils.mappingIconAction(tab.icon)
           break
         }
+        case 'multiple-select': {
+          editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+          break
+        }
+        case 'bg-separate': {
+          if (this.inBgSettingMode) {
+            backgroundUtils.detachBgImage()
+          } else {
+            backgroundUtils.setBgImageSrc()
+          }
+          break
+        }
         case 'copy': {
           shortcutUtils.copy()
           break
@@ -650,30 +805,77 @@ export default defineComponent({
         }
         case 'photo':
         case 'replace': {
-          const { pageIndex, layerIndex, subLayerIdx = 0 } = layerUtils
+          if (tab.panelType !== undefined) break
+          const { pageIndex, layerIndex, subLayerIdx = 0, getCurrLayer: layer } = layerUtils
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
               if (images.length) {
-                const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
-                  .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], imageUtils.getSrc({
-                    type: 'ios',
-                    assetId: images[0],
-                    userId: ''
-                  }))
-                frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
-                  imgWidth,
-                  imgHeight,
-                  imgX,
-                  imgY
-                })
-                frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
+                const isPrimaryLayerFrame = layer.type === LayerType.frame
+                const srcObj = {
                   type: 'ios',
                   assetId: images[0],
                   userId: ''
-                })
+                }
+                const src = imageUtils.getSrc(srcObj)
+                if (isPrimaryLayerFrame) {
+                  // replace frame
+                  const clipIndex = Math.max(subLayerIdx, 0)
+                  const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                    .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[clipIndex], src)
+                  frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, clipIndex, {
+                    imgWidth,
+                    imgHeight,
+                    imgX,
+                    imgY
+                  })
+                  frameUtils.updateFrameClipSrc(pageIndex, layerIndex, clipIndex, srcObj)
+                } else {
+                  await imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+                    const { naturalWidth, naturalHeight } = img
+                    if (this.inBgSettingMode) {
+                      // replace background
+                      backgroundUtils.setBgImage({
+                        pageIndex: pageUtils.currFocusPageIndex,
+                        config: layerFactary.newImage({
+                          srcObj,
+                          styles: {
+                            width: naturalWidth,
+                            height: naturalHeight
+                          }
+                        })
+                      })
+                      backgroundUtils.fitPageBackground(pageUtils.currFocusPageIndex)
+                    } else {
+                      // replace image
+                      const resizeRatio = RESIZE_RATIO_IMAGE
+                      const pageSize = pageUtils.getPageSize(pageIndex)
+                      const pageAspectRatio = pageSize.width / pageSize.height
+                      const photoAspectRatio = naturalWidth / naturalHeight
+                      const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+                      const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+                      const config = layerUtils.getCurrConfig as IImage
+                      const { imgWidth, imgHeight } = config.styles
+                      const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
+                      const styles = {
+                        ...config.styles,
+                        ...mouseUtils.clipperHandler({
+                          styles: {
+                            width: photoWidth,
+                            height: photoHeight
+                          }
+                        } as unknown as IImage, path, config.styles).styles,
+                        ...{
+                          initWidth: config.styles.initWidth,
+                          initHeight: config.styles.initHeight
+                        }
+                      }
+                      layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+                      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+                    }
+                  })
+                }
                 stepsUtils.record()
               }
-              this.$emit('switchTab', 'none')
             })
           break
         }
@@ -681,6 +883,28 @@ export default defineComponent({
         case 'text-color-mobile':
           colorUtils.setCurrEvent(tab?.props?.currColorEvent as string)
           break
+        case 'camera': {
+          vivistickerUtils.getIosImg()
+            .then(async (images: Array<string>) => {
+              if (images.length) {
+                const src = imageUtils.getSrc({
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                })
+                imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+                  const { naturalWidth, naturalHeight } = img
+                  const photoAspectRatio = naturalWidth / naturalHeight
+                  assetUtils.addImage(
+                    src,
+                    photoAspectRatio
+                  )
+                })
+              }
+              this.$emit('switchTab', 'none')
+            })
+          break
+        }
         default: {
           break
         }
@@ -719,7 +943,7 @@ export default defineComponent({
           return this.groupTypes.has(type)
         }
       } else {
-        if (this.currSelectedInfo.types.has('frame') && type === 'image') {
+        if (!this.editorTypeTemplate && this.currSelectedInfo.types.has('frame') && type === 'image') {
           return this.isInFrame
         }
         return this.currSelectedInfo.types.has(type)
@@ -771,6 +995,32 @@ export default defineComponent({
         }
       }
     },
+    handleLockedNotify() {
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+    },
+    tabColor(tab: IFooterTab): string {
+      return (tab.disabled || this.isLocked) ? 'gray-2' : this.tabActive(tab) ? 'white' : 'black-4'
+    },
+    containerStyles(isSubContainer = false): { [index: string]: string } {
+      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
+      return {
+        transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
+        opacity: `${this.contentEditable ? 0 : 1}`,
+        ...(this.isSettingTabsOpen === isSubContainer && {
+          maskImage: this.contentEditable ? 'none'
+            : `linear-gradient(to right,
+          transparent 0, black ${this.leftOverflow ? '56px' : 0},
+          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
+        }),
+        ...(this.isTablet && this.isInEditor && { height: '80px', justifyContent: 'center' }),
+        ...(isSubContainer && { paddingLeft: '0px' })
+      }
+    },
+    subTabStyles(): { [index: string]: string } {
+      return {
+        ...(this.isTablet && { justifyContent: 'center', gridTemplateColumns: 'auto auto' })
+      }
+    }
   }
 })
 </script>
@@ -779,6 +1029,22 @@ export default defineComponent({
 .footer-tabs {
   overflow: hidden;
   background-color: setColor(black-1);
+
+  &__content {
+    display: grid;
+    transition: transform 0.3s, opacity 0.4s;
+  }
+
+  &__unfold {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 12px 0px 24px;
+    background-color: setColor(black-1);
+    z-index: 1;
+  }
+
   &__container {
     height: 57px;
     overflow: scroll;
@@ -815,6 +1081,14 @@ export default defineComponent({
       transform: scale(0.8);
       line-height: 20px;
     }
+  }
+
+  &__sub-tabs {
+    width: 100%;
+    position: absolute;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    background-color: setColor(black-1);
   }
 }
 </style>

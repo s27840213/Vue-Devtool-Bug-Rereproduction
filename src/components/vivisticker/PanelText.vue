@@ -1,52 +1,59 @@
 <template lang="pug">
-div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
-  search-bar(v-if="!isInCategory"
-    class="panel-text__searchbar"
-    :class="{'no-top': isInEditor}"
-    :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
-    clear
-    :defaultKeyword="keywordLabel"
-    vivisticker="dark"
-    :color="{close: 'black-5', search: 'black-5'}"
-    @search="handleSearch")
-  div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-  template(v-if="!keyword && !showAllRecently")
-    div(class="panel-text__text-button-wrapper"
-        :style="`font-family: ${localeFont()}`"
-        @click="handleAddText")
-      span {{ $t('STK0001') }}
-      svg-icon(iconName="plus-square" iconWidth="22px" iconColor="white")
-  category-list(v-for="item in categoryListArray"
-    v-show="item.show" :ref="item.key" :key="item.key"
-    :list="item.content" @loadMore="handleLoadMore")
-    template(#before)
-      div(class="panel-text__top-item")
-    template(v-if="pending" #after)
-      div(class="text-center")
-        svg-icon(iconName="loading"
-          iconColor="white"
-          iconWidth="20px")
-    template(v-slot:category-list-rows="{ list, title, url }")
-      category-list-rows(
-        v-if="!keyword"
-        :list="list"
-        :title="title"
-        :url="url"
-        :columnGap="isTablet ? 5 : 10"
-        @action="handleCategorySearch")
-        template(v-slot:preview="{ item }")
-          category-text-item(class="panel-text__item"
+div(class="overflow-container full-size rwd-container")
+  div(class="panel-text" :class="{'in-category': isInCategory, 'with-search-bar': !isInCategory}")
+    search-bar(v-if="!isInCategory"
+      class="panel-text__searchbar"
+      :class="{'no-top': isInEditor}"
+      :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
+      clear
+      :defaultKeyword="keywordLabel"
+      vivisticker="dark"
+      :color="{close: 'black-5', search: 'black-5'}"
+      v-model:expanded="isSearchBarExpanded"
+      @search="handleSearch")
+    tags(v-show="tags && tags.length"
+        class="panel-text__tags"
+        :class="{collapsed: !isSearchBarExpanded, 'in-category': isInCategory}"
+        :tags="tags"
+        :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+        ref="tags"
+        theme="dark"
+        @search="handleSearch"
+        @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
+    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    category-list(v-for="item in categoryListArray"
+      :class="{collapsed: tags && tags.length && !isSearchBarExpanded}"
+      v-show="item.show" :ref="item.key" :key="item.key"
+      :list="item.content" @loadMore="handleLoadMore")
+      template(#before)
+        div(class="panel-text__top-item")
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+      template(v-slot:category-list-rows="{ list, title, url }")
+        category-list-rows(
+          v-if="!keyword"
+          :list="list"
+          :title="title"
+          :url="url"
+          :columnGap="isTablet ? 5 : 10"
+          @action="handleCategorySearch")
+          template(v-slot:preview="{ item }")
+            category-text-item(class="panel-text__item"
+              :item="item"
+              :itemWidth="itemWidth")
+      template(v-slot:category-text-item="{ list, title }")
+        div(v-if="title" class="panel-text__header") {{ title }}
+        div(class="panel-text__items" :style="itemsStyles")
+          category-text-item(v-for="item in list"
+            class="panel-text__item"
+            :key="item.id"
             :item="item"
-            :itemWidth="itemWidth")
-    template(v-slot:category-text-item="{ list, title }")
-      div(v-if="title" class="panel-text__header") {{ title }}
-      div(class="panel-text__items" :style="itemsStyles")
-        category-text-item(v-for="item in list"
-          class="panel-text__item"
-          :key="item.id"
-          :item="item"
-          :itemWidth="itemWidth"
-          :style="{margin: isTablet ? 0 : '0 auto'}")
+            :itemWidth="itemWidth"
+            :style="{margin: isTablet ? 0 : '0 auto'}")
+    btn-add(v-if="!keyword && !showAllRecently" class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
 </template>
 
 <script lang="ts">
@@ -54,7 +61,9 @@ import listApi from '@/apis/list'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
+import Tags, { ITag } from '@/components/global/Tags.vue'
 import SearchBar from '@/components/SearchBar.vue'
+import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
@@ -64,21 +73,32 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
+type refTarget = 'mainContent' | 'searchResult'
+
 export default defineComponent({
   name: 'panel-text',
   components: {
     SearchBar,
+    Tags,
     CategoryList,
     CategoryListRows,
-    CategoryTextItem
+    CategoryTextItem,
+    BtnAdd
   },
   data() {
     return {
+      targets: ['mainContent', 'searchResult'] as refTarget[],
+      elMainContent: undefined as HTMLElement | undefined,
       scrollTop: {
         mainContent: 0,
         searchResult: 0
-      }
+      },
+      isSearchBarExpanded: false,
+      tagScrollLeft: 0
     }
+  },
+  created() {
+    this.isSearchBarExpanded = !!this.keyword
   },
   computed: {
     ...mapGetters({
@@ -88,7 +108,8 @@ export default defineComponent({
       isTabInCategory: 'vivisticker/getIsInCategory',
       isTabShowAllRecently: 'vivisticker/getShowAllRecently',
       editorBg: 'vivisticker/getEditorBg',
-      pending: 'textStock/pending'
+      pending: 'textStock/pending',
+      tagsBar: 'textStock/tagsBar'
     }),
     ...mapState({
       isTablet: 'isTablet'
@@ -190,9 +211,20 @@ export default defineComponent({
         gridTemplateColumns: 'repeat(3, 1fr)',
         columnGap: '10px'
       }
-    }
+    },
+    tags(): ITag[] {
+      return this.showAllRecently ? [] : this.tagsBar
+    },
   },
   mounted() {
+    // skip transitions after tags load
+    const unwatch = this.$watch('tags.length', () => {
+      this.toggleTransitions(false)
+      window.requestAnimationFrame(() => {
+        this.toggleTransitions(true)
+      })
+      unwatch()
+    })
     eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
     if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending || this.$options.name === 'panel-text-us') return
     generalUtils.panelInit('text',
@@ -201,6 +233,7 @@ export default defineComponent({
       async ({ reset }: {reset: boolean}) => {
         await this.getRecAndCate({ reset, key: 'textStock' })
       })
+    this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelTextToTop)
@@ -215,6 +248,9 @@ export default defineComponent({
       searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
     })
   },
+  deactivated() {
+    if (!this.keyword) this.isSearchBarExpanded = false
+  },
   watch: {
     keyword(newVal: string) {
       if (!newVal) {
@@ -224,6 +260,13 @@ export default defineComponent({
           mainContent.scrollTop = this.scrollTop.mainContent
         })
       }
+    },
+    isInCategory() {
+      // skip transitions when entering or leaving category
+      this.toggleTransitions(false)
+      window.requestAnimationFrame(() => {
+        this.toggleTransitions(true)
+      })
     }
   },
   methods: {
@@ -248,9 +291,10 @@ export default defineComponent({
       }
     },
     async handleSearch(keyword: string) {
-      this.resetSearch()
+      this.resetSearch({ keepSearchResult: true })
       if (keyword) {
         this.getTagContent({ keyword })
+        this.isSearchBarExpanded = true
       }
     },
     async handleCategorySearch(keyword: string, locale = '') {
@@ -297,9 +341,6 @@ export default defineComponent({
         )
       }
     },
-    localeFont() {
-      return AssetUtils.getFontMap()[i18n.global.locale]
-    },
     handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
@@ -319,12 +360,26 @@ export default defineComponent({
             size: 80 + gap + (title ? titleHeight : 0) // 80(object height) + 24(gap) + 0/46(title)
           }
         })
+    },
+    toggleTransitions(enable: boolean) {
+      // tags
+      const elTags = (this.$refs.tags as any)?.$el as HTMLElement
+      if (elTags) elTags.style.transition = enable ? '' : 'none'
+
+      // category list
+      const ref = this.$refs as Record<string, CCategoryList[]>
+      for (const name of this.targets) {
+        ref[name][0].$el.style.transition = enable ? '' : 'none'
+      }
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.overflow-container {
+  overflow: clip;
+}
 .search-bar {
   flex: 0 0 auto;
 }
@@ -332,13 +387,17 @@ export default defineComponent({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow: hidden;
+  color: white;
   &__searchbar {
-    margin-top: 24px;
-    margin-bottom: 14px;
+    margin-top: 10px;
     &.no-top {
       margin-top: 0;
     }
+  }
+  &__tags {
+    margin: 7px 0 10px;
+    color: setColor(black-5);
   }
   &__brand-header {
     margin-top: 10px;
@@ -364,6 +423,30 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     column-gap: 10px;
+  }
+  &.with-search-bar {
+    height: calc(100% + 49px); // 42px (serach bar height) + 7px (margin-top of tags) = 49px
+    .panel-text__tags {
+      clip-path: inset(0 0 0 0);
+      transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
+      &.collapsed {
+        transform: translateY(-49px);
+        clip-path: inset(0 42px 0 0);
+      }
+    }
+    .category-list {
+      transition: transform 200ms 100ms ease-in-out;
+      &.collapsed{
+        transform: translateY(-49px) translateZ(0);
+      }
+    }
+    &:deep(.vue-recycle-scroller__item-wrapper) {
+      margin-bottom: 49px;
+    }
+    &:deep(.tags__flex-container-mobile) {
+      width: max-content;
+      padding-right: 42px;
+    }
   }
   &.in-category:deep(.vue-recycle-scroller__item-wrapper) {
     margin-top: 24px;

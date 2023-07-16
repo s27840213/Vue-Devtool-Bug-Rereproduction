@@ -86,10 +86,10 @@ export default class SubControllerUtils {
              */
             if (this.config.type === LayerType.image) {
               switch (this.primaryLayer.type) {
-                // vivisticker can only crop frame
-                // case LayerType.group:
-                //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIdx)
-                //   break
+                // vivisticker can only crop frame besides template editor
+                case LayerType.group:
+                  if (store.getters['vivisticker/getEditorTypeTemplate']) layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIdx)
+                  break
                 case LayerType.frame:
                   if ((this.config as IImage).srcObj.type !== 'frame') {
                     frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { imgControl: true })
@@ -170,8 +170,8 @@ export default class SubControllerUtils {
     }
     const isEmptClipInFrame = this.primaryLayer.type === LayerType.frame && (this.config as IImage).srcObj.type === 'frame' &&
       !hasActualMove && !store.getters['vivisticker/getControllerHidden']
-    const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.image && this.primaryLayer.layers[this.layerIndex].type === 'frame' &&
-      this.primaryLayer.active && (this.primaryLayer.layers[this.layerIndex] as IFrame).clips.length === 1 && (this.config as IImage).srcObj.type === 'frame'
+    const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.image && this.primaryLayer.layers[this.subLayerIdx].type === 'frame' &&
+      this.primaryLayer.active && (this.primaryLayer.layers[this.subLayerIdx] as IFrame).clips.length === 1 && (this.config as IImage).srcObj.type === 'frame'
     if (!hasActualMove && (isEmptClipInFrame || isEmptClipInGroup)) {
       let image
       if (isEmptClipInGroup) {

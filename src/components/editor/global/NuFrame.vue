@@ -64,6 +64,10 @@ export default defineComponent({
     primaryLayer: {
       default: undefined,
       type: Object as PropType<IGroup | ITmp>
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   async created() {
@@ -175,16 +179,16 @@ export default defineComponent({
       }
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
       vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
-    }
+    } else vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
   },
   mounted() {
     if (this.config.clips.length === 1) {
-      frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
+      if (!this.editorTypeTemplate && this.$route.name !== 'Screenshot') frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
       if (this.config.clips[0].srcObj.type === 'frame') {
         /**
-         * If the frame contain only one clip, and is not init from mydesign auto popping the photo-selector
+         * If the frame contain only one clip, and is not in template editor or init from mydesign or in preview auto popping the photo-selector
          */
-        if (!this.config.initFromMydesign) {
+        if (!(this.editorTypeTemplate || this.config.initFromMydesign || this.inPreview || this.inScreenshotPreview)) {
           window.requestAnimationFrame(() => {
             if (this.primaryLayer) {
               frameUtils.iosPhotoSelect({
@@ -254,7 +258,7 @@ export default defineComponent({
     },
     controllerHidden(val) {
       if (!val) {
-        if (this.config.active && this.config.clips.length === 1) {
+        if (!this.editorTypeTemplate && this.config.active && this.config.clips.length === 1) {
           frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
         }
       }
@@ -266,6 +270,8 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       controllerHidden: 'vivisticker/getControllerHidden',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
+      inScreenshotPreview: 'getInScreenshotPreview',
     }),
     layers() {
       const config = this.config as IFrame
