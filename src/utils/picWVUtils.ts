@@ -191,6 +191,12 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     if (this.inBrowserMode) return
     this.sendToIOS('RATING_REQUEST', { type })
   }
+
+  async getIosImg(limit = 1): Promise<Array<string>> {
+    const { images } = ((await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', { timeout: 60000, cancelOnConfict: true })) ?? { images: [] }) as { images: Array<string> }
+    console.log(images)
+    return images
+  }
 }
 
 export default new VivipicWebViewUtils()
