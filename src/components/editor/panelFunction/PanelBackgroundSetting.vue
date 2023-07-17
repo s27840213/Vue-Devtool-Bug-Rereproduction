@@ -24,10 +24,14 @@ div(class="bg-setting")
       @click="handleDeleteBackground"
       v-hint="$t('NN0034')"
     )
-  div(class="mb-10")
+  div(class="bg-setting__grid mb-10")
     nubtn(theme="edit" size="mid-full"
       :disabled="!isShowImage || backgroundLocked"
       @click="handleControlBgImage") {{$t('NN0040')}}
+    nubtn(theme="edit" size="mid-full"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="handleShow('overlay')") {{$t('NN0899')}}
+  overlay(v-if="show === 'overlay'" class="mb-10" theme="light")
   div(class="bg-setting__grid mb-10")
     nubtn(theme="edit" size="mid-full"
       :active="show === 'popup-flip'"
@@ -62,6 +66,7 @@ div(class="bg-setting")
 </template>
 
 <script lang="ts">
+import Overlay from '@/components/editor/overlay/Overlay.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import i18n from '@/i18n'
@@ -82,7 +87,8 @@ import { mapMutations } from 'vuex'
 export default defineComponent({
   components: {
     PopupAdjust,
-    ColorBtn
+    ColorBtn,
+    Overlay,
   },
   directives: {
     clickOutside: vClickOutside.directive

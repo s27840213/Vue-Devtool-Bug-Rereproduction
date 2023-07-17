@@ -355,6 +355,9 @@ export default defineComponent({
       height: 33px;
       cursor: pointer;
     }
+    .svg-chevron-down {
+      transition: all 0.5s ease-in-out;
+    }
     &[selected=true] .svg-chevron-down {
       transform: scaleY(-1);
     }

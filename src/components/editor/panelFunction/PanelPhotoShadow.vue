@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
+div(class="photo-effect-setting" ref="panel" tabindex="0" @keydown.stop)
   div(class="action-bar")
     div(class="flex-between photo-effect-setting__options mb-10")
       svg-icon(v-for="(icon) in shadowOption.slice(0, 3)"

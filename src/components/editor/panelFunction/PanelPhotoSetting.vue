@@ -1,28 +1,31 @@
+<!-- eslint-disable vue/valid-v-for -->
 <template lang="pug">
 div(class="photo-setting")
   span(class="photo-setting__title text-blue-1 text-H6") {{$t('NN0039')}}
   div(class="photo-setting__grid mb-10")
-    template(v-for="btn in btns")
-      nubtn(v-if="!btn.condition || btn.condition()"
-        :key="btn.name"
-        theme="edit"
-        size="mid-full"
-        :active="activeBtn(btn)"
-        :disabled="disableBtn(btn)"
-        v-hint="disableBtn(btn) ? btn.hint : ''"
-        @click="handleShow(btn.show)") {{ btn.label }}
-    nubtn(v-if="isImage && !isFrame && !inReviewMode"
-      theme="edit"
-      size="mid-full"
-      :disabled="isHandleShadow || isSvgImage || show === 'panel-photo-shadow'"
-      @click="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
-  component(:is="show || 'div'"
-    ref="popup"
-    :imageAdjust="currLayerAdjust"
-    @update="handleAdjust")
+    template(v-for="btnRow in btns")
+      template(v-for="btn in btnRow")
+        nubtn(v-if="!btn.condition || btn.condition()"
+          :key="btn.name"
+          :class="btn.extraClass"
+          theme="edit"
+          size="mid-full"
+          :active="activeBtn(btn)"
+          :disabled="disableBtn(btn)"
+          v-hint="disableBtn(btn) ? btn.hint : ''"
+          @click="handleShow(btn.show)") {{ btn.label }}
+      component(v-if="btnRow.map(b => b.show).includes(show)"
+        class="grid-full"
+        :key="show+'panel'"
+        :is="show || 'div'"
+        ref="popup"
+        :imageAdjust="currLayerAdjust"
+        theme="light"
+        @update="handleAdjust")
 </template>
 
 <script lang="ts">
+import Overlay from '@/components/editor/overlay/Overlay.vue'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
@@ -46,6 +49,7 @@ interface IBtn {
   name: string
   label: string
   show: string
+  extraClass?: string
   condition?: () => boolean
   hint?: string
 }
@@ -57,7 +61,13 @@ export default defineComponent({
     return {
       show: '',
       isSvgImage: false,
-      btns: [
+      btns: [[
+        {
+          name: 'overlay',
+          label: this.$t('NN0899'),
+          show: 'overlay',
+          extraClass: 'grid-full',
+        }], [
         {
           name: 'crop',
           label: `${this.$t('NN0040')}`,
@@ -68,12 +78,11 @@ export default defineComponent({
               (currTargetLayer.type === LayerType.frame && (currTargetLayer as IFrame).clips.length === 1)
           }
         },
-        // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
         {
           name: 'sliders',
           label: `${this.$t('NN0042')}`,
           show: 'popup-adjust'
-        },
+        }], [
         {
           name: 'shadow',
           label: `${this.$t('NN0429')}`,
@@ -86,9 +95,16 @@ export default defineComponent({
             }
             return currLayer.type === LayerType.image
           }
-        }
-      ] as IBtn[],
-      bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
+        },
+        {
+          name: 'BGRM',
+          label: this.$t('NN0043'),
+          show: 'remove-bg',
+          condition: () => {
+            return this.isImage && !this.isFrame && !this.inReviewMode
+          },
+        }]
+      ] as IBtn[][],
     }
   },
   mounted() {
@@ -109,7 +125,8 @@ export default defineComponent({
   },
   components: {
     PopupAdjust,
-    PanelPhotoShadow
+    PanelPhotoShadow,
+    Overlay,
   },
   computed: {
     ...mapState('imgControl', {
@@ -192,6 +209,9 @@ export default defineComponent({
       updateImgCtrlConfig: 'imgControl/UPDATE_CONFIG'
     }),
     disableBtn(btn: IBtn): boolean {
+      if (btn.name === 'BGRM') {
+        return this.isHandleShadow || this.isSvgImage || this.show === 'panel-photo-shadow'
+      }
       const currLayer = layerUtils.getCurrConfig as IImage
       if (!currLayer.styles) return false
       const { shadow } = currLayer.styles
@@ -218,7 +238,7 @@ export default defineComponent({
     },
     handleShow(name: string) {
       switch (name) {
-        case this.btns.find(b => b.name === 'shadow')?.show || '': {
+        case 'panel-photo-shadow': {
           if (this.isUploadImgShadow) {
             return
           }
@@ -277,7 +297,7 @@ export default defineComponent({
       if (colorPanel && colorPanel.contains(e.target as Node)) {
         return
       }
-      if (!(this.$refs.popup as any).$el.contains(e.target as Node)) {
+      if (!(this.$refs.popup as any)[0].$el.contains(e.target as Node)) {
         if (!this.isHandleShadow) {
           this.handleOutside()
         }
@@ -352,9 +372,12 @@ export default defineComponent({
     margin-top: 15px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-auto-rows: 1fr;
-    row-gap: 10px;
-    column-gap: 20px;
+    grid-auto-rows: auto;
+    gap: 15px 12px;
   }
+}
+
+.grid-full {
+  grid-column: 1 / 3;
 }
 </style>
