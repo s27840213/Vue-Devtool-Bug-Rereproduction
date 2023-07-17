@@ -14,6 +14,7 @@ body {
     margin: 0;
     padding: 0;
     touch-action: manipulation;
+    overflow: hidden; // Fallback for older version browser that doesn't support clip.
     overflow: clip;
     -webkit-user-select: none; // vivisticker only
     user-select: none; // vivisticker only
