@@ -14,7 +14,7 @@ div(class="photo-setting")
     nubtn(v-if="isImage && !isFrame && !inReviewMode"
       theme="edit"
       size="mid-full"
-      :disabled="isHandleShadow || isSvgImage || show === 'panel-photo-shadow'"
+      :disabled="hasPreviewSrc || isHandleShadow || isSvgImage || show === 'panel-photo-shadow'"
       @click="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
   component(:is="show || 'div'"
     ref="popup"
@@ -171,6 +171,9 @@ export default defineComponent({
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
     },
+    hasPreviewSrc(): boolean {
+      return this.currLayer.previewSrc !== undefined
+    }
   },
   watch: {
     currSelectedLayers: {
@@ -208,6 +211,11 @@ export default defineComponent({
           return true
         }
       }
+
+      if (btn.name === 'remove-bg') {
+        return this.hasPreviewSrc
+      }
+
       return false
     },
     activeBtn(btn: IBtn): boolean {

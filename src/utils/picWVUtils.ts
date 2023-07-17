@@ -30,7 +30,8 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
 
   MAIN_CALLBACKS = [
     'updateInfoDone',
-    'loginResult'
+    'loginResult',
+    'uploadImageURL'
   ]
 
   CALLBACK_MAPS = {
@@ -127,6 +128,10 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
       this.errorMessageMap.locale = data.msg ?? ''
     }
     this.handleCallback('update-user-info')
+  }
+
+  uploadImageURL(data: any) {
+    this.handleCallback('upload-image', data)
   }
 
   async setState(key: string, value: any) {

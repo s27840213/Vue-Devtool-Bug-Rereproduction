@@ -71,6 +71,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { isEqual } from 'lodash'
 import { defineComponent } from 'vue'
@@ -631,7 +632,15 @@ export default defineComponent({
           break
         }
         case 'cameraroll': {
-          picWVUtils.getIosImg()
+          picWVUtils.getIosImg().then((images: string[]) => {
+            if (images.length > 0) {
+              generalUtils.toDataURL(`vvpic://${images[0]}`, (dataUrl: string) => {
+                uploadUtils.uploadAsset('image', [dataUrl], {
+                  addToPage: true
+                })
+              })
+            }
+          })
           break
         }
         case 'remove-bg': {
