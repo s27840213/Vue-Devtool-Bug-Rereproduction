@@ -58,6 +58,7 @@ export default defineComponent({
 .overlay-item {
   display: grid;
   text-align: center;
+  cursor: pointer;
 
   // Set font color in different state.
   &:hover {

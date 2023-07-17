@@ -2,13 +2,12 @@
 div(v-if="theme !== 'mobile'" class="overlay" :class="theme")
   div(v-for="cate in fakeData"
       :key="cate.name"
-      class="overlay__category"
-      :selected="currCategory === cate.name")
-    span(v-if="cate.name"
+      class="overlay__category")
+    component(v-if="cate.name"
         class="overlay__category-name"
+        :is="theme === 'light' ? 'CollapseTitle' : 'span'"
+        :selected="currCategory === cate.name"
         @click="switchTab(cate.name)") {{ cate.name }}
-      svg-icon(v-if="theme === 'light'" iconName="chevron-down"
-              iconColor="gray-1" iconWidth="24px")
     collapse(class="overlay__collapse"
         :when="currCategory === cate.name || !cate.name || theme !== 'light'")
       div(class="overlay__category-list")
@@ -24,6 +23,7 @@ div(v-if="theme !== 'mobile'" class="overlay" :class="theme")
 
 <script lang="ts">
 import OverlayItem from '@/components/editor/overlay/OverlayItem.vue'
+import CollapseTitle from '@/components/global/CollapseTitle.vue'
 import { IAssetObject } from '@/interfaces/shape'
 import { defineComponent, PropType } from 'vue'
 import { Collapse } from 'vue-collapsed'
@@ -49,6 +49,7 @@ export default defineComponent({
   components: {
     OverlayItem,
     Collapse,
+    CollapseTitle,
   },
   props: {
     theme: {
@@ -138,18 +139,8 @@ export default defineComponent({
   padding: 0 0 10px 0;
   box-sizing: border-box;
   height: 100%;
-  &__category {
-    .svg-chevron-down {
-      transition: all 0.5s ease-in-out;
-    }
-    &[selected=true] .svg-chevron-down {
-      transform: scaleY(-1);
-    }
-  }
+  text-align: left;
   &__category-name {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin: 0 10px;
   }
   &__collapse {

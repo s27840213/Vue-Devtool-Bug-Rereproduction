@@ -3,10 +3,9 @@ div(class="text-effect-setting")
   div(class="text-effect-setting__title") {{ $t('NN0095') }}
   //- Effect category: shadow, shape, bg and fill.
   div(v-for="category in textEffects" :key="category.name"
-      class="text-effect-setting__category"
-      :selected="currCategoryName === category.name")
-    span(@click="switchTab(category.name)") {{category.label}}
-      svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="24px")
+      class="text-effect-setting__category")
+    collapse-title(:selected="currCategoryName === category.name"
+        @click="switchTab(category.name)") {{category.label}}
     //- Effect icons and options.
     collapse(:when="currCategoryName === category.name"
             class="text-effect-setting__effects2d")
@@ -88,6 +87,7 @@ div(class="text-effect-setting")
 
 <!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
+import CollapseTitle from '@/components/global/CollapseTitle.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
@@ -117,6 +117,7 @@ export default defineComponent({
     ColorBtn,
     ProItem,
     Collapse,
+    CollapseTitle,
   },
   emits: ['toggleColorPanel'],
   data() {
@@ -349,17 +350,7 @@ export default defineComponent({
     @include body-SM;
     color: setColor(gray-1);
     > span {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       height: 33px;
-      cursor: pointer;
-    }
-    .svg-chevron-down {
-      transition: all 0.5s ease-in-out;
-    }
-    &[selected=true] .svg-chevron-down {
-      transform: scaleY(-1);
     }
   }
   &__effects2d {

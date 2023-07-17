@@ -44,23 +44,27 @@ div(class="pricing")
         span(v-else) {{item}}
     div(class="pricing-faq")
       span(class="text-H2 mb-20") {{$t('NN0533')}}
-      details(v-for="item in faqs" :key="item.Q")
-        summary {{item.Q}}
-          svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
-        i18n-t(v-if="item.isPath" :keypath="item.A" tag="p" class="body-MD text-gray-2 mt-20")
-          template(#history)
-            router-link(to="/settings/billing") {{$t('NN0614')}}
-        p(v-else class="body-MD text-gray-2 mt-20" v-html="item.A")
+      template(v-for="item in faqs" :key="item.Q")
+        collapse-title(:selected="faqOpen.includes(item.Q)"
+            @click="clickFaq(item.Q)") {{item.Q}}
+        collapse(:when="faqOpen.includes(item.Q)")
+          i18n-t(v-if="item.isPath" :keypath="item.A" tag="p" class="body-MD text-gray-2 mt-20")
+            template(#history)
+              router-link(to="/settings/billing") {{$t('NN0614')}}
+          p(v-else class="body-MD text-gray-2 mt-20" v-html="item.A")
     nu-footer
 </template>
 
 <script lang="ts">
+import CollapseTitle from '@/components/global/CollapseTitle.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import paymentData from '@/utils/constantData'
 import paymentUtils from '@/utils/paymentUtils'
+import { pull } from 'lodash'
 import { defineComponent } from 'vue'
+import { Collapse } from 'vue-collapsed'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 
@@ -77,7 +81,9 @@ export default defineComponent({
   components: {
     NuHeader,
     NuFooter,
-    SlideToggle
+    SlideToggle,
+    CollapseTitle,
+    Collapse,
   },
   metaInfo() {
     return {
@@ -122,7 +128,8 @@ export default defineComponent({
       colorBlock: paymentData.pricingColorBlock(),
       periods: paymentData.periodOptions(),
       compareTable: paymentData.compareTable(),
-      faqs: paymentData.faqs()
+      faqs: paymentData.faqs(),
+      faqOpen: [] as string[],
     }
   },
   computed: {
@@ -166,7 +173,14 @@ export default defineComponent({
       } else {
         this.$router.push('/settings/payment')
       }
-    }
+    },
+    clickFaq(Q: string) {
+      if (this.faqOpen.includes(Q)) {
+        pull(this.faqOpen, Q)
+      } else {
+        this.faqOpen.push(Q)
+      }
+    },
   }
 })
 </script>
@@ -347,26 +361,16 @@ export default defineComponent({
   flex-direction: column;
   width: 1024px;
   color: setColor(gray-1);
-  > details {
-    text-align: left;
-    margin-top: 20px;
-    > summary {
-      @include text-H6;
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px solid setColor(gray-4);
-      padding-bottom: 20px;
-      > svg {
-        flex-shrink: 0;
-      }
-    }
-    summary::-webkit-details-marker {
-      // Romove detail arrow in safari
-      display: none;
-    }
+  @include text-H6;
+  > .collapse-title {
+    padding: 20px 0;
+    border-bottom: 1px solid setColor(gray-4);
   }
-  > details[open] > summary > svg {
-    transform: scaleY(-1);
+  > div { // collapse
+    transition: all calc(var(--vc-auto-duration) * 1.5) ease-in-out;
+  }
+  p { // collapse content
+    text-align: left;
   }
 }
 
