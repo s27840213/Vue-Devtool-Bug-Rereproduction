@@ -34,7 +34,6 @@ div(class="panel-download" :style="containerStyles")
         :value="selectedTypeQuality"
         :min="1"
         :max="100"
-        :enableDefaultPadding="false"
         :optionWidth="'32px'"
         @update="(val)=> selectedTypeQuality = val")
     hr(v-if="'quality' in selected" class="full-width")

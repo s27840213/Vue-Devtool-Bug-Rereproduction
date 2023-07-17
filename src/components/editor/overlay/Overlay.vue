@@ -4,24 +4,32 @@ div(v-if="theme !== 'mobile'" class="overlay" :class="theme")
       :key="cate.name"
       class="overlay__category")
     component(v-if="cate.name"
-        class="overlay__category-name"
+        class="mx-10"
         :is="theme === 'light' ? 'CollapseTitle' : 'span'"
         :selected="currCategory === cate.name"
         @click="switchTab(cate.name)") {{ cate.name }}
     collapse(class="overlay__collapse"
         :when="currCategory === cate.name || !cate.name || theme !== 'light'")
       div(class="overlay__category-list")
-        overlay-item(v-for="item in cate.items"
-          :key="item.name"
-          :name="item.name"
-          :baseImg="cate.baseImg"
-          :mask="item.svg"
-          :active="currOverlay === item.name"
-          :theme="theme"
-          @click="applyOverlay(item)")
+        template(v-for="(item1d, i) in item2d(cate.items)" :key="`row${i}`")
+          overlay-item(v-for="item in item1d"
+            :key="item.name"
+            :name="item.name"
+            :baseImg="cate.baseImg"
+            :mask="item.svg"
+            :active="curr.name === item.name"
+            :theme="theme"
+            @click="applyOverlay(item)")
+          div(v-if="item1d.map(it => it.name).includes(curr.name) && curr.name !== 'none'"
+              class="overlay__options")
+            mobile-slider(v-for="option in options" :key="option.key"
+                :title="option.label"
+                :value="getInputValue(option)"
+                @update="(val: number)=>handleRangeInput(val, option)")
 </template>
 
 <script lang="ts">
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import OverlayItem from '@/components/editor/overlay/OverlayItem.vue'
 import CollapseTitle from '@/components/global/CollapseTitle.vue'
 import { IAssetObject } from '@/interfaces/shape'
@@ -39,6 +47,11 @@ interface IOverlayCategory {
 }
 type IOverlayList = IOverlayCategory[]
 
+interface IOverlayOption {
+  key: 'xOffset' | 'yOffset' | 'opacity'
+  label: string
+}
+
 const whiteImg = `data:image/svg+xml;utf8,
   <svg xmlns="http://www.w3.org/2000/svg" width="9" height="16" fill="white">
     <rect width="9" height="16"/>
@@ -50,6 +63,7 @@ export default defineComponent({
     OverlayItem,
     Collapse,
     CollapseTitle,
+    MobileSlider,
   },
   props: {
     theme: {
@@ -112,8 +126,23 @@ export default defineComponent({
           svg: { id: 'mPpIed3TS4Q3tqFJdMEY', type: 5, ver: 2, plan: 0, tags: ['復古底片效果', 'instawirhfan_復古底片效果', 'instawithfan_復古底片效果', 'film', 'films'], fit: 0 },
         }]
       }] as IOverlayList,
-      currOverlay: 'none',
+      options: [{
+        key: 'xOffset',
+        label: this.$t('NN0425')
+      }, {
+        key: 'yOffset',
+        label: this.$t('NN0426')
+      }, {
+        key: 'opacity',
+        label: this.$t('NN0066')
+      }] as IOverlayOption[],
       currCategory: '',
+      curr: {
+        name: 'none',
+        xOffset: 50,
+        yOffset: 50,
+        opacity: 50,
+      }
     }
   },
   // computed: {
@@ -121,11 +150,25 @@ export default defineComponent({
   // mounted() {
   // },
   methods: {
+    item2d(items: IOverlayItem[]) {
+      const newArr = [] as IOverlayItem[][]
+      const amountInRow = this.theme === 'dark' ? 3 : 4
+      for (let i = 0; i < items.length; i += amountInRow) {
+        newArr.push(items.slice(i, i + amountInRow))
+      }
+      return newArr
+    },
+    getInputValue(option: IOverlayOption) {
+      return this.curr[option.key]
+    },
     switchTab(categoryName: string) {
       this.currCategory = this.currCategory === categoryName ? '' : categoryName
     },
     applyOverlay(item: IOverlayItem) {
-      this.currOverlay = item.name
+      this.curr.name = item.name
+    },
+    handleRangeInput(val: number, option: IOverlayOption) {
+      this.curr[option.key] = val
     },
   }
 })
@@ -140,9 +183,6 @@ export default defineComponent({
   box-sizing: border-box;
   height: 100%;
   text-align: left;
-  &__category-name {
-    margin: 0 10px;
-  }
   &__collapse {
     transition: all calc(var(--vc-auto-duration) * 1.5) ease-in-out;
   }
@@ -151,6 +191,11 @@ export default defineComponent({
     display: grid;
     padding: 10px 10px 0 10px;
     row-gap: 10px;
+  }
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 }
 
@@ -162,6 +207,16 @@ export default defineComponent({
     grid-template-columns: repeat(3, minmax(0, 1fr));
     column-gap: 30px;
   }
+  .overlay__options {
+    grid-column: 1 / 4;
+    .mobile-slider {
+      color: white;
+    }
+    &:deep(.mobile-slider__number) {
+      color: setColor(gray-1);
+      background-color: white;
+    }
+  }
 }
 .light.overlay {
   color: setColor(gray-2);
@@ -169,6 +224,11 @@ export default defineComponent({
   .overlay__category-list {
     grid-template-columns: repeat(4, 44px);
     column-gap: calc((100% - 44px * 4) / 3);
+  }
+  .overlay__options {
+    grid-column: 1 / 5;
+    padding: 10px;
+    background-color: white;
   }
 }
 </style>

@@ -57,7 +57,6 @@ div(class="panel-text-effect")
         :min="option.min ?? 0"
         :step="option.key === 'lineHeight' ? 0.01 : 1"
         :autoRecord="false"
-        :enableDefaultPadding="false"
         :disabled="optionDisabled(option)"
         @update="(val)=>handleRangeInput(val, option)"
         @pointerdown="setEffectFocus(true)"

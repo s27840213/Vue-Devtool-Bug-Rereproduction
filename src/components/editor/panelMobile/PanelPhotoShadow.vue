@@ -177,7 +177,6 @@ export default defineComponent({
 
     &-wrapper {
       width: 100%;
-      padding: 0.375rem 0.625rem;
       box-sizing: border-box;
     }
   }
@@ -202,7 +201,7 @@ export default defineComponent({
     // transition: max-height 1s ease-out;
     display: flex;
     flex-direction: column;
-    row-gap: 5px;
+    row-gap: 10px;
     overflow: scroll;
     @include no-scrollbar;
   }
