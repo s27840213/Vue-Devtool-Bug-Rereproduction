@@ -295,6 +295,17 @@ class ImageUtils {
             cache
           })
         }
+        break
+      }
+      case 'svg': {
+        if (typeof assetId === 'string') {
+          return imageApi.getImgSize({
+            token: '',
+            type: 'svg',
+            key_id: assetId,
+            cache
+          })
+        }
       }
     }
   }
