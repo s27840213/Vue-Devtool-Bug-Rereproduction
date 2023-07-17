@@ -297,6 +297,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .overflow-container {
   position: relative;
+  overflow: hidden; // Fallback for older version browser that doesn't support clip.
   overflow: clip; // Clip can prevent any scroll, include programing scroll.
   transform-origin: 0 0;
 }

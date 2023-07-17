@@ -8,7 +8,7 @@ div(class="panel-shadow")
         @click="onEffectClick(icon)"
         class="photo-shadow__options__option pointer"
         :class="{ 'photo-shadow__options__option--selected': currentEffect === icon }"
-        iconWidth="60px"
+        iconWidth="56px"
         iconColor="gray-2")
       div(class="photo-shadow__options__option-font") {{$t(shadowPropI18nMap[icon]._effectName)}}
   div(class="photo-shadow__attrs" :style="shadowAttrsStyles")
@@ -154,21 +154,19 @@ export default defineComponent({
   &__options {
     display: flex;
     flex-shrink: 0;
+    padding: 0 2px; // For first/last icon border space.
     column-gap: 20px;
     overflow-x: scroll;
     @include no-scrollbar;
 
     &__option {
-      min-width: 60px;
-      box-sizing: border-box;
       margin-top: 10px;
       border-radius: 5px;
-      border: 2px solid transparent;
       &:not(&--selected):hover {
-        border-color: setColor(blue-1, 0.5);
+        @include selection-border(2px, blue-hover);
       }
       &--selected {
-        border-color: setColor(blue-1);
+        @include selection-border(2px);
       }
       &-font {
         box-sizing: border-box;

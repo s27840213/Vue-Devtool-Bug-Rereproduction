@@ -366,19 +366,18 @@ export default defineComponent({
   }
   &__effects1d {
     display: grid;
-    grid-template-columns: repeat(3, 60px);
+    grid-template-columns: repeat(3, 56px);
     gap: 20px;
     margin: 10px auto;
-    width: 220px;
+    width: 208px;
   }
   &__effect {
-    @include size(60px);
+    @include size(56px);
     box-sizing: border-box;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 2px solid transparent;
     border-radius: 6px;
     background-color: white;
     background-clip: content-box;
@@ -391,10 +390,10 @@ export default defineComponent({
       top: -4px;
     }
     &:not(.selected):hover {
-      border-color: setColor(blue-hover);
+      @include selection-border(2px, blue-hover);
     }
     &.selected {
-      border-color: setColor(blue-1);
+      @include selection-border(2px);
     }
   }
   &__options {
@@ -454,20 +453,18 @@ export default defineComponent({
         height: 0;
         padding-top: 100%;
         > img {
+          @include selection-border(1px, gray-5);
           position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
           height: 100%;
           object-fit: cover;
-          top: -1px;
-          left: -1px;
-          border: 1px solid setColor(gray-5);
           border-radius: 4px;
           cursor: pointer;
           transition: all 0.3s;
           &.selected {
-            top: -2px;
-            left: -2px;
-            border: 2px solid setColor(blue-1);
+            @include selection-border(2px);
           }
         }
       }

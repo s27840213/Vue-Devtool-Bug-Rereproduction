@@ -81,10 +81,10 @@ div(class="panel-text-effect")
 </template>
 
 <script lang="ts">
+import Tabs from '@/components/Tabs.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import Tabs from '@/components/Tabs.vue'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import { IEffect, IEffectCategory } from '@/utils/constantData'
@@ -93,7 +93,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import PanelTextEffectSetting from '../panelFunction/PanelTextEffectSetting.vue'
 
 export default defineComponent({
@@ -220,9 +220,10 @@ export default defineComponent({
   &__effects {
     @include no-scrollbar;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
     gap: 15px;
-    margin: 0 15px 15px 15px;
+    margin: 0 13px 13px 13px;
+    padding: 2px 0; // For first/last rows icon border space.
     overflow: auto;
     > div {
       display: flex;
@@ -233,8 +234,10 @@ export default defineComponent({
       height: 56px;
       margin: 0px auto;
       border-radius: 5px;
-      border: 2px solid transparent;
       overflow: hidden;
+      &.selected {
+        @include selection-border(2px, black-5);
+      }
       .panel-text-effect__effects--icon {
         background-color: setColor(gray-5);
         border-radius: 5px;
@@ -243,9 +246,6 @@ export default defineComponent({
         &.svg-icon {
           padding: 16px;
         }
-      }
-      &.selected {
-        border-color: setColor(black-5);
       }
       > .pro {
         left: 1px;
@@ -305,12 +305,11 @@ export default defineComponent({
       align-items: center;
       box-sizing: border-box;
       height: 42px;
-      border: 2px solid transparent;
       border-radius: 5px;
       background-color: setColor(gray-5);
       border: 2px solid transparent;
       &.selected {
-        border-color: setColor(black-5);
+        @include selection-border(2px, black-5);
       }
       > img {
         margin-right: 8px;

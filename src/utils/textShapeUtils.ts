@@ -59,8 +59,8 @@ class Controller {
     return textEffectUtils.getSpecSubTextLayer(index)
   }
 
-  getRadiusByBend(bend: number) {
-    return bend === 0 ? 10000 : 1000 / Math.pow(Math.abs(bend), 0.6)
+  getRadiusByBend(bend: number, fontSize: number) {
+    return bend === 0 ? 10000 : 1000 / Math.pow(Math.abs(bend), 0.6) * fontSize / 60
   }
 
   getTextShapeStyles(layer: IText, shape: string, isSubLayer: boolean, attrs?: any) {
@@ -176,7 +176,7 @@ class Controller {
     if (textWidth.length === 0) return []
     const angleOffset = bend >= 0 ? 90 : 270
     const ratioFix = bend >= 0 ? 1 : -1
-    const radius = this.getRadiusByBend(bend) * fontSize / 60
+    const radius = this.getRadiusByBend(bend, fontSize)
     // 每一段文字寬度對應角度
     const textAngles = textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
     // 總角度
