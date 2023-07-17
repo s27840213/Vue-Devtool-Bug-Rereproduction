@@ -28,6 +28,7 @@ export interface IEffectOptionSelect {
   type: 'select'
   select: {
     key: string
+    plan?: 1 | 0
     img: string
     label: string
     attrs: Record<string, unknown>

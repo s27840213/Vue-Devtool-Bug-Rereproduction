@@ -156,6 +156,7 @@ class LetterBGData {
     }, {
       key: 'paper-tap',
       label: i18n.global.tc('NN0895'),
+      plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }, {
       key: 'paper-tap-point',
@@ -164,10 +165,12 @@ class LetterBGData {
     }, {
       key: 'paper-tap-stripe',
       label: i18n.global.tc('NN0897'),
+      plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }, {
       key: 'paper-tap-grid',
       label: i18n.global.tc('NN0898'),
+      plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }]
   }

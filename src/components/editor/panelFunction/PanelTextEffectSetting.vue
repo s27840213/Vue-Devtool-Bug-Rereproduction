@@ -45,6 +45,7 @@ div(class="text-effect-setting")
                     :class="{'selected': ((getStyle(category)[option.key] as Record<'key', string>).key ?? getStyle(category)[option.key]) === sel.key }"
                     draggable="false"
                     @click="handleSelectInput(sel.attrs)")
+                pro-item(v-if="sel.plan" theme="roundedRect")
             //- Option type range
             template(v-if="option.type === 'range'")
               input(class="text-effect-setting__option--number"
@@ -374,7 +375,7 @@ export default defineComponent({
   &__effects2d {
     display: grid; // Prevent margin collapse
     background: setColor(gray-6);
-    transition: all 0.5s ease-in-out
+    transition: all calc(var(--vc-auto-duration) * 1.5) ease-in-out;
   }
   &__effects1d {
     display: grid;
@@ -397,10 +398,6 @@ export default defineComponent({
     overflow: hidden;
     > img {
       object-fit: cover;
-    }
-    .pro {
-      left: 1px;
-      top: -4px;
     }
     &:not(.selected):hover {
       border-color: setColor(blue-hover);
@@ -465,7 +462,7 @@ export default defineComponent({
         width: 100%;
         height: 0;
         padding-top: 100%;
-        > img {
+        > img:not(.pro) {
           position: absolute;
           width: 100%;
           height: 100%;
@@ -481,6 +478,10 @@ export default defineComponent({
             left: -2px;
             border: 2px solid setColor(blue-1);
           }
+        }
+        .pro {
+          top: 2px;
+          left: 2px;
         }
       }
     }

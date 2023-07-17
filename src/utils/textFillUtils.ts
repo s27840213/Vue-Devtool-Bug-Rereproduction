@@ -27,6 +27,7 @@ interface ITextFillPresetRawImg {
 
 export interface ITextFIllPreset {
   id: string
+  plan: 0 | 1
   param: {
     img: ITextFillPresetRawImg
     size: number
@@ -76,6 +77,7 @@ class TextFill {
           label: i18n.global.t('NN0870'),
           select: fill.list.map(eff => ({
             key: eff.id,
+            plan: eff.plan,
             img: `https://template.vivipic.com/admin/${eff.param.img.teamId}/asset/image/${eff.param.img.id}/tiny`,
             label: '',
             attrs: {
