@@ -131,7 +131,7 @@ export interface IShape extends ILayer<IStyle> {
   category: string,
   scaleType?: number,
   styleArray: string[],
-  color: [string],
+  color: string[],
   size?: number[],
   transArray?: string[],
   markerTransArray?: string[],
