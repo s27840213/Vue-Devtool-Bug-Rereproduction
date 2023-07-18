@@ -318,6 +318,10 @@ class Controller {
               // Prevent TextFIll
               backgroundImage: 'none',
               webkitBackgroundClip: 'initial',
+              // For fix Chrome stroke afterimage issue:
+              // If user adjust stroke to exceed the text element's content range
+              // and then reduce the stroke size, it will leave afterimages.
+              filter: 'opacity(1)',
             },
           }, {
             extraBodyStyle: {
@@ -326,6 +330,7 @@ class Controller {
               // Prevent TextFIll
               backgroundImage: 'none',
               webkitBackgroundClip: 'initial',
+              filter: 'opacity(1)',
             },
           }],
         }
