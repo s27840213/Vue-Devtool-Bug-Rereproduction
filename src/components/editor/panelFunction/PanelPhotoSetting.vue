@@ -67,6 +67,9 @@ export default defineComponent({
           label: this.$t('NN0899'),
           show: 'overlay',
           extraClass: 'grid-full',
+          condition: () => {
+            return this.isAdmin
+          }
         }], [
         {
           name: 'crop',
@@ -142,7 +145,8 @@ export default defineComponent({
       isProcessing: 'bgRemove/getIsProcessing',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
-      isHandleShadow: 'shadow/isHandling'
+      isHandleShadow: 'shadow/isHandling',
+      isAdmin: 'user/isAdmin',
     }),
     ...mapState('shadow', {
       handleId: 'handleId'

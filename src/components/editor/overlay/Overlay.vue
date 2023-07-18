@@ -6,7 +6,7 @@ div(v-if="theme !== 'mobile'" class="overlay" :class="theme")
     component(v-if="cate.name"
         class="mx-10"
         :is="theme === 'light' ? 'CollapseTitle' : 'span'"
-        :selected="currCategory === cate.name"
+        :active="currCategory === cate.name"
         @click="switchTab(cate.name)") {{ cate.name }}
     collapse(class="overlay__collapse"
         :when="currCategory === cate.name || !cate.name || theme !== 'light'")

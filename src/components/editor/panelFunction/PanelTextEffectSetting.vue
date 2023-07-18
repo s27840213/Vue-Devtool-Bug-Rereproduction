@@ -4,7 +4,7 @@ div(class="text-effect-setting")
   //- Effect category: shadow, shape, bg and fill.
   div(v-for="category in textEffects" :key="category.name"
       class="text-effect-setting__category")
-    collapse-title(:selected="currCategoryName === category.name"
+    collapse-title(:active="currCategoryName === category.name"
         @click="switchTab(category.name)") {{category.label}}
     //- Effect icons and options.
     collapse(:when="currCategoryName === category.name"

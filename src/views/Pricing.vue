@@ -45,7 +45,7 @@ div(class="pricing")
     div(class="pricing-faq")
       span(class="text-H2 mb-20") {{$t('NN0533')}}
       template(v-for="item in faqs" :key="item.Q")
-        collapse-title(:selected="faqOpen.includes(item.Q)"
+        collapse-title(:active="faqOpen.includes(item.Q)"
             @click="clickFaq(item.Q)") {{item.Q}}
         collapse(:when="faqOpen.includes(item.Q)")
           i18n-t(v-if="item.isPath" :keypath="item.A" tag="p" class="body-MD text-gray-2 mt-20")

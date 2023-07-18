@@ -1,5 +1,5 @@
 <template lang="pug">
-span(class="collapse-title" :class="{selected}")
+span(class="collapse-title" :class="{active}")
   slot
   svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
 </template>
@@ -10,7 +10,7 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'CollapseTitle',
   props: {
-    selected: {
+    active: {
       type: Boolean,
       required: true,
     }
@@ -27,7 +27,7 @@ export default defineComponent({
   .svg-chevron-down {
     transition: all 0.5s ease-in-out;
   }
-  &.selected .svg-chevron-down {
+  &.active .svg-chevron-down {
     transform: scaleY(-1);
   }
 }
