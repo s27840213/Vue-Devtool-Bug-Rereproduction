@@ -362,7 +362,7 @@ export default defineComponent({
               return
             }
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-            vivistickerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false)
+            vivistickerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false, 10000)
             pageUtils.setPages([page])
             this.usingJSON = true
             break
