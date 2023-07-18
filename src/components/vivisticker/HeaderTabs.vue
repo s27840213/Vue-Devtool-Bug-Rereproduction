@@ -120,7 +120,8 @@ export default defineComponent({
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currSelectedInfo: 'getCurrSelectedInfo',
-      isUploadingShadowImg: 'shadow/isUploading'
+      isUploadingShadowImg: 'shadow/isUploading',
+      currActivePanel: 'mobileEditor/getCurrActivePanel'
     }),
     templateHeaderTab() {
       return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
@@ -385,7 +386,11 @@ export default defineComponent({
       this.switchBg()
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
-    handleEndEditing() {
+    async handleEndEditing() {
+      if (this.currActivePanel === 'photo-shadow') {
+        editorUtils.setCurrActivePanel('none')
+        await new Promise(resolve => setTimeout(resolve, 0)) // await the photo-shaddow-panel unomunted hook action
+      }
       if (this.isUploadingShadowImg) {
         notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
@@ -581,7 +586,6 @@ export default defineComponent({
                 },
                 frameColor: '#FECD56',
               }, undefined)
-              // imageShadowPanelUtils.handleShadowUpload(undefined)
             })
           }, 0)
         }
