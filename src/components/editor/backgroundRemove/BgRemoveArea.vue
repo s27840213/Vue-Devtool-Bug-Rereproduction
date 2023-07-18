@@ -116,7 +116,7 @@ export default defineComponent({
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
-      // this.$isTouchDevice() && this.initMagnifyCanvas()
+      this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
     }
     this.imageElement.onerror = (ev) => {
@@ -352,13 +352,13 @@ export default defineComponent({
       this.clearModeCtx = ctx
     },
     initMagnifyCanvas() {
-      // this.magnifyCanvas = this.$refs.magnify as HTMLCanvasElement
-      // console.log(this.magnifyCanvas)
-      // const ctx = this.magnifyCanvas.getContext('2d') as CanvasRenderingContext2D
+      this.magnifyCanvas = this.$refs.magnify as HTMLCanvasElement
+      console.log(this.magnifyCanvas)
+      const ctx = this.magnifyCanvas.getContext('2d') as CanvasRenderingContext2D
 
-      // this.magnifyCtx = ctx
+      this.magnifyCtx = ctx
 
-      // this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
+      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
     },
     createInitImageCtx() {
       logUtils.setLog('createInitImageCtx')
