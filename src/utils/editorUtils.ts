@@ -64,11 +64,14 @@ class EditorUtils {
       height = width / aspectRatio
     }
 
-    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
+    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight || 0
 
     if (!this.mobileHeight || this.mobileWidth) {
-      const mobileEditor = document.getElementById('mobile-editor__content')
+      const mobileEditor = document.getElementById('vivisticker__content')
+      // const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
+        console.log(mobileEditor.clientWidth, mobileEditor.clientHeight, mobilePanelHeight)
+        console.log('width', width, 'height', height)
         this.setMobileHW({
           width: mobileEditor.clientWidth,
           height: mobileEditor.clientHeight - mobilePanelHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
@@ -89,6 +92,7 @@ class EditorUtils {
     if (generalUtils.isTouchDevice()) {
       const page = pageUtils.getPage(pageIndex)
       const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
+      console.warn('contentScaleRatio', contentScaleRatio)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
       return contentScaleRatio
     }

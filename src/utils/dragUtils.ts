@@ -51,6 +51,7 @@ class DragUtils {
 
     const dragImage = new Image()
     dragImage.src = imgSrc
+    dragImage.crossOrigin = 'anonymous'
     dragImage.setAttribute('style',
       'width: 100%;' +
       'height: 100%;' +

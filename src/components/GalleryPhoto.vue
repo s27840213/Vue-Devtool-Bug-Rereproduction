@@ -16,14 +16,14 @@ div(class="gallery-photo" :class="{border: deletable}")
     :iconName="'more_vertical'"
     :iconColor="'gray-2'"
     :iconWidth="'20px'")
-  img(:src="previewSrc",
-    ref='img'
-    draggable="true",
+  img(ref='img'
+    draggable="true"
     class="gallery-photo__img pointer"
-    crossOrigin="anonymous"
+    crossorigin="anonymous"
     @dragstart="dragStart($event, photo)"
     @dragend="dragEnd"
-    @click="onClick($event, photo as IAssetPhoto)")
+    @click="onClick($event, photo as IAssetPhoto)"
+    :src="previewSrc")
   div(v-if="isUploading"
       class="gallery-photo__progress")
     div(class="gallery-photo__progress-bar"
@@ -195,10 +195,12 @@ export default defineComponent({
 
         const previewSize = imageUtils.getSignificantDimension(this.photo.preview.width, this.photo.preview.height)
         const imgPreview = new Image()
+        imgPreview.crossOrigin = 'anonymous'
         imgPreview.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(srcObj, previewSize))
         imgPreview.onload = () => {
           const significantSize = imageUtils.getSignificantDimension(photoWidth, photoHeight)
           const imgPreload = new Image()
+          imgPreload.crossOrigin = 'anonymous'
           imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(srcObj, significantSize))
         }
 

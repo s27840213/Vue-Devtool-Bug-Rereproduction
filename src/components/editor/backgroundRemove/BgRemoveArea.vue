@@ -123,8 +123,8 @@ export default defineComponent({
       logUtils.setLog('imageElement onerror triggered')
       logUtils.setLog(`${JSON.stringify(ev)}`)
     }
-    this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
+    this.imageElement.src = this.imgSrc
     logUtils.setLog(`set image element src: ${this.imgSrc}`)
     logUtils.setLog(`set image element: ${JSON.stringify(this.imageElement)}`)
 

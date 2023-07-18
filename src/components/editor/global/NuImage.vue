@@ -19,18 +19,17 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       :src="shadowSrc"
       @error="onError")
   div(:class="{'nu-image__clipper': !imgControl}")
-    //- :style="imgWrapperstyle()")
     div(class='nu-image__picture'
       :style="imgStyles()")
       img(ref="img"
         :style="flipStyles"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
-        :src="finalSrc"
         draggable="false"
-        crossOrigin="anonymous"
+        crossorigin="anonymous"
         @error="onError"
-        @load="onLoad($event, 'main')")
+        @load="onLoad($event, 'main')"
+        :src="finalSrc")
       svg(v-if="isAdjustImage"
         :style="flipStyles"
         class="nu-image__svg"
@@ -49,15 +48,16 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        image(:xlink:href="finalSrc" ref="img"
+        image(ref="img"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
-          crossOrigin="anonymous"
+          crossorigin="anonymous"
           draggable="false"
           @error="onError"
-          @load="onAdjustImgLoad($event, 'main')")
+          @load="onAdjustImgLoad($event, 'main')"
+          :xlink:href="finalSrc")
   template(v-if="hasHalation()")
     component(v-for="(elm, idx) in cssFilterElms()"
       class="nu-image__adjust"
@@ -639,7 +639,7 @@ export default defineComponent({
           this.imgNaturalSize.width = img.width
           this.imgNaturalSize.height = img.height
         }
-      })
+      }, { crossOrigin: true })
     },
     onLoad(e: Event, type?: string) {
       if (type === 'main' && !this.isAdjustImage) {

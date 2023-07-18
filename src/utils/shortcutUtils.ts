@@ -381,6 +381,7 @@ class ShortcutUtils {
             userId: ''
           }
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { clips })
+          frameUtils.updateFrameLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, idx, { adjust: {} })
           StepsUtils.record()
           return
         }

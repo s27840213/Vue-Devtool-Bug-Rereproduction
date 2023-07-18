@@ -142,7 +142,11 @@ class ConstantData {
           label: 'IG 貼文',
           url: 'https://blog.vivipic.com/tw/ig-post-design/'
         },
-        ...[3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        ...[3, 9, 4].map((id) => themeItem(id)), {
+          label: 'LINE 圖文選單',
+          url: 'https://blog.vivipic.com/tw/line-official-account/'
+        },
+        ...[21].map((id) => themeItem(id)),
         ]
       }, {
         label: i18n.global.t('NN0668'),

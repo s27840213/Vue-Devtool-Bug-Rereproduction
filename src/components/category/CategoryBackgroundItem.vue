@@ -4,9 +4,9 @@ div(class="panel-bg__item"
     @click="addBackground")
   img(class="panel-bg__img"
     ref="img"
-    crossOrigin="anonymous"
-    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
+    crossorigin="anonymous"
     draggable="false"
+    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
     @error="handleNotFound")
   div(v-if="!isInEditor" class="panel-bg__share" @click.stop.prevent="handleShare")
     svg-icon(iconName="share" iconColor="white" iconWidth="16px")

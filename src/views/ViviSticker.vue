@@ -4,6 +4,7 @@ div(class="vivisticker" :style="copyingStyles()")
     header-tabs(:style="headerStyles()")
     div(ref="vivisticker__content"
         class="vivisticker__content"
+        id="vivisticker__content"
         @click.self="outerClick")
       my-design(v-show="isInMyDesign && !isInEditor")
       vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor" :currPage="currPage" :marginBottom="marginBottom")
