@@ -600,12 +600,12 @@ class Gooey {
     layerHeight = layerHeight / layerScale * contentScaleRatio
     const bend = +config.styles.textShape.bend
 
-    const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
-    const padding = (config.styles.textBg as ITextGooey).distance * fontSizeModifier
+    const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
+    const padding = (config.styles.textBg as ITextGooey).distance * mainFontSize / 60
     const maxHeightCp = maxBy(this.controlPoints[0].slice(1, -1), cp => cp.oldHeight)!
     const borderHeight = maxHeightCp.top.dist(maxHeightCp.bottom)
     const radius = Math.min(maxHeightCp.oldHeight * this.bRadius * 0.005, borderHeight / 2)
-    const shapeRadius = textShapeUtils.getRadiusByBend(bend) * fontSizeModifier
+    const shapeRadius = textShapeUtils.getRadiusByBend(bend, mainFontSize)
 
     const textAngles = [...textWidth, padding, padding].map(w => (360 * w) / (shapeRadius * 2 * Math.PI))
     const totalAngle = sum(textAngles) * (bend >= 0 ? 1 : -1)
@@ -832,7 +832,7 @@ class TextBg {
     layerWidth = layerWidth / layerScale * contentScaleRatio
     layerHeight = layerHeight / layerScale * contentScaleRatio
     const opacity = textBg.opacity * 0.01
-    const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
+    const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
     const withShape = textShape.name !== 'none'
     const bend = +textShape.bend
 
@@ -854,7 +854,7 @@ class TextBg {
     ) ?? { height: 0, y: 0 }
 
     if (isITextGooey(textBg)) {
-      const padding = textBg.distance * fontSizeModifier
+      const padding = textBg.distance * mainFontSize / 60
       const color = textEffectUtils.colorParser(textBg.color, config)
       const fill = this.rgba(color, opacity)
 
@@ -892,7 +892,7 @@ class TextBg {
       // Variable for TextShape version
       const shapeCapWidth = maxHeightSpan.height * 0.005 * textBg.height
       const yOffset = (maxHeightSpan.height - shapeCapWidth * 2) * 0.01 * (100 - textBg.yOffset)
-      const radius = textShapeUtils.getRadiusByBend(bend) * fontSizeModifier
+      const radius = textShapeUtils.getRadiusByBend(bend, mainFontSize)
       const textAngles = textShapeData.textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
       const totalAngle = sum(textAngles) * (bend >= 0 ? 1 : -1)
       const endpointAngle = !withShape ? 0 // Will be 0 for non-TextShape
@@ -989,9 +989,9 @@ class TextBg {
             : textBg.tailOffset * 0.01 : 0
       const fill = textEffectUtils.colorParser(textBg.pColor, config)
       const stroke = isITextBox(textBg) ? textEffectUtils.colorParser(textBg.bColor, config) : ''
-      const bStroke = (isITextBox(textBg) ? textBg.bStroke : 0) * fontSizeModifier
-      const pStrokeY = textBg.pStrokeY * fontSizeModifier
-      const pStrokeX = textBg.pStrokeX * fontSizeModifier
+      const bStroke = (isITextBox(textBg) ? textBg.bStroke : 0) * mainFontSize / 60
+      const pStrokeY = textBg.pStrokeY * mainFontSize / 60
+      const pStrokeX = textBg.pStrokeX * mainFontSize / 60
       let boxWidth = (layerWidth + bStroke)
       let boxHeight = (layerHeight + bStroke)
       let top = -bStroke
@@ -1080,7 +1080,6 @@ class TextBg {
     } else if (isITextLetterBg(textBg)) {
       const scale = textBg.size / 100
       const needRotate = letterBgData.bgNeedRotate(textBg.name)
-      const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
       const textShapeStyle = textShapeUtils.convertTextShape(textShapeData.textWidth, bend, mainFontSize)
       let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]

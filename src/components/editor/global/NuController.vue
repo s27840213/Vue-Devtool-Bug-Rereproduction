@@ -1627,7 +1627,7 @@ export default defineComponent({
     disableTouchEvent(e: TouchEvent) {
       if (this.$isTouchDevice()) {
         e.preventDefault()
-        e.stopPropagation()
+        // e.stopPropagation()
       }
     },
     // computed -> method

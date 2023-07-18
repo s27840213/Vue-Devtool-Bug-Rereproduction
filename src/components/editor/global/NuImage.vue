@@ -19,10 +19,18 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       :src="shadowSrc"
       @error="onError")
   div(:class="{'nu-image__clipper': !imgControl}")
-    //- :style="imgWrapperstyle()")
     div(class='nu-image__picture'
       :style="imgStyles()")
-      svg(v-if="isAdjustImage()"
+      img(ref="img"
+        :style="flipStyles"
+        class="nu-image__img full-size"
+        :class="{'layer-flip': flippedAnimation() }"
+        draggable="false"
+        crossorigin="anonymous"
+        @error="onError"
+        @load="onLoad"
+        :src="finalSrc")
+      svg(v-if="isAdjustImage"
         :style="flipStyles"
         class="nu-image__svg"
         :class="{'layer-flip': flippedAnimation() }"
@@ -40,23 +48,16 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        image(:xlink:href="finalSrc" ref="img"
+        image(ref="img"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
+          crossorigin="anonymous"
           draggable="false"
           @error="onError"
-          @load="onAdjustImgLoad")
-      img(v-else ref="img"
-        :style="flipStyles"
-        class="nu-image__img full-size"
-        :class="{'layer-flip': flippedAnimation() }"
-        :src="finalSrc"
-        draggable="false"
-        crossOrigin="anonymous"
-        @error="onError"
-        @load="onLoad")
+          @load="onAdjustImgLoad"
+          :xlink:href="finalSrc")
   template(v-if="hasHalation()")
     component(v-for="(elm, idx) in cssFilterElms()"
       class="nu-image__adjust"
@@ -92,7 +93,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
 export default defineComponent({
-  emits: [],
+  emits: ['onload'],
   props: {
     config: {
       type: Object,
@@ -211,7 +212,7 @@ export default defineComponent({
         width: 0,
         height: 0
       },
-      initialized: false,
+      initialized: false
     }
   },
   watch: {
@@ -351,6 +352,11 @@ export default defineComponent({
       if (this.src.startsWith('data:image') || !this.initialized) return false
       return true
     },
+    isAdjustImage(): boolean {
+      const { styles: { adjust = {} } } = this.config
+      const arr = Object.entries(adjust).filter(([, v]) => typeof v === 'number' && v !== 0)
+      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
+    },
     finalSrc(): string {
       if (this.$route.name === 'Preview') {
         return imageUtils.appendCompQueryForVivipic(this.src)
@@ -420,7 +426,7 @@ export default defineComponent({
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
       const styles = {
-        ...(this.isAdjustImage() && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        ...(this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -523,7 +529,7 @@ export default defineComponent({
           this.imgNaturalSize.width = img.width
           this.imgNaturalSize.height = img.height
         }
-      })
+      }, { crossOrigin: true })
     },
     onLoad(e: Event) {
       this.isOnError = false
@@ -549,6 +555,7 @@ export default defineComponent({
           }, this.subLayerIndex)
         }
       }
+      this.$emit('onload')
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return
@@ -627,21 +634,6 @@ export default defineComponent({
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
       return new Promise<void>((resolve, reject) => {
-      //   const img = new Image()
-      //   img.onload = () => resolve()
-      //   img.onerror = (error) => {
-      //     reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-      //     fetch(img.src)
-      //       .then(res => {
-      //         const { status, statusText } = res
-      //         this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
-      //       })
-      //       .catch((e) => {
-      //         this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
-      //       })
-      //   }
-      //   img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
-      // })
         const size = imageUtils.getSrcSize(this.config.adjustSrcObj?.srcObj?.type ? this.config.adjustSrcObj?.srcObj : this.config.srcObj, val, preLoadType)
         const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, size))
         imageUtils.imgLoadHandler(src, () => resolve(), {
@@ -682,7 +674,7 @@ export default defineComponent({
         this.handleIsTransparent()
         await this.previewAsLoading()
       } else {
-        if (this.isAdjustImage()) {
+        if (this.isAdjustImage) {
           this.handleIsTransparent()
         }
         const { imgWidth, imgHeight } = this.config.styles
@@ -1076,11 +1068,6 @@ export default defineComponent({
       return imageUtils
         .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 320)
     },
-    isAdjustImage(): boolean {
-      const { styles: { adjust = {} } } = this.config
-      const arr = Object.entries(adjust).filter(([, v]) => typeof v === 'number' && v !== 0)
-      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
-    },
     hasHalation(): boolean {
       return this.config.styles.adjust?.halation
     },
@@ -1174,6 +1161,8 @@ export default defineComponent({
 
   &__svg {
     display: block;
+    position: absolute;
+    top: 0;
   }
 
   &__adjust {

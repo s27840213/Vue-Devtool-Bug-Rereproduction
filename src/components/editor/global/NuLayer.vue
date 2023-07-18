@@ -9,7 +9,7 @@ div(class="nu-layer flex-center"
   //- class="nu-layer"
   //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
   //- ref="body"
-  div(class="full-size pos-left"
+  div(class="nu-layer__event-center full-size pos-left"
       :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
       :style="layerStyles()"
       @pointerdown="onPointerDown($event)"
@@ -32,7 +32,8 @@ div(class="nu-layer flex-center"
             :page="page"
             :scaleRatio="scaleRatio"
             :primaryLayer="primaryLayer"
-            :forRender="forRender")
+            :forRender="forRender"
+            :inPreview="inPreview")
           svg(v-if="showSvgContour"
             class="clip-contour full-size"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
@@ -283,7 +284,7 @@ export default defineComponent({
         {
           outline,
           outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
-          willChange: this.config.active ? 'transform' : '',
+          willChange: this.config.active && !this.isSubLayer ? 'transform' : '',
           pointerEvents,
           clipPath,
           'mix-blend-mode': this.config.styles.blendMode,
@@ -819,6 +820,9 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  &__event-center {
+    z-index: -1; // To keep outline/border above the content.
   }
   &__scale {
     transform-origin: top left;
