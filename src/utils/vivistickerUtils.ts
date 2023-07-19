@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, isV1_26, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -564,12 +564,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  makeFlagKey(layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
+  makeFlagKey(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
     if (layerIndex === -1) return 'bg'
-    return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}` + (typeof clipIndex !== 'undefined' ? `_c${clipIndex}` : ''))
+    return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}` + (addition ? `_${addition.k}${addition.v ?? ''}` : ''))
   }
 
-  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
+  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
     switch (layer.type) {
       case LayerType.group:
         for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
@@ -582,10 +582,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         const frame = layer as IFrame
         const layers = [...frame.clips] as Array<IImage | IShape>
         if (frame.decoration) {
-          layers.unshift(frame.decoration)
+          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'd' })] = false
+          // layers.unshift(frame.decoration)
         }
         if (frame.decorationTop) {
-          layers.push(frame.decorationTop)
+          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'dt' })] = false
+          // layers.push(frame.decorationTop)
         }
         if (subLayerIndex === -1) {
           for (const [_clipIndex, subLayer] of layers.entries()) {
@@ -593,13 +595,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           }
         } else {
           for (const [_clipIndex, subLayer] of layers.entries()) {
-            this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, _clipIndex)
+            this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, { k: 'c', v: _clipIndex })
           }
         }
       }
         break
       default:
-        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, clipIndex)] = false
+        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, addition)] = false
     }
   }
 
@@ -609,8 +611,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.loadingFlags[this.makeFlagKey(0, -1)] = false
   }
 
-  setLoadingFlag(layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
-    const key = this.makeFlagKey(layerIndex, subLayerIndex, clipIndex)
+  setLoadingFlag(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
+    const key = this.makeFlagKey(layerIndex, subLayerIndex, addition)
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true
     }
