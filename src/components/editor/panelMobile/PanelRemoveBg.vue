@@ -106,7 +106,6 @@ export default defineComponent({
   position: relative;
   text-align: center;
   &__btns {
-    margin-top: 15px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-auto-rows: 1fr;

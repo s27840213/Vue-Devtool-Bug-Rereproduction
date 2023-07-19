@@ -34,7 +34,7 @@ import { mapGetters, mapMutations } from 'vuex'
 export default defineComponent({
   emits: [],
   props: {
-    editorViewCanvas: {
+    cotainerRef: {
       type: HTMLElement,
       required: true
     },
@@ -149,13 +149,13 @@ export default defineComponent({
     this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
 
     if (this.$isTouchDevice()) {
-      this.editorViewCanvas.addEventListener('touchstart', this.touchEventHandler)
+      this.cotainerRef.addEventListener('touchstart', this.touchEventHandler)
     }
-    this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
+    this.cotainerRef.addEventListener('pointerdown', this.drawStart)
     window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
-      this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
-      this.editorViewCanvas.addEventListener('mouseleave', this.handleBrushLeave)
+      this.cotainerRef.addEventListener('mouseenter', this.handleBrushEnter)
+      this.cotainerRef.addEventListener('mouseleave', this.handleBrushLeave)
     }
     window.addEventListener('keydown', this.handleKeydown)
     this.setPrevPageScaleRatio(this.scaleRatio)
@@ -165,12 +165,12 @@ export default defineComponent({
     window.removeEventListener('pointerup', this.drawEnd)
     window.removeEventListener('pointermove', this.setBrushPos)
     window.removeEventListener('pointermove', this.drawing)
-    this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
-    this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
+    this.cotainerRef.removeEventListener('mouseenter', this.handleBrushEnter)
+    this.cotainerRef.removeEventListener('mouseleave', this.handleBrushLeave)
     if (this.$isTouchDevice()) {
-      this.editorViewCanvas.removeEventListener('touchstart', this.touchEventHandler)
+      this.cotainerRef.removeEventListener('touchstart', this.touchEventHandler)
     }
-    this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
+    this.cotainerRef.removeEventListener('pointerdown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
   },
   computed: {
