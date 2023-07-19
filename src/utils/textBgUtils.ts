@@ -2,6 +2,7 @@ import { CustomElementConfig } from '@/interfaces/editor'
 import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, isTextFill, ITextBg, ITextGooey } from '@/interfaces/format'
 import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
+import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
 import letterBgData from '@/utils/letterBgData'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -12,7 +13,6 @@ import { Editor } from '@tiptap/vue-3'
 import _, { cloneDeep, isEqual, omit } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
-import cssConverter from '@/utils/cssConverter'
 
 // For text effect gooey
 export class Point {
@@ -119,11 +119,7 @@ export class Rect {
 
             const span = document.createElement('span')
             span.classList.add('nu-text__span')
-            if (t === ' ') {
-              span.innerHTML = '&nbsp;'
-            } else {
-              span.textContent = t
-            }
+            span.textContent = t
 
             const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
             spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'

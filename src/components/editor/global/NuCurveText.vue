@@ -232,7 +232,7 @@ export default defineComponent({
   }
   &__span {
     text-align: left;
-    white-space: pre-wrap;
+    white-space: pre;
     overflow-wrap: break-word;
     letter-spacing: 0.1px;
     line-height: 1;
