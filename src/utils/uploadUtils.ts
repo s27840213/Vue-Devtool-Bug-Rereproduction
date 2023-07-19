@@ -958,7 +958,7 @@ class UploadUtils {
     }
   }
 
-  uploadTemplate() {
+  uploadTemplate(bypass?: boolean) {
     const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     /**
@@ -994,7 +994,7 @@ class UploadUtils {
     formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
-    formData.append('x-amz-meta-tn', this.userId)
+    formData.append('x-amz-meta-tn', bypass ? `${this.userId},bypass` : this.userId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
