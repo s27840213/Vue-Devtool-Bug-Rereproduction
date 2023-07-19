@@ -205,8 +205,6 @@ export default defineComponent({
   },
   unmounted() {
     this.hasDestroyed = true
-    if (this.config.srcObj.type === 'local') {
-    }
   },
   data() {
     return {
