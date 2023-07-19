@@ -1,3 +1,4 @@
+import useCanvasUtils from '@/composable/useCanvasUtils'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
@@ -148,7 +149,6 @@ class BgRemoveUtils {
             inProcess: false
           })
         }
-
         this.setIsProcessing(false)
         paymentUtils.errorHandler(data.msg)
       }
@@ -165,8 +165,6 @@ class BgRemoveUtils {
   }
 
   save() {
-    console.log(generalUtils.deepCopy(this.autoRemoveResult))
-    console.log(store.getters['bgRemove/getAutoRemoveResult'])
     const { index, pageIndex } = pageUtils.currSelectedInfo as ICurrSelectedInfo
     imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
     imageShadowUtils.updateEffectProps({ pageIndex, layerIndex: index }, { isTransparent: true })
@@ -200,12 +198,29 @@ class BgRemoveUtils {
     } else {
       const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
       const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
-      const previewSrc = this.canvas.toDataURL('image/png;base64')
+      const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles
+      const { width, height } = targetLayerStyle
+      const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+      const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimCanvas(this.canvas)
+      const previewSrc = trimedCanvas.toDataURL('image/png;base64')
+
       const { pageId, layerId } = this.bgRemoveIdInfo
       layerUtils.updateLayerProps(pageIndex, index, {
         panelPreviewSrc: '',
         previewSrc,
         trace: 1
+      })
+      const newImageWidth = width * remainingWidthPercentage
+      const newImageHeight = height * remainingHeightPercentage
+      layerUtils.updateLayerStyles(pageIndex, index, {
+        x: targetLayerStyle.x + xShift,
+        y: targetLayerStyle.y + yShift,
+        width: newImageWidth,
+        height: newImageHeight,
+        imgWidth: newImageWidth,
+        imgHeight: newImageHeight,
+        imgX: 0,
+        imgY: 0
       })
       this.setInBgRemoveMode(false)
       pageUtils.setScaleRatio(this.prevPageScaleRatio)

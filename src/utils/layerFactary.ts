@@ -333,6 +333,7 @@ class LayerFactary {
      * 9: replace textShape and textEffect value {} to {name: none}
      * 10: Fix problem that some text effect and text shape will not scale with font-size
      * 11: use 'vertical' instead of truly used value for css to represent vetical text in json for flexibility
+     * 12: some text has &nbsp; (\xa0) instead of whitespace, which renders weirdly on Safari, replace them with whitespace
      */
     // 11: use 'vertical' instead of truly used value for css to represent vetical text in json for flexibility
     if (basicConfig.styles.writingMode.includes('vertical-')) {
@@ -398,7 +399,8 @@ class LayerFactary {
           },
           spanHandler: (span) => {
             // 8: span contains invalid unicode characters (which breaks emoji)
-            span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
+            // 12: some text has &nbsp; (\xa0) instead of whitespace, which renders weirdly on Safari, replace them with whitespace
+            span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '').replace(/\xa0/g, ' ')
           },
           spanPostHandler: (span) => {
             // This needs to be done after removeInvalidStyles's span processing,
@@ -498,7 +500,7 @@ class LayerFactary {
               console.warn('layer in group at index:', idx, 'has no designId and empty svg, it has been removed!')
               return []
             }
-            !shape.designId && console.warn('layer in group at index:', idx, 'has no designId!')
+            !shape.designId && !shape.svg && !['D', 'E'].includes(shape.category) && console.warn('layer in group at index:', idx, 'has no designId!')
           }
           return [this.newByLayerType(l, jsonVer) as IShape | IText | IImage]
         })

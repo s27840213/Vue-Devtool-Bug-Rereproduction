@@ -146,7 +146,7 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
+  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo', addToPage = false) {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
@@ -171,7 +171,7 @@ class UploadUtils {
       if (type === 'logo') {
         params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
-      this.uploadAsset(type, files as FileList, params)
+      this.uploadAsset(type, files as FileList, Object.assign(params, { addToPage }))
       document.body.removeChild(inputNode)
     }, false)
   }
