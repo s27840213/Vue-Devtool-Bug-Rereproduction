@@ -550,13 +550,13 @@ export default defineComponent({
           bgRemoveUtils.setInBgRemoveMode(false)
           editorUtils.setShowMobilePanel(false)
           this.setInEffectEditingMode(true)
-          return await bgRemoveUtils.saveToIOS(async (data, assetId) => {
+          return await bgRemoveUtils.saveToIOS(async (data, assetId, aspectRatio) => {
             const srcObj = {
               type: 'ios',
               userId: '',
               assetId: 'bgRemove/' + assetId,
             }
-            this.addImage(srcObj, this.autoRemoveResult.width / this.autoRemoveResult.height)
+            this.addImage(srcObj, aspectRatio)
             imageShadowUtils.updateEffectProps({
               pageIndex: layerUtils.pageIndex,
               layerIndex: layerUtils.layerIndex,

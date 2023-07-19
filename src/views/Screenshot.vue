@@ -19,7 +19,6 @@ import PageContent from '@/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { AllLayerTypes, IImageStyle, ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
@@ -279,10 +278,6 @@ export default defineComponent({
           // }
           case 'background': {
             this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
-            break
-          }
-          case 'bgRemove': {
-            this.bgRemoveSrc = bgRemoveUtils.getBgRemoveResultSrc()
             break
           }
           case 'backgroundColor': {
