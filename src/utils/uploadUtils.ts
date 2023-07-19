@@ -201,16 +201,13 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(
-    type:
-      | 'image'
-      | 'font'
-      | 'avatar'
-      | 'logo'
-      | 'stk-bg-remove'
-      | 'stk-bg-remove-face',
-    addToPage = false
-  ) {
+  chooseAssets(type:
+    | 'image'
+    | 'font'
+    | 'avatar'
+    | 'logo'
+    | 'stk-bg-remove'
+    | 'stk-bg-remove-face', addToPage = false) {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
@@ -404,7 +401,6 @@ class UploadUtils {
       pollingJsonName?: string
     } = {}
   ) {
-    console.log(type, files)
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
@@ -1384,10 +1380,7 @@ class UploadUtils {
       `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`
     )
     // only for template
-    formData.append(
-      'Content-Disposition',
-      `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`
-    )
+    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
     formData.append('x-amz-meta-tn', bypass ? `${this.userId},bypass` : this.userId)
     const xhr = new XMLHttpRequest()
 

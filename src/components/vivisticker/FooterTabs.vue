@@ -208,7 +208,7 @@ export default defineComponent({
     },
     photoTabs(): Array<IFooterTab> {
       console.log(this.inEffectEditingMode)
-      const tabs = [
+      const tabs:Array<IFooterTab> = [
         { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
@@ -225,6 +225,7 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
         ...this.copyPasteTabs,
         ...(this.editorTypeTemplate && !this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []), // conditional insert to prevent duplicate key
+        // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: false, plan: 'bg-remove' },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: !this.editorTypeTemplate },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {
@@ -660,7 +661,6 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
-      console.log(tab.plan)
       if (!vivistickerUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, tab.plan)) return
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)

@@ -152,7 +152,8 @@ export interface IShape extends ILayer<IStyle> {
   trimOffset?: number[],
   filled?: boolean,
   shapeType?: string,
-  pDiffLimits?: number[]
+  pDiffLimits?: number[],
+  frameDecType?: 'blend' | 'decoration' | 'decorationTop'
 }
 export interface IImage extends ILayer<IImageStyle> {
   type: 'image'
