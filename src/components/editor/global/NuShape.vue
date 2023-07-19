@@ -429,18 +429,31 @@ export default defineComponent({
         primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame
       }
       if (primaryLayer.type === LayerType.frame) {
-        let subLayerIdx = -1
-        if (primaryLayer.decoration && (primaryLayer.decoration as IShape).id === this.config.id) {
-          subLayerIdx = 0
-        }
-        if (primaryLayer.decorationTop && (primaryLayer.decorationTop as IShape).id === this.config.id) {
-          subLayerIdx = primaryLayer.clips.length + (primaryLayer.decoration ? 1 : 0)
-        }
         this.$nextTick(() => {
-          if (this.priPrimaryLayerIndex !== -1) {
-            vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+          if (this.priPrimaryLayerIndex !== -1 && (this.config as IShape).frameDecType) {
+            switch ((this.config as IShape).frameDecType) {
+              case 'decoration':
+                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'd' })
+                break
+              case 'decorationTop':
+                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'dt' })
+                break
+              // case 'blend':
+              //   vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
+              //   break
+            }
           } else {
-            vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+            switch ((this.config as IShape).frameDecType) {
+              case 'decoration':
+                vivistickerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'd' })
+                break
+              case 'decorationTop':
+                vivistickerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'dt' })
+                break
+              // case 'blend':
+              //   vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
+              //   break
+            }
           }
         })
       } else {

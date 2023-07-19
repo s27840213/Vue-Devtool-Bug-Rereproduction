@@ -190,8 +190,6 @@ export default defineComponent({
      * The shadow effect is set, but the img is not uploaded and fetched
      */
     const config = this.config as IImage
-    console.log(config.styles.shadow.currentEffect !== 'none', config.styles.shadow.srcObj)
-    // if (config.styles.shadow.currentEffect !== 'none' && !config.styles.shadow.srcObj.assetId) {
     if (config.styles.shadow.currentEffect !== 'none' && config.styles.shadow.srcObj.type === 'upload') {
       console.log(' mounted handle shadow')
       this.handleNewShadowEffect()
@@ -207,9 +205,6 @@ export default defineComponent({
   },
   unmounted() {
     this.hasDestroyed = true
-    if (this.config.srcObj.type === 'local') {
-      // URL.revokeObjectURL(this.config.srcObj.assetId)
-    }
   },
   data() {
     return {
@@ -560,14 +555,10 @@ export default defineComponent({
             this.src = imageUtils.getSrc(this.config)
             window.requestAnimationFrame(() => {
               vivistickerUtils.isAnyIOSImgOnError = true
-              let subLayerIdx = this.subLayerIndex
-              if ((this.primaryLayer as IFrame).decoration) {
-                subLayerIdx++
-              }
               if (this.priPrimaryLayerIndex !== -1) {
-                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
               } else {
-                vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+                vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
               }
             })
           } else {
@@ -614,19 +605,14 @@ export default defineComponent({
     },
     onAdjustImgLoad(e: Event, type?: string) {
       if (type === 'main') {
-        let subLayerIdx = this.subLayerIndex
-        if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
-          subLayerIdx++
-        }
-
         // detect if SVG image rendered
         const rendering = () => {
           const elImg = this.$refs.img as SVGImageElement
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            if (this.priPrimaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
-            else vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+            if (this.priPrimaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+            else vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -643,14 +629,10 @@ export default defineComponent({
     },
     onLoad(e: Event, type?: string) {
       if (type === 'main' && !this.isAdjustImage) {
-        let subLayerIdx = this.subLayerIndex
-        if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
-          subLayerIdx++
-        }
         if (this.priPrimaryLayerIndex !== -1) {
-          vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, subLayerIdx)
+          vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
         } else {
-          vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+          vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
         }
       }
       this.isOnError = false
