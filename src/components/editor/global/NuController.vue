@@ -471,7 +471,7 @@ export default defineComponent({
       return this.config.type
     },
     needAutoRescale(): boolean {
-      return this.config.inAutoRescaleMode && this.getLayerRotate() === 0
+      return this.config.inAutoRescaleMode && this.getLayerRotate() === 0 && !textShapeUtils.isCurvedText(this.config.styles.textShape)
     },
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)

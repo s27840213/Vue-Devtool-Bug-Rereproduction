@@ -587,7 +587,7 @@ class TextUtils {
   handleAutoRescale(options?: { forceFull?: boolean, onlyCentralize?: boolean }, pageIndex = layerUtils.pageIndex, layerIndex = layerUtils.layerIndex) {
     const config = layerUtils.getLayer(pageIndex, layerIndex) as AllLayerTypes
     if (config?.type !== LayerType.text) return
-    if (config.styles.rotate !== 0 || !config.inAutoRescaleMode) return
+    if (config.styles.rotate !== 0 || !config.inAutoRescaleMode || textShapeUtils.isCurvedText(config.styles.textShape)) return
     const { textHW, x, y, scale } = this.getAutoRescaleResult(
       config,
       this.getTextHW(config, config.widthLimit),
