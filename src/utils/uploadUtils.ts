@@ -402,7 +402,6 @@ class UploadUtils {
       pollingJsonName?: string;
     } = {}
   ) {
-    console.log(type, files)
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }

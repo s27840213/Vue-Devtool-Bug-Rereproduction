@@ -61,7 +61,8 @@ class ImageUtils {
   }
 
   appendQuery(src: string, name: string, value: string) {
-    if (src === '' || src.includes('data:image/')) return ''
+    if (src === '') return ''
+    if (src.includes('data:image/')) return src
     if (src.includes('?')) {
       return src + `&${name}=${value}`
     } else {
