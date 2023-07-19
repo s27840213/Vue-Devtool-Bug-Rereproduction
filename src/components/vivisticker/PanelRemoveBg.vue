@@ -1,6 +1,10 @@
 <template lang="pug">
 div(class="panel-remove-bg" ref="panelRemoveBg")
-  bg-remove-container(v-if="inBgRemoveMode || isProcessing" :containerWH="containerWH" :containerRef="panelRemoveBg" ref="bgRemoveContainer")
+  bg-remove-container(v-if="inBgRemoveMode || isProcessing"
+    :containerWH="containerWH"
+    :containerRef="panelRemoveBg"
+    :previewSrc="previewSrc"
+    ref="bgRemoveContainer")
   div(v-else class="btn-section")
     div(class="btn" @click="removeBg")
       div(class="btn__content-section")

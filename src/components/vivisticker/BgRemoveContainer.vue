@@ -32,6 +32,10 @@ export default defineComponent({
     containerRef: {
       type: HTMLElement,
       default: null
+    },
+    previewSrc: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -49,7 +53,6 @@ export default defineComponent({
       initImgSize: { width: 0, height: 0 },
       imgAspectRatio: 1,
       distanceBetweenFingers: -1,
-      previewSrc: ''
       // p1StartClientY: 0,
       // p1StartClientX: 0,
       // p2StartClientY: 0,
