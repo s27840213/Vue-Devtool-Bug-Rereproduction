@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="overlay-item" :class="{active, [theme]: true}")
-  div(class="overlay-item__imgs")
+  div(class="overlay-item__img")
     img(:src="baseImg")
     svg-icon(v-if="!mask"
       class="overlay-item__mask"
@@ -8,6 +8,9 @@ div(class="overlay-item" :class="{active, [theme]: true}")
     img(v-else class="overlay-item__mask"
         draggable="false"
         :src="`https://template.vivipic.com/svg/${mask.id}/prev?ver=${mask.ver}`")
+    div(v-if="active && theme === 'mobile' && name !== 'none'"
+        class="overlay-item__img--more")
+      svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
   span(class="overlay-item__name") {{ name }}
 </template>
 
@@ -71,11 +74,11 @@ export default defineComponent({
     color: setColor(gray-3);
   }
 
-  &.active .overlay-item__imgs {
+  &.active .overlay-item__img {
     @include selection-border(3px);
   }
 
-  &__imgs {
+  &__img {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -84,6 +87,16 @@ export default defineComponent({
     overflow: hidden;
     img {
       width: 100%;
+    }
+    &--more {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(71, 74, 87, 0.6);
+      backdrop-filter: blur(2px);
     }
   }
   &__mask {

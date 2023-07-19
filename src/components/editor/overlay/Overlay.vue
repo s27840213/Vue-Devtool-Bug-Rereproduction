@@ -28,13 +28,13 @@ div(v-if="!$isTouchDevice()" class="overlay desktop" :class="theme")
                 @update="(val: number)=>handleRangeInput(val, option)")
 //- Mobile version
 div(v-else class="overlay mobile" :class="theme")
-  div(class="overlay__tabs")
+  div(v-if="state === 'effects'" class="overlay__tabs")
     svg-icon(iconName="forbid" iconWidth="24px" iconColor="gray-2"
         @click="applyOverlay({ name: 'none', svg: null })")
     tabs(:theme="`${theme}-narrow`"
         :tabs="mobileTabs"
         v-model="currCategory")
-  div(class="overlay__items")
+  div(v-if="state === 'effects'" class="overlay__items")
     template(v-for="cate in mobileCategories")
       overlay-item(v-for="item in cate.items"
         :key="item.name"
@@ -44,6 +44,12 @@ div(v-else class="overlay mobile" :class="theme")
         :active="curr.name === item.name"
         theme="mobile"
         @click="applyOverlay(item)")
+  div(v-if="state === 'options'" class="overlay__options")
+    span {{ curr.name }}
+    mobile-slider(v-for="option in options" :key="option.key"
+        :title="option.label"
+        :value="getInputValue(option)"
+        @update="(val: number)=>handleRangeInput(val, option)")
 </template>
 
 <script lang="ts">
@@ -89,6 +95,10 @@ export default defineComponent({
     theme: {
       type: String as PropType<'dark' | 'light'>,
       default: 'dark',
+    },
+    panelHistory: {
+      type: Array as PropType<string[]>,
+      default: [] as string[]
     },
   },
   data() {
@@ -186,6 +196,9 @@ export default defineComponent({
     }
   },
   computed: {
+    state() {
+      return this.panelHistory.length === 0 ? 'effects' : 'options'
+    },
     mobileTabs() {
       return this.data.map(category => category.name || 'All')
     },
@@ -194,7 +207,7 @@ export default defineComponent({
         if (this.currCategory === 0) return true
         return this.currCategory === categoryIndex
       })
-    }
+    },
   },
   // mounted() {
   // },
@@ -214,7 +227,11 @@ export default defineComponent({
       this.currCategory = this.currCategory === categoryIndex ? 0 : categoryIndex
     },
     applyOverlay(item: IOverlayItem) {
-      this.curr.name = item.name
+      if (this.$isTouchDevice() && this.curr.name === item.name && item.name !== 'none') {
+        this.$emit('pushHistory', this.curr.name)
+      } else {
+        this.curr.name = item.name
+      }
     },
     handleRangeInput(val: number, option: IOverlayOption) {
       this.curr[option.key] = val
@@ -241,14 +258,16 @@ export default defineComponent({
     padding: 10px 10px 0 10px;
     row-gap: 10px;
   }
-  .overlay__options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
 }
 
-// Handle RWD and theme
+// Common CSS for both mobile and desktop.
+.overlay__options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// Handle RWD and theme for desktop.
 .dark.desktop.overlay {
   @include hover-scrollbar(dark);
   @include body-MD;
@@ -311,8 +330,14 @@ export default defineComponent({
       height: 76px;
     }
   }
+  .overlay__options {
+    @include body-MD;
+    padding: 0 16px 16px 16px;
+  }
   &.light {
-    background-color: setColor(gray-6);
+    .overlay__tabs, .overlay__items{
+      background-color: setColor(gray-6);
+    }
   }
 }
 </style>

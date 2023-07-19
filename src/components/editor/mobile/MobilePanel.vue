@@ -235,7 +235,8 @@ export default defineComponent({
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
         'multiple-select', 'remove-bg', 'nudge', 'overlay-light']
-      return this.extraPanel !== '' || whiteThemePanel.includes(this.currActivePanel)
+      return this.extraPanel !== '' || whiteThemePanel.includes(this.currActivePanel) ||
+        (this.currActivePanel === 'overlay-dark' && this.historySize > 0)
     },
     noPaddingTheme(): boolean {
       return this.extraPanel === '' &&
@@ -251,7 +252,7 @@ export default defineComponent({
       return ['download', 'remove-bg'].includes(this.currActivePanel)
     },
     hideTopSection(): boolean {
-      return ['overlay-dark', 'overlay-light'].includes(this.currActivePanel)
+      return ['overlay-dark', 'overlay-light'].includes(this.currActivePanel) && this.historySize === 0
     },
     extraFixSizeCondition(): boolean { // For panel that fix in some condition
       switch (this.currActivePanel) {
@@ -288,8 +289,6 @@ export default defineComponent({
     showRightBtn(): boolean {
       if (this.currActivePanel === 'download') {
         return (this.historySize < 2) && !['polling', 'downloaded'].includes(this.currHistory)
-      } else if (this.currActivePanel.includes('overlay')) {
-        return (this.historySize > 0)
       }
       return this.currActivePanel !== 'none'
     },
@@ -418,7 +417,8 @@ export default defineComponent({
         case 'overlay-dark':
         case 'overlay-light':
           return {
-            theme: this.currActivePanel.replace('overlay-', '')
+            theme: this.currActivePanel.replace('overlay-', ''),
+            panelHistory: this.panelHistory,
           }
         default: {
           return {}
@@ -442,6 +442,8 @@ export default defineComponent({
       switch (this.currActivePanel) {
         case 'color':
         case 'more':
+        case 'overlay-dark':
+        case 'overlay-light':
           return { pushHistory }
         case 'background':
           return { openExtraColorModal }
