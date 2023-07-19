@@ -81,7 +81,8 @@ export default defineComponent({
       groupId: 'getGroupId',
       groupType: 'getGroupType',
       isOutsourcer: 'user/isOutsourcer',
-      showAdminTool: 'user/showAdminTool'
+      showAdminTool: 'user/showAdminTool',
+      isAdmin: 'user/isAdmin'
     }),
     component(): string {
       return (this.popupComponent as IPopupComponent).component
@@ -191,6 +192,15 @@ export default defineComponent({
           condition: this.groupId && this.showAdminTool && !this.isOutsourcer && this.isLogin && this.groupType === 1,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '上傳單頁模板(不檢查)',
+          shortcutText: '',
+          condition: this.showAdminTool && this.isLogin && (this.isAdmin && !this.isOutsourcer),
+          action: () => {
+            uploadUtils.uploadTemplate(true)
           }
         }
         // {

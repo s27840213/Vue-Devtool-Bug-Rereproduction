@@ -176,6 +176,7 @@ class LayerFactary {
         newStyles.blendMode = l.blendMode
         l.styles = newStyles
         l.vSize = [newStyles.width, newStyles.height]
+        l.frameDecType = 'blend'
         return this.newShape(l)
       }) : undefined
 
@@ -212,6 +213,7 @@ class LayerFactary {
       blendLayers,
       decoration: decoration && !clips[0].isFrameImg ? this.newShape((() => {
         decoration.vSize = [initWidth, initHeight]
+        decoration.frameDecType = 'decoration'
         decoration.styles = {
           width: initWidth,
           height: initHeight,
@@ -222,6 +224,7 @@ class LayerFactary {
       })(), { decoration: true }) : undefined,
       decorationTop: decorationTop && !clips[0].isFrameImg ? this.newShape((() => {
         decorationTop.vSize = [initWidth, initHeight]
+        decorationTop.frameDecType = 'decorationTop'
         decorationTop.styles = {
           width: initWidth,
           height: initHeight,

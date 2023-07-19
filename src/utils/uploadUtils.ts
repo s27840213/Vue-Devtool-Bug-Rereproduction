@@ -81,7 +81,7 @@ class UploadUtils {
   readonly GroupDesignUpdateFlag = UploadUtils.GroupDesignUpdateFlag;
   static readonly GetDesignType = GetDesignType;
   readonly GetDesignType = UploadUtils.GetDesignType;
-  loginOutput: any;
+  loginOutput: any
   /**
    * @param getDesignInfo
    *  - the reason why we need this param is that if  the url contain the infomation of type=design, and design_id, we need to get the design "after" logining
@@ -90,15 +90,15 @@ class UploadUtils {
    */
 
   getDesignInfo: {
-    flag: number;
-    type: string;
-    id: string;
-    teamId: string;
-  };
+    flag: number
+    type: string
+    id: string
+    teamId: string
+  }
 
-  event: any;
-  eventHash: { [index: string]: (param: any) => void };
-  designStatusTimer: number;
+  event: any
+  eventHash: { [index: string]: (param: any) => void }
+  designStatusTimer: number
   DEFAULT_POLLING_RETRY_LIMIT = 15;
 
   get token(): string {
@@ -321,11 +321,10 @@ class UploadUtils {
         xhr.onload = () => {
           // polling the JSON file of uploaded image
           const interval = window.setInterval(() => {
-            const pollingTargetSrc = `https://template.vivipic.com/export/${
-              this.teamId
-            }/${assetId}/result.json?ver=${generalUtils.generateRandomString(
-              6
-            )}`
+            const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId
+              }/${assetId}/result.json?ver=${generalUtils.generateRandomString(
+                6
+              )}`
             fetch(pollingTargetSrc).then((response) => {
               if (response.status === 200) {
                 clearInterval(interval)
@@ -393,13 +392,13 @@ class UploadUtils {
       isShadow = false,
       pollingJsonName = 'result.json',
     }: {
-      addToPage?: boolean;
-      id?: string;
-      pollingCallback?: (json: IUploadAssetResponse) => void;
-      needCompressed?: boolean;
-      brandId?: string;
-      isShadow?: boolean;
-      pollingJsonName?: string;
+      addToPage?: boolean
+      id?: string
+      pollingCallback?: (json: IUploadAssetResponse) => void
+      needCompressed?: boolean
+      brandId?: string
+      isShadow?: boolean
+      pollingJsonName?: string
     } = {}
   ) {
     if (type === 'font') {
@@ -420,9 +419,9 @@ class UploadUtils {
         typeof files[i] === 'string'
           ? i18n.global.t('NN0705', { size: fileSizeLimit })
           : i18n.global.t('NN0696', {
-              file: (files[i] as File)?.name,
-              size: fileSizeLimit,
-            })
+            file: (files[i] as File)?.name,
+            size: fileSizeLimit,
+          })
 
       if (fileSize > fileSizeLimit) {
         modalUtils.setModalInfo(i18n.global.t('NN0137') as string, [
@@ -496,8 +495,8 @@ class UploadUtils {
         needCompressed
           ? this.userId
           : isShadow
-          ? `${this.userId},2`
-          : `${this.userId},1`
+            ? `${this.userId},2`
+            : `${this.userId},1`
       )
       const xhr = new XMLHttpRequest()
 
@@ -565,11 +564,10 @@ class UploadUtils {
             xhr.onload = () => {
               // polling the JSON file of uploaded image
               const interval = window.setInterval(() => {
-                const pollingTargetSrc = `https://template.vivipic.com/export/${
-                  this.teamId
-                }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
-                  6
-                )}`
+                const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId
+                  }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+                    6
+                  )}`
                 fetch(pollingTargetSrc).then((response) => {
                   if (response.status === 200) {
                     clearInterval(interval)
@@ -630,11 +628,10 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${
-                this.teamId
-              }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
-                6
-              )}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId
+                }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+                  6
+                )}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -664,11 +661,10 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${
-                this.teamId
-              }/avatar/${pollingJsonName}?ver=${generalUtils.generateRandomString(
-                6
-              )}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId
+                }/avatar/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+                  6
+                )}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -677,16 +673,13 @@ class UploadUtils {
                       console.log('Successfully upload the file')
                       const targetUrls = this.isAdmin
                         ? {
-                            prev: `https://template.vivipic.com/admin/${
-                              this.teamId || this.userId
+                          prev: `https://template.vivipic.com/admin/${this.teamId || this.userId
                             }/asset/avatar/prev`,
-                            prev_2x: `https://template.vivipic.com/admin/${
-                              this.teamId || this.userId
+                          prev_2x: `https://template.vivipic.com/admin/${this.teamId || this.userId
                             }/asset/avatar/prev_2x`,
-                            prev_4x: `https://template.vivipic.com/admin/${
-                              this.teamId || this.userId
+                          prev_4x: `https://template.vivipic.com/admin/${this.teamId || this.userId
                             }/asset/avatar/prev_4x`,
-                          }
+                        }
                         : json.url
                       store.commit('user/SET_STATE', {
                         avatar: targetUrls,
@@ -710,11 +703,10 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = window.setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${
-                this.teamId
-              }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
-                6
-              )}`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId
+                }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+                  6
+                )}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -1347,7 +1339,7 @@ class UploadUtils {
     }
   }
 
-  uploadTemplate() {
+  uploadTemplate(bypass?: boolean) {
     const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     /**
@@ -1388,11 +1380,8 @@ class UploadUtils {
       `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`
     )
     // only for template
-    formData.append(
-      'Content-Disposition',
-      `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`
-    )
-    formData.append('x-amz-meta-tn', this.userId)
+    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
+    formData.append('x-amz-meta-tn', bypass ? `${this.userId},bypass` : this.userId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([JSON.stringify(pageJSON)], {
@@ -1592,10 +1581,10 @@ class UploadUtils {
   async getDesign(
     type: string,
     designParams: {
-      designId?: string;
-      teamId?: string;
-      signedUrl?: string;
-      fetchTarget?: string;
+      designId?: string
+      teamId?: string
+      signedUrl?: string
+      fetchTarget?: string
     },
     params: { [index: string]: any } = {}
   ) {
@@ -1634,9 +1623,8 @@ class UploadUtils {
           throw new Error('design url is not provided')
         }
         // ? `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}` : `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
-        fetchTarget = `${
-          designParams.fetchTarget
-        }&ver=${generalUtils.generateRandomString(6)}`
+        fetchTarget = `${designParams.fetchTarget
+          }&ver=${generalUtils.generateRandomString(6)}`
         break
       }
 
