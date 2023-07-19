@@ -810,70 +810,85 @@ export default defineComponent({
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
               if (images.length) {
-                const isPrimaryLayerFrame = layer.type === LayerType.frame
                 const srcObj = {
                   type: 'ios',
                   assetId: images[0],
                   userId: ''
                 }
                 const src = imageUtils.getSrc(srcObj)
-                if (isPrimaryLayerFrame) {
-                  // replace frame
-                  const clipIndex = Math.max(subLayerIdx, 0)
-                  const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
-                    .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[clipIndex], src)
-                  frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, clipIndex, {
-                    imgWidth,
-                    imgHeight,
-                    imgX,
-                    imgY
-                  })
-                  frameUtils.updateFrameClipSrc(pageIndex, layerIndex, clipIndex, srcObj)
-                } else {
-                  await imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
-                    const { naturalWidth, naturalHeight } = img
-                    if (this.inBgSettingMode) {
-                      // replace background
-                      backgroundUtils.setBgImage({
-                        pageIndex: pageUtils.currFocusPageIndex,
-                        config: layerFactary.newImage({
-                          srcObj,
-                          styles: {
-                            width: naturalWidth,
-                            height: naturalHeight
-                          }
-                        })
+                await imageUtils.imgLoadHandler(src, async (img: HTMLImageElement) => {
+                  const { naturalWidth, naturalHeight } = img
+                  if (this.inBgSettingMode) {
+                    // replace background
+                    backgroundUtils.setBgImage({
+                      pageIndex: pageUtils.currFocusPageIndex,
+                      config: layerFactary.newImage({
+                        srcObj,
+                        styles: {
+                          width: naturalWidth,
+                          height: naturalHeight
+                        }
                       })
-                      backgroundUtils.fitPageBackground(pageUtils.currFocusPageIndex)
-                    } else {
-                      // replace image
-                      const resizeRatio = RESIZE_RATIO_IMAGE
-                      const pageSize = pageUtils.getPageSize(pageIndex)
-                      const pageAspectRatio = pageSize.width / pageSize.height
-                      const photoAspectRatio = naturalWidth / naturalHeight
-                      const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
-                      const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
-                      const config = layerUtils.getCurrConfig as IImage
-                      const { imgWidth, imgHeight } = config.styles
-                      const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
-                      const styles = {
-                        ...config.styles,
-                        ...mouseUtils.clipperHandler({
-                          styles: {
-                            width: photoWidth,
-                            height: photoHeight
+                    })
+                    backgroundUtils.fitPageBackground(pageUtils.currFocusPageIndex)
+                  } else {
+                    switch (layer.type) {
+                      case 'image': {
+                        // replace image
+                        const resizeRatio = RESIZE_RATIO_IMAGE
+                        const pageSize = pageUtils.getPageSize(pageIndex)
+                        const pageAspectRatio = pageSize.width / pageSize.height
+                        const photoAspectRatio = naturalWidth / naturalHeight
+                        const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+                        const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+                        const config = layerUtils.getCurrConfig as IImage
+                        const { imgWidth, imgHeight } = config.styles
+                        const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
+                        const styles = {
+                          ...config.styles,
+                          ...mouseUtils.clipperHandler({
+                            styles: {
+                              width: photoWidth,
+                              height: photoHeight
+                            }
+                          } as unknown as IImage, path, config.styles).styles,
+                          ...{
+                            initWidth: config.styles.initWidth,
+                            initHeight: config.styles.initHeight
                           }
-                        } as unknown as IImage, path, config.styles).styles,
-                        ...{
-                          initWidth: config.styles.initWidth,
-                          initHeight: config.styles.initHeight
+                        }
+                        layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+                        layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+                        break
+                      }
+                      case 'frame': {
+                        // replace frame
+                        const clipIndex = Math.max(subLayerIdx, 0)
+                        const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                          .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[clipIndex], src)
+                        frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, clipIndex, {
+                          imgX, imgY, imgWidth, imgHeight
+                        })
+                        frameUtils.updateFrameClipSrc(pageIndex, layerIndex, clipIndex, srcObj)
+                        break
+                      }
+                      case 'group': {
+                        const target = layerUtils.getCurrConfig
+                        if (target.type === LayerType.image) {
+                          const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                            .getClipImgDimension(target, src)
+                          layerUtils.updateLayerStyles(pageIndex, layerIndex, { imgX, imgY, imgWidth, imgHeight }, subLayerIdx)
+                          layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+                        } else if (target.type === LayerType.frame && target.clips.length === 1) {
+                          const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                            .getClipImgDimension(target.clips[0], src)
+                          frameUtils.updateFrameLayerProps(pageIndex, subLayerIdx, 0, { srcObj }, layerIndex)
+                          frameUtils.updateSubFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, 0, { imgX, imgY, imgWidth, imgHeight })
                         }
                       }
-                      layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-                      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
                     }
-                  })
-                }
+                  }
+                })
                 stepsUtils.record()
               }
             })
