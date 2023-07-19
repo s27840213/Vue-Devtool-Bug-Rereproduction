@@ -94,34 +94,53 @@ export default defineComponent({
           }
         }
       })
-      if (config.decoration && json.decoration) {
-        json.decoration.color = [...config.decoration.color]
-        const newDecor = {} as IShape
-        Object.entries(config.decoration)
-          .forEach(([k, v]) => {
-            if (v instanceof Object || v instanceof Array) {
-              newDecor[k] = generalUtils.unproxify(v)
-            } else {
-              newDecor[k] = v
-            }
-          })
-        Object.assign(newDecor, json.decoration)
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: newDecor }, this.subLayerIndex)
+
+      if (json.decoration) {
+        if (config.decoration) {
+          if (config.decoration.color.length) {
+            json.decoration.color = [...config.decoration.color]
+          }
+          const newDecor = {} as IShape
+          Object.entries(config.decoration)
+            .forEach(([k, v]) => {
+              if (v instanceof Object || v instanceof Array) {
+                newDecor[k] = generalUtils.unproxify(v)
+              } else {
+                newDecor[k] = v
+              }
+            })
+          Object.assign(newDecor, json.decoration)
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: newDecor }, this.subLayerIndex)
+        } else {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration }, this.subLayerIndex)
+        }
+      } else if (!json.decoration && config.decoration) {
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: undefined }, this.subLayerIndex)
       }
-      if (config.decorationTop && json.decorationTop) {
-        json.decorationTop.color = [...config.decorationTop.color]
-        const newDecorTop = {} as IShape
-        Object.entries(config.decorationTop)
-          .forEach(([k, v]) => {
-            if (v instanceof Object || v instanceof Array) {
-              newDecorTop[k] = generalUtils.unproxify(v)
-            } else {
-              newDecorTop[k] = v
-            }
-          })
-        Object.assign(newDecorTop, json.decorationTop)
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: newDecorTop }, this.subLayerIndex)
+
+      if (json.decorationTop) {
+        if (config.decorationTop) {
+          if (config.decorationTop.color.length) {
+            json.decorationTop.color = [...config.decorationTop.color]
+          }
+          const newDecorTop = {} as IShape
+          Object.entries(config.decorationTop)
+            .forEach(([k, v]) => {
+              if (v instanceof Object || v instanceof Array) {
+                newDecorTop[k] = generalUtils.unproxify(v)
+              } else {
+                newDecorTop[k] = v
+              }
+            })
+          Object.assign(newDecorTop, json.decorationTop)
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: newDecorTop }, this.subLayerIndex)
+        } else {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop }, this.subLayerIndex)
+        }
+      } else if (!json.decorationTop && config.decorationTop) {
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: undefined }, this.subLayerIndex)
       }
+
       if (json.blendLayers) {
         if (!this.config.blendLayers) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { blendLayers: [] }, this.subLayerIndex)

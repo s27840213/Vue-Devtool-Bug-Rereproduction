@@ -1,4 +1,5 @@
 import removeBgTestJSON from '@/assets/json/removeBgTest.json'
+import useCanvasUtils from '@/composable/useCanvasUtils'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
@@ -154,7 +155,6 @@ class BgRemoveUtils {
             inProcess: false
           })
         }
-
         this.setIsProcessing(false)
         paymentUtils.errorHandler(data.msg)
       }
@@ -234,12 +234,29 @@ class BgRemoveUtils {
     } else {
       const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
       const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
-      const previewSrc = this.canvas.toDataURL('image/png;base64')
+      const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles
+      const { width, height } = targetLayerStyle
+      const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+      const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimCanvas(this.canvas)
+      const previewSrc = trimedCanvas.toDataURL('image/png;base64')
+
       const { pageId, layerId } = this.bgRemoveIdInfo
       layerUtils.updateLayerProps(pageIndex, index, {
         panelPreviewSrc: '',
         previewSrc,
         trace: 1
+      })
+      const newImageWidth = width * remainingWidthPercentage
+      const newImageHeight = height * remainingHeightPercentage
+      layerUtils.updateLayerStyles(pageIndex, index, {
+        x: targetLayerStyle.x + xShift,
+        y: targetLayerStyle.y + yShift,
+        width: newImageWidth,
+        height: newImageHeight,
+        imgWidth: newImageWidth,
+        imgHeight: newImageHeight,
+        imgX: 0,
+        imgY: 0
       })
       this.setInBgRemoveMode(false)
       pageUtils.setScaleRatio(this.prevPageScaleRatio)
@@ -314,13 +331,17 @@ class BgRemoveUtils {
     })
   }
 
-  saveToIOS(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string) => any) {
-    const src = this.canvas.toDataURL('image/png;base64')
+  saveToIOS(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number) => any) {
+    const { trimCanvas } = useCanvasUtils()
+    const { canvas: trimedCanvas, width, height } = trimCanvas(this.canvas)
+    const src = trimedCanvas.toDataURL('image/png;base64')
+
+    generalUtils.downloadImage(src)
     const assetId = generalUtils.generateAssetId()
     return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'bgRemove', name: assetId, toast: false }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
       if (callback) {
-        return callback(_data, assetId)
+        return callback(_data, assetId, width / height)
       }
     })
   }

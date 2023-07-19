@@ -19,7 +19,6 @@ import PageContent from '@/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { AllLayerTypes, IImageStyle, ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
@@ -281,10 +280,6 @@ export default defineComponent({
             this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
             break
           }
-          case 'bgRemove': {
-            this.bgRemoveSrc = bgRemoveUtils.getBgRemoveResultSrc()
-            break
-          }
           case 'backgroundColor': {
             this.backgroundColor = id ?? '#FFFFFFFF'
             setTimeout(() => { this.onload() }, 100)
@@ -362,7 +357,7 @@ export default defineComponent({
               return
             }
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-            vivistickerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false)
+            vivistickerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false, 10000)
             pageUtils.setPages([page])
             this.usingJSON = true
             break

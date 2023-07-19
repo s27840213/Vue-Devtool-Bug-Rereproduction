@@ -211,7 +211,7 @@ export default defineComponent({
     this.setDebugMode(debugMode)
     this.footerTabsRef = (this.$refs.footerTabs as any).$el as HTMLElement
 
-    if (debugMode) {
+    if (this.showVConsole) {
       this.vConsole = new VConsole({ theme: 'dark' })
       this.vConsole.setSwitchPosition(25, 80)
     }
@@ -256,6 +256,9 @@ export default defineComponent({
     },
     showFooterTabs(): boolean {
       return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview)
+    },
+    showVConsole(): boolean {
+      return false
     }
   },
   watch: {
@@ -273,7 +276,7 @@ export default defineComponent({
     //   }
     // },
     debugMode(newVal) {
-      if (newVal && !this.vConsole) {
+      if (newVal && this.showVConsole && !this.vConsole) {
         this.vConsole = new VConsole({ theme: 'dark' })
         this.vConsole.setSwitchPosition(25, 80)
       } else if (!newVal && this.vConsole) {
