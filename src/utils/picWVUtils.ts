@@ -30,7 +30,8 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
 
   MAIN_CALLBACKS = [
     'updateInfoDone',
-    'loginResult'
+    'loginResult',
+    'uploadImageURL'
   ]
 
   CALLBACK_MAPS = {
@@ -127,6 +128,10 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('update-user-info')
   }
 
+  uploadImageURL(data: any) {
+    this.handleCallback('upload-image', data)
+  }
+
   async setState(key: string, value: any) {
     if (this.inBrowserMode) return
     await this.callIOSAsAPI('SET_STATE', { key, value }, 'setState')
@@ -188,6 +193,12 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   ratingRequest(type: string) {
     if (this.inBrowserMode) return
     this.sendToIOS('RATING_REQUEST', { type })
+  }
+
+  async getIosImg(limit = 1): Promise<Array<string>> {
+    const { images } = ((await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', { timeout: 60000, cancelOnConfict: true })) ?? { images: [] }) as { images: Array<string> }
+    console.log(images)
+    return images
   }
 }
 

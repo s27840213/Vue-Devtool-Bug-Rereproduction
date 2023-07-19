@@ -99,6 +99,8 @@ export default component
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+
   &.full {
     width: 100%;
   }
