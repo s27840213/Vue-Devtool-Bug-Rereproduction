@@ -1,15 +1,15 @@
 <template lang="pug">
-div(v-if="theme !== 'mobile'" class="overlay" :class="theme")
-  div(v-for="cate in fakeData"
+div(v-if="!$isTouchDevice()" class="overlay desktop" :class="theme")
+  div(v-for="(cate, cateIndex) in data"
       :key="cate.name"
       class="overlay__category")
     component(v-if="cate.name"
         class="mx-10"
-        :is="theme === 'light' ? 'CollapseTitle' : 'span'"
-        :active="currCategory === cate.name"
-        @click="switchTab(cate.name)") {{ cate.name }}
+        :is="theme === 'light' ? 'CollapseTitle' : 'div'"
+        :active="currCategory === cateIndex"
+        @click="switchTab(cateIndex)") {{ cate.name }}
     collapse(class="overlay__collapse"
-        :when="currCategory === cate.name || !cate.name || theme !== 'light'")
+        :when="currCategory === cateIndex || !cate.name || theme !== 'light'")
       div(class="overlay__category-list")
         template(v-for="(item1d, i) in item2d(cate.items)" :key="`row${i}`")
           overlay-item(v-for="item in item1d"
@@ -26,19 +26,38 @@ div(v-if="theme !== 'mobile'" class="overlay" :class="theme")
                 :title="option.label"
                 :value="getInputValue(option)"
                 @update="(val: number)=>handleRangeInput(val, option)")
+//- Mobile version
+div(v-else class="overlay mobile" :class="theme")
+  div(class="overlay__tabs")
+    svg-icon(iconName="forbid" iconWidth="24px" iconColor="gray-2"
+        @click="applyOverlay({ name: 'none', svg: null })")
+    tabs(:theme="`${theme}-narrow`"
+        :tabs="mobileTabs"
+        v-model="currCategory")
+  div(class="overlay__items")
+    template(v-for="cate in mobileCategories")
+      overlay-item(v-for="item in cate.items"
+        :key="item.name"
+        :name="item.name"
+        :baseImg="cate.baseImg"
+        :mask="item.svg"
+        :active="curr.name === item.name"
+        theme="mobile"
+        @click="applyOverlay(item)")
 </template>
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import OverlayItem from '@/components/editor/overlay/OverlayItem.vue'
 import CollapseTitle from '@/components/global/CollapseTitle.vue'
+import Tabs from '@/components/Tabs.vue'
 import { IAssetObject } from '@/interfaces/shape'
 import { defineComponent, PropType } from 'vue'
 import { Collapse } from 'vue-collapsed'
 
 interface IOverlayItem {
   name: string
-  svg: IAssetObject
+  svg: IAssetObject | null
 }
 interface IOverlayCategory {
   name: string
@@ -64,16 +83,17 @@ export default defineComponent({
     Collapse,
     CollapseTitle,
     MobileSlider,
+    Tabs,
   },
   props: {
     theme: {
-      type: String as PropType<'dark' | 'light' | 'mobile'>,
+      type: String as PropType<'dark' | 'light'>,
       default: 'dark',
     },
   },
   data() {
     return {
-      fakeData: [{
+      data: [{
         name: '',
         baseImg: whiteImg,
         items: [{
@@ -125,6 +145,26 @@ export default defineComponent({
           name: '光芒愛心3',
           svg: { id: 'mPpIed3TS4Q3tqFJdMEY', type: 5, ver: 2, plan: 0, tags: ['復古底片效果', 'instawirhfan_復古底片效果', 'instawithfan_復古底片效果', 'film', 'films'], fit: 0 },
         }]
+      }, {
+        name: '填充用',
+        baseImg: 'https://images.unsplash.com/photo-1604311795833-25e1d5c128c6?auto=format&fit=crop&w=627&q=80',
+        items: []
+      }, {
+        name: '填充用',
+        baseImg: 'https://images.unsplash.com/photo-1604311795833-25e1d5c128c6?auto=format&fit=crop&w=627&q=80',
+        items: []
+      }, {
+        name: '填充用',
+        baseImg: 'https://images.unsplash.com/photo-1604311795833-25e1d5c128c6?auto=format&fit=crop&w=627&q=80',
+        items: []
+      }, {
+        name: '填充用',
+        baseImg: 'https://images.unsplash.com/photo-1604311795833-25e1d5c128c6?auto=format&fit=crop&w=627&q=80',
+        items: []
+      }, {
+        name: '填充用',
+        baseImg: 'https://images.unsplash.com/photo-1604311795833-25e1d5c128c6?auto=format&fit=crop&w=627&q=80',
+        items: []
       }] as IOverlayList,
       options: [{
         key: 'xOffset',
@@ -136,7 +176,7 @@ export default defineComponent({
         key: 'opacity',
         label: this.$t('NN0066')
       }] as IOverlayOption[],
-      currCategory: '',
+      currCategory: 0,
       curr: {
         name: 'none',
         xOffset: 50,
@@ -145,8 +185,17 @@ export default defineComponent({
       }
     }
   },
-  // computed: {
-  // },
+  computed: {
+    mobileTabs() {
+      return this.data.map(category => category.name || 'All')
+    },
+    mobileCategories() {
+      return this.data.filter((category, categoryIndex) => {
+        if (this.currCategory === 0) return true
+        return this.currCategory === categoryIndex
+      })
+    }
+  },
   // mounted() {
   // },
   methods: {
@@ -161,8 +210,8 @@ export default defineComponent({
     getInputValue(option: IOverlayOption) {
       return this.curr[option.key]
     },
-    switchTab(categoryName: string) {
-      this.currCategory = this.currCategory === categoryName ? '' : categoryName
+    switchTab(categoryIndex: number) {
+      this.currCategory = this.currCategory === categoryIndex ? 0 : categoryIndex
     },
     applyOverlay(item: IOverlayItem) {
       this.curr.name = item.name
@@ -175,7 +224,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.overlay {
+.desktop.overlay {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -183,16 +232,16 @@ export default defineComponent({
   box-sizing: border-box;
   height: 100%;
   text-align: left;
-  &__collapse {
+  .overlay__collapse {
     transition: all calc(var(--vc-auto-duration) * 1.5) ease-in-out;
   }
   // To prevent the border of OverlayItem to be clipped, put padding inside collapse.
-  &__category-list {
+  .overlay__category-list {
     display: grid;
     padding: 10px 10px 0 10px;
     row-gap: 10px;
   }
-  &__options {
+  .overlay__options {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -200,8 +249,9 @@ export default defineComponent({
 }
 
 // Handle RWD and theme
-.dark.overlay {
+.dark.desktop.overlay {
   @include hover-scrollbar(dark);
+  @include body-MD;
   color: white;
   .overlay__category-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -218,7 +268,8 @@ export default defineComponent({
     }
   }
 }
-.light.overlay {
+.light.desktop.overlay {
+  @include body-SM;
   color: setColor(gray-2);
   background-color: setColor(gray-6);
   .overlay__category-list {
@@ -229,6 +280,39 @@ export default defineComponent({
     grid-column: 1 / 5;
     padding: 10px;
     background-color: white;
+  }
+}
+
+// Mobile version
+.mobile.overlay {
+  @include body;
+  font-size: 10px; // body-XXS without scale, only for Safari, will be 12px at Chrome.
+  padding: 0;
+  .overlay__tabs {
+    display: grid;
+    align-items: center;
+    grid-template-columns: auto 1fr;
+    padding: 8px 16px;
+    gap: 16px;
+    .tabs {
+      @include no-scrollbar;
+      overflow-x: auto;
+    }
+  }
+  .overlay__items {
+    @include no-scrollbar;
+    display: grid;
+    grid-auto-columns: 44px;
+    grid-auto-flow: column;
+    gap: 10px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    .overlay-item {
+      height: 76px;
+    }
+  }
+  &.light {
+    background-color: setColor(gray-6);
   }
 }
 </style>

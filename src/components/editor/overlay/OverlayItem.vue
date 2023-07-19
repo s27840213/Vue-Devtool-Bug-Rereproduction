@@ -89,9 +89,22 @@ export default defineComponent({
   &__mask {
     position: absolute;
   }
+  &__name {
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden;
+    white-space: nowrap;
+  }
 }
 
+.dark, .light {
+  @include body-XS;
+}
 .dark.overlay-item {
   gap: 4px;
+}
+.mobile {
+  @include body;
+  font-size: 10px; // body-XXS without scale, only for Safari, will be 12px at Chrome.
 }
 </style>
