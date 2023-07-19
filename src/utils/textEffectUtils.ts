@@ -207,6 +207,14 @@ class Controller {
 
     const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
 
+    // Prevent TextFIll maskImage clip shadow, and remove TextFill BG for some shadow duplicatedTexts.
+    const disableTextFill = {
+      backgroundImage: 'none',
+      backgroundColor: 'transparent',
+      webkitBackgroundClip: 'initial',
+      maskImage: 'none',
+    }
+
     switch (name) {
       case 'shadow':
         return {
@@ -242,9 +250,7 @@ class Controller {
             extraBodyStyle: {
               left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) - maxFontSize}px`,
               top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) - maxFontSize}px`,
-              // Prevent TextFIll
-              backgroundImage: 'none',
-              webkitBackgroundClip: 'initial',
+              ...disableTextFill,
             },
             extraSpanStyle: {
               color,
@@ -282,10 +288,7 @@ class Controller {
                 color,
               ),
               opacity: effectOpacity,
-              // Prevent TextFIll maskImage clip shadow, and remove TextFill BG for shadow.
-              backgroundImage: 'none',
-              webkitBackgroundClip: 'initial',
-              maskImage: 'none',
+              ...disableTextFill,
             },
           }]
         }
@@ -315,9 +318,7 @@ class Controller {
             extraBodyStyle: {
               '--base-stroke': `${((effect.strokeOut + effect.strokeIn) * this.strokeScale * 2) * (fontSize / 60)}px`,
               webkitTextStrokeColor: this.convertColor2rgba(colorOut, effectOpacity),
-              // Prevent TextFIll
-              backgroundImage: 'none',
-              webkitBackgroundClip: 'initial',
+              ...disableTextFill,
               // For fix Chrome stroke afterimage issue:
               // If user adjust stroke to exceed the text element's content range
               // and then reduce the stroke size, it will leave afterimages.
@@ -327,9 +328,7 @@ class Controller {
             extraBodyStyle: {
               '--base-stroke': `${(effect.strokeIn * this.strokeScale * 2) * (fontSize / 60)}px`,
               webkitTextStrokeColor: this.convertColor2rgba(colorIn, effectOpacity),
-              // Prevent TextFIll
-              backgroundImage: 'none',
-              webkitBackgroundClip: 'initial',
+              ...disableTextFill,
               filter: 'opacity(1)',
             },
           }],

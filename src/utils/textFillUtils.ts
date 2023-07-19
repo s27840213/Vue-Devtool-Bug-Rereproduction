@@ -167,6 +167,7 @@ class TextFill {
     const topDir = imgHeight - divHeight < 0 ? -1 : 1
     return {
       backgroundImage: `url("${imgSrc}")`,
+      backgroundColor: textEffectUtils.getLayerMainColor(config.paragraphs), // Fallback BG, for BG load fail and switch diffect resolution transition.
       backgroundSize: scaleByWidth ? `${textFill.size}% auto` : `auto ${textFill.size}%`,
       backgroundPosition: `${textFill.xOffset200 * leftDir / 2 + 50}% ${textFill.yOffset200 * topDir / 2 + 50}%`,
       backgroundOrigin: 'content-box',
