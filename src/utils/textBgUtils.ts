@@ -140,11 +140,7 @@ export class Rect {
 
             const span = document.createElement('span')
             span.classList.add('nu-text__span')
-            if (t === ' ') {
-              span.innerHTML = '&nbsp;'
-            } else {
-              span.textContent = t
-            }
+            span.textContent = t
 
             const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
             spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'

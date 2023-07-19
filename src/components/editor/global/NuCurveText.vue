@@ -198,7 +198,7 @@ export default defineComponent({
   }
   &__span {
     text-align: left;
-    white-space: pre-wrap;
+    white-space: pre; // if use pre-wrap (as in NuText), single space on Safari will have weirdly thin width.
     overflow-wrap: break-word;
     letter-spacing: 0.1px;
     line-height: 1;

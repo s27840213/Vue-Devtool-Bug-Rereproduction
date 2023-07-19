@@ -237,11 +237,7 @@ class Controller {
     const spans = this.flattenSpans(config)
     spans.forEach(spanData => {
       const span = document.createElement('span')
-      if (spanData.text === ' ') {
-        span.innerHTML = '&nbsp;'
-      } else {
-        span.textContent = spanData.text
-      }
+      span.textContent = spanData.text
 
       const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
       spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
