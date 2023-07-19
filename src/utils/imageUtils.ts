@@ -15,7 +15,7 @@ import LayerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v7169'
+const APP_VER_FOR_REFRESH_CACHE = 'v7174'
 
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
@@ -295,6 +295,17 @@ class ImageUtils {
             cache
           })
         }
+        break
+      }
+      case 'svg': {
+        if (typeof assetId === 'string') {
+          return imageApi.getImgSize({
+            token: '',
+            type: 'svg',
+            key_id: assetId,
+            cache
+          })
+        }
       }
     }
   }
@@ -509,10 +520,13 @@ class ImageUtils {
 
   async getImageSize(url: string, defaultWidth: number, defaultHeight: number, setAnonymous = true): Promise<{ width: number; height: number, exists: boolean }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
-      const image = new Image()
-      image.onload = () => resolve(image)
-      image.onerror = () => reject(new Error('Could not load image'))
-      image.src = url
+      if (!url.includes('appver')) {
+        url = this.appendQuery(url, 'appver', APP_VER_FOR_REFRESH_CACHE)
+      }
+      this.imgLoadHandler(url, (img) => resolve(img), {
+        error: () => reject(new Error('Could not load image')),
+        crossOrigin: true
+      })
     })
     try {
       const img = await loadImage
