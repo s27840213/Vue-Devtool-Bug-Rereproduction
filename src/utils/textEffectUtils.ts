@@ -79,7 +79,7 @@ class Controller {
         shadowStrokeColor: 'fontColor',
         color: 'fontColorL+-40/BC/00'
       },
-      outline: {
+      outline: { // 描邊
         strokeOut: 20,
         strokeIn: 20,
         opacity: 100,
@@ -147,7 +147,7 @@ class Controller {
     }
     if (colorStr.startsWith('rgb')) {
       const [r, g, b, a = 1] = colorStr.match(/[.\d]+/g) || []
-      return `rgba(${r}, ${g}, ${b}, ${alpha || a})`
+      return `rgba(${r}, ${g}, ${b}, ${alpha ?? a})`
     }
     return this.convertHex2rgba('#000000', 0.6)
   }
