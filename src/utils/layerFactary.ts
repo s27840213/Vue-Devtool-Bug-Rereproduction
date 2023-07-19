@@ -500,7 +500,7 @@ class LayerFactary {
               console.warn('layer in group at index:', idx, 'has no designId and empty svg, it has been removed!')
               return []
             }
-            !shape.designId && console.warn('layer in group at index:', idx, 'has no designId!')
+            !shape.designId && !shape.svg && !['D', 'E'].includes(shape.category) && console.warn('layer in group at index:', idx, 'has no designId!')
           }
           return [this.newByLayerType(l, jsonVer) as IShape | IText | IImage]
         })
