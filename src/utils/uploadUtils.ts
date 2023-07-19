@@ -201,15 +201,13 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(
-    type:
-      | 'image'
-      | 'font'
-      | 'avatar'
-      | 'logo'
-      | 'stk-bg-remove'
-      | 'stk-bg-remove-face'
-  ) {
+  chooseAssets(type:
+    | 'image'
+    | 'font'
+    | 'avatar'
+    | 'logo'
+    | 'stk-bg-remove'
+    | 'stk-bg-remove-face', addToPage = false) {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
@@ -243,7 +241,7 @@ class UploadUtils {
         if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
           store.commit('bgRemove/SET_isProcessing', true)
         }
-        this.uploadAsset(type, files as FileList, params)
+        this.uploadAsset(type, files as FileList, Object.assign(params, { addToPage }))
         document.body.removeChild(inputNode)
       },
       false
@@ -404,7 +402,6 @@ class UploadUtils {
       pollingJsonName?: string;
     } = {}
   ) {
-    console.log(type, files)
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
