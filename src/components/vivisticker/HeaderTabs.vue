@@ -149,7 +149,7 @@ export default defineComponent({
         return [
           { icon: 'chevron-left', width: 24, action: this.clearTemplateShare }
         ]
-      } else if (this.isInEditor) {
+      } else if (this.isInEditor && !this.inBgRemoveMode) {
         if (this.isInPagePreview) return [{ icon: 'chevron-left', width: 24, action: () => this.setIsInPagePreview(false) }]
         const retTabs = []
         const stepTabs = [
@@ -271,6 +271,8 @@ export default defineComponent({
         return [
           { icon: 'home', width: 24, action: this.handleEndEditing },
         ]
+      } else if (this.inBgRemoveMode) {
+        return []
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
         if (this.inEffectEditingMode) {
@@ -294,8 +296,6 @@ export default defineComponent({
       } else if (this.isInCategory && !_.isEmpty(this.gihpyHeaderTab)) {
         return this.gihpyHeaderTab
       } else if (this.isInCategory || this.isInBgShare) {
-        return []
-      } else if (this.inBgRemoveMode) {
         return []
       } else {
         return [

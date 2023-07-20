@@ -22,14 +22,23 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
     span(class="page-pill__text body-XS text-black-5 no-wrap") {{ strPagePill }}
   page-preivew(v-if="isInPagePreview" :pagesState="pagesState")
   share-template(v-if="isInTemplateShare" :isMultiPage="pagesState.length > 1")
+  div(v-if="inBgRemoveMode && isInEditor"
+      class="vvstk-editor__bg-remove-container"
+      ref="bgRemoveContainer")
+    bg-remove-container(v-if="bgRemoveContainerRef"
+      :containerWH="containerWH"
+      :containerRef="bgRemoveContainerRef"
+      ref="bgRemoveContainer")
 </template>
 
 <script lang="ts">
+import BgRemoveContainer from '@/components/vivisticker/BgRemoveContainer.vue'
 import PageCard from '@/components/vivisticker/PageCard.vue'
 import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
 import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
 import { IPageState } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
+import SwipeDetector from '@/utils/SwipeDetector'
 import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -38,12 +47,17 @@ import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import SwipeDetector from '@/utils/SwipeDetector'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
+  components: {
+    PageCard,
+    PagePreivew,
+    ShareTemplate,
+    BgRemoveContainer
+  },
   props: {
     isInEditor: {
       type: Boolean,
@@ -61,17 +75,30 @@ export default defineComponent({
       cardHeight: 0,
       animated: false,
       swipeDetector: null as unknown as SwipeDetector,
-      isInPageAdd: false
+      bgRemoveContainerRef: null as unknown as HTMLElement,
+      isInPageAdd: false,
+      mobilePanelHeight: 0
     }
   },
   mounted() {
     const editorView = this.$refs.editorView as HTMLElement
+    this.bgRemoveContainerRef = this.$refs.bgRemoveContainer as HTMLElement
     this.swipeDetector = new SwipeDetector(editorView, { targetDirection: 'horizontal' }, this.handleSwipe)
   },
   beforeUnmount() {
     this.swipeDetector.unbind()
   },
   watch: {
+    inBgRemoveMode(val) {
+      if (val === true) {
+        this.$nextTick(() => {
+          this.bgRemoveContainerRef = this.$refs.bgRemoveContainer as HTMLElement
+        })
+      }
+    },
+    containerWH(val) {
+      console.log(val)
+    },
     isInEditor(newVal, oldVal): void {
       if (newVal && !oldVal) {
         this.$nextTick(() => {
@@ -111,6 +138,28 @@ export default defineComponent({
     },
     currActivePageIndex(newVal) {
       if (newVal === -1) this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+    },
+    showMobilePanel(val) {
+      if (val) {
+        this.$nextTick(() => {
+          // to prevent the problems that the mobile panel is not fully expanded
+          setTimeout(() => {
+            const panel = document.querySelector('.mobile-panel')
+            const footerTabs = document.querySelector('.footer-tabs') as HTMLElement
+            if (panel && panel.clientHeight) {
+              /**
+               * @Note 60 is the size of footer tab
+               */
+              this.mobilePanelHeight = panel.clientHeight - footerTabs.clientHeight
+            } else {
+              this.mobilePanelHeight = 0
+            }
+            console.log(this.mobilePanelHeight)
+          }, 500)
+        })
+      } else {
+        this.mobilePanelHeight = 0
+      }
     }
   },
   computed: {
@@ -137,6 +186,8 @@ export default defineComponent({
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isInTemplateShare: 'vivisticker/getIsInTemplateShare',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
+      showMobilePanel: 'mobileEditor/getShowMobilePanel',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
     }),
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -155,12 +206,16 @@ export default defineComponent({
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
-    }
-  },
-  components: {
-    PageCard,
-    PagePreivew,
-    ShareTemplate
+    },
+    containerWH() {
+      return {
+        width: this.bgRemoveContainerRef ? this.bgRemoveContainerRef.offsetWidth : 0,
+        /**
+         * @Note 60 is the height of the footer
+         */
+        height: this.bgRemoveContainerRef ? this.bgRemoveContainerRef.offsetHeight - this.mobilePanelHeight : 0,
+      }
+    },
   },
   methods: {
     ...mapMutations({
@@ -177,6 +232,7 @@ export default defineComponent({
       pageUtils.setBackgroundImageControlDefault()
     },
     selectStart(e: PointerEvent) {
+      if (this.inBgRemoveMode) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
       const isClickOnController = controlUtils.isClickOnController(e)
       if (this.isImgCtrl && !isClickOnController) {
@@ -303,6 +359,18 @@ export default defineComponent({
     display: grid;
     grid-auto-flow: column;
     position: relative;
+  }
+  &__bg-remove-container {
+    background-color: setColor(black-2);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - v-bind(mobilePanelHeight)* 1px);
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 

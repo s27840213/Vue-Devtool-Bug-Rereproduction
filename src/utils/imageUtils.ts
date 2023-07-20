@@ -70,7 +70,7 @@ class ImageUtils {
     }
   }
 
-  getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number, forBgRemove?: boolean): string {
+  getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number, forBgRemove?: boolean, useMaxSize?: boolean): string {
     // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
     let { type, userId, assetId, brandId, updateQuery, maxSize } = {} as SrcObj
     let ratio = 1
@@ -94,6 +94,10 @@ class ImageUtils {
     }
     if (size === 'xtra' && maxSize && maxSize !== 'xtra') {
       size = maxSize
+    }
+
+    if (useMaxSize) {
+      size = typeof size === 'string' ? maxSize : 1600
     }
 
     let res = ''

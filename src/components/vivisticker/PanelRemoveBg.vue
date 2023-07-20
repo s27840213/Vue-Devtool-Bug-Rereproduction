@@ -1,10 +1,9 @@
 <template lang="pug">
 div(class="panel-remove-bg" ref="panelRemoveBg")
-  bg-remove-container(v-if="inBgRemoveMode || isProcessing"
+  bg-remove-container(v-if="!isInEditor && (inBgRemoveMode || isProcessing)"
     :containerWH="containerWH"
     :containerRef="panelRemoveBg"
-    :previewSrc="previewSrc"
-    ref="bgRemoveContainer")
+    :previewSrc="previewSrc")
   div(v-else class="btn-section")
     div(class="btn" @click="removeBg")
       div(class="btn__content-section")
@@ -19,22 +18,9 @@ div(class="panel-remove-bg" ref="panelRemoveBg")
       div(class="btn__text-section")
         span(class="text-H7 no-wrap") {{ $t('STK0059') }}
         span(class="text-black-5 body-XXS btn__description") {{ $t('STK0062') }}
-  //- used to debug
-  teleport(v-if="false" to="body")
-    div(class="panel-remove-bg__test-input")
-      mobile-slider(
-        :title="'scale'"
-        :borderTouchArea="true"
-        :name="'scale'"
-        :value="bgRemoveScaleRatio"
-        :min="minRatio"
-        :max="maxRatio"
-        :step="0.01"
-        @update="setScaleRatio")
 </template>
 
 <script lang="ts">
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveContainer from '@/components/vivisticker/BgRemoveContainer.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -45,16 +31,12 @@ import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   components: {
-    MobileSlider,
     BgRemoveContainer
   },
   data() {
     return {
       panelRemoveBg: null as unknown as HTMLElement,
       mobilePanelHeight: 0,
-      bgRemoveScaleRatio: 1,
-      minRatio: 0.1,
-      maxRatio: 2,
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
       debugMode: false,
@@ -69,6 +51,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
+      isInEditor: 'vivisticker/getIsInEditor'
     }),
     containerWH() {
       return {
@@ -138,9 +121,6 @@ export default defineComponent({
         callback(dataURL)
       }
       image.src = src
-    },
-    setScaleRatio(val: number) {
-      this.bgRemoveScaleRatio = val
     },
   },
   watch: {

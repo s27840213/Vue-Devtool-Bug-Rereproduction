@@ -50,7 +50,7 @@ div(class="footer-tabs" ref="tabs")
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
-import { IFooterTab } from '@/interfaces/editor'
+import { ICurrSelectedInfo, IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import assetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
@@ -72,6 +72,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { isEqual, startCase } from 'lodash'
@@ -126,6 +127,7 @@ export default defineComponent({
       debugMode: 'vivisticker/getDebugMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      isProcessing: 'bgRemove/getIsProcessing',
     }),
     isSettingTabsOpen(): boolean {
       return this.editorTypeTemplate && this.tabs.length > 0
@@ -225,7 +227,7 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
         ...this.copyPasteTabs,
         ...(this.editorTypeTemplate && !this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []), // conditional insert to prevent duplicate key
-        // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: false, plan: 'bg-remove' },
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: false, plan: 'bg-remove', disabled: this.isProcessing },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: !this.editorTypeTemplate },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {
@@ -247,8 +249,7 @@ export default defineComponent({
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !vivistickerUtils.isTemplateSupported },
-        // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove' }
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: false, plan: 'bg-remove' }
       ]
     },
     homeTabsSize(): number {
@@ -651,7 +652,8 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setBgImageControl: 'SET_backgroundImageControl'
+      setBgImageControl: 'SET_backgroundImageControl',
+      setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     updateContainerOverflow() {
       const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
@@ -801,6 +803,29 @@ export default defineComponent({
           //   notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           //   return
           // }
+          break
+        }
+        case 'remove-bg': {
+          if (!this.isInEditor) break
+          if (!this.inBgRemoveMode && !this.isProcessing) {
+            // first step: get the image src
+
+            // second step: upload the src to backend, and then call the bg remove API
+
+            // after finish bg removing, update the srcObj
+            const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
+            const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage)
+            layerUtils.updateLayerProps(pageIndex, index, {
+              isProcessing: true
+            })
+
+            generalUtils.toDataURL(src, (dataUrl: string) => {
+              this.setIsProcessing(true)
+              uploadUtils.uploadAsset('stk-bg-remove', [dataUrl])
+            })
+
+            return
+          }
           break
         }
         case 'photo':

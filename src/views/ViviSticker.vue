@@ -20,7 +20,7 @@ div(class="vivisticker" :style="copyingStyles()")
           :currPage="currPage"
           @switchTab="switchTab"
           @panelHeight="setPanelHeight"
-          @bottomThemeChange="(val) => isMobilePanelBottom = val"
+          @bottomThemeChange="(val: boolean) => isMobilePanelBottom = val"
           :footerTabsRef="footerTabsRef")
   footer-tabs(v-if="showFooterTabs" class="vivisticker__bottom"
     ref="footerTabs"
