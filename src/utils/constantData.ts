@@ -29,7 +29,7 @@ export interface IEffectOptionSelect {
     key: string
     img: string
     label: string
-    attrs: Record<string, unknown>
+    preset: Record<string, unknown>
   }[]
 }
 export interface IEffectOptionColor {
@@ -410,7 +410,7 @@ class ConstantData {
             key,
             img: require(`@/assets/img/svg/text-effect/endpoint/endpoint-${key}.svg`),
             label: i18n.global.tc(`NN073${i}`),
-            attrs: { endpoint: key },
+            preset: { endpoint: key },
           }))
           break
         case 'angle':

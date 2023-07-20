@@ -43,7 +43,7 @@ div(class="text-effect-setting")
                 img(:src="sel.img"
                     :class="{'selected': ((getStyle(category)[option.key] as Record<'key', string>).key ?? getStyle(category)[option.key]) === sel.key }"
                     draggable="false"
-                    @click="handleSelectInput(sel.attrs)")
+                    @click="handleSelectInput(sel.preset)")
             //- Option type range
             template(v-if="option.type === 'range'")
               input(class="text-effect-setting__option--number"

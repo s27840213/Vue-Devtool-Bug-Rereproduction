@@ -4,13 +4,14 @@ div(class="overlay-item" :class="{active, [theme]: true}")
     img(:src="baseImg")
     svg-icon(v-if="!mask"
       class="overlay-item__mask"
-      iconName="forbid" iconWidth="24px" iconColor="gray-2")
-    img(v-else class="overlay-item__mask"
-        draggable="false"
-        :src="`https://template.vivipic.com/svg/${mask.id}/prev?ver=${mask.ver}`")
-    div(v-if="active && theme === 'mobile' && name !== 'none'"
-        class="overlay-item__img--more")
-      svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
+      iconName="forbid" iconWidth="24px" iconColor="gray-3")
+    template(v-else)
+      img(class="overlay-item__mask"
+          draggable="false"
+          :src="`https://template.vivipic.com/overlay/${mask.id}/prev?ver=${mask.ver}`")
+      div(v-if="active && theme === 'mobile'"
+          class="overlay-item__img--more")
+        svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
   span(class="overlay-item__name") {{ name }}
 </template>
 

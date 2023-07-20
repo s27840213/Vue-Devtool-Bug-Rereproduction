@@ -61,7 +61,7 @@ export default defineComponent({
         case 'dark-narrow':
           return {
             active: '#FFFFFF',
-            inactive: '#474A57'
+            inactive: '#969BAB'
           }
         case 'dark':
         default:
