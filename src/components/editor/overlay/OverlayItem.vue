@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="overlay-item" :class="{active, [theme]: true}")
   div(class="overlay-item__img")
-    img(:src="baseImg")
+    img(class="overlay-item__base" :src="baseImg")
     svg-icon(v-if="!mask"
       class="overlay-item__mask"
       iconName="forbid" iconWidth="24px" iconColor="gray-3")
@@ -9,6 +9,7 @@ div(class="overlay-item" :class="{active, [theme]: true}")
       img(class="overlay-item__mask"
           draggable="false"
           :src="`https://template.vivipic.com/overlay/${mask.id}/prev?ver=${mask.ver}`")
+      pro-item(v-if="mask?.plan" theme="roundedRect")
       div(v-if="active && theme === 'mobile'"
           class="overlay-item__img--more")
         svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
@@ -16,13 +17,15 @@ div(class="overlay-item" :class="{active, [theme]: true}")
 </template>
 
 <script lang="ts">
+import ProItem from '@/components/payment/ProItem.vue'
 import { IAssetObject } from '@/interfaces/shape'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   name: 'OverlayItem',
-  // components: {
-  // },
+  components: {
+    ProItem,
+  },
   props: {
     name: {
       type: String,
@@ -86,9 +89,6 @@ export default defineComponent({
     position: relative;
     border-radius: 5px;
     overflow: hidden;
-    img {
-      width: 100%;
-    }
     &--more {
       display: flex;
       justify-content: center;
@@ -99,6 +99,9 @@ export default defineComponent({
       background: rgba(71, 74, 87, 0.6);
       backdrop-filter: blur(2px);
     }
+  }
+  &__base, &__mask {
+    width: 100%;
   }
   &__mask {
     position: absolute;

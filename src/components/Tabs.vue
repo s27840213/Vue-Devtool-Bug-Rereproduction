@@ -131,8 +131,7 @@ export default defineComponent({
     @include text-H6;
   }
   &.narrow {
-    @include body;
-    font-size: 10px; // body-XXS without scale, only for Safari, will be 12px at Chrome.
+    @include body-XS;
     justify-content: initial;
     gap: 16px;
   }

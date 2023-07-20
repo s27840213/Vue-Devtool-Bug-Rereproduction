@@ -206,7 +206,13 @@ class PageUtils {
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
-      contentScaleRatio: 1
+      contentScaleRatio: 1,
+      overlay: {
+        id: 'none',
+        xOffset: 0,
+        yOffset: 0,
+        opacity: 100,
+      },
     }
     // pageData.snapUtils && delete pageData.snapUtils
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))

@@ -1,6 +1,21 @@
 import i18n from '@/i18n'
+import { IImage } from '@/interfaces/layer'
 import { IAssetObject } from '@/interfaces/shape'
+import backgroundUtils from '@/utils/backgroundUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { cloneDeep, find } from 'lodash'
 
+// Overlay data that store in design config file.
+export interface IOverlay {
+  id: string
+  xOffset: number
+  yOffset: number
+  opacity: number
+}
+
+// Data in app.json
 export interface IApiOverlayPreset {
   id: string
   ofh: number
@@ -22,6 +37,7 @@ export interface IApiOverlayCategory {
   title_us: string
 }
 
+// For Overlay UI.
 export interface IOverlayItem {
   id: string
   label: string
@@ -95,6 +111,63 @@ class Overlay {
 
   updateOverlayCategory(normalOverlays: IApiOverlayCategory[]) {
     this.overlaysData = normalOverlays
+  }
+
+  getCurrOverlay(type: 'page' | 'layer') {
+    const { subLayerIdx } = layerUtils
+    const currLayer = layerUtils.getCurrLayer
+
+    if (type === 'page') {
+      return pageUtils.currFocusPage.overlay
+    } else if (!layerUtils.hasSelectedLayer) {
+      return pageUtils.currFocusPage.backgroundImage.config.overlay
+    } else if (currLayer.type === 'image') {
+      return currLayer.overlay
+    } else if (currLayer.type === 'group' || currLayer.type === 'tmp') {
+      return ((subLayerIdx !== -1
+        ? currLayer.layers[subLayerIdx]
+        : find(currLayer.layers, ['type', 'image'])) as IImage).overlay
+    } else {
+      return {
+        id: 'none',
+        xOffset: 0,
+        yOffset: 0,
+        opacity: 100,
+      }
+    }
+  }
+
+  applyOverlay(type: 'page' | 'layer', options: Partial<IOverlay>) {
+    const { pageIndex, layerIndex, subLayerIdx } = layerUtils
+    const currLayer = layerUtils.getCurrLayer
+    const overlay = cloneDeep(this.getCurrOverlay(type))
+    Object.assign(overlay, options)
+
+    if (type === 'page') {
+      pageUtils.updatePageProps({ overlay })
+    } else if (!layerUtils.hasSelectedLayer) {
+      backgroundUtils.setBgImage({ pageIndex, config: { overlay } })
+    } else if (currLayer.type === 'image' || subLayerIdx !== -1) {
+      // For single image layer and groun sub image layer.
+      layerUtils.updateSpecLayerData({
+        pageIndex,
+        layerIndex,
+        subLayerIndex: subLayerIdx,
+        props: { overlay }
+      })
+    } else if (currLayer.type === 'group' || currLayer.type === 'tmp') {
+      // For multiple img layers in group/tmp.
+      for (const i in currLayer.layers) {
+        if (currLayer.layers[+i].type !== 'image') continue
+        layerUtils.updateSpecLayerData({
+          pageIndex,
+          layerIndex,
+          subLayerIndex: +i,
+          props: { overlay }
+        })
+      }
+    }
+    stepsUtils.record()
   }
 }
 

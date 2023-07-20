@@ -13,13 +13,13 @@ div(v-if="!$isTouchDevice()" class="overlay desktop" :class="theme")
       div(class="overlay__category-list")
         template(v-for="(item1d, i) in item2d(cate.items)" :key="`row${i}`")
           overlay-item(v-for="item in item1d"
-            :key="item.id"
-            :name="item.label"
-            :baseImg="cate.baseImg"
-            :mask="item.svg"
-            :active="curr.id === item.id"
-            :theme="theme"
-            @click="applyOverlay(item)")
+              :key="item.id"
+              :name="item.label"
+              :baseImg="cate.baseImg"
+              :mask="item.svg"
+              :active="curr.id === item.id"
+              :theme="theme"
+              @click="applyOverlay(item)")
           div(v-if="item1d.map(it => it.id).includes(curr.id) && curr.id !== 'none'"
               class="overlay__options")
             mobile-slider(v-for="option in options" :key="option.key"
@@ -37,13 +37,13 @@ div(v-else class="overlay mobile" :class="theme")
   div(v-if="state === 'effects'" class="overlay__items")
     template(v-for="cate in mobileCategories")
       overlay-item(v-for="item in cate.items"
-        :key="item.id"
-        :name="item.label"
-        :baseImg="cate.baseImg"
-        :mask="item.svg"
-        :active="curr.id === item.id"
-        theme="mobile"
-        @click="applyOverlay(item)")
+          :key="item.id"
+          :name="item.label"
+          :baseImg="cate.baseImg"
+          :mask="item.svg"
+          :active="curr.id === item.id"
+          theme="mobile"
+          @click="applyOverlay(item)")
   div(v-if="state === 'options'" class="overlay__options")
     span {{ currOverlayName }}
     mobile-slider(v-for="option in options" :key="option.key"
@@ -94,23 +94,23 @@ export default defineComponent({
         label: this.$t('NN0425')
       }, {
         key: 'yOffset',
-        label: this.$t('NN0426')
+        label: this.$t('NN0424')
       }, {
         key: 'opacity',
         label: this.$t('NN0066')
       }] as IOverlayOption[],
       currCategory: 0,
-      curr: {
-        id: 'none',
-        xOffset: 50,
-        yOffset: 50,
-        opacity: 50,
-      }
     }
   },
   computed: {
     state() {
       return this.panelHistory.length === 0 ? 'effects' : 'options'
+    },
+    targetType() {
+      return this.theme === 'dark' ? 'page' : 'layer'
+    },
+    curr() {
+      return overlayUtils.getCurrOverlay(this.targetType)
     },
     mobileTabs() {
       return this.data.map(category => category.label || this.$t('NN0324'))
@@ -146,11 +146,16 @@ export default defineComponent({
       if (this.$isTouchDevice() && this.curr.id === item.id && item.id !== 'none') {
         this.$emit('pushHistory', this.currOverlayName)
       } else {
-        Object.assign(this.curr, { id: item.id }, item.preset)
+        overlayUtils.applyOverlay(
+          this.targetType, {
+            id: item.id,
+            ...item.preset,
+          }
+        )
       }
     },
     handleRangeInput(val: number, option: IOverlayOption) {
-      this.curr[option.key] = val
+      overlayUtils.applyOverlay(this.targetType, { [option.key]: val })
     },
   }
 })
@@ -161,7 +166,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 0 0 10px 0;
   box-sizing: border-box;
   height: 100%;
   text-align: left;
@@ -187,6 +191,7 @@ export default defineComponent({
 .dark.desktop.overlay {
   @include hover-scrollbar(dark);
   @include body-MD;
+  padding: 10px 0;
   color: white;
   .overlay__category-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -205,6 +210,7 @@ export default defineComponent({
 }
 .light.desktop.overlay {
   @include body-SM;
+  padding: 0 0 10px 0;
   color: setColor(gray-2);
   background-color: setColor(gray-6);
   .overlay__category-list {

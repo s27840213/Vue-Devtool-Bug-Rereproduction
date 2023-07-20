@@ -1,4 +1,5 @@
 import { IFrame, IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IOverlay } from '@/utils/overlayUtils'
 import SnapUtils from '@/utils/snapUtils'
 import { ICoordinate } from './frame'
 import { ISize } from './math'
@@ -51,6 +52,7 @@ export interface IPage extends IPageSizeWithBleeds {
   },
   isEnableBleed: boolean,
   contentScaleRatio: number
+  overlay: IOverlay
 }
 
 export interface IPageState {

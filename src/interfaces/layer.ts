@@ -1,5 +1,6 @@
 import { IAdjustJsonProps } from '@/interfaces/adjust'
 import { LayerProcessType } from '@/store/types'
+import { IOverlay } from '@/utils/overlayUtils'
 import { ITextBg, ITextEffect, ITextFill, ITextShape } from './format'
 import { SrcObj } from './gallery'
 import { IShadowProps, IShadowStyles } from './imgShadow'
@@ -168,6 +169,7 @@ export interface IImage extends ILayer<IImageStyle> {
   isHoveringFrame?: boolean,
   panelPreviewSrc?: string,
   categoryType?: number
+  overlay: IOverlay
 }
 
 export interface IFrameStyle extends IStyle {
