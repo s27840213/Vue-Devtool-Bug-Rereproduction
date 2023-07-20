@@ -542,6 +542,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.showController()
     this.setState('tempDesign', { design: 'none' })
     store.commit('vivisticker/SET_editorType', 'none')
+    store.commit('vivisticker/SET_templateShareType', 'none')
   }
 
   initLoadingFlags(page: IPage | { layers: ILayer[] }, cbLoad?: () => void, cbTimeout?: () => void, noBg = true, timeout = 60000) {

@@ -263,8 +263,12 @@ export default defineComponent({
     },
     rightTabs(): TabConfig[] {
       const downloadTab = vivistickerUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
-      if (this.isInTemplateShare) {
+      if (this.isInMultiPageShare) {
         return []
+      } else if (this.isInTemplateShare) {
+        return [
+          { icon: 'home', width: 24, action: this.handleEndEditing },
+        ]
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
         if (this.inEffectEditingMode) {
