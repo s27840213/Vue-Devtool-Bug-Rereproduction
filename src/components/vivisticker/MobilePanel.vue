@@ -271,7 +271,7 @@ export default defineComponent({
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust',
-        'brand-list', 'vvstk-more', 'select-design', 'multiple-select'].includes(this.currActivePanel)
+        'brand-list', 'vvstk-more', 'select-design', 'multiple-select', 'remove-bg'].includes(this.currActivePanel)
     },
     trueWholeSize(): boolean {
       return false // ['text', 'template-content'].includes(this.currActivePanel)

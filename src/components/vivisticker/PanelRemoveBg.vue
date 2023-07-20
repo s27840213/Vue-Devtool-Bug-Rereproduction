@@ -1,14 +1,10 @@
 <template lang="pug">
-div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
-  div(v-if="inBgRemoveMode || isProcessing" class="panel-remove-bg__rm-section" ref="rmSection")
-    div(v-if="isProcessing" class="panel-remove-bg__preview-section")
-      img(:src="previewImage.src ? previewImage.src  : previewSrc")
-      div(class="gray-mask")
-      img(class="loading" :src="require('@/assets/img/gif/gray-loading.gif')")
-    bg-remove-area(v-else :editorViewCanvas="panelRemoveBg"
-      :teleportTarget="'.panel-remove-bg__rm-section'"
-      :inVivisticker="true"
-      :fitScaleRatio="bgRemoveScaleRatio")
+div(class="panel-remove-bg" ref="panelRemoveBg")
+  bg-remove-container(v-if="inBgRemoveMode || isProcessing"
+    :containerWH="containerWH"
+    :containerRef="panelRemoveBg"
+    :previewSrc="previewSrc"
+    ref="bgRemoveContainer")
   div(v-else class="btn-section")
     div(class="btn" @click="removeBg")
       div(class="btn__content-section")
@@ -23,6 +19,7 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
       div(class="btn__text-section")
         span(class="text-H7 no-wrap") {{ $t('STK0059') }}
         span(class="text-black-5 body-XXS btn__description") {{ $t('STK0062') }}
+  //- used to debug
   teleport(v-if="false" to="body")
     div(class="panel-remove-bg__test-input")
       mobile-slider(
@@ -38,61 +35,39 @@ div(class="panel-remove-bg" ref="panelRemoveBg" @pinch="pinchHandler")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
-import { IBgRemoveInfo } from '@/interfaces/image'
+import BgRemoveContainer from '@/components/vivisticker/BgRemoveContainer.vue'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import imageUtils from '@/utils/imageUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+
 export default defineComponent({
   components: {
-    BgRemoveArea,
-    MobileSlider
+    MobileSlider,
+    BgRemoveContainer
   },
   data() {
     return {
       panelRemoveBg: null as unknown as HTMLElement,
-      rmSection: null as unknown as HTMLElement | null,
       mobilePanelHeight: 0,
       bgRemoveScaleRatio: 1,
-      panelRemoveBgAt: null as unknown as AnyTouch,
-      tmpScaleRatio: 1,
       minRatio: 0.1,
       maxRatio: 2,
-      isPanning: false,
-      initPinchPos: null as null | { x: number, y: number },
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
-      imgAspectRatio: 1,
-      distanceBetweenFingers: -1,
       debugMode: false,
       previewSrc: ''
-      // p1StartClientY: 0,
-      // p1StartClientX: 0,
-      // p2StartClientY: 0,
-      // p2StartClientX: 0,
-      // distanceBetweenFingers: 0
     }
   },
   mounted() {
     this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
-    this.rmSection = this.$refs.rmSection as HTMLElement
-
-    this.panelRemoveBgAt = new AnyTouch(this.$refs.panelRemoveBg as HTMLElement, { preventDefault: false })
-  },
-  unmounted() {
-    bgRemoveUtils.setInBgRemoveMode(false)
-    this.panelRemoveBgAt.destroy()
   },
   computed: {
     ...mapGetters({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
-      autoRemoveResult: 'bgRemove/getAutoRemoveResult',
-      previewImage: 'bgRemove/getPreviewImage',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
     }),
     containerWH() {
@@ -104,26 +79,9 @@ export default defineComponent({
         height: this.panelRemoveBg ? this.panelRemoveBg.offsetHeight - this.mobilePanelHeight : 0,
       }
     },
-    fitScaleRatio(): number {
-      const { width, height } = this.containerWH
-      const { width: imgWidth, height: imgHeight } = this.previewImage
-      const aspectRatio = imgWidth / imgHeight
-      if (width === 0 || height === 0 || imgWidth === 0 || imgHeight === 0) return 1
-
-      const newWidth = aspectRatio > 1 ? 1600 : 1600 * aspectRatio
-      const newHeight = aspectRatio > 1 ? 1600 / aspectRatio : 1600
-      const ratio = Math.min(width / newWidth, height / newHeight) * 0.9
-
-      return ratio
-    },
-    // eslint-disable-next-line vue/no-unused-properties
-    alignPos(): string {
-      return this.inBgRemoveMode || this.isProcessing ? 'flex-start' : 'center'
-    }
   },
   methods: {
     ...mapMutations({
-      setInGestureMode: 'SET_inGestureMode',
       setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     removeBg() {
@@ -164,28 +122,6 @@ export default defineComponent({
               this.setIsProcessing(true)
               uploadUtils.uploadAsset(type, [dataUrl])
             })
-
-            console.log(src)
-            // try {
-            //   const response = await fetch(src)
-            //   console.log(response.headers)
-            //   try {
-            //     const blob = await response.blob()
-            //     // Read the Blob as DataURL using the FileReader API
-            //     const reader = new FileReader()
-            //     reader.onloadend = () => {
-            //       this.setIsProcessing(true)
-            //       uploadUtils.uploadAsset(type, [reader.result as string])
-            //     }
-            //     reader.readAsDataURL(blob)
-            //   } catch (error) {
-            //     console.log('to blob error')
-            //     console.log(error)
-            //   }
-            // } catch (error) {
-            //   console.log('fetch error')
-            //   console.log(error)
-            // }
           }
         })
     },
@@ -206,119 +142,8 @@ export default defineComponent({
     setScaleRatio(val: number) {
       this.bgRemoveScaleRatio = val
     },
-    pinchHandler(event: AnyTouchEvent) {
-      if (!this.inBgRemoveMode) return
-      let deltaDistance = 0
-      if (event.pointLength === 2) {
-        // calculate the distance between two fingers
-        const tmpDistance = this.distanceBetweenFingers
-        this.distanceBetweenFingers = Math.sqrt(
-          Math.pow(event.points[0].clientX - event.points[1].clientX, 2) +
-          Math.pow(event.points[0].clientY - event.points[1].clientY, 2)
-        )
-
-        deltaDistance = Math.abs(this.distanceBetweenFingers - tmpDistance)
-      }
-
-      switch (event.phase) {
-        /**
-         * @Note the very first event won't fire start phase, it's very strange and need to pay attention
-         */
-        case 'start': {
-          this.tmpScaleRatio = this.bgRemoveScaleRatio
-          this.setInGestureMode(true)
-
-          this.isPanning = true
-
-          const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
-          this.imgAspectRatio = width / height
-
-          const imgHeight = 1600 / this.imgAspectRatio
-
-          this.initImgSize = {
-            width: 1600 * this.bgRemoveScaleRatio,
-            height: imgHeight * this.bgRemoveScaleRatio
-          }
-          break
-        }
-        case 'move': {
-          this.isPanning = true
-
-          if (!this.initPinchPos) {
-            this.initPinchPos = { x: event.x, y: event.y }
-          }
-
-          // const sizeDiff = {
-          //   width: this.bgRemoveScaleRatio * (this.initImgSize.width) * (event.scale - 1) * 0.5,
-          //   height: this.bgRemoveScaleRatio * (this.initImgSize.height) * (event.scale - 1) * 0.5
-          // }
-          if (event.pointLength === 2) {
-            if (deltaDistance > 1) {
-              const ratio = this.tmpScaleRatio * event.scale
-
-              if (ratio <= this.minRatio) {
-                this.bgRemoveScaleRatio = this.minRatio
-              } else if (ratio >= this.maxRatio) {
-                this.bgRemoveScaleRatio = this.maxRatio
-              } else {
-                this.bgRemoveScaleRatio = ratio
-              }
-
-              /**
-               * for center scroll caculation
-               */
-
-              if (this.rmSection) {
-                const scrollCenterX = (2 * this.rmSection.scrollLeft + this.rmSection.clientWidth)
-                const scrollCenterY = (2 * this.rmSection.scrollTop + this.rmSection.clientHeight)
-                const oldScrollWidth = this.rmSection.scrollWidth
-                const oldScrollHeight = this.rmSection.scrollHeight
-                this.$nextTick(() => {
-                  if (this.rmSection) {
-                    const rmSecton = this.$refs.rmSection as HTMLElement
-                    rmSecton.scrollLeft = (scrollCenterX * rmSecton.scrollWidth / oldScrollWidth - rmSecton.clientWidth) / 2
-                    rmSecton.scrollTop = (scrollCenterY * rmSecton.scrollHeight / oldScrollHeight - rmSecton.clientHeight) / 2
-                  }
-                })
-              }
-            } else {
-              const sizeDiff = {
-                width: (this.initImgSize.width - 1600 * this.bgRemoveScaleRatio) * 0.5,
-                height: (this.initImgSize.height - (1600 * this.imgAspectRatio) * this.bgRemoveScaleRatio) * 0.5
-              }
-
-              this.$nextTick(() => {
-                if (this.rmSection) {
-                  this.rmSection.scrollLeft = this.rmSection.scrollLeft - event.deltaX * 2
-                  this.rmSection.scrollTop = this.rmSection.scrollTop - event.deltaY * 2
-                }
-              })
-            }
-          }
-          break
-        }
-
-        case 'end': {
-          this.isPanning = false
-          this.initPinchPos = null
-          this.rmSection = null
-          this.setInGestureMode(false)
-          break
-        }
-      }
-    },
   },
   watch: {
-    inBgRemoveMode(val) {
-      if (val) {
-        this.$nextTick(() => {
-          this.$emit('setBgRemoveMode', false)
-        })
-      } else {
-        bgRemoveUtils.setPreviewImage({ src: '', width: 0, height: 0 })
-        this.rmSection = null
-      }
-    },
     showMobilePanel(val) {
       if (val) {
         this.$nextTick(() => {
@@ -339,16 +164,6 @@ export default defineComponent({
       } else {
         this.mobilePanelHeight = 0
       }
-    },
-    fitScaleRatio(val) {
-      this.bgRemoveScaleRatio = val
-      this.tmpScaleRatio = val
-    },
-    bgRemoveScaleRatio(val) {
-      if (!this.rmSection) {
-        this.rmSection = this.$refs.rmSection as HTMLElement
-      }
-      // generalUtils.scaleFromCenter(this.rmSection)
     }
   }
 })
@@ -363,32 +178,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-
-  &__rm-section {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    overflow: overlay;
-    display: flex;
-    padding: 20px;
-  }
-
-  &__preview-section {
-    position: relative;
-    margin: auto;
-    width: 100%;
-    > img:nth-of-type(1) {
-      width: 100%;
-    }
-  }
-
-  &__test-input {
-    position: absolute;
-    width: 100%;
-    top: 10%;
-    left: 0;
-    z-index: 999;
-  }
 }
 
 .btn-section {
@@ -500,23 +289,5 @@ export default defineComponent({
   &__description {
     height: 48px;
   }
-}
-
-.gray-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.2);
-  z-index: 1;
-}
-
-.loading {
-  width: 30%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 }
 </style>
