@@ -61,6 +61,13 @@ export default defineComponent({
   beforeUnmount() {
     if (colorUtils.currEvent !== ColorEventType.photoShadow) {
       imageShadowPanelUtils.handleShadowUpload()
+      setTimeout(() => {
+        const cb = (this.$store.getters['shadow/uploadingCallback'] as Map<string, () => void>).get(layerUtils.getCurrConfig.id)
+        if (cb) {
+          cb()
+          this.$store.commit('shadow/SET_UPLOADING_CB', { id: layerUtils.getCurrConfig.id })
+        }
+      }, 0)
     }
   },
   computed: {
