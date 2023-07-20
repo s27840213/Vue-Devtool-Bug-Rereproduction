@@ -67,7 +67,7 @@ export default defineComponent({
           cb()
           this.$store.commit('shadow/SET_UPLOADING_CB', { id: layerUtils.getCurrConfig.id })
         }
-      }, 0)
+      }, 300)
     }
   },
   computed: {
