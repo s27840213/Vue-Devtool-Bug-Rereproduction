@@ -17,6 +17,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       class="nu-image__picture-shadow"
       draggable="false"
       :src="shadowSrc"
+      @onload='onLoadShadowImg($event)'
       @error="onError")
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
@@ -223,7 +224,8 @@ export default defineComponent({
         width: 0,
         height: 0
       },
-      initialized: false
+      initialized: false,
+      isShadowImgLoaded: false
     }
   },
   watch: {
@@ -334,6 +336,7 @@ export default defineComponent({
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
         }
         this.handleUploadShadowImg()
+        this.isShadowImgLoaded = false
       },
       deep: true
     },
@@ -454,7 +457,8 @@ export default defineComponent({
           return this.config.id === handleId.layerId
         }
       })()
-      return isCurrShadowEffectApplied && isHandling
+      const hasShadowSrc = !!(this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId)
+      return (isCurrShadowEffectApplied && isHandling) || (hasShadowSrc && !this.isShadowImgLoaded)
     },
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
@@ -659,6 +663,11 @@ export default defineComponent({
         }
       }
       this.$emit('onload')
+    },
+    onLoadShadowImg(e: Event) {
+      setTimeout(() => {
+        this.isShadowImgLoaded = true
+      }, 100)
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return

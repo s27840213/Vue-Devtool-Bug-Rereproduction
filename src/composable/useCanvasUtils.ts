@@ -1,9 +1,9 @@
 import { IStyle } from '@/interfaces/layer'
 
 const useCanvasUtils = (targetLayerStyle?: IStyle) => {
-// This function takes an HTMLCanvasElement as input and returns a trimmed version of it.
+  // This function takes an HTMLCanvasElement as input and returns a trimmed version of it.
   const trimCanvas = (canvas: HTMLCanvasElement) => {
-  // Get the 2D rendering context of the input canvas.
+    // Get the 2D rendering context of the input canvas.
     const ctx = canvas.getContext('2d')!
 
     // Create a new canvas and get its 2D rendering context to hold the trimmed content.
@@ -13,7 +13,7 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
     const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height)
 
     // The total number of pixels (RGBA values).
-    const l = pixels.data.length
+    const bufferSize = pixels.data.length
 
     // Variables to store the boundaries of the non-transparent content.
     const bound = {
@@ -25,10 +25,10 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
     let x, y
 
     // Iterate over every pixel to find the boundaries of the non-transparent content.
-    for (let i = 0; i < l; i += 4) {
-    // Check the alpha (transparency) value of each pixel.
+    for (let i = 0; i < bufferSize; i += 4) {
+      // Check the alpha (transparency) value of each pixel.
       if (pixels.data[i + 3] !== 0) {
-      // Calculate the x and y coordinates of the current pixel.
+        // Calculate the x and y coordinates of the current pixel.
         x = (i / 4) % canvas.width
         y = ~~((i / 4) / canvas.width)
 
@@ -41,7 +41,7 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
         if (bound.left === -1) {
           bound.left = x
         } else if (x < bound.left) {
-        // Update the left boundary if the current x coordinate is smaller.
+          // Update the left boundary if the current x coordinate is smaller.
           bound.left = x
         }
 
@@ -49,7 +49,7 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
         if (bound.right === -1) {
           bound.right = x
         } else if (x > bound.right) {
-        // Update the right boundary if the current x coordinate is greater.
+          // Update the right boundary if the current x coordinate is greater.
           bound.right = x
         }
 
@@ -57,16 +57,17 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
         if (bound.bottom === -1) {
           bound.bottom = y
         } else if (y > bound.bottom) {
-        // Update the bottom boundary if the current y coordinate is greater.
+          // Update the bottom boundary if the current y coordinate is greater.
           bound.bottom = y
         }
       }
     }
 
     // Calculate the height and width of the non-transparent content.
-    const trimHeight = bound.bottom - bound.top
-    const trimWidth = bound.right - bound.left
+    const trimHeight = bound.bottom - bound.top + 1
+    const trimWidth = bound.right - bound.left + 1
 
+    console.log(canvas.width, canvas.height, bound, trimHeight, trimWidth)
     // Get the trimmed image data based on the boundaries found above.
     const trimmed = ctx.getImageData(bound.left, bound.top, trimWidth, trimHeight)
 
