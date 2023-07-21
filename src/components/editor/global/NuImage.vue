@@ -17,20 +17,20 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       class="nu-image__picture-shadow"
       draggable="false"
       :src="shadowSrc"
+      @load='onLoadShadowImg($event)'
       @error="onError")
   div(:class="{'nu-image__clipper': !imgControl}")
-    //- :style="imgWrapperstyle()")
     div(class='nu-image__picture'
       :style="imgStyles()")
       img(ref="img"
         :style="flipStyles"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
-        :src="finalSrc"
         draggable="false"
-        crossOrigin="anonymous"
+        crossorigin="anonymous"
         @error="onError"
-        @load="onLoad")
+        @load="onLoad"
+        :src="finalSrc")
       svg(v-if="isAdjustImage"
         :style="flipStyles"
         class="nu-image__svg"
@@ -49,15 +49,16 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        image(:xlink:href="finalSrc" ref="img"
+        image(ref="img"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
-          crossOrigin="anonymous"
+          crossorigin="anonymous"
           draggable="false"
           @error="onError"
-          @load="onAdjustImgLoad")
+          @load="onAdjustImgLoad"
+          :xlink:href="finalSrc")
   template(v-if="hasHalation()")
     component(v-for="(elm, idx) in cssFilterElms()"
       class="nu-image__adjust"
@@ -88,7 +89,7 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -212,7 +213,8 @@ export default defineComponent({
         width: 0,
         height: 0
       },
-      initialized: false
+      initialized: false,
+      isShadowImgLoaded: false
     }
   },
   watch: {
@@ -307,6 +309,7 @@ export default defineComponent({
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
         }
         this.handleUploadShadowImg()
+        this.isShadowImgLoaded = false
       },
       deep: true
     },
@@ -421,7 +424,8 @@ export default defineComponent({
           return this.config.id === handleId.layerId
         }
       })()
-      return isCurrShadowEffectApplied && isHandling
+      const hasShadowSrc = !!(this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId)
+      return (isCurrShadowEffectApplied && isHandling) || (hasShadowSrc && !this.isShadowImgLoaded)
     },
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
@@ -529,7 +533,7 @@ export default defineComponent({
           this.imgNaturalSize.width = img.width
           this.imgNaturalSize.height = img.height
         }
-      })
+      }, { crossOrigin: true })
     },
     onLoad(e: Event) {
       this.isOnError = false
@@ -556,6 +560,11 @@ export default defineComponent({
         }
       }
       this.$emit('onload')
+    },
+    onLoadShadowImg(e: Event) {
+      setTimeout(() => {
+        this.isShadowImgLoaded = true
+      }, 100)
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return

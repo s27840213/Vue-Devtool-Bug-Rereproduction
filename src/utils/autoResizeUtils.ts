@@ -1,4 +1,5 @@
 import { IText } from '@/interfaces/layer'
+import logUtils from '@/utils/logUtils'
 import textUtils, { ITextHW } from '@/utils/textUtils'
 
 export interface IRunResult {
@@ -52,9 +53,13 @@ abstract class AutoResize {
   }
 
   log(...args: any[]) {
-    if (!this.isDebugMode) return
     if (!DEBUG_LOG_FILTER(this.BY, this.identity)) return
-    console.log(this.BY, this.identity.substring(0, 50), '::', ...args)
+    const messages = [this.BY, this.identity.substring(0, 50), '::', ...args]
+    if (this.isDebugMode) {
+      console.log(...messages)
+    } else {
+      logUtils.setLog(messages.join(' '))
+    }
   }
 
   async updateSize(): Promise<void> {

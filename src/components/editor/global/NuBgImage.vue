@@ -20,20 +20,21 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
               :is="child.tag"
               v-bind="child.attrs")
               //- class="nu-background-image__adjust-picture"
-      image(:xlink:href="finalSrc" ref="img"
-        crossOrigin="anonymous"
+      image(ref="img"
+        crossorigin="anonymous"
         class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
         :width="imgNaturalSize.width"
         :height="imgNaturalSize.height"
         @error="onError"
-        @load="onAdjustImgLoad")
+        @load="onAdjustImgLoad"
+        :xlink:href="finalSrc" )
     img(v-else-if="src" ref="img"
-      crossOrigin="anonymous"
-      :src="finalSrc"
+      crossorigin="anonymous"
       draggable="false"
       @error="onError"
-      @load="onLoad")
+      @load="onLoad"
+      :src="finalSrc")
   div(:style="filterContainerStyles()" class="filter-container")
     component(v-for="(elm, idx) in cssFilterElms"
       :key="`cssFilter${idx}`"

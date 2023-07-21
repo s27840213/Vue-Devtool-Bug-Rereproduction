@@ -12,7 +12,7 @@ div(:layer-index="`${layerIndex}`"
     div(class="nu-controller__object-hint__text")
       span {{ Math.round(hintAngle) % 360 }}
   div(v-if="subLayer && subLayer.config" class="nu-controller__sublayer-container" :style="sizeStyles")
-    nu-sub-controller(v-if="subLayer.config.type !== 'image' || !subLayer.config.imgControl"
+    nu-sub-controller(v-if="(subLayer.config.type !== 'image' || !subLayer.config.imgControl) && !FrameUtils.isImageFrame(config)"
       :style="subContentStyles"
       class="relative nu-controller__subCtrlContent"
       data-identifier="controller"
@@ -1058,8 +1058,8 @@ export default defineComponent({
       this.initialPos = { x: event.clientX, y: event.clientY }
 
       const vect = MouseUtils.getMouseRelPoint(event, center)
-      const angeleInRad = this.getLayerRotate() * Math.PI / 180
-      const clientP = ControlUtils.getNoRotationPos(vect, center, angeleInRad)
+      const angleInRad = this.getLayerRotate() * Math.PI / 180
+      const clientP = ControlUtils.getNoRotationPos(vect, center, angleInRad)
       this.control.xSign = (clientP.x - center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - center.y > 0) ? 1 : -1
 

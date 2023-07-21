@@ -1044,9 +1044,9 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, preprimaryLayerIndex = -1, layerIndex, subLayerIdx, shape } = data
     let frame
     if (preprimaryLayerIndex !== -1) {
-      frame = state.pages[pageIndex].config.layers[layerIndex] as IFrame
-    } else {
       frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[layerIndex] as IFrame
+    } else {
+      frame = state.pages[pageIndex].config.layers[layerIndex] as IFrame
     }
     if (frame.type === LayerType.frame) {
       if (subLayerIdx === -1) {
