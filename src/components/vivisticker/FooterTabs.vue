@@ -808,19 +808,17 @@ export default defineComponent({
         case 'remove-bg': {
           if (!this.isInEditor) break
           if (!this.inBgRemoveMode && !this.isProcessing) {
+            this.setIsProcessing(true)
+
             // first step: get the image src
 
             // second step: upload the src to backend, and then call the bg remove API
 
             // after finish bg removing, update the srcObj
             const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
-            const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage)
-            layerUtils.updateLayerProps(pageIndex, index, {
-              isProcessing: true
-            })
+            const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
 
             generalUtils.toDataURL(src, (dataUrl: string) => {
-              this.setIsProcessing(true)
               uploadUtils.uploadAsset('stk-bg-remove', [dataUrl])
             })
 

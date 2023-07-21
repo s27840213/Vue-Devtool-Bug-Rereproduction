@@ -22,13 +22,14 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
     span(class="page-pill__text body-XS text-black-5 no-wrap") {{ strPagePill }}
   page-preivew(v-if="isInPagePreview" :pagesState="pagesState")
   share-template(v-if="isInTemplateShare" :isMultiPage="pagesState.length > 1")
-  div(v-if="inBgRemoveMode && isInEditor"
-      class="vvstk-editor__bg-remove-container"
-      ref="bgRemoveContainer")
-    bg-remove-container(v-if="bgRemoveContainerRef"
-      :containerWH="containerWH"
-      :containerRef="bgRemoveContainerRef"
-      ref="bgRemoveContainer")
+  div(v-if="(isProcessing || inBgRemoveMode) && isInEditor"
+      class="vvstk-editor__bg-remove-container")
+    div(class="vvstk-editor__event-section"
+        :style="{ backgroundColor: editorBg }"
+        ref="bgRemoveContainer")
+      bg-remove-container(v-if="bgRemoveContainerRef"
+        :containerWH="containerWH"
+        :containerRef="bgRemoveContainerRef")
 </template>
 
 <script lang="ts">
@@ -89,7 +90,7 @@ export default defineComponent({
     this.swipeDetector.unbind()
   },
   watch: {
-    inBgRemoveMode(val) {
+    isProcessing(val) {
       if (val === true) {
         this.$nextTick(() => {
           this.bgRemoveContainerRef = this.$refs.bgRemoveContainer as HTMLElement
@@ -188,6 +189,7 @@ export default defineComponent({
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isProcessing: 'bgRemove/getIsProcessing'
     }),
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -216,6 +218,10 @@ export default defineComponent({
         height: this.bgRemoveContainerRef ? this.bgRemoveContainerRef.offsetHeight - this.mobilePanelHeight : 0,
       }
     },
+    // bgRemovePreviewSrc() {
+    //   if (!this.isProcessing) return ''
+    //   return imageUtils.getSrc(layerUtils.getCurrLayer as IImage)
+    // }
   },
   methods: {
     ...mapMutations({
@@ -368,6 +374,14 @@ export default defineComponent({
     width: 100%;
     height: calc(100% - v-bind(mobilePanelHeight)* 1px);
     max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__event-section {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
