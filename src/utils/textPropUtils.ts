@@ -1239,7 +1239,7 @@ class TextPropUtils {
     const subLayerIdx = layerUtils.subLayerIdx
     const currLayer = this.getCurrLayer
     if (!layerUtils.isOfLayerType(currLayer, LayerType.text, subLayerIdx, true)) return
-    let value
+    let value: number | string | boolean | undefined
     switch (propName) {
       case 'textAlign': {
         value = this.propReader('textAlign')

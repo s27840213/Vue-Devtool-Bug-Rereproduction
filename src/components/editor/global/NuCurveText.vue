@@ -11,17 +11,13 @@ p(class="nu-curve-text__p")
 
 <script lang="ts">
 import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { isEqual } from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -39,20 +35,12 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    page: {
-      type: Object as PropType<IPage>,
-      required: true
-    },
     subLayerIndex: {
       type: Number
     },
     primaryLayer: {
       type: Object,
       default: () => { return undefined }
-    },
-    contentScaleRatio: {
-      default: 1,
-      type: Number
     },
     extraSpanStyle: {
       type: Object as PropType<Record<string, string|number>>,
@@ -64,12 +52,10 @@ export default defineComponent({
       textHeight: [] as number[],
       minHeight: 0,
       isDestroyed: false,
-      textFillVersion: 0,
-      textFillSpanStyle: [] as Record<string, string | number>[][]
     }
   },
   async created () {
-    await this.computeDimensions(this.spans())
+    await this.computeDimensions()
     // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
@@ -77,11 +63,9 @@ export default defineComponent({
     this.isDestroyed = true
   },
   async mounted() {
-    this.drawTextFill()
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(async () => {
         await this.resizeCallback()
-        await this.drawTextFill()
         generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
       }, 100) // for the delay between font loading and dom rendering
     })
@@ -103,16 +87,12 @@ export default defineComponent({
   watch: {
     'config.paragraphs': {
       handler(newVal) {
-        this.computeDimensions(this.spans())
+        this.computeDimensions()
         textUtils.untilFontLoaded(newVal).then(() => {
-          this.computeDimensions(this.spans())
+          this.computeDimensions()
         })
       },
       deep: true
-    },
-    focus() { this.drawTextFill() },
-    async 'config.styles.textFill'() {
-      if (this.focus === 'none') this.drawTextFill()
     },
   },
   methods: {
@@ -122,16 +102,6 @@ export default defineComponent({
     },
     spans(): ISpan[] {
       return textShapeUtils.flattenSpans(this.config)
-    },
-    async drawTextFill() {
-      // Prevent earlier result overwrite later result
-      const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
-      const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
-
-      const newSpanStyle = await textFillUtils.convertTextEffect(this.config, ratio)
-      if (newTextFillVersion === this.textFillVersion && !isEqual(newSpanStyle, this.textFillSpanStyle)) {
-        this.textFillSpanStyle = newSpanStyle
-      }
     },
     circleStyle(): Record<string, string> {
       const { minHeight, scaleRatio } = this
@@ -170,8 +140,6 @@ export default defineComponent({
       const transforms = this.transforms
       const baseline = `${(minHeight - textHeight[sIndex]) / 2 - fontSize}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
-      const textFillStyle = this.textFillSpanStyle[0]?.[sIndex] ?? {}
-      const textShadowStrokeColor = textEffectUtils.convertTextEffect(this.config).webkitTextStrokeColor
       return Object.assign(
         fontStyles,
         {
@@ -180,12 +148,10 @@ export default defineComponent({
           padding: `${fontSize}px`,
         },
         bend >= 0 ? { top: baseline } : { bottom: baseline },
-        ['none', 'fill'].includes(this.focus) ? textFillStyle : null,
-        textShadowStrokeColor ? { webkitTextStrokeColor: textShadowStrokeColor } : {},
       )
     },
-    async computeDimensions(spans: ISpan[]) {
-      const { textWidth, textHeight, minHeight } = await textShapeUtils.getTextHWsBySpansAsync(spans)
+    async computeDimensions() {
+      const { textWidth, textHeight, minHeight } = await textShapeUtils.getTextHWsAsync(this.config)
       this.textWidth = textWidth
       this.textHeight = textHeight
       this.minHeight = minHeight
@@ -204,7 +170,7 @@ export default defineComponent({
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
       }
 
-      await this.computeDimensions(this.spans())
+      await this.computeDimensions()
     }
   }
 })

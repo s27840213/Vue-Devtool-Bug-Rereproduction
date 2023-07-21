@@ -101,9 +101,7 @@ export default defineComponent({
       },
       textBgVersion: 0,
       textBg: {} as CustomElementConfig | null,
-      textFillVersion: 0,
       textFillBg: {} as CustomElementConfig | null,
-      textFillSpanStyle: [] as Record<string, string | number>[][]
     }
   },
   created() {
@@ -159,16 +157,19 @@ export default defineComponent({
       this.drawTextBg()
       textUtils.untilFontLoaded(newVal).then(async () => {
         this.drawTextBg()
-        this.drawTextFill()
       })
     },
     aspectRatio() {
       // To prevent NuText and NuCurveText update when scaling,
       // don't use w/h in style method and watch aspectRatio instead w/h.
       this.drawTextBg()
-      this.drawTextFill()
     },
     focus() { this.drawTextFill() },
+    'config.styles.textShape'() {
+      if (this.config.styles.textBg.name !== 'none') {
+        this.drawTextBg()
+      }
+    },
     'config.styles.textBg'() { this.drawTextBg() },
     'config.styles.textFill'() { this.drawTextFill() },
   },
@@ -185,19 +186,11 @@ export default defineComponent({
       })
     },
     async drawTextFill() {
-      // Prevent earlier result overwrite later result
-      const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
       const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
 
       const newFillBg = textFillUtils.drawTextFill(this.config, ratio)
       if (!isEqual(newFillBg, this.textFillBg)) { // Prevent unnecessary update
         this.textFillBg = newFillBg
-      }
-      if (this.isCurveText) return
-
-      const newSpanStyle = await textFillUtils.convertTextEffect(this.config, ratio)
-      if (newTextFillVersion === this.textFillVersion && !isEqual(newSpanStyle, this.textFillSpanStyle)) {
-        this.textFillSpanStyle = newSpanStyle
       }
     },
     isLayerAutoResizeNeeded(): boolean {
@@ -226,11 +219,14 @@ export default defineComponent({
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const textEffectStyles = omit(textEffectUtils.convertTextEffect(this.config), ['duplicatedTexts'])
       const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
+      const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
+      const textFillStyle = textFillUtils.convertTextEffect(this.config, ratio)
       return {
         width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
         opacity,
+        ...textFillStyle,
         ...textEffectStyles,
         // Add padding at body to prevent Safari bug that overflow text of drop-shadow/opacity<1 will be cliped
         padding: `${maxFontSize}px`,
@@ -241,13 +237,12 @@ export default defineComponent({
     spanStyle(sIndex: number, pIndex: number): Record<string, string> {
       const p = this.config.paragraphs[pIndex]
       const span = p.spans[sIndex]
-      const textFillStyle = this.textFillSpanStyle[pIndex]?.[sIndex] ?? {}
-      const textShadowStrokeColor = textEffectUtils.convertTextEffect(this.config).webkitTextStrokeColor
-      return Object.assign(tiptapUtils.textStylesRaw(span.styles),
+      let baseCSS = tiptapUtils.textStylesRaw(span.styles)
+      if (this.config.styles.textFill.name !== 'none') { // Cancel underline if TextFill enabled.
+        baseCSS = omit(baseCSS, ['text-decoration-line', '-webkit-text-decoration-line'])
+      }
+      return Object.assign(baseCSS,
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        ['none', 'fill'].includes(this.focus) ? textFillStyle : null,
-        // Overwrite stroke color
-        textShadowStrokeColor ? { webkitTextStrokeColor: textShadowStrokeColor } : {},
         textBgUtils.fixedWidthStyle(span.styles, p.styles, this.config),
       )
     },
@@ -292,21 +287,19 @@ export default defineComponent({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      await this.drawTextBg()
-      await this.drawTextFill()
     },
     async resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(async () => {
           await this.resizeCallback()
+          this.drawTextBg() // Redraw TextBg after resize.
           if (!this.isCurveText) {
             generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
           }
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawTextBg()
-      this.drawTextFill()
     }
   }
 })
