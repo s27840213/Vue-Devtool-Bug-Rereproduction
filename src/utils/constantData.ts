@@ -427,7 +427,7 @@ class ConstantData {
             key,
             img: require(`@/assets/img/svg/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
             label: key,
-            attrs: { tailPosition: key },
+            preset: { tailPosition: key },
           }))
           break
         case 'angle':
