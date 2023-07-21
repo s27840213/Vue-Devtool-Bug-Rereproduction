@@ -276,15 +276,9 @@ export default defineComponent({
           break
         case 'bg':
           await textBgUtils.setTextBg(effectName, effect)
-          if (textShape.name !== 'none' && !this.isAdmin) {
-            textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
-          }
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName, effect)
-          if (!this.isAdmin) {
-            await textBgUtils.setTextBg('none')
-          }
           textFillUtils.setTextFill('none') // fill & shape are exclusive.
           break
         case 'fill':

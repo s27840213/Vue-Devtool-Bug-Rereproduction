@@ -502,11 +502,11 @@ class ConstantData {
         key: 'bold3d',
         label: i18n.global.tc('NN0729'),
         options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
-      }, ...store.getters['user/isAdmin'] && [{
+      }, {
         key: 'outline',
         label: i18n.global.tc('NN0894'),
         options: toOptions(['strokeOut', 'strokeIn', 'opacity', 'colorOut', 'colorIn'])
-      }]])
+      }])
     }, {
       name: 'shape' as const,
       label: i18n.global.t('NN0070'),
@@ -550,7 +550,7 @@ class ConstantData {
         key: 'rounded-both',
         label: i18n.global.tc('NN0725'),
         options: toOptions(['opacity', 'bRadius', 'bStroke', 'pStrokeY', 'bColor', 'pColor'])
-      }, ...store.getters['user/isAdmin'] ? [{
+      }, {
         key: 'speech-bubble',
         label: i18n.global.tc('NN0884'),
         options: toOptions(['tailPosition', 'tailOffset', 'pStrokeY', 'opacity', 'pColor'], 'speech-bubble')
@@ -558,7 +558,7 @@ class ConstantData {
         key: 'speech-bubble-triangle',
         label: i18n.global.tc('NN0885'),
         options: toOptions(['tailPosition', 'tailOffset', 'bRadius', 'pStrokeY', 'opacity', 'pColor'], 'speech-bubble-triangle')
-      }] : [], {
+      }, {
         key: 'gooey',
         label: i18n.global.tc('NN0726'),
         options: toOptions(['distance', 'bRadius', 'opacity', 'color'])
@@ -584,7 +584,7 @@ class ConstantData {
         options: [...toOptions(['customImg', 'xOffset200', 'yOffset200', 'size', 'opacity'])]
       }, ...textFillUtils.fillCategories])
     }]
-    return categories.filter(c => store.getters['user/isAdmin'] ? true : c.name !== 'fill')
+    return categories
   }
 
   // For Settings
