@@ -665,6 +665,9 @@ export default defineComponent({
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
       }
+      // If current state is in cropping, the layerIndex sould be stored
+      // bcz after we disable the cropping, the current active index would be lost
+      const { pageIndex, layerIndex, subLayerIdx } = layerUtils
       if (tab.icon !== 'crop' && this.isCropping) {
         imageUtils.setImgControlDefault()
       }
@@ -806,7 +809,8 @@ export default defineComponent({
         case 'photo':
         case 'replace': {
           if (tab.panelType !== undefined) break
-          const { pageIndex, layerIndex, subLayerIdx = 0, getCurrLayer: layer } = layerUtils
+          const { getCurrLayer: layer } = layerUtils
+          // const { pageIndex, layerIndex, subLayerIdx = 0, getCurrLayer: layer } = layerUtils
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
               if (images.length) {
