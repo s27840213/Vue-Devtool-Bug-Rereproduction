@@ -17,7 +17,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       class="nu-image__picture-shadow"
       draggable="false"
       :src="shadowSrc"
-      @onload='onLoadShadowImg($event)'
+      @load='onLoadShadowImg($event)'
       @error="onError")
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
@@ -89,7 +89,7 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
