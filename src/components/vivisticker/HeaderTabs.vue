@@ -42,6 +42,7 @@ import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
 import i18n from '@/i18n'
 import { SrcObj } from '@/interfaces/gallery'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IImage } from '@/interfaces/layer'
 import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -121,6 +122,7 @@ export default defineComponent({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currSelectedInfo: 'getCurrSelectedInfo',
       isUploadingShadowImg: 'shadow/isUploading',
+      isProcessShadowImg: 'shadow/isProcessing',
       currActivePanel: 'mobileEditor/getCurrActivePanel'
     }),
     templateHeaderTab() {
@@ -263,8 +265,12 @@ export default defineComponent({
     },
     rightTabs(): TabConfig[] {
       const downloadTab = vivistickerUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
-      if (this.isInTemplateShare) {
+      if (this.isInMultiPageShare) {
         return []
+      } else if (this.isInTemplateShare) {
+        return [
+          { icon: 'home', width: 24, action: this.handleEndEditing },
+        ]
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
         if (this.inEffectEditingMode) {
@@ -495,6 +501,30 @@ export default defineComponent({
       }
       if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
       if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
+
+      if (this.currActivePanel === 'photo-shadow') {
+        this.$store.commit('shadow/SET_UPLOADING_CB', {
+          id: (layerUtils.getCurrConfig as IImage).id,
+          cb: () => {
+            if (this.isProcessShadowImg) {
+              let time = 0
+              const interval = setInterval(() => {
+                // check if the drawing is finished. if finished, doing the copy process
+                if (time++ >= 30 || !this.isProcessShadowImg) {
+                  this._handleCopy()
+                  clearInterval(interval)
+                }
+              }, 200)
+            } else {
+              this._handleCopy()
+            }
+          }
+        })
+        return
+      }
+      this._handleCopy()
+    },
+    _handleCopy() {
       const copyCallback = this.getCopyCallback(
         `${this.$t('STK0018')}`,
         () => {
@@ -518,16 +548,39 @@ export default defineComponent({
     },
     handleDownload() {
       if (!vivistickerUtils.checkVersion('1.34')) return
-      if (imageUtils.isImgControl()) {
-        imageUtils.setImgControlDefault()
-      }
       if (this.isUploadingShadowImg) {
         notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
       }
+      if (imageUtils.isImgControl()) {
+        imageUtils.setImgControlDefault()
+      }
       if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
       if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
+
       const downloadCallback = this.getCopyCallback(`${this.$t('STK0082')}`)
+      if (this.currActivePanel === 'photo-shadow') {
+        this.$store.commit('shadow/SET_UPLOADING_CB', {
+          id: (layerUtils.getCurrConfig as IImage).id,
+          cb: () => {
+            const task = () => vivistickerUtils.downloadEditor(downloadCallback)
+            if (this.isProcessShadowImg) {
+              let time = 0
+              const interval = setInterval(() => {
+                // check if the drawing is finished. if finished, doing the download process
+                if (time++ >= 30 || !this.isProcessShadowImg) {
+                  task()
+                  clearInterval(interval)
+                }
+              }, 200)
+            } else {
+              task()
+            }
+          }
+        })
+        return
+      }
+
       if (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1) {
         vivistickerUtils.downloadWithScreenshotUrl(
           vivistickerUtils.createUrlForJSON({ source: 'editor' }),

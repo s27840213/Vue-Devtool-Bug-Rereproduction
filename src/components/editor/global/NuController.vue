@@ -12,7 +12,7 @@ div(:layer-index="`${layerIndex}`"
     div(class="nu-controller__object-hint__text")
       span {{ Math.round(hintAngle) % 360 }}
   div(v-if="subLayer && subLayer.config" class="nu-controller__sublayer-container" :style="sizeStyles")
-    nu-sub-controller(v-if="subLayer.config.type !== 'image' || !subLayer.config.imgControl"
+    nu-sub-controller(v-if="(subLayer.config.type !== 'image' || !subLayer.config.imgControl) && !FrameUtils.isImageFrame(config)"
       :style="subContentStyles"
       class="relative nu-controller__subCtrlContent"
       data-identifier="controller"
@@ -471,7 +471,7 @@ export default defineComponent({
       return this.config.type
     },
     needAutoRescale(): boolean {
-      return this.config.inAutoRescaleMode && this.getLayerRotate() === 0
+      return this.config.inAutoRescaleMode && this.getLayerRotate() === 0 && !textShapeUtils.isCurvedText(this.config.styles.textShape)
     },
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
