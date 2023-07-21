@@ -501,6 +501,30 @@ export default defineComponent({
       }
       if (backgroundUtils.inBgSettingMode) editorUtils.setInBgSettingMode(false)
       if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
+
+      if (this.currActivePanel === 'photo-shadow') {
+        this.$store.commit('shadow/SET_UPLOADING_CB', {
+          id: (layerUtils.getCurrConfig as IImage).id,
+          cb: () => {
+            if (this.isProcessShadowImg) {
+              let time = 0
+              const interval = setInterval(() => {
+                // check if the drawing is finished. if finished, doing the copy process
+                if (time++ >= 30 || !this.isProcessShadowImg) {
+                  this._handleCopy()
+                  clearInterval(interval)
+                }
+              }, 200)
+            } else {
+              this._handleCopy()
+            }
+          }
+        })
+        return
+      }
+      this._handleCopy()
+    },
+    _handleCopy() {
       const copyCallback = this.getCopyCallback(
         `${this.$t('STK0018')}`,
         () => {
