@@ -132,7 +132,7 @@ export interface IShape extends ILayer<IStyle> {
   category: string,
   scaleType?: number,
   styleArray: string[],
-  color: [string],
+  color: string[],
   size?: number[],
   transArray?: string[],
   markerTransArray?: string[],
@@ -151,7 +151,8 @@ export interface IShape extends ILayer<IStyle> {
   trimOffset?: number[],
   filled?: boolean,
   shapeType?: string,
-  pDiffLimits?: number[]
+  pDiffLimits?: number[],
+  frameDecType?: 'blend' | 'decoration' | 'decorationTop'
 }
 export interface IImage extends ILayer<IImageStyle> {
   type: 'image'

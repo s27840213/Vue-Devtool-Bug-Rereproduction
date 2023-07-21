@@ -146,7 +146,7 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
+  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo', addToPage = false) {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
@@ -171,7 +171,7 @@ class UploadUtils {
       if (type === 'logo') {
         params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
-      this.uploadAsset(type, files as FileList, params)
+      this.uploadAsset(type, files as FileList, Object.assign(params, { addToPage }))
       document.body.removeChild(inputNode)
     }, false)
   }
@@ -958,7 +958,7 @@ class UploadUtils {
     }
   }
 
-  uploadTemplate() {
+  uploadTemplate(bypass?: boolean) {
     const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     /**
@@ -994,7 +994,7 @@ class UploadUtils {
     formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
-    formData.append('x-amz-meta-tn', this.userId)
+    formData.append('x-amz-meta-tn', bypass ? `${this.userId},bypass` : this.userId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })

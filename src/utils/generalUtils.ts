@@ -254,6 +254,21 @@ class GeneralUtils {
     return new Blob([u8arr], { type: mime })
   }
 
+  toDataURL(src: string, callback: (dataUrl: string)=> void) {
+    const image = new Image()
+    image.crossOrigin = 'Anonymous'
+    image.onload = () => {
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      canvas.height = image.naturalHeight
+      canvas.width = image.naturalWidth
+      context?.drawImage(image, 0, 0)
+      const dataURL = canvas.toDataURL('image/png')
+      callback(dataURL)
+    }
+    image.src = src
+  }
+
   fbq(type: string, action: string, params?: { [index: string]: any }) {
     params ? (window as any).fbq(type, action, params) : (window as any).fbq(type, action)
   }

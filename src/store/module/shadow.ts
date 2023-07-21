@@ -12,6 +12,7 @@ const SET_PROCESS_ID = 'SET_PROCESS_ID' as const
 const SET_HANDLE_ID = 'SET_HANDLE_ID' as const
 const ADD_UPLOAD_IMG = 'ADD_UPLOAD_IMG' as const
 const ADD_SHADOW_IMG = 'ADD_SHADOW_IMG' as const
+const SET_UPLOADING_CB = 'SET_UPLOADING_CB' as const
 
 export interface IUploadShadowImg {
   id: string,
@@ -40,7 +41,8 @@ interface IShadowState {
    */
   handleId: ILayerIdentifier,
   uploadShadowImgs: Array<IUploadShadowImg>,
-  shadowImgs: Map<number, IShadowAsset>
+  shadowImgs: Map<number, IShadowAsset>,
+  uploadingCallback: Map<string, () => void>
 }
 
 const getters: GetterTree<IShadowState, IEditorState> = {
@@ -55,6 +57,9 @@ const getters: GetterTree<IShadowState, IEditorState> = {
   },
   shadowImgs(state): Map<number, IShadowAsset> {
     return state.shadowImgs
+  },
+  uploadingCallback(state): Map<string, () => void> {
+    return state.uploadingCallback
   }
 }
 const state: IShadowState = {
@@ -74,7 +79,8 @@ const state: IShadowState = {
     subLayerId: ''
   },
   uploadShadowImgs: [],
-  shadowImgs: new Map()
+  shadowImgs: new Map(),
+  uploadingCallback: new Map()
 }
 
 const mutations: MutationTree<IShadowState> = {
@@ -89,6 +95,13 @@ const mutations: MutationTree<IShadowState> = {
   },
   [ADD_UPLOAD_IMG](state, data: IUploadShadowImg) {
     state.uploadShadowImgs.push(data)
+  },
+  [SET_UPLOADING_CB](state, data: { id: string, cb: (() => void) | undefined }) {
+    if (data.cb) {
+      state.uploadingCallback.set(data.id, data.cb)
+    } else {
+      state.uploadingCallback.delete(data.id)
+    }
   }
 }
 

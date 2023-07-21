@@ -71,6 +71,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { isEqual } from 'lodash'
 import { defineComponent } from 'vue'
@@ -194,7 +195,20 @@ export default defineComponent({
       }
     },
     homeTabs() :Array<IFooterTab> {
-      return [
+      return generalUtils.versionCheck({ greaterThan: '1.05', version: picWVUtils.getUserInfoFromStore().appVer }) ? [
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
+        { icon: 'cameraroll', text: `${this.$tc('NN0002', 2)}` },
+        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
+        { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
+        { icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' },
+        { icon: 'add-page', text: `${this.$t('NN0139')}` },
+        { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 },
+        { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
+        { icon: 'paste', text: `${this.$t('NN0230')}` },
+        ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
+      ] : [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
@@ -630,6 +644,22 @@ export default defineComponent({
             frameUtils.detachImage(layerUtils.layerIndex)
           } else {
             frameUtils.updateImgToFrame()
+          }
+          break
+        }
+        case 'cameraroll': {
+          if (picWVUtils.inBrowserMode) {
+            uploadUtils.chooseAssets('image', true)
+          } else {
+            picWVUtils.getIosImg().then((images: string[]) => {
+              if (images.length > 0) {
+                generalUtils.toDataURL(`vvpic://${images[0]}`, (dataUrl: string) => {
+                  uploadUtils.uploadAsset('image', [dataUrl], {
+                    addToPage: true
+                  })
+                })
+              }
+            })
           }
           break
         }

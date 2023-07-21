@@ -327,8 +327,8 @@ export default defineComponent({
     },
     innerTabs(): Record<string, string[]> {
       const panelReplace = {
-        key: ['photo', 'file'],
-        label: [this.$tc('NN0002', 2), this.$tc('NN0006')]
+        key: ['file', 'photo'],
+        label: [this.$tc('NN0006'), this.$t('STK0069')]
       }
 
       if (this.extraPanel === 'replace') {

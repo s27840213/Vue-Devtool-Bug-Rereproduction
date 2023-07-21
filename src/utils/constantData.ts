@@ -1,4 +1,5 @@
 import i18n from '@/i18n'
+import { tailPositions } from '@/interfaces/format'
 import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
 import store from '@/store'
@@ -27,6 +28,7 @@ export interface IEffectOptionSelect {
   type: 'select'
   select: {
     key: string
+    plan?: 1 | 0
     img: string
     label: string
     preset: Record<string, unknown>
@@ -368,8 +370,12 @@ class ConstantData {
       blur: i18n.global.tc('NN0065'),
       opacity: i18n.global.tc('NN0066'),
       color: i18n.global.tc('NN0067'),
+      colorOut: i18n.global.tc('NN0890'),
+      colorIn: i18n.global.tc('NN0891'),
       spread: i18n.global.tc('NN0068'),
       stroke: i18n.global.tc('NN0069'),
+      strokeOut: i18n.global.tc('NN0892'),
+      strokeIn: i18n.global.tc('NN0893'),
       shape: i18n.global.tc('NN0070'),
       bend: i18n.global.tc('NN0071'),
       bStroke: i18n.global.tc('NN0733'),
@@ -390,6 +396,8 @@ class ConstantData {
       fontSpacing: i18n.global.tc('NN0109'),
       img: i18n.global.t('NN0870'),
       customImg: i18n.global.t('NN0871'),
+      tailOffset: i18n.global.tc('NN0886'),
+      tailPosition: i18n.global.tc('NN0887'),
     }
 
     return array.map((name: string) => {
@@ -399,7 +407,7 @@ class ConstantData {
       } as IEffectOption
 
       option.type = 'range'
-      if (name.toLocaleLowerCase().endsWith('color')) {
+      if (name.toLocaleLowerCase().includes('color')) {
         option.type = 'color'
       }
       if (name === 'customImg') option.type = 'img'
@@ -408,9 +416,18 @@ class ConstantData {
           option.type = 'select';
           (option as IEffectOptionSelect).select = ['triangle', 'rounded', 'square'].map((key, i) => ({
             key,
-            img: require(`@/assets/img/svg/text-effect/endpoint/endpoint-${key}.svg`),
+            img: require(`@/assets/img/svg/text-effect/select/endpoint-${key}.svg`),
             label: i18n.global.tc(`NN073${i}`),
             preset: { endpoint: key },
+          }))
+          break
+        case 'tailPosition':
+          option.type = 'select';
+          (option as IEffectOptionSelect).select = tailPositions.map((key) => ({
+            key,
+            img: require(`@/assets/img/svg/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
+            label: key,
+            attrs: { tailPosition: key },
           }))
           break
         case 'angle':
@@ -485,6 +502,10 @@ class ConstantData {
         key: 'bold3d',
         label: i18n.global.tc('NN0729'),
         options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
+      }, {
+        key: 'outline',
+        label: i18n.global.tc('NN0894'),
+        options: toOptions(['strokeOut', 'strokeIn', 'opacity', 'colorOut', 'colorIn'])
       }])
     }, {
       name: 'shape' as const,
@@ -530,6 +551,14 @@ class ConstantData {
         label: i18n.global.tc('NN0725'),
         options: toOptions(['opacity', 'bRadius', 'bStroke', 'pStrokeY', 'bColor', 'pColor'])
       }, {
+        key: 'speech-bubble',
+        label: i18n.global.tc('NN0884'),
+        options: toOptions(['tailPosition', 'tailOffset', 'pStrokeY', 'opacity', 'pColor'], 'speech-bubble')
+      }, {
+        key: 'speech-bubble-triangle',
+        label: i18n.global.tc('NN0885'),
+        options: toOptions(['tailPosition', 'tailOffset', 'bRadius', 'pStrokeY', 'opacity', 'pColor'], 'speech-bubble-triangle')
+      }, {
         key: 'gooey',
         label: i18n.global.tc('NN0726'),
         options: toOptions(['distance', 'bRadius', 'opacity', 'color'])
@@ -555,7 +584,7 @@ class ConstantData {
         options: [...toOptions(['customImg', 'xOffset200', 'yOffset200', 'size', 'opacity'])]
       }, ...textFillUtils.fillCategories])
     }]
-    return categories.filter(c => store.getters['user/isAdmin'] ? true : c.name !== 'fill')
+    return categories
   }
 
   // For Settings
