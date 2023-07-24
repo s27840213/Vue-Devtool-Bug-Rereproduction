@@ -89,7 +89,7 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -351,8 +351,10 @@ export default defineComponent({
       inAllPagesMode: 'mobileAllPageMode',
     }),
     cyReady(): boolean {
-      // Uploading image, wait for polling
-      if (this.src.startsWith('data:image') || !this.initialized) return false
+      if (this.src.startsWith('data:image') || // Uploading image, wait for polling, for imageManuallyBgRemove.
+        !this.initialized || // Wait for NuImage init, for Image.cy.ts before snapshotTest('init').
+        (this.$isTouchDevice() && this.showCanvas) // Wait for mobile shadow process/upload/download/load, for imageShadow command.
+      ) return false
       return true
     },
     isAdjustImage(): boolean {

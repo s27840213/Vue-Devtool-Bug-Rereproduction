@@ -1058,8 +1058,8 @@ export default defineComponent({
       this.initialPos = { x: event.clientX, y: event.clientY }
 
       const vect = MouseUtils.getMouseRelPoint(event, center)
-      const angeleInRad = this.getLayerRotate() * Math.PI / 180
-      const clientP = ControlUtils.getNoRotationPos(vect, center, angeleInRad)
+      const angleInRad = this.getLayerRotate() * Math.PI / 180
+      const clientP = ControlUtils.getNoRotationPos(vect, center, angleInRad)
       this.control.xSign = (clientP.x - center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - center.y > 0) ? 1 : -1
 

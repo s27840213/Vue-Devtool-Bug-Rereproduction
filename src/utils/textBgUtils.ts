@@ -1,5 +1,5 @@
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, isTextFill, ITextBg, ITextGooey } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextSpeechBubble, isITextUnderline, ITextBg, ITextGooey, tailPositions } from '@/interfaces/format'
 import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 import cssConverter from '@/utils/cssConverter'
@@ -8,9 +8,10 @@ import letterBgData from '@/utils/letterBgData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
-import _, { cloneDeep, isEqual, omit } from 'lodash'
+import _, { cloneDeep, isEqual, maxBy, omit, sum } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
 
@@ -18,7 +19,7 @@ import textUtils from './textUtils'
 export class Point {
   x: number
   y: number
-  constructor(x: number, y: number) {
+  constructor(x = 0, y = 0) {
     this.x = x
     this.y = y
   }
@@ -37,8 +38,27 @@ export class Point {
     )
   }
 
-  dist(p: Point): number {
+  sub(p: { x: number, y: number }): Point {
+    return new Point(
+      this.x - p.x,
+      this.y - p.y
+    )
+  }
+
+  mul(scale: number): Point {
+    return new Point(
+      this.x * scale,
+      this.y * scale,
+    )
+  }
+
+  dist(p = new Point()): number {
     return Math.pow(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2), 0.5)
+  }
+
+  // Rotate clockwise
+  rotate(angle: number, origin = new Point()) {
+    return obj2Point(mathUtils.getRotatedPoint(angle, origin, this))
   }
 
   toString(): string {
@@ -64,6 +84,7 @@ export class Rect {
       height: number
       text: string
       letterSpacing: number
+      // pIndex, sIndex, and lineHeight were originally used for TextFill, but are currently unused.
       pIndex: number
       sIndex: number
       lineHeight: number
@@ -169,7 +190,7 @@ export class Rect {
     this.bodyRect = div.getClientRects()[0]
     this.width = this.bodyRect.width
     this.height = this.bodyRect.height
-    this.transform = this.vertical ? 'rotate(90) scale(1,-1)' : ''
+    this.transform = this.vertical ? 'rotate(90deg) scale(1,-1)' : ''
     this.rows = []
 
     for (let pIndex = 0; pIndex < div.children.length; pIndex++) {
@@ -298,10 +319,10 @@ export class Rect {
     })
   }
 
-  preprocess({ skipMergeLine } = { skipMergeLine: false }) {
+  preprocess() {
     const { vertical } = this
     if (vertical) this.xyExchange()
-    if (!skipMergeLine) this.mergeLine()
+    this.mergeLine()
     this.expandEmptyLine()
     this.coordinateInit()
   }
@@ -356,23 +377,50 @@ export class Path {
     this.pathArray.push(`h${dist}`)
   }
 
-  l(x: number, y: number): void {
-    this.currPos = this.currPos.add(new Point(x, y))
+  l(p: Point): void {
+    this.currPos = this.currPos.add(p)
     this.pointArray.push(this.currPos)
-    this.pathArray.push(`l${x} ${y}`)
+    this.pathArray.push(`l${p.x} ${p.y}`)
   }
 
-  a(rx: number, ry: number, sweepFlag: number, x: number, y: number): void {
-    this.currPos = this.currPos.add(new Point(x, y))
+  a(p: Point, { rx = 1, ry = 1, largeArcFlac = 0, sweepFlag = 1, radius = 1 } = {}): void {
+    if (radius !== 1) [rx, ry] = [radius, radius]
+    this.currPos = this.currPos.add(p)
     this.pointArray.push(this.currPos)
-    this.pathArray.push(`a${rx} ${ry} 0 0${sweepFlag}${x} ${y}`)
+    this.pathArray.push(`a${rx} ${ry} 0 ${largeArcFlac}${sweepFlag}${p.x} ${p.y}`)
+  }
+
+  largeArc(totalAngles: number, origin = new Point()): void { // For arc that angle > 360
+    const clockwise = totalAngles > 0
+    const rotateDir = (clockwise ? 1 : -1)
+    const radius = this.currPos.dist(origin)
+    let angleAcc = 0
+    totalAngles = Math.abs(totalAngles)
+    while (angleAcc < totalAngles) {
+      const currAngle = Math.min(totalAngles - angleAcc, 180)
+      const arcEnd = this.currPos.rotate(currAngle * rotateDir, origin)
+      this.a(arcEnd.sub(this.currPos), { sweepFlag: +clockwise, radius })
+      angleAcc += currAngle
+    }
+  }
+
+  q(dp1: Point, dp: Point): void
+  q(dx1: number, dy1: number, dx: number, dy: number): void
+  q(dx1: number | Point, dy1: number | Point, dx?: number, dy?: number): void {
+    if (dx1 instanceof Point && dy1 instanceof Point) {
+      [dx, dy] = [dy1.x, dy1.y];
+      [dx1, dy1] = [dx1.x, dx1.y]
+    }
+    this.currPos = this.currPos.add(new Point(dx as number, dy as number))
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`q${dx1} ${dy1} ${dx} ${dy}`)
   }
 
   result(): string {
-    return this.pathArray.join('') + 'z'
+    return this.pathArray.join('\n') + 'z'
   }
 
-  toCircle(): { tag: string, attrs: { cx: number, cy: number, r: string, fill: string } }[] {
+  toCircle(): CustomElementConfig[] {
     return this.pointArray.map(p => {
       return {
         tag: 'circle',
@@ -492,10 +540,7 @@ class Gooey {
       let curveTopStartMiddle = curr.top.middle(curveTopStart)
       const curveTopEndMiddle = curr.top.middle(curveTopEnd)
       let angle = Math.abs(Math.atan(radiusTop / radius) * (180 / Math.PI))
-      curveTopStartMiddle = obj2Point(mathUtils.getRotatedPoint(
-        (angle * 2 - 90) * dirTop,
-        curveTopStart, curveTopStartMiddle
-      ))
+      curveTopStartMiddle = curveTopStartMiddle.rotate((angle * 2 - 90) * dirTop, curveTopStart)
       path.L(curveTopStart)
       path.C(curveTopStartMiddle, curveTopEndMiddle, curveTopEnd)
 
@@ -506,10 +551,7 @@ class Gooey {
       const curveBottomStartMiddle = curr.bottom.middle(curveBottomStart)
       let curveBottomEndMiddle = curr.bottom.middle(curveBottomEnd)
       angle = Math.abs(Math.atan(radiusBottom / radius) * (180 / Math.PI))
-      curveBottomEndMiddle = obj2Point(mathUtils.getRotatedPoint(
-        (90 - angle * 2) * dirBottom,
-        curveBottomEnd, curveBottomEndMiddle
-      ))
+      curveBottomEndMiddle = curveBottomEndMiddle.rotate((90 - angle * 2) * dirBottom, curveBottomEnd)
       path.L(curveBottomStart)
       path.C(curveBottomStartMiddle, curveBottomEndMiddle, curveBottomEnd)
     }
@@ -529,10 +571,7 @@ class Gooey {
       let curveBottomStartMiddle = curr.bottom.middle(curveBottomStart)
       const curveBottomEndMiddle = curr.bottom.middle(curveBottomEnd)
       let angle = Math.abs(Math.atan(radiusBottom / radius) * (180 / Math.PI))
-      curveBottomStartMiddle = obj2Point(mathUtils.getRotatedPoint(
-        (90 - angle * 2) * dirBottom,
-        curveBottomStart, curveBottomStartMiddle
-      ))
+      curveBottomStartMiddle = curveBottomStartMiddle.rotate((90 - angle * 2) * dirBottom, curveBottomStart)
       path.L(curveBottomStart)
       path.C(curveBottomStartMiddle, curveBottomEndMiddle, curveBottomEnd)
 
@@ -543,29 +582,92 @@ class Gooey {
       const curveTopStartMiddle = curr.top.middle(curveTopStart)
       let curveTopEndMiddle = curr.top.middle(curveTopEnd)
       angle = Math.abs(Math.atan(radiusTop / radius) * (180 / Math.PI))
-      curveTopEndMiddle = obj2Point(mathUtils.getRotatedPoint(
-        (angle * 2 - 90) * dirTop,
-        curveTopEnd, curveTopEndMiddle
-      ))
+      curveTopEndMiddle = curveTopEndMiddle.rotate((angle * 2 - 90) * dirTop, curveTopEnd)
       path.L(curveTopStart)
       path.C(curveTopStartMiddle, curveTopEndMiddle, curveTopEnd)
     }
 
-    return path.result()
+    return path
+  }
+
+  processWithShape(config: IText, maxHeightSpan: Record<'height' | 'y', number>, textWidth: number[], contentScaleRatio: number) {
+    let { width: layerWidth, height: layerHeight, scale: layerScale } = config.styles
+    layerWidth = layerWidth / layerScale * contentScaleRatio
+    layerHeight = layerHeight / layerScale * contentScaleRatio
+    const bend = +config.styles.textShape.bend
+
+    const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
+    const padding = (config.styles.textBg as ITextGooey).distance * mainFontSize / 60
+    const maxHeightCp = maxBy(this.controlPoints[0].slice(1, -1), cp => cp.oldHeight)!
+    const borderHeight = maxHeightCp.top.dist(maxHeightCp.bottom)
+    const radius = Math.min(maxHeightCp.oldHeight * this.bRadius * 0.005, borderHeight / 2)
+    const shapeRadius = textShapeUtils.getRadiusByBend(bend, mainFontSize)
+
+    const textAngles = [...textWidth, padding, padding].map(w => (360 * w) / (shapeRadius * 2 * Math.PI))
+    const totalAngle = sum(textAngles) * (bend >= 0 ? 1 : -1)
+    const endpointAngle = radius * 360 / (shapeRadius * 2 * Math.PI) * (bend >= 0 ? 1 : -1)
+    const bodyAngle = totalAngle - endpointAngle * 2
+
+    const center = new Point(layerWidth / 2,
+      bend >= 0 ? maxHeightSpan.height / 2 + shapeRadius : layerHeight - maxHeightSpan.height / 2 - shapeRadius)
+    maxHeightSpan.height += padding * 2
+    maxHeightSpan.y -= padding
+    const middle = new Point(layerWidth / 2,
+      bend >= 0 ? maxHeightSpan.y : layerHeight - maxHeightSpan.height - maxHeightSpan.y)
+    const begin = middle.rotate(-bodyAngle / 2, center)
+
+    // Index 0 ~ 3 mean: right-top, right-bottom, left-bottom, left-top.
+    const corner = [
+      middle.rotate(totalAngle / 2, center),
+      middle.add(new Point(0, 1).mul(borderHeight)).rotate(totalAngle / 2, center),
+      middle.add(new Point(0, 1).mul(borderHeight)).rotate(-totalAngle / 2, center),
+      middle.rotate(-totalAngle / 2, center)
+    ]
+    const rightBorderDir = new Point(0, 1).rotate(totalAngle / 2)
+    const leftBorderDir = new Point(0, 1).rotate(-totalAngle / 2)
+    const curveBegin = [
+      corner[0].rotate(-endpointAngle, center),
+      corner[1].add(rightBorderDir.mul(-radius)),
+      corner[2].rotate(endpointAngle, center),
+      corner[3].add(leftBorderDir.mul(radius)),
+    ]
+    const curveEnd = [
+      corner[0].add(rightBorderDir.mul(radius)),
+      corner[1].rotate(-endpointAngle, center),
+      corner[2].add(leftBorderDir.mul(-radius)),
+      corner[3].rotate(endpointAngle, center),
+    ]
+
+    const path = new Path(begin)
+    path.largeArc(bodyAngle, center)
+    path.C(curveBegin[0].middle(corner[0]), corner[0].middle(curveEnd[0]), curveEnd[0])
+    path.L(curveBegin[1])
+    path.C(curveBegin[1].middle(corner[1]), corner[1].middle(curveEnd[1]), curveEnd[1])
+    path.largeArc(-bodyAngle, center)
+    path.C(curveBegin[2].middle(corner[2]), corner[2].middle(curveEnd[2]), curveEnd[2])
+    path.L(curveBegin[3])
+    path.C(curveBegin[3].middle(corner[3]), corner[3].middle(curveEnd[3]), curveEnd[3])
+
+    this.controlPoints = [
+      Array(3).fill({ top: corner[3], bottom: corner[2], oldHeight: 0 }),
+      Array(3).fill({ top: corner[0], bottom: corner[1], oldHeight: 0 }),
+    ]
+
+    return path
   }
 
   // For debug
   toCircle() {
-    const circle = [] as Record<string, unknown>[]
+    const circle = [] as CustomElementConfig[]
     this.controlPoints.forEach(side => {
-      side.forEach(cps => {
+      side.slice(1, -1).forEach(cps => {
         circle.push({
           tag: 'circle',
           attrs: {
             cx: cps.top.x,
             cy: cps.top.y,
             r: '5',
-            fill: 'red'
+            fill: 'green'
           }
         })
         circle.push({
@@ -598,7 +700,7 @@ class TextBg {
         bStroke: 0, // unadjustable
         bRadius: 0, // unadjustable
         bColor: 'transparent', // unadjustable
-        pStrokeX: 20, // unadjustable in all effects in all effects
+        pStrokeX: 20, // unadjustable in all effects
         pStrokeY: 20,
         pColor: 'fontColorL+-40/BC/00'
       },
@@ -647,6 +749,24 @@ class TextBg {
         pStrokeY: 10,
         pColor: 'fontColorL+-40/BC/00'
       },
+      'speech-bubble': {
+        tailOffset: 50,
+        tailPosition: 'right',
+        bRadius: 100, // unadjustable
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 20,
+        opacity: 100,
+        pColor: 'fontColorL+-40/BC/00'
+      },
+      'speech-bubble-triangle': {
+        tailOffset: 50,
+        tailPosition: 'bottom',
+        bRadius: 100,
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 20,
+        opacity: 100,
+        pColor: 'fontColorL+-40/BC/00'
+      },
       underline: {
         endpoint: 'rounded',
         height: 20,
@@ -674,10 +794,10 @@ class TextBg {
     return {}
   }
 
+  // A fixedWith text must be splitSpan, but a splitSpan may not be fixedWidth.
+  // Originally, TextFill was also splitSpan, but it is no longer. So isSplitSpan just call isFixedWidth.
   isSplitSpan(styles: ITextStyle) {
-    const { textBg, textFill } = styles
-    return (isITextLetterBg(textBg) && textBg.fixedWidth) ||
-      (isTextFill(textFill))
+    return this.isFixedWidth(styles)
   }
 
   isFixedWidth(styles: ITextStyle) {
@@ -700,18 +820,37 @@ class TextBg {
   }
 
   async drawTextBg(config: IText): Promise<CustomElementConfig | null> {
-    const textBg = config.styles.textBg
+    const contentScaleRatio = 1
+    const { textBg, textShape } = config.styles
     if (textBg.name === 'none') return null
 
+    let { width: layerWidth, height: layerHeight, scale: layerScale } = config.styles
+    layerWidth = layerWidth / layerScale * contentScaleRatio
+    layerHeight = layerHeight / layerScale * contentScaleRatio
     const opacity = textBg.opacity * 0.01
-    const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs) / 60
+    const mainFontSize = textEffectUtils.getLayerFontSize(config.paragraphs)
+    const withShape = textShape.name !== 'none'
+    const bend = +textShape.bend
+
     const myRect = new Rect()
-    await myRect.init(config, { splitSpan: isITextLetterBg(textBg) })
+    let textShapeData = { textWidth: [] as number[], textHeight: [] as number[], minHeight: -1 }
+    await Promise.all([
+      myRect.init(config, { splitSpan: isITextLetterBg(textBg) }),
+      withShape && (isITextLetterBg(textBg) || isITextUnderline(textBg) || isITextGooey(textBg))
+        ? textShapeUtils.getTextHWsAsync(config)
+        : { textWidth: [], textHeight: [], minHeight: -1 }
+    ]).then(result => {
+      textShapeData = result[1]
+    })
     myRect.preprocess()
     const { vertical, width, height, transform, rects, rows } = myRect.get()
+    const maxHeightSpan = maxBy( // y is accrodding to its row, not entire svg.
+      rows.flatMap(row => row.spanData.map(span => ({ height: span.height, y: span.y - row.rect.y }))),
+      data => data.height
+    ) ?? { height: 0, y: 0 }
 
     if (isITextGooey(textBg)) {
-      const padding = textBg.distance * fontSizeModifier
+      const padding = textBg.distance * mainFontSize / 60
       const color = textEffectUtils.colorParser(textBg.color, config)
       const fill = this.rgba(color, opacity)
 
@@ -724,8 +863,9 @@ class TextBg {
       })
 
       const cps = new Gooey(textBg, rects)
-      cps.preprocess()
-      const d = cps.process()
+      !withShape && cps.preprocess()
+      const resultPath = !withShape ? cps.process()
+        : cps.processWithShape(config, maxHeightSpan, textShapeData.textWidth, contentScaleRatio)
 
       return {
         tag: 'svg',
@@ -733,37 +873,88 @@ class TextBg {
         content: [{
           tag: 'path',
           attrs: {
-            d,
-            transform
-          }
+            d: resultPath.result(),
+          },
+          style: { transform },
         }]
         // .concat(cps.toCircle() as any) // Show control point
+        // .concat(resultPath.toCircle() as any)
       }
     } else if (isITextUnderline(textBg)) {
       const color = textEffectUtils.colorParser(textBg.color, config)
       const fill = this.rgba(color, opacity)
       const paths = [] as CustomElementConfig[]
-      rects.forEach(rect => {
-        const capWidth = rect.height * 0.005 * textBg.height
-        const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
-        const path = new Path(new Point(rect.x + capWidth, rect.y + yOffset))
 
+      // Variable for TextShape version
+      const shapeCapWidth = maxHeightSpan.height * 0.005 * textBg.height
+      const yOffset = (maxHeightSpan.height - shapeCapWidth * 2) * 0.01 * (100 - textBg.yOffset)
+      const radius = textShapeUtils.getRadiusByBend(bend, mainFontSize)
+      const textAngles = textShapeData.textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
+      const totalAngle = sum(textAngles) * (bend >= 0 ? 1 : -1)
+      const endpointAngle = !withShape ? 0 // Will be 0 for non-TextShape
+        : shapeCapWidth * 360 / (radius * 2 * Math.PI) * (bend >= 0 ? 1 : -1)
+      const bodyAngle = totalAngle - endpointAngle * 2
+
+      const middle = new Point(layerWidth / 2,
+        (bend >= 0 ? maxHeightSpan.y : layerHeight - maxHeightSpan.height - maxHeightSpan.y) + yOffset)
+      const center = new Point(layerWidth / 2,
+        bend >= 0 ? maxHeightSpan.height / 2 + radius : layerHeight - maxHeightSpan.height / 2 - radius)
+      const begin = middle.rotate(-bodyAngle / 2, center)
+
+      for (const rect of rects) {
+        const capWidth = withShape ? shapeCapWidth : rect.height * 0.005 * textBg.height
+        const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
+        const path = withShape ? new Path(begin)
+          : new Path(new Point(rect.x + capWidth, rect.y + yOffset))
+
+        // Step 1: top line
+        if (withShape) {
+          path.largeArc(bodyAngle, center)
+        } else {
+          path.h(rect.width - capWidth * 2)
+        }
+
+        // Step 2: right endpoint
         switch (textBg.endpoint) {
           case 'triangle':
-            path.h(rect.width - capWidth)
-            path.l(-capWidth, capWidth * 2)
-            path.h(-(rect.width - capWidth))
+            withShape ? path.largeArc(endpointAngle, center)
+              : path.l(new Point(capWidth, 0))
+            // If !withShape, all rotate in step 2, 4 take no effect.
+            path.l(new Point(-capWidth, capWidth * 2).rotate((totalAngle - endpointAngle) / 2))
             break
           case 'rounded':
-            path.a(1, 1, 0, 0, capWidth * 2)
-            path.h(rect.width - capWidth * 2)
-            path.a(1, 1, 0, 0, -capWidth * 2)
+            path.a(new Point(0, capWidth * 2).rotate(bodyAngle / 2))
             break
           case 'square':
-            path.h(rect.width - capWidth)
-            path.v(capWidth * 2)
-            path.h(-rect.width)
-            path.v(-capWidth * 2)
+            withShape ? path.largeArc(endpointAngle, center)
+              : path.l(new Point(capWidth, 0))
+            path.l(new Point(0, capWidth * 2).rotate(totalAngle / 2))
+            withShape ? path.largeArc(-endpointAngle, center)
+              : path.l(new Point(-capWidth, 0))
+            break
+        }
+
+        // Step 3: bottom line
+        if (withShape) {
+          path.largeArc(-bodyAngle, center)
+        } else {
+          path.h(-(rect.width - capWidth * 2))
+        }
+
+        // Step 4: left endpoint
+        switch (textBg.endpoint) {
+          case 'triangle':
+            withShape ? path.largeArc(-endpointAngle, center)
+              : path.l(new Point(-capWidth, 0))
+            break
+          case 'rounded':
+            path.a(new Point(0, -capWidth * 2).rotate(-bodyAngle / 2))
+            break
+          case 'square':
+            withShape ? path.largeArc(-endpointAngle, center)
+              : path.l(new Point(-capWidth, 0))
+            path.l(new Point(0, -capWidth * 2).rotate(-totalAngle / 2))
+            withShape && path.largeArc(endpointAngle, center)
             break
         }
 
@@ -771,25 +962,34 @@ class TextBg {
           tag: 'path',
           attrs: {
             d: path.result(),
-            transform
-          }
+          },
+          style: { transform },
         })
         // paths.push(...path.toCircle()) // Show control point
-      })
+        if (withShape) break // TextShape only have one line.
+      }
 
       return {
         tag: 'svg',
-        attrs: { width, height, fill },
+        attrs: {
+          width: layerWidth,
+          height: layerHeight,
+          fill
+        },
         content: paths
       }
-    } else if (isITextBox(textBg)) {
+    } else if (isITextBox(textBg) || isITextSpeechBubble(textBg)) {
+      // Tail in bottom or left need inverse offset direction.
+      const tailOffset = isITextSpeechBubble(textBg)
+        ? ['bottom', 'left'].includes(textBg.tailPosition) ? 1 - textBg.tailOffset * 0.01
+            : textBg.tailOffset * 0.01 : 0
       const fill = textEffectUtils.colorParser(textBg.pColor, config)
-      const stroke = textEffectUtils.colorParser(textBg.bColor, config)
-      const bStroke = textBg.bStroke * fontSizeModifier
-      const pStrokeY = textBg.pStrokeY * fontSizeModifier
-      const pStrokeX = textBg.pStrokeX * fontSizeModifier
-      let boxWidth = (width + bStroke)
-      let boxHeight = (height + bStroke)
+      const stroke = isITextBox(textBg) ? textEffectUtils.colorParser(textBg.bColor, config) : ''
+      const bStroke = (isITextBox(textBg) ? textBg.bStroke : 0) * mainFontSize / 60
+      const pStrokeY = textBg.pStrokeY * mainFontSize / 60
+      const pStrokeX = textBg.pStrokeX * mainFontSize / 60
+      let boxWidth = (layerWidth + bStroke)
+      let boxHeight = (layerHeight + bStroke)
       let top = -bStroke
       let left = -bStroke
       if (vertical) {
@@ -803,16 +1003,55 @@ class TextBg {
         top -= pStrokeY
         left -= pStrokeX
       }
-      const boxRadius = Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
+      const maxRowHeight = Math.max(...rows.map(r => r.rect.height))
+      const boxRadius = isITextSpeechBubble(textBg) ? maxRowHeight * (textBg.bRadius / 100) / 2
+        : Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
 
+      // Start to draw Path.
       const path = new Path(new Point(bStroke / 2, bStroke / 2 + boxRadius))
-      path.a(boxRadius, boxRadius, 1, boxRadius, -boxRadius)
-      path.h(boxWidth - boxRadius * 2)
-      path.a(boxRadius, boxRadius, 1, boxRadius, boxRadius)
-      path.v(boxHeight - boxRadius * 2)
-      path.a(boxRadius, boxRadius, 1, -boxRadius, boxRadius)
-      path.h(-(boxWidth - boxRadius * 2))
-      path.a(boxRadius, boxRadius, 1, -boxRadius, -boxRadius)
+      for (const [i, section] of tailPositions.entries()) {
+        const cornerDir = obj2Point({
+          top: { x: 1, y: -1 },
+          right: { x: 1, y: 1 },
+          bottom: { x: -1, y: 1 },
+          left: { x: -1, y: -1 },
+        }[section])
+        const centerDir = i % 2 ? new Point(0, cornerDir.y) : new Point(cornerDir.x)
+        const center = centerDir.mul(boxRadius)
+
+        // Draw corner, insert tail at corner for speech-bubble.
+        if (textBg.name === 'speech-bubble' && section === textBg.tailPosition) {
+          const tailBegin = new Point().rotate(60 * tailOffset, center)
+          const tailEnd = tailBegin.rotate(30, center)
+          let tailMid = tailBegin.middle(tailEnd)
+          tailMid = tailMid.add(tailMid.sub(center).mul(0.7))
+          const arcEnd = tailEnd.rotate(60 * (1 - tailOffset), center)
+
+          path.a(tailBegin, { radius: boxRadius })
+          path.q(tailMid.middle(tailBegin).sub(tailBegin).add(cornerDir.mul(boxRadius * 0.1 * cornerDir.y)), tailMid.sub(tailBegin))
+          path.q(tailEnd.middle(tailMid).sub(tailMid).add(cornerDir.mul(boxRadius * 0.1 * cornerDir.y)), tailEnd.sub(tailMid))
+          path.a(arcEnd.sub(tailEnd), { radius: boxRadius })
+        } else { // Normal corner
+          path.a(cornerDir.mul(boxRadius), { radius: boxRadius })
+        }
+
+        // Draw line, insert tail for speech-bubble-triangle.
+        const lineDist = (['top', 'bottom'].includes(section) ? boxWidth : boxHeight) - boxRadius * 2
+        const lineEnd = centerDir.mul(lineDist)
+        if (textBg.name === 'speech-bubble-triangle' && section === textBg.tailPosition) {
+          const tailLength = Math.max(Math.min(maxRowHeight * 0.25, lineDist), 0)
+          const tailBegin = centerDir.mul((lineDist - tailLength) * tailOffset)
+          const tailEnd = tailBegin.add(centerDir.mul(tailLength))
+          const tailMid = tailBegin.middle(tailEnd).add(centerDir.rotate(-90).mul(tailLength * 1.5))
+
+          path.l(tailBegin)
+          path.l(tailMid.sub(tailBegin))
+          path.l(tailEnd.sub(tailMid))
+          path.l(lineEnd.sub(tailEnd))
+        } else { // Normal line
+          path.l(lineEnd)
+        }
+      }
 
       return {
         tag: 'svg',
@@ -836,27 +1075,39 @@ class TextBg {
       }
     } else if (isITextLetterBg(textBg)) {
       const scale = textBg.size / 100
+      const needRotate = letterBgData.bgNeedRotate(textBg.name)
+      const textShapeStyle = textShapeUtils.convertTextShape(textShapeData.textWidth, bend, mainFontSize)
       let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
-      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
-      let i = 0
+      const pos = [] as (Record<'i' | 'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
+      let [i, spaceCount] = [0, 0]
       rows.forEach((row) => {
-        row.spanData.forEach((span) => {
+        row.spanData.forEach((span, spanIndex) => {
           const { x, y, width, height, text } = span
-          if (text !== ' ') {
+          if (text === ' ') spaceCount += 1
+          else {
             pos.push({
-              ...letterBgData.getLetterBgSetting(textBg, i),
+              ...letterBgData.getLetterBgSetting(textBg, i - spaceCount, spanIndex === 0, spanIndex === row.spanData.length - 1),
               // 1. Because all letter svg width = height, so need to -(h-w)/2
               // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
               // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
-              x: x - (height - width) / 2 - (!textBg.fixedWidth ? span.letterSpacing / 2 : 0),
-              y,
+              ...!withShape ? {
+                x: x - (height - width) / 2 - (!textBg.fixedWidth ? span.letterSpacing / 2 : 0),
+                y,
+              } : {
+                x: (layerWidth - height) / 2, // Align horizontal center.
+                y: (bend >= 0 // Align heighest letter to top/bottom.
+                  ? maxHeightSpan.y // bend >= 0, align from top.
+                  : layerHeight - maxHeightSpan.height - maxHeightSpan.y) + // bend < 0, align from bottom.
+                  (maxHeightSpan.height - height) / 2, // Height correction according to highest letter.
+              },
               width,
               height,
+              i,
             })
-            i += 1
           }
+          i += 1
         })
       })
 
@@ -867,9 +1118,12 @@ class TextBg {
         content: pos.map(p => {
           // Scale will let width be (scale-1)*p.height times larger than before,
           // So -(scale-1)*p.height/2 to justify it to center.
-          let x = p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100
-          let y = p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100
-          if (vertical) [x, y] = [y, x]
+          let x = p.x - (scale - 1) * p.height / 2
+          let y = p.y - (scale - 1) * p.height / 2
+          const offset = (vertical && !needRotate)
+            ? `translate(${p.height * yOffset / 100}px, ${p.width * xOffset / 100}px)`
+            : `translate(${p.width * xOffset / 100}px, ${p.height * yOffset / 100}px)`
+          if (vertical && !needRotate) [x, y] = [y, x]
           const colorChangeable = letterBgData.isColorChangeable(p.href)
           return {
             tag: colorChangeable ? 'use' : 'image',
@@ -878,10 +1132,17 @@ class TextBg {
                 : require(`@/assets/img/svg/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
-              x,
-              y,
+              ...!withShape && { x, y },
             },
-            style: { color: p.color }
+            style: {
+              color: p.color,
+              ...withShape ? { // Transform for TextShape
+                transform: `translate(${x}px, ${y}px) ` + textShapeStyle[p.i] + offset,
+                // For rotate svg component against its center.
+                transformOrigin: `${p.height * scale / 2}px ${p.height * scale / 2}px 0`,
+              } : needRotate ? { transform: transform + offset } // If needRotate cancel xy exchange and add transform on it.
+                : { transform: offset },
+            }
           }
         })
       }
@@ -905,7 +1166,7 @@ class TextBg {
     if (isITextBox(effect) &&
       ['square-hollow', 'rounded-hollow'].includes(effect.name)) {
       return ['bColor', effect.bColor]
-    } else if (isITextBox(effect)) { // Non-hollow text box
+    } else if (isITextBox(effect) || isITextSpeechBubble(effect)) { // Non-hollow text box
       return ['pColor', effect.pColor]
     } else if (isITextGooey(effect) || isITextUnderline(effect)) {
       return ['color', effect.color]
