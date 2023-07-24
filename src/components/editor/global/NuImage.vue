@@ -351,8 +351,10 @@ export default defineComponent({
       inAllPagesMode: 'mobileAllPageMode',
     }),
     cyReady(): boolean {
-      // Uploading image, wait for polling
-      if (this.src.startsWith('data:image') || !this.initialized) return false
+      if (this.src.startsWith('data:image') || // Uploading image, wait for polling, for imageManuallyBgRemove.
+        !this.initialized || // Wait for NuImage init, for Image.cy.ts before snapshotTest('init').
+        this.showCanvas // Wait for shadow process/upload/download/load, for imageShadow command.
+      ) return false
       return true
     },
     isAdjustImage(): boolean {
