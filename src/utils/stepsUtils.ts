@@ -160,7 +160,8 @@ class StepsUtils {
     const initSize = {
       width: layer.styles.width,
       height: layer.styles.height,
-      widthLimit: layer.widthLimit === -1 ? -1 : dimension
+      widthLimit: layer.widthLimit === -1 ? -1 : dimension,
+      spanDataList: layer.spanDataList
     }
     layer.widthLimit = await textUtils.autoResize(layer, initSize)
     const textHW = await textUtils.getTextHWAsync(layer, layer.widthLimit)
@@ -173,6 +174,7 @@ class StepsUtils {
     }
     layer.styles.width = textHW.width
     layer.styles.height = textHW.height
+    layer.spanDataList = textHW.spanDataList
     return layer
   }
 

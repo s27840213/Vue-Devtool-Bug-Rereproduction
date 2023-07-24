@@ -48,6 +48,7 @@ div(class="panel-text-effect")
             @click="handleSelectInput(sel.attrs)")
           img(:src="sel.img"
               :class="{'selected': ((currentStyle[option.key] as Record<'key', string>).key ?? currentStyle[option.key]) === sel.key }")
+          pro-item(v-if="sel.plan" theme="roundedRect")
       //- Option type range
       mobile-slider(v-if="option.type === 'range'"
         :borderTouchArea="true"
@@ -68,6 +69,7 @@ div(class="panel-text-effect")
         class="panel-text-effect__color")
         div {{option.label}}
         color-btn(:color="colorParser(currentStyle[option.key] as string)"
+                :disable="optionDisabled(option)"
                 size="30px" @click="openColorPanel(option.key)")
       //- Option type img
       div(v-if="option.type === 'img'"
@@ -220,9 +222,10 @@ export default defineComponent({
   &__effects {
     @include no-scrollbar;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
     gap: 15px;
     margin: 0 13px 13px 13px;
+    padding: 2px 0; // For first/last rows icon border space.
     overflow: auto;
     > div {
       display: flex;
@@ -233,8 +236,10 @@ export default defineComponent({
       height: 56px;
       margin: 0px auto;
       border-radius: 5px;
-      border: 2px solid transparent;
       overflow: hidden;
+      &.selected {
+        @include selection-border(2px);
+      }
       .panel-text-effect__effects--icon {
         background-color: setColor(gray-5);
         border-radius: 5px;
@@ -243,13 +248,6 @@ export default defineComponent({
         &.svg-icon {
           padding: 16px;
         }
-      }
-      &.selected {
-        border: 2px solid setColor(blue-1);
-      }
-      > .pro {
-        left: 1px;
-        top: -4px;
       }
     }
     &--more {
@@ -305,11 +303,10 @@ export default defineComponent({
       align-items: center;
       box-sizing: border-box;
       height: 42px;
-      border: 2px solid transparent;
       border-radius: 5px;
       background-color: setColor(gray-5);
       &.selected {
-        border-color: setColor(blue-1);
+        @include selection-border(2px);
       }
       > img {
         margin-right: 8px;
@@ -328,7 +325,7 @@ export default defineComponent({
       width: 100%;
       height: 0;
       padding-top: 100%;
-      > img {
+      > img:not(.pro) {
         position: absolute;
         width: 100%;
         height: 100%;
@@ -344,6 +341,10 @@ export default defineComponent({
           left: -2px;
           border: 2px solid setColor(blue-1);
         }
+      }
+      .pro {
+        top: 2px;
+        left: 2px;
       }
     }
   }

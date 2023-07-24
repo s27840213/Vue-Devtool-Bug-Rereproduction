@@ -29,6 +29,19 @@ export interface ITextBox {
   pColor: string
 }
 
+export const tailPositions = ['top', 'right', 'bottom', 'left'] as const
+export type ITailPosition = typeof tailPositions[number]
+export interface ITextSpeechBubble {
+  name: 'speech-bubble' | 'speech-bubble-triangle'
+  tailOffset: number
+  tailPosition: ITailPosition
+  bRadius: number
+  pStrokeX: number
+  pStrokeY: number
+  opacity: number
+  pColor: string
+}
+
 export interface ITextUnderline {
   name: 'underline'
   endpoint: string
@@ -56,12 +69,15 @@ export interface ITextLetterBg {
   color: string
 }
 
-export type ITextBg = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
+export type ITextBg = ITextBox | ITextSpeechBubble | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
 
 export function isITextBox(object: ITextBg): object is ITextBox {
   return object && object.name &&
     ['square-borderless', 'rounded-borderless', 'square-hollow',
       'rounded-hollow', 'square-both', 'rounded-both'].includes(object.name)
+}
+export function isITextSpeechBubble(object: ITextBg): object is ITextSpeechBubble {
+  return object && object.name && ['speech-bubble', 'speech-bubble-triangle'].includes(object.name)
 }
 export function isITextUnderline(object: ITextBg): object is ITextUnderline {
   return object && object.name && object.name === 'underline'
@@ -80,8 +96,6 @@ export interface ITextFillConfig {
   xOffset200: number
   yOffset200: number
   size: number
-  opacity: number
-  focus: boolean
 }
 
 export interface ITextFillCustom {
@@ -94,8 +108,6 @@ export interface ITextFillCustom {
   xOffset200: number
   yOffset200: number
   size: number
-  opacity: number
-  focus: boolean
 }
 
 export type ITextFill = ITextFillConfig | ITextFillCustom | { name: 'none', customImg: IAssetPhoto | IPhotoItem | null }
@@ -108,9 +120,7 @@ export function isITextFillCustom(object: ITextFill): object is ITextFillCustom 
   return object && !!object.name && !['none', 'custom-fill-img'].includes(object.name)
 }
 
-// export const textAdjustTypes = ['textEffect', 'textBg', 'textShape', 'textFill']
-
-class TextStyleClass {
+class TextStyleCopiedFormatClass {
   textEffect?: ITextEffect
   textBg?: ITextBg
   textShape?: ITextShape
@@ -118,9 +128,9 @@ class TextStyleClass {
   scale?: number
   writingMode?: string
 }
-const textCopiedStyles = new TextStyleClass()
-export const textCopiedStyleKeys = Object.keys(textCopiedStyles)
-export type ITextStyleCopiedFormat = Required<TextStyleClass>
+const textStyleCopiedFormat = new TextStyleCopiedFormatClass()
+export const textStyleCopiedFormatKeys = Object.keys(textStyleCopiedFormat)
+export type ITextStyleCopiedFormat = Required<TextStyleCopiedFormatClass>
 export type ITextFormat = ITextStyleCopiedFormat & {
   paragraphStyle: IParagraphStyle
   spanStyle: ISpanStyle

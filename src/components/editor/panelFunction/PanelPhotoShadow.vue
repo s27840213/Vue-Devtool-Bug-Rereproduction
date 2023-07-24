@@ -8,7 +8,7 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
         @click="onEffectClick(icon)"
         class="photo-effect-setting__option pointer"
         :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
-        iconWidth="60px"
+        iconWidth="56px"
         iconColor="gray-2"
         v-hint="$t(shadowPropI18nMap[icon]._effectName)")
     div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
@@ -17,12 +17,13 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
         :key="field")
         div(class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
-          input(class="photo-effect-setting__value-input"
+          input(class="photo-effect-setting__value-input body-2 text-gray-2"
             :value="getFieldValue(field)"
             :name="field"
             @change="handleEffectUpdate"
             type="number")
-        input(class="photo-effect-setting__range-input"
+        input(class="photo-effect-setting__range-input input__slider--range"
+          v-progress
           :value="getFieldValue(field)"
           :max="fieldRange[currentEffect][field].max"
           :min="fieldRange[currentEffect][field].min"
@@ -45,7 +46,7 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
         @click="onEffectClick(icon)"
         class="photo-effect-setting__option pointer"
         :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
-        iconWidth="60px"
+        iconWidth="56px"
         iconColor="gray-2"
         v-hint="$t(shadowPropI18nMap[icon]._effectName)"
       )
@@ -55,12 +56,13 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
         :key="field")
         div(class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
-          input(class="photo-effect-setting__value-input"
+          input(class="photo-effect-setting__value-input body-2 text-gray-2"
             :value="getFieldValue(field)"
             :name="field"
             @change="handleEffectUpdate"
             type="number")
-        input(class="photo-effect-setting__range-input"
+        input(class="photo-effect-setting__range-input input__slider--range"
+          v-progress
           :value="getFieldValue(field)"
           :max="fieldRange[currentEffect][field].max"
           :min="fieldRange[currentEffect][field].min"
@@ -204,12 +206,11 @@ export default defineComponent({
     box-sizing: border-box;
     margin-top: 10px;
     border-radius: 3px;
-    border: 2px solid transparent;
     &:not(&--selected):hover {
-      border-color: setColor(blue-1, 0.5);
+      @include selection-border(2px, blue-hover);
     }
     &--selected {
-      border-color: setColor(blue-1);
+      @include selection-border(2px);
     }
   }
   &__field {
@@ -223,30 +224,11 @@ export default defineComponent({
     white-space: nowrap;
   }
   &__range-input {
-    appearance: none;
-    outline: none;
-    background: none;
-    width: 98%;
     margin: 12px 0;
     box-sizing: border-box;
-    &::-webkit-slider-runnable-track {
-      height: 2px;
-      background-color: #d9dbe1;
-    }
-    &::-webkit-slider-thumb {
-      appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background-color: #ffffff;
-      border: 2px solid setColor(blue-1);
-      transition: 0.2s;
-      margin-top: -5px;
-      position: relative;
-    }
   }
   &__value-input {
-    border: 1px solid #d9dbe1;
+    border: 1px solid setColor(gray-4);
     width: 32px;
     height: 24px;
     box-sizing: border-box;

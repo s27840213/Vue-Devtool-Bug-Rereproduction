@@ -5,14 +5,13 @@ import { lab2rgb, rgb2lab } from '@/utils/colorUtils'
 import LayerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
-import { debounce, max, omit } from 'lodash'
+import { debounce, max } from 'lodash'
 import { reactive } from 'vue'
 import tiptapUtils from './tiptapUtils'
 
 type ITextShadowCSS = {
   '--base-stroke'?: string
   filter?: string
-  willChange?: string
   webkitTextStrokeColor?: string
   webkitTextFillColor?: string
   duplicatedTexts?: {
@@ -79,7 +78,14 @@ class Controller {
         textStrokeColor: 'fontColorL+-40/BC/00',
         shadowStrokeColor: 'fontColor',
         color: 'fontColorL+-40/BC/00'
-      }
+      },
+      outline: { // 描邊
+        strokeOut: 20,
+        strokeIn: 20,
+        opacity: 100,
+        colorOut: 'fontColor',
+        colorIn: 'fontColorL+-40/BC/00'
+      },
     }
   }
 
@@ -141,7 +147,7 @@ class Controller {
     }
     if (colorStr.startsWith('rgb')) {
       const [r, g, b, a = 1] = colorStr.match(/[.\d]+/g) || []
-      return `rgba(${r}, ${g}, ${b}, ${alpha || a})`
+      return `rgba(${r}, ${g}, ${b}, ${alpha ?? a})`
     }
     return this.convertHex2rgba('#000000', 0.6)
   }
@@ -201,6 +207,14 @@ class Controller {
 
     const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
 
+    // Prevent TextFIll maskImage clip shadow, and remove TextFill BG for some shadow duplicatedTexts.
+    const disableTextFill = {
+      backgroundImage: 'none',
+      backgroundColor: 'transparent',
+      webkitBackgroundClip: 'initial',
+      maskImage: 'none',
+    }
+
     switch (name) {
       case 'shadow':
         return {
@@ -210,7 +224,6 @@ class Controller {
             ${effectShadowOffset * Math.cos(angle * Math.PI / 180)}px
             ${effectShadowOffset * Math.sin(angle * Math.PI / 180)}px
             ${effectBlur / 2}px)`,
-          willChange: 'filter',
         }
       case 'lift':
         return {
@@ -220,7 +233,6 @@ class Controller {
             ${0}px
             ${0.3 * unit}px
             ${((0.3 * unit) + effectSpreadBlur) / 2}px)`,
-          willChange: 'filter',
         }
       case 'hollow':
         return {
@@ -238,6 +250,7 @@ class Controller {
             extraBodyStyle: {
               left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) - maxFontSize}px`,
               top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) - maxFontSize}px`,
+              ...disableTextFill,
             },
             extraSpanStyle: {
               color,
@@ -255,9 +268,9 @@ class Controller {
             extraBodyStyle: {
               left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
               top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
+              opacity,
             },
             extraSpanStyle: {
-              opacity,
               color,
               'text-decoration-color': color,
             },
@@ -275,9 +288,7 @@ class Controller {
                 color,
               ),
               opacity: effectOpacity,
-              // Prevent TextFIll maskImage clip shadow, and remove TextFill BG for shadow.
-              background: 'none',
-              maskImage: 'none',
+              ...disableTextFill,
             },
           }]
         }
@@ -297,6 +308,30 @@ class Controller {
               webkitTextStrokeColor: `${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`,
             },
           }]
+        }
+      }
+      case 'outline': {
+        const colorOut = this.colorParser(effect.colorOut, config)
+        const colorIn = this.colorParser(effect.colorIn, config)
+        return {
+          duplicatedTexts: [{
+            extraBodyStyle: {
+              '--base-stroke': `${((effect.strokeOut + effect.strokeIn) * this.strokeScale * 2) * (fontSize / 60)}px`,
+              webkitTextStrokeColor: this.convertColor2rgba(colorOut, effectOpacity),
+              ...disableTextFill,
+              // For fix Chrome stroke afterimage issue:
+              // If user adjust stroke to exceed the text element's content range
+              // and then reduce the stroke size, it will leave afterimages.
+              filter: 'opacity(1)',
+            },
+          }, {
+            extraBodyStyle: {
+              '--base-stroke': `${(effect.strokeIn * this.strokeScale * 2) * (fontSize / 60)}px`,
+              webkitTextStrokeColor: this.convertColor2rgba(colorIn, effectOpacity),
+              ...disableTextFill,
+              filter: 'opacity(1)',
+            },
+          }],
         }
       }
       default:
@@ -341,11 +376,8 @@ class Controller {
       if (oldTextEffect && oldTextEffect.name === effect) { // Adjust effect option.
         Object.assign(newTextEffect, oldTextEffect, attrs)
         localStorageUtils.set('textEffectSetting', effect, newTextEffect)
-        // this.syncShareAttrs(textEffect, null)
       } else { // Switch to other effect.
-        // this.syncShareAttrs(textEffect, effect)
-        let localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
-        localAttrs = omit(localAttrs, ['color']) as ITextEffect
+        const localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
         Object.assign(newTextEffect, defaultAttrs, localAttrs, attrs, { name: effect })
       }
       const mainColor = this.getLayerMainColor(paragraphs)

@@ -4,8 +4,9 @@ div(class="panel-bg__item"
     @click.right.prevent="openUpdateDesignPopup()")
   img(class="panel-bg__img"
     ref="img"
-    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
+    crossorigin="anonymous"
     draggable="false"
+    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
     @error="handleNotFound")
   pro-item(v-if="item.plan" draggable="false")
 </template>
