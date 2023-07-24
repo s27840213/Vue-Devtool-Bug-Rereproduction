@@ -353,7 +353,7 @@ export default defineComponent({
     cyReady(): boolean {
       if (this.src.startsWith('data:image') || // Uploading image, wait for polling, for imageManuallyBgRemove.
         !this.initialized || // Wait for NuImage init, for Image.cy.ts before snapshotTest('init').
-        this.showCanvas // Wait for shadow process/upload/download/load, for imageShadow command.
+        (this.$isTouchDevice() && this.showCanvas) // Wait for mobile shadow process/upload/download/load, for imageShadow command.
       ) return false
       return true
     },
