@@ -17,7 +17,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       class="nu-image__picture-shadow"
       draggable="false"
       :src="shadowSrc"
-      @onload='onLoadShadowImg($event)'
+      @load='onLoadShadowImg($event)'
       @error="onError")
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
@@ -564,7 +564,9 @@ export default defineComponent({
     onLoadShadowImg(e: Event) {
       setTimeout(() => {
         this.isShadowImgLoaded = true
-      }, 100)
+        // add 10ms to wait for shadow img render.
+        // In vvstk, this help prevent screenshot error as shadow img transitioning.
+      }, 10)
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return
