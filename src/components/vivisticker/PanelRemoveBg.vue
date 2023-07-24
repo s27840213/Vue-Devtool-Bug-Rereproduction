@@ -130,12 +130,11 @@ export default defineComponent({
           // to prevent the problems that the mobile panel is not fully expanded
           setTimeout(() => {
             const panel = document.querySelector('.mobile-panel')
-            const footerTabs = document.querySelector('.footer-tabs') as HTMLElement
             if (panel && panel.clientHeight) {
               /**
                * @Note 60 is the size of footer tab
                */
-              this.mobilePanelHeight = panel.clientHeight - footerTabs.clientHeight
+              this.mobilePanelHeight = panel.clientHeight
             } else {
               this.mobilePanelHeight = 0
             }

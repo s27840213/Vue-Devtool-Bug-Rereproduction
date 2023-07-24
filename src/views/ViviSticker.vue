@@ -233,6 +233,8 @@ export default defineComponent({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
+      isProcessing: 'bgRemove/getIsProcessing',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       getPage: 'getPage',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
@@ -255,7 +257,7 @@ export default defineComponent({
       return this.getPage(pageUtils.currFocusPageIndex)
     },
     showFooterTabs(): boolean {
-      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview)
+      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview || this.isProcessing)
     },
     showVConsole(): boolean {
       return false

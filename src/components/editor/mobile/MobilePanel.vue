@@ -246,7 +246,7 @@ export default defineComponent({
         'font-spacing', 'more', 'object-adjust', 'brand-list', 'multiple-select', 'nudge', 'remove-bg'].includes(this.currActivePanel)
     },
     hideFooter(): boolean {
-      return ['download', 'remove-bg'].includes(this.currActivePanel)
+      return ['download'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean { // For panel that fix in some condition
       switch (this.currActivePanel) {

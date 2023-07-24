@@ -28,7 +28,7 @@ div(class="header-bar relative" @pointerdown.stop)
                   iconHeight="18px"
                   iconColor="black-1")
         span {{ $t('NN0032') }}
-    div(v-if="inBgRemoveMode" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleNext")
+    div(v-if="inBgRemoveMode" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleBgRemoveNext")
         span(class="ml-5") {{ $t('NN0744') }}
         svg-icon(iconName="chevron-right"
                   iconWidth="18px"
@@ -39,10 +39,12 @@ div(class="header-bar relative" @pointerdown.stop)
 
 <script lang="ts">
 import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
+import useCanvasUtils from '@/composable/useCanvasUtils'
 import i18n from '@/i18n'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -77,10 +79,12 @@ export default defineComponent({
     const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
     const isInLastStep = computed(() => stepsUtils.isInLastStep)
     const isSavingAsMyDesign = false
+    const { trimCanvas } = useCanvasUtils()
     return {
       isInFirstStep,
       isInLastStep,
-      isSavingAsMyDesign
+      isSavingAsMyDesign,
+      trimCanvas
     }
   },
   components: {
@@ -123,7 +127,8 @@ export default defineComponent({
       currSelectedInfo: 'getCurrSelectedInfo',
       isUploadingShadowImg: 'shadow/isUploading',
       isProcessShadowImg: 'shadow/isProcessing',
-      currActivePanel: 'mobileEditor/getCurrActivePanel'
+      currActivePanel: 'mobileEditor/getCurrActivePanel',
+      isProcessing: 'bgRemove/getIsProcessing'
     }),
     templateHeaderTab() {
       return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
@@ -298,7 +303,7 @@ export default defineComponent({
       } else if (this.isInCategory || this.isInBgShare) {
         return []
       } else {
-        return [
+        return this.isProcessing ? [] : [
           ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
           { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
         ]
@@ -595,54 +600,94 @@ export default defineComponent({
         pageIndex: 0,
       })
     },
-    handleNext() {
-      vivistickerUtils.startEditing(
-        'image',
-        { plan: 0, assetId: '' },
-        async () => {
-          bgRemoveUtils.setInBgRemoveMode(false)
-          editorUtils.setShowMobilePanel(false)
-          this.setInEffectEditingMode(true)
-          return await bgRemoveUtils.saveToIOS(async (data, assetId, aspectRatio) => {
-            const srcObj = {
-              type: 'ios',
-              userId: '',
-              assetId: 'bgRemove/' + assetId,
-            }
-            this.addImage(srcObj, aspectRatio)
-            imageShadowUtils.updateEffectProps({
-              pageIndex: layerUtils.pageIndex,
-              layerIndex: layerUtils.layerIndex,
-              subLayerIdx: -1
-            }, { isTransparent: true })
-            editorUtils.setCurrActivePanel('photo-shadow')
-            return srcObj
-          })
-        },
-        (srcObj: SrcObj) => {
-          setTimeout(() => {
-            imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj), (img) => {
-              const maxsize = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
+    handleBgRemoveNext() {
+      if (!this.isInEditor) {
+        vivistickerUtils.startEditing(
+          'image',
+          { plan: 0, assetId: '' },
+          async () => {
+            bgRemoveUtils.setInBgRemoveMode(false)
+            editorUtils.setShowMobilePanel(false)
+            this.setInEffectEditingMode(true)
+            return await bgRemoveUtils.saveToIOS(async (data, assetId, aspectRatio) => {
+              const srcObj = {
+                type: 'ios',
+                userId: '',
+                assetId: 'bgRemove/' + assetId,
+              }
+              this.addImage(srcObj, aspectRatio)
               imageShadowUtils.updateEffectProps({
                 pageIndex: layerUtils.pageIndex,
                 layerIndex: layerUtils.layerIndex,
                 subLayerIdx: -1
-              }, {
-                maxsize,
-                middsize: Math.max(img.naturalWidth, img.naturalHeight)
-              })
-              imageShadowUtils.setEffect(ShadowEffectType.frame, {
-                frame: {
-                  spread: 30,
-                  radius: 0,
-                  opacity: 100
-                },
-                frameColor: '#FECD56',
-              }, undefined)
+              }, { isTransparent: true })
+              editorUtils.setCurrActivePanel('photo-shadow')
+              return srcObj
             })
-          }, 0)
-        }
-      )
+          },
+          (srcObj: SrcObj) => {
+            setTimeout(() => {
+              imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj), (img) => {
+                const maxsize = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
+                imageShadowUtils.updateEffectProps({
+                  pageIndex: layerUtils.pageIndex,
+                  layerIndex: layerUtils.layerIndex,
+                  subLayerIdx: -1
+                }, {
+                  maxsize,
+                  middsize: Math.max(img.naturalWidth, img.naturalHeight)
+                })
+                imageShadowUtils.setEffect(ShadowEffectType.frame, {
+                  frame: {
+                    spread: 30,
+                    radius: 0,
+                    opacity: 100
+                  },
+                  frameColor: '#FECD56',
+                }, undefined)
+              })
+            }, 0)
+          }
+        )
+      } else {
+        const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
+        const targetLayerStyle = layers[0].styles as IImageStyle
+        bgRemoveUtils.setInBgRemoveMode(false)
+        editorUtils.setShowMobilePanel(false)
+        this.setInEffectEditingMode(true)
+        bgRemoveUtils.saveToIOS(async (data, assetId, aspectRatio, trimmedCanvasInfo) => {
+          const srcObj = {
+            type: 'ios',
+            userId: '',
+            assetId: 'bgRemove/' + assetId,
+          }
+
+          const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+
+          const { width, height } = targetLayerStyle
+
+          const newImageWidth = width * remainingWidthPercentage
+          const newImageHeight = height * remainingHeightPercentage
+          layerUtils.updateLayerStyles(pageIndex, index, {
+            x: targetLayerStyle.x + xShift,
+            y: targetLayerStyle.y + yShift,
+            width: newImageWidth,
+            height: newImageHeight,
+            imgWidth: newImageWidth,
+            imgHeight: newImageHeight,
+            imgX: 0,
+            imgY: 0
+          })
+
+          layerUtils.updateLayerProps(pageIndex, index, {
+            srcObj,
+          })
+
+          // this.addImage(srcObj, aspectRatio)
+
+          return srcObj
+        }, targetLayerStyle)
+      }
     },
     handleMore() {
       editorUtils.setCurrActivePanel('vvstk-more')

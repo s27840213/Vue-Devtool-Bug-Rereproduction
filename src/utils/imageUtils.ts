@@ -18,6 +18,17 @@ import pageUtils from './pageUtils'
 const APP_VER_FOR_REFRESH_CACHE = 'v7174'
 
 class ImageUtils {
+  get imageSizeMap (): { [key: string]: number } {
+    return {
+      larg: 1600,
+      full: 1200,
+      midd: 766,
+      smal: 510,
+      tiny: 320,
+      prev: 150
+    }
+  }
+
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
     const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve) => {
@@ -96,6 +107,10 @@ class ImageUtils {
       size = maxSize
     }
 
+    if (typeof size === 'string' && ['unsplash', 'pexels'].includes(type)) {
+      size = this.imageSizeMap[size]
+    }
+
     let res = ''
 
     switch (type) {
@@ -110,7 +125,7 @@ class ImageUtils {
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
-        const query = forBgRemove ? `&rand_ver=${generalUtils.generateRandomString(6)}` : '&origin=true'
+        const query = forBgRemove ? `&rand_ver=${generalUtils.generateRandomString(6)}` : '&orPigin=true'
         res = editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
         break
       }

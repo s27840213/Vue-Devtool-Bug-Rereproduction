@@ -17,3 +17,11 @@ export interface IBgRemoveInfo {
   urls: IImageUrls,
   initSrc: string
 }
+
+export interface ITrimmedCanvasInfo {
+  canvas: HTMLCanvasElement,
+  remainingHeightPercentage: number,
+  remainingWidthPercentage: number,
+  xShift: number,
+  yShift: number
+}

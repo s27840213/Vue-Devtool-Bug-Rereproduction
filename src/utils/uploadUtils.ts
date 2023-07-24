@@ -442,6 +442,17 @@ class UploadUtils {
       // const assetId = '230511154035471yNJGiW58'
       // const uuid = '230511154035471qUvA6TTT'
       const formData = new FormData()
+
+      if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
+        Object.keys(this.loginOutput.ul_removebg_map.fields).forEach((key) => {
+          formData.append(key, this.loginOutput.ul_removebg_map.fields[key])
+        })
+      } else {
+        Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
+          formData.append(key, this.loginOutput.upload_map.fields[key])
+        })
+      }
+
       let key = ''
       switch (type) {
         case 'avatar':

@@ -2,9 +2,9 @@ import removeBgTestJSON from '@/assets/json/removeBgTest.json'
 import useCanvasUtils from '@/composable/useCanvasUtils'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { IBgRemoveInfo } from '@/interfaces/image'
+import { IBgRemoveInfo, ITrimmedCanvasInfo } from '@/interfaces/image'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import store from '@/store'
 import { LayerProcessType, LayerType, SidebarPanelType } from '@/store/types'
@@ -331,17 +331,17 @@ class BgRemoveUtils {
     })
   }
 
-  saveToIOS(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number) => any) {
-    const { trimCanvas } = useCanvasUtils()
-    const { canvas: trimedCanvas, width, height } = trimCanvas(this.canvas)
+  saveToIOS(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
+    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const trimmedCanvasInfo = trimCanvas(this.canvas)
+    const { canvas: trimedCanvas, width, height, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
 
-    generalUtils.downloadImage(src)
     const assetId = generalUtils.generateAssetId()
     return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'bgRemove', name: assetId, toast: false }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
       if (callback) {
-        return callback(_data, assetId, width / height)
+        return callback(_data, assetId, width / height, trimmedCanvasInfo)
       }
     })
   }
