@@ -49,7 +49,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
-import { IFooterTab } from '@/interfaces/editor'
+import { ICurrSelectedInfo, IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import backgroundUtils from '@/utils/backgroundUtils'
@@ -61,6 +61,7 @@ import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
@@ -70,6 +71,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { isEqual } from 'lodash'
 import { defineComponent } from 'vue'
@@ -100,7 +102,8 @@ export default defineComponent({
       leftOverflow: false,
       rightOverflow: false,
       clickedTab: '',
-      clickedTabTimer: -1
+      clickedTabTimer: -1,
+      isSvgImage: false,
     }
   },
   computed: {
@@ -109,6 +112,7 @@ export default defineComponent({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      currSelectedLayers: 'getCurrSelectedLayers',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
@@ -190,7 +194,20 @@ export default defineComponent({
       }
     },
     homeTabs() :Array<IFooterTab> {
-      return [
+      return generalUtils.versionCheck({ greaterThan: '1.05', version: picWVUtils.getUserInfoFromStore().appVer }) ? [
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
+        { icon: 'cameraroll', text: `${this.$tc('STK0067', 2)}` },
+        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
+        { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
+        { icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' },
+        { icon: 'add-page', text: `${this.$t('NN0139')}` },
+        { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 },
+        { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
+        { icon: 'paste', text: `${this.$t('NN0230')}` },
+        ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
+      ] : [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
@@ -237,8 +254,8 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
-        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame }] : []
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isCopyFormatDisabled },
+        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame, disabled: this.isSvgImage }] : []
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -278,7 +295,7 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isCopyFormatDisabled }
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
@@ -357,6 +374,7 @@ export default defineComponent({
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'nudge', text: `${this.$t('NN0872')}`, panelType: 'nudge' },
         { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' }
         // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]
@@ -534,6 +552,19 @@ export default defineComponent({
     }
   },
   watch: {
+    currSelectedLayers: {
+      immediate: true,
+      async handler() {
+        const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+        if (types.has('image') && layers.length === 1) {
+          const src = imageUtils.getSrc(layers[0] as IImage, 'tiny')
+          const isSvg = await imageShadowPanelUtils.isSVG(src, layers[0] as IImage)
+          this.isSvgImage = isSvg
+        } else {
+          this.isSvgImage = false
+        }
+      }
+    },
     selectedLayerNum(newVal) {
       if (newVal === 0) {
         this.$emit('switchTab', 'none')
@@ -609,6 +640,22 @@ export default defineComponent({
             frameUtils.detachImage(layerUtils.layerIndex)
           } else {
             frameUtils.updateImgToFrame()
+          }
+          break
+        }
+        case 'cameraroll': {
+          if (picWVUtils.inBrowserMode) {
+            uploadUtils.chooseAssets('image', true)
+          } else {
+            picWVUtils.getIosImg().then((images: string[]) => {
+              if (images.length > 0) {
+                generalUtils.toDataURL(`vvpic://${images[0]}`, (dataUrl: string) => {
+                  uploadUtils.uploadAsset('image', [dataUrl], {
+                    addToPage: true
+                  })
+                })
+              }
+            })
           }
           break
         }

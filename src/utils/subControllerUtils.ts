@@ -48,6 +48,10 @@ export default class SubControllerUtils {
       return
     }
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
+    if (groupUtils.inMultiSelecitonMode && ['tmp', 'frame'].includes(this.primaryLayer.type)) {
+      this._onMouseup = this.onMouseup.bind(this)
+      eventUtils.addPointerEvent('pointerup', this._onMouseup)
+    }
     if (e.button !== 0) return
 
     if (!this.touches.has(e.pointerId)) {
@@ -165,7 +169,7 @@ export default class SubControllerUtils {
     }
 
     if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
-      if (groupUtils.inMultiSelecitonMode) {
+      if (groupUtils.inMultiSelecitonMode && this.primaryLayer.type !== 'frame') {
         groupUtils.deselectTargetLayer(this.subLayerIdx)
         return
       }

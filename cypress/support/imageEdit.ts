@@ -89,7 +89,9 @@ Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
   return cy.wrap(subject)
 })
 
-Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCrop: 'button' | 'dblclick') => {
+Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCrop, isMobile) => {
+  const cropOffset = isMobile ? 31 : 28.5
+
   cy.wrap(subject).click()
     .then(() => {
       if (enterCrop === 'button') {
@@ -101,9 +103,9 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
       }
     })
     .snapshotTest('Crop init')
-    .get('.dim-background .nu-controller__body .controller-point').eq(1)
+    .get('.dim-background .nu-controller__body .control-point').eq(1)
     .realMouseDown()
-    .realMouseMove(30, -30)
+    .realMouseMove(cropOffset, -cropOffset)
     .realMouseUp()
     .snapshotTest('Crop scale top right').then(() => {
       const moves = [
@@ -124,7 +126,7 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
     .realMouseDown()
     .realMouseMove(100, -100, { position: 'center' })
     .realMouseUp()
-    .get('.dim-background .nu-controller__body .controller-point').eq(1)
+    .get('.dim-background .nu-controller__body .control-point').eq(1)
     .realMouseDown()
     .realMouseMove(-100, 100)
     .realMouseUp()
@@ -144,7 +146,10 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
         cy.contains('重置效果').click()
           // 30 = DRAWING_TIMEOUT in imageShadowUtils, debounce time of shadow setting
           .wait(30)
-          .snapshotTest(`Shadow ${shadow.name} default`, { toggleMobilePanel: '陰影' })
+          .togglePanel('陰影')
+          .snapshotTest(`Shadow ${shadow.name} default`)
+          .get('.nu-layer .nu-image').invoke('attr', 'cy-ready').should('eq', 'true')
+          .togglePanel('陰影')
         for (const option of shadow.options) {
           if (option.name === 'color') {
             cy.get('div.photo-effect-setting__value-input, .photo-shadow__color').click()
@@ -160,7 +165,11 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
             cy.get('.nu-layer .nu-layer__inProcess').should('not.exist')
           }
         }
-        cy.wait(30).snapshotTest(`Shadow ${shadow.name} preset`, { toggleMobilePanel: '陰影' })
+        cy.wait(30)
+          .togglePanel('陰影')
+          .snapshotTest(`Shadow ${shadow.name} preset`)
+          .get('.nu-layer .nu-image').invoke('attr', 'cy-ready').should('eq', 'true')
+          .togglePanel('陰影')
       }
     })
     // Restore image to original state

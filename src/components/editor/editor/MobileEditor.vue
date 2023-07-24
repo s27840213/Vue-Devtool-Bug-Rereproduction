@@ -45,7 +45,7 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { find } from 'lodash'
 // import VConsole from 'vconsole'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -115,8 +115,6 @@ export default defineComponent({
 
     brandkitUtils.fetchBrands(this.fetchBrands)
 
-    this.setUserState({ enableAdminView: false })
-
     this.footerTabsRef = (this.$refs.footerTabs as any).$el as HTMLElement
     // console.log('v console update')
     // this.vConsole = new VConsole({ theme: 'dark' })
@@ -141,7 +139,6 @@ export default defineComponent({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel'
     }),
@@ -168,7 +165,6 @@ export default defineComponent({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
-      setUserState: 'user/SET_STATE'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'

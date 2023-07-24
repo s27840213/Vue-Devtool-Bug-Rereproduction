@@ -12,12 +12,14 @@ import { IEditorState, ILayerInfo, LayerType } from '../types'
 const SET_CONFIG = 'SET_CONFIG' as const
 const SET_BG_CONFIG = 'SET_BG_CONFIG' as const
 const UPDATE_CONFIG = 'UPDATE_CONFIG' as const
+const SET_IsBgCtrlImgLoaded = 'SET_IsBgCtrlImgLoaded' as const
 
 interface IImgControlState {
   image: IImage | undefined,
   image_ori: IImage | undefined,
   primaryLayer?: IFrame | IGroup | IImage,
-  layerInfo: ILayerInfo
+  layerInfo: ILayerInfo,
+  isBgCtrlImgLoaded: boolean
 }
 
 const state: IImgControlState = {
@@ -28,7 +30,8 @@ const state: IImgControlState = {
     pageIndex: -1,
     layerIndex: -1,
     subLayerIdx: -1
-  }
+  },
+  isBgCtrlImgLoaded: false
 }
 
 const getters: GetterTree<IImgControlState, IEditorState> = {
@@ -40,6 +43,9 @@ const getters: GetterTree<IImgControlState, IEditorState> = {
   },
   isBgImgCtrl(state): boolean {
     return state.image !== undefined && state.layerInfo.layerIndex === -1
+  },
+  isBgCtrlImgLoaded(state): boolean {
+    return state.isBgCtrlImgLoaded
   }
 }
 
@@ -106,6 +112,7 @@ const mutations: MutationTree<IImgControlState> = {
       state.image = undefined
       state.image_ori = undefined
       state.layerInfo = { pageIndex: -1, layerIndex: -1, subLayerIdx: -1 }
+      state.isBgCtrlImgLoaded = false
       return
     }
 
@@ -123,6 +130,9 @@ const mutations: MutationTree<IImgControlState> = {
           image.styles[k] = v
         })
     }
+  },
+  [SET_IsBgCtrlImgLoaded](state, bool: boolean) {
+    state.isBgCtrlImgLoaded = bool
   }
 }
 

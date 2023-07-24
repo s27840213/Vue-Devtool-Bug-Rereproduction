@@ -4,6 +4,8 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
+import { IInitSize, IMultiStageRunResult, autoResizePipeLine, autoResizePipeLineSync } from '@/utils/autoResizeUtils'
+import controlUtils from '@/utils/controlUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -20,6 +22,12 @@ import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
 import textShapeUtils from './textShapeUtils'
 import tiptapUtils from './tiptapUtils'
+
+export interface ITextHW {
+  width: number
+  height: number
+  spanDataList: DOMRect[][][]
+}
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -265,7 +273,7 @@ class TextUtils {
     }
   }
 
-  getTextHW(_content: IText, widthLimit = -1): { width: number, height: number } {
+  getTextHW(_content: IText, widthLimit = -1): ITextHW {
     const body = this.genTextDiv(_content, widthLimit)
     const scale = _content.styles.scale ?? 1
     document.body.appendChild(body)
@@ -274,7 +282,7 @@ class TextUtils {
     return textHW
   }
 
-  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<{ width: number, height: number }> {
+  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<ITextHW> {
     const textId = generalUtils.generateRandomString(12)
     const body = this.genTextDiv(_content, widthLimit)
     body.setAttribute('id', textId)
@@ -341,7 +349,7 @@ class TextUtils {
       body.style.height = 'max-content'
     }
     body.classList.add('nu-text')
-    body.style.writingMode = content.styles.writingMode
+    body.style.writingMode = cssConverter.convertVerticalStyle(content.styles.writingMode).writingMode
     body.style.position = 'fixed'
     body.style.top = '100%'
     body.style.left = '100%'
@@ -349,18 +357,59 @@ class TextUtils {
     return body
   }
 
-  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number } {
+  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): ITextHW {
     return this.getHWBySize(body.getBoundingClientRect(), body, scale, widthLimit)
   }
 
-  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number } {
+  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): ITextHW {
+    const spanDataList = Array.from(body.children).map(
+      p => Array.from(p.children).map(
+        span => Array.from(span.getClientRects()).map(
+          rect => rect.toJSON()
+        )
+      )
+    )
+    this.mergeLines(spanDataList)
     return {
       width: body.style.width !== 'max-content' ? widthLimit : size.width * scale,
-      height: body.style.height !== 'max-content' ? widthLimit : size.height * scale
+      height: body.style.height !== 'max-content' ? widthLimit : size.height * scale,
+      spanDataList
     }
   }
 
-  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false, noPush = false) {
+  mergeLines(spanDataList: DOMRect[][][]) {
+    /**
+     * The result of getClientRects may contain multiple DOMRects for a single line.
+     * This is typically observed when the whitespace immediately preceding a line wrap
+     * which is split and represented as a separate DOMRect.
+     */
+    spanDataList.forEach(p => {
+      p.forEach(span => {
+        span.forEach((row, index) => {
+          const nextIndex = index + 1
+          while (nextIndex < span.length) {
+            const curr = row
+            const next = span[nextIndex]
+            const currTop = curr.y
+            const currBottom = curr.y + curr.height
+            const nextTop = next.y
+            const nextBottom = next.y + next.height
+            if (((nextTop <= currTop && currTop <= nextBottom &&
+              nextTop <= currBottom && currBottom <= nextBottom) ||
+              (currTop <= nextTop && nextTop <= currBottom &&
+                currTop <= nextBottom && nextBottom <= currBottom))) {
+              curr.y = Math.min(curr.y, next.y)
+              curr.width += next.width
+              curr.height = Math.max(curr.height, next.height)
+              span.splice(nextIndex, 1)
+            } else break
+          }
+        })
+      })
+    })
+  }
+
+  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, { noPush = false, keepCorner = false } = {}) {
     const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     if (subLayerIndex !== -1) {
@@ -373,6 +422,24 @@ class TextUtils {
       } else {
         textHW = this.getTextHW(config, config.widthLimit)
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+        layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { spanDataList: textHW.spanDataList })
+        const isVertical = config.styles.writingMode.includes('vertical')
+        const initData = {
+          xSign: (isVertical || keepCorner) ? -1 : 1,
+          ySign: 1,
+          x: config.styles.x,
+          y: config.styles.y,
+          angle: config.styles.rotate * Math.PI / 180
+        }
+        const offsetSize = {
+          width: (isVertical || keepCorner) ? textHW.width - originSize.width : 0,
+          height: (isVertical || keepCorner) ? 0 : textHW.height - originSize.height
+        }
+        const trans = controlUtils.getTranslateCompensation(initData, offsetSize)
+        layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, {
+          x: trans.x,
+          y: trans.y
+        })
       }
       /**
        * Group layout height compensation
@@ -405,23 +472,7 @@ class TextUtils {
     height *= group.styles.scale
     layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
 
-    /**
-     * Compensate the offset difference to the left-edge of group layer
-     */
-    if (compensateX) {
-      let minX = Number.MAX_SAFE_INTEGER
-      group.layers
-        .forEach(l => {
-          minX = Math.min(minX, l.styles.x)
-        })
-      if (minX > 0) {
-        for (const [idx, layer] of Object.entries(group.layers)) {
-          layerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
-            x: layer.styles.x - minX
-          })
-        }
-      }
-    }
+    this.fixGroupCoordinates(pageIndex, layerIndex)
   }
 
   asSubLayerSizeRefresh(pageIndex: number, layerIndex: number, subLayerIndex: number, height: number, heightOri: number, noPush = false) {
@@ -465,7 +516,7 @@ class TextUtils {
     this.updateGroupLayerSize(pageIndex, layerIndex)
   }
 
-  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, noPush = false) {
+  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, { noPush = false, keepCorner = false } = {}) {
     const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     const config = group.layers[subLayerIndex]
@@ -477,7 +528,7 @@ class TextUtils {
       this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri, noPush)
       this.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
-      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, false, noPush)
+      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, { noPush, keepCorner })
     }
   }
 
@@ -490,14 +541,34 @@ class TextUtils {
       } else {
         const widthLimit = config.widthLimit
         const textHW = this.getTextHW(config, widthLimit)
+        const isVertical = config.styles.writingMode.includes('vertical')
         let x = config.styles.x
         let y = config.styles.y
-        if (config.widthLimit === -1) {
-          x = config.styles.x - (textHW.width - config.styles.width) / 2
-          y = config.styles.y - (textHW.height - config.styles.height) / 2
+        if (config.widthLimit === -1 && config.styles.rotate === 0) {
+          if (isVertical) {
+            x = config.styles.x - (textHW.width - config.styles.width)
+            y = config.styles.y - (textHW.height - config.styles.height) / 2
+          } else {
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
+          }
+        } else {
+          const initData = {
+            xSign: isVertical ? -1 : 1,
+            ySign: 1,
+            x,
+            y,
+            angle: config.styles.rotate * Math.PI / 180
+          }
+          const offsetSize = {
+            width: isVertical ? textHW.width - config.styles.width : 0,
+            height: isVertical ? 0 : textHW.height - config.styles.height
+          }
+          const trans = controlUtils.getTranslateCompensation(initData, offsetSize)
+          x = trans.x
+          y = trans.y
         }
         layerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit })
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { spanDataList: textHW.spanDataList })
       }
     } else { // sub text layer in a group
       const group = targetLayer as IGroup
@@ -505,12 +576,11 @@ class TextUtils {
       if (textShapeUtils.isCurvedText(config.styles.textShape)) {
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textShapeUtils.getCurveTextProps(config))
         this.updateGroupLayerSize(pageIndex, layerIndex)
-        this.fixGroupCoordinates(pageIndex, layerIndex)
       } else {
         const widthLimit = config.widthLimit
         const textHW = this.getTextHW(config, widthLimit)
         layerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
-        layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { widthLimit })
+        layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { spanDataList: textHW.spanDataList })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
       }
@@ -525,6 +595,7 @@ class TextUtils {
       .forEach(l => {
         minX = Math.min(minX, mathUtils.getBounding(l.styles).x)
       })
+    if (minX === 0) return
     for (const [idx, layer] of Object.entries(group.layers)) {
       layerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
         x: layer.styles.x - minX
@@ -543,6 +614,7 @@ class TextUtils {
       .forEach(l => {
         minY = Math.min(minY, mathUtils.getBounding(l.styles).y)
       })
+    if (minY === 0) return
     for (const [idx, layer] of Object.entries(group.layers)) {
       layerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
         y: layer.styles.y - minY
@@ -588,13 +660,11 @@ class TextUtils {
       textLayer.paragraphs[i].styles.size = paragraphSizes[i]
     }
 
-    const size = {} as { [key: string]: number }
-    if (textLayer.styles && textLayer.styles.height && textLayer.styles.width) {
-      Object.assign(size, { width: textLayer.styles.width, height: textLayer.styles.height })
-    } else {
-      Object.assign(size, this.getTextHW(textLayer))
-    }
+    const textHW = this.getTextHW(textLayer)
+    const size = pick(textHW, ['width', 'height'])
     const position = {} as { [key: string]: number }
+
+    textLayer.spanDataList = textHW.spanDataList
 
     if (textLayer.styles && typeof textLayer.styles.x !== 'undefined' && typeof textLayer.styles.y !== 'undefined') {
       Object.assign(position, { x: textLayer.styles.x, y: textLayer.styles.y })
@@ -649,10 +719,6 @@ class TextUtils {
       start,
       end
     })
-  }
-
-  setCurrTextInfo(data: { config?: IText | IGroup, layerIndex?: number, subLayerIndex?: number }) {
-    store.commit('text/SET_textInfo', data)
   }
 
   loadDefaultFonts(extraFonts: { type: string, face: string, url: string, userId: string, assetId: string, ver: string }[] = []) {
@@ -715,15 +781,19 @@ class TextUtils {
     }
   }
 
-  async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<number> {
+  getFirstPText(config: IText): string {
+    return config.paragraphs[0].spans.map(span => span.text).join('')
+  }
+
+  async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number, spanDataList?: DOMRect[][][] }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
-    const { widthLimit, otherDimension, loops } = await this.autoResizeCore(config, initSize)
+    const { widthLimit, otherDimension, stageLoops } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
-    const firstPText = config.paragraphs[0].spans.map(span => span.text).join('')
+    const firstPText = this.getFirstPText(config)
     if (router.currentRoute.value.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
-      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText} loops: ${loops}`)
+      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText} loops: ${stageLoops}`)
     }
     if (limitDiff / initSize.widthLimit > 0.20) {
       return initSize.widthLimit
@@ -732,138 +802,12 @@ class TextUtils {
     }
   }
 
-  autoResizeCoreSync(config: IText, initSize: { width: number, height: number, widthLimit: number }): {
-    widthLimit: number,
-    otherDimension: number,
-    loops: number
-  } {
-    const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
-    const scale = config.styles.scale
-    let direction = 0
-    let shouldContinue = true
-    let widthLimit = initSize.widthLimit
-    let autoDimension = -1
-    let autoSize = this.getTextHW(config, widthLimit)
-    const originDimension = initSize[dimension]
-    let prevDiff = Number.MAX_VALUE
-    let minDiff = Number.MAX_VALUE
-    let minDiffWidLimit = -1
-    let minDiffDimension = -1
-    while (shouldContinue) {
-      autoDimension = autoSize[dimension]
-      const currDiff = Math.abs(autoDimension - originDimension)
-      // console.log(autoDimension, originDimension, currDiff, widthLimit, config.widthLimit)
-      if (currDiff < minDiff) {
-        minDiff = currDiff
-        minDiffWidLimit = widthLimit
-        minDiffDimension = autoDimension
-      }
-      if (currDiff > prevDiff) {
-        if (minDiffWidLimit !== -1) {
-          return {
-            widthLimit: minDiffWidLimit,
-            otherDimension: minDiffDimension,
-            loops: Math.abs(direction)
-          }
-        } else {
-          return {
-            widthLimit: initSize.widthLimit,
-            otherDimension: originDimension,
-            loops: Math.abs(direction)
-          }
-        }
-      }
-      prevDiff = currDiff
-      if (autoDimension - originDimension > 5 * scale) {
-        if (direction < 0) break
-        if (direction >= 200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
-        widthLimit += scale
-        direction += 1
-        autoSize = this.getTextHW(config, widthLimit)
-        continue
-      }
-      if (originDimension - autoDimension > 5 * scale) {
-        if (direction > 0) break
-        if (direction <= -200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
-        widthLimit -= scale
-        direction -= 1
-        autoSize = this.getTextHW(config, widthLimit)
-        continue
-      }
-      shouldContinue = false
-    }
-    return {
-      widthLimit,
-      otherDimension: autoDimension,
-      loops: Math.abs(direction)
-    }
+  autoResizeCoreSync(config: IText, initSize: IInitSize): IMultiStageRunResult {
+    return autoResizePipeLineSync(config, initSize, ['height', 'spanDataList2'])
   }
 
-  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<{
-    widthLimit: number,
-    otherDimension: number,
-    loops: number
-  }> {
-    const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
-    const scale = config.styles.scale
-    let direction = 0
-    let shouldContinue = true
-    let widthLimit = initSize.widthLimit
-    let autoDimension = -1
-    let autoSize = await this.getTextHWAsync(config, widthLimit)
-    const originDimension = initSize[dimension]
-    let prevDiff = Number.MAX_VALUE
-    let minDiff = Number.MAX_VALUE
-    let minDiffWidLimit = -1
-    let minDiffDimension = -1
-    while (shouldContinue) {
-      autoDimension = autoSize[dimension]
-      const currDiff = Math.abs(autoDimension - originDimension)
-      // console.log(autoDimension, originDimension, currDiff, widthLimit, config.widthLimit)
-      if (currDiff < minDiff) {
-        minDiff = currDiff
-        minDiffWidLimit = widthLimit
-        minDiffDimension = autoDimension
-      }
-      if (currDiff > prevDiff) {
-        if (minDiffWidLimit !== -1) {
-          return {
-            widthLimit: minDiffWidLimit,
-            otherDimension: minDiffDimension,
-            loops: Math.abs(direction)
-          }
-        } else {
-          return {
-            widthLimit: initSize.widthLimit,
-            otherDimension: originDimension,
-            loops: Math.abs(direction)
-          }
-        }
-      }
-      prevDiff = currDiff
-      if (autoDimension - originDimension > 5 * scale) {
-        if (direction < 0) break
-        if (direction >= 200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
-        widthLimit += scale
-        direction += 1
-        autoSize = await this.getTextHWAsync(config, widthLimit)
-        continue
-      }
-      if (originDimension - autoDimension > 5 * scale) {
-        if (direction > 0) break
-        if (direction <= -200) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension, loops: Math.abs(direction) }
-        widthLimit -= scale
-        direction -= 1
-        autoSize = await this.getTextHWAsync(config, widthLimit)
-        continue
-      }
-      shouldContinue = false
-    }
-    return {
-      widthLimit,
-      otherDimension: autoDimension,
-      loops: Math.abs(direction)
-    }
+  async autoResizeCore(config: IText, initSize: IInitSize): Promise<IMultiStageRunResult> {
+    return await autoResizePipeLine(config, initSize, ['height', 'spanDataList2'])
   }
 
   async setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
@@ -1075,6 +1019,7 @@ class TextUtils {
 
   resetScaleForLayer(layer: AllLayerTypes, preMount = false): AllLayerTypes {
     layer = generalUtils.deepCopy(layer)
+    let targetScale = 1
     let subLayers
     let newStyles
     let stylesBuffer = {} as { [key: string]: any }
@@ -1082,39 +1027,43 @@ class TextUtils {
     let newHW
     switch (layer.type) {
       case LayerType.text:
-        if (layer.styles.scale > 1) {
-          stylesBuffer = pick(layer.styles, ['scale'])
-          layer.styles.scale = 1
-          layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
-            return size * stylesBuffer.scale
-          })
-          if (!preMount) {
-            // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
-            // and let the mounted hook of NuText to deal with size and position
-            originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
-            if (textShapeUtils.isCurvedText(layer.styles.textShape)) {
-              newHW = textShapeUtils.getCurveTextProps(layer)
-              Object.assign(layer.styles, newHW)
-            } else {
-              if (layer.widthLimit !== -1) {
-                layer.widthLimit = this.autoResizeCoreSync(layer, {
-                  width: originHW.width,
-                  height: originHW.height,
-                  widthLimit: layer.widthLimit
-                }).widthLimit
-              }
-              newHW = this.getTextHW(layer, layer.widthLimit)
-              Object.assign(layer.styles, {
-                width: newHW.width,
-                height: newHW.height,
-                x: originHW.x + (newHW.width - originHW.width) / 2,
-                y: originHW.y + (newHW.height - originHW.height) / 2
-              })
+        stylesBuffer = pick(layer.styles, ['scale'])
+        if (layer.styles.scale < 1) {
+          const baseFontSize = textPropUtils.getBaseFontSizeOfLayer(layer)
+          const { scale } = textPropUtils.getScaleCompensation(baseFontSize * layer.styles.scale)
+          targetScale = scale
+        }
+        layer.styles.scale = targetScale
+        layer.paragraphs = textPropUtils.propAppliedParagraphs(layer.paragraphs, 'size', 0, (size) => {
+          return size * stylesBuffer.scale / targetScale
+        })
+        if (!preMount) {
+          // if it's before mounting layers, don't change the size and position since fonts are not loaded yet,
+          // and let the mounted hook of NuText to deal with size and position
+          originHW = { width: layer.styles.width, height: layer.styles.height, x: layer.styles.x, y: layer.styles.y }
+          if (textShapeUtils.isCurvedText(layer.styles.textShape)) {
+            newHW = textShapeUtils.getCurveTextProps(layer)
+            Object.assign(layer.styles, newHW)
+          } else {
+            if (layer.widthLimit !== -1) {
+              layer.widthLimit = this.autoResizeCoreSync(layer, {
+                width: originHW.width,
+                height: originHW.height,
+                widthLimit: layer.widthLimit
+              }).widthLimit
             }
+            newHW = this.getTextHW(layer, layer.widthLimit)
+            Object.assign(layer.styles, {
+              width: newHW.width,
+              height: newHW.height,
+              x: originHW.x + (newHW.width - originHW.width) / 2,
+              y: originHW.y + (newHW.height - originHW.height) / 2
+            })
+            layer.spanDataList = newHW.spanDataList
           }
-          if (layer.styles.textEffect.fontSize !== undefined) {
-            layer.styles.textEffect.fontSize = textEffectUtils.getLayerFontSize(layer.paragraphs)
-          }
+        }
+        if (layer.styles.textEffect.fontSize !== undefined) {
+          layer.styles.textEffect.fontSize = textEffectUtils.getLayerFontSize(layer.paragraphs)
         }
         break
       case LayerType.tmp:

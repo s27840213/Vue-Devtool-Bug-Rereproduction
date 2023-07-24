@@ -8,27 +8,26 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IShadowAsset } from '@/store/module/shadow'
 import { AxiosPromise } from 'axios'
+import { findLastIndex } from 'lodash'
 import FrameUtils from './frameUtils'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 
+const APP_VER_FOR_REFRESH_CACHE = 'v7174'
+
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
     const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve) => {
       const image = new Image()
-      image.src = src
       if (crossOrigin) {
-        image.crossOrigin = 'anoynous'
+        image.crossOrigin = 'anonymous'
       }
-      if (image.complete) {
-        resolve(cb(image))
-      } else {
-        image.onload = () => resolve(cb(image))
-        error && (image.onerror = error)
-      }
+      image.onload = () => resolve(cb(image))
+      error && (image.onerror = error)
+      image.src = src
     })
   }
 
@@ -61,6 +60,15 @@ class ImageUtils {
     return typeof srcObj.assetId !== 'undefined' && typeof srcObj.userId !== 'undefined' && typeof srcObj.type !== 'undefined'
   }
 
+  appendQuery(src: string, name: string, value: string) {
+    if (src === '' || src.includes('data:image/')) return ''
+    if (src.includes('?')) {
+      return src + `&${name}=${value}`
+    } else {
+      return src + `?${name}=${value}`
+    }
+  }
+
   getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number, forBgRemove?: boolean): string {
     // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
     let { type, userId, assetId, brandId, updateQuery, maxSize } = {} as SrcObj
@@ -70,7 +78,7 @@ class ImageUtils {
     } else {
       if (!config.srcObj && !config.src_obj) return ''
       if (config.previewSrc) {
-        return config.previewSrc
+        return this.appendRefreshAppver(config.previewSrc)
       }
       const srcObj = config.srcObj || config.src_obj as SrcObj
       ({ type, userId, assetId, brandId, updateQuery, maxSize } = srcObj)
@@ -87,52 +95,71 @@ class ImageUtils {
       size = maxSize
     }
 
+    let res = ''
+
     switch (type) {
       case 'public': {
         if (typeof size === 'string' && (size as string).includes('ext')) {
-          return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
+          res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
         } else {
           const query = forBgRemove ? `?rand_ver=${generalUtils.generateRandomString(6)}` : '?origin=true'
-          return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`
+          res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`
         }
+        break
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
         const query = forBgRemove ? `&rand_ver=${generalUtils.generateRandomString(6)}` : '&origin=true'
-        return editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
+        res = editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
+        break
       }
       case 'logo-public':
         if ((size as string).includes('ext')) {
-          return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true`
+          res = `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true`
         } else {
-          return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true`
+          res = `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true`
         }
+        break
       case 'logo-private': {
         const editorLogo = store.getters['brandkit/getEditorViewLogos']
-        return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
+        res = editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
+        break
       }
       case 'unsplash':
-        return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
+        res = `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
+        break
       case 'pexels':
-        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
+        res = `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
+        break
       case 'background':
-        return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
+        res = `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
+        break
       case 'frame':
-        return require('@/assets/img/svg/frame.svg')
+        res = require('@/assets/img/svg/frame.svg')
+        break
       case 'shadow-private': {
         const shadowImgs = (store.getters['shadow/shadowImgs'] as Map<number, IShadowAsset>)
         if (typeof assetId === 'number') {
           if (shadowImgs.has(assetId)) {
-            return (shadowImgs as Map<any, any>).get(assetId)?.urls[size as string || 'midd'] || ''
+            res = (shadowImgs as Map<any, any>).get(assetId)?.urls[size as string || 'midd'] || ''
+            break
           }
         }
-        return ''
+        res = ''
+        break
       }
       case 'svg':
-        return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
+        res = `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
+        break
       default:
-        return ''
+        res = ''
     }
+    /**
+     * to solve the cross origin error cause by add crossOrigin='anonymous'
+     * the cache img of the users would keep catching this error
+     * use a universe query version can solve this problem
+     */
+    return this.appendRefreshAppver(res)
   }
 
   getSrcSize(srcObj: SrcObj, dimension: number | string, preload = '') {
@@ -148,10 +175,8 @@ class ImageUtils {
     if (sizeMap?.length) {
       let i = 0
       if (typeof dimension === 'number') {
-        while (dimension <= sizeMap[i].size && i < sizeMap.length - 1) {
-          i++
-        }
-        i = Math.max(i - 1, 0)
+        i = findLastIndex(sizeMap, s => dimension <= s.size)
+        i = Math.max(i, 0) // For i === -1
       } else if (typeof dimension === 'string') {
         i = Math.max(sizeMap.findIndex(m => m[key] === dimension, 0))
       }
@@ -266,6 +291,17 @@ class ImageUtils {
           return imageApi.getImgSize({
             token: '',
             type: 'background',
+            key_id: assetId,
+            cache
+          })
+        }
+        break
+      }
+      case 'svg': {
+        if (typeof assetId === 'string') {
+          return imageApi.getImgSize({
+            token: '',
+            type: 'svg',
             key_id: assetId,
             cache
           })
@@ -484,10 +520,13 @@ class ImageUtils {
 
   async getImageSize(url: string, defaultWidth: number, defaultHeight: number, setAnonymous = true): Promise<{ width: number; height: number, exists: boolean }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
-      const image = new Image()
-      image.onload = () => resolve(image)
-      image.onerror = () => reject(new Error('Could not load image'))
-      image.src = url
+      if (!url.includes('appver')) {
+        url = this.appendQuery(url, 'appver', APP_VER_FOR_REFRESH_CACHE)
+      }
+      this.imgLoadHandler(url, (img) => resolve(img), {
+        error: () => reject(new Error('Could not load image')),
+        crossOrigin: true
+      })
     })
     try {
       const img = await loadImage
@@ -498,6 +537,7 @@ class ImageUtils {
   }
 
   adaptToSize(srcSize: { width: number, height: number }, targetSize: { width: number, height: number }): { width: number, height: number, posX: number, posY: number } {
+    if (!srcSize.width || !srcSize.height) return { width: srcSize.width, height: srcSize.height, posX: 0, posY: 0 }
     const srcAspectRatio = srcSize.width / srcSize.height
     const targetAspectRatio = targetSize.width / targetSize.height
     let width = 0
@@ -586,6 +626,10 @@ class ImageUtils {
     } else {
       return `${src}?rand_ver=${generalUtils.generateRandomString(6)}`
     }
+  }
+
+  appendRefreshAppver(src: string) {
+    return this.appendQuery(src, 'appver', APP_VER_FOR_REFRESH_CACHE)
   }
 
   appendCompQuery(src: string): string {

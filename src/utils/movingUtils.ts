@@ -425,13 +425,21 @@ export class MovingUtils {
   }
 
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    const config = this.layerIndex === layerUtils.layerIndex ? this.config : layerUtils.getCurrLayer
+    if (Object.values(config).length === 0) {
+      /**
+       * if the layer is deleted the config will be empty object
+       */
+      eventUtils.removePointerEvent('pointerup', this._moveEnd)
+      eventUtils.removePointerEvent('pointermove', this._moving)
+      return
+    }
     if (!this.config.moved) {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
-    const offsetRatio = (generalUtils.isTouchDevice() ? 1 / store.state.contentScaleRatio : 1) * 100 / store.getters.getPageScaleRatio
+    const offsetRatio = (generalUtils.isTouchDevice() ? 1 / store.getters.getContentScaleRatio : 1) * 100 / store.getters.getPageScaleRatio
     const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, offsetRatio)
-    const config = this.layerIndex === layerUtils.layerIndex ? this.config : layerUtils.getCurrLayer
 
     const isLine = config.type === 'shape' && config.category === 'D'
     const _updateStyles = {
@@ -473,7 +481,7 @@ export class MovingUtils {
     }
 
     const { getCurrPage: page } = pageUtils
-    const contentScaleRatio = store.state.contentScaleRatio
+    const contentScaleRatio = store.getters.getContentScaleRatio
     const pageScaleRatio = store.state.pageScaleRatio * 0.01
     const EDGE_WIDTH = {
       x: (editorUtils.mobileSize.width - page.width * contentScaleRatio) * 0.5,

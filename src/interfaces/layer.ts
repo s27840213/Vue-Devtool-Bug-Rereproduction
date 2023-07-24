@@ -56,7 +56,9 @@ export interface ILayer<T extends IStyle = IStyle> {
   dragging: boolean,
   designId: string,
   styles: T,
-  id: string
+  id: string,
+  jsonVer: string,
+  jsonVer_origin: string,
 }
 
 export interface ITextStyle extends IStyle {
@@ -96,9 +98,10 @@ export interface ISpan {
   styles: ISpanStyle
 }
 export interface IParagraph {
-  [key: string]: string | number | Array<ISpan> | IParagraphStyle,
+  [key: string]: string | number | Array<ISpan> | IParagraphStyle | undefined,
   spans: Array<ISpan>,
-  styles: IParagraphStyle
+  styles: IParagraphStyle,
+  spanStyle?: string
 }
 
 export interface IText extends ILayer<ITextStyle> {
@@ -117,6 +120,7 @@ export interface IText extends ILayer<ITextStyle> {
   isCompensated?: boolean,
   isDraggingCursor: boolean,
   isFlipping: boolean,
+  spanDataList?: DOMRect[][][]
 }
 
 export interface IShape extends ILayer<IStyle> {
@@ -127,7 +131,7 @@ export interface IShape extends ILayer<IStyle> {
   category: string,
   scaleType?: number,
   styleArray: string[],
-  color: [string],
+  color: string[],
   size?: number[],
   transArray?: string[],
   markerTransArray?: string[],
@@ -146,7 +150,8 @@ export interface IShape extends ILayer<IStyle> {
   trimOffset?: number[],
   filled?: boolean,
   shapeType?: string,
-  pDiffLimits?: number[]
+  pDiffLimits?: number[],
+  frameDecType?: 'blend' | 'decoration' | 'decorationTop'
 }
 export interface IImage extends ILayer<IImageStyle> {
   type: 'image'

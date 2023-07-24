@@ -8,18 +8,20 @@ div(class="list")
       :to="moreLink")
       span {{$t('NN0082')}}
   div(class="list-content")
-    div(v-if="prevIcon"
-      class="list-content__lefticon"
-      @click="scroll(false)")
-      svg-icon(iconName="chevron-left"
-        iconWidth="25px"
-        iconColor="gray-3")
-    div(v-if="nextIcon"
-      class="list-content__righticon"
-      @click="scroll(true)")
-      svg-icon(iconName="chevron-right"
-        iconWidth="25px"
-        iconColor="gray-3")
+    transition(name="fade-in")
+      div(v-if="prevIcon"
+        class="list-content__lefticon"
+        @click="scroll(false)")
+        svg-icon(iconName="chevron-left"
+          iconWidth="25px"
+          iconColor="gray-3")
+    transition(name="fade-in")
+      div(v-if="nextIcon"
+        class="list-content__righticon"
+        @click="scroll(true)")
+        svg-icon(iconName="chevron-right"
+          iconWidth="25px"
+          iconColor="gray-3")
     div(class="list-content-items"
       :style="itemContainerStyles"
       @scroll.passive="updateIcon"
@@ -125,7 +127,8 @@ export default defineComponent({
     }),
     ...mapGetters({
       mydesignData: 'design/getAllDesigns',
-      inBrowserMode: 'webView/getInBrowserMode'
+      inBrowserMode: 'webView/getInBrowserMode',
+      _newTemplateShownMode: 'getNewTemplateShownMode'
     }),
     itemContainerStyles() {
       return this.gridMode ? {
@@ -235,16 +238,36 @@ export default defineComponent({
       picWVUtils.openOrGoto(this.templateUrl(item))
     },
     templateImgStyle(match_cover: IAssetTemplate['match_cover']): Record<string, string> {
-      let height = this.theme === '3' ? 284
-        : this.theme === '7' ? 320
-          : 160
-      if (this.$isTouchDevice()) {
-        height *= 2 / 3
-      }
-      const aspectRatio = match_cover.width / match_cover.height
-      return {
-        height: `${height}px`,
-        width: `${height * aspectRatio}px`
+      if (this._newTemplateShownMode) {
+        const aspectRatio = match_cover.width / match_cover.height
+        const widthLarger = aspectRatio >= 1
+        const rectSize = 160
+        // let height = this.theme === '3' ? 284
+        //   : this.theme === '7' ? 320
+        //     : 200
+        let shownHeight = widthLarger ? rectSize : rectSize / aspectRatio
+        let shownWidth = widthLarger ? rectSize * aspectRatio : rectSize
+        if (this.$isTouchDevice()) {
+          shownHeight *= 2 / 3
+          shownWidth *= 2 / 3
+        }
+
+        return {
+          height: `${shownHeight}px`,
+          width: `${shownWidth}px`
+        }
+      } else {
+        let height = this.theme === '3' ? 284
+          : this.theme === '7' ? 320
+            : 160
+        if (this.$isTouchDevice()) {
+          height *= 2 / 3
+        }
+        const aspectRatio = match_cover.width / match_cover.height
+        return {
+          height: `${height}px`,
+          width: `${height * aspectRatio}px`
+        }
       }
     },
     prevSize (match_cover: IAssetTemplate['match_cover']): string {
@@ -323,8 +346,9 @@ export default defineComponent({
   gap: 8px;
   &__theme-item {
     display: grid;
-    grid-template-rows: 1fr 46px;
+    grid-template-rows: 1fr 36px;
     grid-template-columns: 1fr;
+    row-gap: 4px;
     text-align: center;
     box-sizing: border-box;
     width: 100%;
@@ -333,7 +357,7 @@ export default defineComponent({
       height: 100%;
       object-fit: contain;
       object-position: bottom;
-      transition: all 0.2s ease-in-out;
+      transition: transform 0.2s ease-in-out;
     }
 
     span {
@@ -381,12 +405,14 @@ export default defineComponent({
     margin: 8px 0px;
     position: relative;
     cursor: pointer;
+    transition: all 0.2s ease-in-out;
     img {
-      border: 2px solid setColor(gray-5);
+      border: 1px solid setColor(gray-5);
+      border-radius: 4px;
+      overflow: hidden;
       box-sizing: border-box;
     }
     &:hover {
-      transition: all 0.2s ease-in-out;
       transform: translate(0, -5px);
     }
     img:hover {

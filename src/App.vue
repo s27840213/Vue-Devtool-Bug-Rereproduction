@@ -1,6 +1,6 @@
 <template lang="pug">
 metainfo
-  template(v-slot:title ="{ content }") {{ content ? `${content}` : `SITE_NAME` }}
+  template(v-slot:title ="{ content }") {{ content ? `${content}` : `${$t('SE0001')}` }}
 div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.googleapis.com")
   link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
@@ -46,7 +46,9 @@ import HomeFooterTabs from '@/components/homepage/HomeFooterTabs.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import Popup from '@/components/popup/Popup.vue'
+import generalUtils from '@/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
+import { throttle } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from './utils/localeUtils'
@@ -64,6 +66,11 @@ export default defineComponent({
   },
   directives: {
     clickOutside: vClickOutside.directive
+  },
+  metaInfo() {
+    return {
+      title: `${this.$t('SE0001')}`
+    }
   },
   data() {
     return {
@@ -83,6 +90,21 @@ export default defineComponent({
     }
 
     this.$router.isReady().then(() => { picWVUtils.sendAppLoaded() })
+    /**
+     * @Note the function below is moved from the index.ts store
+     * Why I moved to here is bcz it work trigger properly
+     * the original way we used is directly change the state value
+     * but it will not trigger the watcher in that way,
+     * so I change it to use normal mutation to change them
+     * then the value could be watch, the computed will update properly
+     */
+    const handleResize = throttle(() => {
+      this.setIsMobile(generalUtils.getWidth() <= 768)
+      this.setIsLargeDesktop(generalUtils.getWidth() >= 1440)
+    }, 500)
+
+    window.addEventListener('resize', handleResize)
+    handleResize()
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
@@ -115,6 +137,8 @@ export default defineComponent({
       updateDefaultFonts: 'UPDATE_DEFAULT_FONT'
     }),
     ...mapMutations({
+      setIsMobile: 'SET_isMobile',
+      setIsLargeDesktop: 'SET_isLargeDesktop',
       setDropdown: 'popup/SET_STATE',
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),

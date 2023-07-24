@@ -120,7 +120,6 @@ class EditorUtils {
     if (generalUtils.isTouchDevice()) {
       const page = pageUtils.getPage(pageIndex)
       const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
-      this.setContentScaleRatio(contentScaleRatio)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
       const pos = {
         x: (editorUtils.mobileSize.width - page.width * this.contentScaleRatio) * 0.5,
@@ -199,12 +198,6 @@ class EditorUtils {
   setShowMobileSubPanel(bool: boolean): void {
     if (generalUtils.isTouchDevice()) {
       store.commit('mobileEditor/SET_showMobileSubPanel', bool)
-    }
-  }
-
-  setContentScaleRatio(ratio: number): void {
-    if (generalUtils.isTouchDevice()) {
-      store.commit('SET_contentScaleRatio', ratio)
     }
   }
 }

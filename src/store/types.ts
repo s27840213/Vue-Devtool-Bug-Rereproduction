@@ -85,7 +85,6 @@ export interface IEditorState {
   isLargeDesktop: boolean,
   isGlobalLoading: boolean,
   useMobileEditor: boolean,
-  contentScaleRatio: number,
   _3dEnabledPageIndex: number,
   currFocusPageIndex: number,
   enalbleComponentLog: boolean,
@@ -94,6 +93,7 @@ export interface IEditorState {
   isPageScaling: boolean,
   isGettingDesign: boolean,
   showGlobalErrorModal: boolean,
+  newTemplateShownMode: boolean,
 }
 
 export enum SidebarPanelType {

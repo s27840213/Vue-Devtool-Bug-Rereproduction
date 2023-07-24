@@ -3,18 +3,18 @@ div(class="photo-setting")
   span(class="photo-setting__title text-blue-1 text-H6") {{$t('NN0039')}}
   div(class="photo-setting__grid mb-10")
     template(v-for="btn in btns")
-      btn(v-if="!btn.condition || btn.condition()"
-        class="full-width"
-        :class="[activeBtn(btn) ? 'active' : '']"
-        type="gray-mid"
-        :disabled="disableBtn(btn)"
+      nubtn(v-if="!btn.condition || btn.condition()"
         :key="btn.name"
+        theme="edit"
+        size="mid-full"
+        :active="activeBtn(btn)"
+        :disabled="disableBtn(btn)"
         v-hint="disableBtn(btn) ? btn.hint : ''"
         @click="handleShow(btn.show)") {{ btn.label }}
-    btn(v-if="isImage && !isFrame && !inReviewMode"
-      class="full-width"
-      type="gray-mid"
-      :disabled="isHandleShadow || show === 'panel-photo-shadow'"
+    nubtn(v-if="isImage && !isFrame && !inReviewMode"
+      theme="edit"
+      size="mid-full"
+      :disabled="hasPreviewSrc || isHandleShadow || isSvgImage || show === 'panel-photo-shadow'"
       @click="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
   component(:is="show || 'div'"
     ref="popup"
@@ -34,6 +34,7 @@ import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -55,6 +56,7 @@ export default defineComponent({
   data() {
     return {
       show: '',
+      isSvgImage: false,
       btns: [
         {
           name: 'crop',
@@ -128,9 +130,6 @@ export default defineComponent({
     ...mapState('shadow', {
       handleId: 'handleId'
     }),
-    // isHandleShadow(): boolean {
-    //   return this.isProcessImgShadow || this.isUploadImgShadow
-    // },
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
@@ -172,6 +171,24 @@ export default defineComponent({
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
     },
+    hasPreviewSrc(): boolean {
+      return this.currLayer.previewSrc !== undefined
+    }
+  },
+  watch: {
+    currSelectedLayers: {
+      immediate: true,
+      async handler() {
+        const { layers, types, index } = this.currSelectedInfo as ICurrSelectedInfo
+        if (types.has('image') && layers.length === 1) {
+          const src = imageUtils.getSrc(layers[0] as IImage, 'tiny')
+          const isSvg = await imageShadowPanelUtils.isSVG(src, layers[0] as IImage)
+          this.isSvgImage = isSvg
+        } else {
+          this.isSvgImage = false
+        }
+      }
+    }
   },
   methods: {
     ...mapMutations({
@@ -188,13 +205,17 @@ export default defineComponent({
         if (btn.name === 'shadow') {
           return (isCurrLayerHanlingShadow && !isShadowPanelOpen) ||
             this.isUploadImgShadow ||
-            this.isHandleShadow ||
             currLayer.previewSrc?.includes('data:image/png;base64') ||
             (store.state as any).file.uploadingAssets.some((e: { id: string }) => e.id === (layerUtils.getCurrConfig as IImage).tmpId)
         } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
           return true
         }
       }
+
+      if (btn.name === 'remove-bg') {
+        return this.hasPreviewSrc
+      }
+
       return false
     },
     activeBtn(btn: IBtn): boolean {
@@ -204,11 +225,8 @@ export default defineComponent({
       return false
     },
     handleShow(name: string) {
-      const { pageIndex, layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
       switch (name) {
         case this.btns.find(b => b.name === 'shadow')?.show || '': {
-          const target = (currLayer.type === LayerType.group && subLayerIdx !== -1
-            ? (currLayer as IGroup).layers[subLayerIdx] : currLayer) as IImage
           if (this.isUploadImgShadow) {
             return
           }
@@ -255,7 +273,7 @@ export default defineComponent({
           this.show = ''
         }
       }
-      this.show = this.show.includes(name) || name === 'remove-bg' ? '' : name
+      this.show = name
     },
     handleOutside() {
       this.show = ''
@@ -345,17 +363,6 @@ export default defineComponent({
     grid-auto-rows: 1fr;
     row-gap: 10px;
     column-gap: 20px;
-    > button {
-      border-radius: 4px;
-      &.active {
-        border: 2px solid setColor(blue-1);
-        color: setColor(blue-1);
-        padding: 8px 20px;
-      }
-      &.displayNone {
-        display: none;
-      }
-    }
   }
 }
 </style>

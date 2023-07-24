@@ -35,7 +35,7 @@ export interface IUserModule {
   userId: string,
   teamId: string,
   role: number,
-  roleRaw: number,
+  roleRaw: number, // 0 admin/ 1 user / 2 dev /3 outsource
   adminMode: boolean, // Control in DesktopEditor
   isAuthenticated: boolean,
   enableAdminView: boolean, // Control in PopupFile
@@ -95,7 +95,7 @@ const getDefaultState = (): IUserModule => ({
   role: -1,
   roleRaw: -1,
   adminMode: true,
-  enableAdminView: true,
+  enableAdminView: localStorage.getItem('enableAdminView') === 'true',
   isAuthenticated: false,
   account: '',
   email: '',

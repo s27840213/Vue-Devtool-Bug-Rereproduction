@@ -6,7 +6,9 @@ import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
+import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 
@@ -50,7 +52,6 @@ class Controller {
       none: {},
       curve: {
         bend: 4,
-        focus: false
       }
     }
   }
@@ -59,8 +60,8 @@ class Controller {
     return textEffectUtils.getSpecSubTextLayer(index)
   }
 
-  getRadiusByBend(bend: number) {
-    return bend === 0 ? 10000 : 1000 / Math.pow(Math.abs(bend), 0.6)
+  getRadiusByBend(bend: number, fontSize: number) {
+    return bend === 0 ? 10000 : 1000 / Math.pow(Math.abs(bend), 0.6) * fontSize / 60
   }
 
   getTextShapeStyles(layer: IText, shape: string, isSubLayer: boolean, attrs?: any) {
@@ -88,7 +89,8 @@ class Controller {
       const { bend } = styleTextShape as any
       const textHW = textUtils.getTextHW(layer, -1)
       Object.assign(styles, {
-        ...textHW,
+        width: textHW.width,
+        height: textHW.height,
         x: x + ((width - textHW.width) / 2),
         y: +bend < 0 ? y + height - textHW.height : y
       })
@@ -97,10 +99,12 @@ class Controller {
       } else {
         props.widthLimit = -1
       }
+      props.spanDataList = textHW.spanDataList
     } else { // curve
       const { bend } = styles.textShape as any
       Object.assign(styles, this.getCurveTextProps(layer, +bend))
       props.widthLimit = -1
+      props.spanDataList = undefined
     }
     return { styles, props }
   }
@@ -145,7 +149,7 @@ class Controller {
             styles,
             props
           })
-          textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, +idx, styles.height, heightOri)
+          textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, +idx, styles.height, heightOri, true)
         }
       }
       textUtils.fixGroupCoordinates(pageIndex, layerIndex)
@@ -164,16 +168,18 @@ class Controller {
         styles,
         props
       })
-      textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, styles.height, heightOri)
+      textUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, styles.height, heightOri, true)
       textUtils.fixGroupCoordinates(pageIndex, layerIndex)
     }
+    // Leave/apply TextShape need to update textProps writingMode.
+    textPropUtils.updateTextPropState('isVertical', true)
   }
 
   convertTextShape(textWidth: number[], bend: number, fontSize: number): string[] {
     if (textWidth.length === 0) return []
     const angleOffset = bend >= 0 ? 90 : 270
     const ratioFix = bend >= 0 ? 1 : -1
-    const radius = this.getRadiusByBend(bend) * fontSize / 60
+    const radius = this.getRadiusByBend(bend, fontSize)
     // 每一段文字寬度對應角度
     const textAngles = textWidth.map(w => (360 * w) / (radius * 2 * Math.PI))
     // 總角度
@@ -198,17 +204,17 @@ class Controller {
     )
   }
 
-  getTextHWsBySpans(spans: ISpan[]): { textWidth: number[], textHeight: number[], minHeight: number } {
-    const { body, p } = this.genTextDivP(spans)
+  getTextHWs(config: IText): { textWidth: number[], textHeight: number[], minHeight: number } {
+    const { body, p } = this.genTextDivP(config)
     document.body.appendChild(body)
     const textHWs = this.getHWsByOffset(p)
     document.body.removeChild(body)
     return textHWs
   }
 
-  async getTextHWsBySpansAsync(spans: ISpan[]): Promise<{ textWidth: number[]; textHeight: number[]; minHeight: number }> {
+  async getTextHWsAsync(config: IText): Promise<{ textWidth: number[]; textHeight: number[]; minHeight: number }> {
     const textId = generalUtils.generateRandomString(12)
-    const { body, p } = this.genTextDivP(spans)
+    const { body, p } = this.genTextDivP(config)
     body.setAttribute('id', textId)
     return new Promise(resolve => {
       this.observerCallbackMap[textId] = () => {
@@ -221,24 +227,22 @@ class Controller {
     })
   }
 
-  genTextDivP(spans: ISpan[]): {
+  genTextDivP(config: IText): {
     body: HTMLDivElement,
     p: HTMLParagraphElement
   } {
     const body = document.createElement('div')
     const p = document.createElement('p')
 
+    const spans = this.flattenSpans(config)
     spans.forEach(spanData => {
       const span = document.createElement('span')
-      if (spanData.text === ' ') {
-        span.innerHTML = '&nbsp;'
-      } else {
-        span.textContent = spanData.text
-      }
+      span.textContent = spanData.text
 
       const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
       spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
-      Object.assign(span.style, spanStyleObject)
+      const fixedWidthStyle = textBgUtils.fixedWidthStyle(spanData.styles, config.paragraphs[0].styles, config)
+      Object.assign(span.style, spanStyleObject, fixedWidthStyle)
 
       span.classList.add('nu-curve-text__span')
       p.appendChild(span)
@@ -275,14 +279,6 @@ class Controller {
       minHeight = Math.max(minHeight, offsetHeight)
     }
     return { textWidth, textHeight, minHeight }
-  }
-
-  getTextHWs(_content: IText): { textWidth: number[], textHeight: number[], minHeight: number } {
-    return this.getTextHWsBySpans(this.flattenSpans(generalUtils.deepCopy(_content)))
-  }
-
-  async getTextHWsAsync(_content: IText): Promise<{ textWidth: number[]; textHeight: number[]; minHeight: number }> {
-    return await this.getTextHWsBySpansAsync(this.flattenSpans(generalUtils.deepCopy(_content)))
   }
 
   calcArea(transforms: string[], minHeight: number, scale: number, config: IText): { areaWidth: number, areaHeight: number } {

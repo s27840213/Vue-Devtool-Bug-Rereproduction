@@ -32,8 +32,9 @@ div(class="nu-layer flex-center"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :page="page"
             :primaryLayer="primaryLayer"
-            :forRender="forRender")
-          svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
+            :forRender="forRender"
+            :inPreview="inPreview")
+          svg(v-if="showSvgContour"
             class="clip-contour full-size"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
             g(v-html="frameClipFormatter(config.clipPath)"
@@ -243,7 +244,6 @@ export default defineComponent({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isProcessImgShadow: 'shadow/isProcessing',
       currSelectedInfo: 'getCurrSelectedInfo',
       scaleRatio: 'getPageScaleRatio',
@@ -289,7 +289,7 @@ export default defineComponent({
         {
           outline,
           outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
-          willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
+          willChange: this.config.active && !this.isSubLayer ? 'transform' : '',
           pointerEvents,
           clipPath,
           'mix-blend-mode': this.config.styles.blendMode,
@@ -316,9 +316,6 @@ export default defineComponent({
       const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
     },
-    isDragging(): boolean {
-      return (this.config as ILayer).dragging
-    },
     transformStyle(): { [index: string]: string } {
       return {
         transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial'
@@ -334,11 +331,13 @@ export default defineComponent({
       return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     frameClipStyles(): any {
+      const isRectFrameClip = this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
       return {
         ...(this.primaryLayer?.type === 'frame' && this.config.type === 'image' && this.$isTouchDevice() && { transform: `scale(${100 / this.scaleRatio})` }),
         fill: '#00000000',
         stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
-        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (this.$isTouchDevice() ? 1 : 100 / this.scaleRatio)}px`
+        strokeWidth: `${7 / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
+        // strokeWidth: `${(this.$isTouchDevice() ? 14 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
       }
     },
     getPointerEvents(): string {
@@ -374,6 +373,10 @@ export default defineComponent({
     },
     isMultipleSelect(): boolean {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length > 1
+    },
+    showSvgContour(): boolean {
+      const { config } = this
+      return config.active && config.isFrame && !config.isFrameImg && config.type === 'image' && !this.forRender && !frameUtils.checkIsRect(this.config.clipPath)
     }
   },
   methods: {

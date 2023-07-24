@@ -1,10 +1,22 @@
 <template lang="pug">
-div(:class="{ 'nu-frame__custom': !isFrameImg }"
+div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']"
     :style="styles")
   div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
     img(class="shadow__img"
       draggable="false"
       :src="shadowSrc()")
+  nu-layer(v-if="hasDecor"
+    class="click-disabled"
+    :key="`layer-${config.decoration?.id}`"
+    :pageIndex="pageIndex"
+    :page="page"
+    :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
+    :inFrame="true"
+    :contentScaleRatio="contentScaleRatio"
+    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+    :primaryLayer="config"
+    :config="config.decoration"
+    :isSubLayer="true")
   nu-layer(v-for="(layer,index) in layers"
     :key="`layer-${layer.id}`"
     :pageIndex="pageIndex"
@@ -12,11 +24,37 @@ div(:class="{ 'nu-frame__custom': !isFrameImg }"
     :layerIndex="layerIndex"
     :inFrame="true"
     :inImageFrame="inImageFrame()"
-    :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
+    :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
     :primaryLayer="config"
     :config="layer"
     :isSubLayer="true")
+  nu-layer(v-if="hasDecorTop"
+    class="click-disabled"
+    :key="`layer-${config.decorationTop?.id}`"
+    :pageIndex="pageIndex"
+    :page="page"
+    :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
+    :inFrame="true"
+    :contentScaleRatio="contentScaleRatio"
+    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+    :primaryLayer="config"
+    :config="config.decorationTop"
+    :isSubLayer="true")
+  template(v-if="hasBlendLayers")
+    nu-layer(v-for="(layer, index) in config.blendLayers"
+      class="click-disabled"
+      :key="`layer-${layer.id}`"
+      :pageIndex="pageIndex"
+      :page="page"
+      :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
+      :inFrame="true"
+      :subLayerIndex="index"
+      :contentScaleRatio="contentScaleRatio"
+      :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+      :primaryLayer="config"
+      :config="layer"
+      :isSubLayer="true")
 </template>
 
 <script lang="ts">
@@ -88,34 +126,53 @@ export default defineComponent({
           }
         }
       })
-      if (config.decoration && json.decoration) {
-        json.decoration.color = [...config.decoration.color]
-        const newDecor = {} as IShape
-        Object.entries(config.decoration)
-          .forEach(([k, v]) => {
-            if (v instanceof Object || v instanceof Array) {
-              newDecor[k] = generalUtils.unproxify(v)
-            } else {
-              newDecor[k] = v
-            }
-          })
-        Object.assign(newDecor, json.decoration)
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: newDecor }, this.subLayerIndex)
+
+      if (json.decoration) {
+        if (config.decoration) {
+          if (config.decoration.color.length) {
+            json.decoration.color = [...config.decoration.color]
+          }
+          const newDecor = {} as IShape
+          Object.entries(config.decoration)
+            .forEach(([k, v]) => {
+              if (v instanceof Object || v instanceof Array) {
+                newDecor[k] = generalUtils.unproxify(v)
+              } else {
+                newDecor[k] = v
+              }
+            })
+          Object.assign(newDecor, json.decoration)
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: newDecor }, this.subLayerIndex)
+        } else {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration }, this.subLayerIndex)
+        }
+      } else if (!json.decoration && config.decoration) {
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: undefined }, this.subLayerIndex)
       }
-      if (config.decorationTop && json.decorationTop) {
-        json.decorationTop.color = [...config.decorationTop.color]
-        const newDecorTop = {} as IShape
-        Object.entries(config.decorationTop)
-          .forEach(([k, v]) => {
-            if (v instanceof Object || v instanceof Array) {
-              newDecorTop[k] = generalUtils.unproxify(v)
-            } else {
-              newDecorTop[k] = v
-            }
-          })
-        Object.assign(newDecorTop, json.decorationTop)
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: newDecorTop }, this.subLayerIndex)
+
+      if (json.decorationTop) {
+        if (config.decorationTop) {
+          if (config.decorationTop.color.length) {
+            json.decorationTop.color = [...config.decorationTop.color]
+          }
+          const newDecorTop = {} as IShape
+          Object.entries(config.decorationTop)
+            .forEach(([k, v]) => {
+              if (v instanceof Object || v instanceof Array) {
+                newDecorTop[k] = generalUtils.unproxify(v)
+              } else {
+                newDecorTop[k] = v
+              }
+            })
+          Object.assign(newDecorTop, json.decorationTop)
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: newDecorTop }, this.subLayerIndex)
+        } else {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop }, this.subLayerIndex)
+        }
+      } else if (!json.decorationTop && config.decorationTop) {
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: undefined }, this.subLayerIndex)
       }
+
       if (json.blendLayers) {
         if (!this.config.blendLayers) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { blendLayers: [] }, this.subLayerIndex)
@@ -173,6 +230,7 @@ export default defineComponent({
       }
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false })
     }
+    console.warn('nuframe', generalUtils.deepCopy(this.config))
   },
   watch: {
     'config.needFetch': function (newVal) {
@@ -226,28 +284,39 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview'
     }),
+    hasDecor(): boolean {
+      const config = this.config as IFrame
+      return !!config.decoration && !!config.decoration.svg && !config.clips[0].isFrameImg
+    },
+    hasDecorTop(): boolean {
+      const config = this.config as IFrame
+      return !!config.decorationTop && !!config.decorationTop.svg
+    },
+    hasBlendLayers(): boolean {
+      return !!this.config.blendLayers
+    },
     layers() {
       const config = this.config as IFrame
       let layers: Array<IImage | IShape> = []
-      if (config.decoration && config.decoration.svg && !config.clips[0].isFrameImg) {
-        layers = layers.concat(config.decoration)
-      }
+      // if (config.decoration && config.decoration.svg && !config.clips[0].isFrameImg) {
+      //   layers = layers.concat(config.decoration)
+      // }
 
       layers = layers.concat(...config.clips)
 
-      if (config.decorationTop && config.decorationTop.svg) {
-        layers = layers.concat(config.decorationTop)
-      }
+      // if (config.decorationTop && config.decorationTop.svg) {
+      //   layers = layers.concat(config.decorationTop)
+      // }
 
-      if (config.blendLayers) {
-        layers = layers.concat(config.blendLayers)
-      }
+      // if (config.blendLayers) {
+      //   layers = layers.concat(config.blendLayers)
+      // }
       return layers
     },
-    layerIdxOffset(): number {
-      const { config } = this
-      return config.decoration && config.decoration.svg && !config.clips[0].isFrameImg ? 1 : 0
-    },
+    // layerIdxOffset(): number {
+    //   const { config } = this
+    //   return config.decoration && config.decoration.svg && !config.clips[0].isFrameImg ? 1 : 0
+    // },
     shadowWrapperStyles() {
       const shadow = this.config.styles.shadow
       if (shadow && shadow.srcObj?.type) {

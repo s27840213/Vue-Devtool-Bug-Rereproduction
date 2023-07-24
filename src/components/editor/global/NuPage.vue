@@ -314,8 +314,6 @@ export default defineComponent({
       return this.$isTouchDevice() && this.pageIndex === layerUtils.pageIndex
     },
     contentScaleRatio(): number {
-      // return this.pageState.config.contentScaleRatio
-      // if (this.$isTouchDevice()) {
       if (this.$isTouchDevice()) {
         return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this.pageState.config.contentScaleRatio
       } else {

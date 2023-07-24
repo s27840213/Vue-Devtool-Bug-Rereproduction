@@ -34,13 +34,12 @@ import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
-import { ADD_subLayer } from '@/utils/layerUtils'
+import layerUtils, { ADD_subLayer } from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
-import { throttle } from 'lodash'
-import { createStore, GetterTree, MutationTree } from 'vuex'
+import { GetterTree, MutationTree, createStore } from 'vuex'
 import brandkit from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
@@ -123,7 +122,6 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
-  contentScaleRatio: 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
@@ -131,6 +129,7 @@ const getDefaultState = (): IEditorState => ({
   isPageScaling: false,
   isGettingDesign: false,
   showGlobalErrorModal: false,
+  newTemplateShownMode: true
 })
 
 const state = getDefaultState()
@@ -317,7 +316,8 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.useMobileEditor
   },
   getContentScaleRatio(state: IEditorState) {
-    return state.contentScaleRatio
+    const pageIndex = layerUtils.pageIndex === -1 ? 0 : layerUtils.pageIndex
+    return state.pages[pageIndex].config.contentScaleRatio
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state.useMobileEditor ? -1 : state._3dEnabledPageIndex
@@ -333,6 +333,15 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getShowGlobalErrorModal(state: IEditorState) {
     return state.showGlobalErrorModal
+  },
+  getNewTemplateShownMode(state: IEditorState) {
+    return state.newTemplateShownMode
+  },
+  getIsMobile(state: IEditorState) {
+    return state.isMobile
+  },
+  getIsLargeDesktop(state: IEditorState) {
+    return state.isLargeDesktop
   },
 }
 
@@ -516,12 +525,13 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
     state.pages[updateInfo.pageIndex].config.backgroundImage.config.styles.adjust.halation = 0
   },
-  SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
+  SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage, bgColorReset?: boolean }) {
     // state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
-    const { pageIndex, config } = updateInfo
+    const { pageIndex, config, bgColorReset = true } = updateInfo
     Object.assign(state.pages[pageIndex].config.backgroundImage.config, config)
-    state.pages[pageIndex].config.backgroundColor = '#ffffff'
-    // state.pages[pageIndex].backgroundColor = '#ffffff'
+    if (bgColorReset) {
+      state.pages[pageIndex].config.backgroundColor = '#ffffff'
+    }
   },
   SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '', panelPreviewSrc: '' }) {
     const { pageIndex, srcObj, previewSrc, panelPreviewSrc } = updateInfo
@@ -1039,9 +1049,9 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, preprimaryLayerIndex = -1, layerIndex, subLayerIdx, shape } = data
     let frame
     if (preprimaryLayerIndex !== -1) {
-      frame = state.pages[pageIndex].config.layers[layerIndex] as IFrame
-    } else {
       frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[layerIndex] as IFrame
+    } else {
+      frame = state.pages[pageIndex].config.layers[layerIndex] as IFrame
     }
     if (frame.type === LayerType.frame) {
       if (subLayerIdx === -1) {
@@ -1085,9 +1095,6 @@ const mutations: MutationTree<IEditorState> = {
   SET_isGettingDesign(state: IEditorState, bool: boolean) {
     state.isGettingDesign = bool
   },
-  SET_contentScaleRatio(state: IEditorState, ratio: number) {
-    state.contentScaleRatio = ratio
-  },
   UPDATE_pagePos(state: IEditorState, data: { pageIndex: number, styles: { [key: string]: number } }) {
     const { pageIndex, styles } = data
     const page = state.pages[pageIndex]
@@ -1122,14 +1129,16 @@ const mutations: MutationTree<IEditorState> = {
   SET_showGlobalErrorModal(state: IEditorState, showGlobalErrorModal: boolean) {
     state.showGlobalErrorModal = showGlobalErrorModal
   },
+  SET_newTemplateShownMode(state: IEditorState, newTemplateShownMode: boolean) {
+    state.newTemplateShownMode = newTemplateShownMode
+  },
+  SET_isMobile(state: IEditorState, boolean: boolean) {
+    state.isMobile = boolean
+  },
+  SET_isLargeDesktop(state: IEditorState, boolean: boolean) {
+    state.isLargeDesktop = boolean
+  },
 }
-const handleResize = throttle(() => {
-  state.isMobile = generalUtils.getWidth() <= 768
-  state.isLargeDesktop = generalUtils.getWidth() >= 1440
-}, 500)
-
-window.addEventListener('resize', handleResize)
-handleResize()
 
 const store = createStore({
   state,

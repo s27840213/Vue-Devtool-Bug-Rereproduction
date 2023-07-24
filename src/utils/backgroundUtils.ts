@@ -88,7 +88,8 @@ class BackgroundUtils {
       pageIndex: pageUtils.currFocusPageIndex,
       config: {
         locked: !this.backgroundLocked
-      }
+      },
+      bgColorReset: false
     })
     this.setBgImageControl({
       pageIndex: pageUtils.currFocusPageIndex,
@@ -108,7 +109,7 @@ class BackgroundUtils {
     notify({ group: 'copy', text: i18n.global.tc('NN0804') })
   }
 
-  setBgImage(props: { pageIndex: number, config: Partial<IImage> }) {
+  setBgImage(props: { pageIndex: number, config: Partial<IImage>, bgColorReset?: boolean }) {
     store.commit('SET_backgroundImage', props)
   }
 

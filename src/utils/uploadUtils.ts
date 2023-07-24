@@ -146,7 +146,7 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
+  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo', addToPage = false) {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
@@ -171,7 +171,7 @@ class UploadUtils {
       if (type === 'logo') {
         params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
-      this.uploadAsset(type, files as FileList, params)
+      this.uploadAsset(type, files as FileList, Object.assign(params, { addToPage }))
       document.body.removeChild(inputNode)
     }, false)
   }
@@ -958,7 +958,7 @@ class UploadUtils {
     }
   }
 
-  uploadTemplate() {
+  uploadTemplate(bypass?: boolean) {
     const designId = generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     /**
@@ -994,7 +994,7 @@ class UploadUtils {
     formData.append('key', `${this.loginOutput.upload_admin_map.path}template/${designId}/config.json`)
     // only for template
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('config.json')}`)
-    formData.append('x-amz-meta-tn', this.userId)
+    formData.append('x-amz-meta-tn', bypass ? `${this.userId},bypass` : this.userId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([JSON.stringify(pageJSON)], { type: 'application/json' })
@@ -1403,17 +1403,19 @@ class UploadUtils {
     switch (layer.type) {
       case 'image': {
         const image = layer as IImage
-        const { type, srcObj, styles, trace } = image
+        const { type, srcObj, styles, trace, jsonVer, jsonVer_origin } = image
         return {
           type,
           srcObj,
           trace,
+          jsonVer,
+          jsonVer_origin,
           styles: this.styleFilter(styles, 'image')
         }
       }
       case 'shape': {
         const shape = layer as IShape
-        const { type, designId, ratio, color, styles, category } = shape
+        const { type, designId, ratio, color, styles, category, jsonVer, jsonVer_origin } = shape
         switch (shape.category) {
           case 'D': {
             return {
@@ -1427,6 +1429,8 @@ class UploadUtils {
               dasharray: shape.dasharray,
               linecap: shape.linecap,
               point: shape.point,
+              jsonVer,
+              jsonVer_origin,
               styles: this.styleFilter(styles)
             }
           }
@@ -1446,6 +1450,8 @@ class UploadUtils {
               shapeType: shape.shapeType,
               vSize: shape.vSize,
               filled: shape.filled,
+              jsonVer,
+              jsonVer_origin,
               styles: this.styleFilter(styles)
             }
           default: {
@@ -1457,6 +1463,8 @@ class UploadUtils {
                 ratio,
                 color,
                 pDiff: shape.pDiff,
+                jsonVer,
+                jsonVer_origin,
                 styles: this.styleFilter(styles)
               }
             } else {
@@ -1470,7 +1478,7 @@ class UploadUtils {
       }
       case 'frame': {
         const frame = layer as IFrame
-        const { type, designId, clips, decoration, decorationTop, styles, blendLayers } = frame
+        const { type, designId, clips, decoration, decorationTop, styles, blendLayers, jsonVer, jsonVer_origin } = frame
         return {
           type,
           designId,
@@ -1497,24 +1505,29 @@ class UploadUtils {
           ...(blendLayers && {
             blendLayers: blendLayers.map(function (l) { return { color: l.color } })
           }),
+          jsonVer,
+          jsonVer_origin,
           styles: this.styleFilter(styles, 'frame')
         }
       }
       case 'text': {
         const text = layer as IText
-        const { type, widthLimit, isEdited, paragraphs, styles, isCompensated } = text
+        const { type, widthLimit, isEdited, paragraphs, styles, isCompensated, spanDataList, jsonVer, jsonVer_origin } = text
         return {
           type,
           widthLimit,
           isEdited,
           isCompensated,
-          paragraphs: paragraphs,
+          paragraphs,
+          spanDataList,
+          jsonVer,
+          jsonVer_origin,
           styles: this.styleFilter(styles, 'text')
         }
       }
       case 'group': {
         const group = layer as IGroup
-        const { type, layers, styles, designId, db } = group
+        const { type, layers, styles, designId, db, jsonVer, jsonVer_origin } = group
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)
@@ -1524,12 +1537,14 @@ class UploadUtils {
           designId,
           db,
           layers: filteredLayers,
+          jsonVer,
+          jsonVer_origin,
           styles: this.styleFilter(styles)
         }
       }
       case 'tmp': {
         const tmp = layer as ITmp
-        const { type, layers, styles } = tmp
+        const { layers, styles, jsonVer, jsonVer_origin } = tmp
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)
@@ -1537,6 +1552,8 @@ class UploadUtils {
         return {
           type: 'group',
           layers: filteredLayers,
+          jsonVer,
+          jsonVer_origin,
           styles: this.styleFilter(styles)
 
         }

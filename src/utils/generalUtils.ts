@@ -254,6 +254,21 @@ class GeneralUtils {
     return new Blob([u8arr], { type: mime })
   }
 
+  toDataURL(src: string, callback: (dataUrl: string)=> void) {
+    const image = new Image()
+    image.crossOrigin = 'Anonymous'
+    image.onload = () => {
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      canvas.height = image.naturalHeight
+      canvas.width = image.naturalWidth
+      context?.drawImage(image, 0, 0)
+      const dataURL = canvas.toDataURL('image/png')
+      callback(dataURL)
+    }
+    image.src = src
+  }
+
   fbq(type: string, action: string, params?: { [index: string]: any }) {
     params ? (window as any).fbq(type, action, params) : (window as any).fbq(type, action)
   }
@@ -362,8 +377,6 @@ class GeneralUtils {
   // Get browser W/H, from jQuery lib, https://stackoverflow.com/a/1038781
   getWidth() {
     return Math.max(
-      document.body.scrollWidth,
-      document.documentElement.scrollWidth,
       document.body.offsetWidth,
       document.documentElement.offsetWidth,
       document.documentElement.clientWidth
@@ -372,8 +385,6 @@ class GeneralUtils {
 
   getHeight() {
     return Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight,
       document.body.offsetHeight,
       document.documentElement.offsetHeight,
       document.documentElement.clientHeight

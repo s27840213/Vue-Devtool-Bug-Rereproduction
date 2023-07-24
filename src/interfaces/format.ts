@@ -3,6 +3,7 @@
 import { IAdjustJsonProps } from '@/interfaces/adjust'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { IParagraphStyle, ISpanStyle } from '@/interfaces/layer'
+import { textLetterBgName } from '@/utils/letterBgData'
 
 export interface ITextEffect {
   name: string
@@ -28,6 +29,19 @@ export interface ITextBox {
   pColor: string
 }
 
+export const tailPositions = ['top', 'right', 'bottom', 'left'] as const
+export type ITailPosition = typeof tailPositions[number]
+export interface ITextSpeechBubble {
+  name: 'speech-bubble' | 'speech-bubble-triangle'
+  tailOffset: number
+  tailPosition: ITailPosition
+  bRadius: number
+  pStrokeX: number
+  pStrokeY: number
+  opacity: number
+  pColor: string
+}
+
 export interface ITextUnderline {
   name: 'underline'
   endpoint: string
@@ -45,12 +59,6 @@ export interface ITextGooey {
   color: string
 }
 
-const textLetterBgName = [
-  'rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book', 'penguin',
-  'planet', 'heart', 'heart-warm', 'heart-custom', 'gummybear', 'leaf',
-  'butter-flower', 'flower-frame', 'flower-frame-custom', 'vintage-flower',
-  'vintage-flower-custom', 'cat-paw', 'bread',
-] as const
 export interface ITextLetterBg {
   name: typeof textLetterBgName[number]
   xOffset200: number
@@ -61,12 +69,15 @@ export interface ITextLetterBg {
   color: string
 }
 
-export type ITextBg = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
+export type ITextBg = ITextBox | ITextSpeechBubble | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
 
 export function isITextBox(object: ITextBg): object is ITextBox {
   return object && object.name &&
     ['square-borderless', 'rounded-borderless', 'square-hollow',
       'rounded-hollow', 'square-both', 'rounded-both'].includes(object.name)
+}
+export function isITextSpeechBubble(object: ITextBg): object is ITextSpeechBubble {
+  return object && object.name && ['speech-bubble', 'speech-bubble-triangle'].includes(object.name)
 }
 export function isITextUnderline(object: ITextBg): object is ITextUnderline {
   return object && object.name && object.name === 'underline'
@@ -85,8 +96,6 @@ export interface ITextFillConfig {
   xOffset200: number
   yOffset200: number
   size: number
-  opacity: number
-  focus: boolean
 }
 
 export interface ITextFillCustom {
@@ -99,8 +108,6 @@ export interface ITextFillCustom {
   xOffset200: number
   yOffset200: number
   size: number
-  opacity: number
-  focus: boolean
 }
 
 export type ITextFill = ITextFillConfig | ITextFillCustom | { name: 'none', customImg: IAssetPhoto | IPhotoItem | null }
@@ -113,15 +120,20 @@ export function isITextFillCustom(object: ITextFill): object is ITextFillCustom 
   return object && !!object.name && !['none', 'custom-fill-img'].includes(object.name)
 }
 
-export interface ITextFormat {
-  textEffect: ITextEffect
-  textBg: ITextBg
-  textShape: ITextShape
-  textFill: ITextFill
-  scale: number
-  paragraphStyle: IParagraphStyle,
-  spanStyle: ISpanStyle,
-  writingMode: string
+class TextStyleCopiedFormatClass {
+  textEffect?: ITextEffect
+  textBg?: ITextBg
+  textShape?: ITextShape
+  textFill?: ITextFill
+  scale?: number
+  writingMode?: string
+}
+const textStyleCopiedFormat = new TextStyleCopiedFormatClass()
+export const textStyleCopiedFormatKeys = Object.keys(textStyleCopiedFormat)
+export type ITextStyleCopiedFormat = Required<TextStyleCopiedFormatClass>
+export type ITextFormat = ITextStyleCopiedFormat & {
+  paragraphStyle: IParagraphStyle
+  spanStyle: ISpanStyle
 }
 
 export interface IImageFormat extends IAdjustJsonProps { }

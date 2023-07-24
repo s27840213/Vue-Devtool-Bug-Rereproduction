@@ -12,7 +12,7 @@ div(:layer-index="`${layerIndex}`"
     div(class="nu-controller__object-hint__text")
       span {{ Math.round(hintAngle) % 360 }}
   div(v-if="subLayer && subLayer.config" class="nu-controller__sublayer-container" :style="sizeStyles")
-    nu-sub-controller(v-if="subLayer.config.type !== 'image' || !subLayer.config.imgControl"
+    nu-sub-controller(v-if="(subLayer.config.type !== 'image' || !subLayer.config.imgControl) && !FrameUtils.isImageFrame(config)"
       :style="subContentStyles"
       class="relative nu-controller__subCtrlContent"
       data-identifier="controller"
@@ -145,63 +145,71 @@ div(:layer-index="`${layerIndex}`"
             class="control-point__controller-wrapper")
           template(v-if="isLine()")
             template(v-if="!$isTouchDevice()")
-              div(class="control-point__action shadow"
+              action-icon(iconName="rotate2"
+                          iconWidth="20px"
+                          theme="shadow"
+                          :extraStyle="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
+                          @action="lineRotateStart")
+            div(class="control-point__action-icon")
+              div(v-if="$isTouchDevice()"
+                  class="control-point__touch-area control-point__mover"
+                  ref="moveStart-moverArea")
+              div(class="control-point__action shadow control-point__mover"
+                  ref="moveStart-mover"
                   :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
-                  @pointerdown.stop="lineRotateStart"
                   @touchstart="disableTouchEvent")
                 svg-icon(class="control-point__action-svg"
-                  iconName="rotate2" iconWidth="20px"
+                  iconName="move2" iconWidth="24px"
                   iconColor="blue-2")
-            div(class="control-point__action shadow control-point__mover"
-                ref="moveStart-mover"
-                :style="ctrlPointerStyles(lineControlPointStyles(), { cursor: 'move' })"
-                @touchstart="disableTouchEvent")
-              svg-icon(class="control-point__action-svg"
-                iconName="move2" iconWidth="24px"
-                iconColor="blue-2")
           template(v-else)
             template(v-if="!$isTouchDevice()")
-              div(class="control-point__action shadow"
+              action-icon(iconName="rotate2"
+                          iconWidth="20px"
+                          theme="shadow"
+                          :extraStyle="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
+                          @action="rotateStart")
+            div(class="control-point__action-icon")
+              div(v-if="$isTouchDevice()"
+                  class="control-point__touch-area control-point__mover"
+                  ref="moveStart-moverArea")
+              div(class="control-point__action shadow control-point__mover"
+                  ref="moveStart-mover"
                   :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
-                  @pointerdown.stop="rotateStart"
                   @touchstart="disableTouchEvent")
                 svg-icon(class="control-point__action-svg"
-                  iconName="rotate2" iconWidth="20px"
+                  iconName="move2" iconWidth="24px"
                   iconColor="blue-2")
-            div(class="control-point__action shadow control-point__mover"
-                ref="moveStart-mover"
-                :style="ctrlPointerStyles(controlPointStyles(), { cursor: 'move' })"
-                @touchstart="disableTouchEvent")
-              svg-icon(class="control-point__action-svg"
-                iconName="move2" iconWidth="24px"
-                iconColor="blue-2")
-    div(v-if="isActive && isLocked() && (scaleRatio > 20)"
-        class="control-point__bottom-right-icon control-point__action shadow"
-        :style="actionIconStyles()"
-        @click="MappingUtils.mappingIconAction('lock')")
-      svg-icon(iconName="lock" iconWidth="16px" iconColor="red")
-    template(v-if="$isTouchDevice() && isActive")
+    action-icon(v-if="isActive && isLocked() && (scaleRatio > 20)"
+                class="control-point__bottom-right-icon"
+                iconName="lock"
+                iconSize="16px"
+                iconColor="red"
+                theme="shadow"
+                :extraStyle="actionIconStyles()"
+                @action="MappingUtils.mappingIconAction('lock')")
+    template(v-if="$isTouchDevice() && isActive && !isLocked()")
       div(v-show="!isMoving")
-        div(class="control-point__top-left-icon control-point__action border"
-            :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'pointer' })"
-            @pointerdown.prevent.stop="MappingUtils.mappingIconAction('trash')")
-          svg-icon(iconName="close" iconWidth="18px" iconColor="blue-2")
-        div(v-if="isLine()" class="control-point__bottom-left-icon control-point__action border"
-            :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
-            @pointerdown.prevent.stop="lineRotateStart")
-          svg-icon(iconName="rotate2" iconWidth="24px" iconColor="blue-2")
-        div(v-else class="control-point__bottom-left-icon control-point__action border"
-            :style="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
-            @pointerdown.prevent.stop="rotateStart")
-          svg-icon(iconName="rotate2" iconWidth="24px" iconColor="blue-2")
-        div(v-if="!tooSmall && !isLine()"
-            class="control-point__bottom-right-icon control-point__action border"
-            :style="ctrlPointerStyles(actionIconStyles(), cursorStyles(4, getLayerRotate()))"
-            @pointerdown.prevent.stop="scaleStart($event)")
-          svg-icon(iconName="scale" iconWidth="24px" iconColor="blue-2")
+        action-icon(class="control-point__top-left-icon"
+                    iconName="close"
+                    iconSize="18px"
+                    theme="border"
+                    :extraStyle="ctrlPointerStyles(actionIconStyles(), { cursor: 'pointer' })"
+                    @action="MappingUtils.mappingIconAction('trash')")
+        action-icon(class="control-point__bottom-left-icon"
+                    iconName="rotate2"
+                    theme="border"
+                    :extraStyle="ctrlPointerStyles(actionIconStyles(), { cursor: 'move' })"
+                    @action="(e) => isLine() ? lineRotateStart(e) : rotateStart(e)")
+        action-icon(v-if="!tooSmall && !isLine()"
+                    class="control-point__bottom-right-icon"
+                    iconName="scale"
+                    theme="border"
+                    :extraStyle="ctrlPointerStyles(actionIconStyles(), cursorStyles(4, getLayerRotate()))"
+                    @action="scaleStart")
 </template>
 
 <script lang="ts">
+import ActionIcon from '@/components/editor/controlPoint/ActionIcon.vue'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import { IResizer } from '@/interfaces/controller'
 import { isTextFill } from '@/interfaces/format'
@@ -210,6 +218,7 @@ import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, ITex
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
+import cssConverter from '@/utils/cssConverter'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -267,7 +276,8 @@ export default defineComponent({
   },
   emits: ['isDragging', 'setFocus'],
   components: {
-    NuTextEditor
+    NuTextEditor,
+    ActionIcon
   },
   created() {
     this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
@@ -278,7 +288,6 @@ export default defineComponent({
       MappingUtils,
       FrameUtils,
       controlPoints: ControlUtils.getControlPoints() as ICP,
-      resizerProfile: ControlUtils.getResizerProfile(this.config as AllLayerTypes),
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -334,7 +343,6 @@ export default defineComponent({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
@@ -355,6 +363,9 @@ export default defineComponent({
         }
       }
     },
+    resizerProfile() {
+      return ControlUtils.getResizerProfile(this.config as AllLayerTypes)
+    },
     subLayer(): any {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
@@ -363,7 +374,7 @@ export default defineComponent({
             config: (this.config as IGroup).layers[subLayerIdx],
             subLayerIdx
           }
-        } else if ((this.config.type === LayerType.group)) {
+        } else if ((this.config.type === LayerType.frame)) {
           const subLayerIdx = (this.config as IFrame).clips.findIndex(l => l.active)
           return {
             config: (this.config as IFrame).clips[subLayerIdx],
@@ -394,6 +405,7 @@ export default defineComponent({
       }
     },
     subContentStyles(): any {
+      if (this.config.type === 'frame') return
       const transform = `scale(${this.config.styles.scale})`
       return {
         transform
@@ -411,7 +423,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.isDragging() && !this.useMobileEditor ? 'transform' : '',
+        willChange: this.config.active ? 'transform' : '',
         ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -680,13 +692,15 @@ export default defineComponent({
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) translate(-50%, -50%)`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         ...(this.isDraggingCursor ? { zIndex: 100 } : {})
       }
     },
     textBodyStyle() {
       const checkTextFill = isTextFill(this.config.styles.textFill)
-      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) && !this.contentEditable ? 0 : 1
+      // To fix tiptap focus issue that opacity 0 need one more tap to focus, set opacity to 0.0001.
+      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
+        !this.contentEditable ? 0.0001 : 1
       return {
         width: '100%',
         height: '100%',
@@ -948,6 +962,8 @@ export default defineComponent({
         LayerUtils.replaceLayer(this.pageIndex, this.layerIndex, newLayer)
         if (newLayer.type === 'tmp') {
           groupUtils.set(this.pageIndex, this.layerIndex, newLayer.layers)
+        } else {
+          groupUtils.set(this.pageIndex, this.layerIndex, [newLayer])
         }
         tiptapUtils.updateHtml()
       }
@@ -1058,8 +1074,8 @@ export default defineComponent({
       this.initialPos = { x: event.clientX, y: event.clientY }
 
       const vect = MouseUtils.getMouseRelPoint(event, center)
-      const angeleInRad = this.getLayerRotate() * Math.PI / 180
-      const clientP = ControlUtils.getNoRotationPos(vect, center, angeleInRad)
+      const angleInRad = this.getLayerRotate() * Math.PI / 180
+      const clientP = ControlUtils.getNoRotationPos(vect, center, angleInRad)
       this.control.xSign = (clientP.x - center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - center.y > 0) ? 1 : -1
 
@@ -1172,11 +1188,13 @@ export default defineComponent({
            * use computed size given widthlimit instead of querying the DOM object property to achieve higher consistency.
            */
           if (this.config.styles.writingMode.includes('vertical')) {
-            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height })
-            width = TextUtils.getTextHW(this.config as IText, height).width
+            const textHW = TextUtils.getTextHW(this.config as IText, height)
+            width = textHW.width
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height, spanDataList: textHW.spanDataList })
           } else {
-            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width })
-            height = TextUtils.getTextHW(this.config as IText, width).height
+            const textHW = TextUtils.getTextHW(this.config as IText, width)
+            height = textHW.height
+            ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width, spanDataList: textHW.spanDataList })
           }
           const textInitWidth = width / this.config.styles.scale
           const textInitHeight = height / this.config.styles.scale
@@ -1185,7 +1203,7 @@ export default defineComponent({
            * below make the anchor-point always pinned at the top-left or top-right
            */
           if (this.config.styles.writingMode.includes('vertical')) {
-            this.control.xSign = 1
+            this.control.xSign = -1
           } else {
             this.control.ySign = 1
           }
@@ -1549,11 +1567,11 @@ export default defineComponent({
           textHW = TextUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
-        layerX = isVertical ? layerX : layerPos
+        layerX = isVertical ? layerX - textHW.width + this.getLayerWidth() : layerPos
         layerY = isVertical ? layerPos : layerY
       } else {
         const initData = {
-          xSign: 1,
+          xSign: isVertical ? -1 : 1,
           ySign: 1,
           x: this.getLayerPos().x,
           y: this.getLayerPos().y,
@@ -1577,7 +1595,7 @@ export default defineComponent({
         textHW.height = TextUtils.getTextHW(config).height
       }
 
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
         width: textHW.width,
         height: textHW.height,
@@ -1629,7 +1647,7 @@ export default defineComponent({
     disableTouchEvent(e: TouchEvent) {
       if (this.$isTouchDevice()) {
         e.preventDefault()
-        e.stopPropagation()
+        // e.stopPropagation()
       }
     },
     // computed -> method
@@ -1659,9 +1677,6 @@ export default defineComponent({
     },
     getLayerScale(): number {
       return this.config.styles.scale
-    },
-    isDragging(): boolean {
-      return this.config.dragging
     },
     actionIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100

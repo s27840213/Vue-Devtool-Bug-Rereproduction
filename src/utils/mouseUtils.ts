@@ -1,7 +1,7 @@
 /**
  */
 import { ICoordinate } from '@/interfaces/frame'
-import { IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { IImage, ILayer, IShape, IStyle, IText, ITmp, jsonVer as latestJsonVer } from '@/interfaces/layer'
 import store from '@/store'
 import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
@@ -127,6 +127,8 @@ class MouseUtils {
       moving: false,
       dragging: false,
       designId: data.designId || '',
+      jsonVer: latestJsonVer,
+      jsonVer_origin: latestJsonVer,
       styles: {
         x: x,
         y: y,

@@ -20,7 +20,7 @@
   &__controller-wrapper {
     position: absolute;
     top: 100%;
-    padding: 24px;
+    margin: 24px;
     box-sizing: border-box;
     transform-origin: top;
     display: flex;
@@ -38,6 +38,22 @@
     border: none;
     pointer-events: auto;
     position: absolute;
+  }
+
+  &__action-icon {
+    @include size(24px);
+    @include flexCenter;
+  }
+
+  &__touch-area {
+    position: absolute;
+    @include size(32px);
+    pointer-events: initial;
+    border-radius: 50%;
+    opacity: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   &__action {
@@ -67,25 +83,29 @@
 
   &__top-left-icon {
     position: absolute;
-    left: -12px;
-    top: -12px;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
   }
 
   &__top-right-icon {
     position: absolute;
-    right: -12px;
-    top: -12px;
+    right: 0;
+    top: 0;
+    transform: translate(50%, -50%);
   }
 
   &__bottom-left-icon {
     position: absolute;
-    left: -12px;
-    bottom: -12px;
+    left: 0;
+    bottom: 0;
+    transform: translate(-50%, 50%);
   }
 
   &__bottom-right-icon {
     position: absolute;
-    right: -12px;
-    bottom: -12px;
+    right: 0;
+    bottom: 0;
+    transform: translate(50%, 50%);
   }
 }

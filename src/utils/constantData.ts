@@ -1,7 +1,9 @@
 import i18n from '@/i18n'
+import { tailPositions } from '@/interfaces/format'
 import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
 import store from '@/store'
+import letterBgData from '@/utils/letterBgData'
 import textFillUtils from '@/utils/textFillUtils'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
@@ -26,6 +28,7 @@ export interface IEffectOptionSelect {
   type: 'select'
   select: {
     key: string
+    plan?: 1 | 0
     img: string
     label: string
     attrs: Record<string, unknown>
@@ -127,7 +130,11 @@ class ConstantData {
           label: 'IG 貼文',
           url: 'https://blog.vivipic.com/tw/ig-post-design/'
         },
-        ...[3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        ...[3, 9, 4].map((id) => themeItem(id)), {
+          label: 'LINE 圖文選單',
+          url: 'https://blog.vivipic.com/tw/line-official-account/'
+        },
+        ...[21].map((id) => themeItem(id)),
         ]
       }, {
         label: i18n.global.t('NN0668'),
@@ -146,6 +153,9 @@ class ConstantData {
         content: [{
           label: '喜帖',
           url: 'https://blog.vivipic.com/tw/wedding-invitation/'
+        }, {
+          label: '結婚書約',
+          url: 'https://blog.vivipic.com/tw/marriage-contract/'
         }, {
           label: '邀請卡',
           url: 'https://blog.vivipic.com/tw/invitation-card/'
@@ -360,8 +370,12 @@ class ConstantData {
       blur: i18n.global.tc('NN0065'),
       opacity: i18n.global.tc('NN0066'),
       color: i18n.global.tc('NN0067'),
+      colorOut: i18n.global.tc('NN0890'),
+      colorIn: i18n.global.tc('NN0891'),
       spread: i18n.global.tc('NN0068'),
       stroke: i18n.global.tc('NN0069'),
+      strokeOut: i18n.global.tc('NN0892'),
+      strokeIn: i18n.global.tc('NN0893'),
       shape: i18n.global.tc('NN0070'),
       bend: i18n.global.tc('NN0071'),
       bStroke: i18n.global.tc('NN0733'),
@@ -382,6 +396,8 @@ class ConstantData {
       fontSpacing: i18n.global.tc('NN0109'),
       img: i18n.global.t('NN0870'),
       customImg: i18n.global.t('NN0871'),
+      tailOffset: i18n.global.tc('NN0886'),
+      tailPosition: i18n.global.tc('NN0887'),
     }
 
     return array.map((name: string) => {
@@ -391,7 +407,7 @@ class ConstantData {
       } as IEffectOption
 
       option.type = 'range'
-      if (name.toLocaleLowerCase().endsWith('color')) {
+      if (name.toLocaleLowerCase().includes('color')) {
         option.type = 'color'
       }
       if (name === 'customImg') option.type = 'img'
@@ -400,9 +416,18 @@ class ConstantData {
           option.type = 'select';
           (option as IEffectOptionSelect).select = ['triangle', 'rounded', 'square'].map((key, i) => ({
             key,
-            img: require(`@/assets/img/svg/text-effect/endpoint/endpoint-${key}.svg`),
+            img: require(`@/assets/img/svg/text-effect/select/endpoint-${key}.svg`),
             label: i18n.global.tc(`NN073${i}`),
             attrs: { endpoint: key },
+          }))
+          break
+        case 'tailPosition':
+          option.type = 'select';
+          (option as IEffectOptionSelect).select = tailPositions.map((key) => ({
+            key,
+            img: require(`@/assets/img/svg/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
+            label: key,
+            attrs: { tailPosition: key },
           }))
           break
         case 'angle':
@@ -477,6 +502,10 @@ class ConstantData {
         key: 'bold3d',
         label: i18n.global.tc('NN0729'),
         options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
+      }, {
+        key: 'outline',
+        label: i18n.global.tc('NN0894'),
+        options: toOptions(['strokeOut', 'strokeIn', 'opacity', 'colorOut', 'colorIn'])
       }])
     }, {
       name: 'shape' as const,
@@ -522,6 +551,14 @@ class ConstantData {
         label: i18n.global.tc('NN0725'),
         options: toOptions(['opacity', 'bRadius', 'bStroke', 'pStrokeY', 'bColor', 'pColor'])
       }, {
+        key: 'speech-bubble',
+        label: i18n.global.tc('NN0884'),
+        options: toOptions(['tailPosition', 'tailOffset', 'pStrokeY', 'opacity', 'pColor'], 'speech-bubble')
+      }, {
+        key: 'speech-bubble-triangle',
+        label: i18n.global.tc('NN0885'),
+        options: toOptions(['tailPosition', 'tailOffset', 'bRadius', 'pStrokeY', 'opacity', 'pColor'], 'speech-bubble-triangle')
+      }, {
         key: 'gooey',
         label: i18n.global.tc('NN0726'),
         options: toOptions(['distance', 'bRadius', 'opacity', 'color'])
@@ -530,98 +567,9 @@ class ConstantData {
         label: i18n.global.tc('NN0727'),
         plan: 1,
         options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
-      }, {
-        key: 'rainbow',
-        label: i18n.global.tc('NN0816'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'rainbow-dark',
-        label: i18n.global.tc('NN0817'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'circle',
-        label: i18n.global.tc('NN0820'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'heart',
-        label: i18n.global.tc('NN0847'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'heart-warm',
-        label: i18n.global.tc('NN0848'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'heart-custom',
-        label: i18n.global.tc('NN0849'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'cloud',
-        label: i18n.global.tc('NN0818'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'text-book',
-        label: i18n.global.tc('NN0819'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'penguin',
-        label: i18n.global.tc('NN0821'),
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'planet',
-        label: i18n.global.tc('NN0822'),
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'leaf',
-        label: i18n.global.tc('NN0851'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'gummybear',
-        label: i18n.global.tc('NN0850'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'butter-flower',
-        label: i18n.global.tc('NN0852'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'flower-frame',
-        label: i18n.global.tc('NN0853'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'flower-frame-custom',
-        label: i18n.global.tc('NN0854'),
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'vintage-flower',
-        label: i18n.global.tc('NN0855'),
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'vintage-flower-custom',
-        label: i18n.global.tc('NN0856'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
-      }, {
-        key: 'cat-paw',
-        label: i18n.global.tc('NN0864'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }, {
-        key: 'bread',
-        label: i18n.global.tc('NN0865'),
-        plan: 1,
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
-      }])
+      },
+      ...letterBgData.getEffects(),
+      ])
     }, {
       name: 'fill' as const,
       label: i18n.global.t('NN0868'),
@@ -636,7 +584,7 @@ class ConstantData {
         options: [...toOptions(['customImg', 'xOffset200', 'yOffset200', 'size', 'opacity'])]
       }, ...textFillUtils.fillCategories])
     }]
-    return categories.filter(c => store.getters['user/isAdmin'] ? true : c.name !== 'fill')
+    return categories
   }
 
   // For Settings

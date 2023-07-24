@@ -95,6 +95,10 @@ class CssConveter {
     return result
   }
 
+  convertVerticalStyle(writingMode: string): { writingMode: string } {
+    return { writingMode: writingMode.includes('vertical') ? 'vertical-rl' : 'initial' }
+  }
+
   getFontFamily(font: string): string {
     return (font + ',').concat(store.getters['text/getDefaultFonts'])
   }

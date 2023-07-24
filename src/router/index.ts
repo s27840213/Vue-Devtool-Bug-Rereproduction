@@ -11,7 +11,7 @@ import picWVUtils from '@/utils/picWVUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import Home from '@/views/Home.vue'
 import { h, resolveComponent } from 'vue'
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import { editorRouteHandler } from './handler'
 
 const MOBILE_ROUTES = [
@@ -285,7 +285,7 @@ const router = createRouter({
         }
         picWVUtils.updateLocale(locale)
 
-        document.title = to.meta?.title as string || i18n.global.t('SE0001')
+        // document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
         if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
           // Delete locale in url, will be ignore by prerender.
@@ -299,10 +299,13 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if ((window as any).__PRERENDER_INJECTED !== undefined) {
-    next()
-    return
-  }
+  /**
+   * @Note the following commented codes will cause prerender render error.
+   */
+  // if ((window as any).__PRERENDER_INJECTED !== undefined) {
+  //   next()
+  //   return
+  // }
   picWVUtils.detectIfInApp()
   await picWVUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.
@@ -313,7 +316,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Force login in these page
-  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) && !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode'])) {
+  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) && !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode']) && (window as any).__PRERENDER_INJECTED === undefined) {
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
       if (token === '' || !token) {
@@ -379,17 +382,18 @@ router.beforeEach(async (to, from, next) => {
     logUtils.setLog(`Read device width: ${window.screen.width}`)
     logUtils.setLog(`User agent: ${userAgent}`)
     if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
-      // is Desktop
+      // is Desktop or iPad
       if (userAgent.indexOf('Mac OS X') > 0) {
-        // is Mac (could be iPad)
-        if (window.screen.width <= 1024) {
-          // less than iPad Pro width
+        // is Mac or iPad
+        if (navigator.maxTouchPoints && navigator.maxTouchPoints > 2) {
+          // has more than 2 touch points available (iPad) => mobile
           isMobile = true
-        } // wider
+        }
+        // real Mac => desktop
       }
-      // not Mac
+      // not Mac => desktop
     } else {
-      // is Mobile
+      // is Mobile => mobile
       isMobile = true
     }
     if (isMobile) {

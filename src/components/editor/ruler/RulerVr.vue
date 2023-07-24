@@ -21,8 +21,7 @@ import { mapGetters } from 'vuex'
 export default defineComponent({
   emits: [],
   props: {
-    canvasRect: DOMRect,
-    editorView: HTMLElement
+    editorView: HTMLElement,
   },
   data() {
     return {
@@ -34,7 +33,8 @@ export default defineComponent({
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
-      pageScaleRatio: 'getPageScaleRatio'
+      pageScaleRatio: 'getPageScaleRatio',
+      showPagePanel: 'page/getShowPagePanel'
     }),
     currFocusPage(): IPage {
       return pageUtils.currFocusPage
@@ -84,12 +84,12 @@ export default defineComponent({
     currFocusPageSizeWithBleeds() {
       this.calcRulerBodyOffset()
       this.scale = rulerUtils.adjRulerScale(this.scale)
-    }
+    },
   },
   methods: {
     calcRulerBodyOffset(): void {
       this.$nextTick(() => {
-        this.rulerBodyOffset = pageUtils.pageRect.top - this.canvasRect!.top + this.editorView!.scrollTop
+        this.rulerBodyOffset = pageUtils.pageRect.top - rulerUtils.RULER_SIZE + this.editorView!.scrollTop
       })
     }
   }
@@ -136,7 +136,7 @@ export default defineComponent({
     left: 20%;
     font-size: 12px;
     transform: scale(0.8) rotate(180deg);
-    writing-mode: vertical-lr;
+    writing-mode: vertical-rl;
   }
 
   &__line {

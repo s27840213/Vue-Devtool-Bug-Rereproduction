@@ -39,6 +39,8 @@ class LayerFactary {
       dragging: false,
       designId: '',
       categoryType: config.categoryType,
+      jsonVer: latestJsonVer,
+      jsonVer_origin: latestJsonVer,
       styles: {
         x: 0,
         y: 0,
@@ -98,7 +100,7 @@ class LayerFactary {
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
 
-    const image = Object.assign(basicConfig, config)
+    const image = Object.assign(basicConfig, config, { jsonVer: latestJsonVer })
     return image
   }
 
@@ -174,6 +176,7 @@ class LayerFactary {
         newStyles.blendMode = l.blendMode
         l.styles = newStyles
         l.vSize = [newStyles.width, newStyles.height]
+        l.frameDecType = 'blend'
         return this.newShape(l)
       }) : undefined
 
@@ -187,6 +190,8 @@ class LayerFactary {
       moving: false,
       dragging: false,
       designId: designId ?? '',
+      jsonVer: latestJsonVer,
+      jsonVer_origin: config.jsonVer_origin ?? latestJsonVer,
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,
@@ -208,6 +213,7 @@ class LayerFactary {
       blendLayers,
       decoration: decoration && !clips[0].isFrameImg ? this.newShape((() => {
         decoration.vSize = [initWidth, initHeight]
+        decoration.frameDecType = 'decoration'
         decoration.styles = {
           width: initWidth,
           height: initHeight,
@@ -218,6 +224,7 @@ class LayerFactary {
       })()) : undefined,
       decorationTop: decorationTop && !clips[0].isFrameImg ? this.newShape((() => {
         decorationTop.vSize = [initWidth, initHeight]
+        decorationTop.frameDecType = 'decorationTop'
         decorationTop.styles = {
           width: initWidth,
           height: initHeight,
@@ -254,6 +261,8 @@ class LayerFactary {
       designId: '',
       isEdited: false,
       contentEditable: config.contentEditable ?? false,
+      jsonVer: latestJsonVer,
+      jsonVer_origin: latestJsonVer,
       styles: {
         x: config.styles?.x,
         y: config.styles?.y,
@@ -326,7 +335,13 @@ class LayerFactary {
      * 8: span contains invalid unicode characters (which breaks emoji)
      * 9: replace textShape and textEffect value {} to {name: none}
      * 10: Fix problem that some text effect and text shape will not scale with font-size
+     * 11: use 'vertical' instead of truly used value for css to represent vetical text in json for flexibility
+     * 12: some text has &nbsp; (\xa0) instead of whitespace, which renders weirdly on Safari, replace them with whitespace
      */
+    // 11: use 'vertical' instead of truly used value for css to represent vetical text in json for flexibility
+    if (basicConfig.styles.writingMode.includes('vertical-')) {
+      basicConfig.styles.writingMode = 'vertical'
+    }
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
       // some paragraphs contain empty spans.
@@ -387,7 +402,8 @@ class LayerFactary {
           },
           spanHandler: (span) => {
             // 8: span contains invalid unicode characters (which breaks emoji)
-            span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
+            // 12: some text has &nbsp; (\xa0) instead of whitespace, which renders weirdly on Safari, replace them with whitespace
+            span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '').replace(/\xa0/g, ' ')
           },
           spanPostHandler: (span) => {
             // This needs to be done after removeInvalidStyles's span processing,
@@ -416,7 +432,7 @@ class LayerFactary {
       if (isEqual(basicConfig.styles[key], {})) basicConfig.styles[key] = { name: 'none' }
     }
     // 10: Fix problem that some text effect and text shape will not scale with font-size
-    if (generalUtils.versionCheck({ version: jsonVer, lessThan: '1.0.7' })) {
+    if (generalUtils.versionCheck({ version: config.jsonVer ?? jsonVer, lessThan: '1.0.7' })) {
       const fontSizeModifier = textEffectUtils.getLayerFontSize(config.paragraphs as any) / 60
       const isTextBox = /(square-borderless|rounded-borderless|square-hollow|rounded-hollow|square-both|rounded-both)/
       const target = [
@@ -444,7 +460,7 @@ class LayerFactary {
         }
       }
     }
-    return Object.assign(basicConfig, config)
+    return Object.assign(basicConfig, config, { jsonVer: latestJsonVer })
   }
 
   newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IFrame>, jsonVer = latestJsonVer): IGroup {
@@ -459,6 +475,8 @@ class LayerFactary {
       dragging: false,
       designId: config.designId,
       db: config.db,
+      jsonVer: latestJsonVer,
+      jsonVer_origin: config.jsonVer_origin ?? latestJsonVer,
       styles: {
         x: config.styles.x,
         y: config.styles.y,
@@ -485,7 +503,7 @@ class LayerFactary {
               console.warn('layer in group at index:', idx, 'has no designId and empty svg, it has been removed!')
               return []
             }
-            !shape.designId && console.warn('layer in group at index:', idx, 'has no designId!')
+            !shape.designId && !shape.svg && !['D', 'E'].includes(shape.category) && console.warn('layer in group at index:', idx, 'has no designId!')
           }
           return [this.newByLayerType(l, jsonVer) as IShape | IText | IImage]
         })
@@ -507,6 +525,8 @@ class LayerFactary {
       moving: false,
       dragging: false,
       designId: '',
+      jsonVer: latestJsonVer,
+      jsonVer_origin: latestJsonVer,
       styles: {
         x: styles.x,
         y: styles.y,
@@ -555,6 +575,8 @@ class LayerFactary {
       dragging: false,
       designId: config.designId || '',
       ...(config.category === 'E' && { filled: false }),
+      jsonVer: latestJsonVer,
+      jsonVer_origin: latestJsonVer,
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,
@@ -579,7 +601,7 @@ class LayerFactary {
     }
     delete config.styles
     // delete config.blendMode
-    return Object.assign(basicConfig, config)
+    return Object.assign(basicConfig, config, { jsonVer: latestJsonVer })
   }
 
   newTemplate(config: any): any {

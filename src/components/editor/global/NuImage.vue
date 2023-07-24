@@ -17,12 +17,21 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       class="nu-image__picture-shadow"
       draggable="false"
       :src="shadowSrc"
+      @load='onLoadShadowImg($event)'
       @error="onError")
   div(:class="{'nu-image__clipper': !imgControl}")
-    //- :style="imgWrapperstyle()")
     div(class='nu-image__picture'
       :style="imgStyles()")
-      svg(v-if="isAdjustImage()"
+      img(ref="img"
+        :style="flipStyles"
+        class="nu-image__img full-size"
+        :class="{'layer-flip': flippedAnimation() }"
+        draggable="false"
+        crossorigin="anonymous"
+        @error="onError"
+        @load="onLoad"
+        :src="finalSrc")
+      svg(v-if="isAdjustImage"
         :style="flipStyles"
         class="nu-image__svg"
         :class="{'layer-flip': flippedAnimation() }"
@@ -40,22 +49,16 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        image(:xlink:href="finalSrc" ref="img"
+        image(ref="img"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
+          crossorigin="anonymous"
           draggable="false"
           @error="onError"
-          @load="onAdjustImgLoad")
-      img(v-else ref="img"
-        :style="flipStyles"
-        class="nu-image__img full-size"
-        :class="{'layer-flip': flippedAnimation() }"
-        :src="finalSrc"
-        draggable="false"
-        @error="onError"
-        @load="onLoad")
+          @load="onAdjustImgLoad"
+          :xlink:href="finalSrc")
   template(v-if="hasHalation()")
     component(v-for="(elm, idx) in cssFilterElms()"
       class="nu-image__adjust"
@@ -84,7 +87,6 @@ import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import unitUtils from '@/utils/unitUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
@@ -92,7 +94,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
 export default defineComponent({
-  emits: [],
+  emits: ['onload'],
   props: {
     config: {
       type: Object,
@@ -212,6 +214,7 @@ export default defineComponent({
         height: 0
       },
       initialized: false,
+      isShadowImgLoaded: false
     }
   },
   watch: {
@@ -306,6 +309,7 @@ export default defineComponent({
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
         }
         this.handleUploadShadowImg()
+        this.isShadowImgLoaded = false
       },
       deep: true
     },
@@ -328,7 +332,7 @@ export default defineComponent({
       const src = imageUtils.getSrc(this.config, val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       imageUtils.imgLoadHandler(src, () => {
         this.src = src
-      })
+      }, { crossOrigin: true })
     }
   },
   components: { NuAdjustImage },
@@ -341,15 +345,22 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing'
     }),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     ...mapState('mobileEditor', {
       inAllPagesMode: 'mobileAllPageMode',
     }),
     cyReady(): boolean {
-      // Uploading image, wait for polling
-      if (this.src.startsWith('data:image') || !this.initialized) return false
+      if (this.src.startsWith('data:image') || // Uploading image, wait for polling, for imageManuallyBgRemove.
+        !this.initialized || // Wait for NuImage init, for Image.cy.ts before snapshotTest('init').
+        (this.$isTouchDevice() && this.showCanvas) // Wait for mobile shadow process/upload/download/load, for imageShadow command.
+      ) return false
       return true
+    },
+    isAdjustImage(): boolean {
+      const { styles: { adjust = {} } } = this.config
+      const arr = Object.entries(adjust).filter(([, v]) => typeof v === 'number' && v !== 0)
+      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
     },
     finalSrc(): string {
       if (this.$route.name === 'Preview') {
@@ -444,12 +455,13 @@ export default defineComponent({
           return this.config.id === handleId.layerId
         }
       })()
-      return isCurrShadowEffectApplied && isHandling
+      const hasShadowSrc = !!(this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId)
+      return (isCurrShadowEffectApplied && isHandling) || (hasShadowSrc && !this.isShadowImgLoaded)
     },
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
       const styles = {
-        ...(this.isAdjustImage() && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        ...(this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -473,22 +485,10 @@ export default defineComponent({
         renderW *= scale
         renderH *= scale
       }
-      const { dpi } = this
-      if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSize
-        if (unit !== 'px' && physicalHeight && physicalWidth) {
-          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
-          renderW *= dpi / physicaldpi
-          renderH *= dpi / physicaldpi
-        } else {
-          renderW *= dpi / 96
-          renderH *= dpi / 96
-        }
-      }
+      const dpiRatio = pageUtils.getImageDpiRatio(this.page)
+      renderW *= dpiRatio
+      renderH *= dpiRatio
       return imageUtils.getSrcSize(srcObj, imageUtils.getSignificantDimension(renderW, renderH) * (this.pageScaleRatio * 0.01))
-    },
-    pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     isBlurImg(): boolean {
       return !!this.config.styles.adjust?.blur
@@ -564,7 +564,7 @@ export default defineComponent({
           this.imgNaturalSize.width = img.width
           this.imgNaturalSize.height = img.height
         }
-      })
+      }, { crossOrigin: true })
     },
     onLoad(e: Event) {
       this.isOnError = false
@@ -590,6 +590,12 @@ export default defineComponent({
           }, this.subLayerIndex)
         }
       }
+      this.$emit('onload')
+    },
+    onLoadShadowImg(e: Event) {
+      setTimeout(() => {
+        this.isShadowImgLoaded = true
+      }, 100)
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return
@@ -612,11 +618,11 @@ export default defineComponent({
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
       const previewSrc = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
-      imageUtils.imgLoadHandler(previewSrc, () => {
+      imageUtils.imgLoadHandler(previewSrc, (img) => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
-      })
+      }, { crossOrigin: true })
 
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
@@ -640,7 +646,8 @@ export default defineComponent({
                   this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
                 }
               })
-          }
+          },
+          crossOrigin: true
         })
       })
     },
@@ -662,31 +669,34 @@ export default defineComponent({
               this.preLoadImg('next', this.getImgDimension)
             }
           }
-        })
+        }, { crossOrigin: true })
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
       return new Promise<void>((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => resolve()
-        img.onerror = (error) => {
-          reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-          fetch(img.src)
-            .then(res => {
-              const { status, statusText } = res
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
-            })
-            .catch((e) => {
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
-            })
-        }
-        img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
+        const size = imageUtils.getSrcSize(this.config.adjustSrcObj?.srcObj?.type ? this.config.adjustSrcObj?.srcObj : this.config.srcObj, val, preLoadType)
+        const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, size))
+        imageUtils.imgLoadHandler(src, () => resolve(), {
+          error: () => {
+            reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+            fetch(src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError('img src:', src, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                this.logImgError('img src:', src, 'fetch result: ' + e)
+              })
+          },
+          crossOrigin: true
+        })
       })
     },
     handleIsTransparent() {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
       const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-      const src = imageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      const _src = imageUtils.getSrc(this.config, imgSize)
+      const src = _src + `${_src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       imageUtils.imgLoadHandler(src,
         (img) => {
           if (!this.hasDestroyed) {
@@ -704,7 +714,7 @@ export default defineComponent({
         this.handleIsTransparent()
         await this.previewAsLoading()
       } else {
-        if (this.isAdjustImage()) {
+        if (this.isAdjustImage) {
           this.handleIsTransparent()
         }
         const { imgWidth, imgHeight } = this.config.styles
@@ -1073,11 +1083,6 @@ export default defineComponent({
       return imageUtils
         .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 320)
     },
-    isAdjustImage(): boolean {
-      const { styles: { adjust = {} } } = this.config
-      const arr = Object.entries(adjust).filter(([, v]) => typeof v === 'number' && v !== 0)
-      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
-    },
     hasHalation(): boolean {
       return this.config.styles.adjust?.halation
     },
@@ -1171,6 +1176,8 @@ export default defineComponent({
 
   &__svg {
     display: block;
+    position: absolute;
+    top: 0;
   }
 
   &__adjust {

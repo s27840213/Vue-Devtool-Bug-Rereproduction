@@ -35,9 +35,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 .pro {
   position: absolute;
+  top: 4px;
+  left: 4px;
   &.default {
-    top: 4px;
-    left: 4px;
+    width: 24px;
+    height: 24px;
+  }
+  &.roundedRect {
+    width: 22px;
+    height: 12px;
   }
 }
 </style>

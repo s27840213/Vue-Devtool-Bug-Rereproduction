@@ -1,6 +1,6 @@
 <template lang="pug">
-p(class="nu-curve-text__p" :style="pStyle()")
-  span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
+p(class="nu-curve-text__p")
+  span(v-if="focus === 'shape'"  class="nu-curve-text__circle" :style="circleStyle()")
     svg-icon(iconName="curve-center" :style="curveIconStyle")
   span(v-for="(span, sIndex) in spans()"
     class="nu-curve-text__span"
@@ -14,8 +14,7 @@ import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import textFillUtils from '@/utils/textFillUtils'
-import TextShapeUtils from '@/utils/textShapeUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { defineComponent, PropType } from 'vue'
@@ -39,6 +38,10 @@ export default defineComponent({
     subLayerIndex: {
       type: Number
     },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    },
     extraSpanStyle: {
       type: Object as PropType<Record<string, string|number>>,
     },
@@ -49,11 +52,10 @@ export default defineComponent({
       textHeight: [] as number[],
       minHeight: 0,
       isDestroyed: false,
-      textFillSpanStyle: [] as Record<string, string | number>[][]
     }
   },
   async created () {
-    await this.computeDimensions(this.spans())
+    await this.computeDimensions()
     // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
@@ -61,11 +63,9 @@ export default defineComponent({
     this.isDestroyed = true
   },
   async mounted() {
-    this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(async () => {
         await this.resizeCallback()
-        this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
         generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
       }, 100) // for the delay between font loading and dom rendering
     })
@@ -75,50 +75,41 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
+    focus() {
+      if (!(this.config.active || this.primaryLayer?.active)) return 'none'
+      return textEffectUtils.focus
+    },
+    transforms(): string[] {
+      const mainFontSize = textEffectUtils.getLayerFontSize(this.config.paragraphs)
+      return textShapeUtils.convertTextShape(this.textWidth, this.bend(), mainFontSize)
+    },
   },
   watch: {
     'config.paragraphs': {
       handler(newVal) {
-        this.computeDimensions(this.spans())
+        this.computeDimensions()
         textUtils.untilFontLoaded(newVal).then(() => {
-          this.computeDimensions(this.spans())
+          this.computeDimensions()
         })
       },
       deep: true
     },
-    async 'config.styles.textFill'() {
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
-    },
-    async 'config.styles.textShape'() {
-      this.textFillSpanStyle = await textFillUtils.convertTextEffect(this.config)
-    },
   },
   methods: {
-    focus(): boolean {
-      const { textShape } = this.config.styles
-      return textShape.focus
-    },
     bend(): number {
       const { textShape } = this.config.styles
       return +textShape.bend
     },
     spans(): ISpan[] {
-      return TextShapeUtils.flattenSpans(this.config)
-    },
-    pStyle(): Record<string, string | number> {
-      const { height, width, scale } = this.config.styles
-      return {
-        margin: 0,
-        height: `${height / scale}px`,
-        width: `${width / scale}px`
-      }
+      return textShapeUtils.flattenSpans(this.config)
     },
     circleStyle(): Record<string, string> {
       const { minHeight, scaleRatio } = this
       const bend = this.bend()
       const borderWidth = `${1 / (scaleRatio * 0.01)}px`
       const style = {} as Record<string, string|number>
-      const radius = 1000 / Math.pow(Math.abs(bend), 0.6)
+      const mainFontSize = textEffectUtils.getLayerFontSize(this.config.paragraphs)
+      const radius = textShapeUtils.getRadiusByBend(bend, mainFontSize)
       if (bend >= 0) {
         style.top = `${minHeight / 2}px`
       } else {
@@ -142,18 +133,13 @@ export default defineComponent({
         height: `${size / styles.scale}px`
       }
     },
-    transforms(): string[] {
-      const mainFontSize = textEffectUtils.getLayerFontSize(this.config.paragraphs)
-      return TextShapeUtils.convertTextShape(this.textWidth, this.bend(), mainFontSize)
-    },
     spanStyle(styles: ISpanStyle, sIndex: number) {
       const fontSize = styles.size
       const { textHeight, minHeight } = this
       const bend = this.bend()
-      const transforms = this.transforms()
+      const transforms = this.transforms
       const baseline = `${(minHeight - textHeight[sIndex]) / 2 - fontSize}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
-      const textFillStyle = this.textFillSpanStyle[0]?.[sIndex] ?? {}
       return Object.assign(
         fontStyles,
         {
@@ -162,11 +148,10 @@ export default defineComponent({
           padding: `${fontSize}px`,
         },
         bend >= 0 ? { top: baseline } : { bottom: baseline },
-        textFillStyle,
       )
     },
-    async computeDimensions(spans: ISpan[]) {
-      const { textWidth, textHeight, minHeight } = await TextShapeUtils.getTextHWsBySpansAsync(spans)
+    async computeDimensions() {
+      const { textWidth, textHeight, minHeight } = await textShapeUtils.getTextHWsAsync(this.config)
       this.textWidth = textWidth
       this.textHeight = textHeight
       this.minHeight = minHeight
@@ -177,16 +162,15 @@ export default defineComponent({
       // console.log('resize')
 
       if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await textShapeUtils.getCurveTextPropsAsync(this.config))
       } else {
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await textShapeUtils.getCurveTextPropsAsync(this.config))
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-        textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
       }
 
-      await this.computeDimensions(this.spans())
+      await this.computeDimensions()
     }
   }
 })
@@ -199,6 +183,9 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     position: relative;
+    margin: 0;
+    width: 100%;
+    height: 100%;
   }
   &__circle {
     border: 1px solid rgba(212, 9, 70, 0.5);
@@ -211,7 +198,7 @@ export default defineComponent({
   }
   &__span {
     text-align: left;
-    white-space: pre-wrap;
+    white-space: pre; // if use pre-wrap (as in NuText), single space on Safari will have weirdly thin width.
     overflow-wrap: break-word;
     letter-spacing: 0.1px;
     line-height: 1;

@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-text" :style="textWrapperStyle()" draggable="false")
+div(class="nu-text" draggable="false" :style="textWrapperStyle()")
   //- NuText BGs.
   template(v-for="(bgConfig, idx) in [textBg, textFillBg]")
     custom-element(v-if="bgConfig" class="nu-text__BG" :config="bgConfig" :key="`textSvgBg${idx}`")
@@ -14,6 +14,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :page="page"
       :subLayerIndex="subLayerIndex"
       :primaryLayer="primaryLayer"
+      :contentScaleRatio="contentScaleRatio"
       :extraSpanStyle="text.extraSpanStyle")
     p(v-else
       v-for="(p, pIndex) in config.paragraphs"
@@ -24,7 +25,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
         :key="`span${sIndex}`"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(sIndex, pIndex, config), text.extraSpanStyle)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, pIndex), text.extraSpanStyle)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
@@ -35,16 +36,18 @@ import { CustomElementConfig } from '@/interfaces/editor'
 import { isTextFill } from '@/interfaces/format'
 import { IGroup, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import _, { max, omit } from 'lodash'
+import _, { isEqual, max, omit, round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
@@ -77,6 +80,10 @@ export default defineComponent({
       type: Object,
       default: () => { return undefined }
     },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    },
     inPreview: {
       default: false,
       type: Boolean
@@ -89,13 +96,12 @@ export default defineComponent({
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
-        widthLimit: this.config.widthLimit === -1 ? -1 : dimension
+        widthLimit: this.config.widthLimit === -1 ? -1 : dimension,
+        spanDataList: this.config.spanDataList
       },
       textBgVersion: 0,
       textBg: {} as CustomElementConfig | null,
-      textFillVersion: 0,
       textFillBg: {} as CustomElementConfig | null,
-      textFillSpanStyle: [] as Record<string, string | number>[][]
     }
   },
   created() {
@@ -119,6 +125,13 @@ export default defineComponent({
     },
     isLocked(): boolean {
       return this.config.locked
+    },
+    focus() {
+      if (!(this.config.active || this.primaryLayer?.active)) return 'none'
+      return textEffectUtils.focus
+    },
+    aspectRatio() {
+      return round(this.config.styles.width / this.config.styles.height, 2)
     },
     // Use duplicated of text to do some text effect, define their difference css here.
     duplicatedText() {
@@ -144,31 +157,23 @@ export default defineComponent({
       this.drawTextBg()
       textUtils.untilFontLoaded(newVal).then(async () => {
         this.drawTextBg()
-        this.drawTextFill()
       })
     },
-    async 'config.styles.width'() {
+    aspectRatio() {
+      // To prevent NuText and NuCurveText update when scaling,
+      // don't use w/h in style method and watch aspectRatio instead w/h.
       this.drawTextBg()
-      this.drawTextFill()
     },
-    async 'config.styles.height'() {
-      this.drawTextBg()
-      this.drawTextFill()
+    focus() { this.drawTextFill() },
+    'config.styles.textShape'() {
+      if (this.config.styles.textBg.name !== 'none') {
+        this.drawTextBg()
+      }
     },
     'config.styles.textBg'() { this.drawTextBg() },
     'config.styles.textFill'() { this.drawTextFill() },
   },
   methods: {
-    textWrapperStyle(): Record<string, string> {
-      return {
-        width: '100%',
-        height: '100%',
-        // width: `${this.config.styles.width / this.config.styles.scale}px`,
-        // height: `${this.config.styles.height / this.config.styles.scale}px`,
-        textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode,
-      }
-    },
     drawTextBg(): Promise<void> {
       return new Promise(resolve => {
         this.$nextTick(async () => {
@@ -181,11 +186,12 @@ export default defineComponent({
       })
     },
     async drawTextFill() {
-      // Prevent earlier result overwrite later result
-      const newTextFillVersion = this.textFillVersion = this.textFillVersion + 1
-      this.textFillBg = textFillUtils.drawTextFill(this.config)
-      const result = await textFillUtils.convertTextEffect(this.config)
-      if (newTextFillVersion === this.textFillVersion) this.textFillSpanStyle = result
+      const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
+
+      const newFillBg = textFillUtils.drawTextFill(this.config, ratio)
+      if (!isEqual(newFillBg, this.textFillBg)) { // Prevent unnecessary update
+        this.textFillBg = newFillBg
+      }
     },
     isLayerAutoResizeNeeded(): boolean {
       return this.config.isAutoResizeNeeded
@@ -203,34 +209,41 @@ export default defineComponent({
         return 1
       }
     },
+    textWrapperStyle(): Record<string, string|number> {
+      return {
+        ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
+      }
+    },
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const textEffectStyles = omit(textEffectUtils.convertTextEffect(this.config), ['duplicatedTexts'])
       const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
+      const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
+      const textFillStyle = textFillUtils.convertTextEffect(this.config, ratio)
       return {
         width: isVertical ? '100%' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
         opacity,
+        ...textFillStyle,
         ...textEffectStyles,
         // Add padding at body to prevent Safari bug that overflow text of drop-shadow/opacity<1 will be cliped
         padding: `${maxFontSize}px`,
-        left: `${maxFontSize * -1}px`,
+        [isVertical ? 'right' : 'left']: `${maxFontSize * -1}px`, // When writingMode: vertical-rl, left and right will be exchange.
         top: `${maxFontSize * -1}px`,
       }
     },
-    spanStyle(sIndex: number, pIndex: number, config: IText): Record<string, string> {
-      const p = config.paragraphs[pIndex]
+    spanStyle(sIndex: number, pIndex: number): Record<string, string> {
+      const p = this.config.paragraphs[pIndex]
       const span = p.spans[sIndex]
-      const textFillStyle = this.textFillSpanStyle[pIndex]?.[sIndex] ?? {}
-      const textShadowStrokeColor = textEffectUtils.convertTextEffect(config).webkitTextStrokeColor
-      return Object.assign(tiptapUtils.textStylesRaw(span.styles, this.page.contentScaleRatio),
+      let baseCSS = tiptapUtils.textStylesRaw(span.styles)
+      if (this.config.styles.textFill.name !== 'none') { // Cancel underline if TextFill enabled.
+        baseCSS = omit(baseCSS, ['text-decoration-line', '-webkit-text-decoration-line'])
+      }
+      return Object.assign(baseCSS,
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        textFillStyle,
-        // Overwrite stroke color
-        textShadowStrokeColor ? { webkitTextStrokeColor: textShadowStrokeColor } : {},
-        textBgUtils.fixedWidthStyle(span.styles, p.styles, config),
+        textBgUtils.fixedWidthStyle(span.styles, p.styles, this.config),
       )
     },
     pStyle(styles: any) {
@@ -258,7 +271,7 @@ export default defineComponent({
           y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
       } else {
         /**
          * use LayerUtils.getLayer and not use this.primaryLayer is bcz the tmp layer may contain the group layer,
@@ -267,25 +280,23 @@ export default defineComponent({
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit, spanDataList: textHW.spanDataList })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      await this.drawTextBg()
-      await this.drawTextFill()
     },
     async resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(async () => {
           await this.resizeCallback()
+          this.drawTextBg() // Redraw TextBg after resize.
           if (!this.isCurveText) {
             generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
           }
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawTextBg()
-      this.drawTextFill()
     }
   }
 })
