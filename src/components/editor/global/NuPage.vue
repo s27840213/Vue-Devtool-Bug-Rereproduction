@@ -399,9 +399,11 @@ export default defineComponent({
       if (generalUtils.isTouchDevice()) {
         const { pinchScale, isPinchingEditor } = this.$store.state.mobileEditor
         position = 'absolute'
-        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
-        transform += isPinchingEditor && pinchScale !== 1 ? `scale(${pinchScale})` : ''
         transformOrigin = '0 0'
+        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
+        if (isPinchingEditor && pinchScale !== 1) {
+          transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px) scale(${pinchScale})`
+        }
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
       }

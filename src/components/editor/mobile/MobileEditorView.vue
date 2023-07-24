@@ -373,8 +373,8 @@ export default defineComponent({
     },
     EDGE_WIDTH(): {x : number, y: number} {
       return {
-        x: (editorUtils.mobileSize.width - pageUtils.getCurrPage.width * this.$store.state.contentScaleRatio) * 0.5,
-        y: (editorUtils.mobileSize.height - pageUtils.getCurrPage.height * this.$store.state.contentScaleRatio) * 0.5
+        x: (editorUtils.mobileSize.width - pageUtils.getCurrPage.width * this.$store.getters.getContentScaleRatio) * 0.5,
+        y: (editorUtils.mobileSize.height - pageUtils.getCurrPage.height * this.$store.getters.getContentScaleRatio) * 0.5
       }
     },
     pageEdgeLimitHandler(page: IPage, pageScaleRatio: number) {
@@ -388,7 +388,7 @@ export default defineComponent({
       }
     },
     getEdgeLimit(page: IPage, pageScaleRatio: number) {
-      const contentScaleRatio = this.$store.state.contentScaleRatio
+      const contentScaleRatio = this.$store.getters.getContentScaleRatio
       const EDGE_WIDTH = this.EDGE_WIDTH()
       return {
         left: EDGE_WIDTH.x,
@@ -402,14 +402,13 @@ export default defineComponent({
 
       window.requestAnimationFrame(() => {
         const { getCurrPage: page, scaleRatio } = pageUtils
-        const contentScaleRatio = this.$store.state.contentScaleRatio
+        const contentScaleRatio = this.$store.getters.getContentScaleRatio
         const evtScale = ((e.scale - 1) * 0.5 + 1)
         switch (e.phase) {
           case 'start': {
             if (this.isBgImgCtrl || this.isImgCtrl) return
 
             this.currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-            console.warn('pinching start')
             this.movingUtils.removeListener()
             this.initPagePos.x = page.x
             this.initPagePos.y = page.y
@@ -429,7 +428,6 @@ export default defineComponent({
             const newScaleRatio = evtScale * this.tmpScaleRatio
             if (!this.isPinchingEditor) {
               this.currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-              console.warn('pinching start')
               this.movingUtils.removeListener()
               this.initPagePos.x = page.x
               this.initPagePos.y = page.y
@@ -471,7 +469,6 @@ export default defineComponent({
               x: this.initPagePos.x - sizeDiff.width * this.translationRatio.x + movingTraslate.x,
               y: this.initPagePos.y - sizeDiff.height * this.translationRatio.y + movingTraslate.y
             })
-            console.log('pinch moving')
             break
           }
           case 'end': {
@@ -556,7 +553,6 @@ export default defineComponent({
             this.initPinchPos = null
 
             store.commit('SET_isPageScaling', false)
-            console.warn('pinching end', isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge)
             this.movingUtils.pageMoveStart(e as any)
           }
         }
