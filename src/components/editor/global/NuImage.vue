@@ -89,7 +89,7 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -426,7 +426,7 @@ export default defineComponent({
           return this.config.id === handleId.layerId
         }
       })()
-      const hasShadowSrc = !!(this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId)
+      const hasShadowSrc = !!(this.shadow().srcObj && this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId)
       return (isCurrShadowEffectApplied && isHandling) || (hasShadowSrc && !this.isShadowImgLoaded)
     },
     containerStyles(): any {
