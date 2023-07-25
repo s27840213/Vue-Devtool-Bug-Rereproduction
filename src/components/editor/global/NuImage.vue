@@ -455,7 +455,7 @@ export default defineComponent({
           return this.config.id === handleId.layerId
         }
       })()
-      const hasShadowSrc = !!(this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId)
+      const hasShadowSrc = !!(this.shadow().srcObj && this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId)
       return (isCurrShadowEffectApplied && isHandling) || (hasShadowSrc && !this.isShadowImgLoaded)
     },
     containerStyles(): any {
@@ -595,7 +595,9 @@ export default defineComponent({
     onLoadShadowImg(e: Event) {
       setTimeout(() => {
         this.isShadowImgLoaded = true
-      }, 100)
+        // add 10ms to wait for shadow img render.
+        // In vvstk, this help prevent screenshot error as shadow img transitioning.
+      }, 10)
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return

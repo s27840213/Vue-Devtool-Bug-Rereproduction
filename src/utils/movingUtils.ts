@@ -114,7 +114,6 @@ export class MovingUtils {
 
   pageMoveStart(e: PointerEvent) {
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
-    console.warn('page move start')
     // this.initPageTranslate.x = pageUtils.getCurrPage.x
     // this.initPageTranslate.y = pageUtils.getCurrPage.y
     setInitPageTranslate()
@@ -137,7 +136,6 @@ export class MovingUtils {
   }
 
   pageMoveEnd(e: PointerEvent) {
-    console.log('page move end')
     this.removeListener()
   }
 
@@ -196,7 +194,6 @@ export class MovingUtils {
       //       if (this.getLayerType === LayerType.image) {
       //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
       //         eventUtils.emit(PanelEvent.switchTab, 'crop')
-      //         console.log(1231312)
       //       }
       //       this.dblTabsFlag = true
       //     }
@@ -438,7 +435,7 @@ export class MovingUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
-    const offsetRatio = (generalUtils.isTouchDevice() ? 1 / store.getters.getContentScaleRatio : 1) * 100 / store.getters.getPageScaleRatio
+    const offsetRatio = generalUtils.isTouchDevice() ? 1 / store.getters.getContentScaleRatio : 100 / store.getters.getPageScaleRatio
     const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, offsetRatio)
 
     const isLine = config.type === 'shape' && config.category === 'D'

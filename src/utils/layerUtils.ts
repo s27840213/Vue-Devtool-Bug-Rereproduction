@@ -161,8 +161,8 @@ class LayerUtils {
      * The action of adding layer will trigger record function; so if we also record delete step, we will record two steps at once.
      */
     if (record) {
-      // groupUtils.reset(false)
-      groupUtils.reset()
+      groupUtils.reset(false)
+      // groupUtils.reset()
       stepsUtils.record()
     }
   }
