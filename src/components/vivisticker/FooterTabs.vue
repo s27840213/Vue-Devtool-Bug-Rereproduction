@@ -810,7 +810,6 @@ export default defineComponent({
         case 'replace': {
           if (tab.panelType !== undefined) break
           const { getCurrLayer: layer } = layerUtils
-          // const { pageIndex, layerIndex, subLayerIdx = 0, getCurrLayer: layer } = layerUtils
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
               if (images.length) {
