@@ -159,9 +159,8 @@ export default defineComponent({
           this.redrawShadow()
           return
         }
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.onload = () => {
+        const src = imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, 100))
+        imageUtils.imgLoadHandler(src, (img) => {
           const isTransparent = imageShadowUtils.isTransparentBg(img)
           imageShadowUtils.updateEffectProps({
             pageIndex: this.pageIndex,
@@ -172,12 +171,12 @@ export default defineComponent({
             imageShadowUtils.setHandleId()
             isTransparent && this.redrawShadow()
           }
-        }
-        img.onerror = (e) => {
-          logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img.src + 'error:' + e.toString())
-        }
-        const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-        img.src = imageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        }, {
+          crossOrigin: true,
+          error: (img) => {
+            logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img?.src)
+          }
+        })
       } else {
         stepsUtils.record()
       }
@@ -768,9 +767,7 @@ export default defineComponent({
               layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
             }
             img.crossOrigin = 'anonymous'
-            img.src = imageUtils.getSrc(this.config,
-              ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
-              `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+            img.src = imageUtils.getSrc(this.config, ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal')
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 console.log('img load error')
