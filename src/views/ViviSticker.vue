@@ -20,7 +20,7 @@ div(class="vivisticker" :style="copyingStyles()")
           :currPage="currPage"
           @switchTab="switchTab"
           @panelHeight="setPanelHeight"
-          @bottomThemeChange="(val) => isMobilePanelBottom = val"
+          @bottomThemeChange="(val: boolean) => isMobilePanelBottom = val"
           :footerTabsRef="footerTabsRef")
   footer-tabs(v-if="showFooterTabs" class="vivisticker__bottom"
     ref="footerTabs"
@@ -233,6 +233,8 @@ export default defineComponent({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
+      isProcessing: 'bgRemove/getIsProcessing',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       getPage: 'getPage',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
@@ -249,13 +251,14 @@ export default defineComponent({
       slideType: 'vivisticker/getSlideType',
       isSlideShown: 'vivisticker/getIsSlideShown',
       modalInfo: 'vivisticker/getModalInfo',
-      debugMode: 'vivisticker/getDebugMode'
+      debugMode: 'vivisticker/getDebugMode',
+      isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
     }),
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
     },
     showFooterTabs(): boolean {
-      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview)
+      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview || this.isProcessing || this.isInBgRemoveSection)
     },
     showVConsole(): boolean {
       return false

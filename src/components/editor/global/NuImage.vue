@@ -90,7 +90,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -182,7 +182,8 @@ export default defineComponent({
           logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img.src + 'error:' + e.toString())
         }
         const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-        img.src = imageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+
+        img.src = imageUtils.appendQuery(imageUtils.getSrc(this.config, imgSize), 'ver', generalUtils.generateRandomString(6))
       } else {
         stepsUtils.record()
       }
@@ -790,7 +791,7 @@ export default defineComponent({
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayer?.type ?? '')) return
       const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
       const _src = imageUtils.getSrc(this.config, imgSize)
-      const src = _src + `${_src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      const src = imageUtils.appendQuery(_src, 'ver', generalUtils.generateRandomString(6))
       imageUtils.imgLoadHandler(src,
         (img) => {
           if (!this.hasDestroyed) {
@@ -920,7 +921,7 @@ export default defineComponent({
                 img.src = this.config.previewSrc
               } else {
                 const src = imageUtils.getSrc(this.config, ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal')
-                img.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+                img.src = imageUtils.appendQuery(src, 'ver', generalUtils.generateRandomString(6))
               }
             })
           } else {

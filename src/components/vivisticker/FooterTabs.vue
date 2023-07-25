@@ -113,6 +113,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
+      isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
@@ -126,6 +127,7 @@ export default defineComponent({
       debugMode: 'vivisticker/getDebugMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      isProcessing: 'bgRemove/getIsProcessing',
     }),
     isSettingTabsOpen(): boolean {
       return this.editorTypeTemplate && this.tabs.length > 0
@@ -207,7 +209,6 @@ export default defineComponent({
       ]
     },
     photoTabs(): Array<IFooterTab> {
-      console.log(this.inEffectEditingMode)
       const tabs:Array<IFooterTab> = [
         { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode },
@@ -222,10 +223,10 @@ export default defineComponent({
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate },
         ...this.copyPasteTabs,
         ...(this.editorTypeTemplate && !this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []), // conditional insert to prevent duplicate key
-        // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: false, plan: 'bg-remove' },
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove', hidden: this.inEffectEditingMode || this.isInFrame, disabled: this.isProcessing },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: !this.editorTypeTemplate },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {
@@ -247,7 +248,6 @@ export default defineComponent({
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !vivistickerUtils.isTemplateSupported },
-        // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: !this.debugMode }
         { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove' }
       ]
     },
@@ -651,7 +651,9 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setBgImageControl: 'SET_backgroundImageControl'
+      setBgImageControl: 'SET_backgroundImageControl',
+      setIsProcessing: 'bgRemove/SET_isProcessing',
+      setIsInBgRemoveSection: 'vivisticker/SET_isInBgRemoveSection'
     }),
     updateContainerOverflow() {
       const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
@@ -802,6 +804,31 @@ export default defineComponent({
           // Unreachable, becaues button is disabled
           // if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
           //   notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          //   return
+          // }
+          break
+        }
+        case 'remove-bg': {
+          if (this.isInEditor) {
+            this.setIsInBgRemoveSection(!this.isInBgRemoveSection)
+            this.$emit('switchTab', 'none')
+            return
+          }
+          // if (!this.inBgRemoveMode && !this.isProcessing) {
+          //   this.setIsProcessing(true)
+
+          //   // first step: get the image src
+
+          //   // second step: upload the src to backend, and then call the bg remove API
+
+          //   // after finish bg removing, update the srcObj
+          //   const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
+          //   const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
+
+          //   generalUtils.toDataURL(src, (dataUrl: string) => {
+          //     uploadUtils.uploadAsset('stk-bg-remove', [dataUrl])
+          //   })
+
           //   return
           // }
           break

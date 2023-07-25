@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 import designApis from '@/apis/design'
 import designInfoApis from '@/apis/design-info'
 import listService from '@/apis/list'
@@ -374,7 +373,7 @@ class UploadUtils {
   //
 
   // Upload the user's asset in my file panel
-  uploadAsset(
+  async uploadAsset(
     type:
       | 'image'
       | 'font'
@@ -443,6 +442,7 @@ class UploadUtils {
       // const assetId = '230511154035471yNJGiW58'
       // const uuid = '230511154035471qUvA6TTT'
       const formData = new FormData()
+
       if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
         Object.keys(this.loginOutput.ul_removebg_map.fields).forEach((key) => {
           formData.append(key, this.loginOutput.ul_removebg_map.fields[key])
@@ -452,38 +452,31 @@ class UploadUtils {
           formData.append(key, this.loginOutput.upload_map.fields[key])
         })
       }
-      if (type === 'avatar') {
-        formData.append(
-          'key',
-          `${this.loginOutput.upload_map.path}asset/${type}/original`
-        )
-      } else if (type === 'font') {
-        formData.append(
-          'key',
-          `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.global.locale}_original`
-        )
-      } else if (type === 'stk-bg-remove') {
-        formData.append(
-          'key',
-          `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bg`
-        )
-      } else if (type === 'stk-bg-remove-face') {
-        formData.append(
-          'key',
-          `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bgf`
-        )
-      } else if (type === 'logo') {
-        if (!brandId) return
-        formData.append(
-          'key',
-          `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`
-        )
-      } else {
-        formData.append(
-          'key',
-          `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`
-        )
+
+      let key = ''
+      switch (type) {
+        case 'avatar':
+          key = `${this.loginOutput.upload_map.path}asset/${type}/original`
+          break
+        case 'font':
+          key = `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.global.locale}_original`
+          break
+        case 'stk-bg-remove':
+          key = `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bg`
+          break
+        case 'stk-bg-remove-face':
+          key = `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bgf`
+          break
+        case 'logo':
+          if (!brandId) return
+          key = `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`
+          break
+        default:
+          key = `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`
       }
+
+      formData.append('key', key)
+
       formData.append(
         'Content-Disposition',
         `attachment; filename*=UTF-8''${encodeURIComponent(
@@ -498,7 +491,6 @@ class UploadUtils {
             ? `${this.userId},2`
             : `${this.userId},1`
       )
-      const xhr = new XMLHttpRequest()
 
       const file = isFile
         ? files[i]
@@ -509,7 +501,8 @@ class UploadUtils {
         formData.append('file', file)
       }
 
-      const assetHandler = (src: string, imgType?: string) => {
+      const assetHandler = async (src: string, imgType?: string) => {
+        const xhr = new XMLHttpRequest()
         if (type === 'image') {
           const img = new Image()
           img.src = src
@@ -673,13 +666,13 @@ class UploadUtils {
                       console.log('Successfully upload the file')
                       const targetUrls = this.isAdmin
                         ? {
-                          prev: `https://template.vivipic.com/admin/${this.teamId || this.userId
+                            prev: `https://template.vivipic.com/admin/${this.teamId || this.userId
                             }/asset/avatar/prev`,
-                          prev_2x: `https://template.vivipic.com/admin/${this.teamId || this.userId
+                            prev_2x: `https://template.vivipic.com/admin/${this.teamId || this.userId
                             }/asset/avatar/prev_2x`,
-                          prev_4x: `https://template.vivipic.com/admin/${this.teamId || this.userId
+                            prev_4x: `https://template.vivipic.com/admin/${this.teamId || this.userId
                             }/asset/avatar/prev_4x`,
-                        }
+                          }
                         : json.url
                       store.commit('user/SET_STATE', {
                         avatar: targetUrls,
@@ -757,6 +750,136 @@ class UploadUtils {
       } else {
         assetHandler(files[i] as string)
       }
+    }
+  }
+
+  async assetHandler (type: string, formData: FormData, assetId: string, params: {
+    imgType?: string
+    addToPage?: boolean,
+    isShadow?: boolean,
+    pollingJsonName?: string,
+    pollingCallback?: (json: IUploadAssetResponse) => void
+  }) {
+    switch (type) {
+      case 'image': {
+        this.uploadImage(type, formData, assetId, params)
+      }
+    }
+  }
+
+  async uploadImage(src: string, formData: FormData, assetId: string, { imgType, addToPage, isShadow, pollingJsonName, pollingCallback }: {
+    imgType?: string,
+    addToPage?: boolean,
+    isShadow?: boolean,
+    pollingJsonName?: string,
+    pollingCallback?: (json: IUploadAssetResponse) => void
+  }) {
+    const img = new Image()
+    img.src = src
+    const isUnknown = imgType === 'unknown'
+    const imgCallBack = async (src: string) => {
+      store.commit('file/SET_UPLOADING_IMGS', {
+        id: assetId,
+        adding: true,
+        pageIndex: pageUtils.currFocusPageIndex,
+      })
+      if (addToPage) {
+        assetUtils.addImage(src, isUnknown ? 1 : img.width / img.height, {
+          pageIndex: pageUtils.currFocusPageIndex,
+          // The following props is used for preview image during polling process
+          isPreview: true,
+          assetId,
+        })
+      }
+      try {
+        await this.sendRequest('POST', this.loginOutput.upload_map.url, formData, {
+          trackProgress: true,
+          uploadProgressCallback: (progress: number) => {
+            store.commit('file/UPDATE_PROGRESS', {
+              assetId: assetId,
+              progress: progress / 2,
+            })
+            if (progress === 100) {
+              increaseInterval = window.setInterval(() => {
+                const targetIndex = this.images.findIndex(
+                  (img: IAssetPhoto) => {
+                    return img.id === assetId
+                  }
+                )
+                const curr = this.images[targetIndex].progress as number
+                const increaseNum = (90 - curr) * 0.05
+                this.images[targetIndex].progress = curr + increaseNum
+              }, 10)
+            }
+          }
+        })
+
+        // polling the JSON file of uploaded image
+        const interval = window.setInterval(() => {
+          const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId
+              }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+                6
+              )}`
+          fetch(pollingTargetSrc).then((response) => {
+            if (response.status === 200) {
+              clearInterval(interval)
+              clearInterval(increaseInterval)
+              response.json().then((json: IUploadAssetResponse) => {
+                if (json.flag === 0) {
+                  const { width, height, asset_index } = json.data
+                  if (!isShadow) {
+                    store.commit('file/UPDATE_PROGRESS', {
+                      assetId: assetId,
+                      progress: 100,
+                    })
+                    store.commit('file/UPDATE_IMAGE_URLS', {
+                      assetId,
+                      urls: json.url,
+                      assetIndex: asset_index,
+                      ...(isUnknown && { width, height }),
+                    })
+                  }
+                  store.commit('DELETE_previewSrc', {
+                    type: this.isAdmin ? 'public' : 'private',
+                    userId: this.userId,
+                    assetId,
+                    assetIndex: json.data.asset_index,
+                  })
+                  store.commit('file/SET_UPLOADING_IMGS', {
+                    id: assetId,
+                    adding: false,
+                  })
+                  if (pollingCallback) {
+                    pollingCallback(json)
+                  }
+                } else {
+                  store.commit('file/DEL_PREVIEW', { assetId })
+                  layerUtils.deleteLayerByAssetId(assetId)
+                  paymentUtils.errorHandler(json.msg)
+                }
+              })
+            }
+          })
+        }, 2000)
+      } catch (error) {
+        networkUtils.notifyNetworkError()
+      }
+      let increaseInterval = undefined as any
+      if (!isShadow) {
+        store.commit('file/ADD_PREVIEW', {
+          width: isUnknown ? 250 : img.width,
+          height: isUnknown ? 250 : img.height,
+          src,
+          assetId: assetId,
+        })
+      }
+    }
+    if (!isUnknown) {
+      img.onload = (evt) => {
+        imgCallBack(img.src)
+      }
+    } else {
+      imgCallBack(require('@/assets/img/svg/image-preview.svg'))
     }
   }
 
@@ -1003,7 +1126,7 @@ class UploadUtils {
       .catch(async (error) => {
         // Error: 403: Forbidden
         logUtils.setLog(`Failed: ${error}`)
-        console.error(error)
+        networkUtils.notifyNetworkError()
         await store.dispatch('user/login', { token: this.token })
       })
   }
@@ -2226,6 +2349,86 @@ class UploadUtils {
         reject(new Error(`${this.status}: ${this.statusText}`))
       }
       xhr.send(data)
+    })
+  }
+
+  async sendRequest(method: string, uploadMapUrl: string, data: FormData, { trackProgress = false, uploadProgressCallback } : {
+    trackProgress?: boolean,
+    uploadProgressCallback?: (progress: number) => void
+  }): Promise<IUploadAssetResponse> {
+    try {
+      if (trackProgress) {
+        // Use XMLHttpRequest to track upload progress
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest()
+
+          xhr.open(method, uploadMapUrl, true)
+
+          xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              const response = xhr.response
+              resolve(response)
+            } else {
+              reject(new Error(`${xhr.status}: ${xhr.statusText}`))
+            }
+          }
+
+          xhr.onerror = function () {
+            reject(new Error('XMLHttpRequest error'))
+          }
+
+          xhr.upload.onprogress = function (event) {
+            const uploadProgress = Math.floor((event.loaded / event.total) * 100)
+            if (uploadProgressCallback) {
+              uploadProgressCallback(uploadProgress)
+            }
+          }
+
+          xhr.send(data)
+        })
+      } else {
+        // Use fetch API for regular requests
+        const response = await fetch(uploadMapUrl, {
+          method: method,
+          body: data,
+        })
+
+        if (!response.ok) {
+          throw new Error(`${response.status}: ${response.statusText}`)
+        }
+
+        return await response.json()
+      }
+    } catch (error) {
+      throw new Error('Request error: ' + error)
+    }
+  }
+
+  async pollingNew(targetSrc: string, retryLimit = this.DEFAULT_POLLING_RETRY_LIMIT, retryTime = 0) {
+    return new Promise((resolve, reject) => {
+      const interval = window.setInterval(async () => {
+        if (retryTime === retryLimit) {
+          clearInterval(interval)
+          reject(new Error('Polling failed: reach retry limits'))
+          return
+        }
+
+        retryTime += 1
+        try {
+          const response = await fetch(`${targetSrc}?ver=${generalUtils.generateRandomString(6)}`)
+
+          if (response.ok) {
+            const json: IUploadAssetResponse = await response.json()
+            resolve(json)
+            clearInterval(interval)
+          }
+        } catch (error) {
+          // Handle any errors that occur during fetch or JSON parsing.
+          console.error('Polling error:', error)
+          reject(error)
+          clearInterval(interval)
+        }
+      }, 2000)
     })
   }
 
