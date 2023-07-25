@@ -1,29 +1,36 @@
 <template lang="pug">
 div(class="panel-remove-bg" ref="panelRemoveBg")
-  bg-remove-container(v-if="!isInEditor && (inBgRemoveMode || isProcessing)"
+  bg-remove-container(v-if="inBgRemoveMode || isProcessing"
     :containerWH="containerWH"
     :containerRef="panelRemoveBg"
     :previewSrc="previewSrc")
   div(v-else class="btn-section")
-    div(class="btn" @click="removeBg")
-      div(class="btn__content-section")
-        img(class="img-object-cutout" :src="require('@/assets/img/png/bgRemove/object-cutout.png')")
-      div(class="btn__text-section")
-        span(class="text-H7") {{ $t('STK0060') }}
-        span(class="text-black-5 body-XXS btn__description") {{ $t('STK0061') }}
-    div(class="btn btn--bgf" @click="removeBgf")
-      div(class="btn__content-section btn__content-section--bgf")
-        img(:src="require('@/assets/img/png/bgRemove/face-cutout-body.png')")
-        img(:src="require('@/assets/img/png/bgRemove/face-cutout.png')")
-      div(class="btn__text-section")
-        span(class="text-H7 no-wrap") {{ $t('STK0059') }}
-        span(class="text-black-5 body-XXS btn__description") {{ $t('STK0062') }}
+    transition(name="fade-down-up")
+      div(v-if="mounted" class="btn" @click="removeBg('stk-bg-remove')")
+        div(class="btn__content-section")
+          img(class="img-object-cutout" :src="require('@/assets/img/png/bgRemove/object-cutout.png')")
+        div(class="btn__text-section")
+          span(class="text-H7") {{ $t('STK0060') }}
+          span(class="text-black-5 body-XXS btn__description") {{ $t('STK0061') }}
+    transition(name="fade-down-up")
+      div(v-if="mounted" class="btn btn--bgf"
+          :style="{ 'transition-delay': '0.2s' }"
+          @click="removeBg('stk-bg-remove-face')")
+        div(class="btn__content-section btn__content-section--bgf")
+          img(:src="require('@/assets/img/png/bgRemove/face-cutout-body.png')")
+          img(:src="require('@/assets/img/png/bgRemove/face-cutout.png')")
+        div(class="btn__text-section")
+          span(class="text-H7 no-wrap") {{ $t('STK0059') }}
+          span(class="text-black-5 body-XXS btn__description") {{ $t('STK0062') }}
 </template>
 
 <script lang="ts">
 import BgRemoveContainer from '@/components/vivisticker/BgRemoveContainer.vue'
+import { IImage } from '@/interfaces/layer'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
@@ -33,6 +40,12 @@ export default defineComponent({
   components: {
     BgRemoveContainer
   },
+  props: {
+    needCalculateMobilePanelHeight: {
+      type: Boolean,
+      default: true
+    }
+  },
   data() {
     return {
       panelRemoveBg: null as unknown as HTMLElement,
@@ -40,14 +53,17 @@ export default defineComponent({
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
       debugMode: false,
-      previewSrc: ''
+      previewSrc: '',
+      mounted: false
     }
   },
   mounted() {
     this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
+    this.mounted = true
   },
   computed: {
     ...mapGetters({
+      currSelectedInfo: 'getCurrSelectedInfo',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
@@ -67,27 +83,17 @@ export default defineComponent({
     ...mapMutations({
       setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
-    removeBg() {
+    removeBg(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
       if (this.debugMode) {
         bgRemoveUtils.removeBgStkDebug()
         return
       }
 
-      this.handleIOSImage('stk-bg-remove')
+      this.isInEditor ? this.handleCurrSelectedImage(type) : this.handleIOSImage(type)
       /**
        * @Note the below codes is for old version
        */
       // uploadUtils.chooseAssets('stk-bg-remove')
-    },
-    removeBgf() {
-      if (this.debugMode) {
-        bgRemoveUtils.removeBgStkDebug()
-        return
-      }
-      /**
-       * @Note the below codes is for old version
-       */
-      this.handleIOSImage('stk-bg-remove-face')
     },
     handleIOSImage(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
       vivistickerUtils.getIosImg()
@@ -108,6 +114,17 @@ export default defineComponent({
           }
         })
     },
+    handleCurrSelectedImage (type: 'stk-bg-remove' | 'stk-bg-remove-face') {
+      if (!this.inBgRemoveMode && !this.isProcessing) {
+        this.setIsProcessing(true)
+
+        const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
+        this.previewSrc = src
+        generalUtils.toDataURL(src, (dataUrl: string) => {
+          uploadUtils.uploadAsset(type, [dataUrl])
+        })
+      }
+    },
     toDataURL(src: string, callback: (dataUrl: string)=> void) {
       const image = new Image()
       image.crossOrigin = 'Anonymous'
@@ -125,6 +142,7 @@ export default defineComponent({
   },
   watch: {
     showMobilePanel(val) {
+      if (!this.needCalculateMobilePanelHeight) return
       if (val) {
         this.$nextTick(() => {
           // to prevent the problems that the mobile panel is not fully expanded

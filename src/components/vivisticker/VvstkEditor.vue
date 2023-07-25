@@ -22,30 +22,26 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
     span(class="page-pill__text body-XS text-black-5 no-wrap") {{ strPagePill }}
   page-preivew(v-if="isInPagePreview" :pagesState="pagesState")
   share-template(v-if="isInTemplateShare" :isMultiPage="pagesState.length > 1")
-  div(v-if="(isProcessing || inBgRemoveMode) && isInEditor"
+  div(v-if="isInBgRemoveSection"
       class="vvstk-editor__bg-remove-container")
-    div(class="vvstk-editor__event-section"
-        :style="{ backgroundColor: editorBg }"
-        ref="bgRemoveContainer")
-      bg-remove-container(v-if="bgRemoveContainerRef"
-        :containerWH="containerWH"
-        :containerRef="bgRemoveContainerRef"
-        :previewSrc="bgRemovePreviewSrc")
+    panel-remove-bg(:need-calculate-mobile-panel-height="false")
+      //- bg-remove-container(v-if="bgRemoveContainerRef"
+      //-   :containerWH="containerWH"
+      //-   :containerRef="bgRemoveContainerRef"
+      //-   :previewSrc="bgRemovePreviewSrc")
 </template>
 
 <script lang="ts">
-import BgRemoveContainer from '@/components/vivisticker/BgRemoveContainer.vue'
 import PageCard from '@/components/vivisticker/PageCard.vue'
 import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
+import PanelRemoveBg from '@/components/vivisticker/PanelRemoveBg.vue'
 import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
-import { IImage } from '@/interfaces/layer'
 import { IPageState } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import SwipeDetector from '@/utils/SwipeDetector'
 import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
-import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -60,7 +56,7 @@ export default defineComponent({
     PageCard,
     PagePreivew,
     ShareTemplate,
-    BgRemoveContainer
+    PanelRemoveBg
   },
   props: {
     isInEditor: {
@@ -188,7 +184,8 @@ export default defineComponent({
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      isProcessing: 'bgRemove/getIsProcessing'
+      isProcessing: 'bgRemove/getIsProcessing',
+      isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
     }),
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -207,19 +204,6 @@ export default defineComponent({
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
-    },
-    containerWH() {
-      return {
-        width: this.bgRemoveContainerRef ? this.bgRemoveContainerRef.offsetWidth : 0,
-        /**
-         * @Note 60 is the height of the footer
-         */
-        height: this.bgRemoveContainerRef ? this.bgRemoveContainerRef.offsetHeight - this.mobilePanelHeight : 0,
-      }
-    },
-    bgRemovePreviewSrc() {
-      if (!this.isProcessing) return ''
-      return imageUtils.getSrc(layerUtils.getCurrLayer as IImage)
     }
   },
   methods: {
@@ -237,7 +221,7 @@ export default defineComponent({
       pageUtils.setBackgroundImageControlDefault()
     },
     selectStart(e: PointerEvent) {
-      if (this.inBgRemoveMode) return
+      if (this.inBgRemoveMode || this.isInBgRemoveSection) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
       const isClickOnController = controlUtils.isClickOnController(e)
       if (this.isImgCtrl && !isClickOnController) {

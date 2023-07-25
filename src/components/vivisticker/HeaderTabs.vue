@@ -129,7 +129,8 @@ export default defineComponent({
       isUploadingShadowImg: 'shadow/isUploading',
       isProcessShadowImg: 'shadow/isProcessing',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
-      isProcessing: 'bgRemove/getIsProcessing'
+      isProcessing: 'bgRemove/getIsProcessing',
+      isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
     }),
     templateHeaderTab() {
       return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
@@ -147,6 +148,34 @@ export default defineComponent({
       return imageUtils.isImgControl()
     },
     leftTabs(): TabConfig[] {
+      if (this.inBgRemoveMode) {
+        const retTabs = []
+        const stepTabs = [
+          { icon: 'undo', disabled: this.inBgRemoveFirstStep || this.isCropping, width: 24, action: this.undo },
+          { icon: 'redo', disabled: this.inBgRemoveLastStep || this.isCropping, width: 24, action: this.redo }
+        ]
+        retTabs.push({
+          icon: 'vivisticker_close',
+          disabled: false,
+          width: 24,
+          action: () => {
+            if (this.isUploadingShadowImg) {
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              return
+            }
+            bgRemoveUtils.setInBgRemoveMode(false)
+            editorUtils.setCurrActivePanel('none')
+            this.setInEffectEditingMode(false)
+
+            if (this.isInBgRemoveSection) {
+              this.setIsInBgRemoveSection(false)
+            }
+          }
+        })
+        retTabs.push(...stepTabs)
+        return retTabs
+      }
+
       if (this.isInMultiPageShare) {
         return [
           { icon: 'chevron-left', width: 24, action: () => this.setIsInMultiPageShare(false) }
@@ -157,6 +186,15 @@ export default defineComponent({
         ]
       } else if (this.isInEditor && !this.inBgRemoveMode) {
         if (this.isInPagePreview) return [{ icon: 'chevron-left', width: 24, action: () => this.setIsInPagePreview(false) }]
+        if (this.isInBgRemoveSection) {
+          if (this.isProcessing) {
+            return [
+              { icon: 'vivisticker_logo', logo: true, width: 20, action: this.handleOpenIG },
+              { icon: 'vivisticker_title', logo: true, width: 100, height: 18, action: this.handleOpenIG }
+            ]
+          }
+          return [{ icon: 'chevron-left', width: 24, action: () => this.setIsInBgRemoveSection(!this.isInBgRemoveSection) }]
+        }
         const retTabs = []
         const stepTabs = [
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: this.undo },
@@ -195,28 +233,6 @@ export default defineComponent({
         return [
           { icon: 'chevron-left', width: 24, action: this.clearCategory }
         ]
-      } else if (this.inBgRemoveMode) {
-        const retTabs = []
-        const stepTabs = [
-          { icon: 'undo', disabled: this.inBgRemoveFirstStep || this.isCropping, width: 24, action: this.undo },
-          { icon: 'redo', disabled: this.inBgRemoveLastStep || this.isCropping, width: 24, action: this.redo }
-        ]
-        retTabs.push({
-          icon: 'vivisticker_close',
-          disabled: false,
-          width: 24,
-          action: () => {
-            if (this.isUploadingShadowImg) {
-              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-              return
-            }
-            bgRemoveUtils.setInBgRemoveMode(false)
-            editorUtils.setCurrActivePanel('none')
-            this.setInEffectEditingMode(false)
-          }
-        })
-        retTabs.push(...stepTabs)
-        return retTabs
       } else {
         return [
           { icon: 'vivisticker_logo', logo: true, width: 20, action: this.handleOpenIG },
@@ -283,6 +299,9 @@ export default defineComponent({
         if (this.isInPagePreview) return []
         if (this.inEffectEditingMode) {
           return downloadTab
+        }
+        if (this.isInBgRemoveSection) {
+          return []
         }
         if (this.editorTypeTemplate) {
           return [
@@ -355,7 +374,8 @@ export default defineComponent({
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInEffectEditingMode: 'bgRemove/SET_inEffectEditingMode',
-      deletePreviewSrc: 'DELETE_previewSrc'
+      deletePreviewSrc: 'DELETE_previewSrc',
+      setIsInBgRemoveSection: 'vivisticker/SET_isInBgRemoveSection'
     }),
     resetTemplatesSearch(params = {}) {
       this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
@@ -684,8 +704,7 @@ export default defineComponent({
             srcObj,
           })
 
-          // this.addImage(srcObj, aspectRatio)
-
+          this.setIsInBgRemoveSection(false)
           return srcObj
         }, targetLayerStyle)
       }

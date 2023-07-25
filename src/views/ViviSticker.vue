@@ -251,13 +251,14 @@ export default defineComponent({
       slideType: 'vivisticker/getSlideType',
       isSlideShown: 'vivisticker/getIsSlideShown',
       modalInfo: 'vivisticker/getModalInfo',
-      debugMode: 'vivisticker/getDebugMode'
+      debugMode: 'vivisticker/getDebugMode',
+      isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
     }),
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
     },
     showFooterTabs(): boolean {
-      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview || this.isProcessing)
+      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview || this.isProcessing || this.isInBgRemoveSection)
     },
     showVConsole(): boolean {
       return false

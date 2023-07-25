@@ -50,7 +50,7 @@ div(class="footer-tabs" ref="tabs")
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
-import { ICurrSelectedInfo, IFooterTab } from '@/interfaces/editor'
+import { IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import assetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
@@ -72,7 +72,6 @@ import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { isEqual, startCase } from 'lodash'
@@ -114,6 +113,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
+      isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
@@ -652,7 +652,8 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setBgImageControl: 'SET_backgroundImageControl',
-      setIsProcessing: 'bgRemove/SET_isProcessing'
+      setIsProcessing: 'bgRemove/SET_isProcessing',
+      setIsInBgRemoveSection: 'vivisticker/SET_isInBgRemoveSection'
     }),
     updateContainerOverflow() {
       const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
@@ -808,24 +809,28 @@ export default defineComponent({
           break
         }
         case 'remove-bg': {
-          if (!this.isInEditor) break
-          if (!this.inBgRemoveMode && !this.isProcessing) {
-            this.setIsProcessing(true)
-
-            // first step: get the image src
-
-            // second step: upload the src to backend, and then call the bg remove API
-
-            // after finish bg removing, update the srcObj
-            const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
-            const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
-
-            generalUtils.toDataURL(src, (dataUrl: string) => {
-              uploadUtils.uploadAsset('stk-bg-remove', [dataUrl])
-            })
-
+          if (this.isInEditor) {
+            this.setIsInBgRemoveSection(!this.isInBgRemoveSection)
+            this.$emit('switchTab', 'none')
             return
           }
+          // if (!this.inBgRemoveMode && !this.isProcessing) {
+          //   this.setIsProcessing(true)
+
+          //   // first step: get the image src
+
+          //   // second step: upload the src to backend, and then call the bg remove API
+
+          //   // after finish bg removing, update the srcObj
+          //   const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
+          //   const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
+
+          //   generalUtils.toDataURL(src, (dataUrl: string) => {
+          //     uploadUtils.uploadAsset('stk-bg-remove', [dataUrl])
+          //   })
+
+          //   return
+          // }
           break
         }
         case 'photo':
