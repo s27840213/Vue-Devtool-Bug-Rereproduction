@@ -669,6 +669,7 @@ class ImageUtils {
   }
 
   appendRandomQuery(src: string) {
+    if (src.includes('data:image/')) return src
     if (src.includes('?')) {
       return `${src}&rand_ver=${generalUtils.generateRandomString(6)}`
     } else {

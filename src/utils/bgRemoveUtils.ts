@@ -323,6 +323,12 @@ class BgRemoveUtils {
     return this.canvas.toDataURL('image/png;base64')
   }
 
+  getTrimmedCanvasInfo(targetLayerStyle?: IImageStyle) {
+    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const trimmedCanvasInfo = trimCanvas(this.canvas)
+    return trimmedCanvasInfo
+  }
+
   screenshot() {
     const src = this.canvas.toDataURL('image/png;base64')
     vivistickerUtils.sendToIOS('COPY_IMAGE_FROM_URL', {

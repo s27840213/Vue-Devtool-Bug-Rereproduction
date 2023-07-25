@@ -49,6 +49,7 @@ import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE } from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -647,7 +648,8 @@ export default defineComponent({
                 }, undefined)
               })
             }, 0)
-          }
+          },
+          generalUtils.generateAssetId()
         )
       } else {
         const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo

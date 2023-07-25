@@ -29,7 +29,8 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
         ref="bgRemoveContainer")
       bg-remove-container(v-if="bgRemoveContainerRef"
         :containerWH="containerWH"
-        :containerRef="bgRemoveContainerRef")
+        :containerRef="bgRemoveContainerRef"
+        :previewSrc="bgRemovePreviewSrc")
 </template>
 
 <script lang="ts">
@@ -37,12 +38,14 @@ import BgRemoveContainer from '@/components/vivisticker/BgRemoveContainer.vue'
 import PageCard from '@/components/vivisticker/PageCard.vue'
 import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
 import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
+import { IImage } from '@/interfaces/layer'
 import { IPageState } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
 import SwipeDetector from '@/utils/SwipeDetector'
 import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
+import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -217,10 +220,10 @@ export default defineComponent({
         height: this.bgRemoveContainerRef ? this.bgRemoveContainerRef.offsetHeight - this.mobilePanelHeight : 0,
       }
     },
-    // bgRemovePreviewSrc() {
-    //   if (!this.isProcessing) return ''
-    //   return imageUtils.getSrc(layerUtils.getCurrLayer as IImage)
-    // }
+    bgRemovePreviewSrc() {
+      if (!this.isProcessing) return ''
+      return imageUtils.getSrc(layerUtils.getCurrLayer as IImage)
+    }
   },
   methods: {
     ...mapMutations({

@@ -209,7 +209,6 @@ export default defineComponent({
       ]
     },
     photoTabs(): Array<IFooterTab> {
-      console.log(this.inEffectEditingMode)
       const tabs:Array<IFooterTab> = [
         { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode },
@@ -227,7 +226,7 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame },
         ...this.copyPasteTabs,
         ...(this.editorTypeTemplate && !this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []), // conditional insert to prevent duplicate key
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: false, plan: 'bg-remove', disabled: this.isProcessing },
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: false, plan: 'bg-remove', hidden: this.inEffectEditingMode, disabled: this.isProcessing },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: !this.editorTypeTemplate },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {

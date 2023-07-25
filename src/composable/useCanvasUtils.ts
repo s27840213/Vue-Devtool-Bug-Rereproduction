@@ -27,7 +27,7 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
     // Iterate over every pixel to find the boundaries of the non-transparent content.
     for (let i = 0; i < bufferSize; i += 4) {
       // Check the alpha (transparency) value of each pixel.
-      if (pixels.data[i + 3] > 3) {
+      if (pixels.data[i + 3] !== 0) {
         // Calculate the x and y coordinates of the current pixel.
         x = (i / 4) % canvas.width
         y = ~~((i / 4) / canvas.width)
@@ -58,7 +58,6 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
           bound.bottom = y
         } else if (y > bound.bottom) {
           // Update the bottom boundary if the current y coordinate is greater.
-          console.log(`bound update: ${bound.bottom} -> ${y}}, ${pixels.data[i + 3]}`)
           bound.bottom = y
         }
       }
@@ -68,7 +67,6 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
     const trimHeight = bound.bottom - bound.top + 1
     const trimWidth = bound.right - bound.left + 1
 
-    console.log(canvas.width, canvas.height, bound, trimHeight, trimWidth)
     // Get the trimmed image data based on the boundaries found above.
     const trimmed = ctx.getImageData(bound.left, bound.top, trimWidth, trimHeight)
 

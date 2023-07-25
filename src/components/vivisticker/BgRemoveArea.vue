@@ -89,7 +89,8 @@ export default defineComponent({
       clearModeShift: 4,
       pointerStartX: 0,
       pointerStartY: 0,
-      isDrawing: false
+      isDrawing: false,
+      loading: true
     }
   },
   created() {
@@ -128,8 +129,7 @@ export default defineComponent({
       this.initClearModeCanvas()
       // this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
-
-      console.log('on load trigger')
+      this.loading = false
     }
     this.imageElement.onerror = (ev) => {
       logUtils.setLog('imageElement onerror triggered')
@@ -188,7 +188,6 @@ export default defineComponent({
       currStep: 'bgRemove/getCurrStep',
       inLastStep: 'bgRemove/inLastStep',
       inFirstStep: 'bgRemove/inFirstStep',
-      loading: 'bgRemove/getLoading',
       inGestureMode: 'getInGestureToolMode',
       contentScaleRatio: 'getContentScaleRatio',
       useMobileEditor: 'getUseMobileEditor'
@@ -414,7 +413,7 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
-      if (!this.inGestureMode && !this.movingMode) {
+      if (!this.inGestureMode && !this.movingMode && !this.loading) {
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
         this.pointerStartX = e.clientX
         this.pointerStartY = e.clientY
