@@ -226,7 +226,7 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate },
         ...this.copyPasteTabs,
         ...(this.editorTypeTemplate && !this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []), // conditional insert to prevent duplicate key
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: false, plan: 'bg-remove', hidden: this.inEffectEditingMode || this.isInFrame, disabled: this.isProcessing },
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove', hidden: this.inEffectEditingMode || this.isInFrame, disabled: this.isProcessing },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: !this.editorTypeTemplate },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {
@@ -248,7 +248,7 @@ export default defineComponent({
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !vivistickerUtils.isTemplateSupported },
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: false, plan: 'bg-remove' }
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove' }
       ]
     },
     homeTabsSize(): number {
