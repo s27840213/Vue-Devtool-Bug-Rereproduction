@@ -100,9 +100,6 @@ export default defineComponent({
         })
       }
     },
-    containerWH(val) {
-      console.log(val)
-    },
     isInEditor(newVal, oldVal): void {
       if (newVal && !oldVal) {
         this.$nextTick(() => {

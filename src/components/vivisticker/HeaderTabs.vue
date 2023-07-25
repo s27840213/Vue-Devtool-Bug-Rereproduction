@@ -656,7 +656,6 @@ export default defineComponent({
         const targetLayerStyle = layers[0].styles as IImageStyle
         bgRemoveUtils.setInBgRemoveMode(false)
         editorUtils.setShowMobilePanel(false)
-        this.setInEffectEditingMode(true)
         bgRemoveUtils.saveToIOS(async (data, assetId, aspectRatio, trimmedCanvasInfo) => {
           const srcObj = {
             type: 'ios',
