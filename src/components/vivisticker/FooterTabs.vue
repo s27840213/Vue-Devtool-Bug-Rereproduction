@@ -45,6 +45,7 @@ div(class="footer-tabs" ref="tabs")
                 :style="textIconStyle")
               span(class="no-wrap click-disabled"
                 :class="`text-${tabColor(tab)}`") {{tab.text}}
+              pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
 </template>
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
