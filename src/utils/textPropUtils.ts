@@ -2,7 +2,7 @@ import i18n from '@/i18n'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
 import store from '@/store'
-import text, { ITextState } from '@/store/text/index'
+import text from '@/store/text/index'
 import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import logUtils from '@/utils/logUtils'
@@ -39,9 +39,9 @@ class TextPropUtils {
   get pageIndex(): number { return store.getters.getCurrSelectedPageIndex }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
-  get getCurrTextProps(): { [key: string]: number | boolean | string } { return (text.state as any).props }
-  get getCurrSel(): { start: ISelection, end: ISelection } { return (text.state as any).sel }
-  get getTextState() { return text.state as ITextState }
+  get getCurrTextProps(): { [key: string]: number | boolean | string } { return text.state.props }
+  get getCurrSel(): { start: ISelection, end: ISelection } { return text.state.sel }
+  get getTextState() { return text.state }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
 
   propTypeSorter(propName: string): textPropType {

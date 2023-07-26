@@ -91,7 +91,7 @@ class AssetUtils {
     return typeStrMap[type]
   }
 
-  getTypeModule(type: number): string | undefined {
+  getTypeModule(type: number) {
     // @TODO 暫時
     const typeModuleMap = {
       0: 'font',
@@ -107,7 +107,8 @@ class AssetUtils {
       15: 'objects',
       16: 'giphy'
     } as { [key: number]: string }
-    return typeModuleMap[type]
+    // Return without 'giphy' because vivipic doesn't have giphy vuex module.
+    return typeModuleMap[type] as 'font' | 'background' | 'templates' | 'textStock' | 'objects'
   }
 
   getFontMap(): { [key: string]: string } {
@@ -832,7 +833,7 @@ class AssetUtils {
     const typeModule = this.getTypeModule(type)
     if (typeCategory && typeModule) {
       // @TODO 手動加入最近使用
-      const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
+      const categories = generalUtils.deepCopy(store.state[typeModule].categories)
       const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
       if (recentlyUsed) {
         const assetIndex = recentlyUsed.list.findIndex((asset: IListServiceContentDataItem) => asset.id === id)

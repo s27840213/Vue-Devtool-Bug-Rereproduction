@@ -112,7 +112,7 @@ export default new class ImageShadowPanelUtils {
   async _handleShadowUpload(_layerData?: any, forceUpload = false) {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     let layerData = (() => {
-      const handleId = (store.state as any).shadow.handleId
+      const handleId = store.state.shadow.handleId
       if (handleId) {
         const { pageId, layerId, subLayerId } = handleId
         const isSubLayer = subLayerId && layerId !== subLayerId

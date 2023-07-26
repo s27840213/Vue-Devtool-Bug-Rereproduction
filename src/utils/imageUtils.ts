@@ -168,9 +168,9 @@ class ImageUtils {
       return 0
     }
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
-    const sizeMap = [...(store.state as any).user.imgSizeMap as Array<{ [key: string]: number | string }>]
+    const sizeMap = store.state.user.imgSizeMap
     if (store.getters['user/getUserId'] === 'backendRendering') {
-      sizeMap.unshift(...(store.state as any).user.imgSizeMapExtra)
+      sizeMap.unshift(...store.state.user.imgSizeMapExtra)
     }
     if (sizeMap?.length) {
       let i = 0
