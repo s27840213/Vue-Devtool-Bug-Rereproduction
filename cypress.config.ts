@@ -1,8 +1,10 @@
 import { defineConfig } from 'cypress'
 
 /**
- * To run test in local computer, please specific download chromium version
- * Current version: 109.0.5414.74
+ * How to run Cypress test in local computer:
+ *
+ * 1. Install Chromium
+ * Current Chromium version: 109.0.5414.74
  * Download from:
  * Mac(arm) v109.0.5414.0: https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Mac_Arm/1070135/
  * Mac(x64): https://chromium.cypress.io/mac/beta/109.0.5414.74
@@ -10,6 +12,39 @@ import { defineConfig } from 'cypress'
  *
  * If you are Mac user, you need to trun off some security setting and put app in Application folder:
  * https://blog.ntmy.com.tw/fix-app-damaged-cant-be-opened-trash-error-mac/
+ *
+ * 2. Prevent unnecessary test
+ * Often, during the debugging process, you may only need to test a specific part of the entire test.
+ * To achieve this, you can:
+ *   (1) Add ".only" after "it".
+ *   (2) Uncomment isMobile or !isMobile coutinue.
+ *   (3) Comment some test command.
+ *
+ * For example:
+ *  for (const isMobile of [true, false]) {
+ *    if (isMobile) continue // (2) All mobile test will be ignore
+ *    // if (!isMobile) continue
+ *    ...
+ *      // (1) I only want to test "Unsplash image" test, so I replace it with it.only to prevent other test it.
+ *      it.only(`Unsplash image${suffix}`, function () {
+ *      ...
+ *          // .imageAdjust()
+ *          // .layerFlip()
+ *          // .imageCrop('button', isMobile)
+ *          // .imageCrop('dblclick', isMobile)
+ *          .imageShadow() // (3) I only want to test image shadow, so I comment other test command.
+ *          // .layerAlign()
+ *          // .imageSetAsBg()
+ * These three steps are optional, use them only if necessary.
+ *
+ * 3. Running test command
+ * To obtain the correct snapshot test result, use:
+ *   yarn cyrun -s cypress/e2e/Editor/Image.cy.ts
+ * If you wish to observe how Cypress performs the test or inspect HTML elements, use:
+ *   yarn cyopen
+ * The cyopen command will open Chrome (not Chromium!), and you can select the desired test to execute.
+ * However, please note that the snapshot result in cyopen is not correct,
+ * so all snapshot tests will always pass (their difference threshold is 100%).
  */
 
 export default defineConfig({
