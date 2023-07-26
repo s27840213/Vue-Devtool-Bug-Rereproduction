@@ -4,7 +4,7 @@ import { IPage } from '@/interfaces/page'
 import { IStep } from '@/interfaces/steps'
 import store from '@/store'
 import { FunctionPanelType } from '@/store/types'
-import GeneralUtils from '@/utils/generalUtils'
+import generalUtils from '@/utils/generalUtils'
 import GroupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import { nextTick, reactive } from 'vue'
 import assetUtils from './assetUtils'
@@ -73,7 +73,7 @@ class StepsUtils {
         }
         return typedLayer
       case 'text':
-        if (!GeneralUtils.isTouchDevice()) return layer
+        if (!generalUtils.isTouchDevice()) return layer
         typedLayer = layer as IText
         typedLayer.contentEditable = false
         return typedLayer
@@ -248,9 +248,9 @@ class StepsUtils {
     //     modified: modifiedPage.modified !== undefined
     //   })
     // }
-    const pages = this.filterDataForLayersInPages(GeneralUtils.deepCopy(store.getters.getPages))
+    const pages = this.filterDataForLayersInPages(generalUtils.deepCopy(store.getters.getPages))
     // Watch out! The deep cody method we use won't work on Set/Map object
-    const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
+    const currSelectedInfo = generalUtils.deepCopy(store.getters.getCurrSelectedInfo)
 
     // There's not any steps before, create the initial step first
     if (this.currStep < 0) {
@@ -271,8 +271,8 @@ class StepsUtils {
   }
 
   async asyncRecord() {
-    const pages = GeneralUtils.unproxify(store.getters.getPages)
-    const selectedInfo = GeneralUtils.unproxify(store.getters.getCurrSelectedInfo)
+    const pages = generalUtils.unproxify(store.getters.getPages)
+    const selectedInfo = generalUtils.unproxify(store.getters.getCurrSelectedInfo)
     const clonedData = await workerUtils.asyncCloneDeep({
       pages_1: pages,
       selectedInfo: selectedInfo
@@ -319,7 +319,7 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep--
-    const pages = await this.fillDataForLayersInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
+    const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages)
@@ -352,7 +352,7 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep++
-    const pages = await this.fillDataForLayersInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
+    const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages)
@@ -435,7 +435,7 @@ export default reactive(stepsUtils)
 //         }
 //         return typedLayer
 //       case 'text':
-//         if (!GeneralUtils.isTouchDevice()) return layer
+//         if (!generalUtils.isTouchDevice()) return layer
 //         typedLayer = layer as IText
 //         typedLayer.contentEditable = false
 //         return typedLayer
@@ -593,9 +593,9 @@ export default reactive(stepsUtils)
 //     //     modified: modifiedPage.modified !== undefined
 //     //   })
 //     // }
-//     const pages = filterDataForLayersInPages(GeneralUtils.deepCopy(store.getters.getPages))
+//     const pages = filterDataForLayersInPages(generalUtils.deepCopy(store.getters.getPages))
 //     // Watch out! The deep cody method we use won't work on Set/Map object
-//     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
+//     const currSelectedInfo = generalUtils.deepCopy(store.getters.getCurrSelectedInfo)
 
 //     // There's not any steps before, create the initial step first
 //     if (currStep.value < 0) {
@@ -618,8 +618,8 @@ export default reactive(stepsUtils)
 //   }
 
 //   async function asyncRecord() {
-//     const pages = GeneralUtils.unproxify(store.getters.getPages)
-//     const selectedInfo = GeneralUtils.unproxify(store.getters.getCurrSelectedInfo)
+//     const pages = generalUtils.unproxify(store.getters.getPages)
+//     const selectedInfo = generalUtils.unproxify(store.getters.getCurrSelectedInfo)
 //     const clonedData = await workerUtils.asyncCloneDeep({
 //       pages_1: pages,
 //       selectedInfo: selectedInfo
@@ -665,7 +665,7 @@ export default reactive(stepsUtils)
 //       popupUtils.closePopup()
 //     }
 //     currStep.value--
-//     const pages = await fillDataForLayersInPages(GeneralUtils.deepCopy(steps.value[currStep.value].pages))
+//     const pages = await fillDataForLayersInPages(generalUtils.deepCopy(steps.value[currStep.value].pages))
 //     store.commit('SET_pages', pages)
 //     store.commit('SET_lastSelectedLayerIndex', steps.value[currStep.value].lastSelectedLayerIndex)
 //     const { pageIndex, index } = steps.value[currStep.value].currSelectedInfo
@@ -719,7 +719,7 @@ export default reactive(stepsUtils)
 //       popupUtils.closePopup()
 //     }
 //     currStep.value++
-//     const pages = await fillDataForLayersInPages(GeneralUtils.deepCopy(steps.value[currStep.value].pages))
+//     const pages = await fillDataForLayersInPages(generalUtils.deepCopy(steps.value[currStep.value].pages))
 //     store.commit('SET_pages', pages)
 //     store.commit('SET_lastSelectedLayerIndex', steps.value[currStep.value].lastSelectedLayerIndex)
 //     const { pageIndex, index } = steps.value[currStep.value].currSelectedInfo

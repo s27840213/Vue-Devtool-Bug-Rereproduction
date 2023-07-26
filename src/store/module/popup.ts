@@ -1,7 +1,7 @@
 import { IPopupComponent, ISliderConfig } from '@/interfaces/popup'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
-interface IPopupState {
+export interface IPopupState {
   isPopupOpen: boolean,
   popupComponent: IPopupComponent,
   sliderConfig: ISliderConfig

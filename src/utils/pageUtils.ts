@@ -314,6 +314,10 @@ class PageUtils {
     })
   }
 
+  activePage(pageIndex: number) {
+    store.commit('SET_currActivePageIndex', pageIndex)
+  }
+
   activeMiddlemostPage(): number {
     const targetIndex = generalUtils.isTouchDevice() && this.isDetailPage ? this.currActivePageIndex : this.middlemostPageIndex
     FocusUtils.focusElement(`.nu-page-${targetIndex}`, true)

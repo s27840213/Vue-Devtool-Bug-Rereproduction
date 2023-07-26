@@ -2,7 +2,7 @@ import { IUserInfo } from '@/interfaces/webView'
 import picWVUtils from '@/utils/picWVUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
-interface IWebViewState {
+export interface IWebViewState {
   userInfo: IUserInfo
   inBrowserMode: boolean
   inReviewMode: boolean,

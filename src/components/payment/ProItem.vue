@@ -35,15 +35,23 @@ export default defineComponent({
 <style lang="scss" scoped>
 .pro {
   position: absolute;
-  width: 24px;
-  height: 24px;
+  top: 4px;
+  left: 4px;
   &.default {
+    width: 24px;
+    height: 24px;
     top: -1px; // (2px - 3px). The img contains spaces (3px in top and bottom, so to compensate the space, the top should be reduced by 3px)
     left: 2px;
   }
   &.top-right-corner {
+    width: 24px;
+    height: 24px;
     top: -1px;
     right: 2px;
+  }
+  &.roundedRect {
+    width: 22px;
+    height: 12px;
   }
 }
 </style>

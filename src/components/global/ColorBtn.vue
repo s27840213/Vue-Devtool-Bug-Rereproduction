@@ -3,6 +3,7 @@ div(class="color-btn" :style="wrapperStyle")
   div(class="color-btn__wrapper" :class="{active: active || focus, mobile: $isTouchDevice()}")
     div(v-if="color === 'add'" class="color-btn__add-color")
     div(v-else-if="color === 'multi'" class="color-btn__multi-color")
+    svg-icon(v-else-if="disable" iconName="disable" iconWidth="16px")
     div(v-else :style="{backgroundColor: color}"
         :class="`color-btn__color color-${color.replace('#', '')}`")
     svg-icon(v-if="focus" iconName="item-check" iconColor="black-3" iconWidth="40%")
@@ -25,6 +26,10 @@ export default defineComponent({
     active: {
       type: Boolean
     },
+    disable: {
+      type: Boolean,
+      default: false,
+    },
     focus: {
       type: Boolean
     }
@@ -34,7 +39,8 @@ export default defineComponent({
       return this.size ? {
         width: this.size,
         height: this.size,
-        paddingTop: 0
+        paddingTop: 0,
+        ...this.disable ? { pointerEvents: 'none' } : {},
       } : {}
     },
   }
@@ -51,6 +57,9 @@ export default defineComponent({
   cursor: pointer;
 
   &__wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: absolute;
     top: 0;
     bottom: 0;
@@ -58,22 +67,27 @@ export default defineComponent({
     right: 0;
     border-radius: 4px;
   }
-  &__add-color {
+  &__add-color, &__multi-color, &__color {
+    width: 100%;
     height: 100%;
+    border-radius: 4px;
+  }
+  &__add-color {
     background-image: url("~@/assets/img/svg/addColor.svg");
     background-size: cover;
   }
   &__multi-color {
-    height: 100%;
     background-image: url("~@/assets/img/jpg/multi-color.jpg");
     background-size: cover;
-    border-radius: 4px;
   }
   &__color {
     box-sizing: border-box;
-    height: 100%;
-    border-radius: 4px;
     border: 1px solid setColor(gray-0, 0.2);
+  }
+  .svg-disable {
+    padding: calc((100% - 18px) / 2);
+    border: 1px solid setColor(gray-0, 0.2);
+    border-radius: 4px;
   }
   &__wrapper {
     &.focus, &.active, &:not(.mobile):hover {
@@ -89,7 +103,7 @@ export default defineComponent({
     &:not(.mobile):hover {
       border: 2px solid setColor(black-5);
     }
-    > svg {
+    .svg-item-check {
       position: absolute;
       right: -11%;
       bottom: -11%;

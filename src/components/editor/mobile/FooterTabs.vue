@@ -196,7 +196,7 @@ export default defineComponent({
     homeTabs() :Array<IFooterTab> {
       return generalUtils.versionCheck({ greaterThan: '1.05', version: picWVUtils.getUserInfoFromStore().appVer }) ? [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
-        { icon: 'cameraroll', text: `${this.$tc('NN0002', 2)}` },
+        { icon: 'cameraroll', text: `${this.$tc('STK0067', 2)}` },
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },

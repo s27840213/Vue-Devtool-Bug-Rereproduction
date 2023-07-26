@@ -164,9 +164,8 @@ export default defineComponent({
           this.redrawShadow()
           return
         }
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.onload = () => {
+        const src = imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, 100))
+        imageUtils.imgLoadHandler(src, (img) => {
           const isTransparent = imageShadowUtils.isTransparentBg(img)
           imageShadowUtils.updateEffectProps({
             pageIndex: this.pageIndex,
@@ -177,13 +176,12 @@ export default defineComponent({
             imageShadowUtils.setHandleId()
             isTransparent && this.redrawShadow()
           }
-        }
-        img.onerror = (e) => {
-          logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img.src + 'error:' + e.toString())
-        }
-        const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-
-        img.src = imageUtils.appendQuery(imageUtils.getSrc(this.config, imgSize), 'ver', generalUtils.generateRandomString(6))
+        }, {
+          crossOrigin: true,
+          error: (img) => {
+            logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img?.src)
+          }
+        })
       } else {
         stepsUtils.record()
       }
@@ -381,8 +379,10 @@ export default defineComponent({
       inAllPagesMode: 'mobileAllPageMode',
     }),
     cyReady(): boolean {
-      // Uploading image, wait for polling
-      if (this.src.startsWith('data:image') || !this.initialized) return false
+      if (this.src.startsWith('data:image') || // Uploading image, wait for polling, for imageManuallyBgRemove.
+        !this.initialized || // Wait for NuImage init, for Image.cy.ts before snapshotTest('init').
+        (this.$isTouchDevice() && this.showCanvas) // Wait for mobile shadow process/upload/download/load, for imageShadow command.
+      ) return false
       return true
     },
     isAdjustImage(): boolean {
@@ -458,7 +458,7 @@ export default defineComponent({
           return this.config.id === handleId.layerId
         }
       })()
-      const hasShadowSrc = !!(this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId)
+      const hasShadowSrc = !!(this.shadow().srcObj && this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId)
       return (isCurrShadowEffectApplied && isHandling) || (hasShadowSrc && !this.isShadowImgLoaded)
     },
     containerStyles(): any {
@@ -668,7 +668,9 @@ export default defineComponent({
     onLoadShadowImg(e: Event) {
       setTimeout(() => {
         this.isShadowImgLoaded = true
-      }, 100)
+        // add 10ms to wait for shadow img render.
+        // In vvstk, this help prevent screenshot error as shadow img transitioning.
+      }, 10)
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return
