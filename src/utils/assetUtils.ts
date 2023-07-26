@@ -92,7 +92,7 @@ class AssetUtils {
     return typeStrMap[type]
   }
 
-  getTypeModule(type: number): string | undefined {
+  getTypeModule(type: number) {
     // @TODO 暫時
     const typeModuleMap = {
       0: 'font',
@@ -108,7 +108,8 @@ class AssetUtils {
       15: 'objects',
       16: 'giphy'
     } as { [key: number]: string }
-    return typeModuleMap[type]
+    // Return without 'giphy' because vivipic doesn't have giphy vuex module.
+    return typeModuleMap[type] as 'font' | 'background' | 'templates' | 'textStock' | 'objects'
   }
 
   getFontMap(): { [key: string]: string } {

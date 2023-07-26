@@ -561,7 +561,7 @@ class PageUtils {
     ) * RESIZE_MULTIPLIER
     const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
 
-    if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
+    if (store.state.user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
       // @testing not use scaleRatio in mobile
@@ -601,7 +601,7 @@ class PageUtils {
     const resizeRatio = editorViewBox.clientWidth / (targetWidth * (this.scaleRatio / 100)) * 0.9
 
     editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
-    if ((store.state as any).user.userId === 'backendRendering') {
+    if (store.state.user.userId === 'backendRendering') {
       store.commit('SET_pageScaleRatio', 100)
     } else {
       store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
@@ -635,7 +635,7 @@ class PageUtils {
     const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
 
     return newRatio
-    // if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
+    // if (store.state.user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
     //   store.commit('SET_pageScaleRatio', 100)
     // } else {
     //   // @testing not use scaleRatio in mobile
@@ -685,7 +685,7 @@ class PageUtils {
   }
 
   getImageDpiRatio(page: IPage): number {
-    const dpi = (store.state as any).user.dpi as number
+    const dpi = store.state.user.dpi as number
     if (dpi === -1) return 1
 
     const pageWithoutBleed = page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(page) : page

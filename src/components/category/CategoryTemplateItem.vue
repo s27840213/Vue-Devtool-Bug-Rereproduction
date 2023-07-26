@@ -8,7 +8,7 @@ div(class="category-template-item")
       ref="img"
       :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
       @error="handleNotFound")
-    pro-item(v-if="item.plan" draggable="false")
+    pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">

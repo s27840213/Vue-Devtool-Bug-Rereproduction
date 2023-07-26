@@ -1,6 +1,9 @@
 <template lang="pug">
-img(:class="`pro ${theme}`" loading="lazy"
-    :src="require(`@/assets/img/svg/pricing/${iconFileName}`)" )
+img(
+    :class="`pro ${theme}`"
+    loading="lazy"
+    draggable="false"
+    :src="require(`@/assets/img/svg/pricing/${iconFileName}`)")
 </template>
 
 <script lang="ts">

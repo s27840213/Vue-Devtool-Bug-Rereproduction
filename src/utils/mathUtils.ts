@@ -1,3 +1,4 @@
+import { CustomElementConfig } from '@/interfaces/editor'
 import { IStyle, ITextStyle } from '@/interfaces/layer'
 import { IBounding } from '@/interfaces/math'
 import store from '@/store'
@@ -229,3 +230,156 @@ class MathUtils {
 
 const mathUtils = new MathUtils()
 export default mathUtils
+
+// For basic Point operation like:
+//   add, subtract, multiply with const, get middle point, get distance, rotate
+export class Point {
+  x: number
+  y: number
+  constructor(x = 0, y = 0) {
+    this.x = x
+    this.y = y
+  }
+
+  middle(p: Point): Point {
+    return new Point(
+      (this.x + p.x) / 2,
+      (this.y + p.y) / 2
+    )
+  }
+
+  add(p: { x: number, y: number }): Point {
+    return new Point(
+      this.x + p.x,
+      this.y + p.y
+    )
+  }
+
+  sub(p: { x: number, y: number }): Point {
+    return new Point(
+      this.x - p.x,
+      this.y - p.y
+    )
+  }
+
+  mul(scale: number): Point {
+    return new Point(
+      this.x * scale,
+      this.y * scale,
+    )
+  }
+
+  dist(p = new Point()): number {
+    return Math.pow(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2), 0.5)
+  }
+
+  // Rotate clockwise
+  rotate(angle: number, origin = new Point()) {
+    return obj2Point(mathUtils.getRotatedPoint(angle, origin, this))
+  }
+
+  toString(): string {
+    return `${this.x} ${this.y}`
+  }
+}
+export function obj2Point(p: { x: number, y: number }): Point {
+  return new Point(p.x, p.y)
+}
+
+// For drawing svg path and debug
+export class Path {
+  pathArray = [] as string[]
+  pointArray = [] as Point[]
+  currPos: Point
+  constructor(p: Point) {
+    this.currPos = p
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`M${p}`)
+  }
+
+  L(end: Point): void {
+    if (this.currPos.dist(end) < 0.1) return
+    this.currPos = end
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`L${end}`)
+  }
+
+  C(c1: Point, c2: Point, end: Point): void {
+    if (this.currPos.dist(end) < 0.1) return
+    this.currPos = end
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`C${c1} ${c2} ${end}`)
+  }
+
+  v(dist: number): void {
+    this.currPos = this.currPos.add(new Point(0, dist))
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`v${dist}`)
+  }
+
+  h(dist: number): void {
+    this.currPos = this.currPos.add(new Point(dist, 0))
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`h${dist}`)
+  }
+
+  l(p: Point): void {
+    this.currPos = this.currPos.add(p)
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`l${p.x} ${p.y}`)
+  }
+
+  a(p: Point, { rx = 1, ry = 1, largeArcFlac = 0, sweepFlag = 1, radius = 1 } = {}): void {
+    if (radius !== 1) [rx, ry] = [radius, radius]
+    this.currPos = this.currPos.add(p)
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`a${rx} ${ry} 0 ${largeArcFlac}${sweepFlag}${p.x} ${p.y}`)
+  }
+
+  // For arc that angle > 360
+  largeArc(totalAngles: number, origin = new Point()): void {
+    const clockwise = totalAngles > 0
+    const rotateDir = (clockwise ? 1 : -1)
+    const radius = this.currPos.dist(origin)
+    let angleAcc = 0
+    totalAngles = Math.abs(totalAngles)
+    while (angleAcc < totalAngles) {
+      const currAngle = Math.min(totalAngles - angleAcc, 180)
+      const arcEnd = this.currPos.rotate(currAngle * rotateDir, origin)
+      this.a(arcEnd.sub(this.currPos), { sweepFlag: +clockwise, radius })
+      angleAcc += currAngle
+    }
+  }
+
+  q(dp1: Point, dp: Point): void
+  q(dx1: number, dy1: number, dx: number, dy: number): void
+  q(dx1: number | Point, dy1: number | Point, dx?: number, dy?: number): void {
+    if (dx1 instanceof Point && dy1 instanceof Point) {
+      [dx, dy] = [dy1.x, dy1.y];
+      [dx1, dy1] = [dx1.x, dx1.y]
+    }
+    this.currPos = this.currPos.add(new Point(dx as number, dy as number))
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`q${dx1} ${dy1} ${dx} ${dy}`)
+  }
+
+  // Return path result.
+  result(): string {
+    return this.pathArray.join('\n') + 'z'
+  }
+
+  // Return path point for debuging.
+  toCircle(): CustomElementConfig[] {
+    return this.pointArray.map(p => {
+      return {
+        tag: 'circle',
+        attrs: {
+          cx: p.x,
+          cy: p.y,
+          r: '5',
+          fill: 'red'
+        }
+      }
+    })
+  }
+}
