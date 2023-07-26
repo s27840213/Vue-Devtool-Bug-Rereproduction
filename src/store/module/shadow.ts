@@ -32,7 +32,7 @@ export interface IShadowAsset {
     tiny: string
   }
 }
-interface IShadowState {
+export interface IShadowState {
   uploadId: ILayerIdentifier,
   processId: ILayerIdentifier,
   /**

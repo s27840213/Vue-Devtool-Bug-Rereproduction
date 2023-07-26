@@ -1,7 +1,7 @@
 import { IModalInfo } from '@/interfaces/modal'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
-interface IModalState {
+export interface IModalState {
   modalInfo: IModalInfo,
   modalOpen: boolean,
   pending: boolean

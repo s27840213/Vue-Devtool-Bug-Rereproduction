@@ -2,7 +2,7 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import { GetterTree, MutationTree } from 'vuex'
 
 const MAX_STEP_COUNT = 20
-interface IBgRemoveState {
+export interface IBgRemoveState {
   inBgRemoveMode: boolean,
   brushSize: number,
   showInitImage: boolean,

@@ -46,7 +46,7 @@ div(class="popup-file")
       span {{$t('NN0790', {type: $tc('NN0793', 1)})}}
   div(class="popup-file__item" @click="onLogoutClicked()")
     span {{$tc('NN0167',2)}}
-  div(class="popup-file__item" @click="gotoMobile()")
+  div(class="popup-file__item")
     span(class="text-gray-3") Version: {{buildNumber}}
   template(v-if="isAdmin")
     div(class="popup-file__item" @click="addTwentyPage()")
@@ -59,6 +59,12 @@ div(class="popup-file")
       span duplicatePageTwentyTimes
     div(class="popup-file__item" @click="testError()")
       span testError
+    div(class="popup-file__item" @click="testAllFonts(0, 1000)")
+      span list all font 0~1000
+    div(class="popup-file__item" @click="testAllFonts(1000, 2000)")
+      span list all font 1000~2000
+    div(class="popup-file__item" @click="testAllFonts(2000, 3000)")
+      span list all font 2000~3000
   //- div(class="popup-file__item" @click="uploadTmpJson()")
   //-   span Upload Temp.json
   //- div(class="popup-file__item" @click="getTmpJson()")
@@ -74,6 +80,7 @@ import popupUtils from '@/utils/popupUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import testUtils from '@/utils/testUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -186,9 +193,9 @@ export default defineComponent({
       localStorage.setItem('token', '')
       window.location.href = '/'
     },
-    gotoMobile() { // TO-DELETE
-      window.location.href = this.$router.currentRoute.value.fullPath.replace('editor', 'mobile-editor')
-    }
+    testAllFonts(start: number, end: number) {
+      return testUtils.testAllFonts(start, end)
+    },
   }
 })
 </script>
@@ -197,11 +204,13 @@ export default defineComponent({
 .popup-file {
   position: relative;
   border-radius: 5px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
   justify-content: center;
   z-index: setZindex("dropdowns");
   padding: 25px 20px;
+  max-height: calc(100vh - 48px);
+  box-sizing: border-box;
+  overflow-y: auto;
 
   &__profile {
     display: flex;

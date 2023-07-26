@@ -1,15 +1,15 @@
-import { ActionTree, MutationTree, GetterTree } from 'vuex'
-import unsplash from '@/apis/unsplash'
 import pexels from '@/apis/pexels'
+import unsplash from '@/apis/unsplash'
 import { IPhoto } from '@/interfaces/api'
 import logUtils from '@/utils/logUtils'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 const UNSPLASH_PER_PAGE = 30 as const
 const PEXELS_PER_PAGE = 50 as const
 const SET_STATE = 'SET_STATE' as const
 const SET_TOTAL_PAGES = 'SET_TOTAL_PAGES' as const
 
-interface IPhotoState {
+export interface IPhotoState {
   list: IPhoto[],
   query: string,
   page: number,
