@@ -13,7 +13,7 @@ div(class="category-object-item"
     :iconName="'more_vertical'"
     :iconColor="'gray-2'"
     :iconWidth="'20px'")
-  pro-item(v-if="item.plan" draggable="false")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
