@@ -538,12 +538,11 @@ class Gooey {
 
 class TextBg {
   private currColorKey = ''
-  effects = this.getDefaultEffects() as Record<string, Record<string, string | number | boolean>>
 
   rgba = (color: string, opacity: number) =>
     textEffectUtils.convertColor2rgba(color, opacity)
 
-  getDefaultEffects() {
+  get effectDefaultOptions() {
     return {
       none: {},
       'square-borderless': {
@@ -633,7 +632,7 @@ class TextBg {
       },
       // A part of additional default ITextLetterBg setting is in setExtraDefaultAttrs func.
       ...letterBgData.getDeafultOptions()
-    }
+    } as Record<string, Record<string, string | number | boolean>>
   }
 
   inlineSvg(svg: string) {
@@ -1057,7 +1056,7 @@ class TextBg {
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
     const subLayerIndex = layerUtils.subLayerIdx
-    const defaultAttrs = this.effects[effect]
+    const defaultAttrs = this.effectDefaultOptions[effect]
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
@@ -1169,7 +1168,7 @@ class TextBg {
 
   async resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
-    await this.setTextBg(effectName, this.effects[effectName])
+    await this.setTextBg(effectName, this.effectDefaultOptions[effectName])
     await letterBgData.setExtraDefaultAttrs(effectName)
   }
 }
