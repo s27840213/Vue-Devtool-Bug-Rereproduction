@@ -25,7 +25,8 @@ div(v-if="!$isTouchDevice()" class="overlay desktop" :class="theme")
             mobile-slider(v-for="option in options" :key="option.key"
                 :title="option.label"
                 :value="getInputValue(option)"
-                @update="(val: number)=>handleRangeInput(val, option)")
+                @update="(val: number)=>handleRangeInput(val, option)"
+                @mouseup="record")
 //- Mobile version
 div(v-else class="overlay mobile" :class="theme")
   div(v-if="state === 'effects'" class="overlay__tabs")
@@ -49,7 +50,8 @@ div(v-else class="overlay mobile" :class="theme")
     mobile-slider(v-for="option in options" :key="option.key"
         :title="option.label"
         :value="getInputValue(option)"
-        @update="(val: number)=>handleRangeInput(val, option)")
+        @update="(val: number)=>handleRangeInput(val, option)"
+        @mouseup="record")
 </template>
 
 <script lang="ts">
@@ -57,7 +59,10 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import OverlayItem from '@/components/editor/overlay/OverlayItem.vue'
 import CollapseTitle from '@/components/global/CollapseTitle.vue'
 import Tabs from '@/components/Tabs.vue'
+import { IAsset } from '@/interfaces/module'
+import assetUtils from '@/utils/assetUtils'
 import overlayUtils, { IOverlayItem } from '@/utils/overlayUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import { find } from 'lodash'
 import { defineComponent, PropType } from 'vue'
 import { Collapse } from 'vue-collapsed'
@@ -142,7 +147,7 @@ export default defineComponent({
     switchTab(categoryIndex: number) {
       this.currCategory = this.currCategory === categoryIndex ? 0 : categoryIndex
     },
-    applyOverlay(item: IOverlayItem) {
+    async applyOverlay(item: IOverlayItem) {
       if (this.$isTouchDevice() && this.curr.id === item.id && item.id !== 'none') {
         this.$emit('pushHistory', this.currOverlayName)
       } else {
@@ -150,13 +155,17 @@ export default defineComponent({
           this.targetType, {
             id: item.id,
             ...item.preset,
+            config: !item.svg ? null
+              : assetUtils.svgJsonInit(await assetUtils.get(item.svg, 'svg') as IAsset)
           }
         )
+        this.record()
       }
     },
     handleRangeInput(val: number, option: IOverlayOption) {
       overlayUtils.applyOverlay(this.targetType, { [option.key]: val })
     },
+    record() { stepsUtils.record() },
   }
 })
 </script>

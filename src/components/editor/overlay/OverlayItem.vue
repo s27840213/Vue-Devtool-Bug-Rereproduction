@@ -9,7 +9,7 @@ div(class="overlay-item" :class="{active, [theme]: true}")
       img(class="overlay-item__mask"
           draggable="false"
           :src="`https://template.vivipic.com/overlay/${mask.id}/prev?ver=${mask.ver}`")
-      pro-item(v-if="mask?.plan" theme="roundedRect")
+      pro-item(v-if="mask.plan" theme="roundedRect")
       div(v-if="active && theme === 'mobile'"
           class="overlay-item__img--more")
         svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")

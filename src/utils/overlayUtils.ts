@@ -1,10 +1,9 @@
 import i18n from '@/i18n'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IShape } from '@/interfaces/layer'
 import { IAssetObject } from '@/interfaces/shape'
 import backgroundUtils from '@/utils/backgroundUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import { cloneDeep, find } from 'lodash'
 
 // Overlay data that store in design config file.
@@ -13,6 +12,7 @@ export interface IOverlay {
   xOffset: number
   yOffset: number
   opacity: number
+  config: IShape | null
 }
 
 // Data in app.json
@@ -113,13 +113,11 @@ class Overlay {
     this.overlaysData = normalOverlays
   }
 
-  getCurrOverlay(type: 'page' | 'layer') {
+  getCurrOverlay(target: 'page' | 'layer') {
     const { subLayerIdx } = layerUtils
     const currLayer = layerUtils.getCurrLayer
 
-    if (type === 'page') {
-      return pageUtils.currFocusPage.overlay
-    } else if (!layerUtils.hasSelectedLayer) {
+    if (target === 'page') {
       return pageUtils.currFocusPage.backgroundImage.config.overlay
     } else if (currLayer.type === 'image') {
       return currLayer.overlay
@@ -133,19 +131,18 @@ class Overlay {
         xOffset: 0,
         yOffset: 0,
         opacity: 100,
+        config: null,
       }
     }
   }
 
-  applyOverlay(type: 'page' | 'layer', options: Partial<IOverlay>) {
+  applyOverlay(target: 'page' | 'layer', options: Partial<IOverlay>) {
     const { pageIndex, layerIndex, subLayerIdx } = layerUtils
     const currLayer = layerUtils.getCurrLayer
-    const overlay = cloneDeep(this.getCurrOverlay(type))
+    const overlay = cloneDeep(this.getCurrOverlay(target))
     Object.assign(overlay, options)
 
-    if (type === 'page') {
-      pageUtils.updatePageProps({ overlay })
-    } else if (!layerUtils.hasSelectedLayer) {
+    if (target === 'page') {
       backgroundUtils.setBgImage({ pageIndex, config: { overlay } })
     } else if (currLayer.type === 'image' || subLayerIdx !== -1) {
       // For single image layer and groun sub image layer.
@@ -167,7 +164,6 @@ class Overlay {
         })
       }
     }
-    stepsUtils.record()
   }
 }
 

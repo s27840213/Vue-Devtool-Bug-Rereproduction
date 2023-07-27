@@ -4,7 +4,6 @@ import { ISize } from '@/interfaces/math'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import layerFactary from '@/utils/layerFactary'
-import { IOverlay } from '@/utils/overlayUtils'
 import SnapUtils from '@/utils/snapUtils'
 
 export class Page implements IPage {
@@ -49,7 +48,6 @@ export class Page implements IPage {
   }
 
   contentScaleRatio: number
-  overlay: IOverlay
 
   constructor() {
     this.mobilePysicalSize = {
@@ -107,11 +105,5 @@ export class Page implements IPage {
       right: 11
     }
     this.contentScaleRatio = 1
-    this.overlay = {
-      id: 'none',
-      xOffset: 0,
-      yOffset: 0,
-      opacity: 100,
-    }
   }
 }

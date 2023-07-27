@@ -227,7 +227,7 @@ class AssetUtils {
     }
   }
 
-  addSvg(json: any, attrs: IAssetProps = {}) {
+  svgJsonInit(json: any, attrs: IAssetProps = {}): IShape {
     const { pageIndex, styles = {} } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
@@ -240,7 +240,7 @@ class AssetUtils {
     json.ratio = 1
     json.className = ShapeUtils.classGenerator()
 
-    const config = {
+    return {
       ...json,
       styles: {
         x: currentPage.width / 2 - svgWidth / 2,
@@ -255,6 +255,14 @@ class AssetUtils {
         ...styles
       }
     }
+  }
+
+  addSvg(json: any, attrs: IAssetProps = {}) {
+    const { pageIndex } = attrs
+    const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
+    const currentPage = this.getPage(targetPageIndex)
+    const config = this.svgJsonInit(json, attrs)
+
     const index = layerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
     layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)

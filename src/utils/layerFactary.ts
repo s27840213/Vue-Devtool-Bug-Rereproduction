@@ -46,6 +46,7 @@ class LayerFactary {
         xOffset: 0,
         yOffset: 0,
         opacity: 100,
+        content: null,
       },
       styles: {
         x: 0,
