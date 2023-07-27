@@ -127,7 +127,8 @@ export default defineComponent({
     text-align: center;
     transition: all 0.2s;
   }
-  &__underline{
+  &__underline {
+    margin-top: 4px;
     border: 1px solid var(--border-color);
     border-radius: 1px;
   }
@@ -142,7 +143,6 @@ export default defineComponent({
   }
   &.default, &.stk {
     .tabs__item {
-      padding-bottom: 4px;
       min-width: fit-content;
     }
   }
