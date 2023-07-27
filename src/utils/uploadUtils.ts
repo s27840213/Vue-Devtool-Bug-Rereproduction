@@ -5,7 +5,7 @@ import i18n from '@/i18n'
 import {
   IAssetPhoto,
   IGroupDesignInputParams,
-  IListServiceContentData,
+  IListServiceContentData
 } from '@/interfaces/api'
 import {
   IFrame,
@@ -15,13 +15,13 @@ import {
   IShape,
   IText,
   ITmp,
-  jsonVer,
+  jsonVer
 } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import {
   IUploadAssetFontResponse,
   IUploadAssetLogoResponse,
-  IUploadAssetResponse,
+  IUploadAssetResponse
 } from '@/interfaces/upload'
 import router from '@/router'
 import store from '@/store'
@@ -2068,13 +2068,14 @@ class UploadUtils {
     switch (layer.type) {
       case 'image': {
         const image = layer as IImage
-        const { type, srcObj, styles, trace, jsonVer, jsonVer_origin } = image
+        const { type, srcObj, styles, trace, jsonVer, jsonVer_origin, overlay } = image
         return {
           type,
           srcObj,
           trace,
           jsonVer,
           jsonVer_origin,
+          overlay,
           styles: this.styleFilter(styles, 'image'),
         }
       }

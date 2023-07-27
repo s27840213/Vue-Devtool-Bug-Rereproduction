@@ -31,7 +31,7 @@ export interface IEffectOptionSelect {
     plan?: 1 | 0
     img: string
     label: string
-    attrs: Record<string, unknown>
+    preset: Record<string, unknown>
   }[]
 }
 export interface IEffectOptionColor {
@@ -432,7 +432,7 @@ class ConstantData {
             key,
             img: require(`@/assets/img/svg/text-effect/select/endpoint-${key}.svg`),
             label: i18n.global.tc(`NN073${i}`),
-            attrs: { endpoint: key },
+            preset: { endpoint: key },
           }))
           break
         case 'tailPosition':
@@ -441,7 +441,7 @@ class ConstantData {
             key,
             img: require(`@/assets/img/svg/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
             label: key,
-            attrs: { tailPosition: key },
+            preset: { tailPosition: key },
           }))
           break
         case 'angle':

@@ -545,6 +545,9 @@ export default defineComponent({
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  .tabs {
+    margin-bottom: 24px;
+  }
   &__tabs {
     margin-top: v-bind("isInEditor ? '0' : '24px'");
   }
