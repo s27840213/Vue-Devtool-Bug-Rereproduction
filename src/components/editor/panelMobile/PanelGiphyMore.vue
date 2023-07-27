@@ -59,7 +59,7 @@ export default defineComponent({
       this.toggleFavorite({ items: this.selectedGif })
     },
     download() {
-      vivistickerUtils.saveToIOS(this.selectedGif.src, undefined, 'gif')
+      vivistickerUtils.saveToIOS(this.selectedGif.src, 'gif')
     }
   }
 })

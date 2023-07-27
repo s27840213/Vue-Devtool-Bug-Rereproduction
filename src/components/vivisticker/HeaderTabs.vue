@@ -91,6 +91,14 @@ export default defineComponent({
   components: {
     LinkOrText
   },
+  data() {
+    return {
+      bgRemoveSrcInfo: {
+        key: '',
+        id: '',
+      }
+    }
+  },
   computed: {
     ...mapState('templates', {
       templatesIgLayout: 'igLayout'
@@ -131,6 +139,7 @@ export default defineComponent({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       isProcessing: 'bgRemove/getIsProcessing',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
+      editingDesignId: 'vivisticker/getEditingDesignId'
     }),
     templateHeaderTab() {
       return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
@@ -375,7 +384,9 @@ export default defineComponent({
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInEffectEditingMode: 'bgRemove/SET_inEffectEditingMode',
       deletePreviewSrc: 'DELETE_previewSrc',
-      setIsInBgRemoveSection: 'vivisticker/SET_isInBgRemoveSection'
+      setIsInBgRemoveSection: 'vivisticker/SET_isInBgRemoveSection',
+      setEditorType: 'vivisticker/SET_editorType',
+      setEditingDesignId: 'vivisticker/SET_editingDesignId',
     }),
     resetTemplatesSearch(params = {}) {
       this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
@@ -486,11 +497,24 @@ export default defineComponent({
                   vivistickerUtils.endEditing()
                   this.isSavingAsMyDesign = false
                 })
+
+                // restore the stored id and key info if saving design, otherwise we may ocationnaly delete wrong asset
+                const { id, key } = this.bgRemoveSrcInfo
+                if (id && key) {
+                  this.bgRemoveSrcInfo.id = ''
+                  this.bgRemoveSrcInfo.key = ''
+                }
               }
             },
             {
               msg: `${this.$t('STK0011')}`,
-              action: () => { vivistickerUtils.endEditing() },
+              action: () => {
+                vivistickerUtils.endEditing()
+                const { id, key } = this.bgRemoveSrcInfo
+                if (id && key) {
+                  vivistickerUtils.deleteAsset(key, id)
+                }
+              },
               style: {
                 color: '#474A57',
                 backgroundColor: '#D9DBE1'
@@ -623,6 +647,8 @@ export default defineComponent({
     },
     handleBgRemoveNext() {
       if (!this.isInEditor) {
+        const designId = generalUtils.generateAssetId()
+        this.setEditorType('image')
         vivistickerUtils.startEditing(
           'image',
           { plan: 0, assetId: '' },
@@ -630,11 +656,17 @@ export default defineComponent({
             bgRemoveUtils.setInBgRemoveMode(false)
             editorUtils.setShowMobilePanel(false)
             this.setInEffectEditingMode(true)
-            return await bgRemoveUtils.saveToIOS(async (data, assetId, aspectRatio) => {
+            return await bgRemoveUtils.saveToIOS(designId, async (data, path, aspectRatio) => {
               const srcObj = {
                 type: 'ios',
                 userId: '',
-                assetId: 'bgRemove/' + assetId,
+                assetId: path,
+              }
+              const [key, id, ...res] = path.split('/')
+
+              this.bgRemoveSrcInfo = {
+                key,
+                id
               }
               this.addImage(srcObj, aspectRatio)
               imageShadowUtils.updateEffectProps({
@@ -669,18 +701,31 @@ export default defineComponent({
               })
             }, 0)
           },
-          generalUtils.generateAssetId()
+          designId
         )
       } else {
         const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
         const targetLayerStyle = layers[0].styles as IImageStyle
         bgRemoveUtils.setInBgRemoveMode(false)
         editorUtils.setShowMobilePanel(false)
-        bgRemoveUtils.saveToIOS(async (data, assetId, aspectRatio, trimmedCanvasInfo) => {
+        const designId = this.editingDesignId ? this.editingDesignId : generalUtils.generateAssetId()
+
+        // bcz the bg removing will save the image to document first before we save designs, so we need to set the editingDesignId to make the saved json
+        // to save to the same directory, or it will cause disk leak
+
+        this.setEditingDesignId(designId)
+        bgRemoveUtils.saveToIOS(designId, async (data, path, aspectRatio, trimmedCanvasInfo) => {
           const srcObj = {
             type: 'ios',
             userId: '',
-            assetId: 'bgRemove/' + assetId,
+            assetId: path,
+          }
+
+          const [key, id, ...res] = path.split('/')
+
+          this.bgRemoveSrcInfo = {
+            key,
+            id
           }
 
           const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo

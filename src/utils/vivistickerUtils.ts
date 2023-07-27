@@ -143,6 +143,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'thumbDone',
     'addAssetDone',
     'deleteAssetDone',
+    'deleteImageDone',
     'getAssetResult',
     'uploadImageURL',
     'informWebResult',
@@ -197,6 +198,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   get isTemplateSupported(): boolean {
     return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.34') && !generalUtils.isIPadOS())
+  }
+
+  get isBgRemoveSupported(): boolean {
+    return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.35'))
   }
 
   getUserInfoFromStore(): IUserInfo {
@@ -1116,7 +1121,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('save-image-from-url', data)
   }
 
-  async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {
+  // this is delete something from "local storage"
+  async deleteAsset(key: string, id: string, thumbType?: string): Promise<void> {
     if (this.checkVersion('1.27')) {
       await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, `delete-asset-${key}-${id}`)
     } else {
@@ -1130,6 +1136,23 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.handleCallback(`delete-asset-${data.key}-${data.id}`)
     } else {
       this.handleCallback('delete-asset')
+    }
+  }
+
+  async deleteImage(key: string, name: string, type: string): Promise<void> {
+    if (this.checkVersion('1.27')) {
+      await this.callIOSAsAPI('DELETE_IMAGE', { key, name, type }, `delete-image-${key}-${name}`)
+    } else {
+      await this.callIOSAsAPI('DELETE_IMAGE', { key, name, type }, 'delete-image')
+    }
+    store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), name })
+  }
+
+  deleteImageDone(data: { key: string, id: string } | undefined) {
+    if (data !== undefined) {
+      this.handleCallback(`delete-image-${data.key}-${data.id}`)
+    } else {
+      this.handleCallback('delete-image')
     }
   }
 
@@ -1575,8 +1598,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     )
   }
 
-  async saveToIOS(src: string, callback?: (data: { flag: string, msg: string, imageId: string }) => void, type = 'png') {
-    await this.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type, url: src }, 'save-image-from-url').then((data) => {
+  async saveToIOS(src: string, type = 'png', param?: {
+    key?: string,
+    designId?: string,
+    name?: string,
+    toast?: boolean
+  }, callback?: (data: { flag: string, msg: string, imageId: string }) => void) {
+    await this.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { url: src, type, ...param }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
       callback && callback(_data)
     })

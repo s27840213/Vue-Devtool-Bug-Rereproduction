@@ -810,6 +810,9 @@ export default defineComponent({
           break
         }
         case 'remove-bg': {
+          if (!vivistickerUtils.isBgRemoveSupported) {
+            vivistickerUtils.showUpdateModal()
+          }
           if (this.isInEditor) {
             this.setIsInBgRemoveSection(!this.isInBgRemoveSection)
             this.$emit('switchTab', 'none')
