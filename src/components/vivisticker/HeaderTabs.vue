@@ -656,7 +656,7 @@ export default defineComponent({
             bgRemoveUtils.setInBgRemoveMode(false)
             editorUtils.setShowMobilePanel(false)
             this.setInEffectEditingMode(true)
-            return await bgRemoveUtils.saveToIOS(designId, async (data, path, aspectRatio) => {
+            return await bgRemoveUtils.saveToIOS(designId, (data, path, aspectRatio) => {
               const srcObj = {
                 type: 'ios',
                 userId: '',

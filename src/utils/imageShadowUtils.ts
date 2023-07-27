@@ -1,7 +1,6 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
-import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
@@ -668,14 +667,18 @@ class ImageShadowUtils {
     }
   }
 
-  saveToIOS(canvas: HTMLCanvasElement, callback?: (data: WEBVIEW_API_RESULT, assetId: string) => void) {
+  saveToIOS(canvas: HTMLCanvasElement, callback?: (data: { flag: string, msg: string, imageId: string }, path: string) => void) {
+    const name = generalUtils.generateAssetId()
     const src = canvas.toDataURL('image/png;base64')
-    const assetId = generalUtils.generateAssetId()
+    const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
+    const designId = store.getters['vivisticker/getEditingDesignId'] || generalUtils.generateAssetId()
 
-    vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'shadow', name: assetId, toast: false }, 'save-image-from-url')
-      .then((data) => {
-        callback && callback(data, assetId)
-      })
+    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      if (callback) {
+        return callback(_data, `${key}/${designId}/${name}`)
+      }
+    })
   }
 
   getImgEdgeWidth(canvas: HTMLCanvasElement) {
