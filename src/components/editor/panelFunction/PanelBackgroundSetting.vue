@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="bg-setting")
   span(class="bg-setting__title text-blue-1 text-H6") {{$t('NN0142')}}
-  div(class="action-bar flex-evenly my-10")
+  div(class="action-bar flex-evenly")
     svg-icon(class="btn-opacity pointer p-5 feature-button"
       iconName="transparency" :iconWidth="'20px'"
       :class="{ 'disabled': backgroundLocked }"
@@ -24,11 +24,15 @@ div(class="bg-setting")
       @click="handleDeleteBackground"
       v-hint="$t('NN0034')"
     )
-  div(class="mb-10")
+  div(:class="{ 'bg-setting__grid': isAdmin }")
     nubtn(theme="edit" size="mid-full"
       :disabled="!isShowImage || backgroundLocked"
       @click="handleControlBgImage") {{$t('NN0040')}}
-  div(class="bg-setting__grid mb-10")
+    nubtn(v-if="isAdmin" theme="edit" size="mid-full"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="handleShow('overlay')") {{$t('NN0899')}}
+  overlay(v-if="show === 'overlay'" class="mb-10" theme="light")
+  div(class="bg-setting__grid")
     nubtn(theme="edit" size="mid-full"
       :active="show === 'popup-flip'"
       :disabled="!isShowImage || backgroundLocked"
@@ -37,24 +41,23 @@ div(class="bg-setting")
       :active="show === 'popup-adjust'"
       :disabled="!isShowImage || backgroundLocked"
       @click="handleShow('popup-adjust')") {{$t('NN0042')}}
-  div(class="mb-10 text-left")
-    div(v-if="show === 'popup-flip'"
-      class="popup-flip"
-      v-click-outside="handleOutSide")
-      div(v-for="data in popupDatas"
-          :key="`popup-${data.icon}`"
-          class="popup-flip__item"
-          @click="() => handleImageFlip(data.icon)")
-        svg-icon(
-          class="pointer"
-          :iconName="data.icon"
-          :iconWidth="'12px'"
-          :iconColor="'gray-1'")
-        span(class="ml-5 body-2") {{data.text}}
-    popup-adjust(v-if="show === 'popup-adjust'"
-      :imageAdjust="backgroundAdjust"
-      @update="handleChangeBgAdjust"
-      v-click-outside="handleOutSide")
+  div(v-if="show === 'popup-flip'"
+    class="popup-flip"
+    v-click-outside="handleOutSide")
+    div(v-for="data in popupDatas"
+        :key="`popup-${data.icon}`"
+        class="popup-flip__item"
+        @click="() => handleImageFlip(data.icon)")
+      svg-icon(
+        class="pointer"
+        :iconName="data.icon"
+        :iconWidth="'12px'"
+        :iconColor="'gray-1'")
+      span(class="ml-5 body-2") {{data.text}}
+  popup-adjust(v-if="show === 'popup-adjust'"
+    :imageAdjust="backgroundAdjust"
+    @update="handleChangeBgAdjust"
+    v-click-outside="handleOutSide")
   div(class="bg-setting__current-colors" :class="{lock: backgroundLocked}")
     color-btn(:color="colorSlipsIcon"
               :active="colorSlipsIcon !== 'multi' && showColorSlips"
@@ -62,6 +65,7 @@ div(class="bg-setting")
 </template>
 
 <script lang="ts">
+import Overlay from '@/components/editor/overlay/Overlay.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import i18n from '@/i18n'
@@ -77,12 +81,13 @@ import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
-import { mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   components: {
     PopupAdjust,
-    ColorBtn
+    ColorBtn,
+    Overlay,
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -104,6 +109,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapGetters({
+      isAdmin: 'user/isAdmin',
+    }),
     backgroundColor(): string {
       return this.currPage.backgroundColor
     },
@@ -239,13 +247,14 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .bg-setting {
+  display: grid;
+  gap: 15px 12px;
   text-align: left;
   &__grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-auto-rows: 1fr;
-    row-gap: 10px;
-    column-gap: 20px;
+    gap: 15px 12px;
   }
   &__current-colors {
     display: grid;

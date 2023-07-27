@@ -60,6 +60,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .panel-spacing {
+  display: grid;
+  gap: 10px;
   width: 100%;
 }
 </style>

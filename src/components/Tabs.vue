@@ -1,12 +1,12 @@
 <template lang="pug">
-div(:class="`tabs ${theme}`")
+div(:class="`tabs ${themeColor} ${themeType}`")
   div(v-for="(tab,index) in tabs"
       :key="tab"
       class="tabs__item"
       :style="tabStyle(index)"
       @click="switchTab(index)")
-    span(
-      class="text-H6") {{tab}}
+    span {{tab}}
+    div(v-if="['default', 'narrow'].includes(themeType)" class="tabs__underline")
 </template>
 
 <script lang="ts">
@@ -24,7 +24,7 @@ export default defineComponent({
       required: true
     },
     theme: {
-      type: String as PropType<'dark'|'light'|'dark-rect'>,
+      type: String as PropType<'dark' | 'light' | 'dark-rect' | 'dark-narrow' | 'light-narrow'>,
       default: 'dark'
     }
   },
@@ -32,6 +32,12 @@ export default defineComponent({
   computed: {
     tabIndex() {
       return this.modelValue
+    },
+    themeColor(): 'dark' | 'light' {
+      return this.theme.split('-')[0] as 'dark' | 'light'
+    },
+    themeType(): 'default' | 'rect' | 'narrow' {
+      return this.theme.split('-')[1] as 'rect' | 'narrow' | undefined ?? 'default'
     },
     colors() {
       switch (this.theme) {
@@ -47,6 +53,16 @@ export default defineComponent({
             inactive: '#9C9C9C',
             inactiveBG: '#2E2E2E'
           }
+        case 'light-narrow':
+          return {
+            active: '#474A57',
+            inactive: '#969BAB'
+          }
+        case 'dark-narrow':
+          return {
+            active: '#FFFFFF',
+            inactive: '#969BAB'
+          }
         case 'dark':
         default:
           return {
@@ -60,21 +76,30 @@ export default defineComponent({
     tabStyle(tabIndex: number) {
       const isActive = tabIndex === this.tabIndex
       const activeMode = isActive ? 'active' : 'inactive'
-      const type = this.theme.split('-')[1]
-      return type === 'rect' ? {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        margin: '0 8px 0 8px',
-        width: `calc(100% / ${this.tabs.length} - 16px)`,
-        height: '36px',
-        borderRadius: '10px',
-        color: this.colors[activeMode],
-        backgroundColor: this.colors[`${activeMode}BG` as 'activeBG'|'inactiveBG']
-      } : {
-        color: this.colors[activeMode],
-        borderBottom: isActive ? `2px solid ${this.colors[activeMode]}` : '2px solid transparent',
-        width: `${100 / this.tabs.length / 2}%`
+      switch (this.themeType) {
+        case 'rect':
+          return {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            margin: '0 8px 0 8px',
+            width: `calc(100% / ${this.tabs.length} - 16px)`,
+            height: '36px',
+            borderRadius: '10px',
+            color: this.colors[activeMode],
+            backgroundColor: this.colors[`${activeMode}BG`]
+          }
+        case 'narrow':
+          return {
+            color: this.colors[activeMode],
+            '--border-color': isActive ? this.colors[activeMode] : 'transparent',
+          }
+        default:
+          return {
+            color: this.colors[activeMode],
+            '--border-color': isActive ? this.colors[activeMode] : 'transparent',
+            width: `${100 / this.tabs.length / 2}%`
+          }
       }
     },
     switchTab(tabIndex: number) {
@@ -87,19 +112,30 @@ export default defineComponent({
 <style lang="scss" scoped>
 .tabs {
   width: 100%;
+  height: fit-content;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  &.light, &.dark {
-    margin-bottom: 24px;
-  }
+  white-space: nowrap;
   &__item {
     box-sizing: border-box;
     text-align: center;
     transition: all 0.2s;
   }
-  &.light, &.dark {
-    margin-bottom: 24px;
+  &__underline{
+    border: 1px solid var(--border-color);
+    border-radius: 1px;
+  }
+
+  &.default &.rect {
+    @include text-H6;
+  }
+  &.narrow {
+    @include body-XS;
+    justify-content: initial;
+    gap: 16px;
+  }
+  &.default {
     .tabs__item {
       padding-bottom: 4px;
       min-width: fit-content;

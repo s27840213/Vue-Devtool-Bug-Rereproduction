@@ -49,7 +49,8 @@ export default defineComponent({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isAdmin: 'user/isAdmin',
     }),
     navItem(): Array<{ icon: string, text: string }> {
       const navItems = [
@@ -58,8 +59,8 @@ export default defineComponent({
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}` },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}` },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}` },
-        { icon: 'upload', text: `${this.$tc('NN0006')}` }
-        // { icon: 'photo', text: 'Pexels' }
+        { icon: 'upload', text: `${this.$tc('NN0006')}` },
+        ...this.isAdmin ? [{ icon: 'overlay', text: `${this.$tc('NN0899')}` }] : [],
       ]
       if (brandkitUtils.isBrandkitAvailable) {
         navItems.push({ icon: 'brand', text: `${this.$t('NN0497')}` })
@@ -74,17 +75,17 @@ export default defineComponent({
       _setShowPagePanel: 'page/SET_showPagePanel'
     }),
     switchNav(index: number): void {
-      if (!this.inBgRemoveMode) {
-        // switch to sidebar panel index
-        this.setCurrSidebarPanel(index)
-        this.$emit('toggleSidebarPanel', true)
-        if (this.showPagePanel) {
-          this._setShowPagePanel(false)
-        }
-        if (this.isShowPagePreview) {
-          this._setIsShowPagePreview(false)
-          pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
-        }
+      if (this.inBgRemoveMode) return
+
+      // switch to sidebar panel index
+      this.setCurrSidebarPanel(index)
+      this.$emit('toggleSidebarPanel', true)
+      if (this.showPagePanel) {
+        this._setShowPagePanel(false)
+      }
+      if (this.isShowPagePreview) {
+        this._setIsShowPagePreview(false)
+        pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
       }
     },
     toggleSidebarPanel() {
