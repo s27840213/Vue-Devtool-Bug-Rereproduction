@@ -1072,7 +1072,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (!resGenThumb || resGenThumb.flag === '1') await onThumbError()
     } else {
       const flag = await this.genThumbnail(id)
-      console.log(editingDesignId, id, flag)
       if (flag === '1') await onThumbError()
     }
     await this.saveDesignJson(id)
@@ -1139,20 +1138,21 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  async deleteImage(key: string, name: string, type: string): Promise<void> {
+  deleteImage(key: string, name: string, type: string, designId?: string): Promise<any> {
     if (this.checkVersion('1.27')) {
-      await this.callIOSAsAPI('DELETE_IMAGE', { key, name, type }, `delete-image-${key}-${name}`)
+      return this.callIOSAsAPI('DELETE_IMAGE', { key, name, type, designId }, `delete-image-${key}-${name}`)
     } else {
-      await this.callIOSAsAPI('DELETE_IMAGE', { key, name, type }, 'delete-image')
+      return this.callIOSAsAPI('DELETE_IMAGE', { key, name, type, designId }, 'delete-image')
     }
-    store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), name })
+    // @TODO discuss with alan if this is necessary
+    // store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), name })
   }
 
-  deleteImageDone(data: { key: string, id: string } | undefined) {
+  deleteImageDone(data: { key: string, name: string } | undefined) {
     if (data !== undefined) {
-      this.handleCallback(`delete-image-${data.key}-${data.id}`)
+      this.handleCallback(`delete-image-${data.key}-${data.name}`, data)
     } else {
-      this.handleCallback('delete-image')
+      this.handleCallback('delete-image', data)
     }
   }
 
@@ -1162,7 +1162,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const editorType = store.getters['vivisticker/getEditorType']
     const editorTypeTemplate = store.getters['vivisticker/getEditorTypeTemplate']
     const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
-    console.log(editorType, assetInfo)
     const json = {
       type: editorType,
       id,
@@ -1296,7 +1295,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     // console.log('init loading flag', frames)
     const missingClips = frames
       .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
-    console.log('missingClips.length', missingClips.length)
     if (missingClips.length) {
       const action = missingClips.length !== 1 ? undefined : () => {
         let subLayerIdx = -1

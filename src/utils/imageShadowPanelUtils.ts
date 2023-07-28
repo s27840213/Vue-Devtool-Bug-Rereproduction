@@ -320,11 +320,8 @@ export default new class ImageShadowPanelUtils {
         }
         imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
         imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
-        console.log(config, config.styles.shadow.srcObj.type)
         if (config.styles.shadow.srcState?.shadowSrcObj.type === 'ios') {
-          this.delIosOldImg(config.styles.shadow.srcState?.shadowSrcObj)?.then((data) => {
-            console.warn('delete ios old img', data)
-          })
+          this.delIosOldImg(config.styles.shadow.srcState?.shadowSrcObj)
         }
         imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, {
           effect: shadow.currentEffect,
@@ -356,13 +353,11 @@ export default new class ImageShadowPanelUtils {
   }
 
   delIosOldImg(srcObj: SrcObj) {
-    console.log('delIosOldImg delIosOldImgdelIosOldImgdelIosOldImgdelIosOldImg')
     if (srcObj.type !== 'ios') return
-    console.log('delIosOldImg delIosOldImgdelIosOldImgdelIosOldImgdelIosOldImg 222')
     const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
     const designId = store.getters['vivisticker/getEditingDesignId']
-    // need discuss: is type always png
-    return vivistickerUtils.deleteImage(key, designId, 'png')
+    const name = (srcObj.assetId as string).split('/').pop() || ''
+    return vivistickerUtils.deleteImage(key, name, 'png', designId)
   }
 
   async isSVG(src: string, config: IImage) {
