@@ -109,6 +109,7 @@ export default defineComponent({
       },
       isSearchBarExpanded: false,
       elMainContent: undefined as HTMLElement | undefined,
+      numColumns: 2,
       tagScrollLeft: 0
     }
   },
@@ -121,6 +122,7 @@ export default defineComponent({
       })
       unwatch()
     })
+    this.$nextTick(this.updateNumColumns)
     if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
     generalUtils.panelInit('template',
       this.handleSearch,
@@ -156,11 +158,15 @@ export default defineComponent({
     },
     isInGroupTemplate(newVal) {
       if (!newVal) this.currentGroup = null
-    }
+    },
+    'windowSize.width'() {
+      this.updateNumColumns()
+    },
   },
   computed: {
     ...mapState({
-      isTablet: 'isTablet'
+      isTablet: 'isTablet',
+      windowSize: 'windowSize',
     }),
     ...mapState('user', ['userId']),
     ...mapGetters({
@@ -226,10 +232,10 @@ export default defineComponent({
     listRecently(): ICategoryItem[] {
       const { categories } = this
       const list = (categories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
-      const result = new Array(Math.ceil(list.length / 3))
+      const result = new Array(Math.ceil(list.length / this.numColumns))
         .fill('')
         .map((_, idx) => {
-          const rowItems = list.slice(idx * 3, idx * 3 + 3)
+          const rowItems = list.slice(idx * this.numColumns, idx * this.numColumns + this.numColumns)
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-template-item',
@@ -354,10 +360,10 @@ export default defineComponent({
     processListResult(list = [] as IAssetTemplate[] | IContentTemplate[], isSearch: boolean): ICategoryItem[] {
       const titleHeight = 46
       const gap = 20
-      return new Array(Math.ceil(list.length / 3))
+      return new Array(Math.ceil(list.length / this.numColumns))
         .fill('')
         .map((_, idx) => {
-          const rowItems = list.slice(idx * 3, idx * 3 + 3)
+          const rowItems = list.slice(idx * this.numColumns, idx * this.numColumns + this.numColumns)
           const title = !isSearch && !idx ? `${this.$t('NN0083')}` : ''
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
@@ -401,6 +407,12 @@ export default defineComponent({
       for (const name of this.targets) {
         ref[name][0].$el.style.transition = enable ? '' : 'none'
       }
+    },
+    updateNumColumns() {
+      const elPanel = this.$el as HTMLElement
+      const computedStyle = window.getComputedStyle(elPanel, null)
+      const panelWidth = elPanel.clientWidth - parseFloat(computedStyle.paddingLeft) - parseFloat(computedStyle.paddingRight)
+      this.numColumns = panelWidth < (this.itemWidth * 3 + 24) ? 2 : 3
     }
   }
 })
@@ -429,8 +441,7 @@ export default defineComponent({
   }
   &__items {
     display: grid;
-    column-gap: 20px;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(v-bind(numColumns), 1fr);
   }
   &.with-search-bar {
     height: calc(100% + 49px); // 42px (serach bar height) + 7px (margin-top of tags) = 49px

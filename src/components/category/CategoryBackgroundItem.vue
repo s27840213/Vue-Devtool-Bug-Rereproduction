@@ -10,7 +10,7 @@ div(class="panel-bg__item"
     @error="handleNotFound")
   div(v-if="!isInEditor" class="panel-bg__share" @click.stop.prevent="handleShare")
     svg-icon(iconName="share" iconColor="white" iconWidth="16px")
-  pro-item(v-if="item.plan" draggable="false")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">

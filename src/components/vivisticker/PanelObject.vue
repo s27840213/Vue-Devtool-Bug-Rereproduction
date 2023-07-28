@@ -1,12 +1,12 @@
 <template lang="pug">
 div(class="panel-objects rwd-container")
-  tabs(v-if="!isInCategory"
+  Tabs(v-if="!isInCategory"
       class="panel-objects__tabs"
       :tabs="tabs"
       v-model="tabIndex")
   //- Favorites tabs
   div(v-if="!isInEditor && isFavorites && !isInCategory" class="panel-objects__favorites-tabs")
-    tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
+    Tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
         v-model="favoritesTabIndex")
     svg-icon(iconName="info-reverse" iconWidth="24px" iconColor="white"
             @click="doubleTapTips")
@@ -113,6 +113,7 @@ export default defineComponent({
   overflow: hidden;
   &__tabs {
     margin-top: v-bind("isInEditor ? '0' : '24px'");
+    margin-bottom: 24px;
   }
   &__favorites-tabs {
     display: flex;

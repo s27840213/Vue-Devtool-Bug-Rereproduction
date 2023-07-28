@@ -67,7 +67,6 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
     const trimHeight = bound.bottom - bound.top + 1
     const trimWidth = bound.right - bound.left + 1
 
-    console.log(canvas.width, canvas.height, bound, trimHeight, trimWidth)
     // Get the trimmed image data based on the boundaries found above.
     const trimmed = ctx.getImageData(bound.left, bound.top, trimWidth, trimHeight)
 

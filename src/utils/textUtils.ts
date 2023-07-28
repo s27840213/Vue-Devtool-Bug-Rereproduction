@@ -4,7 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
-import { IInitSize, IMultiStageRunResult, autoResizePipeLine, autoResizePipeLineSync } from '@/utils/autoResizeUtils'
+import { autoResizePipeLine, autoResizePipeLineSync, IInitSize, IMultiStageRunResult } from '@/utils/autoResizeUtils'
 import controlUtils from '@/utils/controlUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
@@ -31,9 +31,9 @@ export interface ITextHW {
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
-  get getCurrTextProps() { return (store.state as any).text.props }
-  get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
-  get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
+  get getCurrTextProps() { return store.state.text.props }
+  get getCurrSel(): { start: ISelection, end: ISelection } { return store.state.text.sel }
+  get isFontLoading(): boolean { return store.state.text.isFontLoading }
 
   observer: IntersectionObserver
   observerCallbackMap: { [key: string]: (size: { width: number, height: number }) => void }
@@ -816,8 +816,8 @@ class TextUtils {
     */
 
     // 僅剛進入editor需要判斷
-    // if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
-    //   if (!((store.state as any).templates.categories.length > 0) && times < 5) {
+    // if (!store.state.text.firstLoad && window.location.pathname === '/editor') {
+    //   if (!(store.state.templates.categories.length > 0) && times < 5) {
     //     setTimeout(() => {
     //       this.loadAllFonts(config, times + 1)
     //     }, 3000)

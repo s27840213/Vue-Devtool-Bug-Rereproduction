@@ -156,10 +156,18 @@ export interface IListServiceContentDataItem {
   title?: string
   description?: string
   content_ids?: IListServiceContentDataItem[]
+  match_cover?: {
+    height: number
+    id: string
+    theme: string
+    width: number
+    ver: number
+  }
   group_id?: string
   group_type?: number | string
   user_id?: string
   asset_index?: number
+  signed_url?: Record<string, string>
   asset_id?: string
   src?: string
   unit?: string

@@ -328,11 +328,8 @@ export default defineComponent({
       })
     },
     handleIsTransparent() {
-      const img = new Image()
-      const imgSize = imageUtils.getSrcSize(this.image.config.srcObj, 100)
-      img.src = imageUtils.getSrc(this.image.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
+      const src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(this.image.config.srcObj, 100))
+      imageUtils.imgLoadHandler(src, (img) => {
         this.$store.commit('SET_backgroundImageStyles', {
           pageIndex: this.pageIndex,
           styles: {
@@ -341,7 +338,12 @@ export default defineComponent({
             }
           }
         })
-      }
+      }, {
+        crossOrigin: true,
+        error: (img) => {
+          console.error('handleIsTransparent in nu-bgImage error: src: ', img?.src)
+        }
+      })
     },
     filterContainerStyles() {
       return { margin: this.padding }

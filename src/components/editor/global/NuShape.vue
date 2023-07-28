@@ -438,9 +438,9 @@ export default defineComponent({
               case 'decorationTop':
                 vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'dt' })
                 break
-              // case 'blend':
-              //   vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
-              //   break
+              case 'blend':
+                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
+                break
             }
           } else {
             switch ((this.config as IShape).frameDecType) {
@@ -450,9 +450,9 @@ export default defineComponent({
               case 'decorationTop':
                 vivistickerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'dt' })
                 break
-              // case 'blend':
-              //   vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
-              //   break
+              case 'blend':
+                vivistickerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'b', v: this.subLayerIndex })
+                break
             }
           }
         })

@@ -567,7 +567,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   makeFlagKey(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
     if (layerIndex === -1) return 'bg'
-    return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}` + (addition ? `_${addition.k}${addition.v ?? ''}` : ''))
+    const res = subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}`)
+    // additionKey now used in frame's decoration-related-layers
+    const additionKey = addition ? `_${addition.k}${addition.v ?? ''}` : ''
+    return res + additionKey
   }
 
   initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
@@ -581,21 +584,24 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       case LayerType.frame: {
         this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
         const frame = layer as IFrame
-        const layers = [...frame.clips] as Array<IImage | IShape>
+        const clips = [...frame.clips] as Array<IImage | IShape>
         if (frame.decoration) {
           this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'd' })] = false
-          // layers.unshift(frame.decoration)
         }
         if (frame.decorationTop) {
           this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'dt' })] = false
-          // layers.push(frame.decorationTop)
+        }
+        if (frame.blendLayers?.length) {
+          frame.blendLayers.forEach((_, i) => {
+            this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'b', v: i })] = false
+          })
         }
         if (subLayerIndex === -1) {
-          for (const [_clipIndex, subLayer] of layers.entries()) {
+          for (const [_clipIndex, subLayer] of clips.entries()) {
             this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex)
           }
         } else {
-          for (const [_clipIndex, subLayer] of layers.entries()) {
+          for (const [_clipIndex, subLayer] of clips.entries()) {
             this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, { k: 'c', v: _clipIndex })
           }
         }
@@ -617,6 +623,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true
     }
+    // console.log(generalUtils.deepCopy(this.loadingFlags), key)
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       window.clearTimeout(this.loadingTimeout)
       this.loadingCallback()

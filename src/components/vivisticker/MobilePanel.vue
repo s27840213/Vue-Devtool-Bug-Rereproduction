@@ -859,6 +859,10 @@ export default defineComponent({
     }
   }
 
+  .tabs {
+    margin-bottom: 14px;
+  }
+
   &__btn {
     position: relative;
   }

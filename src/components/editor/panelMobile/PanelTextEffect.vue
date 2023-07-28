@@ -38,26 +38,26 @@ div(class="panel-text-effect")
         div(v-for="sel in option.select"
             :key="sel.key"
             :class="{'selected': currentStyle[option.key] === sel.key }"
-            @click="handleSelectInput(sel.attrs)")
+            @click="handleSelectInput(sel.preset)")
           img(:src="sel.img")
           span {{sel.label}}
       //- Option type select
       div(v-if="option.type === 'select' && option.key !== 'endpoint'"
           class="panel-text-effect__select")
         div(v-for="sel in option.select" :key="sel.key"
-            @click="handleSelectInput(sel.attrs)")
+            @click="handleSelectInput(sel.preset)")
           img(:src="sel.img"
               :class="{'selected': ((currentStyle[option.key] as Record<'key', string>).key ?? currentStyle[option.key]) === sel.key }")
+          pro-item(v-if="sel.plan" theme="roundedRect")
       //- Option type range
       mobile-slider(v-if="option.type === 'range'"
         :borderTouchArea="true"
         :title="option.label"
         :value="getInputValue(currentStyle, option)"
-        :max="option.max ?? 100"
-        :min="option.min ?? 0"
+        :max="option.max"
+        :min="option.min"
         :step="option.key === 'lineHeight' ? 0.01 : 1"
         :autoRecord="false"
-        :enableDefaultPadding="false"
         :disabled="optionDisabled(option)"
         @update="(val)=>handleRangeInput(val, option)"
         @pointerdown="setEffectFocus(true)"
@@ -68,6 +68,7 @@ div(class="panel-text-effect")
         class="panel-text-effect__color")
         div {{option.label}}
         color-btn(:color="colorParser(currentStyle[option.key] as string)"
+                :disable="optionDisabled(option)"
                 size="30px" @click="openColorPanel(option.key)")
       //- Option type img
       div(v-if="option.type === 'img'"
@@ -247,10 +248,6 @@ export default defineComponent({
           padding: 16px;
         }
       }
-      > .pro {
-        left: 1px;
-        top: -4px;
-      }
     }
     &--more {
       display: flex;
@@ -328,7 +325,7 @@ export default defineComponent({
       width: 100%;
       height: 0;
       padding-top: 100%;
-      > img {
+      > img:not(.pro) {
         position: absolute;
         width: 100%;
         height: 100%;
@@ -344,6 +341,10 @@ export default defineComponent({
           left: -2px;
           border: 2px solid setColor(blue-1);
         }
+      }
+      .pro {
+        top: 2px;
+        left: 2px;
       }
     }
   }

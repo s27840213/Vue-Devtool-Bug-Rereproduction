@@ -3,10 +3,9 @@ div(class="text-effect-setting")
   div(class="text-effect-setting__title") {{ $t('NN0095') }}
   //- Effect category: shadow, shape, bg and fill.
   div(v-for="category in textEffects" :key="category.name"
-      class="text-effect-setting__category"
-      :selected="currCategoryName === category.name")
-    span(@click="switchTab(category.name)") {{category.label}}
-      svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="24px")
+      class="text-effect-setting__category")
+    collapse-title(:active="currCategoryName === category.name"
+        @click="switchTab(category.name)") {{category.label}}
     //- Effect icons and options.
     collapse(:when="currCategoryName === category.name"
             class="text-effect-setting__effects2d")
@@ -44,7 +43,8 @@ div(class="text-effect-setting")
                 img(:src="sel.img"
                     :class="{'selected': ((getStyle(category)[option.key] as Record<'key', string>).key ?? getStyle(category)[option.key]) === sel.key }"
                     draggable="false"
-                    @click="handleSelectInput(sel.attrs)")
+                    @click="handleSelectInput(sel.preset)")
+                pro-item(v-if="sel.plan" theme="roundedRect")
             //- Option type range
             template(v-if="option.type === 'range'")
               input(class="text-effect-setting__option--number"
@@ -71,6 +71,7 @@ div(class="text-effect-setting")
             color-btn(v-if="option.type === 'color' && getStyle(category)[option.key]" size="25px"
               :color="colorParser(getStyle(category)[option.key] as string)"
               :active="option.key === colorTarget && settingTextEffect"
+              :disable="optionDisabled(option)"
               @click="handleColorModal(option)")
             //- Option type img
             div(v-if="option.type === 'img'"
@@ -88,6 +89,7 @@ div(class="text-effect-setting")
 
 <!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
+import CollapseTitle from '@/components/global/CollapseTitle.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
@@ -97,6 +99,7 @@ import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOption, IEffectOptionRange } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
+import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -104,7 +107,6 @@ import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils, { isFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
-import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
@@ -117,6 +119,7 @@ export default defineComponent({
     ColorBtn,
     ProItem,
     Collapse,
+    CollapseTitle,
   },
   emits: ['toggleColorPanel'],
   data() {
@@ -226,12 +229,15 @@ export default defineComponent({
     getInputValue(style: Record<string, unknown>, option: IEffectOptionRange) {
       if (['lineHeight', 'fontSpacing'].includes(option.key)) {
         return this.selectedTextProps[option.key]
+      } else if (option.key === 'opacity' && this.currCategoryName === 'fill') {
+        return layerUtils.getCurrOpacity
       } else {
         return style[option.key]
       }
     },
     optionDisabled(option: IEffectOption) {
       const config = textEffectUtils.getCurrentLayer()
+      const textShadow = config.styles.textEffect
       const textFill = config.styles.textFill
       if (this.currCategoryName === 'fill' && isTextFill(textFill) && textFill.size === 100) {
         const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } =
@@ -240,6 +246,10 @@ export default defineComponent({
           (option.key === 'yOffset200' && (imgHeight === divHeight || !scaleByWidth))) {
           return true
         }
+      }
+      if (this.currCategoryName === 'shadow' && isTextFill(textFill) &&
+        ['echo', 'bold3d'].includes(textShadow.name) && option.key === 'color') {
+        return true
       }
       return false
     },
@@ -267,18 +277,16 @@ export default defineComponent({
           break
         case 'bg':
           await textBgUtils.setTextBg(effectName, effect)
-          if (textShape.name !== 'none') {
-            textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
-            textPropUtils.updateTextPropsState()
-          }
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName, effect)
-          textPropUtils.updateTextPropsState()
-          await textBgUtils.setTextBg('none') // Bg & shape are exclusive.
+          textFillUtils.setTextFill('none') // fill & shape are exclusive.
           break
         case 'fill':
-          await textFillUtils.setTextFill(effectName, effect)
+          textFillUtils.setTextFill(effectName, effect)
+          if (textShape.name !== 'none') {
+            textShapeUtils.setTextShape('none') // fill & shape are exclusive.
+          }
           break
       }
     },
@@ -314,8 +322,8 @@ export default defineComponent({
       if (!focus) this.recordChange()
     },
     replaceImg(key: string) {
-      return (img: IAssetPhoto | IPhotoItem) => {
-        this.setEffect({ effect: { [key]: img } })
+      return async (img: IAssetPhoto | IPhotoItem) => {
+        await this.setEffect({ effect: { [key]: img } })
         this.recordChange()
       }
     },
@@ -349,20 +357,13 @@ export default defineComponent({
     @include body-SM;
     color: setColor(gray-1);
     > span {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       height: 33px;
-      cursor: pointer;
-    }
-    &[selected=true] .svg-chevron-down {
-      transform: scaleY(-1);
     }
   }
   &__effects2d {
     display: grid; // Prevent margin collapse
     background: setColor(gray-6);
-    transition: all 0.5s ease-in-out
+    transition: all calc(var(--vc-auto-duration) * 1.5) ease-in-out;
   }
   &__effects1d {
     display: grid;
@@ -384,10 +385,6 @@ export default defineComponent({
     overflow: hidden;
     > img {
       object-fit: cover;
-    }
-    .pro {
-      left: 1px;
-      top: -4px;
     }
     &:not(.selected):hover {
       @include selection-border(2px, blue-hover);
@@ -452,7 +449,7 @@ export default defineComponent({
         width: 100%;
         height: 0;
         padding-top: 100%;
-        > img {
+        > img:not(.pro) {
           @include selection-border(1px, gray-5);
           position: absolute;
           top: 0;
@@ -466,6 +463,10 @@ export default defineComponent({
           &.selected {
             @include selection-border(2px);
           }
+        }
+        .pro {
+          top: 2px;
+          left: 2px;
         }
       }
     }

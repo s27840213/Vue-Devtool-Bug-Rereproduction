@@ -8,10 +8,22 @@ div(class="panel-remove-bg__rm-section" ref="rmSection"  @pinch="pinchHandler")
     :teleportTarget="'.panel-remove-bg__rm-section'"
     :inVivisticker="true"
     :fitScaleRatio="bgRemoveScaleRatio")
+  //- used to debug
+  teleport(v-if="false" to="body")
+    div(class="panel-remove-bg__test-input")
+      mobile-slider(
+        :title="'scale'"
+        :borderTouchArea="true"
+        :name="'scale'"
+        :value="bgRemoveScaleRatio"
+        :min="minRatio"
+        :max="maxRatio"
+        :step="0.01"
+        @update="setScaleRatio")
 </template>
 
 <script lang="ts">
-
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -20,7 +32,8 @@ import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 export default defineComponent({
   components: {
-    BgRemoveArea
+    BgRemoveArea,
+    MobileSlider
   },
   props: {
     containerWH: {
@@ -115,6 +128,9 @@ export default defineComponent({
       setInGestureMode: 'SET_inGestureMode',
       setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
+    setScaleRatio(val: number) {
+      this.bgRemoveScaleRatio = val
+    },
     pinchHandler(event: AnyTouchEvent) {
       if (!this.inBgRemoveMode) return
       let deltaDistance = 0

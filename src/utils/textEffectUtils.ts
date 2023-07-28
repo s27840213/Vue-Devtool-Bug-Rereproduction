@@ -30,10 +30,10 @@ class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
   private currColorKey = ''
-  effects = {} as Record<string, Record<string, string | number>>
+  effectDefaultOptions = {} as Record<string, Record<string, string | number>>
   focus = 'none' as IFocusState
   constructor() {
-    this.effects = this.getDefaultEffects()
+    this.effectDefaultOptions = this.getDefaultEffects()
   }
 
   getDefaultEffects() {
@@ -78,7 +78,14 @@ class Controller {
         textStrokeColor: 'fontColorL+-40/BC/00',
         shadowStrokeColor: 'fontColor',
         color: 'fontColorL+-40/BC/00'
-      }
+      },
+      outline: { // 描邊
+        strokeOut: 20,
+        strokeIn: 20,
+        opacity: 100,
+        colorOut: 'fontColor',
+        colorIn: 'fontColorL+-40/BC/00'
+      },
     }
   }
 
@@ -140,7 +147,7 @@ class Controller {
     }
     if (colorStr.startsWith('rgb')) {
       const [r, g, b, a = 1] = colorStr.match(/[.\d]+/g) || []
-      return `rgba(${r}, ${g}, ${b}, ${alpha || a})`
+      return `rgba(${r}, ${g}, ${b}, ${alpha ?? a})`
     }
     return this.convertHex2rgba('#000000', 0.6)
   }
@@ -200,6 +207,14 @@ class Controller {
 
     const maxFontSize = max(config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
 
+    // Prevent TextFIll maskImage clip shadow, and remove TextFill BG for some shadow duplicatedTexts.
+    const disableTextFill = {
+      backgroundImage: 'none',
+      backgroundColor: 'transparent',
+      webkitBackgroundClip: 'initial',
+      maskImage: 'none',
+    }
+
     switch (name) {
       case 'shadow':
         return {
@@ -235,6 +250,7 @@ class Controller {
             extraBodyStyle: {
               left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) - maxFontSize}px`,
               top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) - maxFontSize}px`,
+              ...disableTextFill,
             },
             extraSpanStyle: {
               color,
@@ -252,9 +268,9 @@ class Controller {
             extraBodyStyle: {
               left: `${effectShadowOffset * Math.cos(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
               top: `${effectShadowOffset * Math.sin(angle * Math.PI / 180) * (i + 1) - maxFontSize}px`,
+              opacity,
             },
             extraSpanStyle: {
-              opacity,
               color,
               'text-decoration-color': color,
             },
@@ -272,9 +288,7 @@ class Controller {
                 color,
               ),
               opacity: effectOpacity,
-              // Prevent TextFIll maskImage clip shadow, and remove TextFill BG for shadow.
-              background: 'none',
-              maskImage: 'none',
+              ...disableTextFill,
             },
           }]
         }
@@ -294,6 +308,30 @@ class Controller {
               webkitTextStrokeColor: `${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`,
             },
           }]
+        }
+      }
+      case 'outline': {
+        const colorOut = this.colorParser(effect.colorOut, config)
+        const colorIn = this.colorParser(effect.colorIn, config)
+        return {
+          duplicatedTexts: [{
+            extraBodyStyle: {
+              '--base-stroke': `${((effect.strokeOut + effect.strokeIn) * this.strokeScale * 2) * (fontSize / 60)}px`,
+              webkitTextStrokeColor: this.convertColor2rgba(colorOut, effectOpacity),
+              ...disableTextFill,
+              // For fix Chrome stroke afterimage issue:
+              // If user adjust stroke to exceed the text element's content range
+              // and then reduce the stroke size, it will leave afterimages.
+              filter: 'opacity(1)',
+            },
+          }, {
+            extraBodyStyle: {
+              '--base-stroke': `${(effect.strokeIn * this.strokeScale * 2) * (fontSize / 60)}px`,
+              webkitTextStrokeColor: this.convertColor2rgba(colorIn, effectOpacity),
+              ...disableTextFill,
+              filter: 'opacity(1)',
+            },
+          }],
         }
       }
       default:
@@ -316,7 +354,7 @@ class Controller {
 
   resetCurrTextEffect() {
     const effectName = this.getCurrentLayer().styles.textEffect.name
-    this.setTextEffect(effectName, this.effects[effectName])
+    this.setTextEffect(effectName, this.effectDefaultOptions[effectName])
   }
 
   setTextEffect(effect: string, attrs = {} as any): void {
@@ -324,7 +362,7 @@ class Controller {
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
     const subLayerIndex = LayerUtils.subLayerIdx
-    const defaultAttrs = this.effects[effect]
+    const defaultAttrs = this.effectDefaultOptions[effect]
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue

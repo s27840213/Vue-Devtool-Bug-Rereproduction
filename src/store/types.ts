@@ -108,8 +108,8 @@ export enum SidebarPanelType {
   bg,
   text,
   file,
+  overlay,
   brand,
-  pexels,
   page
 }
 

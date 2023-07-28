@@ -335,6 +335,7 @@ export default defineComponent({
     justify-content: space-between;
     padding: 0 10%;
     box-sizing: border-box;
+    margin-bottom: 24px;
     &::v-deep .tabs__item {
       width: 40% !important;
     }

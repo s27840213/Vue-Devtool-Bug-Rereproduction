@@ -10,7 +10,7 @@ import { captureException } from '@sentry/browser'
 import _ from 'lodash'
 import { ActionTree, GetterTree, ModuleTree, MutationTree } from 'vuex'
 
-interface IFileState {
+export interface IFileState {
   myfileImages: Array<IAssetPhoto>,
   editorViewImages: Record<string, Record<string, string>>,
   checkedAssets: Array<number>,

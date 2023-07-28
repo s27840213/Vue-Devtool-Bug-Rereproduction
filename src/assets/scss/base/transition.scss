@@ -115,17 +115,15 @@
   }
 }
 
-.fade-up-down {
+.fade-down-up {
   &-enter-active {
-    &[data-transition="user-panel"] {
-      transition: all 0.5s;
-    }
+    opacity: 1;
+    transition: opcity 0.3s, transform 0.3s;
   }
 
   &-leave-active {
-    &[data-transition="user-panel"] {
-      transition: all 0.5s;
-    }
+    opacity: 1;
+    transition: opcity 0.3s, transform 0.3s;
   }
 
   &-enter-from {
@@ -135,6 +133,26 @@
 
   &-leave-to {
     transform: translateY(-30px);
+    opacity: 0;
+  }
+}
+
+.fade-down-up {
+  &-enter-active {
+    transition: all 0.5s;
+  }
+
+  &-leave-active {
+    transition: all 0.5s;
+  }
+
+  &-enter-from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+
+  &-leave-to {
+    transform: translateY(100px);
     opacity: 0;
   }
 }

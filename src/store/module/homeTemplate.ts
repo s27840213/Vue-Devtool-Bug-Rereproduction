@@ -5,7 +5,7 @@ import { captureException } from '@sentry/browser'
 import { floor } from 'lodash'
 import { ActionTree, GetterTree } from 'vuex'
 
-interface IHomeTemplateState {
+export interface IHomeTemplateState {
   locale: string,
   keyword: string,
   isShowPagePreview: boolean,

@@ -5,7 +5,7 @@ div(class="panel-text__item"
   img(class="panel-text__img"
     :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
     @error="handleNotFound")
-  pro-item(v-if="item.plan" draggable="false")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
