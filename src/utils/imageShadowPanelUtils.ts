@@ -1,3 +1,4 @@
+import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import store from '@/store'
@@ -319,6 +320,12 @@ export default new class ImageShadowPanelUtils {
         }
         imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
         imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+        console.log(config, config.styles.shadow.srcObj.type)
+        if (config.styles.shadow.srcState?.shadowSrcObj.type === 'ios') {
+          this.delIosOldImg(config.styles.shadow.srcState?.shadowSrcObj)?.then((data) => {
+            console.warn('delete ios old img', data)
+          })
+        }
         imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, {
           effect: shadow.currentEffect,
           effects: shadow.effects,
@@ -346,6 +353,16 @@ export default new class ImageShadowPanelUtils {
       imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
       imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
     }
+  }
+
+  delIosOldImg(srcObj: SrcObj) {
+    console.log('delIosOldImg delIosOldImgdelIosOldImgdelIosOldImgdelIosOldImg')
+    if (srcObj.type !== 'ios') return
+    console.log('delIosOldImg delIosOldImgdelIosOldImgdelIosOldImgdelIosOldImg 222')
+    const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
+    const designId = store.getters['vivisticker/getEditingDesignId']
+    // need discuss: is type always png
+    return vivistickerUtils.deleteImage(key, designId, 'png')
   }
 
   async isSVG(src: string, config: IImage) {

@@ -671,7 +671,15 @@ class ImageShadowUtils {
     const name = generalUtils.generateAssetId()
     const src = canvas.toDataURL('image/png;base64')
     const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
-    const designId = store.getters['vivisticker/getEditingDesignId'] || generalUtils.generateAssetId()
+    const designId = (() => {
+      if (store.getters['vivisticker/getEditingDesignId']) {
+        return store.getters['vivisticker/getEditingDesignId']
+      } else {
+        const _designId = generalUtils.generateAssetId()
+        store.commit('vivisticker/SET_editingDesignId', _designId)
+        return _designId
+      }
+    })()
 
     return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
