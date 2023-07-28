@@ -452,11 +452,12 @@ export default new class ImageShadowPanelUtils {
       const shadow = config.styles.shadow
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
 
-      if (!forceUpload && config.styles.shadow.srcState && this.checkIfSameEffect(config)) {
+      const isSameSrc = config.styles.shadow.srcState && config.styles.shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId
+      if (!forceUpload && isSameSrc && this.checkIfSameEffect(config)) {
         /**
          * Check if the state of the shadow is the same
          */
-        const { shadowSrcObj } = config.styles.shadow.srcState
+        const { shadowSrcObj } = config.styles.shadow.srcState as any
         const layerInfo = {
           pageIndex: _pageIndex,
           layerIndex: _layerIndex,
