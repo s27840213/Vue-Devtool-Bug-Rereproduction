@@ -598,7 +598,7 @@ class ConstantData {
         options: [...toOptions(['customImg', 'xOffset200', 'yOffset200', 'size', 'opacity'])]
       }, ...textFillUtils.fillCategories])
     }]
-    return categories
+    return categories.filter(c => store.getters['user/isAdmin'] ? true : c.name !== 'fill')
   }
 
   // For Settings

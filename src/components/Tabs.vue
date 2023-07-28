@@ -6,7 +6,7 @@ div(:class="`tabs ${themeColor} ${themeType}`")
       :style="tabStyle(index)"
       @click="switchTab(index)")
     span {{tab}}
-    div(v-if="['default', 'narrow'].includes(themeType)" class="tabs__underline")
+    div(v-if="['default', 'narrow', 'stk'].includes(themeType)" class="tabs__underline")
 </template>
 
 <script lang="ts">
