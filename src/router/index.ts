@@ -5,6 +5,7 @@ import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
+import overlayUtils from '@/utils/overlayUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -210,6 +211,7 @@ router.beforeEach(async (to, from, next) => {
       dimensionMap: json.dimension_map
     })
     textFillUtils.updateFillCategory(json.text_effect, json.text_effect_admin)
+    overlayUtils.updateOverlayCategory(json.overlay)
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 
     // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.

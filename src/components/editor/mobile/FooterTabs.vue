@@ -121,7 +121,8 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat',
-      userInfo: picWVUtils.appendModuleName('getUserInfo')
+      userInfo: picWVUtils.appendModuleName('getUserInfo'),
+      isAdmin: 'user/isAdmin',
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
@@ -214,6 +215,7 @@ export default defineComponent({
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
+        ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-dark' }] : [],
         { icon: 'add-page', text: `${this.$t('NN0139')}` },
         { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 },
         { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
@@ -250,6 +252,7 @@ export default defineComponent({
           hidden: this.isInFrame,
           disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
         },
+        ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-light' }] : [],
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
@@ -303,6 +306,7 @@ export default defineComponent({
       return [
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-light', hidden: !hasBgImage, disabled: this.backgroundLocked }] : [],
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
         {

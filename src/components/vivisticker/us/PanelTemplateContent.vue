@@ -108,8 +108,7 @@ export default defineComponent({
   }
   &__items {
     display: grid;
-    column-gap: 20px;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(v-bind(numColumns), 1fr);
   }
   &.with-search-bar {
     height: calc(100% + 56px); // 42px (serach bar height) + 14px (margin-top of tags) = 56px

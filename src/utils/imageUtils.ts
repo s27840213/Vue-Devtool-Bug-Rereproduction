@@ -8,7 +8,7 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IShadowAsset } from '@/store/module/shadow'
 import { AxiosPromise } from 'axios'
-import { findLastIndex } from 'lodash'
+import { cloneDeep, findLastIndex } from 'lodash'
 import FrameUtils from './frameUtils'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
@@ -189,7 +189,7 @@ class ImageUtils {
       return 0
     }
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
-    const sizeMap = store.state.user.imgSizeMap
+    const sizeMap = cloneDeep(store.state.user.imgSizeMap)
     if (store.getters['user/getUserId'] === 'backendRendering') {
       sizeMap.unshift(...store.state.user.imgSizeMapExtra)
     }

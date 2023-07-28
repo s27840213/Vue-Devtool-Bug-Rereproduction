@@ -29,7 +29,7 @@ div(class="panel-remove-bg")
     :iconMargin="4"
     :flexDir="'column'"
     @click="restoreInitState()") {{$t('NN0389')}}
-  div(class="panel-remove-bg__slider full mt-10")
+  div(class="panel-remove-bg__slider full my-10")
     mobile-slider(
       :title="`${$t('NN0387')}`"
       :borderTouchArea="true"
