@@ -113,25 +113,24 @@ class TextFill {
     else return { customImg: null }
   }
 
-  getImg(effect: { img?: IAssetPhoto, customImg?: IAssetPhoto | IPhotoItem | null }): IAssetPhoto | IPhotoItem | null {
+  getTextFillImg(effect: { img?: IAssetPhoto, customImg?: IAssetPhoto | IPhotoItem | null }): IAssetPhoto | IPhotoItem | null {
     return effect.img ?? effect.customImg ?? null
   }
 
-  getTextFillImg(config: IText, { ratio = 1, finalSize }: { ratio?: number, finalSize?: number }): string {
+  getTextFillImgSrc(config: IText, { ratio = 1, finalSize }: { ratio?: number, finalSize?: number }): string {
     const textFill = config.styles.textFill as ITextFillConfig
-    const img = this.getImg(textFill)
+    const img = this.getTextFillImg(textFill)
     if (!img) return ''
     const pageScale = store.getters.getPageScaleRatio * 0.01
     // ratio = contentScaleRatio * dpiRatio
     const layerSize = finalSize ?? Math.max(config.styles.height, config.styles.width) *
       pageScale * ratio * (textFill.size * 0.01)
 
-    const srcObj = isIAssetPhoto(img)
-      ? img.id
-        ? img.urls.full === img.urls.tiny ? { type: 'ios', assetId: img.id, userId: '' } // ios user img
-          : { type: 'public', userId: imageUtils.getUserId(img.urls.full, 'public'), assetId: img.id } // TextFill preset img
-        : { type: 'private', userId: '', assetId: img.assetIndex as number } // non-admin myfile img
-      : { type: 'unsplash', userId: '', assetId: img.id } // custom unsplash img
+    const srcObj =
+      !isIAssetPhoto(img) ? { type: 'unsplash', userId: '', assetId: img.id } // custom unsplash img
+        : !img.id ? { type: 'private', userId: '', assetId: img.assetIndex as number } // non-admin myfile img
+            : img.urls.full === img.urls.tiny ? { type: 'ios', assetId: img.id, userId: '' } // ios user img
+              : { type: 'public', userId: imageUtils.getUserId(img.urls.full, 'public'), assetId: img.id } // TextFill preset img
     let src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, layerSize))
     if (router.currentRoute.value.name === 'Preview') src = imageUtils.appendCompQueryForVivipic(src)
     return src
@@ -139,7 +138,7 @@ class TextFill {
 
   calcTextFillVar(config: IText) {
     const textFill = config.styles.textFill as ITextFillConfig
-    const img = this.getImg(textFill)
+    const img = this.getTextFillImg(textFill)
     if (!img) return {}
     const layerScale = config.styles.scale
     const divWidth = config.styles.width / layerScale
@@ -160,7 +159,7 @@ class TextFill {
     // If has textShape, skip TextFill effect.
     if (textFill.name === 'none' || textShape.name !== 'none') return {}
 
-    const imgSrc = this.getTextFillImg(config, { ratio })
+    const imgSrc = this.getTextFillImgSrc(config, { ratio })
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
     if (!imgSrc || !divHeight) return {}
 
@@ -190,7 +189,7 @@ class TextFill {
     // If has textShape, skip TextFill effect.
     if (textFill.name === 'none' || textShape.name !== 'none' || !(textEffectUtils.focus === 'fill')) return null
 
-    const imgSrc = this.getTextFillImg(config, { ratio })
+    const imgSrc = this.getTextFillImgSrc(config, { ratio })
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
     if (!imgSrc || !divHeight) return null
 
