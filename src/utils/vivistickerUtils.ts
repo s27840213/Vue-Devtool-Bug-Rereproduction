@@ -1140,11 +1140,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async deleteImage(key: string, name: string, type: string): Promise<void> {
-    if (this.checkVersion('1.27')) {
-      await this.callIOSAsAPI('DELETE_IMAGE', { key, name, type }, `delete-image-${key}-${name}`)
-    } else {
-      await this.callIOSAsAPI('DELETE_IMAGE', { key, name, type }, 'delete-image')
-    }
+    await this.callIOSAsAPI('DELETE_IMAGE', { key, name, type }, `delete-image-${key}-${name}`)
     store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), name })
   }
 

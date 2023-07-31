@@ -353,6 +353,18 @@ class BgRemoveUtils {
       }
     })
   }
+
+  moveOldBgRemoveImages(src: string, callback?: (path: string) => void) {
+    const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
+    const editingDesignId = store.getters['vivisticker/getEditingDesignId']
+    const name = generalUtils.generateAssetId()
+    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId: editingDesignId }, 'save-image-from-url').then((data) => {
+      if (callback) {
+        const path = `${key}/${editingDesignId}/${name}`
+        return callback(path)
+      }
+    })
+  }
 }
 
 export default new BgRemoveUtils()
