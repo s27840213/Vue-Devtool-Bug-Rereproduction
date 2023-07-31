@@ -981,7 +981,7 @@ class TextBg {
             tag: colorChangeable ? 'use' : 'image',
             attrs: {
               href: colorChangeable ? `#${p.href}`
-                : require(`@/assets/img/svg/LetterBG/${p.href}.svg`),
+                : require(`@/assets/img/text-effect/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
               ...!withShape && { x, y },

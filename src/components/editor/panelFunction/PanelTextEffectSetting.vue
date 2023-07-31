@@ -186,7 +186,7 @@ export default defineComponent({
       switch (effect.key) {
         case 'text-book':
           return {
-            name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
+            name: require(`@/assets/img/text-effect/icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
             size: '56',
           }
         case 'custom-fill-img': // svg-icon
@@ -196,7 +196,7 @@ export default defineComponent({
           }
         default:
           return {
-            name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}.png`),
+            name: require(`@/assets/img/text-effect/icon/${category.name}-${effect.key}.png`),
             size: '56',
           }
       }

@@ -416,7 +416,7 @@ class ConstantData {
           option.type = 'select';
           (option as IEffectOptionSelect).select = ['triangle', 'rounded', 'square'].map((key, i) => ({
             key,
-            img: require(`@/assets/img/svg/text-effect/select/endpoint-${key}.svg`),
+            img: require(`@/assets/img/text-effect/select/endpoint-${key}.svg`),
             label: i18n.global.tc(`NN073${i}`),
             preset: { endpoint: key },
           }))
@@ -425,7 +425,7 @@ class ConstantData {
           option.type = 'select';
           (option as IEffectOptionSelect).select = tailPositions.map((key) => ({
             key,
-            img: require(`@/assets/img/svg/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
+            img: require(`@/assets/img/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
             label: key,
             preset: { tailPosition: key },
           }))

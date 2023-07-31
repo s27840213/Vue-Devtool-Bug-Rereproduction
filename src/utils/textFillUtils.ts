@@ -176,7 +176,7 @@ class TextFill {
       webkitTextStrokeColor: 'transparent',
       textDecorationColor: 'transparent',
       // To fix Safari BG-clip bug where background appear on its border, apply border-transparent mask on it.
-      maskImage: `url(${require('@/assets/img/svg/text-fill-mask-image.svg')})`,
+      maskImage: `url(${require('@/assets/img/text-effect/text-fill-mask-image.svg')})`,
       maskSize: '100% 100%',
       // To fix Safari PDF reader bug: https://bit.ly/3IPcS8o
       ...store.getters['user/getUserId'] === 'backendRendering' ? { filter: 'opacity(1)' } : {},
