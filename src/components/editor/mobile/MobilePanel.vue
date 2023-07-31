@@ -99,7 +99,6 @@ import { IFrame } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
-import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import formatUtils from '@/utils/formatUtils'
@@ -485,16 +484,8 @@ export default defineComponent({
         }
       }
 
-      const colorHandler = () => {
-        if (this.extraPanel === 'color' || this.currActivePanel === 'color') {
-          if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
-            this.addRecentlyColors(colorUtils.currColor)
-          }
-        }
-      }
       if (this.extraPanel === 'color') {
         return () => {
-          colorHandler()
           this.extraPanel = ''
           this.panelHistory.pop()
         }
@@ -507,12 +498,10 @@ export default defineComponent({
       }
       if (this.panelHistory.length > 0) {
         return () => {
-          colorHandler()
           this.panelHistory.pop()
         }
       } else {
         return () => {
-          colorHandler()
           this.closeMobilePanel()
         }
       }
@@ -565,16 +554,6 @@ export default defineComponent({
             }
             break
           }
-
-          case 'color': {
-            if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
-              this.addRecentlyColors(colorUtils.currColor)
-            }
-            break
-          }
-        }
-        if (this.extraPanel === 'color') {
-          this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
       }
@@ -625,7 +604,6 @@ export default defineComponent({
     ...mapActions({
       fetchPalettes: 'brandkit/fetchPalettes',
       initRecentlyColors: 'color/initRecentlyColors',
-      addRecentlyColors: 'color/addRecentlyColors'
     }),
     vcoConfig() {
       return {
