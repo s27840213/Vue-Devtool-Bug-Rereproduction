@@ -847,6 +847,10 @@ class ImageShadowUtils {
     })
   }
 
+  updateIosShadowUploadBuffer(pageIndex: number, srcObjs: Array<SrcObj>, remove = false) {
+    store.commit('UPDATE_uploadShadow2Buffer', { pageIndex, srcObjs, remove })
+  }
+
   updateShadowOld(layerInfo: ILayerInfo) {
     store.commit('SET_old', layerInfo)
   }

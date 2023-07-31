@@ -319,6 +319,7 @@ export default new class ImageShadowPanelUtils {
           imgX: newX,
           imgY: newY
         }
+        imageShadowUtils.updateIosShadowUploadBuffer(pageIndex, [srcObj])
         imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
         imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
         if (config.styles.shadow.srcState?.shadowSrcObj.type === 'ios') {

@@ -13,6 +13,7 @@ const SET_shadowEffectState = 'SET_shadowEffectState' as const
 const SET_srcObj = 'SET_srcObj' as const
 const SET_srcState = 'SET_srcState' as const
 const SET_old = 'SET_old' as const
+const UPDATE_uploadShadow2Buffer = 'UPDATE_uploadShadow2Buffer' as const
 
 const imgShadowMutations = {
   [UPDATE_shadowEffect](state: IEditorState, data: { layerInfo: ILayerInfo, payload: IShadowEffects }) {
@@ -122,6 +123,24 @@ const imgShadowMutations = {
       ((state.pages[pageIndex].config.layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage).styles.shadow.cb = cb
     } else {
       (state.pages[pageIndex].config.layers[layerIndex] as IImage).styles.shadow.cb = cb
+    }
+  },
+  [UPDATE_uploadShadow2Buffer](state: IEditorState, data: { pageIndex: number, srcObjs: Array<SrcObj>, remove: boolean }) {
+    const { pageIndex, srcObjs, remove = false } = data
+    if (remove) {
+      srcObjs.forEach(srcObj => {
+        const buffer = state.pages[pageIndex].config.iosImgUploadBuffer.shadow
+        const index = buffer.findIndex(s => s.assetId === srcObj.assetId)
+        if (index !== -1) {
+          buffer.splice(index, 1)
+        }
+      })
+    } else {
+      srcObjs.forEach(srcObj => {
+        if (srcObj.type === 'ios') {
+          state.pages[pageIndex].config.iosImgUploadBuffer.shadow.push(srcObj)
+        }
+      })
     }
   }
 }

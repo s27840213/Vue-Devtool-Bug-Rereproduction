@@ -1,4 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
+import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
@@ -48,6 +49,8 @@ export class Page implements IPage {
   }
 
   contentScaleRatio: number
+
+  iosImgUploadBuffer: { shadow: SrcObj[] }
 
   constructor() {
     this.mobilePysicalSize = {
@@ -105,5 +108,6 @@ export class Page implements IPage {
       right: 11
     }
     this.contentScaleRatio = 1
+    this.iosImgUploadBuffer = { shadow: [] }
   }
 }
