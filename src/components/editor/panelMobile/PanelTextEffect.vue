@@ -144,7 +144,9 @@ export default defineComponent({
       return _.find(this.effectList, ['key', this.currentStyle.name]) ?? null
     },
     state(): string {
-      if (this.currCategoryName === 'fill' && !this.currentStyle.customImg) return 'effects'
+      if (this.currCategoryName === 'fill' &&
+        this.currEffect?.options.some(op => op.type === 'img') &&
+        !this.currentStyle.customImg) return 'effects' // No customImg, no options.
       return this.panelHistory.length === 0 ? 'effects' : 'options'
     }
   },
