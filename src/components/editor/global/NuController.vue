@@ -188,7 +188,7 @@ div(:layer-index="`${layerIndex}`"
                 @action="MappingUtils.mappingIconAction('lock')")
     template(v-if="$isTouchDevice() && isActive && !isLocked()")
       div(v-show="!isMoving")
-        action-icon(class="control-point__top-left-icon"
+        action-icon(v-if="showCloseAction" class="control-point__top-left-icon"
                     iconName="close"
                     iconSize="18px"
                     theme="border"
@@ -348,6 +348,7 @@ export default defineComponent({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       useMobileEditor: 'getUseMobileEditor'
     }),
     isControllerShown(): boolean {
@@ -479,6 +480,9 @@ export default defineComponent({
     tooSmall(): boolean {
       const { tooShort, tooNarrow } = this.checkLimits(this.$isTouchDevice(), !this.resizerProfile.hasHorizontal && !this.resizerProfile.hasVertical)
       return tooShort || tooNarrow
+    },
+    showCloseAction(): boolean {
+      return this.editorTypeTextLike || this.editorTypeTemplate
     }
   },
   watch: {
