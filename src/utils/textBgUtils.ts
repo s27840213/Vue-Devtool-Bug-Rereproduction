@@ -751,7 +751,9 @@ class TextBg {
         bend >= 0 ? maxHeightSpan.height / 2 + radius : layerHeight - maxHeightSpan.height / 2 - radius)
       const begin = middle.rotate(-bodyAngle / 2, center)
 
-      for (const rect of rects) {
+      for (const row of rows) {
+        if (row.spanData.every(span => span.text === '')) continue
+        const rect = row.rect
         const capWidth = withShape ? shapeCapWidth : rect.height * 0.005 * textBg.height
         const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
         const path = withShape ? new Path(begin)
