@@ -128,7 +128,8 @@ class TextFill {
 
     const srcObj = isIAssetPhoto(img)
       ? img.id
-        ? { type: 'public', userId: imageUtils.getUserId(img.urls.full, 'public'), assetId: img.id } // TextFill preset img
+        ? img.urls.full === img.urls.tiny ? { type: 'ios', assetId: img.id, userId: '' } // ios user img
+          : { type: 'public', userId: imageUtils.getUserId(img.urls.full, 'public'), assetId: img.id } // TextFill preset img
         : { type: 'private', userId: '', assetId: img.assetIndex as number } // non-admin myfile img
       : { type: 'unsplash', userId: '', assetId: img.id } // custom unsplash img
     let src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, layerSize))
