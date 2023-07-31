@@ -646,6 +646,11 @@ export default defineComponent({
       })
     },
     handleBgRemoveNext() {
+      if (!vivistickerUtils.checkVersion('1.35')) {
+        this.handleBgRemoveNextOldVer()
+        return
+      }
+
       if (!this.isInEditor) {
         const designId = generalUtils.generateAssetId()
         this.setEditorType('image')
@@ -726,6 +731,95 @@ export default defineComponent({
           this.bgRemoveSrcInfo = {
             key,
             id
+          }
+
+          const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+
+          const { width, height } = targetLayerStyle
+
+          const newImageWidth = width * remainingWidthPercentage
+          const newImageHeight = height * remainingHeightPercentage
+          layerUtils.updateLayerStyles(pageIndex, index, {
+            x: targetLayerStyle.x + xShift,
+            y: targetLayerStyle.y + yShift,
+            width: newImageWidth,
+            height: newImageHeight,
+            imgWidth: newImageWidth,
+            imgHeight: newImageHeight,
+            imgX: 0,
+            imgY: 0
+          })
+
+          layerUtils.updateLayerProps(pageIndex, index, {
+            srcObj,
+          })
+
+          this.setIsInBgRemoveSection(false)
+          return srcObj
+        }, targetLayerStyle)
+      }
+    },
+    // this is used for old version(< 1.35)
+    handleBgRemoveNextOldVer() {
+      if (!this.isInEditor) {
+        vivistickerUtils.startEditing(
+          'image',
+          { plan: 0, assetId: '' },
+          async () => {
+            bgRemoveUtils.setInBgRemoveMode(false)
+            editorUtils.setShowMobilePanel(false)
+            this.setInEffectEditingMode(true)
+            return await bgRemoveUtils.saveToIOSOld(async (data, assetId, aspectRatio) => {
+              const srcObj = {
+                type: 'ios',
+                userId: '',
+                assetId: 'bgRemove/' + assetId,
+              }
+              this.addImage(srcObj, aspectRatio)
+              imageShadowUtils.updateEffectProps({
+                pageIndex: layerUtils.pageIndex,
+                layerIndex: layerUtils.layerIndex,
+                subLayerIdx: -1
+              }, { isTransparent: true })
+              editorUtils.setCurrActivePanel('photo-shadow')
+              return srcObj
+            })
+          },
+          (srcObj: SrcObj) => {
+            setTimeout(() => {
+              imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj), (img) => {
+                const maxsize = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
+                imageShadowUtils.updateEffectProps({
+                  pageIndex: layerUtils.pageIndex,
+                  layerIndex: layerUtils.layerIndex,
+                  subLayerIdx: -1
+                }, {
+                  maxsize,
+                  middsize: Math.max(img.naturalWidth, img.naturalHeight)
+                })
+                imageShadowUtils.setEffect(ShadowEffectType.frame, {
+                  frame: {
+                    spread: 30,
+                    radius: 0,
+                    opacity: 100
+                  },
+                  frameColor: '#FECD56',
+                }, undefined)
+              })
+            }, 0)
+          },
+          generalUtils.generateAssetId()
+        )
+      } else {
+        const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
+        const targetLayerStyle = layers[0].styles as IImageStyle
+        bgRemoveUtils.setInBgRemoveMode(false)
+        editorUtils.setShowMobilePanel(false)
+        bgRemoveUtils.saveToIOSOld(async (data, assetId, aspectRatio, trimmedCanvasInfo) => {
+          const srcObj = {
+            type: 'ios',
+            userId: '',
+            assetId: 'bgRemove/' + assetId,
           }
 
           const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo

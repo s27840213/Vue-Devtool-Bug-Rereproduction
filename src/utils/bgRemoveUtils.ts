@@ -337,6 +337,22 @@ class BgRemoveUtils {
     })
   }
 
+  // this is for IOS version < 1.35
+  saveToIOSOld(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
+    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const trimmedCanvasInfo = trimCanvas(this.canvas)
+    const { canvas: trimedCanvas, width, height, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+    const src = trimedCanvas.toDataURL('image/png;base64')
+
+    const assetId = generalUtils.generateAssetId()
+    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'bgRemove', name: assetId, toast: false }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      if (callback) {
+        return callback(_data, assetId, width / height, trimmedCanvasInfo)
+      }
+    })
+  }
+
   saveToIOS(designId:string, callback?: (data: { flag: string, msg: string, imageId: string }, path: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
     const { trimCanvas } = useCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
