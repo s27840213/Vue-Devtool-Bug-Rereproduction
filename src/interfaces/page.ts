@@ -29,10 +29,10 @@ export interface IPageSizeWithBleeds extends IPageSize {
 }
 export interface IPage extends IPageSizeWithBleeds {
   [index: string]: unknown,
-  mobilePysicalSize: {
-    pageCenterPos: ICoordinate,
-    pageSize: ISize
-  }
+  mobilePhysicalSize: {
+    originSize: ISize,
+    initPos: ICoordinate
+  },
   id: string,
   x: number,
   y: number,

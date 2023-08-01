@@ -68,6 +68,7 @@ const getDefaultState = (): IEditorState => ({
   showColorSlips: false,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
+  pinchScaleRatio: 100,
   isSettingScaleRatio: false,
   middlemostPageIndex: 0,
   currActivePageIndex: -1,
@@ -439,6 +440,7 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[pageInfo.index].config.physicalWidth = pageInfo.physicalWidth
     state.pages[pageInfo.index].config.physicalHeight = pageInfo.physicalHeight
     state.pages[pageInfo.index].config.unit = pageInfo.unit
+    state.pages[pageInfo.index].config.shownSize = { width: pageInfo.width, height: pageInfo.height }
   },
   SET_designId(state: IEditorState, designId: string) {
     state.designId = designId
@@ -491,6 +493,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
     state.pageScaleRatio = ratio
+  },
+  SET_pinchScaleRatio(state: IEditorState, ratio: number) {
+    state.pinchScaleRatio = ratio
   },
   SET_isSettingScaleRatio(state: IEditorState, isSettingScaleRatio: boolean) {
     state.isSettingScaleRatio = isSettingScaleRatio
@@ -1101,6 +1106,12 @@ const mutations: MutationTree<IEditorState> = {
         }
       })
   },
+  UPDATE_pageInitPos(state: IEditorState, data: { pageIndex: number, initPos: ICoordinate }) {
+    const { pageIndex, initPos } = data
+    const page = state.pages[pageIndex]
+    page.config.mobilePhysicalSize.initPos.x = initPos.x
+    page.config.mobilePhysicalSize.initPos.y = initPos.y
+  },
   UPDATE_snapUtilsIndex(state: IEditorState, index: number) {
     state.pages[index].modules.snapUtils.pageIndex = index
   },
@@ -1108,13 +1119,10 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, contentScaleRatio } = payload
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
-  SET_pagePysicalSize(state: IEditorState, payload: { pageIndex: number, pageSize: ISize, pageCenterPos: ICoordinate }) {
-    const { pageIndex, pageSize, pageCenterPos } = payload
-    if (pageCenterPos) {
-      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageCenterPos, pageCenterPos)
-    }
-    if (pageSize) {
-      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageSize, pageSize)
+  SET_pagePhysicalSize(state: IEditorState, payload: { pageIndex: number, originSize?: ISize, pageCenterPos?: ICoordinate }) {
+    const { pageIndex, originSize, pageCenterPos } = payload
+    if (originSize) {
+      Object.assign(state.pages[pageIndex].config.mobilePhysicalSize.originSize, originSize)
     }
   },
   ...imgShadowMutations,

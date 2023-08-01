@@ -30,6 +30,7 @@ div(:layer-index="`${layerIndex}`"
   div(v-show="isActive && !isImgControl" :style="contentStyles" class="nu-controller__content")
     div(v-show="!isLocked()"
         class="nu-controller__ctrl-points"
+        :style="ctrlPtrStyles"
         ref="body"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
@@ -348,6 +349,20 @@ export default defineComponent({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor'
     }),
+    ctrlPtrStyles(): Record<string, number | string> {
+      if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
+        return {
+          // outline: this.outlineStyles(),
+          outline: this.outlineStyles().outline,
+          opacity: 0
+        }
+      } else {
+        return {
+          outline: this.outlineStyles().outline
+          // outline: this.outlineStyles()
+        }
+      }
+    },
     resizerProfile() {
       return ControlUtils.getResizerProfile(this.config as AllLayerTypes)
     },
@@ -373,6 +388,7 @@ export default defineComponent({
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.$isTouchDevice(), this.config.size?.[0])
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
+      // const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       const finalWidth = width * _f
       const finalHeight = height * _f
@@ -735,7 +751,7 @@ export default defineComponent({
       return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px)`
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
 
@@ -775,7 +791,7 @@ export default defineComponent({
       window.addEventListener('keydown', this.handleScaleOffset)
     },
     scaling(event: MouseEvent | TouchEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       if (generalUtils.getEventType(event) !== 'touch') {
@@ -795,7 +811,7 @@ export default defineComponent({
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 1 / this.contentScaleRatio : undefined)
+      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 1 / this.contentScaleRatio * 100 / this.$store.getters.getPageScaleRatio : undefined)
       const [dx, dy] = [diff.offsetX, diff.offsetY]
 
       /**
@@ -1035,7 +1051,7 @@ export default defineComponent({
       this.snapUtils.event.emit('clearSnapLines')
     },
     resizeStart(event: MouseEvent, type: string) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       if (eventUtils.checkIsMultiTouch(event)) {
@@ -1113,7 +1129,7 @@ export default defineComponent({
       }
     },
     resizing(event: MouseEvent | TouchEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       event.preventDefault()
@@ -1132,7 +1148,7 @@ export default defineComponent({
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
-      const _f = (this.$isTouchDevice() ? 1 / this.contentScaleRatio : 1 / (this.scaleRatio * 0.01))
+      const _f = (this.$isTouchDevice() ? 1 / this.contentScaleRatio : 1) / (this.scaleRatio * 0.01)
       const [dx, dy] = [diff.x * _f, diff.y * _f]
 
       const offsetMultiplier = isCenterBased ? 2 : 1
@@ -1165,7 +1181,7 @@ export default defineComponent({
           }
           break
         }
-        case 'text':
+        case 'text': {
           /**
            * When the size is very close to the text-wrapping boundary, the getBoundingClientRect() result in textResizeHandler may be
            * wrong. That maybe results from the tiny delay between the size-update by setting layerSize and the function call. Thus,
@@ -1180,6 +1196,9 @@ export default defineComponent({
             height = textHW.height
             ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width, spanDataList: textHW.spanDataList })
           }
+          const textInitWidth = width / this.config.styles.scale
+          const textInitHeight = height / this.config.styles.scale
+          ControlUtils.updateLayerInitSize(this.pageIndex, this.layerIndex, textInitWidth, textInitHeight)
           /**
            * below make the anchor-point always pinned at the top-left or top-right
            */
@@ -1189,6 +1208,7 @@ export default defineComponent({
             this.control.ySign = 1
           }
           break
+        }
         case 'frame': {
           /**
            * only plain-rectangular-frame would have resizer
@@ -1246,7 +1266,7 @@ export default defineComponent({
       this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent | PointerEvent, index = -1) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
@@ -1276,7 +1296,7 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
       if (!this.config.moved) {
@@ -1665,6 +1685,12 @@ export default defineComponent({
           : 'translate(0px, 0px)'
       }
     },
+    ctrlMiddleware(): boolean {
+      if (this.$isTouchDevice()) {
+        if (this.$store.getters['mobileEditor/getIsPinchingEditor']) return true
+      }
+      return false
+    }
   }
 })
 </script>
@@ -1709,14 +1735,14 @@ export default defineComponent({
     }
   }
   &__content {
-    border-width: 0;
     z-index: 10000;
-    border-color: transparent;
-    background-color: transparent;
-    background-image: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    // border-width: 0;
+    // border-color: transparent;
+    // background-color: transparent;
+    // background-image: none;
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
     position: absolute;
     touch-action: none;
   }
@@ -1732,7 +1758,8 @@ export default defineComponent({
   &__ctrl-points {
     width: 100%;
     height: 100%;
-    position: relative;
+    transition: opacity .2s;
+    position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;

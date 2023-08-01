@@ -1,6 +1,5 @@
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { ICoordinate } from '@/interfaces/frame'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
@@ -126,18 +125,15 @@ class PageUtils {
 
   mobileMinScaleRatio: number
   isSwitchingToEditor: boolean
-  editorSize: { width: number, height: number }
-  pageSize: { width: number, height: number }
   originPageSize = { width: -1, height: -1 }
   originEditorSize = { width: -1, height: -1 }
   pageEventPosOffset = null as unknown as { x: number, y: number }
   pageCenterPos = { x: 0, y: 0 }
+  originPageY = 0
 
   constructor() {
     this.mobileMinScaleRatio = 0
     this.isSwitchingToEditor = false
-    this.editorSize = { width: 0, height: 0 }
-    this.pageSize = { width: 0, height: 0 }
   }
 
   newPage(pageData: Partial<IPage>) {
@@ -155,9 +151,14 @@ class PageUtils {
       })
     }
 
+    pageData.shownSize ||= { width: 1080, height: 1080 }
     // set physical size to px size if not exist
-    if (pageData.width) pageData.physicalWidth ||= pageData.width
-    if (pageData.height) pageData.physicalHeight ||= pageData.height
+    if (pageData.width) {
+      pageData.physicalWidth ||= pageData.width
+    }
+    if (pageData.height) {
+      pageData.physicalHeight ||= pageData.height
+    }
     pageData.unit ||= 'px'
 
     const defaultBleeds = this.getPageDefaultBleeds()
@@ -165,7 +166,7 @@ class PageUtils {
       width: 1080,
       height: 1080,
       x: 0,
-      y: 0,
+      y: this.originPageY || 0,
       physicalWidth: 1080,
       physicalHeight: 1080,
       unit: 'px',
@@ -199,16 +200,16 @@ class PageUtils {
         v: [],
         h: []
       },
-      mobilePysicalSize: {
-        pageCenterPos: { x: 0, y: 0 },
-        pageSize: { width: 0, height: 0 }
+      mobilePhysicalSize: {
+        originSize: { width: 0, height: 0 },
+        initPos: { x: 0, y: 0 }
       },
+      shownSize: { width: 1080, height: 1080 },
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
       contentScaleRatio: 1,
     }
-    // pageData.snapUtils && delete pageData.snapUtils
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
   }
 
@@ -526,15 +527,10 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage(scrollToTop = false, minRatioFiRestricttDisable = false) {
+  fitPage(scrollToTop = false, minRatioFiRestricttDisable = false, resetPageScaleRatio = true) {
     // In these mode, don't fitPage.
 
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
-      return
-    }
-
-    // If mobile user zoom in page, don't fitPage.
-    if (this.isMobile && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
 
@@ -594,6 +590,7 @@ class PageUtils {
     }
 
     editorUtils.handleContentScaleRatio(this.currFocusPageIndex)
+    store.commit('SET_pageScaleRatio', 100)
   }
 
   fillPage() {
@@ -937,8 +934,15 @@ class PageUtils {
     })
   }
 
-  setMobilePysicalPage(payload: { pageIndex: number, pageSize?: ISize, pageCenterPos?: ICoordinate }) {
-    store.commit('SET_pagePysicalSize', payload)
+  updatePageInitPos(pageIndex: number, initPos: { x?: number, y?: number }) {
+    store.commit('UPDATE_pageInitPos', {
+      pageIndex,
+      initPos
+    })
+  }
+
+  setMobilePhysicalPage(payload: { pageIndex: number, originSize?: ISize }) {
+    store.commit('SET_pagePhysicalSize', payload)
   }
 }
 
