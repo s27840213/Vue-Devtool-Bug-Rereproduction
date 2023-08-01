@@ -79,7 +79,7 @@ div(class="text-effect-setting")
                 @click="chooseImg(option.key)")
               img(:src="getStyleImg")
               div
-              svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="16px")
+              svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="32px")
           div(class="text-effect-setting__option")
             span(class="text-effect-setting__option--admin"
                 @click="adminTool.action()") {{ adminTool.label }}
@@ -154,7 +154,7 @@ export default defineComponent({
         editorUtils.showColorSlips
     },
     getStyleImg(): string {
-      return textFillUtils.getTextFillImg(textEffectUtils.getCurrentLayer(),
+      return textFillUtils.getTextFillImgSrc(textEffectUtils.getCurrentLayer(),
         { finalSize: (this.$el as HTMLElement | undefined)?.clientWidth ?? 320 })
     },
     adminTool() {
