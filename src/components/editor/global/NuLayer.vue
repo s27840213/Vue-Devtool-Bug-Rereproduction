@@ -63,11 +63,10 @@ import controlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import DragUtils from '@/utils/dragUtils'
-import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import MouseUtils from '@/utils/mouseUtils'
@@ -792,22 +791,6 @@ export default defineComponent({
       if (e.dataTransfer?.getData('data')) {
         if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
           this.dragUtils.itemOnDrop(e, this.pageIndex)
-        } else if (this.getLayerType === 'image') {
-          if (this.isHandleShadow) {
-            const replacedImg = new Image()
-            replacedImg.crossOrigin = 'anonynous'
-            replacedImg.onload = () => {
-              const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
-              const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
-              imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
-            }
-            const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
-            const src = imageUtils.getSrc(this.config, size)
-            replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-            // return
-          } else {
-            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
-          }
         }
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files

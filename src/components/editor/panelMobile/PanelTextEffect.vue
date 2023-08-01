@@ -38,14 +38,14 @@ div(class="panel-text-effect")
         div(v-for="sel in option.select"
             :key="sel.key"
             :class="{'selected': currentStyle[option.key] === sel.key }"
-            @click="handleSelectInput(sel.attrs)")
+            @click="handleSelectInput(sel.preset)")
           img(:src="sel.img")
           span {{sel.label}}
       //- Option type select
       div(v-if="option.type === 'select' && option.key !== 'endpoint'"
           class="panel-text-effect__select")
         div(v-for="sel in option.select" :key="sel.key"
-            @click="handleSelectInput(sel.attrs)")
+            @click="handleSelectInput(sel.preset)")
           img(:src="sel.img"
               :class="{'selected': ((currentStyle[option.key] as Record<'key', string>).key ?? currentStyle[option.key]) === sel.key }")
           pro-item(v-if="sel.plan" theme="roundedRect")
@@ -54,11 +54,10 @@ div(class="panel-text-effect")
         :borderTouchArea="true"
         :title="option.label"
         :value="getInputValue(currentStyle, option)"
-        :max="option.max ?? 100"
-        :min="option.min ?? 0"
+        :max="option.max"
+        :min="option.min"
         :step="option.key === 'lineHeight' ? 0.01 : 1"
         :autoRecord="false"
-        :enableDefaultPadding="false"
         :disabled="optionDisabled(option)"
         @update="(val)=>handleRangeInput(val, option)"
         @pointerdown="setEffectFocus(true)"
@@ -145,6 +144,9 @@ export default defineComponent({
       return _.find(this.effectList, ['key', this.currentStyle.name]) ?? null
     },
     state(): string {
+      if (this.currCategoryName === 'fill' &&
+        this.currEffect?.options.some(op => op.type === 'img') &&
+        !this.currentStyle.customImg) return 'effects' // No customImg, no options.
       return this.panelHistory.length === 0 ? 'effects' : 'options'
     }
   },
@@ -326,20 +328,17 @@ export default defineComponent({
       height: 0;
       padding-top: 100%;
       > img:not(.pro) {
+        @include selection-border(1px, gray-5);
         position: absolute;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        top: -1px;
-        left: -1px;
-        border: 1px solid setColor(gray-5);
+        top: 0;
         border-radius: 4px;
         transition: all 0.3s;
         pointer-events: none;
         &.selected {
-          top: -2px;
-          left: -2px;
-          border: 2px solid setColor(blue-1);
+          @include selection-border(2px);
         }
       }
       .pro {

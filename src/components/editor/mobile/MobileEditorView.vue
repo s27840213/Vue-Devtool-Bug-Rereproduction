@@ -6,8 +6,8 @@ div(class="editor-view" v-touch
     @scroll="!inBgRemoveMode ? scrollUpdate() : null"
     @pointerdown="selectStart"
     @mousewheel="handleWheel"
-    @pinch="pinchHandler"
     ref="editorView")
+  //- @pinch="pinchHandler"
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
     div(class="editor-view__canvas"
@@ -397,6 +397,7 @@ export default defineComponent({
         bottom: editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
       }
     },
+    // eslint-disable-next-line
     pinchHandler(e: AnyTouchEvent) {
       if (this.isHandlingEdgeReach) return
 

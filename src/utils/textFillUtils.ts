@@ -17,7 +17,7 @@ import { AxiosResponse } from 'axios'
 import { find, omit, pick } from 'lodash'
 import { InjectionKey } from 'vue'
 
-interface ITextFillPresetRawImg {
+interface IApiTextFillPresetRawImg {
   assetIndex: number
   teamId: string
   id: string
@@ -25,20 +25,20 @@ interface ITextFillPresetRawImg {
   height: number
 }
 
-export interface ITextFIllPreset {
+export interface IApiTextFIllPreset {
   id: string
   plan: 0 | 1
   param: {
-    img: ITextFillPresetRawImg
+    img: IApiTextFillPresetRawImg
     size: number
     xOffset200: number
     yOffset200: number
   }
 }
 
-export interface ITextFillCategory {
+export interface IApiTextFillCategory {
   id: number
-  list: ITextFIllPreset[]
+  list: IApiTextFIllPreset[]
   plan: 0 | 1
   title_jp: string
   title_tw: string
@@ -46,8 +46,8 @@ export interface ITextFillCategory {
 }
 
 class TextFill {
-  normalFills = [] as ITextFillCategory[]
-  adminFills = [] as ITextFIllPreset[]
+  normalFills = [] as IApiTextFillCategory[]
+  adminFills = [] as IApiTextFIllPreset[]
 
   get fillCategories(): IEffect[] { // TextFill that from appJSON
     const isAdmin = store.getters['user/isAdmin']
@@ -80,7 +80,7 @@ class TextFill {
             plan: eff.plan,
             img: `https://template.vivipic.com/admin/${eff.param.img.teamId}/asset/image/${eff.param.img.id}/tiny`,
             label: '',
-            attrs: {
+            preset: {
               ...omit(eff.param, ['opacity']),
               img: {
                 ...eff.param.img,
@@ -97,7 +97,7 @@ class TextFill {
     })
   }
 
-  updateFillCategory(normalFills: ITextFillCategory[], adminFills: ITextFIllPreset[]) {
+  updateFillCategory(normalFills: IApiTextFillCategory[], adminFills: IApiTextFIllPreset[]) {
     this.normalFills = normalFills
     this.adminFills = adminFills
   }
@@ -113,24 +113,23 @@ class TextFill {
     else return { customImg: null }
   }
 
-  getImg(effect: { img?: IAssetPhoto, customImg?: IAssetPhoto | IPhotoItem | null }): IAssetPhoto | IPhotoItem | null {
+  getTextFillImg(effect: { img?: IAssetPhoto, customImg?: IAssetPhoto | IPhotoItem | null }): IAssetPhoto | IPhotoItem | null {
     return effect.img ?? effect.customImg ?? null
   }
 
-  getTextFillImg(config: IText, { ratio = 1, finalSize }: { ratio?: number, finalSize?: number }): string {
+  getTextFillImgSrc(config: IText, { ratio = 1, finalSize }: { ratio?: number, finalSize?: number }): string {
     const textFill = config.styles.textFill as ITextFillConfig
-    const img = this.getImg(textFill)
+    const img = this.getTextFillImg(textFill)
     if (!img) return ''
     const pageScale = store.getters.getPageScaleRatio * 0.01
     // ratio = contentScaleRatio * dpiRatio
     const layerSize = finalSize ?? Math.max(config.styles.height, config.styles.width) *
       pageScale * ratio * (textFill.size * 0.01)
 
-    const srcObj = isIAssetPhoto(img)
-      ? img.id
-        ? { type: 'public', userId: imageUtils.getUserId(img.urls.full, 'public'), assetId: img.id } // TextFill preset img
-        : { type: 'private', userId: '', assetId: img.assetIndex as number } // non-admin myfile img
-      : { type: 'unsplash', userId: '', assetId: img.id } // custom unsplash img
+    const srcObj =
+      !isIAssetPhoto(img) ? { type: 'unsplash', userId: '', assetId: img.id } // custom unsplash img
+        : !img.id ? { type: 'private', userId: '', assetId: img.assetIndex as number } // non-admin myfile img
+            : { type: 'public', userId: imageUtils.getUserId(img.urls.full, 'public'), assetId: img.id } // TextFill preset img
     let src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, layerSize))
     if (router.currentRoute.value.name === 'Preview') src = imageUtils.appendCompQueryForVivipic(src)
     return src
@@ -138,7 +137,7 @@ class TextFill {
 
   calcTextFillVar(config: IText) {
     const textFill = config.styles.textFill as ITextFillConfig
-    const img = this.getImg(textFill)
+    const img = this.getTextFillImg(textFill)
     if (!img) return {}
     const layerScale = config.styles.scale
     const divWidth = config.styles.width / layerScale
@@ -159,7 +158,7 @@ class TextFill {
     // If has textShape, skip TextFill effect.
     if (textFill.name === 'none' || textShape.name !== 'none') return {}
 
-    const imgSrc = this.getTextFillImg(config, { ratio })
+    const imgSrc = this.getTextFillImgSrc(config, { ratio })
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
     if (!imgSrc || !divHeight) return {}
 
@@ -189,7 +188,7 @@ class TextFill {
     // If has textShape, skip TextFill effect.
     if (textFill.name === 'none' || textShape.name !== 'none' || !(textEffectUtils.focus === 'fill')) return null
 
-    const imgSrc = this.getTextFillImg(config, { ratio })
+    const imgSrc = this.getTextFillImgSrc(config, { ratio })
     const { divHeight, divWidth, imgHeight, imgWidth, scaleByWidth } = this.calcTextFillVar(config)
     if (!imgSrc || !divHeight) return null
 
@@ -243,7 +242,7 @@ class TextFill {
       } else { // Switch to other effect.
         // Get default img and its preset options of the effect
         const targetEffect = find(this.fillCategories, ['key', effect])
-        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.attrs as { img: { key: string } } | undefined
+        const effectDefaultPreset = (targetEffect?.options[0] as IEffectOptionSelect)?.select[0]?.preset as { img: { key: string } } | undefined
         const localAttrs = effectDefaultPreset?.img?.key ? localStorageUtils.get('textEffectSetting', `fill.${effectDefaultPreset.img.key}`) : null
         Object.assign(newTextFill, defaultAttrs, effectDefaultPreset, localAttrs,
           { name: effect, customImg: oldTextFill.customImg }
@@ -270,7 +269,7 @@ class TextFill {
     }
     const targetEffect = find(this.fillCategories, ['key', effectName])
     const targetFillImg = find((targetEffect?.options[0] as IEffectOptionSelect)?.select, ['key', textFill.img.key])
-    const effectDefaultPreset = targetFillImg?.attrs
+    const effectDefaultPreset = targetFillImg?.preset
     this.setTextFill(effectName, effectDefaultPreset, true)
   }
 
@@ -288,7 +287,7 @@ class TextFill {
     }
 
     let res: AxiosResponse<IPutTextEffectResponse>
-    const params = pick(fill, ['xOffset200', 'yOffset200', 'size']) as ITextFIllPreset['param']
+    const params = pick(fill, ['xOffset200', 'yOffset200', 'size']) as IApiTextFIllPreset['param']
     if (fill.name === 'custom-fill-img') {
       if (!isIAssetPhoto(fill.customImg) || !fill.customImg.assetIndex) {
         notify({ group: 'error', text: '當前文字填滿沒有圖片，或是圖片不是來自管理員上傳。' })
@@ -309,7 +308,7 @@ class TextFill {
         notify({ group: 'error', text: '找不到文字填滿id' })
         return
       }
-      params.img = pick(fill.img, ['assetIndex', 'teamId', 'id', 'width', 'height']) as ITextFillPresetRawImg
+      params.img = pick(fill.img, ['assetIndex', 'teamId', 'id', 'width', 'height']) as IApiTextFillPresetRawImg
       res = await textEffect.updateTextFill(targetFillImg.key, params)
     }
 

@@ -8,7 +8,7 @@ import { ActionTree, GetterTree, MutationTree } from 'vuex'
 const SET_STATE = 'SET_STATE' as const
 const REGEX_JAPANESE = /[\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f]/
 
-interface IPhotoState {
+export interface IUnaplashState {
   content: IPhotoItem[]
   searchResult: IPhotoItem[]
   keyword: string
@@ -18,7 +18,7 @@ interface IPhotoState {
   pending: boolean
 }
 
-const getDefaultState = (): IPhotoState => ({
+const getDefaultState = (): IUnaplashState => ({
   content: [],
   searchResult: [],
   keyword: '',
@@ -28,7 +28,7 @@ const getDefaultState = (): IPhotoState => ({
   pending: false
 })
 
-const actions: ActionTree<IPhotoState, unknown> = {
+const actions: ActionTree<IUnaplashState, unknown> = {
   init({ dispatch, state }) {
     if (state.content.length !== 0) return
     dispatch('getPhotos', { keyword: '' })
@@ -69,10 +69,10 @@ const actions: ActionTree<IPhotoState, unknown> = {
   }
 }
 
-const mutations: MutationTree<IPhotoState> = {
-  [SET_STATE](state: IPhotoState, data: Partial<IPhotoState>) {
+const mutations: MutationTree<IUnaplashState> = {
+  [SET_STATE](state: IUnaplashState, data: Partial<IUnaplashState>) {
     const newState = data || getDefaultState()
-    const keys = Object.keys(newState) as Array<keyof IPhotoState>
+    const keys = Object.keys(newState) as Array<keyof IUnaplashState>
     keys
       .forEach(key => {
         if (key in state) {
@@ -80,7 +80,7 @@ const mutations: MutationTree<IPhotoState> = {
         }
       })
   },
-  SET_CONTENT(state: IPhotoState, { data, isSearch }: { data: IPhotoServiceData, isSearch: boolean }) {
+  SET_CONTENT(state: IUnaplashState, { data, isSearch }: { data: IPhotoServiceData, isSearch: boolean }) {
     const { searchResult, content } = state
     const { next_page } = data
 
@@ -96,7 +96,7 @@ const mutations: MutationTree<IPhotoState> = {
   }
 }
 
-const getters: GetterTree<IPhotoState, any> = {
+const getters: GetterTree<IUnaplashState, any> = {
   getCurrentPagePhotos(state) {
     const { nextPage, content } = state
     return content[nextPage] || []

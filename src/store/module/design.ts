@@ -7,7 +7,7 @@ import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
-interface IDesignState {
+export interface IDesignState {
   currLocation: string,
   moveToFolderSelectInfo: string,
   folders: IFolder[],

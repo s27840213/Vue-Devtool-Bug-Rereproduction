@@ -151,39 +151,7 @@ export default defineComponent({
   mounted() {
     if (this.isBgImgControl) return
     this.src = this.config.previewSrc === undefined ? this.src : this.config.previewSrc
-    eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
-      if (this.currentShadowEffect() !== ShadowEffectType.none) {
-        const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
-        const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent)
-        if (redrawImmediately) {
-          this.redrawShadow()
-          return
-        }
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.onload = () => {
-          const isTransparent = imageShadowUtils.isTransparentBg(img)
-          imageShadowUtils.updateEffectProps({
-            pageIndex: this.pageIndex,
-            layerIndex: this.layerIndex,
-            subLayerIdx: this.subLayerIndex
-          }, { isTransparent })
-          if (!redrawImmediately) {
-            imageShadowUtils.setHandleId()
-            isTransparent && this.redrawShadow()
-          }
-        }
-        img.onerror = (e) => {
-          logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img.src + 'error:' + e.toString())
-        }
-        const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-        img.src = imageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      } else {
-        stepsUtils.record()
-      }
-    })
-
-    // this.canvas = this.$refs.canvas as HTMLCanvasElement | undefined
+    this.mountShadowRedrawEvt()
   },
   beforeUnmount() {
     if (!this.isBgImgControl) {
@@ -228,7 +196,14 @@ export default defineComponent({
           return
         }
         this.previewAsLoading()
-        this.handleIsTransparent()
+        const _oldIsTransparent = (this.config as IImage).styles.shadow.isTransparent
+        this.handleIsTransparent()?.then(bool => {
+          const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
+          const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || bool || _oldIsTransparent)
+          if (redrawImmediately) {
+            this.redrawShadow()
+          }
+        })
       },
       deep: true
     },
@@ -697,9 +672,8 @@ export default defineComponent({
     handleIsTransparent() {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
       const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-      const _src = imageUtils.getSrc(this.config, imgSize)
-      const src = _src + `${_src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      imageUtils.imgLoadHandler(src,
+      const src = imageUtils.getSrc(this.config, imgSize)
+      return imageUtils.imgLoadHandler(src,
         (img) => {
           if (!this.hasDestroyed) {
             const isTransparent = imageShadowUtils.isTransparentBg(img)
@@ -707,6 +681,7 @@ export default defineComponent({
             if (!isTransparent && this.config.styles.adjust.blur > 0) {
               this.$forceUpdate()
             }
+            return isTransparent
           }
         }, { crossOrigin: true }
       )
@@ -797,9 +772,7 @@ export default defineComponent({
               layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
             }
             img.crossOrigin = 'anonymous'
-            img.src = imageUtils.getSrc(this.config,
-              ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
-              `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+            img.src = imageUtils.getSrc(this.config, ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal')
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 console.log('img load error')
@@ -989,6 +962,7 @@ export default defineComponent({
       }
     },
     redrawShadow() {
+      console.log('redraw shadow 11 ')
       const id = {
         pageId: this.page.id,
         layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
@@ -1125,6 +1099,39 @@ export default defineComponent({
         layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
           ? layerUtils.getLayer(this.pageIndex, this.layerIndex).id : this.config.id,
         subLayerId: this.config.id
+      }
+    },
+    mountShadowRedrawEvt() {
+      eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
+        this.shadowRedrawEvt()
+      })
+    },
+    shadowRedrawEvt() {
+      if (this.currentShadowEffect() !== ShadowEffectType.none) {
+        const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
+        const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent)
+        if (redrawImmediately) {
+          this.redrawShadow()
+          return
+        }
+        const src = imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, 100))
+        imageUtils.imgLoadHandler(src, (img) => {
+          const isTransparent = imageShadowUtils.isTransparentBg(img)
+          imageShadowUtils.updateEffectProps({
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex,
+            subLayerIdx: this.subLayerIndex
+          }, { isTransparent })
+          imageShadowUtils.setHandleId()
+          isTransparent && this.redrawShadow()
+        }, {
+          crossOrigin: true,
+          error: (img) => {
+            logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img?.src)
+          }
+        })
+      } else {
+        stepsUtils.record()
       }
     }
   }

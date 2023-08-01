@@ -30,10 +30,10 @@ class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
   private currColorKey = ''
-  effects = {} as Record<string, Record<string, string | number>>
+  effectDefaultOptions = {} as Record<string, Record<string, string | number>>
   focus = 'none' as IFocusState
   constructor() {
-    this.effects = this.getDefaultEffects()
+    this.effectDefaultOptions = this.getDefaultEffects()
   }
 
   getDefaultEffects() {
@@ -354,7 +354,7 @@ class Controller {
 
   resetCurrTextEffect() {
     const effectName = this.getCurrentLayer().styles.textEffect.name
-    this.setTextEffect(effectName, this.effects[effectName])
+    this.setTextEffect(effectName, this.effectDefaultOptions[effectName])
   }
 
   setTextEffect(effect: string, attrs = {} as any): void {
@@ -362,7 +362,7 @@ class Controller {
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
     const subLayerIndex = LayerUtils.subLayerIdx
-    const defaultAttrs = this.effects[effect]
+    const defaultAttrs = this.effectDefaultOptions[effect]
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
