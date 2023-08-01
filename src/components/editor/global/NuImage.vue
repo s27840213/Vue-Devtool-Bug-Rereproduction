@@ -147,7 +147,6 @@ export default defineComponent({
     }
   },
   async created() {
-    console.warn('image created', generalUtils.deepCopy(this.$store.state.pages[0]))
     this.src = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
@@ -159,6 +158,7 @@ export default defineComponent({
     if (this.isBgImgControl) return
     this.src = this.config.previewSrc === undefined ? this.src : this.config.previewSrc
     this.mountShadowRedrawEvt()
+
     const config = this.config as IImage
     /**
      * bcz bg removing saving place has benn changed
@@ -169,7 +169,6 @@ export default defineComponent({
     //             userId: '',
     //             assetId: path,
     //           }
-
     const { assetId, type } = config.srcObj
     if (type === 'ios' && (assetId as string).includes('bgRemove')) {
       const imageName = (assetId as string).split('/')[1]

@@ -544,7 +544,6 @@ class ImageShadowUtils {
     }
     console.log('finish draw shadow')
     this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-    const stime = Date.now()
     cb && cb()
     setMark('shadow', 4)
     logMark('shadow')
@@ -668,7 +667,7 @@ class ImageShadowUtils {
   }
 
   saveToIOS(canvas: HTMLCanvasElement, callback?: (data: { flag: string, msg: string, imageId: string }, path: string) => void) {
-    const name = generalUtils.generateAssetId()
+    const name = 'img-shadow-' + generalUtils.generateAssetId()
     const src = canvas.toDataURL('image/png;base64')
     const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
     const designId = (() => {
@@ -881,7 +880,6 @@ class ImageShadowUtils {
   }
 
   setHandleId(id?: ILayerIdentifier) {
-    // console.warn('set handle id', id?.pageId)
     if (!id) {
       id = { pageId: '', layerId: '', subLayerId: '' }
     }
@@ -911,7 +909,6 @@ class ImageShadowUtils {
   iosImgDelHandler() {
     const promises = [] as Promise<unknown>[]
     const pages = pageUtils.getPages
-    console.warn('page', generalUtils.deepCopy(pages))
     pages.forEach((page, pageIndex) => {
       const imgBuffs = [...page.iosImgUploadBuffer.shadow]
       page.layers.forEach(l => {
@@ -925,7 +922,6 @@ class ImageShadowUtils {
       for (const p of this.delIosOldImg(imgBuffs)) {
         promises.push(new Promise(resolve => {
           p.then(data => {
-            console.warn('delIosOldImg success', data)
             const target = imgBuffs.find(b => (b.assetId as string).split('/').pop() === data.name)
             this.updateIosShadowUploadBuffer(pageIndex, target ? [target] : [], true)
             resolve(data)
