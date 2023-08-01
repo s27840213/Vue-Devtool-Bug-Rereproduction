@@ -11,6 +11,7 @@ import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import constantData, { IStickerVideoUrls } from '@/utils/constantData'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import colorUtils from './colorUtils'
@@ -1138,7 +1139,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  deleteImage(key: string, name: string, type: string, designId?: string): Promise<any> {
+  deleteImage(key: string, name: string, type: string, designId?: string): Promise<unknown> {
     if (this.checkVersion('1.27')) {
       return this.callIOSAsAPI('DELETE_IMAGE', { key, name, type, designId }, `delete-image-${key}-${name}`)
     } else {
@@ -1148,7 +1149,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     // store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), name })
   }
 
-  deleteImageDone(data: { key: string, name: string } | undefined) {
+  deleteImageDone(data: { key: string, flag: number, name: string }) {
     if (data !== undefined) {
       this.handleCallback(`delete-image-${data.key}-${data.name}`, data)
     } else {
@@ -1158,6 +1159,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   async saveDesignJson(id: string): Promise<IMyDesign | undefined> {
     if (this.isStandaloneMode) return
+    await Promise.race([
+      imageShadowUtils.iosImgDelHandler(),
+      new Promise((resolve) => setTimeout(resolve, 3000))
+    ])
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
     const editorTypeTemplate = store.getters['vivisticker/getEditorTypeTemplate']

@@ -146,6 +146,7 @@ export default defineComponent({
     }
   },
   async created() {
+    console.warn('image created', generalUtils.deepCopy(this.$store.state.pages[0]))
     this.src = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
