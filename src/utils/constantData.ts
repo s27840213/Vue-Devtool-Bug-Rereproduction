@@ -4,6 +4,7 @@ import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
 import store from '@/store'
 import letterBgData from '@/utils/letterBgData'
+import { minMaxHash } from '@/utils/mappingUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
@@ -442,13 +443,13 @@ class ConstantData {
           break
         case 'size':
           if (effectName === 'fill-img') Object.assign(option, { min: 100, max: 200 })
-          else Object.assign(option, { min: 50, max: 200 })
+          else Object.assign(option, { min: 50, max: 250 })
           break
         case 'lineHeight':
-          Object.assign(option, { min: 0.5, max: 2.5, isPStyle: true })
+          Object.assign(option, { ...minMaxHash.lineHeight, isPStyle: true })
           break
         case 'fontSpacing':
-          Object.assign(option, { min: -200, max: 1600, isPStyle: true })
+          Object.assign(option, { ...minMaxHash.letterSpacing, isPStyle: true })
           break
         default:
           /* distance, blur, opacity, spread, stroke,
