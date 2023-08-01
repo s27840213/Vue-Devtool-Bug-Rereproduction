@@ -339,7 +339,7 @@ export default defineComponent({
         transition: all 0.3s;
         pointer-events: none;
         &.selected {
-          @include selection-border(2px);
+          @include selection-border(2px, black-5);
         }
       }
       .pro {

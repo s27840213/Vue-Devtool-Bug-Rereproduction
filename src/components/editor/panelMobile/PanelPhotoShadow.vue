@@ -171,7 +171,7 @@ export default defineComponent({
       border-radius: 5px;
       border: 2px solid transparent;
       &--selected {
-        border-color: setColor(blue-1);
+        border-color: setColor(black-5);
       }
       &-font {
         box-sizing: border-box;
