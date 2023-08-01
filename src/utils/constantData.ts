@@ -28,7 +28,7 @@ export interface IEffectOptionSelect {
   type: 'select'
   select: {
     key: string
-    plan?: 1 | 0
+    plan: 1 | 0
     img: string
     label: string
     preset: Record<string, unknown>
@@ -416,6 +416,7 @@ class ConstantData {
           option.type = 'select';
           (option as IEffectOptionSelect).select = ['triangle', 'rounded', 'square'].map((key, i) => ({
             key,
+            plan: 0,
             img: require(`@/assets/img/text-effect/select/endpoint-${key}.svg`),
             label: i18n.global.tc(`NN073${i}`),
             preset: { endpoint: key },
@@ -425,6 +426,7 @@ class ConstantData {
           option.type = 'select';
           (option as IEffectOptionSelect).select = tailPositions.map((key) => ({
             key,
+            plan: 0,
             img: require(`@/assets/img/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
             label: key,
             preset: { tailPosition: key },
