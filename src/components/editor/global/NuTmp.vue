@@ -73,13 +73,13 @@ export default defineComponent({
   },
   methods: {
     styles() {
-      // const pageScale = this.$store.state.pageScaleRatio * 0.01
       return {
-        // width: `${this.config.styles.initWidth * this.contentScaleRatio * pageScale}px`,
-        // height: `${this.config.styles.initHeight * this.contentScaleRatio * pageScale}px`,
-        // transform: `scale(${1 / this.contentScaleRatio})`,
-        // transformOrigin: 'top left',
+        width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
+        height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
+        transform: `scale(${1 / this.contentScaleRatio})`,
+        transformOrigin: 'top left',
         ...this.transformStyle
+
       }
     },
     subLayerStyles(layer: ILayer) {

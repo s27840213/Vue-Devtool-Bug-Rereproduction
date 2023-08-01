@@ -8,11 +8,7 @@ export interface IMobileEditorState {
   currActivePanel: string,
   currActiveSubPanel: string,
   inBgSettingMode: boolean,
-  showMobilePanel: boolean,
-  // pageCenterPos: used to indicate the center pos of the page (editor)
-  pageCenterPos: { x: number, y: number },
-  isPinchingEditor: boolean,
-  pinchScale: number
+  showMobilePanel: boolean
   showMobileSubPanel: boolean
 }
 
@@ -25,9 +21,6 @@ const getDefaultState = (): IMobileEditorState => ({
   currActiveSubPanel: 'none',
   inBgSettingMode: false,
   showMobilePanel: false,
-  pageCenterPos: { x: -1, y: -1 },
-  isPinchingEditor: false,
-  pinchScale: 1,
   showMobileSubPanel: false,
 })
 
@@ -53,9 +46,6 @@ const getters: GetterTree<IMobileEditorState, unknown> = {
   },
   getShowMobilePanel(state: IMobileEditorState): boolean {
     return state.showMobilePanel
-  },
-  getIsPinchingEditor(state: IMobileEditorState): boolean {
-    return state.isPinchingEditor
   }
 }
 
@@ -90,16 +80,6 @@ const mutations: MutationTree<IMobileEditorState> = {
   },
   SET_showMobilePanel(state: IMobileEditorState, bool: boolean) {
     state.showMobilePanel = bool
-  },
-  SET_isPinchingEditor(state: IMobileEditorState, bool: boolean) {
-    state.isPinchingEditor = bool
-  },
-  SET_pageCenterPos(state: IMobileEditorState, pos: { x: number, y: number }) {
-    state.pageCenterPos.x = pos.x
-    state.pageCenterPos.y = pos.y
-  },
-  UPDATE_pinchScale(state: IMobileEditorState, scale: number) {
-    state.pinchScale = scale
   },
   SET_showMobileSubPanel(state: IMobileEditorState, bool: boolean) {
     state.showMobileSubPanel = bool

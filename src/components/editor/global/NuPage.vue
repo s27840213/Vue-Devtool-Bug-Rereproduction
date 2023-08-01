@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/use-v-on-exact -->
 <template lang="pug">
 div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
-  div(class="nu-page full-size"
+  div(class="nu-page"
       :id="`nu-page_${pageIndex}`"
       :style="pageStyles"
       ref="page")
@@ -112,9 +112,8 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
             target=".editor-view"
             :rootMargin="'1500px 0px 1500px 0px'"
             v-bind="lazyloadSize"
-            :forceRender="forceRender"
             :threshold="[0,1]")
-          div(:style="sizeStyles" class="click-enable")
+          div(:style="sizeStyles")
             div(class="scale-container relative"
                 :style="scaleContainerStyles")
               page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
@@ -238,12 +237,6 @@ export default defineComponent({
   },
   emits: ['stepChange'],
   mounted() {
-    const page = this.$refs.page as HTMLElement
-    const rect = page.getBoundingClientRect()
-    pageUtils.setMobilePhysicalPage({
-      pageIndex: this.pageIndex,
-      originSize: { width: rect.width, height: rect.height }
-    })
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
@@ -281,7 +274,6 @@ export default defineComponent({
   computed: {
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
-    ...mapState({ pinchScaleRatio: 'pinchScaleRatio' }),
     ...mapGetters({
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode'
@@ -310,9 +302,6 @@ export default defineComponent({
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
-    forceRender(): boolean {
-      return this.$isTouchDevice() && this.pageIndex === layerUtils.pageIndex
-    },
     contentScaleRatio(): number {
       if (this.$isTouchDevice()) {
         return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this.pageState.config.contentScaleRatio
@@ -330,24 +319,21 @@ export default defineComponent({
     lazyloadSize(): unknown {
       if (this.$isTouchDevice()) {
         return {
-          // the max page scale size is currently set to 3
-          // using the max scale as a const scale factor prevents screen tearing as using the dynamic chaging scale factor
-          minHeight: this.config.height * this.contentScaleRatio * (this.pageIndex === layerUtils.pageIndex ? 3 : this.scaleRatio * 0.01),
-          maxHeight: this.config.height * this.contentScaleRatio * (this.pageIndex === layerUtils.pageIndex ? 3 : this.scaleRatio * 0.01)
+          minHeight: this.config.height * this.contentScaleRatio,
+          maxHeight: this.config.height * this.contentScaleRatio
         }
       } else {
         return {
-          minHeight: this.config.height * (this.scaleRatio * 0.01),
-          maxHeight: this.config.height * (this.scaleRatio * 0.01)
+          minHeight: this.config.height * (this.scaleRatio / 100),
+          maxHeight: this.config.height * (this.scaleRatio / 100)
         }
       }
     },
     scaleContainerStyles(): { [index: string]: string } {
-      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return {
-        width: `${this.config.width * _f}px`,
-        height: `${this.config.height * _f}px`,
-        ...(!generalUtils.isTouchDevice() && { transform: `scale(${this.scaleRatio * 0.01 / this.contentScaleRatio})` }),
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
+        ...(!generalUtils.isTouchDevice() && { transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})` }),
         willChange: this.isScaling ? 'transform' : ''
       }
     },
@@ -392,25 +378,17 @@ export default defineComponent({
       }
     },
     pageRootStyles(): { [index: string]: string | number } {
-      let transform = ''
+      const transform = ''
       let margin = ''
       let position = 'relative'
-      let transformOrigin = ''
-      if (generalUtils.isTouchDevice()) {
-        const { pinchScale, isPinchingEditor } = this.$store.state.mobileEditor
+      if (this.$isTouchDevice()) {
         position = 'absolute'
-        transformOrigin = '0 0'
-        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
-        if (isPinchingEditor && pinchScale !== 1) {
-          transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px) scale(${pinchScale})`
-        }
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
       }
       return {
         position,
         transform,
-        transformOrigin,
         margin,
         ...this.sizeStyles
       }
@@ -465,10 +443,9 @@ export default defineComponent({
       updateSnapUtilsIndex: 'UPDATE_snapUtilsIndex'
     }),
     styles(type: string): Record<string, string> {
-      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return type === 'content' ? {
-        width: `${this.config.width * _f}px`,
-        height: `${this.config.height * _f}px`,
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
         backgroundColor: this.config.backgroundColor,
         backgroundImage: `url(${ImageUtils.getSrc(this.config.backgroundImage.config)})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
@@ -831,10 +808,6 @@ export default defineComponent({
 
 .skeleton {
   background-color: setColor(white);
-}
-
-.page-wrapper {
-  transform-origin: top left;
 }
 
 .layer-num {

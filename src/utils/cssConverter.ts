@@ -40,10 +40,10 @@ const styleMap = Object.assign({}, ...fontProps.map(prop => // Transfer camelCas
 ) as IStyleMap
 
 class CssConveter {
-  convertTransformStyle(x: number, y: number, zindex: number, rotate: number, cancel3D = false, factor = 1): { transform: string } {
+  convertTransformStyle(x: number, y: number, zindex: number, rotate: number, cancel3D = false, contentScaleRatio = 1): { transform: string } {
     //  The scale feature only applied on "layer-scale" as a child-container of the layer
     return {
-      transform: cancel3D ? `translate(${x * factor}px, ${y * factor}px) rotate(${rotate}deg)` : `translate3d(${x * factor}px, ${y * factor}px, ${zindex}px) rotate(${rotate}deg)`
+      transform: cancel3D ? `translate(${x * contentScaleRatio}px, ${y * contentScaleRatio}px) rotate(${rotate}deg)` : `translate3d(${x * contentScaleRatio}px, ${y * contentScaleRatio}px, ${zindex}px) rotate(${rotate}deg)`
     }
   }
 
@@ -103,13 +103,13 @@ class CssConveter {
     return (font + ',').concat(store.getters['text/getDefaultFonts'])
   }
 
-  convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, factor = 1): { [key: string]: string } {
+  convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, contentScaleRatio = 1): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     Object.assign(result, {
-      width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width * factor}px` : 'initial',
-      height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height * factor}px` : 'initial',
+      width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width * contentScaleRatio}px` : 'initial',
+      height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height * contentScaleRatio}px` : 'initial',
       ...(sourceStyles.opacity !== 100 && { opacity: `${sourceStyles.opacity / 100}` }),
-      ...this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, factor)
+      ...this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, contentScaleRatio)
     })
     return result
   }

@@ -315,7 +315,6 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .page-preview-page {
-  pointer-events: initial;
   display: flex;
   flex-direction: column;
   justify-content: center;

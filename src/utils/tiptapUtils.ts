@@ -123,7 +123,7 @@ class TiptapUtils {
     this.event.emit('update', toRecord)
   }
 
-  textStylesRaw(styles: any, contentScaleRatio = 1): { [key: string]: any } {
+  textStylesRaw(styles: any): { [key: string]: any } {
     const textStyles = cssConveter.convertFontStyle(styles)
     return Object.assign(textStyles, {
       '-webkit-text-decoration-line': textStyles['text-decoration-line']

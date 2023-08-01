@@ -41,6 +41,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { find } from 'lodash'
@@ -82,6 +83,14 @@ export default defineComponent({
     // this.vConsole && this.vConsole.destroy()
   },
   mounted() {
+    if (this.$isTouchDevice()) {
+      const el = this.$refs['mobile-editor__content'] as HTMLElement
+      editorUtils.setMobileHW({
+        width: el.clientWidth,
+        height: el.clientHeight
+      })
+      editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+    }
     // const pz = new PinchZoom(el, {
     //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)
     // })

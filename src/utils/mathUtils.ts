@@ -77,10 +77,6 @@ class MathUtils {
     }
   }
 
-  clamp(num: number, min: number, max: number) {
-    return Math.min(Math.max(num, min), max)
-  }
-
   // getCornerPoints(angle: number, posInfo: Partial<IStyle>) {
   //   const { x, y, width, height } = posInfo
   //   const center = this.getCenter(posInfo)

@@ -76,12 +76,12 @@ export default defineComponent({
   data() {
     return {
       controlPoints: ControlUtils.getControlPoints(),
+      isControlling: false,
       initialPos: { x: 0, y: 0 },
       initImgPos: { imgX: 0, imgY: 0 },
       initialWH: { width: 0, height: 0 },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1 },
-      pointerId: -1
     }
   },
   mounted() {
@@ -118,15 +118,13 @@ export default defineComponent({
       getPage: 'getPage'
     }),
     styles(): any {
+      const zindex = (this.layerIndex + 1) * 1000
       const pos = this.imgControllerPosHandler()
-      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : 1
-      // const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : (100 / this.scaleRatio)
       return {
-        transform: `translate(${pos.x * _f}px, ${pos.y * _f}px) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.imgWidth * _f}px`,
-        height: `${this.config.styles.imgHeight * _f}px`,
-        // outline: '2px solid #7190CC',
-        outline: `${2 * (this.$isTouchDevice() ? 1 : 100 / this.scaleRatio)}px solid #7190CC`,
+        transform: `translate(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
+        width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
+        height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`,
+        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
@@ -173,15 +171,13 @@ export default defineComponent({
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
     controllerStyles() {
-      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : 1
-      // const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * this.contentScaleRatio) : (100 / this.scaleRatio)
+      const zindex = 0
       return {
-        transform: `translate(${this.config.styles.x * _f}px, ${this.config.styles.y * _f}px) rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
         // transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.width * _f}px`,
-        height: `${this.config.styles.height * _f}px`,
-        // outline: '2px solid #7190CC'
-        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
+        width: `${this.config.styles.width * this.contentScaleRatio}px`,
+        height: `${this.config.styles.height * this.contentScaleRatio}px`,
+        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`
       }
     },
     scalerStyles(scaler: { [key: string]: string }) {
@@ -218,11 +214,25 @@ export default defineComponent({
         y: imgAnchor.y - center.y
       }
       const imgControllerPos = ControlUtils.getNoRotationPos(vect, center, angleInRad)
+
+      /**
+       * For sub-img-controller under frame layer
+       * if the frame layer is set the flip prop, do following mapping modification
+       */
+      // const currLayer = LayerUtils.getCurrLayer
+      // if (currLayer.type === 'frame' && !this.config.forRender) {
+      //   const baseLine = {
+      //     x: -w / 2 + currLayer.styles.width / 2,
+      //     y: -h / 2 + currLayer.styles.height / 2
+      //   }
+      //   imgControllerPos.x += currLayer.styles.horizontalFlip ? -2 * (imgControllerPos.x - baseLine.x) : 0
+      //   imgControllerPos.y += currLayer.styles.verticalFlip ? -2 * (imgControllerPos.y - baseLine.y) : 0
+      // }
+
       return imgControllerPos
     },
     moveStart(event: MouseEvent | PointerEvent) {
-      this.pointerId = (event as PointerEvent).pointerId ?? -1
-
+      this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
 
@@ -233,8 +243,6 @@ export default defineComponent({
       this.setLastSelectedLayerIndex(this.layerIndex)
     },
     moving(event: MouseEvent | PointerEvent) {
-      if (this.pointerId !== (event as PointerEvent).pointerId) return
-
       this.setCursorStyle('move')
       event.preventDefault()
       const _layerScale = 1 / this.getLayerScale
@@ -247,7 +255,7 @@ export default defineComponent({
         height: (this.getImgHeight - this.config.styles.height * _layerScale) * 0.5
       }
 
-      const _f = this.$isTouchDevice() ? (100 / this.scaleRatio / this.contentScaleRatio) : (100 / this.scaleRatio)
+      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * 1 / this.contentScaleRatio) : (100 / this.scaleRatio)
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
       offsetPos.x = (offsetPos.x * _layerScale) * _f
@@ -284,6 +292,7 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointermove', this.moving)
     },
     scaleStart(event: MouseEvent) {
+      this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initialWH = {
         width: this.getImgWidth,
@@ -313,7 +322,7 @@ export default defineComponent({
 
       const angleInRad = this.angleInRad
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 100 / this.scaleRatio / this.contentScaleRatio : undefined)
+      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 1 / this.contentScaleRatio * this.scaleRatio * 0.01 : undefined)
       if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
         const primaryScale = currLayer.styles.scale
         diff.offsetX /= primaryScale
@@ -407,6 +416,7 @@ export default defineComponent({
       })
     },
     scaleEnd(e: MouseEvent) {
+      this.isControlling = false
       this.setCursorStyle('default')
 
       eventUtils.removePointerEvent('pointerup', this.scaleEnd)
