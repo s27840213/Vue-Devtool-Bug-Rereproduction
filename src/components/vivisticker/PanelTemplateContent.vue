@@ -9,7 +9,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
     :color="{close: 'black-5', search: 'black-5'}"
     v-model:expanded="isSearchBarExpanded"
     @search="handleSearch")
-  tags(v-show="tags && tags.length"
+  Tags(v-show="tags && tags.length"
       class="panel-template-content__tags"
       :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"
@@ -18,6 +18,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
       theme="dark"
       @search="handleSearch"
       @scroll="(scrollLeft: number) => tagScrollLeft = (isInCategory || isInGroupTemplate) ? tagScrollLeft : scrollLeft")
+  div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
                 :class="{invisible: !item.show, collapsed: tags && tags.length && !isSearchBarExpanded}"
@@ -296,7 +297,15 @@ export default defineComponent({
     },
     strBtnAdd(): string {
       return this.$t('STK0064', { type: this.igLayout === 'post' ? this.$t('STK0063') : this.$t('STK0005') })
-    }
+    },
+    emptyResultMessage(): string {
+      const { keyword, pending } = this
+      if (pending || !keyword || this.rawSearchResult.list.length > 0) return ''
+      return `${this.$t('NN0393', {
+          keyword: this.keywordLabel,
+          target: this.$t('NN0001').toLowerCase()
+        })}`
+    },
   },
   methods: {
     ...mapMutations('vivisticker', { setIsInGroupTemplate: 'SET_isInGroupTemplate' }),

@@ -19,6 +19,7 @@ div(class="overflow-container full-size rwd-container")
         theme="dark"
         @search="handleSearch"
         @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
+    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(v-for="item in categoryListArray"
       :class="{collapsed: tags && tags.length && !isSearchBarExpanded}"
       v-show="item.show" :ref="item.key" :key="item.key"

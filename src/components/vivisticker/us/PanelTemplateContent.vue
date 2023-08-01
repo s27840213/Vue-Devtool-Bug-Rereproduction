@@ -8,6 +8,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
       theme="dark"
       @search="(keyword?: string) => $emit('search', keyword)"
       @scroll="(scrollLeft: number) => tagScrollLeft = (isInCategory || isInGroupTemplate) ? tagScrollLeft : scrollLeft")
+  div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
                 :class="{invisible: !item.show}"
