@@ -307,7 +307,10 @@ export default defineComponent({
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
         if (this.inEffectEditingMode) {
-          return downloadTab
+          return [
+            { icon: 'bg', width: 24, action: this.handleSwitchBg },
+            ...downloadTab
+          ]
         }
         if (this.isInBgRemoveSection) {
           return []

@@ -77,65 +77,6 @@
   }
 }
 
-.fade-down-up {
-  &-enter-active {
-    &[data-transition="check-in"] {
-      transition: all 0.8s 0.2s;
-    }
-
-    &[data-transition="drop"] {
-      transition: all 0.6s;
-    }
-
-    &[data-transition="default"] {
-      transition: all 0.5s;
-    }
-  }
-
-  &-leave-active {
-
-    &[data-transition="default"],
-    &[data-transition="check-in"] {
-      transition: all 0.5s;
-    }
-
-    &[data-transition="drop"] {
-      transition: all 0.4s;
-    }
-  }
-
-  &-enter-from {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-
-  &-leave-to {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-}
-
-.fade-down-up {
-  &-enter-active {
-    opacity: 1;
-    transition: opcity 0.3s, transform 0.3s;
-  }
-
-  &-leave-active {
-    opacity: 1;
-    transition: opcity 0.3s, transform 0.3s;
-  }
-
-  &-enter-from {
-    transform: translateY(-30px);
-    opacity: 0;
-  }
-
-  &-leave-to {
-    transform: translateY(-30px);
-    opacity: 0;
-  }
-}
 
 .fade-down-up {
   &-enter-active {
