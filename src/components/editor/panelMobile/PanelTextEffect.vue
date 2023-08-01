@@ -329,20 +329,17 @@ export default defineComponent({
       height: 0;
       padding-top: 100%;
       > img:not(.pro) {
+        @include selection-border(1px, gray-5);
         position: absolute;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        top: -1px;
-        left: -1px;
-        border: 1px solid setColor(gray-5);
+        top: 0;
         border-radius: 4px;
         transition: all 0.3s;
         pointer-events: none;
         &.selected {
-          top: -2px;
-          left: -2px;
-          border: 2px solid setColor(blue-1);
+          @include selection-border(2px);
         }
       }
       .pro {
