@@ -258,7 +258,7 @@ class GeneralUtils {
     return new Blob([u8arr], { type: mime })
   }
 
-  toDataURL(src: string, callback: (dataUrl: string) => void) {
+  toDataURL(src: string, callback?: (dataUrl: string) => void) {
     const image = new Image()
     image.crossOrigin = 'Anonymous'
     image.onload = () => {
@@ -268,7 +268,7 @@ class GeneralUtils {
       canvas.width = image.naturalWidth
       context?.drawImage(image, 0, 0)
       const dataURL = canvas.toDataURL('image/png')
-      callback(dataURL)
+      callback && callback(dataURL)
     }
     image.src = src
   }
