@@ -203,7 +203,6 @@ export default defineComponent({
     .tabs {
       width: 200px;
       height: 28px;
-      margin-bottom: 0;
     }
     .search-bar {
       width: 300px;

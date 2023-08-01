@@ -14,7 +14,7 @@ const SET_BG_CONFIG = 'SET_BG_CONFIG' as const
 const UPDATE_CONFIG = 'UPDATE_CONFIG' as const
 const SET_IsBgCtrlImgLoaded = 'SET_IsBgCtrlImgLoaded' as const
 
-interface IImgControlState {
+export interface IImgControlState {
   image: IImage | undefined,
   image_ori: IImage | undefined,
   primaryLayer?: IFrame | IGroup | IImage,

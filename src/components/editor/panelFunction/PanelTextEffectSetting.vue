@@ -3,10 +3,9 @@ div(class="text-effect-setting")
   div(class="text-effect-setting__title") {{ $t('NN0095') }}
   //- Effect category: shadow, shape, bg and fill.
   div(v-for="category in textEffects" :key="category.name"
-      class="text-effect-setting__category"
-      :selected="currCategoryName === category.name")
-    span(@click="switchTab(category.name)") {{category.label}}
-      svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="24px")
+      class="text-effect-setting__category")
+    collapse-title(:active="currCategoryName === category.name"
+        @click="switchTab(category.name)") {{category.label}}
     //- Effect icons and options.
     collapse(:when="currCategoryName === category.name"
             class="text-effect-setting__effects2d")
@@ -44,7 +43,7 @@ div(class="text-effect-setting")
                 img(:src="sel.img"
                     :class="{'selected': ((getStyle(category)[option.key] as Record<'key', string>).key ?? getStyle(category)[option.key]) === sel.key }"
                     draggable="false"
-                    @click="handleSelectInput(sel.attrs)")
+                    @click="handleSelectInput(sel.preset)")
                 pro-item(v-if="sel.plan" theme="roundedRect")
             //- Option type range
             template(v-if="option.type === 'range'")
@@ -80,7 +79,7 @@ div(class="text-effect-setting")
                 @click="chooseImg(option.key)")
               img(:src="getStyleImg")
               div
-              svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="16px")
+              svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="32px")
           div(class="text-effect-setting__option")
             span(class="text-effect-setting__option--admin"
                 @click="adminTool.action()") {{ adminTool.label }}
@@ -90,6 +89,7 @@ div(class="text-effect-setting")
 
 <!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
+import CollapseTitle from '@/components/global/CollapseTitle.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
@@ -119,6 +119,7 @@ export default defineComponent({
     ColorBtn,
     ProItem,
     Collapse,
+    CollapseTitle,
   },
   emits: ['toggleColorPanel'],
   data() {
@@ -153,7 +154,7 @@ export default defineComponent({
         editorUtils.showColorSlips
     },
     getStyleImg(): string {
-      return textFillUtils.getTextFillImg(textEffectUtils.getCurrentLayer(),
+      return textFillUtils.getTextFillImgSrc(textEffectUtils.getCurrentLayer(),
         { finalSize: (this.$el as HTMLElement | undefined)?.clientWidth ?? 320 })
     },
     adminTool() {
@@ -356,14 +357,7 @@ export default defineComponent({
     @include body-SM;
     color: setColor(gray-1);
     > span {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       height: 33px;
-      cursor: pointer;
-    }
-    &[selected=true] .svg-chevron-down {
-      transform: scaleY(-1);
     }
   }
   &__effects2d {

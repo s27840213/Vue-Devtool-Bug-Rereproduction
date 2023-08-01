@@ -10,7 +10,7 @@ import { ActionTree, GetterTree, MutationTree } from 'vuex'
 import { getField, updateField } from 'vuex-map-fields'
 import store from '..'
 
-interface IPaymentState {
+export interface IPaymentState {
   isLoading: boolean
   initView: type.IPaymentView
   templateImg: string

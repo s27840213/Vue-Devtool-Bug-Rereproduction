@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
+div(class="photo-effect-setting" ref="panel" tabindex="0" @keydown.stop)
   div(class="action-bar")
     div(class="flex-between photo-effect-setting__options mb-10")
       svg-icon(v-for="(icon) in shadowOption.slice(0, 3)"
@@ -20,7 +20,7 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
           input(class="photo-effect-setting__value-input body-2 text-gray-2"
             :value="getFieldValue(field)"
             :name="field"
-            @change="handleEffectUpdate"
+            @input="handleEffectUpdate"
             type="number")
         input(class="photo-effect-setting__range-input input__slider--range"
           v-progress
@@ -59,7 +59,7 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
           input(class="photo-effect-setting__value-input body-2 text-gray-2"
             :value="getFieldValue(field)"
             :name="field"
-            @change="handleEffectUpdate"
+            @input="handleEffectUpdate"
             type="number")
         input(class="photo-effect-setting__range-input input__slider--range"
           v-progress

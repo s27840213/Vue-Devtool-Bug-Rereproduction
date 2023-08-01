@@ -3,33 +3,34 @@ import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
+import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
-import bgRemove from '@/store/module/bgRemove'
-import color from '@/store/module/color'
-import design from '@/store/module/design'
-import file from '@/store/module/file'
+import bgRemove, { IBgRemoveState } from '@/store/module/bgRemove'
+import color, { IColorState } from '@/store/module/color'
+import design, { IDesignState } from '@/store/module/design'
+import file, { IFileState } from '@/store/module/file'
 import font from '@/store/module/font'
-import fontTag from '@/store/module/fontTag'
-import homeTemplate from '@/store/module/homeTemplate'
-import imgControl from '@/store/module/imgControl'
+import fontTag, { IFontTagState } from '@/store/module/fontTag'
+import homeTemplate, { IHomeTemplateState } from '@/store/module/homeTemplate'
+import imgControl, { IImgControlState } from '@/store/module/imgControl'
 import layouts from '@/store/module/layouts'
 import markers from '@/store/module/markers'
-import mobileEditor from '@/store/module/mobileEditor'
-import modal from '@/store/module/modal'
+import mobileEditor, { IMobileEditorState } from '@/store/module/mobileEditor'
+import modal, { IModalState } from '@/store/module/modal'
 import objects from '@/store/module/objects'
-import page from '@/store/module/page'
-import payment from '@/store/module/payment'
-import popup from '@/store/module/popup'
-import shadow from '@/store/module/shadow'
+import page, { IPageState as IPageStateModule } from '@/store/module/page'
+import payment, { IPaymentState } from '@/store/module/payment'
+import popup, { IPopupState } from '@/store/module/popup'
+import shadow, { IShadowState } from '@/store/module/shadow'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
-import unsplash from '@/store/module/unsplash'
-import user from '@/store/module/user'
-import webView from '@/store/module/webView'
-import photos from '@/store/photos'
-import text from '@/store/text'
+import unsplash, { IUnaplashState } from '@/store/module/unsplash'
+import user, { IUserModule } from '@/store/module/user'
+import webView, { IWebViewState } from '@/store/module/webView'
+import photos, { IPhotoState } from '@/store/photos'
+import text, { ITextState } from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -39,8 +40,8 @@ import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
-import { GetterTree, MutationTree, createStore } from 'vuex'
-import brandkit from './module/brandkit'
+import { createStore, GetterTree, MutationTree } from 'vuex'
+import brandkit, { IBrandKitState } from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
@@ -1132,8 +1133,36 @@ const mutations: MutationTree<IEditorState> = {
   },
 }
 
+type IStoreRoot = IEditorState & {
+  user: IUserModule,
+  photos: IPhotoState,
+  text: ITextState,
+  font: IListModuleState,
+  color: IColorState,
+  objects: IListModuleState,
+  templates: IListModuleState,
+  textStock: IListModuleState,
+  background: IListModuleState,
+  mobileEditor: IMobileEditorState,
+  modal: IModalState,
+  popup: IPopupState,
+  page: IPageStateModule,
+  homeTemplate: IHomeTemplateState,
+  design: IDesignState,
+  layouts: IListModuleState,
+  markers: IListModuleState,
+  brandkit: IBrandKitState,
+  unsplash: IUnaplashState,
+  bgRemove: IBgRemoveState,
+  file: IFileState,
+  payment: IPaymentState,
+  shadow: IShadowState,
+  fontTag: IFontTagState,
+  imgControl: IImgControlState,
+  webView: IWebViewState,
+}
 const store = createStore({
-  state,
+  state: state as IStoreRoot,
   getters,
   mutations,
   modules: {

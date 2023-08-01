@@ -930,6 +930,10 @@ export default defineComponent({
   background-color: setColor(white);
   padding: 40px 24px 24px 24px;
 
+  @media screen and (max-height: 715px) {
+    max-height: 90%;
+  }
+
   &__icon {
     position: absolute;
     top: 20px;

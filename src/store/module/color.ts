@@ -1,10 +1,10 @@
 import list from '@/apis/list'
 import _ from 'lodash'
-import { GetterTree, MutationTree, ActionTree } from 'vuex'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 import store from '..'
 import { IEditorState } from '../types'
 
-interface IColorState {
+export interface IColorState {
   defaultColors: Array<string>
   brandColors: Array<string>
   defaultBgColors: Array<string>

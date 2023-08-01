@@ -288,7 +288,7 @@ class GroupUtils {
           store.getters.getCurrSelectedIndex)
         LayerUtils.updateLayersOrder(this.currSelectedInfo.pageIndex)
       }
-      this.reset()
+      this.reset(false)
       ZindexUtils.reassignZindex(tmpPageIndex)
     }
   }
