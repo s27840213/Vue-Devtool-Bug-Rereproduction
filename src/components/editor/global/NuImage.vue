@@ -18,7 +18,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       draggable="false"
       :src="shadowSrc"
       @load='onLoadShadowImg($event)'
-      @error="onError")
+      @error="onShadowError()")
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
       :style="imgStyles()")
@@ -512,6 +512,16 @@ export default defineComponent({
     getErrorSrcIdentifier(config: IImage) {
       const { srcObj, styles } = config
       return srcObj.type + srcObj.assetId + srcObj.userId + (styles.adjust.blur > 0 ? '_blur' : '')
+    },
+    onShadowError() {
+      const shadow = this.config.styles.shadow
+      if (shadow.srcObj.type === 'ios') {
+        const layerData = {
+          config: this.config,
+          layerInfo: this.layerInfo()
+        }
+        imageShadowPanelUtils.handleShadowUpload(layerData, true)
+      }
     },
     onError() {
       if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {
