@@ -19,7 +19,9 @@ div(class="category-template-item" :style="itemStyle")
 import ProItem from '@/components/payment/ProItem.vue'
 import assetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
+import editorUtils from '@/utils/editorUtils'
 import GeneralUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
@@ -128,8 +130,20 @@ export default defineComponent({
       const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === unit
       const cb = this.groupItem ? (resize?: any) => {
         assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
+          .then(() => {
+            if (this.$isTouchDevice()) {
+              editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+              this.$store.commit('SET_pageScaleRatio', 100)
+            }
+          })
       } : (resize?: any) => {
         assetUtils.addAsset(this.item as any, resize)
+          .then(() => {
+            if (this.$isTouchDevice()) {
+              editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+              this.$store.commit('SET_pageScaleRatio', 100)
+            }
+          })
         GeneralUtils.fbq('track', 'AddToWishlist', {
           content_ids: [this.item.id]
         })

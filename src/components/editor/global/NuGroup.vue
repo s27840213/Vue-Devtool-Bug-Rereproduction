@@ -51,7 +51,7 @@ export default defineComponent({
       return {
         // width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
         // height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
-        transform: `scale(${1 / this.contentScaleRatio})`,
+        // transform: `scale(${1 / this.contentScaleRatio})`,
         transformOrigin: 'top left'
       }
     }

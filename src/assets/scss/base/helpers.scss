@@ -218,6 +218,10 @@ $spacer: 5;
     pointer-events: none;
 }
 
+.click-enable {
+    pointer-events: initial;
+}
+
 .visible-hidden {
     pointer-events: none;
     visibility: hidden;
@@ -225,4 +229,8 @@ $spacer: 5;
 
 .preserve3D {
     transform-style: preserve-3d;
+}
+
+.transform-origin-0 {
+    transform-origin: 0 0;
 }
