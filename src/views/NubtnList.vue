@@ -11,11 +11,11 @@ div(class="btnList" :style="BGstyle")
       input(type="text" v-model="btnIcon")
   div(class="btnList-table")
     span
-    span(v-for="btn in btns" :key="btn.theme") {{btn.theme}} ({{btn.size}})
-    template(v-for="status in statuses" :key="status")
-      span {{status}}
-      nubtn(v-for="btn in btns"
-        :key="btn.theme"
+    span(v-for="status in statuses" :key="status") {{status}}
+    template(v-for="btn in btns" :key="btn.theme")
+      span {{btn.theme}} ({{btn.size}})
+      nubtn(v-for="status in statuses"
+        :key="`${btn.theme}-${status}`"
         :theme="btn.theme"
         :size="`${full ? btn.size.replace('center', 'full') as INubtnSize : btn.size}`"
         :active="status==='active'"
@@ -126,9 +126,6 @@ export default defineComponent({
         color: 'black'
       }
     },
-    tableRowsAmount(): number {
-      return this.btns.length + 1
-    },
     testBtnDisabled(): boolean {
       return this.testBtnStatus === 'disabled'
     },
@@ -160,8 +157,7 @@ export default defineComponent({
   &-table {
     display: grid;
     align-items: center;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(v-bind(tableRowsAmount), auto);
+    grid-template-columns: repeat(4, minmax(150px, auto));
     gap: 10px;
     width: fit-content;
   }
