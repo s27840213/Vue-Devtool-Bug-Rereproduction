@@ -666,7 +666,22 @@ class ImageShadowUtils {
     }
   }
 
+  // this is for IOS version < 1.35
+  saveToIOSOld(canvas: HTMLCanvasElement, callback?: (data: { flag: string, msg: string, imageId: string }, path: string) => void) {
+    const name = 'img-shadow-' + generalUtils.generateAssetId()
+    const src = canvas.toDataURL('image/png;base64')
+    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'shadow', name, toast: false }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      if (callback) {
+        return callback(_data, `shadow/${name}`)
+      }
+    })
+  }
+
   saveToIOS(canvas: HTMLCanvasElement, callback?: (data: { flag: string, msg: string, imageId: string }, path: string) => void) {
+    if (!vivistickerUtils.checkVersion('1.35')) {
+      return this.saveToIOSOld(canvas, callback)
+    }
     const name = 'img-shadow-' + generalUtils.generateAssetId()
     const src = canvas.toDataURL('image/png;base64')
     const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
