@@ -47,7 +47,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { cloneDeep } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -82,6 +82,7 @@ export default defineComponent({
   beforeUnmount() {
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
+    colorUtils.setCurrEvent('')
   },
   watch: {
     // For switch PanelColor event target without close MobilePanel. Ex: shape color and text color in group
