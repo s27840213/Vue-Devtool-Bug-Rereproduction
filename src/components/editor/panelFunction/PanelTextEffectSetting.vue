@@ -101,13 +101,13 @@ import constantData, { IEffect, IEffectCategory, IEffectOption, IEffectOptionRan
 import editorUtils from '@/utils/editorUtils'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
-import paymentUtils from '@/utils/paymentUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils, { isFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
 import { Collapse } from 'vue-collapsed'
@@ -291,7 +291,7 @@ export default defineComponent({
       }
     },
     async onEffectClick(effect: IEffect): Promise<void> {
-      if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      if (!vivistickerUtils.checkPro(effect, 'text')) return
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
 
@@ -301,7 +301,7 @@ export default defineComponent({
       }
     },
     async handleSelectInput(attrs: IEffectOptionSelect['select'][number]) {
-      if (!paymentUtils.checkPro(attrs, 'pro-text')) return
+      if (!vivistickerUtils.checkPro(attrs, 'text')) return
       await this.setEffect({ effect: attrs.preset })
       this.recordChange()
     },
