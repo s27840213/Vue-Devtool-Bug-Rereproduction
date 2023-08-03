@@ -681,7 +681,10 @@ export default defineComponent({
     },
     showMobilePanel(newVal) {
       if (!newVal) {
-        this.extraPanel = ''
+        // Reset extraPanel after panel close animation
+        setTimeout(() => {
+          this.extraPanel = ''
+        }, 1000)
       }
     },
     bottomTheme(newVal) {
