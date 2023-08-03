@@ -1,6 +1,7 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
@@ -905,11 +906,11 @@ class ImageShadowUtils {
     store.commit('shadow/ADD_UPLOAD_IMG', data)
   }
 
-  delIosOldImg(srcObjs: Array<SrcObj>) {
+  delIosOldImg(srcObjs: Array<SrcObj>, editorType = vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)) {
     const promises = [] as Promise<{ key: string, flag: number, name: string }>[]
     srcObjs.forEach(srcObj => {
       if (srcObj.type !== 'ios') return
-      const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
+      const key = `mydesign-${editorType}`
       const designId = store.getters['vivisticker/getEditingDesignId']
       const name = (srcObj.assetId as string).split('/').pop() || ''
       promises.push(vivistickerUtils.deleteImage(key, name, 'png', designId) as Promise<{ key: string, flag: number, name: string }>)
@@ -945,6 +946,33 @@ class ImageShadowUtils {
       }
     })
     return Promise.all(promises)
+  }
+
+  /**
+   * This func used to delete the shadow image stored in ios app at the timimg as no save the config.json
+   */
+  async iosImgDelHandlerAsNoSave() {
+    const newShadowBuffImgs = pageUtils.getPages.flatMap(p => p.iosImgUploadBuffer.shadow)
+
+    const type = vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)
+    const key = `mydesign-${type}`
+    const designId = store.getters['vivisticker/getEditingDesignId']
+    const data = await vivistickerUtils.getAsset(key, designId, 'config')
+    const oldPages = pageUtils.newPages(data.pages) as Array<IPage>
+
+    const oldShadowImgs = oldPages.flatMap(p => {
+      return p.layers.flatMap(l => {
+        if (l.type === LayerType.image && l.styles.shadow.srcObj.type === 'ios') {
+          return [l.styles.shadow.srcObj]
+        } else return []
+      })
+    })
+
+    newShadowBuffImgs.forEach(newImg => {
+      if (!oldShadowImgs.some(oldImg => oldImg.assetId === newImg.assetId)) {
+        this.delIosOldImg([newImg], type)
+      }
+    })
   }
 
   TEST_showtTestCanvas(canvas: HTMLCanvasElement) {

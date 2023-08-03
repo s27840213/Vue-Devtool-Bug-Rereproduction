@@ -512,6 +512,7 @@ export default defineComponent({
             {
               msg: `${this.$t('STK0011')}`,
               action: () => {
+                imageShadowUtils.iosImgDelHandlerAsNoSave()
                 vivistickerUtils.endEditing()
                 const { id, key } = this.bgRemoveSrcInfo
                 if (id && key) {
