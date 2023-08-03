@@ -11,6 +11,7 @@ import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import constantData, { IStickerVideoUrls } from '@/utils/constantData'
+import logUtils from '@/utils/logUtils'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import colorUtils from './colorUtils'
@@ -1088,6 +1089,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   setPages(pages: IPage[]) {
+    logUtils.setLogAndConsoleLog('debugInfo@setPages', JSON.stringify(pages.map(page => page.id)))
     layerUtils.setAutoResizeNeededForLayersInPages(pages, true)
     store.commit('SET_pages', pages)
   }
