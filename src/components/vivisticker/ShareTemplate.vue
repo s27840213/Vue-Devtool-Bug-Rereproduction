@@ -40,12 +40,6 @@ div(class="share-template")
         svg-icon(:iconName="button.iconName" iconWidth="24px" iconColor="white")
         div(class="share-template__actions__action__text text-white body-XS")
           span {{ button.title }}
-  Transition(name="fade")
-    div(v-if="pending" class="share-template__pending text-H6 text-white")
-      div(class="share-template__pending__spinner")
-        svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
-      div(v-if="selectedPages.size" class="share-template__pending__progress") {{ strDownloadProgress }}
-      div(class="share-template__pending__text") {{ selectedPages.size ? $t('STK0080') : $t('STK0081') }}
 </template>
 
 <script lang="ts">
@@ -105,6 +99,12 @@ export default defineComponent({
       this.$nextTick(() => {
         this.handleResize()
       })
+    },
+    loadingOverlayMsgs(newVal) {
+      vivistickerUtils.setLoadingOverlayMsgs(newVal)
+    },
+    pending(newVal) {
+      vivistickerUtils.setLoadingOverlayShow(newVal)
     }
   },
   computed: {
@@ -161,11 +161,11 @@ export default defineComponent({
     strToggleSelectAll() {
       return this.selectedPages.size === this.pagesState.length ? this.$t('STK0016') : this.$t('STK0015')
     },
-    strDownloadProgress() {
-      return `${this.downloadProgress}/${this.selectedPages.size}`
-    },
     selectedPageIndexes() {
       return Array.from(this.selectedPages).sort((a, b) => b - a)
+    },
+    loadingOverlayMsgs() {
+      return this.selectedPages.size ? [`${this.downloadProgress}/${this.selectedPages.size}`, this.$t('STK0080')] : [this.$t('STK0081')]
     }
   },
   methods: {
@@ -397,38 +397,6 @@ export default defineComponent({
     }
   }
 
-  &__pending {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    row-gap: 10px;
-    &__spinner {
-      @include size(120px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(46, 46, 46, 0.5);
-      border-radius: 10px;
-      .spinner {
-        color: #D9D9D9;
-        animation: rotate 0.5s infinite linear;
-      }
-    }
-    &::before {
-      content: "";
-      @include size(100vw, 100vh);
-      z-index: -1;
-      position: absolute;
-      background-color: rgba(24, 25, 31, 0.8);
-    }
-  }
-
   .checkbox {
     @include size(20px);
     background: setColor(gray-6);
@@ -442,23 +410,6 @@ export default defineComponent({
       background: setColor(black-3);
       border: none;
     }
-  }
-}
-
-.fade {
-  &-enter-active,
-  &-leave-active {
-    transition: 0.2s;
-  }
-  &-enter-from,
-  &-leave-to {
-    opacity: 0;
-  }
-}
-
-@keyframes rotate {
-  to {
-    transform: rotate(360deg);
   }
 }
 </style>

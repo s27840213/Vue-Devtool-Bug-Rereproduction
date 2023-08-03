@@ -141,3 +141,8 @@ export interface ISubscribeInfo extends ISubscribeResult {
     priceText: string
   }
 }
+
+export interface ILoadingOverlay {
+  show: boolean,
+  msgs: string[]
+}

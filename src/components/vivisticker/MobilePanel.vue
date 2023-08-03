@@ -108,7 +108,6 @@ import { IFrame } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
-import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import formatUtils from '@/utils/formatUtils'
@@ -542,14 +541,6 @@ export default defineComponent({
       }
     },
     leftButtonAction(): (e: PointerEvent) => void {
-      const colorHandler = () => {
-        if (this.extraPanel === 'color' && this.currActivePanel === 'background') return this.addRecentlyBgColor(colorUtils.currColor)
-        if (this.extraPanel === 'color' || this.currActivePanel === 'color') {
-          if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
-            this.addRecentlyColors(colorUtils.currColor)
-          }
-        }
-      }
       if (this.currActivePanel === 'text' && this.isTextInCategory) {
         return () => {
           this.setIsInCategory({ tab: 'text', bool: false })
@@ -584,7 +575,6 @@ export default defineComponent({
       }
       if (this.extraPanel === 'color') {
         return () => {
-          colorHandler()
           this.extraPanel = ''
           this.panelHistory.pop()
         }
@@ -603,12 +593,10 @@ export default defineComponent({
       }
       if (this.panelHistory.length > 0) {
         return () => {
-          colorHandler()
           this.panelHistory.pop()
         }
       } else {
         return () => {
-          colorHandler()
           this.closeMobilePanel()
         }
       }
@@ -663,20 +651,10 @@ export default defineComponent({
             break
           }
 
-          case 'color': {
-            if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
-              this.addRecentlyColors(colorUtils.currColor)
-            }
-            break
-          }
-
           case 'color-picker': {
             vivistickerUtils.commitNewBgColor()
             break
           }
-        }
-        if (this.extraPanel === 'color') {
-          this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
       }
@@ -703,7 +681,10 @@ export default defineComponent({
     },
     showMobilePanel(newVal) {
       if (!newVal) {
-        this.extraPanel = ''
+        // Reset extraPanel after panel close animation
+        setTimeout(() => {
+          this.extraPanel = ''
+        }, 1000)
       }
     },
     bottomTheme(newVal) {
@@ -732,12 +713,10 @@ export default defineComponent({
       setIsInCategory: 'vivisticker/SET_isInCategory',
       setShowAllRecently: 'vivisticker/SET_showAllRecently',
       setBgImageControl: 'SET_backgroundImageControl',
-      addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor',
       setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
     }),
     ...mapActions({
       initRecentlyColors: 'color/initRecentlyColors',
-      addRecentlyColors: 'color/addRecentlyColors',
       resetTextsSearch: 'textStock/resetSearch',
       resetObjectsSearch: 'objects/resetSearch',
       resetObjectsFavSearch: 'objects/resetFavoritesSearch',

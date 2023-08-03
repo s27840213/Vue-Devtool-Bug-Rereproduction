@@ -37,6 +37,7 @@ import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType } from '@/store/types'
 import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -48,7 +49,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { cloneDeep } from 'lodash'
 import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   data() {
@@ -56,7 +57,8 @@ export default defineComponent({
       colorUtils,
       currSelectedColorIndex: 0,
       leftOverflow: false,
-      rightOverflow: false
+      rightOverflow: false,
+      initColor: colorUtils.currColor,
     }
   },
   props: {
@@ -80,6 +82,12 @@ export default defineComponent({
     colorUtils.onStop(this.currEvent, this.recordChange)
   },
   beforeUnmount() {
+    // When closing panel, if user has changed the color, add it to recently.
+    if (colorUtils.currColor !== this.initColor) {
+      if (editorUtils.currActivePanel === 'background' || this.currEvent === ColorEventType.background) {
+        this.addRecentlyBgColor(colorUtils.currColor)
+      } else this.addRecentlyColors(colorUtils.currColor)
+    }
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
   },
@@ -152,6 +160,12 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor',
+    }),
+    ...mapActions({
+      addRecentlyColors: 'color/addRecentlyColors',
+    }),
     updateColorsOverflow() {
       if (!this.$refs.colors) return
       const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.colors as HTMLElement
