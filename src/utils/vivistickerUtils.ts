@@ -61,19 +61,22 @@ interface IUserSettingListOption {
   val: any
   description: string
   icon?: string
+  first?: boolean
 }
 
 const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
   emojiSetting: [
     {
-      val: '-apple-system',
+      val: 'Apple Color Emoji',
       description: '<P>Apple Emoji',
-      icon: 'apple_emoji'
+      icon: 'apple_emoji',
+      first: true,
     },
     {
       val: 'zVUjQ0MaGOm7HOJXv5gB',
       description: '<P>Noto Color Emoji',
-      icon: 'noto_color_emoji'
+      icon: 'noto_color_emoji',
+      first: true,
     },
     {
       val: 'dLe1S0oDanIJjvty5RxG',
@@ -82,6 +85,8 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
     },
   ],
 }
+
+export const SYSTEM_FONTS = ['-apple-system', 'Apple Color Emoji']
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
@@ -232,9 +237,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return USER_SETTINGS_CONFIG[key]?.description ?? ''
   }
 
+  getDefaultUserConfig<T extends keyof IUserSettingListOption>(key: keyof typeof USER_SETTINGS_CONFIG, by: T, query: IUserSettingListOption[T]): IUserSettingListOption | undefined {
+    if (!USER_SETTINGS_CONFIG[key].isList) throw new Error(`getDefaultUserConfig can only query USER_SETTING_CONFIG whose isList=true, provided key: ${key}`)
+    const options = USER_SETTINGS_LIST_CONFIG[key]
+    return options.find(option => option[by] === query)
+  }
+
   addFontForEmoji() {
     const defaultEmoji = this.userSettings.emojiSetting
-    if (defaultEmoji === '-apple-system') return
+    if (SYSTEM_FONTS.includes(defaultEmoji)) return
     store.dispatch('text/addFont', {
       face: defaultEmoji,
       type: 'public',
