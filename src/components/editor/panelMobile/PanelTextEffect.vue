@@ -38,14 +38,14 @@ div(class="panel-text-effect")
         div(v-for="sel in option.select"
             :key="sel.key"
             :class="{'selected': currentStyle[option.key] === sel.key }"
-            @click="handleSelectInput(sel.preset)")
+            @click="handleSelectInput(sel)")
           img(:src="sel.img")
           span {{sel.label}}
       //- Option type select
       div(v-if="option.type === 'select' && option.key !== 'endpoint'"
           class="panel-text-effect__select")
         div(v-for="sel in option.select" :key="sel.key"
-            @click="handleSelectInput(sel.preset)")
+            @click="handleSelectInput(sel)")
           img(:src="sel.img"
               :class="{'selected': ((currentStyle[option.key] as Record<'key', string>).key ?? currentStyle[option.key]) === sel.key }")
           pro-item(v-if="sel.plan" theme="roundedRect")

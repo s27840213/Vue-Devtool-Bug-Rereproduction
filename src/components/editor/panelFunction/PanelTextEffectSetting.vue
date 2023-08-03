@@ -43,7 +43,7 @@ div(class="text-effect-setting")
                 img(:src="sel.img"
                     :class="{'selected': ((getStyle(category)[option.key] as Record<'key', string>).key ?? getStyle(category)[option.key]) === sel.key }"
                     draggable="false"
-                    @click="handleSelectInput(sel.preset)")
+                    @click="handleSelectInput(sel)")
                 pro-item(v-if="sel.plan" theme="roundedRect")
             //- Option type range
             template(v-if="option.type === 'range'")
@@ -97,7 +97,7 @@ import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { isTextFill } from '@/interfaces/format'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import constantData, { IEffect, IEffectCategory, IEffectOption, IEffectOptionRange } from '@/utils/constantData'
+import constantData, { IEffect, IEffectCategory, IEffectOption, IEffectOptionRange, IEffectOptionSelect } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -186,7 +186,7 @@ export default defineComponent({
       switch (effect.key) {
         case 'text-book':
           return {
-            name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
+            name: require(`@/assets/img/text-effect/icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
             size: '56',
           }
         case 'custom-fill-img': // svg-icon
@@ -196,7 +196,7 @@ export default defineComponent({
           }
         default:
           return {
-            name: require(`@/assets/img/png/text-effect-icon/${category.name}-${effect.key}.png`),
+            name: require(`@/assets/img/text-effect/icon/${category.name}-${effect.key}.png`),
             size: '56',
           }
       }
@@ -300,8 +300,9 @@ export default defineComponent({
         this.chooseImg(chooseImgkey)
       }
     },
-    async handleSelectInput(attrs: Record<string, unknown>) {
-      await this.setEffect({ effect: attrs })
+    async handleSelectInput(attrs: IEffectOptionSelect['select'][number]) {
+      if (!paymentUtils.checkPro(attrs, 'pro-text')) return
+      await this.setEffect({ effect: attrs.preset })
       this.recordChange()
     },
     handleRangeInputEvent(event: Event, option: IEffectOptionRange) {

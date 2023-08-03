@@ -48,7 +48,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { cloneDeep } from 'lodash'
 import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   data() {
@@ -56,7 +56,8 @@ export default defineComponent({
       colorUtils,
       currSelectedColorIndex: 0,
       leftOverflow: false,
-      rightOverflow: false
+      rightOverflow: false,
+      initColor: colorUtils.currColor,
     }
   },
   props: {
@@ -80,6 +81,10 @@ export default defineComponent({
     colorUtils.onStop(this.currEvent, this.recordChange)
   },
   beforeUnmount() {
+    // When closing panel, if user has changed the color, add it to recently.
+    if (colorUtils.currColor !== this.initColor) {
+      this.addRecentlyColors(colorUtils.currColor)
+    }
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
   },
@@ -152,6 +157,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapActions({
+      addRecentlyColors: 'color/addRecentlyColors',
+    }),
     updateColorsOverflow() {
       if (!this.$refs.colors) return
       const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.colors as HTMLElement
