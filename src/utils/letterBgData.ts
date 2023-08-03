@@ -181,7 +181,6 @@ class LetterBGData {
     }, {
       key: 'triangle-flag-custom',
       label: i18n.global.tc('NN0901'),
-      plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }, {
       key: 'rectangle-flag',
@@ -191,7 +190,6 @@ class LetterBGData {
     }, {
       key: 'rectangle-flag-custom',
       label: i18n.global.tc('NN0903'),
-      plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }]
   }
