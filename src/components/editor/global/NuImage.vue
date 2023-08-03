@@ -170,25 +170,28 @@ export default defineComponent({
     //             assetId: path,
     //           }
     const { assetId, type } = config.srcObj
-    if (type === 'ios' && (assetId as string).includes('bgRemove')) {
-      const imageName = (assetId as string).split('/')[1]
-      const src = imageUtils.getSrc(config.srcObj)
 
-      generalUtils.toDataURL(src, (dataUrl) => {
-        bgRemoveUtils.moveOldBgRemoveImages(dataUrl, (path) => {
-          vivistickerUtils.deleteImage('bgRemove', imageName, 'png')
+    if (vivistickerUtils.checkVersion('1.35')) {
+      if (type === 'ios' && (assetId as string).includes('bgRemove')) {
+        const imageName = (assetId as string).split('/')[1]
+        const src = imageUtils.getSrc(config.srcObj)
 
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-            srcObj: {
-              type: 'ios',
-              userId: '',
-              assetId: path
-            },
+        generalUtils.toDataURL(src, (dataUrl) => {
+          bgRemoveUtils.moveOldBgRemoveImages(dataUrl, (path) => {
+            vivistickerUtils.deleteImage('bgRemove', imageName, 'png')
+
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              srcObj: {
+                type: 'ios',
+                userId: '',
+                assetId: path
+              },
+            })
+
+            vivistickerUtils.saveAsMyDesign()
           })
-
-          vivistickerUtils.saveAsMyDesign()
         })
-      })
+      }
     }
   },
   beforeUnmount() {
