@@ -12,7 +12,7 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
     v-model:expanded="isSearchBarExpanded"
     @search="handleSearch"
     @favorite="toggleFavoritesTag")
-  tags(v-show="tags && tags.length"
+  Tags(v-show="tags && tags.length"
       class="panel-gifs__tags"
       :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"

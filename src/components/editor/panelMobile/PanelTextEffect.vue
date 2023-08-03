@@ -82,10 +82,10 @@ div(class="panel-text-effect")
 </template>
 
 <script lang="ts">
-import Tabs from '@/components/Tabs.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
+import Tabs from '@/components/Tabs.vue'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import { IEffect, IEffectCategory } from '@/utils/constantData'
@@ -94,7 +94,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import PanelTextEffectSetting from '../panelFunction/PanelTextEffectSetting.vue'
 
 export default defineComponent({
@@ -144,6 +144,9 @@ export default defineComponent({
       return _.find(this.effectList, ['key', this.currentStyle.name]) ?? null
     },
     state(): string {
+      if (this.currCategoryName === 'fill' &&
+        this.currEffect?.options.some(op => op.type === 'img') &&
+        !this.currentStyle.customImg) return 'effects' // No customImg, no options.
       return this.panelHistory.length === 0 ? 'effects' : 'options'
     }
   },
@@ -326,20 +329,17 @@ export default defineComponent({
       height: 0;
       padding-top: 100%;
       > img:not(.pro) {
+        @include selection-border(1px, gray-5);
         position: absolute;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        top: -1px;
-        left: -1px;
-        border: 1px solid setColor(gray-5);
+        top: 0;
         border-radius: 4px;
         transition: all 0.3s;
         pointer-events: none;
         &.selected {
-          top: -2px;
-          left: -2px;
-          border: 2px solid setColor(blue-1);
+          @include selection-border(2px, black-5);
         }
       }
       .pro {

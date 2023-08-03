@@ -169,11 +169,9 @@ export default defineComponent({
     &__option {
       margin-top: 10px;
       border-radius: 5px;
-      &:not(&--selected):hover {
-        @include selection-border(2px, blue-hover);
-      }
+      border: 2px solid transparent;
       &--selected {
-        @include selection-border(2px);
+        border-color: setColor(black-5);
       }
       &-font {
         box-sizing: border-box;
@@ -219,7 +217,7 @@ export default defineComponent({
   }
   &__reset {
     > button {
-      color: setColor(blue-1);
+      color: setColor(black-3);
       font-size: 14px;
       padding: 0;
     }

@@ -5,7 +5,7 @@ div(class="my-design")
         :key="tag.tab"
         :class="{ selected: checkTagSelected(tag) }"
         @click.prevent.stop="selectTag(tag)")
-      span(class="my-design__tag-name") {{ $tc(tag.name, tag.name === 'NN0001' ? 1 : 2) }}
+      span(class="my-design__tag-name") {{ $tc(tag.name, tag.name === 'NN0001' ? 1 : 2) /* TODO: fix wrong usage of i18n.tc() */ }}
   div(v-show="list.length === 0" class="my-design__content center")
     div(class="my-design__empty-icon")
       svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")

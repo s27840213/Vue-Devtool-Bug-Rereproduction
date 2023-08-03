@@ -97,11 +97,12 @@ import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
 import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
 import PanelObject from '@/components/vivisticker/PanelObject.vue'
 import PanelPageManagement from '@/components/vivisticker/PanelPageManagement.vue'
+import PanelReplace from '@/components/vivisticker/PanelReplace.vue'
 import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 import i18n from '@/i18n'
-
+import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -116,11 +117,14 @@ import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import { replaceImgInject } from '@/utils/textFillUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent, PropType } from 'vue'
+import { computed, defineComponent, PropType, provide } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+
+type IExtraPanelName = '' | 'color' | 'replace'
 
 export default defineComponent({
   name: 'mobile-panel',
@@ -183,7 +187,8 @@ export default defineComponent({
     Tabs,
     PanelRemoveBg,
     PanelPageManagement,
-    PanelTemplateContent
+    PanelTemplateContent,
+    PanelReplace,
   },
   data() {
     return {
@@ -191,12 +196,21 @@ export default defineComponent({
       // If fixSize is true, panelDragHeight take no effect.
       panelDragHeight: 0,
       lastPointerY: 0,
-      showExtraColorPanel: false,
+      extraPanel: '' as IExtraPanelName,
+      replaceImg: (() => { /**/ }) as (img: IAssetPhoto | IPhotoItem) => void,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       innerTabIndex: 0,
       resizeObserver: null as unknown as ResizeObserver
     }
+  },
+  created() {
+    // Provide props to descendant component, https://vuejs.org/guide/components/provide-inject.html
+    provide(replaceImgInject, computed(() => this.extraPanel === 'replace' ? (img: IAssetPhoto | IPhotoItem) => {
+      this.replaceImg(img)
+      this.extraPanel = ''
+      this.panelHistory.pop()
+    } : null))
   },
   computed: {
     ...mapState('templates', {
@@ -249,10 +263,13 @@ export default defineComponent({
         'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design',
         'multiple-select', 'nudge']
 
-      return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
+      if (this.extraPanel === 'replace' &&
+        this.panelHistory[this.panelHistory.length - 1] === 'stock') return false
+      return this.extraPanel !== '' || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list', 'text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'].includes(this.currActivePanel)
+      return this.extraPanel === '' &&
+      ['brand-list', 'text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     noHeaderTheme(): boolean {
       return ['select-design', 'page-management'].includes(this.currActivePanel)
@@ -284,7 +301,7 @@ export default defineComponent({
       }
     },
     halfSizeInInitState(): boolean {
-      return this.showExtraColorPanel || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
+      return this.extraPanel !== '' || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -309,13 +326,14 @@ export default defineComponent({
       }
     },
     insertTheme(): boolean {
-      return !this.showExtraColorPanel && ['text', 'object', 'background', 'photo', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
+      return this.extraPanel === '' && ['text', 'object', 'background', 'photo', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
     showRightBtn(): boolean {
       return this.currActivePanel !== 'none' && this.currActivePanel !== 'remove-bg'
     },
     showLeftBtn(): boolean {
-      if (this.whiteTheme) return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel
+      if (this.whiteTheme) return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.extraPanel !== ''
+      if (this.extraPanel === 'replace') return true
       if (this.currActivePanel === 'text' && this.isTextInCategory) return true
       if (this.currActivePanel === 'object' && this.isObjectInCategory) return true
       if (this.currActivePanel === 'background' && this.isBackgroundInCategory) return true
@@ -329,7 +347,7 @@ export default defineComponent({
       return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template', 'multiple-select'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
-      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts', 'template-content'].includes(this.currActivePanel)
+      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts', 'template-content', 'replace'].includes(this.currActivePanel)
       const footerTabsHeight = this.footerTabsRef?.clientHeight || 0
       return Object.assign({ bottom: this.hideFooter ? -1 * footerTabsHeight + 'px' : '0' },
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
@@ -365,19 +383,11 @@ export default defineComponent({
     //   isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
     //   )
     // },
+    // innerTab(): string {
+    //   return this.innerTabs.key[this.innerTabIndex]
+    // },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
-        // case 'replace':
-        // return {
-        //   key: [
-        //     'photo',
-        //     'file'
-        //   ],
-        //   label: [
-        //     this.$tc('NN0002', 2),
-        //     this.$tc('NN0006')
-        //   ]
-        // }
         default:
           return {
             key: ['']
@@ -388,8 +398,11 @@ export default defineComponent({
       return ['remove-bg'].includes(this.currActivePanel)
     },
     dynamicBindIs(): string {
-      if (this.showExtraColorPanel) {
-        return 'panel-color'
+      switch (this.extraPanel) {
+        case 'color':
+          return 'panel-color'
+        case 'replace':
+          return 'panel-replace'
       }
 
       const defaultVal = `panel-${this.currActivePanel}`
@@ -401,9 +414,6 @@ export default defineComponent({
         case 'text': {
           return 'panel-text' + (this.isUs ? '-us' : '')
         }
-        // case 'replace': {
-        //   return `panel-${this.innerTab}`
-        // }
         case 'none':
           return ''
         default: {
@@ -412,7 +422,7 @@ export default defineComponent({
       }
     },
     dynamicBindProps(): { [index: string]: any } {
-      if (this.showExtraColorPanel) {
+      if (this.extraPanel === 'color') {
         return {
           currEvent: this.extraColorEvent,
           panelHistory: this.panelHistory
@@ -481,10 +491,18 @@ export default defineComponent({
       const pushHistory = (history: string) => {
         this.panelHistory.push(history)
       }
+      const leaveExtraPanel = () => {
+        this.extraPanel = ''
+      }
       const openExtraColorModal = (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-        this.showExtraColorPanel = true
+        this.extraPanel = 'color'
         this.extraColorEvent = colorEventType
         this.panelHistory.push(initColorPanelType)
+      }
+      const openExtraPanelReplace = (replaceImg: (img: IAssetPhoto | IPhotoItem) => void) => {
+        this.extraPanel = 'replace'
+        this.replaceImg = replaceImg
+        this.panelHistory.push('replace')
       }
       switch (this.currActivePanel) {
         case 'color':
@@ -492,9 +510,9 @@ export default defineComponent({
         case 'background':
           return { openExtraColorModal }
         case 'text-effect':
-        case 'photo-shadow': {
+          return { pushHistory, openExtraColorModal, openExtraPanelReplace, leaveExtraPanel }
+        case 'photo-shadow':
           return { pushHistory, openExtraColorModal }
-        }
         case 'brand-list':
         case 'vvstk-more':
           return {
@@ -525,8 +543,8 @@ export default defineComponent({
     },
     leftButtonAction(): (e: PointerEvent) => void {
       const colorHandler = () => {
-        if (this.showExtraColorPanel && this.currActivePanel === 'background') return this.addRecentlyBgColor(colorUtils.currColor)
-        if (this.showExtraColorPanel || this.currActivePanel === 'color') {
+        if (this.extraPanel === 'color' && this.currActivePanel === 'background') return this.addRecentlyBgColor(colorUtils.currColor)
+        if (this.extraPanel === 'color' || this.currActivePanel === 'color') {
           if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
             this.addRecentlyColors(colorUtils.currColor)
           }
@@ -564,11 +582,17 @@ export default defineComponent({
           }
         }
       }
-      if (this.showExtraColorPanel) {
+      if (this.extraPanel === 'color') {
         return () => {
           colorHandler()
-          this.showExtraColorPanel = false
+          this.extraPanel = ''
           this.panelHistory.pop()
+        }
+      }
+      if (this.extraPanel === 'replace') {
+        return () => {
+          if (this.panelHistory[this.panelHistory.length - 1] === 'stock') this.panelHistory.pop()
+          else this.extraPanel = ''
         }
       }
       if (this.currActivePanel === 'color-picker') {
@@ -651,7 +675,7 @@ export default defineComponent({
             break
           }
         }
-        if (this.showExtraColorPanel) {
+        if (this.extraPanel === 'color') {
           this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
@@ -679,7 +703,7 @@ export default defineComponent({
     },
     showMobilePanel(newVal) {
       if (!newVal) {
-        this.showExtraColorPanel = false
+        this.extraPanel = ''
       }
     },
     bottomTheme(newVal) {
