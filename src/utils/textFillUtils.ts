@@ -120,11 +120,17 @@ class TextFill {
   getTextFillImgSrc(config: IText, { ratio = 1, finalSize }: { ratio?: number, finalSize?: number }): string {
     const textFill = config.styles.textFill as ITextFillConfig
     const img = this.getTextFillImg(textFill)
-    if (!img) return ''
+    const { divHeight, divWidth, scaleByWidth } = this.calcTextFillVar(config)
+    if (!img || !divHeight) return ''
+    let scaleSideLength = scaleByWidth ? divWidth : divHeight
+    if (scaleByWidth !== (img.width > img.height)) {
+      // If scale side is img short side, need to use the long side of re-scaled img as scaleSideLength.
+      scaleSideLength = scaleSideLength / Math.min(img.width, img.height) * Math.max(img.width, img.height)
+    }
+
     const pageScale = store.getters.getPageScaleRatio * 0.01
     // ratio = contentScaleRatio * dpiRatio
-    const layerSize = finalSize ?? Math.max(config.styles.height, config.styles.width) *
-      pageScale * ratio * (textFill.size * 0.01)
+    const layerSize = finalSize ?? scaleSideLength * pageScale * ratio * (textFill.size * 0.01)
 
     const srcObj =
       !isIAssetPhoto(img) ? { type: 'unsplash', userId: '', assetId: img.id } // custom unsplash img
@@ -176,7 +182,7 @@ class TextFill {
       webkitTextStrokeColor: 'transparent',
       textDecorationColor: 'transparent',
       // To fix Safari BG-clip bug where background appear on its border, apply border-transparent mask on it.
-      maskImage: `url(${require('@/assets/img/svg/text-fill-mask-image.svg')})`,
+      maskImage: `url(${require('@/assets/img/text-effect/text-fill-mask-image.svg')})`,
       maskSize: '100% 100%',
       // To fix Safari PDF reader bug: https://bit.ly/3IPcS8o
       ...store.getters['user/getUserId'] === 'backendRendering' ? { filter: 'opacity(1)' } : {},
