@@ -65,6 +65,7 @@ import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -178,6 +179,9 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       this.getRecAndCate)
+    if (this.$isTouchDevice()) colorUtils.setCurrEvent(ColorEventType.background)
+    // In desktop, without setting event, ColorSlip will emit event to trigger setBgColor.
+    // Because desktop may open multiple ColorSlip at the same time.
   },
   activated() {
     this.$nextTick(() => {
