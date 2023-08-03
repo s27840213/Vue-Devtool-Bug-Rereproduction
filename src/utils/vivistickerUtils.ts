@@ -1054,9 +1054,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
     const onThumbError = async () => {
       await this.saveDesignJson(id)
+      this.setLoadingOverlayShow(false)
       throw new Error('gen thumb failed')
     }
     if (store.getters['vivisticker/getEditorTypeTemplate']) {
+      this.setLoadingOverlay([i18n.global.t('STK0084')])
       const resGenThumb = await this.callIOSAsAPI('INFORM_WEB', {
         info: {
           event: 'gen-thumb',
@@ -1071,6 +1073,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (flag === '1') await onThumbError()
     }
     await this.saveDesignJson(id)
+    this.setLoadingOverlayShow(false)
   }
 
   setPages(pages: IPage[]) {
@@ -1591,6 +1594,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       container.style.transform = `translateX(-${targetPos}px)`
       if (pageIndex >= 0 && pageIndex < store.getters.getPageslength) store.commit('SET_middlemostPageIndex', pageIndex)
     }
+  }
+
+  setLoadingOverlayShow(value: boolean) {
+    store.commit('vivisticker/SET_loadingOverlayShow', value)
+  }
+
+  setLoadingOverlayMsgs(msgs: string[]) {
+    store.commit('vivisticker/SET_loadingOverlayMsgs', msgs)
+  }
+
+  setLoadingOverlay(msgs: string[]) {
+    this.setLoadingOverlayMsgs(msgs)
+    this.setLoadingOverlayShow(true)
   }
 }
 
