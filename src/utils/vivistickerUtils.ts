@@ -71,13 +71,13 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
       val: 'Apple Color Emoji',
       description: '<P>Apple Emoji',
       icon: 'apple_emoji',
-      first: true,
+      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'zVUjQ0MaGOm7HOJXv5gB',
       description: '<P>Noto Color Emoji',
       icon: 'noto_color_emoji',
-      first: true,
+      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'dLe1S0oDanIJjvty5RxG',
