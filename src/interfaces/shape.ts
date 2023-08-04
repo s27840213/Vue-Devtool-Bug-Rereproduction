@@ -29,3 +29,12 @@ export interface IMarker {
     vSize: number[];
     trimOffset: number;
 }
+
+export interface IAssetObject {
+  type: number
+  id: string
+  plan: number
+  tags: string[]
+  fit: number
+  ver: number
+}

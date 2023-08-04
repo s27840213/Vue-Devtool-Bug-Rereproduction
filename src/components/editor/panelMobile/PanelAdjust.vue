@@ -145,6 +145,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .panel-adjust {
+  display: grid;
+  gap: 10px;
   height: 100%;
   width: 100%;
   overflow: scroll;

@@ -41,6 +41,13 @@ class LayerFactary {
       categoryType: config.categoryType,
       jsonVer: latestJsonVer,
       jsonVer_origin: latestJsonVer,
+      overlay: {
+        id: 'none',
+        xOffset: 0,
+        yOffset: 0,
+        opacity: 100,
+        content: null,
+      },
       styles: {
         x: 0,
         y: 0,

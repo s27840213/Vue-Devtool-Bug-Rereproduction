@@ -157,11 +157,9 @@ export default defineComponent({
     &__option {
       margin-top: 10px;
       border-radius: 5px;
-      &:not(&--selected):hover {
-        @include selection-border(2px, blue-hover);
-      }
+      border: 2px solid transparent;
       &--selected {
-        @include selection-border(2px);
+        border-color: setColor(blue-1);
       }
       &-font {
         box-sizing: border-box;
@@ -177,7 +175,6 @@ export default defineComponent({
 
     &-wrapper {
       width: 100%;
-      padding: 0.375rem 0.625rem;
       box-sizing: border-box;
     }
   }
@@ -202,7 +199,7 @@ export default defineComponent({
     // transition: max-height 1s ease-out;
     display: flex;
     flex-direction: column;
-    row-gap: 5px;
+    row-gap: 10px;
     overflow: scroll;
     @include no-scrollbar;
   }

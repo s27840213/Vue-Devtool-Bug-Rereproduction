@@ -4,6 +4,7 @@ import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
 import store from '@/store'
 import letterBgData from '@/utils/letterBgData'
+import { minMaxHash } from '@/utils/mappingUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
@@ -28,10 +29,10 @@ export interface IEffectOptionSelect {
   type: 'select'
   select: {
     key: string
-    plan?: 1 | 0
+    plan: 1 | 0
     img: string
     label: string
-    attrs: Record<string, unknown>
+    preset: Record<string, unknown>
   }[]
 }
 export interface IEffectOptionColor {
@@ -416,18 +417,20 @@ class ConstantData {
           option.type = 'select';
           (option as IEffectOptionSelect).select = ['triangle', 'rounded', 'square'].map((key, i) => ({
             key,
-            img: require(`@/assets/img/svg/text-effect/select/endpoint-${key}.svg`),
+            plan: 0,
+            img: require(`@/assets/img/text-effect/select/endpoint-${key}.svg`),
             label: i18n.global.tc(`NN073${i}`),
-            attrs: { endpoint: key },
+            preset: { endpoint: key },
           }))
           break
         case 'tailPosition':
           option.type = 'select';
           (option as IEffectOptionSelect).select = tailPositions.map((key) => ({
             key,
-            img: require(`@/assets/img/svg/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
+            plan: 0,
+            img: require(`@/assets/img/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
             label: key,
-            attrs: { tailPosition: key },
+            preset: { tailPosition: key },
           }))
           break
         case 'angle':
@@ -440,13 +443,13 @@ class ConstantData {
           break
         case 'size':
           if (effectName === 'fill-img') Object.assign(option, { min: 100, max: 200 })
-          else Object.assign(option, { min: 50, max: 200 })
+          else Object.assign(option, { min: 50, max: 250 })
           break
         case 'lineHeight':
-          Object.assign(option, { min: 0.5, max: 2.5, isPStyle: true })
+          Object.assign(option, { ...minMaxHash.lineHeight, isPStyle: true })
           break
         case 'fontSpacing':
-          Object.assign(option, { min: -200, max: 1600, isPStyle: true })
+          Object.assign(option, { ...minMaxHash.letterSpacing, isPStyle: true })
           break
         default:
           /* distance, blur, opacity, spread, stroke,

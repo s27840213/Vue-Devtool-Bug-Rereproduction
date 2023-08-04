@@ -1,7 +1,8 @@
 <template lang="pug">
 div(class="function-panel"
   :style="functionPanelStyles")
-  div(class="function-panel__topbar")
+  div(v-if="!isShowPagePreview"
+    class="function-panel__topbar")
     svg-icon(:class="{'pointer': !isInFirstStep}"
       :iconName="'undo'"
       :iconWidth="'20px'"
