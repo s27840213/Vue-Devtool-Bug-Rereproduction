@@ -318,7 +318,8 @@ export default defineComponent({
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel',
-      isProcessing: 'shadow/isProcessing'
+      isProcessing: 'shadow/isProcessing',
+      isShowPagePreview: 'page/getIsShowPagePreview'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
@@ -933,7 +934,6 @@ export default defineComponent({
       }
     },
     redrawShadow() {
-      console.log('redraw shadow 11 ')
       const id = {
         pageId: this.page.id,
         layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
@@ -944,7 +944,9 @@ export default defineComponent({
       imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
       layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { scale: 1 }, this.subLayerIndex)
       groupUtils.deselect()
-      groupUtils.select(this.pageIndex, [this.layerIndex])
+      if (!this.isShowPagePreview) {
+        groupUtils.select(this.pageIndex, [this.layerIndex])
+      }
       if (typeof this.subLayerIndex && this.subLayerIndex !== -1) {
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true }, this.subLayerIndex)
       }

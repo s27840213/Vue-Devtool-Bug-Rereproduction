@@ -1,6 +1,8 @@
 <template lang="pug">
 div(class="scale-ratio-editor" cy-visual-test="transparent")
-  input(class="scale-ratio-editor__input pointer"
+  input(
+    class="scale-ratio-editor__input pointer"
+    :class="disableRatioEditor ? '' : 'showInput'"
     ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
     v-model="ratioInPercent"
     :style="ratioStyles()"
@@ -9,13 +11,16 @@ div(class="scale-ratio-editor" cy-visual-test="transparent")
     @mousedown="setIsSettingScaleRatio(true)"
     @mouseup="handleMouseUp"
     v-ratio-change)
-  div(class="px-5 flex items-center  btn-page-resize hover-effect pointer"
+  div(class="px-5 flex items-center  btn-page-resize"
+      :class="disableRatioEditor ? '' : 'pointer hover-effect'"
       @click="openResizePopup()")
     div(class="scale-ratio-editor__percentage lead-2")
-      span(class="text-gray-2") {{pageScaleRatio}}%
-    svg-icon(class="pointer"
-      :class="[{'rotate-hr': isPageScalePopupOpen}]"
-      :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
+      span(:class="disableRatioEditor ? 'text-gray-4' : 'text-gray-2' ") {{pageScaleRatio}}%
+    svg-icon(
+      :class="[{'rotate-hr': isPageScalePopupOpen, 'pointer': disableRatioEditor}]"
+      :iconName="'chevron-down'"
+      :iconColor="disableRatioEditor ? 'gray-4' : 'gray-2'"
+      iconWidth="16px")
   svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
     @click="setIsShowPagePreview(!isShowPagePreview)"
     :iconName="'grid'"
@@ -38,6 +43,12 @@ import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: ['toggleSidebarPanel'],
+  props: {
+    disableRatioEditor: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
     }
@@ -99,6 +110,8 @@ export default defineComponent({
       this.$emit('toggleSidebarPanel', open)
     },
     openResizePopup() {
+      if (this.isShowPagePreview) return
+
       popupUtils.openPopup('page-scale', {
         posX: 'right',
         posY: 'top'
@@ -128,10 +141,6 @@ export default defineComponent({
   }
   &__input {
     display: none;
-    .scale-ratio-editor:hover & {
-      // Show range input when hovering this component.
-      display: block;
-    }
     width: 180px;
     --lower-color: #{setColor(gray-1)};
     --upper-color: #{setColor(gray-4)};
@@ -170,6 +179,7 @@ export default defineComponent({
     }
   }
   &__percentage {
+    transition: color 0.2s;
     width: 2.5rem;
   }
 }
@@ -179,6 +189,13 @@ export default defineComponent({
   cursor: pointer;
   &:hover {
     background-color: setColor(gray-5);
+  }
+}
+
+.showInput {
+  .scale-ratio-editor:hover & {
+    // Show range input when hovering this component.
+    display: block;
   }
 }
 </style>
