@@ -563,6 +563,7 @@ class PageUtils {
     } else {
       // @testing not use scaleRatio in mobile
       if (!generalUtils.isTouchDevice()) {
+        // console.warn('newRatio', newRatio)
         store.commit('SET_pageScaleRatio', newRatio)
       } else {
         store.commit('SET_pageScaleRatio', 100)
@@ -590,7 +591,9 @@ class PageUtils {
     }
 
     editorUtils.handleContentScaleRatio(this.currFocusPageIndex)
-    store.commit('SET_pageScaleRatio', 100)
+    if (generalUtils.isTouchDevice()) {
+      store.commit('SET_pageScaleRatio', 100)
+    }
   }
 
   fillPage() {
