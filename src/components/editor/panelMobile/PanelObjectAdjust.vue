@@ -105,8 +105,6 @@ div(class="panel-object-adjust")
         :borderTouchArea="true"
         :name="`${$t('NN0085')}`"
         :value="corRadPercentage"
-        :min="0"
-        :max="100"
         @update="handleBasicShapeCorRadPercentUpdate")
 </template>
 
@@ -124,7 +122,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({

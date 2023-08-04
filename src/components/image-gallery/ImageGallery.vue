@@ -84,7 +84,7 @@ const component = defineComponent({
             size: row[0].preview.height + this.margin
           }))
         if (this.rows.length) {
-          this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
+          this.rows[Math.max(this.rows.length - 3, 0)].sentinel = true
         }
       },
     }
@@ -101,7 +101,7 @@ const component = defineComponent({
           size: row[0].preview.height + this.margin
         }))
       if (this.rows.length) {
-        this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
+        this.rows[Math.max(this.rows.length - 3, 0)].sentinel = true
       }
     },
     imageStyle(preview: any) {

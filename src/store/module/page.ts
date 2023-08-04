@@ -1,10 +1,10 @@
-import { GetterTree, MutationTree } from 'vuex'
-import { floor } from 'lodash'
-import pageUtils from '@/utils/pageUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
+import pageUtils from '@/utils/pageUtils'
+import { floor } from 'lodash'
+import { GetterTree, MutationTree } from 'vuex'
 
-interface IPageState {
+export interface IPageState {
   isShowPagePreview: boolean,
   pagesPerRow: number,
   showPagePanel: boolean,

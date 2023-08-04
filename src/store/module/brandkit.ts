@@ -1,21 +1,21 @@
-import store from '@/store'
-import { GetterTree, ActionTree, MutationTree } from 'vuex'
-import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle, IDeletingItem } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
 import brandkitApi from '@/apis/brandkit'
-import i18n from '@/i18n'
-import generalUtils from '@/utils/generalUtils'
-import { IUserFontContentData, IUserLogoContentData } from '@/interfaces/api'
-import { IFrame, IGroup, IImage, IText } from '@/interfaces/layer'
-import { SrcObj } from '@/interfaces/gallery'
 import userApis from '@/apis/user'
-import _ from 'lodash'
+import i18n from '@/i18n'
+import { IUserFontContentData, IUserLogoContentData } from '@/interfaces/api'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle, IDeletingItem } from '@/interfaces/brandkit'
+import { SrcObj } from '@/interfaces/gallery'
+import { IFrame, IGroup, IImage, IText } from '@/interfaces/layer'
+import store from '@/store'
 import apiUtils from '@/utils/apiUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
+import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import { notify } from '@kyvg/vue3-notification'
-import logUtils from '@/utils/logUtils'
+import _ from 'lodash'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
-interface IBrandKitState {
+export interface IBrandKitState {
   brands: IBrand[],
   currentBrandId: string,
   isDefaultSelected: boolean,

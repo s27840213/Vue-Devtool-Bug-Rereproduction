@@ -9,7 +9,7 @@ div(class="category-template-item" :style="itemStyle")
       :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
       :style="previewStyle"
       @error="handleNotFound")
-    pro-item(v-if="item.plan" draggable="false")
+    pro-item(v-if="item.plan")
   div(v-if="showId"
     class="category-template-item__id"
     @click="copyId") {{ item.id }}

@@ -230,7 +230,6 @@ export default defineComponent({
       }
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false })
     }
-    console.warn('nuframe', generalUtils.deepCopy(this.config))
   },
   watch: {
     'config.needFetch': function (newVal) {

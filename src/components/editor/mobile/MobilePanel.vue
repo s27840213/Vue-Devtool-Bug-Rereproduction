@@ -4,7 +4,7 @@ div(class="mobile-panel"
     :style="panelStyle"
     v-click-outside="vcoConfig()"
     ref="panel")
-  div(class="mobile-panel__top-section"
+  div(v-if="!hideTopSection" class="mobile-panel__top-section"
     :class="{'self-padding': noPaddingTheme}")
     div(class="mobile-panel__drag-bar"
       :class="{'visible-hidden': panelTitle !== ''}"
@@ -61,7 +61,7 @@ div(class="mobile-panel"
 </template>
 
 <script lang="ts">
-import Tabs from '@/components/Tabs.vue'
+import Overlay from '@/components/editor/overlay/Overlay.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
 import PanelBleed from '@/components/editor/panelMobile/PanelBleed.vue'
@@ -91,6 +91,7 @@ import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
+import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
@@ -98,7 +99,6 @@ import { IFrame } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
-import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import formatUtils from '@/utils/formatUtils'
@@ -110,7 +110,7 @@ import picWVUtils from '@/utils/picWVUtils'
 import { replaceImgInject } from '@/utils/textFillUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
-import { PropType, computed, defineComponent, provide } from 'vue'
+import { computed, defineComponent, PropType, provide } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 type IExtraPanelName = '' | 'color' | 'replace'
@@ -168,7 +168,8 @@ export default defineComponent({
     PanelObjectAdjust,
     PanelBrandList,
     PanelBleed,
-    Tabs
+    Tabs,
+    Overlay,
   },
   data() {
     return {
@@ -232,12 +233,13 @@ export default defineComponent({
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
-        'multiple-select', 'remove-bg', 'nudge']
-      return this.extraPanel !== '' || whiteThemePanel.includes(this.currActivePanel)
+        'multiple-select', 'remove-bg', 'nudge', 'overlay-light']
+      return this.extraPanel !== '' || whiteThemePanel.includes(this.currActivePanel) ||
+        (this.currActivePanel === 'overlay-dark' && this.historySize > 0)
     },
     noPaddingTheme(): boolean {
       return this.extraPanel === '' &&
-        ['brand-list', 'text-effect'].includes(this.currActivePanel)
+        ['brand-list', 'text-effect', 'overlay-dark', 'overlay-light'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return [
@@ -247,6 +249,9 @@ export default defineComponent({
     },
     hideFooter(): boolean {
       return ['download', 'remove-bg'].includes(this.currActivePanel)
+    },
+    hideTopSection(): boolean {
+      return ['overlay-dark', 'overlay-light'].includes(this.currActivePanel) && this.historySize === 0
     },
     extraFixSizeCondition(): boolean { // For panel that fix in some condition
       switch (this.currActivePanel) {
@@ -312,6 +317,8 @@ export default defineComponent({
       },
       // Prevent MobilePanel collapse
       isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
+      // If no top section, overwrite grid-template-rows to prevent row-gap appear.
+      this.hideTopSection ? { gridTemplateRows: 'minmax(0, 1fr)' } : {},
       )
     },
     innerTab(): string {
@@ -346,6 +353,9 @@ export default defineComponent({
       switch (this.currActivePanel) {
         case 'replace':
           return `panel-${this.innerTab}`
+        case 'overlay-dark':
+        case 'overlay-light':
+          return 'overlay'
         case 'none':
           return ''
         default:
@@ -361,28 +371,24 @@ export default defineComponent({
       }
 
       switch (this.currActivePanel) {
-        case 'fonts': {
+        case 'fonts':
           return {
             showTitle: false
           }
-        }
-        case 'download': {
+        case 'download':
           return {
             hideContainer: true,
             pageIndex: pageUtils.currFocusPageIndex,
             panelHistory: this.panelHistory
           }
-        }
-        case 'text-effect': {
+        case 'text-effect':
           return {
             panelHistory: this.panelHistory
           }
-        }
-        case 'color': {
+        case 'color':
           return {
             panelHistory: this.panelHistory
           }
-        }
         case 'brand-list': {
           const brandDefaultVal = {
             panelHistory: this.panelHistory
@@ -399,16 +405,20 @@ export default defineComponent({
           }
           return brandDefaultVal
         }
-        case 'brand': {
+        case 'brand':
           return {
             maxheight: this.panelParentHeight()
           }
-        }
-        case 'more': {
+        case 'more':
           return {
             panelHistory: this.panelHistory
           }
-        }
+        case 'overlay-dark':
+        case 'overlay-light':
+          return {
+            theme: this.currActivePanel.replace('overlay-', ''),
+            panelHistory: this.panelHistory,
+          }
         default: {
           return {}
         }
@@ -431,6 +441,8 @@ export default defineComponent({
       switch (this.currActivePanel) {
         case 'color':
         case 'more':
+        case 'overlay-dark':
+        case 'overlay-light':
           return { pushHistory }
         case 'background':
           return { openExtraColorModal }
@@ -472,16 +484,8 @@ export default defineComponent({
         }
       }
 
-      const colorHandler = () => {
-        if (this.extraPanel === 'color' || this.currActivePanel === 'color') {
-          if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
-            this.addRecentlyColors(colorUtils.currColor)
-          }
-        }
-      }
       if (this.extraPanel === 'color') {
         return () => {
-          colorHandler()
           this.extraPanel = ''
           this.panelHistory.pop()
         }
@@ -494,12 +498,10 @@ export default defineComponent({
       }
       if (this.panelHistory.length > 0) {
         return () => {
-          colorHandler()
           this.panelHistory.pop()
         }
       } else {
         return () => {
-          colorHandler()
           this.closeMobilePanel()
         }
       }
@@ -552,16 +554,6 @@ export default defineComponent({
             }
             break
           }
-
-          case 'color': {
-            if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
-              this.addRecentlyColors(colorUtils.currColor)
-            }
-            break
-          }
-        }
-        if (this.extraPanel === 'color') {
-          this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
       }
@@ -584,7 +576,10 @@ export default defineComponent({
     },
     showMobilePanel(newVal) {
       if (!newVal) {
-        this.extraPanel = ''
+        // Reset extraPanel after panel close animation
+        setTimeout(() => {
+          this.extraPanel = ''
+        }, 1000)
       }
     }
   },
@@ -612,7 +607,6 @@ export default defineComponent({
     ...mapActions({
       fetchPalettes: 'brandkit/fetchPalettes',
       initRecentlyColors: 'color/initRecentlyColors',
-      addRecentlyColors: 'color/addRecentlyColors'
     }),
     vcoConfig() {
       return {

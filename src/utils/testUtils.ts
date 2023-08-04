@@ -1,6 +1,16 @@
+import { IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import textUtils from '@/utils/textUtils'
 import { notify } from '@kyvg/vue3-notification'
+import { cloneDeep } from 'lodash'
+import { nextTick } from 'vue'
 
 class TestUtils {
   toShowTouchPoint: boolean
@@ -103,6 +113,82 @@ class TestUtils {
     } else {
       this.startShowingTouchPoint()
     }
+  }
+
+  /**
+   * This function is used to create a design with all available fonts, which helps address font-related issues.
+   * Usage:
+   *  1. Create a design with only one page.
+   *  2. Add some text to the page.
+   *  3. Click the "testAllFonts" button in the PopupFile.
+   *  4. Wait for the "testAllFonts" process to complete without interacting with your browser.
+   * - When setting the font, the "testAllFonts" function will apply 2 texts to the same font.
+   * This is done to create an experimental group and a control group for comparison purposes.
+   * Therefore, you should set the 2 texts to the experimental group and leave the other text unaffected.
+   * - Make sure that no text had been multi-selected, or their widthLimit will not be -1.
+   */
+  async testAllFonts(start: number, end: number) {
+    // Get all font list.
+    await store.dispatch('font/getCategories')
+    while (store.state.font.nextPage !== -1) {
+      console.log('get more font')
+      await store.dispatch('font/getMoreCategory')
+    }
+
+    // Apply all font.
+    const fonts = (store.state.font.categories).flatMap(cate => cate.is_recent ? [] : cate.list)
+    const currPage = layerUtils.getCurrPage
+    let fontIndex = start
+    currPage.layers.forEach(layer => {
+      if (layer.type !== 'text') notify('有圖片layer 請刪除')
+    })
+
+    while (fontIndex < end) {
+      const { pageIndex } = layerUtils
+      for (let i = 0; i < currPage.layers.length; i++) {
+        groupUtils.select(pageIndex, [i])
+        await generalUtils.sleep(100)
+
+        // Set font
+        const font = fonts[fontIndex] as unknown as Record<string, string>
+        textPropUtils.applyPropsToAll('span,paragraph', {
+          type: font.src || font.fontType, // public fonts in list-design don't have src
+          fontUrl: font.fontUrl ?? '',
+          userId: font.userId ?? '',
+          assetId: font.assetId ?? '',
+          font: font.id,
+        })
+        console.log('set', font.name)
+
+        // Download font
+        await store.dispatch('text/addFont', {
+          type: font.src || font.fontType, // public fonts in list-design don't have src
+          url: font.fontUrl,
+          userId: font.userId,
+          assetId: font.assetId,
+          face: font.id,
+          ver: font.ver,
+        })
+        await textUtils.untilFontLoaded((currPage.layers[i] as IText).paragraphs)
+        await generalUtils.sleep(500)
+
+        // Re-calc text w/h
+        textUtils.updateTextLayerSizeByShape(pageIndex, i, -1)
+        groupUtils.deselect()
+        groupUtils.reset()
+        if (i % 2) fontIndex++
+      }
+
+      // Add next page
+      await generalUtils.sleep(1000)
+      pageUtils.addPage(pageUtils.newPage(cloneDeep(currPage)))
+      nextTick(() => {
+        pageUtils.scrollIntoPage(pageIndex + 1)
+        pageUtils.activePage(pageIndex + 1)
+      })
+      await generalUtils.sleep(1000)
+    }
+    stepsUtils.record()
   }
 }
 

@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="panel")
-  keep-alive(:include="['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText', 'PanelFile', 'PanelBrand']")
+  keep-alive(:include="['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText', 'PanelFile', 'PanelOverlay', 'PanelBrand']")
     component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
       class="p-10 border-box"
       :style="panelStyles()"
@@ -9,6 +9,7 @@ div(class="panel")
 </template>
 
 <script lang="ts">
+import Overlay from '@/components/editor/overlay/Overlay.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
@@ -20,7 +21,6 @@ import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import { IPage } from '@/interfaces/page'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
-// import { CartType } from '@/store/types'
 
 export default defineComponent({
   emits: [],
@@ -32,7 +32,8 @@ export default defineComponent({
     PanelText,
     PanelFile,
     PanelBrand,
-    PanelPage
+    PanelPage,
+    Overlay,
   },
   props: {
     isSidebarPanelOpen: {
@@ -53,8 +54,8 @@ export default defineComponent({
         'panel-background',
         'panel-text',
         'panel-file',
+        'overlay',
         'panel-brand',
-        'panel-pexels',
         'panel-page',
         'panel-group',
         'panel-text-setting',

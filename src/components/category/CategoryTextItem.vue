@@ -9,7 +9,7 @@ div(class="panel-text__item"
     :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
     :style="itemStyle"
     @error="handleNotFound")
-  pro-item(v-if="item.plan" draggable="false")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">

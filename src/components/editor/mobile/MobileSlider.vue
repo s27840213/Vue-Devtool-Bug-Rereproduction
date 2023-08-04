@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="mobile-slider" :style="containerStyles")
+div(class="mobile-slider")
   div(class="mobile-slider__top")
     span(class="mobile-slider__name no-wrap") {{title}}
     input(class="mobile-slider__number"
@@ -10,7 +10,7 @@ div(class="mobile-slider" :style="containerStyles")
   div(class="mobile-slider__range-input-wrapper")
     input(class="input__slider--range"
       v-progress
-      :style="{ 'pointer-events': borderTouchArea ? 'none' : 'auto' }"
+      :style="{ 'pointer-events': 'none' }"
       v-model.number="propsVal"
       :name="name"
       :max="max"
@@ -18,10 +18,8 @@ div(class="mobile-slider" :style="containerStyles")
       :step="step"
       v-ratio-change
       type="range"
-      :disabled="disabled"
-      @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
-      @pointerup="!borderTouchArea ? handlePointerup : null")
-    input(v-if="borderTouchArea"
+      :disabled="disabled")
+    input(
       class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
       v-model.number="propsVal"
       :name="name"
@@ -53,29 +51,21 @@ export default defineComponent({
     name: {
       type: String,
     },
-    borderTouchArea: {
-      type: Boolean,
-      default: false
-    },
     value: {
       type: [Number, String],
       required: true
     },
     min: {
       type: Number,
-      required: true
+      default: 0,
     },
     max: {
       type: Number,
-      required: true
+      default: 100,
     },
     step: {
       default: 1,
       type: Number
-    },
-    enableDefaultPadding: {
-      type: Boolean,
-      default: true
     },
     autoRecord: {
       type: Boolean,
@@ -99,11 +89,6 @@ export default defineComponent({
         this.$forceUpdate()
       }
     },
-    containerStyles() {
-      return {
-        padding: this.enableDefaultPadding ? '0.375rem 0.625rem' : 'none'
-      }
-    }
   },
   methods: {
     handleChangeStop() {

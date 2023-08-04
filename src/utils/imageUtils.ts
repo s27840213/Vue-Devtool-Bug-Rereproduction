@@ -8,7 +8,7 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IShadowAsset } from '@/store/module/shadow'
 import { AxiosPromise } from 'axios'
-import { findLastIndex } from 'lodash'
+import { cloneDeep, findLastIndex } from 'lodash'
 import FrameUtils from './frameUtils'
 import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
@@ -18,7 +18,7 @@ import pageUtils from './pageUtils'
 const APP_VER_FOR_REFRESH_CACHE = 'v7174'
 
 class ImageUtils {
-  async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
+  async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: (img?: HTMLImageElement) => void, crossOrigin?: boolean }) {
     const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve) => {
       const image = new Image()
@@ -26,7 +26,7 @@ class ImageUtils {
         image.crossOrigin = 'anonymous'
       }
       image.onload = () => resolve(cb(image))
-      error && (image.onerror = error)
+      error && (image.onerror = () => error(image))
       image.src = src
     })
   }
@@ -168,9 +168,9 @@ class ImageUtils {
       return 0
     }
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
-    const sizeMap = [...(store.state as any).user.imgSizeMap as Array<{ [key: string]: number | string }>]
+    const sizeMap = cloneDeep(store.state.user.imgSizeMap)
     if (store.getters['user/getUserId'] === 'backendRendering') {
-      sizeMap.unshift(...(store.state as any).user.imgSizeMapExtra)
+      sizeMap.unshift(...store.state.user.imgSizeMapExtra)
     }
     if (sizeMap?.length) {
       let i = 0

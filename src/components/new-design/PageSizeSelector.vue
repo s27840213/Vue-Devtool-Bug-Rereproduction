@@ -650,9 +650,18 @@ export type CPageSizeSelector = InstanceType<typeof component>
 .page-size-selector {
   height: 100%;
   text-align: left;
-  overflow-y: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  scrollbar-width: thin;
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background-color: setColor(gray-3);
+  }
   &__body {
     background-color: setColor(gray-1-5);
     box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25);
@@ -796,6 +805,7 @@ export type CPageSizeSelector = InstanceType<typeof component>
     }
   }
   &__container {
+    min-height: 100px;
     display: grid;
     gap: 10px;
     overflow-y: auto; // overlay is not supported in Firefox

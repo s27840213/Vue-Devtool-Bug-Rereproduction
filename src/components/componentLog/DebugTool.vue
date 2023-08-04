@@ -18,7 +18,7 @@ div(class="fps")
 
 <script lang="ts">
 import MobilePropsToggle from '@/components/editor/mobile/MobilePropsToggle.vue'
-import { Path, Point } from '@/utils/textBgUtils'
+import { Path, Point } from '@/utils/mathUtils'
 import { filter, range } from 'lodash'
 import { defineComponent } from 'vue'
 

@@ -6,7 +6,7 @@ import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
 import letterBgData from '@/utils/letterBgData'
 import localStorageUtils from '@/utils/localStorageUtils'
-import mathUtils from '@/utils/mathUtils'
+import { obj2Point, Path, Point } from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -14,60 +14,6 @@ import { Editor } from '@tiptap/vue-3'
 import _, { cloneDeep, isEqual, maxBy, omit, sum } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
-
-// For text effect gooey
-export class Point {
-  x: number
-  y: number
-  constructor(x = 0, y = 0) {
-    this.x = x
-    this.y = y
-  }
-
-  middle(p: Point): Point {
-    return new Point(
-      (this.x + p.x) / 2,
-      (this.y + p.y) / 2
-    )
-  }
-
-  add(p: { x: number, y: number }): Point {
-    return new Point(
-      this.x + p.x,
-      this.y + p.y
-    )
-  }
-
-  sub(p: { x: number, y: number }): Point {
-    return new Point(
-      this.x - p.x,
-      this.y - p.y
-    )
-  }
-
-  mul(scale: number): Point {
-    return new Point(
-      this.x * scale,
-      this.y * scale,
-    )
-  }
-
-  dist(p = new Point()): number {
-    return Math.pow(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2), 0.5)
-  }
-
-  // Rotate clockwise
-  rotate(angle: number, origin = new Point()) {
-    return obj2Point(mathUtils.getRotatedPoint(angle, origin, this))
-  }
-
-  toString(): string {
-    return `${this.x} ${this.y}`
-  }
-}
-function obj2Point(p: { x: number, y: number }) {
-  return new Point(p.x, p.y)
-}
 
 export class Rect {
   bodyRect = new DOMRect()
@@ -340,101 +286,6 @@ export class Rect {
   }
 }
 
-// For text effect gooey
-export class Path {
-  pathArray = [] as string[]
-  pointArray = [] as Point[]
-  currPos: Point
-  constructor(p: Point) {
-    this.currPos = p
-    this.pointArray.push(this.currPos)
-    this.pathArray.push(`M${p}`)
-  }
-
-  L(end: Point): void {
-    if (this.currPos.dist(end) < 0.1) return
-    this.currPos = end
-    this.pointArray.push(this.currPos)
-    this.pathArray.push(`L${end}`)
-  }
-
-  C(c1: Point, c2: Point, end: Point): void {
-    if (this.currPos.dist(end) < 0.1) return
-    this.currPos = end
-    this.pointArray.push(this.currPos)
-    this.pathArray.push(`C${c1} ${c2} ${end}`)
-  }
-
-  v(dist: number): void {
-    this.currPos = this.currPos.add(new Point(0, dist))
-    this.pointArray.push(this.currPos)
-    this.pathArray.push(`v${dist}`)
-  }
-
-  h(dist: number): void {
-    this.currPos = this.currPos.add(new Point(dist, 0))
-    this.pointArray.push(this.currPos)
-    this.pathArray.push(`h${dist}`)
-  }
-
-  l(p: Point): void {
-    this.currPos = this.currPos.add(p)
-    this.pointArray.push(this.currPos)
-    this.pathArray.push(`l${p.x} ${p.y}`)
-  }
-
-  a(p: Point, { rx = 1, ry = 1, largeArcFlac = 0, sweepFlag = 1, radius = 1 } = {}): void {
-    if (radius !== 1) [rx, ry] = [radius, radius]
-    this.currPos = this.currPos.add(p)
-    this.pointArray.push(this.currPos)
-    this.pathArray.push(`a${rx} ${ry} 0 ${largeArcFlac}${sweepFlag}${p.x} ${p.y}`)
-  }
-
-  largeArc(totalAngles: number, origin = new Point()): void { // For arc that angle > 360
-    const clockwise = totalAngles > 0
-    const rotateDir = (clockwise ? 1 : -1)
-    const radius = this.currPos.dist(origin)
-    let angleAcc = 0
-    totalAngles = Math.abs(totalAngles)
-    while (angleAcc < totalAngles) {
-      const currAngle = Math.min(totalAngles - angleAcc, 180)
-      const arcEnd = this.currPos.rotate(currAngle * rotateDir, origin)
-      this.a(arcEnd.sub(this.currPos), { sweepFlag: +clockwise, radius })
-      angleAcc += currAngle
-    }
-  }
-
-  q(dp1: Point, dp: Point): void
-  q(dx1: number, dy1: number, dx: number, dy: number): void
-  q(dx1: number | Point, dy1: number | Point, dx?: number, dy?: number): void {
-    if (dx1 instanceof Point && dy1 instanceof Point) {
-      [dx, dy] = [dy1.x, dy1.y];
-      [dx1, dy1] = [dx1.x, dx1.y]
-    }
-    this.currPos = this.currPos.add(new Point(dx as number, dy as number))
-    this.pointArray.push(this.currPos)
-    this.pathArray.push(`q${dx1} ${dy1} ${dx} ${dy}`)
-  }
-
-  result(): string {
-    return this.pathArray.join('\n') + 'z'
-  }
-
-  toCircle(): CustomElementConfig[] {
-    return this.pointArray.map(p => {
-      return {
-        tag: 'circle',
-        attrs: {
-          cx: p.x,
-          cy: p.y,
-          r: '5',
-          fill: 'red'
-        }
-      }
-    })
-  }
-}
-
 class Gooey {
   controlPoints = [[], []] as { top: Point, bottom: Point, oldHeight: number }[][]
   bRadius: number
@@ -687,12 +538,11 @@ class Gooey {
 
 class TextBg {
   private currColorKey = ''
-  effects = this.getDefaultEffects() as Record<string, Record<string, string | number | boolean>>
 
   rgba = (color: string, opacity: number) =>
     textEffectUtils.convertColor2rgba(color, opacity)
 
-  getDefaultEffects() {
+  get effectDefaultOptions() {
     return {
       none: {},
       'square-borderless': {
@@ -782,7 +632,7 @@ class TextBg {
       },
       // A part of additional default ITextLetterBg setting is in setExtraDefaultAttrs func.
       ...letterBgData.getDeafultOptions()
-    }
+    } as Record<string, Record<string, string | number | boolean>>
   }
 
   inlineSvg(svg: string) {
@@ -901,7 +751,9 @@ class TextBg {
         bend >= 0 ? maxHeightSpan.height / 2 + radius : layerHeight - maxHeightSpan.height / 2 - radius)
       const begin = middle.rotate(-bodyAngle / 2, center)
 
-      for (const rect of rects) {
+      for (const row of rows) {
+        if (row.spanData.every(span => span.text === '')) continue
+        const rect = row.rect
         const capWidth = withShape ? shapeCapWidth : rect.height * 0.005 * textBg.height
         const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
         const path = withShape ? new Path(begin)
@@ -1085,7 +937,7 @@ class TextBg {
       rows.forEach((row) => {
         row.spanData.forEach((span, spanIndex) => {
           const { x, y, width, height, text } = span
-          if (text === ' ') spaceCount += 1
+          if (text === ' ') spaceCount += 1
           else {
             pos.push({
               ...letterBgData.getLetterBgSetting(textBg, i - spaceCount, spanIndex === 0, spanIndex === row.spanData.length - 1),
@@ -1129,7 +981,7 @@ class TextBg {
             tag: colorChangeable ? 'use' : 'image',
             attrs: {
               href: colorChangeable ? `#${p.href}`
-                : require(`@/assets/img/svg/LetterBG/${p.href}.svg`),
+                : require(`@/assets/img/text-effect/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
               ...!withShape && { x, y },
@@ -1206,7 +1058,7 @@ class TextBg {
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
     const subLayerIndex = layerUtils.subLayerIdx
-    const defaultAttrs = this.effects[effect]
+    const defaultAttrs = this.effectDefaultOptions[effect]
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
@@ -1318,7 +1170,7 @@ class TextBg {
 
   async resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
-    await this.setTextBg(effectName, this.effects[effectName])
+    await this.setTextBg(effectName, this.effectDefaultOptions[effectName])
     await letterBgData.setExtraDefaultAttrs(effectName)
   }
 }

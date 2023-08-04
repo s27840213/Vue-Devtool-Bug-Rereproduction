@@ -13,7 +13,7 @@ class GeneralUtils {
   flagsCallback: (() => void) | undefined = undefined
 
   get scaleRatio() { return store.getters.getPageScaleRatio }
-  get isSuperUser() { return (store.state as any).user.role === 0 }
+  get isSuperUser() { return store.state.user.role === 0 }
   get browserInfo() {
     return store.getters['user/getBrowserInfo'] as IBrowserInfo
   }
@@ -254,7 +254,7 @@ class GeneralUtils {
     return new Blob([u8arr], { type: mime })
   }
 
-  toDataURL(src: string, callback: (dataUrl: string)=> void) {
+  toDataURL(src: string, callback: (dataUrl: string) => void) {
     const image = new Image()
     image.crossOrigin = 'Anonymous'
     image.onload = () => {

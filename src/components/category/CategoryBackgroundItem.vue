@@ -8,7 +8,7 @@ div(class="panel-bg__item"
     draggable="false"
     :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
     @error="handleNotFound")
-  pro-item(v-if="item.plan" draggable="false")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
