@@ -62,15 +62,18 @@ interface IUserSettingListOption {
   val: any
   description: string
   icon?: string
+  queryFunc?: (query: string) => boolean
   first?: boolean
 }
 
 const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
   emojiSetting: [
     {
-      val: 'Apple Color Emoji',
+      // val: 'Apple Color Emoji',
+      val: '-apple-system',
       description: '<P>Apple Emoji',
       icon: 'apple_emoji',
+      queryFunc: (query: string) => SYSTEM_FONTS.includes(query)
       // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
@@ -241,7 +244,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   getDefaultUserConfig<T extends keyof IUserSettingListOption>(key: keyof typeof USER_SETTINGS_CONFIG, by: T, query: IUserSettingListOption[T]): IUserSettingListOption | undefined {
     if (!USER_SETTINGS_CONFIG[key].isList) throw new Error(`getDefaultUserConfig can only query USER_SETTING_CONFIG whose isList=true, provided key: ${key}`)
     const options = USER_SETTINGS_LIST_CONFIG[key]
-    return options.find(option => option[by] === query)
+    return options.find(option => option.queryFunc ? option.queryFunc(query) : option[by] === query) ?? options[0]
   }
 
   addFontForEmoji() {
