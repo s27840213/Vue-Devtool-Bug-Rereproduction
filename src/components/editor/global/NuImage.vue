@@ -190,8 +190,9 @@ export default defineComponent({
       this.handleDimensionUpdate(newVal, oldVal)
     },
     'config.srcObj': {
-      handler: function () {
-        console.log('handle config srcobj')
+      handler: function (val, oldVal) {
+        if (generalUtils.isSameObjVal(val, oldVal)) return
+
         this.shadowBuff.canvasShadowImg = undefined
         if (this.forRender) {
           return
@@ -209,7 +210,9 @@ export default defineComponent({
       deep: true
     },
     'config.styles.shadow.effects': {
-      handler(val) {
+      handler(val, oldVal) {
+        if (generalUtils.isSameObjVal(val, oldVal)) return
+
         const shadow = (this.config as IImage).styles.shadow
         if (shadow.old && shadow.old.currentEffect !== shadow.currentEffect) {
           return
@@ -221,9 +224,7 @@ export default defineComponent({
       deep: true
     },
     'config.styles.shadow.currentEffect'() {
-      if (this.forRender || this.shadow().srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) {
-        return
-      }
+      if (this.forRender || this.shadow().srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) return
       if (this.$refs.canvas) {
         this.handleNewShadowEffect()
       } else {
@@ -280,7 +281,8 @@ export default defineComponent({
       }
     },
     'config.styles.shadow.srcObj': {
-      handler: function (val) {
+      handler: function (val, oldVal) {
+        if (generalUtils.isSameObjVal(val, oldVal)) return
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
         }

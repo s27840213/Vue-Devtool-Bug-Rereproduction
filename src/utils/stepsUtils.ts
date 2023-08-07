@@ -320,6 +320,7 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep--
+    const activePageIndex = pageUtils.currActivePageIndex
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
@@ -354,6 +355,7 @@ class StepsUtils {
     if (uploadUtils.isLogin) {
       uploadUtils.uploadDesign()
     }
+    store.commit('SET_currActivePageIndex', activePageIndex)
   }
 
   delayedRecord(key: string, interval = 300) {
@@ -374,6 +376,7 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep++
+    const activePageIndex = pageUtils.currActivePageIndex
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
@@ -406,6 +409,7 @@ class StepsUtils {
     if (uploadUtils.isLogin) {
       uploadUtils.uploadDesign()
     }
+    store.commit('SET_currActivePageIndex', activePageIndex)
   }
 
   updateHead(pageIndex: number, layerIndex: number, props: any, subLayerIdx = -1) {
