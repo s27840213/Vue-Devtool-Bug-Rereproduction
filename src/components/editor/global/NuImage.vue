@@ -141,7 +141,7 @@ export default defineComponent({
     }
   },
   async created() {
-    this.src = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+    this.src = (this.config.panelPreviewSrc || this.config.previewSrc) ?? imageUtils.getSrc(this.config, this.getPreviewSize())
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
@@ -191,6 +191,7 @@ export default defineComponent({
     },
     'config.srcObj': {
       handler: function () {
+        console.log('handle config srcobj')
         this.shadowBuff.canvasShadowImg = undefined
         if (this.forRender) {
           return
@@ -561,18 +562,21 @@ export default defineComponent({
       logUtils.setLog(log)
     },
     async previewAsLoading() {
-      if (this.config.previewSrc) {
-        return
-      }
+      // if (this.config.previewSrc) {
+      //   return
+      // }
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
-      const previewSrc = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+      const previewSrc = (this.config.panelPreviewSrc || this.config.previewSrc) ?? imageUtils.getSrc(this.config, this.getPreviewSize())
       imageUtils.imgLoadHandler(previewSrc, (img) => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
       }, { crossOrigin: true })
 
+      // if (this.config.previewSrc) {
+      //   return
+      // }
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       return new Promise<void>((resolve, reject) => {
