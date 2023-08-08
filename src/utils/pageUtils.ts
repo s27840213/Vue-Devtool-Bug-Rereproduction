@@ -151,7 +151,6 @@ class PageUtils {
       })
     }
 
-    pageData.shownSize ||= { width: 1080, height: 1080 }
     // set physical size to px size if not exist
     if (pageData.width) {
       pageData.physicalWidth ||= pageData.width
@@ -170,7 +169,6 @@ class PageUtils {
       physicalWidth: 1080,
       physicalHeight: 1080,
       unit: 'px',
-      // snapUtils: new SnapUtils(-1),
       backgroundColor: '#ffffff',
       backgroundImage: {
         config: layerFactary.newImage({
@@ -204,7 +202,6 @@ class PageUtils {
         originSize: { width: 0, height: 0 },
         initPos: { x: 0, y: 0 }
       },
-      shownSize: { width: 1080, height: 1080 },
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,

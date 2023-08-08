@@ -6,8 +6,8 @@ div(class="editor-view" v-touch
     @scroll="!inBgRemoveMode ? scrollUpdate() : null"
     @pointerdown="selectStart"
     @mousewheel="handleWheel"
+    @pinch="pinchHandler"
     ref="editorView")
-  //- @pinch="pinchHandler"
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
     div(class="editor-view__canvas"
@@ -132,9 +132,6 @@ export default defineComponent({
       /**
        * @Note - make the transitoin being set after the mounted hook, or when switching between all pages mode, you will see a lovely page floating from the top to its normal posiiton
        */
-      // const currFocusPageIndex = pageUtils.currFocusPageIndex
-      // pageUtils.scrollIntoPage(currFocusPageIndex, 'auto')
-      // this.currCardIndex = currFocusPageIndex
       this.mounted = true
     })
     this.getRecently()
@@ -406,23 +403,6 @@ export default defineComponent({
         const contentScaleRatio = this.$store.getters.getContentScaleRatio
         const evtScale = ((e.scale - 1) * 0.5 + 1)
         switch (e.phase) {
-          case 'start': {
-            if (this.isBgImgCtrl || this.isImgCtrl) return
-
-            this.currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-            this.movingUtils.removeListener()
-            this.initPagePos.x = page.x
-            this.initPagePos.y = page.y
-            this.initPinchPos = {
-              x: e.x,
-              y: e.y
-            }
-            this.tmpScaleRatio = scaleRatio
-            store.commit('SET_isPageScaling', true)
-            this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
-            break
-          }
-
           case 'move': {
             if (this.isBgImgCtrl || this.isImgCtrl) return
 
@@ -441,9 +421,7 @@ export default defineComponent({
               this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
             }
             if (!this.initPinchPos) return
-            if (!store.state.isPageScaling) {
-              store.commit('SET_isPageScaling', true)
-            }
+
             store.commit('mobileEditor/UPDATE_pinchScale', evtScale)
 
             if (!this.translationRatio) {

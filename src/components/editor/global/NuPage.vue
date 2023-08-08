@@ -248,16 +248,6 @@ export default defineComponent({
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
     })
-
-    // const page = this.$refs.page as HTMLElement
-    // const rect = page.getBoundingClientRect()
-    // console.log(rect)
-    // console.log('width: rect.width, height: rect.height', this.pageIndex, rect.width, rect.height)
-    // pageUtils.setMobilePysicalPage({
-    //   pageIndex: this.pageIndex,
-    //   pageSize: { width: rect.width, height: rect.height },
-    //   pageCenterPos: { x: rect.left + rect.width * 0.5, y: rect.top + rect.height * 0.5 }
-    // })
   },
   watch: {
     pageIndex(val) {

@@ -40,7 +40,7 @@ import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
-import { createStore, GetterTree, MutationTree } from 'vuex'
+import { GetterTree, MutationTree, createStore } from 'vuex'
 import brandkit, { IBrandKitState } from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
@@ -440,7 +440,6 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[pageInfo.index].config.physicalWidth = pageInfo.physicalWidth
     state.pages[pageInfo.index].config.physicalHeight = pageInfo.physicalHeight
     state.pages[pageInfo.index].config.unit = pageInfo.unit
-    state.pages[pageInfo.index].config.shownSize = { width: pageInfo.width, height: pageInfo.height }
   },
   SET_designId(state: IEditorState, designId: string) {
     state.designId = designId
@@ -1120,7 +1119,7 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
   SET_pagePhysicalSize(state: IEditorState, payload: { pageIndex: number, originSize?: ISize, pageCenterPos?: ICoordinate }) {
-    const { pageIndex, originSize, pageCenterPos } = payload
+    const { pageIndex, originSize } = payload
     if (originSize) {
       Object.assign(state.pages[pageIndex].config.mobilePhysicalSize.originSize, originSize)
     }

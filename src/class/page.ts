@@ -29,6 +29,7 @@ export class Page implements IPage {
     v: Array<number>
     h: Array<number>
   }
+
   mobilePhysicalSize: { originSize: ISize, initPos: ICoordinate }
 
   isEnableBleed: boolean
@@ -53,7 +54,6 @@ export class Page implements IPage {
       initPos: { x: 0, y: 0 },
       originSize: { width: 0, height: 0 },
     }
-    this.shownSize = { width: 0, height: 0 }
     this.snapUtils = new SnapUtils(-1)
     this.width = 1080
     this.height = 1080
