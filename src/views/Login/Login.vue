@@ -201,6 +201,7 @@ import store from '@/store'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
+import logUtils from '@/utils/logUtils'
 import loginUtils from '@/utils/loginUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -363,6 +364,7 @@ export default defineComponent({
         const { data } = await userApis.fbLogin(code, redirectUri, this.currLocale)
         this.handleLoginResult(data, 'Facebook', 'fb', redirect)
       } catch (error) {
+        logUtils.setLogForError(error as Error)
       }
     },
     async googleLogin(code: string, redirectUri: string, redirect: string) {
@@ -371,11 +373,13 @@ export default defineComponent({
         const { data } = await userApis.googleLogin(code, redirectUri, this.currLocale)
         this.handleLoginResult(data, 'Google', 'google', redirect)
       } catch (error) {
+        logUtils.setLogForError(error as Error)
       }
     },
     handleLoginResult(data: { data: ILoginResult, flag: number, msg?: string }, gtmTitle: 'Facebook' | 'Google' | 'Vivipic', loginType: string, redirect?: string) {
       if (data.flag === 0) {
         if (data.data.new_user) {
+          logUtils.setLogAndConsoleLog(`Registration complete with ${loginType} login`)
           if (picWVUtils.inBrowserMode) {
             fbPixelUtils.fbq('track', 'CompleteRegistration')
           } else {
@@ -386,7 +390,7 @@ export default defineComponent({
         store.dispatch('user/loginSetup', { data: data })
         this.$router.push(this.redirect || redirect || '/')
       } else {
-        console.log(`${loginType} login failed`)
+        logUtils.setLogAndConsoleLog(`${loginType} login failed`)
         notify({ group: 'error', text: data.msg })
       }
       this.isLoading = false
@@ -399,6 +403,7 @@ export default defineComponent({
       }
     },
     async onLogInClicked() {
+      logUtils.setLogAndConsoleLog('Click Email login')
       this.isLoginClicked = true
       this.isLoading = true
       if (this.password.length === 0) {
@@ -416,10 +421,12 @@ export default defineComponent({
       } else {
         this.password = ''
         this.passwordErrorMessage = data.msg || this.$t('NN0242')
+        logUtils.setLogAndConsoleLog(`Email login failed (msg: ${this.passwordErrorMessage})`)
       }
       this.isLoading = false
     },
     onForgotClicked() {
+      logUtils.setLogAndConsoleLog('Click forgot password')
       this.currentPageIndex = 1
       this.password = ''
       this.isPeerPassword = false
@@ -430,9 +437,11 @@ export default defineComponent({
       this.isLoginClicked = false
     },
     onCloseClicked() {
+      logUtils.setLogAndConsoleLog('Click close icon')
       this.$router.push({ name: 'Home' })
     },
     async onSendEmailClicked() {
+      logUtils.setLogAndConsoleLog('Send Vcode')
       this.isLoginClicked = true
       this.emailResponseError = false
       this.isLoading = true
@@ -458,12 +467,14 @@ export default defineComponent({
         this.isVcodeClicked = false
         this.currentPageIndex = 2
       } else {
+        logUtils.setLogAndConsoleLog(`Send Vcode failed (msg: ${data.msg})`)
         this.emailResponseError = true
         this.mailErrorMessage = data.msg || this.$t('NN0242')
       }
       this.isLoading = false
     },
     async onResendClicked() {
+      logUtils.setLogAndConsoleLog('Resend Vcode')
       this.isLoading = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
@@ -519,10 +530,12 @@ export default defineComponent({
       const data = await store.dispatch('user/verifyVcode', parameter)
       this.vcode = ''
       if (data.flag === 0) {
+        logUtils.setLogAndConsoleLog('Verify Vcode success')
         this.currentPageIndex = 3
         this.isResetClicked = false
         this.token = data.token
       } else {
+        logUtils.setLogAndConsoleLog(`Verify Vcode failed (msg: ${data.msg})`)
         this.vcodeErrorMessage = data.msg || this.$t('NN0242')
       }
       this.isLoading = false
@@ -549,15 +562,18 @@ export default defineComponent({
       this.password = ''
       this.confirmPassword = ''
       if (data.flag === 0) {
+        logUtils.setLogAndConsoleLog('Reset password success')
         this.email = ''
         this.currentPageIndex = 0
         this.isLoginClicked = false
       } else {
+        logUtils.setLogAndConsoleLog(`Reset password failed (msg: ${data.msg})`)
         this.confirmErrorMessage = data.msg || this.$t('NN0242')
       }
       this.isLoading = false
     },
     async onFacebookClicked() {
+      logUtils.setLogAndConsoleLog('Click Facebook login')
       if (picWVUtils.inBrowserMode) {
         loginUtils.onFacebookClicked(this.redirect)
       } else {
@@ -568,6 +584,7 @@ export default defineComponent({
       }
     },
     async onGoogleClicked() {
+      logUtils.setLogAndConsoleLog('Click Google login')
       if (picWVUtils.inBrowserMode) {
         loginUtils.onGoogleClicked(this.redirect)
       } else {
