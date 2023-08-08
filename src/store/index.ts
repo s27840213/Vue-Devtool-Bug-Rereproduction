@@ -45,6 +45,7 @@ import brandkit, { IBrandKitState } from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
+  sessionId: generalUtils.generateRandomString(12),
   pages: [{
     config: pageUtils.newPage({}),
     modules: {

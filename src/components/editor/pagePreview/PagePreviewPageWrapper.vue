@@ -4,6 +4,7 @@ lazy-load(
     :target="lazyLoadTarget"
     :threshold="[0,1]"
     :minHeight="itemSize ? pageHeight() * scaleRatio() : contentWidth"
+    :anamationEnabled="true"
     @loaded="handleLoaded")
   div(class="page-preview-page"
     :style="styles2()"
@@ -204,12 +205,11 @@ export default defineComponent({
     handleDragStart(e: DragEvent) {
       this._setIsDragged(true)
       this.isMouseOver = false
-      this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
 
       const target = e.target as HTMLElement
       setTimeout(function () {
-        target.style.visibility = 'hidden'
+        target.style.opacity = '0.3'
       }, 0)
 
       if (!e.dataTransfer) return
@@ -223,7 +223,7 @@ export default defineComponent({
 
       const target = e.target as HTMLElement
       setTimeout(function () {
-        target.style.visibility = 'visible'
+        target.style.opacity = '1'
       }, 0)
 
       document.removeEventListener('dragover', this.preventDefaultDragOver, false)
@@ -327,6 +327,7 @@ export default defineComponent({
     box-shadow: 0px 0px 7px setColor(gray-2, 0.4);
     transform-origin: 0 0;
     z-index: 1;
+    transition: 0.3s opacity;
     &-more {
       position: absolute;
       right: 8px;

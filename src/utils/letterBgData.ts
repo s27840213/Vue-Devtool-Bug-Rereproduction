@@ -10,7 +10,8 @@ export const textLetterBgName = [
   'vintage-flower-custom', 'cat-paw', 'bread', 'bear', 'bear-custom',
   'cat', 'cat-custom', 'rabbit', 'rabbit-custom', 'dog', 'dog-custom',
   'star', 'baby', 'paper-tap', 'paper-tap-point', 'paper-tap-stripe',
-  'paper-tap-grid'
+  'paper-tap-grid', 'triangle-flag', 'triangle-flag-custom',
+  'rectangle-flag', 'rectangle-flag-custom',
 ] as const
 
 class LetterBGData {
@@ -172,6 +173,24 @@ class LetterBGData {
       label: i18n.global.tc('NN0898'),
       plan: 1,
       options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+    }, {
+      key: 'triangle-flag',
+      label: i18n.global.tc('NN0900'),
+      plan: 1,
+      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+    }, {
+      key: 'triangle-flag-custom',
+      label: i18n.global.tc('NN0901'),
+      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+    }, {
+      key: 'rectangle-flag',
+      label: i18n.global.tc('NN0902'),
+      plan: 1,
+      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+    }, {
+      key: 'rectangle-flag-custom',
+      label: i18n.global.tc('NN0903'),
+      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
     }]
   }
 
@@ -218,6 +237,7 @@ class LetterBGData {
         href += index % 3
         break
       case 'cloud':
+      case 'triangle-flag':
         href += index % 4
         break
       case 'penguin':
@@ -229,6 +249,7 @@ class LetterBGData {
       case 'bread':
       case 'cat':
       case 'baby':
+      case 'rectangle-flag':
         href += index % 5
         break
       // LetterBg that has head/tail.
@@ -238,7 +259,7 @@ class LetterBGData {
       case 'paper-tap-grid':
         href += head ? '-head' : tail ? '-tail' : '0'
         break
-      // text-book, vintage-flower-custom, bear-custom, cat-custom, rabbit-custom, dog-custom
+      // text-book, *-custom
       default:
     }
     return { href, color }
@@ -412,6 +433,28 @@ class LetterBGData {
         size: 150,
         color: '#D3DDAC',
       },
+      'triangle-flag': {
+        ...letterBgDefault,
+        yOffset200: 60,
+        size: 225,
+      },
+      'triangle-flag-custom': {
+        ...letterBgDefault,
+        yOffset200: 50,
+        size: 200,
+        color: '#99D3D3',
+      },
+      'rectangle-flag': {
+        ...letterBgDefault,
+        yOffset200: 20,
+        size: 155,
+      },
+      'rectangle-flag-custom': {
+        ...letterBgDefault,
+        yOffset200: 20,
+        size: 155,
+        color: '#FFBBD0'
+      },
     }
   }
 
@@ -515,6 +558,18 @@ class LetterBGData {
       },
       'paper-tap-grid': {
         lineHeight: 2.4, fontSpacing: 240
+      },
+      'triangle-flag': {
+        lineHeight: 1.96, fontSpacing: 2000
+      },
+      'triangle-flag-custom': {
+        lineHeight: 1.96, fontSpacing: 1650
+      },
+      'rectangle-flag': {
+        lineHeight: 1.96, fontSpacing: 1010
+      },
+      'rectangle-flag-custom': {
+        lineHeight: 1.96, fontSpacing: 1010
       },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 

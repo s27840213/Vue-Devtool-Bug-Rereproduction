@@ -32,14 +32,15 @@ div(class="editor-view" v-touch
 </template>
 
 <script lang="ts">
+import PageNumber from '@/components/editor/PageNumber.vue'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
-import PageNumber from '@/components/editor/PageNumber.vue'
 import { ICoordinate } from '@/interfaces/frame'
 import { ILayer } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import { ILayerInfo } from '@/store/types'
+import SwipeDetector from '@/utils/SwipeDetector'
 import backgroundUtils from '@/utils/backgroundUtils'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -48,12 +49,12 @@ import formatUtils from '@/utils/formatUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
+import logUtils from '@/utils/logUtils'
 import mathUtils from '@/utils/mathUtils'
 import modalUtils from '@/utils/modalUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import SwipeDetector from '@/utils/SwipeDetector'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { AnyTouchEvent } from 'any-touch'
@@ -110,6 +111,7 @@ export default defineComponent({
     // check and auto resize pages oversized on design loaded
     const unwatchPages = this.$watch('isGettingDesign', (newVal) => {
       if (!newVal) {
+        logUtils.setLog('mobileEditorView created and got design')
         if (this.pages.length > 0 && pageUtils.fixPageSize()) {
           pageUtils.fitPage()
           uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)

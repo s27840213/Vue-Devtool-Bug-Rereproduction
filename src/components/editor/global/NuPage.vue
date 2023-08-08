@@ -1,6 +1,8 @@
 <!-- eslint-disable vue/use-v-on-exact -->
 <template lang="pug">
-div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
+div(ref="page-wrapper" :id="`nu-page-wrapper_${pageIndex}`"
+  :style="pageRootStyles"
+  :class="{ 'click-disabled': isAnyBackgroundImageControl }")
   div(class="nu-page full-size"
       :id="`nu-page_${pageIndex}`"
       :style="pageStyles"
@@ -234,6 +236,10 @@ export default defineComponent({
     minContentScaleRatio: {
       type: Number,
       default: 0
+    },
+    isAnyBackgroundImageControl: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['stepChange'],
@@ -577,6 +583,7 @@ export default defineComponent({
       }
       GroupUtils.deselect()
       const page = generalUtils.deepCopy(this.pageState.config) as IPage
+      this.$store.commit('SET_currSelectedInfo', { pageIndex: this.pageIndex + 1 })
       page.layers.forEach(l => {
         l.id = generalUtils.generateRandomString(8)
         if (l.type === LayerType.frame) {

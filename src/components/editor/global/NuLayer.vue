@@ -219,7 +219,6 @@ export default defineComponent({
       }
     }
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
-      body.addEventListener(this.$isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
       body.addEventListener(this.$isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
   },
@@ -576,12 +575,7 @@ export default defineComponent({
       }
     },
     onFrameMouseMove(e: MouseEvent | PointerEvent) {
-      if (!this.hasHandledFrameMouseEnter && this.isOk2HandleFrameMouseEnter) {
-        this.hasHandledFrameMouseEnter = true
-        this.handleFrameMouseEnter(e)
-      }
-    },
-    onFrameMouseEnter(e: MouseEvent | PointerEvent) {
+      console.log('this.hasHandledFrameMouseEnter move', !this.hasHandledFrameMouseEnter, this.isOk2HandleFrameMouseEnter)
       if (!this.hasHandledFrameMouseEnter && this.isOk2HandleFrameMouseEnter) {
         this.hasHandledFrameMouseEnter = true
         this.handleFrameMouseEnter(e)
@@ -590,15 +584,21 @@ export default defineComponent({
     handleFrameMouseEnter(e: MouseEvent | PointerEvent) {
       e.stopPropagation()
       const currLayer = layerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
-        const { srcObj, panelPreviewSrc } = this.config
+      // if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
+      if (currLayer && currLayer.type === LayerType.image && this.isMoving) {
+        let { srcObj, panelPreviewSrc, previewSrc } = this.config
         const clips = generalUtils.deepCopy(this.primaryLayer?.clips) as Array<IImage>
         const clip = clips[this.subLayerIndex]
+
+        if (!panelPreviewSrc) {
+          panelPreviewSrc = previewSrc
+        }
 
         Object.assign(this.imgBuff, {
           srcObj: {
             ...srcObj
           },
+          previewSrc,
           panelPreviewSrc,
           styles: {
             imgX: clip.styles.imgX,
@@ -611,7 +611,8 @@ export default defineComponent({
 
         frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, {
           srcObj: { ...currLayer.srcObj },
-          ...((currLayer as IImage).panelPreviewSrc && { panelPreviewSrc: (currLayer as IImage).panelPreviewSrc as string })
+          ...((currLayer as IImage).panelPreviewSrc && { panelPreviewSrc: (currLayer as IImage).panelPreviewSrc as string }),
+          ...((currLayer as IImage).previewSrc && { previewSrc: (currLayer as IImage).previewSrc as string })
         })
         layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { opacity: 35 })
         layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: true })
