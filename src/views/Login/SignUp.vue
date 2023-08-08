@@ -152,6 +152,7 @@ import store from '@/store'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
+import logUtils from '@/utils/logUtils'
 import loginUtils from '@/utils/loginUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -207,7 +208,7 @@ export default defineComponent({
         this.isLoading = true
         if (this.$route.query.error) {
           this.isLoading = false
-          console.log(`fb login error, reason: ${this.$route.query.error_reason}`)
+          logUtils.setLogAndConsoleLog(`fb login error, reason: ${this.$route.query.error_reason}`)
           this.$router.push({ query: {} })
         } else {
           const code = this.$route.query.code as string
@@ -320,6 +321,7 @@ export default defineComponent({
         const { data } = await userApis.fbLogin(code, redirectUri, this.currLocale)
         this.handleLoginResult(data, 'Facebook', 'fb', redirect)
       } catch (error) {
+        logUtils.setLogForError(error as Error)
       }
     },
     async googleLogin(code: string, redirectUri: string, redirect: string) {
@@ -328,6 +330,7 @@ export default defineComponent({
         const { data } = await userApis.googleLogin(code, redirectUri, this.currLocale)
         this.handleLoginResult(data, 'Google', 'google', redirect)
       } catch (error) {
+        logUtils.setLogForError(error as Error)
       }
     },
     handleLoginResult(data: { data: ILoginResult, flag: number, msg?: string }, gtmTitle: 'Facebook' | 'Google' | 'Vivipic', loginType: string, redirect?: string) {
@@ -343,7 +346,7 @@ export default defineComponent({
         store.dispatch('user/loginSetup', { data: data })
         this.$router.push(this.redirect || redirect || '/')
       } else {
-        console.log(`${loginType} login failed`)
+        logUtils.setLogAndConsoleLog(`${loginType} login failed`)
         notify({ group: 'error', text: data.msg })
       }
       this.isLoading = false
@@ -366,6 +369,7 @@ export default defineComponent({
       this.isLoading = false
     },
     onCloseClicked() {
+      logUtils.setLogAndConsoleLog('Click close icon')
       this.$router.push({ name: 'Home' })
     },
     async onSignUpClicked() {
@@ -394,6 +398,7 @@ export default defineComponent({
       this.isLoading = false
     },
     async onResendClicked() {
+      logUtils.setLogAndConsoleLog('Resend Vcode')
       this.isLoading = true
       if (this.email.length === 0) {
         this.currentPageIndex = 0
@@ -444,6 +449,7 @@ export default defineComponent({
       const parameter = {
         account: this.email,
         vcode: this.vcode,
+        locale: this.currLocale,
         type: 3
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
@@ -453,17 +459,20 @@ export default defineComponent({
         } else {
           picWVUtils.sendAdEvent('register')
         }
+        logUtils.setLogAndConsoleLog('Verify Vcode and register success')
         gtmUtils.signUp('Vivipic')
         await store.dispatch('user/login', { token: data.token })
         this.$router.push(this.redirect || '/')
         this.currentPageIndex = 0
       } else {
+        logUtils.setLogAndConsoleLog(`Verify Vcode failed (msg: ${data.msg})`)
         this.vcode = ''
         this.vcodeErrorMessage = data.msg || this.$t('NN0242')
       }
       this.isLoading = false
     },
     async onFacebookClicked() {
+      logUtils.setLogAndConsoleLog('Click Facebook login')
       if (picWVUtils.inBrowserMode) {
         loginUtils.onFacebookClicked(this.redirect)
       } else {
@@ -474,6 +483,7 @@ export default defineComponent({
       }
     },
     async onGoogleClicked() {
+      logUtils.setLogAndConsoleLog('Click Google login')
       if (picWVUtils.inBrowserMode) {
         loginUtils.onGoogleClicked(this.redirect)
       } else {

@@ -141,7 +141,7 @@ export default defineComponent({
     }
   },
   async created() {
-    this.src = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+    this.src = (this.config.panelPreviewSrc || this.config.previewSrc) ?? imageUtils.getSrc(this.config, this.getPreviewSize())
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
@@ -190,7 +190,9 @@ export default defineComponent({
       this.handleDimensionUpdate(newVal, oldVal)
     },
     'config.srcObj': {
-      handler: function () {
+      handler: function (val, oldVal) {
+        if (generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)) return
+
         this.shadowBuff.canvasShadowImg = undefined
         if (this.forRender) {
           return
@@ -208,7 +210,9 @@ export default defineComponent({
       deep: true
     },
     'config.styles.shadow.effects': {
-      handler(val) {
+      handler: function (val, oldVal) {
+        if (generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)) return
+
         const shadow = (this.config as IImage).styles.shadow
         if (shadow.old && shadow.old.currentEffect !== shadow.currentEffect) {
           return
@@ -220,9 +224,7 @@ export default defineComponent({
       deep: true
     },
     'config.styles.shadow.currentEffect'() {
-      if (this.forRender || this.shadow().srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) {
-        return
-      }
+      if (this.forRender || this.shadow().srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) return
       if (this.$refs.canvas) {
         this.handleNewShadowEffect()
       } else {
@@ -279,7 +281,8 @@ export default defineComponent({
       }
     },
     'config.styles.shadow.srcObj': {
-      handler: function (val) {
+      handler: function (val, oldVal) {
+        if (generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)) return
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
         }
@@ -561,18 +564,21 @@ export default defineComponent({
       logUtils.setLog(log)
     },
     async previewAsLoading() {
-      if (this.config.previewSrc) {
-        return
-      }
+      // if (this.config.previewSrc) {
+      //   return
+      // }
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
-      const previewSrc = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+      const previewSrc = (this.config.panelPreviewSrc || this.config.previewSrc) ?? imageUtils.getSrc(this.config, this.getPreviewSize())
       imageUtils.imgLoadHandler(previewSrc, (img) => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
       }, { crossOrigin: true })
 
+      // if (this.config.previewSrc) {
+      //   return
+      // }
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       return new Promise<void>((resolve, reject) => {

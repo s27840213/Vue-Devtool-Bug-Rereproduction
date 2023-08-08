@@ -101,13 +101,14 @@ export default {
       locale
     }
   }),
-  verifyVcode: (account: string, vcode: string, token: string, type: number): AxiosPromise => axios('/verify-vcode', {
+  verifyVcode: (account: string, vcode: string, token: string, type: number, locale: string): AxiosPromise => axios('/verify-vcode', {
     method: 'POST',
     data: {
       account,
       vcode,
       token,
       type,
+      locale,
       campaign: localStorage.getItem('campaign') || undefined
     }
   }),

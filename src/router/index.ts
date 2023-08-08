@@ -10,6 +10,7 @@ import logUtils from '@/utils/logUtils'
 import overlayUtils from '@/utils/overlayUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import textFillUtils from '@/utils/textFillUtils'
+import Editor from '@/views/Editor.vue'
 import Home from '@/views/Home.vue'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
@@ -44,7 +45,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'editor',
     name: 'Editor',
-    component: () => import('@/views/Editor.vue'),
+    component: Editor,
     beforeEnter: editorRouteHandler
   },
   // {
