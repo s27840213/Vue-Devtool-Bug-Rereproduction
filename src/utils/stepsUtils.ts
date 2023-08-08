@@ -270,6 +270,7 @@ class StepsUtils {
         uploadUtils.uploadDesign()
       }
     }
+    // console.warn(generalUtils.deepCopy(this.steps))
   }
 
   async asyncRecord() {
@@ -310,6 +311,7 @@ class StepsUtils {
         }
       }
     }
+    // console.warn(generalUtils.deepCopy(this.steps))
   }
 
   async undo() {
@@ -324,6 +326,7 @@ class StepsUtils {
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
+    // console.warn(generalUtils.deepCopy(this.steps[this.currStep]))
     const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
     let layers: (IShape | IText | IImage | IGroup | IFrame)[]
     if (pages[pageIndex]) {
@@ -340,10 +343,17 @@ class StepsUtils {
     } else {
       layers = []
     }
-    GroupUtils.set(pageIndex, index, layers)
+
     if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
+      store.commit('SET_currActivePageIndex', pageIndex)
       pageUtils.scrollIntoPage(pageIndex)
+    } else if (pageIndex === -1) {
+      // If the pageIndex be reset e.g. deleting the background-Img,
+      // however, the activePageIndex should remain the same for a better UX
+      store.commit('SET_currActivePageIndex', activePageIndex)
     }
+    GroupUtils.set(pageIndex, index, layers)
+
     if (this.currStep > 0) {
       nextTick(() => {
         if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
@@ -355,7 +365,6 @@ class StepsUtils {
     if (uploadUtils.isLogin) {
       uploadUtils.uploadDesign()
     }
-    store.commit('SET_currActivePageIndex', activePageIndex)
   }
 
   delayedRecord(key: string, interval = 300) {
@@ -396,10 +405,15 @@ class StepsUtils {
     } else {
       layers = []
     }
-    GroupUtils.set(pageIndex, index, layers)
+
     if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
+      store.commit('SET_currActivePageIndex', pageIndex)
       pageUtils.scrollIntoPage(pageIndex)
+    } else if (pageIndex === -1) {
+      store.commit('SET_currActivePageIndex', activePageIndex)
     }
+    GroupUtils.set(pageIndex, index, layers)
+
     nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
         TextPropUtils.updateTextPropsState()
@@ -409,7 +423,6 @@ class StepsUtils {
     if (uploadUtils.isLogin) {
       uploadUtils.uploadDesign()
     }
-    store.commit('SET_currActivePageIndex', activePageIndex)
   }
 
   updateHead(pageIndex: number, layerIndex: number, props: any, subLayerIdx = -1) {
