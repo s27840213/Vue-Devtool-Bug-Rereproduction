@@ -587,7 +587,7 @@ class UploadUtils {
     }
     logUtils.setLog(`Query Info:
       type: ${type},
-      designId: ${designId}
+      designId: ${designId},
       teamId: ${teamId},
       needAppendQuery: ${!type || !designId || !teamId}`)
 
@@ -609,10 +609,11 @@ class UploadUtils {
     // const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
     logUtils.setLog(`Upload Design:
-      Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'}
+      Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'},
       AssetId: ${assetId},
-      TeamId: ${teamId}
-      PageNum: ${pages.length}`)
+      TeamId: ${teamId},
+      PageNum: ${pages.length},
+      SessionId: ${store.state.sessionId}`)
 
     const pagesJSON = pages.map((page: IPage) => {
       const newPage = this.default(page, false)

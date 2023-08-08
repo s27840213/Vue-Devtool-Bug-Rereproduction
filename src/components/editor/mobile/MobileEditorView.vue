@@ -46,6 +46,7 @@ import formatUtils from '@/utils/formatUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
+import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -99,6 +100,7 @@ export default defineComponent({
     // check and auto resize pages oversized on design loaded
     const unwatchPages = this.$watch('isGettingDesign', (newVal) => {
       if (!newVal) {
+        logUtils.setLog('mobileEditorView created and got design')
         if (this.pages.length > 0 && pageUtils.fixPageSize()) {
           pageUtils.fitPage()
           uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
