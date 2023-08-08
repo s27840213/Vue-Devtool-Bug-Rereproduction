@@ -191,7 +191,7 @@ export default defineComponent({
     },
     'config.srcObj': {
       handler: function (val, oldVal) {
-        if (generalUtils.isSameObjVal(val, oldVal)) return
+        if (generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)) return
 
         this.shadowBuff.canvasShadowImg = undefined
         if (this.forRender) {
@@ -210,8 +210,8 @@ export default defineComponent({
       deep: true
     },
     'config.styles.shadow.effects': {
-      handler(val, oldVal) {
-        if (generalUtils.isSameObjVal(val, oldVal)) return
+      handler: function (val, oldVal) {
+        if (generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)) return
 
         const shadow = (this.config as IImage).styles.shadow
         if (shadow.old && shadow.old.currentEffect !== shadow.currentEffect) {
@@ -282,7 +282,7 @@ export default defineComponent({
     },
     'config.styles.shadow.srcObj': {
       handler: function (val, oldVal) {
-        if (generalUtils.isSameObjVal(val, oldVal)) return
+        if (generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)) return
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
         }

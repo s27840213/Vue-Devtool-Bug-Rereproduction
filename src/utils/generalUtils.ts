@@ -412,6 +412,12 @@ class GeneralUtils {
     }
   }
 
+  isWatcherTriggerByUndoRedo(v1: any, v2: any): boolean {
+    // if the object props val is the same and the reference address is different,
+    // means the watcher is triggered by undo/redo
+    return v1 !== v2 && this.isSameObjVal(v1, v2)
+  }
+
   isObject(obj: any): boolean {
     return obj === Object(obj)
   }
