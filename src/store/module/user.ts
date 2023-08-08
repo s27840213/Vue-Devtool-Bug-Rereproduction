@@ -454,9 +454,9 @@ const actions: ActionTree<IUserModule, unknown> = {
     }
   },
 
-  async verifyVcode({ commit }, { account, vcode, token, type }) {
+  async verifyVcode({ commit }, { account, vcode, token, type, locale }) {
     try {
-      const { data } = await userApis.verifyVcode(account, vcode, token, type)
+      const { data } = await userApis.verifyVcode(account, vcode, token, type, locale)
       return Promise.resolve(data)
     } catch (error) {
       logUtils.setLogForError(error as Error)

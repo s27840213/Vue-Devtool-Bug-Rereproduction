@@ -209,6 +209,9 @@ export default defineComponent({
         return false
       }
     },
+    currLocale(): string {
+      return localeUtils.currLocale()
+    },
   },
   methods: {
     ...mapGetters({
@@ -263,6 +266,7 @@ export default defineComponent({
       const parameter = {
         token: this.token,
         vcode: this.vcode,
+        locale: this.currLocale,
         type: 1
       }
       const data = await store.dispatch('user/verifyVcode', parameter)

@@ -449,6 +449,7 @@ export default defineComponent({
       const parameter = {
         account: this.email,
         vcode: this.vcode,
+        locale: this.currLocale,
         type: 3
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
