@@ -105,6 +105,7 @@ div(class="popup-verify"
 import userApis from '@/apis/user'
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
+import logUtils from '@/utils/logUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -209,15 +210,13 @@ export default defineComponent({
         return false
       }
     },
-    currLocale(): string {
-      return localeUtils.currLocale()
-    },
   },
   methods: {
     ...mapGetters({
       isLogin: 'user/isLogin'
     }),
     async onResendClicked() {
+      logUtils.setLogAndConsoleLog('Resend Vcode')
       this.isLoading = true
       if (!this.account || this.account.length === 0) {
         this.isLoading = false
@@ -266,20 +265,22 @@ export default defineComponent({
       const parameter = {
         token: this.token,
         vcode: this.vcode,
-        locale: this.currLocale,
+        locale: localeUtils.currLocale(),
         type: 1
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       this.vcode = ''
       if (data.flag === 0) {
+        logUtils.setLogAndConsoleLog('Verify Vcode success')
         this.$emit('isVerified')
       } else {
+        logUtils.setLogAndConsoleLog(`Verify Vcode failed (msg: ${data.msg})`)
         this.vcodeErrorMessage = data.msg
-        console.log(data.msg)
       }
       this.isLoading = false
     },
     async onCheckPasswordClicked() {
+      logUtils.setLogAndConsoleLog('Check password')
       this.isCheckPasswordClicked = true
       this.isLoading = true
       if (!this.oldPassValid) {
@@ -294,12 +295,13 @@ export default defineComponent({
       }
       const data = await store.dispatch('user/updateUser', parameter)
       if (data.flag === 0) {
+        logUtils.setLogAndConsoleLog('Check password success')
         this.isConfirmClicked = false
         this.currentPage = 'newPass'
       } else {
+        logUtils.setLogAndConsoleLog(`Check password failed (msg: ${data.msg})`)
         this.oldPass = ''
         this.oldPassErrorMessage = data.msg || this.$t('NN0242') as string
-        console.log(data.msg)
       }
       this.isLoading = false
     },
@@ -308,6 +310,7 @@ export default defineComponent({
       this.isConfirmClicked = false
     },
     async onConfirmPasswordClicked() {
+      logUtils.setLogAndConsoleLog('Confirm password')
       this.isConfirmClicked = true
       this.isResponseError = false
       if (!this.resetPasswordValid) {
@@ -321,18 +324,20 @@ export default defineComponent({
       }
       const data = await store.dispatch('user/updateUser', parameter)
       if (data.flag === 0) {
+        logUtils.setLogAndConsoleLog('Confirm password success')
         store.commit('user/SET_STATE', {
           upassUpdate: data.data.upass_update
         })
         this.closePopup()
       } else {
+        logUtils.setLogAndConsoleLog(`Confirm password failed (msg: ${data.msg})`)
         this.isResponseError = true
         this.passwordHint = data.msg || this.$t('NN0242') as string
-        console.log(data.msg)
       }
       this.isLoading = false
     },
     onForgotClicked() {
+      logUtils.setLogAndConsoleLog('Click forgot password')
       this.$router.push({
         name: 'Login',
         query: {

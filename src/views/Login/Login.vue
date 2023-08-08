@@ -267,7 +267,7 @@ export default defineComponent({
         this.isLoading = true
         if (this.$route.query.error) {
           this.isLoading = false
-          console.log(`fb login error, reason: ${this.$route.query.error_reason}`)
+          logUtils.setLogAndConsoleLog(`fb login error, reason: ${this.$route.query.error_reason}`)
           this.$router.push({ query: {} })
         } else {
           const code = this.$route.query.code as string
