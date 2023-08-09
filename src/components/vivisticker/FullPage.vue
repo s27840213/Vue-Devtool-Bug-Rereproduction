@@ -7,8 +7,10 @@ div(ref="main" class="full-page relative")
         :src="fullPageConfig.params.video"
         :poster="fullPageConfig.params.thumbnail"
         @ended="handleEnded"
-        @canplay="handleVideoLoaded")
-  payment(v-if="fullPageConfig.type === 'payment'" :target="fullPageConfig.params.target")
+        @canplay="sendAppLoaded")
+  payment(v-if="fullPageConfig.type === 'payment'"
+          :target="fullPageConfig.params.target"
+          @canShow="sendAppLoaded")
   welcome(v-if="fullPageConfig.type === 'welcome'")
   div(v-if="showCloseButton"
     class="full-page__close"
@@ -84,7 +86,7 @@ export default defineComponent({
     handleClose() {
       this.clearFullPageConfig()
     },
-    handleVideoLoaded() {
+    sendAppLoaded() {
       vivistickerUtils.sendAppLoaded()
     },
     handleEnded() {

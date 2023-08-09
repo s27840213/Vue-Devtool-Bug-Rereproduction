@@ -29,6 +29,8 @@ div(class="vivisticker" :style="copyingStyles()")
     :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
     :inAllPagesMode="false")
   div(id="vivisticker__mobile-panel-bottom")
+  div(v-if="pushModalInfo && isShowPushModal" class="vivisticker__push-modal-container" :style="pushModalInfo?.backdropStyle")
+    modal-card(v-model:show="isShowPushModal" :initModalInfo="pushModalInfo")
   transition(name="slide-left")
     component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
   transition(name="panel-up")
@@ -39,6 +41,7 @@ div(class="vivisticker" :style="copyingStyles()")
 </template>
 
 <script lang="ts">
+import ModalCard from '@/components/modal/ModalCard.vue'
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
 import FullPage from '@/components/vivisticker/FullPage.vue'
 import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
@@ -52,11 +55,11 @@ import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
+import { IModalInfo } from '@/interfaces/modal'
 import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import logUtils from '@/utils/logUtils'
-import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
@@ -81,7 +84,8 @@ export default defineComponent({
     FullPage,
     SlideUserSettings,
     ShareTemplate,
-    LoadingOverlay
+    LoadingOverlay,
+    ModalCard
   },
   data() {
     return {
@@ -94,18 +98,21 @@ export default defineComponent({
       footerTabsRef: undefined as unknown as HTMLElement,
       mounted: false,
       isMobilePanelBottom: false,
+      pushModalInfo: undefined as IModalInfo | undefined,
+      isShowPushModal: true
     }
   },
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
     textUtils.loadDefaultFonts()
     vivistickerUtils.registerCallbacks('vvstk')
-    if (this.userInfo.isFirstOpen) {
-      if (this.$i18n.locale === 'us') {
-        vivistickerUtils.openFullPageVideo('tutorial1', { delayedClose: 5000 })
-      } else {
-        this.setShowTutorial(true)
+    if (!vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0')) vivistickerUtils.showUpdateModal(true)
+    else {
+      if (this.userInfo.isFirstOpen) {
+        vivistickerUtils.openPayment()
+        if (this.$i18n.locale !== 'us') this.setShowTutorial(true)
       }
+      this.getPushModalInfo()
     }
   },
   async mounted() {
@@ -150,65 +157,6 @@ export default defineComponent({
       lastTouchEnd = now
     }, false)
     document.addEventListener('scroll', this.handleScroll)
-
-    // parse modal info
-    const exp = !vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0') ? 'exp_' : ''
-    let locale = this.userInfo.locale
-    if (!['us', 'tw', 'jp'].includes(locale)) {
-      locale = 'us'
-    }
-    const prefix = exp + locale + '_'
-    const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
-      ([k, v]) => {
-        if (k.startsWith(prefix)) k = k.replace(prefix, '')
-        return [k, v as string]
-      })
-    )
-
-    // show popup
-    const lastModalMsg = await vivistickerUtils.getState('lastModalMsg')
-    const shown = (exp || lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
-    const btn_txt = modalInfo.btn_txt
-    if (btn_txt && !shown) {
-      const options = {
-        imgSrc: modalInfo.img_url,
-        noClose: !!exp,
-        noCloseIcon: true,
-        backdropStyle: {
-          backgroundColor: 'rgba(24,25,31,0.3)'
-        },
-        cardStyle: {
-          backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(255,255,255,0.9)'
-        }
-      }
-      modalUtils.setModalInfo(
-        modalInfo.title,
-        modalInfo.msg,
-        {
-          msg: btn_txt,
-          class: 'btn-black-mid',
-          style: {
-            color: '#F8F8F8'
-          },
-          action: () => {
-            const url = modalInfo.btn_url
-            if (url) { window.open(url, '_blank') }
-          }
-        },
-        {
-          msg: modalInfo.btn2_txt || '',
-          class: 'btn-light-mid',
-          style: {
-            border: 'none',
-            color: '#474A57',
-            backgroundColor: '#D3D3D3'
-          }
-        },
-        options
-      )
-      if (!exp) await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
-    }
 
     const debugMode = process.env.NODE_ENV === 'development' ? true : (await vivistickerUtils.getState('debugMode'))?.value ?? false
     this.setDebugMode(debugMode)
@@ -411,6 +359,65 @@ export default defineComponent({
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)
+    },
+    async getPushModalInfo() {
+      // parse modal info
+      let locale = this.userInfo.locale
+      if (!['us', 'tw', 'jp'].includes(locale)) {
+        locale = 'us'
+      }
+      const prefix = locale + '_'
+      const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
+        ([k, v]) => {
+          if (k.startsWith(prefix)) k = k.replace(prefix, '')
+          return [k, v as string]
+        })
+      )
+
+      // show popup
+      const lastModalMsg = await vivistickerUtils.getState('lastModalMsg')
+      const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
+      const btn_txt = modalInfo.btn_txt
+      if (!btn_txt || shown) return
+
+      const options = {
+        imgSrc: modalInfo.img_url,
+        noClose: false,
+        noCloseIcon: true,
+        backdropStyle: {},
+        cardStyle: {
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255,255,255,0.9)'
+        },
+        checkboxText: '',
+        checked: false,
+        onCheckedChange: (checked: boolean) => { console.log(checked) }
+      }
+      this.pushModalInfo = {
+        title: modalInfo.title,
+        content: [modalInfo.msg],
+        confirmButton: {
+          msg: btn_txt,
+          class: 'btn-black-mid',
+          style: {
+            color: '#F8F8F8'
+          },
+          action: () => {
+            const url = modalInfo.btn_url
+            if (url) { window.open(url, '_blank') }
+          }
+        },
+        cancelButton: {
+          msg: modalInfo.btn2_txt || '',
+          class: 'btn-light-mid',
+          style: {
+            border: 'none',
+            color: '#474A57',
+            backgroundColor: '#D3D3D3'
+          }
+        },
+        ...options
+      }
     }
   }
 })
@@ -452,6 +459,19 @@ export default defineComponent({
     height: 100%;
     width: 100%;
     overflow: hidden;
+    z-index: setZindex("popup");
+  }
+
+  &__push-modal-container {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: setColor(gray-1, 0.3);
     z-index: setZindex("popup");
   }
 }

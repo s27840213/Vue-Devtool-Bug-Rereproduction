@@ -1543,7 +1543,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
-          this.openFullPageVideo('iOS', { delayedClose: 5000 })
+          this.openFullPageVideo(i18n.global.locale === 'us' ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
           modalUtils.clearModalInfo()
         }
       }, undefined, {
@@ -1553,7 +1553,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  showUpdateModal() {
+  showUpdateModal(force = false) {
     let locale = this.getUserInfoFromStore().locale
     if (!['us', 'tw', 'jp'].includes(locale)) {
       locale = 'us'
@@ -1567,8 +1567,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     )
     const options = {
       imgSrc: modalInfo.img_url,
-      noClose: false,
-      noCloseIcon: false,
+      noClose: force,
+      noCloseIcon: force,
       backdropStyle: {
         backgroundColor: 'rgba(24,25,31,0.3)'
       },
