@@ -18,7 +18,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       draggable="false"
       :src="shadowSrc"
       @load='onLoadShadowImg($event)'
-      @error="onError")
+      @error="onShadowError()")
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
       :style="imgStyles()")
@@ -75,6 +75,7 @@ import { IPage } from '@/interfaces/page'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import { IBrowserInfo } from '@/store/module/user'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -157,6 +158,41 @@ export default defineComponent({
     if (this.isBgImgControl) return
     this.src = this.config.previewSrc === undefined ? this.src : this.config.previewSrc
     this.mountShadowRedrawEvt()
+
+    const config = this.config as IImage
+    /**
+     * bcz bg removing saving place has benn changed
+     * the below code is used to update old version design to new version
+     */
+    //  const srcObj = {
+    //             type: 'ios',
+    //             userId: '',
+    //             assetId: path,
+    //           }
+    const { assetId, type } = config.srcObj
+
+    if (vivistickerUtils.checkVersion('1.35')) {
+      if (type === 'ios' && (assetId as string).includes('bgRemove')) {
+        const imageName = (assetId as string).split('/')[1]
+        const src = imageUtils.getSrc(config.srcObj)
+
+        generalUtils.toDataURL(src, (dataUrl) => {
+          bgRemoveUtils.moveOldBgRemoveImages(dataUrl, (path) => {
+            vivistickerUtils.deleteImage('bgRemove', imageName, 'png')
+
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              srcObj: {
+                type: 'ios',
+                userId: '',
+                assetId: path
+              },
+            })
+
+            vivistickerUtils.saveAsMyDesign()
+          })
+        })
+      }
+    }
   },
   beforeUnmount() {
     if (!this.isBgImgControl) {
@@ -479,6 +515,16 @@ export default defineComponent({
     getErrorSrcIdentifier(config: IImage) {
       const { srcObj, styles } = config
       return srcObj.type + srcObj.assetId + srcObj.userId + (styles.adjust.blur > 0 ? '_blur' : '')
+    },
+    onShadowError() {
+      const shadow = this.config.styles.shadow
+      if (shadow.srcObj.type === 'ios') {
+        const layerData = {
+          config: this.config,
+          layerInfo: this.layerInfo()
+        }
+        imageShadowPanelUtils.handleShadowUpload(layerData, true)
+      }
     },
     onError() {
       if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {

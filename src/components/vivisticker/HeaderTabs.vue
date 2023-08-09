@@ -91,6 +91,14 @@ export default defineComponent({
   components: {
     LinkOrText
   },
+  data() {
+    return {
+      bgRemoveSrcInfo: {
+        key: '',
+        id: '',
+      }
+    }
+  },
   computed: {
     ...mapState('templates', {
       templatesIgLayout: 'igLayout'
@@ -131,6 +139,7 @@ export default defineComponent({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       isProcessing: 'bgRemove/getIsProcessing',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
+      editingDesignId: 'vivisticker/getEditingDesignId'
     }),
     templateHeaderTab() {
       return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
@@ -378,7 +387,9 @@ export default defineComponent({
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInEffectEditingMode: 'bgRemove/SET_inEffectEditingMode',
       deletePreviewSrc: 'DELETE_previewSrc',
-      setIsInBgRemoveSection: 'vivisticker/SET_isInBgRemoveSection'
+      setIsInBgRemoveSection: 'vivisticker/SET_isInBgRemoveSection',
+      setEditorType: 'vivisticker/SET_editorType',
+      setEditingDesignId: 'vivisticker/SET_editingDesignId',
     }),
     resetTemplatesSearch(params = {}) {
       this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
@@ -489,11 +500,25 @@ export default defineComponent({
                   vivistickerUtils.endEditing()
                   this.isSavingAsMyDesign = false
                 })
+
+                // restore the stored id and key info if saving design, otherwise we may ocationnaly delete wrong asset
+                const { id, key } = this.bgRemoveSrcInfo
+                if (id && key) {
+                  this.bgRemoveSrcInfo.id = ''
+                  this.bgRemoveSrcInfo.key = ''
+                }
               }
             },
             {
               msg: `${this.$t('STK0011')}`,
-              action: () => { vivistickerUtils.endEditing() },
+              action: () => {
+                imageShadowUtils.iosImgDelHandlerAsNoSave()
+                vivistickerUtils.endEditing()
+                const { id, key } = this.bgRemoveSrcInfo
+                if (id && key) {
+                  vivistickerUtils.deleteAsset(key, id)
+                }
+              },
               style: {
                 color: '#474A57',
                 backgroundColor: '#D9DBE1'
@@ -625,6 +650,121 @@ export default defineComponent({
       })
     },
     handleBgRemoveNext() {
+      if (!vivistickerUtils.checkVersion('1.35')) {
+        this.handleBgRemoveNextOldVer()
+        return
+      }
+
+      if (!this.isInEditor) {
+        const designId = generalUtils.generateAssetId()
+        this.setEditorType('image')
+        vivistickerUtils.startEditing(
+          'image',
+          { plan: 0, assetId: '' },
+          async () => {
+            bgRemoveUtils.setInBgRemoveMode(false)
+            editorUtils.setShowMobilePanel(false)
+            this.setInEffectEditingMode(true)
+            return await bgRemoveUtils.saveToIOS(designId, (data, path, aspectRatio) => {
+              const srcObj = {
+                type: 'ios',
+                userId: '',
+                assetId: path,
+              }
+              const [key, id, ...res] = path.split('/')
+
+              this.bgRemoveSrcInfo = {
+                key,
+                id
+              }
+              this.addImage(srcObj, aspectRatio)
+              imageShadowUtils.updateEffectProps({
+                pageIndex: layerUtils.pageIndex,
+                layerIndex: layerUtils.layerIndex,
+                subLayerIdx: -1
+              }, { isTransparent: true })
+              editorUtils.setCurrActivePanel('photo-shadow')
+              return srcObj
+            })
+          },
+          (srcObj: SrcObj) => {
+            setTimeout(() => {
+              imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj), (img) => {
+                const maxsize = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
+                imageShadowUtils.updateEffectProps({
+                  pageIndex: layerUtils.pageIndex,
+                  layerIndex: layerUtils.layerIndex,
+                  subLayerIdx: -1
+                }, {
+                  maxsize,
+                  middsize: Math.max(img.naturalWidth, img.naturalHeight)
+                })
+                imageShadowUtils.setEffect(ShadowEffectType.frame, {
+                  frame: {
+                    spread: 30,
+                    radius: 0,
+                    opacity: 100
+                  },
+                  frameColor: '#FECD56',
+                }, undefined)
+              })
+            }, 0)
+          },
+          designId
+        )
+      } else {
+        const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
+        const targetLayerStyle = layers[0].styles as IImageStyle
+        bgRemoveUtils.setInBgRemoveMode(false)
+        editorUtils.setShowMobilePanel(false)
+        const designId = this.editingDesignId ? this.editingDesignId : generalUtils.generateAssetId()
+
+        // bcz the bg removing will save the image to document first before we save designs, so we need to set the editingDesignId to make the saved json
+        // to save to the same directory, or it will cause disk leak
+
+        this.setEditingDesignId(designId)
+        bgRemoveUtils.saveToIOS(designId, async (data, path, aspectRatio, trimmedCanvasInfo) => {
+          const srcObj = {
+            type: 'ios',
+            userId: '',
+            assetId: path,
+          }
+
+          const [key, id, ...res] = path.split('/')
+
+          this.bgRemoveSrcInfo = {
+            key,
+            id
+          }
+
+          const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+
+          const { width, height } = targetLayerStyle
+
+          const newImageWidth = width * remainingWidthPercentage
+          const newImageHeight = height * remainingHeightPercentage
+          layerUtils.updateLayerStyles(pageIndex, index, {
+            x: targetLayerStyle.x + xShift,
+            y: targetLayerStyle.y + yShift,
+            width: newImageWidth,
+            height: newImageHeight,
+            imgWidth: newImageWidth,
+            imgHeight: newImageHeight,
+            imgX: 0,
+            imgY: 0
+          })
+
+          layerUtils.updateLayerProps(pageIndex, index, {
+            srcObj,
+          })
+
+          this.setIsInBgRemoveSection(false)
+          return srcObj
+        }, targetLayerStyle)
+      }
+    },
+    // this is used for old version(< 1.35)
+    handleBgRemoveNextOldVer() {
       if (!this.isInEditor) {
         vivistickerUtils.startEditing(
           'image',
@@ -633,7 +773,7 @@ export default defineComponent({
             bgRemoveUtils.setInBgRemoveMode(false)
             editorUtils.setShowMobilePanel(false)
             this.setInEffectEditingMode(true)
-            return await bgRemoveUtils.saveToIOS(async (data, assetId, aspectRatio) => {
+            return await bgRemoveUtils.saveToIOSOld(async (data, assetId, aspectRatio) => {
               const srcObj = {
                 type: 'ios',
                 userId: '',
@@ -679,7 +819,7 @@ export default defineComponent({
         const targetLayerStyle = layers[0].styles as IImageStyle
         bgRemoveUtils.setInBgRemoveMode(false)
         editorUtils.setShowMobilePanel(false)
-        bgRemoveUtils.saveToIOS(async (data, assetId, aspectRatio, trimmedCanvasInfo) => {
+        bgRemoveUtils.saveToIOSOld(async (data, assetId, aspectRatio, trimmedCanvasInfo) => {
           const srcObj = {
             type: 'ios',
             userId: '',
