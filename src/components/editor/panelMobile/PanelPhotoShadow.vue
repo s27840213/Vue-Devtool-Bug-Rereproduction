@@ -217,7 +217,7 @@ export default defineComponent({
   }
   &__reset {
     > button {
-      color: setColor(blue-1);
+      color: setColor(black-3);
       font-size: 14px;
       padding: 0;
     }

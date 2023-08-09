@@ -12,6 +12,7 @@ import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import constantData, { IStickerVideoUrls } from '@/utils/constantData'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import logUtils from '@/utils/logUtils'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import colorUtils from './colorUtils'
@@ -62,19 +63,25 @@ interface IUserSettingListOption {
   val: any
   description: string
   icon?: string
+  queryFunc?: (query: string) => boolean
+  first?: boolean
 }
 
 const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
   emojiSetting: [
     {
+      // val: 'Apple Color Emoji',
       val: '-apple-system',
       description: '<P>Apple Emoji',
-      icon: 'apple_emoji'
+      icon: 'apple_emoji',
+      queryFunc: (query: string) => SYSTEM_FONTS.includes(query)
+      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'zVUjQ0MaGOm7HOJXv5gB',
       description: '<P>Noto Color Emoji',
-      icon: 'noto_color_emoji'
+      icon: 'noto_color_emoji',
+      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'dLe1S0oDanIJjvty5RxG',
@@ -83,6 +90,8 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
     },
   ],
 }
+
+export const SYSTEM_FONTS = ['-apple-system', 'Apple Color Emoji']
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
@@ -238,9 +247,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return USER_SETTINGS_CONFIG[key]?.description ?? ''
   }
 
+  getDefaultUserConfig<T extends keyof IUserSettingListOption>(key: keyof typeof USER_SETTINGS_CONFIG, by: T, query: IUserSettingListOption[T]): IUserSettingListOption | undefined {
+    if (!USER_SETTINGS_CONFIG[key].isList) throw new Error(`getDefaultUserConfig can only query USER_SETTING_CONFIG whose isList=true, provided key: ${key}`)
+    const options = USER_SETTINGS_LIST_CONFIG[key]
+    return options.find(option => option.queryFunc ? option.queryFunc(query) : option[by] === query) ?? options[0]
+  }
+
   addFontForEmoji() {
     const defaultEmoji = this.userSettings.emojiSetting
-    if (defaultEmoji === '-apple-system') return
+    if (SYSTEM_FONTS.includes(defaultEmoji)) return
     store.dispatch('text/addFont', {
       face: defaultEmoji,
       type: 'public',
@@ -1060,9 +1075,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
     const onThumbError = async () => {
       await this.saveDesignJson(id)
+      this.setLoadingOverlayShow(false)
       throw new Error('gen thumb failed')
     }
     if (store.getters['vivisticker/getEditorTypeTemplate']) {
+      this.setLoadingOverlay([i18n.global.t('STK0084')])
       const resGenThumb = await this.callIOSAsAPI('INFORM_WEB', {
         info: {
           event: 'gen-thumb',
@@ -1076,9 +1093,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (flag === '1') await onThumbError()
     }
     await this.saveDesignJson(id)
+    this.setLoadingOverlayShow(false)
   }
 
   setPages(pages: IPage[]) {
+    logUtils.setLogAndConsoleLog('debugInfo@setPages', JSON.stringify(pages.map(page => page.id)))
     layerUtils.setAutoResizeNeededForLayersInPages(pages, true)
     store.commit('SET_pages', pages)
   }
@@ -1617,6 +1636,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       container.style.transform = `translateX(-${targetPos}px)`
       if (pageIndex >= 0 && pageIndex < store.getters.getPageslength) store.commit('SET_middlemostPageIndex', pageIndex)
     }
+  }
+
+  setLoadingOverlayShow(value: boolean) {
+    store.commit('vivisticker/SET_loadingOverlayShow', value)
+  }
+
+  setLoadingOverlayMsgs(msgs: string[]) {
+    store.commit('vivisticker/SET_loadingOverlayMsgs', msgs)
+  }
+
+  setLoadingOverlay(msgs: string[]) {
+    this.setLoadingOverlayMsgs(msgs)
+    this.setLoadingOverlayShow(true)
   }
 }
 

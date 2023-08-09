@@ -19,7 +19,7 @@ div(class="panel-objects")
           iconColor="white"
           iconWidth="24px"
           @click="handleRecent")
-      tabs(class="panel-objects__nav__tabs"
+      Tabs(class="panel-objects__nav__tabs"
           :tabs="[$t('NN0758'), 'GIFs', $t('NN0759')]"
           v-model="tabIndex"
           :style="{marginBottom: '0px'}")
@@ -31,7 +31,7 @@ div(class="panel-objects")
           @click="showSearchBar")
   //- Favorites tabs
   div(v-if="isFavorites && !isInCategory" class="panel-objects__favorites-tabs")
-    tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
+    Tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
         v-model="favoritesTabIndex")
     svg-icon(iconName="info-reverse" iconWidth="24px" iconColor="white"
             @click="doubleTapTips")

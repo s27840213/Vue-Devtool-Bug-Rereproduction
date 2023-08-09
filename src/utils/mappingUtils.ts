@@ -30,7 +30,7 @@ export const minMaxHash = {
     min: 0.5, max: 2.5
   },
   letterSpacing: {
-    min: -200, max: 1600
+    min: -200, max: 2000
   },
   lineWidth: {
     min: 1, max: 100

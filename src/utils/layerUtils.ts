@@ -6,6 +6,7 @@ import { ITiptapSelection } from '@/interfaces/text'
 import store from '@/store'
 import { IEditorState, ILayerInfo, ISpecLayerData, LayerType } from '@/store/types'
 import groupUtils from '@/utils/groupUtils'
+import logUtils from '@/utils/logUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import { round } from 'lodash'
 import { nextTick } from 'vue'
@@ -161,8 +162,7 @@ class LayerUtils {
      * The action of adding layer will trigger record function; so if we also record delete step, we will record two steps at once.
      */
     if (record) {
-      groupUtils.reset(false)
-      // groupUtils.reset()
+      groupUtils.reset()
       stepsUtils.record()
     }
   }
@@ -611,6 +611,14 @@ class LayerUtils {
     }
     /**  If the layerIndex === -1 means the layer is grouped or deleted */
     if (layerIndex === -1) {
+      logUtils.setLogAndConsoleLog(
+        'debugInfo@getLayerInfoById',
+        JSON.stringify({
+          pageIndex,
+          pageId,
+          pages: pageUtils.getPages.map(page => page.id)
+        })
+      )
       layerIndex = (pages ? pages[pageIndex] : pageUtils.getPage(pageIndex)).layers
         .findIndex(l => [LayerType.group, LayerType.tmp].includes(l.type as LayerType) && (l as IGroup).layers.find(subLayer => subLayer.id === layerId))
       subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, layerId, pages)

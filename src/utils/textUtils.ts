@@ -4,7 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
-import { autoResizePipeLine, autoResizePipeLineSync, IInitSize, IMultiStageRunResult } from '@/utils/autoResizeUtils'
+import { IInitSize, IMultiStageRunResult, autoResizePipeLine, autoResizePipeLineSync } from '@/utils/autoResizeUtils'
 import controlUtils from '@/utils/controlUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
@@ -22,6 +22,7 @@ import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
 import textShapeUtils from './textShapeUtils'
 import tiptapUtils from './tiptapUtils'
+import { SYSTEM_FONTS } from './vivistickerUtils'
 
 export interface ITextHW {
   width: number
@@ -989,7 +990,11 @@ class TextUtils {
   }
 
   async untilFontLoadedForP(paragraph: IParagraph): Promise<void> {
-    const fontList = cssConverter.getFontFamily(paragraph.styles.font as string).replace(/\s+/g, '').split(',').filter(id => id !== '-apple-system')
+    // -apple-system is currently not used, but kept for back compatibility
+    const fontList = cssConverter.getFontFamily(paragraph.styles.font as string)
+      .replace(/\s+/g, '')
+      .split(',')
+      .filter(id => !SYSTEM_FONTS.includes(id))
     await Promise.all([
       (async (): Promise<void> => {
         const valid = await store.dispatch('text/checkFontLoaded', fontList[0])

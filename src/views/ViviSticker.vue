@@ -35,12 +35,14 @@ div(class="vivisticker" :style="copyingStyles()")
     tutorial(v-if="showTutorial")
   transition(name="panel-up")
     full-page(v-if="fullPageType !== 'none'" class="vivisticker__full-page")
+  loading-overlay
 </template>
 
 <script lang="ts">
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
 import FullPage from '@/components/vivisticker/FullPage.vue'
 import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
+import LoadingOverlay from '@/components/vivisticker/LoadingOverlay.vue'
 import MainMenu from '@/components/vivisticker/MainMenu.vue'
 import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
@@ -78,7 +80,8 @@ export default defineComponent({
     Tutorial,
     FullPage,
     SlideUserSettings,
-    ShareTemplate
+    ShareTemplate,
+    LoadingOverlay
   },
   data() {
     return {

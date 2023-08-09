@@ -3,6 +3,7 @@
  */
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
@@ -100,7 +101,13 @@ class CssConveter {
   }
 
   getFontFamily(font: string): string {
-    return (font + ',').concat(store.getters['text/getDefaultFonts'])
+    let fontFaces = store.getters['text/getDefaultFontFacesList'] as string[]
+    if (vivistickerUtils.getDefaultUserConfig('emojiSetting', 'val', vivistickerUtils.userSettings.emojiSetting)!.first) {
+      fontFaces = [vivistickerUtils.userSettings.emojiSetting, font, ...fontFaces]
+    } else {
+      fontFaces = [font, ...fontFaces.slice(0, fontFaces.length - 1), vivistickerUtils.userSettings.emojiSetting, fontFaces[fontFaces.length - 1]]
+    }
+    return fontFaces.join(', ')
   }
 
   convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, contentScaleRatio = 1): { [key: string]: string } {

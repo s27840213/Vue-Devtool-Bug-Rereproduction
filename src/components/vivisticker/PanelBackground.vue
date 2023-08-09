@@ -115,6 +115,7 @@ import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
+import colorUtils from '@/utils/colorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -310,6 +311,7 @@ export default defineComponent({
         await this.getRecAndCate({ reset, key: 'background' })
         await vivistickerUtils.listAsset('backgroundColor')
       })
+    colorUtils.setCurrEvent(ColorEventType.background)
   },
   activated() {
     this.$nextTick(() => {

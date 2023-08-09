@@ -132,6 +132,7 @@ export default defineComponent({
       _defaultColors: 'color/getDefaultColors',
       defaultBgColor: 'color/getDefaultBgColors',
       _recentlyColors: 'color/getRecentlyColors',
+      stkRecentlyBgColors: 'vivisticker/getRecentlyBgColors',
       currSelectedInfo: 'getCurrSelectedInfo',
       currPanel: 'getCurrSidebarPanelType',
       getBackgroundColor: 'getBackgroundColor'
@@ -161,6 +162,7 @@ export default defineComponent({
       return ['PanelColor'].includes(this.mode) ? this.allRecentlyControl : this.showAllRecently
     },
     recentlyColors(): string[] {
+      if (colorUtils.currEvent === ColorEventType.background) return this.stkRecentlyBgColors
       return this.showAllRecentlyColor
         ? this._recentlyColors
         : this._recentlyColors.slice(0, 20)

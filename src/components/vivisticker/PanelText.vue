@@ -11,7 +11,7 @@ div(class="overflow-container full-size rwd-container")
       :color="{close: 'black-5', search: 'black-5'}"
       v-model:expanded="isSearchBarExpanded"
       @search="handleSearch")
-    tags(v-show="tags && tags.length"
+    Tags(v-show="tags && tags.length"
         class="panel-text__tags"
         :class="{collapsed: !isSearchBarExpanded, 'in-category': isInCategory}"
         :tags="tags"
@@ -197,7 +197,7 @@ export default defineComponent({
       if (pending || !keyword || this.searchResult.length > 0 || this.showAllRecently) return ''
       return `${i18n.global.t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.global.tc('NN0005', 1)
+          target: i18n.global.t('NN0005').toLowerCase()
         })}`
     },
     itemWidth(): number {

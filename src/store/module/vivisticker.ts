@@ -1,5 +1,5 @@
 import { IAsset } from '@/interfaces/module'
-import { IFullPageConfig, IMyDesign, IPayment, IPaymentPending, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
@@ -45,6 +45,7 @@ interface IViviStickerState {
   uuid: string,
   loadedFonts: { [key: string]: true },
   templateShareType: 'none' | 'story' | 'post',
+  loadingOverlay: ILoadingOverlay,
 }
 
 const EDITOR_BGS = [
@@ -122,7 +123,11 @@ const getDefaultState = (): IViviStickerState => ({
   uuid: '',
   loadedFonts: {},
   debugMode: process.env.NODE_ENV === 'development',
-  templateShareType: 'none'
+  templateShareType: 'none',
+  loadingOverlay: {
+    show: false,
+    msgs: []
+  }
 })
 
 const state = getDefaultState()
@@ -277,6 +282,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getDebugMode(state: IViviStickerState): boolean {
     return state.debugMode
+  },
+  getLoadingOverlay(state: IViviStickerState): ILoadingOverlay {
+    return state.loadingOverlay
   }
 }
 
@@ -499,6 +507,12 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_templateShareType(state: IViviStickerState, type: 'none' | 'story' | 'post') {
     state.templateShareType = type
   },
+  SET_loadingOverlayShow(state: IViviStickerState, value: boolean) {
+    state.loadingOverlay.show = value
+  },
+  SET_loadingOverlayMsgs(state: IViviStickerState, msgs: string[]) {
+    state.loadingOverlay.msgs = msgs
+  }
 }
 
 export default {
