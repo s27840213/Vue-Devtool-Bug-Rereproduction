@@ -133,14 +133,6 @@ export default defineComponent({
     },
     showMoreBtn(): boolean {
       return !this.inFilePanel && !this.inLogoPanel && !this.$isTouchDevice()
-    },
-    panelPreviewSrc(): string {
-      const img = this.$refs.img as HTMLImageElement
-      if (!img) {
-        console.error('img in gallery photo is null')
-        return ''
-      }
-      return img.src
     }
   },
   methods: {
@@ -188,7 +180,6 @@ export default defineComponent({
           height: photoHeight,
           offsetX: 10,
           offsetY: 15,
-          panelPreviewSrc: this.panelPreviewSrc,
           aspectRatio: imgEl.naturalWidth / imgEl.naturalHeight
         })
 
@@ -202,6 +193,7 @@ export default defineComponent({
           imgPreload.crossOrigin = 'anonymous'
           imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(srcObj, significantSize))
         }
+        console.warn('preivewSrc', this.previewSrc)
 
         this.setCurrDraggedPhoto({
           srcObj: {
@@ -209,8 +201,7 @@ export default defineComponent({
           },
           styles: { width: photoWidth, height: photoHeight },
           isPreview: this.isUploading,
-          previewsrc: this.previewSrc,
-          panelPreviewSrc: this.panelPreviewSrc
+          previewsrc: this.previewSrc
         })
       }
     },
@@ -273,13 +264,9 @@ export default defineComponent({
       if (isPrimaryLayerFrame) {
         frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, Math.max(subLayerIdx, 0), styles)
         frameUtils.updateFrameClipSrc(pageIndex, layerIndex, Math.max(subLayerIdx, 0), srcObj)
-        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { panelPreviewSrc: this.panelPreviewSrc })
       } else {
         layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-        layerUtils.updateLayerProps(pageIndex, layerIndex, {
-          srcObj,
-          panelPreviewSrc: this.panelPreviewSrc
-        }, subLayerIdx)
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
       }
       this.setCloseMobilePanelFlag(true)
       stepsUtils.record()
@@ -298,7 +285,6 @@ export default defineComponent({
         src,
         photoAspectRatio,
         {
-          panelPreviewSrc: this.panelPreviewSrc,
           ...((this.inFilePanel || this.inLogoPanel) && !photo.id && { assetIndex: photo.assetIndex }),
           ...((this.inFilePanel || this.inLogoPanel) && photo.id && { assetId: photo.id }),
           // The following props is used for preview image during polling process

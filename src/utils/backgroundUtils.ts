@@ -166,8 +166,7 @@ class BackgroundUtils {
     store.commit('SET_backgroundImageSrc', {
       pageIndex: pageIndex,
       srcObj: image.srcObj,
-      previewSrc: image.previewSrc,
-      panelPreviewSrc: image.panelPreviewSrc
+      previewSrc: image.previewSrc
     })
     const _image = generalUtils.deepCopy(image)
     _image.styles.width = _image.styles.imgWidth

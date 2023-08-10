@@ -102,6 +102,7 @@ export default defineComponent({
     srcObj: {
       deep: true,
       handler: function () {
+        console.warn('bg srcObj', generalUtils.deepCopy(this.image.config))
         if (this.isColorBackground) {
           this.src = ''
         } else {
@@ -148,12 +149,6 @@ export default defineComponent({
     if (this.userId !== 'backendRendering') {
       this.handleIsTransparent()
       this.previewAsLoading()
-      // const nextImg = new Image()
-      // nextImg.onload = () => {
-      //   const preImg = new Image()
-      //   preImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
-      // }
-      // nextImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
     } else {
       if (this.isAdjustImage) {
         this.handleIsTransparent()
@@ -313,7 +308,6 @@ export default defineComponent({
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
-            console.warn(this.image.config.srcObj)
             this.setBgImageControl({
               pageIndex: this.pageIndex,
               imgControl: true
@@ -355,16 +349,9 @@ export default defineComponent({
             this.src = previewSrc
           }
         }, { crossOrigin: true })
-      } else if (config.panelPreviewSrc) {
-        const panelPreviewSrc = this.image.config.panelPreviewSrc
-        imageUtils.imgLoadHandler(panelPreviewSrc, () => {
-          if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
-            this.src = panelPreviewSrc
-          }
-        }, { crossOrigin: true })
       }
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
+      const src = imageUtils.getSrc(this.image.config.srcObj, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       return new Promise<void>((resolve, reject) => {
         imageUtils.imgLoadHandler(src, () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {

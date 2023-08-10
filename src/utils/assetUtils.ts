@@ -385,9 +385,8 @@ class AssetUtils {
   }
 
   addBackground(url: string, attrs: IAssetProps = {}) {
-    const { pageIndex, styles = {}, ver, panelPreviewSrc, imgSrcSize } = attrs
+    const { pageIndex, ver, previewSrc, imgSrcSize } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
-    const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imgSrcSize || { width: 0, height: 0 }
     const page = store.getters.getPage(targetPageIndex)
     const { width, height, posX, posY } = ImageUtils.adaptToPage({
@@ -416,7 +415,7 @@ class AssetUtils {
         userId: ''
       },
       ver,
-      panelPreviewSrc
+      previewSrc
     })
 
     store.commit('SET_backgroundImage', {

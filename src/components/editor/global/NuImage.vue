@@ -141,7 +141,7 @@ export default defineComponent({
     }
   },
   async created() {
-    this.src = (this.config.panelPreviewSrc || this.config.previewSrc) ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+    this.src = this.config.previewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
@@ -191,6 +191,7 @@ export default defineComponent({
     },
     'config.srcObj': {
       handler: function (val, oldVal) {
+        console.log('generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)', generalUtils.isWatcherTriggerByUndoRedo(val, oldVal))
         if (generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)) return
 
         this.shadowBuff.canvasShadowImg = undefined
@@ -564,21 +565,15 @@ export default defineComponent({
       logUtils.setLog(log)
     },
     async previewAsLoading() {
-      // if (this.config.previewSrc) {
-      //   return
-      // }
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
       const previewSrc = (this.config.panelPreviewSrc || this.config.previewSrc) ?? imageUtils.getSrc(this.config, this.getPreviewSize())
-      imageUtils.imgLoadHandler(previewSrc, (img) => {
+      imageUtils.imgLoadHandler(previewSrc, () => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
       }, { crossOrigin: true })
 
-      // if (this.config.previewSrc) {
-      //   return
-      // }
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       return new Promise<void>((resolve, reject) => {
@@ -586,6 +581,7 @@ export default defineComponent({
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             isPrimaryImgLoaded = true
             this.src = src
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: src }, this.subLayerIndex)
             resolve()
           }
         }, {
@@ -616,6 +612,7 @@ export default defineComponent({
         imageUtils.imgLoadHandler(currUrl, async () => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             this.src = currUrl
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: currUrl }, this.subLayerIndex)
             if (newVal > oldVal) {
               await this.preLoadImg('next', this.getImgDimension)
               this.preLoadImg('pre', this.getImgDimension)
