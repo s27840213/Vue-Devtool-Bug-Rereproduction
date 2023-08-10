@@ -1,6 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
-import { ISize } from '@/interfaces/math'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import layerFactary from '@/utils/layerFactary'
@@ -30,7 +29,7 @@ export class Page implements IPage {
     h: Array<number>
   }
 
-  mobilePhysicalSize: { originSize: ISize, initPos: ICoordinate }
+  mobilePhysicalSize: { initPos: ICoordinate }
 
   isEnableBleed: boolean
   bleeds: {
@@ -51,8 +50,7 @@ export class Page implements IPage {
 
   constructor() {
     this.mobilePhysicalSize = {
-      initPos: { x: 0, y: 0 },
-      originSize: { width: 0, height: 0 },
+      initPos: { x: 0, y: 0 }
     }
     this.snapUtils = new SnapUtils(-1)
     this.width = 1080

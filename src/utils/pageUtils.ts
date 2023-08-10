@@ -199,7 +199,6 @@ class PageUtils {
         h: []
       },
       mobilePhysicalSize: {
-        originSize: { width: 0, height: 0 },
         initPos: { x: 0, y: 0 }
       },
       isEnableBleed: false,

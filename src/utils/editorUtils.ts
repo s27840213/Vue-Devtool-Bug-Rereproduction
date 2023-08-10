@@ -126,7 +126,6 @@ class EditorUtils {
         y: (editorUtils.mobileSize.height - page.height * this.contentScaleRatio) * 0.5
       }
       pageUtils.updatePagePos(pageIndex, pos)
-      // @TODO: the initPos should be updated as the page size is updated
       pageUtils.updatePageInitPos(pageIndex, pos)
       return contentScaleRatio
     }

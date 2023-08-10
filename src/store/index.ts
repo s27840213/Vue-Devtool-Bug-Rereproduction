@@ -2,7 +2,6 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
-import { ISize } from '@/interfaces/math'
 import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
@@ -1119,12 +1118,6 @@ const mutations: MutationTree<IEditorState> = {
   SET_contentScaleRatio4Page(state: IEditorState, payload: { pageIndex: number, contentScaleRatio: number }) {
     const { pageIndex, contentScaleRatio } = payload
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
-  },
-  SET_pagePhysicalSize(state: IEditorState, payload: { pageIndex: number, originSize?: ISize, pageCenterPos?: ICoordinate }) {
-    const { pageIndex, originSize } = payload
-    if (originSize) {
-      Object.assign(state.pages[pageIndex].config.mobilePhysicalSize.originSize, originSize)
-    }
   },
   ...imgShadowMutations,
   ADD_subLayer,

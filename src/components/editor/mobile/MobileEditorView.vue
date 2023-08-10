@@ -405,6 +405,22 @@ export default defineComponent({
         const contentScaleRatio = this.$store.getters.getContentScaleRatio
         const evtScale = ((e.scale - 1) * 0.5 + 1)
         switch (e.phase) {
+          case 'start': {
+            if (this.isBgImgCtrl || this.isImgCtrl) return
+
+            this.currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+            this.movingUtils.removeListener()
+            this.initPagePos.x = page.x
+            this.initPagePos.y = page.y
+            this.initPinchPos = {
+              x: e.x,
+              y: e.y
+            }
+            this.tmpScaleRatio = scaleRatio
+            store.commit('SET_isPageScaling', true)
+            this.$store.commit('mobileEditor/SET_isPinchingEditor', true)
+            break
+          }
           case 'move': {
             if (this.isBgImgCtrl || this.isImgCtrl) return
 

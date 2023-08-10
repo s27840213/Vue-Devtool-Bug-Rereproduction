@@ -147,15 +147,16 @@ export default defineComponent({
         }
         case 'move': {
           this.isPinching = true
-          const { contentScaleRatio, mobilePhysicalSize: { originSize } } = this.page
+          const { contentScaleRatio } = this.page
+          const pageRenderSize = { width: this.page.width * contentScaleRatio, height: this.page.height * contentScaleRatio }
           const { styles } = this.config
           const _sizeRatio = contentScaleRatio
           if (!this.initPinchPos) {
             this.initPinchPos = { x: event.x, y: event.y }
           }
           const posInConfig = {
-            x: (event.x - editorUtils.mobileCenterPos.x + originSize.width * 0.5) / _sizeRatio - styles.imgX,
-            y: (event.y - editorUtils.mobileCenterPos.y + originSize.height * 0.5) / _sizeRatio - styles.imgY
+            x: (event.x - editorUtils.mobileCenterPos.x + pageRenderSize.width * 0.5) / _sizeRatio - styles.imgX,
+            y: (event.y - editorUtils.mobileCenterPos.y + pageRenderSize.height * 0.5) / _sizeRatio - styles.imgY
           }
           const translationRatio = {
             x: -posInConfig.x / styles.imgWidth,

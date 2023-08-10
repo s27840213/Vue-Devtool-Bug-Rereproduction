@@ -244,12 +244,6 @@ export default defineComponent({
   },
   emits: ['stepChange'],
   mounted() {
-    const page = this.$refs.page as HTMLElement
-    const rect = page.getBoundingClientRect()
-    pageUtils.setMobilePhysicalPage({
-      pageIndex: this.pageIndex,
-      originSize: { width: rect.width, height: rect.height }
-    })
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
@@ -328,8 +322,10 @@ export default defineComponent({
         return {
           // the max page scale size is currently set to 3
           // using the max scale as a const scale factor prevents screen tearing as using the dynamic chaging scale factor
-          minHeight: this.config.height * this.contentScaleRatio * (this.pageIndex === layerUtils.pageIndex ? 3 : this.scaleRatio * 0.01),
-          maxHeight: this.config.height * this.contentScaleRatio * (this.pageIndex === layerUtils.pageIndex ? 3 : this.scaleRatio * 0.01)
+          minHeight: this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01,
+          maxHeight: this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01
+          // minHeight: this.config.height * this.contentScaleRatio * (this.pageIndex === layerUtils.pageIndex ? 3 : this.scaleRatio * 0.01),
+          // maxHeight: this.config.height * this.contentScaleRatio * (this.pageIndex === layerUtils.pageIndex ? 3 : this.scaleRatio * 0.01)
         }
       } else {
         return {
