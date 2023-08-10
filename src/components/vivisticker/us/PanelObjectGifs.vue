@@ -298,6 +298,7 @@ export default defineComponent({
     }
   }
   .category-list {
+    height: 100%;
     overflow-x: hidden;
   }
   .invisible {

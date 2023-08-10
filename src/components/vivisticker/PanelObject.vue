@@ -5,16 +5,19 @@ div(class="panel-objects rwd-container")
       :tabs="tabs"
       v-model="tabIndex")
   //- Favorites tabs
-  div(v-if="!isInEditor && isFavorites && !isInCategory" class="panel-objects__favorites-tabs")
+  div(v-if="!isInEditor && isFavorites && !isInCategory"
+      class="panel-objects__favorites-tabs")
     Tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
         v-model="favoritesTabIndex")
     svg-icon(iconName="info-reverse" iconWidth="24px" iconColor="white"
             @click="doubleTapTips")
   keep-alive
     panel-object-static(v-if="isStatic || isFavoritesStatic"
+      class="panel-objects__content"
       :showFav="isFavoritesStatic" ref="static")
   keep-alive
     panel-object-gifs(v-if="isGifs || isFavoritesGifs"
+      class="panel-objects__content"
       :showFav="isFavoritesGifs" ref="gif")
 </template>
 
@@ -124,6 +127,9 @@ export default defineComponent({
       margin-left: 10px;
       padding: 6px;
     }
+  }
+  &__content {
+    grid-row: 3 / 4; // Always take 1fr grid row.
   }
 }
 </style>

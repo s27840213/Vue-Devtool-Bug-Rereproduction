@@ -37,9 +37,11 @@ div(class="panel-objects")
             @click="doubleTapTips")
   keep-alive
     panel-object-static-us(v-if="isStatic || isFavoritesStatic"
+      class="panel-objects__content"
       :showFav="isFavoritesStatic" ref="static" @search="showSearchBar")
   keep-alive
     panel-object-gifs-us(v-if="isGifs || isFavoritesGifs"
+      class="panel-objects__content"
       :showFav="isFavoritesGifs" ref="gif" @search="showSearchBar")
 </template>
 
@@ -188,6 +190,9 @@ export default defineComponent({
       margin-left: 10px;
       padding: 6px;
     }
+  }
+  &__content {
+    grid-row: 3 / 4; // Always take 1fr grid row.
   }
 }
 </style>
