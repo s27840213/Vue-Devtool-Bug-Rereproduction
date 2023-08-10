@@ -109,7 +109,7 @@ export default defineComponent({
     if (!vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0')) vivistickerUtils.showUpdateModal(true)
     else {
       if (this.userInfo.isFirstOpen) {
-        vivistickerUtils.openPayment()
+        if (this.modalInfo[`pop_${this.userInfo.locale}`] === '1') vivistickerUtils.openPayment()
         if (this.$i18n.locale !== 'us') this.setShowTutorial(true)
       }
       this.getPushModalInfo()
