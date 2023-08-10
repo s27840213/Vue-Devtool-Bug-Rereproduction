@@ -337,7 +337,8 @@ class BgRemoveUtils {
     })
   }
 
-  saveToIOS(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
+  // this is for IOS version < 1.35
+  saveToIOSOld(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
     const { trimCanvas } = useCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     const { canvas: trimedCanvas, width, height, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
@@ -348,6 +349,35 @@ class BgRemoveUtils {
       const _data = data as { flag: string, msg: string, imageId: string }
       if (callback) {
         return callback(_data, assetId, width / height, trimmedCanvasInfo)
+      }
+    })
+  }
+
+  saveToIOS(designId:string, callback?: (data: { flag: string, msg: string, imageId: string }, path: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
+    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const trimmedCanvasInfo = trimCanvas(this.canvas)
+    const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
+    const src = trimedCanvas.toDataURL('image/png;base64')
+
+    const name = generalUtils.generateAssetId()
+
+    const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
+    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      if (callback) {
+        return callback(_data, `${key}/${designId}/${name}`, width / height, trimmedCanvasInfo)
+      }
+    })
+  }
+
+  moveOldBgRemoveImages(src: string, callback?: (path: string) => void) {
+    const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
+    const editingDesignId = store.getters['vivisticker/getEditingDesignId']
+    const name = generalUtils.generateAssetId()
+    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId: editingDesignId }, 'save-image-from-url').then((data) => {
+      if (callback) {
+        const path = `${key}/${editingDesignId}/${name}`
+        return callback(path)
       }
     })
   }

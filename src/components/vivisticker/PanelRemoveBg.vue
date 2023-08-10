@@ -90,10 +90,6 @@ export default defineComponent({
       }
 
       this.isInEditor ? this.handleCurrSelectedImage(type) : this.handleIOSImage(type)
-      /**
-       * @Note the below codes is for old version
-       */
-      // uploadUtils.chooseAssets('stk-bg-remove')
     },
     handleIOSImage(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
       vivistickerUtils.getIosImg()

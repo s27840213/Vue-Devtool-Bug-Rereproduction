@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-show="modalInfo.imgSrc ? isImgLoaded : true" class="modal-card" :style="modalInfo.cardStyle")
+div(v-show="modalInfo.imgSrc ? isImgLoaded : show" class="modal-card" :style="modalInfo.cardStyle")
   div(v-if="modalInfo.title" class="modal-card__row modal-card__title text-H6 text-gray-2")
     span {{modalInfo.title}}
   div(v-if="modalInfo.imgSrc" class="modal-card__image")
@@ -45,12 +45,21 @@ div(v-show="modalInfo.imgSrc ? isImgLoaded : true" class="modal-card" :style="mo
 <script lang="ts">
 import { IModalInfo } from '@/interfaces/modal'
 import modalUtils from '@/utils/modalUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
-  emits: [],
+  emits: ['update:show'],
   name: 'ModalCard',
+  props: {
+    show: {
+      type: Boolean,
+      default: true
+    },
+    initModalInfo: {
+      type: Object as PropType<IModalInfo>
+    }
+  },
   data: () => {
     return {
       isImgLoaded: false
@@ -62,11 +71,15 @@ export default defineComponent({
       pending: 'modal/getIsPending'
     }),
     modalInfo(): IModalInfo {
-      return this._modalInfo
+      return this.initModalInfo || this._modalInfo
     }
   },
   methods: {
     closePopup(): void {
+      if (this.initModalInfo) {
+        this.$emit('update:show', false)
+        return
+      }
       modalUtils.setIsModalOpen(false)
       modalUtils.clearModalInfo()
     },

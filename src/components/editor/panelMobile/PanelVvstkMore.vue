@@ -166,6 +166,22 @@ export default defineComponent({
           return window.location.hostname === 'stkrd.vivipic.com'
         },
         action: () => { this.switchDomain('stkrd') }
+      }, {
+        text: 'localhost',
+        icon: 'vivisticker_global',
+        selected: () => {
+          return window.location.hostname === 'localhost:8080'
+        },
+        action: () => {
+          if (process.env.NODE_ENV === 'development') {
+            this.switchDomain('localhost')
+          } else {
+            this.$notify({
+              group: 'error',
+              text: 'Only available in development mode.  '
+            })
+          }
+        }
       }, ...Array(6).fill(1).map((_, index) => {
         const host = `stkdev${index}`
         return {

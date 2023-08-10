@@ -362,7 +362,7 @@ export default defineComponent({
       const isRectFrameClip = layerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
       if (layerUtils.getCurrLayer.type === 'frame' && !isRectFrameClip) return 'none'
 
-      if (this.config?.active) {
+      if (this.isControllerShown) {
         return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
       } else {
         return 'none'

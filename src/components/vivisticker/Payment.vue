@@ -10,7 +10,8 @@ div(class="payment" v-touch @swipe="handleSwipe")
       div(class="payment__carousel-item")
         img(class="payment__carousel-item__img" :class="{contain: isLandscape && item.key === 'frame'}"
             draggable="false"
-            :src="item.img")
+            :src="item.img"
+            @load="handleImgLoad(item.key)")
         div(class="payment__carousel-item__overlay")
         div(class="payment__carousel-item__title text-white") {{ item.title }}
   div(class="payment__content")
@@ -70,7 +71,7 @@ import networkUtils from '@/utils/networkUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface CarouselItem {
@@ -86,6 +87,7 @@ interface IComparison {
 }
 
 export default defineComponent({
+  emits: ['canShow'],
   components: {
     Carousel
   },
@@ -101,6 +103,7 @@ export default defineComponent({
       planSelected: 'annually',
       isPanelUp: false,
       isPanelTransitioning: false,
+      canShow: false,
       carouselItems: [
         {
           key: 'frame',
@@ -304,6 +307,12 @@ export default defineComponent({
           updateTxtNoticeStyles()
         }
       })
+    },
+    handleImgLoad(key: string) {
+      if (!this.canShow && key === this.carouselItems[0].key) {
+        this.canShow = true
+        this.$emit('canShow')
+      }
     }
   }
 })

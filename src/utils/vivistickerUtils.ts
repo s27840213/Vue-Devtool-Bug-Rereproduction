@@ -11,6 +11,8 @@ import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import constantData, { IStickerVideoUrls } from '@/utils/constantData'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import logUtils from '@/utils/logUtils'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import colorUtils from './colorUtils'
@@ -61,19 +63,25 @@ interface IUserSettingListOption {
   val: any
   description: string
   icon?: string
+  queryFunc?: (query: string) => boolean
+  first?: boolean
 }
 
 const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
   emojiSetting: [
     {
+      // val: 'Apple Color Emoji',
       val: '-apple-system',
       description: '<P>Apple Emoji',
-      icon: 'apple_emoji'
+      icon: 'apple_emoji',
+      queryFunc: (query: string) => SYSTEM_FONTS.includes(query)
+      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'zVUjQ0MaGOm7HOJXv5gB',
       description: '<P>Noto Color Emoji',
-      icon: 'noto_color_emoji'
+      icon: 'noto_color_emoji',
+      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'dLe1S0oDanIJjvty5RxG',
@@ -82,6 +90,8 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
     },
   ],
 }
+
+export const SYSTEM_FONTS = ['-apple-system', 'Apple Color Emoji']
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
@@ -143,6 +153,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'thumbDone',
     'addAssetDone',
     'deleteAssetDone',
+    'deleteImageDone',
     'getAssetResult',
     'uploadImageURL',
     'informWebResult',
@@ -199,6 +210,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.34') && !generalUtils.isIPadOS())
   }
 
+  get isBgRemoveSupported(): boolean {
+    return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.35'))
+  }
+
   getUserInfoFromStore(): IUserInfo {
     return store.getters['vivisticker/getUserInfo']
   }
@@ -232,9 +247,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return USER_SETTINGS_CONFIG[key]?.description ?? ''
   }
 
+  getDefaultUserConfig<T extends keyof IUserSettingListOption>(key: keyof typeof USER_SETTINGS_CONFIG, by: T, query: IUserSettingListOption[T]): IUserSettingListOption | undefined {
+    if (!USER_SETTINGS_CONFIG[key].isList) throw new Error(`getDefaultUserConfig can only query USER_SETTING_CONFIG whose isList=true, provided key: ${key}`)
+    const options = USER_SETTINGS_LIST_CONFIG[key]
+    return options.find(option => option.queryFunc ? option.queryFunc(query) : option[by] === query) ?? options[0]
+  }
+
   addFontForEmoji() {
     const defaultEmoji = this.userSettings.emojiSetting
-    if (defaultEmoji === '-apple-system') return
+    if (SYSTEM_FONTS.includes(defaultEmoji)) return
     store.dispatch('text/addFont', {
       face: defaultEmoji,
       type: 'public',
@@ -1069,7 +1090,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (!resGenThumb || resGenThumb.flag === '1') await onThumbError()
     } else {
       const flag = await this.genThumbnail(id)
-      console.log(editingDesignId, id, flag)
       if (flag === '1') await onThumbError()
     }
     await this.saveDesignJson(id)
@@ -1077,6 +1097,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   setPages(pages: IPage[]) {
+    logUtils.setLogAndConsoleLog('debugInfo@setPages', JSON.stringify(pages.map(page => page.id)))
     layerUtils.setAutoResizeNeededForLayersInPages(pages, true)
     store.commit('SET_pages', pages)
   }
@@ -1119,7 +1140,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('save-image-from-url', data)
   }
 
-  async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {
+  // this is delete something from "local storage"
+  async deleteAsset(key: string, id: string, thumbType?: string): Promise<void> {
     if (this.checkVersion('1.27')) {
       await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, `delete-asset-${key}-${id}`)
     } else {
@@ -1136,13 +1158,29 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
+  deleteImage(key: string, name: string, type: string, designId?: string): Promise<unknown> {
+    store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), name })
+    return this.callIOSAsAPI('DELETE_IMAGE', { key, name, type, designId }, `delete-image-${key}-${name}`)
+  }
+
+  deleteImageDone(data: { key: string, flag: number, name: string }) {
+    if (data !== undefined) {
+      this.handleCallback(`delete-image-${data.key}-${data.name}`, data)
+    } else {
+      this.handleCallback('delete-image', data)
+    }
+  }
+
   async saveDesignJson(id: string): Promise<IMyDesign | undefined> {
     if (this.isStandaloneMode) return
+    await Promise.race([
+      imageShadowUtils.iosImgDelHandler(),
+      new Promise((resolve) => setTimeout(resolve, 3000))
+    ])
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
     const editorTypeTemplate = store.getters['vivisticker/getEditorTypeTemplate']
     const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
-    console.log(editorType, assetInfo)
     const json = {
       type: editorType,
       id,
@@ -1276,7 +1314,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     // console.log('init loading flag', frames)
     const missingClips = frames
       .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
-    console.log('missingClips.length', missingClips.length)
     if (missingClips.length) {
       const action = missingClips.length !== 1 ? undefined : () => {
         let subLayerIdx = -1
@@ -1506,7 +1543,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
-          this.openFullPageVideo('iOS', { delayedClose: 5000 })
+          this.openFullPageVideo(i18n.global.locale === 'us' ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
           modalUtils.clearModalInfo()
         }
       }, undefined, {
@@ -1516,7 +1553,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  showUpdateModal() {
+  showUpdateModal(force = false) {
     let locale = this.getUserInfoFromStore().locale
     if (!['us', 'tw', 'jp'].includes(locale)) {
       locale = 'us'
@@ -1530,8 +1567,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     )
     const options = {
       imgSrc: modalInfo.img_url,
-      noClose: false,
-      noCloseIcon: false,
+      noClose: force,
+      noCloseIcon: force,
       backdropStyle: {
         backgroundColor: 'rgba(24,25,31,0.3)'
       },
@@ -1578,8 +1615,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     )
   }
 
-  async saveToIOS(src: string, callback?: (data: { flag: string, msg: string, imageId: string }) => void, type = 'png') {
-    await this.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type, url: src }, 'save-image-from-url').then((data) => {
+  async saveToIOS(src: string, type = 'png', param?: {
+    key?: string,
+    designId?: string,
+    name?: string,
+    toast?: boolean
+  }, callback?: (data: { flag: string, msg: string, imageId: string }) => void) {
+    await this.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { url: src, type, ...param }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
       callback && callback(_data)
     })
