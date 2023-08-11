@@ -61,6 +61,6 @@ module.exports = {
         ignorePublicMembers: false,
       },
     ],
-    'sonarjs/cognitive-complexity': ['warn', 15]
+    'sonarjs/cognitive-complexity': [offInCommand('warn'), 15]
   }
 }
