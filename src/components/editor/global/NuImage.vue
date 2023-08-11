@@ -75,7 +75,6 @@ import { IPage } from '@/interfaces/page'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import { IBrowserInfo } from '@/store/module/user'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -86,7 +85,6 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
@@ -141,24 +139,17 @@ export default defineComponent({
     }
   },
   async created() {
-    this.src = this.config.previewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
       this.handleShadowInit()
     }
   },
-  mounted() {
-    if (this.isBgImgControl) return
-    this.src = this.config.previewSrc === undefined ? this.src : this.config.previewSrc
-    this.mountShadowRedrawEvt()
-  },
   beforeUnmount() {
     if (!this.isBgImgControl) {
       if (this.config.inProcess) {
         this.setIsProcessing(LayerProcessType.none)
       }
-      eventUtils.off(ImageEvent.redrawCanvasShadow + this.config.id)
     }
   },
   unmounted() {
@@ -188,6 +179,9 @@ export default defineComponent({
   watch: {
     getImgDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
+    },
+    src(val) {
+      console.warn('src', val)
     },
     'config.srcObj': {
       handler: function (val, oldVal) {
@@ -567,7 +561,7 @@ export default defineComponent({
     async previewAsLoading() {
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
-      const previewSrc = (this.config.panelPreviewSrc || this.config.previewSrc) ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+      const previewSrc = this.config.previewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
       imageUtils.imgLoadHandler(previewSrc, () => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
@@ -575,7 +569,7 @@ export default defineComponent({
       }, { crossOrigin: true })
 
       const { imgWidth, imgHeight } = this.config.styles
-      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config.srcObj, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       return new Promise<void>((resolve, reject) => {
         imageUtils.imgLoadHandler(src, () => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
@@ -1091,48 +1085,12 @@ export default defineComponent({
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
       return primaryLayer.type
     },
-    // uploadingImagePreviewSrc(): string {
-    //   return this.config.previewSrc
-    // },
     id(): ILayerIdentifier {
       return {
         pageId: this.page.id,
         layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
           ? layerUtils.getLayer(this.pageIndex, this.layerIndex).id : this.config.id,
         subLayerId: this.config.id
-      }
-    },
-    mountShadowRedrawEvt() {
-      eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
-        this.shadowRedrawEvt()
-      })
-    },
-    shadowRedrawEvt() {
-      if (this.currentShadowEffect() !== ShadowEffectType.none) {
-        const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
-        const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent)
-        if (redrawImmediately) {
-          this.redrawShadow()
-          return
-        }
-        const src = imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, 100))
-        imageUtils.imgLoadHandler(src, (img) => {
-          const isTransparent = imageShadowUtils.isTransparentBg(img)
-          imageShadowUtils.updateEffectProps({
-            pageIndex: this.pageIndex,
-            layerIndex: this.layerIndex,
-            subLayerIdx: this.subLayerIndex
-          }, { isTransparent })
-          imageShadowUtils.setHandleId()
-          isTransparent && this.redrawShadow()
-        }, {
-          crossOrigin: true,
-          error: (img) => {
-            logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img?.src)
-          }
-        })
-      } else {
-        stepsUtils.record()
       }
     }
   }

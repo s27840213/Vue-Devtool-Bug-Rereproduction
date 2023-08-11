@@ -121,7 +121,7 @@ export default defineComponent({
       } as IImage
       const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
       const tinySize = sizeMap.find(e => e.key === 'tiny')?.size || 320
-      return imageUtils.appendRandomQuery(imageUtils.getSrc(data, tinySize))
+      return imageUtils.getSrc(data, tinySize)
     },
     fullSrc(): string {
       const { inFilePanel, inLogoPanel, photo, vendor } = this
