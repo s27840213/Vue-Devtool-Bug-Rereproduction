@@ -30,6 +30,7 @@ div(class="settings-security")
 
 <script lang="ts">
 import PopupVerify from '@/components/popup/PopupVerify.vue'
+import logUtils from '@/utils/logUtils'
 import popupUtils from '@/utils/popupUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -66,9 +67,11 @@ export default defineComponent({
   },
   methods: {
     deleteAccount() {
+      logUtils.setLogAndConsoleLog('Click delete account')
       popupUtils.openPopup('delete-account')
     },
     onChangeClicked() {
+      logUtils.setLogAndConsoleLog('Click change password')
       this.showVerifyPopup = true
     },
     closePopup() {

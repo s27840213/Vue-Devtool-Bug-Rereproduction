@@ -393,6 +393,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async loginSetup({ commit, dispatch }, { data }: { data: ILoginResponse }) {
     if (data.flag === 0) {
+      logUtils.setLogAndConsoleLog('login success (loginSetup)')
       const newToken = data.data.token // token may be refreshed
       const complete = data.data.complete
       const uname = data.data.user_name
@@ -438,7 +439,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         picWVUtils.sendStatistics()
       }
     } else {
-      console.log('login failed')
+      logUtils.setLogAndConsoleLog('login failed (loginSetup)')
       commit('SET_TOKEN', '')
     }
   },
@@ -453,9 +454,9 @@ const actions: ActionTree<IUserModule, unknown> = {
     }
   },
 
-  async verifyVcode({ commit }, { account, vcode, token, type }) {
+  async verifyVcode({ commit }, { account, vcode, token, type, locale }) {
     try {
-      const { data } = await userApis.verifyVcode(account, vcode, token, type)
+      const { data } = await userApis.verifyVcode(account, vcode, token, type, locale)
       return Promise.resolve(data)
     } catch (error) {
       logUtils.setLogForError(error as Error)
