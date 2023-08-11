@@ -106,7 +106,7 @@ const MYDESIGN_TAGS = [{
   name: 'NN0005',
   tab: 'text'
 }, {
-  name: 'NN0003',
+  name: 'STK0085',
   tab: 'object'
 }, {
   name: 'NN0001',
