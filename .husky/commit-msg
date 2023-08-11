@@ -4,6 +4,7 @@
 # npx --no-install commitlint --edit $1
 # use npx.cmd instead of npx why?
 # ans: in window, npx will throw errors, fucking strange
+echo "Checking the format of commit msg..."
 if [[ $(uname) == "Darwin" ]]; then
 	echo "System: $(uname)"
   npx --no-install commitlint --edit "$1"
