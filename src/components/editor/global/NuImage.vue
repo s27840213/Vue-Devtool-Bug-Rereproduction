@@ -569,7 +569,7 @@ export default defineComponent({
       }, { crossOrigin: true })
 
       const { imgWidth, imgHeight } = this.config.styles
-      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config.srcObj, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       return new Promise<void>((resolve, reject) => {
         imageUtils.imgLoadHandler(src, () => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
@@ -580,7 +580,7 @@ export default defineComponent({
           }
         }, {
           error: () => {
-            reject(new Error(`cannot load the current image, src: ${this.src}`))
+            reject(new Error(`cannot load the current image, src: ${src}`))
             fetch(src)
               .then(res => {
                 const { status, statusText } = res
