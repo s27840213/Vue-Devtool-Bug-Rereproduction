@@ -9,6 +9,7 @@ import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
 import bgRemove, { IBgRemoveState } from '@/store/module/bgRemove'
 import color, { IColorState } from '@/store/module/color'
+import cypress, { ICypressState } from '@/store/module/cypress'
 import design, { IDesignState } from '@/store/module/design'
 import file, { IFileState } from '@/store/module/file'
 import font from '@/store/module/font'
@@ -40,11 +41,12 @@ import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
-import { createStore, GetterTree, MutationTree } from 'vuex'
+import { GetterTree, MutationTree, createStore } from 'vuex'
 import brandkit, { IBrandKitState } from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
+  sessionId: generalUtils.generateRandomString(12),
   pages: [{
     config: pageUtils.newPage({}),
     modules: {
@@ -1160,6 +1162,7 @@ type IStoreRoot = IEditorState & {
   fontTag: IFontTagState,
   imgControl: IImgControlState,
   webView: IWebViewState,
+  cypress: ICypressState,
 }
 const store = createStore({
   state: state as IStoreRoot,
@@ -1191,7 +1194,8 @@ const store = createStore({
     shadow,
     fontTag,
     imgControl,
-    webView
+    webView,
+    cypress,
   }
 })
 export default store

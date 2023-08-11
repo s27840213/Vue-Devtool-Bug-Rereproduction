@@ -22,7 +22,7 @@ class ImageUtils {
     const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve) => {
       const image = new Image()
-      if (crossOrigin) {
+      if (crossOrigin && !src.includes('data:image/png;base64')) {
         image.crossOrigin = 'anonymous'
       }
       image.onload = () => resolve(cb(image))
@@ -611,7 +611,7 @@ class ImageUtils {
   }
 
   appendOriginQuery(src: string) {
-    if (!src) return src
+    if (!src || src.includes('data:image/')) return src
     if (src.includes('origin=true')) return src
     if (src.includes('?')) {
       return `${src}&origin=true`
@@ -621,6 +621,7 @@ class ImageUtils {
   }
 
   appendRandomQuery(src: string) {
+    if (src.includes('data:image/')) return src
     if (src.includes('?')) {
       return `${src}&rand_ver=${generalUtils.generateRandomString(6)}`
     } else {
@@ -629,11 +630,12 @@ class ImageUtils {
   }
 
   appendRefreshAppver(src: string) {
+    if (src.includes('data:image/')) return src
     return this.appendQuery(src, 'appver', APP_VER_FOR_REFRESH_CACHE)
   }
 
   appendCompQuery(src: string): string {
-    if (src.includes('comp=0')) return src
+    if (src.includes('comp=0' || 'data:image/')) return src
     if (src.includes('?')) {
       return `${src}&comp=0`
     } else {

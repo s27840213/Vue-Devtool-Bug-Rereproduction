@@ -65,6 +65,7 @@ import PopupVerify from '@/components/popup/PopupVerify.vue'
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
+import logUtils from '@/utils/logUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
@@ -158,6 +159,7 @@ export default defineComponent({
       this.responseError = false
     },
     async onConfirmClicked() {
+      logUtils.setLogAndConsoleLog('Click update and save userInfo')
       this.isLoading = true
       this.responseError = false
       this.isConfirmClicked = true
@@ -180,6 +182,7 @@ export default defineComponent({
         updateValue.uname = this.inputName.trim()
       }
       if (this.inputAccount.trim() !== this.account.trim()) {
+        logUtils.setLogAndConsoleLog('update email case')
         if (!this.isEmailVerified) {
           const parameter = {
             token: this.token,
@@ -191,8 +194,10 @@ export default defineComponent({
           }
           const data = await store.dispatch('user/sendVcode', parameter)
           if (data.flag === 0) {
+            logUtils.setLogAndConsoleLog('Send Vcode success')
             this.showVerifyPopup = true
           } else {
+            logUtils.setLogAndConsoleLog(`Send Vcode failed (msg: ${data.msg})`)
             this.responseError = true
             this.accountErrorMessage = data.msg
           }
@@ -212,6 +217,7 @@ export default defineComponent({
 
       const data = await store.dispatch('user/updateUser', updateValue)
       if (data.flag === 0) {
+        logUtils.setLogAndConsoleLog('Update userInfo success')
         store.commit('user/SET_STATE', {
           uname: data.data.uname,
           account: data.data.account,
@@ -225,6 +231,8 @@ export default defineComponent({
         }
         this.isConfirmClicked = false
         this.isEmailVerified = false
+      } else {
+        logUtils.setLogAndConsoleLog(`Update userInfo failed (msg: ${data.msg})`)
       }
 
       this.isLoading = false
@@ -245,9 +253,11 @@ export default defineComponent({
       this.showRemovePopup = false
     },
     chooseAvatar() {
+      logUtils.setLogAndConsoleLog('Click upload avatar')
       uploadUtils.chooseAssets('avatar')
     },
     onRemoveAvatarClicked() {
+      logUtils.setLogAndConsoleLog('Click remove avatar')
       this.showRemovePopup = true
       // uploadUtils.chooseAssets('avatar')
     },
