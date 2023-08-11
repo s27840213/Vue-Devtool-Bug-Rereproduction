@@ -624,7 +624,7 @@ class UploadUtils {
           newPage.layers[i] = this.layerInfoFilter(layer)
         }
       }
-      newPage.backgroundImage.config.imgControl = false
+      newPage.backgroundImage.config = this.layerInfoFilter(newPage.backgroundImage.config)
       newPage.width = _.round(newPage.width)
       newPage.height = _.round(newPage.height)
       newPage.bleeds && Object.keys(newPage.bleeds).forEach(key => {
