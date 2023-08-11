@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# npx --no-install commitlint --edit $1
+# use npx.cmd instead of npx why?
+# ans: in window, npx will throw errors, fucking strange
+if [[ $(uname) == "Darwin" ]]; then
+	echo "System: $(uname)"
+  npx --no-install commitlint --edit "$1"
+else
+	echo "System: $(uname)"
+  npx.cmd --no-install commitlint --edit "$1"
+fi
