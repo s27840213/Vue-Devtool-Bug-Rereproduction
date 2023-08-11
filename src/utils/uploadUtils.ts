@@ -1401,27 +1401,33 @@ class UploadUtils {
   }
 
   layerInfoFilter(layer: ILayer): any {
+    const { type, jsonVer, jsonVer_origin, locked } = layer
+    // props for all type layer
+    const general = {
+      type,
+      locked,
+      jsonVer,
+      jsonVer_origin
+    }
     switch (layer.type) {
       case 'image': {
         const image = layer as IImage
-        const { type, srcObj, styles, trace, jsonVer, jsonVer_origin, overlay } = image
+        const { srcObj, styles, trace, overlay } = image
         return {
-          type,
+          ...general,
           srcObj,
           trace,
-          jsonVer,
-          jsonVer_origin,
           overlay,
           styles: this.styleFilter(styles, 'image')
         }
       }
       case 'shape': {
         const shape = layer as IShape
-        const { type, designId, ratio, color, styles, category, jsonVer, jsonVer_origin } = shape
+        const { designId, ratio, color, styles, category } = shape
         switch (shape.category) {
           case 'D': {
             return {
-              type,
+              ...general,
               color,
               ratio,
               category,
@@ -1431,8 +1437,6 @@ class UploadUtils {
               dasharray: shape.dasharray,
               linecap: shape.linecap,
               point: shape.point,
-              jsonVer,
-              jsonVer_origin,
               styles: this.styleFilter(styles)
             }
           }
@@ -1442,7 +1446,7 @@ class UploadUtils {
             styles.initHeight = styles.height
             shape.vSize = [styles.initWidth, styles.initHeight]
             return {
-              type,
+              ...general,
               color,
               ratio,
               category,
@@ -1452,26 +1456,23 @@ class UploadUtils {
               shapeType: shape.shapeType,
               vSize: shape.vSize,
               filled: shape.filled,
-              jsonVer,
-              jsonVer_origin,
               styles: this.styleFilter(styles)
             }
           default: {
             if (designId) {
               return {
-                type,
+                ...general,
                 category,
                 designId,
                 ratio,
                 color,
                 pDiff: shape.pDiff,
-                jsonVer,
-                jsonVer_origin,
                 styles: this.styleFilter(styles)
               }
             } else {
               // for downward compatible reason record the entire shape info
               return {
+                ...general,
                 ...shape
               }
             }
@@ -1480,9 +1481,9 @@ class UploadUtils {
       }
       case 'frame': {
         const frame = layer as IFrame
-        const { type, designId, clips, decoration, decorationTop, styles, blendLayers, jsonVer, jsonVer_origin } = frame
+        const { designId, clips, decoration, decorationTop, styles, blendLayers } = frame
         return {
-          type,
+          ...general,
           designId,
           clips: [
             ...clips.map(img => {
@@ -1507,57 +1508,49 @@ class UploadUtils {
           ...(blendLayers && {
             blendLayers: blendLayers.map(function (l) { return { color: l.color } })
           }),
-          jsonVer,
-          jsonVer_origin,
           styles: this.styleFilter(styles, 'frame')
         }
       }
       case 'text': {
         const text = layer as IText
-        const { type, widthLimit, isEdited, paragraphs, styles, isCompensated, spanDataList, jsonVer, jsonVer_origin } = text
+        const { widthLimit, isEdited, paragraphs, styles, isCompensated, spanDataList } = text
         return {
-          type,
+          ...general,
           widthLimit,
           isEdited,
           isCompensated,
           paragraphs,
           spanDataList,
-          jsonVer,
-          jsonVer_origin,
           styles: this.styleFilter(styles, 'text')
         }
       }
       case 'group': {
         const group = layer as IGroup
-        const { type, layers, styles, designId, db, jsonVer, jsonVer_origin } = group
+        const { layers, styles, designId, db } = group
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)
           })
         return {
-          type,
+          ...general,
           designId,
           db,
           layers: filteredLayers,
-          jsonVer,
-          jsonVer_origin,
           styles: this.styleFilter(styles)
         }
       }
       case 'tmp': {
         const tmp = layer as ITmp
-        const { layers, styles, jsonVer, jsonVer_origin } = tmp
+        const { layers, styles } = tmp
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)
           })
         return {
+          ...general,
           type: 'group',
           layers: filteredLayers,
-          jsonVer,
-          jsonVer_origin,
           styles: this.styleFilter(styles)
-
         }
       }
     }
