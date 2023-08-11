@@ -11,7 +11,8 @@ module.exports = {
 
   plugins: [
     'cypress',
-    'unused-imports'
+    'unused-imports',
+    'sonarjs',
   ],
   env: {
     'cypress/globals': true,
@@ -60,5 +61,6 @@ module.exports = {
         ignorePublicMembers: false,
       },
     ],
+    'sonarjs/cognitive-complexity': ['warn', 15]
   }
 }
