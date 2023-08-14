@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "vivipic:dev": "pnpm --filter aipe dev",
-    "stk:dev": "pnpm --filter aipe dev",
-    "aipe:dev": "pnpm --filter aipe dev",
+    "build-all": "nx run-many --target=build --all",
+    "build-affected": "nx affected:build --parallel",
+    "aipe": "nx dev aipe",
+    "pic": "nx dev pic",
+    "stk": "nx dev stk",
     "lint": "pnpm -r run lint",
     "format": "pnpm -r run format"
   },
@@ -37,7 +39,9 @@
     "vite": "^4.4.6",
     "tailwindcss": "^3.0.23",
     "autoprefixer": "^10.4.2",
-    "postcss": "^8.4.8"
+    "postcss": "^8.4.8",
+    "nx": "16.6.0",
+    "nx-cloud": "latest"
   },
   "config": {
     "commitizen": {

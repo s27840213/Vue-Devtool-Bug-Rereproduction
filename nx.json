@@ -1,0 +1,39 @@
+{
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx-cloud",
+      "options": {
+        "cacheableOperations": [
+          "build"
+        ],
+        "accessToken": "MGMyNGMwZDAtMTM3My00M2Y3LTgyZjMtZjcxYTZmYTE3N2I1fHJlYWQtd3JpdGU="
+      }
+    }
+  },
+  "nameInputs": {
+    "noMarkdown": "{projectRoot}/**/*.md"
+  },
+  "targetDefaults": {
+    "dev": {
+      // Why depend on build? bcz build will generate dist folder, which is the entry point for some packages
+      // so if we didn't build for certain packages, the dev will fail
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "build": {
+      // ^ sign means including its dependencies,
+      // ex: if A project used B packages, and B package changed the README.md, then the build will still use cached build result
+      "input": ["noMarkdown", "^noMarkdown"],
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ]
+    }
+  },
+  "affected": {
+    "defaultBase": "develop"
+  }
+}
