@@ -175,7 +175,7 @@ class BgRemoveUtils {
           userId: (this.autoRemoveResult as IBgRemoveInfo).teamId,
           assetId: this.isAdmin ? (this.autoRemoveResult as IBgRemoveInfo).id : (this.autoRemoveResult as IBgRemoveInfo).assetIndex
         },
-        panelPreviewSrc: (this.autoRemoveResult as IBgRemoveInfo).urls.larg,
+        previewSrc: (this.autoRemoveResult as IBgRemoveInfo).urls.larg,
         trace: 1
       })
       const image = layerUtils.getLayer(pageIndex, index) as IImage
@@ -206,7 +206,6 @@ class BgRemoveUtils {
 
       const { pageId, layerId } = this.bgRemoveIdInfo
       layerUtils.updateLayerProps(pageIndex, index, {
-        panelPreviewSrc: '',
         previewSrc,
         trace: 1
       })

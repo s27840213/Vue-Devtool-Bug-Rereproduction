@@ -96,7 +96,8 @@ const getDefaultState = (): IEditorState => ({
     },
     isTransparent: false,
     isPreview: false,
-    panelPreviewSrc: ''
+    // panelPreviewSrc: ''
+    previewSrc: ''
   },
   currSubSelectedInfo: {
     index: -1,
@@ -598,9 +599,6 @@ const mutations: MutationTree<IEditorState> = {
     if (typeof photo.isTransparent !== 'undefined') {
       state.currDraggedPhoto.isTransparent = photo.isTransparent
     }
-    if (photo.panelPreviewSrc) {
-      state.currDraggedPhoto.panelPreviewSrc = photo.panelPreviewSrc
-    }
   },
   SET_hasCopiedFormat(state: IEditorState, value: boolean) {
     state.hasCopiedFormat = value
@@ -938,12 +936,13 @@ const mutations: MutationTree<IEditorState> = {
              * @Vue3Update
              */
             // Vue.delete(l, 'previewSrc')
-            delete l.previewSrc
+            // delete l.previewSrc
             Object.assign((l as IImage).srcObj, {
               type,
               userId,
               assetId: uploadUtils.isAdmin ? assetId : assetIndex
             })
+            Object.assign(l, { previewSrc: '' })
             uploadUtils.uploadDesign()
           }
           break

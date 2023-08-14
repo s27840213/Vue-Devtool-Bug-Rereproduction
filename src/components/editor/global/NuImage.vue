@@ -575,7 +575,13 @@ export default defineComponent({
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             isPrimaryImgLoaded = true
             this.src = src
-            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: src }, this.subLayerIndex)
+            if (this.config.previewSrc === '') {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: src }, this.subLayerIndex)
+            }
+            if (!this.isBlurImg) {
+              this.preLoadImg('pre', this.getImgDimension)
+              this.preLoadImg('next', this.getImgDimension)
+            }
             resolve()
           }
         }, {
