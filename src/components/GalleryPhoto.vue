@@ -117,7 +117,8 @@ export default defineComponent({
         }
       }
       const data = {
-        srcObj: { type: vendor, userId: '', assetId: photo.id }
+        srcObj: { type: vendor, userId: '', assetId: photo.id },
+        styles: { imgWidth: photo.width, imgHeight: photo.height }
       } as IImage
       const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
       const tinySize = sizeMap.find(e => e.key === 'tiny')?.size || 320

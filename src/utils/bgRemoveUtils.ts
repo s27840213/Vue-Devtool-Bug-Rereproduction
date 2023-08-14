@@ -231,7 +231,12 @@ class BgRemoveUtils {
       const targetPageIndex = pageUtils.getPageIndexById(pageId)
       const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
       layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-        tmpId: id
+        tmpId: id,
+        srcObj: {
+          type: '',
+          userId: '',
+          assetId: ''
+        }
       })
       uploadUtils.uploadAsset('image', [previewSrc], {
         addToPage: false,

@@ -547,7 +547,6 @@ class AssetUtils {
   addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}, categoryType = -1) {
     store.commit('SET_mobileSidebarPanelOpen', false)
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc } = attrs
-    console.log('addimg', previewSrc)
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
 
     let newStyles = {
