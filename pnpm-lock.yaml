@@ -55,6 +55,9 @@ importers:
       typescript: 5.1.6
       vite: 4.4.9_@types+node@18.17.4
 
+  packages/tailwindcss:
+    specifiers: {}
+
   projects/aipe:
     specifiers:
       '@tsconfig/node18': ^18.2.0

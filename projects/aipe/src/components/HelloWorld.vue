@@ -7,7 +7,7 @@ defineProps<{
 <template lang="pug">
 div(class="greetings")
   h1 {{  msg  }}
-  h3 You’ve successfully created a project with
+  h3(class="text-appBtnPrimaryBg hover:text-appSelection text-btn-md") You’ve successdsdasfully created a project with
     a(
       href="https://vitejs.dev/"
       target="_blank"

@@ -1,0 +1,13 @@
+{
+  "name": "@frontier/tailwindcss",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path ../../.gitignore",
+    "format": "prettier --write '**/*.{js,ts,vue,json}' --ignore-path ../../.gitignore"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
