@@ -135,7 +135,10 @@ export default defineComponent({
       if (!this.inBgRemoveMode) return
       let deltaDistance = 0
       if (event.pointLength === 2) {
-        // calculate the distance between two fingers
+        // calculate the delta distance between two fingers
+        // use to determine the action we do
+        // if smaller than 1 -> pan
+        // if bigger than 1 -> pinch
         const tmpDistance = this.distanceBetweenFingers
         this.distanceBetweenFingers = Math.sqrt(
           Math.pow(event.points[0].clientX - event.points[1].clientX, 2) +
@@ -173,12 +176,9 @@ export default defineComponent({
             this.initPinchPos = { x: event.x, y: event.y }
           }
 
-          // const sizeDiff = {
-          //   width: this.bgRemoveScaleRatio * (this.initImgSize.width) * (event.scale - 1) * 0.5,
-          //   height: this.bgRemoveScaleRatio * (this.initImgSize.height) * (event.scale - 1) * 0.5
-          // }
           if (event.pointLength === 2) {
             if (deltaDistance > 1) {
+              // pinching
               const ratio = this.tmpScaleRatio * event.scale
 
               if (ratio <= this.minRatio) {
@@ -207,11 +207,7 @@ export default defineComponent({
                 })
               }
             } else {
-              const sizeDiff = {
-                width: (this.initImgSize.width - 1600 * this.bgRemoveScaleRatio) * 0.5,
-                height: (this.initImgSize.height - (1600 * this.imgAspectRatio) * this.bgRemoveScaleRatio) * 0.5
-              }
-
+              // panning
               this.$nextTick(() => {
                 if (this.rmSection) {
                   this.rmSection.scrollLeft = this.rmSection.scrollLeft - event.deltaX * 2
