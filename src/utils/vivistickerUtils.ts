@@ -407,7 +407,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   sendAppLoaded() {
     if (!this.appLoadedSent) {
-      this.sendToIOS('APP_LOADED', { hideReviewRequest: false, sendNotifyMail: false })
+      this.sendToIOS('APP_LOADED', {
+        hideReviewRequest: false,
+        logJsonContent: true,
+        ul_log_map: uploadUtils.loginOutput.upload_log_map
+      })
       this.appLoadedSent = true
     }
   }
