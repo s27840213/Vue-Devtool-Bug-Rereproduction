@@ -28,9 +28,7 @@ export interface IPageSizeWithBleeds extends IPageSize {
 }
 export interface IPage extends IPageSizeWithBleeds {
   [index: string]: unknown,
-  mobilePhysicalSize: {
-    initPos: ICoordinate
-  },
+  initPos: ICoordinate
   id: string,
   x: number,
   y: number,

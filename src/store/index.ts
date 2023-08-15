@@ -1109,8 +1109,8 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_pageInitPos(state: IEditorState, data: { pageIndex: number, initPos: ICoordinate }) {
     const { pageIndex, initPos } = data
     const page = state.pages[pageIndex]
-    page.config.mobilePhysicalSize.initPos.x = initPos.x
-    page.config.mobilePhysicalSize.initPos.y = initPos.y
+    page.config.initPos.x = initPos.x
+    page.config.initPos.y = initPos.y
   },
   UPDATE_snapUtilsIndex(state: IEditorState, index: number) {
     state.pages[index].modules.snapUtils.pageIndex = index

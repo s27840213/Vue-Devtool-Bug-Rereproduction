@@ -103,8 +103,7 @@ export default defineComponent({
       initPinchPos: null as ICoordinate | null,
       isHandlingEdgeReach: false,
       movingUtils: null as unknown as MovingUtils,
-      translationRatio: null as null | ICoordinate,
-      currPageEl: null as null | HTMLElement
+      translationRatio: null as null | ICoordinate
     }
   },
   created() {
@@ -408,7 +407,6 @@ export default defineComponent({
           case 'start': {
             if (this.isBgImgCtrl || this.isImgCtrl) return
 
-            this.currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
             this.movingUtils.removeListener()
             this.initPagePos.x = page.x
             this.initPagePos.y = page.y
@@ -426,7 +424,6 @@ export default defineComponent({
 
             const newScaleRatio = evtScale * this.tmpScaleRatio
             if (!this.isPinchingEditor) {
-              this.currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
               this.movingUtils.removeListener()
               this.initPagePos.x = page.x
               this.initPagePos.y = page.y
@@ -444,8 +441,8 @@ export default defineComponent({
 
             if (!this.translationRatio) {
               const translationRatio_ori_pos = {
-                x: ((page.mobilePhysicalSize.initPos.x - this.initPagePos.x) / (page.width * this.tmpScaleRatio * 0.01 * contentScaleRatio)),
-                y: ((page.mobilePhysicalSize.initPos.y - this.initPagePos.y) / (page.height * this.tmpScaleRatio * 0.01 * contentScaleRatio))
+                x: ((page.initPos.x - this.initPagePos.x) / (page.width * this.tmpScaleRatio * 0.01 * contentScaleRatio)),
+                y: ((page.initPos.y - this.initPagePos.y) / (page.height * this.tmpScaleRatio * 0.01 * contentScaleRatio))
               }
 
               this.translationRatio = {
@@ -454,14 +451,18 @@ export default defineComponent({
               }
             }
 
+            // size difference via pinching
             const sizeDiff = {
               width: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.width * contentScaleRatio),
               height: (newScaleRatio - this.tmpScaleRatio) * 0.01 * (page.height * contentScaleRatio)
             }
+
+            // pos difference via moving pinching pos
             const movingTraslate = {
               x: (e.x - this.initPinchPos.x),
               y: (e.y - this.initPinchPos.y)
             }
+
             pageUtils.updatePagePos(layerUtils.pageIndex, {
               x: this.initPagePos.x - sizeDiff.width * this.translationRatio.x + movingTraslate.x,
               y: this.initPagePos.y - sizeDiff.height * this.translationRatio.y + movingTraslate.y
@@ -476,8 +477,10 @@ export default defineComponent({
 
             const newScaleRatio = this.$store.state.mobileEditor.pinchScale * this.tmpScaleRatio
             const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(page, newScaleRatio * 0.01)
+            const currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+
             if (newScaleRatio > MAX_SCALE) {
-              this.currPageEl?.classList.add('editor-view__pinch-transition')
+              currPageEl?.classList.add('editor-view__pinch-transition')
               this.isHandlingEdgeReach = true
 
               const sizeDiff = {
@@ -499,11 +502,11 @@ export default defineComponent({
                 this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
                 this.$store.commit('SET_pageScaleRatio', MAX_SCALE)
                 this.isHandlingEdgeReach = false
-                this.currPageEl?.classList.remove('editor-view__pinch-transition')
+                currPageEl?.classList.remove('editor-view__pinch-transition')
               }, TRANSITION_TIME)
             } else if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
               this.isHandlingEdgeReach = true
-              this.currPageEl?.classList.add('editor-view__pinch-transition')
+              currPageEl?.classList.add('editor-view__pinch-transition')
 
               const pos = { x: page.x, y: page.y }
               const EDGE_WIDTH = this.EDGE_WIDTH()
@@ -538,7 +541,7 @@ export default defineComponent({
 
               setTimeout(() => {
                 this.isHandlingEdgeReach = false
-                this.currPageEl?.classList.remove('editor-view__pinch-transition')
+                currPageEl?.classList.remove('editor-view__pinch-transition')
               }, TRANSITION_TIME)
             } else {
               this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
