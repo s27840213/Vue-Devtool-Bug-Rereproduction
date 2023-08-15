@@ -3,7 +3,7 @@ div(class="panel-objects")
   div(v-show="!isInCategory" class="panel-objects__nav" :style="navStyles")
     template(v-if="isShowSearchBar && !isFavorites")
       search-bar(class="panel-objects__nav__searchbar" ref="searchbar"
-          :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
+          :placeholder="$t('NN0092', { target: $tc('STK0085', 2) })"
           clear
           :defaultKeyword="keywordLabel"
           vivisticker="dark"

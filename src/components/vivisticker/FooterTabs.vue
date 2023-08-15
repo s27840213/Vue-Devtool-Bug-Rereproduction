@@ -16,7 +16,7 @@ div(class="footer-tabs" ref="tabs")
             :iconColor="tabColor(tab)"
             :iconWidth="'24px'"
             :style="textIconStyle")
-          span(class="no-wrap click-disabled"
+          span(class="no-wrap click-disabled text-capitalize"
             :class="`text-${tabColor(tab)}`") {{tab.text}}
           pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
     transition(name="panel-up")
@@ -248,7 +248,7 @@ export default defineComponent({
     },
     homeTabs(): Array<IFooterTab> {
       return [
-        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: 'objects', text: `${this.$tc('STK0085', 2)}`, panelType: 'object' },
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !vivistickerUtils.isTemplateSupported },
@@ -402,7 +402,7 @@ export default defineComponent({
       return [
         { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template-content' },
         { icon: 'camera', text: this.$t('STK0067') },
-        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: 'objects', text: `${this.$tc('STK0085', 2)}`, panelType: 'object' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' },
