@@ -351,21 +351,38 @@ export default defineComponent({
         }, { crossOrigin: true })
       }
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.getSrc(this.image.config.srcObj, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
-      return new Promise<void>((resolve, reject) => {
-        imageUtils.imgLoadHandler(src, () => {
-          if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
-            isPrimaryImgLoaded = true
-            this.src = src
-            resolve()
-          }
-        }, {
-          error: () => {
-            reject(new Error('cannot load the current image'))
-          },
-          crossOrigin: true
+      const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
+
+      if (src && src !== config.previewSrc) {
+        return new Promise<void>((resolve, reject) => {
+          imageUtils.imgLoadHandler(src, () => {
+            if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+              isPrimaryImgLoaded = true
+              this.src = src
+              if (!this.isBlurImg) {
+                this.preLoadImg('pre', this.getImgDimension)
+                this.preLoadImg('next', this.getImgDimension)
+              }
+              resolve()
+            }
+          }, {
+            error: () => {
+              reject(new Error(`cannot load the current image, src: ${src}`))
+              fetch(src)
+                .then(res => {
+                  const { status, statusText } = res
+                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
+                })
+                .catch((e) => {
+                  if (src.indexOf('data:image/png;base64') !== 0) {
+                    this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
+                  }
+                })
+            },
+            crossOrigin: true
+          })
         })
-      })
+      }
     },
     stylesConverter(): { [key: string]: string } {
       return {
