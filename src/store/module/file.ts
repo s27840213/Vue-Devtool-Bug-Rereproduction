@@ -1,8 +1,7 @@
 import file from '@/apis/file'
 import userApis from '@/apis/user'
-import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
+import { IAssetPhoto, isIAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
-import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import store from '@/store'
 import apiUtils from '@/utils/apiUtils'
 import logUtils from '@/utils/logUtils'
@@ -138,19 +137,25 @@ const actions: ActionTree<IFileState, unknown> = {
     const imgToRequest = new Set<string>()
 
     imgToRequest.add(isPrivate(backgroundImage.config.srcObj))
-    for (const layer of layers) {
-      const targets = layer.type === 'group' ? (layer as IGroup).layers : [layer]
-
-      for (const target of targets) {
-        switch (target.type) {
-          case 'image':
-            imgToRequest.add(isPrivate((target as IImage).srcObj))
-            break
-          case 'frame':
-            for (const clip of (target as IFrame).clips) {
-              imgToRequest.add(isPrivate(clip.srcObj))
-            }
-            break
+    const flattedLayers = layers.flatMap(
+      layer => layer.type === 'group' ? layer.layers : [layer]
+    )
+    for (const layer of flattedLayers) {
+      switch (layer.type) {
+        case 'image':
+          imgToRequest.add(isPrivate(layer.srcObj))
+          break
+        case 'frame':
+          for (const clip of layer.clips) {
+            imgToRequest.add(isPrivate(clip.srcObj))
+          }
+          break
+        case 'text': {
+          const customImg = layer.styles.textFill.customImg
+          if (isIAssetPhoto(customImg) && !customImg.id) { // Is private img
+            imgToRequest.add(`${customImg.assetIndex}`)
+          }
+          break
         }
       }
     }
