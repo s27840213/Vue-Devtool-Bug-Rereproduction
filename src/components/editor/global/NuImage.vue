@@ -606,10 +606,11 @@ export default defineComponent({
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
       if (this.isBlurImg) return
-      if (!this.isOnError && this.config.previewSrc === undefined) {
+
+      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
+      if (!this.isOnError && currUrl) {
         const { type } = this.config.srcObj
         if (type === 'background') return
-        const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
         const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
         imageUtils.imgLoadHandler(currUrl, async () => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
@@ -632,7 +633,7 @@ export default defineComponent({
         const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, size))
         imageUtils.imgLoadHandler(src, () => resolve(), {
           error: () => {
-            reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+            reject(new Error(`cannot preLoad the ${preLoadType}-image, src: ${src}`))
             fetch(src)
               .then(res => {
                 const { status, statusText } = res

@@ -26,7 +26,11 @@ class ImageUtils {
         image.crossOrigin = 'anonymous'
       }
       image.onload = () => resolve(cb(image))
-      error && (image.onerror = () => error(image))
+      image.onerror = (_e) => {
+        if (error) {
+          error(image)
+        }
+      }
       image.src = src
     })
   }

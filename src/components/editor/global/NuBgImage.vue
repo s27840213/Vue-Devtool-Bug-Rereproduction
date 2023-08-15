@@ -379,8 +379,9 @@ export default defineComponent({
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.isBlurImg) return
-      if (this.image.config.previewSrc === undefined) {
-        const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
+
+      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
+      if (currUrl) {
         const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)
         imageUtils.imgLoadHandler(currUrl, async () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
