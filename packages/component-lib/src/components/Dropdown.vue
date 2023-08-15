@@ -1,0 +1,98 @@
+<template lang="pug">
+div(class="relative dropdown")
+  property-bar(class="pointer"
+    @click.prevent="handleOpen")
+    div(class="dropdown__label")
+      slot {{ current || placeholder }}
+    slot(name="caret-down")
+      svg-icon(iconName="caret-down"
+        iconWidth="10px"
+        iconColor="gray-2")
+  div(v-if="showDropdown && options.length"
+    v-click-outside="handleClose"
+    class="dropdown__options")
+    div(v-for="option in options"
+      :key="typeof option === 'number' ? option : option.value"
+      @click.stop="() => handleSelect(option)")
+      slot(name="option" :data="option")
+        div(class="dropdown__option") {{ typeof option === 'number' ? option : option.label }}
+  div(v-if="showDropdown && isCustomOptions"
+    v-click-outside="handleClose"
+    class="dropdown__options")
+    slot(name="custom")
+</template>
+
+<script lang="ts">
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+
+export default defineComponent({
+  props: {
+    current: {
+      type: String
+    },
+    placeholder: {
+      type: String
+    },
+    options: {
+      type: Array as PropType<{value: string, label: string}[] | number[]>,
+      default: () => []
+    },
+    closeAfterSelection: {
+      type: Boolean,
+      default: true
+    },
+    isCustomOptions: {
+      type: Boolean,
+      default: false
+    },
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
+  emits: ['open', 'close', 'select'],
+  data () {
+    return {
+      showDropdown: false
+    }
+  },
+  methods: {
+    handleOpen (event: Event) {
+      this.showDropdown = true
+      this.$emit('open', event)
+    },
+    // Used by DownloadPageSelection.handleSubmit
+    // eslint-disable-next-line vue/no-unused-properties
+    handleClose (event: Event) {
+      this.showDropdown = false
+      this.$emit('close', event)
+    },
+    handleSelect (option: any) {
+      this.closeAfterSelection && (this.showDropdown = false)
+      this.$emit('select', option)
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+  .dropdown {
+    &__options {
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      min-width: 100%;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid setColor(gray-4);
+      background-color: setColor(white);
+    }
+    &__option {
+      padding: 6px 10px;
+      &:hover {
+        background-color: setColor(gray-4);
+      }
+    }
+  }
+</style>

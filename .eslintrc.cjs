@@ -16,5 +16,8 @@ module.exports = {
   // to prevent commitlint.config.js to throw error
   env: {
     node: true
+  },
+  rules: {
+    'vue/multi-word-component-names': 'off'
   }
 }
