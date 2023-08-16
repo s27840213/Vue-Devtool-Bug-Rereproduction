@@ -180,12 +180,8 @@ export default defineComponent({
     getImgDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
     },
-    src(val) {
-      console.warn('src', val)
-    },
     'config.srcObj': {
       handler: function (val, oldVal) {
-        console.log('generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)', generalUtils.isWatcherTriggerByUndoRedo(val, oldVal))
         if (generalUtils.isWatcherTriggerByUndoRedo(val, oldVal)) return
 
         this.shadowBuff.canvasShadowImg = undefined

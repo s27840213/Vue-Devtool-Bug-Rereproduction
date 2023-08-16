@@ -102,7 +102,6 @@ export default defineComponent({
     srcObj: {
       deep: true,
       handler: function () {
-        console.warn('bg srcObj', generalUtils.deepCopy(this.image.config))
         if (this.isColorBackground) {
           this.src = ''
         } else {
