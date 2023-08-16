@@ -10,5 +10,8 @@
       "component-lib": ["../path/to/component-lib/dist/component-lib.d.ts"]
     },
     "resolveJsonModule": true
+  },
+  "vueCompilerOptions": {
+    "plugins": ["@vue/language-plugin-pug"]
   }
 }

@@ -1,8 +1,37 @@
-<script setup lang="ts"></script>
-
-<template lang="pug">
-div {{  $t("NN0001")  }}
+<!-- <template lang="pug">
+div {{  count  }}
+div {{ doubleCount }}
+button(@click="increment") ++
+</template> -->
+<template>
+  <div>{{ count }} / {{ notReactiveCount }}</div>
+  <div>{{ name }}</div>
+  <button @click="increment">+</button>
+  <button @click="reset">reset</button>
+  <button @click="patch">patch</button>
 </template>
+
+<script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useCounterStore } from './stores/counter'
+
+const counterStore = useCounterStore()
+
+counterStore.count = 100
+const { increment, count: notReactiveCount } = counterStore
+const { count, name } = storeToRefs(counterStore)
+
+const reset = () => {
+  counterStore.$reset()
+}
+
+const patch = () => {
+  counterStore.$patch({
+    count: 100,
+    name: 'patch'
+  })
+}
+</script>
 
 <style scoped>
 header {

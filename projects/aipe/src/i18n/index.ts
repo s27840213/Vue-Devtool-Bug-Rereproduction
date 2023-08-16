@@ -1,13 +1,13 @@
-import en from '@/locales/en.json'
 import tw from '@/locales/tw.json'
+import us from '@/locales/us.json'
 import { createI18n } from 'vue-i18n'
 
 export default createI18n({
   legacy: false,
-  locale: 'en',
-  fallbackLocale: 'en',
+  locale: 'us',
+  fallbackLocale: 'us',
   messages: {
-    en: en,
+    us: us,
     zh: tw
   },
   globalInjection: true
