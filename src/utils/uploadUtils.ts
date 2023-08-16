@@ -360,6 +360,7 @@ class UploadUtils {
                 pageIndex: pageUtils.currFocusPageIndex,
                 // The following props is used for preview image during polling process
                 isPreview: true,
+                previewSrc: src,
                 assetId
               })
             }

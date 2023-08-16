@@ -72,7 +72,8 @@ div(class=" popup-layer bg-gray-6"
       div(class="shortcut")
         span(class="ml-10 body-2 text-gray-3") {{data.shortcutText}}
   hr(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))" class="popup-layer__hr")
-  div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image')) && currSelectedInfo.layers[0].previewSrc === undefined"
+  //- div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image')) && currSelectedInfo.layers[0].previewSrc === undefined"
+  div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))"
       class="popup-layer__item"
       @click="setBackgroundImage")
     svg-icon(

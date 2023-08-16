@@ -385,9 +385,8 @@ class AssetUtils {
   }
 
   addBackground(url: string, attrs: IAssetProps = {}) {
-    const { pageIndex, styles = {}, ver, panelPreviewSrc, imgSrcSize } = attrs
+    const { pageIndex, ver, previewSrc, imgSrcSize } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
-    const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imgSrcSize || { width: 0, height: 0 }
     const page = store.getters.getPage(targetPageIndex)
     const { width, height, posX, posY } = ImageUtils.adaptToPage({
@@ -416,7 +415,7 @@ class AssetUtils {
         userId: ''
       },
       ver,
-      panelPreviewSrc
+      previewSrc
     })
 
     store.commit('SET_backgroundImage', {
@@ -547,7 +546,7 @@ class AssetUtils {
 
   addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}, categoryType = -1) {
     store.commit('SET_mobileSidebarPanelOpen', false)
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, panelPreviewSrc, previewSrc } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc } = attrs
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
 
     let newStyles = {
@@ -625,11 +624,10 @@ class AssetUtils {
     const y = imageLayers.length === 0 ? (this.pageSize.height / 2 - newStyles.height / 2) : (imageLayers[imageLayers.length - 1].styles.y + 20)
 
     const config = {
-      ...(previewSrc && { previewSrc }),
       ...(isPreview && { previewSrc: url }),
       ...(categoryType === 14 || categoryType === 15) && { categoryType },
       srcObj,
-      panelPreviewSrc,
+      previewSrc,
       styles: {
         ...styles,
         x,

@@ -148,12 +148,6 @@ export default defineComponent({
     if (this.userId !== 'backendRendering') {
       this.handleIsTransparent()
       this.previewAsLoading()
-      // const nextImg = new Image()
-      // nextImg.onload = () => {
-      //   const preImg = new Image()
-      //   preImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
-      // }
-      // nextImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
     } else {
       if (this.isAdjustImage) {
         this.handleIsTransparent()
@@ -313,7 +307,6 @@ export default defineComponent({
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
-            console.warn(this.image.config.srcObj)
             this.setBgImageControl({
               pageIndex: this.pageIndex,
               imgControl: true
@@ -355,30 +348,40 @@ export default defineComponent({
             this.src = previewSrc
           }
         }, { crossOrigin: true })
-      } else if (config.panelPreviewSrc) {
-        const panelPreviewSrc = this.image.config.panelPreviewSrc
-        imageUtils.imgLoadHandler(panelPreviewSrc, () => {
-          if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
-            this.src = panelPreviewSrc
-          }
-        }, { crossOrigin: true })
       }
       const { imgWidth, imgHeight } = this.image.config.styles
       const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
-      return new Promise<void>((resolve, reject) => {
-        imageUtils.imgLoadHandler(src, () => {
-          if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
-            isPrimaryImgLoaded = true
-            this.src = src
-            resolve()
-          }
-        }, {
-          error: () => {
-            reject(new Error('cannot load the current image'))
-          },
-          crossOrigin: true
+
+      if (src && src !== config.previewSrc) {
+        return new Promise<void>((resolve, reject) => {
+          imageUtils.imgLoadHandler(src, () => {
+            if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+              isPrimaryImgLoaded = true
+              this.src = src
+              if (!this.isBlurImg) {
+                this.preLoadImg('pre', this.getImgDimension)
+                this.preLoadImg('next', this.getImgDimension)
+              }
+              resolve()
+            }
+          }, {
+            error: () => {
+              reject(new Error(`cannot load the current image, src: ${src}`))
+              fetch(src)
+                .then(res => {
+                  const { status, statusText } = res
+                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
+                })
+                .catch((e) => {
+                  if (src.indexOf('data:image/png;base64') !== 0) {
+                    this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
+                  }
+                })
+            },
+            crossOrigin: true
+          })
         })
-      })
+      }
     },
     stylesConverter(): { [key: string]: string } {
       return {
@@ -392,8 +395,9 @@ export default defineComponent({
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.isBlurImg) return
-      if (this.image.config.previewSrc === undefined) {
-        const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
+
+      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
+      if (currUrl) {
         const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)
         imageUtils.imgLoadHandler(currUrl, async () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
