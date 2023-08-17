@@ -439,7 +439,11 @@ export class MovingUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
-    const offsetRatio = generalUtils.isTouchDevice() ? 1 / store.getters.getContentScaleRatio : 100 / store.getters.getPageScaleRatio
+    let offsetRatio = 100 / store.getters.getPageScaleRatio
+    if (generalUtils.isTouchDevice()) {
+      offsetRatio *= 1 / store.getters.getContentScaleRatio
+    }
+
     const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, offsetRatio)
 
     const isLine = config.type === 'shape' && config.category === 'D'

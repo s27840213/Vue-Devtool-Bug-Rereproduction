@@ -129,6 +129,7 @@ class EditorUtils {
       pageUtils.updatePageInitPos(pageIndex, pos)
       return contentScaleRatio
     }
+    return 1
   }
 
   toggleColorSlips(bool: boolean) {

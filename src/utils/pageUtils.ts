@@ -584,8 +584,8 @@ class PageUtils {
       })
     }
 
-    editorUtils.handleContentScaleRatio(this.currFocusPageIndex)
     if (generalUtils.isTouchDevice()) {
+      editorUtils.handleContentScaleRatio(this.currFocusPageIndex)
       store.commit('SET_pageScaleRatio', 100)
     }
   }
