@@ -397,7 +397,7 @@ export default defineComponent({
     },
     // eslint-disable-next-line
     pinchHandler(e: AnyTouchEvent) {
-      if (this.isHandlingEdgeReach) return
+      if (this.isHandlingEdgeReach || !this.$store.getters['user/isAdmin']) return
 
       window.requestAnimationFrame(() => {
         const { getCurrPage: page, scaleRatio } = pageUtils

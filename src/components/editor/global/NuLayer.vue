@@ -14,7 +14,6 @@ div(class="nu-layer flex-center"
       :style="layerStyles()"
       @pointerdown="onPointerDown($event)"
       @tap="dblTap"
-      @pointerup="onPointerUp($event)"
       @contextmenu.prevent
       @click.right.stop="onRightClick($event)"
       @dragenter="dragEnter($event)"
@@ -430,32 +429,26 @@ export default defineComponent({
     //   return !this.useMobileEditor ? 1 : Math.max(1, this.pageScaleRatio())
     // },
     scaleStyles(): { [index: string]: string } {
-      const { zindex } = this.config.styles
-      const { scale, scaleX, scaleY } = this.config.styles
+      const { scale, scaleX, scaleY, zindex } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
-      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
-      let transform = ''
-      // let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
-      if (!isImgType) {
-        // transform += this.compensationRatio() !== 1 ? `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})` : ''
-        transform += `scale(${scale * (type === 'text' ? _f : 1)}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
-      }
-      const hasActualScale = !!transform && transform !== 'scale(1)'
       const styles = {
         ...(pageUtils._3dEnabledPageIndex === this.pageIndex && { transformStyle: type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d' })
       } as Record<string, string>
-      if (hasActualScale) {
-        if (this.config.type === LayerType.text) {
-          // styles.width = `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
-          // styles.height = `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`
-          styles.width = `${this.config.styles.width / this.config.styles.scale}px`
-          styles.height = `${this.config.styles.height / this.config.styles.scale}px`
-        } else {
-          styles.width = `${this.config.styles.initWidth * _f}px`
-          styles.height = `${this.config.styles.initHeight * _f}px`
+
+      if (!isImgType) {
+        const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
+        const transform = `scale(${scale * (type === 'text' ? _f : 1)}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
+        if (transform !== 'scale(1)') {
+          if (this.config.type === LayerType.text) {
+            styles.width = `${this.config.styles.width / this.config.styles.scale}px`
+            styles.height = `${this.config.styles.height / this.config.styles.scale}px`
+          } else {
+            styles.width = `${this.config.styles.initWidth * _f}px`
+            styles.height = `${this.config.styles.initHeight * _f}px`
+          }
+          styles.transform = transform
         }
-        styles.transform = transform
       }
       return styles
     },
@@ -486,34 +479,13 @@ export default defineComponent({
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
     },
-    onPointerUp(e: PointerEvent) {
-      // console.log(e.target)
-      // if (this.isImgCtrl && this.imgCtrlConfig.id !== this.config.id) {
-      //   imageUtils.setImgControlDefault()
-      // }
-    },
     dblTap(e: PointerEvent) {
-      // console.log(this.layerIndex, this.subLayerIndex, this.config.type)
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.getLayerType === LayerType.image) {
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
             eventUtils.emit(PanelEvent.switchTab, 'crop')
           }
-          // console.log(this.config.type, this.primaryLayer, this.primaryLayer?.type)
-          // if (this.config.type === LayerType.image) {
-          //   switch (this.primaryLayer?.type) {
-          //     case LayerType.group:
-          //       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIndex)
-          //       break
-          //     case LayerType.frame:
-          //       if ((this.config as IImage).srcObj.type !== 'frame') {
-          //         frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { imgControl: true })
-          //       }
-          //       break
-          //   }
-          //   eventUtils.emit(PanelEvent.switchTab, 'crop')
-          // }
         }
       })
     },
@@ -807,8 +779,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  // content-visibility: auto;
-  // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   &:focus {
     background-color: rgba(168, 218, 220, 1);
   }

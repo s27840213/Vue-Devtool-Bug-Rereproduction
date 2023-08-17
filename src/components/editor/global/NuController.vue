@@ -325,12 +325,9 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.movingUtils && this.movingUtils.removeListener()
-    // eventUtils.removePointerEvent('pointerup', this.moveEnd)
-    // eventUtils.removePointerEvent('pointermove', this.moving)
     if (this.eventTarget) {
       this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
     }
-    // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -352,14 +349,12 @@ export default defineComponent({
     ctrlPtrStyles(): Record<string, number | string> {
       if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
         return {
-          // outline: this.outlineStyles(),
           outline: this.outlineStyles().outline,
           opacity: 0
         }
       } else {
         return {
           outline: this.outlineStyles().outline
-          // outline: this.outlineStyles()
         }
       }
     },
@@ -388,7 +383,6 @@ export default defineComponent({
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.$isTouchDevice(), this.config.size?.[0])
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
-      // const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       const finalWidth = width * _f
       const finalHeight = height * _f
@@ -461,11 +455,6 @@ export default defineComponent({
     isFlipping(): boolean {
       return this.config.isFlipping
     },
-    // isTextEditing(): boolean {
-    //   // return !this.isControlling && this.contentEditable
-    //   // @Test
-    //   return !this.isControlling
-    // },
     contentEditable(): boolean {
       return this.config.contentEditable
     },

@@ -1,6 +1,5 @@
 <template lang="pug">
-div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']"
-    :style="styles")
+div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
   div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
     img(class="shadow__img"
       draggable="false"
@@ -334,19 +333,6 @@ export default defineComponent({
     },
     isFrameImg(): boolean {
       return this.config.clips.length === 1 && !!this.config.clips[0].isFrameImg
-    },
-    styles(): Record<string, string> {
-      if (!this.isFrameImg) {
-        return {
-          // width: `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`,
-          // height: `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio * this.$store.state.pageScaleRatio * 0.01}px`,
-
-          // For controll pointer-events from parent, please don't add any pointer-events: initial to layer component.this.contentScaleRatio * this.$store.state.pageScaleRatio *
-          // ...((this.contentScaleRatio !== 1 || this.config.styles.scale) && { transform: `scale(${1 / this.contentScaleRatio / this.config.styles.scale * this.$store.state.pageScaleRatio * 0.01})` }),
-          // transform: `scale(${this.$store.state.pageScaleRatio / 100})`
-        }
-      }
-      return {}
     }
   },
   methods: {
