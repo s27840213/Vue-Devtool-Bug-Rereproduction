@@ -8,7 +8,8 @@ import ImageCarousel from './components/ImageCarousel.vue'
 import MarkerIcon from './components/MarkerIcon.vue'
 import PropertyBar from './components/PropertyBar.vue'
 import RadioBtn from './components/RadioBtn.vue'
-import SqureLoading from './components/SqureLoading.vue'
+import SvgIcon from './components/SvgIcon.vue'
+import Test from './components/Test.vue'
 import ToggleBtn from './components/ToggleBtn.vue'
 import Url from './components/Url.vue'
 export default {
@@ -21,8 +22,9 @@ export default {
     app.component('MarkerIcon', MarkerIcon)
     app.component('PropertyBar', PropertyBar)
     app.component('RadioBtn', RadioBtn)
-    app.component('SqureLoading', SqureLoading)
+    app.component('Test', Test)
     app.component('ToggleBtn', ToggleBtn)
+    app.component('SvgIcon', SvgIcon)
     app.component('ColorBtn', ColorBtn)
     app.component('Url', Url)
   }
@@ -38,7 +40,7 @@ export {
   MarkerIcon,
   PropertyBar,
   RadioBtn,
-  SqureLoading,
+  Test,
   ToggleBtn,
   Url
 }
@@ -46,7 +48,7 @@ export {
 // https://medium.com/@jogarcia/dynamically-register-vue3-vite-components-54954b8fafea
 // export default {
 //   install(app: App) {
-//     const components: Record<string, DefineComponent> = import.meta.glob('./src/**/*.vue', {
+//     const components: Record<string, DefineComponent> = import.meta.glob('./src/**/*.vue,
 //       eager: true
 //     })
 //     for (const path in components) {

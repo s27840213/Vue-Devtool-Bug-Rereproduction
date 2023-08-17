@@ -29,7 +29,7 @@ export default defineConfig({
     cssCodeSplit: true,
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: 'src/components/component-lib.ts',
+      entry: 'src/index.ts',
       name: 'component-lib',
       formats: ['es', 'cjs', 'umd'],
       fileName: (format) => `component-lib.${format}.js`
@@ -38,7 +38,7 @@ export default defineConfig({
       // make sure to externalize deps that shouldn't be bundled
       // into your library
       input: {
-        main: path.resolve(__dirname, 'src/plugin.ts')
+        main: path.resolve(__dirname, 'src/index.ts')
       },
       external: ['vue'],
       output: {

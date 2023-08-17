@@ -14,7 +14,7 @@ button(class="btn"
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 
 const component = defineComponent({
   emits: [],

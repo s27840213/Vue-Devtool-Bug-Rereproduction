@@ -9,6 +9,8 @@
       <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>
   </div>
+  <Test></Test>
+  <SvgIcon></SvgIcon>
 </template>
 
 <style scoped>

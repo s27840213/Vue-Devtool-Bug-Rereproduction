@@ -4,6 +4,8 @@ import path from 'path'
 import { defineConfig } from 'vite'
 // https://vue-i18n.intlify.dev/guide/advanced/optimization.html
 import vuei18n from '@intlify/unplugin-vue-i18n/vite'
+import svgSpritePlugin from 'vite-plugin-svg-sprite-component'
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -14,7 +16,8 @@ export default defineConfig({
       runtimeOnly: false,
       // you need to set i18n resource including paths !
       include: path.resolve(__dirname, './src/locales')
-    })
+    }),
+    svgSpritePlugin({ symbolId: (name) => name })
   ],
   resolve: {
     alias: {
