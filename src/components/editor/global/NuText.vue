@@ -247,7 +247,7 @@ export default defineComponent({
       )
     },
     pStyle(styles: any) {
-      return _.omit(tiptapUtils.textStylesRaw(styles, this.page.contentScaleRatio), [
+      return _.omit(tiptapUtils.textStylesRaw(styles), [
         'text-decoration-line', '-webkit-text-decoration-line'
       ])
     },

@@ -21,8 +21,7 @@ export default class SwipeDetector {
   constructor(private element: HTMLElement, options?: Partial<SwipeOptions>, callback?: (direction: string) => void) {
     const defaultOptions: SwipeOptions = {
       tolerance: 20,
-      // velocityLimit: 30,
-      velocityLimit: 500,
+      velocityLimit: 30,
       targetDirection: 'all'
     }
     this.swipeOptions = { ...defaultOptions, ...options }

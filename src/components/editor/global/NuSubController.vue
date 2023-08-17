@@ -300,7 +300,6 @@ export default defineComponent({
     },
     textWrapperStyle() {
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
-      // const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
@@ -323,8 +322,6 @@ export default defineComponent({
       }
     },
     onPointerdown(e: PointerEvent) {
-      // const
-      // e.stopPropagation()
       this.subLayerCtrlUtils.onPointerdown(e)
     },
     onMouseup(e: PointerEvent) {
@@ -352,7 +349,6 @@ export default defineComponent({
     positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
-      // const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       let { x, y } = this.config.styles
 
       if (this.type === 'frame' && horizontalFlip) {
@@ -378,7 +374,6 @@ export default defineComponent({
     sizeStyle() {
       const { isFrameImg } = this.config
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
-      // const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
         width = `${this.config.styles.initWidth * _f}px`
@@ -496,8 +491,6 @@ export default defineComponent({
             imgWidth: clip.styles.imgWidth,
             imgHeight: clip.styles.imgHeight,
             adjust: clip.styles.adjust
-            // horizontalFlip: clip.styles.horizontalFlip,
-            // verticalFlip: clip.styles.verticalFlip
           }
         })
 

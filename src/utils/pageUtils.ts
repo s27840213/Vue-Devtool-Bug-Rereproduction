@@ -521,7 +521,7 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage(scrollToTop = false, minRatioFiRestricttDisable = false, resetPageScaleRatio = true) {
+  fitPage(scrollToTop = false) {
     // In these mode, don't fitPage.
 
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
@@ -557,7 +557,6 @@ class PageUtils {
     } else {
       // @testing not use scaleRatio in mobile
       if (!generalUtils.isTouchDevice()) {
-        // console.warn('newRatio', newRatio)
         store.commit('SET_pageScaleRatio', newRatio)
       } else {
         store.commit('SET_pageScaleRatio', 100)

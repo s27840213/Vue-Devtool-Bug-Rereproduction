@@ -16,13 +16,6 @@ import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
 import tiptapUtils from './tiptapUtils'
 
-const initPageTranslate = { x: 0, y: 0 }
-
-export function setInitPageTranslate() {
-  initPageTranslate.x = pageUtils.getCurrPage.x
-  initPageTranslate.y = pageUtils.getCurrPage.y
-}
-
 export class MovingUtils {
   isControlling = false
   private component = undefined as any | undefined
@@ -80,6 +73,7 @@ export class MovingUtils {
     return false
   }
 
+  private initPageTranslate = { x: 0, y: 0 }
   private randId = ''
 
   constructor({ _config, snapUtils, component, body, layerInfo }: { _config: { config: ILayer }, snapUtils: unknown, component?: any, body: HTMLElement, layerInfo?: ILayerInfo }) {
@@ -114,7 +108,10 @@ export class MovingUtils {
 
   pageMoveStart(e: PointerEvent) {
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
-    setInitPageTranslate()
+
+    this.initPageTranslate.x = pageUtils.getCurrPage.x
+    this.initPageTranslate.y = pageUtils.getCurrPage.y
+
     this.removeListener()
     if (e.type === 'pinch') {
       this.initialPos = null
@@ -145,8 +142,8 @@ export class MovingUtils {
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
-    initPageTranslate.x = pageUtils.getCurrPage.x
-    initPageTranslate.y = pageUtils.getCurrPage.y
+    this.initPageTranslate.x = pageUtils.getCurrPage.x
+    this.initPageTranslate.y = pageUtils.getCurrPage.y
     const currLayerIndex = layerUtils.layerIndex
 
     formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
@@ -541,8 +538,8 @@ export class MovingUtils {
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }
     const pagePosDiff = {
-      x: Math.abs(pageUtils.getCurrPage.x - initPageTranslate.x),
-      y: Math.abs(pageUtils.getCurrPage.y - initPageTranslate.y)
+      x: Math.abs(pageUtils.getCurrPage.x - this.initPageTranslate.x),
+      y: Math.abs(pageUtils.getCurrPage.y - this.initPageTranslate.y)
     }
     const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0

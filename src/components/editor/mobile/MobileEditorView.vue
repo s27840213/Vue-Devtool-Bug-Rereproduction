@@ -145,7 +145,7 @@ export default defineComponent({
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
-    pageUtils.fitPage(false, true)
+    pageUtils.fitPage(false)
     this.tmpScaleRatio = pageUtils.scaleRatio
 
     if (this.$isTouchDevice()) {
@@ -315,7 +315,6 @@ export default defineComponent({
       }
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
-        console.warn('outerClick')
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()

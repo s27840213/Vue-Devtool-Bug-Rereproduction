@@ -146,8 +146,6 @@ export default defineComponent({
     },
     stylesWith3DPreserve(): { [index: string]: string } {
       return {
-        // width: `${this.config.width * this.contentScaleRatio}px`,
-        // height: `${this.config.height * this.contentScaleRatio}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
     },
@@ -158,8 +156,6 @@ export default defineComponent({
     contentStyles() {
       if (!this.config.isEnableBleed) {
         return {
-          // width: this.config.width * this.contentScaleRatio + 'px',
-          // height: this.config.height * this.contentScaleRatio + 'px',
           padding: [
             '0px',
             this.margin.right + 'px',
