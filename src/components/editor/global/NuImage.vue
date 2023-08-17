@@ -87,7 +87,7 @@ import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -558,7 +558,7 @@ export default defineComponent({
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
       const previewSrc = this.config.previewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
-      imageUtils.imgLoadHandler(previewSrc, () => {
+      await imageUtils.imgLoadHandler(previewSrc, () => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
@@ -566,39 +566,39 @@ export default defineComponent({
 
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
-      if (src && src !== previewSrc) {
-        return new Promise<void>((resolve, reject) => {
-          imageUtils.imgLoadHandler(src, () => {
-            if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
-              isPrimaryImgLoaded = true
-              this.src = src
-              if (this.config.previewSrc === '') {
-                layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: src }, this.subLayerIndex)
-              }
-              if (!this.isBlurImg) {
-                this.preLoadImg('pre', this.getImgDimension)
-                this.preLoadImg('next', this.getImgDimension)
-              }
-              resolve()
+      if (!src || src === previewSrc) return
+
+      return new Promise<void>((resolve, reject) => {
+        imageUtils.imgLoadHandler(src, () => {
+          if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+            isPrimaryImgLoaded = true
+            this.src = src
+            if (this.config.previewSrc === '') {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: src }, this.subLayerIndex)
             }
-          }, {
-            error: () => {
-              reject(new Error(`cannot load the current image, src: ${src}`))
-              fetch(src)
-                .then(res => {
-                  const { status, statusText } = res
-                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
-                })
-                .catch((e) => {
-                  if (src.indexOf('data:image/png;base64') !== 0) {
-                    this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
-                  }
-                })
-            },
-            crossOrigin: true
-          })
+            if (!this.isBlurImg) {
+              this.preLoadImg('pre', this.getImgDimension)
+              this.preLoadImg('next', this.getImgDimension)
+            }
+            resolve()
+          }
+        }, {
+          error: () => {
+            reject(new Error(`cannot load the current image, src: ${src}`))
+            fetch(src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                if (src.indexOf('data:image/png;base64') !== 0) {
+                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
+                }
+              })
+          },
+          crossOrigin: true
         })
-      }
+      })
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
       if (this.isBlurImg) return
