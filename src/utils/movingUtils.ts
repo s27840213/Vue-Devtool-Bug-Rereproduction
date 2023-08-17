@@ -30,7 +30,7 @@ export class MovingUtils {
   private eventTarget = null as unknown as HTMLElement
   private dblTabsFlag = false
   private _config = { config: null as unknown as ILayer }
-  private initialPos = { x: 0, y: 0 }
+  private initialPos = { x: 0, y: 0 } as ICoordinate | null
   private initTranslate = { x: 0, y: 0 }
   // private initPageTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
@@ -114,11 +114,13 @@ export class MovingUtils {
 
   pageMoveStart(e: PointerEvent) {
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
-    // this.initPageTranslate.x = pageUtils.getCurrPage.x
-    // this.initPageTranslate.y = pageUtils.getCurrPage.y
     setInitPageTranslate()
     this.removeListener()
-    this.initialPos = mouseUtils.getMouseAbsPoint(e)
+    if (e.type === 'pinch') {
+      this.initialPos = null
+    } else {
+      this.initialPos = mouseUtils.getMouseAbsPoint(e)
+    }
     this._moving = this.pageMoving.bind(this)
     this._moveEnd = this.pageMoveEnd.bind(this)
     eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -337,7 +339,7 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (eventUtils.checkIsMultiTouch(e) || store.getters['mobileEditor/getIsPinchingEditor']) {
+    if (eventUtils.checkIsMultiTouch(e) || store.getters['mobileEditor/getIsPinchingEditor'] || this.initialPos === null) {
       return
     }
     this.isControlling = true
@@ -422,6 +424,8 @@ export class MovingUtils {
   }
 
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (this.initialPos === null) return
+
     const config = this.layerIndex === layerUtils.layerIndex ? this.config : layerUtils.getCurrLayer
     if (Object.values(config).length === 0) {
       /**
@@ -473,10 +477,12 @@ export class MovingUtils {
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
-      this.removeListener()
       return
     }
-
+    if (this.initialPos === null) {
+      this.initialPos = mouseUtils.getMouseAbsPoint(e)
+      return
+    }
     const { getCurrPage: page } = pageUtils
     const contentScaleRatio = store.getters.getContentScaleRatio
     const pageScaleRatio = store.state.pageScaleRatio * 0.01
@@ -515,8 +521,8 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
-    if (eventUtils.checkIsMultiTouch(e)) {
-      return
+    if (eventUtils.checkIsMultiTouch(e) || this.initialPos === null) {
+      return this.removeListener()
     }
     this.isControlling = false
     this.removeListener()

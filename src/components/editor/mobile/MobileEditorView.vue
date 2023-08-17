@@ -440,11 +440,13 @@ export default defineComponent({
             store.commit('mobileEditor/UPDATE_pinchScale', evtScale)
 
             if (!this.translationRatio) {
+              // translation ratio for current-window-pos (not for pinch). Details read doc.
               const translationRatio_ori_pos = {
                 x: ((page.initPos.x - this.initPagePos.x) / (page.width * this.tmpScaleRatio * 0.01 * contentScaleRatio)),
                 y: ((page.initPos.y - this.initPagePos.y) / (page.height * this.tmpScaleRatio * 0.01 * contentScaleRatio))
               }
 
+              // actual translation ratio equals to current pinch-in-current-window plus current-window-pos
               this.translationRatio = {
                 x: ((this.initPinchPos.x - editorUtils.mobileCenterPos.x) / (page.width * contentScaleRatio) + 0.5) / (this.tmpScaleRatio * 0.01) + translationRatio_ori_pos.x,
                 y: ((this.initPinchPos.y - editorUtils.mobileCenterPos.y) / (page.height * contentScaleRatio) + 0.5) / (this.tmpScaleRatio * 0.01) + translationRatio_ori_pos.y
@@ -499,6 +501,7 @@ export default defineComponent({
 
               setTimeout(() => {
                 this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
+                this.movingUtils.pageMoveStart(e as any)
                 this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
                 this.$store.commit('SET_pageScaleRatio', MAX_SCALE)
                 this.isHandlingEdgeReach = false
@@ -508,17 +511,20 @@ export default defineComponent({
               this.isHandlingEdgeReach = true
               currPageEl?.classList.add('editor-view__pinch-transition')
 
-              const pos = { x: page.x, y: page.y }
               const EDGE_WIDTH = this.EDGE_WIDTH()
               if (newScaleRatio < 100 || ((isReachLeftEdge && isReachRightEdge) || (isReachTopEdge && isReachBottomEdge))) {
+                const pos = { x: page.x, y: page.y }
                 pos.x = EDGE_WIDTH.x
                 pos.y = EDGE_WIDTH.y
                 this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
                 this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
+                this.movingUtils.pageMoveStart(e as any)
                 setTimeout(() => {
                   this.$store.commit('SET_pageScaleRatio', 100)
                 }, 0)
+                pageUtils.updatePagePos(layerUtils.pageIndex, pos)
               } else {
+                const pos = { x: page.x, y: page.y }
                 if (isReachLeftEdge) {
                   pos.x = EDGE_WIDTH.x
                 }
@@ -533,11 +539,12 @@ export default defineComponent({
                 }
                 setTimeout(() => {
                   this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
+                  this.movingUtils.pageMoveStart(e as any)
                   this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
                   this.$store.commit('SET_pageScaleRatio', newScaleRatio)
                 }, TRANSITION_TIME)
+                pageUtils.updatePagePos(layerUtils.pageIndex, pos)
               }
-              pageUtils.updatePagePos(layerUtils.pageIndex, pos)
 
               setTimeout(() => {
                 this.isHandlingEdgeReach = false
@@ -545,6 +552,7 @@ export default defineComponent({
               }, TRANSITION_TIME)
             } else {
               this.$store.commit('mobileEditor/SET_isPinchingEditor', false)
+              this.movingUtils.pageMoveStart(e as any)
               this.$store.commit('mobileEditor/UPDATE_pinchScale', 1)
               this.$store.commit('SET_pageScaleRatio', newScaleRatio)
             }
