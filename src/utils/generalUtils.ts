@@ -391,35 +391,10 @@ class GeneralUtils {
     )
   }
 
-  // This func check if two objects has same props val
-  isSameObjVal(v1: any, v2: any): boolean {
-    if (this.isObject(v1) || this.isObject(v2)) {
-      const entries1 = Object.entries(v1)
-      if (entries1.length !== Object.entries(v2).length) return false
-
-      for (const [k, v] of entries1) {
-        if (this.isObject(v)) {
-          if (!this.isSameObjVal(v, v2[k])) {
-            return false
-          }
-        } else if (v2[k] !== v) {
-          return false
-        }
-      }
-      return true
-    } else {
-      return v1 === v2
-    }
-  }
-
   isWatcherTriggerByUndoRedo(v1: any, v2: any): boolean {
     // if the object props val is the same and the reference address is different,
     // means the watcher is triggered by undo/redo
-    return v1 !== v2 && this.isSameObjVal(v1, v2)
-  }
-
-  isObject(obj: any): boolean {
-    return obj === Object(obj)
+    return v1 !== v2 && _.isEqual(v1, v2)
   }
 
   unproxify<T>(val: T): T {

@@ -10,14 +10,14 @@ div(class="sidebar")
   div(class="nav")
     div(class="nav-container")
       div(class="nav-item pointer"
-        v-for="(item,index) in navItem" :key="`icon-${index}`"
-        @click="switchNav(index)")
+        v-for="item in navItem" :key="`icon-${item.index}`"
+        @click="switchNav(item.index)")
         svg-icon(class="nav-item__icon"
           :iconName="item.icon"
-          :iconColor="(currPanel === index && !inBgRemoveMode) ? 'blue-1' : 'gray-3'"
+          :iconColor="(currPanel === item.index && !inBgRemoveMode) ? 'blue-1' : 'gray-3'"
           :iconWidth="'24px'")
         div(class="nav-item__text body-3"
-          :class="[(currPanel === index && !inBgRemoveMode) ? 'text-blue-1' : 'text-gray-3', $i18n.locale]") {{item.text}}
+          :class="[(currPanel === item.index && !inBgRemoveMode) ? 'text-blue-1' : 'text-gray-3', $i18n.locale]") {{item.text}}
   div(class="sidebar__chevron pointer"
       :class="[{'rotate-hr': isSidebarPanelOpen}]"
       @click="toggleSidebarPanel")
@@ -52,18 +52,18 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isAdmin: 'user/isAdmin',
     }),
-    navItem(): Array<{ icon: string, text: string }> {
+    navItem(): Array<{ icon: string, text: string, index: number }> {
       const navItems = [
-        { icon: 'template', text: `${this.$tc('NN0001', 2)}` },
-        { icon: 'photo', text: `${this.$tc('NN0002', 2)}` },
-        { icon: 'objects', text: `${this.$tc('NN0003', 2)}` },
-        { icon: 'bg', text: `${this.$tc('NN0004', 2)}` },
-        { icon: 'text', text: `${this.$tc('NN0005', 2)}` },
-        { icon: 'upload', text: `${this.$tc('NN0006')}` },
-        ...this.isAdmin ? [{ icon: 'overlay', text: `${this.$tc('NN0899')}` }] : [],
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, index: 0 },
+        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, index: 1 },
+        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, index: 2 },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, index: 3 },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, index: 4 },
+        { icon: 'upload', text: `${this.$tc('NN0006')}`, index: 5 },
+        ...this.isAdmin ? [{ icon: 'overlay', text: `${this.$tc('NN0899')}`, index: 6 }] : [],
       ]
       if (brandkitUtils.isBrandkitAvailable) {
-        navItems.push({ icon: 'brand', text: `${this.$t('NN0497')}` })
+        navItems.push({ icon: 'brand', text: `${this.$t('NN0497')}`, index: 7 })
       }
       return navItems
     }

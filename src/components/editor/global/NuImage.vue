@@ -75,7 +75,6 @@ import { IPage } from '@/interfaces/page'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import { IBrowserInfo } from '@/store/module/user'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -86,10 +85,9 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -141,24 +139,17 @@ export default defineComponent({
     }
   },
   async created() {
-    this.src = (this.config.panelPreviewSrc || this.config.previewSrc) ?? imageUtils.getSrc(this.config, this.getPreviewSize())
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
       this.handleShadowInit()
     }
   },
-  mounted() {
-    if (this.isBgImgControl) return
-    this.src = this.config.previewSrc === undefined ? this.src : this.config.previewSrc
-    this.mountShadowRedrawEvt()
-  },
   beforeUnmount() {
     if (!this.isBgImgControl) {
       if (this.config.inProcess) {
         this.setIsProcessing(LayerProcessType.none)
       }
-      eventUtils.off(ImageEvent.redrawCanvasShadow + this.config.id)
     }
   },
   unmounted() {
@@ -593,33 +584,36 @@ export default defineComponent({
       logUtils.setLog(log)
     },
     async previewAsLoading() {
-      // if (this.config.previewSrc) {
-      //   return
-      // }
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
-      const previewSrc = (this.config.panelPreviewSrc || this.config.previewSrc) ?? imageUtils.getSrc(this.config, this.getPreviewSize())
-      imageUtils.imgLoadHandler(previewSrc, (img) => {
+      const previewSrc = this.config.previewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+      await imageUtils.imgLoadHandler(previewSrc, () => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
       }, { crossOrigin: true })
 
-      // if (this.config.previewSrc) {
-      //   return
-      // }
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+      if (!src || src === previewSrc) return
+
       return new Promise<void>((resolve, reject) => {
         imageUtils.imgLoadHandler(src, () => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             isPrimaryImgLoaded = true
             this.src = src
+            if (this.config.previewSrc === '') {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: src }, this.subLayerIndex)
+            }
+            if (!this.isBlurImg) {
+              this.preLoadImg('pre', this.getImgDimension)
+              this.preLoadImg('next', this.getImgDimension)
+            }
             resolve()
           }
         }, {
           error: () => {
-            reject(new Error(`cannot load the current image, src: ${this.src}`))
+            reject(new Error(`cannot load the current image, src: ${src}`))
             fetch(src)
               .then(res => {
                 const { status, statusText } = res
@@ -637,14 +631,16 @@ export default defineComponent({
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
       if (this.isBlurImg) return
-      if (!this.isOnError && this.config.previewSrc === undefined) {
+
+      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
+      if (!this.isOnError && currUrl) {
         const { type } = this.config.srcObj
         if (type === 'background') return
-        const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
         const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
         imageUtils.imgLoadHandler(currUrl, async () => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             this.src = currUrl
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: currUrl }, this.subLayerIndex)
             if (newVal > oldVal) {
               await this.preLoadImg('next', this.getImgDimension)
               this.preLoadImg('pre', this.getImgDimension)
@@ -662,7 +658,7 @@ export default defineComponent({
         const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, size))
         imageUtils.imgLoadHandler(src, () => resolve(), {
           error: () => {
-            reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+            reject(new Error(`cannot preLoad the ${preLoadType}-image, src: ${src}`))
             fetch(src)
               .then(res => {
                 const { status, statusText } = res
@@ -1098,48 +1094,12 @@ export default defineComponent({
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
       return primaryLayer.type
     },
-    // uploadingImagePreviewSrc(): string {
-    //   return this.config.previewSrc
-    // },
     id(): ILayerIdentifier {
       return {
         pageId: this.page.id,
         layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
           ? layerUtils.getLayer(this.pageIndex, this.layerIndex).id : this.config.id,
         subLayerId: this.config.id
-      }
-    },
-    mountShadowRedrawEvt() {
-      eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
-        this.shadowRedrawEvt()
-      })
-    },
-    shadowRedrawEvt() {
-      if (this.currentShadowEffect() !== ShadowEffectType.none) {
-        const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
-        const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent)
-        if (redrawImmediately) {
-          this.redrawShadow()
-          return
-        }
-        const src = imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, 100))
-        imageUtils.imgLoadHandler(src, (img) => {
-          const isTransparent = imageShadowUtils.isTransparentBg(img)
-          imageShadowUtils.updateEffectProps({
-            pageIndex: this.pageIndex,
-            layerIndex: this.layerIndex,
-            subLayerIdx: this.subLayerIndex
-          }, { isTransparent })
-          imageShadowUtils.setHandleId()
-          isTransparent && this.redrawShadow()
-        }, {
-          crossOrigin: true,
-          error: (img) => {
-            logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img?.src)
-          }
-        })
-      } else {
-        stepsUtils.record()
       }
     }
   }

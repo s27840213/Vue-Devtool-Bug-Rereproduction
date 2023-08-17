@@ -62,7 +62,7 @@ import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -119,7 +119,7 @@ export default defineComponent({
       imgBuff: {} as {
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
-        panelPreviewSrc: ''
+        previewSrc: ''
       },
       isPrimaryActive: false,
     }
@@ -290,8 +290,7 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
-      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setCurrDraggedPhoto: 'SET_currDraggedPhoto'
+      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
     }),
     isDraggedPanelPhoto(): boolean {
       return this.currDraggedPhoto.srcObj.type !== ''
@@ -482,7 +481,7 @@ export default defineComponent({
       e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
-        const { srcObj, panelPreviewSrc } = this.config
+        const { srcObj, previewSrc } = this.config
         const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
         const clip = clips[this.layerIndex]
 
@@ -490,7 +489,7 @@ export default defineComponent({
           srcObj: {
             ...srcObj
           },
-          panelPreviewSrc,
+          previewSrc,
           styles: {
             imgX: clip.styles.imgX,
             imgY: clip.styles.imgY,
@@ -504,7 +503,7 @@ export default defineComponent({
 
         frameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...currLayer.srcObj },
-          ...((currLayer as IImage).panelPreviewSrc && { panelPreviewSrc: (currLayer as IImage).panelPreviewSrc as string })
+          ...((currLayer as IImage).previewSrc && { previewSrc: (currLayer as IImage).previewSrc as string })
         })
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
         LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: true })

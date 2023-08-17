@@ -66,12 +66,12 @@ export default defineComponent({
         console.error('img in background category is null')
         return
       }
-      const panelPreviewSrc = img.src
+      const previewSrc = img.src
       const imgSrcSize = {
         width: img.naturalWidth,
         height: img.naturalHeight
       }
-      AssetUtils.addAsset(this.item, { panelPreviewSrc, imgSrcSize })
+      AssetUtils.addAsset(this.item, { previewSrc, imgSrcSize })
     },
     openUpdateDesignPopup() {
       if (this.isAdmin) {
