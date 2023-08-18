@@ -1,9 +1,10 @@
 const colors = require('./src/assets/json/colors.json')
 const plugin = require('tailwindcss/plugin')
+const joinedColor = Object.keys(colors).join('|')
+const bgPattern = new RegExp(`bg-(${joinedColor})`)
+const textPattern = new RegExp(`text-(${joinedColor})`)
+const borderPattern = new RegExp(`border-(${joinedColor})`)
 
-const bgPattern = new RegExp(`/bg-${Object.keys(colors).join('|')}/`)
-const textPattern = new RegExp(`/bg-${Object.keys(colors).join('|')}/`)
-const borderPattern = new RegExp(`/bg-${Object.keys(colors).join('|')}/`)
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{vue,js,ts,jsx,tsx}', '../../packages/ui-component/src/**/*.vue'],
