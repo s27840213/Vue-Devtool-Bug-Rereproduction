@@ -46,8 +46,7 @@ export default defineComponent({
     }
   },
   data() {
-    return {
-    }
+    return {}
   },
   methods: {
     iconStyles() {
@@ -74,7 +73,10 @@ export default defineComponent({
     styleFormatter(): string {
       let style = this.styleFormat
       style = style.replace(/\$color\[0\]/g, this.iconColor)
-      return style + `transform: rotate(180deg) translate(-${2.5 * this.markerWidth}px, -10px) scale(2.5);`
+      return (
+        style +
+        `transform: rotate(180deg) translate(-${2.5 * this.markerWidth}px, -10px) scale(2.5);`
+      )
     }
   }
 })

@@ -10,15 +10,10 @@ div(class="flex flex-col justify-center items-center")
 
 <script setup lang="ts">
 import colors from '@/assets/json/colors.json'
-import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
 import { useCounterStore } from './stores/counter'
 const counterStore = useCounterStore()
 
-const { increment } = counterStore
-const { count } = storeToRefs(counterStore)
 const colorKeys = computed<any>(() => Object.keys(colors))
-console.log(colorKeys.value)
 </script>
 
 <style scoped>

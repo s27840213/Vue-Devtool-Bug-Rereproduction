@@ -6,10 +6,35 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/component-lib.umd.js",
-  "module": "./dist/component-lib.es.js",
-  "types": "./dist/component-lib.d.ts",
-  "typings": "./dist/component-lib.d.ts",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": {
+        "require": "./dist/index.d.ts",
+        "default": "./dist/index.d.ts"
+      },
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./plugin": {
+      "types": {
+        "require": "./dist/plugin.d.ts",
+        "default": "./dist/plugin.d.ts"
+      },
+      "import": "./dist/plugin.es.js",
+      "require": "./dist/plugin.cjs.js"
+    },
+    "./types": {
+      "types": {
+        "require": "./dist/components.d.ts",
+        "default": "./dist/components.d.ts"
+      },
+      "import": "./dist/types.es.js",
+      "require": "./dist/types.cjs.js"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
@@ -26,5 +51,9 @@
     "vite": "^4.0.0",
     "vite-plugin-dts": "^1.7.1",
     "vue-tsc": "^1.0.11"
+  },
+  "dependencies": {
+    "@types/lodash-es": "^4.17.8",
+    "lodash-es": "^4.17.21"
   }
 }

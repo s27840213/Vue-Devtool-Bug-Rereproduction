@@ -1,6 +1,8 @@
 import vue from '@vitejs/plugin-vue'
 import * as path from 'path'
-import typescript2 from 'rollup-plugin-typescript2'
+// import typescript2 from 'rollup-plugin-typescript2'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
@@ -11,41 +13,31 @@ export default defineConfig({
     dts({
       insertTypesEntry: true
     }),
-    typescript2({
-      check: false,
-      include: ['src/components/**/*.vue'],
-      tsconfigOverride: {
-        compilerOptions: {
-          outDir: 'dist',
-          sourceMap: true,
-          declaration: true,
-          declarationMap: true
-        }
-      },
-      exclude: ['vite.config.ts']
+    Components({
+      dirs: ['src/components'],
+      extensions: ['vue'],
+      dts: 'src/components.d.ts'
+    }),
+    // https://github.com/antfu/unplugin-auto-import
+    AutoImport({
+      imports: ['vue', 'vue-router', 'vue-i18n'],
+      dts: 'src/auto-import.d.ts'
     })
   ],
   build: {
     cssCodeSplit: true,
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: 'src/index.ts',
+      entry: ['src/index.ts', 'src/plugin.ts', 'src/types.ts'],
       name: 'component-lib',
-      formats: ['es', 'cjs', 'umd'],
-      fileName: (format) => `component-lib.${format}.js`
+      formats: ['es', 'cjs'],
+      fileName: (format, entry) => `${entry}.${format}.js`
     },
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled
       // into your library
-      input: {
-        main: path.resolve(__dirname, 'src/index.ts')
-      },
       external: ['vue'],
       output: {
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'main.css') return 'component-lib.css'
-          return assetInfo.name
-        },
         exports: 'named',
         globals: {
           vue: 'Vue'

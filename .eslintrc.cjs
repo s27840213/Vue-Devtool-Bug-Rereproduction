@@ -18,6 +18,7 @@ module.exports = {
     node: true
   },
   rules: {
-    'vue/multi-word-component-names': 'off'
+    'vue/multi-word-component-names': 'off',
+    'vue/no-ref-object-reactivity-loss': 'on'
   }
 }
