@@ -9,6 +9,7 @@
   "main": "./dist/component-lib.umd.js",
   "module": "./dist/component-lib.es.js",
   "types": "./dist/component-lib.d.ts",
+  "typings": "./dist/component-lib.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",

@@ -40,6 +40,7 @@ export {
   MarkerIcon,
   PropertyBar,
   RadioBtn,
+  SvgIcon,
   Test,
   ToggleBtn,
   Url

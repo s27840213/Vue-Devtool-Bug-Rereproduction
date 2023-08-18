@@ -1,17 +1,24 @@
 <template lang="pug">
-div(class="bg-appSelection") {{  count  }}
-button(@click="increment") ++
-svg-icon(name="vue" :iconColor="'text-appBtnPrimaryBg'" class="text-appBtnPrimaryBg")
-test 
+div(class="flex flex-col justify-center items-center")
+  div(v-for="color in colorKeys" :key="color" class="flex flex-col items-center justify-center rounded-full p-10 border-2 border-appBg")
+    span() {{color}}
+    div(class="w-10 h-10" :class="`bg-${color}`")
+    svg-icon(:iconName="'brush'" :iconColor="color")
+    nu-svg-icon(:iconName="'brush'" :iconColor="color")
+    hr
 </template>
 
 <script setup lang="ts">
+import colors from '@/assets/json/colors.json'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import { useCounterStore } from './stores/counter'
 const counterStore = useCounterStore()
 
 const { increment } = counterStore
 const { count } = storeToRefs(counterStore)
+const colorKeys = computed<any>(() => Object.keys(colors))
+console.log(colorKeys.value)
 </script>
 
 <style scoped>

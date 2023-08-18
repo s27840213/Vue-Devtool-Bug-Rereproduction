@@ -33,7 +33,7 @@ export default defineComponent({
   name: 'SvgIcon',
   props: {
     iconName: {
-      type: [String, Number],
+      type: [String],
       default: 'menu'
     },
     iconWidth: {

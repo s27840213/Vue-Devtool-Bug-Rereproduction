@@ -1,6 +1,9 @@
 const colors = require('./src/assets/json/colors.json')
 const plugin = require('tailwindcss/plugin')
 
+const bgPattern = new RegExp(`/bg-${Object.keys(colors).join('|')}/`)
+const textPattern = new RegExp(`/bg-${Object.keys(colors).join('|')}/`)
+const borderPattern = new RegExp(`/bg-${Object.keys(colors).join('|')}/`)
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{vue,js,ts,jsx,tsx}', '../../packages/ui-component/src/**/*.vue'],
@@ -8,6 +11,17 @@ module.exports = {
     extend: {},
     colors: colors
   },
+  safelist: [
+    {
+      pattern: bgPattern
+    },
+    {
+      pattern: textPattern
+    },
+    {
+      pattern: borderPattern
+    }
+  ],
   plugins: [
     // why we should use this plugin? bcz if we add custom class using @layer, they won't be change in tailwind intellsense
     plugin(function ({ addUtilities }) {
