@@ -13,6 +13,7 @@ importers:
       '@vue/eslint-config-prettier': ^8.0.0
       '@vue/eslint-config-typescript': ^11.0.3
       '@vue/language-plugin-pug': ^1.8.8
+      '@vueuse/core': ^10.3.0
       add: ^2.0.6
       autoprefixer: ^10.4.2
       click-outside-vue3: ^4.0.1
@@ -51,6 +52,7 @@ importers:
       '@vue/eslint-config-prettier': 8.0.0_dnr35tqn2zj54nd4n43eu6fwwa
       '@vue/eslint-config-typescript': 11.0.3_27wxxokrosng3uisy77zwvv5oq
       '@vue/language-plugin-pug': 1.8.8
+      '@vueuse/core': 10.3.0_vue@3.3.4
       add: 2.0.6
       autoprefixer: 10.4.14_postcss@8.4.27
       commitizen: 4.3.0
@@ -68,12 +70,12 @@ importers:
       sass: 1.65.1
       tailwindcss: 3.3.3_ts-node@10.9.1
       typescript: 5.1.6
-      unplugin-auto-import: 0.16.6
+      unplugin-auto-import: 0.16.6_@vueuse+core@10.3.0
       unplugin-vue-components: 0.25.1_vue@3.3.4
       vite: 4.4.9_3gpcgnga2cevsysm5nhi47pkne
       vite-plugin-svg-sprite-component: 1.0.10
 
-  packages/component-lib:
+  packages/shared-lib:
     specifiers:
       '@types/lodash-es': ^4.17.8
       '@vitejs/plugin-vue': ^4.0.0
@@ -107,14 +109,14 @@ importers:
       '@types/node': ^18.17.0
       '@vitejs/plugin-vue': ^4.2.3
       '@vue/tsconfig': ^0.4.0
-      component-lib: workspace:^0.0.1
       npm-run-all: ^4.1.5
       pinia: ^2.1.4
+      shared-lib: workspace:^0.0.1
       vue-router: ^4.2.4
       vue-tsc: ^1.8.6
     dependencies:
-      component-lib: link:../../packages/component-lib
       pinia: 2.1.6_typescript@5.1.6+vue@3.3.4
+      shared-lib: link:../../packages/shared-lib
       vue-router: 4.2.4_vue@3.3.4
     devDependencies:
       '@tsconfig/node18': 18.2.0
@@ -1106,6 +1108,10 @@ packages:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
     dev: true
 
+  /@types/web-bluetooth/0.0.17:
+    resolution: {integrity: sha512-4p9vcSmxAayx72yn70joFoL44c9MO/0+iVEBIQXe3v2h2SiAsEIo/G5v6ObFWvNKRFjbrVadNf9LqEEZeQPzdA==}
+    dev: true
+
   /@typescript-eslint/eslint-plugin/5.62.0_c42x62htuvinjyo6sqia6oy3e4:
     resolution: {integrity: sha512-TiZzBSJja/LbhNPvk6yc0JrX9XqhQ0hdh6M2svYfsHGejaKFIAGd9MQ+ERIMzLGlN/kZoYIgdxFV0PuljTKXag==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -1455,6 +1461,31 @@ packages:
       '@vue/language-core': 1.8.8_typescript@5.1.6
     transitivePeerDependencies:
       - typescript
+    dev: true
+
+  /@vueuse/core/10.3.0_vue@3.3.4:
+    resolution: {integrity: sha512-BEM5yxcFKb5btFjTSAFjTu5jmwoW66fyV9uJIP4wUXXU8aR5Hl44gndaaXp7dC5HSObmgbnR2RN+Un1p68Mf5Q==}
+    dependencies:
+      '@types/web-bluetooth': 0.0.17
+      '@vueuse/metadata': 10.3.0
+      '@vueuse/shared': 10.3.0_vue@3.3.4
+      vue-demi: 0.14.5_vue@3.3.4
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - vue
+    dev: true
+
+  /@vueuse/metadata/10.3.0:
+    resolution: {integrity: sha512-Ema3YhNOa4swDsV0V7CEY5JXvK19JI/o1szFO1iWxdFg3vhdFtCtSTP26PCvbUpnUtNHBY2wx5y3WDXND5Pvnw==}
+    dev: true
+
+  /@vueuse/shared/10.3.0_vue@3.3.4:
+    resolution: {integrity: sha512-kGqCTEuFPMK4+fNWy6dUOiYmxGcUbtznMwBZLC1PubidF4VZY05B+Oht7Jh7/6x4VOWGpvu3R37WHi81cKpiqg==}
+    dependencies:
+      vue-demi: 0.14.5_vue@3.3.4
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - vue
     dev: true
 
   /@yarnpkg/lockfile/1.1.0:
@@ -5601,7 +5632,7 @@ packages:
     engines: {node: '>= 10.0.0'}
     dev: true
 
-  /unplugin-auto-import/0.16.6:
+  /unplugin-auto-import/0.16.6_@vueuse+core@10.3.0:
     resolution: {integrity: sha512-M+YIITkx3C/Hg38hp8HmswP5mShUUyJOzpifv7RTlAbeFlO2Tyw0pwrogSSxnipHDPTtI8VHFBpkYkNKzYSuyA==}
     engines: {node: '>=14'}
     peerDependencies:
@@ -5615,6 +5646,7 @@ packages:
     dependencies:
       '@antfu/utils': 0.7.6
       '@rollup/pluginutils': 5.0.3
+      '@vueuse/core': 10.3.0_vue@3.3.4
       fast-glob: 3.3.1
       local-pkg: 0.4.3
       magic-string: 0.30.2
@@ -5899,7 +5931,6 @@ packages:
         optional: true
     dependencies:
       vue: 3.3.4
-    dev: false
 
   /vue-eslint-parser-template-tokenizer-pug/0.4.10_vue-eslint-parser@9.3.1:
     resolution: {integrity: sha512-Npzjna9PUJzIal/o7hOo4D7dF4hqjHwTafBtLgdtja2LZuCc4UT5BU7dyYJeKb9s1SnCFBflHMg3eFA3odq6bg==}

@@ -7,7 +7,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "component-lib": ["../path/to/component-lib/dist/component-lib.d.ts"]
+      "shared-lib": ["../path/to/shared-lib/dist/shared-lib.d.ts"]
     },
     "resolveJsonModule": true
   },

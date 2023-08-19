@@ -29,7 +29,7 @@ export default defineConfig({
     lib: {
       // Could also be a dictionary or array of multiple entry points
       entry: ['src/index.ts', 'src/plugin.ts', 'src/types.ts'],
-      name: 'component-lib',
+      name: 'shared-lib',
       formats: ['es', 'cjs'],
       fileName: (format, entry) => `${entry}.${format}.js`
     },
