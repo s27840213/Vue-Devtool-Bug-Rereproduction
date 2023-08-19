@@ -1,5 +1,5 @@
 {
-  "name": "shared-lib",
+  "name": "@nu/shared-lib",
   "private": false,
   "version": "0.0.1",
   "type": "module",

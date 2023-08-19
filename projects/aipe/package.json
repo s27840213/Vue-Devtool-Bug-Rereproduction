@@ -1,5 +1,5 @@
 {
-  "name": "aipe",
+  "name": "@nu/aipe",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -12,7 +12,7 @@
     "format": "prettier --write src/ --ignore-path"
   },
   "dependencies": {
-    "shared-lib": "workspace:^0.0.1",
+    "@nu/shared-lib": "workspace:^0.0.1",
     "pinia": "^2.1.4",
     "vue-router": "^4.2.4"
   },

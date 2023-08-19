@@ -1,0 +1,15 @@
+{
+  "name": "@nu/plugin-prettier-region",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "subsecond": "^0.2.5"
+  }
+}

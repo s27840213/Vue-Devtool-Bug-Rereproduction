@@ -9,11 +9,18 @@ div(class="flex flex-col justify-center items-center")
 </template>
 
 <script setup lang="ts">
-import colors from '@/assets/json/colors.json'
-import { useCounterStore } from './stores/counter'
-const counterStore = useCounterStore()
-
+import colors from '@/assets/json/colors.json';
+import { useCounterStore } from './stores/counter';
+  const counterStore = useCounterStore()
+  // #region hello
+// #region test
 const colorKeys = computed<any>(() => Object.keys(colors))
+// #endregion
+
+// #region hahaha
+const test = ref(0)
+// #endregion
+// #endregion
 </script>
 
 <style scoped>

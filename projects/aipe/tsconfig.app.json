@@ -6,8 +6,7 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "shared-lib": ["../path/to/shared-lib/dist/shared-lib.d.ts"]
+      "@/*": ["./src/*"]
     },
     "resolveJsonModule": true
   },

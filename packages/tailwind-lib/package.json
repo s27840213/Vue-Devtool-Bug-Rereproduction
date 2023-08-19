@@ -1,5 +1,5 @@
 {
-  "name": "tailwind-lib",
+  "name": "@nu/tailwind-lib",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
