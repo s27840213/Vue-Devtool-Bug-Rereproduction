@@ -30,12 +30,13 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     return false
   }
 
-  registerCallbacks(type: string) {
+  registerCallbacks(type: string, hook?: (callbackName: string, ...args: any[]) => void) {
     for (const callbackName of this.CALLBACK_MAPS[type]) {
       (window as any)[callbackName] = (...args: any[]) => {
         if (!this.filterCallbackLog(callbackName)) {
           logUtils.setLogAndConsoleLog(callbackName, ...args)
         }
+        hook && hook(callbackName, ...args)
         const self = this as any
         self[callbackName].bind(this)(...args)
       }
