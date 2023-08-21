@@ -64,7 +64,7 @@ enum appType {
 }
 
 const mobileOS = ref(mobileOSType.IOS) // TODO: auto-detect OS type
-const app = ref(appType.Vivisticker) // TODO: somehow detect app type
+const app = ref(appType.Vivipic) // TODO: somehow detect app type
 
 switch (app.value) {
   case appType.Vivipic:
