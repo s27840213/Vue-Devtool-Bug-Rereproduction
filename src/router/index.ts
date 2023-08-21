@@ -11,7 +11,7 @@ import textFillUtils from '@/utils/textFillUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { h, resolveComponent } from 'vue'
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import ViviSticker from '../views/ViviSticker.vue'
 
@@ -125,6 +125,8 @@ const router = createRouter({
         if (standalone) {
           vivistickerUtils.enterStandaloneMode()
           vivistickerUtils.setDefaultLocale()
+        } else {
+          vivistickerUtils.detectIfInApp()
         }
         const userInfo = await vivistickerUtils.getUserInfo()
         if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo

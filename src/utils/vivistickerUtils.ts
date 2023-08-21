@@ -667,6 +667,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     store.commit('vivisticker/SET_controllerHidden', false)
   }
 
+  detectIfInApp() {
+    if (window.webkit?.messageHandlers?.APP_LOADED === undefined) {
+      this.enterStandaloneMode()
+      this.setDefaultLocale()
+    }
+  }
+
   enterStandaloneMode() {
     store.commit('vivisticker/SET_isStandaloneMode', true)
   }
