@@ -136,7 +136,7 @@ const checkRecordSelected = (record: ICallbackRecord): boolean => {
 }
 
 const processedArg = (arg: string): string => {
-  return JSON.stringify(generalUtils.unproxify(arg), undefined, 4)
+  return JSON.stringify(generalUtils.unproxify(arg), undefined, 2)
 }
 </script>
 
