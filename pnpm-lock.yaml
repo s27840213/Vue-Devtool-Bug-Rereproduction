@@ -32,6 +32,7 @@ importers:
       pug: ^3.0.2
       pug-plain-loader: ^1.1.0
       sass: ^1.65.1
+      tailwind-scrollbar-hide: ^1.1.7
       tailwindcss: ^3.0.23
       typescript: ^5.1.6
       unplugin-auto-import: ^0.16.6
@@ -72,6 +73,7 @@ importers:
       pug: 3.0.2
       pug-plain-loader: 1.1.0_pug@3.0.2
       sass: 1.65.1
+      tailwind-scrollbar-hide: 1.1.7
       tailwindcss: 3.3.3_ts-node@10.9.1
       typescript: 5.1.6
       unplugin-auto-import: 0.16.6_@vueuse+core@10.3.0
@@ -5383,6 +5385,10 @@ packages:
     dependencies:
       '@pkgr/utils': 2.4.2
       tslib: 2.6.1
+    dev: true
+
+  /tailwind-scrollbar-hide/1.1.7:
+    resolution: {integrity: sha512-X324n9OtpTmOMqEgDUEA/RgLrNfBF/jwJdctaPZDzB3mppxJk7TLIDmOreEDm1Bq4R9LSPu4Epf8VSdovNU+iA==}
     dev: true
 
   /tailwindcss/3.3.3_ts-node@10.9.1:

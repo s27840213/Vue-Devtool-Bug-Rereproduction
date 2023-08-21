@@ -14,7 +14,22 @@ div(class="bg-app-bg px-24 py-8 border-b-2 border-primary-white flex justify-bet
   div
     nu-btn(
       theme="primary"
-      size="md") {{ $t('NN0012') }}
+      size="md"
+      @click="handleNext") {{ $t('NN0012') }}
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useEditorStore } from '@/stores/editor'
+import { storeToRefs } from 'pinia'
+
+const editorStore = useEditorStore()
+const { setEditorState } = editorStore
+const { editorState } = storeToRefs(editorStore)
+
+const handleNext = function () {
+  if (editorState.value === 'aspectRatio') {
+    setEditorState('editing')
+  } else {
+  }
+}
+</script>
 <style lang="scss"></style>

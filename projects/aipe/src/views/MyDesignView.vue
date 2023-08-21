@@ -1,30 +1,32 @@
 <template lang="pug">
-div(
-  class="flex"
-  v-for="theme in nubtnThemesArray"
-  :key="theme")
-  div(class="flex items-center justify-evenly")
-    div(
-      v-for="size in sizeMap[theme]"
-      :key="size")
-      span {{ `${theme}${size ? `-${size}` : size}` }}
-      nu-btn(
-        :theme="theme"
-        :size="size"
-        :hasIcon="hasIconThemes.includes(theme)"
-        :iconName="'close-btn'") Button
-      nu-btn(
-        :theme="theme"
-        :size="size"
-        :active="true"
-        :hasIcon="hasIconThemes.includes(theme)"
-        :iconName="'close-btn'") Button
-      nu-btn(
-        :theme="theme"
-        :size="size"
-        :disabled="true"
-        :hasIcon="hasIconThemes.includes(theme)"
-        :iconName="'close-btn'") Button
+div
+  div(class="text-app-selection") 施工中，暫時拿來 show btn
+  div(
+    class="flex"
+    v-for="theme in nubtnThemesArray"
+    :key="theme")
+    div(class="flex items-center justify-evenly")
+      div(
+        v-for="size in sizeMap[theme]"
+        :key="size")
+        span {{ `${theme}${size ? `-${size}` : size}` }}
+        nu-btn(
+          :theme="theme"
+          :size="size"
+          :hasIcon="hasIconThemes.includes(theme)"
+          :iconName="'close-btn'") Button
+        nu-btn(
+          :theme="theme"
+          :size="size"
+          :active="true"
+          :hasIcon="hasIconThemes.includes(theme)"
+          :iconName="'close-btn'") Button
+        nu-btn(
+          :theme="theme"
+          :size="size"
+          :disabled="true"
+          :hasIcon="hasIconThemes.includes(theme)"
+          :iconName="'close-btn'") Button
 </template>
 <script setup lang="ts">
 import type { INubtnSize, INubtnThemes } from '@/types/btn'

@@ -1,32 +1,57 @@
 <template lang="pug">
-div(class="w-full h-full")
-  router-view(:style="viewStyles")
-//- div(class="absolute text-app-icon-light top-4 left-0") {{ width }} {{ height }}
-bottom-panel(v-if="atHome || atMyDesign")
-  home-tab
+div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
+  router-view(class="pb-12" v-slot="{ Component }")
+    transition(
+      name="fade-in"
+      mode="out-in")
+      component(:is="Component")
+  bottom-panel(class="z-10")
+    transition(
+      name="fade-down-up"
+      mode="out-in")
+      home-tab(v-if="showHomeTabs")
+      aspect-ratio-selector(v-else-if="showAspectRatioSelector")
+      editing-options(v-else-if="showEditingOpstions")
+  //- div(class="fixed bottom-1/4 left-4 text-app-selection") {{ atHome }} {{ atMyDesign }} {{ routeInfo.atHome }}
 </template>
 
 <script setup lang="ts">
-import { useElementSize } from '@vueuse/core'
-
-const bottomPanelRef = ref<HTMLElement | null>(null)
-const { height } = useElementSize(bottomPanelRef)
-const viewStyles = computed(() => {
-  return {
-    // 32 is the padding height of the bottom panel
-    paddingBottom: `${height.value + 32 + 24}px`
-  }
-})
+import useStateInfo from './composable/useStateInfo'
 
 // #region route info
-const route = useRoute()
-const atHome = computed(() => {
-  return route.path === '/'
-})
-const atMyDesign = computed(() => {
-  return route.path === '/mydesign'
-})
+const stateInfo = useStateInfo()
+const { showAspectRatioSelector, showHomeTabs, showEditingOpstions } = stateInfo
 // #endregion
 </script>
 
-<style></style>
+<style lang="scss">
+.fade-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+.fade-down-up {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+</style>

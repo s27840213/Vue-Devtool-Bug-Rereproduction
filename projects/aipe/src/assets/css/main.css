@@ -16,4 +16,5 @@
   /* /block swipe navagation, only work for Chrome & FireFox */
   overscroll-behavior-x: none;
   touch-action: none;
+  background-color: #050505;
 }

@@ -17,8 +17,6 @@ const props = defineProps<{
 
 const cardStyles = computed(() => {
   const targetUrl = getImageUrl()
-  console.log(targetUrl)
-
   return {
     background: `linear-gradient(0deg, rgba(0%, 0%, 0%, 0.85) 3%, transparent 40%), url(${targetUrl}`
   }

@@ -4,61 +4,46 @@ svg(
   class="svg-icon"
   :class="`text-${iconColor} svg-${iconName}` + (strokeColor ? `stroke-${strokeColor}` : '')"
   viewBox="0 0 120 30"
-  :style="iconStyles()"
-  v-html="loadingSvg")
+  :style="iconStyles"
+  v-html="loadingSvg"
+  ref="svgIconRef")
 svg(
   v-else
   class="svg-icon"
   :class="`text-${iconColor} svg-${iconName} ` + (strokeColor ? `stroke-${strokeColor}` : '')"
-  :style="iconStyles()")
-  use(:xlink:href="`#${iconName}`")
+  :style="iconStyles"
+  ref="svgIconRef")
+  use(
+    :xlink:href="`#${iconName}`"
+    ref="useRef")
 </template>
 
-<script lang="ts">
-// import svgIconUtils from '@/utils/svgIconUtils'
-import { defineComponent } from 'vue'
-
-// eslint-disable-next-line no-undef
-// const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-// const req = require.context('@/assets/icon', true, /\.svg$/, 'lazy-once')
-
-// if (window.location.host !== 'vivipic.com') {
-//   requireAll(req).forEach((promise: any) => {
-//     promise.then((context: any) => {
-//       svgIconUtils.pushIcon(context.default?.id)
-//     })
-//   })
-// } else {
-//   requireAll(req)
-// }
-
-export default defineComponent({
-  emits: [],
-  name: 'SvgIcon',
-  props: {
-    iconName: {
-      type: [String],
-      default: 'menu'
-    },
-    iconWidth: {
-      type: String,
-      default: '40px'
-    },
-    iconColor: {
-      type: String,
-      default: 'blue-1'
-    },
-    iconHeight: {
-      type: String
-    },
-    // only used for those who alread has stroke
-    strokeColor: {
-      type: String
-    }
+<script setup lang="ts">
+const props = defineProps({
+  iconName: {
+    type: [String],
+    default: 'menu'
   },
-  data() {
-    return {
-      loadingSvg: `
+  iconWidth: {
+    type: String
+  },
+  iconColor: {
+    type: String,
+    default: 'blue-1'
+  },
+  iconHeight: {
+    type: String
+  },
+  // only used for those who alread has stroke
+  strokeColor: {
+    type: String
+  },
+  sameSize: {
+    type: Boolean,
+    default: true
+  }
+})
+const loadingSvg = `
         <circle cx="15" cy="15" r="15">
             <animate attributeName="r" from="15" to="15"
                     begin="0s" dur="0.8s"
@@ -90,22 +75,40 @@ export default defineComponent({
                     repeatCount="indefinite" />
         </circle>
       `
+const iconStyles = computed(() => {
+  let width = props.iconWidth
+  let height = props.iconHeight
+
+  if (!props.sameSize) {
+    if (!props.iconWidth && props.iconHeight) {
+      width = `${parseInt(props.iconHeight?.split('px')[0]) * iconAspectRatio.value}px`
     }
-  },
-  methods: {
-    iconStyles() {
-      return {
-        width: this.iconWidth,
-        height: this.iconHeight ?? this.iconWidth
-      }
+
+    if (props.iconWidth && !props.iconHeight) {
+      width = `${parseInt(props.iconWidth?.split('px')[0]) * iconAspectRatio.value}px`
     }
   }
+  return {
+    width: width || (props.sameSize && height) || '40px',
+    height: height || (props.sameSize && width) || '40px'
+  }
 })
+
+const iconAspectRatio = computed(() => {
+  if (props.sameSize) return 1
+
+  if (useRef && useRef.value) {
+    const { width, height } = useRef.value.getBoundingClientRect()
+    return width / height
+  }
+
+  return 1
+})
+const useRef = ref<HTMLElement | null>(null)
 </script>
 
 <style lang="scss" scoped>
 .svg-icon {
-  width: 100%;
   transition:
     background-color 0.4s,
     color 0.4s,

@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="w-full h-full")
   div(class="typo-btn-lg text-app-text-secondary") {{ $t('NN0013') }}
-  div(class="scroll-container h-full overflow-scroll")
+  scrollable-container
     div(
       v-for="aspectRatio in aspectRatioTypes"
       :key="aspectRatio"
@@ -18,20 +18,29 @@ div(class="w-full h-full")
         :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
 </template>
 <script setup lang="ts">
+import { useEditorStore } from '@/stores/editor'
+
+const editorStore = useEditorStore()
+const { setPageSize } = editorStore
+
 const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5', '5_4']
 const selectedType = ref('9_16')
 
 const selectAspectRatio = (type: string) => {
   selectedType.value = type
+
+  if (type === 'original') {
+    setPageSize(900, 1600)
+  } else {
+    const [w, h] = type.split('_')
+    const width = parseInt(w)
+    const height = parseInt(h)
+    if (width > height) {
+      setPageSize(1600, (1600 * height) / width)
+    } else {
+      setPageSize((1600 * width) / height, 1600)
+    }
+  }
 }
 </script>
-<style lang="scss">
-.scroll-container {
-  overflow: scroll;
-  display: grid;
-  grid-template-rows: auto;
-  grid-auto-flow: column;
-  column-gap: 12px;
-  padding: 8px 12px;
-}
-</style>
+<style lang="scss"></style>

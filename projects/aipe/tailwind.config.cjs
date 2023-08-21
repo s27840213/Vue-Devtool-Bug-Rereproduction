@@ -47,6 +47,7 @@ module.exports = {
     }
   ],
   plugins: [
+    require('tailwind-scrollbar-hide'),
     // why we should use this plugin? bcz if we add custom class using @layer, they won't be change in tailwind intellsense
     plugin(function ({ addUtilities }) {
       const textStyles = {
