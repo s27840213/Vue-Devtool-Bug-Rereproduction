@@ -22,12 +22,14 @@
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[svg]": {
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": false
   },
   "files.insertFinalNewline": true,
-  "i18n-ally.localesPaths": [
-    "src/locales"
-  ],
+  "i18n-ally.localesPaths": ["src/locales"],
   "i18n-ally.keystyle": "nested",
-  "i18n-ally.sourceLanguage": "us"
+  "i18n-ally.sourceLanguage": "us",
+  "vue.complete.casing.status": false,
+  "vue.complete.casing.tags": "kebab",
+  "vue.complete.casing.props": "camel",
+  "vue.inlayHints.missingProps": true
 }

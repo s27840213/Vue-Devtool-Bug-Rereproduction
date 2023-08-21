@@ -9,8 +9,9 @@ import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
 import bgRemove, { IBgRemoveState } from '@/store/module/bgRemove'
 import color, { IColorState } from '@/store/module/color'
-import { IDesignState } from '@/store/module/design'
-import { IFileState } from '@/store/module/file'
+import cypress, { ICypressState } from '@/store/module/cypress'
+import design, { IDesignState } from '@/store/module/design'
+import file, { IFileState } from '@/store/module/file'
 import font from '@/store/module/font'
 import fontTag, { IFontTagState } from '@/store/module/fontTag'
 import giphy from '@/store/module/giphy'
@@ -43,10 +44,11 @@ import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
-import { IBrandKitState } from './module/brandkit'
+import brandkit, { IBrandKitState } from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
+  sessionId: generalUtils.generateRandomString(12),
   pages: [{
     config: pageUtils.newPage({}),
     modules: {
@@ -96,7 +98,8 @@ const getDefaultState = (): IEditorState => ({
     },
     isTransparent: false,
     isPreview: false,
-    panelPreviewSrc: ''
+    // panelPreviewSrc: ''
+    previewSrc: ''
   },
   currSubSelectedInfo: {
     index: -1,
@@ -604,9 +607,6 @@ const mutations: MutationTree<IEditorState> = {
     if (typeof photo.isTransparent !== 'undefined') {
       state.currDraggedPhoto.isTransparent = photo.isTransparent
     }
-    if (photo.panelPreviewSrc) {
-      state.currDraggedPhoto.panelPreviewSrc = photo.panelPreviewSrc
-    }
   },
   SET_hasCopiedFormat(state: IEditorState, value: boolean) {
     state.hasCopiedFormat = value
@@ -966,13 +966,13 @@ const mutations: MutationTree<IEditorState> = {
              * @Vue3Update
              */
             // Vue.delete(l, 'previewSrc')
-            delete l.previewSrc
+            // delete l.previewSrc
             Object.assign((l as IImage).srcObj, {
               type,
               userId,
               assetId: uploadUtils.isAdmin ? assetId : assetIndex
             })
-
+            Object.assign(l, { previewSrc: '' })
             if (!forSticker) {
               uploadUtils.uploadDesign()
             }
@@ -1216,6 +1216,7 @@ type IStoreRoot = IEditorState & {
   fontTag: IFontTagState,
   imgControl: IImgControlState,
   webView: IWebViewState,
+  cypress: ICypressState,
 }
 const store = createStore({
   state: state as IStoreRoot,
@@ -1243,7 +1244,8 @@ const store = createStore({
     vivisticker,
     fontTag,
     imgControl,
-    webView
+    webView,
+    cypress,
   }
 })
 export default store

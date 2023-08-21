@@ -945,6 +945,10 @@ class PageUtils {
   setMobilePysicalPage(payload: { pageIndex: number, pageSize?: ISize, pageCenterPos?: ICoordinate }) {
     store.commit('SET_pagePysicalSize', payload)
   }
+
+  logPageIndexInfo() {
+    console.log(this.middlemostPageIndex, this.currActivePageIndex, this.currFocusPageIndex, this.currSelectedInfo.pageIndex)
+  }
 }
 
 const pageUtils = new PageUtils()

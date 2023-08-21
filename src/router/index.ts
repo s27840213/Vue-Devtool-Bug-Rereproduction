@@ -98,6 +98,11 @@ if (window.location.host !== 'vivipic.com') {
     name: 'NubtnList',
     component: () => import('@/views/NubtnList.vue')
   })
+  routes.push({
+    path: 'nativeevttest',
+    name: 'NativeEventTester',
+    component: () => import('@/views/NativeEventTester.vue')
+  })
 }
 
 const router = createRouter({
@@ -111,6 +116,9 @@ const router = createRouter({
         render() { return h(resolveComponent('router-view')) }
       },
       async beforeEnter(to, from, next) {
+        if (to.name === 'NativeEventTester') {
+          vivistickerUtils.enterEventTestMode()
+        }
         vivistickerUtils.registerCallbacks('router')
         const urlParams = new URLSearchParams(window.location.search)
         const standalone = urlParams.get('standalone')
@@ -155,8 +163,8 @@ const router = createRouter({
         if (editorBg) {
           store.commit('vivisticker/SET_editorBg', editorBg)
         }
-        picWVUtils.updateLocale(locale)
-        vivistickerUtils.setDefaultPrices(locale)
+        picWVUtils.updateLocale(i18n.global.locale)
+        vivistickerUtils.setDefaultPrices(i18n.global.locale)
 
         // document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
@@ -179,6 +187,7 @@ router.beforeEach(async (to, from, next) => {
   //   next()
   //   return
   // }
+  logUtils.setLog(`navigate to route: ${to.path}`)
   picWVUtils.detectIfInApp()
   await picWVUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.
