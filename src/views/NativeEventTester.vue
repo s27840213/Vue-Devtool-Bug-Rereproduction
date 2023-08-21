@@ -22,7 +22,7 @@ div(class="native-event-tester")
         :disabled="!eventParamsValid || eventName === ''"
         @click="submitEvent") SEND
     div(class="native-event-tester__row vertical")
-      div(class="native-event-tester__label") Callback From Native:
+      div(class="native-event-tester__label") Callbacks From Native:
       div(class="native-event-tester__callbacks scrollbar-gray-thin")
         div(class="native-event-tester__callback"
             :class="{ selected: checkRecordSelected(record) }"
