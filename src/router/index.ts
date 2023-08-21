@@ -253,6 +253,9 @@ const router = createRouter({
         render() { return h(resolveComponent('router-view')) }
       },
       async beforeEnter(to, from, next) {
+        if (to.name === 'NativeEventTester') {
+          picWVUtils.enterEventTestMode()
+        }
         if (logUtils.getLog()) {
           logUtils.uploadLog()
         }
