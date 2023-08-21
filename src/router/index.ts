@@ -293,7 +293,7 @@ const router = createRouter({
           i18n.global.locale = locale
           localStorage.setItem('locale', locale)
         }
-        picWVUtils.updateLocale(locale)
+        picWVUtils.updateLocale(i18n.global.locale)
 
         // document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
