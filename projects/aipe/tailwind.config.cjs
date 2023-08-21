@@ -5,22 +5,41 @@ const bgPattern = new RegExp(`bg-(${joinedColor})`)
 const textPattern = new RegExp(`text-(${joinedColor})`)
 const borderPattern = new RegExp(`border-(${joinedColor})`)
 
+const spacingMap = {}
+for (let i = 0; i <= 360; i++) {
+  switch (true) {
+    case i <= 40:
+    case i <= 120 && i % 4 === 0:
+    case i % 8 === 0:
+      spacingMap[i] = `${i}px`
+      break
+    default:
+      break
+  }
+}
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{vue,js,ts,jsx,tsx}', '../../packages/ui-component/src/**/*.vue'],
+  // purge: ['./src/**/*.html', './src/**/*.vue', './src/**/*.ts'],
   theme: {
     extend: {},
-    colors: colors
+
+    colors: { transparent: 'transparent', ...colors },
+    // this project only for mobile, no need to add to much spacing
+    spacing: spacingMap
   },
   safelist: [
     {
-      pattern: bgPattern
+      pattern: bgPattern,
+      variants: ['active']
     },
     {
-      pattern: textPattern
+      pattern: textPattern,
+      variants: ['active']
     },
     {
-      pattern: borderPattern
+      pattern: borderPattern,
+      variants: ['active']
     }
   ],
   plugins: [
@@ -100,7 +119,7 @@ module.exports = {
           lineHeight: '16px'
         }
       }
-      addUtilities(textStyles, ['responsive', 'hover'])
+      addUtilities(textStyles, ['responsive'])
     })
   ]
 }

@@ -9,7 +9,7 @@
   "pugClassNotation": "attribute",
   "pugIdNotation": "as-is",
   "pugFramework": "vue",
-  "pugBracketSameLine": "true",
+  "pugBracketSameLine": true,
   "pugWrapAttributesThreshold": 1,
   "plugins": ["@prettier/plugin-pug"]
 }
