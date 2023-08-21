@@ -47,7 +47,7 @@ import Checkbox from '@/components/global/Checkbox.vue'
 import { ICallbackRecord } from '@/interfaces/webView'
 import generalUtils from '@/utils/generalUtils'
 import picWVUtils from '@/utils/picWVUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+// import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
 import { useStore } from 'vuex'
@@ -71,7 +71,7 @@ switch (app.value) {
     picWVUtils.registerCallbacks('main')
     break
   case appType.Vivisticker:
-    vivistickerUtils.registerCallbacks('vvstk')
+    // vivistickerUtils.registerCallbacks('vvstk')
     break
 }
 
@@ -160,7 +160,7 @@ const sendToIOSByAPP = () => {
       picWVUtils.sendToIOS(eventName.value, eventParams, true)
       break
     case appType.Vivisticker:
-      vivistickerUtils.sendToIOS(eventName.value, eventParams, true)
+      // vivistickerUtils.sendToIOS(eventName.value, eventParams, true)
       break
   }
 }
