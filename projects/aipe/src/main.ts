@@ -7,7 +7,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import i18n from './i18n'
 import router from './router'
-const svgs = import.meta.glob('./assets/icon/*.svg', { eager: true })
+const svgs = import.meta.glob('./assets/icon/**/*.svg', { eager: true })
 const app = createApp(App)
 
 // the *.d.ts file for the global components in shared-lib

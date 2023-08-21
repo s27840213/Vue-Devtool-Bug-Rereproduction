@@ -11,11 +11,28 @@ const router = createRouter({
     },
     {
       path: '/btn',
-      name: 'btn',
+      name: 'Btn',
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('@/views/BtnView.vue')
+    },
+    {
+      path: '/mydesign',
+      name: 'MyDesign',
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('@/views/MyDesignView.vue')
+    },
+    ,
+    {
+      path: '/editor',
+      name: 'Editor',
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('@/views/EditorView.vue')
     }
   ]
 })

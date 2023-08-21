@@ -1,69 +1,32 @@
 <template lang="pug">
-router-view
+div(class="w-full h-full")
+  router-view(:style="viewStyles")
+//- div(class="absolute text-app-icon-light top-4 left-0") {{ width }} {{ height }}
+bottom-panel(v-if="atHome || atMyDesign")
+  home-tab
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useElementSize } from '@vueuse/core'
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+const bottomPanelRef = ref<HTMLElement | null>(null)
+const { height } = useElementSize(bottomPanelRef)
+const viewStyles = computed(() => {
+  return {
+    // 32 is the padding height of the bottom panel
+    paddingBottom: `${height.value + 32 + 24}px`
   }
+})
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+// #region route info
+const route = useRoute()
+const atHome = computed(() => {
+  return route.path === '/'
+})
+const atMyDesign = computed(() => {
+  return route.path === '/mydesign'
+})
+// #endregion
+</script>
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
+<style></style>

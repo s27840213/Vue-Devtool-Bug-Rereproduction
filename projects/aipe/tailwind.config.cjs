@@ -4,6 +4,7 @@ const joinedColor = Object.keys(colors).join('|')
 const bgPattern = new RegExp(`bg-(${joinedColor})`)
 const textPattern = new RegExp(`text-(${joinedColor})`)
 const borderPattern = new RegExp(`border-(${joinedColor})`)
+const strokePattern = new RegExp(`stroke-(${joinedColor})`)
 
 const spacingMap = {}
 for (let i = 0; i <= 360; i++) {
@@ -40,6 +41,9 @@ module.exports = {
     {
       pattern: borderPattern,
       variants: ['active']
+    },
+    {
+      pattern: strokePattern
     }
   ],
   plugins: [
