@@ -522,6 +522,7 @@ export default defineComponent({
       }
     },
     onError() {
+      if (!this.src) return
       if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {
         if (this.errorSrcIdentifier.retry === 3) {
           return
