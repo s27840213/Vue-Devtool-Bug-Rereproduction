@@ -22,7 +22,7 @@ div(class="native-event-tester")
         :disabled="!eventParamsValid || eventName === ''"
         @click="submitEvent") SEND
     div(class="native-event-tester__row vertical")
-      div(class="native-event-tester__label") Events From IOS:
+      div(class="native-event-tester__label") Events From Native:
       div(class="native-event-tester__callbacks scrollbar-gray-thin")
         div(class="native-event-tester__callback"
             :class="{ selected: checkRecordSelected(record) }"
@@ -44,17 +44,39 @@ div(class="native-event-tester")
 
 <script setup lang="ts">
 import Checkbox from '@/components/global/Checkbox.vue'
-import { ICallbackRecord } from '@/interfaces/vivisticker'
+import { ICallbackRecord } from '@/interfaces/webView'
 import generalUtils from '@/utils/generalUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
 import { useStore } from 'vuex'
 
-vivistickerUtils.registerCallbacks('vvstk')
+enum mobileOSType {
+  IOS,
+  Android
+}
+
+enum appType {
+  Vivipic,
+  Vivisticker,
+  AIPhotoEditor // TODO: change to finalized App name
+}
+
+const mobileOS = ref(mobileOSType.IOS) // TODO: auto-detect OS type
+const app = ref(appType.Vivisticker) // TODO: somehow detect app type
+
+switch (app.value) {
+  case appType.Vivipic:
+    picWVUtils.registerCallbacks('main')
+    break
+  case appType.Vivisticker:
+    vivistickerUtils.registerCallbacks('vvstk')
+    break
+}
 
 const store = useStore()
-const callbackRecords = computed(() => store.getters['vivisticker/getCallbackRecords'])
+const callbackRecords = computed(() => store.getters['webView/getCallbackRecords'])
 
 const paramsEle = ref(null as HTMLTextAreaElement | null)
 
@@ -96,10 +118,14 @@ const doAlertOnTimeout = ref(true)
 const doClearOnSubmet = ref(true)
 let eventTimeout = -1
 
+const resetEventTimeout = () => {
+  window.clearTimeout(eventTimeout)
+  eventTimeout = -1
+}
+
 watch(() => callbackRecords, (val) => {
   if (val.value.length !== 0) {
-    window.clearTimeout(eventTimeout)
-    eventTimeout = -1
+    resetEventTimeout()
   }
 }, { deep: true })
 
@@ -107,21 +133,44 @@ const submitEvent = () => {
   if (doClearOnSubmet.value) {
     clearCallbacks()
   }
-  window.clearTimeout(eventTimeout)
+  resetEventTimeout()
   if (doAlertOnTimeout.value) {
     eventTimeout = window.setTimeout(() => {
       notify({ group: 'error', text: 'no reply in 5 seconds' })
     }, 5000)
   }
   try {
-    vivistickerUtils.sendToIOS(eventName.value, eventParams, true)
+    switch (mobileOS.value) {
+      case mobileOSType.IOS:
+        sendToIOSByAPP()
+        break
+      case mobileOSType.Android:
+        sendToAndroidByApp()
+        break
+    }
   } catch (error: any) {
+    resetEventTimeout()
     notify({ group: 'error', text: error.toString() })
   }
 }
 
+const sendToIOSByAPP = () => {
+  switch (app.value) {
+    case appType.Vivipic:
+      picWVUtils.sendToIOS(eventName.value, eventParams, true)
+      break
+    case appType.Vivisticker:
+      vivistickerUtils.sendToIOS(eventName.value, eventParams, true)
+      break
+  }
+}
+
+const sendToAndroidByApp = () => {
+  // TODO: implement Android event sender
+}
+
 const clearCallbacks = () => {
-  vivistickerUtils.clearCallbackRecords()
+  store.commit('webView/UPDATE_clearCallbackRecords')
   selectedRecord.value = null
 }
 
