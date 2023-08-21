@@ -15,7 +15,7 @@ import LayerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v7174'
+const APP_VER_FOR_REFRESH_CACHE = 'v7457'
 
 class ImageUtils {
   get imageSizeMap(): { [key: string]: number } {
@@ -33,11 +33,15 @@ class ImageUtils {
     const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve) => {
       const image = new Image()
-      if (crossOrigin) {
+      if (crossOrigin && !src.includes('data:image/png;base64')) {
         image.crossOrigin = 'anonymous'
       }
       image.onload = () => resolve(cb(image))
-      error && (image.onerror = () => error(image))
+      image.onerror = (_e) => {
+        if (error) {
+          error(image)
+        }
+      }
       image.src = src
     })
   }
@@ -89,9 +93,6 @@ class ImageUtils {
       ({ type, userId, assetId, brandId, maxSize } = config)
     } else {
       if (!config.srcObj && !config.src_obj) return ''
-      if (config.previewSrc) {
-        return this.appendRefreshAppver(config.previewSrc)
-      }
       const srcObj = config.srcObj || config.src_obj as SrcObj
       ({ type, userId, assetId, brandId, updateQuery, maxSize } = srcObj)
       if (typeof size === 'undefined' && config.styles) {
@@ -175,12 +176,13 @@ class ImageUtils {
       default:
         res = ''
     }
-    /**
-     * to solve the cross origin error cause by add crossOrigin='anonymous'
-     * the cache img of the users would keep catching this error
-     * use a universe query version can solve this problem
-     */
-    return this.appendRefreshAppver(res)
+
+    if (!res && !this.isSrcObj(config) && (config as IImage).previewSrc) {
+      // If the res is empty, use the previewSrc instead.
+      return this.appendRefreshAppver((config as IImage).previewSrc || '')
+    } else {
+      return this.appendRefreshAppver(res)
+    }
   }
 
   getSrcSize(srcObj: SrcObj, dimension: number | string, preload = '') {
@@ -659,7 +661,7 @@ class ImageUtils {
   }
 
   appendOriginQuery(src: string) {
-    if (!src) return src
+    if (!src || src.includes('data:image/')) return src
     if (src.includes('origin=true')) return src
     if (src.includes('?')) {
       return `${src}&origin=true`
@@ -677,12 +679,18 @@ class ImageUtils {
     }
   }
 
+  /**
+   * to solve the cross origin error cause by add crossOrigin='anonymous'
+   * the cache img of the users would keep catching this error
+   * use a universe query version can solve this problem
+   */
   appendRefreshAppver(src: string) {
+    if (src.includes('data:image/')) return src
     return this.appendQuery(src, 'appver', APP_VER_FOR_REFRESH_CACHE)
   }
 
   appendCompQuery(src: string): string {
-    if (src.includes('comp=0')) return src
+    if (src.includes('comp=0' || 'data:image/')) return src
     if (src.includes('?')) {
       return `${src}&comp=0`
     } else {

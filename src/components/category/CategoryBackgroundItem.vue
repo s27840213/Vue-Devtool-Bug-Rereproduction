@@ -15,10 +15,12 @@ div(class="panel-bg__item"
 
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
+import i18n from '@/i18n'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -35,6 +37,10 @@ export default defineComponent({
       type: Object as PropType<IAsset>,
       required: true
     },
+    locked: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {
@@ -54,7 +60,22 @@ export default defineComponent({
     },
     addBackground() {
       if (!vivistickerUtils.checkPro(this.item, 'object')) return
-      if (this.isInEditor) return assetUtils.addAsset(this.item, undefined, 'background')
+      if (this.isInEditor) {
+        if (this.locked) {
+          return notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+        }
+        const img = this.$refs.img as HTMLImageElement
+        if (!img) {
+          console.error('img in background category is null')
+          return
+        }
+        const previewSrc = img.src
+        const imgSrcSize = {
+          width: img.naturalWidth,
+          height: img.naturalHeight
+        }
+        return assetUtils.addAsset(this.item, { previewSrc, imgSrcSize }, 'background')
+      }
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
       assetUtils.addAssetToRecentlyUsed(this.item, 'background')
     },

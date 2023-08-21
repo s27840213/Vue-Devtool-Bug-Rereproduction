@@ -28,7 +28,7 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
           template(v-slot:preview="{ item }")
             category-background-item(class="panel-bg__item"
               :item="item"
-              :locked="false"
+              :locked="currentPageBackgroundLocked"
               :style="itemStyles"
               @share="handleShareImage")
       template(v-slot:category-background-item="{ list, title }")

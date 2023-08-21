@@ -1,19 +1,21 @@
-import { IUserInfo } from '@/interfaces/webView'
+import { ICallbackRecord, IUserInfo } from '@/interfaces/webView'
 import picWVUtils from '@/utils/picWVUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
 export interface IWebViewState {
   userInfo: IUserInfo
   inBrowserMode: boolean
-  inReviewMode: boolean,
+  inReviewMode: boolean
   inDevMode: boolean
+  callbackRecords: ICallbackRecord[]
 }
 
 const getDefaultState = (): IWebViewState => ({
   userInfo: picWVUtils.getDefaultUserInfo(),
   inBrowserMode: false,
   inReviewMode: false,
-  inDevMode: false
+  inDevMode: false,
+  callbackRecords: [],
 })
 
 const state = getDefaultState()
@@ -29,7 +31,10 @@ const getters: GetterTree<IWebViewState, unknown> = {
   },
   getInReviewMode(state: IWebViewState): boolean {
     return state.inReviewMode
-  }
+  },
+  getCallbackRecords(state: IWebViewState): ICallbackRecord[] {
+    return state.callbackRecords
+  },
 }
 
 const mutations: MutationTree<IWebViewState> = {
@@ -45,6 +50,12 @@ const mutations: MutationTree<IWebViewState> = {
   SET_inReviewMode(state: IWebViewState, inReviewMode: boolean) {
     state.inReviewMode = inReviewMode
   },
+  UPDATE_addCallbackRecord(state: IWebViewState, callbackRecord: ICallbackRecord) {
+    state.callbackRecords.push(callbackRecord)
+  },
+  UPDATE_clearCallbackRecords(state: IWebViewState) {
+    state.callbackRecords = []
+  }
 }
 
 export default {

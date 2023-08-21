@@ -1,11 +1,13 @@
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import generalUtils from './generalUtils'
 import logUtils from './logUtils'
+import store from '@/store'
 
 export abstract class WebViewUtils<T extends { [key: string]: any }> {
   abstract STANDALONE_USER_INFO: T
   abstract CALLBACK_MAPS: { [key: string]: string[] }
 
+  eventTestMode = false
   callbackMap = {} as { [key: string]: (res: { data: WEBVIEW_API_RESULT, isTimeouted: boolean }) => void }
   eventMap = {} as { [key: string]: (data: WEBVIEW_API_RESULT) => void }
   errorMessageMap = {} as { [key: string]: string }
@@ -19,6 +21,18 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   abstract getUserInfoFromStore(): T
 
   abstract appendModuleName(identifier: string): string
+
+  enterEventTestMode() {
+    this.eventTestMode = true
+  }
+
+  callbackRecordHook(callbackName: string, ...args: any[]) {
+    store.commit('webView/UPDATE_addCallbackRecord', {
+      name: callbackName,
+      id: generalUtils.generateRandomString(8),
+      args
+    })
+  }
 
   filterLog(messageType: string, message: any): boolean {
     // implementation classes can filter out logs for certain messageType with certain messages
@@ -36,6 +50,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
         if (!this.filterCallbackLog(callbackName)) {
           logUtils.setLogAndConsoleLog(callbackName, ...args)
         }
+        this.eventTestMode && this.callbackRecordHook(callbackName, ...args)
         const self = this as any
         self[callbackName].bind(this)(...args)
       }
