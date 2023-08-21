@@ -236,9 +236,9 @@ if (window.location.host !== 'vivipic.com') {
     component: () => import('@/views/NubtnList.vue')
   })
   routes.push({
-    path: 'iosevttest',
-    name: 'IOSEventTester',
-    component: () => import('@/views/IOSEventTester.vue')
+    path: 'nativeevttest',
+    name: 'NativeEventTester',
+    component: () => import('@/views/NativeEventTester.vue')
   })
 }
 

@@ -1,44 +1,44 @@
 <template lang="pug">
-div(class="ios-event-tester")
-  div(class="ios-event-tester__send-event")
-    div(class="ios-event-tester__title") SEND EVENT
-    div(class="ios-event-tester__row horizontal")
-      div(class="ios-event-tester__label") Event Name:
-      input(class="ios-event-tester__event-name" v-model="eventName")
-    div(class="ios-event-tester__row vertical")
-      div(class="ios-event-tester__label") Message Body:
+div(class="native-event-tester")
+  div(class="native-event-tester__send-event")
+    div(class="native-event-tester__title") SEND EVENT
+    div(class="native-event-tester__row horizontal")
+      div(class="native-event-tester__label") Event Name:
+      input(class="native-event-tester__event-name" v-model="eventName")
+    div(class="native-event-tester__row vertical")
+      div(class="native-event-tester__label") Message Body:
       textarea(ref="paramsEle"
-                class="ios-event-tester__params"
+                class="native-event-tester__params"
                 rows="5"
                 v-model="eventParamsStr"
                 @keydown.tab.prevent="insertAtCursor")
-    div(class="ios-event-tester__row horizontal flex-between")
-      div(class="ios-event-tester__option")
+    div(class="native-event-tester__row horizontal flex-between")
+      div(class="native-event-tester__option")
         checkbox(v-model="doAlertOnTimeout")
-        div(class="ios-event-tester__label-inverted") alert on timeout (5s)
-      nubtn(class="ios-event-tester__submit"
+        div(class="native-event-tester__label-inverted") alert on timeout (5s)
+      nubtn(class="native-event-tester__submit"
         theme="ghost"
         size="sm"
         :disabled="!eventParamsValid || eventName === ''"
         @click="submitEvent") SEND
-    div(class="ios-event-tester__row vertical")
-      div(class="ios-event-tester__label") Events From IOS:
-      div(class="ios-event-tester__callbacks scrollbar-gray-thin")
-        div(class="ios-event-tester__callback"
+    div(class="native-event-tester__row vertical")
+      div(class="native-event-tester__label") Events From IOS:
+      div(class="native-event-tester__callbacks scrollbar-gray-thin")
+        div(class="native-event-tester__callback"
             :class="{ selected: checkRecordSelected(record) }"
             v-for="record in callbackRecords" :key="record.id"
             @click="selectRecord(record)")
-          div(class="ios-event-tester__label") {{ record.name }}
-    div(class="ios-event-tester__row horizontal flex-between")
-      div(class="ios-event-tester__option")
+          div(class="native-event-tester__label") {{ record.name }}
+    div(class="native-event-tester__row horizontal flex-between")
+      div(class="native-event-tester__option")
         checkbox(v-model="doClearOnSubmet")
-        div(class="ios-event-tester__label-inverted") clear on submit
-      nubtn(class="ios-event-tester__clear"
+        div(class="native-event-tester__label-inverted") clear on submit
+      nubtn(class="native-event-tester__clear"
         theme="ghost"
         size="sm"
         @click="clearCallbacks") CLEAR
-    div(v-if="selectedRecord" class="ios-event-tester__row vertical ios-event-tester__record-args")
-      pre(class="ios-event-tester__record-arg"
+    div(v-if="selectedRecord" class="native-event-tester__row vertical native-event-tester__record-args")
+      pre(class="native-event-tester__record-arg"
           v-for="arg in selectedRecord.args" :key="arg.toString()") {{ processedArg(arg) }}
 </template>
 
@@ -141,7 +141,7 @@ const processedArg = (arg: string): string => {
 </script>
 
 <style lang="scss" scoped>
-.ios-event-tester {
+.native-event-tester {
   @include size(100%, 100%);
   font-family: Poppins;
   display: flex;
@@ -240,7 +240,7 @@ const processedArg = (arg: string): string => {
     padding: 0px 6px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgb(156, 156, 156);
-    & > .ios-event-tester__label, & > .ios-event-tester__label-inverted {
+    & > .native-event-tester__label, & > .native-event-tester__label-inverted {
       margin: 0;
     }
   }
