@@ -7,7 +7,6 @@
     "build-all": "nx run-many --target=build --all",
     "build-affected": "nx affected:build --parallel",
     "aipe": "nx dev @nu/aipe",
-    "demo": "nx dev @nu/demo",
     "pic": "nx dev pic",
     "stk": "nx dev stk",
     "comp-lib": "nx dev @nu/shared-lib",

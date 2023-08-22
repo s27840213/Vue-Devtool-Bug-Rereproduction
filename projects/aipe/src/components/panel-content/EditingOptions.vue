@@ -61,7 +61,6 @@ const canvasStore = useCanvasStore()
 const { setCanvasStoreState } = canvasStore
 const { brushSize } = storeToRefs(canvasStore)
 const setBrushSize = (value: number) => {
-  p
   setCanvasStoreState({ brushSize: value })
 }
 const setIsChangingBrushSize = (value: boolean) => {

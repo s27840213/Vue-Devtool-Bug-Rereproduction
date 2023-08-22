@@ -8,14 +8,12 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AspectRatioSelector: typeof import('./components/panel-content/AspectRatioSelector.vue')['default']
-    BgRemoveArea: typeof import('./components/editor/BgRemoveArea.vue')['default']
     BottomPanel: typeof import('./components/BottomPanel.vue')['default']
     CanvasSection: typeof import('./components/editor/CanvasSection.vue')['default']
     EditingOptions: typeof import('./components/panel-content/EditingOptions.vue')['default']
     FeatureCard: typeof import('./components/home/FeatureCard.vue')['default']
     Headerbar: typeof import('./components/Headerbar.vue')['default']
     HomeTab: typeof import('./components/panel-content/HomeTab.vue')['default']
-    MobileSlider: typeof import('./components/global/MobileSlider.vue')['default']
     NuBtn: typeof import('./components/global/NuBtn.vue')['default']
     NuSvgIcon: typeof import('./components/global/NuSvgIcon.vue')['default']
     PropsSlider: typeof import('./components/global/PropsSlider.vue')['default']

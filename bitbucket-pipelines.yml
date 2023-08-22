@@ -287,7 +287,7 @@ pipelines:
               name: "Verify build environment"
               script: #show node and yarn version
                 - node -v
-                - yarn -v
+                - pnpm -v
           - step:
               name: "Start build with node module cache"
               size: 2x
@@ -295,11 +295,11 @@ pipelines:
                 - node
               image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
-                - yarn install
-                - yarn build:prerender
+                - pnpm install
+                - pnpm run build-all
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-                - dist/**
-                - node_modules/**
+                - projects/aipe/dist/**
+                - projects/aipe/node_modules/**
       - parallel:
           - step:
               name: "deploy rd"
@@ -336,4 +336,3 @@ pipelines:
               trigger: manual
               script:
                 - ./bash/create_pull_request.sh
-                
