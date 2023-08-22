@@ -47,7 +47,7 @@ import Checkbox from '@/components/global/Checkbox.vue'
 import { ICallbackRecord } from '@/interfaces/webView'
 import generalUtils from '@/utils/generalUtils'
 import picWVUtils from '@/utils/picWVUtils'
-// import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
 import { useStore } from 'vuex'
@@ -64,14 +64,14 @@ enum appType {
 }
 
 const mobileOS = ref(mobileOSType.IOS) // TODO: auto-detect OS type
-const app = ref(appType.Vivipic) // TODO: somehow detect app type
+const app = ref(appType.Vivisticker) // TODO: somehow detect app type
 
 switch (app.value) {
   case appType.Vivipic:
     picWVUtils.registerCallbacks('main')
     break
   case appType.Vivisticker:
-    // vivistickerUtils.registerCallbacks('vvstk')
+    vivistickerUtils.registerCallbacks('vvstk')
     break
 }
 
@@ -160,7 +160,7 @@ const sendToIOSByAPP = () => {
       picWVUtils.sendToIOS(eventName.value, eventParams, true)
       break
     case appType.Vivisticker:
-      // vivistickerUtils.sendToIOS(eventName.value, eventParams, true)
+      vivistickerUtils.sendToIOS(eventName.value, eventParams, true)
       break
   }
 }
