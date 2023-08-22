@@ -130,8 +130,8 @@ class BackgroundUtils {
     if (detachedBackgroundImage.config.srcObj.assetId) {
       /** get a tiny photo in order to get the aspectRatio of the image */
       const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj, 50))
-      const img = new Image()
-      img.onload = () => {
+
+      imageUtils.imgLoadHandler(src, (img) => {
         const ratio = img.naturalWidth / img.naturalHeight
         assetUtils.addImage(src, ratio, {
           pageIndex: layerUtils.pageIndex,
@@ -155,8 +155,7 @@ class BackgroundUtils {
             }
           })
         })
-      }
-      img.src = src
+      }, { crossOrigin: true })
     }
   }
 
