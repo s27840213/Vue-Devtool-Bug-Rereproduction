@@ -15,6 +15,7 @@ div(class="bg-app-bg px-24 py-8 border-b-2 border-primary-white flex justify-bet
     nu-btn(
       theme="primary"
       size="md"
+      :disabled="isDisabled"
       @click="handleNext") {{ $t('NN0012') }}
 </template>
 <script setup lang="ts">
@@ -25,7 +26,14 @@ const editorStore = useEditorStore()
 const { setEditorState } = editorStore
 const { editorState } = storeToRefs(editorStore)
 
+const isDisabled = computed(() => {
+  return editorState.value === 'editing'
+})
+
 const handleNext = function () {
+  if (isDisabled.value) {
+    return
+  }
   if (editorState.value === 'aspectRatio') {
     setEditorState('editing')
   } else {

@@ -3,7 +3,10 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar
   div(class="flex justify-center items-center" ref="editorContainerRef")
     div(class="w-full h-full box-border overflow-scroll flex justify-center items-center")
-      div(:style="wrapperStyles")
+      div(
+        class="wrapper"
+        :style="wrapperStyles"
+        ref="editorWrapperRef")
         transition(
           name="fade-right-in"
           mode="out-in")
@@ -11,14 +14,26 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
             class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
             :style="pageStyles")
             img(class="h-full object-contain" src="@/assets/img/test.jpg")
+            canvas-section(
+              v-if="showEditingOpstions"
+              class="absolute top-0 left-0 w-full h-full"
+              :containerDOM="editorContainerRef"
+              :wrapperDOM="editorWrapperRef")
+        div(
+          v-if="isChangingBrushSize"
+          class="demo-btn"
+          :style="demoBrushSizeStyles")
 </template>
 <script setup lang="ts">
 import useImageUtils from '@/composable/useImageUtils'
+import useStateInfo from '@/composable/useStateInfo'
+import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useElementSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 
 const editorContainerRef = ref<HTMLElement | null>(null)
+const editorWrapperRef = ref<HTMLElement | null>(null)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementSize(editorContainerRef)
@@ -31,8 +46,8 @@ onMounted(() => {
     setInitAspectRatio(img.width / img.height)
   })
 })
-
-// #region Editor Store
+// #region Stores
+const { showEditingOpstions } = useStateInfo()
 const editorStore = useEditorStore()
 const { setPageScaleRatio, setInitAspectRatio } = editorStore
 const { editingPage, pageSize, pageScaleRatio } = storeToRefs(editorStore)
@@ -81,6 +96,19 @@ const pageStyles = computed(() => {
   }
 })
 // #endregion
+
+// #region demo brush size section
+const canvasStore = useCanvasStore()
+const { brushSize, isChangingBrushSize } = storeToRefs(canvasStore)
+
+const demoBrushSizeStyles = computed(() => {
+  return {
+    width: `${brushSize.value * pageScaleRatio.value}px`,
+    height: `${brushSize.value * pageScaleRatio.value}px`
+  }
+})
+// #endregion
+
 /**
  * fitPage
  */
@@ -88,4 +116,9 @@ watchEffect(() => {
   setPageScaleRatio(fitScaleRatio.value)
 })
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+.demo-btn {
+  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-selection bg-opacity-30;
+  @apply pointer-events-none rounded-full border border-solid border-8 border-primary-white;
+}
+</style>

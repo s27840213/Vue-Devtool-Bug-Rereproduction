@@ -1,5 +1,5 @@
 import { AppColors } from '@/types/color'
-import type { EditorState } from '@/types/editor'
+import type { EditorState, EditorType, PowerfulFillMode } from '@/types/editor'
 import { defineStore } from 'pinia'
 export interface IPage {
   width: number
@@ -23,6 +23,8 @@ interface IEditorStore {
   editingPage: Page
   pageScaleRatio: number
   editorState: EditorState
+  editorType: EditorType
+  editorMode: PowerfulFillMode
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -30,7 +32,9 @@ export const useEditorStore = defineStore('editor', {
     initAspectRatio: 9 / 16,
     editingPage: new Page(900, 1600),
     pageScaleRatio: 1,
-    editorState: 'aspectRatio'
+    editorState: 'aspectRatio',
+    editorType: 'powerful-fill',
+    editorMode: 'selection'
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -58,6 +62,12 @@ export const useEditorStore = defineStore('editor', {
     },
     setEditorState(state: EditorState) {
       this.editorState = state
+    },
+    setEditorType(state: EditorState) {
+      this.editorState = state
+    },
+    setEditorMode(mode: PowerfulFillMode) {
+      this.editorMode = mode
     }
   }
 })

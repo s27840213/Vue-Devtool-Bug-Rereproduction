@@ -5,7 +5,7 @@ div(
   ref="btnRef"
   @click="click"
   @contextmenu.prevent)
-  svg-icon(
+  svg-icon-test(
     v-if="hasIcon"
     :iconName="iconName"
     :iconWidth="iconSize"
@@ -22,7 +22,7 @@ import type { INubtnSize, INubtnState, INubtnThemes } from '@/types/btn'
 import { computed } from 'vue'
 
 // #region static
-const { theme, size, disabled, iconName, active, full } = withDefaults(
+const props = withDefaults(
   defineProps<{
     theme: INubtnThemes
     size?: INubtnSize
@@ -41,10 +41,12 @@ const { theme, size, disabled, iconName, active, full } = withDefaults(
   }
 )
 
+const { theme, size, disabled, iconName, active, full } = toRefs(props)
+
 const emits = defineEmits(['clickBtn', 'update:active'])
 
 const btnRef = ref<HTMLElement | null>(null)
-const pressed = ref(active)
+const pressed = ref(active.value)
 
 useTapTransition(btnRef, pressed)
 
@@ -53,16 +55,18 @@ const { btnColorMap } = useColorStore()
 
 // #region btnSetting
 const status = computed<INubtnState>(() => {
-  return disabled ? 'disabled' : pressed.value ? 'pressed' : 'default'
+  return disabled.value ? 'disabled' : pressed.value ? 'pressed' : 'default'
 })
 
 const btnColor = computed<string>(() => {
-  return `bg-${btnColorMap[theme][status.value].btn} text-${btnColorMap[theme][status.value].text}`
+  return `bg-${btnColorMap[theme.value][status.value].btn} text-${
+    btnColorMap[theme.value][status.value].text
+  }`
 })
 const iconSize = '24px'
 
 const iconColor = computed<string>(() => {
-  return btnColorMap[theme][status.value].icon
+  return btnColorMap[theme.value][status.value].icon
 })
 // #endregion
 
