@@ -30,7 +30,12 @@ export interface IBgRemoveState {
     width: number,
     height: number
   },
-  inEffectEditingMode: boolean
+  inEffectEditingMode: boolean,
+  pinch: {
+    x: number,
+    y: number,
+    scale: number
+  }
 }
 
 const getDefaultState = (): IBgRemoveState => ({
@@ -61,7 +66,12 @@ const getDefaultState = (): IBgRemoveState => ({
     width: 0,
     height: 0
   },
-  inEffectEditingMode: false
+  inEffectEditingMode: false,
+  pinch: {
+    x: 0,
+    y: 0,
+    scale: 1
+  }
 })
 
 const state = getDefaultState()

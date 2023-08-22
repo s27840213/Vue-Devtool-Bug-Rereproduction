@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-remove-bg__rm-section" ref="rmSection"  @pinch="pinchHandler")
+div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"  @pinch="pinchHandler")
   div(v-if="isProcessing" class="panel-remove-bg__preview-section")
     img(:src="previewImage.src ? previewImage.src  : previewSrc")
     div(class="gray-mask")
@@ -7,6 +7,7 @@ div(class="panel-remove-bg__rm-section" ref="rmSection"  @pinch="pinchHandler")
   bg-remove-area(v-else :cotainerRef="containerRef"
     :teleportTarget="'.panel-remove-bg__rm-section'"
     :inVivisticker="true"
+    :containerHeight="containerHeight"
     :fitScaleRatio="bgRemoveScaleRatio")
   //- used to debug
   teleport(v-if="false" to="body")
@@ -66,6 +67,7 @@ export default defineComponent({
       initImgSize: { width: 0, height: 0 },
       imgAspectRatio: 1,
       distanceBetweenFingers: -1,
+      containerHeight: -1
       // p1StartClientY: 0,
       // p1StartClientX: 0,
       // p2StartClientY: 0,
@@ -76,6 +78,7 @@ export default defineComponent({
   mounted() {
     this.rmSection = this.$refs.rmSection as HTMLElement
     this.anyTouchInstance = new AnyTouch(this.rmSection as HTMLElement, { preventDefault: false })
+    this.containerHeight = this.rmSection.clientHeight
   },
   unmounted() {
     bgRemoveUtils.setInBgRemoveMode(false)
@@ -103,6 +106,14 @@ export default defineComponent({
     },
   },
   watch: {
+    isProcessing(val) {
+      if (!val) {
+        setTimeout(() => {
+          this.containerHeight = this.rmSection?.clientHeight ?? -1
+          console.log('isProcessing', val, this.containerHeight)
+        }, 200)
+      }
+    },
     inBgRemoveMode(val) {
       if (val) {
         this.$nextTick(() => {
@@ -247,7 +258,7 @@ export default defineComponent({
     height: 100%;
     box-sizing: border-box;
     overflow: overlay;
-    display: flex;
+    // display: flex;
     padding: 20px;
   }
 
