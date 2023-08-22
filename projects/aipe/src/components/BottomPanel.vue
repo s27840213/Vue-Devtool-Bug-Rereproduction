@@ -10,6 +10,6 @@ const { height } = useElementSize(bottomPanelRef)
 </script>
 <style lang="scss">
 .bottom-panel {
-  @apply bg-app-tab-bg w-full rounded-t-[24px] py-16 box-border;
+  @apply bg-app-tab-bg w-full rounded-t-[24px] py-24 box-border;
 }
 </style>

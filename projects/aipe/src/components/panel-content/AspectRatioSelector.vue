@@ -1,7 +1,7 @@
 <template lang="pug">
-div(class="w-full h-full")
+div(class="w-full h-full pl-24")
   div(class="typo-btn-lg text-app-text-secondary") {{ $t('NN0013') }}
-  scrollable-container
+  scrollable-container(:px="0")
     div(
       v-for="aspectRatio in aspectRatioTypes"
       :key="aspectRatio"

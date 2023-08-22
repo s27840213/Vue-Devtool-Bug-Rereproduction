@@ -104,7 +104,7 @@ const iconAspectRatio = computed(() => {
 
   return 1
 })
-
+const svgIconRef = ref<HTMLElement | null>(null)
 const useRef = ref<HTMLElement | null>(null)
 </script>
 

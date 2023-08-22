@@ -1,5 +1,7 @@
 <template lang="pug">
-div(class="bg-app-bg px-24 py-8 border-b-2 border-primary-white flex justify-between items-center")
+div(
+  class="bg-app-bg px-24 py-8 flex justify-between items-center"
+  :class="showPromptArea ? 'invisible pointer-events-none' : ''")
   div
     router-link(
       custom
@@ -10,33 +12,27 @@ div(class="bg-app-bg px-24 py-8 border-b-2 border-primary-white flex justify-bet
         icon-name="arrow-left"
         icon-width="24px"
         @click="navigate")
-  div
+  div(class="text-primary-dark")
   div
     nu-btn(
       theme="primary"
       size="md"
-      :disabled="isDisabled"
       @click="handleNext") {{ $t('NN0012') }}
 </template>
 <script setup lang="ts">
+import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { storeToRefs } from 'pinia'
-
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
 const { editorState } = storeToRefs(editorStore)
-
-const isDisabled = computed(() => {
-  return editorState.value === 'editing'
-})
+const { showPromptArea } = useStateInfo()
 
 const handleNext = function () {
-  if (isDisabled.value) {
-    return
-  }
   if (editorState.value === 'aspectRatio') {
     setEditorState('editing')
-  } else {
+  } else if (editorState.value === 'editing') {
+    setEditorState('prompt')
   }
 }
 </script>

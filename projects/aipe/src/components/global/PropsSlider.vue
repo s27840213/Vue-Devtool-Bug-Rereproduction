@@ -2,7 +2,7 @@
 div(class="mobile-slider grid grid-cols-[auto,1fr] grid-rows-1 gap-12")
   span(class="text-app-text-secondary typo-btn-sm") {{ `${$t('NN0021')} ${propsVal}` }}
   input(
-    class="mobile-slider__range-input input__slider--range"
+    class="accent-app-btn-primary-bg"
     v-model.number="propsVal"
     :name="name"
     :max="max"

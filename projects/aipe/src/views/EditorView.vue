@@ -47,7 +47,7 @@ onMounted(() => {
   })
 })
 // #region Stores
-const { showEditingOpstions } = useStateInfo()
+const { showEditingOpstions, showPromptArea, atEditor } = useStateInfo()
 const editorStore = useEditorStore()
 const { setPageScaleRatio, setInitAspectRatio } = editorStore
 const { editingPage, pageSize, pageScaleRatio } = storeToRefs(editorStore)
@@ -55,7 +55,12 @@ const { editingPage, pageSize, pageScaleRatio } = storeToRefs(editorStore)
 
 onBeforeRouteLeave((to, from) => {
   if (from.name === 'Editor') {
-    editorStore.$reset()
+    setTimeout(() => {
+      /**
+       * @NOTE - if we reset immediately, will see the editor from editing state to initial state bcz transition time
+       */
+      editorStore.$reset()
+    }, 1000)
   }
 })
 
@@ -113,7 +118,9 @@ const demoBrushSizeStyles = computed(() => {
  * fitPage
  */
 watchEffect(() => {
-  setPageScaleRatio(fitScaleRatio.value)
+  if (atEditor.value) {
+    setPageScaleRatio(fitScaleRatio.value)
+  }
 })
 </script>
 <style lang="scss">

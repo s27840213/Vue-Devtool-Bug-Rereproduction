@@ -12,6 +12,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
       home-tab(v-if="showHomeTabs")
       aspect-ratio-selector(v-else-if="showAspectRatioSelector")
       editing-options(v-else-if="showEditingOpstions")
+      prompt-area(v-else-if="showPromptArea")
   //- div(class="fixed bottom-1/4 left-4 text-app-selection") {{ atHome }} {{ atMyDesign }} {{ routeInfo.atHome }}
 </template>
 
@@ -20,7 +21,14 @@ import useStateInfo from './composable/useStateInfo'
 
 // #region route info
 const stateInfo = useStateInfo()
-const { showAspectRatioSelector, showHomeTabs, showEditingOpstions, atHome, atMyDesign } = stateInfo
+const {
+  showAspectRatioSelector,
+  showHomeTabs,
+  showEditingOpstions,
+  showPromptArea,
+  atHome,
+  atMyDesign
+} = stateInfo
 // #endregion
 
 const routeTransitionName = computed(() => {
@@ -49,6 +57,21 @@ const routeTransitionName = computed(() => {
   }
 }
 
+.fade-right-in-out {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateX(50%);
+  }
+}
+
 .fade-left-in {
   &-enter-active {
     transition:
@@ -71,6 +94,21 @@ const routeTransitionName = computed(() => {
   }
 }
 
+.fade-left-in-out {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateX(-50%);
+  }
+}
+
 .fade-down-up {
   &-enter-active,
   &-leave-active {
@@ -83,6 +121,21 @@ const routeTransitionName = computed(() => {
   &-leave-to {
     opacity: 0;
     transform: translateY(10px);
+  }
+}
+
+.fade-up-down {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.15s,
+      transform 0.15s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(-20px);
   }
 }
 </style>

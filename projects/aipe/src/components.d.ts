@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    Accordion: typeof import('./components/accordion/Accordion.vue')['default']
     AspectRatioSelector: typeof import('./components/panel-content/AspectRatioSelector.vue')['default']
     BottomPanel: typeof import('./components/BottomPanel.vue')['default']
     CanvasSection: typeof import('./components/editor/CanvasSection.vue')['default']
@@ -16,6 +17,7 @@ declare module 'vue' {
     HomeTab: typeof import('./components/panel-content/HomeTab.vue')['default']
     NuBtn: typeof import('./components/global/NuBtn.vue')['default']
     NuSvgIcon: typeof import('./components/global/NuSvgIcon.vue')['default']
+    PromptArea: typeof import('./components/panel-content/PromptArea.vue')['default']
     PropsSlider: typeof import('./components/global/PropsSlider.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

@@ -2,7 +2,7 @@
 div(class="w-full h-full")
   div(
     v-if="inSelectionMode"
-    class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center pl-24 pr-8 mb-16")
+    class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 pl-24 pr-8")
     span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('NN0015') }}
     scrollable-container(:gap="20")
       nu-svg-icon(
@@ -12,7 +12,7 @@ div(class="w-full h-full")
         :icon-name="shape"
         icon-height="32px"
         :same-size="false")
-  div(v-else class="px-24 mb-16") 
+  div(v-else class="mb-16") 
     props-slider(
       :title="`${$t('NN0001')}`"
       :borderTouchArea="true"

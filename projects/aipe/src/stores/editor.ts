@@ -25,16 +25,18 @@ interface IEditorStore {
   editorState: EditorState
   editorType: EditorType
   editorMode: PowerfulFillMode
+  isAdjustingBottomPanel: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
   state: (): IEditorStore => ({
     initAspectRatio: 9 / 16,
     editingPage: new Page(900, 1600),
-    pageScaleRatio: 1,
+    pageScaleRatio: 0.1,
     editorState: 'aspectRatio',
     editorType: 'powerful-fill',
-    editorMode: 'selection'
+    editorMode: 'selection',
+    isAdjustingBottomPanel: true
   }),
   getters: {
     pageSize(): { width: number; height: number } {

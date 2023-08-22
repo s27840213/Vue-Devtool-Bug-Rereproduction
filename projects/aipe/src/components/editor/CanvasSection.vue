@@ -10,6 +10,7 @@ div(class="absolute top-0 left-0")
 import useCanvasUtils from '@/composable/useCanvasUtils'
 import { useEditorStore } from '@/stores/editor'
 import { storeToRefs } from 'pinia'
+// #region data section
 const props = defineProps<{
   containerDOM: HTMLElement | null
   wrapperDOM: HTMLElement | null
@@ -18,10 +19,14 @@ const props = defineProps<{
 const { containerDOM, wrapperDOM } = toRefs(props)
 const editorStore = useEditorStore()
 const { pageSize } = storeToRefs(editorStore)
+// #endregion
+
+// #region Canvas feature section
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const { brushStyle, showBrush } = useCanvasUtils(canvasRef, wrapperDOM, containerDOM, {
   width: pageSize.value.width,
   height: pageSize.value.height
 })
+// #endregion
 </script>
 <style lang="scss"></style>

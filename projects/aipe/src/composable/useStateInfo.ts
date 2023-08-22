@@ -18,6 +18,7 @@ const useStateInfo = () => {
     () => atEditor.value && editorState.value === 'aspectRatio'
   )
   const showEditingOpstions = computed(() => atEditor.value && editorState.value === 'editing')
+  const showPromptArea = computed(() => atEditor.value && editorState.value === 'prompt')
   // #endregion
 
   return {
@@ -26,7 +27,8 @@ const useStateInfo = () => {
     atEditor,
     showHomeTabs,
     showAspectRatioSelector,
-    showEditingOpstions
+    showEditingOpstions,
+    showPromptArea
   }
 }
 
