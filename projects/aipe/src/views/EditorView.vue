@@ -2,19 +2,35 @@
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar
   div(class="flex justify-center items-center" ref="editorContainerRef")
-    //- div(class="w-100 h-100 bg-app-btn-secondary-pressed")
     div(class="w-full h-full box-border overflow-scroll flex justify-center items-center")
       div(:style="wrapperStyles")
-        div(class="page bg-app-btn-primary-bg origin-top-left" :style="pageStyles")
+        transition(
+          name="fade-right-in"
+          mode="out-in")
+          div(
+            class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
+            :style="pageStyles")
+            img(class="h-full object-contain" src="@/assets/img/test.jpg")
 </template>
 <script setup lang="ts">
+import useImageUtils from '@/composable/useImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useElementSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
+
 const editorContainerRef = ref<HTMLElement | null>(null)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementSize(editorContainerRef)
+
+const { imgLoadHandler, getImageUrl } = useImageUtils()
+
+onMounted(() => {
+  imgLoadHandler(getImageUrl('test', 'jpg'), (img) => {
+    console.log(img.width / img.height)
+    setInitAspectRatio(img.width / img.height)
+  })
+})
 
 // #region Editor Store
 const editorStore = useEditorStore()
@@ -65,7 +81,9 @@ const pageStyles = computed(() => {
   }
 })
 // #endregion
-
+/**
+ * fitPage
+ */
 watchEffect(() => {
   setPageScaleRatio(fitScaleRatio.value)
 })

@@ -2,7 +2,7 @@
 div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
   router-view(class="pb-12" v-slot="{ Component }")
     transition(
-      name="fade-in"
+      :name="routeTransitionName"
       mode="out-in")
       component(:is="Component")
   bottom-panel(class="z-10")
@@ -20,12 +20,18 @@ import useStateInfo from './composable/useStateInfo'
 
 // #region route info
 const stateInfo = useStateInfo()
-const { showAspectRatioSelector, showHomeTabs, showEditingOpstions } = stateInfo
+const { showAspectRatioSelector, showHomeTabs, showEditingOpstions, atHome, atMyDesign } = stateInfo
 // #endregion
+
+const routeTransitionName = computed(() => {
+  if (atHome.value) return 'fade-left-in'
+  if (atMyDesign.value) return 'fade-right-in'
+  return 'fade-right-in'
+})
 </script>
 
 <style lang="scss">
-.fade-in {
+.fade-right-in {
   &-enter-active,
   &-leave-active {
     transition:
@@ -33,10 +39,35 @@ const { showAspectRatioSelector, showHomeTabs, showEditingOpstions } = stateInfo
       transform 0.25s;
   }
 
-  &-enter-from,
+  &-enter-from {
+    opacity: 0;
+    transform: translateX(50%);
+  }
   &-leave-to {
     opacity: 0;
-    transform: translateX(-100%);
+    transform: translateX(-50%);
+  }
+}
+
+.fade-left-in {
+  &-enter-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from {
+    opacity: 0;
+    transform: translateX(-50%);
+  }
+  &-leave-to {
+    opacity: 0;
+    transform: translateX(50%);
   }
 }
 
@@ -44,8 +75,8 @@ const { showAspectRatioSelector, showHomeTabs, showEditingOpstions } = stateInfo
   &-enter-active,
   &-leave-active {
     transition:
-      opacity 0.25s,
-      transform 0.25s;
+      opacity 0.15s,
+      transform 0.15s;
   }
 
   &-enter-from,

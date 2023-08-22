@@ -1,5 +1,5 @@
 <template lang="pug">
-svg-icon(
+svg-icon-test(
   :icon-color="iconColor"
   :icon-name="iconName"
   :icon-width="iconWidth"

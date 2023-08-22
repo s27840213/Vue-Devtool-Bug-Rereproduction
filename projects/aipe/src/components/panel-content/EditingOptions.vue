@@ -17,16 +17,15 @@ div(class="w-full h-full")
       @click="handleTabAction(tab)"
       ref="tabRefs")
       nu-svg-icon(
-        :icon-color="selectedTab === tab.icon ? 'app-tab-active' : 'app-tab-default'"
+        :icon-color="tabColor(tab)"
         :icon-name="tab.icon"
         icon-height="24px")
-      span(
-        class="typo-body-sm transition-colors duration-300"
-        :class="selectedTab === tab.icon ? 'text-app-tab-active' : 'text-app-tab-default'") {{ tab.text }}
+      span(class="typo-body-sm transition-colors duration-300" :class="`text-${tabColor(tab)}`") {{ tab.text }}
 </template>
 <script setup lang="ts">
 import useTapTransition from '@/composable/useTapTransition'
 import { useEditorStore } from '@/stores/editor'
+import type { ColorSlip } from '@/types/color'
 import { useI18n } from 'vue-i18n'
 interface IFeatureTab {
   icon: string
@@ -60,13 +59,23 @@ const featureTabs = reactive<Array<IFeatureTab>>([
   {
     icon: 'reverse',
     text: t('NN0019'),
-    pressed: false
+    pressed: false,
+    disabled: true
   },
   {
     icon: 'move',
-    text: t('NN0020')
+    text: t('NN0020'),
+    disabled: true
   }
 ])
+
+const tabColor = (tab: IFeatureTab): ColorSlip => {
+  return tab.disabled
+    ? 'app-tab-disable'
+    : tab.icon === selectedTab.value
+    ? 'app-tab-active'
+    : 'app-tab-default'
+}
 
 const handleTabAction = (tab: IFeatureTab) => {
   /**

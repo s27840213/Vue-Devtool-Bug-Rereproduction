@@ -104,6 +104,7 @@ const iconAspectRatio = computed(() => {
 
   return 1
 })
+
 const useRef = ref<HTMLElement | null>(null)
 </script>
 

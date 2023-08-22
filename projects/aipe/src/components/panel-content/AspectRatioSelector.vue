@@ -21,7 +21,7 @@ div(class="w-full h-full")
 import { useEditorStore } from '@/stores/editor'
 
 const editorStore = useEditorStore()
-const { setPageSize } = editorStore
+const { setPageSize, initAspectRatio } = editorStore
 
 const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5', '5_4']
 const selectedType = ref('9_16')
@@ -30,7 +30,7 @@ const selectAspectRatio = (type: string) => {
   selectedType.value = type
 
   if (type === 'original') {
-    setPageSize(900, 1600)
+    setPageSize(1600 * initAspectRatio, 1600)
   } else {
     const [w, h] = type.split('_')
     const width = parseInt(w)
