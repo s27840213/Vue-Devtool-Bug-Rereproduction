@@ -77,7 +77,8 @@ const store = useStore()
 const callbackRecords = computed(() => store.getters['webView/getCallbackRecords'])
 
 const leaveStyles = computed(() => {
-  return { top: `${autoWVUtils.getUserInfoFromStore().statusBarHeight ?? 0}px` }
+  const userInfo = autoWVUtils.getUserInfoFromStore() as { statusBarHeight?: number }
+  return { top: `${userInfo.statusBarHeight ?? 0}px` }
 })
 
 const goHome = () => {
