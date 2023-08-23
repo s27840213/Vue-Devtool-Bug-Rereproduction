@@ -17,8 +17,7 @@ const useImageUtils = () => {
   }
 
   const getImageUrl = (imgName: string, type = 'png') => {
-    const targetUrl = `../assets/img/${imgName}.${type}`
-    const res = new URL(targetUrl, import.meta.url).href
+    const res = new URL(`../assets/img/${imgName}.${type}`, import.meta.url).href
     return res
   }
 

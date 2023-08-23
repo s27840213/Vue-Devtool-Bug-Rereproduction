@@ -307,11 +307,11 @@ pipelines:
                 - pnpm install
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-                - projects/aipe/dist/**
-                - projects/aipe/node_modules/**
+                - projects/charmix/dist/**
+                - projects/charmix/node_modules/**
       - parallel:
           - step:
-              name: "deploy aipe to rd"
+              name: "deploy charmix to rd"
               deployment: rd
               # trigger: manual
               script:
@@ -321,7 +321,7 @@ pipelines:
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
                     S3_BUCKET: $AWS_BUCKET
-                    LOCAL_PATH: "projects/aipe/dist" #should be the same as the output folder (artifacts)
+                    LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=*.js.map"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
@@ -329,7 +329,7 @@ pipelines:
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
                     S3_BUCKET: $AWS_BUCKET
-                    LOCAL_PATH: "projects/aipe/dist" #should be the same as the output folder (artifacts)
+                    LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=*"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
@@ -337,7 +337,7 @@ pipelines:
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
                     S3_BUCKET: $AWS_BUCKET
-                    LOCAL_PATH: "projects/aipe/dist" #should be the same as the output folder (artifacts)
+                    LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           # - step:
