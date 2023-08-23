@@ -60,7 +60,7 @@ enum mobileOSType {
 enum appType {
   Vivipic,
   Vivisticker,
-  AIPhotoEditor // TODO: change to finalized App name
+  Charmix
 }
 
 const mobileOS = ref(mobileOSType.IOS) // TODO: auto-detect OS type
