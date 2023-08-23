@@ -49,9 +49,8 @@ div(class="native-event-tester")
 <script setup lang="ts">
 import Checkbox from '@/components/global/Checkbox.vue'
 import { ICallbackRecord } from '@/interfaces/webView'
+import autoWVUtils, { app, appType } from '@/utils/autoWVUtils'
 import generalUtils from '@/utils/generalUtils'
-import picWVUtils from '@/utils/picWVUtils'
-// import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
 import { useStore } from 'vuex'
@@ -61,29 +60,24 @@ enum mobileOSType {
   Android
 }
 
-enum appType {
-  Vivipic,
-  Vivisticker,
-  Charmix
-}
-
 const mobileOS = ref(mobileOSType.IOS) // TODO: auto-detect OS type
-const app = ref(appType.Vivipic) // TODO: somehow detect app type
 
-switch (app.value) {
+let callbackGroup = ''
+switch (app) {
   case appType.Vivipic:
-    picWVUtils.registerCallbacks('main')
+    callbackGroup = 'main'
     break
   case appType.Vivisticker:
-    // vivistickerUtils.registerCallbacks('vvstk')
+    callbackGroup = 'vvstk'
     break
 }
+autoWVUtils.registerCallbacks(callbackGroup)
 
 const store = useStore()
 const callbackRecords = computed(() => store.getters['webView/getCallbackRecords'])
 
 const leaveStyles = computed(() => {
-  return { top: `${picWVUtils.getUserInfoFromStore().statusBarHeight}px` }
+  return { top: `${autoWVUtils.getUserInfoFromStore().statusBarHeight ?? 0}px` }
 })
 
 const goHome = () => {
@@ -154,31 +148,16 @@ const submitEvent = () => {
   try {
     switch (mobileOS.value) {
       case mobileOSType.IOS:
-        sendToIOSByAPP()
+        autoWVUtils.sendToIOS(eventName.value, eventParams, true)
         break
       case mobileOSType.Android:
-        sendToAndroidByApp()
+        // TODO: implement Android event sender
         break
     }
   } catch (error: any) {
     resetEventTimeout()
     notify({ group: 'error', text: error.toString() })
   }
-}
-
-const sendToIOSByAPP = () => {
-  switch (app.value) {
-    case appType.Vivipic:
-      picWVUtils.sendToIOS(eventName.value, eventParams, true)
-      break
-    case appType.Vivisticker:
-      // vivistickerUtils.sendToIOS(eventName.value, eventParams, true)
-      break
-  }
-}
-
-const sendToAndroidByApp = () => {
-  // TODO: implement Android event sender
 }
 
 const clearCallbacks = () => {
