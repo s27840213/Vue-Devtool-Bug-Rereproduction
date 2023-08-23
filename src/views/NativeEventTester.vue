@@ -190,8 +190,9 @@ const processedArg = (arg: string): string => {
   justify-content: center;
   background: setColor(gray-1);
   &__leave {
-    position: absolute;
+    position: fixed;
     left: 16px;
+    z-index: 9999;
   }
   &__send-event {
     width: 80vw;
