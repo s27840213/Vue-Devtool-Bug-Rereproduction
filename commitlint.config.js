@@ -38,7 +38,7 @@ module.exports = {
     'type-case': [2, 'always', 'lower-case'],
     'type-empty': [2, 'never'],
     'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'perf', 'refactor']],
-    'scope-enum': [2, 'always', ['pic', 'stk', 'aipe', '']],
+    'scope-enum': [2, 'always', ['pic', 'stk', 'charmix', '']],
     'scope-case': [2, 'always', 'lower-case']
     // 'scope-empty': [2, 'never'],
   }

@@ -313,7 +313,7 @@ pipelines:
           - step:
               name: "deploy aipe to rd"
               deployment: rd
-              trigger: manual
+              # trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
@@ -340,8 +340,8 @@ pipelines:
                     LOCAL_PATH: "projects/aipe/dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
-          - step:
-              name: "create pull request"
-              trigger: manual
-              script:
-                - ./bash/create_pull_request.sh
+          # - step:
+          #     name: "create pull request"
+          #     trigger: manual
+          #     script:
+          #       - ./bash/create_pull_request.sh

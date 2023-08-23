@@ -163,7 +163,7 @@ importers:
 
   packages/tailwind-lib: {}
 
-  projects/aipe:
+  projects/charmix:
     dependencies:
       '@nu/shared-lib':
         specifier: workspace:^0.0.1
