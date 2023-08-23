@@ -311,33 +311,33 @@ pipelines:
                 - projects/aipe/node_modules/**
       - parallel:
           - step:
-              name: "deploy rd"
+              name: "deploy aipe to rd"
               deployment: rd
               trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
-                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
                     S3_BUCKET: $AWS_BUCKET
-                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                    LOCAL_PATH: "projects/aipe/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
-                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
                     S3_BUCKET: $AWS_BUCKET
-                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                    LOCAL_PATH: "projects/aipe/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
-                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
                     S3_BUCKET: $AWS_BUCKET
-                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    LOCAL_PATH: "projects/aipe/dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
