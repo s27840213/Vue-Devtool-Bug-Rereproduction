@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="overflow-auto grid scrollbar-hide" :style="containerStyles")
+div(class="overflow-scroll grid scrollbar-hide" :style="containerStyles")
   slot
 </template>
 <script setup lang="ts">
