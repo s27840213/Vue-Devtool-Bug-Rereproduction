@@ -23,6 +23,15 @@
 	"NN0022": "Text your dream",
 	"NN0023": "Generate",
 	"NN0024": "Leave here empty if you want to zoom. ",
-	"NN0025": "Clear",
-	"NN0026": "AI from Scratch"
+	"NN0025": "Want to quit?",
+	"NN0026": "You have unsaved changes.\nExiting now will lose your recent edits.",
+	"NN0027": "Quit",
+	"NN0028": "Stay",
+	"NN0029": "Clear",
+	"NN0030": "Clear",
+	"NN0031": "Clear",
+	"NN0032": "Clear",
+	"NN0033": "Clear",
+	"NN0034": "Clear",
+	"NN0035": "AI from Scratch"
 }

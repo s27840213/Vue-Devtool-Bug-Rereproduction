@@ -1,23 +1,31 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
+  div(
+    v-if="isModalOpen"
+    class="mask"
+    ref="maskRef")
   router-view(class="pb-12" v-slot="{ Component }")
     transition(
       :name="routeTransitionName"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(class="z-10")
+  bottom-panel(class="z-20")
     transition(
       name="fade-down-up"
       mode="out-in")
-      home-tab(v-if="showHomeTabs")
+      modal-template(v-if="isModalOpen")
+      home-tab(v-else-if="showHomeTabs")
       aspect-ratio-selector(v-else-if="showAspectRatioSelector")
-      editing-options(v-else-if="showEditingOpstions")
+      editing-options(v-else-if="showEditingOpstions && !isModalOpen")
       prompt-area(v-else-if="showPromptArea")
   //- div(class="fixed bottom-1/4 left-4 text-app-selection") {{ atHome }} {{ atMyDesign }} {{ routeInfo.atHome }}
 </template>
 
 <script setup lang="ts">
+import { onClickOutside } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
 import useStateInfo from './composable/useStateInfo'
+import { useModalStore } from './stores/modal'
 
 // #region route info
 const stateInfo = useStateInfo()
@@ -31,14 +39,30 @@ const {
 } = stateInfo
 // #endregion
 
+const modalStore = useModalStore()
+const { isModalOpen } = storeToRefs(modalStore)
+
 const routeTransitionName = computed(() => {
   if (atHome.value) return 'fade-left-in'
   if (atMyDesign.value) return 'fade-right-in'
   return 'fade-right-in'
 })
+
+const maskRef = ref<HTMLElement | null>(null)
+onClickOutside(maskRef, () => {
+  if (isModalOpen.value) {
+    modalStore.closeModal()
+  }
+})
 </script>
 
 <style lang="scss">
+.mask {
+  @apply w-full h-full fixed top-0 left-0 z-10  pointer-events-none backdrop-blur-sm;
+  transition: backdrop-filter 0.25;
+  background-color: rgba(#050505, 0.5);
+}
+
 .fade-right-in {
   &-enter-active,
   &-leave-active {

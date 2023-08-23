@@ -23,10 +23,7 @@ const { pageSize } = storeToRefs(editorStore)
 
 // #region Canvas feature section
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const { brushStyle, showBrush } = useCanvasUtils(canvasRef, wrapperDOM, containerDOM, {
-  width: pageSize.value.width,
-  height: pageSize.value.height
-})
+const { brushStyle, showBrush } = useCanvasUtils(canvasRef, wrapperDOM, containerDOM)
 // #endregion
 </script>
 <style lang="scss"></style>

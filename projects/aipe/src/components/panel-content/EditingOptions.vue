@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full h-full")
+div(class="editing-options w-full h-full")
   div(
     v-if="inSelectionMode"
     class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 pl-24 pr-8")
@@ -12,7 +12,7 @@ div(class="w-full h-full")
         :icon-name="shape"
         icon-height="32px"
         :same-size="false")
-  div(v-else class="mb-16") 
+  div(v-else class="mb-16 px-24") 
     props-slider(
       :title="`${$t('NN0001')}`"
       :borderTouchArea="true"
@@ -36,6 +36,7 @@ div(class="w-full h-full")
       span(class="typo-body-sm transition-colors duration-300" :class="`text-${tabColor(tab)}`") {{ tab.text }}
 </template>
 <script setup lang="ts">
+import useCanvasUtils from '@/composable/useCanvasUtils'
 import useTapTransition from '@/composable/useTapTransition'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
@@ -57,6 +58,7 @@ const editorStore = useEditorStore()
 const { setEditorMode } = editorStore
 const { editorMode } = storeToRefs(editorStore)
 
+const { reverseSelection } = useCanvasUtils()
 const canvasStore = useCanvasStore()
 const { setCanvasStoreState } = canvasStore
 const { brushSize } = storeToRefs(canvasStore)
@@ -96,8 +98,7 @@ const featureTabs = reactive<Array<IFeatureTab>>([
   {
     icon: 'reverse',
     text: t('NN0019'),
-    pressed: false,
-    disabled: true
+    pressed: false
   },
   {
     icon: 'move',
@@ -119,6 +120,7 @@ const handleTabAction = (tab: IFeatureTab) => {
    * @param functionalTabs - means the tab will triger some function when click
    * instead of switching the state
    */
+  if (tab.disabled) return
   switch (tab.icon) {
     case 'selection':
     case 'brush':
@@ -128,6 +130,7 @@ const handleTabAction = (tab: IFeatureTab) => {
       return
     }
     case 'reverse':
+      reverseSelection()
       break
     default:
       break

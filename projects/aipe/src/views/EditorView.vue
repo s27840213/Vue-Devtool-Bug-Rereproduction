@@ -42,14 +42,13 @@ const { imgLoadHandler, getImageUrl } = useImageUtils()
 
 onMounted(() => {
   imgLoadHandler(getImageUrl('test', 'jpg'), (img) => {
-    console.log(img.width / img.height)
-    setInitAspectRatio(img.width / img.height)
+    setImgAspectRatio(img.width / img.height)
   })
 })
 // #region Stores
 const { showEditingOpstions, showPromptArea, atEditor } = useStateInfo()
 const editorStore = useEditorStore()
-const { setPageScaleRatio, setInitAspectRatio } = editorStore
+const { setPageScaleRatio, setImgAspectRatio } = editorStore
 const { editingPage, pageSize, pageScaleRatio } = storeToRefs(editorStore)
 // #endregion
 
@@ -74,9 +73,9 @@ const fitScaleRatio = computed(() => {
   )
     return 1
 
-  const aspectRatio = pageSize.value.width / pageSize.value.height
-  const newWidth = aspectRatio > 1 ? 1600 : 1600 * aspectRatio
-  const newHeight = aspectRatio > 1 ? 1600 / aspectRatio : 1600
+  const pageAspectRatio = pageSize.value.width / pageSize.value.height
+  const newWidth = pageAspectRatio > 1 ? 1600 : 1600 * pageAspectRatio
+  const newHeight = pageAspectRatio > 1 ? 1600 / pageAspectRatio : 1600
 
   const widhtRatio = editorContainerWidth.value / newWidth
   const heightRatio = editorContainerHeight.value / newHeight

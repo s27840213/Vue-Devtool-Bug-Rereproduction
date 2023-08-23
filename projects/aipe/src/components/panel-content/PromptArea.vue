@@ -1,15 +1,7 @@
 <template lang="pug">
 div(class="flex flex-col justify-center items-center w-full px-24")
   div(class="flex justify-between items-center mb-20 w-full")
-    router-link(
-      custom
-      v-slot="{ navigate }"
-      to="/")
-      nu-svg-icon(
-        icon-color="app-tab-default"
-        icon-name="arrow-left"
-        icon-width="20px"
-        @click="navigate")
+    back-btn
     span(class="text-app-tab-default typo-btn-lg") {{ $t('NN0022') }}
     nu-btn(
       theme="primary"
@@ -26,7 +18,7 @@ div(class="flex flex-col justify-center items-center w-full px-24")
         v-if="promptLen > 0"
         class="absolute bottom-10 right-10 text-app-text-primary typo-body-sm"
         @click="clearPromt")
-        span {{ $t('NN0025') }}
+        span {{ $t('NN0029') }}
 </template>
 <script setup lang="ts">
 const promptText = ref('')

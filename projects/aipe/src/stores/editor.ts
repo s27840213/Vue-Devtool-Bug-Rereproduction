@@ -1,6 +1,7 @@
 import { AppColors } from '@/types/color'
 import type { EditorState, EditorType, PowerfulFillMode } from '@/types/editor'
 import { defineStore } from 'pinia'
+import { useCanvasStore } from './canvas'
 export interface IPage {
   width: number
   height: number
@@ -19,24 +20,32 @@ export class Page implements IPage {
 }
 
 interface IEditorStore {
-  initAspectRatio: number
+  imgAspectRatio: number
   editingPage: Page
   pageScaleRatio: number
   editorState: EditorState
   editorType: EditorType
   editorMode: PowerfulFillMode
   isAdjustingBottomPanel: boolean
+  firstPaintArea: {
+    width: number
+    height: number
+  }
 }
 
 export const useEditorStore = defineStore('editor', {
   state: (): IEditorStore => ({
-    initAspectRatio: 9 / 16,
+    imgAspectRatio: 9 / 16,
     editingPage: new Page(900, 1600),
     pageScaleRatio: 0.1,
     editorState: 'aspectRatio',
     editorType: 'powerful-fill',
-    editorMode: 'selection',
-    isAdjustingBottomPanel: true
+    editorMode: 'brush',
+    isAdjustingBottomPanel: true,
+    firstPaintArea: {
+      width: 0,
+      height: 0
+    }
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -48,6 +57,11 @@ export const useEditorStore = defineStore('editor', {
   },
   actions: {
     setPageSize(width: number, height: number) {
+      useCanvasStore().setCanvasStoreState({
+        canvasWidth: width,
+        canvasHeight: height
+      })
+
       this.editingPage.width = width
       this.editingPage.height = height
     },
@@ -59,8 +73,8 @@ export const useEditorStore = defineStore('editor', {
     setPageScaleRatio(ratio: number) {
       this.pageScaleRatio = ratio
     },
-    setInitAspectRatio(ratio: number) {
-      this.initAspectRatio = ratio
+    setImgAspectRatio(ratio: number) {
+      this.imgAspectRatio = ratio
     },
     setEditorState(state: EditorState) {
       this.editorState = state
@@ -70,6 +84,9 @@ export const useEditorStore = defineStore('editor', {
     },
     setEditorMode(mode: PowerfulFillMode) {
       this.editorMode = mode
+    },
+    setFirstPaintArea(width: number, height: number) {
+      Object.assign(this.firstPaintArea, { width, height })
     }
   }
 })
