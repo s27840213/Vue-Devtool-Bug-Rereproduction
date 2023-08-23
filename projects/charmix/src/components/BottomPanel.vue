@@ -1,12 +1,9 @@
 <template lang="pug">
 div(class="bottom-panel" ref="bottomPanelRef")
-  slot(:panelHeight="height")
+  slot
 </template>
 <script setup lang="ts">
-import { useElementSize } from '@vueuse/core'
-
 const bottomPanelRef = ref<HTMLElement | null>(null)
-const { height } = useElementSize(bottomPanelRef)
 </script>
 <style lang="scss">
 .bottom-panel {
