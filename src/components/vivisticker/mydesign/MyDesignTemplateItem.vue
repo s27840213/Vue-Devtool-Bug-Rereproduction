@@ -74,10 +74,6 @@ export default defineComponent({
             page.layers.forEach(l => {
               l.initFromMydesign = true
             })
-            // TODO: handleFrameClipError
-            // vivistickerUtils.initLoadingFlags(page, () => {
-            //   vivistickerUtils.handleFrameClipError(page, true)
-            // })
           })
         }
       })
