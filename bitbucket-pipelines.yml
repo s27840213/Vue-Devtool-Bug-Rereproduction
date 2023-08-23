@@ -305,7 +305,7 @@ pipelines:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
                 - pnpm install
-                - pnpm run build # Replace with your build/test…etc. commands
+                - pnpm run build-affected # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/aipe/dist/**
                 - projects/aipe/node_modules/**
