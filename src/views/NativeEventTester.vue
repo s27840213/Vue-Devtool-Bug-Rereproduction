@@ -1,5 +1,9 @@
 <template lang="pug">
 div(class="native-event-tester")
+  div(class="native-event-tester__leave" :style="leaveStyles" @click="goHome")
+    svg-icon(iconName="chevron-left"
+              iconWidth="24px"
+              iconColor="white")
   div(class="native-event-tester__send-event")
     div(class="native-event-tester__title") SEND EVENT
     div(class="native-event-tester__row horizontal")
@@ -45,9 +49,8 @@ div(class="native-event-tester")
 <script setup lang="ts">
 import Checkbox from '@/components/global/Checkbox.vue'
 import { ICallbackRecord } from '@/interfaces/webView'
+import autoWVUtils, { app, appType } from '@/utils/autoWVUtils'
 import generalUtils from '@/utils/generalUtils'
-import picWVUtils from '@/utils/picWVUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
 import { useStore } from 'vuex'
@@ -57,26 +60,29 @@ enum mobileOSType {
   Android
 }
 
-enum appType {
-  Vivipic,
-  Vivisticker,
-  AIPhotoEditor // TODO: change to finalized App name
-}
-
 const mobileOS = ref(mobileOSType.IOS) // TODO: auto-detect OS type
-const app = ref(appType.Vivisticker) // TODO: somehow detect app type
 
-switch (app.value) {
+let callbackGroup = ''
+switch (app) {
   case appType.Vivipic:
-    picWVUtils.registerCallbacks('main')
+    callbackGroup = 'main'
     break
   case appType.Vivisticker:
-    vivistickerUtils.registerCallbacks('vvstk')
+    callbackGroup = 'vvstk'
     break
 }
+autoWVUtils.registerCallbacks(callbackGroup)
 
 const store = useStore()
 const callbackRecords = computed(() => store.getters['webView/getCallbackRecords'])
+
+const leaveStyles = computed(() => {
+  return { top: `${autoWVUtils.getUserInfoFromStore().statusBarHeight ?? 0}px` }
+})
+
+const goHome = () => {
+  window.location.pathname = ''
+}
 
 const paramsEle = ref(null as HTMLTextAreaElement | null)
 
@@ -142,31 +148,16 @@ const submitEvent = () => {
   try {
     switch (mobileOS.value) {
       case mobileOSType.IOS:
-        sendToIOSByAPP()
+        autoWVUtils.sendToIOS(eventName.value, eventParams, true)
         break
       case mobileOSType.Android:
-        sendToAndroidByApp()
+        // TODO: implement Android event sender
         break
     }
   } catch (error: any) {
     resetEventTimeout()
     notify({ group: 'error', text: error.toString() })
   }
-}
-
-const sendToIOSByAPP = () => {
-  switch (app.value) {
-    case appType.Vivipic:
-      picWVUtils.sendToIOS(eventName.value, eventParams, true)
-      break
-    case appType.Vivisticker:
-      vivistickerUtils.sendToIOS(eventName.value, eventParams, true)
-      break
-  }
-}
-
-const sendToAndroidByApp = () => {
-  // TODO: implement Android event sender
 }
 
 const clearCallbacks = () => {
@@ -198,6 +189,11 @@ const processedArg = (arg: string): string => {
   align-items: center;
   justify-content: center;
   background: setColor(gray-1);
+  &__leave {
+    position: fixed;
+    left: 16px;
+    z-index: 9999;
+  }
   &__send-event {
     width: 80vw;
     padding: 16px;
