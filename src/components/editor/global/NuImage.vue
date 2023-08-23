@@ -448,7 +448,10 @@ export default defineComponent({
       return srcObj.type + srcObj.assetId + srcObj.userId + (styles.adjust.blur > 0 ? '_blur' : '')
     },
     onError() {
-      if (!this.src) return
+      this._onError()
+    },
+    _onError(imgLoadHandlerError = false) {
+      if (!this.src && !imgLoadHandlerError) return
       if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {
         if (this.errorSrcIdentifier.retry === 3) {
           return
@@ -484,7 +487,10 @@ export default defineComponent({
         try {
           updater().then(() => {
             const { imgWidth, imgHeight } = this.config.styles
-            this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+            const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+            imageUtils.imgLoadHandler(src, () => {
+              this.src = src
+            }, { crossOrigin: true })
           })
         } catch (error) {
           if (this.src.indexOf('data:image/png;base64') !== 0) {
@@ -558,12 +564,15 @@ export default defineComponent({
     async previewAsLoading() {
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
-      const previewSrc = this.config.previewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+      const previewSrc = this.config.previewSrc || imageUtils.getSrc(this.config, this.getPreviewSize())
       await imageUtils.imgLoadHandler(previewSrc, () => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
       }, { crossOrigin: true })
+        .catch(() => {
+          console.warn('img preview cannot be loaded!')
+        })
 
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
@@ -585,17 +594,8 @@ export default defineComponent({
           }
         }, {
           error: () => {
-            reject(new Error(`cannot load the current image, src: ${src}`))
-            fetch(src)
-              .then(res => {
-                const { status, statusText } = res
-                this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
-              })
-              .catch((e) => {
-                if (src.indexOf('data:image/png;base64') !== 0) {
-                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
-                }
-              })
+            reject(new Error(`cannot load the current image, src: ${this.src}`))
+            this._onError(true)
           },
           crossOrigin: true
         })

@@ -95,7 +95,8 @@ export default defineComponent({
       imgNaturalSize: {
         width: 0,
         height: 0
-      }
+      },
+      errorSrcIdentifier: { identifier: '', retry: 0 },
     }
   },
   watch: {
@@ -278,9 +279,27 @@ export default defineComponent({
       setBgImgConfig: 'imgControl/SET_BG_CONFIG',
       setBgImageControl: 'SET_backgroundImageControl'
     }),
+    getErrorSrcIdentifier(config: IImage) {
+      const { srcObj, styles } = config
+      return srcObj.type + srcObj.assetId + srcObj.userId + (styles.adjust.blur > 0 ? '_blur' : '')
+    },
     onError() {
-      let updater
+      this._onError()
+    },
+    _onError(imgLoadHandlerError = false) {
+      if (!this.src && !imgLoadHandlerError) return
+      if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.image.config as IImage)) {
+        if (this.errorSrcIdentifier.retry === 3) {
+          return
+        }
+        this.errorSrcIdentifier.retry++
+      } else {
+        this.errorSrcIdentifier.identifier = this.getErrorSrcIdentifier(this.image.config as IImage)
+        this.errorSrcIdentifier.retry = 1
+      }
+
       const srcObj = this.image.config.srcObj
+      let updater
       switch (srcObj.type) {
         case 'private':
           updater = async () => await this.updateImages({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
@@ -300,6 +319,16 @@ export default defineComponent({
             }, { crossOrigin: true })
           })
         } catch (error) {
+          if (this.src.indexOf('data:image/png;base64') !== 0) {
+            fetch(this.src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError(error, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                this.logImgError(error, 'fetch result: ' + e)
+              })
+          }
         }
       }
     },
@@ -348,9 +377,12 @@ export default defineComponent({
             this.src = previewSrc
           }
         }, { crossOrigin: true })
+          .catch(() => {
+            console.warn('bg-img preview cannot be loaded!')
+          })
       }
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       if (!src || src === config.previewSrc) return
 
       return new Promise<void>((resolve, reject) => {
@@ -367,16 +399,7 @@ export default defineComponent({
         }, {
           error: () => {
             reject(new Error(`cannot load the current image, src: ${src}`))
-            fetch(src)
-              .then(res => {
-                const { status, statusText } = res
-                this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
-              })
-              .catch((e) => {
-                if (src.indexOf('data:image/png;base64') !== 0) {
-                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
-                }
-              })
+            this._onError(true)
           },
           crossOrigin: true
         })
