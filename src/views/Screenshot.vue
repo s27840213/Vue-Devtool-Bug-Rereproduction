@@ -431,7 +431,7 @@ export default defineComponent({
     onTimeout(srcEvent: string) {
       vivistickerUtils.sendToIOS('INFORM_WEB', {
         info: {
-          event: 'sreenshot-timeout',
+          event: 'screenshot-timeout',
           srcEvent
         },
         to: 'UI'
