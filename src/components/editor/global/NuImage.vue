@@ -522,7 +522,10 @@ export default defineComponent({
       }
     },
     onError() {
-      if (!this.src) return
+      this._onError()
+    },
+    _onError(imgLoadHandlerError = false) {
+      if (!this.src && !imgLoadHandlerError) return
       if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {
         if (this.errorSrcIdentifier.retry === 3) {
           return
@@ -604,7 +607,10 @@ export default defineComponent({
         try {
           updater().then(() => {
             const { imgWidth, imgHeight } = this.config.styles
-            this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+            const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+            imageUtils.imgLoadHandler(src, () => {
+              this.src = src
+            }, { crossOrigin: true })
           })
         } catch (error) {
           if (this.src.indexOf('data:image/png;base64') !== 0) {
@@ -701,12 +707,15 @@ export default defineComponent({
     async previewAsLoading() {
       let isPrimaryImgLoaded = false
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
-      const previewSrc = this.config.previewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+      const previewSrc = this.config.previewSrc || imageUtils.getSrc(this.config, this.getPreviewSize())
       await imageUtils.imgLoadHandler(previewSrc, () => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
       }, { crossOrigin: true })
+        .catch(() => {
+          console.warn('img preview cannot be loaded!')
+        })
 
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
@@ -729,37 +738,7 @@ export default defineComponent({
         }, {
           error: () => {
             reject(new Error(`cannot load the current image, src: ${this.src}`))
-            if (this.primaryLayer?.type === LayerType.frame) {
-              if (this.config.srcObj.type === 'ios') {
-                frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
-                  {
-                    type: 'frame',
-                    assetId: '',
-                    userId: ''
-                  }
-                )
-                frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
-                  imgWidth: (this.config as IImage).styles.width,
-                  imgHeight: (this.config as IImage).styles.height,
-                  imgX: 0,
-                  imgY: 0,
-                  opacity: 100,
-                  adjust: {}
-                })
-                this.src = imageUtils.getSrc(this.config)
-              }
-            } else {
-              fetch(src)
-                .then(res => {
-                  const { status, statusText } = res
-                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
-                })
-                .catch((e) => {
-                  if (src.indexOf('data:image/png;base64') !== 0) {
-                    this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
-                  }
-                })
-            }
+            this._onError(true)
           },
           crossOrigin: true
         })
@@ -1032,7 +1011,6 @@ export default defineComponent({
           this.clearShadowSrc()
         }
       }
-      console.warn('handleNewShadowEffect end', params)
       imageShadowUtils.drawingInit(canvas, img, this.config as IImage, params)
       switch (currentEffect) {
         case ShadowEffectType.shadow:
@@ -1050,7 +1028,6 @@ export default defineComponent({
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
-      console.warn('updateShadowEffect')
       const { shadowBuff } = this
       const canvas = this.$refs.canvas as HTMLCanvasElement
       const layerInfo = this.layerInfo()
