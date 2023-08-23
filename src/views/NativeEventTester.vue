@@ -1,5 +1,9 @@
 <template lang="pug">
 div(class="native-event-tester")
+  div(class="native-event-tester__leave" :style="leaveStyles" @click="goHome")
+    svg-icon(iconName="chevron-left"
+              iconWidth="24px"
+              iconColor="white")
   div(class="native-event-tester__send-event")
     div(class="native-event-tester__title") SEND EVENT
     div(class="native-event-tester__row horizontal")
@@ -77,6 +81,14 @@ switch (app.value) {
 
 const store = useStore()
 const callbackRecords = computed(() => store.getters['webView/getCallbackRecords'])
+
+const leaveStyles = computed(() => {
+  return { top: `${picWVUtils.getUserInfoFromStore().statusBarHeight}px` }
+})
+
+const goHome = () => {
+  window.location.pathname = ''
+}
 
 const paramsEle = ref(null as HTMLTextAreaElement | null)
 
@@ -198,6 +210,10 @@ const processedArg = (arg: string): string => {
   align-items: center;
   justify-content: center;
   background: setColor(gray-1);
+  &__leave {
+    position: absolute;
+    left: 16px;
+  }
   &__send-event {
     width: 80vw;
     padding: 16px;
