@@ -361,8 +361,8 @@ export default defineComponent({
 
 .content {
   position: absolute;
-  left: 0px;
-  top: 0px;
+  left: 0;
+  top: 0;
   transform-style: preserve-3d;
 }
 
