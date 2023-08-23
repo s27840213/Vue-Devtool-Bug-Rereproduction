@@ -20,17 +20,13 @@ const APP_VER_FOR_REFRESH_CACHE = 'v7174'
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: (img?: HTMLImageElement) => void, crossOrigin?: boolean }) {
     const { error, crossOrigin = false } = options || {}
-    return new Promise<T>((resolve) => {
+    return new Promise<T>((resolve, reject) => {
       const image = new Image()
       if (crossOrigin && !src.includes('data:image/png;base64')) {
         image.crossOrigin = 'anonymous'
       }
       image.onload = () => resolve(cb(image))
-      image.onerror = (_e) => {
-        if (error) {
-          error(image)
-        }
-      }
+      image.onerror = () => reject(error && error(image))
       image.src = src
     })
   }
