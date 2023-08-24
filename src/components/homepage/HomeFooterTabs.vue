@@ -42,7 +42,6 @@ div(class="footer-tabs" :style="footerTabsStyles")
 
 <script lang="ts" setup>
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
-import picWVUtils from '@/utils/picWVUtils'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
@@ -50,7 +49,7 @@ import { useStore } from 'vuex'
 const route = useRoute()
 const store = useStore()
 
-const userInfo = computed(() => store.getters[picWVUtils.appendModuleName('getUserInfo')])
+const userInfo = computed(() => store.getters['webView/getUserInfo'])
 
 const footerTabsStyles = computed((): { [index: string]: string } => {
   return {

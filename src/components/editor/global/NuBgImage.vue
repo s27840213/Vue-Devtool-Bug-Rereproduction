@@ -1,7 +1,5 @@
 <template lang="pug">
-//- div(class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
 div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
-  //- div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
     svg(v-if="isAdjustImage"
       class="nu-background-image__svg"
@@ -19,7 +17,6 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
               :key="child.tag"
               :is="child.tag"
               v-bind="child.attrs")
-              //- class="nu-background-image__adjust-picture"
       image(ref="img"
         crossorigin="anonymous"
         class="nu-background-image__adjust-image"
@@ -108,7 +105,7 @@ export default defineComponent({
           this.src = ''
         } else {
           this.previewAsLoading()
-          this.handleIsTransparent()
+            .then(() => this.handleIsTransparent())
         }
       }
     },
@@ -148,8 +145,8 @@ export default defineComponent({
     }
 
     if (this.userId !== 'backendRendering') {
-      this.handleIsTransparent()
       this.previewAsLoading()
+        .then(() => this.handleIsTransparent())
     } else {
       if (this.isAdjustImage) {
         this.handleIsTransparent()
@@ -381,6 +378,9 @@ export default defineComponent({
           }
         }, { crossOrigin: true })
           .catch(() => {
+            if (src === config.previewSrc) {
+              this._onError(true)
+            }
             console.warn('bg-img preview cannot be loaded!')
           })
       }
@@ -492,7 +492,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .nu-background-image {
-  // will-change: opacity, transform;
   position: absolute;
   // width: 100%;
   // height: 100%;

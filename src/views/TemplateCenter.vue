@@ -349,7 +349,7 @@ export default defineComponent({
       hasNextPage: 'hasNextPage'
     }),
     ...mapGetters({
-      userInfo: picWVUtils.appendModuleName('getUserInfo')
+      userInfo: 'webView/getUserInfo'
     }),
     statusbarHeight (): string {
       return `${this.userInfo.statusBarHeight ?? 0}px`
