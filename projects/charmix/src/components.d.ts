@@ -12,6 +12,7 @@ declare module 'vue' {
     BackBtn: typeof import('./components/global/BackBtn.vue')['default']
     BottomPanel: typeof import('./components/BottomPanel.vue')['default']
     CanvasSection: typeof import('./components/editor/CanvasSection.vue')['default']
+    CustomRangeInput: typeof import('./components/global/CustomRangeInput.vue')['default']
     EditingOptions: typeof import('./components/panel-content/EditingOptions.vue')['default']
     FeatureCard: typeof import('./components/home/FeatureCard.vue')['default']
     Headerbar: typeof import('./components/Headerbar.vue')['default']

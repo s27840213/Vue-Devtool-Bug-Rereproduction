@@ -1,6 +1,8 @@
 <template lang="pug">
 div(class="mobile-slider grid grid-cols-[auto,1fr] grid-rows-1 gap-12")
-  span(class="text-app-text-secondary typo-btn-sm") {{ `${$t('NN0021')} ${propsVal}` }}
+  div(class="flex gap-4 text-app-text-secondary typo-btn-sm")
+    span(class="") {{ `${$t('NN0021')}` }}
+    span(class="w-[3ch]") {{ propsVal }}
   input(
     class="accent-app-btn-primary-bg"
     v-model.number="propsVal"
