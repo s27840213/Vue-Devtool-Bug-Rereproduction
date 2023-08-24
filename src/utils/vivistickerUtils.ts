@@ -218,10 +218,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return store.getters['vivisticker/getUserInfo']
   }
 
-  appendModuleName(identifier: string): string {
-    return `vivisticker/${identifier}`
-  }
-
   getDefaultUserSettings(): IUserSettings {
     const res = {} as { [key: string]: any }
     for (const [key, value] of Object.entries(USER_SETTINGS_CONFIG)) {
