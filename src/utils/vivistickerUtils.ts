@@ -1311,17 +1311,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const { layers } = page
     const frames = (layers
       .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
-    //   .flatMap((l: ILayer) => {
-    //     if (l.type === 'frame') {
-    //       return [l]
-    //     } else if (l.type === 'group') {
-    //       const frames = (l as any).layers
-    //         .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>
-    //       return frames
-    //     }
-    //     return []
-    //   }) as Array<IFrame>)
-    // console.log('init loading flag', frames)
     const missingClips = frames
       .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
     if (missingClips.length) {

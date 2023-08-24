@@ -423,6 +423,7 @@ export default defineComponent({
         },
         ...options
       }
+      await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
     }
   }
 })
