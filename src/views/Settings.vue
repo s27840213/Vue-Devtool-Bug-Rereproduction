@@ -178,7 +178,7 @@ export default defineComponent({
       isAdmin: 'user/isAdmin',
       userName: 'user/getUname',
       email: 'user/getEmail',
-      userInfo: picWVUtils.appendModuleName('getUserInfo')
+      userInfo: 'webView/getUserInfo'
     }),
     sidebarStyle(): Record<string, string> {
       return this.currentView === 'menu' ? { width: '100%', display: 'grid' } : {}
