@@ -6,7 +6,9 @@ import { defineConfig } from 'vite'
 import vuei18n from '@intlify/unplugin-vue-i18n/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
+import pluginRewriteAll from 'vite-plugin-rewrite-all'
 import svgSpritePlugin from 'vite-plugin-svg-sprite-component'
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -28,7 +30,8 @@ export default defineConfig({
     AutoImport({
       imports: ['vue', 'vue-router', 'vue-i18n'],
       dts: 'src/auto-import.d.ts'
-    })
+    }),
+    pluginRewriteAll()
   ],
   resolve: {
     alias: {
