@@ -1453,6 +1453,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
+    const isSubscribed = subscribe === '1'
     const currencyFormaters = {
       TWD: (value: string) => `${value}元`,
       USD: (value: string) => `$${(+value).toFixed(2)}`,
@@ -1464,7 +1465,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
 
     store.commit('vivisticker/UPDATE_payment', {
-      subscribe: subscribe === '1',
+      subscribe: isSubscribed,
       prices: {
         currency: priceCurrency,
         monthly: {
@@ -1478,6 +1479,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       }
     })
     store.commit('vivisticker/SET_paymentPending', { info: false })
+    this.getState('subscribeInfo').then(subscribeInfo => {
+      if (subscribeInfo?.subscribe && !isSubscribed) {
+        this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
+      }
+    })
+    this.setState('subscribeInfo', { subscribe: isSubscribed })
   }
 
   subscribeResult(data: ISubscribeResult) {
@@ -1488,13 +1495,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       return
     }
     const { subscribe, reason } = data
+    const isSubscribed = subscribe === '1'
     if (!reason) {
       store.commit('vivisticker/UPDATE_payment', {
-        subscribe: subscribe === '1',
+        subscribe: isSubscribed,
       })
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
-    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
+    if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
+    this.setState('subscribeInfo', { subscribe: isSubscribed })
   }
 
   async registerSticker() {

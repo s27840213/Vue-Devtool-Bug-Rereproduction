@@ -102,7 +102,7 @@ export default defineComponent({
       isShowPushModal: true
     }
   },
-  created() {
+  async created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
     textUtils.loadDefaultFonts()
     vivistickerUtils.registerCallbacks('vvstk')
@@ -113,9 +113,27 @@ export default defineComponent({
         const isShowTutorial = this.$i18n.locale !== 'us'
         if (!isShowPaymentView && !isShowTutorial) vivistickerUtils.sendAppLoaded()
         else {
-          if (isShowPaymentView) vivistickerUtils.openPayment()
+          if (isShowPaymentView) {
+            vivistickerUtils.openPayment()
+            vivistickerUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+          }
           if (isShowTutorial) this.setShowTutorial(true)
         }
+      } else {
+        const subscribed = (await vivistickerUtils.getState('subscribeInfo'))?.subscribe ?? false
+        const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
+        const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
+        const showPaymentInfo = await vivistickerUtils.getState('showPaymentInfo')
+        const showPaymentTime = showPaymentInfo?.timestamp ?? 0
+        const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
+        const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
+        const isShowPaymentView = showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
+
+        if (subscribed) vivistickerUtils.sendAppLoaded()
+        else if (isShowPaymentView) {
+          vivistickerUtils.openPayment()
+          vivistickerUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+        } else vivistickerUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
       }
       this.getPushModalInfo()
     }
