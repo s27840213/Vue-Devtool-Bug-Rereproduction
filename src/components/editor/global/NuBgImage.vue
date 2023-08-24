@@ -1,7 +1,5 @@
 <template lang="pug">
-//- div(class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
 div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
-  //- div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
     svg(v-if="isAdjustImage"
       class="nu-background-image__svg"
@@ -19,7 +17,6 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
               :key="child.tag"
               :is="child.tag"
               v-bind="child.attrs")
-              //- class="nu-background-image__adjust-picture"
       image(ref="img"
         crossorigin="anonymous"
         class="nu-background-image__adjust-image"
@@ -43,6 +40,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -56,6 +54,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { AxiosError } from 'axios'
@@ -109,7 +108,7 @@ export default defineComponent({
           this.src = ''
         } else {
           this.previewAsLoading()
-          this.handleIsTransparent()
+            .then(() => this.handleIsTransparent())
         }
       }
     },
@@ -149,8 +148,8 @@ export default defineComponent({
     }
 
     if (this.userId !== 'backendRendering') {
-      this.handleIsTransparent()
       this.previewAsLoading()
+        .then(() => this.handleIsTransparent())
     } else {
       if (this.isAdjustImage) {
         this.handleIsTransparent()
@@ -322,6 +321,10 @@ export default defineComponent({
           })
           this.src = ''
           vivistickerUtils.setLoadingFlag(-1)
+          const modalBtn = {
+            msg: i18n.global.t('STK0023') as string,
+          }
+          modalUtils.setModalInfo(i18n.global.t('STK0024') as string, i18n.global.t('STK0086') as string, modalBtn)
         }
       }
 
@@ -396,6 +399,9 @@ export default defineComponent({
           }
         }, { crossOrigin: true })
           .catch(() => {
+            if (src === config.previewSrc) {
+              this._onError(true)
+            }
             console.warn('bg-img preview cannot be loaded!')
           })
       }
@@ -520,7 +526,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .nu-background-image {
-  // will-change: opacity, transform;
   position: absolute;
   top: 0;
   right: 0;

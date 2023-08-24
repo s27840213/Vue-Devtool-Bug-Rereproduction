@@ -121,7 +121,7 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat',
-      userInfo: picWVUtils.appendModuleName('getUserInfo'),
+      userInfo: 'webView/getUserInfo',
       isAdmin: 'user/isAdmin',
     }),
     hasSubSelectedLayer(): boolean {

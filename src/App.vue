@@ -124,7 +124,7 @@ export default defineComponent({
       modalInfo: 'modal/getModalInfo',
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
-      userInfo: picWVUtils.appendModuleName('getUserInfo'),
+      userInfo: 'webView/getUserInfo',
       browserInfo: 'user/getBrowserInfo'
     }),
     currLocale(): string {

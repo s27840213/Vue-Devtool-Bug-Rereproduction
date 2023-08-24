@@ -85,6 +85,7 @@ import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SIZE, CANVAS_SPACE } from '@/
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -231,14 +232,16 @@ export default defineComponent({
           return
         }
         this.previewAsLoading()
-        const _oldIsTransparent = (this.config as IImage).styles.shadow.isTransparent
-        this.handleIsTransparent()?.then(bool => {
-          const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
-          const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || bool || _oldIsTransparent)
-          if (redrawImmediately) {
-            this.redrawShadow()
-          }
-        })
+          .then(() => {
+            const _oldIsTransparent = (this.config as IImage).styles.shadow.isTransparent
+            this.handleIsTransparent()?.then(bool => {
+              const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
+              const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || bool || _oldIsTransparent)
+              if (redrawImmediately) {
+                this.redrawShadow()
+              }
+            })
+          })
       },
       deep: true
     },
@@ -356,7 +359,7 @@ export default defineComponent({
     },
     isBlurImg(val) {
       const { imgWidth, imgHeight } = this.config.styles
-      const src = imageUtils.getSrc(this.config, val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       imageUtils.imgLoadHandler(src, () => {
         this.src = src
       }, { crossOrigin: true })
@@ -600,6 +603,11 @@ export default defineComponent({
             }, this.subLayerIndex)
             this.src = imageUtils.getSrc(this.config)
           }
+
+          const modalBtn = {
+            msg: i18n.global.t('STK0023') as string,
+          }
+          modalUtils.setModalInfo(i18n.global.t('STK0024') as string, i18n.global.t('STK0086') as string, modalBtn)
         }
       }
 
@@ -706,19 +714,23 @@ export default defineComponent({
     },
     async previewAsLoading() {
       let isPrimaryImgLoaded = false
+      const { imgWidth, imgHeight } = this.config.styles
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
-      const previewSrc = this.config.previewSrc || imageUtils.getSrc(this.config, this.getPreviewSize())
+      const previewSrc = this.config.previewSrc || imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getPreviewSize()))
       await imageUtils.imgLoadHandler(previewSrc, () => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
       }, { crossOrigin: true })
         .catch(() => {
+          // if the previewSrc equals to src, the _onError still need to be called
+          if (src === previewSrc) {
+            this._onError(true)
+          }
           console.warn('img preview cannot be loaded!')
         })
 
-      const { imgWidth, imgHeight } = this.config.styles
-      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       if (!src || src === previewSrc) return
 
       return new Promise<void>((resolve, reject) => {
@@ -807,8 +819,8 @@ export default defineComponent({
     },
     async handleInitLoad() {
       if (this.userId !== 'backendRendering') {
-        this.handleIsTransparent()
         await this.previewAsLoading()
+          .then(() => this.handleIsTransparent())
       } else {
         if (this.isAdjustImage) {
           this.handleIsTransparent()
