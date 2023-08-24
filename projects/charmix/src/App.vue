@@ -3,7 +3,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
   div(
     v-if="isModalOpen"
     class="mask"
-    ref="maskRef")
+    ref="maskRef"
+    @click.stop="closeModal")
   router-view(class="pb-12" v-slot="{ Component }")
     transition(
       :name="routeTransitionName"
@@ -22,7 +23,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
 </template>
 
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import useStateInfo from './composable/useStateInfo'
 import { useModalStore } from './stores/modal'
@@ -48,17 +48,14 @@ const routeTransitionName = computed(() => {
   return 'fade-right-in'
 })
 
-const maskRef = ref<HTMLElement | null>(null)
-onClickOutside(maskRef, () => {
-  if (isModalOpen.value) {
-    modalStore.closeModal()
-  }
-})
+const closeModal = () => {
+  modalStore.closeModal()
+}
 </script>
 
 <style lang="scss">
 .mask {
-  @apply w-full h-full fixed top-0 left-0 z-10  pointer-events-none backdrop-blur-sm;
+  @apply w-full h-full fixed top-0 left-0 z-10  backdrop-blur-sm;
   transition: backdrop-filter 0.25;
   background-color: rgba(#050505, 0.5);
 }
