@@ -121,9 +121,9 @@ export default defineComponent({
           icon: 'vivisticker_global',
           action: () => { this.handleList('event-test') }
         }, {
-          text: 'test error',
+          text: '進入 Native 事件測試器',
           icon: 'vivisticker_global',
-          action: () => { throw Error('test') }
+          action: () => { window.location.pathname = 'nativeevttest' }
         }
       ] : []]
     },

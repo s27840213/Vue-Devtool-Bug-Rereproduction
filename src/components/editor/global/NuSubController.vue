@@ -116,7 +116,7 @@ export default defineComponent({
       imgBuff: {} as {
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
-        panelPreviewSrc: ''
+        previewSrc: ''
       },
     }
   },
@@ -285,8 +285,7 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
-      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setCurrDraggedPhoto: 'SET_currDraggedPhoto'
+      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
     }),
     isDraggedPanelPhoto(): boolean {
       return this.currDraggedPhoto.srcObj.type !== ''
@@ -443,7 +442,7 @@ export default defineComponent({
       e.stopPropagation()
       const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
-        const { srcObj, panelPreviewSrc } = this.config
+        const { srcObj, previewSrc } = this.config
         const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
         const clip = clips[this.layerIndex]
 
@@ -451,7 +450,7 @@ export default defineComponent({
           srcObj: {
             ...srcObj
           },
-          panelPreviewSrc,
+          previewSrc,
           styles: {
             imgX: clip.styles.imgX,
             imgY: clip.styles.imgY,
@@ -463,7 +462,7 @@ export default defineComponent({
 
         frameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...currLayer.srcObj },
-          ...((currLayer as IImage).panelPreviewSrc && { panelPreviewSrc: (currLayer as IImage).panelPreviewSrc as string })
+          ...((currLayer as IImage).previewSrc && { previewSrc: (currLayer as IImage).previewSrc as string })
         })
         layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { opacity: 35 })
         layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: true })

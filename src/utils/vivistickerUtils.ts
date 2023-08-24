@@ -106,7 +106,7 @@ const MYDESIGN_TAGS = [{
   name: 'NN0005',
   tab: 'text'
 }, {
-  name: 'NN0003',
+  name: 'STK0085',
   tab: 'object'
 }, {
   name: 'NN0001',
@@ -407,7 +407,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   sendAppLoaded() {
     if (!this.appLoadedSent) {
-      this.sendToIOS('APP_LOADED', { hideReviewRequest: false, sendNotifyMail: false })
+      this.sendToIOS('APP_LOADED', {
+        hideReviewRequest: false,
+        logJsonContent: true
+      })
       this.appLoadedSent = true
     }
   }
@@ -584,6 +587,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (!noBg && 'backgroundImage' in page && page.backgroundImage.config.srcObj?.assetId !== '') {
       this.loadingFlags[this.makeFlagKey(-1)] = false
     }
+    logUtils.setLogAndConsoleLog('ScreenShot::Init:', generalUtils.deepCopy(this.loadingFlags))
   }
 
   makeFlagKey(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
@@ -643,8 +647,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const key = this.makeFlagKey(layerIndex, subLayerIndex, addition)
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true
+      logUtils.setLogAndConsoleLog('ScreenShot::Set:', generalUtils.deepCopy(this.loadingFlags), key)
     }
-    // console.log(generalUtils.deepCopy(this.loadingFlags), key)
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       window.clearTimeout(this.loadingTimeout)
       this.loadingCallback()
@@ -661,6 +665,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   showController() {
     store.commit('vivisticker/SET_controllerHidden', false)
+  }
+
+  detectIfInApp() {
+    if (window.webkit?.messageHandlers?.APP_LOADED === undefined) {
+      this.enterStandaloneMode()
+      this.setDefaultLocale()
+    }
   }
 
   enterStandaloneMode() {
@@ -1073,8 +1084,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async saveAsMyDesign(): Promise<void> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
-    const onThumbError = async () => {
-      await this.saveDesignJson(id)
+    const onThumbError = async (flag: string, saveDesign: boolean) => {
+      if (saveDesign) {
+        await this.saveDesignJson(id)
+      }
+      logUtils.setLog(`Generating myDesign thumbnail failed, flag: ${flag}`)
       this.setLoadingOverlayShow(false)
       throw new Error('gen thumb failed')
     }
@@ -1087,10 +1101,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         },
         to: 'Shot'
       }, 'gen-thumb', { timeout: -1 }) as any
-      if (!resGenThumb || resGenThumb.flag === '1') await onThumbError()
+      if (!resGenThumb || resGenThumb.flag !== '0') await onThumbError(resGenThumb?.flag ?? '1', true)
     } else {
       const flag = await this.genThumbnail(id)
-      if (flag === '1') await onThumbError()
+      if (flag !== '0') await onThumbError(flag, false)
     }
     await this.saveDesignJson(id)
     this.setLoadingOverlayShow(false)
@@ -1270,8 +1284,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       case 'gen-thumb-done':
         this.handleCallback('gen-thumb', info)
         break
-      case 'sreenshot-timeout':
-        this.handleCallback(info.srcEvent, { flag: '1' })
+      case 'screenshot-timeout':
+        this.handleCallback(info.srcEvent, { flag: '9999' }) // 9999 for timeout
     }
   }
 
@@ -1301,17 +1315,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const { layers } = page
     const frames = (layers
       .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
-    //   .flatMap((l: ILayer) => {
-    //     if (l.type === 'frame') {
-    //       return [l]
-    //     } else if (l.type === 'group') {
-    //       const frames = (l as any).layers
-    //         .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>
-    //       return frames
-    //     }
-    //     return []
-    //   }) as Array<IFrame>)
-    // console.log('init loading flag', frames)
     const missingClips = frames
       .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
     if (missingClips.length) {

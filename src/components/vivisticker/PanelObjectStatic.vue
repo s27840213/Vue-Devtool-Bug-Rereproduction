@@ -3,7 +3,7 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
   //- Search bar
   search-bar(v-if="showSearchBar"
     class="panel-static__searchbar"
-    :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
+    :placeholder="$t('NN0092', { target: $tc('STK0085', 2) })"
     clear
     :defaultKeyword="keywordLabel"
     vivisticker="dark"
@@ -264,7 +264,7 @@ export default defineComponent({
       if (!showFav && keyword && this.searchResult.length === 0) {
         return `${i18n.global.t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.global.tc('NN0003', 1)
+          target: i18n.global.tc('STK0085', 2)
         })}`
       } else return ''
     },

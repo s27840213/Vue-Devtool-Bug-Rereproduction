@@ -100,7 +100,9 @@ function handleFileSelect(evt: any) {
   const reader = new FileReader()
   reader.onload = (evt: Event) => {
     const target = evt.target as FileReader
-    store.commit('SET_pages', pageUtils.newPages(JSON.parse(target.result as string)))
+    const json = JSON.parse(target.result as string)
+    const pages = json.pages ? json.pages : json
+    store.commit('SET_pages', pageUtils.newPages(pages))
   }
   reader.readAsText(file)
 }

@@ -103,7 +103,7 @@ Cypress.Commands.add('importDesign', (designName: string) => {
     .get('#app', silent)
     .invoke(silent, 'prop', '__vue_app__')
     .its('config.globalProperties.$store', silent).then((vuex) => {
-      vuex.commit('SET_pages', designJson)
+      vuex.dispatch('cypress/importDesign', designJson)
     })
 })
 

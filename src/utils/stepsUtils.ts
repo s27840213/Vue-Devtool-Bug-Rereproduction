@@ -268,6 +268,7 @@ class StepsUtils {
       // Don't upload the design when initialize the steps
       vivistickerUtils.saveDesign()
     }
+    // console.warn(generalUtils.deepCopy(this.steps))
   }
 
   async asyncRecord() {
@@ -309,6 +310,7 @@ class StepsUtils {
         // }
       }
     }
+    // console.warn(generalUtils.deepCopy(this.steps))
   }
 
   async undo() {
@@ -319,10 +321,11 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep--
+    const activePageIndex = pageUtils.currActivePageIndex
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages)
+    GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
     if (this.currStep > 0) {
       nextTick(() => {
         if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
@@ -352,10 +355,11 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep++
+    const activePageIndex = pageUtils.currActivePageIndex
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages)
+    GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
     nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
         TextPropUtils.updateTextPropsState()

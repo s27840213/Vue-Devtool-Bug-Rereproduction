@@ -1,3 +1,4 @@
+// import webpack from '@cypress/webpack-preprocessor'
 import { defineConfig } from 'cypress'
 
 /**
@@ -96,6 +97,13 @@ export default defineConfig({
         // console.log('launchOptions', launchOptions)
         return launchOptions
       })
+
+      // For import utils, unfinished.
+      // https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor
+      // on('file:preprocessor', webpack({
+      //   webpackOptions: require('cypress/vue-webpack-config.js'),
+      //   watchOptions: {},
+      // }))
     },
   },
 })

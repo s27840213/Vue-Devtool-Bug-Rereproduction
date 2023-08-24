@@ -376,7 +376,7 @@ class GroupUtils {
     })
   }
 
-  setBySelectedInfo(currSelectedInfo: ICurrSelectedInfo, pages: IPage[]) {
+  setBySelectedInfo(currSelectedInfo: ICurrSelectedInfo, pages: IPage[], activePageIndex: number) {
     const { pageIndex, index } = currSelectedInfo
     let layers: (IShape | IText | IImage | IGroup | IFrame)[]
     if (pages[pageIndex]) {
@@ -393,10 +393,16 @@ class GroupUtils {
     } else {
       layers = []
     }
-    this.set(pageIndex, index, layers)
+
     if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
+      store.commit('SET_currActivePageIndex', pageIndex)
       pageUtils.scrollIntoPage(pageIndex)
+    } else if (pageIndex === -1) {
+      // If the pageIndex be reset e.g. deleting the background-Img,
+      // however, the activePageIndex should remain the same for a better UX
+      store.commit('SET_currActivePageIndex', activePageIndex)
     }
+    this.set(pageIndex, index, layers)
   }
 
   reset() {
