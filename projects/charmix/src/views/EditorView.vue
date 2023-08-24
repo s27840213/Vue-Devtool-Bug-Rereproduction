@@ -4,7 +4,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   div(class="flex justify-center items-center" ref="editorContainerRef")
     div(class="w-full h-full box-border overflow-scroll flex justify-center items-center")
       div(
-        class="wrapper"
+        class="wrapper relative"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         transition(
@@ -21,7 +21,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
               :wrapperDOM="editorWrapperRef")
         div(
           v-if="isChangingBrushSize"
-          class="demo-btn"
+          class="demo-brush"
           :style="demoBrushSizeStyles")
 </template>
 <script setup lang="ts">
@@ -123,8 +123,9 @@ watchEffect(() => {
 })
 </script>
 <style lang="scss">
-.demo-btn {
+.demo-brush {
   @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-selection bg-opacity-30;
-  @apply pointer-events-none rounded-full border border-solid border-8 border-primary-white;
+  @apply pointer-events-none rounded-full outline-4 outline-primary-white;
+  outline-style: solid;
 }
 </style>
