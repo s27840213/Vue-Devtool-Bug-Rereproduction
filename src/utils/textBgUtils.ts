@@ -937,7 +937,7 @@ class TextBg {
       rows.forEach((row) => {
         row.spanData.forEach((span, spanIndex) => {
           const { x, y, width, height, text } = span
-          if (text === ' ') spaceCount += 1
+          if (text === ' ' && !letterBgData.fixedHeadTail(textBg.name)) spaceCount += 1
           else {
             pos.push({
               ...letterBgData.getLetterBgSetting(textBg, i - spaceCount, spanIndex === 0, spanIndex === row.spanData.length - 1),
