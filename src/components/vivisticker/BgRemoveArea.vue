@@ -9,7 +9,7 @@ div(class="bg-remove-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}"
       :ref="'scaleArea'")
-    canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
+    canvas(class="bg-remove-area__canvas" ref="canvas" :cy-ready="cyReady")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
@@ -172,7 +172,7 @@ export default defineComponent({
     }
     this.cotainerRef.removeEventListener('pointerdown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
-    this.$store.commit('bgRemove/UPDATE_pinchState', { initPos: { x: -1, y: -1 } })
+    this.$store.commit('bgRemove/UPDATE_pinchState', { initPos: { x: -1, y: -1 }, x: 0, y: 0 })
   },
   computed: {
     ...mapGetters({
@@ -215,7 +215,7 @@ export default defineComponent({
       return {
         width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
         height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
-        ...(this.isPinchInitialized && { transform: `translate(${this.pinchState.initPos.x}px, ${this.pinchState.initPos.y}px)` })
+        ...(this.isPinchInitialized && { transform: `translate(${this.pinchState.x}px, ${this.pinchState.y}px)` })
       }
     },
     initPhotoStyles(): { [index: string]: string } {
@@ -246,11 +246,25 @@ export default defineComponent({
   watch: {
     movingMode(val) {
       if (val) {
+        // -1 means not be initialized
         if (this.pinchState.initPos.x === -1 || this.pinchState.initPos.y === -1) {
           const paddingSize = 40
-          const containerHeight = (document.getElementById('rmSection') as HTMLElement).clientHeight - paddingSize
-          const y = (containerHeight - this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)) * 0.5
-          this.$store.commit('bgRemove/UPDATE_pinchState', { initPos: { x: 0, y } })
+          const container = document.getElementById('rmSection') as HTMLElement
+          const containerWidth = container.clientWidth - paddingSize
+          const containerHeight = container.clientHeight - paddingSize
+          const initSize = {
+            width: this.size.width * this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio * 0.01,
+            height: this.size.height * this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio * 0.01
+          }
+          const x = (containerWidth - initSize.width) * 0.5
+          const y = (containerHeight - initSize.height) * 0.5
+          this.$store.commit('bgRemove/UPDATE_pinchState', {
+            initScale: this.fitScaleRatio,
+            initPos: { x, y },
+            initSize,
+            x,
+            y
+          })
         }
       }
     },
@@ -654,9 +668,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .bg-remove-area {
-  position: relative;
+  position: absolute;
+  // position: relative;
   box-sizing: content-box;
-  margin: auto auto;
+  // margin: auto auto;
+
+  &__canvas {
+    position: relative;
+    box-sizing: content-box;
+  }
 
   &__initPhoto {
     position: absolute;

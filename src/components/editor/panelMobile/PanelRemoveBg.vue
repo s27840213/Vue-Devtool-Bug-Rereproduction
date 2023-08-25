@@ -81,7 +81,7 @@ export default defineComponent({
   },
   unmounted() {
     this.setMovingMode(false)
-    this.updatePinchState({ initPos: { x: -1, y: -1 } })
+    this.updatePinchState({ initPos: { x: -1, y: -1 }, x: 0, y: 0 })
   },
   methods: {
     ...mapMutations({

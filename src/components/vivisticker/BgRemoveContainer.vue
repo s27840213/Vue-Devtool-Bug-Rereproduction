@@ -97,6 +97,8 @@ export default defineComponent({
       isPinchInitialized: 'bgRemove/getIsPinchInitialized',
       previewImage: 'bgRemove/getPreviewImage',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
+      movingMode: 'bgRemove/getMovingMode',
+      isPinching: 'bgRemove/getIsPinching'
     }),
     fitScaleRatio(): number {
       const { width, height } = this.containerWH
@@ -135,15 +137,19 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setInGestureMode: 'SET_inGestureMode',
-      setIsProcessing: 'bgRemove/SET_isProcessing'
+      setIsProcessing: 'bgRemove/SET_isProcessing',
+      updatePinchState: 'bgRemove/UPDATE_pinchState'
     }),
     setScaleRatio(val: number) {
       this.bgRemoveScaleRatio = val
     },
     moveStart(evt: PointerEvent) {
-      bgRemoveMoveHandler.moveStart(evt)
+      if (this.movingMode && !this.isPinching) {
+        bgRemoveMoveHandler.moveStart(evt)
+      }
     },
     pinchHandler(event: AnyTouchEvent) {
+      if (!this.movingMode) return
       if (!this.inBgRemoveMode) return
       let deltaDistance = 0
       if (event.pointLength === 2) {
@@ -201,6 +207,7 @@ export default defineComponent({
               } else {
                 this.bgRemoveScaleRatio = ratio
               }
+              this.updatePinchState({ scale: this.bgRemoveScaleRatio })
 
               /**
                * for center scroll caculation
