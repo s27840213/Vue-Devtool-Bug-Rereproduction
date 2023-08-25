@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@nu/shared-lib": "workspace:^",
-    "@nu/shared-utils": "workspace:^",
     "pinia": "^2.1.4",
     "vue-router": "^4.2.4"
   },
