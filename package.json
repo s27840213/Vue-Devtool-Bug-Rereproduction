@@ -6,7 +6,7 @@
   "scripts": {
     "build-all": "nx run-many --target=build --all",
     "build-affected": "nx affected:build --parallel",
-    "cm": "nx dev @nu/charmix",
+    "cm": "nx dev @nu/cm",
     "pic": "nx dev pic",
     "stk": "nx dev stk",
     "comp-lib": "nx dev @nu/shared-lib",

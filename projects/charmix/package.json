@@ -1,5 +1,5 @@
 {
-  "name": "@nu/charmix",
+  "name": "@nu/cm",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -12,7 +12,8 @@
     "format": "prettier --write src/ --ignore-path"
   },
   "dependencies": {
-    "@nu/shared-lib": "workspace:^0.0.1",
+    "@nu/shared-lib": "workspace:^",
+    "@nu/shared-utils": "workspace:^",
     "pinia": "^2.1.4",
     "vue-router": "^4.2.4"
   },

@@ -33,6 +33,9 @@
       },
       "import": "./dist/types.es.js",
       "require": "./dist/types.cjs.js"
+    },
+    "./css": {
+      "import": "./dist/plugin.css"
     }
   },
   "scripts": {

@@ -1,5 +1,6 @@
 @import './base.css';
 @import './tailwind.css';
+@import '@nu/shared-lib/css';
 
 #app {
   width: 100%;
