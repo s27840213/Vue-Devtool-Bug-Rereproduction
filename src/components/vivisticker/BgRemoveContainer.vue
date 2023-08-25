@@ -1,13 +1,16 @@
 <template lang="pug">
-div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"  @pinch="pinchHandler")
-  div(v-if="isProcessing" class="panel-remove-bg__preview-section")
-    img(:src="previewImage.src ? previewImage.src  : previewSrc")
-    div(class="gray-mask")
-    img(class="loading" :src="require('@/assets/img/gif/gray-loading.gif')")
+div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"
+  :class="!isPinchInitialized ? 'flex-center' :  ''"
+  @pointerdown="moveStart"
+  @pinch="pinchHandler")
+  div(v-if="isProcessing" class="flex-center full-size")
+    div(class="panel-remove-bg__preview-section")
+      img(:src="previewImage.src ? previewImage.src  : previewSrc")
+      div(class="gray-mask")
+      img(class="loading" :src="require('@/assets/img/gif/gray-loading.gif')")
   bg-remove-area(v-else :cotainerRef="containerRef"
     :teleportTarget="'.panel-remove-bg__rm-section'"
     :inVivisticker="true"
-    :containerHeight="containerHeight"
     :fitScaleRatio="bgRemoveScaleRatio")
   //- used to debug
   teleport(v-if="false" to="body")
@@ -24,9 +27,11 @@ div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"  @pinch="
 </template>
 
 <script lang="ts">
+/* eslint-disable */
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import { IBgRemoveInfo } from '@/interfaces/image'
+import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { PropType, defineComponent } from 'vue'
@@ -89,6 +94,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
+      isPinchInitialized: 'bgRemove/getIsPinchInitialized',
       previewImage: 'bgRemove/getPreviewImage',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
     }),
@@ -106,14 +112,6 @@ export default defineComponent({
     },
   },
   watch: {
-    isProcessing(val) {
-      if (!val) {
-        setTimeout(() => {
-          this.containerHeight = this.rmSection?.clientHeight ?? -1
-          console.log('isProcessing', val, this.containerHeight)
-        }, 200)
-      }
-    },
     inBgRemoveMode(val) {
       if (val) {
         this.$nextTick(() => {
@@ -142,6 +140,9 @@ export default defineComponent({
     setScaleRatio(val: number) {
       this.bgRemoveScaleRatio = val
     },
+    moveStart(evt: PointerEvent) {
+      bgRemoveMoveHandler.moveStart(evt)
+    },
     pinchHandler(event: AnyTouchEvent) {
       if (!this.inBgRemoveMode) return
       let deltaDistance = 0
@@ -164,6 +165,7 @@ export default defineComponent({
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
          */
         case 'start': {
+          this.setIsPinchIng(true)
           this.tmpScaleRatio = this.bgRemoveScaleRatio
           this.setInGestureMode(true)
 
@@ -181,8 +183,8 @@ export default defineComponent({
           break
         }
         case 'move': {
+          this.setIsPinchIng(true)
           this.isPanning = true
-
           if (!this.initPinchPos) {
             this.initPinchPos = { x: event.x, y: event.y }
           }
@@ -231,6 +233,7 @@ export default defineComponent({
         }
 
         case 'end': {
+          this.setIsPinchIng(false)
           this.isPanning = false
           this.initPinchPos = null
           this.rmSection = null
@@ -239,6 +242,13 @@ export default defineComponent({
         }
       }
     },
+    setIsPinchIng(bool: boolean) {
+      console.log('setIsPinchIng', bool)
+      this.$store.commit('bgRemove/UPDATE_pinchState', { isPinchIng: bool })
+    },
+    updatePinchPos(pos: { x: number, y: number }) {
+      this.$store.commit('bgRemove/UPDATE_pincState', { x: pos.x, y: pos.y })
+    }
   }
 })
 </script>

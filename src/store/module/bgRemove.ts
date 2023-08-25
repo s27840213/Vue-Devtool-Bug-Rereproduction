@@ -1,7 +1,21 @@
 import { IBgRemoveInfo } from '@/interfaces/image'
+import eventUtils from '@/utils/eventUtils'
+import mouseUtils from '@/utils/mouseUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
 const MAX_STEP_COUNT = 20
+
+export interface IBgRemovePinchState {
+  isPinchIng: boolean
+  x: number,
+  y: number,
+  initPos: {
+    x: number,
+    y: number
+  }
+  scale: number
+}
+
 export interface IBgRemoveState {
   inBgRemoveMode: boolean,
   brushSize: number,
@@ -31,11 +45,7 @@ export interface IBgRemoveState {
     height: number
   },
   inEffectEditingMode: boolean,
-  pinch: {
-    x: number,
-    y: number,
-    scale: number
-  }
+  pinch: IBgRemovePinchState
 }
 
 const getDefaultState = (): IBgRemoveState => ({
@@ -68,14 +78,25 @@ const getDefaultState = (): IBgRemoveState => ({
   },
   inEffectEditingMode: false,
   pinch: {
+    isPinchIng: false,
     x: 0,
     y: 0,
+    initPos: {
+      x: -1,
+      y: -1
+    },
     scale: 1
   }
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IBgRemoveState, unknown> = {
+  getIsPinchInitialized(state: IBgRemoveState) {
+    return state.pinch.initPos.x !== -1 && state.pinch.initPos.y !== -1
+  },
+  getPinchState(state: IBgRemoveState) {
+    return state.pinch
+  },
   getInBgRemoveMode(state: IBgRemoveState) {
     return state.inBgRemoveMode
   },
@@ -250,6 +271,11 @@ const mutations: MutationTree<IBgRemoveState> = {
   },
   SET_previewImage(state: IBgRemoveState, previewImage: { src: string, width: number, height: number }) {
     Object.assign(state.previewImage, previewImage)
+  },
+  UPDATE_pinchState(state: IBgRemoveState, data: Partial<IBgRemovePinchState>) {
+    Object.entries(data).forEach(([key, val]) => {
+      (state.pinch as any)[key] = val
+    })
   }
 }
 
@@ -259,3 +285,41 @@ export default {
   getters,
   mutations
 }
+
+class BgRemoveMoveHandler {
+  private get pinch () {
+    return state.pinch
+  }
+
+  private initBgPos: { x: number, y: number }
+  private initEvtPos: { x: number, y: number }
+  private _moving = null as unknown
+  private _moveEnd = null as unknown
+
+  constructor() {
+    this.initBgPos = { x: -1, y: -1 }
+    this.initEvtPos = { x: -1, y: -1 }
+  }
+
+  moveStart(evt: PointerEvent) {
+    this.initBgPos.x = this.pinch.x
+    this.initBgPos.y = this.pinch.y
+    this.initEvtPos = mouseUtils.getMouseAbsPoint(evt)
+    this._moving = this.moving.bind(this)
+    this._moveEnd = this.moveEnd.bind(this)
+    eventUtils.addPointerEvent('pointerup', this._moveEnd)
+    eventUtils.addPointerEvent('pointermove', this._moving)
+  }
+
+  private moving(evt: PointerEvent) {
+    console.log('bg moving')
+  }
+
+  private moveEnd(evt: PointerEvent) {
+    console.log('bg move end')
+    eventUtils.removePointerEvent('pointerup', this._moveEnd)
+    eventUtils.removePointerEvent('pointermove', this._moving)
+  }
+}
+
+export const bgRemoveMoveHandler = new BgRemoveMoveHandler()

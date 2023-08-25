@@ -45,10 +45,6 @@ export default defineComponent({
     fitScaleRatio: {
       default: 1,
       type: Number
-    },
-    containerHeight: {
-      type: Number,
-      default: -1
     }
     // teleportTarget: {
     //   default: '.header-bar',
@@ -94,7 +90,7 @@ export default defineComponent({
       pointerStartX: 0,
       pointerStartY: 0,
       isDrawing: false,
-      loading: true
+      loading: true,
     }
   },
   created() {
@@ -164,7 +160,6 @@ export default defineComponent({
     window.addEventListener('keydown', this.handleKeydown)
     this.setPrevPageScaleRatio(this.scaleRatio)
     pageUtils.fitPage()
-    this.initBgRemovePos()
   },
   unmounted() {
     window.removeEventListener('pointerup', this.drawEnd)
@@ -177,6 +172,7 @@ export default defineComponent({
     }
     this.cotainerRef.removeEventListener('pointerdown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
+    this.$store.commit('bgRemove/UPDATE_pinchState', { initPos: { x: -1, y: -1 } })
   },
   computed: {
     ...mapGetters({
@@ -191,15 +187,14 @@ export default defineComponent({
       modifiedFlag: 'bgRemove/getModifiedFlag',
       steps: 'bgRemove/getSteps',
       currStep: 'bgRemove/getCurrStep',
+      pinchState: 'bgRemove/getPinchState',
+      isPinchInitialized: 'bgRemove/getIsPinchInitialized',
       inLastStep: 'bgRemove/inLastStep',
       inFirstStep: 'bgRemove/inFirstStep',
       inGestureMode: 'getInGestureToolMode',
       contentScaleRatio: 'getContentScaleRatio',
       useMobileEditor: 'getUseMobileEditor'
     }),
-    y(): number {
-      return (this.containerHeight - this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)) * 0.5
-    },
     size(): { width: number, height: number } {
       return {
         width: this.canvasWidth,
@@ -220,7 +215,7 @@ export default defineComponent({
       return {
         width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
         height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
-        transform: `translate(0px, ${this.y}px)`
+        ...(this.isPinchInitialized && { transform: `translate(${this.pinchState.initPos.x}px, ${this.pinchState.initPos.y}px)` })
       }
     },
     initPhotoStyles(): { [index: string]: string } {
@@ -249,6 +244,16 @@ export default defineComponent({
     // }
   },
   watch: {
+    movingMode(val) {
+      if (val) {
+        if (this.pinchState.initPos.x === -1 || this.pinchState.initPos.y === -1) {
+          const paddingSize = 40
+          const containerHeight = (document.getElementById('rmSection') as HTMLElement).clientHeight - paddingSize
+          const y = (containerHeight - this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)) * 0.5
+          this.$store.commit('bgRemove/UPDATE_pinchState', { initPos: { x: 0, y } })
+        }
+      }
+    },
     brushSize(newVal: number) {
       if (this.contentCtx) {
         this.contentCtx.lineWidth = newVal
@@ -337,9 +342,6 @@ export default defineComponent({
       clearSteps: 'bgRemove/CLEAR_steps',
       setInGestureMode: 'SET_inGestureMode'
     }),
-    initBgRemovePos() {
-      const y = (this.containerHeight - this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)) * 0.5
-    },
     initCanvas() {
       logUtils.setLog('initCanvas')
       this.contentCanvas = this.$refs.canvas as HTMLCanvasElement
