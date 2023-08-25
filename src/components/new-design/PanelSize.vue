@@ -30,7 +30,6 @@ div(class="mobile-panel p-15"
 <script lang="ts">
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 import eventUtils from '@/utils/eventUtils'
-import picWVUtils from '@/utils/picWVUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
@@ -62,7 +61,7 @@ export default defineComponent({
       'folders'
     ]),
     ...mapGetters({
-      userInfo: picWVUtils.appendModuleName('getUserInfo')
+      userInfo: 'webView/getUserInfo'
     }),
     panelStyle(): { [index: string]: string } {
       return Object.assign(

@@ -20,8 +20,6 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
 
   abstract getUserInfoFromStore(): T
 
-  abstract appendModuleName(identifier: string): string
-
   enterEventTestMode() {
     this.eventTestMode = true
   }
