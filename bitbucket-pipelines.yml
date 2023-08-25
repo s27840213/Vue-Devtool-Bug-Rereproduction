@@ -313,7 +313,7 @@ pipelines:
           - step:
               name: "deploy charmix to rd"
               deployment: rd
-              # trigger: manual
+              trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
