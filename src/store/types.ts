@@ -11,6 +11,7 @@ import { Itheme } from '@/interfaces/theme'
    @param groupId: for template group used (only for admin),
  */
 export interface IEditorState {
+  sessionId: string,
   pages: Array<IPageState>
   name: string,
   designId: string,
@@ -29,6 +30,7 @@ export interface IEditorState {
   showColorSlips: boolean
   currFunctionPanelType: number,
   pageScaleRatio: number,
+  pinchScaleRatio: number,
   isSettingScaleRatio: boolean,
   middlemostPageIndex: number,
   currActivePageIndex: number,

@@ -75,6 +75,10 @@ export default defineComponent({
       type: Number,
       default: -1
     },
+    contentScaleRatio: {
+      type: Number,
+      default: 1
+    }
   },
   data() {
     return {
@@ -275,9 +279,10 @@ export default defineComponent({
     },
     styles() {
       if (this.paramsReady) {
+        const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.$store.state.pageScaleRatio * 0.01 : 1)
         return {
-          width: `${(this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])}px`,
-          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`,
+          width: `${((this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])) * _f}px`,
+          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1]) * _f}px`,
           ...(this.config.wkf && useRoute().path === '/preview' && { '-webkit-filter': 'opacity(1)' }),
           ...(shapeUtils.isLine(this.config) ? { pointerEvents: 'none' } : {})
         }
@@ -387,7 +392,6 @@ export default defineComponent({
         }
         default: {
           if (!svg && this.config.designId) {
-            // const shape = await shapeUtils.fetchSvg(this.config) as Partial<IShape>
             if (shapeUtils.isSvgImg(shape)) {
               shapeUtils.svgImgHandler({
                 pageIndex: this.pageIndex,

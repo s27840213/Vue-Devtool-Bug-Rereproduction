@@ -137,13 +137,12 @@ export interface IAssetProps {
   pageIndex?: number
   styles?: Partial<IStyle>
   // the following props are used for preview image during polling process
-  isPreview?: boolean
-  assetId?: string | number
-  assetIndex?: number
-  width?: number
-  height?: number
-  panelPreviewSrc?: string
-  previewSrc?: string
+  isPreview?: boolean,
+  assetId?: string | number,
+  assetIndex?: number,
+  width?: number,
+  height?: number,
+  previewSrc?: string,
   imgSrcSize?: {
     width: number
     height: number

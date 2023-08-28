@@ -67,6 +67,7 @@ import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
+import logUtils from '@/utils/logUtils'
 import mathUtils from '@/utils/mathUtils'
 import modalUtils from '@/utils/modalUtils'
 import MouseUtils from '@/utils/mouseUtils'
@@ -162,6 +163,7 @@ export default defineComponent({
     // check and auto resize pages oversized on design loaded
     const unwatchPages = this.$watch('isGettingDesign', (newVal) => {
       if (!newVal) {
+        logUtils.setLog('editorView created and got design')
         if (this.pages.length > 0 && pageUtils.fixPageSize()) {
           pageUtils.fitPage()
           uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)

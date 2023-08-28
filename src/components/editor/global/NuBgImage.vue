@@ -1,7 +1,5 @@
 <template lang="pug">
-//- div(class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
 div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
-  //- div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
     svg(v-if="isAdjustImage"
       class="nu-background-image__svg"
@@ -19,7 +17,6 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
               :key="child.tag"
               :is="child.tag"
               v-bind="child.attrs")
-              //- class="nu-background-image__adjust-picture"
       image(ref="img"
         crossorigin="anonymous"
         class="nu-background-image__adjust-image"
@@ -43,6 +40,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -52,14 +50,16 @@ import cssConverter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -97,7 +97,8 @@ export default defineComponent({
       imgNaturalSize: {
         width: 0,
         height: 0
-      }
+      },
+      errorSrcIdentifier: { identifier: '', retry: 0 },
     }
   },
   watch: {
@@ -108,7 +109,7 @@ export default defineComponent({
           this.src = ''
         } else {
           this.previewAsLoading()
-          this.handleIsTransparent()
+            .then(() => this.handleIsTransparent())
         }
       }
     },
@@ -148,14 +149,8 @@ export default defineComponent({
     }
 
     if (this.userId !== 'backendRendering') {
-      this.handleIsTransparent()
       this.previewAsLoading()
-      // const nextImg = new Image()
-      // nextImg.onload = () => {
-      //   const preImg = new Image()
-      //   preImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
-      // }
-      // nextImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
+        .then(() => this.handleIsTransparent())
     } else {
       if (this.isAdjustImage) {
         this.handleIsTransparent()
@@ -217,11 +212,12 @@ export default defineComponent({
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
       const x = image.posX - (aspectRatio < 1 ? offset : offset * aspectRatio)
       const y = image.posY - (aspectRatio > 1 ? offset : offset / aspectRatio)
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return {
-        width: width * this.contentScaleRatio,
-        height: height * this.contentScaleRatio,
-        x: x * this.contentScaleRatio,
-        y: y * this.contentScaleRatio
+        width: width * _f,
+        height: height * _f,
+        x: x * _f,
+        y: y * _f
       }
     },
     mainStyles(): any {
@@ -247,10 +243,11 @@ export default defineComponent({
 
       const elms = []
       if (adjust.halation) {
+        const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
         const position = {
-          width: width / 2 * this.contentScaleRatio,
-          x: width / 2 * this.contentScaleRatio,
-          y: height / 2 * this.contentScaleRatio
+          width: width / 2 * _f,
+          x: width / 2 * _f,
+          y: height / 2 * _f
         }
         elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
       }
@@ -286,9 +283,27 @@ export default defineComponent({
       setBgImgConfig: 'imgControl/SET_BG_CONFIG',
       setBgImageControl: 'SET_backgroundImageControl'
     }),
+    getErrorSrcIdentifier(config: IImage) {
+      const { srcObj, styles } = config
+      return srcObj.type + srcObj.assetId + srcObj.userId + (styles.adjust.blur > 0 ? '_blur' : '')
+    },
     onError() {
-      let updater
+      this._onError()
+    },
+    _onError(imgLoadHandlerError = false) {
+      if (!this.src && !imgLoadHandlerError) return
+      if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.image.config as IImage)) {
+        if (this.errorSrcIdentifier.retry === 3) {
+          return
+        }
+        this.errorSrcIdentifier.retry++
+      } else {
+        this.errorSrcIdentifier.identifier = this.getErrorSrcIdentifier(this.image.config as IImage)
+        this.errorSrcIdentifier.retry = 1
+      }
+
       const srcObj = this.image.config.srcObj
+      let updater
       switch (srcObj.type) {
         case 'private':
           updater = async () => await this.updateImages({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
@@ -296,6 +311,24 @@ export default defineComponent({
         case 'logo-private':
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
           break
+        case 'ios': {
+          // replace error image
+          this.$store.commit('SET_backgroundImageSrc', {
+            pageIndex: this.pageIndex,
+            srcObj: {
+              type: '',
+              userId: '',
+              assetId: ''
+            },
+            previewSrc: ''
+          })
+          this.src = ''
+          vivistickerUtils.setLoadingFlag(-1)
+          const modalBtn = {
+            msg: i18n.global.t('STK0023') as string,
+          }
+          modalUtils.setModalInfo(i18n.global.t('STK0024') as string, i18n.global.t('STK0086') as string, modalBtn)
+        }
       }
 
       if (updater !== undefined) {
@@ -308,6 +341,16 @@ export default defineComponent({
             }, { crossOrigin: true })
           })
         } catch (error) {
+          if (this.src.indexOf('data:image/png;base64') !== 0) {
+            fetch(this.src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError(error, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                this.logImgError(error, 'fetch result: ' + e)
+              })
+          }
         }
       }
     },
@@ -316,7 +359,6 @@ export default defineComponent({
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
-            console.warn(this.image.config.srcObj)
             if (backgroundUtils.backgroundLocked) return backgroundUtils.handleLockedNotify()
             this.setBgImageControl({
               pageIndex: this.pageIndex,
@@ -359,26 +401,32 @@ export default defineComponent({
             this.src = previewSrc
           }
         }, { crossOrigin: true })
-      } else if (config.panelPreviewSrc) {
-        const panelPreviewSrc = this.image.config.panelPreviewSrc
-        imageUtils.imgLoadHandler(panelPreviewSrc, () => {
-          if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
-            this.src = panelPreviewSrc
-          }
-        }, { crossOrigin: true })
+          .catch(() => {
+            if (src === config.previewSrc) {
+              this._onError(true)
+            }
+            console.warn('bg-img preview cannot be loaded!')
+          })
       }
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+      if (!src || src === config.previewSrc) return
+
       return new Promise<void>((resolve, reject) => {
         imageUtils.imgLoadHandler(src, () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
             isPrimaryImgLoaded = true
             this.src = src
+            if (!this.isBlurImg) {
+              this.preLoadImg('pre', this.getImgDimension)
+              this.preLoadImg('next', this.getImgDimension)
+            }
             resolve()
           }
         }, {
           error: () => {
-            reject(new Error('cannot load the current image'))
+            reject(new Error(`cannot load the current image, src: ${src}`))
+            this._onError(true)
           },
           crossOrigin: true
         })
@@ -393,11 +441,13 @@ export default defineComponent({
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
+      groupUtils.deselect()
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.isBlurImg) return
-      if (this.image.config.previewSrc === undefined) {
-        const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
+
+      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
+      if (currUrl) {
         const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)
         imageUtils.imgLoadHandler(currUrl, async () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
@@ -480,8 +530,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .nu-background-image {
-  // will-change: opacity, transform;
   position: absolute;
+  // width: 100%;
+  // height: 100%;
   top: 0;
   right: 0;
   bottom: 0;

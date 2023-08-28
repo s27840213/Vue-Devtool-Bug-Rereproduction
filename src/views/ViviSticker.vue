@@ -106,19 +106,6 @@ export default defineComponent({
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
     textUtils.loadDefaultFonts()
     vivistickerUtils.registerCallbacks('vvstk')
-    if (!vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0')) vivistickerUtils.showUpdateModal(true)
-    else {
-      if (this.userInfo.isFirstOpen) {
-        const isShowPaymentView = this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
-        const isShowTutorial = this.$i18n.locale !== 'us'
-        if (!isShowPaymentView && !isShowTutorial) vivistickerUtils.sendAppLoaded()
-        else {
-          if (isShowPaymentView) vivistickerUtils.openPayment()
-          if (isShowTutorial) this.setShowTutorial(true)
-        }
-      }
-      this.getPushModalInfo()
-    }
   },
   async mounted() {
     this.mounted = true
@@ -131,9 +118,10 @@ export default defineComponent({
       }
     }
 
-    if (!this.userInfo.isFirstOpen) {
+    if (!vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0')) {
+      vivistickerUtils.showUpdateModal(true)
       vivistickerUtils.sendAppLoaded()
-    }
+    } else this.showInitPopups()
 
     stepsUtils.MAX_STORAGE_COUNT = 15
     /**
@@ -423,6 +411,27 @@ export default defineComponent({
         },
         ...options
       }
+      await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
+    },
+    async showInitPopups() {
+      this.getPushModalInfo()
+      const isFirstOpen = this.userInfo.isFirstOpen
+      const subscribed = (await vivistickerUtils.getState('subscribeInfo'))?.subscribe ?? false
+      const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
+      const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
+      const showPaymentInfo = await vivistickerUtils.getState('showPaymentInfo')
+      const showPaymentTime = showPaymentInfo?.timestamp ?? 0
+      const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
+      const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
+      const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
+        : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
+      const isShowTutorial = isFirstOpen && this.$i18n.locale !== 'us'
+      if (isShowPaymentView) {
+        vivistickerUtils.openPayment()
+        vivistickerUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+      } else vivistickerUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
+      if (isShowTutorial) this.setShowTutorial(true)
+      if (!isShowPaymentView && !isShowTutorial) vivistickerUtils.sendAppLoaded()
     }
   }
 })

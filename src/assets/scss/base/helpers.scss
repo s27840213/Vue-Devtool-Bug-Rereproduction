@@ -218,6 +218,10 @@ $spacer: 5;
     pointer-events: none;
 }
 
+.click-enable {
+    pointer-events: initial;
+}
+
 .visible-hidden {
     pointer-events: none;
     visibility: hidden;
@@ -233,4 +237,8 @@ $spacer: 5;
 
 .text-capitalize {
     text-transform: capitalize;
+}
+
+.transform-origin-0 {
+    transform-origin: 0 0;
 }

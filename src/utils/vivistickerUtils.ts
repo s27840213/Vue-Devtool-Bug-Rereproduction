@@ -218,10 +218,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return store.getters['vivisticker/getUserInfo']
   }
 
-  appendModuleName(identifier: string): string {
-    return `vivisticker/${identifier}`
-  }
-
   getDefaultUserSettings(): IUserSettings {
     const res = {} as { [key: string]: any }
     for (const [key, value] of Object.entries(USER_SETTINGS_CONFIG)) {
@@ -409,8 +405,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (!this.appLoadedSent) {
       this.sendToIOS('APP_LOADED', {
         hideReviewRequest: false,
-        logJsonContent: true,
-        ul_log_map: uploadUtils.loginOutput.upload_log_map // to match app.json naming, use snake-case
+        logJsonContent: true
       })
       this.appLoadedSent = true
     }
@@ -588,6 +583,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (!noBg && 'backgroundImage' in page && page.backgroundImage.config.srcObj?.assetId !== '') {
       this.loadingFlags[this.makeFlagKey(-1)] = false
     }
+    logUtils.setLogAndConsoleLog('ScreenShot::Init:', generalUtils.deepCopy(this.loadingFlags))
   }
 
   makeFlagKey(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
@@ -647,8 +643,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const key = this.makeFlagKey(layerIndex, subLayerIndex, addition)
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true
+      logUtils.setLogAndConsoleLog('ScreenShot::Set:', generalUtils.deepCopy(this.loadingFlags), key)
     }
-    // console.log(generalUtils.deepCopy(this.loadingFlags), key)
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       window.clearTimeout(this.loadingTimeout)
       this.loadingCallback()
@@ -665,6 +661,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   showController() {
     store.commit('vivisticker/SET_controllerHidden', false)
+  }
+
+  detectIfInApp() {
+    if (window.webkit?.messageHandlers?.APP_LOADED === undefined) {
+      this.enterStandaloneMode()
+      this.setDefaultLocale()
+    }
   }
 
   enterStandaloneMode() {
@@ -1077,8 +1080,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async saveAsMyDesign(): Promise<void> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
-    const onThumbError = async () => {
-      await this.saveDesignJson(id)
+    const onThumbError = async (flag: string, saveDesign: boolean) => {
+      if (saveDesign) {
+        await this.saveDesignJson(id)
+      }
+      logUtils.setLog(`Generating myDesign thumbnail failed, flag: ${flag}`)
       this.setLoadingOverlayShow(false)
       throw new Error('gen thumb failed')
     }
@@ -1091,10 +1097,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         },
         to: 'Shot'
       }, 'gen-thumb', { timeout: -1 }) as any
-      if (!resGenThumb || resGenThumb.flag === '1') await onThumbError()
+      if (!resGenThumb || resGenThumb.flag !== '0') await onThumbError(resGenThumb?.flag ?? '1', true)
     } else {
       const flag = await this.genThumbnail(id)
-      if (flag === '1') await onThumbError()
+      if (flag !== '0') await onThumbError(flag, false)
     }
     await this.saveDesignJson(id)
     this.setLoadingOverlayShow(false)
@@ -1274,8 +1280,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       case 'gen-thumb-done':
         this.handleCallback('gen-thumb', info)
         break
-      case 'sreenshot-timeout':
-        this.handleCallback(info.srcEvent, { flag: '1' })
+      case 'screenshot-timeout':
+        this.handleCallback(info.srcEvent, { flag: '9999' }) // 9999 for timeout
     }
   }
 
@@ -1305,17 +1311,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const { layers } = page
     const frames = (layers
       .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
-    //   .flatMap((l: ILayer) => {
-    //     if (l.type === 'frame') {
-    //       return [l]
-    //     } else if (l.type === 'group') {
-    //       const frames = (l as any).layers
-    //         .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>
-    //       return frames
-    //     }
-    //     return []
-    //   }) as Array<IFrame>)
-    // console.log('init loading flag', frames)
     const missingClips = frames
       .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
     if (missingClips.length) {
@@ -1443,6 +1438,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
+    const isSubscribed = subscribe === '1'
     const currencyFormaters = {
       TWD: (value: string) => `${value}元`,
       USD: (value: string) => `$${(+value).toFixed(2)}`,
@@ -1454,7 +1450,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
 
     store.commit('vivisticker/UPDATE_payment', {
-      subscribe: subscribe === '1',
+      subscribe: isSubscribed,
       prices: {
         currency: priceCurrency,
         monthly: {
@@ -1468,6 +1464,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       }
     })
     store.commit('vivisticker/SET_paymentPending', { info: false })
+    this.getState('subscribeInfo').then(subscribeInfo => {
+      if (subscribeInfo?.subscribe && !isSubscribed) {
+        this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
+      }
+    })
+    this.setState('subscribeInfo', { subscribe: isSubscribed })
   }
 
   subscribeResult(data: ISubscribeResult) {
@@ -1478,13 +1480,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       return
     }
     const { subscribe, reason } = data
+    const isSubscribed = subscribe === '1'
     if (!reason) {
       store.commit('vivisticker/UPDATE_payment', {
-        subscribe: subscribe === '1',
+        subscribe: isSubscribed,
       })
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
-    if (subscribe === '1') store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
+    if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
+    this.setState('subscribeInfo', { subscribe: isSubscribed })
   }
 
   async registerSticker() {

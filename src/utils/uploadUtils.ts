@@ -405,27 +405,24 @@ class UploadUtils {
     }
 
     // Check if file size over limit.
-    for (let i = 0; i < files.length; i++) {
-      const fileSize =
-        (typeof files[i] === 'string'
-          ? ((files[i] as string).length / 4) * 3
-          : (files[i] as File).size) /
-        1024 /
-        1024
-      const fileSizeLimit = // 50 for font, BGremove and shadow.
-        typeof files[i] === 'string' || type === 'font' ? 50 : 25
-      const modalDesc =
-        typeof files[i] === 'string'
-          ? i18n.global.t('NN0705', { size: fileSizeLimit })
-          : i18n.global.t('NN0696', {
-            file: (files[i] as File)?.name,
-            size: fileSizeLimit,
-          })
+    for (const file of files) {
+      const fileSize = (typeof file === 'string'
+        ? file.length / 4 * 3 // Base64
+        : file.size) / 1024 / 1024
+      const fileSizeLimit =
+        (typeof file === 'string' || type === 'font') ? 50 // For font, BGremove and shadow.
+          : this.isAdmin && file.type === 'image/svg+xml' ? 1.3 // For prevent large admin svg asset.
+            : 25
+      const modalDesc = typeof file === 'string'
+        ? i18n.global.t('NN0705',
+          { size: fileSizeLimit }
+        )
+        : i18n.global.t('NN0696',
+          { file: file.name, size: fileSizeLimit }
+        )
 
       if (fileSize > fileSizeLimit) {
-        modalUtils.setModalInfo(i18n.global.t('NN0137') as string, [
-          modalDesc as string,
-        ])
+        modalUtils.setModalInfo(i18n.global.t('NN0137'), modalDesc)
         return
       }
     }
@@ -518,7 +515,8 @@ class UploadUtils {
                 pageIndex: pageUtils.currFocusPageIndex,
                 // The following props is used for preview image during polling process
                 isPreview: true,
-                assetId,
+                previewSrc: src,
+                assetId
               })
             }
             xhr.open('POST', this.loginOutput.upload_map.url, true)
@@ -753,7 +751,7 @@ class UploadUtils {
     }
   }
 
-  async assetHandler (type: string, formData: FormData, assetId: string, params: {
+  async assetHandler(type: string, formData: FormData, assetId: string, params: {
     imgType?: string
     addToPage?: boolean,
     isShadow?: boolean,
@@ -817,9 +815,9 @@ class UploadUtils {
         // polling the JSON file of uploaded image
         const interval = window.setInterval(() => {
           const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId
-              }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
-                6
-              )}`
+            }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+              6
+            )}`
           fetch(pollingTargetSrc).then((response) => {
             if (response.status === 200) {
               clearInterval(interval)
@@ -938,7 +936,7 @@ class UploadUtils {
     }
     logUtils.setLog(`Query Info:
       type: ${type},
-      designId: ${designId}
+      designId: ${designId},
       teamId: ${teamId},
       needAppendQuery: ${!type || !designId || !teamId}`)
 
@@ -968,10 +966,11 @@ class UploadUtils {
     // const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
     logUtils.setLog(`Upload Design:
-      Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'}
+      Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'},
       AssetId: ${assetId},
-      TeamId: ${teamId}
-      PageNum: ${pages.length}`)
+      TeamId: ${teamId},
+      PageNum: ${pages.length},
+      SessionId: ${store.state.sessionId}`)
 
     const pagesJSON = pages.map((page: IPage) => {
       const newPage = this.default(page, false)
@@ -985,7 +984,7 @@ class UploadUtils {
           newPage.layers[i] = this.layerInfoFilter(layer)
         }
       }
-      newPage.backgroundImage.config.imgControl = false
+      newPage.backgroundImage.config = this.layerInfoFilter(newPage.backgroundImage.config)
       newPage.width = _.round(newPage.width)
       newPage.height = _.round(newPage.height)
       newPage.bleeds &&
@@ -2065,36 +2064,33 @@ class UploadUtils {
   }
 
   layerInfoFilter(layer: ILayer): any {
+    const { type, jsonVer, jsonVer_origin, locked } = layer
+    // props for all type layer
+    const general = {
+      type,
+      locked,
+      jsonVer,
+      jsonVer_origin
+    }
     switch (layer.type) {
       case 'image': {
         const image = layer as IImage
-        const { type, srcObj, styles, trace, jsonVer, jsonVer_origin, overlay } = image
+        const { srcObj, styles, trace, overlay } = image
         return {
-          type,
+          ...general,
           srcObj,
           trace,
-          jsonVer,
-          jsonVer_origin,
           overlay,
           styles: this.styleFilter(styles, 'image'),
         }
       }
       case 'shape': {
         const shape = layer as IShape
-        const {
-          type,
-          designId,
-          ratio,
-          color,
-          styles,
-          category,
-          jsonVer,
-          jsonVer_origin,
-        } = shape
+        const { designId, ratio, color, styles, category } = shape
         switch (shape.category) {
           case 'D': {
             return {
-              type,
+              ...general,
               color,
               ratio,
               category,
@@ -2104,9 +2100,7 @@ class UploadUtils {
               dasharray: shape.dasharray,
               linecap: shape.linecap,
               point: shape.point,
-              jsonVer,
-              jsonVer_origin,
-              styles: this.styleFilter(styles),
+              styles: this.styleFilter(styles)
             }
           }
           case 'E':
@@ -2115,7 +2109,7 @@ class UploadUtils {
             styles.initHeight = styles.height
             shape.vSize = [styles.initWidth, styles.initHeight]
             return {
-              type,
+              ...general,
               color,
               ratio,
               category,
@@ -2125,27 +2119,24 @@ class UploadUtils {
               shapeType: shape.shapeType,
               vSize: shape.vSize,
               filled: shape.filled,
-              jsonVer,
-              jsonVer_origin,
-              styles: this.styleFilter(styles),
+              styles: this.styleFilter(styles)
             }
           default: {
             if (designId) {
               return {
-                type,
+                ...general,
                 category,
                 designId,
                 ratio,
                 color,
                 pDiff: shape.pDiff,
-                jsonVer,
-                jsonVer_origin,
-                styles: this.styleFilter(styles),
+                styles: this.styleFilter(styles)
               }
             } else {
               // for downward compatible reason record the entire shape info
               return {
-                ...shape,
+                ...general,
+                ...shape
               }
             }
           }
@@ -2153,19 +2144,9 @@ class UploadUtils {
       }
       case 'frame': {
         const frame = layer as IFrame
-        const {
-          type,
-          designId,
-          clips,
-          decoration,
-          decorationTop,
-          styles,
-          blendLayers,
-          jsonVer,
-          jsonVer_origin,
-        } = frame
+        const { designId, clips, decoration, decorationTop, styles, blendLayers } = frame
         return {
-          type,
+          ...general,
           designId,
           clips: [
             ...clips.map((img) => {
@@ -2192,56 +2173,49 @@ class UploadUtils {
               return { color: l.color }
             }),
           }),
-          jsonVer,
-          jsonVer_origin,
-          styles: this.styleFilter(styles, 'frame'),
+          styles: this.styleFilter(styles, 'frame')
         }
       }
       case 'text': {
         const text = layer as IText
-        const { type, widthLimit, isEdited, paragraphs, styles, isCompensated, spanDataList, jsonVer, jsonVer_origin } = text
+        const { widthLimit, isEdited, paragraphs, styles, isCompensated, spanDataList } = text
         return {
-          type,
+          ...general,
           widthLimit,
           isEdited,
           isCompensated,
           paragraphs,
           spanDataList,
-          jsonVer,
-          jsonVer_origin,
-          styles: this.styleFilter(styles, 'text'),
+          styles: this.styleFilter(styles, 'text')
         }
       }
       case 'group': {
         const group = layer as IGroup
-        const { type, layers, styles, designId, db, jsonVer, jsonVer_origin } =
-          group
-        const filteredLayers = layers.map((layer) => {
-          return this.layerInfoFilter(layer)
-        })
-        return {
-          type,
-          designId,
-          db,
-          layers: filteredLayers,
-          jsonVer,
-          jsonVer_origin,
-          styles: this.styleFilter(styles),
-        }
-      }
-      case 'tmp': {
-        const tmp = layer as ITmp
-        const { layers, styles, jsonVer, jsonVer_origin } = tmp
+        const { layers, styles, designId, db } = group
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)
           })
         return {
+          ...general,
+          designId,
+          db,
+          layers: filteredLayers,
+          styles: this.styleFilter(styles)
+        }
+      }
+      case 'tmp': {
+        const tmp = layer as ITmp
+        const { layers, styles } = tmp
+        const filteredLayers = layers
+          .map(layer => {
+            return this.layerInfoFilter(layer)
+          })
+        return {
+          ...general,
           type: 'group',
           layers: filteredLayers,
-          jsonVer,
-          jsonVer_origin,
-          styles: this.styleFilter(styles),
+          styles: this.styleFilter(styles)
         }
       }
     }
@@ -2353,7 +2327,7 @@ class UploadUtils {
     })
   }
 
-  async sendRequest(method: string, uploadMapUrl: string, data: FormData, { trackProgress = false, uploadProgressCallback } : {
+  async sendRequest(method: string, uploadMapUrl: string, data: FormData, { trackProgress = false, uploadProgressCallback }: {
     trackProgress?: boolean,
     uploadProgressCallback?: (progress: number) => void
   }): Promise<IUploadAssetResponse> {

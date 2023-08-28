@@ -20,9 +20,9 @@ class DragUtils {
    * @param payload The core data of dragItem, e.g. srcObj for image, designId for svg.
    * @param attrs offsetX/offsetY for dragImg's offset, width/height for dropped layer size
    */
-  itemDragStart(evt: DragEvent, type: string, config: Partial<IImage | IShape>, imgSrc: string, attrs?: { offsetX?: number, offsetY?: number, width?: number, height?: number, resizeRatio?: number, panelPreviewSrc?: string, aspectRatio?: number }) {
+  itemDragStart(evt: DragEvent, type: string, config: Partial<IImage | IShape>, imgSrc: string, attrs?: { offsetX?: number, offsetY?: number, width?: number, height?: number, resizeRatio?: number, aspectRatio?: number, previewSrc?: string }) {
     const { width: rectW, height: rectH, x, y } = (evt.target as Element).getBoundingClientRect()
-    const { offsetX = 10, offsetY = 15, panelPreviewSrc = '', resizeRatio = 0.5, aspectRatio = rectW / rectH } = attrs || {}
+    const { offsetX = 10, offsetY = 15, previewSrc = '', resizeRatio = 0.5, aspectRatio = rectW / rectH } = attrs || {}
     const iconWidth = aspectRatio > 1 ? rectW : (rectH * aspectRatio)
     const iconHeight = iconWidth / aspectRatio
     let { width, height } = attrs || {}
@@ -41,7 +41,7 @@ class DragUtils {
         width,
         height
       },
-      panelPreviewSrc,
+      previewSrc,
       ...config
     }
     const dataTransfer = evt.dataTransfer as DataTransfer
@@ -213,7 +213,7 @@ class DragUtils {
     shadow: {
       srcObj: SrcObj
     },
-    panelPreviewSrc?: string
+    previewSrc?: string
   } = {
       layerId: '',
       subLayerId: '',
@@ -226,7 +226,7 @@ class DragUtils {
 
   onImageDragEnter(e: DragEvent, pageIndex: number, config: IImage) {
     const DragSrcObj = store.state.currDraggedPhoto.srcObj
-    const panelPreviewSrc = store.state.currDraggedPhoto.panelPreviewSrc
+    const previewSrc = store.state.currDraggedPhoto.previewSrc
     const { layerId, subLayerId } = this.imgBuff
     if (store.state.currDraggedPhoto.srcObj.type) {
       const { imgWidth, imgHeight } = config.styles
@@ -252,10 +252,10 @@ class DragUtils {
             ...config.styles.shadow.srcObj
           }
         },
-        panelPreviewSrc: config.panelPreviewSrc
+        previewSrc: config.previewSrc
       })
       const { layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageUtils.getPage(pageIndex).id, layerId, subLayerId)
-      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: DragSrcObj, panelPreviewSrc }, subLayerIdx)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: DragSrcObj, previewSrc }, subLayerIdx)
       layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
       const isFloatingEffect = config.styles.shadow.currentEffect === ShadowEffectType.floating
       if (!isFloatingEffect && (config.styles.shadow.isTransparent || config.styles.shadow.currentEffect === ShadowEffectType.imageMatched)) {
@@ -269,10 +269,10 @@ class DragUtils {
   }
 
   onImageDragLeave(e: DragEvent, pageIndex: number) {
-    const { layerId, subLayerId, styles, srcObj, shadow, panelPreviewSrc } = this.imgBuff
+    const { layerId, subLayerId, styles, srcObj, shadow, previewSrc } = this.imgBuff
     const { layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageUtils.getPage(pageIndex).id, layerId, subLayerId)
     if (store.state.currDraggedPhoto.srcObj.type && srcObj.type) {
-      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, panelPreviewSrc }, subLayerIdx)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, previewSrc }, subLayerIdx)
       layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
       imageShadowUtils.updateShadowSrc({
         pageIndex,
