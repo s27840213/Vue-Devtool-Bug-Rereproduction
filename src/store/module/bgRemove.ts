@@ -307,12 +307,16 @@ class BgRemoveMoveHandler {
 
   private initBgPos: { x: number, y: number }
   private initEvtPos: { x: number, y: number }
+  private currSize: { w: number, h: number }
+  private base: { x: number, y: number }
   private _moving = null as unknown
   private _moveEnd = null as unknown
 
   constructor() {
     this.initBgPos = { x: -1, y: -1 }
     this.initEvtPos = { x: -1, y: -1 }
+    this.currSize = { w: -1, h: -1 }
+    this.base = { x: 0, y: 0 }
   }
 
   moveStart(evt: PointerEvent) {
@@ -320,6 +324,20 @@ class BgRemoveMoveHandler {
     this.initBgPos.x = this.pinch.x
     this.initBgPos.y = this.pinch.y
     this.initEvtPos = mouseUtils.getMouseAbsPoint(evt)
+
+    const scaleIncrement = this.pinch.scale / this.pinch.initScale
+    // current bg-remove-area size
+    this.currSize = {
+      w: this.pinch.initSize.width * scaleIncrement,
+      h: this.pinch.initSize.height * scaleIncrement
+    }
+    // baseline coordinates for current size,
+    // which means at the baseline, bg-remove-area would be placed at center
+    this.base = {
+      x: -(this.currSize.w - this.pinch.initSize.width) * 0.5 + this.pinch.initPos.x,
+      y: -(this.currSize.h - this.pinch.initSize.height) * 0.5 + this.pinch.initPos.y,
+    }
+
     this._moving = this.moving.bind(this)
     this._moveEnd = this.moveEnd.bind(this)
     eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -330,90 +348,29 @@ class BgRemoveMoveHandler {
     if (this.pinch.isPinchIng || !store.getters['bgRemove/getMovingMode']) {
       return
     }
-    // if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
-    // const { originPageSize, getCurrPage: currPage } = pageUtils
     const offsetPos = mouseUtils.getMouseRelPoint(evt, this.initEvtPos)
-    const scaleIncrement = this.pinch.scale / this.pinch.initScale
-    const currSize = {
-      w: this.pinch.initSize.width * scaleIncrement,
-      h: this.pinch.initSize.height * scaleIncrement
-    }
-    console.warn('newSize', currSize, this.pinch.initSize.width)
-
-    const base = {
-      x: -(currSize.w - this.pinch.initSize.width) * 0.5 + this.pinch.initPos.x,
-      y: -(currSize.h - this.pinch.initSize.height) * 0.5 + this.pinch.initPos.y,
-    }
-
-    const limitRange = {
-      x: Math.abs(base.x),
-      y: Math.abs(base.y)
-    }
-
+    const limitRange = { x: Math.abs(this.base.x), y: Math.abs(this.base.y) }
     const diff = {
-      x: Math.abs(this.initBgPos.x + offsetPos.x - base.x),
-      y: Math.abs(this.initBgPos.y + offsetPos.y - base.y)
+      x: Math.abs(this.initBgPos.x + offsetPos.x - this.base.x),
+      y: Math.abs(this.initBgPos.y + offsetPos.y - this.base.y)
     }
-
-    // console.log('offsetPos.x', offsetPos.x)
-    // console.log('this.initBgPos.x + offsetPos.x', this.initBgPos.x + offsetPos.x)
-    // console.log('this.pinch.scale, this.pinch.initScale', this.pinch.scale, this.pinch.initScale)
-    // console.log('base', base)
-    console.log(this.pinch.initSize.width - currSize.w, this.pinch.initPos.x)
-
-    // const newPageSize = {
-    //   w: this.scaleRatio * currPage.width * 0.01,
-    //   h: this.scaleRatio * currPage.height * 0.01
-    // }
-    // const base = {
-    //   x: -(newPageSize.w - originPageSize.width) * 0.5,
-    //   y: 0
-    // }
-    // const limitRange = {
-    //   x: (newPageSize.w - originPageSize.width) * 0.5,
-    //   y: (newPageSize.h - originPageSize.height) * 0.5
-    // }
-    // const diff = {
-    //   x: Math.abs(currPage.x + offsetPos.x - base.x),
-    //   y: Math.abs(currPage.y + offsetPos.y - base.y)
-    // }
-    // const isReachRightEdge = currPage.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
-    // const isReachLeftEdge = currPage.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
-    // const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
-    // const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
-
     const isReachRightEdge = this.pinch.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
     const isReachLeftEdge = this.pinch.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
     const isReachTopEdge = this.pinch.y >= 0 && offsetPos.y > 0 && diff.y > limitRange.y
     const isReachBottomEdge = this.pinch.y < 0 && offsetPos.y < 0 && diff.y > limitRange.y
-    console.log(isReachTopEdge, isReachBottomEdge, isReachLeftEdge, isReachRightEdge)
-    console.log('isReachLeftEdge', 'this.pinch.x', this.pinch.x, 'offsetPos.x', offsetPos.x, 'diff.x', diff.x, 'limitRange.x', limitRange.x)
 
     let { x, y } = this.pinch
     if (isReachRightEdge || isReachLeftEdge) {
-      x = isReachRightEdge ? this.pinch.initSize.width - currSize.w + this.pinch.initPos.x * 2 : 0
-      // pageUtils.updatePagePos(this.pageIndex, {
-      //   x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0
-      // })
+      x = isReachRightEdge ? this.pinch.initSize.width - this.currSize.w + this.pinch.initPos.x * 2 : 0
     } else {
       x = this.initBgPos.x + offsetPos.x
-      // pageUtils.updatePagePos(this.pageIndex, {
-      //   x: offsetPos.x + currPage.x
-      // })
     }
     if (isReachTopEdge || isReachBottomEdge) {
-      y = isReachBottomEdge ? this.pinch.initSize.height - currSize.h + this.pinch.initPos.y * 2 : 0
+      y = isReachBottomEdge ? this.pinch.initSize.height - this.currSize.h + this.pinch.initPos.y * 2 : 0
     } else {
       y = this.initBgPos.y + offsetPos.y
     }
-    // x = this.initBgPos.x + offsetPos.x
-    // y = this.initBgPos.y + offsetPos.y
-
     this.updateBgPos(x, y)
-    // this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
-    // this.initialPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
-    // this.initBgPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
-    // this.initBgPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
   }
 
   private moveEnd(evt: PointerEvent) {
