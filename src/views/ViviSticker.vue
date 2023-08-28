@@ -118,8 +118,10 @@ export default defineComponent({
       }
     }
 
-    if (!vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0')) vivistickerUtils.showUpdateModal(true)
-    else this.showInitPopups()
+    if (!vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0')) {
+      vivistickerUtils.showUpdateModal(true)
+      vivistickerUtils.sendAppLoaded()
+    } else this.showInitPopups()
 
     stepsUtils.MAX_STORAGE_COUNT = 15
     /**
