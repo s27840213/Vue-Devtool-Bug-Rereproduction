@@ -2,7 +2,6 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
-import { ISize } from '@/interfaces/math'
 import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
@@ -10,8 +9,8 @@ import background from '@/store/module/background'
 import bgRemove, { IBgRemoveState } from '@/store/module/bgRemove'
 import color, { IColorState } from '@/store/module/color'
 import cypress, { ICypressState } from '@/store/module/cypress'
-import design, { IDesignState } from '@/store/module/design'
-import file, { IFileState } from '@/store/module/file'
+import { IDesignState } from '@/store/module/design'
+import { IFileState } from '@/store/module/file'
 import font from '@/store/module/font'
 import fontTag, { IFontTagState } from '@/store/module/fontTag'
 import giphy from '@/store/module/giphy'
@@ -44,7 +43,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
-import brandkit, { IBrandKitState } from './module/brandkit'
+import { IBrandKitState } from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
@@ -72,6 +71,7 @@ const getDefaultState = (): IEditorState => ({
   showColorSlips: false,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
+  pinchScaleRatio: 100,
   isSettingScaleRatio: false,
   middlemostPageIndex: 0,
   currActivePageIndex: -1,
@@ -502,6 +502,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
     state.pageScaleRatio = 100
+  },
+  SET_pinchScaleRatio(state: IEditorState, ratio: number) {
+    state.pinchScaleRatio = ratio
   },
   SET_isSettingScaleRatio(state: IEditorState, isSettingScaleRatio: boolean) {
     state.isSettingScaleRatio = isSettingScaleRatio
@@ -1148,6 +1151,12 @@ const mutations: MutationTree<IEditorState> = {
         })
     }
   },
+  UPDATE_pageInitPos(state: IEditorState, data: { pageIndex: number, initPos: ICoordinate }) {
+    const { pageIndex, initPos } = data
+    const page = state.pages[pageIndex]
+    page.config.initPos.x = initPos.x
+    page.config.initPos.y = initPos.y
+  },
   UPDATE_snapUtilsIndex(state: IEditorState, index: number) {
     state.pages[index].modules.snapUtils.pageIndex = index
   },
@@ -1162,15 +1171,6 @@ const mutations: MutationTree<IEditorState> = {
     state.isLargeDesktop = generalUtils.getWidth() >= 1440
     state.windowSize.width = window.outerWidth
     state.windowSize.height = window.outerHeight
-  },
-  SET_pagePysicalSize(state: IEditorState, payload: { pageIndex: number, pageSize: ISize, pageCenterPos: ICoordinate }) {
-    const { pageIndex, pageSize, pageCenterPos } = payload
-    if (pageCenterPos) {
-      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageCenterPos, pageCenterPos)
-    }
-    if (pageSize) {
-      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageSize, pageSize)
-    }
   },
   ...imgShadowMutations,
   ADD_subLayer,

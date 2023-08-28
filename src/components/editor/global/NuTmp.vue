@@ -74,12 +74,7 @@ export default defineComponent({
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
-        height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
-        transform: `scale(${1 / this.contentScaleRatio})`,
-        transformOrigin: 'top left',
         ...this.transformStyle
-
       }
     },
     subLayerStyles(layer: ILayer) {

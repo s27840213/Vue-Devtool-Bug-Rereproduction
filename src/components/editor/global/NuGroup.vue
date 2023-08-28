@@ -1,6 +1,5 @@
 <template lang="pug">
-div(class="nu-group"
-    :style="styles()")
+div(class="nu-group")
   nu-layer(v-for="(layer,index) in config.layers"
     :key="`layer-${layer.id}`"
     :pageIndex="pageIndex"
@@ -45,16 +44,6 @@ export default defineComponent({
       default: false,
       type: Boolean
     }
-  },
-  methods: {
-    styles() {
-      return {
-        // width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
-        // height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
-        transform: `scale(${1 / this.contentScaleRatio})`,
-        transformOrigin: 'top left'
-      }
-    }
   }
 })
 </script>
@@ -63,5 +52,6 @@ export default defineComponent({
 .nu-group {
   position: absolute;
   transform-style: flat;
+  transform-origin: top left;
 }
 </style>

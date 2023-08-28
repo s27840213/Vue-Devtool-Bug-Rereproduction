@@ -131,9 +131,10 @@ export default defineComponent({
       return this.isProcessImgShadow || this.isUploadImgShadow
     },
     pageStyles(): { [index: string]: string } {
+      const _f = this.contentScaleRatio * (this.inPreview || !this.$isTouchDevice() ? 1 : this.scaleRatio * 0.01)
       return {
-        width: `${this.config.width * this.contentScaleRatio + this.margin.right}px`,
-        height: `${this.config.height * this.contentScaleRatio + this.margin.bottom}px`,
+        width: `${this.config.width * _f + this.margin.right}px`,
+        height: `${this.config.height * _f + this.margin.bottom}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
     },
@@ -144,8 +145,6 @@ export default defineComponent({
     },
     stylesWith3DPreserve(): { [index: string]: string } {
       return {
-        // width: `${this.config.width * this.contentScaleRatio}px`,
-        // height: `${this.config.height * this.contentScaleRatio}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
     },
@@ -156,8 +155,6 @@ export default defineComponent({
     contentStyles(): {[key: string]: string} {
       if (!this.config.isEnableBleed) {
         return {
-          // width: this.config.width * this.contentScaleRatio + 'px',
-          // height: this.config.height * this.contentScaleRatio + 'px',
           padding: [
             '0px',
             this.margin.right + 'px',
@@ -323,8 +320,8 @@ export default defineComponent({
 
 .content {
   position: absolute;
-  left: 0px;
-  top: 0px;
+  left: 0;
+  top: 0;
   transform-style: preserve-3d;
 }
 

@@ -578,6 +578,11 @@ class LetterBGData {
     }
   }
 
+  fixedHeadTail(name: ITextLetterBg['name']) {
+    return /(paper-tap)/
+      .test(name)
+  }
+
   isColorChangeable(href: string) {
     return /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower|-custom|star|paper-tap)/
       .test(href)

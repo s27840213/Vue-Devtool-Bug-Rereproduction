@@ -6,15 +6,20 @@ import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 
 class EditorUtils {
-  private _mobileWidth = 0
-  private _mobileHeight = 0
+  private _mobileSize = { width: 0, height: 0 }
+  private _mobileCenterPos = { x: 0, y: 0 }
+  private _mobileTopLeftPos = { x: 0, y: 0 }
 
-  get mobileWidth() {
-    return this._mobileWidth
+  get mobileSize() {
+    return this._mobileSize
   }
 
-  get mobileHeight() {
-    return this._mobileHeight
+  get mobileCenterPos() {
+    return this._mobileCenterPos
+  }
+
+  get mobileTopLeftPos() {
+    return this._mobileTopLeftPos
   }
 
   get mobileAllPageMode() {
@@ -45,12 +50,28 @@ class EditorUtils {
     return store.state.showColorSlips
   }
 
-  setMobileHW(size: { width?: number, height?: number }) {
-    if (size.width) {
-      this._mobileWidth = size.width
+  setMobilePhysicalData(data: { size?: { width: number, height: number }, centerPos?: { x: number, y: number }, pos?: { x: number, y: number } }) {
+    const { size, centerPos, pos } = data
+    if (size) {
+      this._mobileSize.width = size.width
+      this._mobileSize.height = size.height
     }
-    if (size.height) {
-      this._mobileHeight = size.height
+    if (centerPos) {
+      this._mobileCenterPos.x = centerPos.x
+      this._mobileCenterPos.y = centerPos.y
+    }
+    if (pos) {
+      this._mobileTopLeftPos.x = pos.x
+      this._mobileTopLeftPos.y = pos.y
+    }
+  }
+
+  setMobileCenterPos(pos: { x?: number, y?: number }) {
+    if (pos.x) {
+      this._mobileCenterPos.x = pos.x
+    }
+    if (pos.y) {
+      this._mobileCenterPos.y = pos.y
     }
   }
 
@@ -64,22 +85,21 @@ class EditorUtils {
       height = width / aspectRatio
     }
 
-    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight || 0
+    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
 
-    if (!this.mobileHeight || this.mobileWidth) {
-      const mobileEditor = document.getElementById('vivisticker__content')
-      // const mobileEditor = document.getElementById('mobile-editor__content')
+    if (!this.mobileSize.height || !this.mobileSize.width) {
+      const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
-        console.log(mobileEditor.clientWidth, mobileEditor.clientHeight, mobilePanelHeight)
-        console.log('width', width, 'height', height)
-        this.setMobileHW({
-          width: mobileEditor.clientWidth,
-          height: mobileEditor.clientHeight - mobilePanelHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
+        this.setMobilePhysicalData({
+          size: {
+            width: mobileEditor.clientWidth,
+            height: mobileEditor.clientHeight - mobilePanelHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
+          }
         })
       }
     }
-    const PAGE_SIZE_W = (this.mobileWidth || Number.MAX_SAFE_INTEGER) * 0.926
-    const PAGE_SIZE_H = (this.mobileHeight || Number.MAX_SAFE_INTEGER) * 0.926
+    const PAGE_SIZE_W = (this.mobileSize.width || Number.MAX_SAFE_INTEGER) * 0.926
+    const PAGE_SIZE_H = (this.mobileSize.height || Number.MAX_SAFE_INTEGER) * 0.926
 
     if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
       return Math.max(Math.min(PAGE_SIZE_W / width, PAGE_SIZE_H / height), 0.1)
@@ -94,8 +114,15 @@ class EditorUtils {
       const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
       console.warn('contentScaleRatio', contentScaleRatio)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
+      const pos = {
+        x: (editorUtils.mobileSize.width - page.width * this.contentScaleRatio) * 0.5,
+        y: (editorUtils.mobileSize.height - page.height * this.contentScaleRatio) * 0.5
+      }
+      pageUtils.updatePagePos(pageIndex, pos)
+      pageUtils.updatePageInitPos(pageIndex, pos)
       return contentScaleRatio
     }
+    return 1
   }
 
   toggleColorSlips(bool: boolean) {

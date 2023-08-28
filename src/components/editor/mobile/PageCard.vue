@@ -1,5 +1,6 @@
 <template lang="pug">
 div(class="page-card"
+    :id="`page-card_${pageIndex}`"
     :style="cardStyle"
     ref="card")
   nu-page(
@@ -107,9 +108,9 @@ export default defineComponent({
   width: 100%;
   touch-action: none;
   box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  // display: flex;
+  // align-items: center;
+  // justify-content: center;
   @include no-scrollbar;
   overflow: hidden;
   // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container

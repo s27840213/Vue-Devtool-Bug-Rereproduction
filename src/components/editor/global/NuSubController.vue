@@ -125,33 +125,38 @@ export default defineComponent({
     if (body) {
       const props = this.$props
       const layerInfo = { } as ILayerInfo
-      Object.defineProperty(layerInfo, 'pageIndex', {
-        get() {
-          return props.pageIndex
-        }
-      })
-      Object.defineProperty(layerInfo, 'layerIndex', {
-        get() {
-          return props.primaryLayerIndex
-        }
-      })
-      Object.defineProperty(layerInfo, 'subLayerIdx', {
-        get() {
-          return props.layerIndex
+      Object.defineProperties(layerInfo, {
+        pageIndex: {
+          get() {
+            return props.pageIndex
+          }
+        },
+        layerIndex: {
+          get() {
+            return props.primaryLayerIndex
+          }
+        },
+        subLayerIdx: {
+          get() {
+            return props.layerIndex
+          }
         }
       })
       const _config = {
         config: { active: false },
         primaryLayer: {}
       } as { config: ILayer, primaryLayer: ITmp | IGroup | IFrame }
-      Object.defineProperty(_config, 'config', {
-        get() {
-          return props.config
-        }
-      })
-      Object.defineProperty(_config, 'primaryLayer', {
-        get() {
-          return props.primaryLayer
+
+      Object.defineProperties(_config, {
+        config: {
+          get() {
+            return props.config
+          }
+        },
+        primaryLayer: {
+          get() {
+            return props.primaryLayer
+          }
         }
       })
       this.subLayerCtrlUtils = new SubCtrlUtils({
@@ -294,11 +299,12 @@ export default defineComponent({
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
     textWrapperStyle() {
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01})`,
+        transform: `scaleX(${this.config.styles.scale * _f}) scaleY(${this.config.styles.scale * _f})`,
         textAlign: this.config.styles.align,
         ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         ...(this.isDraggingCursor ? { zIndex: 100 } : {})
