@@ -2,7 +2,6 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
-import { ISize } from '@/interfaces/math'
 import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
@@ -70,6 +69,7 @@ const getDefaultState = (): IEditorState => ({
   showColorSlips: false,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
+  pinchScaleRatio: 100,
   isSettingScaleRatio: false,
   middlemostPageIndex: 0,
   currActivePageIndex: -1,
@@ -494,6 +494,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
     state.pageScaleRatio = ratio
+  },
+  SET_pinchScaleRatio(state: IEditorState, ratio: number) {
+    state.pinchScaleRatio = ratio
   },
   SET_isSettingScaleRatio(state: IEditorState, isSettingScaleRatio: boolean) {
     state.isSettingScaleRatio = isSettingScaleRatio
@@ -1102,21 +1105,18 @@ const mutations: MutationTree<IEditorState> = {
         }
       })
   },
+  UPDATE_pageInitPos(state: IEditorState, data: { pageIndex: number, initPos: ICoordinate }) {
+    const { pageIndex, initPos } = data
+    const page = state.pages[pageIndex]
+    page.config.initPos.x = initPos.x
+    page.config.initPos.y = initPos.y
+  },
   UPDATE_snapUtilsIndex(state: IEditorState, index: number) {
     state.pages[index].modules.snapUtils.pageIndex = index
   },
   SET_contentScaleRatio4Page(state: IEditorState, payload: { pageIndex: number, contentScaleRatio: number }) {
     const { pageIndex, contentScaleRatio } = payload
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
-  },
-  SET_pagePysicalSize(state: IEditorState, payload: { pageIndex: number, pageSize: ISize, pageCenterPos: ICoordinate }) {
-    const { pageIndex, pageSize, pageCenterPos } = payload
-    if (pageCenterPos) {
-      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageCenterPos, pageCenterPos)
-    }
-    if (pageSize) {
-      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageSize, pageSize)
-    }
   },
   ...imgShadowMutations,
   ADD_subLayer,

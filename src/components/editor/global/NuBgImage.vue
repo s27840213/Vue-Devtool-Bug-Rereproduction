@@ -48,13 +48,14 @@ import cssConverter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import { AxiosError } from 'axios'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
@@ -207,11 +208,12 @@ export default defineComponent({
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
       const x = image.posX - (aspectRatio < 1 ? offset : offset * aspectRatio)
       const y = image.posY - (aspectRatio > 1 ? offset : offset / aspectRatio)
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return {
-        width: width * this.contentScaleRatio,
-        height: height * this.contentScaleRatio,
-        x: x * this.contentScaleRatio,
-        y: y * this.contentScaleRatio
+        width: width * _f,
+        height: height * _f,
+        x: x * _f,
+        y: y * _f
       }
     },
     mainStyles(): any {
@@ -237,10 +239,11 @@ export default defineComponent({
 
       const elms = []
       if (adjust.halation) {
+        const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
         const position = {
-          width: width / 2 * this.contentScaleRatio,
-          x: width / 2 * this.contentScaleRatio,
-          y: height / 2 * this.contentScaleRatio
+          width: width / 2 * _f,
+          x: width / 2 * _f,
+          y: height / 2 * _f
         }
         elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
       }
@@ -414,6 +417,7 @@ export default defineComponent({
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
+      groupUtils.deselect()
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.isBlurImg) return
@@ -489,6 +493,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .nu-background-image {
   position: absolute;
+  // width: 100%;
+  // height: 100%;
   top: 0;
   right: 0;
   bottom: 0;
