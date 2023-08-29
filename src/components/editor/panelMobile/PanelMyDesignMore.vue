@@ -29,6 +29,13 @@ div(class="panel-my-design-more")
                   iconWidth="18px"
                   iconColor="gray-2")
       div(class="panel-my-design-more__option-title") {{ $t('NN0034') }}
+    div(class="panel-my-design-more__option"
+        @click.prevent.stop="handleReport")
+      div(class="panel-my-design-more__option-icon")
+        svg-icon(iconName="error"
+                  iconWidth="22px"
+                  iconColor="gray-2")
+      div(class="panel-my-design-more__option-title") {{ $t('STK0088') }}
 </template>
 
 <script lang="ts">
@@ -37,6 +44,7 @@ import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -145,6 +153,19 @@ export default defineComponent({
             color: '#474A57',
             background: '#D9DBE1'
           }
+        }
+      )
+    },
+    async handleReport() {
+      vivistickerUtils.setLoadingOverlay([this.$t('STK0087')])
+      const data = await vivistickerUtils.fetchMyDesign(this.myDesignBuffer)
+      await uploadUtils.uploadReportedDesign(data, { id: this.myDesignBuffer.id })
+      vivistickerUtils.setLoadingOverlayShow(false)
+      modalUtils.setModalInfo(
+        `${this.$t('STK0089')}`,
+        [`${this.$t('STK0090')}`],
+        {
+          msg: `${this.$t('STK0019')}`
         }
       )
     },
