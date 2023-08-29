@@ -1,7 +1,6 @@
 <template lang="pug">
 div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"
   :class="!isPinchInitialized ? 'flex-center' :  ''"
-  @pointerdown="moveStart"
   @pinch="pinchHandler")
   div(v-if="isProcessing" class="flex-center full-size")
     div(class="panel-remove-bg__preview-section")
@@ -149,11 +148,6 @@ export default defineComponent({
     setScaleRatio(val: number) {
       this.bgRemoveScaleRatio = val
     },
-    moveStart(evt: PointerEvent) {
-      if (this.movingMode && !this.isPinching) {
-        bgRemoveMoveHandler.moveStart(evt)
-      }
-    },
     pinchHandler(event: AnyTouchEvent) {
       if (!this.movingMode) return
       if (!this.inBgRemoveMode) return
@@ -263,9 +257,10 @@ export default defineComponent({
               console.log('pos x, y:', this.initBgPos.x - sizeDiff.width * this.translationRatio.x, this.initBgPos.y - sizeDiff.height * this.translationRatio.y)
               this.updatePinchState({
                 scale: this.bgRemoveScaleRatio,
-                x: this.pinch.x - sizeDiff.width * this.translationRatio.x,
-                y: this.pinch.y - sizeDiff.height * this.translationRatio.y
+                // x: this.pinch.x - sizeDiff.width * this.translationRatio.x,
+                // y: this.pinch.y - sizeDiff.height * this.translationRatio.y
               })
+              bgRemoveMoveHandler.updateBgPos(this.pinch.x - sizeDiff.width * this.translationRatio.x, this.pinch.y - sizeDiff.height * this.translationRatio.y)
 
               /**
                * for center scroll caculation

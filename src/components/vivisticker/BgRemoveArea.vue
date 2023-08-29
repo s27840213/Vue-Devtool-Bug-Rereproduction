@@ -9,7 +9,7 @@ div(class="bg-remove-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}"
       :ref="'scaleArea'")
-    canvas(class="bg-remove-area__canvas" ref="canvas" :cy-ready="cyReady")
+    canvas(class="bg-remove-area__canvas" ref="canvas" :cy-ready="cyReady" @pointerdown="moveStart")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
@@ -24,6 +24,7 @@ div(class="bg-remove-area"
 
 <script lang="ts">
 import { IBgRemoveInfo } from '@/interfaces/image'
+import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
 import logUtils from '@/utils/logUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -193,7 +194,8 @@ export default defineComponent({
       inFirstStep: 'bgRemove/inFirstStep',
       inGestureMode: 'getInGestureToolMode',
       contentScaleRatio: 'getContentScaleRatio',
-      useMobileEditor: 'getUseMobileEditor'
+      useMobileEditor: 'getUseMobileEditor',
+      isPinching: 'bgRemove/getIsPinching'
     }),
     size(): { width: number, height: number } {
       return {
@@ -269,9 +271,12 @@ export default defineComponent({
             physicalCenterPos: {
               x: rect.left + rect.width * 0.5,
               y: rect.top + rect.height * 0.5
+            },
+            containerSize: {
+              width: containerWidth,
+              height: containerHeight
             }
           })
-          console.log(rect.left + rect.width * 0.5, rect.top + rect.height * 0.5)
         }
       }
     },
@@ -445,6 +450,11 @@ export default defineComponent({
       })
 
       this.setModifiedFlag(true)
+    },
+    moveStart(evt: PointerEvent) {
+      if (this.movingMode && !this.isPinching) {
+        bgRemoveMoveHandler.moveStart(evt)
+      }
     },
     // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
