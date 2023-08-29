@@ -29,13 +29,13 @@ div(class="panel-my-design-more")
                   iconWidth="18px"
                   iconColor="gray-2")
       div(class="panel-my-design-more__option-title") {{ $t('NN0034') }}
-    div(class="panel-my-design-more__option"
-        @click.prevent.stop="handleReport")
-      div(class="panel-my-design-more__option-icon")
-        svg-icon(iconName="error"
-                  iconWidth="22px"
-                  iconColor="gray-2")
-      div(class="panel-my-design-more__option-title") {{ $t('STK0088') }}
+    //- div(class="panel-my-design-more__option"
+    //-     @click.prevent.stop="handleReport")
+    //-   div(class="panel-my-design-more__option-icon")
+    //-     svg-icon(iconName="error"
+    //-               iconWidth="22px"
+    //-               iconColor="gray-2")
+    //-   div(class="panel-my-design-more__option-title") {{ $t('STK0088') }}
 </template>
 
 <script lang="ts">
