@@ -258,13 +258,20 @@ export default defineComponent({
           }
           const x = (containerWidth - initSize.width) * 0.5
           const y = (containerHeight - initSize.height) * 0.5
+          const rect = container.getBoundingClientRect()
           this.$store.commit('bgRemove/UPDATE_pinchState', {
             initScale: this.fitScaleRatio,
+            scale: this.fitScaleRatio,
             initPos: { x, y },
             initSize,
             x,
-            y
+            y,
+            physicalCenterPos: {
+              x: rect.left + rect.width * 0.5,
+              y: rect.top + rect.height * 0.5
+            }
           })
+          console.log(rect.left + rect.width * 0.5, rect.top + rect.height * 0.5)
         }
       }
     },

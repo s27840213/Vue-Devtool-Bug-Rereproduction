@@ -1,4 +1,5 @@
 import { IBgRemoveInfo } from '@/interfaces/image'
+import { ISize } from '@/interfaces/math'
 import store from '@/store'
 import eventUtils from '@/utils/eventUtils'
 import mouseUtils from '@/utils/mouseUtils'
@@ -8,8 +9,6 @@ const MAX_STEP_COUNT = 20
 
 export interface IBgRemovePinchState {
   isPinchIng: boolean
-  x: number,
-  y: number,
   initPos: {
     x: number,
     y: number
@@ -20,6 +19,12 @@ export interface IBgRemovePinchState {
   }
   initScale: number,
   scale: number // scale range from 0 ~ 1
+  x: number,
+  y: number,
+  physicalCenterPos: {
+    x: number,
+    y: number
+  }
 }
 
 export interface IBgRemoveState {
@@ -96,12 +101,20 @@ const getDefaultState = (): IBgRemoveState => ({
       height: 0
     },
     initScale: -1,
-    scale: -1
+    scale: -1,
+    physicalCenterPos: { x: 0, y: 0 }
   }
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IBgRemoveState, unknown> = {
+  getBgCurrSize(state: IBgRemoveState): ISize {
+    const scaleIncrement = state.pinch.scale / state.pinch.initScale
+    return {
+      width: state.pinch.initSize.width * scaleIncrement,
+      height: state.pinch.initSize.height * scaleIncrement
+    }
+  },
   getIsPinching(state: IBgRemoveState) {
     return state.pinch.isPinchIng
   },
@@ -305,9 +318,12 @@ class BgRemoveMoveHandler {
     return state.pinch
   }
 
+  private get currSize () {
+    return store.getters['bgRemove/getBgCurrSize']
+  }
+
   private initBgPos: { x: number, y: number }
   private initEvtPos: { x: number, y: number }
-  private currSize: { w: number, h: number }
   private base: { x: number, y: number }
   private _moving = null as unknown
   private _moveEnd = null as unknown
@@ -315,7 +331,6 @@ class BgRemoveMoveHandler {
   constructor() {
     this.initBgPos = { x: -1, y: -1 }
     this.initEvtPos = { x: -1, y: -1 }
-    this.currSize = { w: -1, h: -1 }
     this.base = { x: 0, y: 0 }
   }
 
@@ -325,17 +340,18 @@ class BgRemoveMoveHandler {
     this.initBgPos.y = this.pinch.y
     this.initEvtPos = mouseUtils.getMouseAbsPoint(evt)
 
-    const scaleIncrement = this.pinch.scale / this.pinch.initScale
-    // current bg-remove-area size
-    this.currSize = {
-      w: this.pinch.initSize.width * scaleIncrement,
-      h: this.pinch.initSize.height * scaleIncrement
-    }
+    // const scaleIncrement = this.pinch.scale / this.pinch.initScale
+    // // current bg-remove-area size
+    // this.currSize = {
+    //   w: this.pinch.initSize.width * scaleIncrement,
+    //   h: this.pinch.initSize.height * scaleIncrement
+    // }
+
     // baseline coordinates for current size,
     // which means at the baseline, bg-remove-area would be placed at center
     this.base = {
-      x: -(this.currSize.w - this.pinch.initSize.width) * 0.5 + this.pinch.initPos.x,
-      y: -(this.currSize.h - this.pinch.initSize.height) * 0.5 + this.pinch.initPos.y,
+      x: -(this.currSize.width - this.pinch.initSize.width) * 0.5 + this.pinch.initPos.x,
+      y: -(this.currSize.height - this.pinch.initSize.height) * 0.5 + this.pinch.initPos.y,
     }
 
     this._moving = this.moving.bind(this)
@@ -356,25 +372,26 @@ class BgRemoveMoveHandler {
     }
     const isReachRightEdge = this.pinch.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
     const isReachLeftEdge = this.pinch.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
-    const isReachTopEdge = this.pinch.y >= 0 && offsetPos.y > 0 && diff.y > limitRange.y
-    const isReachBottomEdge = this.pinch.y < 0 && offsetPos.y < 0 && diff.y > limitRange.y
+    const isReachTopEdge = this.pinch.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
+    const isReachBottomEdge = this.pinch.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
 
     let { x, y } = this.pinch
     if (isReachRightEdge || isReachLeftEdge) {
-      x = isReachRightEdge ? this.pinch.initSize.width - this.currSize.w + this.pinch.initPos.x * 2 : 0
+      x = isReachRightEdge ? this.pinch.initSize.width - this.currSize.width + this.pinch.initPos.x * 2 : 0
     } else {
       x = this.initBgPos.x + offsetPos.x
     }
     if (isReachTopEdge || isReachBottomEdge) {
-      y = isReachBottomEdge ? this.pinch.initSize.height - this.currSize.h + this.pinch.initPos.y * 2 : 0
+      y = isReachTopEdge ? this.pinch.initSize.height - this.currSize.height + this.pinch.initPos.y * 2 : 0
+      // y = isReachBottomEdge ? this.pinch.initSize.height - this.currSize.height + this.pinch.initPos.y * 2 : 0
     } else {
       y = this.initBgPos.y + offsetPos.y
     }
+    console.log('this.pinch.isPinchIng in moving', this.pinch.isPinchIng)
     this.updateBgPos(x, y)
   }
 
   private moveEnd(evt: PointerEvent) {
-    console.log('bg move end')
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
   }

@@ -30,6 +30,7 @@ div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"
 /* eslint-disable */
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
+import { ICoordinate } from '@/interfaces/frame'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -68,6 +69,9 @@ export default defineComponent({
       maxRatio: 2,
       isPanning: false,
       initPinchPos: null as null | { x: number, y: number },
+      initBgPos: { x: 0, y: 0 },
+      translationRatio: null as null | ICoordinate,
+      translationRatio_ori_pos: { x: 0, y: 0 },
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
       imgAspectRatio: 1,
@@ -98,7 +102,9 @@ export default defineComponent({
       previewImage: 'bgRemove/getPreviewImage',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       movingMode: 'bgRemove/getMovingMode',
-      isPinching: 'bgRemove/getIsPinching'
+      isPinching: 'bgRemove/getIsPinching',
+      pinch: 'bgRemove/getPinchState',
+      bgCurrSize:'bgRemove/getBgCurrSize'
     }),
     fitScaleRatio(): number {
       const { width, height } = this.containerWH
@@ -171,6 +177,7 @@ export default defineComponent({
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
          */
         case 'start': {
+          console.warn('pinch start')
           this.setIsPinchIng(true)
           this.tmpScaleRatio = this.bgRemoveScaleRatio
           this.setInGestureMode(true)
@@ -186,13 +193,19 @@ export default defineComponent({
             width: 1600 * this.bgRemoveScaleRatio,
             height: imgHeight * this.bgRemoveScaleRatio
           }
+
+          // pinch init state setting
+          this.initBgPos = { x: this.pinch.x, y: this.pinch.y }
+          this.initPinchPos = { x: event.x, y: event.y }
           break
         }
         case 'move': {
           this.setIsPinchIng(true)
           this.isPanning = true
           if (!this.initPinchPos) {
+            this.tmpScaleRatio = this.bgRemoveScaleRatio
             this.initPinchPos = { x: event.x, y: event.y }
+            this.initBgPos = { x: this.pinch.x, y: this.pinch.y }
           }
 
           if (event.pointLength === 2) {
@@ -207,42 +220,88 @@ export default defineComponent({
               } else {
                 this.bgRemoveScaleRatio = ratio
               }
-              this.updatePinchState({ scale: this.bgRemoveScaleRatio })
+
+              // pinch moving translation compensation
+              if (!this.translationRatio) {
+                // translation ratio for current-window-pos (not for pinch). Details read doc.
+                const translationRatio_ori_pos = {
+                  x: (this.pinch.initPos.x - this.initBgPos.x) / this.bgCurrSize.width,
+                  y: (this.pinch.initPos.y - this.initBgPos.y) / this.bgCurrSize.height
+                }
+                this.translationRatio_ori_pos = translationRatio_ori_pos
+
+                // actual translation ratio equals to current pinch-in-current-window plus current-window-pos
+                this.translationRatio = {
+                  x: ((this.initPinchPos.x - this.pinch.physicalCenterPos.x) / this.bgCurrSize.width + 0.5) / (this.bgCurrSize.width / this.pinch.initSize.width) + translationRatio_ori_pos.x,
+                  y: ((this.initPinchPos.y - this.pinch.physicalCenterPos.y) / this.bgCurrSize.height + 0.5) / (this.bgCurrSize.height / this.pinch.initSize.height) + translationRatio_ori_pos.y
+                }
+                console.log('tanslation calc x', this.initPinchPos.x, this.pinch.physicalCenterPos.x, this.bgCurrSize.width, this.bgCurrSize.width / this.pinch.initSize.width)
+                console.log('tanslation calc y', this.initPinchPos.y, this.pinch.physicalCenterPos.y, this.bgCurrSize.height, this.bgCurrSize.height / this.pinch.initSize.height)
+                console.log('this.initBgPos', this.initBgPos, this.pinch.initPos)
+              }
+              console.warn('this.translationRatio', this.translationRatio, this.translationRatio_ori_pos)
+
+              // size difference via pinching
+              const scalingRatioDiff = this.bgRemoveScaleRatio / this.pinch.scale - 1
+              console.log('scale', this.bgRemoveScaleRatio, this.pinch.scale, this.pinch.physicalCenterPos)
+              const sizeDiff = {
+                width: scalingRatioDiff * this.bgCurrSize.width,
+                height: scalingRatioDiff * this.bgCurrSize.height,
+              }
+
+              // pos difference via moving pinching pos
+              // const movingTraslate = {
+              //   x: (e.x - this.initPinchPos.x),
+              //   y: (e.y - this.initPinchPos.y)
+              // }
+
+              // pageUtils.updatePagePos(layerUtils.pageIndex, {
+              //   x: this.initPagePos.x - sizeDiff.width * this.translationRatio.x + movingTraslate.x,
+              //   y: this.initPagePos.y - sizeDiff.height * this.translationRatio.y + movingTraslate.y
+              // })
+              console.log('pos', this.initBgPos.x, sizeDiff.width, sizeDiff.width * this.translationRatio.x)
+              console.log('pos x, y:', this.initBgPos.x - sizeDiff.width * this.translationRatio.x, this.initBgPos.y - sizeDiff.height * this.translationRatio.y)
+              this.updatePinchState({
+                scale: this.bgRemoveScaleRatio,
+                x: this.pinch.x - sizeDiff.width * this.translationRatio.x,
+                y: this.pinch.y - sizeDiff.height * this.translationRatio.y
+              })
 
               /**
                * for center scroll caculation
                */
-
-              if (this.rmSection) {
-                const scrollCenterX = (2 * this.rmSection.scrollLeft + this.rmSection.clientWidth)
-                const scrollCenterY = (2 * this.rmSection.scrollTop + this.rmSection.clientHeight)
-                const oldScrollWidth = this.rmSection.scrollWidth
-                const oldScrollHeight = this.rmSection.scrollHeight
-                this.$nextTick(() => {
-                  if (this.rmSection) {
-                    const rmSecton = this.$refs.rmSection as HTMLElement
-                    rmSecton.scrollLeft = (scrollCenterX * rmSecton.scrollWidth / oldScrollWidth - rmSecton.clientWidth) / 2
-                    rmSecton.scrollTop = (scrollCenterY * rmSecton.scrollHeight / oldScrollHeight - rmSecton.clientHeight) / 2
-                  }
-                })
-              }
+              // if (this.rmSection) {
+              //   const scrollCenterX = (2 * this.rmSection.scrollLeft + this.rmSection.clientWidth)
+              //   const scrollCenterY = (2 * this.rmSection.scrollTop + this.rmSection.clientHeight)
+              //   const oldScrollWidth = this.rmSection.scrollWidth
+              //   const oldScrollHeight = this.rmSection.scrollHeight
+              //   this.$nextTick(() => {
+              //     if (this.rmSection) {
+              //       const rmSecton = this.$refs.rmSection as HTMLElement
+              //       rmSecton.scrollLeft = (scrollCenterX * rmSecton.scrollWidth / oldScrollWidth - rmSecton.clientWidth) / 2
+              //       rmSecton.scrollTop = (scrollCenterY * rmSecton.scrollHeight / oldScrollHeight - rmSecton.clientHeight) / 2
+              //     }
+              //   })
+              // }
             } else {
               // panning
-              this.$nextTick(() => {
-                if (this.rmSection) {
-                  this.rmSection.scrollLeft = this.rmSection.scrollLeft - event.deltaX * 2
-                  this.rmSection.scrollTop = this.rmSection.scrollTop - event.deltaY * 2
-                }
-              })
+              // this.$nextTick(() => {
+              //   if (this.rmSection) {
+              //     this.rmSection.scrollLeft = this.rmSection.scrollLeft - event.deltaX * 2
+              //     this.rmSection.scrollTop = this.rmSection.scrollTop - event.deltaY * 2
+              //   }
+              // })
             }
           }
           break
         }
 
         case 'end': {
+          console.warn('pinch end')
           this.setIsPinchIng(false)
           this.isPanning = false
           this.initPinchPos = null
+          this.translationRatio = null
           this.rmSection = null
           this.setInGestureMode(false)
           break
@@ -250,11 +309,8 @@ export default defineComponent({
       }
     },
     setIsPinchIng(bool: boolean) {
-      console.log('setIsPinchIng', bool)
       this.$store.commit('bgRemove/UPDATE_pinchState', { isPinchIng: bool })
-    },
-    updatePinchPos(pos: { x: number, y: number }) {
-      this.$store.commit('bgRemove/UPDATE_pincState', { x: pos.x, y: pos.y })
+      console.log('this.pinch.isPinchIng', this.$store.state.bgRemove.pinch.isPinchIng)
     }
   }
 })
