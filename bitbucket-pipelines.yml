@@ -316,10 +316,12 @@ pipelines:
               name: "deploy charmix to rd"
               deployment: rd
               trigger: manual
+              # We could trigger this step only if we change the charmix or shared packages settings
               condition:
                 changesets:
                   includePaths:
                     - "projects/charmix/**"
+                    - "packages/**"
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
