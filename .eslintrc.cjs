@@ -5,7 +5,6 @@ require('@rushstack/eslint-patch/modern-module-resolution')
 // and be build/serve command when using vue-cli
 // So this function will return off when using vue-cli
 function offInCommand(value) {
-  console.log('offInCommand', process.env.npm_lifecycle_script)
   return process.env.npm_lifecycle_script ? 'off' : value
 }
 
@@ -40,7 +39,7 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 0,
     'multiline-ternary': 'off',
     'vue/multi-word-component-names': 'off',
-    'vue/no-ref-object-reactivity-loss': 'on',
+    'vue/no-ref-object-reactivity-loss': 'error',
     'comma-dangle': ['error', 'only-multiline'],
     'cypress/no-unnecessary-waiting': 'off',
 
