@@ -1,0 +1,1308 @@
+swagger: "2.0"
+info:
+  version: "20220210"
+  title: apiTemplate
+host: api.vivipic.com
+schemes:
+  - https
+paths:
+  /add-design:
+    post:
+      description: 記錄使用者選用的設計
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: addDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/addDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/apiCommonResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /export-template:
+    post:
+      description: 輸出design
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: exportTemplateInput
+          required: true
+          schema:
+            $ref: "#/definitions/exportTemplateInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/exportTemplateOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /fb-login:
+    post:
+      description: fb登入
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: fbLoginInput
+          required: true
+          schema:
+            $ref: "#/definitions/fbLoginInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/loginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /google-login:
+    post:
+      description: google登入
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: googleLoginInput
+          required: true
+          schema:
+            $ref: "#/definitions/googleLoginInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/loginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /group-design:
+    post:
+      description: 設定模板群組的內容或封面
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: groupDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/groupDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/groupDesignOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-asset:
+    post:
+      description: 列出所有使用者上傳之檔案
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listAssetInput
+          required: true
+          schema:
+            $ref: "#/definitions/listAssetInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listAssetOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-design:
+    get:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          type: string
+        - name: theme
+          in: query
+          required: false
+          type: string
+        - name: list_all
+          in: query
+          required: false
+          type: string
+        - name: token
+          in: query
+          required: true
+          type: string
+        - name: type
+          in: query
+          required: true
+          type: string
+        - name: group_id
+          in: query
+          required: false
+          type: string
+        - name: font_list
+          in: query
+          required: false
+          type: string
+        - name: page_index
+          in: query
+          required: false
+          type: string
+        - name: locale
+          in: query
+          required: true
+          type: string
+        - name: all_theme
+          in: query
+          required: false
+          type: string
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+    post:
+      description: 取得各種設計(background/font/svg/template/text)列表
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/listDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listDesignOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-lib-photo:
+    post:
+      description: 取得圖庫(unsplash or pexels)照片列表
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listLibPhotoInput
+          required: true
+          schema:
+            $ref: "#/definitions/listLibPhotoInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listDesignOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /login:
+    post:
+      description: 進入app時呼叫，取得上傳/下載之url
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: loginInput
+          required: true
+          schema:
+            $ref: "#/definitions/loginInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/loginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /login2:
+    post:
+      consumes:
+        - text/plain
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: loginInput
+          required: true
+          schema:
+            $ref: "#/definitions/loginInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/loginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /put-asset-design:
+    post:
+      description: 將design寫入資料庫或產生縮圖
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: putAssetDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/putAssetDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/apiCommonResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /register:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: registerInput
+          required: true
+          schema:
+            $ref: "#/definitions/registerInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/apiCommonResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /remove-bg:
+    post:
+      description: 圖片去背
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: removeBgInput
+          required: true
+          schema:
+            $ref: "#/definitions/removeBgInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/removeBgOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /reprocess-design:
+    post:
+      description: 重新處理Cyberduck上傳之檔案
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: reprocessDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/reprocessDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/apiCommonResponse"
+  /send-vcode:
+    post:
+      description: 傳送驗證碼
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: sendVcodeInput
+          required: true
+          schema:
+            $ref: "#/definitions/sendVcodeInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/apiCommonResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /update-asset:
+    post:
+      description: 更改使用者個人檔案的資料結構
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: updateAssetInput
+          required: true
+          schema:
+            $ref: "#/definitions/updateAssetInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/updateAssetOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /update-design:
+    post:
+      description: 更新或取得素材資訊
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: updateDesignInput
+          required: true
+          schema:
+            $ref: "#/definitions/updateDesignInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/updateDesignOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /update-user:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: updateUserInput
+          required: true
+          schema:
+            $ref: "#/definitions/updateUserInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/apiCommonResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /verify-vcode:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: verifyVcodeInput
+          required: true
+          schema:
+            $ref: "#/definitions/verifyVcodeInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/verifyVcodeOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /list-brand:
+    post:
+      description: 列出特定 team 擁有的所有 brand
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listBrandInput
+          required: true
+          schema:
+            $ref: "#/definitions/listBrandInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listBrandOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+definitions:
+  removeBgInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+          - src_obj
+          - team_id
+        properties:
+          src_obj:
+            type: string
+            description: json string for srcObj
+          locale:
+            type: string
+            description: locale
+          team_id:
+            type: string
+            description: user team id
+          aspect:
+            type: number
+            description: aspect ratio for 3rd party images (0 for w >= h, 1 for w < h)
+  uploadMap:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Root url for upload files.
+      fields:
+        type: object
+        description: Append all fields to upload form.
+        properties: {}
+      path:
+        type: string
+        description: Allowed path for upload.
+  listAssetOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            properties:
+              photo:
+                $ref: "#/definitions/assetMap"
+              video:
+                $ref: "#/definitions/assetMap"
+              font:
+                $ref: "#/definitions/assetMap"
+              design:
+                $ref: "#/definitions/assetMap"
+            required:
+              - design
+              - font
+              - photo
+              - video
+  registerInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - meta
+        properties:
+          meta:
+            type: string
+            description: meta data
+  updateDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: string
+            description: json string for design info
+  removeBgOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          url:
+            type: string
+            description: "url for polling json. The polling json has the following keys:
+              flag indicates export result (0 for success, 1 for fail), progress
+              indicates the removing background progress, url for the presigned
+              url map of the processed image, data for the full data of the
+              processed image."
+  sendVcodeInput:
+    type: object
+    required:
+      - account
+      - register
+      - vcode_only
+    properties:
+      token:
+        type: string
+        description: user token
+      uname:
+        type: string
+        description: user name
+      account:
+        type: string
+        description: user account
+      upass:
+        type: string
+        description: user password
+      register:
+        type: string
+        description: register flag
+      vcode_only:
+        type: string
+        description: vcode only flag
+      type:
+        type: number
+        description: type
+      locale:
+        type: string
+        description: locale
+  assetMap:
+    type: object
+    properties:
+      title:
+        type: string
+        description: Category title for assets
+      content:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Asset id
+            file_name:
+              type: string
+              description: File name for asset, for display purpose
+            file_ext:
+              type: string
+              description: File extension for asset
+    description: To access the original file of the asset, the url is
+      ${dl_url}/${id}/original
+  loginOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              user_name: name of user
+
+              user_id: user id, as metadata for upload
+
+              token: token (will be refreshed if about to expire)
+
+              design_type_map: key as design type id, value as design type string
+
+              download_url: Url for access private files in S3. Replace wildcard (*) in url by object key.
+
+              upload_map: Map for uploading files to path in private bucket
+
+              upload_admin_map: Map for uploading files to path in public bucket.
+
+              design_type_map: Map for design type id (number) to design type name (string)
+
+              role: 0 for admin, 1 for normal user
+
+              ver_uni: universal version for cache control 
+
+              How to upload asset file:
+
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/asset/${assetType}/${assetId}/original`. The assetType can be 'image', 'font', or 'design'. The assetId is generated in client-side, with the format of 15-digit number 'YYMMDDHHmmssiii' (YY: current year - 2000, MM: month in 2-digit, D: date in 2-digit, H: hour from 00 to 23, mm: minute, ss: second, iii: millisecond) appended with 8-digit alphanumerical (0-9a-zA-Z) random characters.
+
+              3. Append key with name as 'Content-Disposition' and value as `attachment; filename*=UTF-8''${encodeURIComponent(localFileNameWithExtension)}`. For design file, the value of 'Content-Disposition' can be empty string (for which the original should be json file, not for download purpose).
+
+              4. Append key with name as 'x-amz-meta-tn' and value as user_id provided in response
+
+              5. Append key with name as 'file' and value as the File Object of the selected file or Blob
+
+              6. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+               How to upload temporary edit json file:
+              1. Create new FormData() and append all key-value pairs in uploadMap.fields to it
+
+              2. Append key with name as 'key' and value as `${uploadMap.path}/edit/temp.json`.
+
+              3. Append key with name as 'Content-Disposition' and value as empty string
+
+              4. Append key with name as 'x-amz-meta-tn' and value as user_id provided in response
+
+              5. Append key with name as 'file' and value as the File Object of the json
+
+              5. Post the FormData by XMLHttpRequest with the url as uploadMap.url
+            properties:
+              user_name:
+                type: string
+              user_id:
+                type: string
+              token:
+                type: string
+              design_type_map:
+                type: object
+                properties: {}
+              download_url:
+                type: string
+              upload_map:
+                $ref: "#/definitions/uploadMap"
+              upload_admin_map:
+                $ref: "#/definitions/uploadMap"
+              role:
+                type: number
+              ver_uni:
+                type: number
+            required:
+              - design_type_map
+              - download_url
+              - role
+              - token
+              - upload_map
+              - user_id
+              - user_name
+              - ver_uni
+  Empty:
+    type: object
+    title: Empty Schema
+  verifyVcodeOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          token:
+            type: string
+            description: token
+          expire_time:
+            type: string
+            description: expire time
+  apiCommonInput:
+    type: object
+    required:
+      - token
+    properties:
+      token:
+        type: string
+        description: |-
+          User token.
+          Allowed characters: 0-9a-zA-Z.
+  exportTemplateOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          url:
+            type: string
+            description: "url for polling json. The polling json has two keys: flag
+              indicates export result (0 for success, 1 for fail), and url
+              indicates the url for export result (zip or pdf)."
+  reprocessDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - path
+        properties:
+          path:
+            type: string
+            description: path of design files to be re-processed
+  updateAssetInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+          - team_id
+          - type
+          - update_type
+        properties:
+          locale:
+            type: string
+            description: user locale
+          team_id:
+            type: string
+            description: user team id
+          type:
+            type: string
+            description: asset type (image, font, or design)
+          update_type:
+            type: string
+            description: update method (create, copy, move, rename, delete, favor)
+          src_asset:
+            type: string
+            description: |-
+              asset index for copy and rename
+              asset index list separated by comma for move, delete, and favor
+          src_folder:
+            type: string
+            description: |-
+              folder name for create
+              folder id for move and rename
+              folder list separated by comma for delete
+          target:
+            type: string
+            description: |-
+              path for create and move
+              new name for rename
+              0 (recover), 1 (delete), and 2 (force delete) for delete
+              0 (no favor) and 1 (favor) for favor
+  exportTemplateInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - export_id
+          - format
+          - team_id
+        properties:
+          export_id:
+            type: string
+            description: export id generated by app
+          team_id:
+            type: string
+            description: team id for user
+          format:
+            type: string
+            description: "export format: png, jpg, or pdf"
+          quality:
+            type: number
+            description: jpg quality (0-100), default value 80
+          page_index:
+            type: string
+            description: "empty (default) to export all pages, zero-based indexes separated
+              by comma for pages to be exported, ex: 0,1,5"
+          compress:
+            type: number
+            description: 0 (default) for no png compression, 1 for png compression
+          omit_background:
+            type: number
+            description: 0 (default) for keeping png background, 1 for omitting png
+              background
+          scale:
+            type: number
+            description: 1 (default) for scaling, accepting floating number
+          pdf_quality:
+            type: number
+            description: 0 (default) for normal pdf quality, 1 for higher pdf quality
+          merge:
+            type: number
+            description: ecomm only. 0 (default) for not merge, 1 for merge.
+          split_size:
+            type: number
+            description: ecomm only. max. height for output image.
+  apiCommonResponse:
+    type: object
+    required:
+      - flag
+    properties:
+      flag:
+        type: number
+        description: "0: success, 1: fail, 2: token invalid"
+      msg:
+        type: string
+        description: error message
+  updateAssetOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: folder item for create, asset item for copy, recover info in
+              data.msg for recover from delete
+            properties: {}
+  groupDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        properties:
+          update:
+            type: number
+            description: "update type: 0 for create new group, 1 for update group list, 2
+              for update group cover"
+          list:
+            type: string
+            description: Template id list, separate by comma (,). Necessary for update = 0
+              and 1
+          cover:
+            type: string
+            description: Cover type and id as ${cover_type}:${cover_id} (separate by :).
+              Necessary for update = 2
+          group_id:
+            type: string
+            description: Current group id. Necessary for update = 1 and 2
+          ecomm:
+            type: number
+            description: 0 for normal group, 1 for 電商詳情 group
+  listDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          data:
+            type: object
+            description: >-
+              
+              host: Host domain for design preview and data.
+
+              preview: File name for design preview.
+
+              preview2: File name for font sample text preview, only present for font.
+
+              data: File name for design data (json for non-font, woff2 for font).
+
+              content: array of design category, with category_id as id of category, title as categroy name, and list as array of objects with design id and design type. category_id will be -1 and title '' for list_all = 1.
+
+              next_page: pagination index for next query, only for query with list_all = 1.
+
+              Url for design preview: `${host}/${design_id}/${preview}` and `${host}/${design_id}/${preview2}`. Url for design data: `${host}/${design_id}/${data}`.
+            properties:
+              host:
+                type: string
+              preview:
+                type: string
+              preview2:
+                type: string
+              data:
+                type: string
+              content:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category_id:
+                      type: number
+                    title:
+                      type: string
+                    list:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          type:
+                            type: number
+              next_page:
+                type: number
+            required:
+              - content
+              - data
+              - host
+              - preview
+  groupDesignOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          group_id:
+            type: string
+            description: current group id
+  updateUserInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        properties:
+          uname:
+            type: string
+            description: user name
+          account:
+            type: string
+            description: user account
+          upass:
+            type: string
+            description: user password
+          locale:
+            type: string
+            description: user locale
+          subscribe:
+            type: number
+            description: is subscribed
+          view_guide:
+            type: number
+            description: is guide viewed
+          logout:
+            type: number
+            description: to logout
+          delete:
+            type: number
+            description: to delete
+  googleLoginInput:
+    type: object
+    required:
+      - code
+      - redirect_uri
+    properties:
+      code:
+        type: string
+        description: google code
+      redirect_uri:
+        type: string
+        description: google redirect url
+      locale:
+        type: string
+        description: user locale
+  listLibPhotoInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+          - page_index
+          - type
+        properties:
+          type:
+            type: string
+            description: "lib type: unsplash or pexels (pexels is not ready)."
+          locale:
+            type: string
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
+          page_index:
+            type: number
+            description: pagination index
+          keyword:
+            type: string
+            description: keyword to search
+  updateDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - data
+          - key_id
+          - query
+          - type
+        properties:
+          type:
+            type: string
+            description: design type
+          key_id:
+            type: string
+            description: design key_id
+          query:
+            type: string
+            description: get or update design info
+          data:
+            type: string
+            description: design info to be updated
+  listDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - locale
+          - type
+        properties:
+          type:
+            type: string
+            description: "design type: background, font, svg, marker, template, or text"
+          locale:
+            type: string
+            description: |-
+              country code for locale, ex: tw, us, jp...
+              Allowed characters: a-zA-Z.
+          list_all:
+            type: number
+            description: 0 (default) for list first 10 elements in each category except
+              category 0. 1 for list all elements including category 0.
+          page_index:
+            type: number
+            description: pagination index
+          keyword:
+            type: string
+            description: keyword to search
+          font_list:
+            type: number
+            description: 0 (default) for return all font key id in single array, 1 for
+              return key id in various arrays according to title
+          group_id:
+            type: string
+            description: group id
+          theme:
+            type: string
+            description: limit theme_id(s) for return templaytes (separated by comma for
+              multiple theme ids)
+          all_theme:
+            type: number
+            description: 0 (default) for return theme with hidden = 0, 1 for return all
+              themes with corresponding hidden flag
+  addDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - design_id
+          - type
+        properties:
+          type:
+            type: string
+            description: "design type: background, font, svg, template, text, or layout"
+          design_id:
+            type: string
+            description: design id selected by user, fill '-1' for layout case with
+              non-empty custom width/height
+          width:
+            type: number
+            description: custom width for layout
+          height:
+            type: number
+            description: custom height for layout
+  verifyVcodeInput:
+    type: object
+    required:
+      - vcode
+    properties:
+      token:
+        type: string
+        description: user token
+      account:
+        type: string
+        description: user account
+      vcode:
+        type: string
+        description: verification code
+      locale:
+        type: string
+        description: user locale
+  putAssetDesignInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - asset_id
+          - team_id
+          - type
+        properties:
+          team_id:
+            type: string
+            description: team in
+          asset_id:
+            type: string
+            description: asset id for design
+          type:
+            type: number
+            description: 0 for update db, 1 for update prev, 2 for update both
+  loginInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        properties:
+          account:
+            type: string
+            description: User account
+          password:
+            type: string
+            description: User password
+          locale:
+            type: string
+            description: User locale
+  fbLoginInput:
+    type: object
+    required:
+      - code
+      - redirect_uri
+    properties:
+      code:
+        type: string
+        description: fb code
+      redirect_uri:
+        type: string
+        description: fb redirect url
+      locale:
+        type: string
+        description: user locale
+  listAssetInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        properties:
+          locale:
+            type: string
+            description: user locale
+          type:
+            type: string
+            description: "asset type: image, font, or design"
+          page_index:
+            type: number
+            description: pagination index
+          team_id:
+            type: string
+            description: team id
+          asset_list:
+            type: string
+            description: ${assetType}:${teamId}:${assetId} separate by comma
+          asset_id:
+            type: string
+            description: asset id for retriving asset presigned url
+          path:
+            type: string
+            description: >-
+              1.empty or unset to list all files (ex: designs).
+
+              2.'root' to list all files and/or folders in root.
+
+              3.'trash' to list all files and/or folders in trash can.
+
+              4.'favor' to list all favroite files.
+
+              5.`${folderId1},${folderId2}...` to list all files and/or folders under path folder1/folder2...
+
+              For case 2, 3, 5, use additional parameter 'data' to specify the return data type
+          data:
+            type: number
+            description: 0 (default) for files only, 1 for folders only, 2 for files and
+              folders
+          order_by:
+            type: string
+            description: >-
+              use ${orderType}:${sortOrder} (default as create:desc).
+
+              valid orderType: update for update time, create for create time, name for file/folder name.
+
+              valid sortOrder: asc for ascending (由小到大), desc for descending (由大到小)
+  listBrandInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - team_id
+        properties:
+          team_id:
+            type: string
+            description: team id
+  listBrandOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          brands:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                createTime:
+                  type: string
+                name:
+                  type: string
+                logos:
+                  type: array
+                  description: logos of the brand, currently empry array only (item structure TBD)
+                  items:
+                    type: object
+                    description: properties TBD
+                textStyleSetting:
+                  type: object
+                  properties:
+                    headingStyle:
+                      type: object
+                      properties:
+                        font:
+                          type: object
+                          description: properties not finalized
+                        size:
+                          type: number
+                        bold:
+                          type: boolean
+                        underline:
+                          type: boolean
+                        italic:
+                          type: boolean
+                        isDefault:
+                          type: boolean
+                    subheadingStyle:
+                      type: object
+                      properties:
+                        font:
+                          type: object
+                          description: properties not finalized
+                        size:
+                          type: number
+                        bold:
+                          type: boolean
+                        underline:
+                          type: boolean
+                        italic:
+                          type: boolean
+                        isDefault:
+                          type: boolean
+                    bodyStyle:
+                      type: object
+                      properties:
+                        font:
+                          type: object
+                          description: properties not finalized
+                        size:
+                          type: number
+                        bold:
+                          type: boolean
+                        underline:
+                          type: boolean
+                        italic:
+                          type: boolean
+                        isDefault:
+                          type: boolean
+                colorPalettes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      createTime:
+                        type: string
+                      name:
+                        type: string
+                      colors:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            createTime:
+                              type: string
+                            color:
+                              type: string
+                fonts:
+                  type: array
+                  description: fonts of the brand, currently empry array only (item structure TBD)
+                  items:
+                    type: object
+                    description: properties TBD

@@ -34,14 +34,6 @@
       "import": "./dist/types.es.js",
       "require": "./dist/types.cjs.js"
     },
-    "./types-log": {
-      "types": {
-        "require": "./dist/log.d.ts",
-        "default": "./dist/log.d.ts"
-      },
-      "import": "./dist/types.es.js",
-      "require": "./dist/types.cjs.js"
-    },
     "./css": {
       "import": "./dist/plugin.css"
     }

@@ -1,7 +1,6 @@
 import '@/assets/css/main.css'
 import componentPlugin from '@nu/shared-lib/plugin'
 import libType from '@nu/shared-lib/types'
-import logType from '@nu/shared-lib/types-log'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'
@@ -13,7 +12,6 @@ const app = createApp(App)
 
 // the *.d.ts file for the global components in shared-lib, must call it once or it will be clear
 libType
-logType
 app.use(createPinia())
 app.use(router)
 app.use(i18n)

@@ -1,0 +1,29 @@
+{
+  "type": "text",
+  "styles": {
+    "writingMode": "initial",
+    "opacity": 100
+  },
+  "paragraphs": [
+    {
+      "styles": {
+        "align": "center",
+        "fontSpacing": 0,
+        "lineHeight": 1.4
+      },
+      "spans": [
+        {
+          "text": "New Text",
+          "styles": {
+            "font": "OOcHgnEpk9RHYBOiWllz",
+            "weight": "normal",
+            "color": "#000000",
+            "decoration": "none",
+            "style": "normal",
+            "size": 24
+          }
+        }
+      ]
+    }
+  ]
+}

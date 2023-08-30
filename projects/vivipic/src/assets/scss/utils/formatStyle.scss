@@ -1,0 +1,152 @@
+@use '@/assets/scss/utils/functions.scss' as *;
+
+@mixin header() {
+  font-style: normal;
+  font-weight: 700;
+  line-height: 140%;
+}
+
+@mixin body() {
+  font-style: normal;
+  font-weight: normal;
+  line-height: 180%;
+}
+
+@mixin caption() {
+  font-style: normal;
+  font-weight: 600;
+  line-height: 180%;
+}
+
+@mixin btn() {
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+@mixin overline() {
+  font-style: normal;
+  font-weight: 600;
+  line-height: 170%;
+  text-transform: uppercase;
+}
+
+@mixin text-H1 {
+  @include header();
+  font-size: 44px;
+}
+
+@mixin text-H2 {
+  @include header();
+  font-size: 40px;
+}
+
+@mixin text-H3 {
+  @include header();
+  font-size: 32px;
+}
+
+@mixin text-H4 {
+  @include header();
+  font-size: 24px;
+}
+
+@mixin text-H5 {
+  @include header();
+  font-weight: 600;
+  font-size: 20px;
+}
+
+@mixin text-H6 {
+  @include header();
+  font-weight: 600;
+  font-size: 16px;
+}
+
+@mixin body-XL {
+  @include body();
+  font-size: 20px;
+}
+
+@mixin body-LG {
+  @include body();
+  font-size: 18px;
+}
+
+@mixin body-MD {
+  @include body();
+  font-size: 16px;
+}
+
+@mixin body-SM {
+  @include body();
+  font-size: 14px;
+}
+
+@mixin body-XS {
+  @include body();
+  // changethe line-height from 180% to 160% https://www.notion.so/vivipic/Vivipic-Design-for-14312be28c214566aacf865b5695a8dd
+  line-height: 160%;
+  font-size: 12px;
+}
+
+@mixin body-XXS {
+  @include body();
+  font-size: 12px;
+  transform: scale(0.9);
+}
+
+@mixin caption-LG {
+  @include caption();
+  font-size: 14px;
+}
+
+@mixin caption-MD {
+  @include caption();
+  font-size: 12px;
+}
+
+@mixin caption-SM {
+  @include caption();
+  font-size: 12px;
+  transform: scale(0.9);
+}
+
+@mixin btn-LG {
+  @include btn();
+  font-size: 16px;
+}
+
+@mixin btn-SM {
+  @include btn();
+  font-size: 14px;
+}
+
+@mixin overline-LG {
+  @include overline();
+  font-size: 14px;
+}
+
+@mixin overline-SM {
+  @include overline();
+  font-size: 12px;
+}
+
+@mixin primary-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  color: setColor(white);
+  background: setColor(blue-1);
+  border-radius: 4px;
+}
+
+@mixin button-LG {
+  @include primary-btn;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+}

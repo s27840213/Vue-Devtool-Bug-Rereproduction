@@ -1,0 +1,203 @@
+<template lang="pug">
+div(class="snap-area"
+  :style="wrapperStyles()")
+  div(v-for="line in closestSnaplines.v"
+    :key="line"
+    class="snap-area__line snap-area__line--vr"
+    :style="snapLineStyles('v', line)")
+  div(v-for="line in closestSnaplines.h"
+    :key="line"
+    class="snap-area__line snap-area__line--hr"
+    :style="snapLineStyles('h', line)")
+  template(v-if="isShowGuideline && !useMobileEditor")
+    div(v-for="(line,index) in guidelines.v"
+     :key="line"
+      class="snap-area__line snap-area__line--vr"
+      :style="snapLineStyles('v', line, true)"
+      @mouseover="lockGuideline ? null : showGuideline(line,'v',index)"
+      @mouseout="closeGuidelineTimer")
+    div(v-for="(line,index) in guidelines.h"
+      :key="line"
+      class="snap-area__line snap-area__line--hr"
+      :style="snapLineStyles('h', line, true)"
+      @mouseover="lockGuideline ? null : showGuideline(line,'h',index)"
+      @mouseout="closeGuidelineTimer")
+</template>
+
+<script lang="ts">
+
+import { IPage } from '@/interfaces/page'
+import { ISnapline } from '@/interfaces/snap'
+import pageUtils from '@/utils/pageUtils'
+import rulerUtils from '@/utils/rulerUtils'
+import SnapUtils from '@/utils/snapUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapState } from 'vuex'
+
+export default defineComponent({
+  emits: [],
+  props: {
+    config: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    snapUtils: {
+      type: SnapUtils,
+      required: true
+    },
+    contentScaleRatio: {
+      type: Number,
+      required: true
+    }
+  },
+  data() {
+    return {
+      closestSnaplines: {
+        v: [] as Array<number>,
+        h: [] as Array<number>
+      },
+      guidelineTimer: -1
+    }
+  },
+  mounted() {
+    this.snapUtils.on(`getClosestSnaplines-${this.snapUtils.id}`, this.getClosestSnaplines)
+    this.snapUtils.on('clearSnapLines', this.clearSnap)
+  },
+  beforeUnmount() {
+    this.snapUtils.off(`getClosestSnaplines-${this.snapUtils.id}`, this.getClosestSnaplines)
+    this.snapUtils.off('clearSnapLines', this.clearSnap)
+  },
+  computed: {
+    ...mapState(['isMoving']),
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio',
+      groupType: 'getGroupType',
+      lockGuideline: 'getLockGuideline',
+      useMobileEditor: 'getUseMobileEditor'
+    }),
+    isShowGuideline(): boolean {
+      return rulerUtils.showGuideline
+    },
+    guidelines(): { [index: string]: Array<number> } {
+      return (this.config as IPage).guidelines
+    }
+  },
+  watch: {
+    guidelines: {
+      handler() {
+        this.getClosestSnaplines()
+      },
+      deep: true
+    }
+  },
+  methods: {
+    wrapperStyles(): Record<string, string> {
+      return {
+        width: `${this.config.width * this.contentScaleRatio * (this.scaleRatio / 100)}px`,
+        height: `${this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)}px`,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+      }
+    },
+    snapLineStyles(dir: string, pos: number, isGuideline?: boolean): Record<string, string> {
+      const { bleeds } = pageUtils.getPageSizeWithBleeds(this.config)
+      if (this.config.isEnableBleed) {
+        pos += dir === 'v' ? bleeds.left
+          : dir === 'h' ? bleeds.top
+            : 0
+      }
+      pos = pos * (this.scaleRatio * this.contentScaleRatio / 100)
+      return dir === 'v' ? {
+        height: '100%',
+        width: '1px',
+        transform: `translate(${pos}px,0)`,
+        'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
+      } : {
+        width: '100%',
+        height: '1px',
+        transform: `translate(0,${pos}px)`,
+        'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
+      }
+    },
+    getClosestSnaplines() {
+      this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
+      this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
+    },
+    clearSnap(): void {
+      this.snapUtils.clear()
+      this.closestSnaplines.v = []
+      this.closestSnaplines.h = []
+    },
+    showGuideline(pos: number, type: string, index: number) {
+      this.guidelineTimer = window.setTimeout(() => {
+        if (!rulerUtils.isDragging) {
+          rulerUtils.deleteGuideline(
+            index,
+            type,
+            this.pageIndex)
+          rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type, this.pageIndex), type, this.pageIndex)
+        }
+      }, 100)
+    },
+    closeGuidelineTimer() {
+      clearTimeout(this.guidelineTimer)
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.snap-area {
+  @include size(100%, 100%);
+  z-index: setZindex(snap-area);
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  &__line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: setColor("blue-1");
+  }
+  &__line--vr {
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 5px;
+      height: 100%;
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+    }
+  }
+  &__line--hr {
+    &::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+    }
+  }
+}
+</style>
