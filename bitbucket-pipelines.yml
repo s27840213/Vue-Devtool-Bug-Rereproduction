@@ -31,8 +31,8 @@ pipelines:
                 - projects/*/node_modules/**
       - parallel:
           - step:
-              name: "deploy charmix to rd"
-              deployment: rd
+              name: "deploy charmix to cmrd"
+              deployment: cmrd
               trigger: manual
               condition:
                 changesets:
