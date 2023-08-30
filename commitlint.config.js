@@ -37,7 +37,11 @@ module.exports = {
     'subject-full-stop': [2, 'never', '.'],
     'type-case': [2, 'always', 'lower-case'],
     'type-empty': [2, 'never'],
-    'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'perf', 'refactor']],
+    'type-enum': [
+      2,
+      'always',
+      ['feat', 'fix', 'docs', 'perf', 'refactor', 'chore', 'test', 'revert', 'cy']
+    ],
     'scope-enum': [2, 'always', ['pic', 'stk', 'charmix', '']],
     'scope-case': [2, 'always', 'lower-case']
     // 'scope-empty': [2, 'never'],
