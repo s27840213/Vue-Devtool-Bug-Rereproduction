@@ -295,6 +295,8 @@ pipelines:
                 - corepack prepare pnpm@latest-8 --activate
                 - node -v
                 - pnpm -v
+                - COMMIT_MESSAGE=`git log --format=%B -n 1 $BITBUCKET_COMMIT`
+                - echo $COMMIT_MESSAGE
           - step:
               name: "Start build with node module cache"
               size: 2x
