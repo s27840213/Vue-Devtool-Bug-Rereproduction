@@ -29,7 +29,7 @@ div(class="panel-my-design-more")
                   iconWidth="18px"
                   iconColor="gray-2")
       div(class="panel-my-design-more__option-title") {{ $t('NN0034') }}
-    div(v-if="false" class="panel-my-design-more__option"
+    div(class="panel-my-design-more__option"
         @click.prevent.stop="handleReport")
       div(class="panel-my-design-more__option-icon")
         svg-icon(iconName="error"
