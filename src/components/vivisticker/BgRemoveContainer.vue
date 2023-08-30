@@ -27,11 +27,11 @@ div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"
 
 <script lang="ts">
 /* eslint-disable */
+import { TRANSITION_TIME } from '@/components/editor/mobile/MobileEditorView.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import { ICoordinate } from '@/interfaces/frame'
 import { IBgRemoveInfo } from '@/interfaces/image'
-import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { PropType, defineComponent } from 'vue'
@@ -70,7 +70,6 @@ export default defineComponent({
       initPinchPos: null as null | { x: number, y: number },
       initBgPos: { x: 0, y: 0 },
       translationRatio: null as null | ICoordinate,
-      translationRatio_ori_pos: { x: 0, y: 0 },
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
       imgAspectRatio: 1,
@@ -217,30 +216,32 @@ export default defineComponent({
 
               // pinch moving translation compensation
               if (!this.translationRatio) {
-                // translation ratio for current-window-pos (not for pinch). Details read doc.
-                const translationRatio_ori_pos = {
-                  x: (this.pinch.initPos.x - this.initBgPos.x) / this.bgCurrSize.width,
-                  y: (this.pinch.initPos.y - this.initBgPos.y) / this.bgCurrSize.height
+                this.translationRatio = { x: -1, y: -1 }
+                // padding size of the rmSection
+                const padding = 20
+                const actualEvtX = event.x - this.pinch.physicalTopLeftPos.left - padding
+                const actualEvtY = event.y - this.pinch.physicalTopLeftPos.top - padding
+                if (this.pinch.x >= 0) {
+                  this.translationRatio.x = (Math.max(actualEvtX - this.pinch.x, 0) / this.bgCurrSize.width)
+                } else {
+                  this.translationRatio.x = (Math.max(actualEvtX, 0) + Math.abs(this.pinch.x)) / this.bgCurrSize.width
                 }
-                this.translationRatio_ori_pos = translationRatio_ori_pos
 
-                // actual translation ratio equals to current pinch-in-current-window plus current-window-pos
-                this.translationRatio = {
-                  x: ((this.initPinchPos.x - this.pinch.physicalCenterPos.x) / this.bgCurrSize.width + 0.5) / (this.bgCurrSize.width / this.pinch.initSize.width) + translationRatio_ori_pos.x,
-                  y: ((this.initPinchPos.y - this.pinch.physicalCenterPos.y) / this.bgCurrSize.height + 0.5) / (this.bgCurrSize.height / this.pinch.initSize.height) + translationRatio_ori_pos.y
+                if (this.pinch.y >= 0) {
+                  this.translationRatio.y = (Math.max(actualEvtY - this.pinch.y, 0) / this.bgCurrSize.height)
+                } else {
+                  this.translationRatio.y = (Math.max(actualEvtY, 0) + Math.abs(this.pinch.y)) / this.bgCurrSize.height
                 }
-                console.log('tanslation calc x', this.initPinchPos.x, this.pinch.physicalCenterPos.x, this.bgCurrSize.width, this.bgCurrSize.width / this.pinch.initSize.width)
-                console.log('tanslation calc y', this.initPinchPos.y, this.pinch.physicalCenterPos.y, this.bgCurrSize.height, this.bgCurrSize.height / this.pinch.initSize.height)
-                console.log('this.initBgPos', this.initBgPos, this.pinch.initPos)
+                console.warn('this.translationRatio', this.translationRatio)
+                console.warn('actualEvtX, actualEvtY', actualEvtX, actualEvtY)
               }
-              console.warn('this.translationRatio', this.translationRatio, this.translationRatio_ori_pos)
 
               // size difference via pinching
               const scalingRatioDiff = this.bgRemoveScaleRatio / this.pinch.scale - 1
               console.log('scale', this.bgRemoveScaleRatio, this.pinch.scale, this.pinch.physicalCenterPos)
               const sizeDiff = {
                 width: scalingRatioDiff * this.bgCurrSize.width,
-                height: scalingRatioDiff * this.bgCurrSize.height,
+                height: scalingRatioDiff * this.bgCurrSize.height
               }
 
               // pos difference via moving pinching pos
@@ -257,10 +258,10 @@ export default defineComponent({
               console.log('pos x, y:', this.initBgPos.x - sizeDiff.width * this.translationRatio.x, this.initBgPos.y - sizeDiff.height * this.translationRatio.y)
               this.updatePinchState({
                 scale: this.bgRemoveScaleRatio,
-                // x: this.pinch.x - sizeDiff.width * this.translationRatio.x,
-                // y: this.pinch.y - sizeDiff.height * this.translationRatio.y
+                x: this.pinch.x - sizeDiff.width * this.translationRatio.x,
+                y: this.pinch.y - sizeDiff.height * this.translationRatio.y
               })
-              bgRemoveMoveHandler.updateBgPos(this.pinch.x - sizeDiff.width * this.translationRatio.x, this.pinch.y - sizeDiff.height * this.translationRatio.y)
+              // bgRemoveMoveHandler.updateBgPos(this.pinch.x - sizeDiff.width * this.translationRatio.x, this.pinch.y - sizeDiff.height * this.translationRatio.y)
 
               /**
                * for center scroll caculation
@@ -292,7 +293,24 @@ export default defineComponent({
         }
 
         case 'end': {
-          console.warn('pinch end')
+          console.warn('pinch end', this.pinch.scale < this.pinch.initScale)
+          if (this.pinch.scale < this.pinch.initScale) {
+            const bgRemoveArea = document.getElementById('bgRemoveArea') as HTMLElement
+            const bgRemoveScaleArea = document.getElementById('bgRemoveScaleArea') as HTMLElement
+            bgRemoveArea.classList.add('editor-view__pinch-transition')
+            bgRemoveScaleArea.classList.add('editor-view__pinch-transition')
+            this.bgRemoveScaleRatio = this.pinch.initScale
+            console.log(this.bgRemoveScaleRatio, this.pinch.initScale)
+            this.updatePinchState({
+              scale: this.pinch.initScale,
+              x: this.pinch.initPos.x,
+              y: this.pinch.initPos.y
+            })
+            setTimeout(() => {
+              bgRemoveArea.classList.remove('editor-view__pinch-transition')
+              bgRemoveScaleArea.classList.remove('editor-view__pinch-transition')
+            }, TRANSITION_TIME)
+          }
           this.setIsPinchIng(false)
           this.isPanning = false
           this.initPinchPos = null

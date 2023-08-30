@@ -1,12 +1,14 @@
 <template lang="pug">
 div(class="bg-remove-area"
       :style="wrapperStyles"
+      id="bgRemoveArea"
       ref="bgRemoveArea")
   div(v-show="showInitImage"
     class="bg-remove-area__initPhoto"
     :style="initPhotoStyles")
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
+      id="bgRemoveScaleArea"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}"
       :ref="'scaleArea'")
     canvas(class="bg-remove-area__canvas" ref="canvas" :cy-ready="cyReady" @pointerdown="moveStart")
@@ -272,11 +274,16 @@ export default defineComponent({
               x: rect.left + rect.width * 0.5,
               y: rect.top + rect.height * 0.5
             },
+            physicalTopLeftPos: {
+              left: rect.left,
+              top: rect.top
+            },
             containerSize: {
               width: containerWidth,
               height: containerHeight
             }
           })
+          console.log('rect.left, rect.top', rect.left, rect.top)
         }
       }
     },

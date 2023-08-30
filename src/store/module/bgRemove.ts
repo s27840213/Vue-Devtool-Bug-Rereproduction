@@ -25,6 +25,10 @@ export interface IBgRemovePinchState {
     x: number,
     y: number
   },
+  physicalTopLeftPos: {
+    top: number,
+    left: number
+  }
   containerSize: ISize
 }
 
@@ -104,6 +108,7 @@ const getDefaultState = (): IBgRemoveState => ({
     initScale: -1,
     scale: -1,
     physicalCenterPos: { x: 0, y: 0 },
+    physicalTopLeftPos: { top: 0, left: 0 },
     containerSize: { width: 0, height: 0 }
   }
 })
