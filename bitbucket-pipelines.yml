@@ -27,13 +27,18 @@ pipelines:
                 - pnpm install
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-                - projects/charmix/dist/**
-                - projects/charmix/node_modules/**
+                - projects/*/dist/**
+                - projects/*/node_modules/**
       - parallel:
           - step:
               name: "deploy charmix to rd"
               deployment: rd
               # trigger: manual
+              condition:
+                changesets:
+                  includePaths:
+                    - "projects/charmix/**"
+                    - "packages/**"
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
