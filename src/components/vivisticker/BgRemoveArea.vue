@@ -215,10 +215,15 @@ export default defineComponent({
         willChange: this.inGestureMode ? 'transform' : ''
       }
     },
-    wrapperStyles(): { [index: string]: string } {
+    renderSize(): { [index: string]: string } {
       return {
         width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
         height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+      }
+    },
+    wrapperStyles(): { [index: string]: string } {
+      return {
+        ...this.renderSize,
         ...(this.isPinchInitialized && { transform: `translate(${this.pinchState.x}px, ${this.pinchState.y}px)` })
       }
     },
@@ -226,8 +231,7 @@ export default defineComponent({
       const backgroundImage = this.showInitImage ? `url(${this.initImgSrc})` : ''
       const backgroundSize = this.showInitImage ? 'cover' : 'initial'
       return {
-        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+        ...this.renderSize,
         backgroundImage,
         backgroundSize
       }
