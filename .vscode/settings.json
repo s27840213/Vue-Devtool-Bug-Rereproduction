@@ -1,5 +1,6 @@
 {
-	"[vue]": {
+  "editor.formatOnSave": true,
+  "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescript]": {
@@ -11,8 +12,7 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "i18n-ally.localesPaths": [
-    "packages/**/**/locales",
-    "projects/**/**/locales"
-  ],
+  "i18n-ally.localesPaths": ["packages/**/**/locales", "projects/**/**/locales"],
+  // Prevent @apply unknownAtRules warning: https://github.com/tailwindlabs/tailwindcss/discussions/5258#discussioncomment-1979394
+  "css.customData": [".vscode/tailwind.json"]
 }
