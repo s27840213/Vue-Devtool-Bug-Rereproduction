@@ -3,7 +3,6 @@
   "tabWidth": 2,
   "singleQuote": true,
   "printWidth": 100,
-  "trailingComma": "none",
   "pugSingleQuote": false,
   "pugAttributeSeparator": "none",
   "pugClassNotation": "attribute",

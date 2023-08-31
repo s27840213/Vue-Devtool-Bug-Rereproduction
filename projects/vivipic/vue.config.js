@@ -255,6 +255,16 @@ module.exports = defineConfig({
         // }])
     },
 
+    devServer: {
+        client: {
+            overlay: {
+                errors: true,
+                warnings: true,
+                runtimeErrors: false,
+            },
+        },
+    },
+
     css: {
         loaderOptions: {
             scss: {
