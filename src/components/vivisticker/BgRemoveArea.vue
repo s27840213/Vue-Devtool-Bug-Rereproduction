@@ -25,6 +25,7 @@ div(class="bg-remove-area"
 </template>
 
 <script lang="ts">
+import { RM_SECTION_PADDING } from '@/components/vivisticker/BgRemoveContainer.vue'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
 import logUtils from '@/utils/logUtils'
@@ -256,7 +257,7 @@ export default defineComponent({
       if (val) {
         // -1 means not be initialized
         if (this.pinchState.initPos.x === -1 || this.pinchState.initPos.y === -1) {
-          const paddingSize = 40
+          const paddingSize = RM_SECTION_PADDING * 2
           const container = document.getElementById('rmSection') as HTMLElement
           const containerWidth = container.clientWidth - paddingSize
           const containerHeight = container.clientHeight - paddingSize

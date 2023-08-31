@@ -33,9 +33,11 @@ import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import { ICoordinate } from '@/interfaces/frame'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import mathUtils from '@/utils/mathUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+export const RM_SECTION_PADDING = 20
 export default defineComponent({
   components: {
     BgRemoveArea,
@@ -103,7 +105,8 @@ export default defineComponent({
       movingMode: 'bgRemove/getMovingMode',
       isPinching: 'bgRemove/getIsPinching',
       pinch: 'bgRemove/getPinchState',
-      bgCurrSize:'bgRemove/getBgCurrSize'
+      bgCurrSize:'bgRemove/getBgCurrSize',
+      bgContainerSize :'bgRemove/getContainerSize'
     }),
     fitScaleRatio(): number {
       const { width, height } = this.containerWH
@@ -152,6 +155,7 @@ export default defineComponent({
       window.requestAnimationFrame(() => this._pinchHandler(event))
     },
     _pinchHandler(event: AnyTouchEvent) {
+      if (this.pinch.isTransitioning) return
       if (!this.movingMode) return
       if (!this.inBgRemoveMode) return
       let deltaDistance = 0
@@ -175,7 +179,7 @@ export default defineComponent({
          */
         case 'start': {
           console.warn('pinch start')
-          this.setIsPinchIng(true)
+          this.updatePinchState({ isPinching: true })
           this.tmpScaleRatio = this.bgRemoveScaleRatio
           this.setInGestureMode(true)
 
@@ -198,7 +202,7 @@ export default defineComponent({
           break
         }
         case 'move': {
-          this.setIsPinchIng(true)
+          this.updatePinchState({ isPinching: true })
           this.isPanning = true
           if (!this.initPinchPos || !this.initPinchSize) {
             this.tmpScaleRatio = this.bgRemoveScaleRatio
@@ -209,18 +213,15 @@ export default defineComponent({
           }
 
           if (event.pointLength === 2) {
-            // if (deltaDistance > 1) {
-            // pinching
-            const ratio = this.tmpScaleRatio * event.scale
-
-            if (ratio <= this.minRatio) {
-              this.bgRemoveScaleRatio = this.minRatio
-            } else if (ratio >= this.maxRatio) {
-              this.bgRemoveScaleRatio = this.maxRatio
-            } else {
-              this.bgRemoveScaleRatio = ratio
-              // this.bgRemoveScaleRatio = 0.4
-            }
+            // const ratio = this.tmpScaleRatio * event.scale
+            // if (ratio <= this.minRatio) {
+            //   this.bgRemoveScaleRatio = this.minRatio
+            // } else if (ratio >= this.maxRatio) {
+            //   this.bgRemoveScaleRatio = this.maxRatio
+            // } else {
+            //   this.bgRemoveScaleRatio = ratio
+            // }
+            this.bgRemoveScaleRatio = this.tmpScaleRatio * event.scale
 
             // pinch moving translation compensation
             if (!this.translationRatio) {
@@ -241,7 +242,6 @@ export default defineComponent({
                 this.translationRatio.y = (Math.max(actualEvtY, 0) + Math.abs(this.pinch.y)) / this.initPinchSize.height
               }
               console.warn('this.translationRatio', this.translationRatio)
-              console.warn('actualEvtX, actualEvtY', actualEvtX, actualEvtY)
             }
 
             // size difference via pinching
@@ -251,7 +251,7 @@ export default defineComponent({
               height: scalingRatioDiff * this.initPinchSize.height
             }
 
-            // pos difference via moving pinching pos
+            // pos difference via moving as pinching
             const movingTraslate = {
               x: event.x - this.initPinchPos.x,
               y: event.y - this.initPinchPos.y
@@ -261,57 +261,107 @@ export default defineComponent({
               x: this.initBgPos.x - sizeDiff.width * this.translationRatio.x + movingTraslate.x,
               y: this.initBgPos.y - sizeDiff.height * this.translationRatio.y + movingTraslate.y
             })
-            // bgRemoveMoveHandler.updateBgPos(this.pinch.x - sizeDiff.width * this.translationRatio.x, this.pinch.y - sizeDiff.height * this.translationRatio.y)
-
-            /**
-             * for center scroll caculation
-             */
-            // if (this.rmSection) {
-            //   const scrollCenterX = (2 * this.rmSection.scrollLeft + this.rmSection.clientWidth)
-            //   const scrollCenterY = (2 * this.rmSection.scrollTop + this.rmSection.clientHeight)
-            //   const oldScrollWidth = this.rmSection.scrollWidth
-            //   const oldScrollHeight = this.rmSection.scrollHeight
-            //   this.$nextTick(() => {
-            //     if (this.rmSection) {
-            //       const rmSecton = this.$refs.rmSection as HTMLElement
-            //       rmSecton.scrollLeft = (scrollCenterX * rmSecton.scrollWidth / oldScrollWidth - rmSecton.clientWidth) / 2
-            //       rmSecton.scrollTop = (scrollCenterY * rmSecton.scrollHeight / oldScrollHeight - rmSecton.clientHeight) / 2
-            //     }
-            //   })
-            // }
-          } else {
-            // panning
-            // this.$nextTick(() => {
-            //   if (this.rmSection) {
-            //     this.rmSection.scrollLeft = this.rmSection.scrollLeft - event.deltaX * 2
-            //     this.rmSection.scrollTop = this.rmSection.scrollTop - event.deltaY * 2
-            //   }
-            // })
           }
-          // }
           break
         }
 
         case 'end': {
-          console.warn('pinch end', this.pinch.scale < this.pinch.initScale)
-          if (this.pinch.scale < this.pinch.initScale) {
-            const bgRemoveArea = document.getElementById('bgRemoveArea') as HTMLElement
-            const bgRemoveScaleArea = document.getElementById('bgRemoveScaleArea') as HTMLElement
+          console.warn('pinch end')
+          const bgRemoveArea = document.getElementById('bgRemoveArea') as HTMLElement
+          const bgRemoveScaleArea = document.getElementById('bgRemoveScaleArea') as HTMLElement
+
+          // const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(page, newScaleRatio * 0.01)
+          const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.edgingHandler()
+          console.log(isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge)
+
+          // case 1 scale exceed max scale range
+          if (this.pinch.scale > this.maxRatio) {
             bgRemoveArea.classList.add('editor-view__pinch-transition')
             bgRemoveScaleArea.classList.add('editor-view__pinch-transition')
-            this.bgRemoveScaleRatio = this.pinch.initScale
-            console.log(this.bgRemoveScaleRatio, this.pinch.initScale)
+            console.warn('scale exceed max scale range')
+            const scaleRatioDiff = 1 - this.maxRatio / this.pinch.scale
+            const sizeDiff = {
+              width: this.bgCurrSize.width * scaleRatioDiff,
+              height: this.bgCurrSize.height * scaleRatioDiff
+            }
+            const [xMin, xMax] = [this.pinch.initPos.x * 2 - ((this.bgCurrSize.width - sizeDiff.width) - this.pinch.initSize.width), 0]
+            const [yMin, yMax] = [this.pinch.initPos.y * 2 - ((this.bgCurrSize.height - sizeDiff.height) - this.pinch.initSize.height), 0]
+            console.log('this.pinch.x + sizeDiff.width * (this.translationRatio?.x ?? 0)', this.pinch.x + sizeDiff.width * (this.translationRatio?.x ?? 0), this.pinch.y + sizeDiff.height * (this.translationRatio?.y ?? 0))
+            console.log('xMin, xMax', xMin, xMax, yMin, yMax)
+            const x = mathUtils.clamp(this.pinch.x + sizeDiff.width * (this.translationRatio?.x ?? 0), xMin, xMax)
+            const y = mathUtils.clamp(this.pinch.y + sizeDiff.height * (this.translationRatio?.y ?? 0), yMin, yMax)
+            this.bgRemoveScaleRatio = this.maxRatio
             this.updatePinchState({
-              scale: this.pinch.initScale,
-              x: this.pinch.initPos.x,
-              y: this.pinch.initPos.y
+              isTransitioning: true,
+              scale: this.maxRatio,
+              x,
+              y
             })
             setTimeout(() => {
               bgRemoveArea.classList.remove('editor-view__pinch-transition')
               bgRemoveScaleArea.classList.remove('editor-view__pinch-transition')
+              this.updatePinchState({
+                isTransitioning: false
+              })
             }, TRANSITION_TIME)
+          // case 2 exceed edge
+          } else if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
+            console.warn('exceed edge ', isReachTopEdge, isReachBottomEdge, isReachLeftEdge, isReachRightEdge)
+            // sub-case 1: scale ratio smaller than initScale --> reset/initialization
+            bgRemoveArea.classList.add('editor-view__pinch-transition')
+            bgRemoveScaleArea.classList.add('editor-view__pinch-transition')
+            if (this.pinch.scale < this.pinch.initScale || ((isReachLeftEdge && isReachRightEdge) || (isReachTopEdge && isReachBottomEdge))) {
+              this.bgRemoveScaleRatio = this.pinch.initScale
+              this.updatePinchState({
+                isTransitioning: true,
+                scale: this.pinch.initScale,
+                x: this.pinch.initPos.x,
+                y: this.pinch.initPos.y
+              })
+              setTimeout(() => {
+                bgRemoveArea.classList.remove('editor-view__pinch-transition')
+                bgRemoveScaleArea.classList.remove('editor-view__pinch-transition')
+                this.updatePinchState({
+                  isTransitioning: false
+                })
+              }, TRANSITION_TIME)
+            } else {
+              // sub-case 2: only some edge is reached --> align the reached edge
+              const pos = { x: this.pinch.x, y: this.pinch.y }
+              if (isReachTopEdge || isReachBottomEdge) {
+                const isCoverContainer = this.bgCurrSize.height >= this.bgContainerSize.height
+                if (isReachTopEdge) {
+                  pos.y = isCoverContainer ? 0 : (this.bgContainerSize.height - this.bgCurrSize.height) * 0.5
+                } else if (isReachBottomEdge) {
+                  const _y = this.pinch.initPos.y * 2 - (this.bgCurrSize.height - this.pinch.initSize.height)
+                  pos.y = isCoverContainer ? _y : _y - (this.bgContainerSize.height - this.bgCurrSize.height) * 0.5
+                }
+              }
+              if (isReachLeftEdge || isReachRightEdge) {
+                const isCoverContainer = this.bgCurrSize.width >= this.bgContainerSize.width
+                if (isReachLeftEdge) {
+                  pos.x = isCoverContainer ? 0 : (this.bgContainerSize.width - this.bgCurrSize.width) * 0.5
+                } else if (isReachRightEdge) {
+                  const _x = this.pinch.initPos.x * 2 - (this.bgCurrSize.width - this.pinch.initSize.width)
+                  pos.x = isCoverContainer ? _x : _x - (this.bgContainerSize.width - this.bgCurrSize.width) * 0.5
+                }
+              }
+              this.updatePinchState({
+                isTransitioning: true,
+                ...pos
+              })
+              setTimeout(() => {
+                bgRemoveArea.classList.remove('editor-view__pinch-transition')
+                bgRemoveScaleArea.classList.remove('editor-view__pinch-transition')
+                this.updatePinchState({
+                  isTransitioning: false
+                })
+              }, TRANSITION_TIME)
+            }
+          } else {
+            console.warn('else')
           }
-          this.setIsPinchIng(false)
+          this.updatePinchState({ isPinching: false })
           this.isPanning = false
           this.initPinchPos = null
           this.initPinchSize = null
@@ -322,9 +372,13 @@ export default defineComponent({
         }
       }
     },
-    setIsPinchIng(bool: boolean) {
-      this.$store.commit('bgRemove/UPDATE_pinchState', { isPinchIng: bool })
-      console.log('this.pinch.isPinchIng', this.$store.state.bgRemove.pinch.isPinchIng)
+    edgingHandler() {
+      return {
+        isReachTopEdge: this.pinch.y > 0,
+        isReachBottomEdge: this.pinch.y < 0 && (this.bgCurrSize.height - this.pinch.initSize.height) - this.pinch.initPos.y < this.pinch.initPos.y - this.pinch.y,
+        isReachLeftEdge: this.pinch.x > 0,
+        isReachRightEdge: this.pinch.x < 0 && (this.bgCurrSize.width - this.pinch.initSize.width) - this.pinch.initPos.x < this.pinch.initPos.x - this.pinch.x,
+      }
     }
   }
 })

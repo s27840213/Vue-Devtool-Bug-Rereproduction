@@ -8,7 +8,10 @@ import { GetterTree, MutationTree } from 'vuex'
 const MAX_STEP_COUNT = 20
 
 export interface IBgRemovePinchState {
-  isPinchIng: boolean
+  // this flag used to indicate if is doing the pinching action
+  isPinching: boolean,
+  // this flag used to indicate if the edging transition is undergoing
+  isTransitioning: boolean,
   initPos: {
     x: number,
     y: number
@@ -94,7 +97,8 @@ const getDefaultState = (): IBgRemoveState => ({
   },
   inEffectEditingMode: false,
   pinch: {
-    isPinchIng: false,
+    isPinching: false,
+    isTransitioning: false,
     x: 0,
     y: 0,
     initPos: {
@@ -122,8 +126,14 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
       height: state.pinch.initSize.height * scaleIncrement
     }
   },
+  getContainerSize(state: IBgRemoveState): ISize {
+    return {
+      width: state.pinch.initPos.x > 0 ? 2 * state.pinch.initPos.x + state.pinch.initSize.width : state.pinch.initSize.width,
+      height: state.pinch.initPos.y > 0 ? 2 * state.pinch.initPos.y + state.pinch.initSize.height : state.pinch.initSize.height,
+    }
+  },
   getIsPinching(state: IBgRemoveState) {
-    return state.pinch.isPinchIng
+    return state.pinch.isPinching
   },
   getIsPinchInitialized(state: IBgRemoveState) {
     return state.pinch.initPos.x !== -1 && state.pinch.initPos.y !== -1
@@ -350,7 +360,7 @@ class BgRemoveMoveHandler {
   }
 
   private moving(evt: PointerEvent) {
-    if (this.pinch.isPinchIng || !store.getters['bgRemove/getMovingMode']) {
+    if (this.pinch.isPinching || this.pinch.isTransitioning || !store.getters['bgRemove/getMovingMode']) {
       return
     }
     if (!this.initEvtPos) {
@@ -369,7 +379,6 @@ class BgRemoveMoveHandler {
       return
     }
     const offsetPos = mouseUtils.getMouseRelPoint(evt, this.initEvtPos)
-    console.log('moving evt pos', evt.x, evt.y)
     const limitRange = { x: Math.abs(this.base.x), y: Math.abs(this.base.y) }
     const diff = {
       x: Math.abs(this.initBgPos.x + offsetPos.x - this.base.x),
@@ -391,14 +400,11 @@ class BgRemoveMoveHandler {
       const isReachTopEdge = this.pinch.y >= 0 && offsetPos.y > 0 && diff.y > limitRange.y
       const isReachBottomEdge = this.pinch.y < 0 && offsetPos.y < 0 && diff.y > limitRange.y
       if (isReachTopEdge || isReachBottomEdge) {
-        // y = isReachTopEdge ? this.pinch.initSize.height - this.currSize.height + this.pinch.initPos.y * 2 : 0
         y = isReachBottomEdge ? this.pinch.initSize.height - this.currSize.height + this.pinch.initPos.y * 2 : 0
       } else {
         y = this.initBgPos.y + offsetPos.y
       }
     }
-    console.log('this.initBgPos.x', this.initBgPos.x, offsetPos.x)
-    console.log('this.initBgPos.y', this.initBgPos.y, offsetPos.y)
     this.updateBgPos(x, y)
   }
 
@@ -409,8 +415,9 @@ class BgRemoveMoveHandler {
   }
 
   updateBgPos(x: number, y: number) {
+    if (this.pinch.isTransitioning) return
     store.commit('bgRemove/UPDATE_pinchState', { x, y })
-    console.log(x, y)
+    // console.log(x, y)
   }
 }
 
