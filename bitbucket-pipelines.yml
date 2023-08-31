@@ -37,6 +37,7 @@ pipelines:
               condition:
                 changesets:
                   includePaths:
+                    - '*'
                     - "projects/charmix/**"
                     - "packages/**"
               script:
@@ -72,6 +73,7 @@ pipelines:
               condition:
                 changesets:
                   includePaths:
+                    - '*'
                     - "projects/vivipic/**"
                     - "packages/**"
               script:
