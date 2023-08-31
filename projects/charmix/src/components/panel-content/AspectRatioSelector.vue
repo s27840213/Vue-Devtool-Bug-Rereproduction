@@ -9,7 +9,7 @@ div(class="w-full h-full pl-24")
       @click="selectAspectRatio(aspectRatio)")
       nu-svg-icon(
         :icon-color="selectedType === aspectRatio ? 'primary-light-active' : aspectRatio === 'original' ? 'app-text-secondary' : 'transparent'"
-        :stroke-color="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'primary-light-active' : 'app-text-secondary'"
+        :stroke-color="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
         :icon-width="aspectRatio === 'original' ? '40px' : '56px'"
         :icon-height="'56px'"
         :icon-name="aspectRatio")

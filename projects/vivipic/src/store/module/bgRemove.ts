@@ -3,32 +3,32 @@ import { GetterTree, MutationTree } from 'vuex'
 
 const MAX_STEP_COUNT = 20
 export interface IBgRemoveState {
-  inBgRemoveMode: boolean,
-  brushSize: number,
-  showInitImage: boolean,
-  clearMode: boolean,
-  restoreInitState: boolean,
-  canvas: HTMLCanvasElement,
-  autoRemoveResult: IBgRemoveInfo,
-  modifiedFlag: boolean,
-  loading: boolean,
-  prevPageScaleRatio: number,
+  inBgRemoveMode: boolean
+  brushSize: number
+  showInitImage: boolean
+  clearMode: boolean
+  restoreInitState: boolean
+  canvas: HTMLCanvasElement
+  autoRemoveResult: IBgRemoveInfo
+  modifiedFlag: boolean
+  loading: boolean
+  prevPageScaleRatio: number
   preScrollPos: {
-    top: number,
+    top: number
     left: number
-  },
-  steps: Array<string>,
-  currStep: number,
-  isProcessing: boolean,
+  }
+  steps: Array<string>
+  currStep: number
+  isProcessing: boolean
   idInfo: {
-    pageId: number,
+    pageId: number
     layerId: number
   }
 }
 
 const getDefaultState = (): IBgRemoveState => ({
   inBgRemoveMode: false,
-  brushSize: 16,
+  brushSize: 50,
   showInitImage: false,
   clearMode: true,
   restoreInitState: false,
@@ -100,7 +100,7 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
   getIsProcessing(state: IBgRemoveState): boolean {
     return state.isProcessing
   },
-  getIdInfo(state: IBgRemoveState): { pageId: number, layerId: number } {
+  getIdInfo(state: IBgRemoveState): { pageId: number; layerId: number } {
     return state.idInfo
   }
 }
@@ -151,7 +151,7 @@ const mutations: MutationTree<IBgRemoveState> = {
   SET_prevPageScaleRatio(state: IBgRemoveState, val: number) {
     state.prevPageScaleRatio = val
   },
-  SET_prevScrollPos(state: IBgRemoveState, pos: { top: number, left: number }) {
+  SET_prevScrollPos(state: IBgRemoveState, pos: { top: number; left: number }) {
     Object.assign(state.preScrollPos, pos)
   },
   CLEAR_bgRemoveState(state: IBgRemoveState) {
