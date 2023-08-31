@@ -29,8 +29,7 @@
       "esnext",
       "dom",
       "dom.iterable",
-      "scripthost",
-      "webworker"
+      "scripthost"
     ]
   },
   "vueCompilerOptions": {

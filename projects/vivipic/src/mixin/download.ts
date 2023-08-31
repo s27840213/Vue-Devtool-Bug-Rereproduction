@@ -244,8 +244,8 @@ export default defineComponent({
        * @Todo check the upload design function
        */
       return uploadUtils.uploadExportJSON(id)
-        .then((res: any) => {
-          const { status } = res?.target
+        .then((res) => {
+          const { status } = res.target as XMLHttpRequest
           if (status === 204) {
             this.addExportId(id)
             this.exportId = id

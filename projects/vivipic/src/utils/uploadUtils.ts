@@ -1556,7 +1556,7 @@ class UploadUtils {
     }
   }
 
-  uploadExportJSON(exportId: string, json?: any | string) {
+  uploadExportJSON(exportId: string, json?: any | string): Promise<ProgressEvent> {
     return new Promise((resolve) => {
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {

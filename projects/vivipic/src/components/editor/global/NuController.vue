@@ -232,7 +232,7 @@ import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
-import StepsUtils from '@/utils/stepsUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
@@ -489,7 +489,7 @@ export default defineComponent({
           editor.setEditable(newVal)
         })
       }
-      !this.$isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
+      !this.$isTouchDevice() && stepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
   unmounted() {
@@ -945,7 +945,6 @@ export default defineComponent({
         return
       }
       this.isControlling = false
-      // StepsUtils.record()
       if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
         const newLayer = TextUtils.resetScaleForLayer(this.config as AllLayerTypes)
         LayerUtils.replaceLayer(this.pageIndex, this.layerIndex, newLayer)
@@ -956,7 +955,7 @@ export default defineComponent({
         }
         tiptapUtils.updateHtml()
       }
-      StepsUtils.asyncRecord()
+      stepsUtils.record()
 
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.scaling)
@@ -1030,8 +1029,7 @@ export default defineComponent({
       }
       this.isControlling = false
       this.isLineEndMoving = false
-      StepsUtils.asyncRecord()
-      // StepsUtils.record()
+      stepsUtils.record()
 
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.lineEndMoving)
@@ -1244,8 +1242,7 @@ export default defineComponent({
         ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, shapeUtils.clipCorRad(this.config.shapeType, this.config.vSize, this.config.size))
       }
       this.isControlling = false
-      // StepsUtils.record()
-      StepsUtils.asyncRecord()
+      stepsUtils.record()
 
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.resizing)
@@ -1338,8 +1335,7 @@ export default defineComponent({
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1
-      // StepsUtils.record()
-      StepsUtils.asyncRecord()
+      stepsUtils.record()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.rotating)
       eventUtils.removePointerEvent('pointerup', this.rotateEnd)
@@ -1407,8 +1403,7 @@ export default defineComponent({
     lineRotateEnd() {
       this.isRotating = false
       this.isControlling = false
-      // StepsUtils.record()
-      StepsUtils.asyncRecord()
+      stepsUtils.record()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.lineRotating)
       eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)

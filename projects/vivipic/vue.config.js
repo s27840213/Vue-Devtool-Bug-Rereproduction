@@ -88,14 +88,14 @@ module.exports = defineConfig({
             .end()
 
         // set worker-loader
-        config.module
-            .rule('worker')
-            .test(/\.worker\.(j|t)s$/)
-            .exclude.add(/node_modules/)
-            .end()
-            .use('worker-loader')
-            .loader('worker-loader')
-            .end()
+        // config.module
+        //     .rule('worker')
+        //     .test(/\.worker\.(j|t)s$/)
+        //     .exclude.add(/node_modules/)
+        //     .end()
+        //     .use('worker-loader')
+        //     .loader('worker-loader')
+        //     .end()
         // config.module
         //     .rule('worker')
         //     .test(/\.worker\.ts$/)
@@ -105,7 +105,7 @@ module.exports = defineConfig({
 
         // 解决：worker 热更新问题
         // config.module.rule('js').exclude.add(/\.worker\.js$/)
-        config.module.rule('ts').exclude.add(/\.worker\.ts$/)
+        // config.module.rule('ts').exclude.add(/\.worker\.ts$/)
 
         // 先刪除預設的svg配置，否則svg-sprite-loader會失效
         config.module.rules.delete('svg')

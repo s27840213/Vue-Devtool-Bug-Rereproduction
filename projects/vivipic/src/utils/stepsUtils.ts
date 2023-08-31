@@ -16,7 +16,6 @@ import TextPropUtils from './textPropUtils'
 import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
-import workerUtils from './workerUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -268,47 +267,6 @@ class StepsUtils {
       // Don't upload the design when initialize the steps
       if (uploadUtils.isLogin) {
         uploadUtils.uploadDesign()
-      }
-    }
-    // console.warn(generalUtils.deepCopy(this.steps))
-  }
-
-  async asyncRecord() {
-    const pages = generalUtils.unproxify(store.getters.getPages)
-    const selectedInfo = generalUtils.unproxify(store.getters.getCurrSelectedInfo)
-    const clonedData = await workerUtils.asyncCloneDeep({
-      pages_1: pages,
-      selectedInfo: selectedInfo
-    })
-    const pages_2 = await workerUtils.asyncCloneDeep(pages)
-
-    if (clonedData) {
-      const pages = this.filterDataForLayersInPages(clonedData.pages_1)
-      const currSelectedInfo = clonedData.selectedInfo
-      const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
-      /**
-       * The following code modify the wrong config state cause by the async
-       */
-      if (currSelectedInfo.layers.length === 1) {
-        currSelectedInfo.layers[0].active = true
-      }
-
-      // There's not any steps before, create the initial step first
-      if (this.currStep < 0) {
-        this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
-        this.currStep++
-      } else {
-        // if step isn't in last step and we record new step, we need to remove all steps larger than curr step
-        this.steps.length = this.currStep + 1
-        if (this.steps.length === this.MAX_STORAGE_COUNT) {
-          this.steps.shift()
-        }
-        this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
-        this.currStep = this.steps.length - 1
-        // Don't upload the design when initialize the steps
-        if (uploadUtils.isLogin) {
-          uploadUtils.uploadDesign(undefined, { clonedPages: pages_2 })
-        }
       }
     }
     // console.warn(generalUtils.deepCopy(this.steps))

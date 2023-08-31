@@ -453,7 +453,7 @@ export default defineComponent({
       const primaryLayer = this.primaryLayer
       const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
       if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg) {
-        const { scale } = this.config.parentLayerStyles || primaryLayer?.styles
+        const { scale } = this.config.parentLayerStyles || primaryLayer?.styles || { scale: 1 }
         renderW *= scale
         renderH *= scale
       }

@@ -571,7 +571,7 @@ export class MovingUtils {
           // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
         } else {
           if (!(this.config as IImage).isHoveringFrame) {
-            stepsUtils.asyncRecord()
+            stepsUtils.record()
           }
         }
       } else {
