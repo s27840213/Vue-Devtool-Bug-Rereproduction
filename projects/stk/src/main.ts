@@ -70,6 +70,9 @@ store.commit('user/SET_BroswerInfo', {
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $isTouchDevice: () => boolean,
+    $isPic: boolean
+    $isStk: boolean
+    $isCm: boolean
     $eventBus: Emitter<Record<EventType, unknown>>
   }
   function provide<T>(key: InjectionKey<T> | string | number, value: T | ComputedRef<T>): void
@@ -77,6 +80,9 @@ declare module '@vue/runtime-core' {
 // app.config.unwrapInjectedRef = true
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 app.config.globalProperties.$isTablet = () => generalUtils.isTablet()
+app.config.globalProperties.$isPic = generalUtils.isPic
+app.config.globalProperties.$isStk = generalUtils.isStk
+app.config.globalProperties.$isCm = generalUtils.isCm
 app.config.globalProperties.$eventBus = eventBus
 
 const tooltipUtils = new TooltipUtils()
