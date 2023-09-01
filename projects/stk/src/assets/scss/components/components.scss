@@ -1,0 +1,55 @@
+@use '@/assets/scss/utils' as *;
+
+.action-bar {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: setColor(gray-6);
+
+  &--small {
+    padding: 10px 5px;
+  }
+
+  &--mobile {
+    padding: 15px 0px;
+    background-color: setColor(gray-7);
+    justify-content: space-evenly;
+  }
+}
+
+.size-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid setColor(gray-4);
+  border-radius: 3px;
+
+  >div {
+    padding: 4px 8px;
+
+    &:nth-child(1) {
+      border-right: 1px solid setColor(gray-4);
+    }
+
+    &:nth-child(3) {
+      border-left: 1px solid setColor(gray-4);
+    }
+  }
+}
+
+.feature-button {
+  border-radius: 3px;
+
+  &.disabled {
+    opacity: .3;
+  }
+
+  &.active {
+    background-color: setColor(gray-4);
+  }
+
+  // ViviSticker has mobile version only, hence doesn't need hover
+  // &:not(.disabled):hover {
+  //   background-color: setColor(gray-5);
+  // }
+}

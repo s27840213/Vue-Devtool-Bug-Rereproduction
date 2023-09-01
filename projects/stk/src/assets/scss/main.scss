@@ -1,0 +1,44 @@
+@forward "@/assets/scss/base";
+@forward "@/assets/scss/components";
+// @import "@/assets/scss/components/tmpFonts";
+@import '~vue-virtual-scroller/dist/vue-virtual-scroller.css';
+@import '~floating-vue/dist/style.css';
+
+
+// css import rule- https://ithelp.ithome.com.tw/m/articles/10260013
+html,
+body {
+    font-family: 'NOTO SANS TC', sans-serif;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    touch-action: manipulation;
+    overflow: hidden; // Fallback for older version browser that doesn't support clip.
+    overflow: clip;
+    -webkit-user-select: none; // vivisticker only
+    user-select: none; // vivisticker only
+    -webkit-touch-callout: none; // vivisticker only
+    -webkit-text-size-adjust: 100%;
+}
+
+[contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+input,
+button,
+select {
+    font-family: inherit;
+}
+
+
+.inputNode {
+    position: absolute;
+    visibility: hidden;
+}

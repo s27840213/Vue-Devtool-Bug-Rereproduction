@@ -1,0 +1,292 @@
+<template lang="pug">
+div(class="bg-setting")
+  span(class="bg-setting__title text-blue-1 text-H6") {{$t('NN0142')}}
+  div(class="action-bar flex-evenly")
+    svg-icon(class="btn-opacity pointer p-5 feature-button"
+      iconName="transparency" :iconWidth="'20px'"
+      :class="{ 'disabled': backgroundLocked }"
+      :iconColor="'gray-2'"
+      @click="openSliderPopup()"
+      v-hint="$t('NN0030')"
+    )
+    svg-icon(class="pointer p-5 feature-button"
+      :class="{ 'active': backgroundLocked }"
+      :iconName="backgroundLocked ? 'unlock' : 'lock'"
+      :iconWidth="'20px'"
+      :iconColor="'gray-2'"
+      @click="handleLockBackground"
+      v-hint="backgroundLocked ? $t('NN0382'): $t('NN0143')"
+    )
+    svg-icon(class="pointer p-5 feature-button"
+      :class="{ 'disabled': backgroundLocked }"
+      :iconColor="'gray-2'"
+      iconName="trash" :iconWidth="'20px'"
+      @click="handleDeleteBackground"
+      v-hint="$t('NN0034')"
+    )
+  div(:class="{ 'bg-setting__grid': isAdmin }")
+    nubtn(theme="edit" size="mid-full"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="handleControlBgImage") {{$t('NN0040')}}
+    nubtn(v-if="isAdmin" theme="edit" size="mid-full"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="handleShow('overlay')") {{$t('NN0899')}}
+  overlay(v-if="show === 'overlay'" class="mb-10" theme="light")
+  div(class="bg-setting__grid")
+    nubtn(theme="edit" size="mid-full"
+      :active="show === 'popup-flip'"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="handleShow('popup-flip')") {{$t('NN0038')}}
+    nubtn(theme="edit" size="mid-full"
+      :active="show === 'popup-adjust'"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="handleShow('popup-adjust')") {{$t('NN0042')}}
+  div(v-if="show === 'popup-flip'"
+    class="popup-flip"
+    v-click-outside="handleOutSide")
+    div(v-for="data in popupDatas"
+        :key="`popup-${data.icon}`"
+        class="popup-flip__item"
+        @click="() => handleImageFlip(data.icon)")
+      svg-icon(
+        class="pointer"
+        :iconName="data.icon"
+        :iconWidth="'12px'"
+        :iconColor="'gray-1'")
+      span(class="ml-5 body-2") {{data.text}}
+  popup-adjust(v-if="show === 'popup-adjust'"
+    :imageAdjust="backgroundAdjust"
+    @update="handleChangeBgAdjust"
+    v-click-outside="handleOutSide")
+  div(class="bg-setting__current-colors" :class="{lock: backgroundLocked}")
+    color-btn(:color="colorSlipsIcon"
+              :active="colorSlipsIcon !== 'multi' && showColorSlips"
+              @click="handleColorPicker()")
+</template>
+
+<script lang="ts">
+import Overlay from '@/components/editor/overlay/Overlay.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import PopupAdjust from '@/components/popup/PopupAdjust.vue'
+import i18n from '@/i18n'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import backgroundUtils from '@/utils/backgroundUtils'
+import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
+
+export default defineComponent({
+  components: {
+    PopupAdjust,
+    ColorBtn,
+    Overlay,
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
+  emits: ['toggleColorPanel'],
+  data() {
+    return {
+      show: '',
+      popupDatas: [
+        { icon: 'flip-h', text: `${this.$t('NN0053')}` },
+        { icon: 'flip-v', text: `${this.$t('NN0054')}` }
+      ],
+    }
+  },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
+  computed: {
+    ...mapGetters({
+      isAdmin: 'user/isAdmin',
+    }),
+    backgroundColor(): string {
+      return this.currPage.backgroundColor
+    },
+    backgroundOpacity(): number {
+      const { styles: { opacity } } = this.currPage.backgroundImage.config
+      return opacity
+    },
+    backgroundAdjust(): any {
+      const { styles: { adjust } } = this.currPage.backgroundImage.config
+      return adjust
+    },
+    backgroundLocked(): boolean {
+      const { locked } = this.currPage.backgroundImage.config
+      return locked
+    },
+    backgroundImage(): any {
+      return this.currPage.backgroundImage.config?.srcObj ?? {}
+    },
+    backgroundImgControl(): boolean {
+      return this.currPage.backgroundImage.config?.imgControl ?? false
+    },
+    backgroundImgFlip(): boolean[] {
+      const { horizontalFlip = false, verticalFlip = false } = this.currPage.backgroundImage.config?.styles || {}
+      return [horizontalFlip, verticalFlip]
+    },
+    isShowImage(): boolean {
+      return this.backgroundImage.assetId
+    },
+    showColorSlips(): boolean {
+      return editorUtils.showColorSlips
+    },
+    colorSlipsIcon(): string {
+      if (this.backgroundImage.assetId) return 'multi'
+      else return this.backgroundColor
+    }
+  },
+  mounted() {
+    popupUtils.on(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
+    colorUtils.on(ColorEventType.background, this.handleChangeBgColor)
+    colorUtils.onStop(ColorEventType.background, this.recordChange)
+  },
+  beforeUnmount() {
+    popupUtils.event.off(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
+    colorUtils.event.off(ColorEventType.background, this.handleChangeBgColor)
+    colorUtils.offStop(ColorEventType.background, this.recordChange)
+  },
+  methods: {
+    ...mapMutations({
+      updateLayerStyles: 'UPDATE_layerStyles',
+      setBgColor: 'SET_backgroundColor',
+      removeBg: 'REMOVE_background',
+      setBgOpacity: 'SET_backgroundOpacity',
+      setBgImageControl: 'SET_backgroundImageControl',
+      setBgImageStyles: 'SET_backgroundImageStyles'
+    }),
+    handleDeleteBackground() {
+      backgroundUtils.handleDeleteBackground()
+    },
+    handleLockBackground() {
+      backgroundUtils.handleLockBackground()
+    },
+    handleChangeBgColor(color: string) {
+      this.setBgColor({
+        pageIndex: pageUtils.currFocusPageIndex,
+        color
+      })
+    },
+    handleChangeBgOpacity(opacity: number) {
+      this.setBgOpacity({
+        pageIndex: pageUtils.currFocusPageIndex,
+        // opacity: `${opacity}`
+        opacity
+      })
+    },
+    handleControlBgImage() {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+      this.setBgImageControl({
+        pageIndex: pageUtils.currFocusPageIndex,
+        imgControl: !this.backgroundImgControl
+      })
+    },
+    handleChangeBgAdjust(adjust: any) {
+      this.setBgImageStyles({
+        pageIndex: pageUtils.currFocusPageIndex,
+        styles: {
+          adjust: { ...adjust }
+        }
+      })
+    },
+    openSliderPopup() {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+      const { backgroundOpacity } = this
+      popupUtils.setCurrEvent(PopupSliderEventType.opacity)
+      popupUtils.setSliderConfig(Object.assign({ value: backgroundOpacity, noText: false }, MappingUtils.mappingMinMax('opacity')))
+      popupUtils.openPopup('slider', {
+        posX: 'left',
+        target: '.btn-opacity'
+      })
+    },
+    handleShow(name: string) {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+      this.show = this.show.includes(name) ? '' : name
+    },
+    handleColorPicker() {
+      if (this.backgroundLocked) return this.handleLockedNotify()
+      colorUtils.setCurrEvent(ColorEventType.background)
+      colorUtils.setCurrColor(this.backgroundColor)
+      editorUtils.toggleColorSlips(true)
+    },
+    handleImageFlip(flipIcon: string) {
+      const [h, v] = this.backgroundImgFlip
+      this.setBgImageStyles({
+        pageIndex: pageUtils.currFocusPageIndex,
+        styles: {
+          horizontalFlip: flipIcon === 'flip-h' ? !h : h,
+          verticalFlip: flipIcon === 'flip-v' ? !v : v
+        }
+      })
+      stepsUtils.record()
+    },
+    handleLockedNotify() {
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+    },
+    handleOutSide() {
+      this.show = ''
+    },
+    recordChange() {
+      stepsUtils.record()
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.bg-setting {
+  display: grid;
+  gap: 15px 12px;
+  text-align: left;
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
+    gap: 15px 12px;
+  }
+  &__current-colors {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    &.lock { opacity: 0.3; }
+  }
+}
+
+.popup-flip {
+  display: inline-block;
+  border-radius: 5px;
+  box-shadow: 0px 0px 7px rgb(24 25 31 / 25%);
+  &__item {
+    display: flex;
+    align-items: center;
+    transition: background-color 0.1s ease-in;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    &:hover {
+      background-color: setColor(blue-3, 0.5);
+    }
+    &:active {
+      background-color: setColor(blue-3);
+    }
+    > span {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.action-bar {
+  padding: 10px 15px;
+}
+</style>

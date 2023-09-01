@@ -149,14 +149,29 @@ function allDeploy(autoDeploy = '') {
     pullRequest()
   ]
 }
+function stkAllDeploy() {
+  const deploys = [
+    { sub: 'dev5', name: 'dev5 Alan' },
+    { sub: 'dev4', name: 'dev4 Gary' },
+    { sub: 'dev3', name: 'dev3 HsingChi' },
+    { sub: 'dev2', name: 'dev2 TingAn' },
+    { sub: 'dev1', name: 'dev1 Nathan' },
+    { sub: 'dev0', name: 'dev0 ZhengYan' },
+  ]
+  return [
+    ...deploys.map((dep) => getDeploy(dep.name, `stk${dep.sub}`, `STICKER_${dep.sub}`, 'STICKER')),
+  ]
+}
 
 const result = {
   image: 'node:14.16.0',
   pipelines: {
     default: [{
-      parallel: versionCheckAndBuild()
+      parallel: versionCheckAndBuild() // For pic
+      // parallel: versionCheckAndBuild(false) // For stk
     }, {
-      parallel: allDeploy(),
+      parallel: allDeploy(), // For pic
+      // parallel: stkAllDeploy(), // For stk
     }],
     branches: {
       master: [{
@@ -183,6 +198,21 @@ const result = {
           getDeploy('deploy qa', 'qa', 'QA'),
           pullRequest()
         ]
+      }],
+      'stk-hotfix': [{
+        parallel: versionCheckAndBuild(false)
+      }, {
+        parallel: [...stkAllDeploy(), pullRequest()],
+      }],
+      'app/vivisticker': [{
+        parallel: versionCheckAndBuild(false)
+      }, {
+        parallel: [getDeploy('deploy prod', 'stickerproduction', 'STICKER', 'STICKER', true)]
+      }],
+      'app/vivisticker-develop': [{
+        parallel: versionCheckAndBuild(false)
+      }, {
+        parallel: [getDeploy('deploy test', 'stkrd', 'STICKER_RD', 'STICKER'), pullRequest()] // add pull request to app/vivisticker
       }],
       // 'feature/?': [{
       //   parallel: versionCheckAndBuild()

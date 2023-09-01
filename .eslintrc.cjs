@@ -28,7 +28,8 @@ module.exports = {
   // to prevent commitlint.config.js to throw error
   env: {
     'cypress/globals': true,
-    node: true
+    node: true,
+    'vue/setup-compiler-macros': true
   },
   rules: {
     'no-console': 'off',

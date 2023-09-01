@@ -1,0 +1,27 @@
+@use '@/assets/scss/utils' as *;
+
+/*
+	example: class="text-blue-1 bg-blue-1"
+*/
+@each $type,
+$color in $colors {
+	.text-#{""+$type} {
+		// add "" to prevent warning 
+		color: $color;
+	}
+
+	.bg-#{""+$type} {
+		// add "" to prevent warning 
+		background-color: $color;
+	}
+
+	.border-#{""+$type} {
+		// add "" to prevent warning 
+		border: 2px solid $color;
+	}
+
+	.outline-#{""+$type} {
+		// add "" to prevent warning 
+		outline: 2px solid $color;
+	}
+}

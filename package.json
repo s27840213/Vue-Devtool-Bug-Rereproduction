@@ -6,7 +6,7 @@
   "scripts": {
     "cm": "nx dev @nu/cm",
     "pic": "nx serve @nu/pic",
-    "stk": "nx dev stk",
+    "stk": "nx serve @nu/stk",
     "install-all": "pnpm install",
     "cyrun": "npx cypress run --browser chromium --env preserveOriginalScreenshot=true",
     "cyopen": "npx cypress open --e2e -b chrome",

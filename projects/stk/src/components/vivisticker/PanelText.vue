@@ -1,0 +1,484 @@
+<template lang="pug">
+div(class="overflow-container full-size rwd-container")
+  div(class="panel-text" :class="{'in-category': isInCategory, 'with-search-bar': !isInCategory}")
+    search-bar(v-if="!isInCategory"
+      class="panel-text__searchbar"
+      :class="{'no-top': isInEditor}"
+      :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
+      clear
+      :defaultKeyword="keywordLabel"
+      vivisticker="dark"
+      :color="{close: 'black-5', search: 'black-5'}"
+      v-model:expanded="isSearchBarExpanded"
+      @search="handleSearch")
+    Tags(v-show="tags && tags.length"
+        class="panel-text__tags"
+        :class="{collapsed: !isSearchBarExpanded, 'in-category': isInCategory}"
+        :tags="tags"
+        :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+        ref="tags"
+        theme="dark"
+        @search="handleSearch"
+        @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
+    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    category-list(v-for="item in categoryListArray"
+      :class="{collapsed: tags && tags.length && !isSearchBarExpanded}"
+      v-show="item.show" :ref="item.key" :key="item.key"
+      :list="item.content" @loadMore="handleLoadMore")
+      template(#before)
+        div(class="panel-text__top-item")
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+      template(v-slot:category-list-rows="{ list, title, url }")
+        category-list-rows(
+          v-if="!keyword"
+          :list="list"
+          :title="title"
+          :url="url"
+          :columnGap="isTablet ? 5 : 10"
+          @action="handleCategorySearch")
+          template(v-slot:preview="{ item }")
+            category-text-item(class="panel-text__item"
+              :item="item"
+              :itemWidth="itemWidth")
+      template(v-slot:category-text-item="{ list, title }")
+        div(v-if="title" class="panel-text__header") {{ title }}
+        div(class="panel-text__items" :style="itemsStyles")
+          category-text-item(v-for="item in list"
+            class="panel-text__item"
+            :key="item.id"
+            :item="item"
+            :itemWidth="itemWidth"
+            :style="{margin: isTablet ? 0 : '0 auto'}")
+    btn-add(v-if="!keyword && !showAllRecently" class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
+</template>
+
+<script lang="ts">
+import listApi from '@/apis/list'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
+import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
+import Tags, { ITag } from '@/components/global/Tags.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
+import i18n from '@/i18n'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import AssetUtils from '@/utils/assetUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+
+type refTarget = 'mainContent' | 'searchResult'
+
+export default defineComponent({
+  name: 'panel-text',
+  components: {
+    SearchBar,
+    Tags,
+    CategoryList,
+    CategoryListRows,
+    CategoryTextItem,
+    BtnAdd
+  },
+  data() {
+    return {
+      targets: ['mainContent', 'searchResult'] as refTarget[],
+      elMainContent: undefined as HTMLElement | undefined,
+      scrollTop: {
+        mainContent: 0,
+        searchResult: 0
+      },
+      isSearchBarExpanded: false,
+      tagScrollLeft: 0
+    }
+  },
+  created() {
+    this.isSearchBarExpanded = !!this.keyword
+  },
+  computed: {
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio',
+      getLayersNum: 'getLayersNum',
+      isInEditor: 'vivisticker/getIsInEditor',
+      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
+      editorBg: 'vivisticker/getEditorBg',
+      pending: 'textStock/pending',
+      tagsBar: 'textStock/tagsBar'
+    }),
+    ...mapState({
+      isTablet: 'isTablet'
+    }),
+    ...mapState('textStock', {
+      categories: 'categories',
+      rawContent: 'content',
+      rawSearchResult: 'searchResult',
+      keyword: 'keyword'
+    }),
+    isInCategory(): boolean {
+      return this.isTabInCategory('text')
+    },
+    showAllRecently(): boolean {
+      return this.isTabShowAllRecently('text')
+    },
+    keywordLabel(): string {
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
+    },
+    listCategories(): ICategoryItem[] {
+      const titleHeight = 46
+      const gap = this.isTablet ? 20 : 14
+      const { categories } = this
+      return (categories as IListServiceContentData[])
+        .filter(category => category.list.length > 0)
+        .map((category, index) => ({
+          size: 80 + titleHeight + gap,
+          id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
+          type: 'category-list-rows',
+          list: category.is_recent ? category.list.slice(0, 10) : category.list,
+          title: category.title,
+          url: category.url
+        }))
+    },
+    listRecently(): ICategoryItem[] {
+      const { categories } = this
+      const list = (categories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
+      const result = new Array(Math.ceil(list.length / 3))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-text-item',
+            list: rowItems,
+            size: 90,
+            title: ''
+          }
+        })
+      return result
+    },
+    listResult(): ICategoryItem[] {
+      return this.processListResult(this.rawContent.list, false)
+    },
+    searchResult(): ICategoryItem[] {
+      const list = this.processListResult(this.rawSearchResult.list, true)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    mainContent(): ICategoryItem[] {
+      if (this.showAllRecently) {
+        return this.listRecently
+      }
+      const list = this.listCategories.concat(this.listResult)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    categoryListArray(): ICategoryList[] {
+      return [{
+        content: this.searchResult,
+        show: this.keyword,
+        key: 'searchResult'
+      }, {
+        content: this.mainContent,
+        show: !this.keyword,
+        key: 'mainContent'
+      }]
+    },
+    emptyResultMessage(): string {
+      const { keyword, pending } = this
+      if (pending || !keyword || this.searchResult.length > 0 || this.showAllRecently) return ''
+      return `${i18n.global.t('NN0393', {
+          keyword: this.keywordLabel,
+          target: i18n.global.t('NN0005').toLowerCase()
+        })}`
+    },
+    itemWidth(): number {
+      return this.isTablet ? 200 : (window.outerWidth - 68) / 3 - 10
+    },
+    itemsStyles() {
+      return this.isTablet ? {
+        gridTemplateColumns: 'repeat(3, 200px)',
+        justifyContent: 'space-around'
+      } : {
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        columnGap: '10px'
+      }
+    },
+    tags(): ITag[] {
+      return this.showAllRecently ? [] : this.tagsBar
+    },
+  },
+  mounted() {
+    // skip transitions after tags load
+    const unwatch = this.$watch('tags.length', () => {
+      this.toggleTransitions(false)
+      window.requestAnimationFrame(() => {
+        this.toggleTransitions(true)
+      })
+      unwatch()
+    })
+    eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
+    if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending || this.$options.name === 'panel-text-us') return
+    generalUtils.panelInit('text',
+      this.handleSearch,
+      this.handleCategorySearch,
+      async ({ reset }: {reset: boolean}) => {
+        await this.getRecAndCate({ reset, key: 'textStock' })
+      })
+    this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
+  },
+  beforeUnmount() {
+    eventUtils.off(PanelEvent.scrollPanelTextToTop)
+  },
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0].$el
+      mainContent.scrollTop = this.scrollTop.mainContent
+      searchResult.scrollTop = this.scrollTop.searchResult
+      mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+      searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    })
+  },
+  deactivated() {
+    if (!this.keyword) this.isSearchBarExpanded = false
+  },
+  watch: {
+    keyword(newVal: string) {
+      if (!newVal) {
+        this.$nextTick(() => {
+          const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
+          // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
+          mainContent.scrollTop = this.scrollTop.mainContent
+        })
+      }
+    },
+    isInCategory() {
+      // skip transitions when entering or leaving category
+      this.toggleTransitions(false)
+      window.requestAnimationFrame(() => {
+        this.toggleTransitions(true)
+      })
+    }
+  },
+  methods: {
+    ...mapActions('textStock', [
+      'getContent',
+      'getTagContent',
+      'getRecently',
+      'getRecAndCate',
+      'getMoreContent',
+      'resetSearch'
+    ]),
+    ...mapMutations({
+      setSettingsOpen: 'brandkit/SET_isSettingsOpen'
+    }),
+    scrollToTop() {
+      for (const list of this.categoryListArray) {
+        if (list.show) {
+          const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
+          const top = categoryList.$el.querySelector('.panel-text__top-item') as HTMLElement
+          top.scrollIntoView({ behavior: 'smooth' })
+        }
+      }
+    },
+    async handleSearch(keyword: string) {
+      this.resetSearch({ keepSearchResult: true })
+      if (keyword) {
+        this.getTagContent({ keyword })
+        this.isSearchBarExpanded = true
+      }
+    },
+    async handleCategorySearch(keyword: string, locale = '') {
+      this.resetSearch()
+      if (keyword) {
+        if (keyword === `${this.$t('NN0024')}`) {
+          vivistickerUtils.setShowAllRecently('text', true)
+        } else {
+          this.getContent({ keyword, locale })
+        }
+        vivistickerUtils.setIsInCategory('text', true)
+      }
+    },
+    handleLoadMore() {
+      this.getMoreContent()
+    },
+    async addStandardText() {
+      listApi.addDesign('add_text', 'text')
+      let recentFont
+      if (vivistickerUtils.checkVersion('1.5')) {
+        recentFont = await vivistickerUtils.getState('recentFont')
+      }
+      const color = vivistickerUtils.getContrastColor(this.editorBg)
+      await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {
+        size: 21,
+        color,
+        weight: 'normal',
+        ...(recentFont ?? {})
+      })
+    },
+    handleAddText() {
+      if (this.isInEditor) {
+        this.addStandardText()
+      } else {
+        vivistickerUtils.startEditing(
+          'text',
+          { plan: 0, assetId: '' },
+          async () => {
+            console.log('start editing standard text')
+            await this.addStandardText()
+            return true
+          },
+          vivistickerUtils.getEmptyCallback()
+        )
+      }
+    },
+    handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
+      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
+    },
+    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
+      const titleHeight = 46
+      const gap = this.isTablet ? 20 : 24
+      return new Array(Math.ceil(list.length / 3))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 3, (idx + 1) * 3)
+          const title = !isSearch && !idx ? `${this.$t('NN0340')}` : ''
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-text-item',
+            list: rowItems,
+            title,
+            size: 80 + gap + (title ? titleHeight : 0) // 80(object height) + 24(gap) + 0/46(title)
+          }
+        })
+    },
+    toggleTransitions(enable: boolean) {
+      // tags
+      const elTags = (this.$refs.tags as any)?.$el as HTMLElement
+      if (elTags) elTags.style.transition = enable ? '' : 'none'
+
+      // category list
+      const ref = this.$refs as Record<string, CCategoryList[]>
+      for (const name of this.targets) {
+        ref[name][0].$el.style.transition = enable ? '' : 'none'
+      }
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.overflow-container {
+  overflow: clip;
+}
+.search-bar {
+  flex: 0 0 auto;
+}
+.panel-text {
+  @include size(100%, 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: white;
+  &__searchbar {
+    margin-top: 10px;
+    &.no-top {
+      margin-top: 0;
+    }
+  }
+  &__tags {
+    margin: 7px 0 10px;
+    color: setColor(black-5);
+  }
+  &__brand-header {
+    margin-top: 10px;
+    margin-bottom: 13px;
+  }
+  &__brand-settings {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
+  &__item {
+    width: 80px;
+    height: 80px;
+    padding: 0 5px;
+    box-sizing: border-box;
+    // object-fit: contain;
+    // vertical-align: middle;
+  }
+  &__items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 10px;
+  }
+  &.with-search-bar {
+    height: calc(100% + 49px); // 42px (serach bar height) + 7px (margin-top of tags) = 49px
+    .panel-text__tags {
+      clip-path: inset(0 0 0 0);
+      transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
+      &.collapsed {
+        transform: translateY(-49px);
+        clip-path: inset(0 42px 0 0);
+      }
+    }
+    .category-list {
+      transition: transform 200ms 100ms ease-in-out;
+      &.collapsed{
+        transform: translateY(-49px) translateZ(0);
+      }
+    }
+    &:deep(.vue-recycle-scroller__item-wrapper) {
+      margin-bottom: 49px;
+    }
+    &:deep(.tags__flex-container-mobile) {
+      width: max-content;
+      padding-right: 42px;
+    }
+  }
+  &.in-category:deep(.vue-recycle-scroller__item-wrapper) {
+    margin-top: 24px;
+  }
+  &__header {
+    grid-column: 1 / 4;
+    line-height: 26px;
+    color: #ffffff;
+    padding: 10px 0;
+    text-align: left;
+  }
+  &__text-button-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+    margin-bottom: 14px;
+    padding: 14px 0;
+    box-sizing: border-box;
+    background-color: setColor(black-3);
+    border-radius: 10px;
+    &:active {
+      background-color: setColor(black-1-5);
+    }
+    & > span {
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 28px;
+      color: white;
+    }
+  }
+}
+</style>

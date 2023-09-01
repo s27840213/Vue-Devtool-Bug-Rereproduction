@@ -1,0 +1,83 @@
+@use '@/assets/scss/base/typography.scss' as *;
+@use '@/assets/scss/utils' as *;
+
+.scrollbar-white {
+  overscroll-behavior: contain;
+
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: white transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 15px;
+    height: 15px;
+    background-color: unset;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: white;
+  }
+}
+
+.scrollbar-gray {
+  overscroll-behavior: contain;
+
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: setColor(gray-3) transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 15px;
+    height: 15px;
+    background-color: unset;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: setColor(gray-3);
+  }
+}
+
+
+.scrollbar-white-thin {
+  overscroll-behavior: contain;
+
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: white transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background-color: unset;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: white;
+  }
+}
+
+.scrollbar-gray-thin {
+  overscroll-behavior: contain;
+
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: setColor(gray-3) transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background-color: unset;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: setColor(gray-3);
+  }
+}

@@ -203,6 +203,367 @@ importers:
         specifier: ^1.8.6
         version: 1.8.8(typescript@5.2.2)
 
+  projects/stk:
+    dependencies:
+      '@ctrl/tinycolor':
+        specifier: ^3.5.0
+        version: 3.6.1
+      '@dreysolano/prerender-spa-plugin':
+        specifier: ^1.0.3
+        version: 1.0.3
+      '@flatten-js/core':
+        specifier: ^1.3.3
+        version: 1.4.2
+      '@gtm-support/vue2-gtm':
+        specifier: ^1.2.1
+        version: 1.3.0(vue@3.3.4)
+      '@kyvg/vue3-notification':
+        specifier: ^2.7.0
+        version: 2.9.1(vue@3.3.4)
+      '@pixi/filter-kawase-blur':
+        specifier: ^5.1.1
+        version: 5.1.1(@pixi/core@7.2.4)
+      '@sentry/browser':
+        specifier: ^6.11.0
+        version: 6.19.7
+      '@sentry/tracing':
+        specifier: ^6.11.0
+        version: 6.19.7
+      '@sentry/vue':
+        specifier: ^6.11.0
+        version: 6.19.7(vue@3.3.4)
+      '@stripe/stripe-js':
+        specifier: ^1.27.0
+        version: 1.54.2
+      '@tiptap/extension-bubble-menu':
+        specifier: ^2.0.0-beta.209
+        version: 2.1.7(@tiptap/core@2.1.7)(@tiptap/pm@2.1.7)
+      '@tiptap/extension-document':
+        specifier: ^2.0.0-beta.15
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/extension-font-family':
+        specifier: ^2.0.0-beta.20
+        version: 2.1.7(@tiptap/core@2.1.7)(@tiptap/extension-text-style@2.1.7)
+      '@tiptap/extension-hard-break':
+        specifier: ^2.0.0-beta.30
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/extension-history':
+        specifier: ^2.0.0-beta.21
+        version: 2.1.7(@tiptap/core@2.1.7)(@tiptap/pm@2.1.7)
+      '@tiptap/extension-paragraph':
+        specifier: ^2.0.0-beta.23
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/extension-text':
+        specifier: ^2.0.0-beta.15
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/extension-text-style':
+        specifier: ^2.0.0-beta.23
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/pm':
+        specifier: ^2.0.0-beta.217
+        version: 2.1.7
+      '@tiptap/starter-kit':
+        specifier: ^2.0.0-beta.209
+        version: 2.1.7(@tiptap/pm@2.1.7)
+      '@tiptap/vue-3':
+        specifier: ^2.0.0-beta.209
+        version: 2.1.7(@tiptap/core@2.1.7)(@tiptap/pm@2.1.7)(vue@3.3.4)
+      '@types/platform':
+        specifier: ^1.3.4
+        version: 1.3.4
+      '@vue/compat':
+        specifier: ^3.1.0
+        version: 3.3.4(vue@3.3.4)
+      '@vue/composition-api':
+        specifier: ^1.6.2
+        version: 1.7.2(vue@3.3.4)
+      axios:
+        specifier: ^0.21.1
+        version: 0.21.4
+      core-js:
+        specifier: ^3.8.3
+        version: 3.32.1
+      dotenv:
+        specifier: ^8.2.0
+        version: 8.6.0
+      floating-vue:
+        specifier: ^2.0.0-beta.20
+        version: 2.0.0-beta.24(vue@3.3.4)
+      fontfaceobserver:
+        specifier: ^2.1.0
+        version: 2.3.0
+      graphemer:
+        specifier: ^1.4.0
+        version: 1.4.0
+      html2pdf.js:
+        specifier: ^0.10.1
+        version: 0.10.1
+      lottie-vuejs:
+        specifier: ^0.4.0
+        version: 0.4.0
+      lottie-web:
+        specifier: ^5.1.9
+        version: 5.12.2
+      mitt:
+        specifier: ^3.0.0
+        version: 3.0.1
+      open:
+        specifier: ^8.4.0
+        version: 8.4.2
+      pixi-filters:
+        specifier: ^5.2.1
+        version: 5.2.1(@pixi/core@7.2.4)(@pixi/filter-alpha@7.2.4)(@pixi/filter-blur@7.2.4)
+      pixi.js:
+        specifier: ^7.2.4
+        version: 7.2.4(@pixi/utils@7.2.4)
+      platform:
+        specifier: ^1.3.6
+        version: 1.3.6
+      prerender-spa-plugin-next:
+        specifier: ^4.2.3
+        version: 4.2.3(html-webpack-plugin@5.5.3)(webpack@5.88.2)
+      prosemirror-commands:
+        specifier: ^1.5.0
+        version: 1.5.2
+      prosemirror-dropcursor:
+        specifier: ^1.6.1
+        version: 1.8.1
+      prosemirror-gapcursor:
+        specifier: ^1.3.1
+        version: 1.3.2
+      prosemirror-history:
+        specifier: ^1.3.0
+        version: 1.3.2
+      prosemirror-keymap:
+        specifier: ^1.2.0
+        version: 1.2.2
+      prosemirror-model:
+        specifier: ^1.18.3
+        version: 1.19.3
+      prosemirror-schema-list:
+        specifier: ^1.2.2
+        version: 1.3.0
+      prosemirror-state:
+        specifier: ^1.4.2
+        version: 1.4.3
+      prosemirror-transform:
+        specifier: ^1.7.0
+        version: 1.7.5
+      prosemirror-view:
+        specifier: ^1.29.1
+        version: 1.31.7
+      pug-plain-loader:
+        specifier: ^1.1.0
+        version: 1.1.0(pug@3.0.2)
+      stackblur-canvas:
+        specifier: ^2.5.0
+        version: 2.6.0
+      svgo:
+        specifier: ^2.8.0
+        version: 2.8.0
+      svgo-loader:
+        specifier: ^3.0.1
+        version: 3.0.3
+      svgpath:
+        specifier: ^2.5.0
+        version: 2.6.0
+      tiny-emitter:
+        specifier: ^2.1.0
+        version: 2.1.0
+      tinycolor:
+        specifier: ^0.0.1
+        version: 0.0.1
+      tiptap-commands:
+        specifier: ^1.17.1
+        version: 1.17.1
+      uuid:
+        specifier: ^8.3.2
+        version: 8.3.2
+      vconsole:
+        specifier: ^3.14.6
+        version: 3.15.1
+      vite-plugin-optimize-persist:
+        specifier: ^0.1.2
+        version: 0.1.2(vite-plugin-package-config@0.1.1)(vite@2.9.16)
+      vite-plugin-package-config:
+        specifier: ^0.1.1
+        version: 0.1.1(vite@2.9.16)
+      vue:
+        specifier: ^3.2.45
+        version: 3.3.4
+      vue-collapsed:
+        specifier: ^1.1.2
+        version: 1.2.7
+      vue-eslint-parser:
+        specifier: ^9.1.1
+        version: 9.3.1(eslint@8.46.0)
+      vue-i18n:
+        specifier: ^9.1.0
+        version: 9.2.2(vue@3.3.4)
+      vue-i18n-bridge:
+        specifier: ^9.2.0-beta.10
+        version: 9.2.2(@vue/composition-api@1.7.2)(vue@3.3.4)
+      vue-meta:
+        specifier: ^3.0.0-alpha.9
+        version: 3.0.0-alpha.10(vue@3.3.4)
+      vue-notification:
+        specifier: ^1.3.20
+        version: 1.3.20(vue@3.3.4)
+      vue-recyclerview:
+        specifier: ^0.4.1
+        version: 0.4.1
+      vue-router:
+        specifier: ^4.0.8
+        version: 4.2.4(vue@3.3.4)
+      vue-virtual-scroller:
+        specifier: ^2.0.0-beta.8
+        version: 2.0.0-beta.8(vue@3.3.4)
+      vuex:
+        specifier: ^4.0.2
+        version: 4.1.0(vue@3.3.4)
+      vuex-map-fields:
+        specifier: ^1.4.1
+        version: 1.4.1
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.12.16
+        version: 7.22.11
+      '@intlify/vite-plugin-vue-i18n':
+        specifier: ^7.0.0
+        version: 7.0.0(vite@2.9.16)(vue-i18n@9.2.2)
+      '@intlify/vue-i18n-loader':
+        specifier: ^3.2.0
+        version: 3.3.0(vue@3.3.4)
+      '@originjs/vite-plugin-commonjs':
+        specifier: ^1.0.1
+        version: 1.0.3
+      '@originjs/vite-plugin-require-context':
+        specifier: 1.0.9
+        version: 1.0.9
+      '@rollup/plugin-alias':
+        specifier: ^4.0.2
+        version: 4.0.4
+      '@sentry/webpack-plugin':
+        specifier: ^1.17.1
+        version: 1.20.1
+      '@types/css-font-loading-module':
+        specifier: 0.0.6
+        version: 0.0.6
+      '@types/events':
+        specifier: ^3.0.0
+        version: 3.0.0
+      '@types/fs-extra':
+        specifier: ^11.0.1
+        version: 11.0.1
+      '@types/lodash':
+        specifier: ^4.14.170
+        version: 4.14.197
+      '@types/resize-observer-browser':
+        specifier: ^0.1.7
+        version: 0.1.7
+      '@types/tpdirect':
+        specifier: ^5.5.3
+        version: 5.5.3
+      '@types/uuid':
+        specifier: ^8.3.0
+        version: 8.3.4
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^5.50.0
+        version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.46.0)(typescript@5.2.2)
+      '@typescript-eslint/parser':
+        specifier: ^5.50.0
+        version: 5.62.0(eslint@8.46.0)(typescript@5.2.2)
+      '@vue/cli-plugin-babel':
+        specifier: ^5.0.1
+        version: 5.0.8(@vue/cli-service@5.0.8)(core-js@3.32.1)(vue@3.3.4)
+      '@vue/cli-plugin-eslint':
+        specifier: ~5.0.0
+        version: 5.0.8(@vue/cli-service@5.0.8)(eslint@8.46.0)
+      '@vue/cli-plugin-router':
+        specifier: ~5.0.0
+        version: 5.0.8(@vue/cli-service@5.0.8)
+      '@vue/cli-plugin-typescript':
+        specifier: ~5.0.0
+        version: 5.0.8(@vue/cli-service@5.0.8)(eslint@8.46.0)(typescript@5.2.2)(vue-template-compiler@2.7.14)(vue@3.3.4)
+      '@vue/cli-plugin-vuex':
+        specifier: ~5.0.0
+        version: 5.0.8(@vue/cli-service@5.0.8)
+      '@vue/cli-service':
+        specifier: ~5.0.0
+        version: 5.0.8(@vue/compiler-sfc@3.3.4)(prettier@3.0.1)(pug-plain-loader@1.1.0)(pug@3.0.2)(sass-loader@12.6.0)(vue-template-compiler@2.7.14)(vue@3.3.4)
+      '@vue/compiler-sfc':
+        specifier: ^3.0.0-beta.1
+        version: 3.3.4
+      '@vue/eslint-config-standard':
+        specifier: ^6.1.0
+        version: 6.1.0(@vue/cli-service@5.0.8)(eslint-plugin-import@2.28.1)(eslint-plugin-node@11.1.0)(eslint-plugin-promise@5.2.0)(eslint-plugin-vue@7.20.0)(eslint@8.46.0)(webpack@5.88.2)
+      esbuild-loader:
+        specifier: ^3.0.1
+        version: 3.2.0(webpack@5.88.2)
+      eslint-config-standard:
+        specifier: ^16.0.2
+        version: 16.0.3(eslint-plugin-import@2.28.1)(eslint-plugin-node@11.1.0)(eslint-plugin-promise@5.2.0)(eslint@8.46.0)
+      eslint-config-standard-jsx:
+        specifier: ^10.0.0
+        version: 10.0.0(eslint-plugin-react@7.33.2)(eslint@8.46.0)
+      eslint-loader:
+        specifier: ^4.0.2
+        version: 4.0.2(eslint@8.46.0)(webpack@5.88.2)
+      eslint-plugin-cypress:
+        specifier: ^2.12.1
+        version: 2.12.1(eslint@8.46.0)
+      eslint-plugin-import:
+        specifier: ^2.25.3
+        version: 2.28.1(@typescript-eslint/parser@5.62.0)(eslint@8.46.0)
+      eslint-plugin-node:
+        specifier: ^11.1.0
+        version: 11.1.0(eslint@8.46.0)
+      eslint-plugin-promise:
+        specifier: ^5.1.0
+        version: 5.2.0(eslint@8.46.0)
+      eslint-plugin-sonarjs:
+        specifier: ^0.20.0
+        version: 0.20.0(eslint@8.46.0)
+      eslint-plugin-standard:
+        specifier: ^4.1.0
+        version: 4.1.0(eslint@8.46.0)
+      eslint-plugin-unused-imports:
+        specifier: ^2.0.0
+        version: 2.0.0(@typescript-eslint/eslint-plugin@5.62.0)(eslint@8.46.0)
+      file-loader:
+        specifier: ^6.2.0
+        version: 6.2.0(webpack@5.88.2)
+      sass-loader:
+        specifier: ^12.0.0
+        version: 12.6.0(sass@1.65.1)(webpack@5.88.2)
+      serve:
+        specifier: ^14.2.0
+        version: 14.2.1
+      speed-measure-webpack-plugin:
+        specifier: ^1.5.0
+        version: 1.5.0(webpack@5.88.2)
+      svg-sprite-loader:
+        specifier: ^6.0.2
+        version: 6.0.11
+      vue-cli-plugin-i18n:
+        specifier: ~2.3.1
+        version: 2.3.2
+      vue-template-compiler:
+        specifier: ^2.6.11
+        version: 2.7.14
+      vue-tsc:
+        specifier: ^1.0.11
+        version: 1.8.8(typescript@5.2.2)
+      webpack-bundle-analyzer:
+        specifier: ^4.5.0
+        version: 4.9.0
+      worker-loader:
+        specifier: ^3.0.8
+        version: 3.0.8(webpack@5.88.2)
+      yaml:
+        specifier: ^2.2.1
+        version: 2.3.1
+
   projects/vivipic:
     dependencies:
       '@ctrl/tinycolor':
@@ -926,13 +1287,6 @@ packages:
       chalk: 2.4.2
       js-tokens: 4.0.0
     dev: true
-
-  /@babel/parser@7.22.10:
-    resolution: {integrity: sha512-lNbdGsQb9ekfsnjFGhEiF4hfFqGgfOP3H3d27re3n+CGhNuTSUEQdfWk556sTLNTloczcdM5TYF2LhzmDQKyvQ==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-    dependencies:
-      '@babel/types': 7.22.11
 
   /@babel/parser@7.22.13:
     resolution: {integrity: sha512-3l6+4YOvc9wx7VlCSw4yQfcBo01ECA8TicQfbnCPuCEpRQrf+gTUyGdxNw+pyTUyywp6JRD1w0YQs9TpBXYlkw==}
@@ -5262,7 +5616,7 @@ packages:
     peerDependencies:
       vue: 3.3.4
     dependencies:
-      '@babel/parser': 7.22.10
+      '@babel/parser': 7.22.13
       estree-walker: 2.0.2
       source-map-js: 1.0.2
       vue: 3.3.4
@@ -5293,7 +5647,7 @@ packages:
   /@vue/compiler-sfc@3.3.4:
     resolution: {integrity: sha512-6y/d8uw+5TkCuzBkgLS0v3lSM3hJDntFEiUORM11pQ/hKvkhSKZrXW6i69UyXlJQisJxuUEJKAWEqWbWsLeNKQ==}
     dependencies:
-      '@babel/parser': 7.22.10
+      '@babel/parser': 7.22.13
       '@vue/compiler-core': 3.3.4
       '@vue/compiler-dom': 3.3.4
       '@vue/compiler-ssr': 3.3.4
@@ -16283,6 +16637,17 @@ packages:
 
   /wordwrap@1.0.0:
     resolution: {integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==}
+    dev: true
+
+  /worker-loader@3.0.8(webpack@5.88.2):
+    resolution: {integrity: sha512-XQyQkIFeRVC7f7uRhFdNMe/iJOdO6zxAaR3EWbDp45v3mDhrTi+++oswKNxShUNjPC/1xUp5DB29YKLhFo129g==}
+    engines: {node: '>= 10.13.0'}
+    peerDependencies:
+      webpack: ^4.0.0 || ^5.0.0
+    dependencies:
+      loader-utils: 2.0.4
+      schema-utils: 3.3.0
+      webpack: 5.88.2
     dev: true
 
   /wrap-ansi@3.0.1:
