@@ -69,20 +69,14 @@ export default defineComponent({
       minRatio: 0.1,
       maxRatio: 2,
       isPanning: false,
-      initPinchPos: null as null | { x: number, y: number },
-      initPinchSize: null as null | { width: number, height: number },
-      initBgPos: { x: 0, y: 0 },
+      initPinchPos: { x: -1, y: -1 },
+      initPinchSize: { width: -1, height: -1 },
+      initBgPos: { x: -1, y: -1 },
       translationRatio: null as null | ICoordinate,
-      // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
       imgAspectRatio: 1,
       distanceBetweenFingers: -1,
       containerHeight: -1
-      // p1StartClientY: 0,
-      // p1StartClientX: 0,
-      // p2StartClientY: 0,
-      // p2StartClientX: 0,
-      // distanceBetweenFingers: 0
     }
   },
   mounted() {
@@ -154,6 +148,23 @@ export default defineComponent({
     pinchHandler(event: AnyTouchEvent) {
       window.requestAnimationFrame(() => this._pinchHandler(event))
     },
+    pinchStart(event: AnyTouchEvent) {
+      this.setInGestureMode(true)
+      const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
+      this.imgAspectRatio = width / height
+      const imgHeight = 1600 / this.imgAspectRatio
+      this.initImgSize = {
+        width: 1600 * this.bgRemoveScaleRatio,
+        height: imgHeight * this.bgRemoveScaleRatio
+      }
+
+      this.updatePinchState({ isPinching: true })
+      this.isPanning = true
+      this.tmpScaleRatio = this.bgRemoveScaleRatio
+      this.initPinchPos = { x: event.x, y: event.y }
+      this.initPinchSize = { width: this.bgCurrSize.width, height: this.bgCurrSize.height }
+      this.initBgPos = { x: this.pinch.x, y: this.pinch.y }
+    },
     _pinchHandler(event: AnyTouchEvent) {
       if (this.pinch.isTransitioning) return
       if (!this.movingMode) return
@@ -178,58 +189,23 @@ export default defineComponent({
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
          */
         case 'start': {
-          console.warn('pinch start')
-          this.updatePinchState({ isPinching: true })
-          this.tmpScaleRatio = this.bgRemoveScaleRatio
-          this.setInGestureMode(true)
-
-          this.isPanning = true
-
-          const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
-          this.imgAspectRatio = width / height
-
-          const imgHeight = 1600 / this.imgAspectRatio
-
-          this.initImgSize = {
-            width: 1600 * this.bgRemoveScaleRatio,
-            height: imgHeight * this.bgRemoveScaleRatio
-          }
-
-          // pinch init state setting
-          this.initBgPos = { x: this.pinch.x, y: this.pinch.y }
-          this.initPinchPos = { x: event.x, y: event.y }
-          this.initPinchSize = { width: this.bgCurrSize.width, height: this.bgCurrSize.height }
+          this.pinchStart(event)
           break
         }
         case 'move': {
-          this.updatePinchState({ isPinching: true })
-          this.isPanning = true
-          if (!this.initPinchPos || !this.initPinchSize) {
-            this.tmpScaleRatio = this.bgRemoveScaleRatio
-            this.initPinchPos = { x: event.x, y: event.y }
-            this.initPinchSize = { width: this.bgCurrSize.width, height: this.bgCurrSize.height }
-            this.initBgPos = { x: this.pinch.x, y: this.pinch.y }
-            return
+          if (!this.pinch.isPinching) {
+            return this.pinchStart(event)
           }
 
           if (event.pointLength === 2) {
-            // const ratio = this.tmpScaleRatio * event.scale
-            // if (ratio <= this.minRatio) {
-            //   this.bgRemoveScaleRatio = this.minRatio
-            // } else if (ratio >= this.maxRatio) {
-            //   this.bgRemoveScaleRatio = this.maxRatio
-            // } else {
-            //   this.bgRemoveScaleRatio = ratio
-            // }
             this.bgRemoveScaleRatio = this.tmpScaleRatio * event.scale
 
             // pinch moving translation compensation
             if (!this.translationRatio) {
               this.translationRatio = { x: -1, y: -1 }
               // padding size of the rmSection
-              const padding = 20
-              const actualEvtX = event.x - this.pinch.physicalTopLeftPos.left - padding
-              const actualEvtY = event.y - this.pinch.physicalTopLeftPos.top - padding
+              const actualEvtX = event.x - this.pinch.physicalTopLeftPos.left - RM_SECTION_PADDING
+              const actualEvtY = event.y - this.pinch.physicalTopLeftPos.top - RM_SECTION_PADDING
               if (this.pinch.x >= 0) {
                 this.translationRatio.x = (Math.max(actualEvtX - this.pinch.x, 0) / this.initPinchSize.width)
               } else {
@@ -241,16 +217,13 @@ export default defineComponent({
               } else {
                 this.translationRatio.y = (Math.max(actualEvtY, 0) + Math.abs(this.pinch.y)) / this.initPinchSize.height
               }
-              console.warn('this.translationRatio', this.translationRatio)
             }
-
             // size difference via pinching
             const scalingRatioDiff = this.bgRemoveScaleRatio / this.tmpScaleRatio - 1
             const sizeDiff = {
               width: scalingRatioDiff * this.initPinchSize.width,
               height: scalingRatioDiff * this.initPinchSize.height
             }
-
             // pos difference via moving as pinching
             const movingTraslate = {
               x: event.x - this.initPinchPos.x,
@@ -266,19 +239,14 @@ export default defineComponent({
         }
 
         case 'end': {
-          console.warn('pinch end')
           const bgRemoveArea = document.getElementById('bgRemoveArea') as HTMLElement
           const bgRemoveScaleArea = document.getElementById('bgRemoveScaleArea') as HTMLElement
-
-          // const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(page, newScaleRatio * 0.01)
           const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.edgingHandler()
-          console.log(isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge)
 
           // case 1 scale exceed max scale range
           if (this.pinch.scale > this.maxRatio) {
             bgRemoveArea.classList.add('editor-view__pinch-transition')
             bgRemoveScaleArea.classList.add('editor-view__pinch-transition')
-            console.warn('scale exceed max scale range')
             const scaleRatioDiff = 1 - this.maxRatio / this.pinch.scale
             const sizeDiff = {
               width: this.bgCurrSize.width * scaleRatioDiff,
@@ -286,8 +254,6 @@ export default defineComponent({
             }
             const [xMin, xMax] = [this.pinch.initPos.x * 2 - ((this.bgCurrSize.width - sizeDiff.width) - this.pinch.initSize.width), 0]
             const [yMin, yMax] = [this.pinch.initPos.y * 2 - ((this.bgCurrSize.height - sizeDiff.height) - this.pinch.initSize.height), 0]
-            console.log('this.pinch.x + sizeDiff.width * (this.translationRatio?.x ?? 0)', this.pinch.x + sizeDiff.width * (this.translationRatio?.x ?? 0), this.pinch.y + sizeDiff.height * (this.translationRatio?.y ?? 0))
-            console.log('xMin, xMax', xMin, xMax, yMin, yMax)
             const x = mathUtils.clamp(this.pinch.x + sizeDiff.width * (this.translationRatio?.x ?? 0), xMin, xMax)
             const y = mathUtils.clamp(this.pinch.y + sizeDiff.height * (this.translationRatio?.y ?? 0), yMin, yMax)
             this.bgRemoveScaleRatio = this.maxRatio
@@ -306,7 +272,6 @@ export default defineComponent({
             }, TRANSITION_TIME)
           // case 2 exceed edge
           } else if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
-            console.warn('exceed edge ', isReachTopEdge, isReachBottomEdge, isReachLeftEdge, isReachRightEdge)
             // sub-case 1: scale ratio smaller than initScale --> reset/initialization
             bgRemoveArea.classList.add('editor-view__pinch-transition')
             bgRemoveScaleArea.classList.add('editor-view__pinch-transition')
@@ -358,13 +323,9 @@ export default defineComponent({
                 })
               }, TRANSITION_TIME)
             }
-          } else {
-            console.warn('else')
           }
           this.updatePinchState({ isPinching: false })
           this.isPanning = false
-          this.initPinchPos = null
-          this.initPinchSize = null
           this.translationRatio = null
           this.rmSection = null
           this.setInGestureMode(false)

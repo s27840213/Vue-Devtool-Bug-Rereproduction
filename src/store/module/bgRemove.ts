@@ -352,7 +352,6 @@ class BgRemoveMoveHandler {
   }
 
   moveStart(evt: PointerEvent) {
-    console.log('bg move start', evt.x, evt.y)
     this._moving = this.moving.bind(this)
     this._moveEnd = this.moveEnd.bind(this)
     eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -417,7 +416,6 @@ class BgRemoveMoveHandler {
   updateBgPos(x: number, y: number) {
     if (this.pinch.isTransitioning) return
     store.commit('bgRemove/UPDATE_pinchState', { x, y })
-    // console.log(x, y)
   }
 }
 
