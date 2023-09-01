@@ -1,6 +1,29 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+LC_ALL=C
+
+local_branch="$(git rev-parse --abbrev-ref HEAD)"
+echo "Check your branch name..."
+echo "Your branch name: $local_branch"
+echo ""
+
+# ^ - start of regular expression
+# $ - end of regular expression
+valid_branch_regex="^(feature\/.+|develop|master|hotfix)$"
+
+if [[ ! $local_branch =~ $valid_branch_regex ]]
+then
+    echo "There is something wrong with your branch name"
+		echo "Valid branch in this project are: feature/xxx, develop, master, hotfix"
+		echo "Use 'git branch -m <newname>' to rename your branch."
+		echo ""
+    exit 1
+fi
+
+echo "Branch name check passed!"
+echo ""
+
 # npx --no-install commitlint --edit $1
 # use npx.cmd instead of npx why?
 # ans: in window, npx will throw errors, fucking strange
