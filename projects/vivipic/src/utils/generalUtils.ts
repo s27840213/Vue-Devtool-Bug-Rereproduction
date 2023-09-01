@@ -12,6 +12,9 @@ class GeneralUtils {
   flags: { [key: string]: boolean }[] = []
   flagsCallback: (() => void) | undefined = undefined
 
+  get isPic() { return process.env.VUE_APP_APP_NAME === 'vivipic' }
+  get isStk() { return process.env.VUE_APP_APP_NAME === 'vivistk' }
+  get isCm() { return process.env.VUE_APP_APP_NAME === 'charmix' }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get isSuperUser() { return store.state.user.role === 0 }
   get browserInfo() {
