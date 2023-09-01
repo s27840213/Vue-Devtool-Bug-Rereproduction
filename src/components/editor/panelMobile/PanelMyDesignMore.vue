@@ -164,7 +164,7 @@ export default defineComponent({
         assetInfo
       } = this.myDesignBuffer
       const data = await vivistickerUtils.fetchMyDesign(this.myDesignBuffer)
-      await uploadUtils.uploadReportedDesign({ id, editorType: type, assetInfo, pages: data } as ITempDesign, { id: this.myDesignBuffer.id })
+      await uploadUtils.uploadReportedDesign({ id, editorType: type, assetInfo, pages: data.pages } as ITempDesign, { id: this.myDesignBuffer.id })
       vivistickerUtils.setLoadingOverlayShow(false)
       modalUtils.setModalInfo(
         `${this.$t('STK0089')}`,
