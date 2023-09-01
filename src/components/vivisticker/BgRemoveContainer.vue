@@ -75,7 +75,6 @@ export default defineComponent({
       translationRatio: null as null | ICoordinate,
       initImgSize: { width: 0, height: 0 },
       imgAspectRatio: 1,
-      distanceBetweenFingers: -1,
       containerHeight: -1
     }
   },
@@ -99,8 +98,7 @@ export default defineComponent({
       movingMode: 'bgRemove/getMovingMode',
       isPinching: 'bgRemove/getIsPinching',
       pinch: 'bgRemove/getPinchState',
-      bgCurrSize:'bgRemove/getBgCurrSize',
-      bgContainerSize :'bgRemove/getContainerSize'
+      bgCurrSize:'bgRemove/getBgCurrSize'
     }),
     fitScaleRatio(): number {
       const { width, height } = this.containerWH
@@ -166,24 +164,7 @@ export default defineComponent({
       this.initBgPos = { x: this.pinch.x, y: this.pinch.y }
     },
     _pinchHandler(event: AnyTouchEvent) {
-      if (this.pinch.isTransitioning) return
-      if (!this.movingMode) return
-      if (!this.inBgRemoveMode) return
-      let deltaDistance = 0
-      if (event.pointLength === 2) {
-        // calculate the delta distance between two fingers
-        // use to determine the action we do
-        // if smaller than 1 -> pan
-        // if bigger than 1 -> pinch
-        const tmpDistance = this.distanceBetweenFingers
-        this.distanceBetweenFingers = Math.sqrt(
-          Math.pow(event.points[0].clientX - event.points[1].clientX, 2) +
-          Math.pow(event.points[0].clientY - event.points[1].clientY, 2)
-        )
-
-        deltaDistance = Math.abs(this.distanceBetweenFingers - tmpDistance)
-      }
-
+      if (this.pinch.isTransitioning || !this.movingMode || !this.inBgRemoveMode) return
       switch (event.phase) {
         /**
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
@@ -294,21 +275,22 @@ export default defineComponent({
               // sub-case 2: only some edge is reached --> align the reached edge
               const pos = { x: this.pinch.x, y: this.pinch.y }
               if (isReachTopEdge || isReachBottomEdge) {
-                const isCoverContainer = this.bgCurrSize.height >= this.bgContainerSize.height
+                const isCoverContainer = this.bgCurrSize.height >= this.pinch.containerSize.height
                 if (isReachTopEdge) {
-                  pos.y = isCoverContainer ? 0 : (this.bgContainerSize.height - this.bgCurrSize.height) * 0.5
+                  pos.y = isCoverContainer ? 0 : (this.pinch.containerSize.height - this.bgCurrSize.height) * 0.5
                 } else if (isReachBottomEdge) {
                   const _y = this.pinch.initPos.y * 2 - (this.bgCurrSize.height - this.pinch.initSize.height)
-                  pos.y = isCoverContainer ? _y : _y - (this.bgContainerSize.height - this.bgCurrSize.height) * 0.5
+                  pos.y = isCoverContainer ? _y : _y - (this.pinch.containerSize.height - this.bgCurrSize.height) * 0.5
                 }
               }
               if (isReachLeftEdge || isReachRightEdge) {
-                const isCoverContainer = this.bgCurrSize.width >= this.bgContainerSize.width
+                // is the bg-remove-size is larger than the bg-remove-container-size
+                const isCoverContainer = this.bgCurrSize.width >= this.pinch.containerSize.width
                 if (isReachLeftEdge) {
-                  pos.x = isCoverContainer ? 0 : (this.bgContainerSize.width - this.bgCurrSize.width) * 0.5
+                  pos.x = isCoverContainer ? 0 : (this.pinch.containerSize.width - this.bgCurrSize.width) * 0.5
                 } else if (isReachRightEdge) {
                   const _x = this.pinch.initPos.x * 2 - (this.bgCurrSize.width - this.pinch.initSize.width)
-                  pos.x = isCoverContainer ? _x : _x - (this.bgContainerSize.width - this.bgCurrSize.width) * 0.5
+                  pos.x = isCoverContainer ? _x : _x - (this.pinch.containerSize.width - this.bgCurrSize.width) * 0.5
                 }
               }
               this.updatePinchState({

@@ -126,12 +126,6 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
       height: state.pinch.initSize.height * scaleIncrement
     }
   },
-  getContainerSize(state: IBgRemoveState): ISize {
-    return {
-      width: state.pinch.initPos.x > 0 ? 2 * state.pinch.initPos.x + state.pinch.initSize.width : state.pinch.initSize.width,
-      height: state.pinch.initPos.y > 0 ? 2 * state.pinch.initPos.y + state.pinch.initSize.height : state.pinch.initSize.height,
-    }
-  },
   getIsPinching(state: IBgRemoveState) {
     return state.pinch.isPinching
   },
@@ -344,6 +338,7 @@ class BgRemoveMoveHandler {
   private base: { x: number, y: number }
   private _moving = null as unknown
   private _moveEnd = null as unknown
+  private _target = null as EventTarget | null
 
   constructor() {
     this.initBgPos = { x: -1, y: -1 }
@@ -356,9 +351,15 @@ class BgRemoveMoveHandler {
     this._moveEnd = this.moveEnd.bind(this)
     eventUtils.addPointerEvent('pointerup', this._moveEnd)
     eventUtils.addPointerEvent('pointermove', this._moving)
+
+    // only fire the moving event as manipulating at the target
+    if (evt.target) {
+      this._target = evt.target
+    }
   }
 
   private moving(evt: PointerEvent) {
+    if (evt.target !== this._target) return
     if (this.pinch.isPinching || this.pinch.isTransitioning || !store.getters['bgRemove/getMovingMode']) {
       return
     }
@@ -409,6 +410,7 @@ class BgRemoveMoveHandler {
 
   private moveEnd(evt: PointerEvent) {
     this.initEvtPos = null
+    this._target = null
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
   }

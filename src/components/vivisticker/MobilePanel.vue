@@ -1,6 +1,5 @@
 <template lang="pug">
 div(class="mobile-panel"
-    @pointerdown="test"
     :class="{'panel-padding': !noPaddingTheme, 'not-rounded': noRoundTheme, 'at-bottom': bottomTheme}"
     :style="panelStyle"
     v-click-outside="vcoConfig()"
@@ -709,10 +708,6 @@ export default defineComponent({
     this.resizeObserver && this.resizeObserver.disconnect()
   },
   methods: {
-    test(event: PointerEvent) {
-      event.stopPropagation()
-      console.log(event.stopPropagation())
-    },
     ...mapMutations({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
       setIsInCategory: 'vivisticker/SET_isInCategory',
