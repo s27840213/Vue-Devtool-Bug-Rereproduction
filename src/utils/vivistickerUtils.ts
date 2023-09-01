@@ -1560,7 +1560,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
-          this.openFullPageVideo(i18n.global.locale === 'us' ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
+          this.openFullPageVideo(['us', 'jp'].includes(i18n.global.locale) ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
           modalUtils.clearModalInfo()
         }
       }, undefined, {
