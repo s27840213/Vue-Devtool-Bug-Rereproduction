@@ -10,12 +10,12 @@ echo ""
 
 # ^ - start of regular expression
 # $ - end of regular expression
-valid_branch_regex="^(feature\/.+|develop|master|hotfix)$"
+valid_branch_regex="^(feature\/.+|fix\/.+|test\/.+|develop|master|hotfix)$"
 
 if [[ ! $local_branch =~ $valid_branch_regex ]]
 then
     echo "There is something wrong with your branch name"
-		echo "Valid branch in this project are: feature/xxx, develop, master, hotfix"
+		echo "Valid branch in this project are: feature/xxx,test/xxx, fix/xxx, develop, master, hotfix"
 		echo "Use 'git branch -m <newname>' to rename your branch."
 		echo ""
     exit 1
