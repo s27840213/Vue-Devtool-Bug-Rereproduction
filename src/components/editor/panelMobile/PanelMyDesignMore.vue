@@ -40,7 +40,7 @@ div(class="panel-my-design-more")
 
 <script lang="ts">
 import { IPage } from '@/interfaces/page'
-import { IMyDesign } from '@/interfaces/vivisticker'
+import { IMyDesign, ITempDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
@@ -158,8 +158,13 @@ export default defineComponent({
     },
     async handleReport() {
       vivistickerUtils.setLoadingOverlay([this.$t('STK0087')])
+      const {
+        id,
+        type,
+        assetInfo
+      } = this.myDesignBuffer
       const data = await vivistickerUtils.fetchMyDesign(this.myDesignBuffer)
-      await uploadUtils.uploadReportedDesign(data, { id: this.myDesignBuffer.id })
+      await uploadUtils.uploadReportedDesign({ id, editorType: type, assetInfo, pages: data } as ITempDesign, { id: this.myDesignBuffer.id })
       vivistickerUtils.setLoadingOverlayShow(false)
       modalUtils.setModalInfo(
         `${this.$t('STK0089')}`,
