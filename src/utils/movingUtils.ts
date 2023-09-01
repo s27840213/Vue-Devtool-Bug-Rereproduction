@@ -3,6 +3,7 @@ import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText } from '@/interfa
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import controlUtils from './controlUtils'
+import editorUtils from './editorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import formatUtils from './formatUtils'
 import generalUtils from './generalUtils'
@@ -22,9 +23,9 @@ export class MovingUtils {
   private eventTarget = null as unknown as HTMLElement
   private dblTabsFlag = false
   private _config = { config: null as unknown as ILayer }
-  private initialPos = { x: 0, y: 0 }
+  private initialPos = { x: 0, y: 0 } as ICoordinate | null
   private initTranslate = { x: 0, y: 0 }
-  private initPageTranslate = { x: 0, y: 0 }
+  // private initPageTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
   private isDoingGestureAction = false
   private isHandleMovingHandler = false
@@ -72,10 +73,14 @@ export class MovingUtils {
     return false
   }
 
+  private initPageTranslate = { x: 0, y: 0 }
+  private randId = ''
+
   constructor({ _config, snapUtils, component, body, layerInfo }: { _config: { config: ILayer }, snapUtils: unknown, component?: any, body: HTMLElement, layerInfo?: ILayerInfo }) {
     this._config = _config
     this.snapUtils = snapUtils
     this.body = body
+    this.randId = generalUtils.generateRandomString(4)
     component && (this.component = component)
     layerInfo && (this.layerInfo = layerInfo)
   }
@@ -89,6 +94,11 @@ export class MovingUtils {
     }
   }
 
+  updateProps({ _config, body }: { _config: { config: ILayer }, body: HTMLElement }) {
+    this._config = _config
+    this.body = body
+  }
+
   disableTouchEvent(e: TouchEvent) {
     if (this.isTouchDevice) {
       e.preventDefault()
@@ -97,9 +107,17 @@ export class MovingUtils {
   }
 
   pageMoveStart(e: PointerEvent) {
+    if (store.getters['mobileEditor/getIsPinchingEditor']) return
+
     this.initPageTranslate.x = pageUtils.getCurrPage.x
     this.initPageTranslate.y = pageUtils.getCurrPage.y
-    this.initialPos = mouseUtils.getMouseAbsPoint(e)
+
+    this.removeListener()
+    if (e.type === 'pinch') {
+      this.initialPos = null
+    } else {
+      this.initialPos = mouseUtils.getMouseAbsPoint(e)
+    }
     this._moving = this.pageMoving.bind(this)
     this._moveEnd = this.pageMoveEnd.bind(this)
     eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -107,15 +125,21 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
-    // this.pageMovingHandler(e)
+    if (store.getters['mobileEditor/getIsPinchingEditor']) {
+      this.removeListener()
+      return
+    }
+    window.requestAnimationFrame(() => {
+      this.pageMovingHandler(e)
+    })
   }
 
   pageMoveEnd(e: PointerEvent) {
-    eventUtils.removePointerEvent('pointerup', this._moveEnd)
-    eventUtils.removePointerEvent('pointermove', this._moving)
+    this.removeListener()
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
+    if (store.getters['mobileEditor/getIsPinchingEditor']) return
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
     this.initPageTranslate.x = pageUtils.getCurrPage.x
@@ -157,28 +181,28 @@ export class MovingUtils {
     if (this.isTouchDevice && !this.config.locked) {
       this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
-      if (!this.dblTabsFlag && this.isActive) {
-        const touchtime = Date.now()
-        const interval = 500
-        const doubleTap = (e: PointerEvent) => {
-          e.preventDefault()
-          if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
-            /**
-             * This is the dbl-click callback block
-             */
-            if (this.getLayerType === LayerType.image) {
-              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-              eventUtils.emit(PanelEvent.switchTab, 'crop')
-            }
-            this.dblTabsFlag = true
-          }
-        }
-        this.eventTarget.addEventListener('pointerdown', doubleTap)
-        setTimeout(() => {
-          this.eventTarget.removeEventListener('pointerdown', doubleTap)
-          this.dblTabsFlag = false
-        }, interval)
-      }
+      // if (!this.dblTabsFlag && this.isActive) {
+      //   const touchtime = Date.now()
+      //   const interval = 500
+      //   const doubleTap = (e: PointerEvent) => {
+      //     e.preventDefault()
+      //     if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
+      //       /**
+      //        * This is the dbl-click callback block
+      //        */
+      //       if (this.getLayerType === LayerType.image) {
+      //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+      //         eventUtils.emit(PanelEvent.switchTab, 'crop')
+      //       }
+      //       this.dblTabsFlag = true
+      //     }
+      //   }
+      //   this.eventTarget.addEventListener('pointerdown', doubleTap)
+      //   setTimeout(() => {
+      //     this.eventTarget.removeEventListener('pointerdown', doubleTap)
+      //     this.dblTabsFlag = false
+      //   }, interval)
+      // }
     }
     if (eventType === 'pointer') {
       const pointerEvent = event as PointerEvent
@@ -312,7 +336,7 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (eventUtils.checkIsMultiTouch(e)) {
+    if (eventUtils.checkIsMultiTouch(e) || store.getters['mobileEditor/getIsPinchingEditor'] || this.initialPos === null) {
       return
     }
     this.isControlling = true
@@ -374,10 +398,15 @@ export class MovingUtils {
             return
           }
         }
-        const { pageRect, editorRect } = pageUtils.getEditorRenderSize
-        const isPageFullyInsideEditor = pageRect.width + 30 < editorRect.width
+        // const { pageRect, editorRect } = pageUtils.getEditorRenderSize
+        // const isPageFullyInsideEditor = pageRect.width + 30 < editorRect.width
+        const { mobileSize } = editorUtils
+        const { getCurrPage: page, scaleRatio } = pageUtils
+        const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
+          page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
         // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
-        if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
+        if (!isPageFullyInsideEditor) {
+          // if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
           window.requestAnimationFrame(() => {
             this.pageMovingHandler(e)
           })
@@ -392,6 +421,8 @@ export class MovingUtils {
   }
 
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (this.initialPos === null) return
+
     const config = this.layerIndex === layerUtils.layerIndex ? this.config : layerUtils.getCurrLayer
     if (Object.values(config).length === 0) {
       /**
@@ -405,7 +436,11 @@ export class MovingUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
-    const offsetRatio = generalUtils.isTouchDevice() ? 1 / store.getters.getContentScaleRatio : 100 / store.getters.getPageScaleRatio
+    let offsetRatio = 100 / store.getters.getPageScaleRatio
+    if (generalUtils.isTouchDevice()) {
+      offsetRatio *= 1 / store.getters.getContentScaleRatio
+    }
+
     const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, offsetRatio)
 
     const isLine = config.type === 'shape' && config.category === 'D'
@@ -442,61 +477,56 @@ export class MovingUtils {
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
-    const { originPageSize, getCurrPage: currPage } = pageUtils
+    if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
+      return
+    }
+    if (this.initialPos === null) {
+      this.initialPos = mouseUtils.getMouseAbsPoint(e)
+      return
+    }
+    const { getCurrPage: page } = pageUtils
+    const contentScaleRatio = store.getters.getContentScaleRatio
+    const pageScaleRatio = store.state.pageScaleRatio * 0.01
+    const EDGE_WIDTH = {
+      x: (editorUtils.mobileSize.width - page.width * contentScaleRatio) * 0.5,
+      y: (editorUtils.mobileSize.height - page.height * contentScaleRatio) * 0.5
+    }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
 
-    const newPageSize = {
-      w: this.scaleRatio * currPage.width * 0.01,
-      h: this.scaleRatio * currPage.height * 0.01
-    }
-    const base = {
-      x: -(newPageSize.w - originPageSize.width) * 0.5,
-      y: 0
-    }
-    const limitRange = {
-      x: (newPageSize.w - originPageSize.width) * 0.5,
-      y: (newPageSize.h - originPageSize.height) * 0.5
-    }
-    const diff = {
-      x: Math.abs(currPage.x + offsetPos.x - base.x),
-      y: Math.abs(currPage.y + offsetPos.y - base.y)
-    }
-    const isReachRightEdge = currPage.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
-    const isReachLeftEdge = currPage.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
-    const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
-    const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
+    const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
+    const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
+    const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0
+    const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y && offsetPos.y < 0
 
+    let x = -1
+    let y = -1
     if (isReachRightEdge || isReachLeftEdge) {
-      pageUtils.updatePagePos(this.pageIndex, {
-        x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0
-      })
+      x = isReachRightEdge ? editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x : EDGE_WIDTH.x
     } else {
-      pageUtils.updatePagePos(this.pageIndex, {
-        x: offsetPos.x + currPage.x
-      })
+      x = offsetPos.x + page.x
     }
 
     if (isReachTopEdge || isReachBottomEdge) {
-      pageUtils.updatePagePos(this.pageIndex, {
-        y: isReachTopEdge ? -(originPageSize.height - newPageSize.h) * 0.5 : (originPageSize.height - newPageSize.h) * 0.5
-      })
+      y = isReachBottomEdge ? editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y : EDGE_WIDTH.y
     } else {
-      pageUtils.updatePagePos(this.pageIndex, {
-        y: offsetPos.y + currPage.y
-      })
+      y = offsetPos.y + page.y
     }
-    this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
-    this.initialPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
+    pageUtils.updatePagePos(this.pageIndex, { x, y })
+
+    if (!isReachLeftEdge && !isReachRightEdge) {
+      this.initialPos.x += offsetPos.x
+    }
+    if (!isReachBottomEdge && !isReachTopEdge) {
+      this.initialPos.y += offsetPos.y
+    }
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
-    if (eventUtils.checkIsMultiTouch(e)) {
-      return
+    if (eventUtils.checkIsMultiTouch(e) || this.initialPos === null) {
+      return this.removeListener()
     }
     this.isControlling = false
-    eventUtils.removePointerEvent('pointerup', this._moveEnd)
-    eventUtils.removePointerEvent('pointermove', this._moving)
+    this.removeListener()
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
 

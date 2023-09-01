@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-layer flex-center"
-    :class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
+    :class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '', primaryLayer?.type === 'frame' ? 'transform-origin-0' : '']"
     :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :data-p-index="pageIndex"
     :style="layerWrapperStyles"
@@ -13,7 +13,7 @@ div(class="nu-layer flex-center"
       :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
       :style="layerStyles()"
       @pointerdown="onPointerDown($event)"
-      @pointerup="onPointerUp($event)"
+      @tap="dblTap"
       @contextmenu.prevent
       @click.right.stop="onRightClick($event)"
       @dragenter="dragEnter($event)"
@@ -30,7 +30,6 @@ div(class="nu-layer flex-center"
             :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :page="page"
-            :scaleRatio="scaleRatio"
             :primaryLayer="primaryLayer"
             :forRender="forRender"
             :inPreview="inPreview")
@@ -61,7 +60,9 @@ import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 import DragUtils from '@/utils/dragUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -162,19 +163,21 @@ export default defineComponent({
     const lineMover = this.$refs.lineMover as HTMLElement
     const props = this.$props
     const layerInfo = {} as ILayerInfo
-    Object.defineProperty(layerInfo, 'pageIndex', {
-      get() {
-        return props.pageIndex
-      }
-    })
-    Object.defineProperty(layerInfo, 'layerIndex', {
-      get() {
-        return props.layerIndex
-      }
-    })
-    Object.defineProperty(layerInfo, 'subLayerIdx', {
-      get() {
-        return props.subLayerIndex
+    Object.defineProperties(layerInfo, {
+      pageIndex: {
+        get() {
+          return props.pageIndex
+        }
+      },
+      layerIndex: {
+        get() {
+          return props.layerIndex
+        }
+      },
+      subLayerIdx: {
+        get() {
+          return props.subLayerIndex
+        }
       }
     })
     const _config = { config: this.config }
@@ -226,7 +229,8 @@ export default defineComponent({
     ...mapState('shadow', ['processId', 'handleId', 'uploadId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('mobileEditor', {
-      mobilePagePreview: 'mobileAllPageMode'
+      mobilePagePreview: 'mobileAllPageMode',
+      isPinchingEditor: 'isPinchingEditor'
     }),
     ...mapState('imgControl', {
       imgCtrlConfig: 'image'
@@ -276,8 +280,9 @@ export default defineComponent({
         ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
       const pointerEvents = this.getPointerEvents
       const outline = this.outlineStyles()
+      const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
+        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, _f),
         {
           outline,
           outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
@@ -288,6 +293,13 @@ export default defineComponent({
           ...this.transformStyle
         }
       )
+      if (this.primaryLayer?.type === 'frame' && this.config.type === 'image') {
+        if (this.$isTouchDevice()) {
+          styles.transform += `scale(${this.$store.state.pageScaleRatio / 100})`
+        }
+        styles.width = `${this.config.styles.width * _f}px`
+        styles.height = `${this.config.styles.height * _f}px`
+      }
       if (!this.isImgCtrl && !this.inFrame && !this.$isTouchDevice() && !this.useMobileEditor) {
         styles.transform += `translateZ(${this.config.styles.zindex}px)`
       }
@@ -318,6 +330,7 @@ export default defineComponent({
     frameClipStyles(): any {
       const isRectFrameClip = this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
       return {
+        ...(this.primaryLayer?.type === 'frame' && this.config.type === 'image' && this.$isTouchDevice() && { transform: `scale(${100 / this.scaleRatio})` }),
         fill: '#00000000',
         stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
         strokeWidth: `${7 / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
@@ -409,31 +422,27 @@ export default defineComponent({
         return ''
       }
     },
-    pageScaleRatio(): number {
-      return pageUtils.scaleRatio / 100
-    },
-    compensationRatio(): number {
-      return !this.useMobileEditor ? 1 : Math.max(1, this.pageScaleRatio())
-    },
     scaleStyles(): { [index: string]: string } {
-      const { zindex } = this.config.styles
-      const { scale, scaleX, scaleY } = this.config.styles
+      const { scale, scaleX, scaleY, zindex } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
-      let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
-      if (!isImgType) {
-        transform += this.compensationRatio() !== 1 ? `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})` : ''
-        transform += scaleX !== 1 ? `scaleX(${scaleX})` : ''
-        transform += scaleY !== 1 ? `scaleY(${scaleY})` : ''
-      }
-      const hasActualScale = transform !== 'scale(1)'
       const styles = {
         ...(pageUtils._3dEnabledPageIndex === this.pageIndex && { transformStyle: type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d' })
       } as Record<string, string>
-      if (hasActualScale) {
-        styles.width = `${this.config.styles.width / this.config.styles.scale}px`
-        styles.height = `${this.config.styles.height / this.config.styles.scale}px`
-        styles.transform = transform
+
+      if (!isImgType) {
+        const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
+        const transform = `scale(${scale * (type === 'text' ? _f : 1)}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
+        if (transform !== 'scale(1)') {
+          if (this.config.type === LayerType.text) {
+            styles.width = `${this.config.styles.width / this.config.styles.scale}px`
+            styles.height = `${this.config.styles.height / this.config.styles.scale}px`
+          } else {
+            styles.width = `${this.config.styles.initWidth * _f}px`
+            styles.height = `${this.config.styles.initHeight * _f}px`
+          }
+          styles.transform = transform
+        }
       }
       return styles
     },
@@ -464,13 +473,18 @@ export default defineComponent({
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
     },
-    onPointerUp(e: PointerEvent) {
-      // console.log(e.target)
-      // if (this.isImgCtrl && this.imgCtrlConfig.id !== this.config.id) {
-      //   imageUtils.setImgControlDefault()
-      // }
+    dblTap(e: PointerEvent) {
+      doubleTapUtils.click(e, {
+        doubleClickCallback: () => {
+          if (this.getLayerType === LayerType.image) {
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+            eventUtils.emit(PanelEvent.switchTab, 'crop')
+          }
+        }
+      })
     },
     onPointerDown(e: PointerEvent) {
+      if (this.isPinchingEditor) return
       const target = e.target as HTMLElement
       /**
        * Prevent double clicking of img will propagate and set the img-ctrl to default immediately.
@@ -483,6 +497,7 @@ export default defineComponent({
     },
     dblClick(e: MouseEvent) {
       e.stopPropagation()
+      if (this.isPinchingEditor) return
       const isSubLayer = this.subLayerIndex !== -1
       if (isSubLayer) {
         if (!this.primaryLayer || this.isHandleShadow) return
@@ -752,21 +767,12 @@ export default defineComponent({
 <style lang="scss" scoped>
 .nu-layer {
   touch-action: none;
-  // position: absolute;
-  // pointer-events: initial;
-  // top: 0;
-  // left: 0;
-  // display: flex;
-  // width: 100px;
-  // height: 100px;
   position: absolute;
   top: 0;
   left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  // content-visibility: auto;
-  // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   &:focus {
     background-color: rgba(168, 218, 220, 1);
   }
