@@ -79,6 +79,10 @@ export default defineComponent({
       _brushSize: 'bgRemove/getBrushSize'
     }),
   },
+  unmounted() {
+    this.setMovingMode(false)
+    this.updatePinchState({ initPos: { x: -1, y: -1 }, x: 0, y: 0 })
+  },
   methods: {
     ...mapMutations({
       setBrushSize: 'bgRemove/SET_brushSize',
@@ -86,6 +90,7 @@ export default defineComponent({
       _setClearMode: 'bgRemove/SET_clearMode',
       setMovingMode: 'bgRemove/SET_movingMode',
       setShowInitImage: 'bgRemove/SET_showInitImage',
+      updatePinchState: 'bgRemove/UPDATE_pinchState'
     }),
     setClearMode(bool: boolean) {
       this._setClearMode(bool)

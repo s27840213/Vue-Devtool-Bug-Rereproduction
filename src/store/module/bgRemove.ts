@@ -1,7 +1,40 @@
 import { IBgRemoveInfo } from '@/interfaces/image'
+import { ISize } from '@/interfaces/math'
+import store from '@/store'
+import eventUtils from '@/utils/eventUtils'
+import mouseUtils from '@/utils/mouseUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
 const MAX_STEP_COUNT = 20
+
+export interface IBgRemovePinchState {
+  // this flag used to indicate if is doing the pinching action
+  isPinching: boolean,
+  // this flag used to indicate if the edging transition is undergoing
+  isTransitioning: boolean,
+  initPos: {
+    x: number,
+    y: number
+  },
+  initSize: {
+    width: number,
+    height: number
+  }
+  initScale: number,
+  scale: number // scale range from 0 ~ 1
+  x: number,
+  y: number,
+  physicalCenterPos: {
+    x: number,
+    y: number
+  },
+  physicalTopLeftPos: {
+    top: number,
+    left: number
+  }
+  containerSize: ISize
+}
+
 export interface IBgRemoveState {
   inBgRemoveMode: boolean,
   brushSize: number,
@@ -30,7 +63,8 @@ export interface IBgRemoveState {
     width: number,
     height: number
   },
-  inEffectEditingMode: boolean
+  inEffectEditingMode: boolean,
+  pinch: IBgRemovePinchState
 }
 
 const getDefaultState = (): IBgRemoveState => ({
@@ -61,11 +95,46 @@ const getDefaultState = (): IBgRemoveState => ({
     width: 0,
     height: 0
   },
-  inEffectEditingMode: false
+  inEffectEditingMode: false,
+  pinch: {
+    isPinching: false,
+    isTransitioning: false,
+    x: 0,
+    y: 0,
+    initPos: {
+      x: -1,
+      y: -1
+    },
+    initSize: {
+      width: 0,
+      height: 0
+    },
+    initScale: -1,
+    scale: -1,
+    physicalCenterPos: { x: 0, y: 0 },
+    physicalTopLeftPos: { top: 0, left: 0 },
+    containerSize: { width: 0, height: 0 }
+  }
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IBgRemoveState, unknown> = {
+  getBgCurrSize(state: IBgRemoveState): ISize {
+    const scaleIncrement = state.pinch.scale / state.pinch.initScale
+    return {
+      width: state.pinch.initSize.width * scaleIncrement,
+      height: state.pinch.initSize.height * scaleIncrement
+    }
+  },
+  getIsPinching(state: IBgRemoveState) {
+    return state.pinch.isPinching
+  },
+  getIsPinchInitialized(state: IBgRemoveState) {
+    return state.pinch.initPos.x !== -1 && state.pinch.initPos.y !== -1
+  },
+  getPinchState(state: IBgRemoveState) {
+    return state.pinch
+  },
   getInBgRemoveMode(state: IBgRemoveState) {
     return state.inBgRemoveMode
   },
@@ -240,6 +309,11 @@ const mutations: MutationTree<IBgRemoveState> = {
   },
   SET_previewImage(state: IBgRemoveState, previewImage: { src: string, width: number, height: number }) {
     Object.assign(state.previewImage, previewImage)
+  },
+  UPDATE_pinchState(state: IBgRemoveState, data: Partial<IBgRemovePinchState>) {
+    Object.entries(data).forEach(([key, val]) => {
+      (state.pinch as any)[key] = val
+    })
   }
 }
 
@@ -249,3 +323,102 @@ export default {
   getters,
   mutations
 }
+
+class BgRemoveMoveHandler {
+  private get pinch () {
+    return state.pinch
+  }
+
+  private get currSize () {
+    return store.getters['bgRemove/getBgCurrSize']
+  }
+
+  private initBgPos: { x: number, y: number }
+  private initEvtPos: null | { x: number, y: number }
+  private base: { x: number, y: number }
+  private _moving = null as unknown
+  private _moveEnd = null as unknown
+  private _target = null as EventTarget | null
+
+  constructor() {
+    this.initBgPos = { x: -1, y: -1 }
+    this.initEvtPos = null
+    this.base = { x: 0, y: 0 }
+  }
+
+  moveStart(evt: PointerEvent) {
+    this._moving = this.moving.bind(this)
+    this._moveEnd = this.moveEnd.bind(this)
+    eventUtils.addPointerEvent('pointerup', this._moveEnd)
+    eventUtils.addPointerEvent('pointermove', this._moving)
+
+    // only fire the moving event as manipulating at the target
+    if (evt.target) {
+      this._target = evt.target
+    }
+  }
+
+  private moving(evt: PointerEvent) {
+    if (evt.target !== this._target) return
+    if (this.pinch.isPinching || this.pinch.isTransitioning || !store.getters['bgRemove/getMovingMode']) {
+      return
+    }
+    if (!this.initEvtPos) {
+      // At the moveStart phase, the evt.x, evt.y would got wrong position, we don't know the reason (2023/8/29)
+      // so we doing the initialization in the moving phase
+      this.initBgPos.x = this.pinch.x
+      this.initBgPos.y = this.pinch.y
+      this.initEvtPos = mouseUtils.getMouseAbsPoint(evt)
+
+      // baseline coordinates for current size,
+      // which means at the baseline, bg-remove-area would be placed at center
+      this.base = {
+        x: -(this.currSize.width - this.pinch.initSize.width) * 0.5 + this.pinch.initPos.x,
+        y: -(this.currSize.height - this.pinch.initSize.height) * 0.5 + this.pinch.initPos.y,
+      }
+      return
+    }
+    const offsetPos = mouseUtils.getMouseRelPoint(evt, this.initEvtPos)
+    const limitRange = { x: Math.abs(this.base.x), y: Math.abs(this.base.y) }
+    const diff = {
+      x: Math.abs(this.initBgPos.x + offsetPos.x - this.base.x),
+      y: Math.abs(this.initBgPos.y + offsetPos.y - this.base.y)
+    }
+
+    let { x, y } = this.pinch
+    // container should be as the bg-remove-rm-section
+    if (this.currSize.width > this.pinch.containerSize.width) {
+      const isReachRightEdge = this.pinch.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
+      const isReachLeftEdge = this.pinch.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
+      if (isReachRightEdge || isReachLeftEdge) {
+        x = isReachRightEdge ? this.pinch.initSize.width - this.currSize.width + this.pinch.initPos.x * 2 : 0
+      } else {
+        x = this.initBgPos.x + offsetPos.x
+      }
+    }
+    if (this.currSize.height > this.pinch.containerSize.height) {
+      const isReachTopEdge = this.pinch.y >= 0 && offsetPos.y > 0 && diff.y > limitRange.y
+      const isReachBottomEdge = this.pinch.y < 0 && offsetPos.y < 0 && diff.y > limitRange.y
+      if (isReachTopEdge || isReachBottomEdge) {
+        y = isReachBottomEdge ? this.pinch.initSize.height - this.currSize.height + this.pinch.initPos.y * 2 : 0
+      } else {
+        y = this.initBgPos.y + offsetPos.y
+      }
+    }
+    this.updateBgPos(x, y)
+  }
+
+  private moveEnd(evt: PointerEvent) {
+    this.initEvtPos = null
+    this._target = null
+    eventUtils.removePointerEvent('pointerup', this._moveEnd)
+    eventUtils.removePointerEvent('pointermove', this._moving)
+  }
+
+  updateBgPos(x: number, y: number) {
+    if (this.pinch.isTransitioning) return
+    store.commit('bgRemove/UPDATE_pinchState', { x, y })
+  }
+}
+
+export const bgRemoveMoveHandler = new BgRemoveMoveHandler()

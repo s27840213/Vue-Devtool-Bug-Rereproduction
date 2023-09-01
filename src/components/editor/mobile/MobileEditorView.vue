@@ -62,7 +62,7 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 const MAX_SCALE = 300
-const TRANSITION_TIME = 250
+export const TRANSITION_TIME = 250
 
 export default defineComponent({
   emits: [],
