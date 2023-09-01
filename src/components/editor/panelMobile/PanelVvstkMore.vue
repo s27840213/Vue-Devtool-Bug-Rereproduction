@@ -124,6 +124,10 @@ export default defineComponent({
           text: '進入 Native 事件測試器',
           icon: 'vivisticker_global',
           action: () => { window.location.pathname = 'nativeevttest' }
+        }, {
+          text: 'import design',
+          icon: 'vivisticker_global',
+          action: this.handleImportDesign
         }
       ] : []]
     },
@@ -301,6 +305,10 @@ export default defineComponent({
     },
     sendTestEvent(option: string) {
       vivistickerUtils.sendToIOS('EVENT_TEST', { option })
+    },
+    handleImportDesign() {
+      vivistickerUtils.importDesign()
+      editorUtils.setCloseMobilePanelFlag(true)
     },
     iconWidth(icon: string): string {
       switch (icon) {

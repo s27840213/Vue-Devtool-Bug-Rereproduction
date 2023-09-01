@@ -918,6 +918,45 @@ class UploadUtils {
     })
   }
 
+  async uploadReportedDesign(design: object, { id = '' }: { id?: string }) {
+    await this.checkIfUrlExpires()
+    const formData = new FormData()
+    Object.keys(this.loginOutput.upload_log_map.fields).forEach((key) => {
+      formData.append(key, this.loginOutput.upload_log_map.fields[key])
+    })
+
+    const designName = `design-${id}-${generalUtils.generateTimeStamp()}.json`
+    formData.append(
+      'key',
+      `${this.loginOutput.upload_log_map.path}${this.hostId}/${designName}`
+    )
+    console.log(formData.get('key'))
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(designName)}`
+    )
+    formData.append('x-amz-meta-tn', this.hostId)
+    const xhr = new XMLHttpRequest()
+
+    const blob = new Blob([JSON.stringify(design)], {
+      type: 'application/json',
+    })
+
+    formData.append('file', blob)
+
+    await new Promise<void>((resolve, reject) => {
+      xhr.open('POST', this.loginOutput.upload_log_map.url, true)
+      xhr.send(formData)
+      xhr.onerror = () => {
+        networkUtils.notifyNetworkError()
+        reject(new Error('upload to s3 failed'))
+      }
+      xhr.onload = () => {
+        resolve()
+      }
+    })
+  }
+
   async uploadDesign(
     putAssetDesignType?: PutAssetDesignType,
     params?: { clonedPages?: Array<IPage> }

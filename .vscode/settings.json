@@ -31,5 +31,13 @@
   "vue.complete.casing.status": false,
   "vue.complete.casing.tags": "kebab",
   "vue.complete.casing.props": "camel",
-  "vue.inlayHints.missingProps": true
+  "vue.inlayHints.missingProps": true,
+
+  "files.associations": {
+    ".git-blame-ignore-revs": "yaml"
+  },
+  "gitlens.advanced.blame.customArguments": [
+    "--ignore-revs-file",
+    ".git-blame-ignore-revs"
+  ]
 }
