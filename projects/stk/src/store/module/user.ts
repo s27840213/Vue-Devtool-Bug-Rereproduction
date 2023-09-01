@@ -47,8 +47,8 @@ export interface IUserModule {
   downloadUrl: string
   verUni: string,
   verApi: string,
-  imgSizeMap: Array<{ [key: string]: string | number }>,
-  imgSizeMapExtra: Array<{ [key: string]: string | number }>,
+  imgSizeMap: { key: string, size: number }[],
+  imgSizeMapExtra: { key: string, size: number }[],
   avatar: {
     prev: string,
     prev_2x: string,
