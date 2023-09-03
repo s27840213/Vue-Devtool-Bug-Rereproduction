@@ -61,10 +61,6 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     return store.getters['webView/getUserInfo']
   }
 
-  appendModuleName(identifier: string): string {
-    return `webView/${identifier}`
-  }
-
   openOrGoto(url: string) {
     window.open(url, this.inBrowserMode ? '_blank' : '_self')
   }

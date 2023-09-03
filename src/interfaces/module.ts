@@ -134,7 +134,6 @@ export interface IAssetProps {
   assetIndex?: number,
   width?: number,
   height?: number,
-  panelPreviewSrc?: string,
   previewSrc?: string,
   imgSrcSize?: {
     width: number,

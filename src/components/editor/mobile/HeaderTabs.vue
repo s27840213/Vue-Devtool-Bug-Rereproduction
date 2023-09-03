@@ -91,7 +91,7 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       hasBleed: 'getHasBleed',
-      userInfo: picWVUtils.appendModuleName('getUserInfo'),
+      userInfo: 'webView/getUserInfo',
       uploadingImgs: 'file/getUploadingImgs',
     }),
     rootStyles(): {[key: string]: string} {

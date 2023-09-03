@@ -292,25 +292,24 @@ class UploadUtils {
     }
 
     // Check if file size over limit.
-    for (let i = 0; i < files.length; i++) {
-      const fileSize = (typeof files[i] === 'string'
-        ? (files[i] as string).length / 4 * 3
-        : (files[i] as File).size) / 1024 / 1024
-      const fileSizeLimit = // 50 for font, BGremove and shadow.
-        (typeof files[i] === 'string' || type === 'font') ? 50 : 25
-      const modalDesc = typeof files[i] === 'string'
+    for (const file of files) {
+      const fileSize = (typeof file === 'string'
+        ? file.length / 4 * 3 // Base64
+        : file.size) / 1024 / 1024
+      const fileSizeLimit =
+        (typeof file === 'string' || type === 'font') ? 50 // For font, BGremove and shadow.
+          : this.isAdmin && file.type === 'image/svg+xml' ? 1.3 // For prevent large admin svg asset.
+            : 25
+      const modalDesc = typeof file === 'string'
         ? i18n.global.t('NN0705',
           { size: fileSizeLimit }
         )
         : i18n.global.t('NN0696',
-          { file: (files[i] as File)?.name, size: fileSizeLimit }
+          { file: file.name, size: fileSizeLimit }
         )
 
       if (fileSize > fileSizeLimit) {
-        modalUtils.setModalInfo(
-          i18n.global.t('NN0137') as string,
-          [modalDesc as string]
-        )
+        modalUtils.setModalInfo(i18n.global.t('NN0137'), modalDesc)
         return
       }
     }
@@ -360,6 +359,7 @@ class UploadUtils {
                 pageIndex: pageUtils.currFocusPageIndex,
                 // The following props is used for preview image during polling process
                 isPreview: true,
+                previewSrc: src,
                 assetId
               })
             }

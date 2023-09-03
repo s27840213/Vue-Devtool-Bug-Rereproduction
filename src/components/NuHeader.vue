@@ -87,7 +87,6 @@ import PopupAccount from '@/components/popup/PopupAccount.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import store from '@/store'
 import constantData, { IHeaderL1 } from '@/utils/constantData'
-import picWVUtils from '@/utils/picWVUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -123,7 +122,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      userInfo: picWVUtils.appendModuleName('getUserInfo')
+      userInfo: 'webView/getUserInfo'
     }),
     navItems(): IHeaderL1[] {
       return constantData.headerItems()

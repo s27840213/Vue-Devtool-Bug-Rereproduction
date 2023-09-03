@@ -194,7 +194,7 @@ export default defineComponent({
       inBrowserMode: 'webView/getInBrowserMode',
       _themeList: 'getShuffledThemesIds',
       themes: 'getMainHiddenThemes',
-      userInfo: picWVUtils.appendModuleName('getUserInfo')
+      userInfo: 'webView/getUserInfo'
     }),
     statusbarHeight (): string {
       return `${this.userInfo.statusBarHeight ?? 0}px`

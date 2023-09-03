@@ -121,7 +121,7 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat',
-      userInfo: picWVUtils.appendModuleName('getUserInfo'),
+      userInfo: 'webView/getUserInfo',
       isAdmin: 'user/isAdmin',
     }),
     hasSubSelectedLayer(): boolean {
@@ -195,27 +195,17 @@ export default defineComponent({
       }
     },
     homeTabs() :Array<IFooterTab> {
-      return generalUtils.versionCheck({ greaterThan: '1.05', version: picWVUtils.getUserInfoFromStore().appVer }) ? [
+      const useCameraroll = generalUtils.versionCheck({ greaterThan: '1.05', version: picWVUtils.getUserInfoFromStore().appVer })
+      return [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
-        { icon: 'cameraroll', text: `${this.$tc('STK0067', 2)}` },
-        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
-        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
-        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
-        { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
-        { icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' },
-        { icon: 'add-page', text: `${this.$t('NN0139')}` },
-        { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 },
-        { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
-        { icon: 'paste', text: `${this.$t('NN0230')}` },
-        ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
-      ] : [
-        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
-        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
+        ...useCameraroll ? [{ icon: 'cameraroll', text: `${this.$tc('STK0067', 2)}` }]
+          : [{ icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' }],
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
         ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-dark' }] : [],
+        ...useCameraroll ? [{ icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' }] : [],
         { icon: 'add-page', text: `${this.$t('NN0139')}` },
         { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 },
         { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },

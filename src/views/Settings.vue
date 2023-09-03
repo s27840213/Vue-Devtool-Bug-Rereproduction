@@ -104,6 +104,12 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
           :title="$t('NN0167')"
           :iconName="'chevron-right'"
           @click="onLogoutClicked")
+        template(v-if="isAdmin")
+          hr
+          mobile-jump-btn(
+            title="進入 Native 事件測試器"
+            :iconName="'chevron-right'"
+            @click="onEnterNativeEventTester")
     settings-account(v-if="currentView === 'account'")
     settings-security(v-if="currentView === 'security'")
     settings-payment(v-if="currentView === 'payment'")
@@ -169,9 +175,10 @@ export default defineComponent({
     }),
     ...mapGetters({
       isLogin: 'user/isLogin',
+      isAdmin: 'user/isAdmin',
       userName: 'user/getUname',
       email: 'user/getEmail',
-      userInfo: picWVUtils.appendModuleName('getUserInfo')
+      userInfo: 'webView/getUserInfo'
     }),
     sidebarStyle(): Record<string, string> {
       return this.currentView === 'menu' ? { width: '100%', display: 'grid' } : {}
@@ -256,6 +263,9 @@ export default defineComponent({
     },
     buy() {
       paymentUtils.openPayment('step1')
+    },
+    onEnterNativeEventTester() {
+      window.location.pathname = 'nativeevttest'
     }
   }
 })

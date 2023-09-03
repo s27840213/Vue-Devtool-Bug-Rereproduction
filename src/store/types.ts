@@ -30,6 +30,7 @@ export interface IEditorState {
   showColorSlips: boolean
   currFunctionPanelType: number,
   pageScaleRatio: number,
+  pinchScaleRatio: number,
   isSettingScaleRatio: boolean,
   middlemostPageIndex: number,
   currActivePageIndex: number,
