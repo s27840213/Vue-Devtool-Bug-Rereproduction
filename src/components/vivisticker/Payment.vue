@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="payment" v-touch @swipe="handleSwipe")
+div(class="payment" v-touch @swipe.stop)
   carousel(
     :items="carouselItems"
     :itemWidth="containerWidth"
@@ -44,8 +44,8 @@ div(class="payment" v-touch @swipe="handleSwipe")
       template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(class="body-XXS" @tap="footerLink.action") {{ footerLink.title }}
-  div(class="payment__panel" :class="{close: !isPanelUp, disabled: pending.purchase}" ref="panel" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)")
-    div(class="payment__panel__chevron" @tap="togglePanel()")
+  div(class="payment__panel" :class="{close: !isPanelUp, disabled: pending.purchase}" ref="panel")
+    div(class="payment__panel__chevron" @tap="togglePanel()" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)" @panstart.stop="dragPanelStart" @panmove.stop="dragingPanel" @panend.stop="dragPanelEnd" @pointerdown.stop="panelAniProgress = 0")
       svg-icon(iconName="chevron-up" iconWidth="14px")
       div(class="payment__panel__chevron__title") {{ $t('STK0042') }}
     div(class="payment__panel__comparison")
@@ -104,8 +104,12 @@ export default defineComponent({
       idxCurrImg: 0,
       planSelected: 'annually',
       isPanelUp: false,
-      isPanelTransitioning: false,
       canShow: false,
+      initPanelUp: false,
+      isDraggingPanel: false,
+      panelDragHeight: 0,
+      panelAniProgress: 0,
+      lastPointerY: 0,
       carouselItems: [
         {
           key: 'template',
@@ -160,15 +164,6 @@ export default defineComponent({
     }
   },
   mounted() {
-    const elPanel = this.$refs.panel as HTMLElement
-    elPanel.ontransitionstart = (e: Event) => {
-      const elTarget = e.target as HTMLElement
-      if (elTarget === elPanel) this.isPanelTransitioning = true
-    }
-    elPanel.ontransitionend = (e: Event) => {
-      const elTarget = e.target as HTMLElement
-      if (elTarget === elPanel) this.isPanelTransitioning = false
-    }
     // this.updateNoticeStyles()
   },
   // watch: {
@@ -250,6 +245,9 @@ export default defineComponent({
           return ''
       }
     },
+    showPanelTitle() {
+      return !this.isDraggingPanel ? !this.isPanelUp : !this.isPanelUp && this.panelAniProgress === 1
+    }
   },
   methods: {
     ...mapMutations({
@@ -276,16 +274,14 @@ export default defineComponent({
         }, timeout)
       }
     },
-    handleSwipe(e: AnyTouchEvent) {
-      e.stopPropagation()
-    },
     togglePanel(up?: boolean) {
-      if (this.isPanelTransitioning) return
-      if (up !== undefined) {
-        this.isPanelUp = up
+      if (up === undefined) {
+        if (this.panelAniProgress !== 0 && this.panelAniProgress !== 1) return
+        this.isPanelUp = !this.isPanelUp
         return
       }
-      this.isPanelUp = !this.isPanelUp
+      if (this.isPanelUp !== up) this.panelAniProgress = 1 - this.panelAniProgress
+      this.isPanelUp = up
     },
     // updateNoticeStyles() {
     //   const elNotice = this.$refs.notice as HTMLElement
@@ -315,7 +311,31 @@ export default defineComponent({
         this.canShow = true
         this.$emit('canShow')
       }
-    }
+    },
+    dragPanelStart(event: AnyTouchEvent) {
+      this.isDraggingPanel = true
+      this.lastPointerY = event.y
+      this.panelDragHeight = 0
+      this.panelAniProgress = 0
+      this.initPanelUp = this.isPanelUp
+    },
+    dragingPanel(event: AnyTouchEvent) {
+      this.panelDragHeight -= event.y - this.lastPointerY
+      this.lastPointerY = event.y
+      this.panelAniProgress = Math.max(Math.min((this.initPanelUp ? -this.panelDragHeight : this.panelDragHeight) / (this.$refs.panel as HTMLElement).clientHeight, 1), 0)
+      if (this.panelAniProgress > 0) this.isPanelUp = !this.initPanelUp
+      else {
+        this.isPanelUp = this.initPanelUp
+        this.panelAniProgress = 1
+      }
+    },
+    dragPanelEnd() {
+      this.isDraggingPanel = false
+      if (this.initPanelUp !== this.isPanelUp && this.panelAniProgress < 0.5) {
+        this.isPanelUp = this.initPanelUp
+        this.panelAniProgress = 1 - this.panelAniProgress
+      }
+    },
   }
 })
 </script>
@@ -551,19 +571,14 @@ export default defineComponent({
   }
   &__panel {
     position: absolute;
-    bottom: 0px;
-    left: v-bind("containerPadding + 'px'");
-    right: v-bind("containerPadding + 'px'");
     box-sizing: border-box;
-    // min-height: 57%;
-    padding: 16px v-bind(padding) 0px v-bind(padding);
     color: white;
     background-color: setColor(black-3);
     border-radius: 10px 10px 0px 0px;
-    transition-property: transform, left, right, padding;
-    transition-duration: 300ms;
-    transition-timing-function: ease-in-out;
     z-index: setZindex("popup");
+    animation: open-panel 300ms linear forwards;
+    animation-play-state: v-bind("isDraggingPanel ? 'paused' : 'running'");
+    animation-delay: calc(v-bind(panelAniProgress) * -300ms);
     &.disabled {
       color: setColor(black-4);
       pointer-events: none;
@@ -572,11 +587,9 @@ export default defineComponent({
       }
     }
     &.close {
-      padding: 40px 0 0 0;
-      left: v-bind(panelPadding);
-      right: v-bind(panelPadding);
-      bottom: -20px;
-      transform: translateY(calc(100% - 56px));
+      animation: close-panel 300ms linear forwards;
+      animation-play-state: v-bind("isDraggingPanel ? 'paused' : 'running'");
+      animation-delay: calc(v-bind(panelAniProgress) * -300ms);
     }
     &__chevron {
       position: absolute;
@@ -599,7 +612,7 @@ export default defineComponent({
         position: absolute;
         left: 50%;
         top: 26px;
-        display: v-bind("isPanelUp ? 'none' : 'block'");
+        display: v-bind("showPanelTitle ? 'block' : 'none'");
         letter-spacing: 0.8px;
         text-transform: capitalize;
         white-space: nowrap;
@@ -685,6 +698,40 @@ export default defineComponent({
 @keyframes translate-rotate {
   to {
     transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes open-panel {
+  from {
+    padding: 16px 0 0 0;
+    left: v-bind(panelPadding);
+    right: v-bind(panelPadding);
+    bottom: -20px;
+    transform: translateY(calc(100% - 56px));
+  }
+  to {
+    padding: 16px v-bind(padding) 0px v-bind(padding);
+    left: v-bind("containerPadding + 'px'");
+    right: v-bind("containerPadding + 'px'");
+    bottom: 0px;
+    transform: none;
+  }
+}
+
+@keyframes close-panel {
+  from {
+    padding: 16px v-bind(padding) 0px v-bind(padding);
+    left: v-bind("containerPadding + 'px'");
+    right: v-bind("containerPadding + 'px'");
+    bottom: 0px;
+    transform: none;
+  }
+  to {
+    padding: 16px 0 0 0;
+    left: v-bind(panelPadding);
+    right: v-bind(panelPadding);
+    bottom: -20px;
+    transform: translateY(calc(100% - 56px));
   }
 }
 </style>
