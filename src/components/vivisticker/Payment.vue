@@ -45,7 +45,7 @@ div(class="payment" v-touch @swipe.stop)
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(class="body-XXS" @tap="footerLink.action") {{ footerLink.title }}
   div(class="payment__panel" :class="{close: !isPanelUp, disabled: pending.purchase}" ref="panel")
-    div(class="payment__panel__chevron" @tap="togglePanel()" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)" @panstart.stop="dragPanelStart" @panmove.stop="dragingPanel" @panend.stop="dragPanelEnd" @pointerdown.stop="panelAniProgress = 0")
+    div(class="payment__panel__chevron" ref="chevron" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)" @panstart.stop="dragPanelStart" @panmove.stop="dragingPanel" @panend.stop="dragPanelEnd" @pointerdown.stop="panelAniProgress = 0")
       svg-icon(iconName="chevron-up" iconWidth="14px")
       div(class="payment__panel__chevron__title") {{ $t('STK0042') }}
     div(class="payment__panel__comparison")
@@ -71,7 +71,7 @@ import Carousel from '@/components/global/Carousel.vue'
 import { IPaymentPending, IPrices } from '@/interfaces/vivisticker'
 import networkUtils from '@/utils/networkUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
-import { AnyTouchEvent } from 'any-touch'
+import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -164,6 +164,9 @@ export default defineComponent({
     }
   },
   mounted() {
+    const at = new AnyTouch((this.$refs.chevron as HTMLElement))
+    at.on('tap', () => this.togglePanel())
+    at.get('tap').maxDistance = 2
     // this.updateNoticeStyles()
   },
   // watch: {
@@ -306,6 +309,14 @@ export default defineComponent({
     //     }
     //   })
     // },
+    bezier(t: number, initial: number, p1: number, p2: number, final: number) {
+      return (
+        (1 - t) * (1 - t) * (1 - t) * initial +
+        3 * (1 - t) * (1 - t) * t * p1 +
+        3 * (1 - t) * t * t * p2 +
+        t * t * t * final
+      )
+    },
     handleImgLoad(key: string) {
       if (!this.canShow && key === this.carouselItems[0].key) {
         this.canShow = true
@@ -313,18 +324,22 @@ export default defineComponent({
       }
     },
     dragPanelStart(event: AnyTouchEvent) {
+      if (this.isDraggingPanel) return // this event will be triggered on dragging direction change
       this.isDraggingPanel = true
       this.lastPointerY = event.y
       this.panelDragHeight = 0
       this.panelAniProgress = 0
       this.initPanelUp = this.isPanelUp
+      this.dragingPanel(event)
     },
     dragingPanel(event: AnyTouchEvent) {
       this.panelDragHeight -= event.y - this.lastPointerY
       this.lastPointerY = event.y
-      this.panelAniProgress = Math.max(Math.min((this.initPanelUp ? -this.panelDragHeight : this.panelDragHeight) / (this.$refs.panel as HTMLElement).clientHeight, 1), 0)
-      if (this.panelAniProgress > 0) this.isPanelUp = !this.initPanelUp
-      else {
+      const newProgress = Math.max(Math.min((this.initPanelUp ? -this.panelDragHeight : this.panelDragHeight) / ((this.$refs.panel as HTMLElement).clientHeight - 36), 1), 0)
+      if (newProgress > 0) {
+        this.isPanelUp = !this.initPanelUp
+        this.panelAniProgress = newProgress
+      } else {
         this.isPanelUp = this.initPanelUp
         this.panelAniProgress = 1
       }
@@ -335,6 +350,7 @@ export default defineComponent({
         this.isPanelUp = this.initPanelUp
         this.panelAniProgress = 1 - this.panelAniProgress
       }
+      this.panelAniProgress = this.bezier(this.panelAniProgress, 0.0, 0.42, 0.58, 1.0) // css ease-in-out function
     },
   }
 })
@@ -576,7 +592,7 @@ export default defineComponent({
     background-color: setColor(black-3);
     border-radius: 10px 10px 0px 0px;
     z-index: setZindex("popup");
-    animation: open-panel 300ms linear forwards;
+    animation: open-panel 300ms v-bind("isDraggingPanel ? 'linear' : 'ease-in-out'") forwards;
     animation-play-state: v-bind("isDraggingPanel ? 'paused' : 'running'");
     animation-delay: calc(v-bind(panelAniProgress) * -300ms);
     &.disabled {
@@ -587,7 +603,7 @@ export default defineComponent({
       }
     }
     &.close {
-      animation: close-panel 300ms linear forwards;
+      animation: close-panel 300ms v-bind("isDraggingPanel ? 'linear' : 'ease-in-out'") forwards;
       animation-play-state: v-bind("isDraggingPanel ? 'paused' : 'running'");
       animation-delay: calc(v-bind(panelAniProgress) * -300ms);
     }
