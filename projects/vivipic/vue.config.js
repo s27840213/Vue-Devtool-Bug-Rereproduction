@@ -206,11 +206,11 @@ module.exports = defineConfig({
     // if (argv.PRERENDER) {
     //   console.log('start prerender')
     //   // Tell Vue (CLI 3) to provide this file to Pre-SPA:
-    //   config.plugin('html').tap((args) => {
-    //     args[0].template = path.join(__dirname, 'public', 'index.html')
-    //     args[0].filename = 'app.html'
-    //     return args
-    //   })
+    config.plugin('html').tap((args) => {
+      args[0].template = path.join(__dirname, 'public', 'index.html')
+      args[0].filename = 'app.html'
+      return args
+    })
     //   config.plugin('prerender').use(PrerenderSPAPlugin, [
     //     {
     //       // Tell the Pre-SPA plugin not to use index.html as its template file.
