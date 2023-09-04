@@ -1432,7 +1432,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
-    const isPro = store.getters['vivisticker/getIsSubscribed'] || 1 < 11
+    const isPro = store.getters['vivisticker/getIsSubscribed']
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)
       return false
