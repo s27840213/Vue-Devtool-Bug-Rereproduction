@@ -108,7 +108,7 @@ export default defineComponent({
       initPanelUp: false,
       isDraggingPanel: false,
       panelDragHeight: 0,
-      panelAniProgress: 0,
+      panelAniProgress: 1,
       lastPointerY: 0,
       carouselItems: [
         {
