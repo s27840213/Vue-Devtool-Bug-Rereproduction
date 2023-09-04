@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-24")
-  highlight-section(:title="$t('CM0001')")
+  //- highlight-section(:title="$t('CM0001')")
   div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
   div(class="feature-section")
     feature-card(
