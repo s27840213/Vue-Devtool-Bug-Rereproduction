@@ -1,43 +1,31 @@
 <template lang="pug">
 div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-24")
-  div(class="btn btn__powerful-fill w-full box-border p-24 rounded-[20px] flex items-center justify-between")
-    div(class="flex gap-10 items-start justify-between flex-col")
-      div(class="typo-h4") {{ $t('NN0001') }}
-      div(class="typo-body-md") {{ $t('NN0002') }}
-      router-link(
-        custom
-        v-slot="{ navigate }"
-        to="/editor")
-        nu-btn(
-          theme="primary"
-          :full="true"
-          @click="navigate") {{ $t('NN0003') }}
-    img(src="@/assets/img/brush.png")
-  div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('NN0004') }}
+  highlight-section(:title="$t('CM0001')")
+  div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
   div(class="feature-section")
     feature-card(
       :bgImg="'bg-replace'"
-      :title="$t('NN0005')")
+      :title="$t('CM0005')")
     feature-card(
       :bgImg="'tmp'"
-      :title="$t('NN0006')")
+      :title="$t('CM0006')")
     feature-card(
       :bgImg="'tmp'"
-      :title="$t('NN0007')")
+      :title="$t('CM0007')")
     feature-card(
       :bgImg="'tmp'"
-      :title="$t('NN0008')")
-  div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('NN0009') }}
+      :title="$t('CM0008')")
+  div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0009') }}
   div(class="feature-section")
     feature-card(
       :bgImg="'surreal'"
-      :title="$t('NN0009')")
+      :title="$t('CM0009')")
     feature-card(
       :bgImg="'reflection'"
-      :title="$t('NN0010')")
+      :title="$t('CM0010')")
     feature-card(
       :bgImg="'tmp'"
-      :title="$t('NN0011')")
+      :title="$t('CM0011')")
 </template>
 <script setup lang="ts"></script>
 <style scoped lang="scss">

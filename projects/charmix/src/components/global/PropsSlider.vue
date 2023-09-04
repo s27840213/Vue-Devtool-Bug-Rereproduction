@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="mobile-slider grid grid-cols-[auto,1fr] grid-rows-1 gap-12")
   div(class="flex gap-4 text-app-text-secondary typo-btn-sm")
-    span(class="") {{ `${$t('NN0021')}` }}
+    span(class="") {{ `${$t('CM0021')}` }}
     span(class="w-[3ch]") {{ propsVal }}
   input(
     class="accent-app-btn-primary-bg"
@@ -27,31 +27,31 @@ export default defineComponent({
   props: {
     title: {
       type: String,
-      required: true
+      required: true,
     },
     name: {
-      type: String
+      type: String,
     },
     value: {
       type: [Number, String],
-      required: true
+      required: true,
     },
     min: {
       type: Number,
-      default: 0
+      default: 0,
     },
     max: {
       type: Number,
-      default: 100
+      default: 100,
     },
     step: {
       default: 1,
-      type: Number
+      type: Number,
     },
     disabled: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   computed: {
     propsVal: {
@@ -64,8 +64,8 @@ export default defineComponent({
         // If a value is rounded and not changed compared to previous value after rounded,
         // the value in this component will not be synced with the rounded value (since not change happens).
         this.$forceUpdate()
-      }
-    }
+      },
+    },
   },
   methods: {
     handlePointerDown(e: PointerEvent): void {
@@ -73,8 +73,8 @@ export default defineComponent({
     },
     handlePointerUp(e: PointerEvent): void {
       this.$emit('pointerUp', e)
-    }
-  }
+    },
+  },
 })
 </script>
 

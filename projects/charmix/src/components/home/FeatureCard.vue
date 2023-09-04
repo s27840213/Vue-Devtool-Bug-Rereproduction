@@ -10,7 +10,7 @@ router-link(
     span(class="typo-h5 text-primary-white") {{ title }}
 </template>
 <script setup lang="ts">
-import useImageUtils from '@/composable/useImageUtils'
+import useImageUtils from '@/composable/useImageUtils';
 
 const props = defineProps<{
   bgImg: string
@@ -22,7 +22,7 @@ const { getImageUrl } = useImageUtils()
 const cardStyles = computed(() => {
   const targetUrl = getImageUrl(props.bgImg)
   return {
-    background: `linear-gradient(0deg, rgba(0%, 0%, 0%, 0.85) 3%, transparent 40%), url(${targetUrl}`
+    backgroundImage: `linear-gradient(0deg, rgba(0%, 0%, 0%, 0.85) 3%, transparent 40%), url(${targetUrl}`
   }
 })
 </script>
@@ -31,7 +31,5 @@ const cardStyles = computed(() => {
   background-repeat: no-repeat;
   background-size: cover;
   height: 230px;
-  // background: linear-gradient(0deg, rgba(#000000, 0.85) 3%, transparent 40%),
-  //   url('src/assets/img/tmp.png');
 }
 </style>

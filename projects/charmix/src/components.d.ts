@@ -15,6 +15,7 @@ declare module 'vue' {
     EditingOptions: typeof import('./components/panel-content/EditingOptions.vue')['default']
     FeatureCard: typeof import('./components/home/FeatureCard.vue')['default']
     Headerbar: typeof import('./components/Headerbar.vue')['default']
+    HighlightSection: typeof import('./components/home/HighlightSection.vue')['default']
     HomeTab: typeof import('./components/panel-content/HomeTab.vue')['default']
     ModalTemplate: typeof import('./components/panel-content/ModalTemplate.vue')['default']
     NuBtn: typeof import('./components/global/NuBtn.vue')['default']

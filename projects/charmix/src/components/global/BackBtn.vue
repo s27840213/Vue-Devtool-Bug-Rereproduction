@@ -27,17 +27,17 @@ const { t } = useI18n()
 const handleBackAction = (navagate: () => void) => {
   if (showEditingOpstions.value || showPromptArea.value) {
     setNormalModalInfo({
-      title: t('NN0025'),
-      content: t('NN0026'),
-      confirmText: t('NN0027'),
-      cancelText: t('NN0028'),
+      title: t('CM0025'),
+      content: t('CM0026'),
+      confirmText: t('CM0027'),
+      cancelText: t('CM0028'),
       confirm: () => {
         navagate()
         closeModal()
       },
       cancel: () => {
         closeModal()
-      }
+      },
     })
 
     openModal()

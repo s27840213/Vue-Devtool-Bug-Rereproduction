@@ -9,7 +9,7 @@ div(
     nu-btn(
       theme="primary"
       size="md"
-      @click="handleNextAction") {{ $t('NN0012') }}
+      @click="handleNextAction") {{ $t('CM0012') }}
 </template>
 <script setup lang="ts">
 import useStateInfo from '@/composable/useStateInfo'

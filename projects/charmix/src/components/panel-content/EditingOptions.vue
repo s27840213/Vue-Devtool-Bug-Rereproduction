@@ -3,7 +3,7 @@ div(class="editing-options w-full h-full")
   div(
     v-if="inSelectionMode"
     class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 pl-24 pr-8")
-    span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('NN0015') }}
+    span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('CM0015') }}
     scrollable-container(:gap="20")
       nu-svg-icon(
         v-for="shape in shapeTypes"
@@ -14,7 +14,7 @@ div(class="editing-options w-full h-full")
         :same-size="false")
   div(v-else class="mb-16 px-24") 
     props-slider(
-      :title="`${$t('NN0001')}`"
+      :title="`${$t('CM0001')}`"
       :borderTouchArea="true"
       :name="'brushSize'"
       :value="brushSize"
@@ -79,32 +79,32 @@ const selectedTab = computed(() => editorMode.value)
 
 const inSelectionMode = computed(() => editorMode.value === 'selection')
 const inCavnasDrawMode = computed(
-  () => editorMode.value === 'erase' || editorMode.value === 'brush'
+  () => editorMode.value === 'erase' || editorMode.value === 'brush',
 )
 
 const featureTabs = reactive<Array<IFeatureTab>>([
   {
     icon: 'selection',
-    text: t('NN0016')
+    text: t('CM0016'),
   },
   {
     icon: 'brush',
-    text: t('NN0017')
+    text: t('CM0017'),
   },
   {
     icon: 'erase',
-    text: t('NN0018')
+    text: t('CM0018'),
   },
   {
     icon: 'reverse',
-    text: t('NN0019'),
-    pressed: false
+    text: t('CM0019'),
+    pressed: false,
   },
   {
     icon: 'move',
-    text: t('NN0020'),
-    disabled: true
-  }
+    text: t('CM0020'),
+    disabled: true,
+  },
 ])
 
 const tabColor = (tab: IFeatureTab): ColorSlip => {
