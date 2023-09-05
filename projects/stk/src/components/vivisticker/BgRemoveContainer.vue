@@ -27,17 +27,20 @@ div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"
 
 <script lang="ts">
 /* eslint-disable */
-import { TRANSITION_TIME } from '@/components/editor/mobile/MobileEditorView.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
 import { ICoordinate } from '@/interfaces/frame'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import constantData from '@/utils/constantData'
 import mathUtils from '@/utils/mathUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 export const RM_SECTION_PADDING = 20
+
+const TRANSITION_TIME = constantData.pinchTransitionTime
+
 export default defineComponent({
   components: {
     BgRemoveArea,

@@ -1240,6 +1240,10 @@ class ConstantData {
     }
     return res as IStickerVideoUrls
   }
+
+  get pinchTransitionTime() {
+    return 250
+  }
 }
 
 export default new ConstantData()
