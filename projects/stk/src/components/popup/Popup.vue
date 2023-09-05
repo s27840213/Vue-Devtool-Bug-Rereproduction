@@ -10,21 +10,21 @@ div(class="popup bg-white")
 </template>
 
 <script lang="ts">
-import PopupAlign from '@/components/popup/PopupAlign.vue'
-import PopupDeleteAccount from '@/components/popup/PopupDeleteAccount.vue'
-import PopupFile from '@/components/popup/PopupFile.vue'
-import PopupFlip from '@/components/popup/PopupFlip.vue'
-import PopupGuideline from '@/components/popup/PopupGuideline.vue'
+// import PopupAlign from '@/components/popup/PopupAlign.vue'
+// import PopupDeleteAccount from '@/components/popup/PopupDeleteAccount.vue'
+// import PopupFile from '@/components/popup/PopupFile.vue'
+// import PopupFlip from '@/components/popup/PopupFlip.vue'
+// import PopupGuideline from '@/components/popup/PopupGuideline.vue'
 import PopupIcon from '@/components/popup/PopupIcon.vue'
-import PopupLayer from '@/components/popup/PopupLayer.vue'
-import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
-import PopupOrder from '@/components/popup/PopupOrder.vue'
-import PopupPage from '@/components/popup/PopupPage.vue'
-import PopupPageScale from '@/components/popup/PopupPageScale.vue'
-import PopupPayment from '@/components/popup/PopupPayment.vue'
-import PopupReplace from '@/components/popup/PopupReplace.vue'
-import PopupSlider from '@/components/popup/PopupSlider.vue'
-import PopupSubmit from '@/components/popup/PopupSubmit.vue'
+// import PopupLayer from '@/components/popup/PopupLayer.vue'
+// import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
+// import PopupOrder from '@/components/popup/PopupOrder.vue'
+// import PopupPage from '@/components/popup/PopupPage.vue'
+// import PopupPageScale from '@/components/popup/PopupPageScale.vue'
+// import PopupPayment from '@/components/popup/PopupPayment.vue'
+// import PopupReplace from '@/components/popup/PopupReplace.vue'
+// import PopupSlider from '@/components/popup/PopupSlider.vue'
+// import PopupSubmit from '@/components/popup/PopupSubmit.vue'
 import { IPage } from '@/interfaces/page'
 import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
 import modalUtils from '@/utils/modalUtils'
@@ -38,21 +38,21 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
-    PopupOrder,
-    PopupLayer,
-    PopupAlign,
-    PopupPage,
-    PopupFlip,
-    PopupSlider,
-    PopupFile,
-    PopupLineTemplate,
-    PopupGuideline,
-    PopupPageScale,
-    PopupSubmit,
-    PopupPayment,
+    // PopupOrder,
+    // PopupLayer,
+    // PopupAlign,
+    // PopupPage,
+    // PopupFlip,
+    // PopupSlider,
+    // PopupFile,
+    // PopupLineTemplate,
+    // PopupGuideline,
+    // PopupPageScale,
+    // PopupSubmit,
+    // PopupPayment,
     PopupIcon,
-    PopupDeleteAccount,
-    PopupReplace,
+    // PopupDeleteAccount,
+    // PopupReplace,
   },
   directives: {
     clickOutside: vClickOutside.directive

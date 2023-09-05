@@ -13,11 +13,9 @@ div(class="fps")
   div(class="fps__value")
     span(@click="showGraph") FPS: {{fps}}
     span(v-if="jsHeapSize !== -1") JS-Heap: {{jsHeapSize}}MB
-    //- mobile-props-toggle(class="py-5" :title="'切換模板顯示樣式'" v-model="newTemplateShownMode")
 </template>
 
 <script lang="ts">
-import MobilePropsToggle from '@/components/editor/mobile/MobilePropsToggle.vue'
 import { Path, Point } from '@/utils/mathUtils'
 import { filter, range } from 'lodash'
 import { defineComponent } from 'vue'
@@ -67,7 +65,6 @@ interface IFpsGraph {
 export default defineComponent({
   name: 'DebugTool',
   components: {
-    MobilePropsToggle
   },
   data() {
     return {

@@ -65,8 +65,8 @@ div(class="mobile-panel"
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
-import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
-import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
+// import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
+// import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
 import PanelFlip from '@/components/editor/panelMobile/PanelFlip.vue'
@@ -74,7 +74,7 @@ import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue
 import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
 import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
 import PanelGiphyMore from '@/components/editor/panelMobile/PanelGiphyMore.vue'
-import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
+// import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
 import PanelMyDesignMore from '@/components/editor/panelMobile/PanelMyDesignMore.vue'
 import PanelNudge from '@/components/editor/panelMobile/PanelNudge.vue'
 import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
@@ -83,15 +83,15 @@ import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
-import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
+// import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
 import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
-import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
-import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
+// import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+// import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
-import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
-import PopupDownload from '@/components/popup/PopupDownload.vue'
+// import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
+// import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
 import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
@@ -149,15 +149,15 @@ export default defineComponent({
     clickOutside: vClickOutside.directive
   },
   components: {
-    PanelTemplate,
+    // PanelTemplate,
     PanelPhoto,
     PanelObject,
     PanelBackground,
     PanelText,
     PanelTextUs,
-    PanelFile,
-    PanelBrand,
-    PanelPage,
+    // PanelFile,
+    // PanelBrand,
+    // PanelPage,
     ColorPanel,
     PanelPosition,
     PanelFlip,
@@ -168,15 +168,15 @@ export default defineComponent({
     PanelFontFormat,
     PanelFontSpacing,
     PanelNudge,
-    PanelResize,
-    PopupDownload,
-    PanelMore,
+    // PanelResize,
+    // PopupDownload,
+    // PanelMore,
     PanelColor,
     PanelAdjust,
     PanelTextEffect,
     PanelPhotoShadow,
     PanelObjectAdjust,
-    PanelBrandList,
+    // PanelBrandList,
     PanelVvstkMore,
     PanelGiphyMore,
     PanelColorPicker,
