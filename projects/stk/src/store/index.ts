@@ -8,7 +8,6 @@ import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
 import bgRemove, { IBgRemoveState } from '@/store/module/bgRemove'
 import color, { IColorState } from '@/store/module/color'
-import cypress, { ICypressState } from '@/store/module/cypress'
 import { IFileState } from '@/store/module/file'
 import font from '@/store/module/font'
 import fontTag, { IFontTagState } from '@/store/module/fontTag'
@@ -1205,7 +1204,6 @@ type IStoreRoot = IEditorState & {
   fontTag: IFontTagState,
   imgControl: IImgControlState,
   webView: IWebViewState,
-  cypress: ICypressState,
 }
 const store = createStore({
   state: state as IStoreRoot,
@@ -1233,7 +1231,6 @@ const store = createStore({
     fontTag,
     imgControl,
     webView,
-    cypress,
   }
 })
 export default store
