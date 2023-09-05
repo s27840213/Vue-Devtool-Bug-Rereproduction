@@ -1,0 +1,14 @@
+{
+  "name": "tools",
+  "private": true,
+  "scripts": {
+    "update i18n": "",
+    "update pipeline": "",
+    "open preview": ""
+  },
+  "main": "./dist/nueditor.common.js",
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}

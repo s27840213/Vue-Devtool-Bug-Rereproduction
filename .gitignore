@@ -41,6 +41,10 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
+# For tools
+/tools/file-sharing/*.json
+/tools/file-sharing/*.txt
+
 # Preview-url tool config file
 /preview-url-tool/*.json
 
