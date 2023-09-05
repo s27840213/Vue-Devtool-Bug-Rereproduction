@@ -27,7 +27,6 @@ import unsplash, { IUnaplashState } from '@/store/module/unsplash'
 import user, { IUserModule } from '@/store/module/user'
 import vivisticker from '@/store/module/vivisticker'
 import webView, { IWebViewState } from '@/store/module/webView'
-import photos, { IPhotoState } from '@/store/photos'
 import text, { ITextState } from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
@@ -1187,7 +1186,6 @@ window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500
 
 type IStoreRoot = IEditorState & {
   user: IUserModule,
-  photos: IPhotoState,
   text: ITextState,
   font: IListModuleState,
   color: IColorState,
@@ -1216,7 +1214,6 @@ const store = createStore({
   modules: {
     user,
     unsplash,
-    photos,
     text,
     font,
     color,
