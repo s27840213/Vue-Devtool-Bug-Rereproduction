@@ -8,20 +8,16 @@ import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
 import bgRemove, { IBgRemoveState } from '@/store/module/bgRemove'
 import color, { IColorState } from '@/store/module/color'
-import cypress, { ICypressState } from '@/store/module/cypress'
-import { IDesignState } from '@/store/module/design'
 import { IFileState } from '@/store/module/file'
 import font from '@/store/module/font'
 import fontTag, { IFontTagState } from '@/store/module/fontTag'
 import giphy from '@/store/module/giphy'
-import { IHomeTemplateState } from '@/store/module/homeTemplate'
 import imgControl, { IImgControlState } from '@/store/module/imgControl'
 import markers from '@/store/module/markers'
 import mobileEditor, { IMobileEditorState } from '@/store/module/mobileEditor'
 import modal, { IModalState } from '@/store/module/modal'
 import objects from '@/store/module/objects'
 import page, { IPageState as IPageStateModule } from '@/store/module/page'
-import { IPaymentState } from '@/store/module/payment'
 import popup, { IPopupState } from '@/store/module/popup'
 import shadow, { IShadowState } from '@/store/module/shadow'
 import templates from '@/store/module/templates'
@@ -30,7 +26,6 @@ import unsplash, { IUnaplashState } from '@/store/module/unsplash'
 import user, { IUserModule } from '@/store/module/user'
 import vivisticker from '@/store/module/vivisticker'
 import webView, { IWebViewState } from '@/store/module/webView'
-import photos, { IPhotoState } from '@/store/photos'
 import text, { ITextState } from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
@@ -43,7 +38,6 @@ import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
-import { IBrandKitState } from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
@@ -1191,7 +1185,6 @@ window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500
 
 type IStoreRoot = IEditorState & {
   user: IUserModule,
-  photos: IPhotoState,
   text: ITextState,
   font: IListModuleState,
   color: IColorState,
@@ -1203,20 +1196,14 @@ type IStoreRoot = IEditorState & {
   modal: IModalState,
   popup: IPopupState,
   page: IPageStateModule,
-  homeTemplate: IHomeTemplateState,
-  design: IDesignState,
-  layouts: IListModuleState,
   markers: IListModuleState,
-  brandkit: IBrandKitState,
   unsplash: IUnaplashState,
   bgRemove: IBgRemoveState,
   file: IFileState,
-  payment: IPaymentState,
   shadow: IShadowState,
   fontTag: IFontTagState,
   imgControl: IImgControlState,
   webView: IWebViewState,
-  cypress: ICypressState,
 }
 const store = createStore({
   state: state as IStoreRoot,
@@ -1225,7 +1212,6 @@ const store = createStore({
   modules: {
     user,
     unsplash,
-    photos,
     text,
     font,
     color,
@@ -1245,7 +1231,6 @@ const store = createStore({
     fontTag,
     imgControl,
     webView,
-    cypress,
   }
 })
 export default store

@@ -51,7 +51,6 @@ import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetti
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
-import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
 import { IFrame, IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { LayerType } from '@/store/types'

@@ -29,7 +29,6 @@ import textStock from '@/store/module/text'
 import unsplash, { IUnaplashState } from '@/store/module/unsplash'
 import user, { IUserModule } from '@/store/module/user'
 import webView, { IWebViewState } from '@/store/module/webView'
-import photos, { IPhotoState } from '@/store/photos'
 import text, { ITextState } from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
@@ -1136,7 +1135,6 @@ const mutations: MutationTree<IEditorState> = {
 
 type IStoreRoot = IEditorState & {
   user: IUserModule,
-  photos: IPhotoState,
   text: ITextState,
   font: IListModuleState,
   color: IColorState,
@@ -1169,7 +1167,6 @@ const store = createStore({
   mutations,
   modules: {
     user,
-    photos,
     text,
     font,
     color,

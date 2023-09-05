@@ -68,7 +68,6 @@ import CategoryList, { CCategoryList } from '@/components/category/CategoryList.
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import Tags, { ITag } from '@/components/global/Tags.vue'
-import Url from '@/components/global/Url.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
@@ -90,7 +89,6 @@ export default defineComponent({
     CategoryListRows,
     CategoryTemplateItem,
     CategoryGroupTemplateItem,
-    Url,
     Tags,
     BtnAdd
   },
