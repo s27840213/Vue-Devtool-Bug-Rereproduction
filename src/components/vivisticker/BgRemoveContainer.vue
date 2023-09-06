@@ -89,6 +89,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
+      scaleRatio: 'getPageScaleRatio',
+      contentScaleRatio: 'getContentScaleRatio',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
@@ -97,6 +99,7 @@ export default defineComponent({
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       movingMode: 'bgRemove/getMovingMode',
       isPinching: 'bgRemove/getIsPinching',
+      canvasSize: 'bgRemove/getCanvasSize',
       pinch: 'bgRemove/getPinchState',
       bgCurrSize:'bgRemove/getBgCurrSize'
     }),
@@ -143,10 +146,50 @@ export default defineComponent({
     setScaleRatio(val: number) {
       this.bgRemoveScaleRatio = val
     },
+    pinchInit() {
+      // -1 means not be initialized
+      if (this.pinch.initPos.x === -1 || this.pinch.initPos.y === -1) {
+        const paddingSize = RM_SECTION_PADDING * 2
+        const container = document.getElementById('rmSection') as HTMLElement
+        const containerWidth = container.clientWidth - paddingSize
+        const containerHeight = container.clientHeight - paddingSize
+        const initSize = {
+          width: this.canvasSize.width * this.scaleRatio * this.contentScaleRatio * this.bgRemoveScaleRatio * 0.01,
+          height: this.canvasSize.height * this.scaleRatio * this.contentScaleRatio * this.bgRemoveScaleRatio * 0.01
+        }
+        const x = (containerWidth - initSize.width) * 0.5
+        const y = (containerHeight - initSize.height) * 0.5
+        const rect = container.getBoundingClientRect()
+        this.$store.commit('bgRemove/UPDATE_pinchState', {
+          initScale: this.bgRemoveScaleRatio,
+          scale: this.bgRemoveScaleRatio,
+          initPos: { x, y },
+          initSize,
+          x,
+          y,
+          physicalCenterPos: {
+            x: rect.left + rect.width * 0.5,
+            y: rect.top + rect.height * 0.5
+          },
+          physicalTopLeftPos: {
+            left: rect.left,
+            top: rect.top
+          },
+          containerSize: {
+            width: containerWidth,
+            height: containerHeight
+          }
+        })
+        console.log('rect.left, rect.top', rect.left, rect.top)
+      }
+    },
     pinchHandler(event: AnyTouchEvent) {
       window.requestAnimationFrame(() => this._pinchHandler(event))
     },
     pinchStart(event: AnyTouchEvent) {
+      if (this.pinch.initPos.x === -1 || this.pinch.initPos.y === -1) {
+        this.pinchInit()
+      }
       this.setInGestureMode(true)
       const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
       this.imgAspectRatio = width / height
@@ -164,7 +207,7 @@ export default defineComponent({
       this.initBgPos = { x: this.pinch.x, y: this.pinch.y }
     },
     _pinchHandler(event: AnyTouchEvent) {
-      if (this.pinch.isTransitioning || !this.movingMode || !this.inBgRemoveMode) return
+      if (this.pinch.isTransitioning || !this.inBgRemoveMode) return
       switch (event.phase) {
         /**
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention

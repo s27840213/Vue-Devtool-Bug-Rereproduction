@@ -43,6 +43,8 @@ export interface IBgRemoveState {
   movingMode: boolean,
   restoreInitState: boolean,
   canvas: HTMLCanvasElement,
+  canvasWidth: number,
+  canvasHeight: number,
   autoRemoveResult: IBgRemoveInfo,
   modifiedFlag: boolean,
   loading: boolean,
@@ -75,6 +77,8 @@ const getDefaultState = (): IBgRemoveState => ({
   movingMode: false,
   restoreInitState: false,
   canvas: null as unknown as HTMLCanvasElement,
+  canvasWidth: 1600,
+  canvasHeight: 1600,
   autoRemoveResult: null as unknown as IBgRemoveInfo,
   modifiedFlag: false,
   loading: false,
@@ -124,6 +128,12 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
     return {
       width: state.pinch.initSize.width * scaleIncrement,
       height: state.pinch.initSize.height * scaleIncrement
+    }
+  },
+  getCanvasSize(state: IBgRemoveState): ISize {
+    return {
+      width: state.canvasWidth,
+      height: state.canvasHeight
     }
   },
   getIsPinching(state: IBgRemoveState) {
@@ -244,6 +254,14 @@ const mutations: MutationTree<IBgRemoveState> = {
   },
   SET_canvas(state: IBgRemoveState, canvas: HTMLCanvasElement) {
     state.canvas = canvas
+  },
+  SET_canvasSize(state: IBgRemoveState, size: { width?: number, height?: number }) {
+    if (size.width) {
+      state.canvasWidth = size.width
+    }
+    if (size.height) {
+      state.canvasHeight = size.height
+    }
   },
   SET_autoRemoveResult(state: IBgRemoveState, result: IBgRemoveInfo) {
     state.autoRemoveResult = result
