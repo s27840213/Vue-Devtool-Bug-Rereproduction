@@ -40,7 +40,7 @@ div(class="panel-more")
         @click="toggleShowTouchPoint")
       span Toggle show touch point
     div(class="body-2 panel-more__item" @pointerdown.prevent="handleDebugMode")
-      span(class="text-gray-3") Version: {{buildNumber}}{{appVersion}}{{domain}}
+      span(class="text-gray-3") Version: {{buildNumber}}{{appVersion}}{{hostId}} {{userId}} {{domain}}
   template(v-if="lastHistory === 'domain-list'")
     div(v-for="domain in domainList"
         :key="domain.key"
@@ -82,7 +82,8 @@ export default defineComponent({
   },
   computed: {
     ...mapState('user', [
-      'enableAdminView'
+      'enableAdminView',
+      'userId',
     ]),
     ...mapGetters({
       pagesLength: 'getPagesLength',
@@ -107,6 +108,9 @@ export default defineComponent({
     },
     appVersion(): string {
       return picWVUtils.inBrowserMode ? '' : ` - ${picWVUtils.getUserInfoFromStore().appVer}`
+    },
+    hostId(): string {
+      return picWVUtils.inBrowserMode ? '' : ` - ${picWVUtils.getUserInfoFromStore().hostId}`
     },
     domainList(): { key: string, title: string, selected: () => boolean }[] {
       return [
