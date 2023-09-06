@@ -105,7 +105,9 @@ class CssConveter {
     if (vivistickerUtils.getDefaultUserConfig('emojiSetting', 'val', vivistickerUtils.userSettings.emojiSetting)!.first) {
       fontFaces = [vivistickerUtils.userSettings.emojiSetting, font, ...fontFaces]
     } else {
-      fontFaces = [font, ...fontFaces.slice(0, fontFaces.length - 1), vivistickerUtils.userSettings.emojiSetting, fontFaces[fontFaces.length - 1]]
+      const anchor = 'gXgHEvSNTPg2mhrpNOUb'
+      const insertIndex = fontFaces.indexOf(anchor)
+      fontFaces = [font, ...fontFaces.slice(0, insertIndex), vivistickerUtils.userSettings.emojiSetting, ...fontFaces.slice(insertIndex)]
     }
     return fontFaces.join(', ')
   }
