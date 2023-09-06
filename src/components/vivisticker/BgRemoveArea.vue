@@ -1,15 +1,17 @@
 <template lang="pug">
 div(class="bg-remove-area"
       :style="wrapperStyles"
+      id="bgRemoveArea"
       ref="bgRemoveArea")
   div(v-show="showInitImage"
     class="bg-remove-area__initPhoto"
     :style="initPhotoStyles")
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
+      id="bgRemoveScaleArea"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}"
       :ref="'scaleArea'")
-    canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
+    canvas(class="bg-remove-area__canvas" ref="canvas" :cy-ready="cyReady" @pointerdown="moveStart")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
@@ -23,7 +25,9 @@ div(class="bg-remove-area"
 </template>
 
 <script lang="ts">
+import { RM_SECTION_PADDING } from '@/components/vivisticker/BgRemoveContainer.vue'
 import { IBgRemoveInfo } from '@/interfaces/image'
+import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
 import logUtils from '@/utils/logUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -45,7 +49,7 @@ export default defineComponent({
     fitScaleRatio: {
       default: 1,
       type: Number
-    },
+    }
     // teleportTarget: {
     //   default: '.header-bar',
     //   type: String
@@ -90,7 +94,7 @@ export default defineComponent({
       pointerStartX: 0,
       pointerStartY: 0,
       isDrawing: false,
-      loading: true
+      loading: true,
     }
   },
   created() {
@@ -172,6 +176,7 @@ export default defineComponent({
     }
     this.cotainerRef.removeEventListener('pointerdown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
+    this.$store.commit('bgRemove/UPDATE_pinchState', { initPos: { x: -1, y: -1 }, x: 0, y: 0 })
   },
   computed: {
     ...mapGetters({
@@ -186,11 +191,14 @@ export default defineComponent({
       modifiedFlag: 'bgRemove/getModifiedFlag',
       steps: 'bgRemove/getSteps',
       currStep: 'bgRemove/getCurrStep',
+      pinchState: 'bgRemove/getPinchState',
+      isPinchInitialized: 'bgRemove/getIsPinchInitialized',
       inLastStep: 'bgRemove/inLastStep',
       inFirstStep: 'bgRemove/inFirstStep',
       inGestureMode: 'getInGestureToolMode',
       contentScaleRatio: 'getContentScaleRatio',
-      useMobileEditor: 'getUseMobileEditor'
+      useMobileEditor: 'getUseMobileEditor',
+      isPinching: 'bgRemove/getIsPinching'
     }),
     size(): { width: number, height: number } {
       return {
@@ -208,18 +216,23 @@ export default defineComponent({
         willChange: this.inGestureMode ? 'transform' : ''
       }
     },
-    wrapperStyles(): { [index: string]: string } {
+    renderSize(): { [index: string]: string } {
       return {
         width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`
+        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+      }
+    },
+    wrapperStyles(): { [index: string]: string } {
+      return {
+        ...this.renderSize,
+        ...(this.isPinchInitialized && { transform: `translate(${this.pinchState.x}px, ${this.pinchState.y}px)` })
       }
     },
     initPhotoStyles(): { [index: string]: string } {
       const backgroundImage = this.showInitImage ? `url(${this.initImgSrc})` : ''
       const backgroundSize = this.showInitImage ? 'cover' : 'initial'
       return {
-        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+        ...this.renderSize,
         backgroundImage,
         backgroundSize
       }
@@ -240,6 +253,45 @@ export default defineComponent({
     // }
   },
   watch: {
+    movingMode(val) {
+      if (val) {
+        // -1 means not be initialized
+        if (this.pinchState.initPos.x === -1 || this.pinchState.initPos.y === -1) {
+          const paddingSize = RM_SECTION_PADDING * 2
+          const container = document.getElementById('rmSection') as HTMLElement
+          const containerWidth = container.clientWidth - paddingSize
+          const containerHeight = container.clientHeight - paddingSize
+          const initSize = {
+            width: this.size.width * this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio * 0.01,
+            height: this.size.height * this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio * 0.01
+          }
+          const x = (containerWidth - initSize.width) * 0.5
+          const y = (containerHeight - initSize.height) * 0.5
+          const rect = container.getBoundingClientRect()
+          this.$store.commit('bgRemove/UPDATE_pinchState', {
+            initScale: this.fitScaleRatio,
+            scale: this.fitScaleRatio,
+            initPos: { x, y },
+            initSize,
+            x,
+            y,
+            physicalCenterPos: {
+              x: rect.left + rect.width * 0.5,
+              y: rect.top + rect.height * 0.5
+            },
+            physicalTopLeftPos: {
+              left: rect.left,
+              top: rect.top
+            },
+            containerSize: {
+              width: containerWidth,
+              height: containerHeight
+            }
+          })
+          console.log('rect.left, rect.top', rect.left, rect.top)
+        }
+      }
+    },
     brushSize(newVal: number) {
       if (this.contentCtx) {
         this.contentCtx.lineWidth = newVal
@@ -410,6 +462,11 @@ export default defineComponent({
       })
 
       this.setModifiedFlag(true)
+    },
+    moveStart(evt: PointerEvent) {
+      if (this.movingMode && !this.isPinching) {
+        bgRemoveMoveHandler.moveStart(evt)
+      }
     },
     // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
@@ -622,9 +679,9 @@ export default defineComponent({
       this.showBrush = false
     },
     touchEventHandler(e: TouchEvent) {
-      if (this.movingMode) {
-        return
-      }
+      // if (this.movingMode) {
+      //   return
+      // }
       if (e.touches.length === 2) {
         this.setInGestureMode(true)
         return
@@ -640,9 +697,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .bg-remove-area {
-  position: relative;
+  position: absolute;
+  // position: relative;
   box-sizing: content-box;
-  margin: auto auto;
+  // margin: auto auto;
+
+  &__canvas {
+    position: relative;
+    box-sizing: content-box;
+  }
 
   &__initPhoto {
     position: absolute;

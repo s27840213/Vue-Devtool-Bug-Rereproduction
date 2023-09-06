@@ -442,26 +442,35 @@ export default defineComponent({
       if (this.inBgRemoveMode) {
         return this.bgRemoveTabs
       } else if (this.isGroupOrTmp && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
+        console.warn(1)
         /** tmp layer treated as group */
         return this.multiPhotoTabs
       } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
+        console.warn(2)
         return this.photoInGroupTabs
       // text + shape color
       } else if (this.isGroupOrTmp && this.targetIs('text') && this.showObjectColorAndFontTabs) {
+        console.warn(3)
         return [...this.multiObjectTabs, ...this.fontTabs]
       } else if (this.isGroupOrTmp && this.targetIs('text')) {
+        console.warn(4)
         return this.multiFontTabs
       } else if (this.isGroupOrTmp && this.targetIs('shape') && this.singleTargetType()) {
+        console.warn(5)
         return this.multiObjectTabs
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
+        console.warn(6)
         return this.multiGeneralTabs
       // When deselect in object editor with frame
       } else if (this.showFrame) {
+        console.warn(7)
         return [...this.frameTabs, ...this.genearlLayerTabs]
       // When select empty frame in object editor
       } else if (this.showEmptyFrameTabs) {
+        console.warn(8)
         return this.emptyFrameTabs
       } else if ((this.showPhotoTabs || targetType === LayerType.image) && !controllerHidden) {
+        console.warn(9)
         return this.photoTabs
       } else if (this.showFontTabs) {
         const res = [
@@ -539,7 +548,7 @@ export default defineComponent({
     },
     isInFrame(): boolean {
       const layer = layerUtils.getCurrLayer
-      return layer.type === LayerType.frame && (layer as IFrame).clips[0].srcObj.assetId !== ''
+      return layer.type === LayerType.frame && (layer as IFrame).clips[Math.max(layerUtils.subLayerIdx || 0, 0)].srcObj.assetId !== ''
     },
     isSvgImage(): boolean {
       const layer = layerUtils.getCurrLayer

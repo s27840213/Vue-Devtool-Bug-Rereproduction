@@ -82,7 +82,7 @@ export default defineComponent({
       setBrushSize: 'bgRemove/SET_brushSize',
       setRestoreInitState: 'bgRemove/SET_restoreInitState',
       setClearMode: 'bgRemove/SET_clearMode',
-      setShowInitImage: 'bgRemove/SET_showInitImage',
+      setShowInitImage: 'bgRemove/SET_showInitImage'
     }),
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)

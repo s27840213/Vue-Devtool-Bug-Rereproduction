@@ -6,14 +6,14 @@ import store from '@/store'
 import GroupUtils from '@/utils/groupUtils'
 import pageUtils from './pageUtils'
 class FileUtils {
-  import() {
+  import(handler?: (result: string) => void) {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', 'application/json')
     inputNode.click()
-    inputNode.addEventListener('change', handleFileSelect, false)
+    inputNode.addEventListener('change', (evt) => { handleFileSelect(evt, handler) }, false)
   }
 
   export() {
@@ -94,12 +94,17 @@ class FileUtils {
   }
 }
 
-function handleFileSelect(evt: any) {
-  const file = evt.target.files[0]
+function handleFileSelect(evt: Event, handler?: (result: string) => void) {
+  if (!evt.target) return
+  const file = (evt.target as HTMLInputElement).files![0]!
   evt.target.removeEventListener('change', handleFileSelect, false)
   const reader = new FileReader()
   reader.onload = (evt: Event) => {
     const target = evt.target as FileReader
+    if (handler) {
+      handler(target.result as string)
+      return
+    }
     const json = JSON.parse(target.result as string)
     const pages = json.pages ? json.pages : json
     store.commit('SET_pages', pageUtils.newPages(pages))

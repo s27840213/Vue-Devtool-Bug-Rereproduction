@@ -2,7 +2,7 @@
 div(ref="main" class="tutorial relative" v-touch
     @swipeleft="handleSwipeLeft"
     @swiperight="handleSwipeRight")
-  div(class="tutorial__video" :class="{ blue: isBlueVideo }")
+  div(class="tutorial__video")
     video(autoplay playsinline muted :src="videoSource" @ended="handleEnded" @canplay="handleVideoLoaded")
   div(class="tutorial__content")
     div(class="tutorial__content__container")
@@ -51,9 +51,6 @@ export default defineComponent({
   computed: {
     videoSource(): string {
       return this.stepConfigs[this.step].video
-    },
-    isBlueVideo(): boolean {
-      return this.$i18n.locale === 'us'
     }
   },
   methods: {
@@ -66,7 +63,7 @@ export default defineComponent({
       }
     },
     buttonText(index: number): string {
-      if (this.$i18n.locale === 'us') {
+      if (['us', 'jp'].includes(this.$i18n.locale)) {
         return this.stepConfigs[index].btnText ?? ''
       } else {
         return index < this.stepConfigs.length - 1 ? `${this.$t('NN0744')}` : `${this.$t('NN0745')}`
@@ -127,9 +124,6 @@ export default defineComponent({
     width: 100vw;
     overflow: hidden;
     background: setColor(black-1);
-    &.blue {
-      background: setColor(blue-tutorial);
-    }
     & > video {
       width: 100%;
       height: 100%;

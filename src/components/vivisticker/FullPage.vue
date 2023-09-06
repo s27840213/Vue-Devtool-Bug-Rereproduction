@@ -14,6 +14,7 @@ div(ref="main" class="full-page relative")
   welcome(v-if="fullPageConfig.type === 'welcome'")
   div(v-if="showCloseButton"
     class="full-page__close"
+    :class="{'full-page__close--semi-transparent': fullPageConfig.type === 'payment'}"
     @click.prevent.stop="handleClose")
     svg-icon(iconName="vivisticker_close"
             iconColor="white"
@@ -118,6 +119,9 @@ export default defineComponent({
     position: absolute;
     top: 20px;
     right: 20px;
+    &--semi-transparent {
+      opacity: 0.5;
+    }
   }
   &__video {
     width: 100vw;

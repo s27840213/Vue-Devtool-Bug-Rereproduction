@@ -1,0 +1,7 @@
+# Doc about ignore-revs-file: https://git-scm.com/docs/git-blame#Documentation/git-blame.txt---ignore-revs-fileltfilegt
+# How to set Gitlens: https://github.com/gitkraken/vscode-gitlens/issues/413#issuecomment-620852339
+
+665d81348bedf7d16c4636c46e56e046ad1374b7 # 2022-11-25 [Alan] fix: make the project can be served!
+2dd66c434231cb5ae418b43b8bf2d1a0d54eada4 # 2022-11-24 [Alan] fix: fix all red line bugs in SFC and utils, api.ts files
+1603bcdacbc83eff859f437621cdf6acef1c4c14 # 2022-11-23 [Nathan] fix: set vue props as required
+b1482342bb71bb87ed85463b78f7031280a0fbc0 # 2023-02-15 [Nathan] refactor: decrease pug indent for conflict files

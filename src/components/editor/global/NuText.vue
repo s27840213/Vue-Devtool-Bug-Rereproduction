@@ -34,7 +34,7 @@ import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import { CustomElementConfig } from '@/interfaces/editor'
 import { isTextFill } from '@/interfaces/format'
-import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
+import { IGroup, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
@@ -48,7 +48,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { isEqual, max, omit, round } from 'lodash'
+import _, { isEqual, max, omit, round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -255,16 +255,14 @@ export default defineComponent({
         textBgUtils.fixedWidthStyle(span.styles, p.styles, this.config),
       )
     },
-    pStyle(styles: IParagraphStyle) {
-      return omit(tiptapUtils.textStylesRaw(styles), [
+    pStyle(styles: any) {
+      return _.omit(tiptapUtils.textStylesRaw(styles), [
         'text-decoration-line', '-webkit-text-decoration-line'
       ])
     },
     async resizeCallback() {
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles.textShape)) return
-
-      // console.log('resize')
 
       let widthLimit
       if (this.isLayerAutoResizeNeeded()) {
@@ -282,7 +280,6 @@ export default defineComponent({
           x = config.styles.x - (textHW.width - config.styles.width) / 2
           y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
-        // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
       } else {

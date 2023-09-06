@@ -11,6 +11,7 @@ import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
 import constantData, { IStickerVideoUrls } from '@/utils/constantData'
+import fileUtils from '@/utils/fileUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import logUtils from '@/utils/logUtils'
 import { nextTick } from 'vue'
@@ -1041,6 +1042,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }, id ?? '')
   }
 
+  importDesign() {
+    fileUtils.import((result: string) => {
+      const importedDesign = JSON.parse(result)
+      importedDesign.id = undefined
+      this.initWithTempDesign(importedDesign)
+    })
+  }
+
   async fetchMyDesign(myDesign: IMyDesign) {
     const { id, type } = myDesign
     const data = await this.getAsset(`mydesign-${this.mapEditorType2MyDesignKey(type)}`, id, 'config')
@@ -1551,7 +1560,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
-          this.openFullPageVideo(i18n.global.locale === 'us' ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
+          this.openFullPageVideo(['us', 'jp'].includes(i18n.global.locale) ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
           modalUtils.clearModalInfo()
         }
       }, undefined, {

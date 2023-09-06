@@ -1165,25 +1165,25 @@ class ConstantData {
 
   stickerTutorialSteps(): { title: string, description: string, video: string, btnText?: string }[] {
     const stickerVideoUrls = this.stickerVideoUrls()
-    // TODO: after tw and jp new videos are povided, remove title and description and make btnText required.
-    return i18n.global.locale === 'us' ? [
+    // TODO: after tw new videos are povided, remove title and description and make btnText required.
+    return ['us', 'jp'].includes(i18n.global.locale) ? [
       {
         title: '',
         description: '',
         video: stickerVideoUrls.tutorial1.video,
-        btnText: 'Next to Fonts'
+        btnText: `${i18n.global.t('STK0091')}`
       },
       {
         title: '',
         description: '',
         video: stickerVideoUrls.tutorial2.video,
-        btnText: 'Next to Backgrounds'
+        btnText: `${i18n.global.t('STK0092')}`
       },
       {
         title: '',
         description: '',
         video: stickerVideoUrls.tutorial4.video,
-        btnText: 'Let\'s explore'
+        btnText: `${i18n.global.t('STK0093')}`
       }
     ] : [
       {
@@ -1226,7 +1226,7 @@ class ConstantData {
     }
     const res = {} as IStickerVideoUrls
     for (const [key, value] of Object.entries(seeds) as [keyof typeof seeds, string][]) {
-      if (i18n.global.locale === 'us') {
+      if (['us', 'jp'].includes(i18n.global.locale)) {
         res[key] = {
           video: `${value}${key === 'iOS' ? '_v2' : '-v2'}${videoFileName}?ver=${verUni}`,
           thumbnail: `${value}${key === 'iOS' ? '_v2' : '-v2'}${thumbnailFileName}?ver=${verUni}`
