@@ -1148,6 +1148,10 @@ class ConstantData {
       { value: 'Wyoming', label: 'Wyoming' }
     ]
   }
+
+  get pinchTransitionTime() {
+    return 250
+  }
 }
 
 export default new ConstantData()

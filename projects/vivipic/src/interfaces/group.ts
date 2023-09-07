@@ -1,5 +1,3 @@
-import { IShape, IText, IImage, IGroup } from '@/interfaces/layer'
-
 export interface ICalculatedGroupStyle {
   [index: string]: number | boolean,
   x: number,

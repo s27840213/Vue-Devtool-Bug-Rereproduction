@@ -1432,7 +1432,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
-    const isPro = store.getters['vivisticker/getIsSubscribed'] || 1 < 11
+    const isPro = store.getters['vivisticker/getIsSubscribed']
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)
       return false
@@ -1560,7 +1560,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
-          this.openFullPageVideo(i18n.global.locale === 'us' ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
+          this.openFullPageVideo(['us', 'jp'].includes(i18n.global.locale) ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
           modalUtils.clearModalInfo()
         }
       }, undefined, {

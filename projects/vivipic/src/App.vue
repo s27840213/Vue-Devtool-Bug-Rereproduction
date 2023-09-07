@@ -42,14 +42,13 @@ div(id="app" :style="appStyles()")
 
 <script lang="ts">
 import DebugTool from '@/components/componentLog/DebugTool.vue'
-import HomeFooterTabs from '@/components/homepage/HomeFooterTabs.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import Popup from '@/components/popup/Popup.vue'
 import generalUtils from '@/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
 import { throttle } from 'lodash'
-import { defineComponent } from 'vue'
+import { defineAsyncComponent, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
@@ -62,7 +61,11 @@ export default defineComponent({
     ResInfo,
     ModalCard,
     DebugTool,
-    HomeFooterTabs,
+    ...generalUtils.isPic && {
+      HomeFooterTabs: defineAsyncComponent(
+        () => import('@/components/homepage/HomeFooterTabs.vue'),
+      ),
+    },
   },
   directives: {
     clickOutside: vClickOutside.directive

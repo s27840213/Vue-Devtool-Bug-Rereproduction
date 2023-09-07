@@ -266,7 +266,7 @@ const router = createRouter({
         await picWVUtils.getUserInfo()
         let argoError = false
         try {
-          const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
+          const status = (await fetch(`https://media.vivipic.cc/hello.txt?ver=${generalUtils.generateRandomString(12)}`)).status
           if (status !== 200) {
             argoError = true
             logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)

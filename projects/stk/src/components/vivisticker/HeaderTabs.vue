@@ -705,7 +705,7 @@ export default defineComponent({
                     radius: 0,
                     opacity: 100
                   },
-                  frameColor: '#FECD56',
+                  frameColor: imageShadowUtils.getLocalEffectColor(ShadowEffectType.frame) || '#FECD56',
                 }, undefined)
               })
             }, 0)

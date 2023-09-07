@@ -83,11 +83,8 @@ export default defineComponent({
   },
   beforeUnmount() {
     // When closing panel, if user has changed the color, add it to recently.
-    if (colorUtils.currColor !== this.initColor) {
-      if (editorUtils.currActivePanel === 'background' || this.currEvent === ColorEventType.background) {
-        this.addRecentlyBgColor(colorUtils.currColor)
-      } else this.addRecentlyColors(colorUtils.currColor)
-    }
+    this.addToRecently()
+
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
     colorUtils.setCurrEvent('')
@@ -99,7 +96,13 @@ export default defineComponent({
       colorUtils.offStop(oldVal, this.recordChange)
       colorUtils.on(newVal, this.handleColorUpdate)
       colorUtils.onStop(newVal, this.recordChange)
-    }
+    },
+    showColorPicker(newVal, oldVal) {
+      // Back from color-picker, add recently.
+      if (!newVal && oldVal) {
+        this.addToRecently()
+      }
+    },
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -306,6 +309,14 @@ export default defineComponent({
           subLayerIdx: -1
         }, { [key]: color })
       }
+    },
+    addToRecently() {
+      if (colorUtils.currColor === this.initColor) return
+
+      if (editorUtils.currActivePanel === 'background' || this.currEvent === ColorEventType.background) {
+        this.addRecentlyBgColor(colorUtils.currColor)
+      } else this.addRecentlyColors(colorUtils.currColor)
+      this.initColor = colorUtils.currColor
     },
     recordChange() {
       stepsUtils.record()

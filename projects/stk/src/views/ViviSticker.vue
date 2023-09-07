@@ -282,7 +282,7 @@ export default defineComponent({
       this.setIsInMyDesign(false)
       this.setIsInSelectionMode(false)
       this.setCurrActiveTab(panelType)
-      if (this.$i18n.locale === 'us') {
+      if (['us', 'jp'].includes(this.$i18n.locale)) {
         switch (panelType) {
           case 'text':
             if (!vivistickerUtils.tutorialFlags.text && !this.debugMode) {

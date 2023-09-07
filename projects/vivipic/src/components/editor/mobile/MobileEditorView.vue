@@ -42,6 +42,7 @@ import store from '@/store'
 import { ILayerInfo } from '@/store/types'
 import SwipeDetector from '@/utils/SwipeDetector'
 import backgroundUtils from '@/utils/backgroundUtils'
+import constantData from '@/utils/constantData'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
@@ -62,7 +63,7 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 const MAX_SCALE = 300
-const TRANSITION_TIME = 250
+const TRANSITION_TIME = constantData.pinchTransitionTime
 
 export default defineComponent({
   emits: [],
