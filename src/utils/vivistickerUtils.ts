@@ -821,6 +821,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (info.modelName === undefined) { // if modelName isn't included, set '' as default
       info.modelName = ''
     }
+    info.locale = localeUtils.mapNativeLocale(info.locale)
     // after previous handle, info is assured to have modelName
     store.commit('vivisticker/SET_userInfo', info as IUserInfo)
     this.handleCallback('login')
