@@ -25,7 +25,6 @@ div(class="bg-remove-area"
 </template>
 
 <script lang="ts">
-import { RM_SECTION_PADDING } from '@/components/vivisticker/BgRemoveContainer.vue'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
 import logUtils from '@/utils/logUtils'
@@ -60,8 +59,6 @@ export default defineComponent({
       cyReady: false,
       root: undefined as unknown as HTMLElement,
       scaleArea: undefined as unknown as HTMLElement,
-      canvasWidth: 1600,
-      canvasHeight: 1600,
       contentCanvas: undefined as unknown as HTMLCanvasElement,
       contentCtx: undefined as unknown as CanvasRenderingContext2D,
       initImgCanvas: undefined as unknown as HTMLCanvasElement,
@@ -101,12 +98,6 @@ export default defineComponent({
     logUtils.setLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
-    // if (this.inVivisticker) {
-    //   this.canvasWidth = width
-    //   this.canvasHeight = height
-    // } else {
-    //   this.canvasHeight = 1600 / aspectRatio
-    // }
     if (aspectRatio > 1) {
       this.canvasWidth = 1600
       this.canvasHeight = 1600 / aspectRatio
@@ -196,10 +187,27 @@ export default defineComponent({
       inLastStep: 'bgRemove/inLastStep',
       inFirstStep: 'bgRemove/inFirstStep',
       inGestureMode: 'getInGestureToolMode',
+      canvasSize: 'bgRemove/getCanvasSize',
       contentScaleRatio: 'getContentScaleRatio',
       useMobileEditor: 'getUseMobileEditor',
       isPinching: 'bgRemove/getIsPinching'
     }),
+    canvasWidth: {
+      get(): number {
+        return this.canvasSize.width
+      },
+      set(width: number): void {
+        this.setCanvasSize({ width })
+      }
+    },
+    canvasHeight: {
+      get(): number {
+        return this.canvasSize.height
+      },
+      set(height: number): void {
+        this.setCanvasSize({ height })
+      }
+    },
     size(): { width: number, height: number } {
       return {
         width: this.canvasWidth,
@@ -253,45 +261,6 @@ export default defineComponent({
     // }
   },
   watch: {
-    movingMode(val) {
-      if (val) {
-        // -1 means not be initialized
-        if (this.pinchState.initPos.x === -1 || this.pinchState.initPos.y === -1) {
-          const paddingSize = RM_SECTION_PADDING * 2
-          const container = document.getElementById('rmSection') as HTMLElement
-          const containerWidth = container.clientWidth - paddingSize
-          const containerHeight = container.clientHeight - paddingSize
-          const initSize = {
-            width: this.size.width * this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio * 0.01,
-            height: this.size.height * this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio * 0.01
-          }
-          const x = (containerWidth - initSize.width) * 0.5
-          const y = (containerHeight - initSize.height) * 0.5
-          const rect = container.getBoundingClientRect()
-          this.$store.commit('bgRemove/UPDATE_pinchState', {
-            initScale: this.fitScaleRatio,
-            scale: this.fitScaleRatio,
-            initPos: { x, y },
-            initSize,
-            x,
-            y,
-            physicalCenterPos: {
-              x: rect.left + rect.width * 0.5,
-              y: rect.top + rect.height * 0.5
-            },
-            physicalTopLeftPos: {
-              left: rect.left,
-              top: rect.top
-            },
-            containerSize: {
-              width: containerWidth,
-              height: containerHeight
-            }
-          })
-          console.log('rect.left, rect.top', rect.left, rect.top)
-        }
-      }
-    },
     brushSize(newVal: number) {
       if (this.contentCtx) {
         this.contentCtx.lineWidth = newVal
@@ -378,6 +347,7 @@ export default defineComponent({
       setCurrStep: 'bgRemove/SET_currStep',
       setPrevPageScaleRatio: 'bgRemove/SET_prevPageScaleRatio',
       clearSteps: 'bgRemove/CLEAR_steps',
+      setCanvasSize: 'bgRemove/SET_canvasSize',
       setInGestureMode: 'SET_inGestureMode'
     }),
     initCanvas() {
