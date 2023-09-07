@@ -41,6 +41,9 @@ const mutations: MutationTree<IWebViewState> = {
   SET_userInfo(state: IWebViewState, userInfo: IUserInfo) {
     state.userInfo = userInfo
   },
+  UPDATE_userInfo(state: IWebViewState, userInfo: Partial<IUserInfo>) {
+    Object.assign(state.userInfo, userInfo)
+  },
   UPDATE_detectIfInReviewMode(state: IWebViewState, reviewVer: string) {
     state.inReviewMode = reviewVer === state.userInfo.appVer
   },
