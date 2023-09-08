@@ -12,7 +12,7 @@ export interface IWebViewState {
 
 const getDefaultState = (): IWebViewState => ({
   userInfo: picWVUtils.getDefaultUserInfo(),
-  inBrowserMode: false,
+  inBrowserMode: true,
   inReviewMode: false,
   inDevMode: false,
   callbackRecords: [],

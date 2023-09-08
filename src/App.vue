@@ -85,9 +85,7 @@ export default defineComponent({
       window.dispatchEvent(new Event('render-event'))
     }
 
-    if (!picWVUtils.inBrowserMode) {
-      picWVUtils.registerCallbacks('main')
-    }
+    picWVUtils.registerCallbacks('main')
 
     this.$router.isReady().then(() => { picWVUtils.sendAppLoaded() })
     /**
