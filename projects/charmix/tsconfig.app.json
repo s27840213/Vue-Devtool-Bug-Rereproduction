@@ -1,13 +1,14 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue",  "src/**/*.json"],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue",  "src/**/*.json", "../../packages/*/src/*"],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
+    "rootDir": "../../",
     "composite": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@nu/*": ["../packages/*/src"]
+      "@nu/shared-lib/*": ["../../packages/shared-lib/src/*"]
     },
     "resolveJsonModule": true
   },
