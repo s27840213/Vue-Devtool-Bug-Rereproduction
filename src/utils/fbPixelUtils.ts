@@ -68,7 +68,7 @@ class FbPixelUtils {
         eventID: eventId
       })
     } else {
-      picWVUtils.sendAdEvent('subscribe', { subscription_id: this.userId, value: 0, currency: 'USD', predicted_ltv: 0 })
+      picWVUtils.sendAdEvent('subscribe', { subscription_id: this.userId, value: price, currency: 'USD', predicted_ltv: 0 })
     }
   }
 }
