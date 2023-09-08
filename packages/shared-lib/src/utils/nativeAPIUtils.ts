@@ -3,6 +3,12 @@ import logUtils from './logUtils'
 
 export type WEBVIEW_API_RESULT = { [key: string]: any } | null | undefined // 'null' is for timeouted or error occurred, while 'undefined' means no result.
 
+export interface IRequest {
+  eventId: string
+  event: string
+  message: any
+}
+
 export default abstract class WebViewUtils<T extends { [key: string]: any }> {
   abstract STANDALONE_USER_INFO: T
   abstract CALLBACK_MAPS: { [key: string]: string[] }
@@ -47,17 +53,13 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
     return { empty: '' }
   }
 
-  makeAPIRequest(eventId: string, event: string, message: any) {
+  makeAPIRequest(event: string, message: any): IRequest {
+    const eventId = generalUtils.generateAssetId()
     return {
       event,
       message,
       eventId,
     }
-  }
-
-  sendRequest(eventId: string, event: string, message: any) {
-    const request = this.makeAPIRequest(eventId, event, message)
-    this.sendToIOS('REQUEST', request, true)
   }
 
   sendToIOS(messageType: string, message: any, throwsError = false) {
@@ -91,28 +93,31 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
     return generalUtils.versionCheck({ greaterThan: targetVersion, version: currVer })
   }
 
+  async sendRequest(
+    eventId: string,
+    request: IRequest,
+  ): Promise<{ data: WEBVIEW_API_RESULT; isTimeouted: boolean }> {
+    return new Promise((resolve) => {
+      this.callbackMap[eventId] = resolve
+      this.sendToIOS('REQUEST', request, true)
+    })
+  }
+
   async callIOSAsAPI(
     type: string,
     message: any,
     { timeout = 5000, retry = false, retryTimes = 0 } = {},
   ): Promise<WEBVIEW_API_RESULT> {
-    const eventId = generalUtils.generateAssetId()
+    const request = this.makeAPIRequest(type, message)
+    const eventId = request.eventId
     let result: WEBVIEW_API_RESULT
     try {
       if (timeout === -1) {
-        result = (
-          await new Promise<{ data: WEBVIEW_API_RESULT; isTimeouted: boolean }>((resolve) => {
-            this.callbackMap[eventId] = resolve
-            this.sendRequest(eventId, type, message)
-          })
-        ).data
+        result = (await this.sendRequest(eventId, request)).data
         delete this.callbackMap[eventId]
       } else {
         const raceResult = await Promise.race([
-          new Promise<{ data: WEBVIEW_API_RESULT; isTimeouted: boolean }>((resolve) => {
-            this.callbackMap[eventId] = resolve
-            this.sendRequest(eventId, type, message)
-          }),
+          this.sendRequest(eventId, request),
           new Promise<{ data: WEBVIEW_API_RESULT; isTimeouted: boolean }>((resolve) => {
             setTimeout(() => {
               resolve({
@@ -131,7 +136,7 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
           )
           if (retry && retryTimes < 2) {
             logUtils.setLogAndConsoleLog(`retry: ${retryTimes + 1}`)
-            generalUtils.sleep(1000)
+            await generalUtils.sleep(1000)
             result = await this.callIOSAsAPI(type, message, {
               timeout,
               retry,
