@@ -269,30 +269,8 @@ module.exports = defineConfig({
         loaderOptions: {
             scss: {
                 // https://webpack.js.org/loaders/sass-loader/#function-1
-                additionalData: (content) => {
-                    const header = `@use "@/assets/scss/utils" as *;
-                      $appName: ${process.env.VUE_APP_APP_NAME};
-                      @function setColors(
-                        $picColor,
-                        $stkColor: $picColor,
-                        $cmColor: $picColor,
-                        $opacity: 1,
-                        $picOpacity: $opacity,
-                        $stkOpacity: $opacity,
-                        $cmOpacity: $opacity) {
-                        @if $appName == 'vivipic' {
-                          @return rgba(map-get($colors, $picColor), $picOpacity);
-                        } @else if $appName == 'vivisticker' {
-                          @return rgba(map-get($colors, $stkColor), $stkOpacity);
-                        } @else if $appName == 'charmix' {
-                          @return rgba(map-get($colors, $cmColor), $cmOpacity);
-                        }
-                      }
-                    `
-          
-                    // Insert header below @use lines.
-                    return content.replace(/(?<=\n)(?!@use)/m, header);
-                },
+                // https://sass-lang.com/documentation/at-rules/use/#configuration
+                additionalData: `@use "@/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`
             }
         }
     },

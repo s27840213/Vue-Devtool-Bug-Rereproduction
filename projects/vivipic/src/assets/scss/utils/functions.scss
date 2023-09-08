@@ -1,7 +1,25 @@
 @use '@/assets/scss/utils/variables.scss' as *;
+$appName: None !default;
 
 @function setColor($color, $opacity: 1) {
   @return rgba(map-get($colors, $color), $opacity);
+}
+
+@function setColors(
+  $picColor,
+  $stkColor: $picColor,
+  $cmColor: $picColor,
+  $opacity: 1,
+  $picOpacity: $opacity,
+  $stkOpacity: $opacity,
+  $cmOpacity: $opacity) {
+  @if $appName == 'vivipic' {
+    @return rgba(map-get($colors, $picColor), $picOpacity);
+  } @else if $appName == 'vivisticker' {
+    @return rgba(map-get($colors, $stkColor), $stkOpacity);
+  } @else if $appName == 'charmix' {
+    @return rgba(map-get($colors, $cmColor), $cmOpacity);
+  }
 }
 
 @function setZindex($value) {
