@@ -1,4 +1,5 @@
-import { generalUtils, logUtils } from '@nu/shared-lib'
+import generalUtils from './generalUtils'
+import logUtils from './logUtils'
 
 export type WEBVIEW_API_RESULT = { [key: string]: any } | null | undefined // 'null' is for timeouted or error occurred, while 'undefined' means no result.
 
@@ -11,8 +12,6 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
   }
 
   abstract getUserInfoFromStore(): T
-
-  abstract appendModuleName(identifier: string): string
 
   filterLog(messageType: string, message: any): boolean {
     // implementation classes can filter out logs for certain messageType with certain messages
