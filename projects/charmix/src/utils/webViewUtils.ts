@@ -15,7 +15,7 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   STANDALONE_USER_INFO: IUserInfo = {
     hostId: '',
     appVer: '100.0',
-    osVer: '',
+    osVer: '100.0',
     isFirstOpen: false,
     statusBarHeight: 0,
     homeIndicatorHeight: 0,
