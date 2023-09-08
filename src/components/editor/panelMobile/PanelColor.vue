@@ -47,7 +47,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { cloneDeep } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -267,15 +267,20 @@ export default defineComponent({
         if (this.currSelectedColorIndex <= decoration.color.length - 1) {
           key = 'decorationColors'
           color = [...decoration.color]
-          color[this.currSelectedIndex] = newColor
+          color[this.currSelectedColorIndex] = newColor
         } else {
           key = 'decorationTopColors'
           color = [...decorationTop.color]
           color[this.currSelectedColorIndex - decoration.color.length] = newColor
         }
       } else {
-        decoration && decoration.color.length && (key = 'decorationColors') && (color = [...decoration.color])
-        decorationTop && decorationTop.color.length && (key = 'decorationTopColors') && (color = [...decorationTop.color])
+        if (decoration && decoration.color.length) {
+          key = 'decorationColors'
+          color = [...decoration.color]
+        } else if (decorationTop && decorationTop.color.length) {
+          key = 'decorationTopColors'
+          color = [...decorationTop.color]
+        }
         color[this.currSelectedColorIndex] = newColor
       }
       frameUtils.updateFrameDecorColor({
