@@ -1,7 +1,7 @@
 import generalUtils from './generalUtils'
 import logUtils from './logUtils'
 
-export type WEBVIEW_API_RESULT = { [key: string]: any } | null | undefined // 'null' is for timeouted or error occurred, while 'undefined' means no result.
+export type WEBVIEW_API_RESULT = unknown | null | undefined // 'null' is for timeouted or error occurred, while 'undefined' means no result.
 
 export interface IRequest {
   eventId: string
@@ -160,13 +160,9 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
   }
 
   nativeResponse({ eventId, output }: { eventId: string; output: unknown }) {
-    this.handleCallback(eventId, output)
-  }
-
-  handleCallback(eventId: string, data?: any) {
     if (this.callbackMap[eventId]) {
       this.callbackMap[eventId]({
-        data,
+        data: output,
         isTimeouted: false,
       })
     }
