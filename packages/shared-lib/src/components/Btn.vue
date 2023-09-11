@@ -1,9 +1,11 @@
 <template lang="pug">
-button(class="btn"
-    :class="`btn-${squared ? 'squared-' : ''}${buttonType}`"
-    :style="btnStyles"
-    :disabled="disabled")
-  svg-icon(v-if="hasIcon"
+button(
+  class="btn"
+  :class="`btn-${squared ? 'squared-' : ''}${buttonType}`"
+  :style="btnStyles"
+  :disabled="disabled")
+  svg-icon(
+    v-if="hasIcon"
     class="btn__icon"
     :style="flexDir === 'row' ? `margin-right: ${iconMargin}px` : `margin-bottom: ${iconMargin}px`"
     :iconName="iconName"
@@ -14,7 +16,8 @@ button(class="btn"
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import type { PropType } from 'vue'
+import { defineComponent } from 'vue'
 
 const component = defineComponent({
   emits: [],
@@ -23,40 +26,40 @@ const component = defineComponent({
   props: {
     type: {
       type: String,
-      default: 'primary-mid'
+      default: 'primary-mid',
     },
     iconName: {
       type: String,
-      default: 'menu'
+      default: 'menu',
     },
     iconColor: {
       type: String,
-      default: '#fff'
+      default: '#fff',
     },
     iconWidth: {
       type: String,
-      default: '15px'
+      default: '15px',
     },
     iconMargin: {
       type: Number,
-      default: 0
+      default: 0,
     },
     hasIcon: {
       type: Boolean,
-      default: false
+      default: false,
     },
     disabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
     squared: {
       type: Boolean,
-      default: false
+      default: false,
     },
     flexDir: {
       type: String as PropType<'row' | 'column'>,
-      default: 'row'
-    }
+      default: 'row',
+    },
   },
   mounted() {
     if (this.squared) {
@@ -71,10 +74,10 @@ const component = defineComponent({
     btnStyles(): { [index: string]: string } {
       return {
         display: 'flex',
-        'flex-direction': this.flexDir
+        'flex-direction': this.flexDir,
       }
-    }
-  }
+    },
+  },
 })
 export default component
 </script>

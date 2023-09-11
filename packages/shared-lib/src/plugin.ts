@@ -1,8 +1,7 @@
-import type { App, DefineComponent } from 'vue'
-import { Component } from 'vue'
+import type { App, Component, DefineComponent } from 'vue'
 
 const components: Record<string, DefineComponent> = import.meta.glob('./components/*.vue', {
-  eager: true
+  eager: true,
 })
 const componentDefinitions: { [index: string]: Component } = {}
 for (const path in components) {
@@ -15,5 +14,5 @@ export default {
     Object.entries(componentDefinitions).forEach(([name, component]) => {
       app.component(name, component)
     })
-  }
+  },
 }

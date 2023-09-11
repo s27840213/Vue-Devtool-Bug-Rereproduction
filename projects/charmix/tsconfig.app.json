@@ -1,6 +1,6 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue",  "src/**/*.json", "../../packages/*/src/*"],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "src/**/*.json", "../../packages/*/src/*"],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
     "rootDir": "../../",
@@ -10,7 +10,10 @@
       "@/*": ["./src/*"],
       "@nu/shared-lib/*": ["../../packages/shared-lib/src/*"]
     },
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext",
+    "module": "ESNext"
   },
   "vueCompilerOptions": {
     "plugins": ["@vue/language-plugin-pug"]
