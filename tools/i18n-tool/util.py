@@ -1,3 +1,6 @@
+import os
+
+
 class bcolors: # Colored terminal https://stackoverflow.com/a/287944
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -15,3 +18,10 @@ class nocolorsMeta(type):
 
 class nocolors(metaclass=nocolorsMeta):
     pass
+
+def find_project_root(path):
+    def get_parent(path):
+        return os.path.abspath(os.path.join(path, os.pardir))
+    while not os.path.exists(os.path.join(path, 'projects')):
+        path = get_parent(path)
+    return path

@@ -5,12 +5,12 @@ import re
 import sys
 
 from util import bcolors as _bcolors
-from util import nocolors
+from util import find_project_root, nocolors
 
 bcolors = _bcolors
 
 prefix_pattern = re.compile(r'([A-Z]+)[0-9]{4}')
-ROOT = os.path.abspath(os.path.join(os.getcwd(), os.pardir, os.pardir)) # parent folder of the parent folder of this file
+ROOT = find_project_root(os.getcwd()) # parent folder of the parent folder of this file
 
 def getLocaleJsonPathsIter(project):
   file_paths = glob.glob(f"{ROOT}/projects/{project}/src/locales/*.json")
