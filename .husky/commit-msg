@@ -24,6 +24,15 @@ fi
 echo "Branch name check passed!"
 echo ""
 
+OLDPWD=$(pwd)
+cd tools/i18n-tool
+python i18n_shake.py -c -n
+cd "$OLDPWD"
+if [[ $? == 1 ]]
+then
+		exit 1
+fi
+
 # npx --no-install commitlint --edit $1
 # use npx.cmd instead of npx why?
 # ans: in window, npx will throw errors, fucking strange

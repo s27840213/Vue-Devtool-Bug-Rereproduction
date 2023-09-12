@@ -1,20 +1,14 @@
+import collections
+import json
 import os
 import sys
-import json
-import collections
+
 import gspread
 import numpy as np
 
-class bcolors: # Colored terminal https://stackoverflow.com/a/287944
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+from util import bcolors
+
+PROJECTS = ['vivipic', 'stk']
 
 google_sheet_name = 'Vivipic Summary (nuDesign)'
 works_sheet_name = 'i18n'
@@ -55,12 +49,15 @@ for lang in langs:
         all_result.append(keys)
     all_result.append(values)
     
-    output_dir_path = os.environ['OUTPUT_DIR_PATH']
-    print('Output '+lang+ ' to:'   + output_dir_path)
-    if not os.path.exists(output_dir_path):
-        os.makedirs(output_dir_path)
-    with open(f'{output_dir_path}{lang}.json', 'w', encoding='UTF-8') as f:
-        json.dump(_dict, f, indent=2, ensure_ascii=False)
+    output_root = '../../projects/'
+    output_dir_path = '/src/locales/'
+    for project in PROJECTS:
+        output_full_path = f'{output_root}{project}{output_dir_path}'
+        print('Output '+lang+ ' to:'   + output_full_path)
+        if not os.path.exists(output_full_path):
+            os.makedirs(output_full_path)
+        with open(f'{output_full_path}{lang}.json', 'w', encoding='UTF-8') as f:
+            json.dump(_dict, f, indent=2, ensure_ascii=False)
 
 # Check for redundant translation
 all_result = np.transpose(np.array(all_result), (1, 0))

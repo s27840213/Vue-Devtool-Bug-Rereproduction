@@ -7,6 +7,9 @@
 node_modules/
 dist/
 
+# Python cache files
+**/__pycache__
+
 # Log files
 *.log
 
@@ -50,3 +53,6 @@ pnpm-debug.log*
 
 # i18n_rename tool config file
 /src/i18n-tool/config/i18n_rename_setting.py
+
+# i18n tool venv libs
+/tools/i18n-tool/venv/lib/**
