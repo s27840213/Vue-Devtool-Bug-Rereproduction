@@ -35,7 +35,7 @@ const {
   showEditingOpstions,
   showPromptArea,
   atHome,
-  atMyDesign
+  atMyDesign,
 } = stateInfo
 // #endregion
 

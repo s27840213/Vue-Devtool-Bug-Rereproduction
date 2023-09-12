@@ -7,6 +7,7 @@
     "cm": "nx dev @nu/cm",
     "pic": "nx serve @nu/pic",
     "stk": "nx serve @nu/stk",
+    "lib": "nx dev @nu/shared-lib",
     "install-all": "pnpm install",
     "cyrun": "npx cypress run --browser chromium --env preserveOriginalScreenshot=true",
     "cyopen": "npx cypress open --e2e -b chrome",

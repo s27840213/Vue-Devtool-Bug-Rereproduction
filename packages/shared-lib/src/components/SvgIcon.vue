@@ -22,26 +22,26 @@ svg(
 const props = defineProps({
   iconName: {
     type: [String],
-    default: 'menu'
+    default: 'menu',
   },
   iconWidth: {
-    type: String
+    type: String,
   },
   iconColor: {
     type: String,
-    default: 'blue-1'
+    default: 'blue-1',
   },
   iconHeight: {
-    type: String
+    type: String,
   },
   // only used for those who alread has stroke
   strokeColor: {
-    type: String
+    type: String,
   },
   sameSize: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 const loadingSvg = `
         <circle cx="15" cy="15" r="15">
@@ -85,12 +85,12 @@ const iconStyles = computed(() => {
     }
 
     if (props.iconWidth && !props.iconHeight) {
-      width = `${parseInt(props.iconWidth?.split('px')[0]) * iconAspectRatio.value}px`
+      height = `${parseInt(props.iconWidth?.split('px')[0]) * iconAspectRatio.value}px`
     }
   }
   return {
     width: width || (props.sameSize && height) || '40px',
-    height: height || (props.sameSize && width) || '40px'
+    height: height || (props.sameSize && width) || '40px',
   }
 })
 
