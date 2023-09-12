@@ -24,4 +24,6 @@ def find_project_root(path):
         return os.path.abspath(os.path.join(path, os.pardir))
     while not os.path.exists(os.path.join(path, 'projects')):
         path = get_parent(path)
+        if path == '/':
+            return path # prevent infinite loop where the parent of '/' is still '/'
     return path
