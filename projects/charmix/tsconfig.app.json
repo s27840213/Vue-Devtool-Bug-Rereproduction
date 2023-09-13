@@ -8,8 +8,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@nu/shared-lib/*": ["../../packages/shared-lib/src/*"]
+      "@nu/shared-lib/*": ["../../packages/shared-lib/src/*"],
+      "@nu/shared-lib": ["../../packages/shared-lib/src/index"]
     },
+    "types": ["vite/client"],
     "resolveJsonModule": true,
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
