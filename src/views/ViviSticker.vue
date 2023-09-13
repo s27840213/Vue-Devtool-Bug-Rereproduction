@@ -57,6 +57,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IModalInfo } from '@/interfaces/modal'
 import { IPage } from '@/interfaces/page'
+import constantData from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import logUtils from '@/utils/logUtils'
@@ -282,7 +283,7 @@ export default defineComponent({
       this.setIsInMyDesign(false)
       this.setIsInSelectionMode(false)
       this.setCurrActiveTab(panelType)
-      if (['us', 'jp'].includes(this.$i18n.locale)) {
+      if (constantData.checkIfUseNewLogic()) {
         switch (panelType) {
           case 'text':
             if (!vivistickerUtils.tutorialFlags.text && !this.debugMode) {

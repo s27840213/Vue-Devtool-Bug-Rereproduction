@@ -28,6 +28,7 @@
 // })
 
 import jp from '@/locales/jp.json'
+import pt from '@/locales/pt.json'
 import tw from '@/locales/tw.json'
 import us from '@/locales/us.json'
 import { createI18n } from 'vue-i18n'
@@ -51,13 +52,16 @@ import { createI18n } from 'vue-i18n'
 //   return {}
 // }
 
+export type LocaleName = 'us' | 'tw' | 'jp' | 'pt'
+
 const i18n = createI18n({
   locale: process.env.VUE_APP_I18N_LOCALE || 'us',
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'us',
   messages: {
     us,
     tw,
-    jp
+    jp,
+    pt
   },
   globalInjection: true,
   legacy: true,

@@ -34,6 +34,7 @@ div(class="panel-vvstk-more")
 
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
+import localeUtils from '@/utils/localeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -132,28 +133,16 @@ export default defineComponent({
       ] : []]
     },
     localeOptions(): OptionConfig[] {
-      return [{
-        text: 'English',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return this.$i18n.locale === 'us'
-        },
-        action: () => { this.handleUpdateLocale('us') }
-      }, {
-        text: '繁體中文',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return this.$i18n.locale === 'tw'
-        },
-        action: () => { this.handleUpdateLocale('tw') }
-      }, {
-        text: '日本語',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return this.$i18n.locale === 'jp'
-        },
-        action: () => { this.handleUpdateLocale('jp') }
-      }]
+      return localeUtils.SUPPORTED_LOCALES.map(supported_locale => {
+        return {
+          text: supported_locale.name,
+          icon: 'vivisticker_global',
+          selected: () => {
+            return this.$i18n.locale === supported_locale.abbreviation
+          },
+          action: () => { this.handleUpdateLocale(supported_locale.abbreviation) }
+        }
+      })
     },
     domainOptions(): OptionConfig[] {
       return [{
