@@ -5,6 +5,9 @@ import collections
 import gspread
 import numpy as np
 
+LANG_START_INDEX = 3
+LANG_COUNT = 4
+
 class bcolors: # Colored terminal https://stackoverflow.com/a/287944
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -35,7 +38,7 @@ def deep_set(_dict, key, value):
         _dict[latest] = value
 
 # Get languages
-langs = sh.row_values(1)[3:6]
+langs = sh.row_values(1)[LANG_START_INDEX:LANG_START_INDEX + LANG_COUNT]
 print(langs)
 # Construct recursive dictionary
 all_result = []
