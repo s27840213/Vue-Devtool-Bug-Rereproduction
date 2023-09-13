@@ -1,3 +1,4 @@
+import { LocaleName } from '@/i18n'
 import { RawImage } from '@/interfaces/gallery'
 import { IBleed } from '@/interfaces/page'
 import { intersection, isEqual } from 'lodash'
@@ -504,7 +505,7 @@ export interface ILoginResult {
   token: string,
   account: string,
   upass_update: number,
-  locale: 'tw' | 'us' | 'jp',
+  locale: LocaleName,
   subscribe: string,
   role: number,
   roleRaw: number,

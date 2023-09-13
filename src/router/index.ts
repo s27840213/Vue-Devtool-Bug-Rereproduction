@@ -1,5 +1,5 @@
 import appJson from '@/assets/json/app.json'
-import i18n from '@/i18n'
+import i18n, { LocaleName } from '@/i18n'
 import { CustomWindow } from '@/interfaces/customWindow'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
@@ -159,8 +159,9 @@ const router = createRouter({
           locale = userInfo.locale
         }
         logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
-        i18n.global.locale = locale as 'jp' | 'us' | 'tw'
-        localStorage.setItem('locale', locale)
+        locale = 'pt' // TODO: remove this line since it's only for testing
+        i18n.global.locale = locale as LocaleName
+        // localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only for testing
         const editorBg = userInfo.editorBg
         if (editorBg) {
           store.commit('vivisticker/SET_editorBg', editorBg)

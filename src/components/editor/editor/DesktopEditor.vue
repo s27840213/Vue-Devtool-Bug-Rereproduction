@@ -61,7 +61,7 @@ import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import TourGuide from '@/components/editor/TourGuide.vue'
 import PopupBrandSettings from '@/components/popup/PopupBrandSettings.vue'
 import PopupUpdateDesign from '@/components/popup/PopupUpdateDesign.vue'
-import i18n from '@/i18n'
+import i18n, { LocaleName } from '@/i18n'
 import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
@@ -107,7 +107,7 @@ export default defineComponent({
     }
   },
   created() {
-    this.inputLocale = this.$i18n.locale as 'us' | 'tw' | 'jp'
+    this.inputLocale = this.$i18n.locale as LocaleName
     const self = this as any
     self.$eventBus.on('on-re-rendering', (component: IComponentUpdatedLog) => {
       if (this.componentLogs.length >= 50) {

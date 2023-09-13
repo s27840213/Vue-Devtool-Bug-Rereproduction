@@ -2,7 +2,7 @@ import textEffect, { IPutTextEffectResponse } from '@/apis/textEffect'
 import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextFillCustom, ITextFill, ITextFillConfig } from '@/interfaces/format'
+import { ITextFill, ITextFillConfig, isITextFillCustom } from '@/interfaces/format'
 import { AllLayerTypes, IText } from '@/interfaces/layer'
 import router from '@/router'
 import store from '@/store'
@@ -67,7 +67,7 @@ class TextFill {
       const firstImg = fill.list[0]?.param.img
       return {
         key: `${fill.id}`,
-        label: fill[`title_${i18n.global.locale}`],
+        label: fill[`title_${constantData.localeWithFallback}`],
         plan: fill.plan,
         img: firstImg ? `https://template.vivipic.com/admin/${firstImg.teamId}/asset/image/${firstImg.id}/tiny`
           : require('@/assets/img/svg/image-preview.svg') as string,

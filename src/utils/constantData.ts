@@ -1,4 +1,4 @@
-import i18n from '@/i18n'
+import i18n, { LocaleName } from '@/i18n'
 import { tailPositions } from '@/interfaces/format'
 import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
@@ -105,9 +105,17 @@ export enum DeviceType {
   Other
 }
 
+const NEED_FALLBACK_LOCALES = ['pt' as const]
+const NO_TUTORIAL_LOCALES = ['pt']
 class ConstantData {
   get isLogin(): boolean {
     return store.getters['user/isLogin']
+  }
+
+  get localeWithFallback() {
+    return (NEED_FALLBACK_LOCALES as string[]).includes(i18n.global.locale)
+      ? 'us'
+      : i18n.global.locale as Exclude<LocaleName, typeof NEED_FALLBACK_LOCALES[number]>
   }
 
   // For header.vue and mobileMenu.vue
@@ -237,7 +245,7 @@ class ConstantData {
           newTab: true
         }]
       }]
-    }[i18n.global.locale] as IHeaderL2[]
+    }[this.localeWithFallback] as IHeaderL2[]
 
     const resource = {
       tw: [{
@@ -331,7 +339,7 @@ class ConstantData {
           url: 'https://blog.vivipic.com/jp/category/digital-marketing-jp/'
         }]
       }]
-    }[i18n.global.locale] as IHeaderL2[]
+    }[this.localeWithFallback] as IHeaderL2[]
 
     const pricing = i18n.global.locale === 'tw' ? {
       singleLayer: true,
@@ -1166,7 +1174,7 @@ class ConstantData {
   stickerTutorialSteps(): { title: string, description: string, video: string, btnText?: string }[] {
     const stickerVideoUrls = this.stickerVideoUrls()
     // TODO: after tw new videos are povided, remove title and description and make btnText required.
-    return ['us', 'jp'].includes(i18n.global.locale) ? [
+    return this.checkIfUseNewLogic() ? [
       {
         title: '',
         description: '',
@@ -1209,10 +1217,15 @@ class ConstantData {
     ]
   }
 
+  checkIfUseNewLogic(): boolean {
+    return ['us', 'jp', ...NO_TUTORIAL_LOCALES].includes(i18n.global.locale)
+  }
+
   stickerVideoUrls(): IStickerVideoUrls {
+    const locale = NO_TUTORIAL_LOCALES.includes(i18n.global.locale) ? 'us' : i18n.global.locale
     const path = 'https://template.vivipic.com/static/video/'
-    const iOS16PostFix = `${i18n.global.locale.toUpperCase()}_IOS16`
-    const tutorialPostFix = `${i18n.global.locale}`
+    const iOS16PostFix = `${locale.toUpperCase()}_IOS16`
+    const tutorialPostFix = `${locale}`
     const videoFileName = '.mp4'
     const thumbnailFileName = '_thumb.jpg'
     const verUni = store.getters['user/getVerUni']
@@ -1226,7 +1239,7 @@ class ConstantData {
     }
     const res = {} as IStickerVideoUrls
     for (const [key, value] of Object.entries(seeds) as [keyof typeof seeds, string][]) {
-      if (['us', 'jp'].includes(i18n.global.locale)) {
+      if (['us', 'jp'].includes(locale)) {
         res[key] = {
           video: `${value}${key === 'iOS' ? '_v2' : '-v2'}${videoFileName}?ver=${verUni}`,
           thumbnail: `${value}${key === 'iOS' ? '_v2' : '-v2'}${thumbnailFileName}?ver=${verUni}`
