@@ -49,11 +49,11 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   detectIfInApp() {
-    this.enterBrowserMode() // vivisticker is always in browser mode
+    // vivisticker is always in browser mode
   }
 
-  enterBrowserMode() {
-    store.commit('webView/SET_inBrowserMode', true)
+  leaveBrowserMode() {
+    store.commit('webView/SET_inBrowserMode', false)
   }
 
   getUserInfoFromStore(): IUserInfo {
