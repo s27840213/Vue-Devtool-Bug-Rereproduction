@@ -4,15 +4,11 @@ import * as path from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
-import dts from 'vite-plugin-dts'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
-    dts({
-      insertTypesEntry: true
-    }),
     Components({
       dirs: ['src/components'],
       extensions: ['vue'],
