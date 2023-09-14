@@ -11,7 +11,7 @@ svg-icon(
 import type { ColorSlip } from '@/types/color'
 withDefaults(
   defineProps<{
-    iconName?: string
+    iconName: string
     iconWidth?: string
     iconColor?: ColorSlip
     iconHeight?: string
@@ -19,8 +19,8 @@ withDefaults(
     sameSize?: boolean
   }>(),
   {
-    sameSize: true
-  }
+    sameSize: true,
+  },
 )
 </script>
 <style lang=""></style>

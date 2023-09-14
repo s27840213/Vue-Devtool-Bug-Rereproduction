@@ -8,7 +8,7 @@ export default {
 }
 
 const baseArgs = {
-  iconName: 'menu',
+  iconName: 'erase',
   iconColor: 'app-selection',
   iconWidth: '24px',
   iconHeight: '24px',
