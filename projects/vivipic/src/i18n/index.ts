@@ -28,8 +28,11 @@
 // })
 
 import jp from '@/locales/jp.json'
+import jp_shaked from '@/locales/jp_shaked.json'
 import tw from '@/locales/tw.json'
+import tw_shaked from '@/locales/tw_shaked.json'
 import us from '@/locales/us.json'
+import us_shaked from '@/locales/us_shaked.json'
 import { createI18n } from 'vue-i18n'
 
 /**
@@ -55,9 +58,9 @@ const i18n = createI18n({
   locale: process.env.VUE_APP_I18N_LOCALE || 'us',
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'us',
   messages: {
-    us,
-    tw,
-    jp
+    us: process.env.NODE_ENV === 'production' ? us_shaked : us,
+    tw: process.env.NODE_ENV === 'production' ? tw_shaked : tw,
+    jp: process.env.NODE_ENV === 'production' ? jp_shaked : jp,
   },
   globalInjection: true,
   legacy: true,
