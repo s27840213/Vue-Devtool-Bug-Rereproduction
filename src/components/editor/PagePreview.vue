@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="page-preview")
+div(class="page-preview" ref="container")
   template(v-for="(page, idx) in getPages" :key="page.id")
     page-preview-plus(:index="idx" :last="false")
     page-preview-page-wrapper(:index="idx"
@@ -30,7 +30,7 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      screenWidth: 0,
+      containerWidth: 0, // the whole page_preview container width
     }
   },
   components: {
@@ -44,11 +44,16 @@ export default defineComponent({
     })
   },
   mounted() {
-    this.screenWidth = document.body.clientWidth - 130
-    this._setPagesPerRow(floor(this.screenWidth / 180))
+    const body = this.$refs.container as HTMLElement
+    this.containerWidth = body.clientWidth
+
+    // Each page contains a wrapper and a plus object (150 + 30 px).
+    // In each row, there are serveral pages and a plus object (30px) in the end.
+    this._setPagesPerRow(floor((this.containerWidth - 30) / 180))
+
     window.addEventListener('resize', () => {
-      this.screenWidth = document.body.clientWidth - 130
-      this._setPagesPerRow(floor(this.screenWidth / 180))
+      this.containerWidth = body.clientWidth
+      this._setPagesPerRow(floor((this.containerWidth - 30) / 180))
     })
   },
   methods: {
