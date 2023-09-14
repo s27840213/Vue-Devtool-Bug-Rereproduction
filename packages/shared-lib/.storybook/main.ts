@@ -2,7 +2,7 @@ import type { StorybookConfig } from '@storybook/vue3-vite'
 
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
 import { mergeConfig } from 'vite'
-
+import svgSpritePlugin from 'vite-plugin-svg-sprite-component'
 const config: StorybookConfig = {
   stories: ['../src/components/*.stories.@(js|jsx|ts|tsx|mdx)'],
   addons: ['@storybook/addon-essentials', '@storybook/addon-interactions'],
@@ -13,7 +13,7 @@ const config: StorybookConfig = {
 
   viteFinal: async (config) =>
     mergeConfig(config, {
-      plugins: [nxViteTsPaths()],
+      plugins: [nxViteTsPaths(), svgSpritePlugin({ symbolId: (name: string) => name })],
     }),
 }
 

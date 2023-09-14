@@ -16,27 +16,27 @@ export default defineConfig({
       compositionOnly: false,
       runtimeOnly: false,
       // you need to set i18n resource including paths !
-      include: path.resolve(__dirname, './src/locales')
+      include: path.resolve(__dirname, './src/locales'),
     }),
-    svgSpritePlugin({ symbolId: (name) => name }),
     Components({
       dirs: ['src/components'],
       extensions: ['vue'],
-      dts: 'src/components.d.ts'
+      dts: 'src/components.d.ts',
     }),
     // https://github.com/antfu/unplugin-auto-import
     AutoImport({
       imports: ['vue', 'vue-router', 'vue-i18n'],
-      dts: 'src/auto-import.d.ts'
-    })
+      dts: 'src/auto-import.d.ts',
+    }),
+    svgSpritePlugin({ symbolId: (name) => name }),
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
   },
   server: {
     port: 8082,
     host: true,
-  }
+  },
 })

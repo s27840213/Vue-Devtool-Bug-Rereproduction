@@ -18,33 +18,35 @@ for (let i = 0; i <= 360; i++) {
       break
   }
 }
+
+console.log('tailwind setup')
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./src/**/*.{vue,js,ts,jsx,tsx}', '../../packages/ui-component/src/**/*.vue'],
+  content: ['./src/components/**/*.{vue,js,ts,jsx,tsx}'],
   // purge: ['./src/**/*.html', './src/**/*.vue', './src/**/*.ts'],
   theme: {
     extend: {},
 
     colors: { transparent: 'transparent', ...colors },
     // this project only for mobile, no need to add to much spacing
-    spacing: spacingMap
+    spacing: spacingMap,
   },
   safelist: [
     {
       pattern: bgPattern,
-      variants: ['active']
+      variants: ['active'],
     },
     {
       pattern: textPattern,
-      variants: ['active']
+      variants: ['active'],
     },
     {
       pattern: borderPattern,
-      variants: ['active']
+      variants: ['active'],
     },
     {
-      pattern: strokePattern
-    }
+      pattern: strokePattern,
+    },
   ],
   plugins: [
     require('tailwind-scrollbar-hide'),
@@ -55,76 +57,76 @@ module.exports = {
           fontFamily: 'Lato',
           fontSize: '32px',
           fontWeight: 600,
-          lineHeight: '40px'
+          lineHeight: '40px',
         },
         '.typo-h2': {
           fontFamily: 'Lato',
           fontSize: '28px',
           fontWeight: 600,
-          lineHeight: '36px'
+          lineHeight: '36px',
         },
         '.typo-h3': {
           fontFamily: 'Lato',
           fontSize: '24px',
           fontWeight: 600,
-          lineHeight: '32px'
+          lineHeight: '32px',
         },
         '.typo-h4': {
           fontFamily: 'Lato',
           fontSize: '22px',
           fontWeight: 500,
-          lineHeight: '28px'
+          lineHeight: '28px',
         },
         '.typo-h5': {
           fontFamily: 'Lato',
           fontSize: '16px',
           fontWeight: 500,
-          lineHeight: '24px'
+          lineHeight: '24px',
         },
         '.typo-h6': {
           fontFamily: 'Lato',
           fontSize: '14px',
           fontWeight: 500,
-          lineHeight: '20px'
+          lineHeight: '20px',
         },
         '.typo-body-lg': {
           fontFamily: 'Lato',
           fontSize: '16px',
           fontWeight: 400,
-          lineHeight: '24px'
+          lineHeight: '24px',
         },
         '.typo-body-md': {
           fontFamily: 'Lato',
           fontSize: '14px',
           fontWeight: 400,
-          lineHeight: '20px'
+          lineHeight: '20px',
         },
         '.typo-body-sm': {
           fontFamily: 'Lato',
           fontSize: '12px',
           fontWeight: 400,
-          lineHeight: '16px'
+          lineHeight: '16px',
         },
         '.typo-btn-lg': {
           fontFamily: 'Lato',
           fontSize: '14px',
           fontWeight: 600,
-          lineHeight: '20px'
+          lineHeight: '20px',
         },
         '.typo-btn-md': {
           fontFamily: 'Lato',
           fontSize: '12px',
           fontWeight: 600,
-          lineHeight: '16px'
+          lineHeight: '16px',
         },
         '.typo-btn-sm': {
           fontFamily: 'Lato',
           fontSize: '11px',
           fontWeight: 600,
-          lineHeight: '16px'
-        }
+          lineHeight: '16px',
+        },
       }
       addUtilities(textStyles, ['responsive'])
-    })
-  ]
+    }),
+  ],
 }
