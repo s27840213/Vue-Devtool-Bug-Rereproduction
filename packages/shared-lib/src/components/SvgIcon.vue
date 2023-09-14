@@ -23,7 +23,7 @@ const props = withDefaults(
   defineProps<{
     iconName: string
     iconWidth?: string
-    iconColor: string
+    iconColor?: string
     iconHeight?: string
     // only used for those who alread has stroke
     strokeColor?: string
