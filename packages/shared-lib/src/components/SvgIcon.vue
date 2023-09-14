@@ -19,30 +19,21 @@ svg(
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
-  iconName: {
-    type: [String],
-    default: 'menu',
+const props = withDefaults(
+  defineProps<{
+    iconName: string
+    iconWidth?: string
+    iconColor?: string
+    iconHeight?: string
+    // only used for those who alread has stroke
+    strokeColor?: string
+    sameSize?: boolean
+  }>(),
+  {
+    iconWidth: '24px',
+    sameSize: true,
   },
-  iconWidth: {
-    type: String,
-  },
-  iconColor: {
-    type: String,
-    default: 'blue-1',
-  },
-  iconHeight: {
-    type: String,
-  },
-  // only used for those who alread has stroke
-  strokeColor: {
-    type: String,
-  },
-  sameSize: {
-    type: Boolean,
-    default: true,
-  },
-})
+)
 const loadingSvg = `
         <circle cx="15" cy="15" r="15">
             <animate attributeName="r" from="15" to="15"

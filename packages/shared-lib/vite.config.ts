@@ -4,21 +4,23 @@ import * as path from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
+import svgSpritePlugin from 'vite-plugin-svg-sprite-component'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
+    svgSpritePlugin.default({ symbolId: (name) => name }),
     Components({
       dirs: ['src/components'],
       extensions: ['vue'],
-      dts: 'src/components.d.ts'
+      dts: 'src/components.d.ts',
     }),
     // https://github.com/antfu/unplugin-auto-import
     AutoImport({
       imports: ['vue', 'vue-router', 'vue-i18n'],
-      dts: 'src/auto-import.d.ts'
-    })
+      dts: 'src/auto-import.d.ts',
+    }),
   ],
   build: {
     cssCodeSplit: true,
@@ -27,7 +29,7 @@ export default defineConfig({
       entry: ['src/index.ts', 'src/plugin.ts', 'src/types.ts'],
       name: '@nu/shared-lib',
       formats: ['es', 'cjs'],
-      fileName: (format, entry) => `${entry}.${format}.js`
+      fileName: (format, entry) => `${entry}.${format}.js`,
     },
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled
@@ -36,14 +38,14 @@ export default defineConfig({
       output: {
         exports: 'named',
         globals: {
-          vue: 'Vue'
-        }
-      }
-    }
+          vue: 'Vue',
+        },
+      },
+    },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src')
-    }
-  }
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
 })

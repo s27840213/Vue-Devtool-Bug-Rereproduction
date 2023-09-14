@@ -1,13 +1,13 @@
-import collections
 import json
 import os
-import sys
 
 import gspread
 import numpy as np
-from util import bcolors
+from util import bcolors, find_project_root
 
 PROJECTS = ['vivipic', 'stk', 'charmix']
+
+ROOT = find_project_root(os.getcwd())
 
 for project in PROJECTS:
     print(project)
@@ -17,7 +17,7 @@ for project in PROJECTS:
     google_sheet_name = 'Vivipic Summary (nuDesign)'
     works_sheet_name = 'charmix-i18n' if project == 'charmix' else 'i18n'
     print(google_sheet_name, works_sheet_name)
-    gc = gspread.service_account(filename='config/client-secret.json')
+    gc = gspread.service_account(filename=f'{ROOT}/tools/i18n-tool/config/client-secret.json')
     sh = gc.open(google_sheet_name).worksheet(works_sheet_name)
 
     def deep_set(_dict, key, value):
@@ -53,9 +53,8 @@ for project in PROJECTS:
             all_result.append(keys)
         all_result.append(values)
         
-        output_root = '../../projects/'
         output_dir_path = '/src/locales/'
-        output_full_path = f'{output_root}{project}{output_dir_path}'
+        output_full_path = f'{ROOT}/projects/{project}{output_dir_path}'
         print('Output '+lang+ ' to:'   + output_full_path)
         if not os.path.exists(output_full_path):
             os.makedirs(output_full_path)
