@@ -4,7 +4,6 @@ import * as path from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
-import dts from 'vite-plugin-dts'
 import svgSpritePlugin from 'vite-plugin-svg-sprite-component'
 
 // https://vitejs.dev/config/
@@ -12,9 +11,6 @@ export default defineConfig({
   plugins: [
     vue(),
     svgSpritePlugin.default({ symbolId: (name) => name }),
-    dts({
-      insertTypesEntry: true,
-    }),
     Components({
       dirs: ['src/components'],
       extensions: ['vue'],
