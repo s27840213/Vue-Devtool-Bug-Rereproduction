@@ -103,19 +103,21 @@ const fragment = fragment1
 
 export default class PixiRecorder {
   pixi = new PIXI.Application()
-  texture1 = null
-  sprite1 = null
-  texture2 = null
-  sprite2 = null
-  filter = null
-  uniforms = {} as { [key: string]: number }
+  texture1 = null as null | PIXI.Texture
+  sprite1 = null as null | PIXI.Sprite
+  texture2 = null as null | PIXI.Texture
+  sprite2 = null as null | PIXI.Sprite
+  filter = null as null | PIXI.Filter
+  uniforms = {} as { [key: string]: any }
   time = 0
-  canvasRecorder = null
-  _animate = null
+  canvasRecorder = null as null | CanvasRecorder
+  _animate = null as null | ((delta: number) => void)
 
   constructor() {
-    document.body.appendChild(this.pixi.view)
+    document.body.appendChild(this.pixi.view as HTMLCanvasElement)
     this.addImage(IMG1_EXAMPLE, IMG2_EXAMPLE).then(() => {
+      if (!this.sprite1 || !this.sprite2) return console.warn('no sprite')
+
       this.pixi.view.width = this.sprite1.width
       this.pixi.view.height = this.sprite1.height
       this.pixi.stage.addChild(this.sprite1)
@@ -124,45 +126,52 @@ export default class PixiRecorder {
       this.time = 0
       if (RECORD_START_DELAY) {
         setTimeout(() => {
-          this.pixi.ticker.add(this._animate)
+          if (this._animate) {
+            this.pixi.ticker.add(this._animate)
+          }
         }, RECORD_START_DELAY)
       } else {
-        this.pixi.ticker.add(this._animate)
+        if (this._animate) {
+          this.pixi.ticker.add(this._animate)
+        }
       }
 
       if (ENABLE_RECORDING) {
-        this.canvasRecorder = new CanvasRecorder(this.pixi.view)
+        this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement)
         this.canvasRecorder.start(1000)
       }
     })
   }
 
   addOpacityFilter() {
+    if (!this.sprite1) return
+
     this.uniforms.opacity = 0
     this.uniforms.nextImage = this.texture2
-    this.filter = new PIXI.Filter(null, fragment_opacity, this.uniforms)
+    this.filter = new PIXI.Filter(undefined, fragment_opacity, this.uniforms)
     this.sprite1.filters = [this.filter]
     this._animate = (delta) => {
       if (this.uniforms.opacity >= 1) {
-        // if (this.time / 300 - Math.PI * 0.5 > delta) {
-        this.pixi.ticker.remove(this._animate)
-        this.canvasRecorder.stop()
+        this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
+        if (this.canvasRecorder) {
+          this.canvasRecorder.stop()
+        }
       }
       this.time += delta
-      // this.uniforms.opacity = Math.abs(Math.sin(this.time / 300))
       this.uniforms.opacity = this.time / 100
     }
   }
 
   addFragment1Filter() {
+    if (!this.sprite1) return
     this.uniforms.dispFactor = 0
     this.uniforms.nextImage = this.texture2
-    this.filter = new PIXI.Filter(null, fragment1, this.uniforms)
+    this.filter = new PIXI.Filter(undefined, fragment1, this.uniforms)
     this.sprite1.filters = [this.filter]
     console.log(this.filter)
     this._animate = (delta) => {
       if (this.uniforms.dispFactor >= 1) {
-        this.pixi.ticker.remove(this._animate)
+        this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
         if (this.canvasRecorder) {
           this.canvasRecorder.stop()
         }
@@ -173,13 +182,14 @@ export default class PixiRecorder {
   }
 
   addFragment3Filter() {
-    this.filter = new PIXI.Filter(null, fragment3, this.uniforms)
-    this.filter.filterArea = this.pixi.screen
+    if (!this.sprite1) return
+
+    this.filter = new PIXI.Filter(undefined, fragment3, this.uniforms)
     this.sprite1.filters = [this.filter]
     console.log(this.filter)
     this._animate = (delta) => {
       if (this.time / 300 >= Math.PI * 0.5) {
-        this.pixi.ticker.remove(this._animate)
+        this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
         if (this.canvasRecorder) {
           this.canvasRecorder.stop()
         }
@@ -189,14 +199,16 @@ export default class PixiRecorder {
   }
 
   addSlideFilter() {
+    if (!this.sprite1) return
+
     this.uniforms.dispFactor = 0
     this.uniforms.nextImage = this.texture2
-    this.filter = new PIXI.Filter(null, fragment_slide, this.uniforms)
+    this.filter = new PIXI.Filter(undefined, fragment_slide, this.uniforms)
     this.sprite1.filters = [this.filter]
     console.log('addSlideFilter')
     this._animate = (delta) => {
       if (this.time >= 200) {
-        this.pixi.ticker.remove(this._animate)
+        this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
         if (this.canvasRecorder) {
           this.canvasRecorder.stop()
         }
@@ -206,7 +218,7 @@ export default class PixiRecorder {
     }
   }
 
-  addFilter(filter) {
+  addFilter(filter: string) {
     switch (filter) {
       case fragment_opacity:
         return this.addOpacityFilter()
@@ -219,7 +231,7 @@ export default class PixiRecorder {
     }
   }
 
-  addImage(img1, img2) {
+  addImage(img1: string, img2: string) {
     const p1 = new Promise<void>((resolve) => {
       PIXI.Texture.fromURL(img1).then((texture) => {
         this.texture1 = texture
@@ -243,25 +255,20 @@ export default class PixiRecorder {
 }
 
 class CanvasRecorder {
-  canvas = null
-  chunks = []
-  stream = null
-  recorder = null
+  canvas: HTMLCanvasElement
+  stream: MediaStream
+  recorder: MediaRecorder
+  chunks = [] as Array<any>
 
-  constructor(canvas) {
+  constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
-    this.recordInit()
-  }
-
-  recordInit() {
-    console.log('record init')
     this.stream = this.canvas.captureStream()
     this.recorder = new MediaRecorder(this.stream, this.getMimeTypeSupportOptions())
     this.recorder.ondataavailable = (e) => this.onDataAvailable(e)
     this.recorder.onstop = () => this.onRecordStop()
   }
 
-  start(time) {
+  start(time: number) {
     this.recorder.start(time)
   }
 
@@ -269,7 +276,7 @@ class CanvasRecorder {
     this.recorder.stop()
   }
 
-  onDataAvailable(e) {
+  onDataAvailable(e: any) {
     if (e.data && e.data.size) {
       this.chunks.push(e.data)
     }
@@ -299,8 +306,8 @@ class CanvasRecorder {
     video.style.position = 'absolute'
     video.style.top = '0'
     video.style.left = '0'
-    video.style.width = this.canvas.width
-    video.style.height = this.canvas.height
+    video.style.width = this.canvas.width.toString()
+    video.style.height = this.canvas.height.toString()
     video.src = url
   }
 }
