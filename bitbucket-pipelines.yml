@@ -18,30 +18,18 @@ pipelines:
               - pnpm -v
         - step:
             name: "Start build with node module cache"
+            size: 2x
+            caches: #set caches for node modules to speed up building
+              - pnpm
+            image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
             script:
-              - node -v
-    # - parallel:
-    #     - step:
-    #         name: "Verify build environment"
-    #         script: #show node and pnpm version
-    #           - corepack enable
-    #           - corepack prepare pnpm@latest-8 --activate
-    #           - node -v
-    #           - pnpm -v
-    #     - step:
-    #         name: "Start build with node module cache"
-    #         size: 2x
-    #         caches: #set caches for node modules to speed up building
-    #           - pnpm
-    #         image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
-    #         script:
-    #           - corepack enable
-    #           - corepack prepare pnpm@latest-8 --activate
-    #           - pnpm install
-    #           - pnpm run build-all # Replace with your build/test…etc. commands
-    #         artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-    #           - projects/*/dist/**
-    #           - projects/*/node_modules/**
+              - corepack enable
+              - corepack prepare pnpm@latest-8 --activate
+              - pnpm install
+              - pnpm run build-all # Replace with your build/test…etc. commands
+            artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+              - projects/*/dist/**
+              - projects/*/node_modules/**
     # - parallel:
     #     # - step:
     #     #     name: "Run E2E Tests"
