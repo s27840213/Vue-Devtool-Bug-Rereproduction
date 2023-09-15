@@ -1,7 +1,7 @@
 <template lang="pug">
 div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
-    img(ref="img"
+    img(v-show="!isAdjustImage" ref="img"
         crossorigin="anonymous"
         draggable="false"
         @error="onError"
