@@ -18,7 +18,8 @@
     "types": [
       "webpack-env",
       "resize-observer-browser",
-      "tpdirect"
+      "tpdirect",
+      "vite/client"
     ],
     "paths": {
       "@/*": [

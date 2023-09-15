@@ -202,6 +202,361 @@ importers:
 
   packages/tailwind-lib: {}
 
+  packages/vivi-lib:
+    dependencies:
+      '@ctrl/tinycolor':
+        specifier: ^3.5.0
+        version: 3.6.1
+      '@dreysolano/prerender-spa-plugin':
+        specifier: ^1.0.3
+        version: 1.0.3
+      '@flatten-js/core':
+        specifier: ^1.3.3
+        version: 1.4.2
+      '@gtm-support/vue2-gtm':
+        specifier: ^1.2.1
+        version: 1.3.0(vue@3.3.4)
+      '@kyvg/vue3-notification':
+        specifier: ^2.7.0
+        version: 2.9.1(vue@3.3.4)
+      '@pixi/filter-kawase-blur':
+        specifier: ^5.1.1
+        version: 5.1.1(@pixi/core@7.2.4)
+      '@sentry/browser':
+        specifier: ^6.11.0
+        version: 6.19.7
+      '@sentry/tracing':
+        specifier: ^6.11.0
+        version: 6.19.7
+      '@sentry/vue':
+        specifier: ^6.11.0
+        version: 6.19.7(vue@3.3.4)
+      '@stripe/stripe-js':
+        specifier: ^1.27.0
+        version: 1.54.2
+      '@tiptap/extension-bubble-menu':
+        specifier: ^2.0.0-beta.209
+        version: 2.1.7(@tiptap/core@2.1.7)(@tiptap/pm@2.1.7)
+      '@tiptap/extension-document':
+        specifier: ^2.0.0-beta.15
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/extension-font-family':
+        specifier: ^2.0.0-beta.20
+        version: 2.1.7(@tiptap/core@2.1.7)(@tiptap/extension-text-style@2.1.7)
+      '@tiptap/extension-hard-break':
+        specifier: ^2.0.0-beta.30
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/extension-history':
+        specifier: ^2.0.0-beta.21
+        version: 2.1.7(@tiptap/core@2.1.7)(@tiptap/pm@2.1.7)
+      '@tiptap/extension-paragraph':
+        specifier: ^2.0.0-beta.23
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/extension-text':
+        specifier: ^2.0.0-beta.15
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/extension-text-style':
+        specifier: ^2.0.0-beta.23
+        version: 2.1.7(@tiptap/core@2.1.7)
+      '@tiptap/starter-kit':
+        specifier: ^2.0.0-beta.209
+        version: 2.1.7(@tiptap/pm@2.1.7)
+      '@tiptap/vue-3':
+        specifier: ^2.0.0-beta.209
+        version: 2.1.7(@tiptap/core@2.1.7)(@tiptap/pm@2.1.7)(vue@3.3.4)
+      '@types/platform':
+        specifier: ^1.3.4
+        version: 1.3.4
+      '@vue/compat':
+        specifier: ^3.1.0
+        version: 3.3.4(vue@3.3.4)
+      '@vue/composition-api':
+        specifier: ^1.6.2
+        version: 1.7.2(vue@3.3.4)
+      axios:
+        specifier: ^0.21.1
+        version: 0.21.4
+      core-js:
+        specifier: ^3.8.3
+        version: 3.32.1
+      dotenv:
+        specifier: ^8.2.0
+        version: 8.6.0
+      floating-vue:
+        specifier: ^2.0.0-beta.20
+        version: 2.0.0-beta.24(vue@3.3.4)
+      fontfaceobserver:
+        specifier: ^2.1.0
+        version: 2.3.0
+      graphemer:
+        specifier: ^1.4.0
+        version: 1.4.0
+      html2pdf.js:
+        specifier: ^0.10.1
+        version: 0.10.1
+      lottie-vuejs:
+        specifier: ^0.4.0
+        version: 0.4.0
+      lottie-web:
+        specifier: ^5.1.9
+        version: 5.12.2
+      mitt:
+        specifier: ^3.0.0
+        version: 3.0.1
+      open:
+        specifier: ^8.4.0
+        version: 8.4.2
+      pixi-filters:
+        specifier: ^5.2.1
+        version: 5.2.1(@pixi/core@7.2.4)(@pixi/filter-alpha@7.2.4)(@pixi/filter-blur@7.2.4)
+      pixi.js:
+        specifier: ^7.2.4
+        version: 7.2.4(@pixi/utils@7.2.4)
+      platform:
+        specifier: ^1.3.6
+        version: 1.3.6
+      prerender-spa-plugin-next:
+        specifier: ^4.2.3
+        version: 4.2.3(html-webpack-plugin@5.5.3)(webpack@5.88.2)
+      prosemirror-commands:
+        specifier: ^1.5.0
+        version: 1.5.2
+      prosemirror-dropcursor:
+        specifier: ^1.6.1
+        version: 1.8.1
+      prosemirror-gapcursor:
+        specifier: ^1.3.1
+        version: 1.3.2
+      prosemirror-history:
+        specifier: ^1.3.0
+        version: 1.3.2
+      prosemirror-keymap:
+        specifier: ^1.2.0
+        version: 1.2.2
+      prosemirror-model:
+        specifier: ^1.18.3
+        version: 1.19.3
+      prosemirror-schema-list:
+        specifier: ^1.2.2
+        version: 1.3.0
+      prosemirror-state:
+        specifier: ^1.4.2
+        version: 1.4.3
+      prosemirror-transform:
+        specifier: ^1.7.0
+        version: 1.7.5
+      prosemirror-view:
+        specifier: ^1.29.1
+        version: 1.31.7
+      pug-plain-loader:
+        specifier: ^1.1.0
+        version: 1.1.0(pug@3.0.2)
+      stackblur-canvas:
+        specifier: ^2.5.0
+        version: 2.6.0
+      svgo:
+        specifier: ^2.8.0
+        version: 2.8.0
+      svgo-loader:
+        specifier: ^3.0.1
+        version: 3.0.3
+      svgpath:
+        specifier: ^2.5.0
+        version: 2.6.0
+      tiny-emitter:
+        specifier: ^2.1.0
+        version: 2.1.0
+      tinycolor:
+        specifier: ^0.0.1
+        version: 0.0.1
+      tiptap-commands:
+        specifier: ^1.17.1
+        version: 1.17.1
+      uuid:
+        specifier: ^8.3.2
+        version: 8.3.2
+      vconsole:
+        specifier: ^3.14.6
+        version: 3.15.1
+      vite-plugin-optimize-persist:
+        specifier: ^0.1.2
+        version: 0.1.2(vite-plugin-package-config@0.1.1)(vite@2.9.16)
+      vite-plugin-package-config:
+        specifier: ^0.1.1
+        version: 0.1.1(vite@2.9.16)
+      vue:
+        specifier: ^3.2.45
+        version: 3.3.4
+      vue-collapsed:
+        specifier: ^1.1.2
+        version: 1.2.7
+      vue-eslint-parser:
+        specifier: ^9.1.1
+        version: 9.3.1(eslint@8.46.0)
+      vue-i18n:
+        specifier: ^9.1.0
+        version: 9.2.2(vue@3.3.4)
+      vue-i18n-bridge:
+        specifier: ^9.2.0-beta.10
+        version: 9.2.2(@vue/composition-api@1.7.2)(vue@3.3.4)
+      vue-meta:
+        specifier: ^3.0.0-alpha.9
+        version: 3.0.0-alpha.10(vue@3.3.4)
+      vue-notification:
+        specifier: ^1.3.20
+        version: 1.3.20(vue@3.3.4)
+      vue-recyclerview:
+        specifier: ^0.4.1
+        version: 0.4.1
+      vue-router:
+        specifier: ^4.0.8
+        version: 4.2.4(vue@3.3.4)
+      vue-virtual-scroller:
+        specifier: ^2.0.0-beta.8
+        version: 2.0.0-beta.8(vue@3.3.4)
+      vuex:
+        specifier: ^4.0.2
+        version: 4.1.0(vue@3.3.4)
+      vuex-map-fields:
+        specifier: ^1.4.1
+        version: 1.4.1
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.12.16
+        version: 7.22.11
+      '@intlify/vite-plugin-vue-i18n':
+        specifier: ^7.0.0
+        version: 7.0.0(vite@2.9.16)(vue-i18n@9.2.2)
+      '@intlify/vue-i18n-loader':
+        specifier: ^3.2.0
+        version: 3.3.0(vue@3.3.4)
+      '@originjs/vite-plugin-commonjs':
+        specifier: ^1.0.1
+        version: 1.0.3
+      '@originjs/vite-plugin-require-context':
+        specifier: 1.0.9
+        version: 1.0.9
+      '@rollup/plugin-alias':
+        specifier: ^4.0.2
+        version: 4.0.4
+      '@sentry/webpack-plugin':
+        specifier: ^1.17.1
+        version: 1.20.1
+      '@types/css-font-loading-module':
+        specifier: 0.0.6
+        version: 0.0.6
+      '@types/events':
+        specifier: ^3.0.0
+        version: 3.0.0
+      '@types/fs-extra':
+        specifier: ^11.0.1
+        version: 11.0.1
+      '@types/lodash':
+        specifier: ^4.14.170
+        version: 4.14.197
+      '@types/resize-observer-browser':
+        specifier: ^0.1.7
+        version: 0.1.7
+      '@types/tpdirect':
+        specifier: ^5.5.3
+        version: 5.5.3
+      '@types/uuid':
+        specifier: ^8.3.0
+        version: 8.3.4
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^5.50.0
+        version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.46.0)(typescript@5.2.2)
+      '@typescript-eslint/parser':
+        specifier: ^5.50.0
+        version: 5.62.0(eslint@8.46.0)(typescript@5.2.2)
+      '@vue/cli-plugin-babel':
+        specifier: ^5.0.1
+        version: 5.0.8(@swc/core@1.3.83)(@vue/cli-service@5.0.8)(core-js@3.32.1)(esbuild@0.18.19)(vue@3.3.4)
+      '@vue/cli-plugin-eslint':
+        specifier: ~5.0.0
+        version: 5.0.8(@swc/core@1.3.83)(@vue/cli-service@5.0.8)(esbuild@0.18.19)(eslint@8.46.0)
+      '@vue/cli-plugin-router':
+        specifier: ~5.0.0
+        version: 5.0.8(@vue/cli-service@5.0.8)
+      '@vue/cli-plugin-typescript':
+        specifier: ~5.0.0
+        version: 5.0.8(@swc/core@1.3.83)(@vue/cli-service@5.0.8)(esbuild@0.18.19)(eslint@8.46.0)(typescript@5.2.2)(vue-template-compiler@2.7.14)(vue@3.3.4)
+      '@vue/cli-plugin-vuex':
+        specifier: ~5.0.0
+        version: 5.0.8(@vue/cli-service@5.0.8)
+      '@vue/cli-service':
+        specifier: ~5.0.0
+        version: 5.0.8(@swc/core@1.3.83)(@vue/compiler-sfc@3.3.4)(esbuild@0.18.19)(prettier@3.0.1)(pug-plain-loader@1.1.0)(pug@3.0.2)(react-dom@18.2.0)(react@18.2.0)(sass-loader@12.6.0)(vue-template-compiler@2.7.14)(vue@3.3.4)
+      '@vue/compiler-sfc':
+        specifier: ^3.0.0-beta.1
+        version: 3.3.4
+      '@vue/eslint-config-standard':
+        specifier: ^6.1.0
+        version: 6.1.0(@vue/cli-service@5.0.8)(eslint-plugin-import@2.28.1)(eslint-plugin-node@11.1.0)(eslint-plugin-promise@5.2.0)(eslint-plugin-vue@7.20.0)(eslint@8.46.0)(webpack@5.88.2)
+      esbuild-loader:
+        specifier: ^3.0.1
+        version: 3.2.0(webpack@5.88.2)
+      eslint-config-standard:
+        specifier: ^16.0.2
+        version: 16.0.3(eslint-plugin-import@2.28.1)(eslint-plugin-node@11.1.0)(eslint-plugin-promise@5.2.0)(eslint@8.46.0)
+      eslint-config-standard-jsx:
+        specifier: ^10.0.0
+        version: 10.0.0(eslint-plugin-react@7.33.2)(eslint@8.46.0)
+      eslint-loader:
+        specifier: ^4.0.2
+        version: 4.0.2(eslint@8.46.0)(webpack@5.88.2)
+      eslint-plugin-cypress:
+        specifier: ^2.12.1
+        version: 2.12.1(eslint@8.46.0)
+      eslint-plugin-import:
+        specifier: ^2.25.3
+        version: 2.28.1(@typescript-eslint/parser@5.62.0)(eslint@8.46.0)
+      eslint-plugin-node:
+        specifier: ^11.1.0
+        version: 11.1.0(eslint@8.46.0)
+      eslint-plugin-promise:
+        specifier: ^5.1.0
+        version: 5.2.0(eslint@8.46.0)
+      eslint-plugin-sonarjs:
+        specifier: ^0.20.0
+        version: 0.20.0(eslint@8.46.0)
+      eslint-plugin-standard:
+        specifier: ^4.1.0
+        version: 4.1.0(eslint@8.46.0)
+      eslint-plugin-unused-imports:
+        specifier: ^2.0.0
+        version: 2.0.0(@typescript-eslint/eslint-plugin@5.62.0)(eslint@8.46.0)
+      file-loader:
+        specifier: ^6.2.0
+        version: 6.2.0(webpack@5.88.2)
+      sass-loader:
+        specifier: ^12.0.0
+        version: 12.6.0(sass@1.65.1)(webpack@5.88.2)
+      serve:
+        specifier: ^14.2.0
+        version: 14.2.1
+      speed-measure-webpack-plugin:
+        specifier: ^1.5.0
+        version: 1.5.0(webpack@5.88.2)
+      svg-sprite-loader:
+        specifier: ^6.0.2
+        version: 6.0.11
+      vue-cli-plugin-i18n:
+        specifier: ~2.3.1
+        version: 2.3.2
+      vue-template-compiler:
+        specifier: ^2.6.11
+        version: 2.7.14
+      vue-tsc:
+        specifier: ^1.0.11
+        version: 1.8.8(typescript@5.2.2)
+      webpack-bundle-analyzer:
+        specifier: ^4.5.0
+        version: 4.9.0
+      yaml:
+        specifier: ^2.2.1
+        version: 2.3.1
+
   projects/charmix:
     dependencies:
       '@nu/shared-lib':
@@ -605,6 +960,9 @@ importers:
       '@kyvg/vue3-notification':
         specifier: ^2.7.0
         version: 2.9.1(vue@3.3.4)
+      '@nu/vivi-lib':
+        specifier: workspace:^
+        version: link:../../packages/vivi-lib
       '@pixi/filter-kawase-blur':
         specifier: ^5.1.1
         version: 5.1.1(@pixi/core@7.2.4)
@@ -1075,12 +1433,12 @@ packages:
       '@babel/code-frame': 7.22.10
       '@babel/generator': 7.22.10
       '@babel/helper-compilation-targets': 7.22.10
-      '@babel/helper-module-transforms': 7.22.9(@babel/core@7.22.11)
+      '@babel/helper-module-transforms': 7.22.15(@babel/core@7.22.11)
       '@babel/helpers': 7.22.11
       '@babel/parser': 7.22.13
       '@babel/template': 7.22.5
       '@babel/traverse': 7.22.11
-      '@babel/types': 7.22.11
+      '@babel/types': 7.22.15
       convert-source-map: 1.9.0
       debug: 4.3.4(supports-color@8.1.1)
       gensync: 1.0.0-beta.2
@@ -1119,7 +1477,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/compat-data': 7.22.9
-      '@babel/helper-validator-option': 7.22.5
+      '@babel/helper-validator-option': 7.22.15
       browserslist: 4.21.10
       lru-cache: 5.1.1
       semver: 6.3.1
@@ -1204,13 +1562,6 @@ packages:
       '@babel/types': 7.22.15
     dev: true
 
-  /@babel/helper-module-imports@7.22.5:
-    resolution: {integrity: sha512-8Dl6+HD/cKifutF5qGd/8ZJi84QeAKh+CEe1sBzz8UayBBGg1dAIJrdHOcOM5b2MpzWL2yuotJTtGjETq0qjXg==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/types': 7.22.15
-    dev: true
-
   /@babel/helper-module-transforms@7.22.15(@babel/core@7.22.11):
     resolution: {integrity: sha512-l1UiX4UyHSFsYt17iQ3Se5pQQZZHa22zyIXURmvkmLCD4t/aU+dvNWHatKac/D9Vm9UES7nvIqHs4jZqKviUmQ==}
     engines: {node: '>=6.9.0'}
@@ -1220,20 +1571,6 @@ packages:
       '@babel/core': 7.22.11
       '@babel/helper-environment-visitor': 7.22.5
       '@babel/helper-module-imports': 7.22.15
-      '@babel/helper-simple-access': 7.22.5
-      '@babel/helper-split-export-declaration': 7.22.6
-      '@babel/helper-validator-identifier': 7.22.15
-    dev: true
-
-  /@babel/helper-module-transforms@7.22.9(@babel/core@7.22.11):
-    resolution: {integrity: sha512-t+WA2Xn5K+rTeGtC8jCsdAH52bjggG5TKRuRrAGNM/mjIbO4GxvlLMFOEz9wXY5I2XQ60PMFsAG2WIcG82dQMQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/core': 7.22.11
-      '@babel/helper-environment-visitor': 7.22.5
-      '@babel/helper-module-imports': 7.22.5
       '@babel/helper-simple-access': 7.22.5
       '@babel/helper-split-export-declaration': 7.22.6
       '@babel/helper-validator-identifier': 7.22.15
@@ -1306,11 +1643,6 @@ packages:
 
   /@babel/helper-validator-option@7.22.15:
     resolution: {integrity: sha512-bMn7RmyFjY/mdECUbgn9eoSY4vqvacUnS9i9vGAGttgFWesO6B4CYWA7XlpbWgBt71iv/hfbPlynohStqnu5hA==}
-    engines: {node: '>=6.9.0'}
-    dev: true
-
-  /@babel/helper-validator-option@7.22.5:
-    resolution: {integrity: sha512-R3oB6xlIVKUnxNUxbmgq7pKjxpru24zlimpE8WK47fACIlM0II/Hm1RS8IaOI7NgCr6LNS+jl5l75m20npAziw==}
     engines: {node: '>=6.9.0'}
     dev: true
 
@@ -2330,15 +2662,6 @@ packages:
       - supports-color
     dev: true
 
-  /@babel/types@7.22.11:
-    resolution: {integrity: sha512-siazHiGuZRz9aB9NpHy9GOs9xiQPKnMzgdr493iI1M67vRXpnEq8ZOOKzezC5q7zwuQ6sDhdSp4SD9ixKSqKZg==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/helper-string-parser': 7.22.5
-      '@babel/helper-validator-identifier': 7.22.15
-      to-fast-properties: 2.0.0
-    dev: true
-
   /@babel/types@7.22.15:
     resolution: {integrity: sha512-X+NLXr0N8XXmN5ZsaQdm9U2SSC3UbIYq/doL++sueHOTisgZHoKaQtZxGuV2cUPQHMfjKEfg/g6oy7Hm6SKFtA==}
     engines: {node: '>=6.9.0'}
@@ -3129,8 +3452,8 @@ packages:
       vue-i18n:
         optional: true
     dependencies:
-      '@intlify/message-compiler': 9.4.0
-      '@intlify/shared': 9.4.0
+      '@intlify/message-compiler': 9.4.1
+      '@intlify/shared': 9.4.1
       jsonc-eslint-parser: 1.4.1
       source-map: 0.6.1
       vue-i18n: 9.2.2(vue@3.3.4)
@@ -3221,11 +3544,11 @@ packages:
       '@intlify/shared': 9.3.0-beta.25
       source-map-js: 1.0.2
 
-  /@intlify/message-compiler@9.4.0:
-    resolution: {integrity: sha512-EdjqOH3bQqEjZcUOwo90wuW4ZuFr41FDxVni6WNKS0V0myKgwz9EuvLDcnEbjJMIX8vKAWPjWfnSTt5fMwKHLA==}
+  /@intlify/message-compiler@9.4.1:
+    resolution: {integrity: sha512-aN2N+dUx320108QhH51Ycd2LEpZ+NKbzyQ2kjjhqMcxhHdxtOnkgdx+MDBhOy/CObwBmhC3Nygzc6hNlfKvPNw==}
     engines: {node: '>= 16'}
     dependencies:
-      '@intlify/shared': 9.4.0
+      '@intlify/shared': 9.4.1
       source-map-js: 1.0.2
     dev: true
 
@@ -3244,6 +3567,11 @@ packages:
 
   /@intlify/shared@9.4.0:
     resolution: {integrity: sha512-AFqymip2kToqA0B6KZPg5jSrdcVHoli9t/VhGKE2iiMq9utFuMoGdDC/JOCIZgwxo6aXAk86QyU2XtzEoMuZ6A==}
+    engines: {node: '>= 16'}
+    dev: true
+
+  /@intlify/shared@9.4.1:
+    resolution: {integrity: sha512-A51elBmZWf1FS80inf/32diO9DeXoqg9GR9aUDHFcfHoNDuT46Q+fpPOdj8jiJnSHSBh8E1E+6qWRhAZXdK3Ng==}
     engines: {node: '>= 16'}
     dev: true
 
@@ -3297,7 +3625,7 @@ packages:
         optional: true
     dependencies:
       '@intlify/bundle-utils': 3.4.0(vue-i18n@9.2.2)
-      '@intlify/shared': 9.4.0
+      '@intlify/shared': 9.4.1
       '@rollup/pluginutils': 4.2.1
       debug: 4.3.4(supports-color@8.1.1)
       fast-glob: 3.3.1
@@ -4428,6 +4756,23 @@ packages:
       '@pixi/core': 7.2.4
     dev: false
 
+  /@pixi/filter-adjustment@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-AUHe03rmqXwV1ylAHq62t19AolPWOOYomCcL+Qycb1tf+LbM8FWpGXC6wmU1PkUrhgNc958uM9TrA9nRpplViA==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-advanced-bloom@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-C5AWmkWKvoYvJ+600qS7rC81E1X1clvrQLw4QE4IiFec5j1b07KhKE78w/BSRYMrBVa0cQ/ju0J1f7XoQYJfdQ==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+      '@pixi/filter-kawase-blur': 5.1.1(@pixi/core@7.2.4)
+    dev: false
+
   /@pixi/filter-alpha@7.2.4(@pixi/core@7.2.4):
     resolution: {integrity: sha512-UTUMSGyktUr+I9vmigqJo9iUhb0nwGyqTTME2xBWZvVGCnl5z+/wHxvIBBCe5pNZ66IM15pGXQ4cDcfqCuP2kA==}
     peerDependencies:
@@ -4436,10 +4781,62 @@ packages:
       '@pixi/core': 7.2.4
     dev: false
 
+  /@pixi/filter-ascii@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-uGfpd7aYZuiEzkBH8asL/2j7L/7k/jCZRURjAU9c0unWlkagwIjvUwoPMsdzPNMh2DNQzCG1FPWseSbRFjUNow==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-bevel@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-UGik6YEW+fnzVu1DV8ctbxS7eClJQzqaM2sPYI0MopaEE2mW35yjAcg9py9Kwx27BX8FniVRqtJOyKEw1A3mBA==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-bloom@5.1.1(@pixi/core@7.2.4)(@pixi/filter-alpha@7.2.4)(@pixi/filter-blur@7.2.4):
+    resolution: {integrity: sha512-4/i+tMxAQdgezahxsVCqzkAyBAH4TxtuY/zo1wuCJybEqkKFIzOJ76Y4R/lJevEHS9CGpCTrvjRpup0Hze8k0Q==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+      '@pixi/filter-alpha': ^7.0.0-X
+      '@pixi/filter-blur': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+      '@pixi/filter-alpha': 7.2.4(@pixi/core@7.2.4)
+      '@pixi/filter-blur': 7.2.4(@pixi/core@7.2.4)
+    dev: false
+
   /@pixi/filter-blur@7.2.4(@pixi/core@7.2.4):
     resolution: {integrity: sha512-aLyXIoxy14bTansCPtbY8x7Sdn2OrrqkF/pcKiRXHJGGhi7wPacvB/NcmYJdnI/n2ExQ6V5Njuj/nfrsejVwcA==}
     peerDependencies:
       '@pixi/core': 7.2.4
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-bulge-pinch@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-80I3g813td7Fnzi7IJSiR3z8gZlKblk6WN+5z6WnscQROcNEpck6lgWS/Lf/IdeHB/FtUKJCbx7RzxkUhiRTvA==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-color-gradient@5.2.0(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-po3JBEKgfowqhAh2D75Ii1bhNl1gA8Agt+ESIMnSbrTVIkemno8zOVlVmP7xaf8+PKYnX7JWH5buTnnDfA7Hnw==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-color-map@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-WvDKvweXkg/t9t40thFlN1d/kUrWXGsxpRpFPNmkrZF6hNxdRjqgfg4wxUOev7uZwHIjcZtTfoLRKhJjF+1uqw==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
     dependencies:
       '@pixi/core': 7.2.4
     dev: false
@@ -4452,10 +4849,75 @@ packages:
       '@pixi/core': 7.2.4
     dev: false
 
+  /@pixi/filter-color-overlay@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-u8xuWsUePQ1NFBqpxDAFEujW4kImFIIvlp4D2xbRZqJ0RRbeeKEW31Sk4cxl1yFJKWIq0XLyT/TAepT9iIlEXg==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-color-replace@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-t+FEEnuqvlU1cKMSe8939tIGCNJsqpyc7o5BzIunMxsZsHjMQWzZtWQKls+FSdSlFyk2TWYSXWAxtj2VBzBZBg==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-convolution@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-68NNa7lXBFlRgP/ac/L/0bKk/9QvU8urh7CEeOnR9WJxjymglbAa0nM69TBlhg++Fus3t7Mz/jc/GIfPJ/VL6Q==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-cross-hatch@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-g1hPHZYmGBpZtGojOtUOBWH6tqhtQGDo5xAp3o3gwmn2QnY087ZiYWFHF5ml+nTL62fEJ78uIpODscz4Y04e8w==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-crt@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-w+rRbR7eTsPf18QPB68Wiyx8laC+v7fYb3hRVhnq/j6yRUJKQgg4HK5KLP9jfUJ9FJvxy4bzLSDQulvxbOMJZg==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
   /@pixi/filter-displacement@7.2.4(@pixi/core@7.2.4):
     resolution: {integrity: sha512-Simq3IBJKt7+Gvk4kK7OFkfoeYUMhNhIyATCdeT+Jkdkq5WV7pYnH5hqO0YW7eAHrgjV13yn6t4H/GC4+6LhEA==}
     peerDependencies:
       '@pixi/core': 7.2.4
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-dot@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-w3g6bumHzZgv9ktzegEWQS7OWuHH0QG76sbg/hZBy5K01dyuGAe1uUUnzVN5hZuFTD6q77T2UPlifhNI5j4ixg==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-drop-shadow@5.2.0(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-cYS2KDER7cwCu0V4VNSxTHGvzmNcEXdC9j3031YBOkUAE3+p17LMS/TAt6XeMfJV7KaPuusvXy2NFgGkv3RDbw==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+      '@pixi/filter-kawase-blur': 5.1.1(@pixi/core@7.2.4)
+    dev: false
+
+  /@pixi/filter-emboss@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-AoAFVzrMcCXldU+27hvJ95tcKNOVLnanlq1z838l2SzYGgso+ICbLauUz+o2PL/znudUJE6oky+I6WJzeavDsQ==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
     dependencies:
       '@pixi/core': 7.2.4
     dev: false
@@ -4468,8 +4930,64 @@ packages:
       '@pixi/core': 7.2.4
     dev: false
 
+  /@pixi/filter-glitch@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-pl6jOQlzQGg6NwqCwlgioYhlwue2OSRBGByDzh6Y6Y/qxMBuzQi7W56GunhQW79Kpvj9ynDLAGxomvZsrX88qg==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-glow@5.2.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-94I4XePDF9yqqA6KQuhPSphEHPJ2lXfqJLn0Bes8VVdwft0Ianj1wALqjoSUeBWqiJbhjBEXGDNkRZhPHvY3Xg==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-godray@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-JCvNiKBF/01VyaBYzeusULg+h6kmBaYg0NruHwe/FaJMWCRIPOUBHMQIUavJR0JGE5s6bEIR8kRtdpf3RHiwqw==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-grayscale@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-tRyggOhTdAQlQpgH/IzjCbORICua/Gm0JkKGOcdDQOHqt4bTVvAehQ59e2+A6A1yA8pevu2L/C25qQhsPgNW9w==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-hsl-adjustment@5.2.0(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-BjmiKIJQuWNqMUjVUpqkM+HaInQzl7dCvYWj8wx9lSAwjzdOCRVVLbRLdO2TwGdwGIHjR3AylMxY1HZK3P4cLA==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
   /@pixi/filter-kawase-blur@5.1.1(@pixi/core@7.2.4):
     resolution: {integrity: sha512-nPnJ1ChBFP+4pgFCwC0RJgHAJCetiHcQU3INH7zCdq88cFABmVmhN+wCKRNg4H7lF1EJjaXgFDkTrTreOD/bnw==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-motion-blur@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-I94s3pW2GutjCyXiKQ/dI4Vl9JKne+Q8QgGRn1mrk0Uwg6DDO/OQI3jqv01S+SCTU3LZqhR/p8AQyxeDmOhr2w==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-multi-color-replace@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-P1shsJXEOpJGe9FdCUgCMi/nius86lBfb6cDIFM4oXdZfzuBUfWjZfUm7uofOvK7IWSrlXYrYoqp75H0XrLZ8A==}
     peerDependencies:
       '@pixi/core': ^7.0.0-X
     dependencies:
@@ -4480,6 +4998,94 @@ packages:
     resolution: {integrity: sha512-QAU9Ybj2ZQrWM9ZEjTTC0iLnQcuyNoZNRinxSbg1G0yacpmsSb9wvV5ltIZ66+hfY+90+u2Nudt/v9g6pvOdGg==}
     peerDependencies:
       '@pixi/core': 7.2.4
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-old-film@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-Jgq3eLbcQW48o+YxLe8+T4vsQrvBnKrZAHS3cu3yc2aBLaiVIj8EfYP3vpOPjkQlZ7JVRZNdELpYA6KCR+abXw==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-outline@5.2.0(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-xKfAouhZNKl6A0RvxT5i+2/ean7r16dE/QswwIkbWvr2hhHlp4p9U6XsqdgUERCDxK+IZibMAumbWs4DGxOUeQ==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-pixelate@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-qTs0Sv10aIbMFW//BPlhcFh1ByyKiVmvXfytYTTXNLrlK5DU3H3x8Pgy5Vy4lacS9VtOO69/CQ1QObBFCHnEBQ==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-radial-blur@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-q6RreUM+RO25HZaxc6ceEOSi6chadv8vrCOvupNLSY+1lvXue0KyFK6vxMcMInNdqRGYWSyJ+ql3RyHMTr93aw==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-reflection@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-ksmfrRfBqXZ+rEFuA0l2tf4k+yzTU8VcNMuhW7U+ggkWOP2OEHga+oOlJg6TnHjOEbxudCpag5Us6e9aCeKpEw==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-rgb-split@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-DEeAYoPU2lbUTeNYK8e6q89jqtLeUYSkEdFK/a9IyxYkvJP2CPk+nVXIe48v3wORUf5DdP20k6yQzqoPZyP3ww==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-shockwave@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-ovzOdAC2LCyWdxJC5PW97wSzHTNfjmKq4c/61cIO4sZp+9DB6n3b/6Rrad2jU346UATtM6K2XkmPY5p7SrRRXA==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-simple-lightmap@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-S3cHUgbVvUgeef93f3trdL50+162Nyqa7DBYufkGw0dPjPecXyjTH47GJzxDqQPooRwHWWUG9W5EYC+XEwlV9w==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-tilt-shift@5.2.0(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-bCQE/BTGsqu8EhRMyiGg+9/FXsPBYxjfODbGTWWQNsXtbFVqZXvg1vEjUZQXvuso1v/Fh/BtZ3u+t2kFfWpBXA==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-twist@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-ZUxLmSHu7ZcP1OYmO9EsKgWDV/Ophf622N7YVei4opBrj/gBMuQZNvFIfnsm4l8yhqAwwzndSTVLNehq1A2ONw==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
+    dependencies:
+      '@pixi/core': 7.2.4
+    dev: false
+
+  /@pixi/filter-zoom-blur@5.1.1(@pixi/core@7.2.4):
+    resolution: {integrity: sha512-0n10xOqACC2vm9Lpsq37Y/edDvp/B7xsBdkuWxeCI7Ta7J22fsJ8IHG1iUyxgdZGa+SCPcKiFoTrYEUu5PLCpA==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
     dependencies:
       '@pixi/core': 7.2.4
     dev: false
@@ -7519,7 +8125,7 @@ packages:
     dependencies:
       '@babel/core': 7.22.11
       '@babel/helper-compilation-targets': 7.22.10
-      '@babel/helper-module-imports': 7.22.5
+      '@babel/helper-module-imports': 7.22.15
       '@babel/plugin-proposal-class-properties': 7.18.6(@babel/core@7.22.11)
       '@babel/plugin-proposal-decorators': 7.22.10(@babel/core@7.22.11)
       '@babel/plugin-syntax-dynamic-import': 7.8.3(@babel/core@7.22.11)
@@ -16507,6 +17113,50 @@ packages:
     dependencies:
       pngjs: 6.0.0
     dev: true
+
+  /pixi-filters@5.2.1(@pixi/core@7.2.4)(@pixi/filter-alpha@7.2.4)(@pixi/filter-blur@7.2.4):
+    resolution: {integrity: sha512-lsRakKJfK0iH+aCCVePQcSb477hFiS20CR2p4u7xS6RO7q5qh5GhAyGqWdgYZlUT5WLSW0kxAV+FddYLs9z9Sg==}
+    dependencies:
+      '@pixi/filter-adjustment': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-advanced-bloom': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-ascii': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-bevel': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-bloom': 5.1.1(@pixi/core@7.2.4)(@pixi/filter-alpha@7.2.4)(@pixi/filter-blur@7.2.4)
+      '@pixi/filter-bulge-pinch': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-color-gradient': 5.2.0(@pixi/core@7.2.4)
+      '@pixi/filter-color-map': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-color-overlay': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-color-replace': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-convolution': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-cross-hatch': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-crt': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-dot': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-drop-shadow': 5.2.0(@pixi/core@7.2.4)
+      '@pixi/filter-emboss': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-glitch': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-glow': 5.2.1(@pixi/core@7.2.4)
+      '@pixi/filter-godray': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-grayscale': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-hsl-adjustment': 5.2.0(@pixi/core@7.2.4)
+      '@pixi/filter-kawase-blur': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-motion-blur': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-multi-color-replace': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-old-film': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-outline': 5.2.0(@pixi/core@7.2.4)
+      '@pixi/filter-pixelate': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-radial-blur': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-reflection': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-rgb-split': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-shockwave': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-simple-lightmap': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-tilt-shift': 5.2.0(@pixi/core@7.2.4)
+      '@pixi/filter-twist': 5.1.1(@pixi/core@7.2.4)
+      '@pixi/filter-zoom-blur': 5.1.1(@pixi/core@7.2.4)
+    transitivePeerDependencies:
+      - '@pixi/core'
+      - '@pixi/filter-alpha'
+      - '@pixi/filter-blur'
+    dev: false
 
   /pixi.js@7.2.4(@pixi/utils@7.2.4):
     resolution: {integrity: sha512-nBH60meoLnHxoMFz17HoMxXS4uJpG5jwIdL+Gx2S11TzWgP3iKF+/WLOTrkSdyuQoQSdIBxVqpnYii0Wiox15A==}

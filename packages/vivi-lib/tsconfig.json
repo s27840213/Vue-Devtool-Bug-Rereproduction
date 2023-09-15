@@ -10,6 +10,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "allowJs": true,
     "sourceMap": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -22,11 +23,7 @@
       "vite/client"
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@nu/vivi-lib/*": ["../../packages/vivi-lib/src/*"],
-      "@nu/vivi-lib": ["../../packages/vivi-lib/src/index"]
+      "@/*": ["./src/*"]
     },
     "lib": [
       "esnext",
@@ -44,9 +41,7 @@
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "src/**/*.vue"
   ],
   "exclude": [
     "node_modules"
