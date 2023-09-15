@@ -144,7 +144,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getStateResult',
     'setStateDone',
     'subscribeInfo',
-    'internalError'
+    'internalError',
+    'validJsonResult'
   ]
 
   VVSTK_CALLBACKS = [
