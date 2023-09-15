@@ -159,12 +159,30 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
     this.registerCallbacksCore('nativeResponse')
   }
 
-  nativeResponse({ eventId, output }: { eventId: string; output: unknown }) {
+  nativeResponse({
+    eventId,
+    output,
+    hasInternalError,
+    errorMsg,
+  }: {
+    eventId: string
+    output: unknown
+    hasInternalError: string
+    errorMsg: string
+  }) {
     if (this.callbackMap[eventId]) {
-      this.callbackMap[eventId]({
-        data: output,
-        isTimeouted: false,
-      })
+      if (hasInternalError === '0') {
+        this.callbackMap[eventId]({
+          data: output,
+          isTimeouted: false,
+        })
+      } else {
+        logUtils.setLog(`Event: ${eventId} encountered internal native error: ${errorMsg}`)
+        this.callbackMap[eventId]({
+          data: null,
+          isTimeouted: false,
+        })
+      }
     }
   }
 }
