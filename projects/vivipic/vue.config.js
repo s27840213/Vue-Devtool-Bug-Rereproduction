@@ -206,13 +206,14 @@ module.exports = defineConfig({
     // if (argv.PRERENDER) {
     //   console.log('start prerender')
     //   // Tell Vue (CLI 3) to provide this file to Pre-SPA:
-    if (process.env.NODE_ENV === 'production') {
-      config.plugin('html').tap((args) => {
-        args[0].template = path.join(__dirname, 'public', 'index.html')
-        args[0].filename = 'app.html'
-        return args
-      })
-    }
+    console.log(process.env.NODE_ENV)
+    // if (process.env.NODE_ENV === 'production') {
+    config.plugin('html').tap((args) => {
+      args[0].template = path.join(__dirname, 'public', 'index.html')
+      args[0].filename = 'app.html'
+      return args
+    })
+    // }
     //   config.plugin('prerender').use(PrerenderSPAPlugin, [
     //     {
     //       // Tell the Pre-SPA plugin not to use index.html as its template file.
@@ -282,7 +283,7 @@ module.exports = defineConfig({
       scss: {
         // https://webpack.js.org/loaders/sass-loader/#function-1
         // https://sass-lang.com/documentation/at-rules/use/#configuration
-        additionalData: `@use "@/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`
+        additionalData: `@use "@/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`,
       },
     },
   },
