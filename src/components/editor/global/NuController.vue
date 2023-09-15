@@ -1143,7 +1143,7 @@ export default defineComponent({
       }
     },
     resizing(event: MouseEvent | TouchEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.$store.getters.getIsPinchLayer) {
         return
       }
       event.preventDefault()

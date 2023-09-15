@@ -126,7 +126,7 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
-    if (store.getters['mobileEditor/getIsPinchingEditor']) {
+    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer) {
       this.removeListener()
       return
     }
@@ -140,7 +140,7 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
-    if (store.getters['mobileEditor/getIsPinchingEditor']) return
+    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer) return
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
     this.initPageTranslate.x = pageUtils.getCurrPage.x
@@ -337,7 +337,7 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (eventUtils.checkIsMultiTouch(e) || store.getters['mobileEditor/getIsPinchingEditor'] || this.initialPos === null) {
+    if (eventUtils.checkIsMultiTouch(e) || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer || this.initialPos === null) {
       return
     }
     this.isControlling = true

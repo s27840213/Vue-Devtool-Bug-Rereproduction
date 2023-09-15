@@ -114,6 +114,7 @@ const getDefaultState = (): IEditorState => ({
     body: []
   },
   isMoving: false,
+  isPinchLayer: false,
   showRuler: localStorage.getItem('showRuler') === 'true' ?? false,
   showGuideline: true,
   lockGuideline: false,
@@ -354,6 +355,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getIsLargeDesktop(state: IEditorState) {
     return state.isLargeDesktop
   },
+  getIsPinchLayer(state: IEditorState) {
+    return state.isPinchLayer
+  }
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -1185,6 +1189,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isLargeDesktop(state: IEditorState, boolean: boolean) {
     state.isLargeDesktop = boolean
+  },
+  SET_isPinchLayer(state: IEditorState, isPinchLayer: boolean) {
+    state.isPinchLayer = isPinchLayer
   },
 }
 window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500))

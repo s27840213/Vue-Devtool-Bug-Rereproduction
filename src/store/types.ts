@@ -20,6 +20,7 @@ export interface IEditorState {
   groupId: string,
   exportIds: string,
   groupType: number,
+  isPinchLayer: boolean,
   folderInfo: {
     isRoot: boolean,
     parentFolder: string,

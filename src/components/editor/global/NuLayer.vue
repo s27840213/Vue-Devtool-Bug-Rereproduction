@@ -5,6 +5,7 @@ div(class="nu-layer flex-center"
     :data-p-index="pageIndex"
     :style="layerWrapperStyles"
     :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    @pinch="onPinch"
     ref="body")
   //- class="nu-layer"
   //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
@@ -51,8 +52,8 @@ div(class="nu-layer flex-center"
 </template>
 
 <script lang="ts">
-import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
+import SquareLoading from '@/components/global/SqureLoading.vue'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
@@ -72,14 +73,16 @@ import layerUtils from '@/utils/layerUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
+import PinchControlUtils from '@/utils/pinchControlUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
+import { AnyTouchEvent } from 'any-touch'
 import Svgpath from 'svgpath'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -153,6 +156,7 @@ export default defineComponent({
       initPos: { x: 0, y: 0 },
       dragUtils: this.isSubLayer ? new DragUtils(layerUtils.getLayer(this.pageIndex, this.layerIndex).id, this.config.id) : new DragUtils(this.config.id),
       movingUtils: null as unknown as MovingUtils,
+      onPinch: null as null | ((e: AnyTouchEvent) => void),
       imgBuff: {} as {
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
@@ -162,6 +166,7 @@ export default defineComponent({
     }
   },
   mounted() {
+    this.onPinch = this.getPinchHandler()?.pinch ?? null
     /**
      * Use definedProperty to bind some props of the vue.$props with the movingUtils
      * thus, we are unnecessary to watching these props and update them manually
@@ -774,6 +779,28 @@ export default defineComponent({
           addToPage: true
         })
       }
+    },
+    getPinchHandler() {
+      console.log(this.primaryLayer)
+      // only add handler to primary-layer, not sub-layer
+      if (this.primaryLayer) return null
+
+      const data = {
+        layerInfo: new Proxy({
+          pageIndex: this.pageIndex,
+          layerIndex: this.layerIndex
+        }, {
+          get: (target, key) => {
+            if (key === 'pageIndex') {
+              return this.$props.pageIndex
+            } else if (key === 'layerIndex') {
+              return this.$props.layerIndex
+            }
+          }
+        }) as ILayerInfo,
+        config: this.config as ILayer
+      }
+      return new PinchControlUtils(data)
     }
   }
 })
