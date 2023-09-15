@@ -22,8 +22,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
       :style="imgStyles()")
-      img(v-show="!isAdjustImage"
-        ref="img"
+      img(ref="img"
         :style="flipStyles"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
@@ -684,12 +683,11 @@ export default defineComponent({
     },
     handleIsTransparent(_img?: HTMLImageElement) {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
+      if (!this.$refs.img) return
+
       const img = _img ?? this.$refs.img as HTMLImageElement
       const isTransparent = imageShadowUtils.isTransparentBg(img)
       imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
-      if (!isTransparent && this.config.styles.adjust.blur > 0) {
-        this.$forceUpdate()
-      }
       return isTransparent
     },
     async handleInitLoad() {

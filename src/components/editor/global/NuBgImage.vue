@@ -1,7 +1,7 @@
 <template lang="pug">
 div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
-    img(v-show="!isAdjustImage" ref="img"
+    img(ref="img"
         crossorigin="anonymous"
         draggable="false"
         @error="onError"
@@ -351,6 +351,8 @@ export default defineComponent({
       })
     },
     handleIsTransparent(img? : HTMLImageElement) {
+      if (!this.$refs.img) return
+
       this.$store.commit('SET_backgroundImageStyles', {
         pageIndex: this.pageIndex,
         styles: {
