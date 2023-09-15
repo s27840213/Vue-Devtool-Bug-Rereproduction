@@ -2,7 +2,8 @@ import re
 import json
 
 # ======= config =======
-project = 'stk' # 'vivipic' | 'stk' | 'charmix'
+project = 'vivipic' # 'vivipic' | 'stk' | 'charmix'
+# project = 'stk' # 'vivipic' | 'stk' | 'charmix'
 # ======= config =======
 
 set = set()
