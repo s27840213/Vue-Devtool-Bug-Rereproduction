@@ -9,6 +9,7 @@ export interface ILocale {
 class LocaleUtils {
   SUPPORTED_LOCALES: Array<ILocale>
   localeMap: { [index: string]: string }
+  nativeLocaleMap: { [index: string]: string }
   defaultLocale: string
   constructor() {
     this.SUPPORTED_LOCALES = [{
@@ -34,6 +35,12 @@ class LocaleUtils {
       tw: 'tw',
       us: 'us',
       jp: 'jp'
+    }
+
+    this.nativeLocaleMap = {
+      'zh-Hant': 'tw',
+      en: 'us',
+      ja: 'jp'
     }
 
     this.defaultLocale = 'us'
@@ -65,6 +72,11 @@ class LocaleUtils {
 
   getBrowserLang(): 'tw' | 'us' | 'jp' {
     return navigator.language.includes('zh') ? 'tw' : navigator.language.includes('ja') ? 'jp' : 'us'
+  }
+
+  mapNativeLocale(nativeLocale: string): string {
+    if (['tw', 'us', 'jp'].includes(nativeLocale)) return nativeLocale
+    return this.nativeLocaleMap[nativeLocale] ?? this.defaultLocale // TODO: handle map-not-found (need discussion with UX)
   }
 }
 

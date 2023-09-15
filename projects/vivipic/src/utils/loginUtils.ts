@@ -1,3 +1,4 @@
+import picWVUtils from '@/utils/picWVUtils'
 
 class LoginUtils {
   onFacebookClicked(redirect?: string) {
@@ -42,6 +43,12 @@ class LoginUtils {
       `state=${stateStr}&` +
       `redirect_uri=${redirectUri}&` +
       'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
+  }
+
+  logout() {
+    picWVUtils.updateUserInfo({ userId: '' })
+    localStorage.setItem('token', '')
+    window.location.href = '/'
   }
 }
 

@@ -184,7 +184,7 @@ export default defineComponent({
         outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
       }
     },
-    scalerStyles(scaler: { [key: string]: string }) {
+    scalerStyles(scaler: { [key: string]: string | number }) {
       const scalerStyle = { ...scaler }
       scalerStyle.transform += ` scale(${100 / this.scaleRatio})`
       return scalerStyle
