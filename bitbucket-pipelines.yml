@@ -38,6 +38,16 @@ pipelines:
             image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
             script:
               - echo "Test"
+        - step:
+            name: "Test 2"
+            size: 2x
+            image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+            script:
+              - echo "Test"
+        - step:
+            name: "Test 3"
+            script:
+              - echo "Test"
     # - parallel:
     #     # - step:
     #     #     name: "Run E2E Tests"
