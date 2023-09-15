@@ -144,7 +144,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getStateResult',
     'setStateDone',
     'subscribeInfo',
-    'internelError'
+    'internalError'
   ]
 
   VVSTK_CALLBACKS = [
@@ -1575,7 +1575,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return loadedFonts[face] ?? false
   }
 
-  internelError(data: { route: string, data: { [key: string]: any } }) {
+  internalError(data: { route: string, data: { [key: string]: any } }) {
     console.error(`Error occurs in App when processing ${data.route} with ${JSON.stringify(data.data)}`)
   }
 
