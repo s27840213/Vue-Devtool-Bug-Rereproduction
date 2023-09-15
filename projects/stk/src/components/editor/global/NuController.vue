@@ -12,7 +12,7 @@ div(:layer-index="`${layerIndex}`"
     div(class="nu-controller__object-hint__text")
       span {{ Math.round(hintAngle) % 360 }}
   div(v-if="subLayer && subLayer.config" class="nu-controller__sublayer-container" :style="sizeStyles")
-    nu-sub-controller(v-if="(subLayer.config.type !== 'image' || !subLayer.config.imgControl) && !FrameUtils.isImageFrame(config)"
+    nu-sub-controller(v-if="(subLayer.config.type !== 'image' || !subLayer.config.imgControl) && !FrameUtils.isImageFrame(config as IFrame)"
       :style="subContentStyles"
       class="relative nu-controller__subCtrlContent"
       data-identifier="controller"
@@ -695,7 +695,7 @@ export default defineComponent({
     getCornerRotaters(scalers: any) {
       return (this.tooSmall) ? scalers.slice(2, 3) : scalers
     },
-    textWrapperStyle() {
+    textWrapperStyle(): Record<string, string | number> {
       return {
         width: `${this.getLayerWidth() / this.getLayerScale()}px`,
         height: `${this.getLayerHeight() / this.getLayerScale()}px`,

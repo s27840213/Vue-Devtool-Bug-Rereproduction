@@ -49,7 +49,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        image(ref="img"
+        image(ref="adjust-img"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
@@ -191,13 +191,12 @@ export default defineComponent({
         this.previewAsLoading()
           .then(() => {
             const _oldIsTransparent = (this.config as IImage).styles.shadow.isTransparent
-            this.handleIsTransparent()?.then(bool => {
-              const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
-              const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || bool || _oldIsTransparent)
-              if (redrawImmediately) {
-                this.redrawShadow()
-              }
-            })
+            const isTransparent = this.handleIsTransparent()
+            const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
+            const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || isTransparent || _oldIsTransparent)
+            if (redrawImmediately) {
+              this.redrawShadow()
+            }
           })
       },
       deep: true
@@ -302,7 +301,10 @@ export default defineComponent({
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       imageUtils.imgLoadHandler(src, () => {
-        this.src = src
+        // bcz this is an async operation, need to check if isBlurImg is the same val
+        if (this.isBlurImg === val) {
+          this.src = src
+        }
       }, { crossOrigin: true })
     }
   },
@@ -679,33 +681,27 @@ export default defineComponent({
         })
       })
     },
-    handleIsTransparent() {
+    handleIsTransparent(_img?: HTMLImageElement) {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
-      const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
-      const src = imageUtils.getSrc(this.config, imgSize)
-      return imageUtils.imgLoadHandler(src,
-        (img) => {
-          if (!this.hasDestroyed) {
-            const isTransparent = imageShadowUtils.isTransparentBg(img)
-            imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
-            if (!isTransparent && this.config.styles.adjust.blur > 0) {
-              this.$forceUpdate()
-            }
-            return isTransparent
-          }
-        }, { crossOrigin: true }
-      )
+      if (!this.$refs.img) return
+
+      const img = _img ?? this.$refs.img as HTMLImageElement
+      const isTransparent = imageShadowUtils.isTransparentBg(img)
+      imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+      return isTransparent
     },
     async handleInitLoad() {
       if (this.userId !== 'backendRendering') {
         await this.previewAsLoading()
           .then(() => this.handleIsTransparent())
       } else {
-        if (this.isAdjustImage) {
-          this.handleIsTransparent()
-        }
         const { imgWidth, imgHeight } = this.config.styles
         this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+        if (this.isAdjustImage) {
+          imageUtils.imgLoadHandler(this.src, (img) => {
+            this.handleIsTransparent(img)
+          })
+        }
       }
       this.initialized = true
     },

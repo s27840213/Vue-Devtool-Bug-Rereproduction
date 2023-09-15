@@ -40,7 +40,7 @@ div(class="panel-more")
         @click="toggleShowTouchPoint")
       span Toggle show touch point
     div(class="body-2 panel-more__item" @pointerdown.prevent="handleDebugMode")
-      span(class="text-gray-3") Version: {{buildNumber}}{{appVersion}}{{hostId}} {{userId}} {{domain}}
+      span(class="text-gray-3") Version: {{appVersion}}/{{osVer}}/{{modelName}} {{buildNumber}} {{domain}} {{hostId}} {{userId}}
   template(v-if="lastHistory === 'domain-list'")
     div(v-for="domain in domainList"
         :key="domain.key"
@@ -51,7 +51,10 @@ div(class="panel-more")
 </template>
 
 <script lang="ts">
+import { IUserInfo } from '@/interfaces/webView'
 import generalUtils from '@/utils/generalUtils'
+import imageUtils from '@/utils/imageUtils'
+import loginUtils from '@/utils/loginUtils'
 import pageUtils from '@/utils/pageUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
@@ -106,11 +109,20 @@ export default defineComponent({
       const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
       return buildNumber ? `v.${buildNumber}` : 'local'
     },
+    userInfo(): IUserInfo {
+      return picWVUtils.getUserInfoFromStore()
+    },
     appVersion(): string {
-      return picWVUtils.inBrowserMode ? '' : ` - ${picWVUtils.getUserInfoFromStore().appVer}`
+      return picWVUtils.inBrowserMode ? '' : this.userInfo.appVer
     },
     hostId(): string {
-      return picWVUtils.inBrowserMode ? '' : ` - ${picWVUtils.getUserInfoFromStore().hostId}`
+      return picWVUtils.inBrowserMode ? '' : this.userInfo.hostId
+    },
+    osVer(): string {
+      return picWVUtils.inBrowserMode ? '' : this.userInfo.osVer
+    },
+    modelName(): string {
+      return this.userInfo.modelName
     },
     domainList(): { key: string, title: string, selected: () => boolean }[] {
       return [
@@ -160,8 +172,7 @@ export default defineComponent({
       shortcutHandler.save()
     },
     onLogoutClicked() {
-      localStorage.setItem('token', '')
-      window.location.href = '/'
+      loginUtils.logout()
     },
     goToPage(pageName: string, queryString = '') {
       if (queryString) {
@@ -210,7 +221,11 @@ export default defineComponent({
       picWVUtils.setState('debugMode', { value: this.debugMode })
     },
     copyDesignLink() {
-      generalUtils.copyText(window.location.href)
+      let url = window.location.href
+      if (!picWVUtils.inBrowserMode) {
+        url = imageUtils.appendQuery(url, 'hostId', picWVUtils.getUserInfoFromStore().hostId)
+      }
+      generalUtils.copyText(url)
         .then(() => {
           this.$notify({ group: 'copy', text: `${this.$tc('NN0210', { content: `${this.$t('NN0863')}` })}` })
         })

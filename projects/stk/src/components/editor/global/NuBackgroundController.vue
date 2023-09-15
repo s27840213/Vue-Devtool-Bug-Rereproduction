@@ -125,7 +125,7 @@ export default defineComponent({
     ...mapMutations({
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
-    scalerStyles(scaler: { [key: string]: string }) {
+    scalerStyles(scaler: { [key: string]: string | number }) {
       const scalerStyle = { ...scaler }
       scalerStyle.transform += ` scale(${100 / this.scaleRatio})`
       return scalerStyle

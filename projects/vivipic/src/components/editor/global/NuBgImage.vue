@@ -1,6 +1,12 @@
 <template lang="pug">
 div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
+    img(v-show="!isAdjustImage" ref="img"
+        crossorigin="anonymous"
+        draggable="false"
+        @error="onError"
+        @load="onLoad"
+        :src="finalSrc")
     svg(v-if="isAdjustImage"
       class="nu-background-image__svg"
       :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
@@ -17,7 +23,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
               :key="child.tag"
               :is="child.tag"
               v-bind="child.attrs")
-      image(ref="img"
+      image(ref="adjust-img"
         crossorigin="anonymous"
         class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
@@ -26,12 +32,6 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
         @error="onError"
         @load="onAdjustImgLoad"
         :xlink:href="finalSrc" )
-    img(v-else-if="src" ref="img"
-      crossorigin="anonymous"
-      draggable="false"
-      @error="onError"
-      @load="onLoad"
-      :src="finalSrc")
   div(:style="filterContainerStyles()" class="filter-container")
     component(v-for="(elm, idx) in cssFilterElms"
       :key="`cssFilter${idx}`"
@@ -123,7 +123,10 @@ export default defineComponent({
       const { imgWidth, imgHeight } = this.image.config.styles
       const src = imageUtils.getSrc(this.image.config, val ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       imageUtils.imgLoadHandler(src, () => {
-        this.src = src
+        // bcz this is an async operation, need to check if isBlurImg is the same val
+        if (this.isBlurImg === val) {
+          this.src = src
+        }
       }, { crossOrigin: true })
     }
   },
@@ -148,11 +151,13 @@ export default defineComponent({
       this.previewAsLoading()
         .then(() => this.handleIsTransparent())
     } else {
-      if (this.isAdjustImage) {
-        this.handleIsTransparent()
-      }
       const { imgWidth, imgHeight } = this.image.config.styles
       this.src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
+      if (this.isAdjustImage) {
+        imageUtils.imgLoadHandler(this.src, (img) => {
+          this.handleIsTransparent(img)
+        })
+      }
     }
   },
   components: { NuAdjustImage },
@@ -345,21 +350,15 @@ export default defineComponent({
         }
       })
     },
-    handleIsTransparent() {
-      const src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(this.image.config.srcObj, 100))
-      imageUtils.imgLoadHandler(src, (img) => {
-        this.$store.commit('SET_backgroundImageStyles', {
-          pageIndex: this.pageIndex,
-          styles: {
-            shadow: {
-              isTransparent: imageShadowUtils.isTransparentBg(img)
-            }
+    handleIsTransparent(img? : HTMLImageElement) {
+      if (!this.$refs.img) return
+
+      this.$store.commit('SET_backgroundImageStyles', {
+        pageIndex: this.pageIndex,
+        styles: {
+          shadow: {
+            isTransparent: imageShadowUtils.isTransparentBg(img ?? this.$refs.img as HTMLImageElement)
           }
-        })
-      }, {
-        crossOrigin: true,
-        error: (img) => {
-          console.error('handleIsTransparent in nu-bgImage error: src: ', img?.src)
         }
       })
     },

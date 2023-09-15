@@ -75,6 +75,7 @@ div(class="popup-file")
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import fileUtils from '@/utils/fileUtils'
+import loginUtils from '@/utils/loginUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import rulerUtils from '@/utils/rulerUtils'
@@ -190,8 +191,7 @@ export default defineComponent({
       throw new Error('test')
     },
     onLogoutClicked() {
-      localStorage.setItem('token', '')
-      window.location.href = '/'
+      loginUtils.logout()
     },
     testAllFonts(start: number, end: number) {
       return testUtils.testAllFonts(start, end)

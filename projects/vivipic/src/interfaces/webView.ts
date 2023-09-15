@@ -6,6 +6,8 @@ export interface IUserInfo {
   isFirstOpen: boolean,
   statusBarHeight: number,
   homeIndicatorHeight: number,
+  modelName: string,
+  userId?: string,
   country?: string
 }
 
