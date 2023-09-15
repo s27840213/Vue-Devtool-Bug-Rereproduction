@@ -1,11 +1,11 @@
-import store from '@/store'
-import {
-  ISvgFilterTag,
-  IAdjustJsonProps,
-  IAdjustProps
-} from '@/interfaces/adjust'
 import i18n from '@/i18n'
+import {
+  IAdjustJsonProps,
+  IAdjustProps,
+  ISvgFilterTag
+} from '@/interfaces/adjust'
 import { IImage } from '@/interfaces/layer'
+import store from '@/store'
 
 class ImageAdjustUtil {
   getFields() {
@@ -159,7 +159,7 @@ class ImageAdjustUtil {
         attrs: { stdDeviation: 0.275 * value }
       })
     ]
-    if (config && config.styles.shadow && !config.styles.shadow.isTransparent) {
+    if (config && config.styles.shadow.isTransparent === false) {
       res.push(this.createSvgFilter({
         tag: 'feComponentTransfer',
         child: [
