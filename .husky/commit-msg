@@ -26,7 +26,12 @@ echo ""
 
 OLDPWD=$(pwd)
 cd tools/i18n-tool
-python3 i18n_shake.py -c -n
+if ! command -v python3 &> /dev/null
+then
+    python i18n_shake.py -c -n
+else
+    python3 i18n_shake.py -c -n
+fi
 cd "$OLDPWD"
 if [[ $? == 1 ]]
 then
