@@ -11,9 +11,11 @@ pipelines:
     - parallel:
         - step:
             name: "Verify build environment"
-            script: #show node and yarn version
+            script: #show node and pnpm version
+              - corepack enable
+              - corepack prepare pnpm@latest-8 --activate
               - node -v
-              - yarn -v
+              - pnpm -v
         - step:
             name: "Start build with node module cache"
             script:
