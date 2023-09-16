@@ -10,7 +10,8 @@ export default class PinchControlUtils {
     pos: { x: number, y: number },
     layerPos: { x: number, y: number }
     scale: number,
-    size: ISize
+    size: ISize,
+    rotate: number
   }
 
   private layerInfo: ILayerInfo
@@ -39,7 +40,8 @@ export default class PinchControlUtils {
         pos: { x: e.x, y: e.y },
         layerPos: { x: this.config.styles.x, y: this.config.styles.y },
         size: { width: this.config.styles.width, height: this.config.styles.height },
-        scale: this.config.styles.scale
+        scale: this.config.styles.scale,
+        rotate: this.config.styles.rotate
       }
     }
     const newScale = e.scale * this.init.scale
@@ -63,11 +65,10 @@ export default class PinchControlUtils {
       scale: newScale,
       width: newSize.width,
       height: newSize.height,
+      rotate: e.angle + this.init.rotate,
       x: this.init.layerPos.x + totalTranslate.x,
       y: this.init.layerPos.y + totalTranslate.y
     })
-    console.log('moving', e.scale, this.init.layerPos.x + totalTranslate.x, this.init.layerPos.y + totalTranslate.y)
-    console.log(this.init.layerPos.x, this.init.layerPos.y)
   }
 
   end(e: AnyTouchEvent) {
