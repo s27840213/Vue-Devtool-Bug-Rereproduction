@@ -62,7 +62,7 @@ import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -119,7 +119,7 @@ export default defineComponent({
       imgBuff: {} as {
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
-        panelPreviewSrc: ''
+        previewSrc: ''
       },
       isPrimaryActive: false,
     }
@@ -129,33 +129,38 @@ export default defineComponent({
     if (body) {
       const props = this.$props
       const layerInfo = { } as ILayerInfo
-      Object.defineProperty(layerInfo, 'pageIndex', {
-        get() {
-          return props.pageIndex
-        }
-      })
-      Object.defineProperty(layerInfo, 'layerIndex', {
-        get() {
-          return props.primaryLayerIndex
-        }
-      })
-      Object.defineProperty(layerInfo, 'subLayerIdx', {
-        get() {
-          return props.layerIndex
+      Object.defineProperties(layerInfo, {
+        pageIndex: {
+          get() {
+            return props.pageIndex
+          }
+        },
+        layerIndex: {
+          get() {
+            return props.primaryLayerIndex
+          }
+        },
+        subLayerIdx: {
+          get() {
+            return props.layerIndex
+          }
         }
       })
       const _config = {
         config: { active: false },
         primaryLayer: {}
       } as { config: ILayer, primaryLayer: ITmp | IGroup | IFrame }
-      Object.defineProperty(_config, 'config', {
-        get() {
-          return props.config
-        }
-      })
-      Object.defineProperty(_config, 'primaryLayer', {
-        get() {
-          return props.primaryLayer
+
+      Object.defineProperties(_config, {
+        config: {
+          get() {
+            return props.config
+          }
+        },
+        primaryLayer: {
+          get() {
+            return props.primaryLayer
+          }
         }
       })
       this.subLayerCtrlUtils = new SubCtrlUtils({
@@ -285,8 +290,7 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
-      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setCurrDraggedPhoto: 'SET_currDraggedPhoto'
+      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
     }),
     isDraggedPanelPhoto(): boolean {
       return this.currDraggedPhoto.srcObj.type !== ''
@@ -294,12 +298,13 @@ export default defineComponent({
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
-    textWrapperStyle() {
+    textWrapperStyle(): Record<string, string | number> {
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01})`,
+        transform: `scaleX(${this.config.styles.scale * _f}) scaleY(${this.config.styles.scale * _f})`,
         textAlign: this.config.styles.align,
         ...cssConverter.convertVerticalStyle(this.config.styles.writingMode),
         ...(this.isDraggingCursor ? { zIndex: 100 } : {})
@@ -317,8 +322,6 @@ export default defineComponent({
       }
     },
     onPointerdown(e: PointerEvent) {
-      // const
-      // e.stopPropagation()
       this.subLayerCtrlUtils.onPointerdown(e)
     },
     onMouseup(e: PointerEvent) {
@@ -473,7 +476,7 @@ export default defineComponent({
       e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
-        const { srcObj, panelPreviewSrc } = this.config
+        const { srcObj, previewSrc } = this.config
         const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
         const clip = clips[this.layerIndex]
 
@@ -481,21 +484,19 @@ export default defineComponent({
           srcObj: {
             ...srcObj
           },
-          panelPreviewSrc,
+          previewSrc,
           styles: {
             imgX: clip.styles.imgX,
             imgY: clip.styles.imgY,
             imgWidth: clip.styles.imgWidth,
             imgHeight: clip.styles.imgHeight,
             adjust: clip.styles.adjust
-            // horizontalFlip: clip.styles.horizontalFlip,
-            // verticalFlip: clip.styles.verticalFlip
           }
         })
 
         frameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...currLayer.srcObj },
-          ...((currLayer as IImage).panelPreviewSrc && { panelPreviewSrc: (currLayer as IImage).panelPreviewSrc as string })
+          ...((currLayer as IImage).previewSrc && { previewSrc: (currLayer as IImage).previewSrc as string })
         })
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
         LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: true })

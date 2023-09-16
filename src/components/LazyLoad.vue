@@ -185,6 +185,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .lazy-load {
+  pointer-events: none;
   text-align: center;
 }
 </style>

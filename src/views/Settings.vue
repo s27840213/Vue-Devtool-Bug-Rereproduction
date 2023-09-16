@@ -104,6 +104,14 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
           :title="$t('NN0167')"
           :iconName="'chevron-right'"
           @click="onLogoutClicked")
+        template(v-if="isAdmin")
+          hr
+          mobile-jump-btn(
+            title="進入 Native 事件測試器"
+            :iconName="'chevron-right'"
+            @click="onEnterNativeEventTester")
+      hr
+      div(class="settings-mobile__row mt-10") {{appVersion}}/{{osVer}}/{{modelName}} {{buildNumber}} {{domain}} {{hostId}} {{userId}}
     settings-account(v-if="currentView === 'account'")
     settings-security(v-if="currentView === 'security'")
     settings-payment(v-if="currentView === 'payment'")
@@ -121,6 +129,7 @@ import SettingsPayment from '@/components/settings/SettingsPayment.vue'
 import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 import Sidebar from '@/components/settings/Sidebar.vue'
 import router from '@/router'
+import loginUtils from '@/utils/loginUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent } from 'vue'
@@ -148,7 +157,8 @@ export default defineComponent({
   },
   data() {
     return {
-      currentView: 'account'
+      currentView: 'account',
+      domain: window.location.hostname !== 'vivipic.com' ? ` - ${window.location.hostname.replace('.vivipic.com', '')}` : '',
     }
   },
   watch: {
@@ -169,10 +179,28 @@ export default defineComponent({
     }),
     ...mapGetters({
       isLogin: 'user/isLogin',
+      isAdmin: 'user/isAdmin',
       userName: 'user/getUname',
       email: 'user/getEmail',
-      userInfo: picWVUtils.appendModuleName('getUserInfo')
+      userInfo: 'webView/getUserInfo',
+      userId: 'user/getUserId',
     }),
+    buildNumber(): string {
+      const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
+      return buildNumber ? `v.${buildNumber}` : 'local'
+    },
+    appVersion(): string {
+      return picWVUtils.inBrowserMode ? '' : this.userInfo.appVer
+    },
+    hostId(): string {
+      return picWVUtils.inBrowserMode ? '' : this.userInfo.hostId
+    },
+    osVer(): string {
+      return picWVUtils.inBrowserMode ? '' : this.userInfo.osVer
+    },
+    modelName(): string {
+      return this.userInfo.modelName
+    },
     sidebarStyle(): Record<string, string> {
       return this.currentView === 'menu' ? { width: '100%', display: 'grid' } : {}
     },
@@ -251,11 +279,13 @@ export default defineComponent({
       this.$router.back()
     },
     onLogoutClicked() {
-      localStorage.setItem('token', '')
-      window.location.href = '/'
+      loginUtils.logout()
     },
     buy() {
       paymentUtils.openPayment('step1')
+    },
+    onEnterNativeEventTester() {
+      window.location.pathname = 'nativeevttest'
     }
   }
 })

@@ -877,6 +877,7 @@ class DesignUtils {
         physicalHeight: height,
         unit
       }, false).then(() => {
+        editorUtils.handleContentScaleRatio(0)
         stepsUtils.reset()
         if (this.isLogin) {
           /**

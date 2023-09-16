@@ -192,8 +192,11 @@ export default defineComponent({
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
     },
-    hasPreviewSrc(): boolean {
-      return this.currLayer.previewSrc !== undefined
+    // hasPreviewSrc(): boolean {
+    //   return this.currLayer.previewSrc !== undefined
+    // },
+    isUploadingImg(): boolean {
+      return !(this.currLayer.srcObj.type && this.currLayer.srcObj.assetId && imageUtils.getSrc(this.currLayer.srcObj))
     }
   },
   watch: {
@@ -217,7 +220,8 @@ export default defineComponent({
     }),
     disableBtn(btn: IBtn): boolean {
       if (btn.name === 'BGRM') {
-        return this.hasPreviewSrc || this.isHandleShadow || this.isSvgImage || this.show === 'panel-photo-shadow'
+        return this.isUploadingImg || this.isHandleShadow || this.isSvgImage || this.show === 'panel-photo-shadow'
+        // return this.hasPreviewSrc || this.isHandleShadow || this.isSvgImage || this.show === 'panel-photo-shadow'
       }
       const currLayer = layerUtils.getCurrConfig as IImage
       if (!currLayer.styles) return false
@@ -237,7 +241,8 @@ export default defineComponent({
       }
 
       if (btn.name === 'remove-bg') {
-        return this.hasPreviewSrc
+        return this.isUploadingImg
+        // return this.hasPreviewSrc
       }
 
       return false

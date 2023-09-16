@@ -106,7 +106,6 @@ import frameUtils from '@/utils/frameUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import picWVUtils from '@/utils/picWVUtils'
 import { replaceImgInject } from '@/utils/textFillUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
@@ -211,7 +210,7 @@ export default defineComponent({
       currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       hasCopiedFormat: 'getHasCopiedFormat',
-      userInfo: picWVUtils.appendModuleName('getUserInfo'),
+      userInfo: 'webView/getUserInfo',
       inBrowserMode: 'webView/getInBrowserMode'
     }),
     historySize(): number {

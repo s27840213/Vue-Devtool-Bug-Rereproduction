@@ -44,7 +44,7 @@ div(class="menu" :style="rootStyles")
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import constantData, { IHeaderL1 } from '@/utils/constantData'
-import picWVUtils from '@/utils/picWVUtils'
+import loginUtils from '@/utils/loginUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -63,7 +63,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       isLogin: 'user/isLogin',
-      userInfo: picWVUtils.appendModuleName('getUserInfo')
+      userInfo: 'webView/getUserInfo'
     }),
     navItems(): IHeaderL1[] {
       return constantData.headerItems(true)
@@ -85,8 +85,7 @@ export default defineComponent({
   },
   methods: {
     onLogoutClicked() {
-      localStorage.setItem('token', '')
-      window.location.href = '/'
+      loginUtils.logout()
     },
     close() { this.$emit('closeMenu') }
   }

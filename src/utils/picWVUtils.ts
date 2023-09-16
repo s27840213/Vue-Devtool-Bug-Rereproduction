@@ -19,7 +19,8 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     isFirstOpen: false,
     osVer: '100.0',
     statusBarHeight: 0,
-    homeIndicatorHeight: 0
+    homeIndicatorHeight: 0,
+    modelName: 'web'
   }
 
   ROUTER_CALLBACKS = [
@@ -48,21 +49,17 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   detectIfInApp() {
-    if (window.webkit?.messageHandlers?.APP_LOADED === undefined) {
-      this.enterBrowserMode()
+    if (window.webkit?.messageHandlers?.APP_LOADED !== undefined) {
+      this.leaveBrowserMode()
     }
   }
 
-  enterBrowserMode() {
-    store.commit('webView/SET_inBrowserMode', true)
+  leaveBrowserMode() {
+    store.commit('webView/SET_inBrowserMode', false)
   }
 
   getUserInfoFromStore(): IUserInfo {
     return store.getters['webView/getUserInfo']
-  }
-
-  appendModuleName(identifier: string): string {
-    return `webView/${identifier}`
   }
 
   openOrGoto(url: string) {
@@ -117,15 +114,21 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('login', data)
   }
 
+  async updateUserInfo(userInfo: Partial<IUserInfo>): Promise<void> {
+    if (this.inBrowserMode) return
+    store.commit('webView/UPDATE_userInfo', userInfo)
+    await this.callIOSAsAPI('UPDATE_USER_INFO', userInfo, 'update-user-info')
+  }
+
   async updateLocale(locale: string): Promise<void> {
     if (this.inBrowserMode) return
-    await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+    await this.updateUserInfo({ locale })
   }
 
   updateInfoDone(data: { flag: string, msg?: string }) {
     if (data.flag !== '0') {
       logUtils.setLogAndConsoleLog(data.msg)
-      this.errorMessageMap.locale = data.msg ?? ''
+      this.errorMessageMap.updateUserInfo = data.msg ?? ''
     }
     this.handleCallback('update-user-info')
   }
