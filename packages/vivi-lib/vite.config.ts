@@ -25,23 +25,27 @@ export default defineConfig({
     // })
   ],
   build: {
-    cssCodeSplit: true,
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: ['src/index.ts', 'src/plugin.ts', 'src/types.ts'],
+      entry: 'src/main.ts',
       name: '@nu/vivi-lib',
-      formats: ['es', 'cjs'],
+      // To reduce build time, only compile es files, not both es & cjs.
+      formats: ['es'],
+      // formats: ['es', 'cjs'],
       fileName: (format, entry) => `${entry}.${format}.js`
     },
     rollupOptions: {
-      // make sure to externalize deps that shouldn't be bundled
-      // into your library
+      // make sure to externalize deps that shouldn't be bundled into your library
       external: ['vue'],
       output: {
         exports: 'named',
         globals: {
           vue: 'Vue'
-        }
+        },
+        // preserveModules can keep dist folder structure
+        // https://github.com/vitejs/vite/discussions/2447#discussioncomment-6768114
+        preserveModules: true,
+        preserveModulesRoot: './',
       }
     }
   },
@@ -53,7 +57,6 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        // https://webpack.js.org/loaders/sass-loader/#function-1
         // https://sass-lang.com/documentation/at-rules/use/#configuration
         additionalData: `@use "@/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`
       },

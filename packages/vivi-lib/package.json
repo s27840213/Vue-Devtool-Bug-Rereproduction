@@ -10,33 +10,8 @@
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": {
-        "require": "./dist/index.d.ts",
-        "default": "./dist/index.d.ts"
-      },
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
-    },
-    "./plugin": {
-      "types": {
-        "require": "./dist/plugin.d.ts",
-        "default": "./dist/plugin.d.ts"
-      },
-      "import": "./dist/plugin.es.js",
-      "require": "./dist/plugin.cjs.js"
-    },
-    "./types": {
-      "types": {
-        "require": "./dist/components.d.ts",
-        "default": "./dist/components.d.ts"
-      },
-      "import": "./dist/types.es.js",
-      "require": "./dist/types.cjs.js"
-    },
-    "./css": {
-      "import": "./dist/plugin.css"
-    }
+    "./css": "./dist/style.css",
+    "./*": "./dist/src/*.es.js"
   },
   "scripts": {
     "dev": "vite",
