@@ -34,9 +34,10 @@
 const path = require('path')
 // const webpack = require('webpack')
 // const SentryWebpackPlugin = require('@sentry/webpack-plugin')
-const PrerenderSPAPlugin = require('@dreysolano/prerender-spa-plugin')
-const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
-const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
+// const PrerenderSPAPlugin = require('@dreysolano/prerender-spa-plugin')
+// const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
+// const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
 
@@ -214,6 +215,13 @@ module.exports = defineConfig({
         return args
       })
     }
+
+    config.plugin('copy-plugin').use(CopyPlugin, [
+      {
+        patterns: [resolve('prerender')],
+      },
+    ])
+
     //   config.plugin('prerender').use(PrerenderSPAPlugin, [
     //     {
     //       // Tell the Pre-SPA plugin not to use index.html as its template file.
