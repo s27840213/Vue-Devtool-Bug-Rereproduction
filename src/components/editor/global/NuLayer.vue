@@ -5,7 +5,8 @@ div(class="nu-layer flex-center"
     :data-p-index="pageIndex"
     :style="layerWrapperStyles"
     :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
-    @pinch="onPinch"
+    @pointerdown="recordPointer"
+    @pointerup="removePointer"
     ref="body")
   //- class="nu-layer"
   //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
@@ -74,13 +75,14 @@ import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import PinchControlUtils from '@/utils/pinchControlUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { AnyTouchEvent } from 'any-touch'
+import AnyTouch from 'any-touch'
 import Svgpath from 'svgpath'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -156,7 +158,6 @@ export default defineComponent({
       initPos: { x: 0, y: 0 },
       dragUtils: this.isSubLayer ? new DragUtils(layerUtils.getLayer(this.pageIndex, this.layerIndex).id, this.config.id) : new DragUtils(this.config.id),
       movingUtils: null as unknown as MovingUtils,
-      onPinch: null as null | ((e: AnyTouchEvent) => void),
       imgBuff: {} as {
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
@@ -166,7 +167,6 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.onPinch = this.getPinchHandler()?.pinch ?? null
     /**
      * Use definedProperty to bind some props of the vue.$props with the movingUtils
      * thus, we are unnecessary to watching these props and update them manually
@@ -237,6 +237,9 @@ export default defineComponent({
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
       body.addEventListener(this.$isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
+    if (this.$isTouchDevice()) {
+      this.addPinchHandler()
+    }
   },
   unmounted() {
     this.movingUtils && this.movingUtils.removeListener()
@@ -270,7 +273,8 @@ export default defineComponent({
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor',
       showPcPagePreivew: 'page/getIsShowPagePreview',
-      isDuringCopy: 'vivisticker/getIsDuringCopy'
+      isDuringCopy: 'vivisticker/getIsDuringCopy',
+      isPinchLayer: 'getIsPinchLayer'
     }),
     inAllPagesMode(): boolean {
       return this.mobilePagePreview || this.showPcPagePreivew
@@ -312,7 +316,11 @@ export default defineComponent({
           ...this.transformStyle
         }
       )
-      styles.willChange = 'initial'
+      if (this.isPinchLayer) {
+        styles.willChange = 'transform'
+      } else {
+        styles.willChange = 'initial'
+      }
       if (this.primaryLayer?.type === 'frame' && this.config.type === 'image') {
         if (this.$isTouchDevice()) {
           styles.transform += `scale(${this.$store.state.pageScaleRatio / 100})`
@@ -780,8 +788,7 @@ export default defineComponent({
         })
       }
     },
-    getPinchHandler() {
-      console.log(this.primaryLayer)
+    addPinchHandler() {
       // only add handler to primary-layer, not sub-layer
       if (this.primaryLayer) return null
 
@@ -790,7 +797,7 @@ export default defineComponent({
           pageIndex: this.pageIndex,
           layerIndex: this.layerIndex
         }, {
-          get: (target, key) => {
+          get: (_, key) => {
             if (key === 'pageIndex') {
               return this.$props.pageIndex
             } else if (key === 'layerIndex') {
@@ -798,9 +805,18 @@ export default defineComponent({
             }
           }
         }) as ILayerInfo,
-        config: this.config as ILayer
+        config: this.config as ILayer,
+        movingUtils: this.movingUtils as MovingUtils
       }
-      return new PinchControlUtils(data)
+
+      const at = new AnyTouch(this.$refs.body as HTMLElement)
+      at.on('pinch', new PinchControlUtils(data).pinch)
+    },
+    recordPointer(e: PointerEvent) {
+      pointerEvtUtils.addPointer(e)
+    },
+    removePointer(e: PointerEvent) {
+      pointerEvtUtils.removePointer(e.pointerId)
     }
   }
 })

@@ -3,6 +3,8 @@ import { ISize } from '@/interfaces/math'
 import store from '@/store'
 import { ILayerInfo } from '@/store/types'
 import layerUtils from '@/utils/layerUtils'
+import { MovingUtils } from '@/utils/movingUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 
 export default class PinchControlUtils {
@@ -16,26 +18,35 @@ export default class PinchControlUtils {
 
   private layerInfo: ILayerInfo
   private config: ILayer
+  private movingUtils: MovingUtils
 
-  constructor(data: { layerInfo: ILayerInfo, config: ILayer }) {
-    const { layerInfo, config } = data
+  constructor(data: { layerInfo: ILayerInfo, config: ILayer, movingUtils: MovingUtils }) {
+    const { layerInfo, config, movingUtils } = data
     this.config = config
     this.layerInfo = layerInfo
+    this.movingUtils = movingUtils
     this.pinch = this.pinch.bind(this)
   }
 
   pinch(e: AnyTouchEvent) {
-    switch (e.phase) {
-      case 'move':
-        return this.move(e)
-      case 'end':
-        return this.end(e)
-    }
+    requestAnimationFrame(() => {
+      switch (e.phase) {
+        case 'move':
+          return this.move(e)
+        case 'end':
+          return this.end(e)
+      }
+    })
   }
 
   move(e: AnyTouchEvent) {
+    console.warn('pinch moving')
     if (this.init === null) {
+      this.movingUtils.removeListener()
       store.commit('SET_isPinchLayer', true)
+      if (store.getters['vivisticker/getControllerHidden']) {
+        vivistickerUtils.showController()
+      }
       this.init = {
         pos: { x: e.x, y: e.y },
         layerPos: { x: this.config.styles.x, y: this.config.styles.y },
@@ -73,7 +84,10 @@ export default class PinchControlUtils {
 
   end(e: AnyTouchEvent) {
     store.commit('SET_isPinchLayer', false)
-    console.log('move end')
     this.init = null
+    const nativeEvt = e.nativeEvent as TouchEvent
+    if (nativeEvt.touches.length === 1) {
+      this.movingUtils.moveStart(nativeEvt)
+    }
   }
 }

@@ -2,6 +2,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import { nextTick } from 'vue'
 import controlUtils from './controlUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
@@ -140,6 +141,7 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
+    console.log('movevmovestart')
     if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer) return
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
@@ -176,8 +178,10 @@ export class MovingUtils {
      * used for frame layer for entering detection
      * This is used for moving image to replace frame element
      */
-    this.eventTarget = (event.target as HTMLElement)
-    this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
+    if (event.type === 'pointerdown') {
+      this.eventTarget = (event.target as HTMLElement)
+      this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
+    }
 
     if (this.isTouchDevice && !this.config.locked) {
       this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
@@ -337,7 +341,7 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (eventUtils.checkIsMultiTouch(e) || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer || this.initialPos === null) {
+    if (pointerEvtUtils.pointers.length > 1 || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer || this.initialPos === null) {
       return
     }
     this.isControlling = true
