@@ -46,7 +46,6 @@ import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import { ITempDesign } from '@/interfaces/vivisticker'
 import assetUtils from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -55,13 +54,11 @@ import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE } from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
-import logUtils from '@/utils/logUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import _ from 'lodash'
@@ -526,25 +523,9 @@ export default defineComponent({
             },
             {
               msg: `${this.$t('STK0011')}`,
-              action: async () => {
+              action: () => {
                 if (forceModal) {
-                  const pages = pageUtils.getPages
-                  const editorType = this.$store.getters['vivisticker/getEditorType']
-                  const editingDesignId = this.$store.getters['vivisticker/getEditingDesignId']
-                  const assetInfo = this.$store.getters['vivisticker/getEditingAssetInfo']
-                  try {
-                    const design = {
-                      pages: uploadUtils.prepareJsonToUpload(pages),
-                      editorType,
-                      id: editingDesignId,
-                      assetInfo
-                    } as ITempDesign
-                    await uploadUtils.uploadReportedDesign(design, { id: design.id })
-                  } catch (error: any) {
-                    logUtils.setLogAndConsoleLog('uploading reported design failed:', { editorType, id: editingDesignId, assetInfo, pages })
-                    logUtils.setLogForError(error as Error)
-                    logUtils.setLogAndConsoleLog('skip uploading and go on to leave editor')
-                  }
+                  vivistickerUtils.uploadReportedDesign()
                 }
                 imageShadowUtils.iosImgDelHandlerAsNoSave()
                 vivistickerUtils.endEditing()

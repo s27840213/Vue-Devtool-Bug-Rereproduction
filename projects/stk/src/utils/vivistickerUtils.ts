@@ -144,7 +144,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getStateResult',
     'setStateDone',
     'subscribeInfo',
-    'internelError'
+    'internalError',
+    'validJsonResult'
   ]
 
   VVSTK_CALLBACKS = [
@@ -968,6 +969,37 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback(`getState-${data.key}`, data.value ? JSON.parse(data.value) : undefined)
   }
 
+  async isValidJson(data: object): Promise<boolean> {
+    if (!this.checkVersion('1.42')) return true
+    const id = generalUtils.generateRandomString(8)
+    const valid = ((await this.callIOSAsAPI('IS_VALID_JSON', { object: data, id }, `checkJsonValid-${id}`))?.valid ?? '0')
+    return valid === '1'
+  }
+
+  validJsonResult(data: { valid: string, id: string }) {
+    this.handleCallback(`checkJsonValid-${data.id}`, data)
+  }
+
+  async uploadReportedDesign() {
+    const pages = pageUtils.getPages
+    const editorType = store.getters['vivisticker/getEditorType']
+    const editingDesignId = store.getters['vivisticker/getEditingDesignId']
+    const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
+    try {
+      const design = {
+        pages: uploadUtils.prepareJsonToUpload(pages),
+        editorType,
+        id: editingDesignId,
+        assetInfo
+      } as ITempDesign
+      await uploadUtils.uploadReportedDesign(design, { id: design.id })
+    } catch (error: any) {
+      logUtils.setLogAndConsoleLog('uploading reported design failed:', { editorType, id: editingDesignId, assetInfo, pages })
+      logUtils.setLogForError(error as Error)
+      logUtils.setLogAndConsoleLog('skip uploading and go on')
+    }
+  }
+
   async sendCopyEditorCore(action: string): Promise<string> {
     if (this.isStandaloneMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
@@ -1088,6 +1120,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async saveAsMyDesign(): Promise<void> {
+    const isValidJson = await this.isValidJson(uploadUtils.prepareJsonToUpload(pageUtils.getPages))
+    if (!isValidJson) {
+      logUtils.setLog('Saving design as myDesign failed, because the design json is invalid')
+      this.uploadReportedDesign()
+      this.setLoadingOverlayShow(false)
+      throw new Error('save design failed')
+    }
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
     const onThumbError = async (flag: string, saveDesign: boolean) => {
@@ -1537,7 +1576,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return loadedFonts[face] ?? false
   }
 
-  internelError(data: { route: string, data: { [key: string]: any } }) {
+  internalError(data: { route: string, data: { [key: string]: any } }) {
     console.error(`Error occurs in App when processing ${data.route} with ${JSON.stringify(data.data)}`)
   }
 
