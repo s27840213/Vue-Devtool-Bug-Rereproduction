@@ -117,6 +117,12 @@ const MYDESIGN_TAGS = [{
   tab: 'image'
 }] as IMyDesignTag[]
 
+export const CURRENCY_FORMATTERS = {
+  TWD: (value: string) => `${value}元`,
+  USD: (value: string) => `$${(+value).toFixed(2)}`,
+  JPY: (value: string) => `¥${value}円(税込)`
+} as { [key: string]: (value: string) => string }
+
 class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
   isAnyIOSImgOnError = false
@@ -208,6 +214,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return !this.checkVersion('1.26')
   }
 
+  get isOldPrice(): boolean {
+    return !this.checkVersion('1.42')
+  }
+
   get isTemplateSupported(): boolean {
     return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.34') && !generalUtils.isIPadOS())
   }
@@ -289,8 +299,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.STANDALONE_USER_INFO.locale = locale
   }
 
-  setDefaultPrices(locale = 'us') {
-    const defaultPrices = {
+  async setDefaultPrices(locale = 'us') {
+    const defaultPrices = this.isOldPrice ? {
       tw: {
         currency: 'TWD',
         monthly: {
@@ -324,8 +334,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           text: '¥3590円(税込)'
         }
       }
-    } as { [key: string]: IPrices }
-    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[locale] ?? defaultPrices.us })
+    } as { [key: string]: IPrices } : store.getters['vivisticker/getDefaultPrices'] as { [key: string]: IPrices }
+    const subscribeInfo = await this.getState('subscribeInfo')
+    store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] ?? defaultPrices.us })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
@@ -1488,17 +1499,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
     const isSubscribed = subscribe === '1'
-    const currencyFormaters = {
-      TWD: (value: string) => `${value}元`,
-      USD: (value: string) => `$${(+value).toFixed(2)}`,
-      JPY: (value: string) => `¥${value}円(税込)`
-    } as { [key: string]: (value: string) => string }
-    if (Object.keys(currencyFormaters).includes(priceCurrency)) {
-      monthly.priceText = currencyFormaters[priceCurrency](monthly.priceValue)
-      annually.priceText = currencyFormaters[priceCurrency](annually.priceValue)
+    if (Object.keys(CURRENCY_FORMATTERS).includes(priceCurrency)) {
+      monthly.priceText = CURRENCY_FORMATTERS[priceCurrency](monthly.priceValue)
+      annually.priceText = CURRENCY_FORMATTERS[priceCurrency](annually.priceValue)
     }
 
-    store.commit('vivisticker/UPDATE_payment', {
+    const subscribeInfo = {
       subscribe: isSubscribed,
       prices: {
         currency: priceCurrency,
@@ -1511,14 +1517,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           text: annually.priceText
         }
       }
-    })
+    }
+
+    store.commit('vivisticker/UPDATE_payment', subscribeInfo)
     store.commit('vivisticker/SET_paymentPending', { info: false })
     this.getState('subscribeInfo').then(subscribeInfo => {
       if (subscribeInfo?.subscribe && !isSubscribed) {
         this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
       }
     })
-    this.setState('subscribeInfo', { subscribe: isSubscribed })
+    this.setState('subscribeInfo', subscribeInfo)
   }
 
   subscribeResult(data: ISubscribeResult) {
@@ -1537,7 +1545,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
     if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
-    this.setState('subscribeInfo', { subscribe: isSubscribed })
+    this.getState('subscribeInfo').then(subscribeInfo => {
+      this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
+    })
   }
 
   async registerSticker() {

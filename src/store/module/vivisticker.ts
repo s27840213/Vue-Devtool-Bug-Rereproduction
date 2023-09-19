@@ -114,6 +114,7 @@ const getDefaultState = (): IViviStickerState => ({
         text: ''
       },
     },
+    defaultPrices: {},
     pending: {
       info: true,
       purchase: false,
@@ -270,6 +271,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getPrices(state: IViviStickerState): IPrices {
     return state.payment.prices
+  },
+  getDefaultPrices(state: IViviStickerState): { [key: string]: IPrices } {
+    return state.payment.defaultPrices
   },
   getIsPaymentPending(state) {
     return Object.entries(state.payment.pending).some(([key, value]) => value)
