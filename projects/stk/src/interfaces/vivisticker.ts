@@ -113,6 +113,7 @@ export interface IPaymentPending {
 export interface IPayment {
   subscribe: boolean,
   prices: IPrices,
+  defaultPrices: { [key: string]: IPrices },
   pending: IPaymentPending
 }
 
