@@ -4,6 +4,7 @@ import * as path from 'path'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
+import svgSpritePlugin from 'vite-plugin-svg-sprite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -23,6 +24,10 @@ export default defineConfig({
     //   imports: ['vue', 'vue-router', 'vue-i18n'],
     //   dts: 'src/auto-import.d.ts'
     // })
+    svgSpritePlugin({
+      symbolId: '[name]',
+      svgo: false,
+    }),
   ],
   build: {
     lib: {

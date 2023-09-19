@@ -77,7 +77,8 @@
     "unplugin-auto-import": "^0.16.6",
     "unplugin-vue-components": "^0.25.1",
     "vite": "^4.4.6",
-    "vite-plugin-svg-sprite-component": "^1.0.10"
+    "vite-plugin-svg-sprite-component": "^1.0.10",
+    "vite-plugin-svg-sprite": "^0.5.0"
   },
   "config": {
     "commitizen": {
