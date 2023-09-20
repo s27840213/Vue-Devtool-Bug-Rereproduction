@@ -490,7 +490,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
-                  S3_BUCKET: "dev5.vivipic.com"
+                  S3_BUCKET: "stkdev5.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -498,7 +498,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
-                  S3_BUCKET: "dev5.vivipic.com"
+                  S3_BUCKET: "stkdev5.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -506,7 +506,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
-                  S3_BUCKET: "dev5.vivipic.com"
+                  S3_BUCKET: "stkdev5.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -526,7 +526,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev4.vivipic.com"
+                  S3_BUCKET: "stkdev4.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -534,7 +534,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev4.vivipic.com"
+                  S3_BUCKET: "stkdev4.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -542,7 +542,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev4.vivipic.com"
+                  S3_BUCKET: "stkdev4.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -562,7 +562,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev3.vivipic.com"
+                  S3_BUCKET: "stkdev3.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -570,7 +570,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev3.vivipic.com"
+                  S3_BUCKET: "stkdev3.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -578,7 +578,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev3.vivipic.com"
+                  S3_BUCKET: "stkdev3.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -598,7 +598,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev2.vivipic.com"
+                  S3_BUCKET: "stkdev2.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -606,7 +606,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev2.vivipic.com"
+                  S3_BUCKET: "stkdev2.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -614,7 +614,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev2.vivipic.com"
+                  S3_BUCKET: "stkdev2.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -634,7 +634,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev1.vivipic.com"
+                  S3_BUCKET: "stkdev1.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -642,7 +642,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev1.vivipic.com"
+                  S3_BUCKET: "stkdev1.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -650,7 +650,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev1.vivipic.com"
+                  S3_BUCKET: "stkdev1.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -670,7 +670,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev0.vivipic.com"
+                  S3_BUCKET: "stkdev0.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -678,7 +678,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev0.vivipic.com"
+                  S3_BUCKET: "stkdev0.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -686,7 +686,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev0.vivipic.com"
+                  S3_BUCKET: "stkdev0.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -706,7 +706,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev5s.vivipic.com"
+                  S3_BUCKET: "stkdev5s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -714,7 +714,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev5s.vivipic.com"
+                  S3_BUCKET: "stkdev5s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -722,7 +722,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev5s.vivipic.com"
+                  S3_BUCKET: "stkdev5s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -742,7 +742,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev4s.vivipic.com"
+                  S3_BUCKET: "stkdev4s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -750,7 +750,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev4s.vivipic.com"
+                  S3_BUCKET: "stkdev4s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -758,7 +758,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev4s.vivipic.com"
+                  S3_BUCKET: "stkdev4s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -778,7 +778,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev3s.vivipic.com"
+                  S3_BUCKET: "stkdev3s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -786,7 +786,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev3s.vivipic.com"
+                  S3_BUCKET: "stkdev3s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -794,7 +794,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev3s.vivipic.com"
+                  S3_BUCKET: "stkdev3s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -814,7 +814,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev2s.vivipic.com"
+                  S3_BUCKET: "stkdev2s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -822,7 +822,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev2s.vivipic.com"
+                  S3_BUCKET: "stkdev2s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -830,7 +830,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev2s.vivipic.com"
+                  S3_BUCKET: "stkdev2s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -850,7 +850,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev1s.vivipic.com"
+                  S3_BUCKET: "stkdev1s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -858,7 +858,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev1s.vivipic.com"
+                  S3_BUCKET: "stkdev1s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -866,7 +866,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev1s.vivipic.com"
+                  S3_BUCKET: "stkdev1s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
@@ -886,7 +886,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev0s.vivipic.com"
+                  S3_BUCKET: "stkdev0s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -894,7 +894,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev0s.vivipic.com"
+                  S3_BUCKET: "stkdev0s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=* --include=app.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -902,7 +902,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                  S3_BUCKET: "dev0s.vivipic.com"
+                  S3_BUCKET: "stkdev0s.vivipic.com"
                   LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
