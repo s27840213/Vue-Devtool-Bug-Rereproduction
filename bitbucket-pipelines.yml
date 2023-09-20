@@ -938,7 +938,7 @@ pipelines:
       - parallel:
           - step:
               name: "deploy vivipic to rd"
-              deployment: rd
+              deployment: vivipicrd
               trigger: manual
               condition:
                 changesets:
