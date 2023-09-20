@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "start creating pull request"
 apt-get update
 apt-get -y install curl jq
 export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/2.0/users/${BITBUCKET_STEP_TRIGGERER_UUID}" | jq --raw-output '.display_name')
@@ -21,7 +22,7 @@ curl --request POST \
         }
       }
     }'
-
+# ATATT3xFfGF0yhLWxN_f5KAE7c5zo_ifAUOY8WULmi4IjUgpu4ZepYTXC8oOtyzYqd689G3hXVW6MqSZH9obEXDvmADwwMbK1paPyMiNk-yPsIsVZnld8tHdquW_zSjLE4nIV9CPLCfP2nE8hSK-d02prbDrM7vG9BbgvkoGy-sW_ZAVYmy_di0=009F7C14
 # if [[ "$BITBUCKET_BRANCH" == "app/vivisticker-develop" ]]
 # then
 #     echo "create pull request to vivisticker"
