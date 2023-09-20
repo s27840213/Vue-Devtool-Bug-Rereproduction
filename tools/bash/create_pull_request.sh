@@ -3,7 +3,9 @@ echo "start creating pull request"
 apt-get update
 apt-get -y install curl jq
 export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/2.0/users/${BITBUCKET_STEP_TRIGGERER_UUID}" | jq --raw-output '.display_name')
+
 echo "create pull request to develop"
+echo "'"${BITBUCKET_BRANCH}"'"
 curl --request POST \
     --url "https://api.bitbucket.org/2.0/repositories/mingchi/frontend-web/pullrequests" \
     --header "Accept: application/json" \
