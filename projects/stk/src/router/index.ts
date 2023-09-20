@@ -248,23 +248,38 @@ router.beforeEach(async (to, from, next) => {
     store.commit('vivisticker/SET_modalInfo', json.modal)
 
     if (json.default_price && Object.keys(json.default_price).length) {
-      const currencyMap = {
-        us: 'USD',
-        jp: 'JPY',
-        tw: 'TWD'
-      } as { [key: string]: string }
-      store.commit('vivisticker/UPDATE_payment',
-        {
-          defaultPrices: Object.fromEntries(
-            Object.entries(json.default_price as { [key: string]: { monthly: number, annually: number } }).map(
-              ([locale, prices]) => [locale, {
-                currency: currencyMap[locale],
-                ...Object.fromEntries(Object.entries(prices).map(([plan, price]) => [plan, { value: price, text: CURRENCY_FORMATTERS[currencyMap[locale]](price.toString()) }]))
-              }]
-            )
-          ) as { [key: string]: IPrices }
-        }
-      )
+      const mapCurrency = new Map([
+        ['us', 'USD'],
+        ['jp', 'JPY'],
+        ['tw', 'TWD'],
+      ])
+      store.commit('vivisticker/UPDATE_payment', {
+        defaultPrices: Object.fromEntries(
+          Object.entries(
+            json.default_price.prices as { [key: string]: { monthly: number; annually: number } },
+          ).map(([locale, prices]) => {
+            const currency = mapCurrency.get(locale)
+            return [
+              locale,
+              {
+                currency,
+                ...Object.fromEntries(
+                  Object.entries(prices).map(([plan, price]) => [
+                    plan,
+                    {
+                      value: price,
+                      text:
+                        currency && Object.keys(CURRENCY_FORMATTERS).includes(currency)
+                          ? CURRENCY_FORMATTERS[currency](price.toString())
+                          : CURRENCY_FORMATTERS.USD(price.toString()),
+                    },
+                  ]),
+                ),
+              },
+            ]
+          }),
+        ) as { [key: string]: IPrices },
+      })
     }
 
     uploadUtils.setLoginOutput({
