@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="toggle"
-    :class="[modelValue ? 'bg-blue-1' : 'bg-gray-4']"
+    :class="[modelValue ? 'bg-' + colorActive : 'bg-' + colorInactive]"
     :style="toggleStyles"
     @click="toggle")
   div(class="toggle__btn"
@@ -16,19 +16,31 @@ export default defineComponent({
       type: Number,
       default: 60
     },
-    modelValue: [Number, String, Boolean]
+    height: {
+      type: Number,
+      default: (props: any) => props.width / 2
+    },
+    modelValue: [Number, String, Boolean],
+    colorActive: {
+      type: String,
+      default: 'blue-1'
+    },
+    colorInactive: {
+      type: String,
+      default: 'gray-4'
+    }
   },
   emits: ['update:modelValue'],
   computed: {
     toggleStyles(): { [index:string]: string } {
       return {
         width: `${this.width}px`,
-        height: `${this.width / 2}px`
+        height: `${this.height}px`
       }
     },
     toggleBtnStyle():{ [index:string]: string } {
       return {
-        transform: `translateX(${this.modelValue ? this.width / 2 : 0}px) scale(0.8)`,
+        transform: `translateX(${this.modelValue ? this.width - this.height : 0}px) scale(0.8)`,
       }
     }
   },
@@ -50,7 +62,7 @@ export default defineComponent({
 
 .toggle__btn {
   height: 100%;
-  width: 50%;
+  aspect-ratio: 1/1;
   box-sizing: border-box;
   position: absolute;
   border-radius: 100px;
