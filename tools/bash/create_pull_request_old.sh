@@ -9,7 +9,7 @@ then
         --url "https://api.bitbucket.org/2.0/repositories/mingchi/frontend-web/pullrequests" \
         --header "Accept: application/json" \
         --header "Content-Type: application/json" \
-        --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
+        --header "Authorization: Bearer '"${BITBUCKET_API_TOKEN}"'" \
         --data '{
           "title": "Pull request to qa by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
           "source": {
