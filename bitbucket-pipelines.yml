@@ -407,6 +407,11 @@ pipelines:
             trigger: manual
             script:
               - ./tools/bash/create_pull_request.sh
+        - step:
+            name: "test bash script"
+            trigger: manual
+            script:
+              - ./tools/bash/test.sh
   # branches:
   #   develop:
   #     - parallel:
