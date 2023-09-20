@@ -74,9 +74,9 @@ class LocaleUtils {
     return navigator.language.includes('zh') ? 'tw' : navigator.language.includes('ja') ? 'jp' : 'us'
   }
 
-  mapNativeLocale(nativeLocale: string): string {
+  mapNativeLocale(nativeLocale: string): string | undefined {
     if (['tw', 'us', 'jp'].includes(nativeLocale)) return nativeLocale
-    return this.nativeLocaleMap[nativeLocale] ?? this.defaultLocale // TODO: handle map-not-found (need discussion with UX)
+    return this.nativeLocaleMap[nativeLocale]
   }
 }
 
