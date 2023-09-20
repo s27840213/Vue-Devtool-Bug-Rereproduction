@@ -1,6 +1,7 @@
 import appJson from '@/assets/json/app.json'
 import i18n, { LocaleName } from '@/i18n'
 import { CustomWindow } from '@/interfaces/customWindow'
+import { IPrices } from '@/interfaces/vivisticker'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
@@ -14,7 +15,6 @@ import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import ViviSticker from '../views/ViviSticker.vue'
-import { IPrices } from '@/interfaces/vivisticker'
 
 declare let window: CustomWindow
 
@@ -160,9 +160,9 @@ const router = createRouter({
           locale = userInfo.locale
         }
         logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
-        locale = 'pt' // TODO: remove this line since it's only for testing
+        // locale = 'pt' // TODO: remove this line since it's only for testing
         i18n.global.locale = locale as LocaleName
-        // localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only for testing
+        localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only disabled for testing
         const editorBg = userInfo.editorBg
         if (editorBg) {
           store.commit('vivisticker/SET_editorBg', editorBg)
