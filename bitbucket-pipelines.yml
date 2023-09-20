@@ -476,7 +476,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev5 (Alan)"
-            deployment: dev5
+            deployment: stk-dev5
             trigger: manual
             condition:
               changesets:
@@ -512,7 +512,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev4 (Gary)"
-            deployment: dev4
+            deployment: stk-dev4
             trigger: manual
             condition:
               changesets:
@@ -548,7 +548,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev3 (HsingChi)"
-            deployment: dev3
+            deployment: stk-dev3
             trigger: manual
             condition:
               changesets:
@@ -584,7 +584,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev2 (TingAn)"
-            deployment: dev2
+            deployment: stk-dev2
             trigger: manual
             condition:
               changesets:
@@ -620,7 +620,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev1 (Nathan)"
-            deployment: dev1
+            deployment: stk-dev1
             trigger: manual
             condition:
               changesets:
@@ -656,7 +656,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev0 (ZhengYan)"
-            deployment: dev0
+            deployment: stk-dev0
             trigger: manual
             condition:
               changesets:
@@ -692,7 +692,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev5s (Alan)"
-            deployment: dev5s
+            deployment: stk-dev5s
             trigger: manual
             condition:
               changesets:
@@ -728,7 +728,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev4s (Gary)"
-            deployment: dev4s
+            deployment: stk-dev4s
             trigger: manual
             condition:
               changesets:
@@ -764,7 +764,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev3s (HsingChi)"
-            deployment: dev3s
+            deployment: stk-dev3s
             trigger: manual
             condition:
               changesets:
@@ -800,7 +800,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev2s (TingAn)"
-            deployment: dev2s
+            deployment: stk-dev2s
             trigger: manual
             condition:
               changesets:
@@ -836,7 +836,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev1s (Nathan)"
-            deployment: dev1s
+            deployment: stk-dev1s
             trigger: manual
             condition:
               changesets:
@@ -872,7 +872,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "sticker to dev0s (ZhengYan)"
-            deployment: dev0s
+            deployment: stk-dev0s
             trigger: manual
             condition:
               changesets:
@@ -908,7 +908,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev5 (Alan)"
-            deployment: dev5
+            deployment: cm-dev5
             trigger: manual
             condition:
               changesets:
@@ -944,7 +944,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev4 (Gary)"
-            deployment: dev4
+            deployment: cm-dev4
             trigger: manual
             condition:
               changesets:
@@ -980,7 +980,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev3 (HsingChi)"
-            deployment: dev3
+            deployment: cm-dev3
             trigger: manual
             condition:
               changesets:
@@ -1016,7 +1016,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev2 (TingAn)"
-            deployment: dev2
+            deployment: cm-dev2
             trigger: manual
             condition:
               changesets:
@@ -1052,7 +1052,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev1 (Nathan)"
-            deployment: dev1
+            deployment: cm-dev1
             trigger: manual
             condition:
               changesets:
@@ -1088,7 +1088,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev0 (ZhengYan)"
-            deployment: dev0
+            deployment: cm-dev0
             trigger: manual
             condition:
               changesets:
@@ -1124,7 +1124,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev5s (Alan)"
-            deployment: dev5s
+            deployment: cm-dev5s
             trigger: manual
             condition:
               changesets:
@@ -1160,7 +1160,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev4s (Gary)"
-            deployment: dev4s
+            deployment: cm-dev4s
             trigger: manual
             condition:
               changesets:
@@ -1196,7 +1196,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev3s (HsingChi)"
-            deployment: dev3s
+            deployment: cm-dev3s
             trigger: manual
             condition:
               changesets:
@@ -1232,7 +1232,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev2s (TingAn)"
-            deployment: dev2s
+            deployment: cm-dev2s
             trigger: manual
             condition:
               changesets:
@@ -1268,7 +1268,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev1s (Nathan)"
-            deployment: dev1s
+            deployment: cm-dev1s
             trigger: manual
             condition:
               changesets:
@@ -1304,7 +1304,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "charmix to dev0s (ZhengYan)"
-            deployment: dev0s
+            deployment: cm-dev0s
             trigger: manual
             condition:
               changesets:
