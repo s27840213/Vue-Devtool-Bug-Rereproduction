@@ -852,9 +852,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
   }
 
-  updateInfoDone(data: { flag: string, msg?: string }) {
+  updateInfoDone(data: { flag: '0' } | { flag: '1', msg: string }) {
     if (data.flag !== '0') {
-      this.errorMessageMap.locale = data.msg ?? ''
+      this.errorMessageMap.locale = data.msg
+      if (data.msg.includes('fail to update locale')) {
+        this.showUpdateModal()
+      }
     }
     this.handleCallback('update-user-info')
   }
