@@ -23,7 +23,7 @@ export default defineComponent({
     modelValue: [Number, String, Boolean],
     colorActive: {
       type: String,
-      default: 'blue-1' 
+      default: 'blue-1'
     },
     colorInactive: {
       type: String,
