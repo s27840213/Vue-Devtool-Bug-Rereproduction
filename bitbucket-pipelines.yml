@@ -406,7 +406,7 @@ pipelines:
             name: "create pull request"
             trigger: manual
             script:
-              - ./tools/bash/create_pull_request.sh
+              - ./tools/bash/create_pull_request_old.sh
   # branches:
   #   develop:
   #     - parallel:
@@ -508,4 +508,4 @@ pipelines:
           #     name: "create pull request"
           #     trigger: manual
           #     script:
-          #       - ./tools/bash/create_pull_request.sh
+          #       - ./tools/bash/create_pull_request_old.sh
