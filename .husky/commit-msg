@@ -26,7 +26,14 @@ echo ""
 
 OLDPWD=$(pwd)
 cd tools/i18n-tool
-if ! command -v python3 &> /dev/null
+
+python_version=$(python --version 2>&1)
+
+# Define the regular expression pattern
+pattern="Python [0-9]+\.[0-9]+\.[0-9]+"
+
+# Check if the output matches the pattern
+if [[ "$python_version" =~ $pattern ]]
 then
     python i18n_shake.py -c -n
 else
