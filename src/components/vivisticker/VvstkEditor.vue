@@ -1,5 +1,9 @@
 <template lang="pug">
-div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown="selectStart" v-touch)
+div(class="vvstk-editor" ref="editorView" :style="copyingStyles()"
+  @pointerdown="selectStart"
+  @pinch="onPinch"
+  @pointerleave="removePointer"
+  v-touch)
   div(class="vvstk-editor__pages-container" :style="containerStyles()")
     transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" @before-leave="handleBeforePageLeave" :css="animated")
       page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
@@ -32,12 +36,14 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
 </template>
 
 <script lang="ts">
+/* eslint-disable */
 import PageCard from '@/components/vivisticker/PageCard.vue'
 import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
 import PanelRemoveBg from '@/components/vivisticker/PanelRemoveBg.vue'
 import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
+import { ILayer } from '@/interfaces/layer'
 import { IPageState } from '@/interfaces/page'
-import { LayerType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import SwipeDetector from '@/utils/SwipeDetector'
 import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -45,9 +51,12 @@ import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
+import PinchControlUtils from '@/utils/pinchControlUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -77,6 +86,8 @@ export default defineComponent({
       swipeDetector: null as unknown as SwipeDetector,
       bgRemoveContainerRef: null as unknown as HTMLElement,
       isInPageAdd: false,
+      isPinchInit: false,
+      pinchControlUtils: null as null | PinchControlUtils,
       mobilePanelHeight: 0
     }
   },
@@ -84,6 +95,7 @@ export default defineComponent({
     const editorView = this.$refs.editorView as HTMLElement
     this.bgRemoveContainerRef = this.$refs.bgRemoveContainer as HTMLElement
     this.swipeDetector = new SwipeDetector(editorView, { targetDirection: 'horizontal' }, this.handleSwipe)
+    // this.addPinchHandler()
   },
   beforeUnmount() {
     this.swipeDetector.unbind()
@@ -221,6 +233,7 @@ export default defineComponent({
       pageUtils.setBackgroundImageControlDefault()
     },
     selectStart(e: PointerEvent) {
+      this.recordPointer(e)
       if (this.inBgRemoveMode || this.isInBgRemoveSection) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
       const isClickOnController = controlUtils.isClickOnController(e)
@@ -243,6 +256,7 @@ export default defineComponent({
          * the moving logic should be applied to the EditorView.
          */
         if (isClickOnController) {
+          console.log('isClickOnController', isClickOnController)
           const movingUtils = new MovingUtils({
             _config: { config: layerUtils.getCurrLayer },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
@@ -255,6 +269,70 @@ export default defineComponent({
           }
         }
       }
+    },
+    recordPointer(e: PointerEvent) {
+      pointerEvtUtils.addPointer(e)
+    },
+    removePointer(e: PointerEvent) {
+      pointerEvtUtils.removePointer(e.pointerId)
+    },
+    onPinch(e: AnyTouchEvent) {
+      if (e.phase === 'end') {
+        // pinch end handling
+        this.pinchHandler(e)
+        this.isPinchInit = false
+        this.pinchControlUtils = null
+      } else {
+        const touches = (e.nativeEvent as TouchEvent).touches
+        if (touches.length !== 2 || layerUtils.layerIndex === -1) return
+        if (!this.isPinchInit) {
+          // first pinch initialization
+          const isPinchOnController = controlUtils.isClickOnController(touches[0], layerUtils.layerIndex) && controlUtils.isClickOnController(touches[1], layerUtils.layerIndex)
+          if (isPinchOnController) {
+            this.isPinchInit = true
+            return this.pinchStart(e)
+          }
+        } else {
+          // pinch move handling
+          this.pinchHandler(e)
+        }
+      }
+    },
+    pinchHandler(e: AnyTouchEvent) {
+      this.pinchControlUtils?.pinch(e)
+    },
+    pinchStart(e: AnyTouchEvent) {
+      console.log('pinch start')
+      const _config = new Proxy({ config: layerUtils.getCurrLayer as unknown as ILayer }, {
+        get: (_, key) => {
+          if (key === 'config') {
+            return layerUtils.getCurrLayer as unknown as ILayer
+          }
+        }
+      }) as unknown as { config: ILayer }
+      const movingUtils = new MovingUtils({
+        _config,
+        snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+      })
+
+      const data = {
+        layerInfo: new Proxy({
+          pageIndex: layerUtils.pageIndex,
+          layerIndex: layerUtils.layerIndex
+        }, {
+          get: (_, key) => {
+            if (key === 'pageIndex') {
+              return layerUtils.pageIndex
+            } else if (key === 'layerIndex') {
+              return layerUtils.layerIndex
+            }
+          }
+        }) as ILayerInfo,
+        config: undefined,
+        movingUtils: movingUtils as MovingUtils
+      }
+      this.pinchControlUtils = new PinchControlUtils(data)
     },
     showPanelPageManagement() {
       editorUtils.setCurrActivePanel('page-management')

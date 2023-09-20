@@ -567,7 +567,7 @@ class Controller {
     return p1_p2.x * p1_c.y - p1_p2.y * p1_c.x > 0
   }
 
-  isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex, subLayerIdx = layerUtils.subLayerIdx): boolean {
+  isClickOnController(e: MouseEvent | Touch, layerIndex = layerUtils.layerIndex, subLayerIdx = layerUtils.subLayerIdx): boolean {
     let layer = document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
     if (layer) {
       // need to check layerIndex !== -1 i.e. layer !== undefined before accessing styles on layerConfig

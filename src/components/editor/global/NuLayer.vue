@@ -5,8 +5,6 @@ div(class="nu-layer flex-center"
     :data-p-index="pageIndex"
     :style="layerWrapperStyles"
     :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
-    @pointerdown="recordPointer"
-    @pointerup="removePointer"
     ref="body")
   //- class="nu-layer"
   //- :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
@@ -53,6 +51,7 @@ div(class="nu-layer flex-center"
 </template>
 
 <script lang="ts">
+/* eslint-disable */
 import LazyLoad from '@/components/LazyLoad.vue'
 import SquareLoading from '@/components/global/SqureLoading.vue'
 import i18n from '@/i18n'
@@ -75,7 +74,6 @@ import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import PinchControlUtils from '@/utils/pinchControlUtils'
-import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -212,15 +210,37 @@ export default defineComponent({
       body
     }
 
-    if (this.subLayerIndex === -1) {
-      this.movingUtils = new MovingUtils(data as any)
-      const moveStart = this.movingUtils.moveStart.bind(this.movingUtils)
-      if (this.isLine) {
-        lineMover.addEventListener('pointerdown', moveStart)
-      } else {
-        body.addEventListener('pointerdown', moveStart)
-      }
-    } else {
+    // if (this.subLayerIndex === -1) {
+    //   this.movingUtils = new MovingUtils(data as any)
+    //   const moveStart = (e: PointerEvent) => {
+    //     console.log('121323', pointerEvtUtils.pointerIds)
+    //     if (pointerEvtUtils.pointerIds.length === 1) {
+    //       this.movingUtils.moveStart(e)
+    //     }
+    //   }
+    //   if (this.isLine) {
+    //     lineMover.addEventListener('pointerdown', moveStart)
+    //   } else {
+    //     // body.addEventListener('pointerdown', moveStart)
+    //   }
+    // } else {
+    //   Object.defineProperty(_config, 'primaryLayer', {
+    //     get() {
+    //       return props.primaryLayer
+    //     }
+    //   })
+    //   const subCtrlUtils = new SubControllerUtils(data as any)
+    //   const pointerdown = subCtrlUtils.onPointerdown.bind(subCtrlUtils)
+    //   if (this.isLine) {
+    //     lineMover.addEventListener('pointerdown', pointerdown)
+    //   } else {
+    //     body.addEventListener('pointerdown', pointerdown)
+    //   }
+    // }
+    // if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
+    //   body.addEventListener(this.$isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
+    // }
+    if (this.subLayerIndex !== -1) {
       Object.defineProperty(_config, 'primaryLayer', {
         get() {
           return props.primaryLayer
@@ -236,9 +256,6 @@ export default defineComponent({
     }
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
       body.addEventListener(this.$isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
-    }
-    if (this.$isTouchDevice()) {
-      this.addPinchHandler()
     }
   },
   unmounted() {
@@ -812,12 +829,12 @@ export default defineComponent({
       const at = new AnyTouch(this.$refs.body as HTMLElement)
       at.on('pinch', new PinchControlUtils(data).pinch)
     },
-    recordPointer(e: PointerEvent) {
-      pointerEvtUtils.addPointer(e)
-    },
-    removePointer(e: PointerEvent) {
-      pointerEvtUtils.removePointer(e.pointerId)
-    }
+    // recordPointer(e: PointerEvent) {
+    //   pointerEvtUtils.addPointer(e)
+    // },
+    // removePointer(e: PointerEvent) {
+    //   pointerEvtUtils.removePointer(e.pointerId)
+    // }
   }
 })
 </script>

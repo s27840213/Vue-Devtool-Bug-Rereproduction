@@ -141,7 +141,7 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
-    console.log('movevmovestart')
+    console.log('movevmovestart', store.getters.getIsPinchLayer)
     if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer) return
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y

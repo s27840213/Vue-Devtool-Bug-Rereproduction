@@ -17,12 +17,16 @@ export default class PinchControlUtils {
   }
 
   private layerInfo: ILayerInfo
-  private config: ILayer
+  private _config?: ILayer
   private movingUtils: MovingUtils
 
-  constructor(data: { layerInfo: ILayerInfo, config: ILayer, movingUtils: MovingUtils }) {
+  get config() {
+    return this._config ?? layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex)
+  }
+
+  constructor(data: { layerInfo: ILayerInfo, config?: ILayer, movingUtils: MovingUtils }) {
     const { layerInfo, config, movingUtils } = data
-    this.config = config
+    this._config = config
     this.layerInfo = layerInfo
     this.movingUtils = movingUtils
     this.pinch = this.pinch.bind(this)
@@ -40,7 +44,6 @@ export default class PinchControlUtils {
   }
 
   move(e: AnyTouchEvent) {
-    console.warn('pinch moving')
     if (this.init === null) {
       this.movingUtils.removeListener()
       store.commit('SET_isPinchLayer', true)
@@ -72,14 +75,16 @@ export default class PinchControlUtils {
       x: movingTranslate.x + compensateTranslate.x,
       y: movingTranslate.y + compensateTranslate.y
     }
-    layerUtils.updateLayerStyles(this.layerInfo.pageIndex, this.layerInfo.layerIndex, {
-      scale: newScale,
-      width: newSize.width,
-      height: newSize.height,
-      rotate: e.angle + this.init.rotate,
-      x: this.init.layerPos.x + totalTranslate.x,
-      y: this.init.layerPos.y + totalTranslate.y
-    })
+    if (this.layerInfo.pageIndex !== -1 && this.layerInfo.layerIndex !== -1) {
+      layerUtils.updateLayerStyles(this.layerInfo.pageIndex, this.layerInfo.layerIndex, {
+        scale: newScale,
+        width: newSize.width,
+        height: newSize.height,
+        rotate: e.angle + this.init.rotate,
+        x: this.init.layerPos.x + totalTranslate.x,
+        y: this.init.layerPos.y + totalTranslate.y
+      })
+    }
   }
 
   end(e: AnyTouchEvent) {
