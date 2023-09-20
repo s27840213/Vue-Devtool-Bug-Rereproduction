@@ -277,8 +277,8 @@ export default defineComponent({
     },
     handleUpdateLocale(locale: string) {
       if (locale === this.$i18n.locale) return
-      vivistickerUtils.updateLocale(locale).then(() => {
-        location.reload()
+      vivistickerUtils.updateLocale(locale).then((success) => {
+        success && location.reload()
       })
     },
     handleDebugMode() {

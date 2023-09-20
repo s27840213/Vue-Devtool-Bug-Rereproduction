@@ -844,12 +844,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('login')
   }
 
-  async updateLocale(locale: string): Promise<void> {
+  async updateLocale(locale: string): Promise<boolean> {
     localStorage.setItem('locale', locale) // set locale to localStorage whether standalone mode or not
     if (this.isStandaloneMode) {
-      return
+      return true
     }
-    await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+    const data = await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+    return data?.flag === '0'
   }
 
   updateInfoDone(data: { flag: '0' } | { flag: '1', msg: string }) {
@@ -859,7 +860,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         this.showUpdateModal()
       }
     }
-    this.handleCallback('update-user-info')
+    this.handleCallback('update-user-info', data)
   }
 
   async listAsset(key: string): Promise<void> {
