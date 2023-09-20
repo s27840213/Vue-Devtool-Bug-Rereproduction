@@ -23,7 +23,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["vite/client"]
   },
   "vueCompilerOptions": {
     "plugins": ["@vue/language-plugin-pug"]

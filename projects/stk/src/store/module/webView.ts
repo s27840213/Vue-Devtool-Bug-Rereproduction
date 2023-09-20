@@ -12,7 +12,7 @@ export interface IWebViewState {
 
 const getDefaultState = (): IWebViewState => ({
   userInfo: picWVUtils.getDefaultUserInfo(),
-  inBrowserMode: false,
+  inBrowserMode: true,
   inReviewMode: false,
   inDevMode: false,
   callbackRecords: [],
@@ -40,6 +40,9 @@ const getters: GetterTree<IWebViewState, unknown> = {
 const mutations: MutationTree<IWebViewState> = {
   SET_userInfo(state: IWebViewState, userInfo: IUserInfo) {
     state.userInfo = userInfo
+  },
+  UPDATE_userInfo(state: IWebViewState, userInfo: Partial<IUserInfo>) {
+    Object.assign(state.userInfo, userInfo)
   },
   UPDATE_detectIfInReviewMode(state: IWebViewState, reviewVer: string) {
     state.inReviewMode = reviewVer === state.userInfo.appVer

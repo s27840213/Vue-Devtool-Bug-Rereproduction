@@ -100,6 +100,11 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
       fetch(`https://${src}`)
         .then(response => response.json())
         .then(json => { assetUtils.addTemplate(json) })
+        .then(() => {
+          if (generalUtils.isTouchDevice()) {
+            editorUtils.handleContentScaleRatio(0)
+          }
+        })
 
       store.commit('user/SET_STATE', { userId: 'backendRendering' })
       store.commit('SET_currSidebarPanelType', -1)

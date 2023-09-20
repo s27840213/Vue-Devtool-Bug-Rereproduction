@@ -3,6 +3,7 @@ import os
 
 import gspread
 import numpy as np
+from i18n_shake import main as shake
 from util import bcolors, find_project_root
 
 PROJECTS = ['vivipic', 'stk', 'charmix']
@@ -83,3 +84,7 @@ for project in PROJECTS:
         print(f'\n{bcolors.FAIL}Duplicated translation:\n{duplicate}\n{bcolors.ENDC}')
     else:
         print(f'\n{bcolors.OKGREEN}No new duplicated translation found.{bcolors.ENDC}')
+
+from argparse import Namespace
+
+shake(Namespace(check = False, no_color = False))

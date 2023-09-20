@@ -430,6 +430,12 @@ const actions: ActionTree<IUserModule, unknown> = {
         i18n.global.locale = data.data.locale
         localStorage.setItem('locale', data.data.locale)
       }
+      if (generalUtils.isPic) {
+        picWVUtils.updateUserInfo({
+          locale: data.data.locale,
+          userId: data.data.user_id,
+        })
+      }
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       dispatch('payment/getBillingInfo', {}, { root: true })

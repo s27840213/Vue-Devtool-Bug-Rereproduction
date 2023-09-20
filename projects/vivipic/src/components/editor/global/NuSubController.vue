@@ -298,7 +298,7 @@ export default defineComponent({
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
-    textWrapperStyle() {
+    textWrapperStyle(): Record<string, string | number> {
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,

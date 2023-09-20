@@ -5,7 +5,8 @@ div(class="header-bar relative" @pointerdown.stop)
         :key="tab.icon"
         :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
         :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
-        @click.prevent.stop="handleTabAction(tab.action)")
+        @click.prevent.stop="handleTabAction(tab.action)"
+        v-press="() => handleTabAction(tab.longPressAction)")
       svg-icon(:iconName="tab.icon"
                 :iconWidth="`${tab.width}px`"
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
@@ -71,6 +72,7 @@ type TabConfig = {
   width: number,
   height?: number,
   action?: () => void,
+  longPressAction?: () => void,
   // If isPanelIcon is true, MobilePanel v-out will not be triggered by this icon.
   isPanelIcon?: boolean
 }
@@ -222,6 +224,16 @@ export default defineComponent({
               this.setInEffectEditingMode(false)
             }
             this.handleEndEditing()
+          },
+          longPressAction: () => {
+            if (this.isUploadingShadowImg) {
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              return
+            }
+            if (this.inEffectEditingMode) {
+              this.setInEffectEditingMode(false)
+            }
+            this.handleEndEditing(true)
           }
         })
         if (this.stepCount > 1) retTabs.push(...stepTabs)
@@ -432,7 +444,7 @@ export default defineComponent({
       this.switchBg()
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
-    async handleEndEditing() {
+    async handleEndEditing(forceModal = false) {
       if (this.currActivePanel === 'photo-shadow') {
         editorUtils.setCurrActivePanel('none')
         await new Promise(resolve => setTimeout(resolve, 0)) // await the photo-shaddow-panel unomunted hook action
@@ -448,7 +460,7 @@ export default defineComponent({
         this.clearBgRemoveState()
       }
       if (vivistickerUtils.checkVersion('1.13')) {
-        if (vivistickerUtils.userSettings.autoSave) {
+        if (vivistickerUtils.userSettings.autoSave && !forceModal) {
           if (this.isSavingAsMyDesign) return
           this.isSavingAsMyDesign = true
           vivistickerUtils.saveAsMyDesign().catch((err) => {
@@ -512,6 +524,9 @@ export default defineComponent({
             {
               msg: `${this.$t('STK0011')}`,
               action: () => {
+                if (forceModal) {
+                  vivistickerUtils.uploadReportedDesign()
+                }
                 imageShadowUtils.iosImgDelHandlerAsNoSave()
                 vivistickerUtils.endEditing()
                 const { id, key } = this.bgRemoveSrcInfo

@@ -278,7 +278,7 @@ export default defineComponent({
         if (this.currSelectedColorIndex <= decoration.color.length - 1) {
           key = 'decorationColors'
           color = [...decoration.color]
-          color[this.currSelectedIndex] = newColor
+          color[this.currSelectedColorIndex] = newColor
         } else {
           key = 'decorationTopColors'
           color = [...decorationTop.color]
@@ -288,8 +288,7 @@ export default defineComponent({
         if (decoration && decoration.color.length) {
           key = 'decorationColors'
           color = [...decoration.color]
-        }
-        if (decorationTop && decorationTop.color.length) {
+        } else if (decorationTop && decorationTop.color.length) {
           key = 'decorationTopColors'
           color = [...decorationTop.color]
         }

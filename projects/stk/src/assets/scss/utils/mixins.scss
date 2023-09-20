@@ -197,13 +197,13 @@
   &::-webkit-slider-runnable-track {
     height: $height;
     background: linear-gradient(to right, var(--upper-color) 0 var(--base), var(--lower-color) var(--base) var(--progress), var(--upper-color) var(--progress) 100%);
-    border-radius: $height / 2;
+    border-radius: calc($height / 2);
   }
 
   &::-moz-range-track {
     height: $height;
     background: linear-gradient(to right, var(--upper-color) 0 var(--base), var(--lower-color) var(--base) var(--progress), var(--upper-color) var(--progress) 100%);
-    border-radius: $height / 2;
+    border-radius: calc($height / 2);
   }
 
   &::-webkit-progress-bar {
