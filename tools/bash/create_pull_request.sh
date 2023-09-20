@@ -6,6 +6,7 @@ export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/
 
 echo "create pull request to develop"
 echo "'"${BITBUCKET_BRANCH}"'"
+echo "'"${BITBUCKET_API_TOKEN}"'"
 curl --request POST \
     --url "https://api.bitbucket.org/2.0/repositories/mingchi/frontend-web/pullrequests" \
     --header "Accept: application/json" \
