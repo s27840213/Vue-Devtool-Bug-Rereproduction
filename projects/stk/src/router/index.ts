@@ -279,6 +279,8 @@ router.beforeEach(async (to, from, next) => {
             ]
           }),
         ) as { [key: string]: IPrices },
+        trialDays: json.default_price.trial_days,
+        trialCountry: json.default_price.trial_country
       })
     }
 

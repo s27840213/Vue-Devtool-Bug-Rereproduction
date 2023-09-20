@@ -1,5 +1,5 @@
 import { IAsset } from '@/interfaces/module'
-import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IPrices, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
@@ -115,6 +115,8 @@ const getDefaultState = (): IViviStickerState => ({
       },
     },
     defaultPrices: {},
+    trialDays: NaN,
+    trialCountry: [],
     pending: {
       info: true,
       purchase: false,
@@ -269,17 +271,11 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getLoadedFonts(state: IViviStickerState): { [key: string]: true } {
     return state.loadedFonts
   },
-  getPrices(state: IViviStickerState): IPrices {
-    return state.payment.prices
-  },
-  getDefaultPrices(state: IViviStickerState): { [key: string]: IPrices } {
-    return state.payment.defaultPrices
+  getPayment(state: IViviStickerState): IPayment {
+    return state.payment
   },
   getIsPaymentPending(state) {
     return Object.entries(state.payment.pending).some(([key, value]) => value)
-  },
-  getIsSubscribed(state: IViviStickerState): boolean {
-    return state.payment.subscribe
   },
   getUuid(state: IViviStickerState): string {
     return state.uuid

@@ -114,6 +114,8 @@ export interface IPayment {
   subscribe: boolean,
   prices: IPrices,
   defaultPrices: { [key: string]: IPrices },
+  trialDays: number,
+  trialCountry: string[],
   pending: IPaymentPending
 }
 

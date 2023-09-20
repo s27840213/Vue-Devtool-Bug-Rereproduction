@@ -169,6 +169,9 @@ export default defineComponent({
       ] as IComparison[]
     }
   },
+  created() {
+    if(this.payment.trialCountry.includes(this.$i18n.locale)) this.isTrialToggled = true
+  },
   mounted() {
     const at = new AnyTouch((this.$refs.chevron as HTMLElement))
     at.on('tap', () => this.togglePanel())
@@ -193,15 +196,15 @@ export default defineComponent({
       pending: (state: any) => state.payment.pending as IPaymentPending,
     }),
     ...mapGetters({
-      prices: 'vivisticker/getPrices',
+      payment: 'vivisticker/getPayment',
       isPaymentPending: 'vivisticker/getIsPaymentPending',
     }),
     txtBtnSubscribe() {
-      return this.planSelected === 'annually' ? this.$t('STK0046') : this.$t('STK0047')
+      return this.isTrialToggled ? this.$t('STK0046') : this.$t('STK0047')
     },
     localizedTag(): string {
-      if (!this.prices) return ''
-      const prices = this.prices as IPrices
+      if (!this.payment.prices) return ''
+      const prices = this.payment.prices as IPrices
       const currency = prices.currency
       const price = round(prices.annually.value / 12, currency === 'TWD' || currency === 'JPY' ? 0 : 2)
       if (isNaN(price)) return ''
@@ -220,14 +223,14 @@ export default defineComponent({
           key: 'monthly',
           title: this.$t('NN0514'),
           subTitle: '',
-          price: this.prices.monthly.text,
+          price: this.payment.prices.monthly.text,
           tag: ''
         },
         {
           key: 'annually',
           title: this.$t('NN0515'),
           subTitle: '',
-          price: this.prices.annually.text,
+          price: this.payment.prices.annually.text,
           tag: this.localizedTag
         }
       ]
@@ -249,13 +252,13 @@ export default defineComponent({
         case 'monthly':
           return this.$t('STK0056')
         case 'annually':
-          return this.$t('STK0057', { day: 3 })
+          return this.$t('STK0057', { day: this.payment.trialDays })
         default:
           return ''
       }
     },
     strTrial() {
-      return this.isTrialToggled ? this.$t('STK0094') : this.$t('STK0048', { day: 3 })
+      return this.isTrialToggled ? this.$t('STK0094') : this.$t('STK0048', { day: this.payment.trialDays })
     },
     showPanelTitle() {
       return !this.isDraggingPanel ? !this.isPanelUp : !this.isPanelUp && this.panelAniProgress === 1
@@ -273,7 +276,8 @@ export default defineComponent({
     },
     handleBtnPlanClick(key: string) {
       this.planSelected = key
-      if(key === 'monthly') this.isTrialToggled = false
+      if (key === 'monthly') this.isTrialToggled = false
+      else if (key === 'annually' && this.payment.trialCountry.includes(this.$i18n.locale)) this.isTrialToggled = true
     },
     handleSubscribe(option: string, timeout?: number) {
       if (!networkUtils.check()) {

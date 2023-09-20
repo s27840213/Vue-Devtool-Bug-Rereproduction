@@ -334,7 +334,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           text: '¥3590円(税込)'
         }
       }
-    } as { [key: string]: IPrices } : store.getters['vivisticker/getDefaultPrices'] as { [key: string]: IPrices }
+    } as { [key: string]: IPrices } : store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
     const subscribeInfo = await this.getState('subscribeInfo')
     store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] ?? defaultPrices.us })
     store.commit('vivisticker/SET_paymentPending', { info: false })
@@ -1483,7 +1483,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
-    const isPro = store.getters['vivisticker/getIsSubscribed']
+    const isPro = store.getters['vivisticker/getPayment'].subscribe
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)
       return false
