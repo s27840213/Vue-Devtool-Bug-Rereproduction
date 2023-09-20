@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="payment" v-touch @swipe.stop)
+div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
   carousel(
     :items="carouselItems"
     :itemWidth="containerWidth"
@@ -35,7 +35,7 @@ div(class="payment" v-touch @swipe.stop)
           div(class="payment__btn-plan__content__price text-H6") {{ btnPlan.price }}
         div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__tag")
           span(class="caption-SM") {{ btnPlan.tag }}
-    div(class="payment__trial")
+    div(v-if="!isOldPrice" class="payment__trial")
       span(class="payment__trial__text caption-LG") {{ strTrial }}
       toggle-btn(class="payment__trial__toggle" v-model="isTrialToggled" :width="42" :height="24" :colorActive="isTrialDisabled ? 'black-3' : 'alarm'" :colorInactive="isTrialDisabled ? 'black-3' : 'black-4'")
     div(class="payment__btn-subscribe" :class="{pending: pending.purchase}" @touchend="handleSubscribe(planSelected)")
@@ -170,7 +170,7 @@ export default defineComponent({
     }
   },
   created() {
-    if(this.payment.trialCountry.includes(this.$i18n.locale)) this.isTrialToggled = true
+    if(this.payment.trialCountry.includes(this.$i18n.locale) || this.isOldPrice) this.isTrialToggled = true
   },
   mounted() {
     const at = new AnyTouch((this.$refs.chevron as HTMLElement))
@@ -229,7 +229,7 @@ export default defineComponent({
         {
           key: 'annually',
           title: this.$t('NN0515'),
-          subTitle: '',
+          subTitle: this.isOldPrice ? this.$t('STK0048', { day: 3 }) : '',
           price: this.payment.prices.annually.text,
           tag: this.localizedTag
         }
@@ -248,23 +248,19 @@ export default defineComponent({
       return `${this.containerPadding + (this.isTablet ? this.containerWidth * 0.028 : 24)}px`
     },
     strNotice() {
-      switch (this.planSelected) {
-        case 'monthly':
-          return this.$t('STK0056')
-        case 'annually':
-          return this.$t('STK0057', { day: this.payment.trialDays })
-        default:
-          return ''
-      }
+      return this.isTrialToggled ? this.$t('STK0057', { day: this.payment.trialDays }) : this.$t('STK0056')
     },
     strTrial() {
-      return this.isTrialToggled ? this.$t('STK0094') : this.$t('STK0048', { day: this.payment.trialDays })
+      return this.isTrialToggled ? this.$t('STK0094') : this.$t('STK0095', { day: this.payment.trialDays })
     },
     showPanelTitle() {
       return !this.isDraggingPanel ? !this.isPanelUp : !this.isPanelUp && this.panelAniProgress === 1
     },
     isTrialDisabled() {
       return this.planSelected === 'monthly' || this.isPaymentPending
+    },
+    isOldPrice() {
+      return vivistickerUtils.isOldPrice
     }
   },
   methods: {
@@ -277,7 +273,7 @@ export default defineComponent({
     handleBtnPlanClick(key: string) {
       this.planSelected = key
       if (key === 'monthly') this.isTrialToggled = false
-      else if (key === 'annually' && this.payment.trialCountry.includes(this.$i18n.locale)) this.isTrialToggled = true
+      else if (key === 'annually' && (this.payment.trialCountry.includes(this.$i18n.locale) || this.isOldPrice)) this.isTrialToggled = true
     },
     handleSubscribe(option: string, timeout?: number) {
       if (!networkUtils.check()) {
@@ -285,8 +281,7 @@ export default defineComponent({
         return
       }
       if (this.isPaymentPending) return
-      if(option === 'monthly') option = 'com.nuphototw.vivisticker.monthly'
-      else if (option === 'annually') option = !this.isTrialDisabled && this.isTrialToggled ? 'com.nuphototw.vivisticker.annually' : 'com.nuphototw.vivisticker.yearly_free0'
+      if (option === 'annually' && (this.isTrialDisabled || !this.isTrialToggled)) option = 'com.nuphototw.vivisticker.yearly_free0'
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
       if (timeout) {
@@ -445,7 +440,7 @@ export default defineComponent({
     grid-template-columns: 20px 1fr;
     align-items: center;
     column-gap: 16px;
-    padding: 10px 16px;
+    padding: 0px 16px;
     color: setColor(black-5);
     border: 2px solid transparent;
     position: relative;
@@ -525,7 +520,7 @@ export default defineComponent({
           align-items: center;
           justify-content: center;
           height: 20px;
-          right: 18px;
+          right: 16px;
           position: absolute;
           padding: 0px 8px;
           transform: translateY(calc(-50% - 1px));
@@ -724,6 +719,26 @@ export default defineComponent({
       color: #D9D9D9;
       animation: rotate 0.5s infinite linear;
     }
+  }
+}
+
+.old-price .payment {
+  &__content{
+    &__indicator {
+      top: -24px;
+    }
+    &__plans {
+      margin-top: 6px;
+    }
+  }
+  &__btn-plan {
+    height: 60px;
+  }
+  &__btn-subscribe {
+    margin: 16px auto 0 auto;
+  }
+  &__footer {
+    margin: 16px auto 0 auto;
   }
 }
 

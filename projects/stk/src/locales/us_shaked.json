@@ -836,7 +836,7 @@
   "STK0045": "Restore Purchase",
   "STK0046": "Try free & Subscribe",
   "STK0047": "Subscribe",
-  "STK0048": "Use {day}-Day Free Trial.",
+  "STK0048": "{day} Day Free Trial",
   "STK0049": "Creative Frames",
   "STK0050": "Premium Font Collections",
   "STK0051": "PRO Sticker Library",
@@ -883,6 +883,7 @@
   "STK0092": "Next to Backgrounds",
   "STK0093": "Let's explore",
   "STK0094": "Free Trial Enabled.",
+  "STK0095": "Use {day}-Day Free Trial.",
   "SKT0019": "Cannot find the design",
   "SHR0020": "You need access"
 }

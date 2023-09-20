@@ -300,41 +300,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async setDefaultPrices(locale = 'us') {
-    const defaultPrices = this.isOldPrice ? {
-      tw: {
-        currency: 'TWD',
-        monthly: {
-          value: 140,
-          text: '140元'
-        },
-        annually: {
-          value: 799,
-          text: '799元'
-        }
-      },
-      us: {
-        currency: 'USD',
-        monthly: {
-          value: 4.99,
-          text: '$4.99'
-        },
-        annually: {
-          value: 26.90,
-          text: '$26.90'
-        }
-      },
-      jp: {
-        currency: 'JPY',
-        monthly: {
-          value: 600,
-          text: '¥600円(税込)'
-        },
-        annually: {
-          value: 3590,
-          text: '¥3590円(税込)'
-        }
-      }
-    } as { [key: string]: IPrices } : store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
+    const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
     const subscribeInfo = await this.getState('subscribeInfo')
     store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] ?? defaultPrices.us })
     store.commit('vivisticker/SET_paymentPending', { info: false })
