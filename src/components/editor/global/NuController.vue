@@ -335,6 +335,7 @@ export default defineComponent({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
+      isPinchLayer: 'getIsPinchLayer',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -761,7 +762,7 @@ export default defineComponent({
       return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px)`
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
 
@@ -800,7 +801,10 @@ export default defineComponent({
       window.addEventListener('keyup', this.handleScaleOffset)
       window.addEventListener('keydown', this.handleScaleOffset)
     },
-    scaling(event: MouseEvent | TouchEvent) {
+    scaling(event: PointerEvent) {
+      if (this.isPinchLayer) {
+        return this.scaleEnd(event)
+      }
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }

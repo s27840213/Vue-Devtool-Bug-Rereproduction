@@ -178,8 +178,8 @@ export class MovingUtils {
      * used for frame layer for entering detection
      * This is used for moving image to replace frame element
      */
+    this.eventTarget = (event.target as HTMLElement)
     if (event.type === 'pointerdown') {
-      this.eventTarget = (event.target as HTMLElement)
       this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
     }
 
@@ -527,9 +527,12 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
-    if (eventUtils.checkIsMultiTouch(e) || this.initialPos === null) {
+    const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
+    if (pointerEvtUtils.pointerIds.length > 1 || this.initialPos === null || !isLayerExist) {
+      this.isControlling = false
       return this.removeListener()
     }
+    console.warn('move end triggered')
     this.isControlling = false
     this.removeListener()
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })

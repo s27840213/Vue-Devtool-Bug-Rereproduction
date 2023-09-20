@@ -33,6 +33,7 @@ export default class PinchControlUtils {
   }
 
   pinch(e: AnyTouchEvent) {
+    console.log('pinching')
     requestAnimationFrame(() => {
       switch (e.phase) {
         case 'move':
@@ -91,7 +92,8 @@ export default class PinchControlUtils {
     store.commit('SET_isPinchLayer', false)
     this.init = null
     const nativeEvt = e.nativeEvent as TouchEvent
-    if (nativeEvt.touches.length === 1) {
+    const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
+    if (nativeEvt.touches.length === 1 && isLayerExist) {
       this.movingUtils.moveStart(nativeEvt)
     }
   }
