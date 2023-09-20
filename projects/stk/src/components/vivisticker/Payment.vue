@@ -33,8 +33,11 @@ div(class="payment" v-touch @swipe.stop)
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub")
               span {{ btnPlan.subTitle }}
           div(class="payment__btn-plan__content__price text-H6") {{ btnPlan.price }}
-          div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__tag")
-            span(class="body-XXS") {{ btnPlan.tag }}
+        div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__tag")
+          span(class="caption-SM") {{ btnPlan.tag }}
+    div(class="payment__trial")
+      span(class="payment__trial__text caption-LG") {{ strTrial }}
+      toggle-btn(class="payment__trial__toggle" v-model="isTrialToggled" :width="42" :height="24" :colorActive="isTrialDisabled ? 'black-3' : 'alarm'" :colorInactive="isTrialDisabled ? 'black-3' : 'black-4'")
     div(class="payment__btn-subscribe" :class="{pending: pending.purchase}" @touchend="handleSubscribe(planSelected)")
       svg-icon(v-if="pending.purchase" class="spinner" iconName="spiner" iconWidth="20px")
       div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
@@ -68,12 +71,13 @@ div(class="payment" v-touch @swipe.stop)
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
+import ToggleBtn from '@/components/global/ToggleBtn.vue'
 import { IPaymentPending, IPrices } from '@/interfaces/vivisticker'
 import networkUtils from '@/utils/networkUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface CarouselItem {
@@ -91,7 +95,8 @@ interface IComparison {
 export default defineComponent({
   emits: ['canShow'],
   components: {
-    Carousel
+    Carousel,
+    ToggleBtn
   },
   props: {
     target: {
@@ -103,6 +108,7 @@ export default defineComponent({
     return {
       idxCurrImg: 0,
       planSelected: 'annually',
+      isTrialToggled: false,
       isPanelUp: false,
       canShow: false,
       initPanelUp: false,
@@ -220,7 +226,7 @@ export default defineComponent({
         {
           key: 'annually',
           title: this.$t('NN0515'),
-          subTitle: this.$t('STK0048', { day: 3 }),
+          subTitle: '',
           price: this.prices.annually.text,
           tag: this.localizedTag
         }
@@ -243,13 +249,19 @@ export default defineComponent({
         case 'monthly':
           return this.$t('STK0056')
         case 'annually':
-          return this.$t('STK0057')
+          return this.$t('STK0057', { day: 3 })
         default:
           return ''
       }
     },
+    strTrial() {
+      return this.isTrialToggled ? this.$t('STK0094') : this.$t('STK0048', { day: 3 })
+    },
     showPanelTitle() {
       return !this.isDraggingPanel ? !this.isPanelUp : !this.isPanelUp && this.panelAniProgress === 1
+    },
+    isTrialDisabled() {
+      return this.planSelected === 'monthly' || this.isPaymentPending
     }
   },
   methods: {
@@ -261,6 +273,7 @@ export default defineComponent({
     },
     handleBtnPlanClick(key: string) {
       this.planSelected = key
+      if(key === 'monthly') this.isTrialToggled = false
     },
     handleSubscribe(option: string, timeout?: number) {
       if (!networkUtils.check()) {
@@ -268,6 +281,8 @@ export default defineComponent({
         return
       }
       if (this.isPaymentPending) return
+      if(option === 'monthly') option = 'com.nuphototw.vivisticker.monthly'
+      else if (option === 'annually') option = !this.isTrialDisabled && this.isTrialToggled ? 'com.nuphototw.vivisticker.annually' : 'com.nuphototw.vivisticker.yearly_free0'
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
       vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
       if (timeout) {
@@ -402,7 +417,7 @@ export default defineComponent({
       column-gap: 8px;
       position: absolute;
       width: 100%;
-      top: -24px;
+      top: -26px;
       &__item {
         @include size(6px);
         border-radius: 50%;
@@ -417,12 +432,11 @@ export default defineComponent({
       display: flex;
       flex-direction: column;
       row-gap: 12px;
-      margin-top: 6px;
     }
   }
   &__btn-plan {
     box-sizing: border-box;
-    height: 60px;
+    height: 52px;
     display: grid;
     grid-template-columns: 20px 1fr;
     align-items: center;
@@ -430,6 +444,7 @@ export default defineComponent({
     padding: 10px 16px;
     color: setColor(black-5);
     border: 2px solid transparent;
+    position: relative;
     &.disabled {
       pointer-events: none;
       color: setColor(black-3);
@@ -501,19 +516,33 @@ export default defineComponent({
         text-align: right;
       }
       &__tag {
+          align-self: start;
           display: flex;
           align-items: center;
           justify-content: center;
-          top: -100%;
-          right: 0;
+          height: 20px;
+          right: 18px;
           position: absolute;
           padding: 0px 8px;
-          transform: translateY(50%);
+          transform: translateY(calc(-50% - 1px));
           background: setColor(alarm);
-          border-radius: 5px;
+          border-radius: 100px;
           white-space: nowrap;
           color: setColor(black-3);
         }
+    }
+  }
+  &__trial {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 16px 0px;
+    &__text {
+      color: v-bind("isTrialDisabled ? '#474747' : 'white'");
+      transition: color 0.3s ease-in-out;
+    }
+    &__toggle {
+      pointer-events: v-bind("isTrialDisabled ? 'none' : 'auto'");
     }
   }
   &__btn-subscribe {
@@ -521,7 +550,7 @@ export default defineComponent({
     width: 100%;
     height: 40px;
     box-sizing: border-box;
-    margin: 16px auto 0 auto;
+    margin: 12px auto 0 auto;
     padding: 4px 8px;
     background: white;
     border-radius: 100px;
@@ -568,7 +597,7 @@ export default defineComponent({
   }
   &__footer {
     height: 18px;
-    margin: 16px auto 0 auto;
+    margin: 12px auto 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;

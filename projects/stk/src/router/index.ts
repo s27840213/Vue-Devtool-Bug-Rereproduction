@@ -9,11 +9,12 @@ import overlayUtils from '@/utils/overlayUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils, { CURRENCY_FORMATTERS } from '@/utils/vivistickerUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import ViviSticker from '../views/ViviSticker.vue'
+import { IPrices } from '@/interfaces/vivisticker'
 
 declare let window: CustomWindow
 
@@ -245,6 +246,41 @@ router.beforeEach(async (to, from, next) => {
       })
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
+
+    if (json.default_price && Object.keys(json.default_price).length) {
+      const mapCurrency = new Map([
+        ['us', 'USD'],
+        ['jp', 'JPY'],
+        ['tw', 'TWD'],
+      ])
+      store.commit('vivisticker/UPDATE_payment', {
+        defaultPrices: Object.fromEntries(
+          Object.entries(
+            json.default_price.prices as { [key: string]: { monthly: number; annually: number } },
+          ).map(([locale, prices]) => {
+            const currency = mapCurrency.get(locale)
+            return [
+              locale,
+              {
+                currency,
+                ...Object.fromEntries(
+                  Object.entries(prices).map(([plan, price]) => [
+                    plan,
+                    {
+                      value: price,
+                      text:
+                        currency && Object.keys(CURRENCY_FORMATTERS).includes(currency)
+                          ? CURRENCY_FORMATTERS[currency](price.toString())
+                          : CURRENCY_FORMATTERS.USD(price.toString()),
+                    },
+                  ]),
+                ),
+              },
+            ]
+          }),
+        ) as { [key: string]: IPrices },
+      })
+    }
 
     uploadUtils.setLoginOutput({
       upload_log_map: json.ul_log_map,
