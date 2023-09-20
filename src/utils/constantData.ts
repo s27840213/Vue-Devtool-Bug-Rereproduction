@@ -319,17 +319,7 @@ class ConstantData {
       }]
     }[i18n.global.locale] as IHeaderL2[]
 
-    const pricing = i18n.global.locale === 'tw' ? {
-      singleLayer: true,
-      label: i18n.global.t('NN0643'),
-      content: [{
-        label: i18n.global.t('NN0643'),
-        url: '/pricing'
-      }, {
-        label: '政府輔助方案',
-        url: 'https://blog.vivipic.com/tw/tcloud/'
-      }]
-    } : {
+    const pricing = {
       name: 'Pricing',
       url: '/pricing',
       label: i18n.global.t('NN0643')
