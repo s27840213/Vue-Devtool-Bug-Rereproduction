@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "lint": "vue-cli-service lint",
     "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts",
-    "build": "vue-cli-service build --PRERENDER=1",
+    "build": "vue-cli-service build",
     "build-only": "vue-cli-service build",
     "build:dev": "vue-cli-service build --mode development",
     "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\"",
