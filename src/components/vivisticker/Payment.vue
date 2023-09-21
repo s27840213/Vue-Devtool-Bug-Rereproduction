@@ -586,7 +586,7 @@ export default defineComponent({
   }
   &__notice {
     width: 100%;
-    overflow-x: auto;
+    // overflow-x: auto;
     display: flex;
     align-items: center;
     justify-content: center;
