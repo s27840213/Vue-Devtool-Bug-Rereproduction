@@ -29,7 +29,7 @@ import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
-import textUtils from './textUtils'
+import textUtils, { SYSTEM_FONTS } from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
 
@@ -65,7 +65,6 @@ interface IUserSettingListOption {
   description: string
   icon?: string
   queryFunc?: (query: string) => boolean
-  first?: boolean
 }
 
 const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
@@ -76,13 +75,11 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
       description: '<P>Apple Emoji',
       icon: 'apple_emoji',
       queryFunc: (query: string) => SYSTEM_FONTS.includes(query)
-      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'zVUjQ0MaGOm7HOJXv5gB',
       description: '<P>Noto Color Emoji',
       icon: 'noto_color_emoji',
-      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'dLe1S0oDanIJjvty5RxG',
@@ -91,8 +88,6 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
     },
   ],
 }
-
-export const SYSTEM_FONTS = ['-apple-system', 'Apple Color Emoji']
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
