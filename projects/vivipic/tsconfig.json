@@ -23,7 +23,8 @@
     ],
     "paths": {
       "@/*": [
-        "./src/*"
+        "./src/*",
+        "../../packages/vivi-lib/src/*"
       ],
       "@nu/vivi-lib/*": ["../../packages/vivi-lib/src/*"],
       "@nu/vivi-lib": ["../../packages/vivi-lib/src/index"]
