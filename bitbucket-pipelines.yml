@@ -1290,4 +1290,4 @@ pipelines:
               name: "create pull request"
               trigger: manual
               script:
-                - ./bash/pr_others.sh
+                - ./tools/bash/pr_others.sh
