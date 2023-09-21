@@ -1,0 +1,49 @@
+{
+  // For formatter.
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    // Auto fix eslint error/warn.
+    "source.fixAll.eslint": true,
+    // Auto sort import.
+    "source.organizeImports": true
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // For i18n Ally.
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sourceLanguage": "us",
+  "i18n-ally.localesPaths": ["packages/**/**/locales", "projects/**/**/locales"],
+
+  // For preventing @apply unknownAtRules warning: https://github.com/tailwindlabs/tailwindcss/discussions/5258#discussioncomment-1979394
+  "css.customData": [".vscode/tailwind.json"],
+
+  // For Volar HTML tag/props casing setting.
+  "vue.complete.casing.status": false, // Prevent casing setting to show in vscode bottom-bar right side.
+  "vue.complete.casing.tags": "kebab",
+  "vue.complete.casing.props": "camel",
+
+  // For other Volar setting
+  "vue.inlayHints.missingProps": true,
+
+  // For configuring Gitlens to ignore specific commits.
+  "files.associations": {
+    ".git-blame-ignore-revs": "yaml"
+  },
+  "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
+
+  // For other setting
+  "editor.tabSize": 2,
+  "files.insertFinalNewline": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

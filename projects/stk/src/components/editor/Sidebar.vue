@@ -1,0 +1,166 @@
+<template lang="pug">
+div(class="sidebar")
+  div(class="logo")
+    router-link(to="/"
+      style="height: 30px;"
+      :style="inBgRemoveMode ? {pointerEvents: 'none'} : {}")
+      svg-icon(class="pointer"
+        :iconName="'logo-icon'"
+        :iconWidth="'30px'")
+  div(class="nav")
+    div(class="nav-container")
+      div(class="nav-item pointer"
+        v-for="item in navItem" :key="`icon-${item.index}`"
+        @click="switchNav(item.index)")
+        svg-icon(class="nav-item__icon"
+          :iconName="item.icon"
+          :iconColor="(currPanel === item.index && !inBgRemoveMode) ? 'blue-1' : 'gray-3'"
+          :iconWidth="'24px'")
+        div(class="nav-item__text body-3"
+          :class="[(currPanel === item.index && !inBgRemoveMode) ? 'text-blue-1' : 'text-gray-3', $i18n.locale]") {{item.text}}
+  div(class="sidebar__chevron pointer"
+      :class="[{'rotate-hr': isSidebarPanelOpen}]"
+      @click="toggleSidebarPanel")
+    svg-icon(:iconName="'chevron-duo-right'"
+      :iconColor="'gray-3'"
+      :iconWidth="'30px'")
+</template>
+
+<script lang="ts">
+import brandkitUtils from '@/utils/brandkitUtils'
+import pageUtils from '@/utils/pageUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
+
+export default defineComponent({
+  props: {
+    isSidebarPanelOpen: {
+      type: Boolean,
+      required: true
+    }
+  },
+  emits: ['toggleSidebarPanel'],
+  data() {
+    return {
+    }
+  },
+  computed: {
+    ...mapGetters({
+      currPanel: 'getCurrSidebarPanelType',
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      showPagePanel: 'page/getShowPagePanel',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isAdmin: 'user/isAdmin',
+    }),
+    navItem(): Array<{ icon: string, text: string, index: number }> {
+      const navItems = [
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, index: 0 },
+        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, index: 1 },
+        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, index: 2 },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, index: 3 },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, index: 4 },
+        { icon: 'upload', text: `${this.$tc('NN0006')}`, index: 5 },
+        ...this.isAdmin ? [{ icon: 'overlay', text: `${this.$tc('NN0899')}`, index: 6 }] : [],
+      ]
+      if (brandkitUtils.isBrandkitAvailable) {
+        navItems.push({ icon: 'brand', text: `${this.$t('NN0497')}`, index: 7 })
+      }
+      return navItems
+    }
+  },
+  methods: {
+    ...mapMutations({
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview',
+      _setShowPagePanel: 'page/SET_showPagePanel'
+    }),
+    switchNav(index: number): void {
+      if (this.inBgRemoveMode) return
+
+      // switch to sidebar panel index
+      this.setCurrSidebarPanel(index)
+      this.$emit('toggleSidebarPanel', true)
+      if (this.showPagePanel) {
+        this._setShowPagePanel(false)
+      }
+      if (this.isShowPagePreview) {
+        this._setIsShowPagePreview(false)
+        pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
+      }
+    },
+    toggleSidebarPanel() {
+      if (!this.inBgRemoveMode) {
+        if (this.showPagePanel) {
+          this._setShowPagePanel(false)
+        }
+        this.$emit('toggleSidebarPanel', !this.isSidebarPanelOpen)
+      }
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.sidebar {
+  width: 75px;
+  height: 100%;
+  background-color: setColor(nav);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
+  // box-shadow: 2px 0px 5px setColor(gray-4);
+  z-index: setZindex(sidebar);
+  &__chevron {
+    @include flexCenter;
+    padding: 10px;
+    transition: transform 0.5s;
+  }
+}
+
+.logo {
+  padding: 20px 0px;
+}
+
+.nav {
+  @include size(100%, 100%);
+  @include hover-scrollbar(dark);
+  @include firefoxOnly {
+    &:hover {
+      scrollbar-color: setColor(gray-4) setColor(nav);
+    }
+  }
+  &::-webkit-scrollbar-thumb {
+    border: 3px solid setColor(nav);
+  }
+  padding-left: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+.nav-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: auto;
+  row-gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+.nav-item {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  box-sizing: border-box;
+  transition: background-color 0.2s;
+  padding: 5px;
+  &__text {
+    transition: color 0.2s;
+    &.us {
+      transform: scale(0.9);
+    }
+  }
+}
+</style>

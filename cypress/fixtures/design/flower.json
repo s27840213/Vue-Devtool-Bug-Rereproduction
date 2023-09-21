@@ -1,0 +1,176 @@
+[
+  {
+    "width": 1080,
+    "height": 1080,
+    "contentScaleRatio": 1,
+    "x": 0,
+    "y": 0,
+    "physicalWidth": 1080,
+    "physicalHeight": 1080,
+    "unit": "px",
+    "backgroundColor": "#ffffff",
+    "backgroundImage": {
+      "config": {
+        "type": "image",
+        "srcObj": {
+          "type": "",
+          "userId": "",
+          "assetId": ""
+        },
+        "id": "xFu7xx5q",
+        "clipPath": "M0,0h0v0h0z",
+        "active": false,
+        "shown": false,
+        "locked": false,
+        "moved": false,
+        "moving": false,
+        "imgControl": false,
+        "inProcess": "",
+        "trace": 0,
+        "isClipper": true,
+        "dragging": false,
+        "designId": "",
+        "styles": {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotate": 0,
+          "width": 0,
+          "height": 0,
+          "initWidth": 0,
+          "initHeight": 0,
+          "imgX": 0,
+          "imgY": 0,
+          "imgWidth": 0,
+          "imgHeight": 0,
+          "zindex": -1,
+          "opacity": 100,
+          "horizontalFlip": false,
+          "verticalFlip": false,
+          "adjust": {},
+          "shadow": {
+            "currentEffect": "none",
+            "effects": {
+              "color": "#000000",
+              "frameColor": "#000000",
+              "none": {},
+              "shadow": {},
+              "imageMatched": {},
+              "frame": {},
+              "floating": {},
+              "blur": {}
+            },
+            "srcObj": {
+              "type": "",
+              "assetId": "",
+              "userId": ""
+            },
+            "styles": {
+              "imgWidth": 0,
+              "imgHeight": 0,
+              "imgX": 0,
+              "imgY": 0
+            },
+            "old": {}
+          }
+        }
+      },
+      "posX": -1,
+      "posY": -1
+    },
+    "name": "",
+    "layers": [
+      {
+        "type": "image",
+        "srcObj": {
+          "type": "public",
+          "userId": "dXdnvk5YOA1yggbZAxwE",
+          "assetId": "2302081104321519Yqr7H96"
+        },
+        "id": "LMKd66tE",
+        "clipPath": "M0,0h864v576h-864z",
+        "active": false,
+        "shown": false,
+        "locked": false,
+        "moved": false,
+        "moving": false,
+        "imgControl": false,
+        "inProcess": "",
+        "trace": 0,
+        "isClipper": true,
+        "dragging": false,
+        "designId": "",
+        "styles": {
+          "x": 108,
+          "y": 252,
+          "scale": 1,
+          "scaleX": 1,
+          "scaleY": 1,
+          "rotate": 0,
+          "width": 864,
+          "height": 576,
+          "initWidth": 864,
+          "initHeight": 576,
+          "imgX": 0,
+          "imgY": 0,
+          "imgWidth": 864,
+          "imgHeight": 576,
+          "zindex": 1,
+          "opacity": 100,
+          "horizontalFlip": false,
+          "verticalFlip": false,
+          "adjust": {},
+          "shadow": {
+            "currentEffect": "none",
+            "effects": {
+              "color": "#000000",
+              "frameColor": "#000000",
+              "none": {},
+              "shadow": {},
+              "imageMatched": {},
+              "frame": {},
+              "floating": {},
+              "blur": {}
+            },
+            "srcObj": {
+              "type": "",
+              "assetId": "",
+              "userId": ""
+            },
+            "styles": {
+              "imgWidth": 0,
+              "imgHeight": 0,
+              "imgX": 0,
+              "imgY": 0
+            },
+            "old": {},
+            "isTransparent": false
+          }
+        },
+        "panelPreviewSrc": "https://template.vivipic.com/admin/dXdnvk5YOA1yggbZAxwE/asset/image/2302081104321519Yqr7H96/tiny"
+      }
+    ],
+    "documentColors": ["#ffffff"],
+    "designId": "",
+    "id": "DP5xb2jX",
+    "guidelines": {
+      "v": [],
+      "h": []
+    },
+    "isEnableBleed": false,
+    "bleeds": {
+      "top": 35,
+      "bottom": 35,
+      "left": 35,
+      "right": 35
+    },
+    "physicalBleeds": {
+      "top": 35,
+      "bottom": 35,
+      "left": 35,
+      "right": 35
+    }
+  }
+]

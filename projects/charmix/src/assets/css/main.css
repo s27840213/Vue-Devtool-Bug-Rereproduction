@@ -1,0 +1,20 @@
+@import './base.css';
+@import './tailwind.css';
+@import '@nu/shared-lib/css';
+
+#app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  overflow: hidden;
+  text-rendering: geometricPrecision;
+  /* /block swipe navagation, only work for Chrome & FireFox */
+  overscroll-behavior-x: none;
+  touch-action: none;
+  background-color: #050505;
+}

@@ -1,0 +1,13 @@
+{
+  "name": "tools",
+  "private": true,
+  "scripts": {
+    "update i18n": "source i18n-tool/get_translation.sh",
+    "shake i18n": "python3 i18n-tool/i18n_shake.py",
+    "update pipeline": "",
+    "open preview": ""
+  },
+  "main": "./dist/nueditor.common.js",
+  "dependencies": {},
+  "devDependencies": {}
+}

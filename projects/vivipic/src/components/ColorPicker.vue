@@ -1,0 +1,273 @@
+<template lang="pug">
+div(class="color-picker" ref="colorPicker"
+    :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
+  div(v-if="$isTouchDevice()")
+    div(class="color-picker__mobile__hex")
+      span(class="body-1") Hex
+      div(class="color-picker__mobile__input")
+        div(:style="{'background-color': convertedHex}")
+        input(
+          ref="input"
+          type="text"
+          spellcheck="false"
+          v-model="color"
+          maxlength="7")
+  chrome-picker(
+    class="color-picker__picker"
+    :value="convertedHex"
+    @input="updateHex"
+    @paste="onPaste"
+    @mouseup="onmouseup"
+    :disableFields="true"
+    :disableAlpha="true"
+    :isMobile="isMobile"
+    :fullWidth="isMobile"
+    :aspectRatio="aspectRatio")
+  div(v-if="!$isTouchDevice()" class="px-10")
+    div(class="color-picker__hex")
+      svg-icon(class="pointer"
+        iconName="eye-dropper"
+        :iconWidth="'20px'"
+        :iconColor="'gray-2'"
+        @click="eyeDropper"
+        v-hint="$t('NN0407')")
+      span(class="body-1") Hex
+      div(class="color-picker__input")
+        div(:style="{'background-color': convertedHex}")
+        input(
+          ref="input"
+          type="text"
+          spellcheck="false"
+          v-model="color"
+          maxlength="7")
+</template>
+
+<script lang="ts">
+import Chrome from '@/components/colorPicker/Chrome.vue'
+import i18n from '@/i18n'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
+import layerUtils from '@/utils/layerUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
+
+export default defineComponent({
+  props: {
+    currentColor: {
+      type: String,
+      required: true
+    },
+    isMobile: {
+      type: Boolean,
+      default: false
+    },
+    aspectRatio: {
+      type: Number,
+      default: 56.25
+    }
+  },
+  emits: ['update', 'final'],
+  components: {
+    'chrome-picker': Chrome
+  },
+  data() {
+    return {
+      color: this.currentColor || '#194d33',
+      finalizeTimer: -1
+    }
+  },
+  mounted() {
+    const root = this.$refs.colorPicker as HTMLElement
+    const input = this.$refs.input as HTMLInputElement
+    if (!this.$isTouchDevice()) {
+      root.focus()
+      input.select()
+    }
+  },
+  computed: {
+    ...mapGetters({
+      documentColors: 'color/getDocumentColors',
+      defaultColors: 'color/getDefaultColors'
+    }),
+    convertedHex(): string {
+      const formatedColor = this.convertHex(this.color)
+      this.$emit('update', formatedColor)
+      return formatedColor
+    },
+  },
+  watch: {
+    color(): void {
+      this.color = '#' + this.color.replaceAll(/[^a-fA-F0-9]/g, '')
+      this.color = this.color.toUpperCase()
+      if (this.color.indexOf('#') === -1) {
+        this.color = `#${this.color}`
+      }
+      if (this.color.length === 0) {
+        this.color = '#'
+      }
+      this.delayedFinalize(this.convertHex(this.color))
+    }
+  },
+  methods: {
+    ...mapMutations({
+      updateDocumentColors: 'UPDATE_documentColors'
+    }),
+    paddingRight(str: string, n: number) {
+      let len = str.length
+      while (len < n) {
+        str = str + '0'
+        len++
+      }
+      return str
+    },
+    updateHex(val: any) {
+      this.color = val.hex
+    },
+    onPaste(event: ClipboardEvent) {
+      console.log(event.clipboardData)
+    },
+    onmouseup() {
+      this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })
+    },
+    eyeDropper() {
+      if (!(window as any).EyeDropper) {
+        notify({ group: 'error', text: `${i18n.global.t('NN0406')}` })
+        return
+      }
+
+      const eyeDropper = new (window as any).EyeDropper()
+      if (eyeDropper !== undefined) {
+        eyeDropper.open().then((result: { sRGBHex: string }) => {
+          this.color = checkAndConvertToHex(result.sRGBHex)
+        })
+      }
+    },
+    convertHex(color: string) {
+      let hex = color.slice(1).split('')
+      let result = ''
+      const len = hex.length
+      switch (len) {
+        case 0:
+          result = '000000'
+          break
+        case 1:
+        case 2:
+        case 3:
+          hex = hex.map((val: string) => val + val)
+          result = this.paddingRight(hex.join(''), 6)
+          break
+        case 4:
+        case 5:
+        case 6:
+          result = this.paddingRight(hex.join(''), 6)
+          break
+      }
+      return `#${result}`
+    },
+    delayedFinalize(formatedColor: string) {
+      clearTimeout(this.finalizeTimer)
+      this.finalizeTimer = window.setTimeout(() => {
+        this.$emit('final', formatedColor)
+      }, 500)
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  background-color: white;
+  &:focus {
+    outline: none;
+  }
+  &__hex {
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  &__mobile__hex {
+    @include body-MD;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    color: setColor(gray-2);
+    margin-bottom: 14px;
+    & > span {
+      font-family: Poppins;
+    }
+  }
+  &__input {
+    width: 120px;
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: auto 1fr;
+    border: 1px solid setColor(gray-4);
+    border-radius: 4px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    > div {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+    }
+    > input {
+    }
+  }
+  &__mobile__input {
+    width: 137px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid setColor(gray-4);
+    border-radius: 4px;
+    box-sizing: border-box;
+    > div {
+      border: 1px solid setColor(gray-4);
+      border-radius: 3px;
+      width: 18px;
+      height: 18px;
+      box-sizing: border-box;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+    > input {
+      @include body-MD;
+      padding: 0;
+      color: setColor(gray-2);
+      font-family: Poppins;
+    }
+  }
+
+  &__colors {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    > div:nth-child(1) {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+    }
+    > div:nth-child(2) {
+      display: grid;
+      grid-auto-rows: 25px;
+      grid-template-columns: repeat(7, 25px);
+      row-gap: 5px;
+      column-gap: 5px;
+      justify-content: center;
+      align-items: center;
+      > div {
+        width: 100%;
+        height: 100%;
+        border-radius: 2px;
+      }
+    }
+  }
+}
+</style>

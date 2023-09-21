@@ -1,35 +1,1223 @@
-# This is an example Starter pipeline configuration
-# Use a skeleton to build, test and deploy using manual and parallel steps
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
+# https://www.notion.so/vivipic/repo-variables-f30a0f1dfba746ff97f8f94f6f257da2?pvs=4
 
-image: atlassian/default-image:3
+image: node:16.19.1
+
+definitions:
+  caches:
+    pnpm: $BITBUCKET_CLONE_DIR/.pnpm-store
 
 pipelines:
-  default:
+  default: #for feature
     - parallel:
+        - step:
+            name: "Verify build environment"
+            script: #show node and pnpm version
+              - corepack enable
+              - corepack prepare pnpm@latest-8 --activate
+              - node -v
+              - pnpm -v
+        - step:
+            name: "Start build with node module cache"
+            size: 2x
+            caches: #set caches for node modules to speed up building
+              - node
+            image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+            script:
+              - corepack enable
+              - corepack prepare pnpm@latest-8 --activate
+              - pnpm install
+              - pnpm run build-all # Replace with your build/test…etc. commands
+            artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+              - projects/*/dist/**
+              - projects/*/node_modules/**
+    - parallel:
+    #     # - step:
+    #     #     name: "Run E2E Tests"
+    #     #     size: 2x
+    #     #     image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+    #     #     script:
+    #     #       - npx cypress install
+    #     #       - yarn serve & npx wait-on http://localhost:8080
+    #     #       - npx cypress run --record --browser chrome
+    #     #     artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+    #     #       - cypress-visual-report/**
+    #     #       - cypress-visual-screenshots/**
+        - step:
+            name: "vivipic to dev5 (Alan)"
+            deployment: dev5
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev5.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev5.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev5.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev4 (Gary)"
+            deployment: dev4
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev4.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev4.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev4.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev3 (HsingChi)"
+            deployment: dev3
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev3.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev3.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev3.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev2 (TingAn)"
+            deployment: dev2
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev2.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev2.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev2.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev1 (Nathan)"
+            deployment: dev1
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev1.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev1.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev1.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev0 (ZhengYan)"
+            deployment: dev0
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev0.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev0.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev0.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev5s (Alan)"
+            deployment: dev5s
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev5s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev5s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev5s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev4s (Gary)"
+            deployment: dev4s
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev4s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev4s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev4s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev3s (HsingChi)"
+            deployment: dev3s
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev3s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev3s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev3s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev2s (TingAn)"
+            deployment: dev2s
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev2s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev2s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev2s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev1s (Nathan)"
+            deployment: dev1s
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev1s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev1s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev1s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "vivipic to dev0s (ZhengYan)"
+            deployment: dev0s
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev0s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev0s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                  S3_BUCKET: "dev0s.vivipic.com"
+                  LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "sticker to dev5 (Alan)"
+            deployment: stkdev5
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/stk/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev5.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev5.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev5.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "sticker to dev4 (Gary)"
+            deployment: stkdev4
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/stk/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev4.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev4.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev4.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "sticker to dev3 (HsingChi)"
+            deployment: stkdev3
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/stk/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev3.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev3.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev3.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "sticker to dev2 (TingAn)"
+            deployment: stkdev2
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/stk/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev2.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev2.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev2.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "sticker to dev1 (Nathan)"
+            deployment: stkdev1
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/stk/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev1.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev1.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev1.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "sticker to dev0 (ZhengYan)"
+            deployment: stkdev0
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/stk/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev0.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev0.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: "stkdev0.vivipic.com"
+                  LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "charmix to dev5 (Alan)"
+            deployment: cmdev5
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/charmix/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev5.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev5.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev5.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "charmix to dev4 (Gary)"
+            deployment: cmdev4
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/charmix/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev4.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev4.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev4.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "charmix to dev3 (HsingChi)"
+            deployment: cmdev3
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/charmix/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev3.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev3.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev3.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "charmix to dev2 (TingAn)"
+            deployment: cmdev2
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/charmix/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev2.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev2.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev2.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "charmix to dev1 (Nathan)"
+            deployment: cmdev1
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/charmix/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev1.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev1.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev1.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "charmix to dev0 (ZhengYan)"
+            deployment: cmdev0
+            trigger: manual
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/charmix/**"
+                  - "packages/**"
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev0.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev0.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                  S3_BUCKET: "dev0.vivipic.com"
+                  LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "create pull request to develop"
+            trigger: manual
+            script:
+              - ./tools/bash/pr_others.sh
+  branches:
+    main/vivipic:
+      - parallel:
+          - step:
+              name: "Verify build environment"
+              script: #show node and pnpm version
+                - corepack enable
+                - corepack prepare pnpm@latest-8 --activate
+                - node -v
+                - pnpm -v
+          - step:
+              name: "Start build with node module cache"
+              size: 2x
+              caches: #set caches for node modules to speed up building
+                - pnpm
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              script:
+                - corepack enable
+                - corepack prepare pnpm@latest-8 --activate
+                - pnpm install
+                - pnpm run build-all # Replace with your build/test…etc. commands
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - projects/vivipic/dist/**
+                - projects/vivipic/node_modules/**
       - step:
-          name: 'Build and Test'
+          name: "deploy vivipic to test"
+          deployment: test
+          trigger: manual
           script:
-            - echo "Your build and test goes here..."
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                S3_BUCKET: "test.vivipic.com"
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                S3_BUCKET: "test.vivipic.com"
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=* --include=app.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                S3_BUCKET: "test.vivipic.com"
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=*.js.map"
+                DELETE_FLAG: "true"
       - step:
-          name: 'Lint'
+          name: "deploy prod"
+          deployment: vivipicprod
+          trigger: manual
           script:
-            - echo "Your linting goes here..."
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_PROD
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_PROD
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_PROD
+                S3_BUCKET: "vivipic.com"
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_PROD
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_PROD
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_PROD
+                S3_BUCKET: "vivipic.com"
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=* --include=app.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_PROD
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_PROD
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_PROD
+                S3_BUCKET: "vivipic.com"
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=*.js.map"
+                DELETE_FLAG: "true"
+            - curl -k -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID_VIVIPIC/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
+    main/stk:
+      - parallel:
+          - step:
+              name: "Verify build environment"
+              script: #show node and pnpm version
+                - corepack enable
+                - corepack prepare pnpm@latest-8 --activate
+                - node -v
+                - pnpm -v
+          - step:
+              name: "Start build with node module cache"
+              size: 2x
+              caches: #set caches for node modules to speed up building
+                - pnpm
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              script:
+                - corepack enable
+                - corepack prepare pnpm@latest-8 --activate
+                - pnpm install
+                - pnpm run build-all # Replace with your build/test…etc. commands
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - projects/stk/dist/**
+                - projects/stk/node_modules/**
       - step:
-          name: 'Security scan'
+          name: "deploy vivisticker to prod"
+          deployment: stkprod
+          trigger: manual
           script:
-            - echo "Your security scan goes here..."
-
-    # The following deployment steps will be executed for each pipeline run. To configure your steps and conditionally deploy see https://support.atlassian.com/bitbucket-cloud/docs/configure-bitbucket-pipelinesyml/
-    - step:
-        name: 'Deployment to Staging'
-        deployment: staging
-        script:
-          - echo "Your deployment to staging script goes here..."
-    - step:
-        name: 'Deployment to Production'
-        deployment: production
-        trigger: 'manual'
-        script:
-          - echo "Your deployment to production script goes here..."
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                S3_BUCKET: "stickertest.vivipic.com"
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                S3_BUCKET: "stickertest.vivipic.com"
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=* --include=app.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                S3_BUCKET: "stickertest.vivipic.com"
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=*.js.map"
+                DELETE_FLAG: "true"
+            - curl -k -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID_VIVIPIC/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
+    develop:
+      - parallel:
+          - step:
+              name: "Verify build environment"
+              script: #show node and pnpm version
+                - corepack enable
+                - corepack prepare pnpm@latest-8 --activate
+                - node -v
+                - pnpm -v
+          - step:
+              name: "Start build with node module cache"
+              size: 2x
+              caches: #set caches for node modules to speed up building
+                - pnpm
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              script:
+                - corepack enable
+                - corepack prepare pnpm@latest-8 --activate
+                - pnpm install
+                - pnpm run build-all # Replace with your build/test…etc. commands
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - projects/*/dist/**
+                - projects/*/node_modules/**
+      - parallel:
+          - step:
+              name: "deploy vivipic to rd"
+              deployment: vivipicrd
+              trigger: manual
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - 'tools/**'
+                    - "projects/charmix/**"
+                    - "packages/**"
+              script:
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                    S3_BUCKET: "rd.vivipic.com"
+                    LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                    S3_BUCKET: "rd.vivipic.com"
+                    LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_VIVIPIC_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_VIVIPIC_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
+                    S3_BUCKET: "rd.vivipic.com"
+                    LOCAL_PATH: "projects/vivipic/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
+                    DELETE_FLAG: "true"
+          - step:
+              name: "deploy vivisticker to stkrd"
+              deployment: stkrd
+              trigger: manual
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - 'tools/**'
+                    - "projects/stk/**"
+                    - "packages/**"
+              script:
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: "stkrd.vivipic.com"
+                    LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: "stkrd.vivipic.com"
+                    LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: "stkrd.vivipic.com"
+                    LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
+                    DELETE_FLAG: "true"
+          - step:
+              name: "deploy charmix to cmrd"
+              deployment: cmrd
+              trigger: manual
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - 'tools/**'
+                    - "projects/charmix/**"
+                    - "packages/**"
+              script:
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                    S3_BUCKET: "nuphoto.co"
+                    LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                    S3_BUCKET: "nuphoto.co"
+                    LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_CHARMIX
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_CHARMIX
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_CHARMIX
+                    S3_BUCKET: "nuphoto.co"
+                    LOCAL_PATH: "projects/charmix/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
+                    DELETE_FLAG: "true"
+          - step:
+              name: "pull request to qa (Vivipic)"
+              trigger: manual
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - 'tools/**'
+                    - "projects/vivipic/**"
+                    - "packages/**"            
+              script:
+                - ./tools/bash/pr_develop_to_qa.sh
+          - step:
+              name: "pull request to main/stk (Vivisticker)"
+              trigger: manual
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - 'tools/**'
+                    - "projects/stk/**"
+                    - "packages/**"            
+              script:
+                - ./tools/bash/pr_develop_to_stk.sh
+          - step:
+              name: "pull request to main/cm (Charmix)"
+              trigger: manual
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - 'tools/**'
+                    - "projects/charmix/**"
+                    - "packages/**"            
+              script:
+                - ./tools/bash/pr_develop_to_cm.sh

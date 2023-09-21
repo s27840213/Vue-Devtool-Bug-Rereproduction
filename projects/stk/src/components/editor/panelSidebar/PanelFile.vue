@@ -1,0 +1,161 @@
+<template lang="pug">
+div(class="panel-file"
+    @drop.stop.prevent="onDrop($event)"
+    @dragover.prevent,
+    @dragenter.prevent)
+  div(class="panel-file__topbtn")
+    nubtn(size="mid-full" @click="uploadImage()") {{$t('NN0014')}}
+    nubtn(v-if="$isTouchDevice()" theme="icon2" icon="trash" size="mid"
+          :active="inMultiSelectMode === 'on'"
+          @click="toggleMultiSelect()")
+  image-gallery(
+    ref="mainContent"
+    :myfile="myfileImages"
+    vendor="myfile"
+    :inFilePanel="true"
+    :multiSelectMode="inMultiSelectMode"
+    @loadMore="handleLoadMore"
+    @scroll.passive="handleScrollTop($event, 'mainContent')")
+    template(#pending)
+      div(v-if="pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+  transition(name="panel-up")
+    div(v-if="hasCheckedAssets"
+        class="panel-file__menu")
+      div
+        svg-icon(class="pointer"
+          :iconName="'trash'"
+          :iconColor="'white'"
+          :iconWidth="'24px'"
+          @click="deleteAssets()")
+      span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`${$t('NN0130')}(${checkedAssets.length})`}}
+</template>
+
+<script lang="ts">
+import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
+import modalUtils from '@/utils/modalUtils'
+import networkUtils from '@/utils/networkUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+
+export default defineComponent({
+  name: 'PanelFile',
+  emits: [],
+  components: {
+    ImageGallery
+  },
+  data() {
+    return {
+      scrollTop: {
+        mainContent: 0
+        // searchResult: 0
+      },
+      inMultiSelectMode: this.$isTouchDevice() ? 'off' : 'hover' as 'hover' | 'on' | 'off'
+    }
+  },
+  computed: {
+    ...mapState('file', [
+      'myfileImages',
+      'pending'
+    ]),
+    ...mapGetters({
+      checkedAssets: 'file/getCheckedAssets'
+    }),
+    hasCheckedAssets(): boolean {
+      return this.checkedAssets.length !== 0
+    }
+  },
+  mounted() {
+    (this.$refs.mainContent as CImageGallery).myfileUpdate()
+  },
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CImageGallery)
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+    })
+  },
+  methods: {
+    ...mapActions({
+      deleteAssets: 'file/deleteAssets',
+      getMoreMyfiles: 'file/getMoreMyfiles'
+    }),
+    ...mapMutations({
+      clearCheckedAssets: 'file/CLEAR_CHECKED_ASSETS'
+    }),
+    toggleMultiSelect() {
+      this.inMultiSelectMode = this.inMultiSelectMode === 'on' ? 'off' : 'on'
+      if (this.inMultiSelectMode === 'off') this.clearCheckedAssets()
+    },
+    handleLoadMore() {
+      !this.pending && this.getMoreMyfiles()
+    },
+    uploadImage() {
+      if (!networkUtils.check()) {
+        networkUtils.notifyNetworkError()
+      } else if (uploadUtils.isLogin) {
+        uploadUtils.chooseAssets('image')
+      } else {
+        modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
+      }
+    },
+    handleScrollTop(event: Event, key: 'mainContent'/* |'searchResult' */) {
+      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
+    },
+    onDrop(evt: DragEvent) {
+      const dt = evt.dataTransfer
+      if (evt.dataTransfer?.getData('data') || !dt) {
+        // console.log('')
+      } else {
+        const files = dt.files
+        if (!networkUtils.check()) {
+          networkUtils.notifyNetworkError()
+        } else if (uploadUtils.isLogin) {
+          uploadUtils.uploadAsset('image', files)
+        } else {
+          modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
+        }
+      }
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.panel-file {
+  @include size(100%, 100%);
+  display: grid;
+  // Use minmax(0, 1fr) instead of 1fr is because when the content is larger than container, 1fr will almost equal to auto.
+  // If you wanna to know this problem in detailed, please go to https://stackoverflow.com/questions/52861086/why-does-minmax0-1fr-work-for-long-elements-while-1fr-doesnt
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: 1fr;
+  text-align: center;
+  &__title {
+    margin-bottom: 20px;
+  }
+  &__topbtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    * + * {
+      margin-left: 10px;
+    }
+  }
+  &__menu {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    box-sizing: border-box;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 20px;
+    background: setColor(nav);
+    font-size: 14px;
+  }
+}
+</style>

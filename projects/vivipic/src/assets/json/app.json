@@ -1,0 +1,93 @@
+{
+	"design_type_map": {
+		"0": "font",
+		"1": "img_background",
+		"2": "img_photo",
+		"3": "img_unsplash",
+		"4": "img_pexels",
+		"5": "svg",
+		"6": "template",
+		"7": "group",
+		"8": "frame",
+		"9": "marker",
+		"10": "line",
+		"11": "shape",
+		"12": "font_emoji",
+		"13": "layout"
+	},
+	"ver_uni": 101,
+	"ver_api": 1234,
+	"default_font": [
+		{
+			"id": "gkNYxJEe72MBxp0Ay9Dv",
+			"ver": 1
+		},
+		{
+			"id": "OOcHgnEpk9RHYBOiWllz",
+			"ver": 3
+		},
+		{
+			"id": "cRgaSK5ZVXnLDpWTL8MN",
+			"ver": 2
+		},
+		{
+			"id": "zVUjQ0MaGOm7HOJXv5gB",
+			"ver": 5
+		},
+		{
+			"id": "gXgHEvSNTPg2mhrpNOUb",
+			"ver": 1
+		}
+	],
+	"glyph": {
+		"id": "gXgHEvSNTPg2mhrpNOUb",
+		"ver": 1,
+		"priority": 4
+	},
+	"emoji": {
+		"id": "zVUjQ0MaGOm7HOJXv5gB",
+		"ver": 5,
+		"priority": 3
+	},
+	"us_default": {
+		"id": "cRgaSK5ZVXnLDpWTL8MN",
+		"ver": 2,
+		"priority": 2
+	},
+	"tw_default": {
+		"id": "OOcHgnEpk9RHYBOiWllz",
+		"ver": 3,
+		"priority": 1
+	},
+	"jp_default": {
+		"id": "gkNYxJEe72MBxp0Ay9Dv",
+		"ver": 1,
+		"priority": 0
+	},
+	"image_size_map": [
+		{
+			"key": "larg",
+			"size": 1600
+		},
+		{
+			"key": "full",
+			"size": 1200
+		},
+		{
+			"key": "midd",
+			"size": 766
+		},
+		{
+			"key": "smal",
+			"size": 510
+		},
+		{
+			"key": "tiny",
+			"size": 320
+		},
+		{
+			"key": "prev",
+			"size": 150
+		}
+	]
+}
