@@ -6,7 +6,7 @@ export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/
 
 if [[ "$BITBUCKET_BRANCH" == "hotfix" ]]
 then
-    echo "create pull request to master/*, develop, and qa"
+    echo "create pull request to main/*, develop, and qa"
     curl --request POST \
         --url "https://api.bitbucket.org/2.0/repositories/mingchi/frontend-web/pullrequests" \
         --header "Accept: application/json" \
@@ -21,7 +21,7 @@ then
           },
           "destination": {
             "branch": {
-              "name": "master/vivipic"
+              "name": "main/vivipic"
             }
           }
         }'
@@ -39,7 +39,7 @@ then
           },
           "destination": {
             "branch": {
-              "name": "master/stk"
+              "name": "main/stk"
             }
           }
         }'
@@ -57,7 +57,7 @@ then
           },
           "destination": {
             "branch": {
-              "name": "master/cm"
+              "name": "main/cm"
             }
           }
         }'
@@ -99,14 +99,14 @@ then
         }'
 elif [[ "$BITBUCKET_BRANCH" == "hotfix/vivipic" ]]
 then
-    echo "create pull request to master/vivipic, develop, and qa"
+    echo "create pull request to main/vivipic, develop, and qa"
     curl --request POST \
         --url "https://api.bitbucket.org/2.0/repositories/mingchi/frontend-web/pullrequests" \
         --header "Accept: application/json" \
         --header "Content-Type: application/json" \
         --header "Authorization: Bearer ${BITBUCKET_API_TOKEN}" \
         --data '{
-          "title": "Pull request to master/vivipic by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+          "title": "Pull request to main/vivipic by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
           "source": {
             "branch": {
               "name": "'"${BITBUCKET_BRANCH}"'"
@@ -114,7 +114,7 @@ then
           },
           "destination": {
             "branch": {
-              "name": "master/vivipic"
+              "name": "main/vivipic"
             }
           }
         }'
@@ -156,7 +156,7 @@ then
         }'
 elif [[ "$BITBUCKET_BRANCH" == "hotfix/stk" ]]
 then
-    echo "create pull request to master/stk and develop"
+    echo "create pull request to main/stk and develop"
     curl --request POST \
         --url "https://api.bitbucket.org/2.0/repositories/mingchi/frontend-web/pullrequests" \
         --header "Accept: application/json" \
@@ -171,7 +171,7 @@ then
           },
           "destination": {
             "branch": {
-              "name": "master/stk"
+              "name": "main/stk"
             }
           }
         }'
@@ -195,7 +195,7 @@ then
         }'
 elif [[ "$BITBUCKET_BRANCH" == "hotfix/cm" ]]
 then
-    echo "create pull request to master/cm and develop"
+    echo "create pull request to main/cm and develop"
     curl --request POST \
         --url "https://api.bitbucket.org/2.0/repositories/mingchi/frontend-web/pullrequests" \
         --header "Accept: application/json" \
@@ -210,7 +210,7 @@ then
           },
           "destination": {
             "branch": {
-              "name": "master/cm"
+              "name": "main/cm"
             }
           }
         }'
@@ -249,7 +249,7 @@ then
           },
           "destination": {
             "branch": {
-              "name": "master/vivipic"
+              "name": "main/vivipic"
             }
           }
         }'

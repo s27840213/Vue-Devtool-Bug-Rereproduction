@@ -1048,7 +1048,7 @@ pipelines:
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
-              name: "create pull request to qa (Vivipic)"
+              name: "pull request to qa (Vivipic)"
               trigger: manual
               condition:
                 changesets:
@@ -1060,7 +1060,7 @@ pipelines:
               script:
                 - ./tools/bash/pr_develop_to_qa.sh
           - step:
-              name: "create pull request to master/stk (Vivisticker)"
+              name: "pull request to main/stk (Vivisticker)"
               trigger: manual
               condition:
                 changesets:
@@ -1072,7 +1072,7 @@ pipelines:
               script:
                 - ./tools/bash/pr_develop_to_stk.sh
           - step:
-              name: "create pull request to master/cm (Charmix)"
+              name: "pull request to main/cm (Charmix)"
               trigger: manual
               condition:
                 changesets:
