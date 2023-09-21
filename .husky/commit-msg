@@ -10,7 +10,7 @@ echo ""
 
 # ^ - start of regular expression
 # $ - end of regular expression
-valid_branch_regex="^(feature\/.+|fix\/.+|test\/.+|develop|master|hotfix)$"
+valid_branch_regex="^(feature\/.+|fix\/.+|test\/.+|hotfix\/.+|main\/(cm|stk|vivipic)|develop|master|hotfix)$"
 
 if [[ ! $local_branch =~ $valid_branch_regex ]]
 then
