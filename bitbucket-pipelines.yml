@@ -967,7 +967,7 @@ pipelines:
                 DELETE_FLAG: "true"
       - step:
           name: "deploy prod"
-          deployment: production
+          deployment: vivipicprod
           trigger: manual
           script:
             - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -1021,7 +1021,7 @@ pipelines:
                 - projects/stk/node_modules/**
       - step:
           name: "deploy vivisticker to prod"
-          deployment: production
+          deployment: stkprod
           trigger: manual
           script:
             - pipe: atlassian/aws-s3-deploy:1.1.0
