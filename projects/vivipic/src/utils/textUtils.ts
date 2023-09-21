@@ -4,7 +4,7 @@ import { ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import { LayerType } from '@/store/types'
-import { autoResizePipeLine, autoResizePipeLineSync, IInitSize, IMultiStageRunResult } from '@/utils/autoResizeUtils'
+import { IInitSize, IMultiStageRunResult, autoResizePipeLine, autoResizePipeLineSync } from '@/utils/autoResizeUtils'
 import controlUtils from '@/utils/controlUtils'
 import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import mappingUtils from '@/utils/mappingUtils'
@@ -28,6 +28,8 @@ export interface ITextHW {
   height: number
   spanDataList: DOMRect[][][]
 }
+
+export const SYSTEM_FONTS = ['-apple-system', 'Apple Color Emoji']
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -842,6 +844,10 @@ class TextUtils {
     })
   }
 
+  isAppleColorEmoji(font: string) {
+    return font === 'YepeErhdbqhfT4iwUvmH'
+  }
+
   async untilFontLoadedForPage(page: IPage, toSetFlag = false): Promise<void> {
     const setFlagId = generalUtils.generateRandomString(12)
     if (toSetFlag) {
@@ -913,16 +919,25 @@ class TextUtils {
   }
 
   async untilFontLoadedForP(paragraph: IParagraph): Promise<void> {
-    const fontList = cssConverter.getFontFamily(paragraph.styles.font as string).replace(/\s+/g, '').split(',').filter(id => id !== '-apple-system')
-    await Promise.all([
-      (async (): Promise<void> => {
-        const valid = await store.dispatch('text/checkFontLoaded', fontList[0])
-        if (!valid) {
-          throw new Error(`Font ${fontList[0]} not added by 'addFont' before timeout`)
-        }
-      })(),
-      ...fontList.slice(1).map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem))
-    ]) // wait until the css files of fonts are loaded
+    const fontList = cssConverter.getFontFamily(paragraph.styles.font as string)
+      .split(',')
+      .map(font => font.trim())
+      .filter(id => !SYSTEM_FONTS.includes(id))
+    const isFontAppleColorEmoji = this.isAppleColorEmoji(paragraph.styles.font as string)
+    if (isFontAppleColorEmoji) {
+      await Promise.all(fontList.map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem)))
+    } else {
+      await Promise.all([
+        (async (): Promise<void> => {
+          const valid = await store.dispatch('text/checkFontLoaded', fontList[0])
+          if (!valid) {
+            throw new Error(`Font ${fontList[0]} not added by 'addFont' before timeout`)
+          }
+        })(),
+        ...fontList.slice(1).map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem))
+      ])
+    }
+    // wait until the css files of fonts are loaded
     const allCharacters = paragraph.spans.flatMap(s => this.splitter.splitGraphemes(s.text))
     await Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
   }
