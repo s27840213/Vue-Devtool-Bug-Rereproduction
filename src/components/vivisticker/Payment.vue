@@ -72,12 +72,13 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
 import ToggleBtn from '@/components/global/ToggleBtn.vue'
-import { IPaymentPending, IPrices } from '@/interfaces/vivisticker'
+import { IPaymentPending, IPrices, isV1_42 } from '@/interfaces/vivisticker'
+import constantData from '@/utils/constantData'
 import networkUtils from '@/utils/networkUtils'
 import vivistickerUtils, { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface CarouselItem {
@@ -109,6 +110,7 @@ export default defineComponent({
       idxCurrImg: 0,
       planSelected: 'annually',
       isTrialToggled: false,
+      defaultTrialToggled: false,
       isPanelUp: false,
       canShow: false,
       initPanelUp: false,
@@ -170,7 +172,10 @@ export default defineComponent({
     }
   },
   created() {
-    if (this.payment.trialCountry.includes(this.$i18n.locale) || this.isOldPrice) this.isTrialToggled = true
+    const userInfo = vivistickerUtils.getUserInfoFromStore()
+    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(this.$i18n.locale)
+    this.defaultTrialToggled = this.payment.trialCountry.includes(locale) || this.isOldPrice
+    this.isTrialToggled = this.defaultTrialToggled
   },
   mounted() {
     const at = new AnyTouch((this.$refs.chevron as HTMLElement))
@@ -273,7 +278,7 @@ export default defineComponent({
     handleBtnPlanClick(key: string) {
       this.planSelected = key
       if (key === 'monthly') this.isTrialToggled = false
-      else if (key === 'annually' && (this.payment.trialCountry.includes(this.$i18n.locale) || this.isOldPrice)) this.isTrialToggled = true
+      else if (key === 'annually') this.isTrialToggled = this.defaultTrialToggled
     },
     handleSubscribe(option: string, timeout?: number) {
       if (!networkUtils.check()) {

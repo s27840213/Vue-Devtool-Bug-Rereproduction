@@ -1243,6 +1243,22 @@ class ConstantData {
     }
     return res as IStickerVideoUrls
   }
+
+  // map i18n locale to ISO 3166-1 alpha-3
+  countryMap = new Map(
+    [
+      ['us', 'USA'],
+      ['jp', 'JPN'],
+      ['tw', 'TWN'],
+    ]
+  )
+
+  // map country code to currency
+  currencyMap = new Map([
+    ['USA', 'USD'],
+    ['JPN', 'JPY'],
+    ['TWN', 'TWD'],
+  ])
 }
 
 export default new ConstantData()

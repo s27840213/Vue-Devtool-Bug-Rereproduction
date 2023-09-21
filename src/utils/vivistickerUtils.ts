@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -111,12 +111,6 @@ const MYDESIGN_TAGS = [{
   name: 'NN0002',
   tab: 'image'
 }] as IMyDesignTag[]
-
-export const CURRENCY_FORMATTERS = {
-  TWD: (value: string) => `${value}元`,
-  USD: (value: string) => `$${(+value).toFixed(2)}`,
-  JPY: (value: string) => `¥${value}円(税込)`
-} as { [key: string]: (value: string) => string }
 
 class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
@@ -294,10 +288,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.STANDALONE_USER_INFO.locale = locale
   }
 
-  async setDefaultPrices(locale = 'us') {
+  async setDefaultPrices() {
+    const userInfo = this.getUserInfoFromStore()
+    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(i18n.global.locale) ?? 'USA'
     const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
     const subscribeInfo = await this.getState('subscribeInfo')
-    store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] ?? defaultPrices.us })
+    store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
@@ -1469,10 +1465,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
     const isSubscribed = subscribe === '1'
-    if (Object.keys(CURRENCY_FORMATTERS).includes(priceCurrency)) {
-      monthly.priceText = CURRENCY_FORMATTERS[priceCurrency](monthly.priceValue)
-      annually.priceText = CURRENCY_FORMATTERS[priceCurrency](annually.priceValue)
-    }
 
     const subscribeInfo = {
       subscribe: isSubscribed,
@@ -1480,11 +1472,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         currency: priceCurrency,
         monthly: {
           value: parseFloat(monthly.priceValue),
-          text: monthly.priceText
+          text: this.formatPrice(monthly.priceValue, priceCurrency, monthly.priceText)
         },
         annually: {
           value: parseFloat(annually.priceValue),
-          text: annually.priceText
+          text: this.formatPrice(annually.priceValue, priceCurrency, annually.priceText)
         }
       }
     }
@@ -1686,6 +1678,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   setLoadingOverlay(msgs: string[]) {
     this.setLoadingOverlayMsgs(msgs)
     this.setLoadingOverlayShow(true)
+  }
+
+  formatPrice(price: number | string, currency: string, fallbackText?: string) {
+    const currencyFormatters = {
+      TWD: (value: string) => `${value}元`,
+      USD: (value: string) => `$${(+value).toFixed(2)}`,
+      JPY: (value: string) => `¥${value}円(税込)`
+    } as { [key: string]: (value: string) => string }
+    if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
+    return currencyFormatters[currency](price.toString())
   }
 }
 
