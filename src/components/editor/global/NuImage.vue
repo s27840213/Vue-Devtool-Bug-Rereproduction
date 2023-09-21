@@ -462,7 +462,7 @@ export default defineComponent({
       const dpiRatio = pageUtils.getImageDpiRatio(this.page)
       renderW *= dpiRatio
       renderH *= dpiRatio
-      return imageUtils.getSrcSize(srcObj, imageUtils.getSignificantDimension(renderW, renderH) * (this.pageScaleRatio * 0.01))
+      return imageUtils.getSrcSize(srcObj, imageUtils.getSignificantDimension(renderW, renderH) * (this.pageScaleRatio * 0.01) * this.contentScaleRatio)
     },
     isBlurImg(): boolean {
       return !!this.config.styles.adjust?.blur
