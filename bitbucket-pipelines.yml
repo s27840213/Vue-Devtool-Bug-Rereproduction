@@ -1246,6 +1246,11 @@ pipelines:
                 - projects/*/node_modules/**
       - parallel:
           - step:
+              name: "pull request to all project"
+              trigger: manual
+              script:
+                - ./tools/bash/pr_hotfix_to_all.sh
+          - step:
               name: "pull request to main/vivipic (Vivipic)"
               trigger: manual
               condition:
