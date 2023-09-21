@@ -41,6 +41,10 @@ export interface IEditorState {
   currSubSelectedInfo: ICurrSubSelectedInfo,
   isColorPanelOpened: boolean,
   isMoving: boolean,
+  /**
+   * controlState indicates the type of control for current layer
+   */
+  controlState: 'move' | 'resize' | 'scale' | 'rotate' | 'pinch' | ''
   currSelectedResInfo: Record<string, never> | {
     userName: string,
     userLink: string,

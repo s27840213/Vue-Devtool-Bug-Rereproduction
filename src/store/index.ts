@@ -132,7 +132,8 @@ const getDefaultState = (): IEditorState => ({
   isPageScaling: false,
   isGettingDesign: false,
   showGlobalErrorModal: false,
-  newTemplateShownMode: true
+  newTemplateShownMode: true,
+  controlState: ''
 })
 
 const state = getDefaultState()
@@ -346,6 +347,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getIsLargeDesktop(state: IEditorState) {
     return state.isLargeDesktop
   },
+  getControlState(state: IEditorState) {
+    return state.controlState
+  }
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -1131,7 +1135,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isLargeDesktop(state: IEditorState, boolean: boolean) {
     state.isLargeDesktop = boolean
-  },
+  }
 }
 
 type IStoreRoot = IEditorState & {

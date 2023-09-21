@@ -5,6 +5,7 @@ div(class="editor-view" v-touch
     @wheel="handleWheel"
     @scroll="!inBgRemoveMode ? scrollUpdate() : null"
     @pointerdown="selectStart"
+    @pointerleave="removePointer"
     @mousewheel="handleWheel"
     @pinch="pinchHandler"
     ref="editorView")
@@ -54,6 +55,7 @@ import mathUtils from '@/utils/mathUtils'
 import modalUtils from '@/utils/modalUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -326,6 +328,7 @@ export default defineComponent({
       }
     },
     selectStart(e: PointerEvent) {
+      this.recordPointer(e)
       if (!e.isPrimary) return
       e.stopPropagation()
       if (this.hasCopiedFormat) {
@@ -394,7 +397,12 @@ export default defineComponent({
         bottom: editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
       }
     },
-    // eslint-disable-next-line
+    recordPointer(e: PointerEvent) {
+      pointerEvtUtils.addPointer(e)
+    },
+    removePointer(e: PointerEvent) {
+      pointerEvtUtils.removePointer(e.pointerId)
+    },
     pinchHandler(e: AnyTouchEvent) {
       if (this.isHandlingEdgeReach || !this.$store.getters['user/isAdmin']) return
 
