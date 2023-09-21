@@ -1,0 +1,14 @@
+{
+  "semi": false,
+  "tabWidth": 2,
+  "singleQuote": true,
+  "printWidth": 100,
+  "pugSingleQuote": false,
+  "pugAttributeSeparator": "none",
+  "pugClassNotation": "attribute",
+  "pugIdNotation": "as-is",
+  "pugFramework": "vue",
+  "pugBracketSameLine": true,
+  "pugWrapAttributesThreshold": 1,
+  "plugins": ["@prettier/plugin-pug"]
+}

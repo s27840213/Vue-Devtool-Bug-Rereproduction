@@ -1,0 +1,338 @@
+<template lang="pug">
+div(class="color-panel"
+    :style="bgStyle"
+    v-click-outside="vcoConfig"
+    ref="colorPanel")
+  img(v-if="showPanelBtn" class="color-panel__btn"
+    :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
+    @click="closePanel()")
+  div(class="color-panel__scroll" :class="{'p-0': noPadding}")
+    //- Recently colors
+    div(class="color-panel__colors"
+        :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+      div(class="text-left")
+        div(class="flex-center")
+          svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
+                iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
+                class="mr-5" @click="lessRecently()")
+          span {{$t('NN0679')}}
+        span(v-if="!showAllRecentlyColor" class="btn-XS" @click="moreRecently()") {{$t('NN0082')}}
+      div
+        color-btn(color="add" :active="openColorPicker"
+                  @click="openColorPanel($event)")
+        color-btn(v-for="color in recentlyColors" :color="color" :key="color"
+                  :active="color === selectedColor"
+                  @click="handleColorEvent(color)")
+    template(v-if="!showAllRecentlyColor")
+      //- Document colors
+      div(class="color-panel__colors"
+          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+        div(class="text-left")
+          span {{$t('NN0091')}}
+        div
+          color-btn(v-for="color in documentColors" :color="color" :key="color"
+                    :active="color === selectedColor"
+                    @click="handleColorEvent(color)")
+      //- Preset Colors
+      div(class="color-panel__colors"
+          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+        div(class="text-left")
+          span {{$t('NN0089')}}
+        div
+          color-btn(v-for="color in defaultColors" :color="color" :key="color"
+                    :active="color === selectedColor"
+                    @click="handleColorEvent(color)")
+          img(v-if="selectingBg"
+            class="full-width full-height"
+            src="@/assets/img/svg/transparent.svg"
+            @click="handleColorEvent('#ffffff00')")
+  color-picker(v-if="openColorPicker"
+    class="color-panel__color-picker"
+    ref="colorPicker"
+    v-click-outside="closeColorModal"
+    :currentColor="currentColor"
+    @update="handleDragUpdate"
+    @final="handleChangeStop")
+</template>
+
+<script lang="ts">
+import ColorPicker from '@/components/ColorPicker.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
+import layerUtils from '@/utils/layerUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
+
+export default defineComponent({
+  name: 'ColorSlips',
+  props: {
+    // Defind some style or logic difference.
+    mode: {
+      type: String as PropType<'FunctionPanel' | 'PanelBG' | 'PanelColor'>,
+      required: true
+    },
+    /**
+     * @param allRecentlyControl - is used when you want to switch the all recently panel from parent component
+     */
+    allRecentlyControl: {
+      type: Boolean,
+      required: false
+    },
+    selectedColor: {
+      type: String,
+      default: ''
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
+  components: {
+    ColorPicker,
+    ColorBtn
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
+  emits: ['selectColor', 'selectColorEnd', 'toggleColorPanel', 'openColorPicker', 'openColorMore'],
+  data() {
+    return {
+      vcoConfig: {
+        handler: () => { /**/ },
+        middleware: null as unknown,
+        events: ['dblclick', 'click', 'contextmenu']
+        // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
+      },
+      openColorPicker: false,
+      lastPickColor: '',
+      showAllRecently: false
+    }
+  },
+  created() {
+    this.vcoConfig.middleware = this.middleware
+    this.vcoConfig.handler = this.clickOutside
+  },
+  mounted() {
+    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
+    this.setIsColorPanelOpened(true)
+    this.initRecentlyColors()
+  },
+  unmounted() {
+    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
+    this.setIsColorPanelOpened(false)
+  },
+  computed: {
+    ...mapGetters({
+      documentColors: 'color/getDocumentColors',
+      _defaultColors: 'color/getDefaultColors',
+      defaultBgColor: 'color/getDefaultBgColors',
+      _recentlyColors: 'color/getRecentlyColors',
+      stkRecentlyBgColors: 'vivisticker/getRecentlyBgColors',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      currPanel: 'getCurrSidebarPanelType',
+      getBackgroundColor: 'getBackgroundColor'
+    }),
+    bgStyle(): Record<string, string> {
+      return this.mode === 'FunctionPanel' ? {
+        background: '#2C2F43'// gray-1-5
+      } : {
+        background: 'transparent'
+      }
+    },
+    whiteTheme(): boolean {
+      return ['PanelColor'].includes(this.mode)
+    },
+    noPadding(): boolean {
+      return ['PanelColor', 'PanelBG'].includes(this.mode)
+    },
+    showPanelBtn(): boolean {
+      return !['PanelColor', 'PanelBG'].includes(this.mode)
+    },
+    currentColor(): string {
+      return this.mode === 'PanelBG'
+        ? this.currPage.backgroundColor
+        : colorUtils.currColor
+    },
+    showAllRecentlyColor(): boolean {
+      return ['PanelColor'].includes(this.mode) ? this.allRecentlyControl : this.showAllRecently
+    },
+    recentlyColors(): string[] {
+      if (colorUtils.currEvent === ColorEventType.background) return this.stkRecentlyBgColors
+      return this.showAllRecentlyColor
+        ? this._recentlyColors
+        : this._recentlyColors.slice(0, 20)
+    },
+    selectingBg(): boolean {
+      return this.mode === 'PanelBG' || colorUtils.currEvent === ColorEventType.background
+    },
+    defaultColors(): unknown {
+      return this.selectingBg ? this.defaultBgColor : this._defaultColors
+    },
+  },
+  methods: {
+    ...mapMutations({
+      updateDocumentColors: 'UPDATE_documentColors',
+      setIsColorPanelOpened: 'SET_isColorPanelOpened'
+    }),
+    ...mapActions({
+      initRecentlyColors: 'color/initRecentlyColors',
+      addRecentlyColors: 'color/addRecentlyColors'
+    }),
+    handleColorEvent(color: string) {
+      if (this.mode === 'PanelBG') {
+        this.$emit('selectColor', color)
+      } else {
+        colorUtils.event.emit(colorUtils.currEvent, color)
+        colorUtils.event.emit(colorUtils.currStopEvent, color)
+        colorUtils.setCurrColor(color)
+      }
+      this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color })
+    },
+    handleDragUpdate(color: string) {
+      window.requestAnimationFrame(() => {
+        if (this.mode === 'PanelBG') {
+          this.$emit('selectColor', color)
+        } else {
+          colorUtils.event.emit(colorUtils.currEvent, color)
+          colorUtils.setCurrColor(color)
+        }
+      })
+      this.lastPickColor = color
+    },
+    handleChangeStop(color: string) {
+      window.requestAnimationFrame(() => {
+        if (this.mode === 'PanelBG') {
+          this.$emit('selectColorEnd')
+        } else {
+          colorUtils.event.emit(colorUtils.currStopEvent, color)
+        }
+      })
+    },
+    closeColorModal(): void {
+      if (this.openColorPicker && this.lastPickColor !== '') {
+        this.addRecentlyColors(this.lastPickColor)
+      }
+      this.openColorPicker = false
+    },
+    clickOutside(): void {
+      this.closeColorModal()
+      this.closePanel()
+    },
+    middleware(event: MouseEvent): boolean {
+      const target = event.target as HTMLElement
+      return this.mode === 'PanelBG' ? false // Never close in PanelBG
+        // Don't close when selecting color target
+        : !(target.matches('.function-panel .color-btn *') || // Object, BG, text effect color
+        target.matches('.function-panel .text-setting__color *')) // Text color
+    },
+    closePanel(): void {
+      editorUtils.toggleColorSlips(false)
+    },
+    openColorPanel(event: MouseEvent) {
+      if (this.$isTouchDevice()) {
+        this.$emit('openColorPicker')
+        return
+      }
+      this.openColorPicker = true
+      this.$nextTick(() => {
+        const colorPanel = this.$refs.colorPanel as HTMLElement
+        const colorPicker = (this.$refs.colorPicker as any).$el as HTMLElement
+        const [width, height] = [colorPicker.offsetWidth, colorPicker.offsetHeight]
+        const [vw, vh] = [window.outerWidth || document.documentElement.clientWidth, window.outerHeight || document.documentElement.clientHeight]
+        const mousePos = mouseUtils.getMouseAbsPoint(event)
+        const { top, left, right } = (event.target as HTMLElement).getBoundingClientRect()
+
+        const margin = 10
+        const panelTop = colorPanel.getBoundingClientRect().top
+        let topPos = top - panelTop
+        if (top + height > vh) {
+          topPos -= ((top + height) - vh)
+        }
+
+        const pickerPos = {
+          right: `${colorPanel.getBoundingClientRect().right - right - width - margin}px`,
+          top: `${topPos}px`
+        }
+        colorPicker.style.right = pickerPos.right ?? '0px'
+        colorPicker.style.top = pickerPos.top
+      })
+    },
+    lessRecently() { this.showAllRecently = false },
+    moreRecently() {
+      this.$emit('openColorMore')
+      this.showAllRecently = true
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.color-panel {
+  @include body-MD;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: setZindex(color-panel);
+  box-sizing: border-box;
+  filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
+  &__scroll {
+    .mobile-panel & { // only for mobile editor
+      @include no-scrollbar;
+    }
+    @include hover-scrollbar(dark);
+    box-sizing: border-box;
+    height: 100%;
+    &:not(.p-0) {
+      padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
+    }
+    > div + div {
+      margin-top: 20px;
+    }
+  }
+  &__brand-settings {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
+  &__btn {
+    position: absolute;
+    top: 0;
+    transform: translate(-50%, -100%);
+  }
+  &__colors {
+    > div:nth-child(1) {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      @include body-SM;
+      color: setColor(gray-2);
+      margin-bottom: 16px;
+    }
+    > div:nth-child(2) {
+      width: 100%;
+      display: grid;
+      grid-auto-rows: auto;
+      grid-template-columns: repeat(7, 1fr);
+      column-gap: 12px;
+      row-gap: 12px;
+      padding: 0 12px 4px 12px;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+  }
+
+  &__color-picker {
+    position: absolute;
+    z-index: setZindex(color-panel);
+  }
+}
+</style>

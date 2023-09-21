@@ -1,0 +1,275 @@
+@use '@/assets/scss/utils/variables.scss' as *;
+@use '@/assets/scss/utils/functions.scss' as *;
+@use '@/assets/scss/utils/formatStyle.scss' as *;
+
+@mixin size($w, $h: $w) {
+  width: $w;
+  height: $h;
+}
+
+@mixin flexCenter() {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin layout-mobile {
+  @media screen and (max-aspect-ratio: 1/1) {
+    @content;
+  }
+}
+
+// for vivisticker
+@mixin layout-tablet {
+
+  @media screen and (min-width: 768px) and (orientation: portrait),
+  screen and (min-height: 768px) and (orientation: landscape) {
+    @content;
+  }
+}
+
+// for vivisticker
+@mixin layout-landscape {
+  @media (orientation: landscape) {
+    @content;
+  }
+}
+
+// for vivisticker
+@mixin rwd-container($pd: 24px, $pt: 5%, $pl: 18%) {
+  padding: 0 $pd;
+
+  @include layout-tablet {
+    padding: 0 $pt;
+
+    @include layout-landscape {
+      padding: 0 $pl;
+    }
+  }
+}
+
+@mixin firefoxOnly {
+
+  // Only for Firefox, https://stackoverflow.com/a/32455002
+  @supports (-moz-appearance: none) {
+    @content;
+  }
+}
+
+@mixin safariOnly {
+
+  // Only for Safari, https://stackoverflow.com/a/25975282
+  @supports (font: -apple-system-body) and (-webkit-appearance: none) {
+    @content;
+  }
+}
+
+@mixin no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* IE and Edge */
+  -ms-overflow-style: none !important;
+  /* Firefox */
+  scrollbar-width: none !important;
+}
+
+// Push scroll bar to outside. Ex: Categorylist
+@mixin push-scrollbar10 {
+  box-sizing: border-box;
+  margin-right: -10px;
+
+  // Firefox & Safari mobile never display scrollbar, cancel minus margin.
+  .mobile-panel & {
+    @include firefoxOnly {
+      margin-right: 0;
+    }
+
+    @include safariOnly {
+      margin-right: 0;
+    }
+  }
+}
+
+@mixin hover-scrollbar($theme: light, $showX: false) {
+  // $theme == light (default theme)
+  $thumbColor: setColor(gray-3);
+  $trackColor: white;
+  $scrollbarWidth: 12px;
+  $borderRadius: 6px;
+
+  @if $theme ==dark {
+    $thumbColor: setColor(gray-4);
+    $trackColor: setColor(sidebar-panel);
+    $scrollbarWidth : 10px;
+    $borderRadius: 5px;
+  }
+
+  overflow-y: scroll;
+
+  // If in vue-recycle-scroller, overwrite its overflow-y: auto css.
+  &.vue-recycle-scroller.direction-vertical:not(.page-mode) {
+    overflow-y: scroll;
+  }
+
+  @if $showX ==true {
+    overflow-x: scroll;
+  }
+
+  @else {
+    overflow-x: hidden;
+  }
+
+  // Show scrollbar only when hovering, for Webkit
+  &::-webkit-scrollbar {
+    width: $scrollbarWidth;
+    height: $scrollbarWidth;
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: $borderRadius;
+    background-color: $thumbColor;
+    visibility: hidden;
+    border: 3px solid $trackColor;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    visibility: visible;
+  }
+
+  &::-webkit-scrollbar-corner {
+    // Coner of scrollbar x and y.
+    background-color: transparent;
+  }
+
+  // Show scrollbar only when hovering, for Firefox
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+
+    &:hover {
+      scrollbar-color: $thumbColor transparent;
+    }
+  }
+}
+
+@mixin popup-window {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000000a1;
+  z-index: setZindex("popup");
+}
+
+@mixin default-input {
+  @include body-SM;
+  box-sizing: border-box;
+  height: 44px;
+  padding: 10px;
+  border-radius: 4px;
+  color: setColor(gray-2);
+  border: 1px solid setColor(gray-4);
+
+  &:focus {
+    border-color: setColor(blue-1);
+  }
+
+  &[invalid="true"] {
+    border-color: setColor(red);
+  }
+}
+
+@mixin progressSlider($height: 5px, $thumbSize: 12px, $marginTop: -3.5px, $thumbColor: white, $scale: false, $border: none, $boxShadow: 0px 0px 8px rgba(60, 60, 60, 0.31)) {
+  --base: 0;
+  height: $thumbSize;
+  display: block;
+  appearance: none;
+  outline: none;
+  background: transparent;
+
+  &::-webkit-slider-runnable-track {
+    height: $height;
+    background: linear-gradient(to right, var(--upper-color) 0 var(--base), var(--lower-color) var(--base) var(--progress), var(--upper-color) var(--progress) 100%);
+    border-radius: calc($height / 2);
+  }
+
+  &::-moz-range-track {
+    height: $height;
+    background: linear-gradient(to right, var(--upper-color) 0 var(--base), var(--lower-color) var(--base) var(--progress), var(--upper-color) var(--progress) 100%);
+    border-radius: calc($height / 2);
+  }
+
+  &::-webkit-progress-bar {
+    background-color: var(--lower-color);
+  }
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: $thumbSize;
+    height: $thumbSize;
+    border-radius: 50%;
+    background-color: $thumbColor;
+    box-shadow: $boxShadow;
+    border: $border;
+    transition: 0.2s;
+    margin-top: $marginTop;
+    position: relative;
+    cursor: pointer;
+  }
+
+
+  &::-moz-range-thumb {
+    appearance: none;
+    width: $thumbSize;
+    height: $thumbSize;
+    border-radius: 50%;
+    background-color: $thumbColor;
+    box-shadow: $boxShadow;
+    border: $border;
+    transition: 0.2s;
+    margin-top: $marginTop;
+    position: relative;
+    cursor: pointer;
+  }
+
+  @if $scale {
+    &::-webkit-slider-thumb:hover {
+      transform: scale(1.333);
+    }
+
+    &::-moz-range-thumb:hover {
+      transform: scale(1.333);
+    }
+  }
+}
+
+@mixin btn-action-mobile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 0.25rem;
+  background-color: setColor(gray-5);
+  color: setColor(gray-1);
+  transition: color 0.2s;
+
+  &:active {
+    color: setColor(blue-1);
+    font-weight: bold;
+
+    &:deep(.svg-icon) {
+      color: setColor(blue-1);
+    }
+  }
+}
+
+@mixin selection-border($width, $color: blue-1) {
+  box-shadow: 0 0 0 $width setColor($color);;
+}

@@ -1,0 +1,125 @@
+{
+	"pages": [
+		{
+			"pageIndex": 0,
+			"width": 1200,
+			"height": 900,
+			"backgroundColor": "#FFFFFF",
+			"name": "page1",
+			"layers": [
+				{
+					"pageIndex": 0,
+					"type": "shape",
+					"shapeType": "rectangle",
+					"styles": {
+						"color": "#C4C4C4",
+						"x": 343,
+						"y": 320,
+						"scale": 0,
+						"scaleX": 0,
+						"scaleY": 0,
+						"rotate": 0,
+						"width": 629,
+						"height": 629
+					}
+				},
+				{
+					"pageIndex": 0,
+					"type": "group",
+					"styles": {
+						"x": 327,
+						"y": 320,
+						"scale": 0,
+						"scaleX": 0,
+						"scaleY": 0,
+						"rotate": 0,
+						"width": 906,
+						"height": 1221
+					},
+					"layers": [
+						{
+							"pageIndex": 0,
+							"type": "shape",
+							"shapeType": "rectangle",
+							"styles": {
+								"color": "0xC4C4C4",
+								"x": 16,
+								"y": 0,
+								"scale": 0,
+								"scaleX": 0,
+								"scaleY": 0,
+								"rotate": 0,
+								"width": 629,
+								"height": 629
+							}
+						},
+						{
+							"pageIndex": 0,
+							"type": "shape",
+							"shapeType": "ellipse",
+							"styles": {
+								"radius": "453 / 453",
+								"color": "0xE12323",
+								"x": 0,
+								"y": 315,
+								"width": 906,
+								"height": 906
+							}
+						}
+					]
+				},
+				{
+					"pageIndex": 0,
+					"type": "shape",
+					"shapeType": "ellipse",
+					"radius": "453 / 453",
+					"color": "#E12323",
+					"x": 327,
+					"y": 635,
+					"scale": 0,
+					"scaleX": 0,
+					"scaleY": 0,
+					"rotate": 0,
+					"width": 906,
+					"height": 906
+				},
+				{
+					"pageIndex": 0,
+					"type": "text",
+					"text": "測試用文字",
+					"style": {
+						"font": "Mulish",
+						"weight": "bold",
+						"align": "left",
+						"lineHeight": 20,
+						"color": "#000000",
+						"size": 72,
+						"x": 600,
+						"y": 806,
+						"scale": 0,
+						"scaleX": 0,
+						"scaleY": 0,
+						"rotate": 0,
+						"width": 200,
+						"height": 40
+					}
+				},
+				{
+					"pageIndex": 0,
+					"type": "image",
+					"src": "img.png",
+					"style": {
+						"x": 274,
+						"y": 666,
+						"scale": 0,
+						"scaleX": 0,
+						"scaleY": 0,
+						"rotate": 0,
+						"width": 300,
+						"height": 400
+					}
+				}
+			]
+		}
+	]
+}
