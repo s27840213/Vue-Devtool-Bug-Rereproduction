@@ -700,7 +700,7 @@ export default defineComponent({
         if (this.isAdjustImage) {
           imageUtils.imgLoadHandler(this.src, (img) => {
             this.handleIsTransparent(img)
-          })
+          }, { crossOrigin: true })
         }
       }
       this.initialized = true
