@@ -1,7 +1,9 @@
 import appJson from '@/assets/json/app.json'
-import i18n from '@/i18n'
+import i18n, { LocaleName } from '@/i18n'
 import { CustomWindow } from '@/interfaces/customWindow'
+import { IPrices } from '@/interfaces/vivisticker'
 import store from '@/store'
+import constantData from '@/utils/constantData'
 import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
@@ -135,7 +137,7 @@ const router = createRouter({
         logUtils.setLog('App Start')
         let argoError = false
         try {
-          const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
+          const status = (await fetch(`https://media.vivipic.cc/hello.txt?ver=${generalUtils.generateRandomString(12)}`)).status
           if (status !== 200) {
             argoError = true
             logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
@@ -159,14 +161,15 @@ const router = createRouter({
           locale = userInfo.locale
         }
         logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
-        i18n.global.locale = locale as 'jp' | 'us' | 'tw'
-        localStorage.setItem('locale', locale)
+        // locale = 'pt' // TODO: remove this line since it's only for testing
+        i18n.global.locale = locale as LocaleName
+        localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only disabled for testing
         const editorBg = userInfo.editorBg
         if (editorBg) {
           store.commit('vivisticker/SET_editorBg', editorBg)
         }
         picWVUtils.updateLocale(i18n.global.locale)
-        vivistickerUtils.setDefaultPrices(i18n.global.locale)
+        vivistickerUtils.setDefaultPrices()
 
         // document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
@@ -245,6 +248,35 @@ router.beforeEach(async (to, from, next) => {
       })
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
+
+    if (json.default_price && Object.keys(json.default_price).length) {
+      store.commit('vivisticker/UPDATE_payment', {
+        defaultPrices: Object.fromEntries(
+          Object.entries(
+            json.default_price.prices as { [key: string]: { monthly: number; annually: number } },
+          ).map(([locale, prices]) => {
+            const currency = constantData.currencyMap.get(locale) ?? 'USD'
+            return [
+              locale,
+              {
+                currency,
+                ...Object.fromEntries(
+                  Object.entries(prices).map(([plan, price]) => [
+                    plan,
+                    {
+                      value: price,
+                      text: vivistickerUtils.formatPrice(price, currency)
+                    },
+                  ]),
+                ),
+              },
+            ]
+          }),
+        ) as { [key: string]: IPrices },
+        trialDays: json.default_price.trial_days,
+        trialCountry: json.default_price.trial_country
+      })
+    }
 
     uploadUtils.setLoginOutput({
       upload_log_map: json.ul_log_map,

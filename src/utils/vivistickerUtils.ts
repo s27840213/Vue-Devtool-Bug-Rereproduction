@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -29,7 +29,7 @@ import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
-import textUtils from './textUtils'
+import textUtils, { SYSTEM_FONTS } from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
 
@@ -65,7 +65,6 @@ interface IUserSettingListOption {
   description: string
   icon?: string
   queryFunc?: (query: string) => boolean
-  first?: boolean
 }
 
 const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
@@ -76,13 +75,11 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
       description: '<P>Apple Emoji',
       icon: 'apple_emoji',
       queryFunc: (query: string) => SYSTEM_FONTS.includes(query)
-      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'zVUjQ0MaGOm7HOJXv5gB',
       description: '<P>Noto Color Emoji',
       icon: 'noto_color_emoji',
-      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'dLe1S0oDanIJjvty5RxG',
@@ -91,8 +88,6 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
     },
   ],
 }
-
-export const SYSTEM_FONTS = ['-apple-system', 'Apple Color Emoji']
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
@@ -144,7 +139,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getStateResult',
     'setStateDone',
     'subscribeInfo',
-    'internelError'
+    'internalError',
+    'validJsonResult'
   ]
 
   VVSTK_CALLBACKS = [
@@ -205,6 +201,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   get isPaymentDisabled(): boolean {
     return !this.checkVersion('1.26')
+  }
+
+  get isOldPrice(): boolean {
+    return !this.checkVersion('1.42')
   }
 
   get isTemplateSupported(): boolean {
@@ -288,43 +288,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.STANDALONE_USER_INFO.locale = locale
   }
 
-  setDefaultPrices(locale = 'us') {
-    const defaultPrices = {
-      tw: {
-        currency: 'TWD',
-        monthly: {
-          value: 140,
-          text: '140元'
-        },
-        annually: {
-          value: 899,
-          text: '899元'
-        }
-      },
-      us: {
-        currency: 'USD',
-        monthly: {
-          value: 4.99,
-          text: '$4.99'
-        },
-        annually: {
-          value: 35.99,
-          text: '$35.99'
-        }
-      },
-      jp: {
-        currency: 'JPY',
-        monthly: {
-          value: 600,
-          text: '¥600円(税込)'
-        },
-        annually: {
-          value: 4090,
-          text: '¥4090円(税込)'
-        }
-      }
-    } as { [key: string]: IPrices }
-    store.commit('vivisticker/UPDATE_payment', { prices: defaultPrices[locale] ?? defaultPrices.us })
+  async setDefaultPrices() {
+    const userInfo = this.getUserInfoFromStore()
+    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(i18n.global.locale) ?? 'USA'
+    const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
+    const subscribeInfo = await this.getState('subscribeInfo')
+    store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
@@ -395,7 +364,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   screenshotDone(data: { flag: string, params: string, action: string }) {
-    this.handleCallback(`screenshot-${data.params}`, data)
+    const query = data.params.startsWith('type=json') ? data.params.replace(/'/g, '\\\'') : data.params
+    this.handleCallback(`screenshot-${query}`, data)
   }
 
   cloneImageDone(data: any) {
@@ -821,24 +791,34 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (info.modelName === undefined) { // if modelName isn't included, set '' as default
       info.modelName = ''
     }
+    let mappedLocale = localeUtils.mapNativeLocale(info.locale)
+    if (mappedLocale === undefined) {
+      mappedLocale = localeUtils.defaultLocale
+      this.updateLocale(mappedLocale) // if default fallback happens, update Native locale accordingly.
+    }
+    info.locale = mappedLocale
     // after previous handle, info is assured to have modelName
     store.commit('vivisticker/SET_userInfo', info as IUserInfo)
     this.handleCallback('login')
   }
 
-  async updateLocale(locale: string): Promise<void> {
+  async updateLocale(locale: string): Promise<boolean> {
     localStorage.setItem('locale', locale) // set locale to localStorage whether standalone mode or not
     if (this.isStandaloneMode) {
-      return
+      return true
     }
-    await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+    const data = await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+    return data?.flag === '0'
   }
 
-  updateInfoDone(data: { flag: string, msg?: string }) {
+  updateInfoDone(data: { flag: '0' } | { flag: '1', msg: string }) {
     if (data.flag !== '0') {
-      this.errorMessageMap.locale = data.msg ?? ''
+      this.errorMessageMap.locale = data.msg
+      if (data.msg.includes('fail to update locale')) {
+        this.showUpdateModal()
+      }
     }
-    this.handleCallback('update-user-info')
+    this.handleCallback('update-user-info', data)
   }
 
   async listAsset(key: string): Promise<void> {
@@ -967,6 +947,37 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback(`getState-${data.key}`, data.value ? JSON.parse(data.value) : undefined)
   }
 
+  async isValidJson(data: object): Promise<boolean> {
+    if (!this.checkVersion('1.42')) return true
+    const id = generalUtils.generateRandomString(8)
+    const valid = ((await this.callIOSAsAPI('IS_VALID_JSON', { object: data, id }, `checkJsonValid-${id}`))?.valid ?? '0')
+    return valid === '1'
+  }
+
+  validJsonResult(data: { valid: string, id: string }) {
+    this.handleCallback(`checkJsonValid-${data.id}`, data)
+  }
+
+  async uploadReportedDesign() {
+    const pages = pageUtils.getPages
+    const editorType = store.getters['vivisticker/getEditorType']
+    const editingDesignId = store.getters['vivisticker/getEditingDesignId']
+    const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
+    try {
+      const design = {
+        pages: uploadUtils.prepareJsonToUpload(pages),
+        editorType,
+        id: editingDesignId,
+        assetInfo
+      } as ITempDesign
+      await uploadUtils.uploadReportedDesign(design, { id: design.id })
+    } catch (error: any) {
+      logUtils.setLogAndConsoleLog('uploading reported design failed:', { editorType, id: editingDesignId, assetInfo, pages })
+      logUtils.setLogForError(error as Error)
+      logUtils.setLogAndConsoleLog('skip uploading and go on')
+    }
+  }
+
   async sendCopyEditorCore(action: string): Promise<string> {
     if (this.isStandaloneMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
@@ -1087,6 +1098,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async saveAsMyDesign(): Promise<void> {
+    const isValidJson = await this.isValidJson(uploadUtils.prepareJsonToUpload(pageUtils.getPages))
+    if (!isValidJson) {
+      logUtils.setLog('Saving design as myDesign failed, because the design json is invalid')
+      this.uploadReportedDesign()
+      this.setLoadingOverlayShow(false)
+      throw new Error('save design failed')
+    }
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
     const onThumbError = async (flag: string, saveDesign: boolean) => {
@@ -1432,7 +1450,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
-    const isPro = store.getters['vivisticker/getIsSubscribed']
+    const isPro = store.getters['vivisticker/getPayment'].subscribe
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)
       return false
@@ -1448,37 +1466,30 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
     const isSubscribed = subscribe === '1'
-    const currencyFormaters = {
-      TWD: (value: string) => `${value}元`,
-      USD: (value: string) => `$${(+value).toFixed(2)}`,
-      JPY: (value: string) => `¥${value}円(税込)`
-    } as { [key: string]: (value: string) => string }
-    if (Object.keys(currencyFormaters).includes(priceCurrency)) {
-      monthly.priceText = currencyFormaters[priceCurrency](monthly.priceValue)
-      annually.priceText = currencyFormaters[priceCurrency](annually.priceValue)
-    }
 
-    store.commit('vivisticker/UPDATE_payment', {
+    const subscribeInfo = {
       subscribe: isSubscribed,
       prices: {
         currency: priceCurrency,
         monthly: {
           value: parseFloat(monthly.priceValue),
-          text: monthly.priceText
+          text: this.formatPrice(monthly.priceValue, priceCurrency, monthly.priceText)
         },
         annually: {
           value: parseFloat(annually.priceValue),
-          text: annually.priceText
+          text: this.formatPrice(annually.priceValue, priceCurrency, annually.priceText)
         }
       }
-    })
+    }
+
+    store.commit('vivisticker/UPDATE_payment', subscribeInfo)
     store.commit('vivisticker/SET_paymentPending', { info: false })
     this.getState('subscribeInfo').then(subscribeInfo => {
       if (subscribeInfo?.subscribe && !isSubscribed) {
         this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
       }
     })
-    this.setState('subscribeInfo', { subscribe: isSubscribed })
+    this.setState('subscribeInfo', subscribeInfo)
   }
 
   subscribeResult(data: ISubscribeResult) {
@@ -1497,7 +1508,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
     if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
-    this.setState('subscribeInfo', { subscribe: isSubscribed })
+    this.getState('subscribeInfo').then(subscribeInfo => {
+      this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
+    })
   }
 
   async registerSticker() {
@@ -1536,7 +1549,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return loadedFonts[face] ?? false
   }
 
-  internelError(data: { route: string, data: { [key: string]: any } }) {
+  internalError(data: { route: string, data: { [key: string]: any } }) {
     console.error(`Error occurs in App when processing ${data.route} with ${JSON.stringify(data.data)}`)
   }
 
@@ -1560,7 +1573,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
-          this.openFullPageVideo(['us', 'jp'].includes(i18n.global.locale) ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
+          this.openFullPageVideo(constantData.checkIfUseNewLogic() ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
           modalUtils.clearModalInfo()
         }
       }, undefined, {
@@ -1666,6 +1679,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   setLoadingOverlay(msgs: string[]) {
     this.setLoadingOverlayMsgs(msgs)
     this.setLoadingOverlayShow(true)
+  }
+
+  formatPrice(price: number | string, currency: string, fallbackText?: string) {
+    const currencyFormatters = {
+      TWD: (value: string) => `${value}元`,
+      USD: (value: string) => `$${(+value).toFixed(2)}`,
+      JPY: (value: string) => `¥${value}円(税込)`
+    } as { [key: string]: (value: string) => string }
+    if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
+    return currencyFormatters[currency](price.toString())
   }
 }
 

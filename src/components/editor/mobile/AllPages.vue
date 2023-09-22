@@ -25,7 +25,6 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import { globalQueue } from '@/utils/queueUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { floor } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -33,7 +32,6 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      screenWidth: 0,
       itemSize: 0
     }
   },
@@ -43,7 +41,6 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       pages: 'getPages',
-      getPagesPerRow: 'page/getPagesPerRow',
       allPageMode: 'mobileEditor/getMobileAllPageMode'
     }),
     btnStyle(): { [index: string]: string } {
@@ -54,20 +51,12 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.screenWidth = document.body.clientWidth - 130
     // 40 -> column gap, 64 -> padding
     this.itemSize = (document.body.clientWidth - 32 - 64) / 2 - 10
-    this._setPagesPerRow(floor(this.screenWidth / 180))
-    window.addEventListener('resize', () => {
-      this.screenWidth = document.body.clientWidth - 130
-      this._setPagesPerRow(floor(this.screenWidth / 180))
-    })
-
     globalQueue.batchNum = 10
   },
   methods: {
     ...mapMutations({
-      _setPagesPerRow: 'page/SET_PagesPerRow',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     addPage() {

@@ -44,6 +44,7 @@ div(class="menu" :style="rootStyles")
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import constantData, { IHeaderL1 } from '@/utils/constantData'
+import loginUtils from '@/utils/loginUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -84,8 +85,7 @@ export default defineComponent({
   },
   methods: {
     onLogoutClicked() {
-      localStorage.setItem('token', '')
-      window.location.href = '/'
+      loginUtils.logout()
     },
     close() { this.$emit('closeMenu') }
   }

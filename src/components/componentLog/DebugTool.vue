@@ -13,6 +13,7 @@ div(class="fps")
   div(class="fps__value")
     span(@click="showGraph") FPS: {{fps}}
     span(v-if="jsHeapSize !== -1") JS-Heap: {{jsHeapSize}}MB
+    span {{ `Current node env: ${currentEnv}` }}
     //- mobile-props-toggle(class="py-5" :title="'切換模板顯示樣式'" v-model="newTemplateShownMode")
 </template>
 
@@ -78,7 +79,8 @@ export default defineComponent({
       pause: false,
       graph: {} as IFpsGraph,
       valleys: [] as Valley[],
-      jsHeapSize: 0
+      jsHeapSize: 0,
+      currentEnv: process.env.NODE_ENV
     }
   },
   computed: {

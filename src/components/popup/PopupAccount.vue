@@ -32,6 +32,7 @@ div(class="popup-account text-left"
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
 import paymentData from '@/utils/constantData'
+import loginUtils from '@/utils/loginUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
@@ -72,8 +73,7 @@ export default defineComponent({
   },
   methods: {
     onLogoutClicked() {
-      localStorage.setItem('token', '')
-      window.location.href = '/'
+      loginUtils.logout()
     },
     closePopup() {
       this.$emit('close')
