@@ -669,8 +669,10 @@ export default defineComponent({
       if (type === 'main') {
         // detect if SVG image rendered
         const rendering = () => {
-          const elImg = this.$refs['adjust-image'] as SVGImageElement
+          const elImg = this.$refs['adjust-img'] as SVGImageElement
+          console.log(elImg)
           if (!elImg) return
+          console.log(elImg.width.baseVal.value, elImg.height.baseVal.value)
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
             if (this.priPrimaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
@@ -834,6 +836,7 @@ export default defineComponent({
     handleIsTransparent(_img?: HTMLImageElement) {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayer?.type ?? '')) return
       if (!this.$refs.img) return
+      console.trace(_img)
 
       const img = _img ?? this.$refs.img as HTMLImageElement
       const isTransparent = imageShadowUtils.isTransparentBg(img)
@@ -850,7 +853,7 @@ export default defineComponent({
         if (this.isAdjustImage) {
           imageUtils.imgLoadHandler(this.src, (img) => {
             this.handleIsTransparent(img)
-          })
+          }, { crossOrigin: true })
         }
       }
       this.initialized = true
