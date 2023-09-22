@@ -450,8 +450,8 @@ export default defineComponent({
     getImgDimension(): number | string {
       const { srcObj } = this.config
       const { imgWidth, imgHeight } = this.config.styles
-      let renderW = imgWidth
-      let renderH = imgHeight
+      let renderW = imgWidth * this.contentScaleRatio
+      let renderH = imgHeight * this.contentScaleRatio
       const primaryLayer = this.primaryLayer
       const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
       if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg) {

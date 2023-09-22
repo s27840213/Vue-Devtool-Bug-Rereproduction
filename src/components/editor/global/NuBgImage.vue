@@ -188,8 +188,8 @@ export default defineComponent({
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
-      let renderW = imgWidth
-      let renderH = imgHeight
+      let renderW = imgWidth * this.contentScaleRatio
+      let renderH = imgHeight * this.contentScaleRatio
       const dpiRatio = pageUtils.getImageDpiRatio(this.page)
       renderW *= dpiRatio
       renderH *= dpiRatio
