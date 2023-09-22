@@ -297,8 +297,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           text: '140元'
         },
         annually: {
-          value: 799,
-          text: '799元'
+          value: 899,
+          text: '899元'
         }
       },
       us: {
@@ -308,8 +308,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           text: '$4.99'
         },
         annually: {
-          value: 26.90,
-          text: '$26.90'
+          value: 35.99,
+          text: '$35.99'
         }
       },
       jp: {
@@ -319,8 +319,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           text: '¥600円(税込)'
         },
         annually: {
-          value: 3590,
-          text: '¥3590円(税込)'
+          value: 4090,
+          text: '¥4090円(税込)'
         }
       }
     } as { [key: string]: IPrices }
