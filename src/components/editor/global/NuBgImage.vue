@@ -109,7 +109,7 @@ export default defineComponent({
           this.src = ''
         } else {
           this.previewAsLoading()
-            .then(() => this.handleIsTransparent())
+            .then((img) => this.handleIsTransparent(img))
         }
       }
     },
@@ -153,14 +153,14 @@ export default defineComponent({
 
     if (this.userId !== 'backendRendering') {
       this.previewAsLoading()
-        .then(() => this.handleIsTransparent())
+        .then((img) => this.handleIsTransparent(img))
     } else {
       const { imgWidth, imgHeight } = this.image.config.styles
       this.src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       if (this.isAdjustImage) {
         imageUtils.imgLoadHandler(this.src, (img) => {
           this.handleIsTransparent(img)
-        })
+        }, { crossOrigin: true })
       }
     }
   },
@@ -192,8 +192,8 @@ export default defineComponent({
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
-      let renderW = imgWidth
-      let renderH = imgHeight
+      let renderW = imgWidth * this.contentScaleRatio
+      let renderH = imgHeight * this.contentScaleRatio
       const dpiRatio = pageUtils.getImageDpiRatio(this.page)
       renderW *= dpiRatio
       renderH *= dpiRatio
@@ -389,15 +389,17 @@ export default defineComponent({
     filterContainerStyles() {
       return { margin: this.padding }
     },
-    async previewAsLoading() {
+    async previewAsLoading(): Promise<HTMLImageElement | undefined> {
       let isPrimaryImgLoaded = false
       const config = this.image.config as IImage
       const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)
+      let preImg
       if (config.previewSrc) {
         const previewSrc = config.previewSrc
-        imageUtils.imgLoadHandler(previewSrc, () => {
+        preImg = await imageUtils.imgLoadHandler(previewSrc, (img) => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
             this.src = previewSrc
+            return img
           }
         }, { crossOrigin: true })
           .catch(() => {
@@ -409,10 +411,10 @@ export default defineComponent({
       }
       const { imgWidth, imgHeight } = this.image.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
-      if (!src || src === config.previewSrc) return
+      if (!src || src === config.previewSrc) return preImg as HTMLImageElement | undefined
 
-      return new Promise<void>((resolve, reject) => {
-        imageUtils.imgLoadHandler(src, () => {
+      return new Promise<HTMLImageElement | undefined>((resolve, reject) => {
+        imageUtils.imgLoadHandler(src, (img) => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
             isPrimaryImgLoaded = true
             this.src = src
@@ -420,7 +422,7 @@ export default defineComponent({
               this.preLoadImg('pre', this.getImgDimension)
               this.preLoadImg('next', this.getImgDimension)
             }
-            resolve()
+            resolve(img)
           }
         }, {
           error: () => {
