@@ -834,8 +834,6 @@ export default defineComponent({
     handleIsTransparent(_img?: HTMLImageElement) {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayer?.type ?? '')) return
       if (!this.$refs.img) return
-      console.trace(_img)
-
       const img = _img ?? this.$refs.img as HTMLImageElement
       const isTransparent = imageShadowUtils.isTransparentBg(img)
       imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
