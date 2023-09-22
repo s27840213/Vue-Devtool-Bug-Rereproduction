@@ -364,7 +364,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   screenshotDone(data: { flag: string, params: string, action: string }) {
-    this.handleCallback(`screenshot-${data.params}`, data)
+    const query = data.params.startsWith('type=json') ? data.params.replace(/'/g, '\\\'') : data.params
+    this.handleCallback(`screenshot-${query}`, data)
   }
 
   cloneImageDone(data: any) {
