@@ -670,9 +670,7 @@ export default defineComponent({
         // detect if SVG image rendered
         const rendering = () => {
           const elImg = this.$refs['adjust-img'] as SVGImageElement
-          console.log(elImg)
           if (!elImg) return
-          console.log(elImg.width.baseVal.value, elImg.height.baseVal.value)
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
             if (this.priPrimaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
