@@ -1,5 +1,7 @@
 {
   "CM0001": "Powerful Fill",
+  "CM0002": "Smart Object Fill Capability",
+  "CM0003": "Try now!",
   "CM0004": "Quick start",
   "CM0005": "Background Replace",
   "CM0006": "Magic Replace",
@@ -24,5 +26,5 @@
   "CM0026": "You have unsaved changes. Exiting now will lose your recent edits.",
   "CM0027": "Quit",
   "CM0028": "Stay",
-  "CM0029": "Clear"
+  "CM0029": "Pro"
 }

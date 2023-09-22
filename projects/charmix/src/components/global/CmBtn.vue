@@ -3,13 +3,14 @@ div(
   class="transition-colors duration-300 flex items-center justify-center"
   :class="`${btnColor} nu-btn__${theme}${size ? `--${size}` : ''} ${full ? 'w-full' : 'w-fit'}`"
   ref="btnRef"
-  @click="click"
+  @click="handleClick"
   @contextmenu.prevent)
-  svg-icon-test(
+  svg-icon(
     v-if="hasIcon"
     :iconName="iconName"
     :iconWidth="iconSize"
-    :iconColor="iconColor")
+    :iconColor="iconColor"
+    class="mr-4")
   span(v-if="!theme.includes('icon')")
     slot
 </template>
@@ -35,14 +36,14 @@ const props = withDefaults(
   {
     size: '',
     hasIcon: false,
+    iconName: '',
     disabled: false,
     active: false,
-    full: false
-  }
+    full: false,
+  },
 )
 
 const { theme, size, disabled, iconName, active, full } = toRefs(props)
-
 const emits = defineEmits(['clickBtn', 'update:active'])
 
 const btnRef = ref<HTMLElement | null>(null)
@@ -70,7 +71,7 @@ const iconColor = computed<string>(() => {
 })
 // #endregion
 
-const click = (e: MouseEvent) => {
+const handleClick = (e: MouseEvent) => {
   if (status.value === 'disabled') return
   emits('clickBtn', e)
 }

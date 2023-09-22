@@ -3,7 +3,7 @@ div(class="flex flex-col justify-center items-center w-full px-24")
   div(class="flex justify-between items-center mb-20 w-full")
     back-btn
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
-    nu-btn(
+    cm-btn(
       theme="primary"
       size="md"
       @click="handleGenerate") {{ $t('CM0023') }}
