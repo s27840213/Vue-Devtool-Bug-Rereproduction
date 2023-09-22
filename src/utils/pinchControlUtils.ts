@@ -4,6 +4,7 @@ import store from '@/store'
 import { ILayerInfo } from '@/store/types'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { AnyTouchEvent } from 'any-touch'
 
@@ -46,8 +47,7 @@ export default class PinchControlUtils {
 
   move(e: AnyTouchEvent) {
     if (this.init === null) {
-      this.movingUtils.removeListener()
-      store.commit('SET_isPinchLayer', true)
+      store.commit('SET_STATE', { controlState: 'pinch' })
       if (store.getters['vivisticker/getControllerHidden']) {
         vivistickerUtils.showController()
       }
@@ -89,12 +89,14 @@ export default class PinchControlUtils {
   }
 
   end(e: AnyTouchEvent) {
-    store.commit('SET_isPinchLayer', false)
+    store.commit('SET_STATE', { controlState: '' })
     this.init = null
     const nativeEvt = e.nativeEvent as TouchEvent
+    const isHasOnePtrEvt = pointerEvtUtils.pointers.length === nativeEvt.touches.length && nativeEvt.touches.length === 1
     const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
-    if (nativeEvt.touches.length === 1 && isLayerExist) {
-      this.movingUtils.moveStart(nativeEvt)
+    console.log('pinch end', pointerEvtUtils.pointers, pointerEvtUtils.pointerIds, nativeEvt.touches.length)
+    if (isHasOnePtrEvt && isLayerExist) {
+      this.movingUtils.moveStart(nativeEvt, pointerEvtUtils.pointerIds[0] ?? 0)
     }
   }
 }

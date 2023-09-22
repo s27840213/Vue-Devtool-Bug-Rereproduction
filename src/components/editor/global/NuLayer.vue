@@ -74,6 +74,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import PinchControlUtils from '@/utils/pinchControlUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -210,37 +211,19 @@ export default defineComponent({
       body
     }
 
-    // if (this.subLayerIndex === -1) {
-    //   this.movingUtils = new MovingUtils(data as any)
-    //   const moveStart = (e: PointerEvent) => {
-    //     console.log('121323', pointerEvtUtils.pointerIds)
-    //     if (pointerEvtUtils.pointerIds.length === 1) {
-    //       this.movingUtils.moveStart(e)
-    //     }
-    //   }
-    //   if (this.isLine) {
-    //     lineMover.addEventListener('pointerdown', moveStart)
-    //   } else {
-    //     // body.addEventListener('pointerdown', moveStart)
-    //   }
-    // } else {
-    //   Object.defineProperty(_config, 'primaryLayer', {
-    //     get() {
-    //       return props.primaryLayer
-    //     }
-    //   })
-    //   const subCtrlUtils = new SubControllerUtils(data as any)
-    //   const pointerdown = subCtrlUtils.onPointerdown.bind(subCtrlUtils)
-    //   if (this.isLine) {
-    //     lineMover.addEventListener('pointerdown', pointerdown)
-    //   } else {
-    //     body.addEventListener('pointerdown', pointerdown)
-    //   }
-    // }
-    // if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
-    //   body.addEventListener(this.$isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
-    // }
-    if (this.subLayerIndex !== -1) {
+    if (this.subLayerIndex === -1) {
+      this.movingUtils = new MovingUtils(data as any)
+      const moveStart = (e: PointerEvent) => {
+        if (pointerEvtUtils.pointerIds.length <= 1) {
+          this.movingUtils.moveStart(e)
+        }
+      }
+      if (this.isLine) {
+        lineMover.addEventListener('pointerdown', moveStart)
+      } else {
+        body.addEventListener('pointerdown', moveStart)
+      }
+    } else {
       Object.defineProperty(_config, 'primaryLayer', {
         get() {
           return props.primaryLayer

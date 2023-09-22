@@ -256,7 +256,6 @@ export default defineComponent({
          * the moving logic should be applied to the EditorView.
          */
         if (isClickOnController) {
-          console.log('isClickOnController', isClickOnController)
           const movingUtils = new MovingUtils({
             _config: { config: layerUtils.getCurrLayer },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,

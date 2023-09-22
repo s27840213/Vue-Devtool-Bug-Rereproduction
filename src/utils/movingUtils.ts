@@ -26,6 +26,7 @@ export class MovingUtils {
   private _config = { config: null as unknown as ILayer }
   private initialPos = { x: 0, y: 0 } as ICoordinate | null
   private initTranslate = { x: 0, y: 0 }
+  private pointerId = 0
   // private initPageTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
   private isDoingGestureAction = false
@@ -140,9 +141,24 @@ export class MovingUtils {
     this.removeListener()
   }
 
-  moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
-    console.log('movevmovestart', store.getters.getIsPinchLayer)
-    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer) return
+  moveStart(event: MouseEvent | TouchEvent | PointerEvent, pointerId?: number) {
+    const eventType = eventUtils.getEventType(event)
+    if (eventType === 'pointer') {
+      pointerEvtUtils.addPointer(event as PointerEvent)
+    }
+
+    console.warn('moveStart', eventType, store.getters['mobileEditor/getIsPinchingEditor'], store.getters.getControlState)
+    if (this.isImgControl) return
+    if (eventUtils.checkIsMultiTouch(event)) return
+    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState) return
+
+    store.commit('SET_STATE', { controlState: 'move' })
+    if (pointerId) {
+      this.pointerId = pointerId
+    } else if (eventUtils.getEventType(event) === 'pointer') {
+      this.pointerId = (event as PointerEvent).pointerId
+    }
+
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
     this.initPageTranslate.x = pageUtils.getCurrPage.x
@@ -168,12 +184,6 @@ export class MovingUtils {
     if (this.isBgImgCtrl) {
       this.setBgConfig(undefined)
     }
-
-    if (this.isImgControl) {
-      return
-    }
-
-    const eventType = eventUtils.getEventType(event)
     /**
      * used for frame layer for entering detection
      * This is used for moving image to replace frame element
@@ -186,28 +196,6 @@ export class MovingUtils {
     if (this.isTouchDevice && !this.config.locked) {
       this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
-      // if (!this.dblTabsFlag && this.isActive) {
-      //   const touchtime = Date.now()
-      //   const interval = 500
-      //   const doubleTap = (e: PointerEvent) => {
-      //     e.preventDefault()
-      //     if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
-      //       /**
-      //        * This is the dbl-click callback block
-      //        */
-      //       if (this.getLayerType === LayerType.image) {
-      //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-      //         eventUtils.emit(PanelEvent.switchTab, 'crop')
-      //       }
-      //       this.dblTabsFlag = true
-      //     }
-      //   }
-      //   this.eventTarget.addEventListener('pointerdown', doubleTap)
-      //   setTimeout(() => {
-      //     this.eventTarget.removeEventListener('pointerdown', doubleTap)
-      //     this.dblTabsFlag = false
-      //   }, interval)
-      // }
     }
     if (eventType === 'pointer') {
       const pointerEvent = event as PointerEvent
@@ -215,9 +203,6 @@ export class MovingUtils {
     } else if (eventType === 'mouse') {
       const mouseEvent = event as MouseEvent
       if (mouseEvent.button !== 0) return
-    }
-    if (eventUtils.checkIsMultiTouch(event)) {
-      return
     }
     if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
       eventUtils.emit(PanelEvent.showPhotoShadow, '')
@@ -341,7 +326,15 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (pointerEvtUtils.pointers.length > 1 || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer || this.initialPos === null) {
+    const isPointer = eventUtils.getEventType(e) === 'pointer'
+    const isStartedPointer = isPointer && this.pointerId === (e as PointerEvent).pointerId
+    const isSinglePointer = pointerEvtUtils.pointers.length <= 1
+    console.warn('moving', this.randId)
+    if ((!isPointer || !isStartedPointer) || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer || this.initialPos === null) {
+      if (store.getters.getControlState === 'pinch') {
+        // if the pinch is start the moving logic should be turn off
+        this.moveEnd(e)
+      }
       return
     }
     this.isControlling = true
@@ -527,6 +520,12 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
+    store.commit('SET_STATE', { controlState: '' })
+    if (eventUtils.getEventType(e) === 'pointer') {
+      this.pointerId = 0
+      pointerEvtUtils.removePointer((e as PointerEvent).pointerId)
+    }
+
     const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
     if (pointerEvtUtils.pointerIds.length > 1 || this.initialPos === null || !isLayerExist) {
       this.isControlling = false

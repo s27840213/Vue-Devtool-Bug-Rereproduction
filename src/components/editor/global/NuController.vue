@@ -335,7 +335,7 @@ export default defineComponent({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
-      isPinchLayer: 'getIsPinchLayer',
+      controlState: 'getControlState',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -530,6 +530,7 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
+      setState: 'SET_STATE',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
@@ -762,9 +763,10 @@ export default defineComponent({
       return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px)`
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.controlState) {
         return
       }
+      this.setState({ controlState: 'scale' })
 
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
@@ -802,9 +804,6 @@ export default defineComponent({
       window.addEventListener('keydown', this.handleScaleOffset)
     },
     scaling(event: PointerEvent) {
-      if (this.isPinchLayer) {
-        return this.scaleEnd(event)
-      }
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
@@ -970,6 +969,7 @@ export default defineComponent({
       }
     },
     scaleEnd(event: PointerEvent) {
+      this.setState({ controlState: '' })
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
@@ -996,9 +996,10 @@ export default defineComponent({
       this.snapUtils.event.emit('clearSnapLines')
     },
     lineEndMoveStart(event: MouseEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (eventUtils.checkIsMultiTouch(event) || this.controlState) {
         return
       }
+      this.setState({ controlState: 'move' })
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
       this.isLineEndMoving = true
@@ -1054,6 +1055,7 @@ export default defineComponent({
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
     lineEndMoveEnd(event: PointerEvent) {
+      this.setState({ controlState: '' })
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
@@ -1069,13 +1071,13 @@ export default defineComponent({
       this.snapUtils.event.emit('clearSnapLines')
     },
     resizeStart(event: MouseEvent, type: string) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.controlState) {
         return
       }
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-
+      this.setState({ controlState: 'resize' })
       this.isControlling = true
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')
@@ -1265,6 +1267,7 @@ export default defineComponent({
       }
     },
     resizeEnd(event: PointerEvent) {
+      this.setState({ controlState: '' })
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }

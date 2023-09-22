@@ -1,3 +1,4 @@
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import { EventEmitter } from 'events'
 import generalUtils from './generalUtils'
 
@@ -30,7 +31,7 @@ class EventUtils {
   checkIsMultiTouch(event: MouseEvent | TouchEvent | PointerEvent) {
     switch (eventUtils.getEventType(event)) {
       case 'pointer': {
-        if (!(event as PointerEvent).isPrimary) {
+        if (pointerEvtUtils.pointerIds.length > 1) {
           return true
         }
         break

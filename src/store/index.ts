@@ -141,7 +141,8 @@ const getDefaultState = (): IEditorState => ({
   isPageScaling: false,
   isGettingDesign: false,
   showGlobalErrorModal: false,
-  newTemplateShownMode: true
+  newTemplateShownMode: true,
+  controlState: ''
 })
 
 const state = getDefaultState()
@@ -357,6 +358,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsPinchLayer(state: IEditorState) {
     return state.isPinchLayer
+  },
+  getControlState(state: IEditorState) {
+    return state.controlState
   }
 }
 
@@ -1189,10 +1193,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isLargeDesktop(state: IEditorState, boolean: boolean) {
     state.isLargeDesktop = boolean
-  },
-  SET_isPinchLayer(state: IEditorState, isPinchLayer: boolean) {
-    state.isPinchLayer = isPinchLayer
-  },
+  }
 }
 window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500))
 
