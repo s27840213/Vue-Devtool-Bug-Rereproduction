@@ -1489,7 +1489,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
       }
     })
-    this.setState('subscribeInfo', subscribeInfo)
+    if (monthly.priceValue !== '' && annually.priceValue !== '') {
+      this.setState('subscribeInfo', subscribeInfo)
+    }
   }
 
   subscribeResult(data: ISubscribeResult) {
