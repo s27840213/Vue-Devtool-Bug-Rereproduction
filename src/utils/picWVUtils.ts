@@ -9,7 +9,7 @@ const WHITE_STATUS_BAR_ROUTES = [
   'Editor'
 ]
 
-const nativeEventDisabled = false // vivisticker should set this to true
+const nativeEventDisabled = true // vivisticker should set this to true
 
 class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
@@ -43,7 +43,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   get inBrowserMode(): boolean {
-    return store.getters['webView/getInBrowserMode'] // vivisticker is always in browser mode
+    return store.getters['webView/getInBrowserMode']
   }
 
   get inReviewMode(): boolean {
@@ -55,7 +55,9 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   detectIfInApp() {
-    // vivisticker is always in browser mode
+    if (window.webkit?.messageHandlers?.APP_LOADED !== undefined) {
+      this.leaveBrowserMode()
+    }
   }
 
   leaveBrowserMode() {
