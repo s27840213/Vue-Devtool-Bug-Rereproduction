@@ -43,7 +43,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   get inBrowserMode(): boolean {
-    return store.getters['webView/getInBrowserMode'] // vivisticker is always in browser mode
+    return store.getters['webView/getInBrowserMode']
   }
 
   get inReviewMode(): boolean {
