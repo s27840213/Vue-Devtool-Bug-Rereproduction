@@ -698,11 +698,15 @@ export default defineComponent({
           })
       } else {
         const { imgWidth, imgHeight } = this.config.styles
-        this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+        const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
         if (this.isAdjustImage) {
-          imageUtils.imgLoadHandler(this.src, (img) => {
+          // adjust-image need to check if the image is transparent
+          imageUtils.imgLoadHandler(src, (img) => {
             this.handleIsTransparent(img)
+            this.src = src
           }, { crossOrigin: true })
+        } else {
+          this.src = src
         }
       }
       this.initialized = true
