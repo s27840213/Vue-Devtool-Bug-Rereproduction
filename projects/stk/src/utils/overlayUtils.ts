@@ -2,6 +2,7 @@ import i18n from '@/i18n'
 import { IImage, IShape } from '@/interfaces/layer'
 import { IAssetObject } from '@/interfaces/shape'
 import backgroundUtils from '@/utils/backgroundUtils'
+import constantData from '@/utils/constantData'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import { cloneDeep, find } from 'lodash'
@@ -79,12 +80,12 @@ class Overlay {
     return overlays.map(category => {
       return {
         id: category.id,
-        label: category[`title_${i18n.global.locale}`],
+        label: category[`title_${constantData.localeWithFallback}`],
         baseImg: category.cover_url + (category.id !== 0 ? '/prev' : ''),
         items: category.list.map(item => {
           return item ? {
             id: item.id,
-            label: item[`title_${i18n.global.locale}`],
+            label: item[`title_${constantData.localeWithFallback}`],
             svg: {
               id: item.id,
               plan: item.plan,
