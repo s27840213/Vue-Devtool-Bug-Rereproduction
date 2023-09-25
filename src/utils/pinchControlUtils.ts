@@ -1,4 +1,4 @@
-import { ILayer } from '@/interfaces/layer'
+import { IImage, ILayer } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
 import store from '@/store'
 import { ILayerInfo } from '@/store/types'
@@ -16,6 +16,7 @@ export default class PinchControlUtils {
     layerPos: { x: number, y: number }
     scale: number,
     size: ISize,
+    img?: { imgWidth: number, imgHeight: number, imgX: number, imgY: number },
     rotate: number
   }
 
@@ -67,7 +68,15 @@ export default class PinchControlUtils {
         layerPos: { x: this.config.styles.x, y: this.config.styles.y },
         size: { width: this.config.styles.width, height: this.config.styles.height },
         scale: this.config.styles.scale,
-        rotate: this.config.styles.rotate
+        rotate: this.config.styles.rotate,
+      }
+      if (this.config.type === 'image') {
+        this.init.img = {
+          imgWidth: (this.config as IImage).styles.imgWidth,
+          imgHeight: (this.config as IImage).styles.imgHeight,
+          imgX: (this.config as IImage).styles.imgX,
+          imgY: (this.config as IImage).styles.imgY,
+        }
       }
     }
     const newScale = e.scale * this.init.scale
@@ -87,15 +96,22 @@ export default class PinchControlUtils {
       x: movingTranslate.x + compensateTranslate.x,
       y: movingTranslate.y + compensateTranslate.y
     }
+    const styles = {
+      scale: newScale,
+      width: newSize.width,
+      height: newSize.height,
+      rotate: e.angle + this.init.rotate,
+      x: this.init.layerPos.x + totalTranslate.x,
+      y: this.init.layerPos.y + totalTranslate.y
+    } as { [key: string]: number }
+    if (this.config.type === 'image' && this.init.img) {
+      styles.imgWidth = this.init.img.imgWidth * e.scale
+      styles.imgHeight = this.init.img.imgHeight * e.scale
+      styles.imgX = this.init.img.imgX * e.scale
+      styles.imgY = this.init.img.imgY * e.scale
+    }
     if (this.layerInfo.pageIndex !== -1 && this.layerInfo.layerIndex !== -1) {
-      layerUtils.updateLayerStyles(this.layerInfo.pageIndex, this.layerInfo.layerIndex, {
-        scale: newScale,
-        width: newSize.width,
-        height: newSize.height,
-        rotate: e.angle + this.init.rotate,
-        x: this.init.layerPos.x + totalTranslate.x,
-        y: this.init.layerPos.y + totalTranslate.y
-      })
+      layerUtils.updateLayerStyles(this.layerInfo.pageIndex, this.layerInfo.layerIndex, styles)
     }
   }
 

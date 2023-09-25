@@ -198,6 +198,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
+      controlState: 'getControlState',
     }),
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -284,12 +285,13 @@ export default defineComponent({
         this.pinchControlUtils = null
       } else {
         const touches = (e.nativeEvent as TouchEvent).touches
-        // if (touches.length !== 2 || layerUtils.layerIndex === -1) return
         const targetIndex = this.$store.getters.getControlState.layerInfo?.layerIndex ?? -1
+        // console.log(touches.length, targetIndex, this.isPinchInit)
         if (touches.length !== 2 || targetIndex === -1) return
         if (!this.isPinchInit) {
           // first pinch initialization
-          const isPinchOnController = controlUtils.isClickOnController(touches[0], targetIndex) && controlUtils.isClickOnController(touches[1], targetIndex)
+          const isPinchOnController = controlUtils.isClickOnController(e.startInput.points[0] as any, targetIndex) && controlUtils.isClickOnController(e.startInput.points[1] as any, targetIndex)
+          console.log(isPinchOnController, e.startInput.points[0], e.startInput.points[1])
           if (isPinchOnController) {
             this.isPinchInit = true
             return this.pinchStart(e)
@@ -314,8 +316,13 @@ export default defineComponent({
       //   }
       // }) as unknown as { config: ILayer }
       const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, this.$store.getters.getControlState.layerInfo.layerIndex) } as unknown as { config: ILayer }
+      const  layerInfo = {
+        pageIndex: layerUtils.pageIndex,
+        layerIndex: this.$store.getters.getControlState.layerInfo.layerIndex
+      } as ILayerInfo
       const movingUtils = new MovingUtils({
         _config,
+        layerInfo,
         snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
         body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${this.$store.getters.getControlState.layerInfo.layerIndex}_-1`) as HTMLElement
         // body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
@@ -338,13 +345,11 @@ export default defineComponent({
       //   movingUtils: movingUtils as MovingUtils
       // }
       const data = {
-        layerInfo: {
-          pageIndex: layerUtils.pageIndex,
-          layerIndex: this.$store.getters.getControlState.layerInfo.layerIndex
-        } as ILayerInfo,
+        layerInfo,
         config: undefined,
         movingUtils: movingUtils as MovingUtils
       }
+      console.warn('data', data.layerInfo.layerIndex)
       this.pinchControlUtils = new PinchControlUtils(data)
     },
     showPanelPageManagement() {

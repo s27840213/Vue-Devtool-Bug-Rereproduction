@@ -13,14 +13,14 @@ class PointerEventUtils {
   addPointer(pointer: PointerEvent) {
     if (!this.pointerIds.includes(pointer.pointerId)) {
       this._pointers.push(pointer)
-      console.warn('record Pointer', this.pointers)
+      // console.warn('record Pointer', this.pointers)
     }
   }
 
   removePointer(pointerId: number) {
     const i = this._pointers.findIndex(p => p.pointerId === pointerId)
     if (i !== -1) {
-      console.error('remvoe Pointer', pointerId)
+      // console.error('remvoe Pointer', pointerId)
       this._pointers.splice(i, 1)
     }
   }

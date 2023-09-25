@@ -338,7 +338,7 @@ export class MovingUtils {
     const isSinglePointer = pointerEvtUtils.pointers.length <= 1
     if ((!isPointer || !isStartedPointer) || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer || this.initialPos === null) {
       if (store.getters.getControlState.type === 'pinch') {
-        // if the pinch is start the moving logic should be turn off
+        // if the pinch is started, the moving logic should be turn off
         this.moveEnd(e)
       }
       return
@@ -467,12 +467,12 @@ export class MovingUtils {
 
     if (offsetSnap.x || offsetSnap.y) {
       this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
-      layerUtils.updateLayerStyles(this.pageIndex, layerUtils.layerIndex, {
+      layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
         x: _updateStyles.x + offsetSnap.x,
         y: _updateStyles.y + offsetSnap.y
       })
     } else {
-      layerUtils.updateLayerStyles(this.pageIndex, layerUtils.layerIndex, {
+      layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
         x: _updateStyles.x,
         y: _updateStyles.y
       })
