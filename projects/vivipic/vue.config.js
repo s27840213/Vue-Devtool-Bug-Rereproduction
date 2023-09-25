@@ -202,25 +202,19 @@ module.exports = defineConfig({
       fs.writeFile('dist/ver.txt', content, (err) => {
         if (err) console.error(err)
       })
-    }
-    console.log(argv.PRERENDER)
-    // if (argv.PRERENDER) {
-    //   console.log('start prerender')
-    //   // Tell Vue (CLI 3) to provide this file to Pre-SPA:
-    console.log(process.env.NODE_ENV)
-    if (process.env.NODE_ENV === 'production') {
       config.plugin('html').tap((args) => {
         args[0].template = path.join(__dirname, 'public', 'index.html')
         args[0].filename = 'app.html'
         return args
       })
-    }
 
-    config.plugin('copy-plugin').use(CopyPlugin, [
-      {
-        patterns: [resolve('prerender')],
-      },
-    ])
+      console.log('copy prerender files to dist')
+      config.plugin('copy-plugin').use(CopyPlugin, [
+        {
+          patterns: [resolve('prerender')],
+        },
+      ])
+    }
 
     //   config.plugin('prerender').use(PrerenderSPAPlugin, [
     //     {
@@ -259,15 +253,12 @@ module.exports = defineConfig({
 
     // Webpack bundle analyzer
     // if (process.env.NODE_ENV === 'development') {
-    //     config
-    //         .plugin('webpack-bundle-analyzer')
-    //         .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
-    //         .end()
-    //     config.plugins.delete('prefetch')
-    //     config
-    //         .plugin('speed-measure-webpack-plugin')
-    //         .use(SpeedMeasurePlugin)
-    //         .end()
+    //   config
+    //     .plugin('webpack-bundle-analyzer')
+    //     .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
+    //     .end()
+    //   config.plugins.delete('prefetch')
+    //   config.plugin('speed-measure-webpack-plugin').use(SpeedMeasurePlugin).end()
     // }
 
     // .use(SpeedMeasurePlugin, [{

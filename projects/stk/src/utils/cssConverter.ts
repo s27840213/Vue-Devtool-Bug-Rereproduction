@@ -3,6 +3,8 @@
  */
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
+import textUtils from '@/utils/textUtils'
+import generalUtils from '@/utils//generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
@@ -101,13 +103,31 @@ class CssConveter {
   }
 
   getFontFamily(font: string): string {
+    const browserInfo = store.getters['user/getBrowserInfo']
+    const browserIsSafari = browserInfo.name === 'Safari'
+    const osIsIos = browserInfo.os.family === 'iOS'
+    const fontIsAppleColorEmoji = textUtils.isAppleColorEmoji(font)
     let fontFaces = store.getters['text/getDefaultFontFacesList'] as string[]
-    if (vivistickerUtils.getDefaultUserConfig('emojiSetting', 'val', vivistickerUtils.userSettings.emojiSetting)!.first) {
-      fontFaces = [vivistickerUtils.userSettings.emojiSetting, font, ...fontFaces]
-    } else {
-      const anchor = 'gXgHEvSNTPg2mhrpNOUb'
+    if (generalUtils.isPic) {
+      const anchor = 'zVUjQ0MaGOm7HOJXv5gB' // Noto Color Emoji
       const insertIndex = fontFaces.indexOf(anchor)
-      fontFaces = [font, ...fontFaces.slice(0, insertIndex), vivistickerUtils.userSettings.emojiSetting, ...fontFaces.slice(insertIndex)]
+      if (fontIsAppleColorEmoji) {
+        if (browserIsSafari || osIsIos) {
+          fontFaces = [...fontFaces.slice(0, insertIndex), 'Apple Color Emoji', ...fontFaces.slice(insertIndex)]
+        } // else: don't insert font into fontFaces for non-Mac or non-iOS
+      } else {
+        fontFaces = [font, ...fontFaces]
+      }
+    } else if (generalUtils.isStk) {
+      const anchor = 'gXgHEvSNTPg2mhrpNOUb' // Unicode default: DejaVuSans
+      const insertIndex = fontFaces.indexOf(anchor)
+      if (fontIsAppleColorEmoji) {
+        if (browserIsSafari || osIsIos) {
+          fontFaces = [...fontFaces.slice(0, insertIndex), 'Apple Color Emoji', vivistickerUtils.userSettings.emojiSetting, ...fontFaces.slice(insertIndex)]
+        } // else: don't insert font into fontFaces for non-Mac or non-iOS
+      } else {
+        fontFaces = [font, ...fontFaces.slice(0, insertIndex), vivistickerUtils.userSettings.emojiSetting, ...fontFaces.slice(insertIndex)]
+      }
     }
     return fontFaces.join(', ')
   }

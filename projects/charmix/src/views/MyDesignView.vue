@@ -10,18 +10,18 @@ div
         v-for="size in sizeMap[theme]"
         :key="size")
         span {{ `${theme}${size ? `-${size}` : size}` }}
-        nu-btn(
+        cm-btn(
           :theme="theme"
           :size="size"
           :hasIcon="hasIconThemes.includes(theme)"
           :iconName="'close-btn'") Button
-        nu-btn(
+        cm-btn(
           :theme="theme"
           :size="size"
           :active="true"
           :hasIcon="hasIconThemes.includes(theme)"
           :iconName="'close-btn'") Button
-        nu-btn(
+        cm-btn(
           :theme="theme"
           :size="size"
           :disabled="true"
@@ -39,7 +39,7 @@ const sizeMap: { [key in INubtnThemes]: Array<INubtnSize> } = {
   secondary: ['', 'md'],
   icon_light: [''],
   icon_dark: [''],
-  text: ['sm']
+  text: ['sm'],
 }
 </script>
 <style scoped lang="scss">

@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26 } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -29,7 +29,7 @@ import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
-import textUtils from './textUtils'
+import textUtils, { SYSTEM_FONTS } from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
 
@@ -65,7 +65,6 @@ interface IUserSettingListOption {
   description: string
   icon?: string
   queryFunc?: (query: string) => boolean
-  first?: boolean
 }
 
 const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
@@ -76,13 +75,11 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
       description: '<P>Apple Emoji',
       icon: 'apple_emoji',
       queryFunc: (query: string) => SYSTEM_FONTS.includes(query)
-      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'zVUjQ0MaGOm7HOJXv5gB',
       description: '<P>Noto Color Emoji',
       icon: 'noto_color_emoji',
-      // first: true, # temporarily disable first, since it shows wrong result for number
     },
     {
       val: 'dLe1S0oDanIJjvty5RxG',
@@ -91,8 +88,6 @@ const USER_SETTINGS_LIST_CONFIG: { [key: string]: IUserSettingListOption[] } = {
     },
   ],
 }
-
-export const SYSTEM_FONTS = ['-apple-system', 'Apple Color Emoji']
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
@@ -116,12 +111,6 @@ const MYDESIGN_TAGS = [{
   name: 'NN0002',
   tab: 'image'
 }] as IMyDesignTag[]
-
-export const CURRENCY_FORMATTERS = {
-  TWD: (value: string) => `${value}元`,
-  USD: (value: string) => `$${(+value).toFixed(2)}`,
-  JPY: (value: string) => `¥${value}円(税込)`
-} as { [key: string]: (value: string) => string }
 
 class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
@@ -299,10 +288,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.STANDALONE_USER_INFO.locale = locale
   }
 
-  async setDefaultPrices(locale = 'us') {
+  async setDefaultPrices() {
+    const userInfo = this.getUserInfoFromStore()
+    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(i18n.global.locale) ?? 'USA'
     const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
     const subscribeInfo = await this.getState('subscribeInfo')
-    store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] ?? defaultPrices.us })
+    store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
@@ -373,7 +364,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   screenshotDone(data: { flag: string, params: string, action: string }) {
-    this.handleCallback(`screenshot-${data.params}`, data)
+    const query = data.params.startsWith('type=json') ? data.params.replace(/'/g, '\\\'') : data.params
+    this.handleCallback(`screenshot-${query}`, data)
   }
 
   cloneImageDone(data: any) {
@@ -799,25 +791,34 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (info.modelName === undefined) { // if modelName isn't included, set '' as default
       info.modelName = ''
     }
-    info.locale = localeUtils.mapNativeLocale(info.locale)
+    let mappedLocale = localeUtils.mapNativeLocale(info.locale)
+    if (mappedLocale === undefined) {
+      mappedLocale = localeUtils.defaultLocale
+      this.updateLocale(mappedLocale) // if default fallback happens, update Native locale accordingly.
+    }
+    info.locale = mappedLocale
     // after previous handle, info is assured to have modelName
     store.commit('vivisticker/SET_userInfo', info as IUserInfo)
     this.handleCallback('login')
   }
 
-  async updateLocale(locale: string): Promise<void> {
+  async updateLocale(locale: string): Promise<boolean> {
     localStorage.setItem('locale', locale) // set locale to localStorage whether standalone mode or not
     if (this.isStandaloneMode) {
-      return
+      return true
     }
-    await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+    const data = await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+    return data?.flag === '0'
   }
 
-  updateInfoDone(data: { flag: string, msg?: string }) {
+  updateInfoDone(data: { flag: '0' } | { flag: '1', msg: string }) {
     if (data.flag !== '0') {
-      this.errorMessageMap.locale = data.msg ?? ''
+      this.errorMessageMap.locale = data.msg
+      if (data.msg.includes('fail to update locale')) {
+        this.showUpdateModal()
+      }
     }
-    this.handleCallback('update-user-info')
+    this.handleCallback('update-user-info', data)
   }
 
   async listAsset(key: string): Promise<void> {
@@ -1465,10 +1466,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
     const isSubscribed = subscribe === '1'
-    if (Object.keys(CURRENCY_FORMATTERS).includes(priceCurrency)) {
-      monthly.priceText = CURRENCY_FORMATTERS[priceCurrency](monthly.priceValue)
-      annually.priceText = CURRENCY_FORMATTERS[priceCurrency](annually.priceValue)
-    }
 
     const subscribeInfo = {
       subscribe: isSubscribed,
@@ -1476,11 +1473,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         currency: priceCurrency,
         monthly: {
           value: parseFloat(monthly.priceValue),
-          text: monthly.priceText
+          text: this.formatPrice(monthly.priceValue, priceCurrency, monthly.priceText)
         },
         annually: {
           value: parseFloat(annually.priceValue),
-          text: annually.priceText
+          text: this.formatPrice(annually.priceValue, priceCurrency, annually.priceText)
         }
       }
     }
@@ -1492,7 +1489,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
       }
     })
-    this.setState('subscribeInfo', subscribeInfo)
+    if (monthly.priceValue !== '' && annually.priceValue !== '') {
+      this.setState('subscribeInfo', subscribeInfo)
+    }
   }
 
   subscribeResult(data: ISubscribeResult) {
@@ -1576,7 +1575,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
         msg: i18n.global.t('STK0035').toString(),
         action: () => {
-          this.openFullPageVideo(['us', 'jp'].includes(i18n.global.locale) ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
+          this.openFullPageVideo(constantData.checkIfUseNewLogic() ? 'tutorial1' : 'iOS', { delayedClose: 5000 })
           modalUtils.clearModalInfo()
         }
       }, undefined, {
@@ -1682,6 +1681,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   setLoadingOverlay(msgs: string[]) {
     this.setLoadingOverlayMsgs(msgs)
     this.setLoadingOverlayShow(true)
+  }
+
+  formatPrice(price: number | string, currency: string, fallbackText?: string) {
+    const currencyFormatters = {
+      TWD: (value: string) => `${value}元`,
+      USD: (value: string) => `$${(+value).toFixed(2)}`,
+      JPY: (value: string) => `¥${value}円(税込)`
+    } as { [key: string]: (value: string) => string }
+    if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
+    return currencyFormatters[currency](price.toString())
   }
 }
 

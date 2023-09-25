@@ -8,8 +8,6 @@ It's a simple project which generate i18n format json parsed from google sheet
 
 ```
 source ./venv/bin/activate # zsh, Mac
-./venv\Scripts\activate.bat # cmd.exe, Win
-./venv\Scripts\Activate.ps1 # PowerShell, Win
 ```
 
 ### 2. Install requirements

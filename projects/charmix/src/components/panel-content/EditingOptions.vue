@@ -5,7 +5,7 @@ div(class="editing-options w-full h-full")
     class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 pl-24 pr-8")
     span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('CM0015') }}
     scrollable-container(:gap="20")
-      nu-svg-icon(
+      cm-svg-icon(
         v-for="shape in shapeTypes"
         :key="shape"
         icon-color="primary-light-active"
@@ -29,7 +29,7 @@ div(class="editing-options w-full h-full")
       class="flex flex-col items-center justify-center gap-6"
       @click="handleTabAction(tab)"
       ref="tabRefs")
-      nu-svg-icon(
+      cm-svg-icon(
         :icon-color="tabColor(tab)"
         :icon-name="tab.icon"
         icon-height="24px")

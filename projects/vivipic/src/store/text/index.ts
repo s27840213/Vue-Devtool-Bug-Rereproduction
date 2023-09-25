@@ -81,6 +81,9 @@ const getters: GetterTree<ITextState, unknown> = {
     return state.defaultFonts
       .map(font => font.face).join(',')
   },
+  getDefaultFontFacesList(state): string[] {
+    return state.defaultFonts.map(font => font.face)
+  },
   getDefaultFontsList(state): IFont[] {
     return state.defaultFonts
   },

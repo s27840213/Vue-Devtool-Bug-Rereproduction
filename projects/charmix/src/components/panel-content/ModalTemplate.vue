@@ -4,11 +4,11 @@ div(class="flex flex-col items-center justify-center px-24")
   div(class="text-app-text-secondary typo-btn-sm my-24 flex flex-col justify-center")
     span(v-for="line in multilineContent") {{ line }}
   div(class="flex justify-between w-full gap-24")
-    nu-btn(
+    cm-btn(
       theme="secondary"
       :full="true"
       @click="confirm") {{ confirmText }}
-    nu-btn(
+    cm-btn(
       theme="primary"
       :full="true"
       @click="cancel") {{ cancelText }}

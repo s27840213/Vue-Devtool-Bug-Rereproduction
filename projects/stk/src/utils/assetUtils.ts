@@ -36,8 +36,8 @@ import ZindexUtils from './zindexUtils'
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
   us: 'cRgaSK5ZVXnLDpWTL8MN',
-  en: 'cRgaSK5ZVXnLDpWTL8MN',
-  jp: 'OyDbjZxjk9r14eZnPELb'
+  jp: 'OyDbjZxjk9r14eZnPELb',
+  pt: 'cRgaSK5ZVXnLDpWTL8MN',
 }
 export const RESIZE_RATIO_FRAME = 0.6
 export const RESIZE_RATIO_SVG = 0.55

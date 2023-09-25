@@ -1,7 +1,9 @@
 import appJson from '@/assets/json/app.json'
-import i18n from '@/i18n'
+import i18n, { LocaleName } from '@/i18n'
 import { CustomWindow } from '@/interfaces/customWindow'
+import { IPrices } from '@/interfaces/vivisticker'
 import store from '@/store'
+import constantData from '@/utils/constantData'
 import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
@@ -9,12 +11,11 @@ import overlayUtils from '@/utils/overlayUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils, { CURRENCY_FORMATTERS } from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import ViviSticker from '../views/ViviSticker.vue'
-import { IPrices } from '@/interfaces/vivisticker'
 
 declare let window: CustomWindow
 
@@ -160,14 +161,15 @@ const router = createRouter({
           locale = userInfo.locale
         }
         logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
-        i18n.global.locale = locale as 'jp' | 'us' | 'tw'
-        localStorage.setItem('locale', locale)
+        // locale = 'pt' // TODO: remove this line since it's only for testing
+        i18n.global.locale = locale as LocaleName
+        localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only disabled for testing
         const editorBg = userInfo.editorBg
         if (editorBg) {
           store.commit('vivisticker/SET_editorBg', editorBg)
         }
         picWVUtils.updateLocale(i18n.global.locale)
-        vivistickerUtils.setDefaultPrices(i18n.global.locale)
+        vivistickerUtils.setDefaultPrices()
 
         // document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
@@ -248,17 +250,12 @@ router.beforeEach(async (to, from, next) => {
     store.commit('vivisticker/SET_modalInfo', json.modal)
 
     if (json.default_price && Object.keys(json.default_price).length) {
-      const mapCurrency = new Map([
-        ['us', 'USD'],
-        ['jp', 'JPY'],
-        ['tw', 'TWD'],
-      ])
       store.commit('vivisticker/UPDATE_payment', {
         defaultPrices: Object.fromEntries(
           Object.entries(
             json.default_price.prices as { [key: string]: { monthly: number; annually: number } },
           ).map(([locale, prices]) => {
-            const currency = mapCurrency.get(locale)
+            const currency = constantData.currencyMap.get(locale) ?? 'USD'
             return [
               locale,
               {
@@ -268,10 +265,7 @@ router.beforeEach(async (to, from, next) => {
                     plan,
                     {
                       value: price,
-                      text:
-                        currency && Object.keys(CURRENCY_FORMATTERS).includes(currency)
-                          ? CURRENCY_FORMATTERS[currency](price.toString())
-                          : CURRENCY_FORMATTERS.USD(price.toString()),
+                      text: vivistickerUtils.formatPrice(price, currency)
                     },
                   ]),
                 ),

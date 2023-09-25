@@ -3,6 +3,8 @@
  */
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
+import textUtils from '@/utils/textUtils'
+import generalUtils from '@/utils//generalUtils'
 
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
@@ -100,7 +102,33 @@ class CssConveter {
   }
 
   getFontFamily(font: string): string {
-    return (font + ',').concat(store.getters['text/getDefaultFonts'])
+    const browserInfo = store.getters['user/getBrowserInfo']
+    const browserIsSafari = browserInfo.name === 'Safari'
+    const osIsIos = browserInfo.os.family === 'iOS'
+    const fontIsAppleColorEmoji = textUtils.isAppleColorEmoji(font)
+    let fontFaces = store.getters['text/getDefaultFontFacesList'] as string[]
+    if (generalUtils.isPic) {
+      const anchor = 'zVUjQ0MaGOm7HOJXv5gB' // Noto Color Emoji
+      const insertIndex = fontFaces.indexOf(anchor)
+      if (fontIsAppleColorEmoji) {
+        if (browserIsSafari || osIsIos) {
+          fontFaces = [...fontFaces.slice(0, insertIndex), 'Apple Color Emoji', ...fontFaces.slice(insertIndex)]
+        } // else: don't insert font into fontFaces for non-Mac or non-iOS
+      } else {
+        fontFaces = [font, ...fontFaces]
+      }
+    } else if (generalUtils.isStk) {
+      // const anchor = 'gXgHEvSNTPg2mhrpNOUb' // Unicode default: DejaVuSans
+      // const insertIndex = fontFaces.indexOf(anchor)
+      // if (fontIsAppleColorEmoji) {
+      //   if (browserIsSafari || osIsIos) {
+      //     fontFaces = [...fontFaces.slice(0, insertIndex), 'Apple Color Emoji', vivistickerUtils.userSettings.emojiSetting, ...fontFaces.slice(insertIndex)]
+      //   } // else: don't insert font into fontFaces for non-Mac or non-iOS
+      // } else {
+      //   fontFaces = [font, ...fontFaces.slice(0, insertIndex), vivistickerUtils.userSettings.emojiSetting, ...fontFaces.slice(insertIndex)]
+      // }
+    }
+    return fontFaces.join(', ')
   }
 
   convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, factor = 1): { [key: string]: string } {
