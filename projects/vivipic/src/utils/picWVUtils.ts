@@ -9,7 +9,7 @@ const WHITE_STATUS_BAR_ROUTES = [
   'Editor'
 ]
 
-const nativeEventDisabled = false // vivisticker should set this to true
+const nativeEventDisabled = generalUtils.isStk
 
 class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false

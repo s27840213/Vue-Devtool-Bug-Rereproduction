@@ -521,7 +521,8 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage(scrollToTop = false) {
+  fitPage(options?: { scrollToTop?: boolean, handleContentScale?: boolean }) {
+    const { scrollToTop = false, handleContentScale = true } = options || {}
     // In these mode, don't fitPage.
 
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
@@ -583,7 +584,7 @@ class PageUtils {
       })
     }
 
-    if (generalUtils.isTouchDevice()) {
+    if (generalUtils.isTouchDevice() && handleContentScale) {
       editorUtils.handleContentScaleRatio(this.currFocusPageIndex)
       store.commit('SET_pageScaleRatio', 100)
     }
