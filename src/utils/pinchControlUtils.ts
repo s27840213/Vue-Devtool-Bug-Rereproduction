@@ -49,6 +49,7 @@ export default class PinchControlUtils {
   }
 
   move(e: AnyTouchEvent) {
+    // initialization
     if (this.init === null) {
       if (layerUtils.layerIndex === -1) {
         groupUtils.select(this.layerInfo.pageIndex, [this.layerInfo.layerIndex])

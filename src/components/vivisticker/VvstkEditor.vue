@@ -41,7 +41,7 @@ import PageCard from '@/components/vivisticker/PageCard.vue'
 import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
 import PanelRemoveBg from '@/components/vivisticker/PanelRemoveBg.vue'
 import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
-import { ILayer } from '@/interfaces/layer'
+import { ILayer, IText } from '@/interfaces/layer'
 import { IPageState } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import SwipeDetector from '@/utils/SwipeDetector'
@@ -278,7 +278,7 @@ export default defineComponent({
       pointerEvtUtils.removePointer(e.pointerId)
     },
     onPinch(e: AnyTouchEvent) {
-      if (e.phase === 'end') {
+      if (e.phase === 'end' && this.isPinchInit) {
         // pinch end handling
         this.pinchHandler(e)
         this.isPinchInit = false
@@ -291,7 +291,7 @@ export default defineComponent({
         if (!this.isPinchInit) {
           // first pinch initialization
           const isPinchOnController = controlUtils.isClickOnController(e.startInput.points[0] as any, targetIndex) && controlUtils.isClickOnController(e.startInput.points[1] as any, targetIndex)
-          console.log(isPinchOnController, e.startInput.points[0], e.startInput.points[1])
+          // console.log(isPinchOnController, e.startInput.points[0], e.startInput.points[1])
           if (isPinchOnController) {
             this.isPinchInit = true
             return this.pinchStart(e)
@@ -307,15 +307,12 @@ export default defineComponent({
     },
     pinchStart(e: AnyTouchEvent) {
       console.log('pinch start')
-      // const _config = new Proxy({ config: layerUtils.getCurrLayer as unknown as ILayer }, {
-      //   get: (_, key) => {
-      //     if (key === 'config') {
-      //       // return layerUtils.getLayer(layerUtils.pageIndex, this.$store.getters.getControlState.layerInfo.layerIndex)
-      //       return layerUtils.getCurrLayer as unknown as ILayer
-      //     }
-      //   }
-      // }) as unknown as { config: ILayer }
       const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, this.$store.getters.getControlState.layerInfo.layerIndex) } as unknown as { config: ILayer }
+
+      if (_config.config.type === 'text') {
+        if ((_config.config as IText).contentEditable) return
+      }
+
       const  layerInfo = {
         pageIndex: layerUtils.pageIndex,
         layerIndex: this.$store.getters.getControlState.layerInfo.layerIndex
@@ -325,31 +322,12 @@ export default defineComponent({
         layerInfo,
         snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
         body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${this.$store.getters.getControlState.layerInfo.layerIndex}_-1`) as HTMLElement
-        // body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
       })
-
-      // const data = {
-      //   layerInfo: new Proxy({
-      //     pageIndex: layerUtils.pageIndex,
-      //     layerIndex: layerUtils.layerIndex
-      //   }, {
-      //     get: (_, key) => {
-      //       if (key === 'pageIndex') {
-      //         return layerUtils.pageIndex
-      //       } else if (key === 'layerIndex') {
-      //         return layerUtils.layerIndex
-      //       }
-      //     }
-      //   }) as ILayerInfo,
-      //   config: undefined,
-      //   movingUtils: movingUtils as MovingUtils
-      // }
       const data = {
         layerInfo,
         config: undefined,
         movingUtils: movingUtils as MovingUtils
       }
-      console.warn('data', data.layerInfo.layerIndex)
       this.pinchControlUtils = new PinchControlUtils(data)
     },
     showPanelPageManagement() {

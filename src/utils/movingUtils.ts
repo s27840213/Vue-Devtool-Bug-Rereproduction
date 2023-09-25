@@ -147,7 +147,7 @@ export class MovingUtils {
       pointerEvtUtils.addPointer(event as PointerEvent)
     }
 
-    console.warn('moveStart', eventType, store.getters['mobileEditor/getIsPinchingEditor'], store.getters.getControlState.type)
+    console.warn('moveStart', eventUtils.checkIsMultiTouch(event), store.getters['mobileEditor/getIsPinchingEditor'], store.getters.getControlState.type)
     if (this.isImgControl) return
     if (eventUtils.checkIsMultiTouch(event)) return
     if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type) return
@@ -330,6 +330,7 @@ export class MovingUtils {
         }
       }
     }
+    console.log('move start end')
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
@@ -526,6 +527,7 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
+    console.warn('move end', e)
     if (store.getters.getControlState.id === this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })
     }

@@ -175,6 +175,13 @@ export default defineComponent({
         this.drawTextBg()
       }
     },
+    'config.contentEditable'(val) {
+      if (!val) {
+        this.$store.commit('SET_STATE', {
+          controlState: { type: '' }
+        })
+      }
+    },
     'config.styles.textBg'() { this.drawTextBg() },
     'config.styles.textFill'() { this.drawTextFill() },
   },
