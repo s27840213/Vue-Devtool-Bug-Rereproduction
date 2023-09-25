@@ -142,7 +142,7 @@ const getDefaultState = (): IEditorState => ({
   isGettingDesign: false,
   showGlobalErrorModal: false,
   newTemplateShownMode: true,
-  controlState: ''
+  controlState: { type: '' }
 })
 
 const state = getDefaultState()

@@ -571,7 +571,7 @@ class Controller {
     let layer = document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
     if (layer) {
       // need to check layerIndex !== -1 i.e. layer !== undefined before accessing styles on layerConfig
-      const layerConfig = layerUtils.getCurrLayer
+      const layerConfig = layerUtils.getLayer(layerUtils.pageIndex, layerIndex)
       let rotate = layerConfig.styles.rotate
       if (shapeUtils.isLine(layerConfig)) {
         layer = document.getElementById(`nu-layer__line-mover_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement

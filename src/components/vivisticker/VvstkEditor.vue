@@ -273,6 +273,7 @@ export default defineComponent({
       pointerEvtUtils.addPointer(e)
     },
     removePointer(e: PointerEvent) {
+      console.log('on pointer leaveon pointer leaveon pointer leave', e)
       pointerEvtUtils.removePointer(e.pointerId)
     },
     onPinch(e: AnyTouchEvent) {
@@ -283,10 +284,12 @@ export default defineComponent({
         this.pinchControlUtils = null
       } else {
         const touches = (e.nativeEvent as TouchEvent).touches
-        if (touches.length !== 2 || layerUtils.layerIndex === -1) return
+        // if (touches.length !== 2 || layerUtils.layerIndex === -1) return
+        const targetIndex = this.$store.getters.getControlState.layerInfo?.layerIndex ?? -1
+        if (touches.length !== 2 || targetIndex === -1) return
         if (!this.isPinchInit) {
           // first pinch initialization
-          const isPinchOnController = controlUtils.isClickOnController(touches[0], layerUtils.layerIndex) && controlUtils.isClickOnController(touches[1], layerUtils.layerIndex)
+          const isPinchOnController = controlUtils.isClickOnController(touches[0], targetIndex) && controlUtils.isClickOnController(touches[1], targetIndex)
           if (isPinchOnController) {
             this.isPinchInit = true
             return this.pinchStart(e)
@@ -302,32 +305,43 @@ export default defineComponent({
     },
     pinchStart(e: AnyTouchEvent) {
       console.log('pinch start')
-      const _config = new Proxy({ config: layerUtils.getCurrLayer as unknown as ILayer }, {
-        get: (_, key) => {
-          if (key === 'config') {
-            return layerUtils.getCurrLayer as unknown as ILayer
-          }
-        }
-      }) as unknown as { config: ILayer }
+      // const _config = new Proxy({ config: layerUtils.getCurrLayer as unknown as ILayer }, {
+      //   get: (_, key) => {
+      //     if (key === 'config') {
+      //       // return layerUtils.getLayer(layerUtils.pageIndex, this.$store.getters.getControlState.layerInfo.layerIndex)
+      //       return layerUtils.getCurrLayer as unknown as ILayer
+      //     }
+      //   }
+      // }) as unknown as { config: ILayer }
+      const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, this.$store.getters.getControlState.layerInfo.layerIndex) } as unknown as { config: ILayer }
       const movingUtils = new MovingUtils({
         _config,
         snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${this.$store.getters.getControlState.layerInfo.layerIndex}_-1`) as HTMLElement
+        // body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
       })
 
+      // const data = {
+      //   layerInfo: new Proxy({
+      //     pageIndex: layerUtils.pageIndex,
+      //     layerIndex: layerUtils.layerIndex
+      //   }, {
+      //     get: (_, key) => {
+      //       if (key === 'pageIndex') {
+      //         return layerUtils.pageIndex
+      //       } else if (key === 'layerIndex') {
+      //         return layerUtils.layerIndex
+      //       }
+      //     }
+      //   }) as ILayerInfo,
+      //   config: undefined,
+      //   movingUtils: movingUtils as MovingUtils
+      // }
       const data = {
-        layerInfo: new Proxy({
+        layerInfo: {
           pageIndex: layerUtils.pageIndex,
-          layerIndex: layerUtils.layerIndex
-        }, {
-          get: (_, key) => {
-            if (key === 'pageIndex') {
-              return layerUtils.pageIndex
-            } else if (key === 'layerIndex') {
-              return layerUtils.layerIndex
-            }
-          }
-        }) as ILayerInfo,
+          layerIndex: this.$store.getters.getControlState.layerInfo.layerIndex
+        } as ILayerInfo,
         config: undefined,
         movingUtils: movingUtils as MovingUtils
       }

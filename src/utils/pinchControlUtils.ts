@@ -2,6 +2,8 @@ import { ILayer } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
 import store from '@/store'
 import { ILayerInfo } from '@/store/types'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pointerEvtUtils from '@/utils/pointerEvtUtils'
@@ -17,6 +19,7 @@ export default class PinchControlUtils {
     rotate: number
   }
 
+  private id = generalUtils.generateRandomString(4)
   private layerInfo: ILayerInfo
   private _config?: ILayer
   private movingUtils: MovingUtils
@@ -34,7 +37,6 @@ export default class PinchControlUtils {
   }
 
   pinch(e: AnyTouchEvent) {
-    console.log('pinching')
     requestAnimationFrame(() => {
       switch (e.phase) {
         case 'move':
@@ -47,7 +49,16 @@ export default class PinchControlUtils {
 
   move(e: AnyTouchEvent) {
     if (this.init === null) {
-      store.commit('SET_STATE', { controlState: 'pinch' })
+      if (layerUtils.layerIndex === -1) {
+        groupUtils.select(this.layerInfo.pageIndex, [this.layerInfo.layerIndex])
+      }
+      store.commit('SET_STATE', {
+        controlState: {
+          layerInfo: this.layerInfo,
+          type: 'pinch',
+          id: this.id
+        }
+      })
       if (store.getters['vivisticker/getControllerHidden']) {
         vivistickerUtils.showController()
       }
@@ -89,7 +100,9 @@ export default class PinchControlUtils {
   }
 
   end(e: AnyTouchEvent) {
-    store.commit('SET_STATE', { controlState: '' })
+    if (store.getters.getControlState.id === this.id) {
+      store.commit('SET_STATE', { controlState: { type: '' } })
+    }
     this.init = null
     const nativeEvt = e.nativeEvent as TouchEvent
     const isHasOnePtrEvt = pointerEvtUtils.pointers.length === nativeEvt.touches.length && nativeEvt.touches.length === 1

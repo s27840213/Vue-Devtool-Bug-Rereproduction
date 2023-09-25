@@ -77,13 +77,13 @@ export class MovingUtils {
   }
 
   private initPageTranslate = { x: 0, y: 0 }
-  private randId = ''
+  private id = ''
 
   constructor({ _config, snapUtils, component, body, layerInfo }: { _config: { config: ILayer }, snapUtils: unknown, component?: any, body: HTMLElement, layerInfo?: ILayerInfo }) {
     this._config = _config
     this.snapUtils = snapUtils
     this.body = body
-    this.randId = generalUtils.generateRandomString(4)
+    this.id = generalUtils.generateRandomString(4)
     component && (this.component = component)
     layerInfo && (this.layerInfo = layerInfo)
   }
@@ -147,12 +147,19 @@ export class MovingUtils {
       pointerEvtUtils.addPointer(event as PointerEvent)
     }
 
-    console.warn('moveStart', eventType, store.getters['mobileEditor/getIsPinchingEditor'], store.getters.getControlState)
+    console.warn('moveStart', eventType, store.getters['mobileEditor/getIsPinchingEditor'], store.getters.getControlState.type)
     if (this.isImgControl) return
     if (eventUtils.checkIsMultiTouch(event)) return
-    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState) return
+    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type) return
 
-    store.commit('SET_STATE', { controlState: 'move' })
+    store.commit('SET_STATE', {
+      controlState: {
+        layerInfo: this.layerInfo,
+        type: 'move',
+        id: this.id
+      }
+    })
+
     if (pointerId) {
       this.pointerId = pointerId
     } else if (eventUtils.getEventType(event) === 'pointer') {
@@ -329,9 +336,8 @@ export class MovingUtils {
     const isPointer = eventUtils.getEventType(e) === 'pointer'
     const isStartedPointer = isPointer && this.pointerId === (e as PointerEvent).pointerId
     const isSinglePointer = pointerEvtUtils.pointers.length <= 1
-    console.warn('moving', this.randId)
     if ((!isPointer || !isStartedPointer) || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer || this.initialPos === null) {
-      if (store.getters.getControlState === 'pinch') {
+      if (store.getters.getControlState.type === 'pinch') {
         // if the pinch is start the moving logic should be turn off
         this.moveEnd(e)
       }
@@ -520,8 +526,10 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
-    store.commit('SET_STATE', { controlState: '' })
-    if (eventUtils.getEventType(e) === 'pointer') {
+    if (store.getters.getControlState.id === this.id) {
+      store.commit('SET_STATE', { controlState: { type: '' } })
+    }
+    if (eventUtils.getEventType(e) === 'pointer' && ['pointerup', 'poinerleave'].includes(e.type)) {
       this.pointerId = 0
       pointerEvtUtils.removePointer((e as PointerEvent).pointerId)
     }
@@ -531,7 +539,7 @@ export class MovingUtils {
       this.isControlling = false
       return this.removeListener()
     }
-    console.warn('move end triggered')
+    console.warn('move end triggered', e)
     this.isControlling = false
     this.removeListener()
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
