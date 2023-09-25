@@ -11,7 +11,7 @@ curl --request POST \
     --header "Content-Type: application/json" \
     --header "Authorization: Bearer ${BITBUCKET_API_TOKEN}" \
     --data '{
-      "title": "Pull request to vivisticker by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+      "title": "Pull request to qa by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
       "source": {
         "branch": {
           "name": "'"${BITBUCKET_BRANCH}"'"

@@ -147,7 +147,7 @@ export default defineComponent({
     }
     window.addEventListener('keydown', this.handleKeydown)
     this.setPrevPageScaleRatio(this.scaleRatio)
-    pageUtils.fitPage()
+    pageUtils.fitPage({ handleContentScale: false })
   },
   unmounted() {
     window.removeEventListener('pointerup', this.drawEnd)

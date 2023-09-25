@@ -3,7 +3,7 @@ router-link(
   custom
   to="/"
   v-slot="{ navigate }")
-  nu-svg-icon(
+  cm-svg-icon(
     icon-color="app-icon-light"
     icon-name="arrow-left"
     icon-width="24px"

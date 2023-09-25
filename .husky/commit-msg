@@ -10,7 +10,7 @@ echo ""
 
 # ^ - start of regular expression
 # $ - end of regular expression
-valid_branch_regex="^(feature\/.+|fix\/.+|test\/.+|hotfix\/.+|main\/(cm|stk|vivipic)|develop|master|hotfix|qa)$"
+valid_branch_regex="^(feature\/.+|fix\/.+|test\/.+|main\/(cm|stk|vivipic)|develop|master|hotfix)$"
 
 if [[ ! $local_branch =~ $valid_branch_regex ]]
 then
@@ -27,17 +27,11 @@ echo ""
 OLDPWD=$(pwd)
 cd tools/i18n-tool
 
-python_version=$(python --version 2>&1)
-
-# Define the regular expression pattern
-pattern="Python [0-9]+\.[0-9]+\.[0-9]+"
-
 # Check if the output matches the pattern
-if [[ "$python_version" =~ $pattern ]]
-then
-    python i18n_shake.py -c -n
-else
+if [[ $(uname) == "Darwin" ]]; then
     python3 i18n_shake.py -c -n
+else
+    python i18n_shake.py -c -n
 fi
 cd "$OLDPWD"
 if [[ $? == 1 ]]

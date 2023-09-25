@@ -4,7 +4,7 @@ div(class="w-full h-full flex items-center justify-around")
     custom
     v-slot="{ navigate }"
     to="/")
-    nu-svg-icon(
+    cm-svg-icon(
       :icon-name="'home-solid'"
       :icon-color="atHome ? 'app-tab-active' : 'transparent'"
       :icon-width="'32px'"
@@ -14,7 +14,7 @@ div(class="w-full h-full flex items-center justify-around")
     custom
     v-slot="{ navigate }"
     to="/mydesign")
-    nu-svg-icon(
+    cm-svg-icon(
       :icon-name="'grid-solid'"
       :icon-color="atMyDesign ? 'app-tab-active' : 'transparent'"
       :stroke-color="'app-tab-active'"

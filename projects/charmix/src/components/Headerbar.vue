@@ -6,7 +6,7 @@ div(
     back-btn
   div
   div
-    nu-btn(
+    cm-btn(
       theme="primary"
       size="md"
       @click="handleNextAction") {{ $t('CM0012') }}
