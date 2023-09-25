@@ -966,7 +966,7 @@ pipelines:
                 EXTRA_ARGS: "--exclude=*.js.map"
                 DELETE_FLAG: "true"
       - step:
-          name: "deploy prod"
+          name: "deploy vivipic to prod"
           deployment: vivipicprod
           trigger: manual
           script:
