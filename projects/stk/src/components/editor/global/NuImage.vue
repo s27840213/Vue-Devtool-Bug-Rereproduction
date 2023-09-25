@@ -232,9 +232,9 @@ export default defineComponent({
           return
         }
         this.previewAsLoading()
-          .then(() => {
+          .then((img) => {
             const _oldIsTransparent = (this.config as IImage).styles.shadow.isTransparent
-            const isTransparent = this.handleIsTransparent()
+            const isTransparent = this.handleIsTransparent(img)
             const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
             const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || isTransparent || _oldIsTransparent)
             if (redrawImmediately) {
@@ -515,8 +515,8 @@ export default defineComponent({
     getImgDimension(): number | string {
       const { srcObj } = this.config
       const { imgWidth, imgHeight } = this.config.styles
-      let renderW = imgWidth
-      let renderH = imgHeight
+      let renderW = imgWidth * this.contentScaleRatio
+      let renderH = imgHeight * this.contentScaleRatio
       const primaryLayer = this.primaryLayer
       const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
       if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg && srcObj.type !== 'ios') {
@@ -743,15 +743,16 @@ export default defineComponent({
       console.warn(log)
       logUtils.setLog(log)
     },
-    async previewAsLoading() {
+    async previewAsLoading(): Promise<HTMLImageElement | undefined> {
       let isPrimaryImgLoaded = false
       const { imgWidth, imgHeight } = this.config.styles
       const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
       const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
       const previewSrc = this.config.previewSrc || imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getPreviewSize()))
-      await imageUtils.imgLoadHandler(previewSrc, () => {
+      const preImg = await imageUtils.imgLoadHandler<HTMLImageElement | undefined>(previewSrc, (img) => {
         if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
+          return img
         }
       }, { crossOrigin: true })
         .catch(() => {
@@ -760,12 +761,12 @@ export default defineComponent({
             this._onError(true)
           }
           console.warn('img preview cannot be loaded!')
-        })
+        }).finally(() => { return undefined })
 
-      if (!src || src === previewSrc) return
+      if (!src || src === previewSrc) return preImg as HTMLImageElement | undefined
 
-      return new Promise<void>((resolve, reject) => {
-        imageUtils.imgLoadHandler(src, () => {
+      return new Promise<HTMLImageElement>((resolve, reject) => {
+        imageUtils.imgLoadHandler(src, (img) => {
           if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             isPrimaryImgLoaded = true
             this.src = src
@@ -776,7 +777,7 @@ export default defineComponent({
               this.preLoadImg('pre', this.getImgDimension)
               this.preLoadImg('next', this.getImgDimension)
             }
-            resolve()
+            resolve(img)
           }
         }, {
           error: () => {
@@ -834,7 +835,6 @@ export default defineComponent({
     handleIsTransparent(_img?: HTMLImageElement) {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
       if (!this.$refs.img) return
-
       const img = _img ?? this.$refs.img as HTMLImageElement
       const isTransparent = imageShadowUtils.isTransparentBg(img)
       imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
@@ -843,14 +843,20 @@ export default defineComponent({
     async handleInitLoad() {
       if (this.userId !== 'backendRendering') {
         await this.previewAsLoading()
-          .then(() => this.handleIsTransparent())
-      } else {
-        const { imgWidth, imgHeight } = this.config.styles
-        this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
-        if (this.isAdjustImage) {
-          imageUtils.imgLoadHandler(this.src, (img) => {
+          .then((img) => {
             this.handleIsTransparent(img)
           })
+      } else {
+        const { imgWidth, imgHeight } = this.config.styles
+        const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+        if (this.isAdjustImage) {
+          // adjust-image need to check if the image is transparent
+          imageUtils.imgLoadHandler(src, (img) => {
+            this.handleIsTransparent(img)
+            this.src = src
+          }, { crossOrigin: true })
+        } else {
+          this.src = src
         }
       }
       this.initialized = true
