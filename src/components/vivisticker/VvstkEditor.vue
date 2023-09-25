@@ -285,7 +285,7 @@ export default defineComponent({
         this.pinchControlUtils = null
       } else {
         const touches = (e.nativeEvent as TouchEvent).touches
-        const targetIndex = this.$store.getters.getControlState.layerInfo?.layerIndex ?? -1
+        const targetIndex = layerUtils.layerIndex === -1 ? (this.$store.getters.getControlState.layerInfo?.layerIndex ?? -1) : layerUtils.layerIndex
         // console.log(touches.length, targetIndex, this.isPinchInit)
         if (touches.length !== 2 || targetIndex === -1) return
         if (!this.isPinchInit) {
@@ -294,7 +294,7 @@ export default defineComponent({
           // console.log(isPinchOnController, e.startInput.points[0], e.startInput.points[1])
           if (isPinchOnController) {
             this.isPinchInit = true
-            return this.pinchStart(e)
+            return this.pinchStart(e, targetIndex)
           }
         } else {
           // pinch move handling
@@ -305,9 +305,9 @@ export default defineComponent({
     pinchHandler(e: AnyTouchEvent) {
       this.pinchControlUtils?.pinch(e)
     },
-    pinchStart(e: AnyTouchEvent) {
+    pinchStart(e: AnyTouchEvent, targetIndex: number) {
       console.log('pinch start')
-      const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, this.$store.getters.getControlState.layerInfo.layerIndex) } as unknown as { config: ILayer }
+      const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, targetIndex) } as unknown as { config: ILayer }
 
       if (_config.config.type === 'text') {
         if ((_config.config as IText).contentEditable) return
@@ -315,13 +315,13 @@ export default defineComponent({
 
       const  layerInfo = {
         pageIndex: layerUtils.pageIndex,
-        layerIndex: this.$store.getters.getControlState.layerInfo.layerIndex
+        layerIndex: targetIndex
       } as ILayerInfo
       const movingUtils = new MovingUtils({
         _config,
         layerInfo,
         snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${this.$store.getters.getControlState.layerInfo.layerIndex}_-1`) as HTMLElement
+        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${targetIndex}_-1`) as HTMLElement
       })
       const data = {
         layerInfo,

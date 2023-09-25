@@ -340,7 +340,11 @@ export class MovingUtils {
     if ((!isPointer || !isStartedPointer) || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer || this.initialPos === null) {
       if (store.getters.getControlState.type === 'pinch') {
         // if the pinch is started, the moving logic should be turn off
-        this.moveEnd(e)
+        // this.moveEnd(e)
+        this.removeListener()
+        if (store.getters.getControlState.id === this.id) {
+          store.commit('SET_STATE', { controlState: { type: '' } })
+        }
       }
       return
     }
