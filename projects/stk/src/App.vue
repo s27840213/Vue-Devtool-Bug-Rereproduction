@@ -16,7 +16,7 @@ div(id="app" :style="appStyles()")
       :info="currSelectedResInfo"
       @blur="setCurrSelectedResInfo()"
       tabindex="0")
-  debug-tool(v-if="!inScreenshotPreview && showAllAdminTool")
+  debug-tool(v-if="!inScreenshotPreview && enableAdminView && debugMode")
   div(class="modal-container"
       v-if="isModalOpen"
       :style="modalInfo.backdropStyle")
@@ -131,6 +131,10 @@ export default defineComponent({
     networkUtils.unregisterNetworkListener()
   },
   computed: {
+    ...mapState('user', [
+      'uname',
+      'enableAdminView'
+    ]),
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen',
@@ -138,7 +142,8 @@ export default defineComponent({
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
       userInfo: 'webView/getUserInfo',
-      browserInfo: 'user/getBrowserInfo'
+      browserInfo: 'user/getBrowserInfo',
+      debugMode: 'vivisticker/getDebugMode'
     }),
     currLocale(): string {
       return localeUtils.currLocale()

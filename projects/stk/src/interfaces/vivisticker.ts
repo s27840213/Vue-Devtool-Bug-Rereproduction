@@ -16,14 +16,25 @@ export interface IUserInfoV1_26 extends IUserInfoV1_0 {
   country: string,
 }
 
-export type IUserInfo = IUserInfoV1_0 & Partial<IUserInfoV1_26>
+export interface IUserInfoV1_42 extends IUserInfoV1_26 {
+  storeCountry: string
+}
+
+export type IUserInfo = IUserInfoV1_0 & Partial<IUserInfoV1_26> & Partial<IUserInfoV1_42>
 
 export function isV1_0(userInfo: IUserInfo): userInfo is IUserInfoV1_0 {
-  return userInfo.device === undefined
+  if (isV1_26(userInfo)) return false
+  if (isV1_42(userInfo)) return false
+  return true
 }
 
 export function isV1_26(userInfo: IUserInfo): userInfo is IUserInfoV1_26 {
   return userInfo.device !== undefined
+}
+
+export function isV1_42(userInfo: IUserInfo): userInfo is IUserInfoV1_42 {
+  if (!isV1_26(userInfo)) return false
+  return 'storeCountry' in userInfo
 }
 
 export interface IUserSettings {

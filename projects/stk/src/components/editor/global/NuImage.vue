@@ -669,7 +669,7 @@ export default defineComponent({
       if (type === 'main') {
         // detect if SVG image rendered
         const rendering = () => {
-          const elImg = this.$refs.img as SVGImageElement
+          const elImg = this.$refs['adjust-img'] as SVGImageElement
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
