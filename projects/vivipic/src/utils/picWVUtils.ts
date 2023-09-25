@@ -9,8 +9,6 @@ const WHITE_STATUS_BAR_ROUTES = [
   'Editor'
 ]
 
-const nativeEventDisabled = generalUtils.isStk
-
 class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
   toSendStatistics = false
@@ -42,6 +40,10 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     main: this.MAIN_CALLBACKS
   }
 
+  get nativeEventDisabled() {
+    return generalUtils.isStk
+  }
+
   get inBrowserMode(): boolean {
     return store.getters['webView/getInBrowserMode']
   }
@@ -51,7 +53,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   get isEventDisabled(): boolean {
-    return this.inBrowserMode || nativeEventDisabled
+    return this.inBrowserMode || this.nativeEventDisabled
   }
 
   detectIfInApp() {
