@@ -113,6 +113,11 @@ import { defineComponent } from 'vue'
 import { Collapse } from 'vue-collapsed'
 import { mapGetters, mapState } from 'vuex'
 
+const imports = import.meta.glob(
+  `@/assets/img/text-effect/icon/*.png`,
+  { eager: true, import: 'default' }
+) as Record<string, string>
+
 export default defineComponent({
   name: 'PanelTextEffectSetting',
   components: {
@@ -186,7 +191,7 @@ export default defineComponent({
       switch (effect.key) {
         case 'text-book':
           return {
-            name: require(`@/assets/img/text-effect/icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
+            name: imports[`/src/assets/img/text-effect/icon/${category.name}-${effect.key}-${i18n.global.locale}.png`],
             size: '56',
           }
         case 'custom-fill-img': // svg-icon
@@ -196,7 +201,7 @@ export default defineComponent({
           }
         default:
           return {
-            name: require(`@/assets/img/text-effect/icon/${category.name}-${effect.key}.png`),
+            name: imports[`/src/assets/img/text-effect/icon/${category.name}-${effect.key}.png`],
             size: '56',
           }
       }

@@ -3,12 +3,17 @@ img(v-if="!inReviewMode"
     :class="`pro ${theme}`"
     loading="lazy"
     draggable="false"
-    :src="require(`@/assets/img/svg/pricing/${iconFileName}`)")
+    :src="imports[`/src/assets/img/svg/pricing/${iconFileName}`]")
 </template>
 
 <script lang="ts">
 import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent, PropType } from 'vue'
+
+const imports = import.meta.glob(
+  `@/assets/img/svg/pricing/pro*.svg`,
+  { eager: true, import: 'default' }
+) as Record<string, string>
 
 export default defineComponent({
   emits: [],
@@ -17,6 +22,11 @@ export default defineComponent({
     theme: {
       type: String as PropType<'default' | 'roundedRect'>,
       default: 'default',
+    }
+  },
+  data() {
+    return {
+      imports,
     }
   },
   computed: {
