@@ -88,7 +88,7 @@ const fitScaleRatio = computed(() => {
 const wrapperStyles = computed(() => {
   return {
     width: `${editingPage.value.width * fitScaleRatio.value}px`,
-    height: `${editingPage.value.height * fitScaleRatio.value}px`
+    height: `${editingPage.value.height * fitScaleRatio.value}px`,
   }
 })
 
@@ -96,7 +96,7 @@ const pageStyles = computed(() => {
   return {
     width: `${editingPage.value.width}px`,
     height: `${editingPage.value.height}px`,
-    transform: `scale(${pageScaleRatio.value})`
+    transform: `scale(${pageScaleRatio.value})`,
   }
 })
 // #endregion
@@ -108,7 +108,7 @@ const { brushSize, isChangingBrushSize } = storeToRefs(canvasStore)
 const demoBrushSizeStyles = computed(() => {
   return {
     width: `${brushSize.value * pageScaleRatio.value}px`,
-    height: `${brushSize.value * pageScaleRatio.value}px`
+    height: `${brushSize.value * pageScaleRatio.value}px`,
   }
 })
 // #endregion
@@ -116,11 +116,19 @@ const demoBrushSizeStyles = computed(() => {
 /**
  * fitPage
  */
-watchEffect(() => {
-  if (atEditor.value) {
-    setPageScaleRatio(fitScaleRatio.value)
-  }
-})
+
+watch(
+  () => fitScaleRatio.value,
+  (newVal, oldVal) => {
+    if (newVal === oldVal || !atEditor.value) return
+    setPageScaleRatio(newVal)
+  },
+  // useDebounceFn((newVal, oldVal) => {
+  //   if (newVal === oldVal || !atEditor.value) return
+  //   setPageScaleRatio(newVal)
+  //   setPageScaleRatio(newVal)
+  // }, 300),
+)
 </script>
 <style lang="scss">
 .demo-brush {

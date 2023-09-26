@@ -211,6 +211,11 @@ if (window.location.host !== 'vivipic.com') {
     name: 'NubtnList',
     component: () => import('@/views/NubtnList.vue')
   })
+  routes.push({
+    path: 'emoji',
+    name: 'EmojiTest',
+    component: () => import('@/views/EmojiTest.vue')
+  })
 }
 
 routes.forEach((route) => {
