@@ -554,21 +554,6 @@ class Controller {
     return [width, height]
   }
 
-  /**
-   * This function determine if the point 'c' is on the left-hand-side of the line p1_p2
-   */
-  private isOnLeftHandSide(p1: ICoordinate, p2: ICoordinate, c: ICoordinate) {
-    const p1_p2 = {
-      x: p2.x - p1.x,
-      y: p2.y - p1.y
-    }
-    const p1_c = {
-      x: c.x - p1.x,
-      y: c.y - p1.y
-    }
-    return p1_p2.x * p1_c.y - p1_p2.y * p1_c.x > 0
-  }
-
   isClickOnController(e: MouseEvent, layer?: AllLayerTypes): boolean {
     layer = layer ?? layerUtils.getCurrLayer
     if (Object.keys(layer).length > 0) {
@@ -591,6 +576,7 @@ class Controller {
           rotate: layer.styles.rotate
         }
       }
+      layerPolygonConfig = mathUtils.scalePolygonConfig(layerPolygonConfig, store.getters.getContentScaleRatio)
       const scaleRatio = store.getters.getPageScaleRatio
       const mouseRelPoint = mouseUtils.getMouseRelPoint(e, document.querySelector(`.nu-page-content-${pageUtils.currFocusPageIndex}`) as HTMLElement)
       mouseRelPoint.x = mouseRelPoint.x / scaleRatio * 100
