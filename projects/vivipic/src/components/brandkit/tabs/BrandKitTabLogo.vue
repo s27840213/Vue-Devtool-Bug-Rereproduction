@@ -17,7 +17,7 @@ div(class="brand-kit-tab-logo")
 import ImageList, { IImageListItem } from '@/components/image-gallery/ImageList.vue'
 import { IBrand, IBrandLogo } from '@nu/vivi-lib/interfaces/brandkit'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
-import paymentUtils from '@/utils/paymentUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
