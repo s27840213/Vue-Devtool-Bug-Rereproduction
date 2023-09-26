@@ -146,6 +146,7 @@ export class MovingUtils {
     if (eventType === 'pointer') {
       pointerEvtUtils.addPointer(event as PointerEvent)
     }
+    console.log(this.pageIndex, this.layerIndex)
 
     console.warn('moveStart', eventUtils.checkIsMultiTouch(event), store.getters['mobileEditor/getIsPinchingEditor'], store.getters.getControlState.type)
     if (this.isImgControl) return
@@ -431,7 +432,10 @@ export class MovingUtils {
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
     if (this.initialPos === null) return
 
-    const config = this.layerIndex === layerUtils.layerIndex ? this.config : layerUtils.getCurrLayer
+    // target overlay means the current movingHandler is overlaying above the target layer.
+    const isTargetOverlay = this.layerIndex === layerUtils.layerIndex
+    const config = isTargetOverlay ? this.config : layerUtils.getCurrLayer
+    const targetLayerIdx = layerUtils.layerIndex
     if (Object.values(config).length === 0) {
       /**
        * if the layer is deleted the config will be empty object
@@ -441,7 +445,7 @@ export class MovingUtils {
       return
     }
     if (!this.config.moved) {
-      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      layerUtils.updateLayerProps(this.pageIndex, targetLayerIdx, { moved: true })
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
     let offsetRatio = 100 / store.getters.getPageScaleRatio
@@ -472,12 +476,12 @@ export class MovingUtils {
 
     if (offsetSnap.x || offsetSnap.y) {
       this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
-      layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+      layerUtils.updateLayerStyles(this.pageIndex, targetLayerIdx, {
         x: _updateStyles.x + offsetSnap.x,
         y: _updateStyles.y + offsetSnap.y
       })
     } else {
-      layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+      layerUtils.updateLayerStyles(this.pageIndex, targetLayerIdx, {
         x: _updateStyles.x,
         y: _updateStyles.y
       })
