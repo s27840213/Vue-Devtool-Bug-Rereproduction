@@ -50,6 +50,7 @@ def process(project, extensions = ['vue', 'ts'], prefixes = set()):
   file_paths = []
   for extension in extensions:
     file_paths.extend(glob.glob(f"{ROOT}/projects/{project}/src/**/*.{extension}", recursive=True))
+    file_paths.extend(glob.glob(f"{ROOT}/packages/vivi-lib/src/**/*.{extension}", recursive=True))
   count = 0
 
   for file_path in file_paths:
