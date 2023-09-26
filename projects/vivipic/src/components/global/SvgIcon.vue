@@ -1,16 +1,12 @@
 <template lang="pug">
-svg(
-  v-if="iconName === 'loading'"
-  class="svg-icon"
-  :class="`text-${iconColor} svg-${iconName}`"
-  viewBox="0 0 120 30"
-  :style="iconStyles()"
-  v-html="loadingSvg")
-svg(
-  v-else
-  class="svg-icon"
-  :class="`text-${iconColor} svg-${iconName}`"
-  :style="iconStyles()")
+svg(v-if="iconName === 'loading'"
+    class="svg-icon"
+    :class="`text-${iconColor} svg-${iconName}`"
+    viewBox="0 0 120 30"
+    :style="iconStyles()"
+    v-html="loadingSvg")
+svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
+    :style="iconStyles()")
   use(:xlink:href="`#${iconName}`")
 </template>
 
@@ -19,8 +15,7 @@ import svgIconUtils from '@/utils/svgIconUtils'
 import { defineComponent } from 'vue'
 
 // eslint-disable-next-line no-undef
-const requireAll = (requireContext: __WebpackModuleApi.RequireContext) =>
-  requireContext.keys().map(requireContext)
+const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/, 'lazy-once')
 
 if (window.location.host !== 'vivipic.com') {
@@ -57,19 +52,19 @@ const component = defineComponent({
   props: {
     iconName: {
       type: String,
-      default: 'menu',
+      default: 'menu'
     },
     iconWidth: {
       type: String,
-      default: '40px',
+      default: '40px'
     },
     iconColor: {
       type: String,
-      default: 'blue-1',
+      default: 'blue-1'
     },
     iconHeight: {
-      type: String,
-    },
+      type: String
+    }
   },
   data() {
     return {
@@ -104,17 +99,17 @@ const component = defineComponent({
                     values="1;.5;1" calcMode="linear"
                     repeatCount="indefinite" />
         </circle>
-      `,
+      `
     }
   },
   methods: {
     iconStyles() {
       return {
         width: this.iconWidth,
-        height: this.iconHeight ?? this.iconWidth,
+        height: this.iconHeight ?? this.iconWidth
       }
-    },
-  },
+    }
+  }
 })
 export default component
 </script>
@@ -122,9 +117,7 @@ export default component
 <style lang="scss" scoped>
 .svg-icon {
   width: 100%;
-  transition:
-    background-color 0.4s,
-    color 0.4s;
+  transition: background-color 0.4s, color 0.4s;
   fill: currentColor;
   &:focus {
     outline: none;
