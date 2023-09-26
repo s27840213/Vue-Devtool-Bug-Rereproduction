@@ -146,7 +146,7 @@ export default defineComponent({
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
-    pageUtils.fitPage(false)
+    pageUtils.fitPage()
     this.tmpScaleRatio = pageUtils.scaleRatio
 
     if (this.$isTouchDevice()) {

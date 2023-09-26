@@ -52,6 +52,7 @@ import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import BrandKitTextSetting from '@/components/brandkit/BrandKitTextSetting.vue'
 import { IBrand, IBrandFont, IBrandTextStyleSetting } from '@nu/vivi-lib/interfaces/brandkit'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -134,6 +135,7 @@ export default defineComponent({
       refreshFontAsset: 'refreshFontAsset'
     }),
     handleUploadFont() {
+      if (!paymentUtils.checkPro({ plan: 1 }, 'brandkit')) return
       uploadUtils.chooseAssets('font')
     },
     handleDeleteFont(font: IBrandFont) {

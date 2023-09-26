@@ -40,12 +40,20 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     main: this.MAIN_CALLBACKS
   }
 
+  get nativeEventDisabled() {
+    return generalUtils.isStk
+  }
+
   get inBrowserMode(): boolean {
     return store.getters['webView/getInBrowserMode']
   }
 
   get inReviewMode(): boolean {
     return store.getters['webView/getInReviewMode']
+  }
+
+  get isEventDisabled(): boolean {
+    return this.inBrowserMode || this.nativeEventDisabled
   }
 
   detectIfInApp() {
@@ -67,17 +75,16 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   sendToIOS: InstanceType<typeof WebViewUtils>['sendToIOS'] = (...args) => {
-    if (this.inBrowserMode) return
+    if (this.isEventDisabled) return
     super.sendToIOS(...args)
   }
 
   callIOSAsAPI: InstanceType<typeof WebViewUtils>['callIOSAsAPI'] = async (...args) => {
-    if (this.inBrowserMode) return
+    if (this.isEventDisabled) return
     return super.callIOSAsAPI(...args)
   }
 
   sendAppLoaded() {
-    if (this.inBrowserMode) return
     if (!this.appLoadedSent) {
       this.sendToIOS('APP_LOADED', { hideReviewRequest: false })
       this.appLoadedSent = true
@@ -85,7 +92,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getUserInfo(): Promise<IUserInfo> {
-    if (this.inBrowserMode) return this.getUserInfoFromStore()
+    if (this.isEventDisabled) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('APP_LAUNCH', this.getEmptyMessage(), 'launch')
     const userInfo = this.getUserInfoFromStore()
     const appCaps = await fetch(`https://template.vivipic.com/static/appCaps.json?ver=${generalUtils.generateRandomString(6)}`)
@@ -115,13 +122,11 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async updateUserInfo(userInfo: Partial<IUserInfo>): Promise<void> {
-    if (this.inBrowserMode) return
     store.commit('webView/UPDATE_userInfo', userInfo)
     await this.callIOSAsAPI('UPDATE_USER_INFO', userInfo, 'update-user-info')
   }
 
   async updateLocale(locale: string): Promise<void> {
-    if (this.inBrowserMode) return
     await this.updateUserInfo({ locale })
   }
 
@@ -138,7 +143,6 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async setState(key: string, value: any) {
-    if (this.inBrowserMode) return
     await this.callIOSAsAPI('SET_STATE', { key, value }, 'setState')
   }
 
@@ -147,7 +151,6 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getState(key: string): Promise<any> {
-    if (this.inBrowserMode) return
     if (this.checkVersion('1.0.3')) {
       return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
     } else {
@@ -160,13 +163,11 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async changeStatusBarTextColor(routeName: string): Promise<any> {
-    if (this.inBrowserMode) return
     const statusBarColor = WHITE_STATUS_BAR_ROUTES.includes(routeName) ? 'white' : 'black'
     await this.callIOSAsAPI('UPDATE_USER_INFO', { statusBarColor }, 'update-user-info')
   }
 
   switchDomain(domain: string): void {
-    if (this.inBrowserMode) return
     this.sendToIOS('SWITCH_DOMAIN', { domain })
   }
 
@@ -191,12 +192,10 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   sendAdEvent(eventName: string, param: { [key: string]: any } = {}) {
-    if (this.inBrowserMode) return
     this.sendToIOS('SEND_AD_EVENT', { eventName, param })
   }
 
   ratingRequest(type: string) {
-    if (this.inBrowserMode) return
     this.sendToIOS('RATING_REQUEST', { type })
   }
 

@@ -1,4 +1,4 @@
-import i18n from '@/i18n'
+import i18n, { LocaleName } from '@/i18n'
 export interface ILocale {
   abbreviation: string,
   code: string,
@@ -70,13 +70,13 @@ class LocaleUtils {
     return this.SUPPORTED_LOCALES.find(loc => loc.code === i18n.global.locale) as ILocale
   }
 
-  getBrowserLang(): 'tw' | 'us' | 'jp' {
-    return navigator.language.includes('zh') ? 'tw' : navigator.language.includes('ja') ? 'jp' : 'us'
+  getBrowserLang(): LocaleName {
+    return navigator.language.includes('zh') ? 'tw' : navigator.language.includes('ja') ? 'jp' : navigator.language.includes('pt') ? 'pt' : 'us'
   }
 
-  mapNativeLocale(nativeLocale: string): string {
+  mapNativeLocale(nativeLocale: string): string | undefined {
     if (['tw', 'us', 'jp'].includes(nativeLocale)) return nativeLocale
-    return this.nativeLocaleMap[nativeLocale] ?? this.defaultLocale // TODO: handle map-not-found (need discussion with UX)
+    return this.nativeLocaleMap[nativeLocale]
   }
 }
 

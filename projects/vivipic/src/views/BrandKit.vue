@@ -56,6 +56,7 @@ import NuFooter from '@/components/NuFooter.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@nu/vivi-lib/interfaces/brandkit'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
@@ -179,6 +180,7 @@ export default defineComponent({
     handleDrop(e: DragEvent) {
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
+      if (!paymentUtils.checkPro({ plan: 1 }, 'brandkit')) return
       const files = e.dataTransfer?.files
       if (this.selectedTab === 'text') {
         if (!files) return

@@ -10,7 +10,7 @@ echo ""
 
 # ^ - start of regular expression
 # $ - end of regular expression
-valid_branch_regex="^(feature\/.+|fix\/.+|test\/.+|develop|master|hotfix)$"
+valid_branch_regex="^(feature\/.+|fix\/.+|test\/.+|main\/(cm|stk|vivipic)|develop|master|hotfix)$"
 
 if [[ ! $local_branch =~ $valid_branch_regex ]]
 then
@@ -26,11 +26,12 @@ echo ""
 
 OLDPWD=$(pwd)
 cd tools/i18n-tool
-if ! command -v python3 &> /dev/null
-then
-    python i18n_shake.py -c -n
-else
+
+# Check if the output matches the pattern
+if [[ $(uname) == "Darwin" ]]; then
     python3 i18n_shake.py -c -n
+else
+    python i18n_shake.py -c -n
 fi
 cd "$OLDPWD"
 if [[ $? == 1 ]]

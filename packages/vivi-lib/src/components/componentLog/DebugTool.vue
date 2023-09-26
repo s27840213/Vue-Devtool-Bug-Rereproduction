@@ -1,18 +1,24 @@
 <template lang="pug">
 div(class="fps")
   div(v-if="pause" class="fps-graph")
-    svg(v-bind="graph.attrs" class="fps-graph__svg" ref="svg")
-      component(v-for="(elm, idx) in graph.content"
-                :key="`graph-${idx}`"
-                :is="elm.tag"
-                v-bind="elm.attrs")
+    svg(
+      v-bind="graph.attrs"
+      class="fps-graph__svg"
+      ref="svg")
+      component(
+        v-for="(elm, idx) in graph.content"
+        :key="`graph-${idx}`"
+        :is="elm.tag"
+        v-bind="elm.attrs")
     div(class="fps-graph__valleys")
-      div(v-for="valley in valleys"
+      div(
+        v-for="valley in valleys"
         :key="valley.text"
-        :style="{color: valley.color}") {{valley.text}}
+        :style="{ color: valley.color }") {{ valley.text }}
   div(class="fps__value")
-    span(@click="showGraph") FPS: {{fps}}
-    span(v-if="jsHeapSize !== -1") JS-Heap: {{jsHeapSize}}MB
+    span(@click="showGraph") FPS: {{ fps }}
+    span(v-if="jsHeapSize !== -1") JS-Heap: {{ jsHeapSize }}MB
+    span {{ `Current envs: ${currentEnv}` }}
 </template>
 
 <script lang="ts">
@@ -38,9 +44,9 @@ class Valley {
     this.color = ['red', 'orange', 'green', 'purple'][colorIndex]
     this.path = new Path(new Point(this.start, baseline))
     range(this.start, end).forEach((index) => {
-      (this.path as Path).L(new Point(index, baseline - fpsArray[index]))
-    });
-    (this.path as Path).L(new Point(end, baseline))
+      ;(this.path as Path).L(new Point(index, baseline - fpsArray[index]))
+    })
+    ;(this.path as Path).L(new Point(end, baseline))
   }
 }
 
@@ -48,7 +54,7 @@ interface IFpsGraph {
   attrs: {
     viewBox: string
     width: string
-  },
+  }
   content: {
     tag: string
     attrs: {
@@ -64,8 +70,7 @@ interface IFpsGraph {
 
 export default defineComponent({
   name: 'DebugTool',
-  components: {
-  },
+  components: {},
   data() {
     return {
       historySize: 30000,
@@ -75,7 +80,8 @@ export default defineComponent({
       pause: false,
       graph: {} as IFpsGraph,
       valleys: [] as Valley[],
-      jsHeapSize: 0
+      jsHeapSize: 0,
+      currentEnv: process.env.NODE_ENV,
     }
   },
   computed: {
@@ -121,11 +127,13 @@ export default defineComponent({
 
       const { historyLong } = this
       const now = performance.now()
-      const fpsArray = range(291).reverse().map((index) => {
-        return filter(historyLong, (time) => {
-          return now - index * 100 - 1000 < time && time < now - index * 100
-        }).length
-      })
+      const fpsArray = range(291)
+        .reverse()
+        .map((index) => {
+          return filter(historyLong, (time) => {
+            return now - index * 100 - 1000 < time && time < now - index * 100
+          }).length
+        })
       const baseline = Math.max(...fpsArray)
 
       const path = new Path(new Point(0, baseline))
@@ -154,35 +162,39 @@ export default defineComponent({
         tag: 'path',
         attrs: {
           style: `fill: ${valley.color};`,
-          d: valley.path.result()
-        }
+          d: valley.path.result(),
+        },
       }))
-      const scaleLine = range(0, baseline, 10).map(scale => ({
+      const scaleLine = range(0, baseline, 10).map((scale) => ({
         tag: 'line',
         attrs: {
           style: 'stroke: black; stroke-width: 0.3',
           x1: 0,
           y1: baseline - scale,
           x2: 291,
-          y2: baseline - scale
-        }
+          y2: baseline - scale,
+        },
       }))
 
       this.graph = {
         attrs: {
           viewBox: `0 0 291 ${baseline}`,
-          width: '100%'
+          width: '100%',
         },
-        content: [{
-          tag: 'path',
-          attrs: {
-            style: 'fill: #4EABE6;',
-            d: path.result()
-          }
-        }, ...valleyCover, ...scaleLine]
+        content: [
+          {
+            tag: 'path',
+            attrs: {
+              style: 'fill: #4EABE6;',
+              d: path.result(),
+            },
+          },
+          ...valleyCover,
+          ...scaleLine,
+        ],
       }
-    }
-  }
+    },
+  },
 })
 </script>
 

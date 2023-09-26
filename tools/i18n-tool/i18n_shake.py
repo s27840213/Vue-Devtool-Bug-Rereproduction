@@ -99,17 +99,9 @@ def check_files(project, used_keys: set[str]):
       sys.exit(1)
   return mismatch
 
-if __name__ == '__main__':
-  import argparse
-  parser = argparse.ArgumentParser()
-  parser.add_argument('-c', '--check',
-                      action='store_true',
-                      help='check consistency between source code and shaked.json instead of generating shaked.json')
-  parser.add_argument('-n', '--no-color',
-                      action='store_true',
-                      help='don\'t use color in printed messages, usually used by husky')
-  args = parser.parse_args()
+def main(args):
   if args.no_color:
+    global bcolors
     bcolors = nocolors
   PROJECTS = ['vivipic', 'stk', 'charmix']
   any_mismatch = False
@@ -129,3 +121,17 @@ if __name__ == '__main__':
     print(f'{bcolors.FAIL}Some mismatch found')
     print(f'Please run tools/i18n-tool/i18n_shake.py and git add changes before commiting{bcolors.ENDC}')
     sys.exit(1)
+  elif args.check:
+    print(f'{bcolors.OKGREEN}No mismatch found!{bcolors.ENDC}')
+
+if __name__ == '__main__':
+  import argparse
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-c', '--check',
+                      action='store_true',
+                      help='check consistency between source code and shaked.json instead of generating shaked.json')
+  parser.add_argument('-n', '--no-color',
+                      action='store_true',
+                      help='don\'t use color in printed messages, usually used by husky')
+  args = parser.parse_args()
+  main(args)
