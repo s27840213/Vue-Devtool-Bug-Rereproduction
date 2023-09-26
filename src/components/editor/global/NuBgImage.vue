@@ -143,11 +143,6 @@ export default defineComponent({
       const editorImg = this.getEditorViewImages
       if (!editorImg(assetId)) {
         await this.updateImages({ assetSet: new Set<string>([assetId]) })
-        const { imgWidth, imgHeight } = this.image.config.styles
-        const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
-        imageUtils.imgLoadHandler(src, () => {
-          this.src = src
-        }, { crossOrigin: true })
       }
     }
 
@@ -156,11 +151,14 @@ export default defineComponent({
         .then((img) => this.handleIsTransparent(img))
     } else {
       const { imgWidth, imgHeight } = this.image.config.styles
-      this.src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
+      const src = imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
       if (this.isAdjustImage) {
-        imageUtils.imgLoadHandler(this.src, (img) => {
+        imageUtils.imgLoadHandler(src, (img) => {
           this.handleIsTransparent(img)
+          this.src = src
         }, { crossOrigin: true })
+      } else {
+        this.src = src
       }
     }
   },
