@@ -34,9 +34,10 @@ div(class="panel-vvstk-more")
 
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
+import localeUtils from '@/utils/localeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 type OptionConfig = {
   text: string
@@ -60,6 +61,10 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState('user', [
+      'uname',
+      'enableAdminView'
+    ]),
     ...mapGetters({
       userInfo: 'vivisticker/getUserInfo',
       inReviewMode: 'webView/getInReviewMode',
@@ -128,32 +133,24 @@ export default defineComponent({
           text: 'import design',
           icon: 'vivisticker_global',
           action: this.handleImportDesign
+        }, {
+          text: 'toggle admin tool',
+          icon: 'vivisticker_global',
+          action: this.toogleAdminTool
         }
       ] : []]
     },
     localeOptions(): OptionConfig[] {
-      return [{
-        text: 'English',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return this.$i18n.locale === 'us'
-        },
-        action: () => { this.handleUpdateLocale('us') }
-      }, {
-        text: '繁體中文',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return this.$i18n.locale === 'tw'
-        },
-        action: () => { this.handleUpdateLocale('tw') }
-      }, {
-        text: '日本語',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return this.$i18n.locale === 'jp'
-        },
-        action: () => { this.handleUpdateLocale('jp') }
-      }]
+      return localeUtils.SUPPORTED_LOCALES.map(supported_locale => {
+        return {
+          text: supported_locale.name,
+          icon: 'vivisticker_global',
+          selected: () => {
+            return this.$i18n.locale === supported_locale.abbreviation
+          },
+          action: () => { this.handleUpdateLocale(supported_locale.abbreviation) }
+        }
+      })
     },
     domainOptions(): OptionConfig[] {
       return [{
@@ -236,7 +233,8 @@ export default defineComponent({
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setSlideType: 'vivisticker/SET_slideType',
       setFullPageConfig: 'vivisticker/SET_fullPageConfig',
-      setDebugMode: 'vivisticker/SET_debugMode'
+      setDebugMode: 'vivisticker/SET_debugMode',
+      setUserState: 'user/SET_STATE'
     }),
     handleOptionAction(action?: () => void) {
       if (action) {
@@ -277,8 +275,8 @@ export default defineComponent({
     },
     handleUpdateLocale(locale: string) {
       if (locale === this.$i18n.locale) return
-      vivistickerUtils.updateLocale(locale).then(() => {
-        location.reload()
+      vivistickerUtils.updateLocale(locale).then((success) => {
+        success && location.reload()
       })
     },
     handleDebugMode() {
@@ -292,6 +290,9 @@ export default defineComponent({
       this.debugModeTimer = window.setTimeout(() => {
         this.debugModeCounter = 0
       }, 1000)
+    },
+    toogleAdminTool() {
+      this.setUserState({ enableAdminView: !this.enableAdminView })
     },
     toggleDebugMode() {
       this.debugMode = !this.debugMode

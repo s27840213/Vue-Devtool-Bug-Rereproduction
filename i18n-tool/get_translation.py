@@ -31,7 +31,7 @@ def deep_set(_dict, key, value):
     for k in keys:
         _dict = _dict.setdefault(k, {})
     if value == '':
-        _dict[latest] = ''
+        return
     elif value == '!empty' :
         _dict[latest] = ''
     else:

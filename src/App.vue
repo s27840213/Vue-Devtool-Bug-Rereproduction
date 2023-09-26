@@ -16,7 +16,7 @@ div(id="app" :style="appStyles()")
       :info="currSelectedResInfo"
       @blur="setCurrSelectedResInfo()"
       tabindex="0")
-  debug-tool(v-if="!inScreenshotPreview && showAllAdminTool")
+  debug-tool(v-if="!inScreenshotPreview && enableAdminView && debugMode")
   div(class="modal-container"
       v-if="isModalOpen"
       :style="modalInfo.backdropStyle")
@@ -51,7 +51,7 @@ import generalUtils from '@/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
 import { throttle } from 'lodash'
 import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
 import picWVUtils from './utils/picWVUtils'
@@ -88,18 +88,6 @@ export default defineComponent({
 
     picWVUtils.registerCallbacks('main')
 
-    if (picWVUtils.inBrowserMode) {
-      (function (w:any, d:any, s:any, l:any, i:any) {
-        w[l] = w[l] || []; w[l].push({
-          'gtm.start':
-            new Date().getTime(),
-          event: 'gtm.js'
-        }); const f = d.getElementsByTagName(s)[0]
-        const j = d.createElement(s); const dl = l !== 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
-            'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f)
-      })(window, document, 'script', 'dataLayer', 'GTM-T7LDWBP')
-    }
-
     this.$router.isReady().then(() => { picWVUtils.sendAppLoaded() })
     /**
      * @Note the function below is moved from the index.ts store
@@ -128,6 +116,10 @@ export default defineComponent({
     networkUtils.unregisterNetworkListener()
   },
   computed: {
+    ...mapState('user', [
+      'uname',
+      'enableAdminView'
+    ]),
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen',
@@ -135,7 +127,8 @@ export default defineComponent({
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
       userInfo: 'webView/getUserInfo',
-      browserInfo: 'user/getBrowserInfo'
+      browserInfo: 'user/getBrowserInfo',
+      debugMode: 'vivisticker/getDebugMode'
     }),
     currLocale(): string {
       return localeUtils.currLocale()
