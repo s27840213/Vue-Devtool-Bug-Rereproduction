@@ -233,6 +233,16 @@ class MathUtils {
     return this.makePolygon(polygon).contains(this.makePoint(point))
   }
 
+  scalePolygonConfig(polygonConfig: IPolygonConfig, scale: number): IPolygonConfig {
+    return {
+      x: polygonConfig.x * scale,
+      y: polygonConfig.y * scale,
+      width: polygonConfig.width * scale,
+      height: polygonConfig.height * scale,
+      rotate: polygonConfig.rotate
+    }
+  }
+
   // Normal Distribution Between 0 and 1
   randnBm(): number {
     let u = 0
