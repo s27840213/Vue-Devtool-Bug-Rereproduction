@@ -758,12 +758,6 @@ importers:
       vconsole:
         specifier: ^3.14.6
         version: 3.15.1
-      vite-plugin-optimize-persist:
-        specifier: ^0.1.2
-        version: 0.1.2(vite-plugin-package-config@0.1.1)(vite@2.9.16)
-      vite-plugin-package-config:
-        specifier: ^0.1.1
-        version: 0.1.1(vite@2.9.16)
       vue:
         specifier: ^3.2.45
         version: 3.3.4
@@ -804,18 +798,9 @@ importers:
       '@babel/core':
         specifier: ^7.12.16
         version: 7.22.11
-      '@intlify/vite-plugin-vue-i18n':
-        specifier: ^7.0.0
-        version: 7.0.0(vite@2.9.16)(vue-i18n@9.2.2)
       '@intlify/vue-i18n-loader':
         specifier: ^3.2.0
         version: 3.3.0(vue@3.3.4)
-      '@originjs/vite-plugin-commonjs':
-        specifier: ^1.0.1
-        version: 1.0.3
-      '@originjs/vite-plugin-require-context':
-        specifier: 1.0.9
-        version: 1.0.9
       '@rollup/plugin-alias':
         specifier: ^4.0.2
         version: 4.0.4
@@ -6343,7 +6328,7 @@ packages:
       ts-dedent: 2.2.0
       type-fest: 2.19.0
       vue: 3.3.4
-      vue-component-type-helpers: 1.8.11
+      vue-component-type-helpers: 1.8.14
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -20458,8 +20443,8 @@ packages:
     resolution: {integrity: sha512-N9sEPAkH04DZ3K8f2augLTaox/2qSwSvQivguzBjLVeQAXYKe/u1lfms+xNnwULtuxgaPo+Ufnb2WK9lav2CJQ==}
     dev: false
 
-  /vue-component-type-helpers@1.8.11:
-    resolution: {integrity: sha512-CWItFzuEWjkSXDeMGwQEc5cFH4FaueyPQHfi1mBDe+wA2JABqNjFxFUtmZJ9WHkb0HpEwqgBg1umiXrWYXkXHw==}
+  /vue-component-type-helpers@1.8.14:
+    resolution: {integrity: sha512-veuaNIJas+dkRflRumpnY0e0HWqrUrqg5CdWxK/CbQvJ96V4uVOM5eJbj6cJX3rFNmc7+LO3ySHwvKVS8DjG5w==}
     dev: true
 
   /vue-demi@0.13.11(@vue/composition-api@1.7.2)(vue@3.3.4):
