@@ -37,7 +37,7 @@ import editorUtils from '@/utils/editorUtils'
 import localeUtils from '@/utils/localeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 type OptionConfig = {
   text: string
@@ -61,6 +61,10 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState('user', [
+      'uname',
+      'enableAdminView'
+    ]),
     ...mapGetters({
       userInfo: 'vivisticker/getUserInfo',
       inReviewMode: 'webView/getInReviewMode',
@@ -129,6 +133,10 @@ export default defineComponent({
           text: 'import design',
           icon: 'vivisticker_global',
           action: this.handleImportDesign
+        }, {
+          text: 'toggle admin tool',
+          icon: 'vivisticker_global',
+          action: this.toogleAdminTool
         }
       ] : []]
     },
@@ -225,7 +233,8 @@ export default defineComponent({
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setSlideType: 'vivisticker/SET_slideType',
       setFullPageConfig: 'vivisticker/SET_fullPageConfig',
-      setDebugMode: 'vivisticker/SET_debugMode'
+      setDebugMode: 'vivisticker/SET_debugMode',
+      setUserState: 'user/SET_STATE'
     }),
     handleOptionAction(action?: () => void) {
       if (action) {
@@ -281,6 +290,9 @@ export default defineComponent({
       this.debugModeTimer = window.setTimeout(() => {
         this.debugModeCounter = 0
       }, 1000)
+    },
+    toogleAdminTool() {
+      this.setUserState({ enableAdminView: !this.enableAdminView })
     },
     toggleDebugMode() {
       this.debugMode = !this.debugMode
