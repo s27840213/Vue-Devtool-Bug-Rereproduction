@@ -102,10 +102,10 @@ div(class="popup-verify"
 </template>
 
 <script lang="ts">
-import userApis from '@/apis/user'
+import userApis from '@nu/vivi-lib/apis/user'
 import store from '@/store'
-import localeUtils from '@/utils/localeUtils'
-import logUtils from '@/utils/logUtils'
+import localeUtils from '@nu/vivi-lib/utils/localeUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'

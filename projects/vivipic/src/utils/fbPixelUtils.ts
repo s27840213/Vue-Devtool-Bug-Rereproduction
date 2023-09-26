@@ -3,10 +3,10 @@
  */
 
 import tracking from '@/apis/tracking'
-import { IFbTrackingData } from '@/interfaces/api'
+import { IFbTrackingData } from '@nu/vivi-lib/interfaces/api'
 import store from '@/store'
-import generalUtils from './generalUtils'
-import picWVUtils from './picWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 
 class FbPixelUtils {
   get userId(): string { return store.getters['user/getUserId'] }

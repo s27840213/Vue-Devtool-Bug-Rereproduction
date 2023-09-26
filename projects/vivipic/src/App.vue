@@ -41,18 +41,19 @@ div(id="app" :style="appStyles()")
 </template>
 
 <script lang="ts">
-import DebugTool from '@/components/componentLog/DebugTool.vue'
-import ModalCard from '@/components/modal/ModalCard.vue'
-import ResInfo from '@/components/modal/ResInfo.vue'
+import DebugTool from '@nu/vivi-lib/components/componentLog/DebugTool.vue'
+import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
+import ResInfo from '@nu/vivi-lib/components/modal/ResInfo.vue'
 import Popup from '@/components/popup/Popup.vue'
-import generalUtils from '@/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
 import { throttle } from 'lodash'
-import { defineAsyncComponent, defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import localeUtils from './utils/localeUtils'
-import networkUtils from './utils/networkUtils'
-import picWVUtils from './utils/picWVUtils'
+import localeUtils from '@nu/vivi-lib/utils/localeUtils'
+import networkUtils from '@nu/vivi-lib/utils/networkUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import HomeFooterTabs from '@/components/homepage/HomeFooterTabs.vue'
 
 export default defineComponent({
   emits: [],
@@ -61,11 +62,7 @@ export default defineComponent({
     ResInfo,
     ModalCard,
     DebugTool,
-    ...generalUtils.isPic && {
-      HomeFooterTabs: defineAsyncComponent(
-        () => import('@/components/homepage/HomeFooterTabs.vue'),
-      ),
-    },
+    HomeFooterTabs,
   },
   directives: {
     clickOutside: vClickOutside.directive

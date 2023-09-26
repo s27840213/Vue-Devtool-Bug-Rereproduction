@@ -30,8 +30,8 @@ div(class="settings-security")
 
 <script lang="ts">
 import PopupVerify from '@/components/popup/PopupVerify.vue'
-import logUtils from '@/utils/logUtils'
-import popupUtils from '@/utils/popupUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

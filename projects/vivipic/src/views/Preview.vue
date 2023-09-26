@@ -5,9 +5,9 @@ div(class="preview" :style="containStyles")
 </template>
 
 <script lang="ts">
-import PageContent from '@/components/editor/page/PageContent.vue'
-import { IPage } from '@/interfaces/page'
-import pageUtils from '@/utils/pageUtils'
+import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 

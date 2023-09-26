@@ -27,8 +27,8 @@ div(class="sidebar")
 </template>
 
 <script lang="ts">
-import brandkitUtils from '@/utils/brandkitUtils'
-import pageUtils from '@/utils/pageUtils'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

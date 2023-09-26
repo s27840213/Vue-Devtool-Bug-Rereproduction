@@ -13,7 +13,7 @@ div(class="popup-order")
 </template>
 
 <script lang="ts">
-import MappingUtils from '@/utils/mappingUtils'
+import MappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 

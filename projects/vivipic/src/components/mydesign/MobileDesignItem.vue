@@ -46,12 +46,12 @@ div(class="mobile-design-item" :data-index="config.asset_index")
 </template>
 
 <script lang="ts">
-import ImageCarousel from '@/components/global/ImageCarousel.vue'
-import { IDesign } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
-import imageUtils from '@/utils/imageUtils'
-import modalUtils from '@/utils/modalUtils'
-import { PRECISION } from '@/utils/unitUtils'
+import ImageCarousel from '@nu/vivi-lib/components/global/ImageCarousel.vue'
+import { IDesign } from '@nu/vivi-lib/interfaces/design'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import { PRECISION } from '@nu/vivi-lib/utils/unitUtils'
 import vClickOutside from 'click-outside-vue3'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'

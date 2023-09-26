@@ -37,16 +37,16 @@ div(class="popup-page bg-gray-6"
 </template>
 
 <script lang="ts">
-import { IBackgroundImage, IPage } from '@/interfaces/page'
-import { IPopupOptions } from '@/interfaces/popup'
-import assetUtils from '@/utils/assetUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
-import layerFactary from '@/utils/layerFactary'
-import layerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
-import popupUtils from '@/utils/popupUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
+import { IBackgroundImage, IPage } from '@nu/vivi-lib/interfaces/page'
+import { IPopupOptions } from '@nu/vivi-lib/interfaces/popup'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerFactary from '@nu/vivi-lib/utils/layerFactary'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import ShortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

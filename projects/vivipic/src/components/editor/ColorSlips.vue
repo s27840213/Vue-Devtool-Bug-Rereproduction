@@ -82,19 +82,21 @@ div(class="color-panel"
 
 <script lang="ts">
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
-import ColorPicker from '@/components/ColorPicker.vue'
-import ColorBtn from '@/components/global/ColorBtn.vue'
-import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
-import { IPage } from '@/interfaces/page'
-import { ColorEventType, SidebarPanelType } from '@/store/types'
-import brandkitUtils from '@/utils/brandkitUtils'
-import colorUtils from '@/utils/colorUtils'
-import editorUtils from '@/utils/editorUtils'
-import layerUtils from '@/utils/layerUtils'
-import mouseUtils from '@/utils/mouseUtils'
+import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
+import { IBrand, IBrandColorPalette } from '@nu/vivi-lib/interfaces/brandkit'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ColorEventType, SidebarPanelType } from '@nu/vivi-lib/store/types'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+
+// TODO: Extract common part.
 
 export default defineComponent({
   name: 'ColorSlips',

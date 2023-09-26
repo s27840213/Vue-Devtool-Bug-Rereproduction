@@ -38,8 +38,8 @@ import vClickOutside from 'click-outside-vue3'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import { mapGetters, mapMutations } from 'vuex'
-import brandkitUtils from '@/utils/brandkitUtils'
-import { IBrandLogo } from '@/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import { IBrandLogo } from '@nu/vivi-lib/interfaces/brandkit'
 
 export default defineComponent({
   emits: [],

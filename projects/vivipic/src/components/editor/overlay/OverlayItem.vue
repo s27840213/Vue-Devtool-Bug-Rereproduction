@@ -17,8 +17,8 @@ div(class="overlay-item" :class="{active, [theme]: true}")
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
-import { IAssetObject } from '@/interfaces/shape'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
+import { IAssetObject } from '@nu/vivi-lib/interfaces/shape'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({

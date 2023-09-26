@@ -15,8 +15,8 @@ div(v-else class="brand-kit-tab-color")
 <script lang="ts">
 import BrandKitColorPaletteSidebar from '@/components/brandkit/BrandKitColorPaletteSidebar.vue'
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
-import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
+import { IBrand, IBrandColorPalette } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 

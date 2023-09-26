@@ -43,14 +43,14 @@ div(class="brand-kit-text-setting relative")
 </template>
 
 <script lang="ts">
-import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
-import ValueSelector from '@/components/ValueSelector.vue'
-import { IBrandTextStyle } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
-import generalUtils from '@/utils/generalUtils'
-import logUtils from '@/utils/logUtils'
-import { fontSelectValue } from '@/utils/textPropUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
+import ValueSelector from '@nu/vivi-lib/components/ValueSelector.vue'
+import { IBrandTextStyle } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import { fontSelectValue } from '@nu/vivi-lib/utils/textPropUtils'
+import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import vClickOutside from 'click-outside-vue3'
 import _ from 'lodash'
 import { defineComponent } from 'vue'

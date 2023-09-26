@@ -26,11 +26,11 @@ div(class="snap-area"
 
 <script lang="ts">
 
-import { IPage } from '@/interfaces/page'
-import { ISnapline } from '@/interfaces/snap'
-import pageUtils from '@/utils/pageUtils'
-import rulerUtils from '@/utils/rulerUtils'
-import SnapUtils from '@/utils/snapUtils'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ISnapline } from '@nu/vivi-lib/interfaces/snap'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import rulerUtils from '@nu/vivi-lib/utils/rulerUtils'
+import SnapUtils from '@nu/vivi-lib/utils/snapUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 

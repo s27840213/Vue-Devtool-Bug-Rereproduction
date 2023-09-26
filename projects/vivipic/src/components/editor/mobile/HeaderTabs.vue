@@ -32,14 +32,14 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
-import backgroundUtils from '@/utils/backgroundUtils'
-import imageUtils from '@/utils/imageUtils'
-import layerUtils from '@/utils/layerUtils'
-import mappingUtils from '@/utils/mappingUtils'
-import picWVUtils from '@/utils/picWVUtils'
-import shotcutUtils from '@/utils/shortcutUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import i18n from '@nu/vivi-lib/i18n'
+import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import shotcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { computed, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'

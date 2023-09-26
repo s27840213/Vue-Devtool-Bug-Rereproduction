@@ -11,15 +11,15 @@ div(class="brand-kit-color-palette")
 </template>
 
 <script lang="ts">
-import ColorBtn from '@/components/global/ColorBtn.vue'
-import { IBrandColorPalette } from '@/interfaces/brandkit'
-import { IGroup, IShape } from '@/interfaces/layer'
-import brandkitUtils from '@/utils/brandkitUtils'
-import colorUtils from '@/utils/colorUtils'
-import layerUtils from '@/utils/layerUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import textPropUtils from '@/utils/textPropUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
+import { IBrandColorPalette } from '@nu/vivi-lib/interfaces/brandkit'
+import { IGroup, IShape } from '@nu/vivi-lib/interfaces/layer'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
+import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapMutations } from 'vuex'
 

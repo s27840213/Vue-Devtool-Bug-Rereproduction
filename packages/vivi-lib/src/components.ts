@@ -43,10 +43,16 @@ import swipeDetector from '@/utils/SwipeDetector'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
 import { DESIGN_MENU_EVENTS, FOLDER_MENU_EVENTS } from '@/utils/designUtils'
-import { PopupSliderEventType } from '@/store/types'
-// insert import
+import { PopupSliderEventType, LineTemplatesType } from '@/store/types'
+import SvgIconView from '@/views/SvgIconView.vue'
+import DebugTool from '@/components/componentLog/DebugTool.vue'
+import ModalCard from '@/components/modal/ModalCard.vue'
+import ResInfo from '@/components/modal/ResInfo.vue'
+import Popup from '@/components/popup/Popup.vue'
+import fileUtils from '@/utils/fileUtils'
+import * as payment from '@/interfaces/payment'
 
-!!console && console.log('Import',
+!window && console.log('Import',
   Tabs,
   GalleryPhoto,
   SearchBar,
@@ -93,5 +99,12 @@ import { PopupSliderEventType } from '@/store/types'
   DESIGN_MENU_EVENTS,
   FOLDER_MENU_EVENTS,
   PopupSliderEventType,
-  // insert log
+  LineTemplatesType,
+  SvgIconView,
+  DebugTool,
+  ModalCard,
+  ResInfo,
+  Popup,
+  fileUtils,
+  payment,
 )

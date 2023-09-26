@@ -7,7 +7,7 @@ div(class="panel-bleed text-left")
 
 <script lang="ts">
 import BleedSettings from '@/components/editor/BleedSettings.vue'
-import { IPage } from '@/interfaces/page'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({

@@ -48,10 +48,10 @@ div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
 </template>
 
 <script lang="ts">
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import DesignItem from '@/components/mydesign/DesignItem.vue'
-import { IDesign } from '@/interfaces/design'
-import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
+import { IDesign } from '@nu/vivi-lib/interfaces/design'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@nu/vivi-lib/utils/designUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

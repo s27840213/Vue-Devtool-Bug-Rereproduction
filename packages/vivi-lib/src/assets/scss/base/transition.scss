@@ -1,0 +1,281 @@
+@use '@/assets/scss/utils' as *;
+
+.fade-in-out {
+  transition: all 1s 0.2s;
+
+  &-enter-active {
+    &[data-transition="notification"] {
+      // Not in use
+      transition: all 0.5s;
+    }
+
+    &[data-transition="modal"] {
+      transition: all 0.6s;
+    }
+
+    &[data-transition="story-board"] {
+      transition: all 1.5s;
+    }
+
+    &[data-transition="story-beginner"] {
+      transition: all 0.4s;
+    }
+
+    &[data-transition="level-up"] {
+      transition: all 1s 0.3s;
+    }
+
+    &[data-transition="speedline"] {
+      transition: all 0.8s;
+    }
+  }
+
+  &-leave-active {
+    transition: all 0.5s;
+
+    &[data-transition="notification"],
+    &[data-transition="modal"] {
+      transition: all 0.5s;
+    }
+
+    &[data-transition="story-board"] {
+      transition: all 0.8s;
+    }
+
+    &[data-transition="story-beginner"] {
+      transition: all 0.6s;
+    }
+
+    &[data-transition="level-up"] {
+      transition: all 0.5s;
+    }
+
+    &[data-transition="speedline"] {
+      transition: all 0.2s;
+    }
+  }
+
+  &-enter-from {
+    opacity: 0;
+  }
+
+  &-leave-to {
+    opacity: 0;
+  }
+}
+
+.fade-in {
+
+  &-enter-active,
+  &-leave-active {
+    transition: opacity 0.3s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+  }
+}
+
+.fade-down-up {
+  &-enter-active {
+    &[data-transition="check-in"] {
+      transition: all 0.8s 0.2s;
+    }
+
+    &[data-transition="drop"] {
+      transition: all 0.6s;
+    }
+
+    &[data-transition="default"] {
+      transition: all 0.5s;
+    }
+  }
+
+  &-leave-active {
+
+    &[data-transition="default"],
+    &[data-transition="check-in"] {
+      transition: all 0.5s;
+    }
+
+    &[data-transition="drop"] {
+      transition: all 0.4s;
+    }
+  }
+
+  &-enter-from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  &-leave-to {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+}
+
+.fade-up-down {
+  &-enter-active {
+    &[data-transition="user-panel"] {
+      transition: all 0.5s;
+    }
+  }
+
+  &-leave-active {
+    &[data-transition="user-panel"] {
+      transition: all 0.5s;
+    }
+  }
+
+  &-enter-from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+
+  &-leave-to {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+}
+
+.slide {
+  &-x {
+    &-left {
+
+      &-enter-active,
+      &-leave-active,
+      &-move {
+        transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
+      }
+
+      &-enter-from,
+      &-leave-to {
+        opacity: 0;
+        transform: translateX(-24px);
+      }
+
+      &-leave-active {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+
+      &-right {
+
+        &-enter-active,
+        &-leave-active,
+        &-move {
+          transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
+        }
+
+        &-enter-from {
+          opacity: 0;
+          transform: translateX(24px);
+        }
+
+        &-leave-to {
+          opacity: 0;
+          transform: translateX(-24px);
+        }
+
+        &-leave-active {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+
+    &-right {
+
+      &-enter-active,
+      &-leave-active,
+      &-move {
+        transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
+      }
+
+      &-enter-from,
+      &-leave-to {
+        opacity: 0;
+        transform: translateX(24px);
+      }
+
+      &-leave-active {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+
+      &-left {
+
+        &-enter-active,
+        &-leave-active,
+        &-move {
+          transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
+        }
+
+        &-enter-from {
+          opacity: 0;
+          transform: translateX(-24px);
+        }
+
+        &-leave-to {
+          opacity: 0;
+          transform: translateX(24px);
+        }
+
+        &-leave-active {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+  }
+}
+
+// seed warehouse panel transition
+.fade-up {
+  &-leave-active {
+    animation: fade-up 0.15s;
+  }
+
+  &-enter-active {
+    animation: fade-up 0.25s reverse;
+  }
+}
+
+@keyframes fade-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
+
+.panel-up {
+
+  &-leave-active,
+  &-enter-active {
+    transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
+  }
+
+  &-leave-from,
+  &-enter-to {
+    transform: translateY(0);
+  }
+
+  &-leave-to,
+  &-enter-from {
+    transform: translateY(100%);
+  }
+}
+
+.layer-flip {
+  transition: transform 0.2s linear;
+}

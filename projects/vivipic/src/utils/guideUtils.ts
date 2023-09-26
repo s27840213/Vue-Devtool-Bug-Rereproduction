@@ -1,5 +1,5 @@
 import store from '@/store'
-import userApis from '@/apis/user'
+import userApis from '@nu/vivi-lib/apis/user'
 
 enum GuideStatus {
   INPROGRESS = 0,

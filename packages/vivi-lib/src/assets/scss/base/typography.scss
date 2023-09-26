@@ -1,0 +1,277 @@
+@use "@/assets/scss/utils/formatStyle.scss" as *;
+@use "@/assets/scss/utils/mixins.scss" as *;
+
+@mixin heading-1 {
+	font-size: 72px;
+	line-height: 98px;
+}
+
+@mixin heading-2 {
+	font-size: 48px;
+	line-height: 64px;
+	font-weight: 800;
+}
+
+@mixin heading-3 {
+	font-size: 40px;
+	line-height: 54px;
+	font-weight: 800;
+}
+
+@mixin heading-4 {
+	font-size: 28px;
+	line-height: 40px;
+	font-weight: 800;
+}
+
+@mixin heading-5 {
+	font-size: 24px;
+	line-height: 32px;
+	font-weight: 600;
+}
+
+@mixin heading-6 {
+	font-size: 20px;
+	line-height: 30px;
+	font-weight: 400;
+}
+
+@mixin subtitle-1 {
+	font-size: 18px;
+	line-height: 28px;
+	font-weight: 700;
+}
+
+@mixin subtitle-2 {
+	font-size: 14px;
+	line-height: 18px;
+	font-weight: 600;
+}
+
+@mixin body-1 {
+	font-size: 16px;
+	line-height: 26px;
+	font-weight: 400;
+}
+
+@mixin body-2 {
+	font-size: 14px;
+	line-height: 22px;
+	font-weight: 400;
+}
+
+@mixin body-3 {
+	font-size: 12px;
+	line-height: 16px;
+	font-weight: 400;
+}
+
+@mixin body-4 {
+	font-size: 10px;
+	line-height: 16px;
+	font-weight: 400;
+}
+
+@mixin label-sm() {
+	font-size: 12px;
+	line-height: 16px;
+	font-weight: 700;
+}
+
+@mixin label-mid() {
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 700;
+}
+
+@mixin label-lg() {
+	font-size: 20px;
+	line-height: 30px;
+	font-weight: 700;
+}
+
+
+.heading {
+	&-1 {
+		@include heading-1
+	}
+
+	&-2 {
+		@include heading-2
+	}
+
+	&-3 {
+		@include heading-3
+	}
+
+	&-4 {
+		@include heading-4
+	}
+
+	&-5 {
+		@include heading-5
+	}
+
+	&-6 {
+		@include heading-6
+	}
+}
+
+
+.subtitle {
+	&-1 {
+		@include subtitle-1()
+	}
+
+	&-2 {
+		@include subtitle-2()
+	}
+}
+
+
+.body {
+	&-1 {
+		@include body-1()
+	}
+
+	&-2 {
+		@include body-2()
+	}
+
+	&-3 {
+		@include body-3()
+	}
+
+	&-4 {
+		@include body-4()
+	}
+}
+
+.lead {
+	&-1 {
+		font-size: 16px;
+		line-height: 32px;
+		font-weight: 400;
+	}
+
+	&-2 {
+		font-size: 14px;
+		line-height: 24px;
+		font-weight: 400;
+	}
+}
+
+.label {
+	&-sm {
+		@include label-sm()
+	}
+
+	&-mid {
+		@include label-mid()
+	}
+
+	&-lg {
+		@include label-lg()
+	}
+}
+
+
+//
+// Text Controls
+//
+
+.truncate {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.break-word {
+	word-wrap: break-word;
+}
+
+.no-wrap {
+	white-space: nowrap;
+}
+
+// CSS Class from formatStyle.scss
+.text {
+  &-H1 {
+    @include text-H1
+  }
+  &-H2 {
+    @include text-H2
+  }
+  &-H3 {
+    @include text-H3
+  }
+  &-H4 {
+    @include text-H4
+  }
+  &-H5 {
+    @include text-H5
+  }
+  &-H6 {
+    @include text-H6
+  }
+}
+
+.body {
+  &-XL {
+    @include body-XL;
+  }
+  &-LG {
+    @include body-LG;
+  }
+  &-MD {
+    @include body-MD
+  }
+  &-SM {
+    @include body-SM
+  }
+  &-XS {
+    @include body-XS
+  }
+  &-XXS {
+    @include body-XXS
+  }
+}
+
+.caption {
+  &-LG {
+    @include caption-LG
+  }
+  &-MD {
+    @include caption-MD
+  }
+  &-SM {
+    @include caption-SM
+  }
+}
+
+.btn {
+  &-LG {
+    @include btn-LG;
+  }
+  &-SM {
+    @include btn-SM;
+  }
+}
+
+.overline {
+  &-LG {
+    @include overline-LG;
+  }
+  &-SM {
+    @include overline-SM;
+  }
+}
+
+// CSS Class from mixin.scss
+.popup-window {
+  @include popup-window;
+}
+
+.default-input {
+  @include default-input;
+}

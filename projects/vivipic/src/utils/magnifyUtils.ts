@@ -1,5 +1,5 @@
 import store from '@/store'
-import mouseUtils from '@/utils/mouseUtils'
+import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 
 class MagnifyUtils {
   private magnifyCanvas: HTMLCanvasElement

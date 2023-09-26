@@ -11,7 +11,7 @@ div(v-else class="mobile-all-design-view")
 <script lang="ts">
 import MobileDesignEmpty from '@/components/mydesign/MobileDesignEmpty.vue'
 import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
-import designUtils from '@/utils/designUtils'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 

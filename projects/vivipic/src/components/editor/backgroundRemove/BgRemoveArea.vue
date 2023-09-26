@@ -22,11 +22,11 @@ teleport(v-if="useMobileEditor" to=".header-bar")
 </template>
 
 <script lang="ts">
-import { IBgRemoveInfo } from '@/interfaces/image'
+import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
 import MagnifyUtils from '@/utils/magnifyUtils'
-import mouseUtils from '@/utils/mouseUtils'
-import pageUtils from '@/utils/pageUtils'
-import shortcutUtils from '@/utils/shortcutUtils'
+import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

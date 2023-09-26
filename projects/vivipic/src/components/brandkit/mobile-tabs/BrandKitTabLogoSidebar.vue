@@ -29,11 +29,11 @@ div(v-else class="brand-kit-tab-logo" :style="minHeightStyles()")
 
 <script lang="ts">
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
-import GalleryPhoto from '@/components/GalleryPhoto.vue'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
-import GalleryUtils from '@/utils/galleryUtils'
+import GalleryPhoto from '@nu/vivi-lib/components/GalleryPhoto.vue'
+import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
+import { IBrand, IBrandLogo } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import GalleryUtils from '@nu/vivi-lib/utils/galleryUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'

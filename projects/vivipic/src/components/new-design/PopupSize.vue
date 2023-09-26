@@ -14,7 +14,7 @@ div(class="popup-size"
 
 <script lang="ts">
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
-import { ILayout } from '@/interfaces/layout'
+import { ILayout } from '@nu/vivi-lib/interfaces/layout'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'

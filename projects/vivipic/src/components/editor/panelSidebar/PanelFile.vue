@@ -34,10 +34,10 @@ div(class="panel-file"
 </template>
 
 <script lang="ts">
-import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
-import modalUtils from '@/utils/modalUtils'
-import networkUtils from '@/utils/networkUtils'
-import uploadUtils from '@/utils/uploadUtils'
+import ImageGallery, { CImageGallery } from '@nu/vivi-lib/components/image-gallery/ImageGallery.vue'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import networkUtils from '@nu/vivi-lib/utils/networkUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 

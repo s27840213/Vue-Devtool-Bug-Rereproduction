@@ -47,14 +47,14 @@ div(class="panel-objects")
 </template>
 
 <script lang="ts">
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
-import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
+import CategoryObjectItem from '@nu/vivi-lib/components/category/CategoryObjectItem.vue'
 import Url from '@/components/global/Url.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import i18n from '@/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import generalUtils from '@/utils/generalUtils'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
+import i18n from '@nu/vivi-lib/i18n'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'

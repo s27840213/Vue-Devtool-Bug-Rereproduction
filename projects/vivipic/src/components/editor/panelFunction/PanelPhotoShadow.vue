@@ -81,14 +81,14 @@ div(class="photo-effect-setting" ref="panel" tabindex="0" @keydown.stop)
 </template>
 
 <script lang="ts">
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IImage, IImageStyle } from '@/interfaces/layer'
-import { ColorEventType, FunctionPanelType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
-import editorUtils from '@/utils/editorUtils'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
-import layerUtils from '@/utils/layerUtils'
+import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
+import { IImage, IImageStyle } from '@nu/vivi-lib/interfaces/layer'
+import { ColorEventType, FunctionPanelType } from '@nu/vivi-lib/store/types'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
+import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@nu/vivi-lib/utils/imageShadowUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 

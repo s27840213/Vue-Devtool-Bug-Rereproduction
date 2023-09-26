@@ -16,7 +16,7 @@ div(class="download-page-selection")
 </template>
 
 <script lang="ts">
-import Checkbox from '@/components/global/Checkbox.vue'
+import Checkbox from '@nu/vivi-lib/components/global/Checkbox.vue'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

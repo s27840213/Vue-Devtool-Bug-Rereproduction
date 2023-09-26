@@ -1,10 +1,10 @@
 
-import axios from '@/apis'
-import authToken from './auth-token'
-import { IDownloadServiceParams, IDownloadServiceResponse } from '@/interfaces/download'
+import axios from '@nu/vivi-lib/apis'
+import authToken from '@nu/vivi-lib/apis/auth-token'
+import { IDownloadServiceParams, IDownloadServiceResponse } from '@nu/vivi-lib/interfaces/download'
 import { AxiosError } from 'axios'
-import designUtils from '@/utils/designUtils'
-import i18n from '@/i18n'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
+import i18n from '@nu/vivi-lib/i18n'
 class DownloadService {
   createFile(params: IDownloadServiceParams, useDev = 0) {
     const data = {

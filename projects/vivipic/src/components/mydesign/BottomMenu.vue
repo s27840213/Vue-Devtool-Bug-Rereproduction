@@ -142,8 +142,8 @@ div(class="bottom-menu" :style="rootStyles")
 
 <script lang="ts">
 import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
-import { IDesign, IFolder } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import { IDesign, IFolder } from '@nu/vivi-lib/interfaces/design'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'

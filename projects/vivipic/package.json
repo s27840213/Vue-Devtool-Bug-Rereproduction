@@ -12,6 +12,7 @@
     "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\"",
     "serve-vite": "vite",
     "build-vite": "vue-tsc && vite build",
+    "build-watch": "vite build --watch",
     "preview-vite": "vite preview"
   },
   "main": "./dist/nueditor.common.js",

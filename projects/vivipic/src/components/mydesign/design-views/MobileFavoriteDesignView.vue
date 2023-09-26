@@ -10,7 +10,7 @@ div(class="mobile-favorite-design-view")
 
 <script lang="ts">
 import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
-import designUtils from '@/utils/designUtils'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 

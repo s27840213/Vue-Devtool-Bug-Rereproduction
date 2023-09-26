@@ -29,7 +29,7 @@ div(class="mobile-panel p-15"
 
 <script lang="ts">
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
-import eventUtils from '@/utils/eventUtils'
+import eventUtils from '@nu/vivi-lib/utils/eventUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'

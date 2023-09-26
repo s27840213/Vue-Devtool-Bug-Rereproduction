@@ -195,15 +195,15 @@ div(style="position: relative;")
 </template>
 
 <script lang="ts">
-import userApis from '@/apis/user'
-import { ILoginResult } from '@/interfaces/api'
+import userApis from '@nu/vivi-lib/apis/user'
+import { ILoginResult } from '@nu/vivi-lib/interfaces/api'
 import store from '@/store'
 import fbPixelUtils from '@/utils/fbPixelUtils'
-import gtmUtils from '@/utils/gtmUtils'
-import localeUtils from '@/utils/localeUtils'
-import logUtils from '@/utils/logUtils'
+import gtmUtils from '@nu/vivi-lib/utils/gtmUtils'
+import localeUtils from '@nu/vivi-lib/utils/localeUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 import loginUtils from '@/utils/loginUtils'
-import picWVUtils from '@/utils/picWVUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 

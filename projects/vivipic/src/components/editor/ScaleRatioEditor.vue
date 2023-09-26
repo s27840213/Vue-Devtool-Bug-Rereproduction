@@ -36,8 +36,8 @@ div(class="scale-ratio-editor" cy-visual-test="transparent")
 </template>
 
 <script lang="ts">
-import pageUtils from '@/utils/pageUtils'
-import popupUtils from '@/utils/popupUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
