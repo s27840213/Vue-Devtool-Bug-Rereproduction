@@ -80,10 +80,11 @@ export default class PinchControlUtils {
         }
       }
     }
-    const newScale = e.scale * this.init.scale
+    const evtScale = (e.nativeEvent as any).scale
+    const newScale = evtScale * this.init.scale
     const newSize = {
-      width: this.init.size.width * e.scale,
-      height: this.init.size.height * e.scale
+      width: this.init.size.width * evtScale,
+      height: this.init.size.height * evtScale
     }
     const movingTranslate = {
       x: e.x - this.init.pos.x,
@@ -101,15 +102,15 @@ export default class PinchControlUtils {
       scale: newScale,
       width: newSize.width,
       height: newSize.height,
-      rotate: e.angle + this.init.rotate,
+      // rotate: e.angle + this.init.rotate,
       x: this.init.layerPos.x + totalTranslate.x,
       y: this.init.layerPos.y + totalTranslate.y
     } as { [key: string]: number }
     if (this.config.type === 'image' && this.init.img) {
-      styles.imgWidth = this.init.img.imgWidth * e.scale
-      styles.imgHeight = this.init.img.imgHeight * e.scale
-      styles.imgX = this.init.img.imgX * e.scale
-      styles.imgY = this.init.img.imgY * e.scale
+      styles.imgWidth = this.init.img.imgWidth * evtScale
+      styles.imgHeight = this.init.img.imgHeight * evtScale
+      styles.imgX = this.init.img.imgX * evtScale
+      styles.imgY = this.init.img.imgY * evtScale
     }
     if (this.layerInfo.pageIndex !== -1 && this.layerInfo.layerIndex !== -1) {
       layerUtils.updateLayerStyles(this.layerInfo.pageIndex, this.layerInfo.layerIndex, styles)

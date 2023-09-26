@@ -20,7 +20,7 @@ class PointerEventUtils {
   removePointer(pointerId: number) {
     const i = this._pointers.findIndex(p => p.pointerId === pointerId)
     if (i !== -1) {
-      console.error('remvoe Pointer', pointerId)
+      // console.error('remvoe Pointer', pointerId)
       this._pointers.splice(i, 1)
     }
   }

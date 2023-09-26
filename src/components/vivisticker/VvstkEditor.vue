@@ -265,7 +265,12 @@ export default defineComponent({
           movingUtils.moveStart(e)
         } else {
           if (this.isInEditor) {
-            vivistickerUtils.deselect()
+            const body = this.$refs.editorView as HTMLElement
+            body.addEventListener('pointerup', () => {
+              if (!this.controlState.type) {
+                vivistickerUtils.deselect()
+              }
+            })
           }
         }
       }
@@ -285,17 +290,11 @@ export default defineComponent({
         this.pinchControlUtils = null
       } else {
         const touches = (e.nativeEvent as TouchEvent).touches
-        const targetIndex = layerUtils.layerIndex === -1 ? (this.$store.getters.getControlState.layerInfo?.layerIndex ?? -1) : layerUtils.layerIndex
-        // console.log(touches.length, targetIndex, this.isPinchInit)
-        if (touches.length !== 2 || targetIndex === -1) return
+        if (touches.length !== 2 || layerUtils.layerIndex === -1) return
         if (!this.isPinchInit) {
           // first pinch initialization
-          const isPinchOnController = controlUtils.isClickOnController(e.startInput.points[0] as any, targetIndex) && controlUtils.isClickOnController(e.startInput.points[1] as any, targetIndex)
-          // console.log(isPinchOnController, e.startInput.points[0], e.startInput.points[1])
-          if (isPinchOnController) {
-            this.isPinchInit = true
-            return this.pinchStart(e, targetIndex)
-          }
+          this.isPinchInit = true
+          return this.pinchStart(e, layerUtils.layerIndex)
         } else {
           // pinch move handling
           this.pinchHandler(e)
