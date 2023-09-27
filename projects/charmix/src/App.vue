@@ -71,6 +71,8 @@ const bottomPanelComponent = computed(() => {
       return EditingOptions
     case showPromptArea.value:
       return PromptArea
+    default:
+      return ModalTemplate
   }
 })
 
