@@ -15,12 +15,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
       transition(
         name="bottom-panel-transition"
         mode="out-in")
-        component(:is="bottomPanelComponent" :ref="(el: HTMLElement) => setSlotRef(el)")
+        component(:is="bottomPanelComponent" :ref="(el: any) => setSlotRef(el)")
   //- div(class="fixed bottom-1/4 left-4 text-app-selection") {{ atHome }} {{ atMyDesign }} {{ routeInfo.atHome }}
 </template>
 
 <script setup lang="ts">
-import webViewUtils from '@/utils/webViewUtils'
 import { storeToRefs } from 'pinia'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import EditingOptions from './components/panel-content/EditingOptions.vue'
@@ -40,15 +39,6 @@ const {
   atMyDesign,
 } = stateInfo
 // #endregion
-
-onMounted(() => {
-  webViewUtils.getUserInfo().then((res) => {
-    console.log(res)
-  })
-  webViewUtils.getAlbumList().then((res) => {
-    console.log(res)
-  })
-})
 
 const modalStore = useModalStore()
 const { isModalOpen } = storeToRefs(modalStore)
