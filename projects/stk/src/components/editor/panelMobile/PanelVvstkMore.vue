@@ -257,6 +257,7 @@ export default defineComponent({
     },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')
+      editorUtils.setCloseMobilePanelFlag(true)
     },
     handleList(listType: string) {
       this.$emit('pushHistory', listType)
