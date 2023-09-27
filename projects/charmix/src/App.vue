@@ -11,17 +11,17 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
       mode="out-in")
       component(:is="Component")
   bottom-panel(class="z-20")
-    template(#content)
+    template(#content="{setSlotRef}")
       transition(
         name="bottom-panel-transition"
         mode="out-in")
-        component(:is="bottomPanelComponent")
+        component(:is="bottomPanelComponent" :ref="(el: HTMLElement) => setSlotRef(el)")
   //- div(class="fixed bottom-1/4 left-4 text-app-selection") {{ atHome }} {{ atMyDesign }} {{ routeInfo.atHome }}
 </template>
 
 <script setup lang="ts">
+import webViewUtils from '@/utils/webViewUtils'
 import { storeToRefs } from 'pinia'
-
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import EditingOptions from './components/panel-content/EditingOptions.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
@@ -29,6 +29,35 @@ import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import useStateInfo from './composable/useStateInfo'
 import { useModalStore } from './stores/modal'
+// #region route info
+const stateInfo = useStateInfo()
+const {
+  showAspectRatioSelector,
+  showHomeTabs,
+  showEditingOpstions,
+  showPromptArea,
+  atHome,
+  atMyDesign,
+} = stateInfo
+// #endregion
+
+onMounted(() => {
+  webViewUtils.getUserInfo().then((res) => {
+    console.log(res)
+  })
+  webViewUtils.getAlbumList().then((res) => {
+    console.log(res)
+  })
+})
+
+const modalStore = useModalStore()
+const { isModalOpen } = storeToRefs(modalStore)
+
+const routeTransitionName = computed(() => {
+  if (atHome.value) return 'fade-left-in'
+  if (atMyDesign.value) return 'fade-right-in'
+  return 'fade-right-in'
+})
 
 const bottomPanelComponent = computed(() => {
   switch (true) {
@@ -42,30 +71,7 @@ const bottomPanelComponent = computed(() => {
       return EditingOptions
     case showPromptArea.value:
       return PromptArea
-    default:
-      return HomeTab
   }
-})
-
-// #region route info
-const stateInfo = useStateInfo()
-const {
-  showAspectRatioSelector,
-  showHomeTabs,
-  showEditingOpstions,
-  showPromptArea,
-  atHome,
-  atMyDesign,
-} = stateInfo
-// #endregion
-
-const modalStore = useModalStore()
-const { isModalOpen } = storeToRefs(modalStore)
-
-const routeTransitionName = computed(() => {
-  if (atHome.value) return 'fade-left-in'
-  if (atMyDesign.value) return 'fade-right-in'
-  return 'fade-right-in'
 })
 
 const closeModal = () => {
