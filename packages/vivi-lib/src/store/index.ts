@@ -36,6 +36,11 @@ import zindexUtils from '@/utils/zindexUtils'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
+const brushPasteResized = (import.meta.glob(
+  '@/assets/img/svg/brush-paste-resized.svg',
+  { eager: true, import: 'default' }
+) as Record<string, string>)['/src/assets/img/svg/brush-paste-resized.svg']
+
 const getDefaultState = (): IEditorState => ({
   sessionId: generalUtils.generateRandomString(12),
   pages: [{
@@ -598,7 +603,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_hasCopiedFormat(state: IEditorState, value: boolean) {
     state.hasCopiedFormat = value
     if (value) {
-      state.cursor = `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer`
+      state.cursor = `url(${brushPasteResized}) 2 2, pointer`
     } else {
       state.cursor = ''
     }

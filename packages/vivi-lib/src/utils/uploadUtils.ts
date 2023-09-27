@@ -31,6 +31,11 @@ import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import themeUtils from './themeUtils'
 
+const imagePreview = (import.meta.glob(
+  '@/assets/img/svg/image-preview.svg',
+  { eager: true, import: 'default' }
+) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
+
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
   UPDATE_DB,
@@ -433,7 +438,7 @@ class UploadUtils {
               imgCallBack(img.src)
             }
           } else {
-            imgCallBack(require('@/assets/img/svg/image-preview.svg'))
+            imgCallBack(imagePreview)
           }
         } else if (type === 'font') {
           const tempId = brandkitUtils.createTempFont(assetId)

@@ -27,6 +27,11 @@ import GeneralUtils from '@/utils/generalUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 
+const imagePreview = (import.meta.glob(
+  '@/assets/img/svg/image-preview.svg',
+  { eager: true, import: 'default' }
+) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
+
 export default defineComponent({
   emits: ['clickGroupItem'],
   components: {
@@ -75,7 +80,7 @@ export default defineComponent({
   },
   methods: {
     handleNotFound(event: Event) {
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = imagePreview // prevent infinite refetching when network disconneted
     },
     copyId() {
       GeneralUtils.copyText(this.item.id)

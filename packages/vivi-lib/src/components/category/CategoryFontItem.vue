@@ -36,6 +36,11 @@ import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
+const imagePreview = (import.meta.glob(
+  '@/assets/img/svg/image-preview.svg',
+  { eager: true, import: 'default' }
+) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
+
 export default defineComponent({
   emits: [],
   props: {
@@ -98,7 +103,7 @@ export default defineComponent({
         })
         return
       }
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = imagePreview // prevent infinite refetching when network disconneted
       console.warn(this.item)
     },
     setFont() {

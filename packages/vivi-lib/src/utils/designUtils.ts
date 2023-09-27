@@ -183,20 +183,6 @@ class DesignUtils {
       this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
       this.newFolder('日本行銷', 'Daniel', true)
     ]
-    // for (let i = 0; i < 15; i++) {
-    //   const time = new Date(generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())).toISOString()
-    //   template[0].subFolders[0].designs.push({
-    //     name: `Name${i + 1}`,
-    //     width: 1200,
-    //     height: 1200,
-    //     id: generalUtils.generateAssetId(),
-    //     thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
-    //     createdTime: time,
-    //     lastUpdatedTime: time,
-    //     favorite: false,
-    //     ver: 0
-    //   })
-    // }
     return template
   }
 

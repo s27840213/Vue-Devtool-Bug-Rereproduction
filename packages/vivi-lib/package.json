@@ -15,7 +15,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "build": "vue-tsc && vite build -l warn",
     "build-watch": "vite build --watch",
     "preview": "vite preview"
   },

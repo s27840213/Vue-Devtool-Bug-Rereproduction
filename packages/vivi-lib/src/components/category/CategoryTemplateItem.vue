@@ -35,6 +35,11 @@ import { mapGetters } from 'vuex'
  * @Todo - fix the any type problems -> TingAn
  */
 
+const imagePreview = (import.meta.glob(
+  '@/assets/img/svg/image-preview.svg',
+  { eager: true, import: 'default' }
+) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
+
 export default defineComponent({
   emits: [],
   components: {
@@ -83,7 +88,7 @@ export default defineComponent({
   },
   methods: {
     handleNotFound(event: Event) {
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = imagePreview // prevent infinite refetching when network disconneted
     },
     dragStart(event: DragEvent) {
       if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return

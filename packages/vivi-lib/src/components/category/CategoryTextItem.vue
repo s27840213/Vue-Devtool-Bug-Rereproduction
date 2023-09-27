@@ -22,6 +22,11 @@ import textPropUtils from '@/utils/textPropUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
+const imagePreview = (import.meta.glob(
+  '@/assets/img/svg/image-preview.svg',
+  { eager: true, import: 'default' }
+) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
+
 export default defineComponent({
   emits: [],
   components: {
@@ -60,7 +65,7 @@ export default defineComponent({
   },
   methods: {
     handleNotFound(event: Event) {
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = imagePreview // prevent infinite refetching when network disconneted
     },
     dragStart(e: DragEvent) {
       if (!paymentUtils.checkPro(this.item, 'pro-text')) return

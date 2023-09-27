@@ -8,13 +8,18 @@ div(class="category-list-rows")
   category-list-row
     div(v-for="item in list" :key="item.id")
       slot(name="preview" :item="item")
-        img(:src="require('@/assets/img/svg/image-preview.svg')")
+        img(:src="imagePreview")
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { ICategoryItem } from '@/interfaces/api'
 import CategoryListRow from './CategoryListRow.vue'
+
+const imagePreview = (import.meta.glob(
+  '@/assets/img/svg/image-preview.svg',
+  { eager: true, import: 'default' }
+) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
 
 export default defineComponent({
   emits: ['action'],
@@ -30,6 +35,11 @@ export default defineComponent({
   },
   components: {
     CategoryListRow
+  },
+  data() {
+    return {
+      imagePreview
+    }
   },
   methods: {
     onAction(title: string) {
