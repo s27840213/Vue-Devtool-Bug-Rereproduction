@@ -66,7 +66,7 @@ div(:layer-index="`${layerIndex}`"
             @compositionend="handleTextCompositionEnd")
         template(v-if="!$isTouchDevice()")
           div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-              v-show="!isMoving"
+              v-show="showControlPtrs"
               class="control-point__corner-rotate"
               :ref="`corner-rotate-${index}`"
               :key="`corner-rotate-${index}`"
@@ -75,7 +75,7 @@ div(:layer-index="`${layerIndex}`"
               @touchstart="disableTouchEvent")
         template(v-if="isLine()")
           div(v-for="(end, index) in controlPoints.lineEnds"
-              v-show="!isMoving"
+              v-show="showControlPtrs"
               class="control-point"
               :key="index"
               :marker-index="index"
@@ -84,7 +84,7 @@ div(:layer-index="`${layerIndex}`"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
           template(v-if="$isTouchDevice()")
             div(v-for="(end, index) in controlPoints.lineEndTouchAreas"
-                v-show="!isMoving"
+                v-show="showControlPtrs"
                 class="control-point"
                 :key="index"
                 :marker-index="index"
@@ -92,7 +92,7 @@ div(:layer-index="`${layerIndex}`"
                 @pointerdown.stop="lineEndMoveStart"
                 @touchstart="disableTouchEvent")
         div(v-for="(resizer, index) in getResizer(controlPoints)"
-            v-show="!isMoving"
+            v-show="showControlPtrs"
             :key="index"
             class="control-point__resize-bar-wrapper")
           div(class="control-point"
@@ -106,7 +106,7 @@ div(:layer-index="`${layerIndex}`"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
         template(v-if="$isTouchDevice()" )
           div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
-              v-show="!isMoving"
+              v-show="showControlPtrs"
               :key="index"
               class="control-point__resize-bar-wrapper")
             div(class="control-point"
@@ -119,7 +119,7 @@ div(:layer-index="`${layerIndex}`"
                 @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
                 @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice()"
-            v-show="!isMoving"
+            v-show="showControlPtrs"
             class="control-point__resize-bar-wrapper")
           div(v-for="(resizer, index) in getResizer(controlPoints, true)"
               class="control-point control-point__move-bar"
@@ -127,7 +127,7 @@ div(:layer-index="`${layerIndex}`"
               :ref="`moveStart-bar_${index}`"
               :style="resizerBarStyles(resizer.styles)")
         div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalers) : []"
-            v-show="!isMoving"
+            v-show="showControlPtrs"
             class="control-point"
             :key="`scaler-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
@@ -135,13 +135,13 @@ div(:layer-index="`${layerIndex}`"
             @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
         template(v-if="$isTouchDevice()")
           div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalerTouchAreas) : []"
-              v-show="!isMoving"
+              v-show="showControlPtrs"
               class="control-point"
               :key="`scaler-touch-${index}`"
               :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="scaleStart"
               @touchstart="disableTouchEvent")
-        div(v-show="!isMoving"
+        div(v-show="showControlPtrs"
             class="control-point__controller-wrapper")
           template(v-if="isLine()")
             template(v-if="!$isTouchDevice()")
@@ -188,7 +188,7 @@ div(:layer-index="`${layerIndex}`"
                 :extraStyle="actionIconStyles()"
                 @action="MappingUtils.mappingIconAction('lock')")
     template(v-if="$isTouchDevice() && isActive && !isLocked()")
-      div(v-show="!isMoving")
+      div(v-show="showControlPtrs")
         action-icon(v-if="showCloseAction" class="control-point__top-left-icon"
                     iconName="close"
                     iconSize="18px"
@@ -352,6 +352,10 @@ export default defineComponent({
     }),
     isControllerShown(): boolean {
       return this.isActive && !this.controllerHidden
+    },
+    showControlPtrs(): boolean {
+      return !['pinch', 'move'].includes(this.controlState.type)
+      // return !this.isMoving && this.controlState.type !== 'pinch'
     },
     ctrlPtrStyles(): Record<string, number | string> {
       if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {

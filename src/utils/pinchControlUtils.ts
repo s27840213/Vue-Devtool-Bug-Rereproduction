@@ -80,7 +80,18 @@ export default class PinchControlUtils {
         }
       }
     }
+
     const evtScale = (e.nativeEvent as any).scale
+    let evtAngle = (e.nativeEvent as any).rotation % 180
+    // following math demostrated as workround for anytouch e.angle always return integer,
+    if (Math.abs(evtAngle - e.angle) > 90) {
+      if (evtAngle > 0) {
+        evtAngle -= 180
+      } else {
+        evtAngle -= 180
+      }
+    }
+
     const newScale = evtScale * this.init.scale
     const newSize = {
       width: this.init.size.width * evtScale,
@@ -102,7 +113,7 @@ export default class PinchControlUtils {
       scale: newScale,
       width: newSize.width,
       height: newSize.height,
-      // rotate: e.angle + this.init.rotate,
+      rotate: evtAngle + this.init.rotate,
       x: this.init.layerPos.x + totalTranslate.x,
       y: this.init.layerPos.y + totalTranslate.y
     } as { [key: string]: number }
