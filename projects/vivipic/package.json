@@ -5,15 +5,12 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "lint": "vue-cli-service lint",
-    "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts",
     "build": "vue-cli-service build",
     "build-only": "vue-cli-service build",
     "build:dev": "vue-cli-service build --mode development",
-    "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\"",
     "serve-vite": "vite",
     "build-vite": "vue-tsc && vite build",
-    "build-watch": "vite build --watch",
-    "preview-vite": "vite preview"
+    "preview-cy": "vite preview --port 8080 --outDir dist-cy"
   },
   "main": "./dist/nueditor.common.js",
   "dependencies": {

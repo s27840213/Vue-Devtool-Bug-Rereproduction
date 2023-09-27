@@ -6,6 +6,8 @@
 # Node artifact files
 node_modules/
 dist/
+# dist folder for cypress test
+dist-cy/
 
 # Python cache files
 **/__pycache__
