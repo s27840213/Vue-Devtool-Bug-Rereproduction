@@ -160,7 +160,7 @@ export default {
         src_obj: srcObj,
         team_id: this.getTeamId(),
         ...(aspect !== undefined && { aspect }),
-        debug: process.env.NODE_ENV === 'production' ? 0 : 1
+        debug: location.protocol === 'http:' ? 1 : 0,
       }
     }))
   }
