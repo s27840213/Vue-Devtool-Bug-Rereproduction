@@ -32,7 +32,8 @@ div(class="vivisticker" :style="copyingStyles()")
   div(v-if="pushModalInfo && isShowPushModal" class="vivisticker__push-modal-container" :style="pushModalInfo?.backdropStyle")
     modal-card(v-model:show="isShowPushModal" :initModalInfo="pushModalInfo")
   transition(name="slide-left")
-    component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
+    template(v-if="isSlideShown")
+      component(:is="slideType" class="vivisticker__slide")
   transition(name="panel-up")
     tutorial(v-if="showTutorial")
   transition(name="panel-up")
@@ -511,7 +512,7 @@ export default defineComponent({
     transform: translateX(0);
   }
   &-leave-to,
-  &-enter {
+  &-enter-from {
     transform: translateX(100%);
   }
 }
