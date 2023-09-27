@@ -368,7 +368,6 @@ export class MovingUtils {
       }
       this.setCursorStyle(e, 'move')
 
-      // this.movingHandler(e)
       if (!this.isHandleMovingHandler) {
         window.requestAnimationFrame(() => {
           this.movingHandler(e)
@@ -390,23 +389,20 @@ export class MovingUtils {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
         }
       }
-    }
-    if (!this.isControllerShown) {
+    } else {
       // this condition will only happen in Mobile
       const posDiff = {
         x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
         y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
       }
       if (this.isTouchDevice && !this.isLocked) {
-        if (layerUtils.layerIndex !== this.layerIndex && this.isClickOnController) {
-          if (posDiff.x > 1 || posDiff.y > 1) {
-            this.isDoingGestureAction = true
-            window.requestAnimationFrame(() => {
-              this.movingHandler(e)
-              this.isHandleMovingHandler = false
-            })
-            return
-          }
+        if (posDiff.x > 1 || posDiff.y > 1) {
+          this.isDoingGestureAction = true
+          window.requestAnimationFrame(() => {
+            this.movingHandler(e)
+            this.isHandleMovingHandler = false
+          })
+          return
         }
         // vivisticker doesn't have page moving feature
         // const { mobileSize } = editorUtils
@@ -432,7 +428,7 @@ export class MovingUtils {
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
     if (this.initialPos === null) return
 
-    // target overlay means the current movingHandler is overlaying above the target layer.
+    // target overlay means the current layer is overlaying above the target layer.
     const isTargetOverlay = this.layerIndex === layerUtils.layerIndex
     const config = isTargetOverlay ? this.config : layerUtils.getCurrLayer
     const targetLayerIdx = layerUtils.layerIndex

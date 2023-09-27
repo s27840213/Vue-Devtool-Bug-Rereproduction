@@ -252,27 +252,13 @@ export default defineComponent({
         return
       }
       if (layerUtils.layerIndex !== -1) {
-        /**
-         * when the user click the control-region outsize the page,
-         * the moving logic should be applied to the EditorView.
-         */
-        if (isClickOnController) {
-          const movingUtils = new MovingUtils({
-            _config: { config: layerUtils.getCurrLayer },
-            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-            body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
-          })
-          movingUtils.moveStart(e)
-        } else {
-          if (this.isInEditor) {
-            const body = this.$refs.editorView as HTMLElement
-            body.addEventListener('pointerup', () => {
-              if (!this.controlState.type) {
-                vivistickerUtils.deselect()
-              }
-            })
-          }
-        }
+        // when there is an layer being active, the moving logic applied to the EditorView
+        const movingUtils = new MovingUtils({
+          _config: { config: layerUtils.getCurrLayer },
+          snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+          body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+        })
+        movingUtils.moveStart(e)
       }
     },
     recordPointer(e: PointerEvent) {
