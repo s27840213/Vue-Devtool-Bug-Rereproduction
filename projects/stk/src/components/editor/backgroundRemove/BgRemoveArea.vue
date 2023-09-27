@@ -147,9 +147,10 @@ export default defineComponent({
     }
     window.addEventListener('keydown', this.handleKeydown)
     this.setPrevPageScaleRatio(this.scaleRatio)
-    pageUtils.fitPage({ handleContentScale: false })
+    pageUtils.fitPage()
   },
   unmounted() {
+    pageUtils.fitPage()
     window.removeEventListener('pointerup', this.drawEnd)
     window.removeEventListener('pointermove', this.setBrushPos)
     window.removeEventListener('pointermove', this.drawing)
