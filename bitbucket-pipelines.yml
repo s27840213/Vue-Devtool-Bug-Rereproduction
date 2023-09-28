@@ -36,6 +36,12 @@ pipelines:
             caches: #set caches for node modules to speed up building
               - node
             image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/vivi-lib/**"
             script:
               - corepack enable
               - corepack prepare pnpm@latest-8 --activate
@@ -1084,6 +1090,12 @@ pipelines:
               caches: #set caches for node modules to speed up building
                 - node
               image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - "projects/vivipic/**"
+                    - "packages/vivi-lib/**"
               script:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
@@ -1273,6 +1285,12 @@ pipelines:
             caches: #set caches for node modules to speed up building
               - node
             image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/vivi-lib/**"
             script:
               - corepack enable
               - corepack prepare pnpm@latest-8 --activate
@@ -1356,6 +1374,12 @@ pipelines:
               caches: #set caches for node modules to speed up building
                 - node
               image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - "projects/vivipic/**"
+                    - "packages/vivi-lib/**"
               script:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
