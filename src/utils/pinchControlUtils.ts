@@ -7,6 +7,7 @@ import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
+import pageUtils from '@/utils/pageUtils'
 import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -91,11 +92,10 @@ export default class PinchControlUtils {
     let evtAngle = (e.nativeEvent as any).rotation % 180
     // following math demostrated as workround for anytouch e.angle always return integer,
     if (Math.abs(evtAngle - e.angle) > 90) {
-      if (evtAngle > 0) {
-        evtAngle -= 180
-      } else {
-        evtAngle -= 180
-      }
+      evtAngle -= 180
+    }
+    if (evtAngle < 0) {
+      evtAngle += 360
     }
 
     const newScale = evtScale * this.init.scale
@@ -115,11 +115,16 @@ export default class PinchControlUtils {
       x: movingTranslate.x + compensateTranslate.x,
       y: movingTranslate.y + compensateTranslate.y
     }
+
+    const snapUtils = pageUtils.getPageState(this.layerInfo.pageIndex).modules.snapUtils
+    const rotate = snapUtils.calAngleSnapHandler((evtAngle + this.init.rotate) % 360, { snapIncrement: 45 })
+    console.log(rotate)
+
     let styles = {
       scale: newScale,
       width: newSize.width,
       height: newSize.height,
-      rotate: evtAngle + this.init.rotate,
+      rotate,
       x: this.init.layerPos.x + totalTranslate.x,
       y: this.init.layerPos.y + totalTranslate.y
     } as { [key: string]: number | undefined }
