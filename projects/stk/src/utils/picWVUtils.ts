@@ -173,10 +173,13 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
 
   async sendStatistics(countryReady = false, country?: string): Promise<void> {
     if (this.inBrowserMode || countryReady) {
+      const complete = store.getters['user/getComplete'] as number
+      if (complete === 1) return
       const data = {
         token: store.getters['user/getToken'] as string,
         device: store.getters['user/getDevice'] as number,
       }
+      if (!data.token || data.token === '') return
       await store.dispatch('user/updateUser', {
         ...data,
         app: this.inBrowserMode ? 0 : 1,

@@ -36,6 +36,7 @@ export interface IUserModule {
   teamId: string,
   role: number,
   roleRaw: number, // 0 admin/ 1 user / 2 dev /3 outsource
+  complete: number,
   adminMode: boolean, // Control in DesktopEditor
   isAuthenticated: boolean,
   enableAdminView: boolean, // Control in PopupFile
@@ -94,6 +95,7 @@ const getDefaultState = (): IUserModule => ({
   teamId: '',
   role: -1,
   roleRaw: -1,
+  complete: 0,
   adminMode: true,
   enableAdminView: localStorage.getItem('enableAdminView') === 'true',
   isAuthenticated: false,
@@ -161,6 +163,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getToken(state) {
     return state.token
+  },
+  getComplete(state) {
+    return state.complete
   },
   getAccount(state) {
     return state.account
@@ -416,6 +421,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         userId: data.data.user_id,
         role: data.data.role,
         roleRaw: data.data.roleRaw,
+        complete,
         account: data.data.account,
         email: data.data.email,
         upassUpdate: data.data.upass_update,
@@ -436,7 +442,6 @@ const actions: ActionTree<IUserModule, unknown> = {
           userId: data.data.user_id,
         })
       }
-      picWVUtils.updateLocale(data.data.locale)
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       dispatch('payment/getBillingInfo', {}, { root: true })
