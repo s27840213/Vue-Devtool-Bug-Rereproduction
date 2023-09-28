@@ -9,7 +9,6 @@ div(id="app" :style="appStyles()")
   div(class="main-content")
     div(class="main-content__router-view")
       router-view
-    home-footer-tabs(v-if="showHomeFooterTabs")
   div(class="popup-area")
     popup
     res-info(v-show="currSelectedResInfo.type"
@@ -49,7 +48,7 @@ import Popup from '@/components/popup/Popup.vue'
 import generalUtils from '@/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
 import { throttle } from 'lodash'
-import { defineAsyncComponent, defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
@@ -62,11 +61,6 @@ export default defineComponent({
     ResInfo,
     ModalCard,
     DebugTool,
-    ...generalUtils.isPic && {
-      HomeFooterTabs: defineAsyncComponent(
-        () => import('@/components/homepage/HomeFooterTabs.vue'),
-      ),
-    },
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -148,9 +142,6 @@ export default defineComponent({
     currLocale(): string {
       return localeUtils.currLocale()
     },
-    showHomeFooterTabs (): boolean {
-      return ['Home', 'TemplateCenter', 'MyDesign', 'Settings'].includes(this.$route.name as string) && this.$isTouchDevice()
-    }
   },
   methods: {
     ...mapMutations('text', {

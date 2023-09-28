@@ -23,6 +23,8 @@ import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
 
+import '@nu/vivi-lib/css'
+
 const eventBus = mitt()
 window.onerror = function (msg, url, line, colno, error) {
   const errorId = generalUtils.generateRandomString(6)

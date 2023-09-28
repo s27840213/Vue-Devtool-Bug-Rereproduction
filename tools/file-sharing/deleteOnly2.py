@@ -8,5 +8,5 @@ with open(f"tools/file-sharing/diffResultFinal.json") as file:
     b = b.replace('@/', 'src/')
     subprocess.run([
       'rm',
-      f'./packages/vivi-lib/{b}',
+      f'./projects/stk/{b}',
     ])

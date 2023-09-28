@@ -8,7 +8,6 @@ import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
 import bgRemove, { IBgRemoveState } from '@/store/module/bgRemove'
 import color, { IColorState } from '@/store/module/color'
-import { IFileState } from '@/store/module/file'
 import font from '@/store/module/font'
 import fontTag, { IFontTagState } from '@/store/module/fontTag'
 import giphy from '@/store/module/giphy'
@@ -1199,7 +1198,6 @@ type IStoreRoot = IEditorState & {
   markers: IListModuleState,
   unsplash: IUnaplashState,
   bgRemove: IBgRemoveState,
-  file: IFileState,
   shadow: IShadowState,
   fontTag: IFontTagState,
   imgControl: IImgControlState,

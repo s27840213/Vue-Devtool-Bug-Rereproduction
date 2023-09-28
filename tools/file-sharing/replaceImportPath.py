@@ -3,9 +3,12 @@ import re
 import os
 import subprocess
 
+project = 'stk'
+
 def removePrefix(path: str):
   return path.replace('projects/vivipic/src', '@') \
     .replace('packages/vivi-lib/src', '@') \
+    .replace('projects/stk/src', '@') \
     .replace('src/', '@/')
 
 def removeTs(path: str):
@@ -20,22 +23,26 @@ def removeFileName(path: str):
 def path2Target(path: str):
   return removePrefix(removeTs(removeIndex(path)))
 
+def path2SubPath(path: str):
+  return removeFileName(removeTs(removePrefix(path)))
+
 libPaths = glob.glob('packages/vivi-lib/src/**/*.vue', recursive=True) \
   + glob.glob('packages/vivi-lib/src/**/*.ts', recursive=True)
+libPaths.sort()
+# libPaths.reverse()
 
-picPaths = glob.glob('projects/vivipic/src/**/*.vue', recursive=True) \
-  + glob.glob('projects/vivipic/src/**/*.ts', recursive=True)
-
+picPaths = glob.glob(f'projects/{project}/src/**/*.vue', recursive=True) \
+  + glob.glob(f'projects/{project}/src/**/*.ts', recursive=True)
 
 for libPath in libPaths:
   path = libPath.replace('packages/vivi-lib/', '')
 
-  if not os.path.isfile(f'projects/vivipic/{path}'):
-    # print(f'Not find {path}')
+  if not os.path.isfile(f'projects/{project}/{path}'):
+    print(f'Not find {path}')
     continue
 
   with open(f'packages/vivi-lib/{path}') as lib:
-    with open(f'projects/vivipic/{path}') as pic:
+    with open(f'projects/{project}/{path}') as pic:
 
       libs = ''.join(lib.readlines())
       pics = ''.join(pic.readlines())
@@ -43,12 +50,16 @@ for libPath in libPaths:
       pics = re.sub(r'import.+\n', '', pics)
       if libs != pics:
         print(f'Mismatch {path}')
-        continue
+        subprocess.run([
+          'code', '--diff',
+          f'./projects/{project}/{path}',
+          f'./packages/vivi-lib/{path}',
+        ])
 
       target = path2Target(path)
       print(f'Search \'{target}\'')
-      # userInput = input('Input N to skip: ')
-      userInput = 'N'
+      userInput = input('Input N to skip: ')
+      # userInput = 'N'
       if userInput.upper() == 'N':
         continue
 
@@ -56,7 +67,7 @@ for libPath in libPaths:
         if not os.path.isfile(picPath):
           continue
         with open(picPath) as pic:
-          subPicPath = removeFileName(removeTs(removePrefix(picPath)))
+          subPicPath = path2SubPath(picPath)
           lines = pic.readlines()
           for i, line in enumerate(lines):
             if line.startswith('//'):
@@ -75,21 +86,21 @@ for libPath in libPaths:
       print(f'rm {path}\n\n')
       subprocess.run([
         'rm',
-        f'./projects/vivipic/{path}',
+        f'./projects/{project}/{path}',
       ])
 
-      userInput = input('Input 0 to insert import: ')
-      # # if not os.path.isfile(f'projects/vivipic/dist/{target}.es.js'.replace('@/', 'src/')):
-      # #   print(f'Not projects/vivipic/dist/{target}.es.js, need to add import!')
-      if userInput != '0':
-        continue
-      with open('packages/vivi-lib/src/components.ts', 'r') as com:
-        coms = com.readlines()
-        for i, line in enumerate(coms):
-          if line == '// insert import\n':
-            coms[i] = old + line
-          if line == '  // insert log\n':
-            coms[i] = '  ' + re.search(r'import (.+) from', old).group(1) + ',\n' + line
-      with open('packages/vivi-lib/src/components.ts', 'w') as com:
-        com.writelines(coms)
+      # userInput = input('Input 0 to insert import: ')
+      # # if not os.path.isfile(f'projects/{project}/dist/{target}.es.js'.replace('@/', 'src/')):
+      # #   print(f'Not projects/{project}/dist/{target}.es.js, need to add import!')
+      # if userInput != '0':
+      #   continue
+      # with open('packages/vivi-lib/src/components.ts', 'r') as com:
+      #   coms = com.readlines()
+      #   for i, line in enumerate(coms):
+      #     if line == '// insert import\n':
+      #       coms[i] = old + line
+      #     if line == '  // insert log\n':
+      #       coms[i] = '  ' + re.search(r'import (.+) from', old).group(1) + ',\n' + line
+      # with open('packages/vivi-lib/src/components.ts', 'w') as com:
+      #   com.writelines(coms)
 

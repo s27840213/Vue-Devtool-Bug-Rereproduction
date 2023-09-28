@@ -90,16 +90,16 @@ if (window.location.host !== 'vivipic.com') {
     name: 'SvgIconView',
     component: () => import('@/views/SvgIconView.vue')
   })
-  routes.push({
-    path: 'copytool',
-    name: 'CopyTool',
-    component: () => import('@/views/CopyTool.vue')
-  })
-  routes.push({
-    path: 'nubtnlist',
-    name: 'NubtnList',
-    component: () => import('@/views/NubtnList.vue')
-  })
+  // routes.push({
+  //   path: 'copytool',
+  //   name: 'CopyTool',
+  //   component: () => import('@/views/CopyTool.vue')
+  // })
+  // routes.push({
+  //   path: 'nubtnlist',
+  //   name: 'NubtnList',
+  //   component: () => import('@/views/NubtnList.vue')
+  // })
   routes.push({
     path: 'nativeevttest',
     name: 'NativeEventTester',
