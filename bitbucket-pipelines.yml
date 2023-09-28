@@ -29,7 +29,6 @@ pipelines:
               - pnpm run build-all # Replace with your build/test…etc. commands
             artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
               - projects/*/dist/**
-              - projects/*/node_modules/**
     - parallel:
         - step:
             name: "Run E2E Tests"
@@ -37,6 +36,12 @@ pipelines:
             caches: #set caches for node modules to speed up building
               - node
             image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/vivi-lib/**"
             script:
               - corepack enable
               - corepack prepare pnpm@latest-8 --activate
@@ -942,7 +947,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/vivipic/dist/**
-                - projects/vivipic/node_modules/**
       - step:
           name: "deploy vivipic to test"
           deployment: test
@@ -1026,7 +1030,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/stk/dist/**
-                - projects/stk/node_modules/**
       - step:
           name: "deploy vivisticker to prod"
           deployment: stkprod
@@ -1080,7 +1083,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/*/dist/**
-                - projects/*/node_modules/**
       - parallel:
           - step:
               name: "Run E2E Tests"
@@ -1088,6 +1090,12 @@ pipelines:
               caches: #set caches for node modules to speed up building
                 - node
               image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - "projects/vivipic/**"
+                    - "packages/vivi-lib/**"
               script:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
@@ -1270,7 +1278,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/*/dist/**
-                - projects/*/node_modules/**
       - parallel:
           - step:
             name: "Run E2E Tests"
@@ -1278,6 +1285,12 @@ pipelines:
             caches: #set caches for node modules to speed up building
               - node
             image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+            condition:
+              changesets:
+                includePaths:
+                  - '*'
+                  - "projects/vivipic/**"
+                  - "packages/vivi-lib/**"
             script:
               - corepack enable
               - corepack prepare pnpm@latest-8 --activate
@@ -1354,7 +1367,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/vivipic/dist/**
-                - projects/vivipic/node_modules/**
       - parallel:
           - step:
               name: "Run E2E Tests"
@@ -1362,6 +1374,12 @@ pipelines:
               caches: #set caches for node modules to speed up building
                 - node
               image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              condition:
+                changesets:
+                  includePaths:
+                    - '*'
+                    - "projects/vivipic/**"
+                    - "packages/vivi-lib/**"
               script:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
