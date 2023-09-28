@@ -29,7 +29,6 @@ pipelines:
               - pnpm run build-all # Replace with your build/test…etc. commands
             artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
               - projects/*/dist/**
-              - projects/*/node_modules/**
     - parallel:
         - step:
             name: "Run E2E Tests"
@@ -942,7 +941,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/vivipic/dist/**
-                - projects/vivipic/node_modules/**
       - step:
           name: "deploy vivipic to test"
           deployment: test
@@ -1026,7 +1024,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/stk/dist/**
-                - projects/stk/node_modules/**
       - step:
           name: "deploy vivisticker to prod"
           deployment: stkprod
@@ -1080,7 +1077,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/*/dist/**
-                - projects/*/node_modules/**
       - parallel:
           - step:
               name: "Run E2E Tests"
@@ -1270,7 +1266,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/*/dist/**
-                - projects/*/node_modules/**
       - parallel:
           - step:
             name: "Run E2E Tests"
@@ -1354,7 +1349,6 @@ pipelines:
                 - pnpm run build-all # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/vivipic/dist/**
-                - projects/vivipic/node_modules/**
       - parallel:
           - step:
               name: "Run E2E Tests"
