@@ -85,7 +85,7 @@ div(class="panel-text-effect")
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import Tabs from '@/components/Tabs.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import { IEffect, IEffectCategory } from '@/utils/constantData'

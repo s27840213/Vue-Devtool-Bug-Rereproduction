@@ -104,6 +104,7 @@ export default defineComponent({
       return typeof this.photo.progress !== 'undefined' && this.photo.progress !== 100
     },
     hasCheckedAssets(): boolean {
+      if (this.$isStk) return false
       return this.checkedAssets.length !== 0
     },
     previewSrc(): string {

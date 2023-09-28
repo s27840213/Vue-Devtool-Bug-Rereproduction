@@ -1,5 +1,5 @@
-import designApis from '@/apis/design'
-import designInfoApis from '@/apis/design-info'
+import designApis from '@nu/vivi-lib/apis/design'
+import designInfoApis from '@nu/vivi-lib/apis/design-info'
 import listService from '@/apis/list'
 import i18n from '@/i18n'
 import {

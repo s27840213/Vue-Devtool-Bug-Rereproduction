@@ -29,7 +29,7 @@ div(class="panel-color px-5")
 </template>
 
 <script lang="ts">
-import ColorPicker from '@/components/ColorPicker.vue'
+import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import { ShadowEffectType } from '@/interfaces/imgShadow'

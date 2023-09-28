@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import userApis from '@/apis/user'
+import userApis from '@nu/vivi-lib/apis/user'
 import i18n from '@/i18n'
 import { IGroupDesignInputParams, ILoginResponse, IUserAssetsData, IUserFontContentData } from '@/interfaces/api'
 import { DeviceType } from '@/utils/constantData'

@@ -12,7 +12,7 @@ div(class="panel-template rwd-container")
 
 <script lang="ts">
 import { CCategoryList } from '@/components/category/CategoryList.vue'
-import Tabs from '@/components/Tabs.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import { defineComponent } from 'vue'

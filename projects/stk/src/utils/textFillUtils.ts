@@ -1,4 +1,4 @@
-import textEffect, { IPutTextEffectResponse } from '@/apis/textEffect'
+import textEffect, { IPutTextEffectResponse } from '@nu/vivi-lib/apis/textEffect'
 import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'

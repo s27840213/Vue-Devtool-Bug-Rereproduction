@@ -52,7 +52,7 @@ div(class="nu-layer flex-center"
 
 <script lang="ts">
 import SquareLoading from '@/components/global/SqureLoading.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
+import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ShadowEffectType } from '@/interfaces/imgShadow'

@@ -126,6 +126,16 @@ export default {
       app,
     }
   }),
+  registerSticker: (host_id: string, uuid: string, device: number, country: string, app: number): AxiosPromise => axios('/register-sticker', {
+    method: 'POST',
+    data: {
+      host_id,
+      uuid,
+      device,
+      country,
+      app
+    }
+  }),
   fbLogin: (code: string, redirect_uri: string, locale: string): AxiosPromise => axios('/fb-login', {
     method: 'POST',
     data: {
@@ -163,5 +173,18 @@ export default {
         debug: location.protocol === 'http:' ? 1 : 0,
       }
     }))
-  }
+  },
+  async removeBgStk(uuid: string, assetId?: number, type = 'stk-bg-remove'): Promise<any> {
+    const typeMap: {[index: string]: string} = {
+      'stk-bg-remove': 'bg',
+      'stk-bg-remove-face': 'bgf'
+    }
+    return await apiUtils.requestWithRetry(() => axios('/remove-bg-sticker', {
+      method: 'POST',
+      data: {
+        path: `removebg/${uuid}/${assetId}/${typeMap[type]}`,
+        locale: this.getLocale(),
+      }
+    }))
+  },
 }

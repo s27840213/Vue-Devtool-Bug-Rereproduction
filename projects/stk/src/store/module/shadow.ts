@@ -1,5 +1,5 @@
-import authToken from '@/apis/auth-token'
-import user from '@/apis/user'
+import authToken from '@nu/vivi-lib/apis/auth-token'
+import user from '@nu/vivi-lib/apis/user'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import apiUtils from '@/utils/apiUtils'

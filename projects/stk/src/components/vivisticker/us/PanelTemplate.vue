@@ -34,7 +34,7 @@ div(class="panel-template rwd-container")
 
 <script lang="ts">
 import SearchBar from '@/components/SearchBar.vue'
-import Tabs from '@/components/Tabs.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import PanelTemplate from '@/components/vivisticker/PanelTemplate.vue'
 import PanelTemplateContentUs from '@/components/vivisticker/us/PanelTemplateContent.vue'
 import vivistickerUtils from '@/utils/vivistickerUtils'

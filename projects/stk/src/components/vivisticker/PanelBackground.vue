@@ -108,7 +108,7 @@ import CategoryList, { CCategoryList } from '@/components/category/CategoryList.
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import Tabs from '@/components/Tabs.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IAsset } from '@/interfaces/module'

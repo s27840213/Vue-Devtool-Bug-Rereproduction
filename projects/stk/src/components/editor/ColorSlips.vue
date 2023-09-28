@@ -56,7 +56,7 @@ div(class="color-panel"
 </template>
 
 <script lang="ts">
-import ColorPicker from '@/components/ColorPicker.vue'
+import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType } from '@/store/types'

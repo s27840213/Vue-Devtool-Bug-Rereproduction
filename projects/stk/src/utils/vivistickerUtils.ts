@@ -1,5 +1,5 @@
 import listApis from '@/apis/list'
-import userApis from '@/apis/user'
+import userApis from '@nu/vivi-lib/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'

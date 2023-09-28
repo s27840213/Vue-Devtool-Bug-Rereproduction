@@ -1,4 +1,4 @@
-import imageApi from '@/apis/image-api'
+import imageApi from '@nu/vivi-lib/apis/image-api'
 import { IImageSize, IUserImageContentData } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'

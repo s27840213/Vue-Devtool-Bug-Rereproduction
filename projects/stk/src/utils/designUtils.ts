@@ -1,4 +1,4 @@
-import designApis from '@/apis/design'
+import designApis from '@nu/vivi-lib/apis/design'
 import i18n from '@/i18n'
 import { IAssetDesignParams, IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'

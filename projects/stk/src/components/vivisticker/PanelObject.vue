@@ -22,7 +22,7 @@ div(class="panel-objects rwd-container")
 </template>
 
 <script lang="ts">
-import Tabs from '@/components/Tabs.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import PanelObjectGifs from '@/components/vivisticker/PanelObjectGifs.vue'
 import PanelObjectStatic from '@/components/vivisticker/PanelObjectStatic.vue'
 import i18n from '@/i18n'

@@ -1,4 +1,4 @@
-import photos from '@/apis/photos'
+import photos from '@nu/vivi-lib/apis/photos'
 import i18n from '@/i18n'
 import { IPhotoItem, IPhotoServiceData } from '@/interfaces/api'
 import logUtils from '@/utils/logUtils'

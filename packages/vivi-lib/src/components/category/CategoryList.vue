@@ -7,7 +7,8 @@ recycle-scroller(class="category-list" id="recycle" :items="list")
       @callback="onLoadMore(item.moreType)")
     slot(:name="item.type" :key="item.id"
       :list="item.list"
-      :title="item.title")
+      :title="item.title"
+      :url="item.url")
   template(#before)
     slot(name="before")
   template(#after)
@@ -41,8 +42,12 @@ export type CCategoryList = InstanceType<typeof component>
 
 <style lang="scss" scoped>
   .category-list {
-    @include push-scrollbar10;
-    @include hover-scrollbar(dark);
+    @if $appName == 'pic' {
+      @include push-scrollbar10;
+      @include hover-scrollbar(dark);
+    } @else if $appName == 'stk' {
+      @include no-scrollbar;
+    }
     &__header {
       line-height: 26px;
       display: flex;

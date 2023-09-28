@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import errorHandle from '@/apis/errorHandle'
+import errorHandle from '@nu/vivi-lib/apis/errorHandle'
 
 class ErrorHandle {
   addMissingDesign(type: 'svg' | 'background' | 'asset-image' | 'asset-font' | 'font', design_id: string) {

@@ -6,7 +6,7 @@ div(:class="`tabs ${themeColor} ${themeType}`")
       :style="tabStyle(index)"
       @click="switchTab(index)")
     span {{tab}}
-    div(v-if="['default', 'narrow'].includes(themeType)" class="tabs__underline")
+    div(v-if="['default', 'narrow', 'stk'].includes(themeType)" class="tabs__underline")
 </template>
 
 <script lang="ts">
@@ -24,7 +24,7 @@ export default defineComponent({
       required: true
     },
     theme: {
-      type: String as PropType<'dark' | 'light' | 'dark-rect' | 'dark-narrow' | 'light-narrow'>,
+      type: String as PropType<'dark' | 'light' | 'dark-rect' | 'dark-narrow' | 'light-narrow' | 'light-stk'>,
       default: 'dark'
     }
   },
@@ -44,6 +44,11 @@ export default defineComponent({
         case 'light':
           return {
             active: '#4EABE6',
+            inactive: '#969BAB'
+          }
+        case 'light-stk':
+          return {
+            active: '#141414',
             inactive: '#969BAB'
           }
         case 'dark-rect':
@@ -128,7 +133,7 @@ export default defineComponent({
     border-radius: 1px;
   }
 
-  &.default, &.rect {
+  &.default, &.rect, &.stk {
     @include text-H6;
   }
   &.narrow {
@@ -136,7 +141,7 @@ export default defineComponent({
     justify-content: initial;
     gap: 16px;
   }
-  &.default {
+  &.default, &.stk {
     .tabs__item {
       min-width: fit-content;
     }
