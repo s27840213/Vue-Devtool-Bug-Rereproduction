@@ -21,11 +21,7 @@ import paymentUtils from '@/utils/paymentUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
-
-const imagePreview = (import.meta.glob(
-  '@/assets/img/svg/image-preview.svg',
-  { eager: true, import: 'default' }
-) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
+import imagePreview from '@/assets/img/svg/image-preview.svg'
 
 export default defineComponent({
   emits: [],

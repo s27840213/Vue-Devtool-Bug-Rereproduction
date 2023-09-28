@@ -35,11 +35,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
-
-const brushPasteResized = (import.meta.glob(
-  '@/assets/img/svg/brush-paste-resized.svg',
-  { eager: true, import: 'default' }
-) as Record<string, string>)['/src/assets/img/svg/brush-paste-resized.svg']
+import brushPasteResized from '@/assets/img/svg/brush-paste-resized.svg'
 
 const getDefaultState = (): IEditorState => ({
   sessionId: generalUtils.generateRandomString(12),

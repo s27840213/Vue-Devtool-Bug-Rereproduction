@@ -30,15 +30,11 @@ import { notify } from '@kyvg/vue3-notification'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
+import imagePreview from '@/assets/img/svg/image-preview.svg'
 
 /**
  * @Todo - fix the any type problems -> TingAn
  */
-
-const imagePreview = (import.meta.glob(
-  '@/assets/img/svg/image-preview.svg',
-  { eager: true, import: 'default' }
-) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
 
 export default defineComponent({
   emits: [],

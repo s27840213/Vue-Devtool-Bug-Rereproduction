@@ -30,11 +30,7 @@ import pageUtils from './pageUtils'
 import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import themeUtils from './themeUtils'
-
-const imagePreview = (import.meta.glob(
-  '@/assets/img/svg/image-preview.svg',
-  { eager: true, import: 'default' }
-) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
+import imagePreview from '@/assets/img/svg/image-preview.svg'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {

@@ -15,11 +15,7 @@ div(class="category-list-rows")
 import { defineComponent, PropType } from 'vue'
 import { ICategoryItem } from '@/interfaces/api'
 import CategoryListRow from './CategoryListRow.vue'
-
-const imagePreview = (import.meta.glob(
-  '@/assets/img/svg/image-preview.svg',
-  { eager: true, import: 'default' }
-) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
+import imagePreview from '@/assets/img/svg/image-preview.svg'
 
 export default defineComponent({
   emits: ['action'],

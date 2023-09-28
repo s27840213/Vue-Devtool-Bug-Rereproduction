@@ -14,11 +14,7 @@ import generalUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
-
-const frame = (import.meta.glob(
-  '@/assets/img/svg/frame.svg',
-  { eager: true, import: 'default' }
-) as Record<string, string>)['/src/assets/img/svg/frame.svg']
+import frameDefaultImg from '@/assets/img/svg/frame.svg'
 
 const APP_VER_FOR_REFRESH_CACHE = 'v7576'
 
@@ -137,7 +133,7 @@ class ImageUtils {
         res = `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
         break
       case 'frame':
-        res = frame
+        res = frameDefaultImg
         break
       case 'shadow-private': {
         const shadowImgs = (store.getters['shadow/shadowImgs'] as Map<number, IShadowAsset>)

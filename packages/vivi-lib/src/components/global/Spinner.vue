@@ -9,11 +9,7 @@ div(class="spinner popup-window")
 
 import i18n from '@/i18n'
 import { defineComponent } from 'vue'
-
-const rocketLoading = (import.meta.glob(
-  '@/assets/img/gif/rocket-loading.gif',
-  { eager: true, import: 'default' }
-) as Record<string, string>)['/src/assets/img/gif/rocket-loading.gif']
+import rocketLoading from '@/assets/img/gif/rocket-loading.gif'
 
 export default defineComponent({
   emits: [],

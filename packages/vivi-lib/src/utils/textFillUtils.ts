@@ -16,12 +16,8 @@ import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
 import { find, omit, pick } from 'lodash'
 import { InjectionKey } from 'vue'
-
-const imports = import.meta.glob([
-    `@/assets/img/text-effect/text-fill-mask-image.svg`,
-    '@/assets/img/svg/image-preview.svg',
-  ], { eager: true, import: 'default' }
-) as Record<string, string>
+import imagePreview from '@/assets/img/svg/image-preview.svg'
+import textFillMask from '@/assets/img/text-effect/text-fill-mask-image.svg'
 
 interface IApiTextFillPresetRawImg {
   assetIndex: number
@@ -76,7 +72,7 @@ class TextFill {
         label: fill[`title_${i18n.global.locale}`],
         plan: fill.plan,
         img: firstImg ? `https://template.vivipic.com/admin/${firstImg.teamId}/asset/image/${firstImg.id}/tiny`
-          : imports['/src/assets/img/svg/image-preview.svg'],
+          : imagePreview,
         options: [{
           type: 'select' as const,
           key: 'img',
@@ -188,7 +184,7 @@ class TextFill {
       webkitTextStrokeColor: 'transparent',
       textDecorationColor: 'transparent',
       // To fix Safari BG-clip bug where background appear on its border, apply border-transparent mask on it.
-      maskImage: `url(${imports['/src/assets/img/text-effect/text-fill-mask-image.svg']})`,
+      maskImage: `url(${textFillMask})`,
       maskSize: '100% 100%',
       // To fix Safari PDF reader bug: https://bit.ly/3IPcS8o
       ...store.getters['user/getUserId'] === 'backendRendering' ? { filter: 'opacity(1)' } : {},

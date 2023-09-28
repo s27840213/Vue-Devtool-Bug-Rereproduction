@@ -35,11 +35,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-
-const imagePreview = (import.meta.glob(
-  '@/assets/img/svg/image-preview.svg',
-  { eager: true, import: 'default' }
-) as Record<string, string>)['/src/assets/img/svg/image-preview.svg']
+import imagePreview from '@/assets/img/svg/image-preview.svg'
 
 export default defineComponent({
   emits: [],
