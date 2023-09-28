@@ -13,9 +13,10 @@ import textFillUtils from '@/utils/textFillUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { h, resolveComponent } from 'vue'
-import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
+import { RouteRecordRaw } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
 import ViviSticker from '../views/ViviSticker.vue'
+import router from '@nu/vivi-lib/router'
 
 declare let window: CustomWindow
 
@@ -112,81 +113,75 @@ if (window.location.host !== 'vivipic.com') {
   })
 }
 
-const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-
-  routes: [
-    {
-      // Include the locales you support between ()
-      path: `/:locale${localeUtils.getLocaleRegex()}?`,
-      component: {
-        render() { return h(resolveComponent('router-view')) }
-      },
-      async beforeEnter(to, from, next) {
-        if (to.name === 'NativeEventTester') {
-          vivistickerUtils.enterEventTestMode()
-        }
-        vivistickerUtils.registerCallbacks('router')
-        const urlParams = new URLSearchParams(window.location.search)
-        const standalone = urlParams.get('standalone')
-        if (standalone) {
-          vivistickerUtils.enterStandaloneMode()
-          vivistickerUtils.setDefaultLocale()
-        } else {
-          vivistickerUtils.detectIfInApp()
-        }
-        const userInfo = await vivistickerUtils.getUserInfo()
-        if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
-          await logUtils.uploadLog()
-        }
-        logUtils.setLog('App Start')
-        let argoError = false
-        try {
-          const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
-          if (status !== 200) {
-            argoError = true
-            logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
-          }
-        } catch (error) {
-          argoError = true
-          logUtils.setLogForError(error as Error)
-          logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
-        } finally {
-          store.commit('text/SET_isArgoAvailable', !argoError)
-        }
-        let locale = 'us'
-        if (userInfo.appVer === '1.28') {
-          const localLocale = localStorage.getItem('locale')
-          if (localLocale) {
-            locale = localLocale
-          } else {
-            locale = localeUtils.getBrowserLang()
-          }
-        } else {
-          locale = userInfo.locale
-        }
-        logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
-        // locale = 'pt' // TODO: remove this line since it's only for testing
-        i18n.global.locale = locale as LocaleName
-        localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only disabled for testing
-        const editorBg = userInfo.editorBg
-        if (editorBg) {
-          store.commit('vivisticker/SET_editorBg', editorBg)
-        }
-        picWVUtils.updateLocale(i18n.global.locale)
-        vivistickerUtils.setDefaultPrices()
-
-        // document.title = to.meta?.title as string || i18n.global.t('SE0001')
-        next()
-        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
-          // Delete locale in url, will be ignore by prerender.
-          delete router.currentRoute.value.params.locale
-          router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
-        }
-      },
-      children: routes
+router.addRoute({
+  // Include the locales you support between ()
+  path: `/:locale${localeUtils.getLocaleRegex()}?`,
+  component: {
+    render() { return h(resolveComponent('router-view')) }
+  },
+  async beforeEnter(to, from, next) {
+    if (to.name === 'NativeEventTester') {
+      vivistickerUtils.enterEventTestMode()
     }
-  ]
+    vivistickerUtils.registerCallbacks('router')
+    const urlParams = new URLSearchParams(window.location.search)
+    const standalone = urlParams.get('standalone')
+    if (standalone) {
+      vivistickerUtils.enterStandaloneMode()
+      vivistickerUtils.setDefaultLocale()
+    } else {
+      vivistickerUtils.detectIfInApp()
+    }
+    const userInfo = await vivistickerUtils.getUserInfo()
+    if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
+      await logUtils.uploadLog()
+    }
+    logUtils.setLog('App Start')
+    let argoError = false
+    try {
+      const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
+      if (status !== 200) {
+        argoError = true
+        logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
+      }
+    } catch (error) {
+      argoError = true
+      logUtils.setLogForError(error as Error)
+      logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
+    } finally {
+      store.commit('text/SET_isArgoAvailable', !argoError)
+    }
+    let locale = 'us'
+    if (userInfo.appVer === '1.28') {
+      const localLocale = localStorage.getItem('locale')
+      if (localLocale) {
+        locale = localLocale
+      } else {
+        locale = localeUtils.getBrowserLang()
+      }
+    } else {
+      locale = userInfo.locale
+    }
+    logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
+    // locale = 'pt' // TODO: remove this line since it's only for testing
+    i18n.global.locale = locale as LocaleName
+    localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only disabled for testing
+    const editorBg = userInfo.editorBg
+    if (editorBg) {
+      store.commit('vivisticker/SET_editorBg', editorBg)
+    }
+    picWVUtils.updateLocale(i18n.global.locale)
+    vivistickerUtils.setDefaultPrices()
+
+    // document.title = to.meta?.title as string || i18n.global.t('SE0001')
+    next()
+    if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
+      // Delete locale in url, will be ignore by prerender.
+      delete router.currentRoute.value.params.locale
+      router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
+    }
+  },
+  children: routes
 })
 
 router.beforeEach(async (to, from, next) => {

@@ -14,6 +14,7 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
+import Checkbox from '@/components/global/Checkbox.vue'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import FontTag from '@/components/global/Tags.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
@@ -42,8 +43,10 @@ import galleryUtils from '@/utils/galleryUtils'
 import swipeDetector from '@/utils/SwipeDetector'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
+import overlayUtils from '@/utils/overlayUtils'
 import { DESIGN_MENU_EVENTS, FOLDER_MENU_EVENTS } from '@/utils/designUtils'
 import { PopupSliderEventType, LineTemplatesType } from '@/store/types'
+import NativeEventTester from '@/views/NativeEventTester.vue'
 import SvgIconView from '@/views/SvgIconView.vue'
 import DebugTool from '@/components/componentLog/DebugTool.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
@@ -68,6 +71,7 @@ import * as payment from '@/interfaces/payment'
   CategoryBackgroundItem,
   CategoryGroupTemplateItem,
   ImageGallery,
+  Checkbox,
   MarkerIcon,
   FontTag,
   ColorBtn,
@@ -96,10 +100,12 @@ import * as payment from '@/interfaces/payment'
   swipeDetector,
   bgRemoveUtils,
   svgIconUtils,
+  overlayUtils,
   DESIGN_MENU_EVENTS,
   FOLDER_MENU_EVENTS,
   PopupSliderEventType,
   LineTemplatesType,
+  NativeEventTester,
   SvgIconView,
   DebugTool,
   ModalCard,
