@@ -8,7 +8,7 @@
     "pic": "nx serve @nu/pic",
     "stk": "nx serve @nu/stk",
     "lib": "nx dev @nu/shared-lib",
-    "watch": "nx watch --all -- nx run \\$NX_PROJECT_NAME:build",
+    "watch": "nx watch --projects=@nu/*-lib -- nx run \\$NX_PROJECT_NAME:build",
     "install-all": "pnpm install",
     "cyrun": "npx cypress run --browser chromium --env preserveOriginalScreenshot=true",
     "cyopen": "npx cypress open --e2e -b chrome",
