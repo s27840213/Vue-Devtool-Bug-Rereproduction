@@ -63,7 +63,7 @@ export default defineComponent({
       }
     },
     buttonText(index: number): string {
-      if (['us', 'jp'].includes(this.$i18n.locale)) {
+      if (constantData.checkIfUseNewLogic()) {
         return this.stepConfigs[index].btnText ?? ''
       } else {
         return index < this.stepConfigs.length - 1 ? `${this.$t('NN0744')}` : `${this.$t('NN0745')}`

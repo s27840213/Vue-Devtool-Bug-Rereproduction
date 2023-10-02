@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full h-full pl-24")
+div(class="w-full pl-24")
   div(class="typo-btn-lg text-app-text-secondary") {{ $t('CM0013') }}
   scrollable-container(:px="0")
     div(
@@ -7,7 +7,7 @@ div(class="w-full h-full pl-24")
       :key="aspectRatio"
       :class="{ 'mr-12': aspectRatio === 'original' }"
       @click="selectAspectRatio(aspectRatio)")
-      nu-svg-icon(
+      cm-svg-icon(
         :icon-color="selectedType === aspectRatio ? 'primary-light-active' : aspectRatio === 'original' ? 'app-text-secondary' : 'transparent'"
         :stroke-color="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
         :icon-width="aspectRatio === 'original' ? '40px' : '56px'"

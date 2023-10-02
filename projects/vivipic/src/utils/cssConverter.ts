@@ -3,6 +3,7 @@
  */
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
+import textUtils from '@/utils/textUtils'
 
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
@@ -100,7 +101,32 @@ class CssConveter {
   }
 
   getFontFamily(font: string): string {
-    return (font + ',').concat(store.getters['text/getDefaultFonts'])
+    const browserInfo = store.getters['user/getBrowserInfo']
+    const browserIsSafari = browserInfo.name === 'Safari'
+    const osIsIos = browserInfo.os.family === 'iOS'
+    const fontIsAppleColorEmoji = textUtils.isAppleColorEmoji(font)
+    let fontFaces = store.getters['text/getDefaultFontFacesList'] as string[]
+    let skipInserting = false
+    if (fontIsAppleColorEmoji) {
+      if (browserIsSafari || osIsIos) {
+        font = 'Apple Color Emoji'
+      } else {
+        skipInserting = true
+      }
+    }
+    // if (generalUtils.isStk) {
+    //   const anchor = 'gXgHEvSNTPg2mhrpNOUb' // Unicode default: DejaVuSans
+    //   const insertIndex = fontFaces.indexOf(anchor)
+    //   fontFaces = [
+    //     ...fontFaces.slice(0, insertIndex),
+    //     vivistickerUtils.userSettings.emojiSetting,
+    //     ...fontFaces.slice(insertIndex),
+    //   ]
+    // }
+    if (!skipInserting) {
+      fontFaces = [font, ...fontFaces]
+    }
+    return fontFaces.join(', ')
   }
 
   convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, factor = 1): { [key: string]: string } {
