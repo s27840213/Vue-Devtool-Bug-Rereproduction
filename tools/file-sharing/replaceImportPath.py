@@ -24,7 +24,7 @@ def path2Target(path: str):
   return removePrefix(removeTs(removeIndex(path)))
 
 def path2SubPath(path: str):
-  return removeFileName(removeTs(removePrefix(path)))
+  return removePrefix(removeTs(removeFileName(path)))
 
 libPaths = glob.glob('packages/vivi-lib/src/**/*.vue', recursive=True) \
   + glob.glob('packages/vivi-lib/src/**/*.ts', recursive=True)

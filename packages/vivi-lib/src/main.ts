@@ -21,7 +21,7 @@ import generalUtils from './utils/generalUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
-import '@/components'
+import '@/imports'
 
 // Add variable that bind in vue this and its type define
 // Ex: div(v-if="$isTouchDevice()" ...) in pug
