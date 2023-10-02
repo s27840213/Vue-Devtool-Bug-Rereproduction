@@ -531,7 +531,6 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
-    console.warn('move end', e)
     if (store.getters.getControlState.id === this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })
     }

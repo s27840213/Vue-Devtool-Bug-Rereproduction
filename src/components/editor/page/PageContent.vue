@@ -14,15 +14,13 @@ div(class="overflow-container"
         @tap="tapPageContent")
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
       div(class="content full-size" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
-        div(v-if="noBg" class="page-content__pseudo-bg"
-          @mousedown.left.stop="pageClickHandler()")
+        div(v-if="noBg" class="page-content__pseudo-bg")
         nu-bg-image(v-else
             :image="config.backgroundImage"
             :pageIndex="pageIndex"
             :page="config"
             :color="config.backgroundColor"
             :key="config.backgroundImage.config.id"
-            @mousedown.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
             :padding="contentStyles.margin")
         div(class="layers-wrapper" :class="{'preserve3D': !isTouchDevice && isMultipleSelect}")
@@ -64,7 +62,6 @@ import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -254,9 +251,6 @@ export default defineComponent({
           modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
         }
       }
-    },
-    pageClickHandler(): void {
-      vivistickerUtils.deselect()
     },
     onRightClick(event: MouseEvent) {
       if (this.$isTouchDevice()) {

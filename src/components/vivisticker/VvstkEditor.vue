@@ -1,6 +1,7 @@
 <template lang="pug">
 div(class="vvstk-editor" ref="editorView" :style="copyingStyles()"
   @pointerdown="selectStart"
+  @pointerup="selectEnd"
   @pinch="onPinch"
   @pointerleave="removePointer"
   v-touch)
@@ -41,6 +42,7 @@ import PageCard from '@/components/vivisticker/PageCard.vue'
 import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
 import PanelRemoveBg from '@/components/vivisticker/PanelRemoveBg.vue'
 import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
+import { ICoordinate } from '@/interfaces/frame'
 import { ILayer, IText } from '@/interfaces/layer'
 import { IPageState } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
@@ -48,6 +50,7 @@ import SwipeDetector from '@/utils/SwipeDetector'
 import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
+import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -88,7 +91,11 @@ export default defineComponent({
       isInPageAdd: false,
       isPinchInit: false,
       pinchControlUtils: null as null | PinchControlUtils,
-      mobilePanelHeight: 0
+      movingUtils: null as null | MovingUtils,
+      mobilePanelHeight: 0,
+      pointerEvent: {
+        initPos: null as null | ICoordinate
+      }
     }
   },
   mounted() {
@@ -162,7 +169,6 @@ export default defineComponent({
             } else {
               this.mobilePanelHeight = 0
             }
-            console.log(this.mobilePanelHeight)
           }, 500)
         })
       } else {
@@ -253,19 +259,37 @@ export default defineComponent({
       }
       if (layerUtils.layerIndex !== -1) {
         // when there is an layer being active, the moving logic applied to the EditorView
-        const movingUtils = new MovingUtils({
+        this.movingUtils = new MovingUtils({
           _config: { config: layerUtils.getCurrLayer },
           snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
           body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
         })
-        movingUtils.moveStart(e)
+        this.movingUtils.moveStart(e)
+        this.pointerEvent.initPos = { x: e.x, y: e.y }
+      }
+    },
+    // the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
+    // is bcz the native click/tap event is triggered as the event happen in a-short-time even the layer has moved a little position,
+    // this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
+    selectEnd(e: PointerEvent) {
+      if (this.pointerEvent.initPos) {
+        if (Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5) {
+          // the moveingEnd would consider the layer to be selected,
+          // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
+          // following code remove the moveEnd event.
+          if (this.$store.getters.getControlState.type === 'move') {
+            this.$store.commit('SET_STATE', { controlState: { type: '' } })
+          }
+          groupUtils.deselect()
+          this.movingUtils?.removeListener()
+        }
+        this.pointerEvent.initPos = null
       }
     },
     recordPointer(e: PointerEvent) {
       pointerEvtUtils.addPointer(e)
     },
     removePointer(e: PointerEvent) {
-      console.log('on pointer leaveon pointer leaveon pointer leave', e)
       pointerEvtUtils.removePointer(e.pointerId)
     },
     onPinch(e: AnyTouchEvent) {
@@ -291,7 +315,6 @@ export default defineComponent({
       this.pinchControlUtils?.pinch(e)
     },
     pinchStart(e: AnyTouchEvent, targetIndex: number) {
-      console.log('pinch start')
       const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, targetIndex) } as unknown as { config: ILayer }
 
       if (_config.config.type === 'text') {

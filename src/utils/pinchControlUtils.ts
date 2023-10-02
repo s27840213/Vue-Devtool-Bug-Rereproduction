@@ -117,8 +117,7 @@ export default class PinchControlUtils {
     }
 
     const snapUtils = pageUtils.getPageState(this.layerInfo.pageIndex).modules.snapUtils
-    const rotate = snapUtils.calAngleSnapHandler((evtAngle + this.init.rotate) % 360, { snapIncrement: 45 })
-    console.log(rotate)
+    const rotate = snapUtils.calAngleSnapHandler((evtAngle + this.init.rotate) % 360, { snapIncrement: 45, allowedOffset: 5 })
 
     let styles = {
       scale: newScale,
@@ -136,7 +135,7 @@ export default class PinchControlUtils {
       styles.imgY = this.init.img.imgY * evtScale
     } else if (this.config.type === 'shape' && this.config.category === 'D') {
       const shape = this.config as IShape
-      const { point, dx, dy } = shapeUtils.lineCenterRotate(shape.point as number[], evtAngle + this.init.rotate, shape.size?.[0] ?? 1, false)
+      const { point, dx, dy } = shapeUtils.lineCenterRotate(shape.point as number[], rotate, shape.size?.[0] ?? 1, false)
       // const newPoint = [0, 0, point[2] * e.deltaScale, point[3] * e.deltaScale]
       // const [scaleDX, scaleDY] = [point[2] - newPoint[2], point[3] - newPoint[3]]
       styles = {
