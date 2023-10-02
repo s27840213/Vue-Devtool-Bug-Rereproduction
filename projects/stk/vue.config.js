@@ -36,13 +36,24 @@ const path = require('path')
 // const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const PrerenderSPAPlugin = require('@dreysolano/prerender-spa-plugin')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
-const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
+// const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
+// const { StatsWriterPlugin } = require('webpack-stats-plugin');
 
 function resolve (dir) {
     return path.join(__dirname, dir)
 }
+
+// class WebpackConfigLoggerPlugin {
+//     apply(compiler) {
+//       compiler.hooks.beforeRun.tapAsync('WebpackConfigLoggerPlugin', (compiler, callback) => {
+//         const webpackConfig = compiler.options;
+//         console.log(webpackConfig);
+//         callback();
+//       });
+//     }
+//   }
 
 module.exports = defineConfig({
     transpileDependencies: true,
@@ -205,7 +216,7 @@ module.exports = defineConfig({
                 if (err) console.error(err)
             })
         }
-        console.log(argv.PRERENDER)
+        
         if (argv.PRERENDER) {
             console.log('start prerender')
             // Tell Vue (CLI 3) to provide this file to Pre-SPA:
@@ -235,19 +246,17 @@ module.exports = defineConfig({
                     })
                 }])
         }
-
+        
         // Webpack bundle analyzer
-        // if (process.env.NODE_ENV === 'development') {
-        //     config
-        //         .plugin('webpack-bundle-analyzer')
-        //         .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
-        //         .end()
-        //     config.plugins.delete('prefetch')
-        //     config
-        //         .plugin('speed-measure-webpack-plugin')
-        //         .use(SpeedMeasurePlugin)
-        //         .end()
-        // }
+            // config
+            //     .plugin('webpack-bundle-analyzer')
+            //     .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
+            //     .end()
+            // config.plugins.delete('prefetch')
+            // config
+            //     .plugin('speed-measure-webpack-plugin')
+            //     .use(SpeedMeasurePlugin)
+            //     .end()
 
         // .use(SpeedMeasurePlugin, [{
         //     outputFormat: 'humanVerbose',
@@ -264,6 +273,23 @@ module.exports = defineConfig({
             },
         },
     },
+
+
+    // configureWebpack: {
+    //     plugins: [
+    //         // ... other plugins
+    //         // Write stats file relative to the build directory
+    //         new StatsWriterPlugin({
+    //           filename: '../webpack-stats.json',
+    //           stats: {
+    //             assets: true,
+    //             chunks: true,
+    //             modules: true
+    //           }
+    //         }),
+    //         new WebpackConfigLoggerPlugin()
+    //       ]
+    // },
 
     css: {
         loaderOptions: {
