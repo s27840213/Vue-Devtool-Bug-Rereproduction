@@ -1,5 +1,5 @@
 import list from '@/apis/list'
-import { IListServiceParams } from '@/interfaces/api'
+import { IListServiceParams } from '@nu/vivi-lib/interfaces/api'
 import { MutationTree } from 'vuex'
 import listFactory from './listFactory'
 

@@ -29,8 +29,8 @@ div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"
 /* eslint-disable */
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import BgRemoveArea from '@/components/vivisticker/BgRemoveArea.vue'
-import { ICoordinate } from '@/interfaces/frame'
-import { IBgRemoveInfo } from '@/interfaces/image'
+import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
+import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import constantData from '@/utils/constantData'
 import mathUtils from '@/utils/mathUtils'

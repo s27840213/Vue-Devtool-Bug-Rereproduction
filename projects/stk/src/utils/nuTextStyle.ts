@@ -1,5 +1,5 @@
-import { isITextLetterBg, ITextBg } from '@/interfaces/format'
-import { IGroup, IText } from '@/interfaces/layer'
+import { isITextLetterBg, ITextBg } from '@nu/vivi-lib/interfaces/format'
+import { IGroup, IText } from '@nu/vivi-lib/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import { Extension } from '@tiptap/core'
 import { Editor as CoreEditor } from '@tiptap/core/dist/packages/core/src/'

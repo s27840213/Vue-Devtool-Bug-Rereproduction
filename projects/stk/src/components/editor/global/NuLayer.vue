@@ -52,13 +52,8 @@ div(class="nu-layer flex-center"
 
 <script lang="ts">
 import SquareLoading from '@/components/global/SqureLoading.vue'
-import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
-import { ILayerInfo, LayerType, SidebarPanelType } from '@nu/vivi-lib/store/types'
 import controlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
@@ -78,8 +73,13 @@ import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
+import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
+import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ILayerInfo, LayerType, SidebarPanelType } from '@nu/vivi-lib/store/types'
 import Svgpath from 'svgpath'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({

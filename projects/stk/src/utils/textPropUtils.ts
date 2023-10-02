@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
-import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
-import { ISelection } from '@/interfaces/text'
+import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { ISelection } from '@nu/vivi-lib/interfaces/text'
 import store from '@/store'
 import text from '@/store/text/index'
 import { LayerType } from '@nu/vivi-lib/store/types'

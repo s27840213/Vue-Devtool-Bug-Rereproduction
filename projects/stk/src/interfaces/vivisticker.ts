@@ -1,5 +1,5 @@
 import { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
-import { IPage } from './page'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 
 export interface IUserInfoV1_0 {
   hostId: string,

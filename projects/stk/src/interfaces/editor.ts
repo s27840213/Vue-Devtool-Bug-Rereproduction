@@ -1,5 +1,5 @@
 import { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
-import { IFrame, IGroup, IImage, IShape, IText } from './layer'
+import { IFrame, IGroup, IImage, IShape, IText } from '@nu/vivi-lib/interfaces/layer'
 
 export interface ICurrSelectedInfo {
   pageIndex: number,

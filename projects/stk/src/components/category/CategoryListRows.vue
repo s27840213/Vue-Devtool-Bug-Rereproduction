@@ -14,7 +14,7 @@ div(class="category-list-rows")
 
 <script lang="ts">
 import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
-import { ICategoryItem } from '@/interfaces/api'
+import { ICategoryItem } from '@nu/vivi-lib/interfaces/api'
 import { defineComponent, PropType } from 'vue'
 import CategoryListRow from './CategoryListRow.vue'
 

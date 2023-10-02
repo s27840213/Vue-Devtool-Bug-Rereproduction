@@ -1,6 +1,6 @@
 import listService from '@/apis/list'
 import i18n from '@/i18n'
-import { Itheme } from '@/interfaces/theme'
+import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import store from '@/store'
 import PageUtils from '@/utils/pageUtils'
 import _ from 'lodash'

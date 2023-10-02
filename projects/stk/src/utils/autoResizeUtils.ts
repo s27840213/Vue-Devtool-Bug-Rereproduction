@@ -1,4 +1,4 @@
-import { IText } from '@/interfaces/layer'
+import { IText } from '@nu/vivi-lib/interfaces/layer'
 import logUtils from '@/utils/logUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textUtils, { ITextHW } from '@/utils/textUtils'

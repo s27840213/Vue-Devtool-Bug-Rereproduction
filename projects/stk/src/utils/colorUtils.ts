@@ -1,5 +1,5 @@
-import { IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IGroup, IImage, ILayer, IShape, IText } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import { EventEmitter } from 'events'

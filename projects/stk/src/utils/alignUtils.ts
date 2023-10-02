@@ -1,7 +1,7 @@
 
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'
 import GroupUtils from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'

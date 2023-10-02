@@ -1,4 +1,4 @@
-import { SrcObj } from './gallery'
+import { SrcObj } from '@/interfaces/gallery'
 import { IImageStyle } from './layer'
 
 export enum ShadowEffectType {
@@ -54,7 +54,7 @@ export interface IShadowEffects {
   blur?: IBlurEffect,
   frame?: IFrameEffect,
   imageMatched?: IImageMatchedEffect,
-  floating?: IFloatingEffect
+  floating?: IFloatingEffect,
 }
 
 export interface IShadowStyles {

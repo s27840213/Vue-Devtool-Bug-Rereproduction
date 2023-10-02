@@ -1,4 +1,4 @@
-import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@nu/vivi-lib/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import cssConveter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'

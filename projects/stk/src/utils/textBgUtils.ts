@@ -1,6 +1,6 @@
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextBox, isITextGooey, isITextLetterBg, isITextSpeechBubble, isITextUnderline, ITextBg, ITextGooey, tailPositions } from '@/interfaces/format'
-import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@/interfaces/layer'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextSpeechBubble, isITextUnderline, ITextBg, ITextGooey, tailPositions } from '@nu/vivi-lib/interfaces/format'
+import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'

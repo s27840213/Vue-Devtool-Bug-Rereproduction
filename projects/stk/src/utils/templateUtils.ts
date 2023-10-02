@@ -1,4 +1,4 @@
-import { ILayer, IParagraph, IText } from '@/interfaces/layer'
+import { ILayer, IParagraph, IText } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from './layerUtils'

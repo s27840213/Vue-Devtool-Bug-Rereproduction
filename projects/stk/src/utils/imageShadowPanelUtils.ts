@@ -1,5 +1,5 @@
-import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, ShadowEffectType } from '@/interfaces/imgShadow'
-import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
+import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@nu/vivi-lib/store/types'
 import vivistickerUtils from '@/utils/vivistickerUtils'

@@ -1,4 +1,4 @@
-import { IPage } from '@/interfaces/page'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'
 import { LineTemplatesType } from '@nu/vivi-lib/store/types'
 import { EventEmitter } from 'events'

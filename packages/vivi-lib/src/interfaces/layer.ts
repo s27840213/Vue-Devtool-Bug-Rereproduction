@@ -119,6 +119,8 @@ export interface IText extends ILayer<ITextStyle> {
   selection: ITiptapSelection,
   isAutoResizeNeeded: boolean,
   isCompensated?: boolean,
+  inAutoRescaleMode: boolean,
+  initScale: number,
   isDraggingCursor: boolean,
   isFlipping: boolean,
   spanDataList?: DOMRect[][][]

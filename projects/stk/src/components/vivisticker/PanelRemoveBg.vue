@@ -26,7 +26,7 @@ div(class="panel-remove-bg" ref="panelRemoveBg")
 
 <script lang="ts">
 import BgRemoveContainer from '@/components/vivisticker/BgRemoveContainer.vue'
-import { IImage } from '@/interfaces/layer'
+import { IImage } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'

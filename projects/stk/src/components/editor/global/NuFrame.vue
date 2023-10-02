@@ -58,9 +58,9 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
 </template>
 
 <script lang="ts">
-import { IListServiceContentDataItem } from '@/interfaces/api'
-import { IFrame, IGroup, IImage, IShape, ITmp } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IFrame, IGroup, IImage, IShape, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import AssetUtils from '@/utils/assetUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'

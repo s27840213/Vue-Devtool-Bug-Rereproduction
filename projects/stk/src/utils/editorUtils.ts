@@ -1,5 +1,5 @@
-import { IBgRemoveInfo } from '@/interfaces/image'
-import { IPage } from '@/interfaces/page'
+import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'
 import { IMobileEditorState } from '@nu/vivi-lib/store/module/mobileEditor'
 import generalUtils from './generalUtils'

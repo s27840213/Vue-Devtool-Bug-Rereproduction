@@ -1,7 +1,7 @@
 /**
  */
-import { ICoordinate } from '@/interfaces/frame'
-import { IImage, ILayer, IShape, IStyle, IText, ITmp, jsonVer as latestJsonVer } from '@/interfaces/layer'
+import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
+import { IImage, ILayer, IShape, IStyle, IText, ITmp, jsonVer as latestJsonVer } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import { SidebarPanelType } from '@nu/vivi-lib/store/types'
 import LayerFactary from '@/utils/layerFactary'

@@ -1,6 +1,6 @@
 /* eslint-disable indent */
-import { IFrame, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
-import { IBleed, IPage } from '@/interfaces/page'
+import { IFrame, IImage, ILayer, IShape, IText } from '@nu/vivi-lib/interfaces/layer'
+import { IBleed, IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'
 import controlUtils from '@/utils/controlUtils'
 import frameUtils from '@/utils/frameUtils'

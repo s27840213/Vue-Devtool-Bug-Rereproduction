@@ -28,9 +28,9 @@ div(class="nu-background-controller")
 </template>
 
 <script lang="ts">
-import { ICoordinate } from '@/interfaces/frame'
-import { ISize } from '@/interfaces/math'
-import { IPage } from '@/interfaces/page'
+import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
+import { ISize } from '@nu/vivi-lib/interfaces/math'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'

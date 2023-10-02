@@ -1,5 +1,5 @@
 import list from '@/apis/list'
-import { IListServiceContentDataItem, IListServiceData, IListServiceParams } from '@/interfaces/api'
+import { IListServiceContentDataItem, IListServiceData, IListServiceParams } from '@nu/vivi-lib/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'

@@ -103,17 +103,13 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
+import SearchBar from '@/components/SearchBar.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import i18n from '@/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IAsset } from '@/interfaces/module'
-import { IPage } from '@/interfaces/page'
-import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import assetUtils from '@/utils/assetUtils'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -121,8 +117,12 @@ import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import { round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({

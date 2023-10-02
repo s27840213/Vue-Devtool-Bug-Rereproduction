@@ -33,13 +33,13 @@ div(class="panel-shadow")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IImage, IImageStyle } from '@/interfaces/layer'
-import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import colorUtils from '@/utils/colorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
+import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
+import { IImage, IImageStyle } from '@nu/vivi-lib/interfaces/layer'
+import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 export default defineComponent({

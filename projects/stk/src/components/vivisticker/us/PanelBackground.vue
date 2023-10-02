@@ -125,7 +125,7 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
-import { ICategoryItem, IListServiceContentData } from '@/interfaces/api'
+import { ICategoryItem, IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import PanelBackground from '../PanelBackground.vue'

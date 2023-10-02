@@ -1,6 +1,6 @@
 import glob
-import re
 import os
+import re
 import subprocess
 
 project = 'stk'
@@ -35,6 +35,7 @@ picPaths = glob.glob(f'projects/{project}/src/**/*.vue', recursive=True) \
   + glob.glob(f'projects/{project}/src/**/*.ts', recursive=True)
 
 for libPath in libPaths:
+  if 'interface' not in libPath: continue
   path = libPath.replace('packages/vivi-lib/', '')
 
   if not os.path.isfile(f'projects/{project}/{path}'):

@@ -65,6 +65,9 @@ import {
 import {
   _IPaymentWarningView,
 } from '@/interfaces/payment'
+import {
+  webViewImport,
+} from '@/interfaces/webView'
 import router from '@/router'
 import store from '@/store'
 import background from '@/store/module/background'
@@ -79,13 +82,13 @@ import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
 import text from '@/store/text'
 import {
-  ColorEventType, 
-  FunctionPanelType, 
-  LayerProcessType, 
-  LayerType, 
-  LineTemplatesType, 
-  MobileColorPanelType, 
-  PopupSliderEventType, 
+  ColorEventType,
+  FunctionPanelType,
+  LayerProcessType,
+  LayerType,
+  LineTemplatesType,
+  MobileColorPanelType,
+  PopupSliderEventType,
   SidebarPanelType,
 } from '@/store/types'
 import apiUtils from '@/utils/apiUtils'
@@ -94,13 +97,13 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils, {
-  checkAndConvertToHex, 
+  checkAndConvertToHex,
   isValidHexColor,
 } from '@/utils/colorUtils'
 import constantData from '@/utils/constantData'
 import controlUtils from '@/utils/controlUtils'
 import designUtils, {
-  DESIGN_MENU_EVENTS, 
+  DESIGN_MENU_EVENTS,
   FOLDER_MENU_EVENTS,
 } from '@/utils/designUtils'
 import doubleTapUtils from '@/utils/doubleTapUtils'
@@ -120,7 +123,7 @@ import hintUtils from '@/utils/hintUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, {
-  fieldRange, 
+  fieldRange,
   shadowPropI18nMap,
 } from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -162,7 +165,7 @@ import textUtils from '@/utils/textUtils'
 import themeUtils from '@/utils/themeUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import unitUtils, {
-  PRECISION, 
+  PRECISION,
   STR_UNITS,
 } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -230,6 +233,7 @@ import SvgIconView from '@/views/SvgIconView.vue'
   isIAssetPhoto, 
   ShadowEffectType, 
   _IPaymentWarningView, 
+  webViewImport, 
   router, 
   store, 
   background, 

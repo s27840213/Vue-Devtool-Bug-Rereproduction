@@ -18,7 +18,7 @@ div(class="my-design-text-item" @click="editTemplate")
 </template>
 
 <script lang="ts">
-import { IPage } from '@/interfaces/page'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'

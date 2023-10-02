@@ -1,4 +1,4 @@
-import { IGroup, IImage, ILayer, IShape, ITmp } from '@/interfaces/layer'
+import { IGroup, IImage, ILayer, IShape, ITmp } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
 

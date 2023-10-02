@@ -59,7 +59,7 @@ div(class="overflow-container full-size rwd-container")
 import { CCategoryList } from '@/components/category/CategoryList.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import CategoryTextPreview from '@/components/vivisticker/us/CategoryTextPreview.vue'
-import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
 import textPropUtils from '@/utils/textPropUtils'

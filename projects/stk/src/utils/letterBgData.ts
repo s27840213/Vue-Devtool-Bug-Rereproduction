@@ -1,5 +1,5 @@
 import i18n from '@/i18n'
-import { ITextLetterBg } from '@/interfaces/format'
+import { ITextLetterBg } from '@nu/vivi-lib/interfaces/format'
 import constantData from '@/utils/constantData'
 import textUtils from '@/utils/textUtils'
 

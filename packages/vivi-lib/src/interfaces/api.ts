@@ -1,3 +1,4 @@
+import { LocaleName } from '@/i18n'
 import { RawImage } from '@/interfaces/gallery'
 import { IBleed } from '@/interfaces/page'
 import { intersection, isEqual } from 'lodash'
@@ -132,6 +133,8 @@ export interface IListServiceParams {
   cache?: boolean
   platform?: string
   all_theme?: number
+  colNum?: number,
+  igLayout?: 'story' | 'post'
   shuffle?: number
 }
 
@@ -171,8 +174,9 @@ export interface IListServiceContentDataItem {
   unit?: string
   valid?: number
   plan?: number
-  icon?: string,
+  icon?: string
   bleed?: IBleed
+  fit?: number
 }
 
 export interface ICategoryItem {
@@ -181,10 +185,11 @@ export interface ICategoryItem {
   size: number
   type: string
   list: IListServiceContentDataItem[]
+  url?: string
   sentinel?: boolean
 }
 export interface ICategoryList {
-  key: 'mainContent' | 'searchResult'
+  key: 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult' | 'categoryCardList' | 'groupContent'
   show: boolean
   content: ICategoryItem[]
   loadMore?: () => void
@@ -196,7 +201,10 @@ export interface IListServiceContentData {
   list: IListServiceContentDataItem[]
   title: string
   title_locale?: string // Category title locale
-  is_recent?: number
+  is_recent?: number,
+  cover_id?: string,
+  cover_url?: string,
+  url?: string
 }
 
 export interface IListServiceData {
@@ -497,7 +505,7 @@ export interface ILoginResult {
   token: string,
   account: string,
   upass_update: number,
-  locale: 'tw' | 'us' | 'jp',
+  locale: LocaleName,
   subscribe: string,
   role: number,
   roleRaw: number,

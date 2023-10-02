@@ -1,4 +1,4 @@
-import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
+import { WEBVIEW_API_RESULT } from '@nu/vivi-lib/interfaces/webView'
 import store from '@/store'
 import generalUtils from './generalUtils'
 import logUtils from './logUtils'

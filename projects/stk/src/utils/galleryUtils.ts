@@ -1,10 +1,10 @@
 // import GeneralUtils from '@/utils/generalUtils'
-import { IBrandLogo } from '@/interfaces/brandkit'
+import { IBrandLogo } from '@nu/vivi-lib/interfaces/brandkit'
 import {
   GalleryImage,
   LogoRowData,
   RowData
-} from '@/interfaces/gallery'
+} from '@nu/vivi-lib/interfaces/gallery'
 import { cloneDeep } from 'lodash'
 
 export default class GalleryUtils {

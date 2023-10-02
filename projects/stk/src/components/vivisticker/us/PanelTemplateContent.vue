@@ -54,7 +54,7 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
 
 <script lang="ts">
 import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
-import { ICategoryItem, IListServiceContentData } from '@/interfaces/api'
+import { ICategoryItem, IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

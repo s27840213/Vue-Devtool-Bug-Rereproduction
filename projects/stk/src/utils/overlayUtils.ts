@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
-import { IImage, IShape } from '@/interfaces/layer'
-import { IAssetObject } from '@/interfaces/shape'
+import { IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
+import { IAssetObject } from '@nu/vivi-lib/interfaces/shape'
 import backgroundUtils from '@/utils/backgroundUtils'
 import constantData from '@/utils/constantData'
 import layerUtils from '@/utils/layerUtils'

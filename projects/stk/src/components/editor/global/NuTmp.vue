@@ -18,8 +18,8 @@ div(class="nu-tmp"
 </template>
 
 <script lang="ts">
-import { ILayer, ITmp } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { ILayer, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'

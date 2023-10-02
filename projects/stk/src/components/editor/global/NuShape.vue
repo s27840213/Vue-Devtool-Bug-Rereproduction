@@ -12,12 +12,12 @@ div(class="nu-shape" :style="styles")
 </template>
 
 <script lang="ts">
-import { IFrame, IGroup, IShape } from '@/interfaces/layer'
-import { LayerType } from '@nu/vivi-lib/store/types'
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IFrame, IGroup, IShape } from '@nu/vivi-lib/interfaces/layer'
+import { LayerType } from '@nu/vivi-lib/store/types'
 import { PropType, defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
 

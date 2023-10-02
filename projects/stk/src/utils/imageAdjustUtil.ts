@@ -3,8 +3,8 @@ import {
   IAdjustJsonProps,
   IAdjustProps,
   ISvgFilterTag
-} from '@/interfaces/adjust'
-import { IImage } from '@/interfaces/layer'
+} from '@nu/vivi-lib/interfaces/adjust'
+import { IImage } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 
 class ImageAdjustUtil {

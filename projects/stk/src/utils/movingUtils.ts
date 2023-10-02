@@ -1,5 +1,5 @@
-import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
+import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import { nextTick } from 'vue'

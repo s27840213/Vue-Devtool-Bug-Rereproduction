@@ -1,5 +1,5 @@
-import { ITextEffect } from '@/interfaces/format'
-import { AllLayerTypes, IParagraph, IText } from '@/interfaces/layer'
+import { ITextEffect } from '@nu/vivi-lib/interfaces/format'
+import { AllLayerTypes, IParagraph, IText } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import { lab2rgb, rgb2lab } from '@/utils/colorUtils'
 import LayerUtils from '@/utils/layerUtils'

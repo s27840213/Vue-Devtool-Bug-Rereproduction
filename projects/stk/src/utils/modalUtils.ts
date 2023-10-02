@@ -1,4 +1,4 @@
-import { IModalButton, IModalInfo } from '@/interfaces/modal'
+import { IModalButton, IModalInfo } from '@nu/vivi-lib/interfaces/modal'
 import store from '@/store'
 
 interface ModalOptions {

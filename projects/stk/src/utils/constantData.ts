@@ -1,6 +1,6 @@
 import i18n, { LocaleName } from '@/i18n'
-import { tailPositions } from '@/interfaces/format'
-import { Itheme } from '@/interfaces/theme'
+import { tailPositions } from '@nu/vivi-lib/interfaces/format'
+import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import router from '@/router'
 import store from '@/store'
 import letterBgData from '@/utils/letterBgData'

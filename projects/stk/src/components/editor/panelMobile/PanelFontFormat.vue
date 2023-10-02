@@ -15,7 +15,7 @@ div(class="panel-font-format")
 </template>
 
 <script lang="ts">
-import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, ILayer, IParagraph, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'

@@ -45,7 +45,7 @@ div(class="share-template")
 <script lang="ts">
 import PageContent from '@/components/editor/page/PageContent.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
-import { IPage } from '@/interfaces/page'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'

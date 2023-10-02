@@ -3,7 +3,7 @@ editor-content(:editor="(editor as Editor)")
 </template>
 
 <script lang="ts">
-import { IGroup, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'

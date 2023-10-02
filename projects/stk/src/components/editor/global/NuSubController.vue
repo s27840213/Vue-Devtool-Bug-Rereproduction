@@ -42,10 +42,6 @@ div(class="nu-sub-controller")
 
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import { isTextFill } from '@/interfaces/format'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
-import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -60,6 +56,10 @@ import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import { isTextFill } from '@nu/vivi-lib/interfaces/format'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 

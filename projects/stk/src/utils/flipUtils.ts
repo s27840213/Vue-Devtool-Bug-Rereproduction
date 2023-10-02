@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import { AllLayerTypes, IFrame, IGroup, IImage } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import controlUtils from '@/utils/controlUtils'
 import layerUtils from '@/utils/layerUtils'

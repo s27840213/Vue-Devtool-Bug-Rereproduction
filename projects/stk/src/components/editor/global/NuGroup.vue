@@ -14,7 +14,7 @@ div(class="nu-group")
 </template>
 
 <script lang="ts">
-import { IPage } from '@/interfaces/page'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({

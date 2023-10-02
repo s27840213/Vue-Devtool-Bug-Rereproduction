@@ -56,14 +56,14 @@ div(class="color-panel"
 </template>
 
 <script lang="ts">
-import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import { IPage } from '@/interfaces/page'
-import { ColorEventType } from '@nu/vivi-lib/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
+import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ColorEventType } from '@nu/vivi-lib/store/types'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'

@@ -1,7 +1,7 @@
 
-import { IGroup, IImage, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
-import { IConsideredEdges, ISnapline, ISnaplineInfo, ISnaplinePos } from '@/interfaces/snap'
+import { IGroup, IImage, IShape, IStyle, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { IConsideredEdges, ISnapline, ISnaplineInfo, ISnaplinePos } from '@nu/vivi-lib/interfaces/snap'
 import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
 import MathUtils from '@/utils/mathUtils'

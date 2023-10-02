@@ -18,7 +18,7 @@ div(v-else class="my-design-object-item")
 
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
-import { IPage } from '@/interfaces/page'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'

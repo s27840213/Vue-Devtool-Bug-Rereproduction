@@ -1,6 +1,6 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { ICalculatedGroupStyle } from '@nu/vivi-lib/interfaces/group'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'

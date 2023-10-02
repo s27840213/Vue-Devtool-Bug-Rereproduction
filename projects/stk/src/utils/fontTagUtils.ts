@@ -1,7 +1,7 @@
 import axios from '@nu/vivi-lib/apis'
 import localeUtils from './localeUtils'
 import store from '@/store'
-import { IListServiceResponse } from '@/interfaces/api'
+import { IListServiceResponse } from '@nu/vivi-lib/interfaces/api'
 
 class FontTagUtils {
   getFontTags() {

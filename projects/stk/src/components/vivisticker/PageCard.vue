@@ -18,8 +18,8 @@ div(class="page-card" :id="`page-card-${pageIndex}`" :style="styles('card')")
 <script lang="ts">
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
-import { ILayer } from '@/interfaces/layer'
-import { IPage, IPageState } from '@/interfaces/page'
+import { ILayer } from '@nu/vivi-lib/interfaces/layer'
+import { IPage, IPageState } from '@nu/vivi-lib/interfaces/page'
 import backgroundUtils from '@/utils/backgroundUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'

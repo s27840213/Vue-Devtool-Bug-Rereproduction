@@ -39,7 +39,7 @@ div(class="panel-my-design-more")
 </template>
 
 <script lang="ts">
-import { IPage } from '@/interfaces/page'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { IMyDesign, ITempDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'

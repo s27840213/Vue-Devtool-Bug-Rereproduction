@@ -47,7 +47,7 @@ export interface IPage extends IPageSizeWithBleeds {
     h: Array<number>
   },
   isEnableBleed: boolean,
-  contentScaleRatio: number
+  contentScaleRatio: number,
   iosImgUploadBuffer: {
     shadow: Array<SrcObj>
   }

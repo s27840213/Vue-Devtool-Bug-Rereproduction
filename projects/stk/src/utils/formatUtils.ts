@@ -1,5 +1,5 @@
-import { IFormat, IImageFormat, ITextFormat, ITextShape, ITextStyleCopiedFormat, textStyleCopiedFormatKeys } from '@/interfaces/format'
-import { AllLayerTypes, IGroup, IImage, IParagraph, IText } from '@/interfaces/layer'
+import { IFormat, IImageFormat, ITextFormat, ITextShape, ITextStyleCopiedFormat, textStyleCopiedFormatKeys } from '@nu/vivi-lib/interfaces/format'
+import { AllLayerTypes, IGroup, IImage, IParagraph, IText } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import { cloneDeep, pick } from 'lodash'
 import frameUtils from './frameUtils'

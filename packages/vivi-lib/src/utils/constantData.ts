@@ -1,4 +1,4 @@
-import i18n from '@/i18n'
+import i18n, { LocaleName } from '@/i18n'
 import { tailPositions } from '@/interfaces/format'
 import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
@@ -86,6 +86,20 @@ export type IHeaderL1 = {
   content?: IHeaderL2[]
 }
 
+export interface IStickerVideoUrl {
+  video: string
+  thumbnail: string
+}
+
+export interface IStickerVideoUrls {
+  iOS: IStickerVideoUrl
+  tutorial1: IStickerVideoUrl
+  tutorial2: IStickerVideoUrl
+  tutorial3: IStickerVideoUrl
+  tutorial4: IStickerVideoUrl
+  tutorial5: IStickerVideoUrl
+}
+
 export enum DeviceType {
   iPhone,
   iPad,
@@ -96,9 +110,17 @@ export enum DeviceType {
   Other
 }
 
+const NEED_FALLBACK_LOCALES = ['pt' as const]
+const NO_TUTORIAL_LOCALES = ['pt']
 class ConstantData {
   get isLogin(): boolean {
     return store.getters['user/isLogin']
+  }
+
+  get localeWithFallback() {
+    return (NEED_FALLBACK_LOCALES as string[]).includes(i18n.global.locale)
+      ? 'us'
+      : i18n.global.locale as Exclude<LocaleName, typeof NEED_FALLBACK_LOCALES[number]>
   }
 
   // For header.vue and mobileMenu.vue
@@ -228,7 +250,7 @@ class ConstantData {
           newTab: true
         }]
       }]
-    }[i18n.global.locale] as IHeaderL2[]
+    }[this.localeWithFallback] as IHeaderL2[]
 
     const resource = {
       tw: [{
@@ -322,7 +344,7 @@ class ConstantData {
           url: 'https://blog.vivipic.com/jp/category/digital-marketing-jp/'
         }]
       }]
-    }[i18n.global.locale] as IHeaderL2[]
+    }[this.localeWithFallback] as IHeaderL2[]
 
     const pricing = {
       name: 'Pricing',
@@ -1144,9 +1166,108 @@ class ConstantData {
     ]
   }
 
+  stickerTutorialSteps(): { title: string, description: string, video: string, btnText?: string }[] {
+    const stickerVideoUrls = this.stickerVideoUrls()
+    // TODO: after tw new videos are povided, remove title and description and make btnText required.
+    return this.checkIfUseNewLogic() ? [
+      {
+        title: '',
+        description: '',
+        video: stickerVideoUrls.tutorial1.video,
+        btnText: `${i18n.global.t('STK0091')}`
+      },
+      {
+        title: '',
+        description: '',
+        video: stickerVideoUrls.tutorial2.video,
+        btnText: `${i18n.global.t('STK0092')}`
+      },
+      {
+        title: '',
+        description: '',
+        video: stickerVideoUrls.tutorial4.video,
+        btnText: `${i18n.global.t('STK0093')}`
+      }
+    ] : [
+      {
+        title: `${i18n.global.t('NN0746')}`,
+        description: `${i18n.global.t('NN0750')}`,
+        video: stickerVideoUrls.tutorial1.video
+      },
+      {
+        title: `${i18n.global.t('NN0747')}`,
+        description: `${i18n.global.t('NN0751')}`,
+        video: stickerVideoUrls.tutorial2.video
+      },
+      {
+        title: `${i18n.global.t('NN0748')}`,
+        description: `${i18n.global.t('NN0752')}`,
+        video: stickerVideoUrls.tutorial3.video
+      },
+      {
+        title: `${i18n.global.t('NN0749')}`,
+        description: `${i18n.global.t('NN0753')}`,
+        video: stickerVideoUrls.tutorial4.video
+      }
+    ]
+  }
+
+  checkIfUseNewLogic(): boolean {
+    return ['us', 'jp', ...NO_TUTORIAL_LOCALES].includes(i18n.global.locale)
+  }
+
+  stickerVideoUrls(): IStickerVideoUrls {
+    const locale = NO_TUTORIAL_LOCALES.includes(i18n.global.locale) ? 'us' : i18n.global.locale
+    const path = 'https://template.vivipic.com/static/video/'
+    const iOS16PostFix = `${locale.toUpperCase()}_IOS16`
+    const tutorialPostFix = `${locale}`
+    const videoFileName = '.mp4'
+    const thumbnailFileName = '_thumb.jpg'
+    const verUni = store.getters['user/getVerUni']
+    const seeds = {
+      iOS: `${path}${iOS16PostFix}`,
+      tutorial1: `${path}${tutorialPostFix}-01-copy_paste`,
+      tutorial2: `${path}${tutorialPostFix}-02-text`,
+      tutorial3: `${path}${tutorialPostFix}-03-objects`,
+      tutorial4: `${path}${tutorialPostFix}-04-background`,
+      tutorial5: `${path}${tutorialPostFix}-05-carousel_post`
+    }
+    const res = {} as IStickerVideoUrls
+    for (const [key, value] of Object.entries(seeds) as [keyof typeof seeds, string][]) {
+      if (['us', 'jp'].includes(locale)) {
+        res[key] = {
+          video: `${value}${key === 'iOS' ? '_v2' : '-v2'}${videoFileName}?ver=${verUni}`,
+          thumbnail: `${value}${key === 'iOS' ? '_v2' : '-v2'}${thumbnailFileName}?ver=${verUni}`
+        }
+      } else {
+        res[key] = {
+          video: `${value}${videoFileName}?ver=${verUni}`,
+          thumbnail: `${value}${thumbnailFileName}?ver=${verUni}`
+        }
+      }
+    }
+    return res as IStickerVideoUrls
+  }
+
   get pinchTransitionTime() {
     return 250
   }
+  
+  // map i18n locale to ISO 3166-1 alpha-3
+  countryMap = new Map(
+    [
+      ['us', 'USA'],
+      ['jp', 'JPN'],
+      ['tw', 'TWN'],
+    ]
+  )
+
+  // map country code to currency
+  currencyMap = new Map([
+    ['USA', 'USD'],
+    ['JPN', 'JPY'],
+    ['TWN', 'TWD'],
+  ])
 }
 
 export default new ConstantData()

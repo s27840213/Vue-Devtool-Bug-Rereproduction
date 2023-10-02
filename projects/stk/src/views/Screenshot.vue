@@ -17,8 +17,8 @@ div(class="screenshot")
 <script lang="ts">
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
-import { AllLayerTypes, IImageStyle, ILayer } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { AllLayerTypes, IImageStyle, ILayer } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'

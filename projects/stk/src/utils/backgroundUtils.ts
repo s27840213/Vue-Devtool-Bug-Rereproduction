@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
-import { IImage, IImageStyle } from '@/interfaces/layer'
-import { IBackgroundImage, IPage } from '@/interfaces/page'
+import { IImage, IImageStyle } from '@nu/vivi-lib/interfaces/layer'
+import { IBackgroundImage, IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
 import assetUtils from './assetUtils'

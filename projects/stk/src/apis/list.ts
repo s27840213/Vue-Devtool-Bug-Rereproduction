@@ -1,5 +1,5 @@
 import axios from '@nu/vivi-lib/apis'
-import { IListServiceParams, IListServiceResponse } from '@/interfaces/api'
+import { IListServiceParams, IListServiceResponse } from '@nu/vivi-lib/interfaces/api'
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
 import uploadUtils from '@/utils/uploadUtils'

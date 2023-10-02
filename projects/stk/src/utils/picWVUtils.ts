@@ -1,5 +1,5 @@
-import { ILoginResult } from '@/interfaces/api'
-import { IUserInfo } from '@/interfaces/webView'
+import { ILoginResult } from '@nu/vivi-lib/interfaces/api'
+import { IUserInfo } from '@nu/vivi-lib/interfaces/webView'
 import store from '@/store'
 import { WebViewUtils } from '@/utils/webViewUtils'
 import generalUtils from './generalUtils'

@@ -6,7 +6,7 @@ import {
   IAssetPhoto,
   IGroupDesignInputParams,
   IListServiceContentData
-} from '@/interfaces/api'
+} from '@nu/vivi-lib/interfaces/api'
 import {
   IFrame,
   IGroup,
@@ -16,13 +16,13 @@ import {
   IText,
   ITmp,
   jsonVer
-} from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+} from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import {
   IUploadAssetFontResponse,
   IUploadAssetLogoResponse,
   IUploadAssetResponse
-} from '@/interfaces/upload'
+} from '@nu/vivi-lib/interfaces/upload'
 import router from '@/router'
 import store from '@/store'
 import { SidebarPanelType } from '@nu/vivi-lib/store/types'

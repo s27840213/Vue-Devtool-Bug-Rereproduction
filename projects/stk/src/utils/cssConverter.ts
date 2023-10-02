@@ -1,7 +1,7 @@
 /**
  * This file is used to convert properties of layers into CSS-readable properties
  */
-import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
+import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'

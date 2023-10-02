@@ -54,6 +54,8 @@ import { createI18n } from 'vue-i18n'
 //   return {}
 // }
 
+export type LocaleName = 'us' | 'tw' | 'jp'
+
 const i18n = createI18n({
   locale: process.env.VUE_APP_I18N_LOCALE || 'us',
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'us',
@@ -61,6 +63,9 @@ const i18n = createI18n({
     us: process.env.NODE_ENV === 'production' ? us_shaked : us,
     tw: process.env.NODE_ENV === 'production' ? tw_shaked : tw,
     jp: process.env.NODE_ENV === 'production' ? jp_shaked : jp,
+    // ...(generalUtils.isStk ? {
+    //   pt: process.env.NODE_ENV === 'production' ? pt_shaked : pt,
+    // } : {})
   },
   globalInjection: true,
   legacy: true,

@@ -10,7 +10,7 @@ p(class="nu-curve-text__p")
 </template>
 
 <script lang="ts">
-import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, ISpan, ISpanStyle, IText } from '@nu/vivi-lib/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'

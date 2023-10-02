@@ -1,4 +1,4 @@
-import { IPopupComponent, IPopupProps, ISliderConfig } from '@/interfaces/popup'
+import { IPopupComponent, IPopupProps, ISliderConfig } from '@nu/vivi-lib/interfaces/popup'
 import store from '@/store'
 import { EventEmitter } from 'events'
 import { nextTick, reactive } from 'vue'

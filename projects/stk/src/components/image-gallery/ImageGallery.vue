@@ -17,11 +17,11 @@ recycle-scroller(class="image-gallery" id="recycle"
 </template>
 
 <script lang="ts">
+import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@nu/vivi-lib/components/GalleryPhoto.vue'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
-import { IPhotoItem } from '@/interfaces/api'
-import { GalleryImage } from '@/interfaces/gallery'
-import GalleryUtils from '@/utils/galleryUtils'
+import { IPhotoItem } from '@nu/vivi-lib/interfaces/api'
+import { GalleryImage } from '@nu/vivi-lib/interfaces/gallery'
 import { defineComponent, PropType } from 'vue'
 
 const component = defineComponent({

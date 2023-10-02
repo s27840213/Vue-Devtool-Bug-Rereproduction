@@ -23,10 +23,10 @@ div(class="nu-img-controller")
 </template>
 
 <script lang="ts">
-import { ICoordinate } from '@/interfaces/frame'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IImage } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
+import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
+import { IImage } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'

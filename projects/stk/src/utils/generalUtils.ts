@@ -1,5 +1,5 @@
-import { IGroup } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IGroup } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import router from '@/router'
 import store from '@/store'
 import { IBrowserInfo } from '@nu/vivi-lib/store/module/user'

@@ -1,4 +1,4 @@
-import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, ITmp } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, IExtendLayerInfo, ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import { nextTick } from 'vue'

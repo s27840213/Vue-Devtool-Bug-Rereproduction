@@ -23,8 +23,8 @@ div(class="category-fonts pointer feature-button"
 </template>
 
 <script lang="ts">
-import { IGroup, IParagraph, IText } from '@/interfaces/layer'
-import { ISelection } from '@/interfaces/text'
+import { IGroup, IParagraph, IText } from '@nu/vivi-lib/interfaces/layer'
+import { ISelection } from '@nu/vivi-lib/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import layerUtils from '@/utils/layerUtils'

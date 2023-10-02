@@ -14,7 +14,7 @@ div(class="panel-adjust")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import { IFrame, IImage } from '@/interfaces/layer'
+import { IFrame, IImage } from '@nu/vivi-lib/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'

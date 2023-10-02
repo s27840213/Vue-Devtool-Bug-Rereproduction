@@ -1,7 +1,7 @@
 import { CustomElementConfig } from '@/interfaces/editor'
-import { ICoordinate } from '@/interfaces/frame'
-import { IStyle, ITextStyle } from '@/interfaces/layer'
-import { IBounding } from '@/interfaces/math'
+import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
+import { IStyle, ITextStyle } from '@nu/vivi-lib/interfaces/layer'
+import { IBounding } from '@nu/vivi-lib/interfaces/math'
 import store from '@/store'
 import Flatten from '@flatten-js/core'
 

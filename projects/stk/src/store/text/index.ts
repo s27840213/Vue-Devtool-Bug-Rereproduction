@@ -1,5 +1,5 @@
-import { IParagraph } from '@/interfaces/layer'
-import { IFont, ISelection } from '@/interfaces/text'
+import { IParagraph } from '@nu/vivi-lib/interfaces/layer'
+import { IFont, ISelection } from '@nu/vivi-lib/interfaces/text'
 import router from '@/router'
 import store from '@/store'
 import brandkitUtils from '@/utils/brandkitUtils'

@@ -53,8 +53,8 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
 
 <script lang="ts">
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
-import { IImage } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IImage } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'

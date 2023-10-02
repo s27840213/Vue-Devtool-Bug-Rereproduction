@@ -1,4 +1,4 @@
-import { IStyle } from '@/interfaces/layer'
+import { IStyle } from '@nu/vivi-lib/interfaces/layer'
 
 const useCanvasUtils = (targetLayerStyle?: IStyle) => {
   // This function takes an HTMLCanvasElement as input and returns a trimmed version of it.

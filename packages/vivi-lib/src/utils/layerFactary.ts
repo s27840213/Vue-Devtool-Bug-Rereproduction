@@ -127,7 +127,7 @@ class LayerFactary {
         const imgConfig = {
           isFrame: true,
           clipPath: img.clipPath,
-          styles: img.styles,
+          styles: { ...img.styles },
           srcObj: img.srcObj ?? {
             type: 'frame',
             assetId: '',
@@ -228,7 +228,7 @@ class LayerFactary {
           initHeight: initHeight
         } as IStyle
         return decoration
-      })()) : undefined,
+      })(), { decoration: true }) : undefined,
       decorationTop: decorationTop && !clips[0].isFrameImg ? this.newShape((() => {
         decorationTop.vSize = [initWidth, initHeight]
         decorationTop.frameDecType = 'decorationTop'
@@ -239,7 +239,7 @@ class LayerFactary {
           initHeight: initHeight
         } as IStyle
         return decorationTop
-      })()) : undefined
+      })(), { decorationTop: true }) : undefined
     } as IFrame
     frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
     if (frame.decoration && !frame.decoration.svg) {
@@ -323,6 +323,8 @@ class LayerFactary {
       },
       isAutoResizeNeeded: false,
       isCompensated: true,
+      inAutoRescaleMode: false,
+      initScale: 1,
       isDraggingCursor: false,
       isFlipping: false,
     }
@@ -482,6 +484,7 @@ class LayerFactary {
       dragging: false,
       designId: config.designId,
       db: config.db,
+      has_frame: config.has_frame,
       jsonVer: latestJsonVer,
       jsonVer_origin: config.jsonVer_origin ?? latestJsonVer,
       styles: {
@@ -556,7 +559,7 @@ class LayerFactary {
     return tmp
   }
 
-  newShape(config?: any): IShape {
+  newShape(config?: any, options?: { decoration?: boolean, decorationTop?: boolean }): IShape {
     config = config || {}
     const { styles = {} } = generalUtils.deepCopy(config)
     const basicConfig = {
@@ -582,6 +585,8 @@ class LayerFactary {
       dragging: false,
       designId: config.designId || '',
       ...(config.category === 'E' && { filled: false }),
+      ...(options && options.decoration && { decoration: true }),
+      ...(options && options.decorationTop && { decorationTop: true }),
       jsonVer: latestJsonVer,
       jsonVer_origin: latestJsonVer,
       styles: {

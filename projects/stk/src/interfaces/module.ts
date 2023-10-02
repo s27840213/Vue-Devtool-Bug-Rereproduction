@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
-import { IMarker } from '@/interfaces/shape'
+import { IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { IMarker } from '@nu/vivi-lib/interfaces/shape'
 
 export interface IAsset {
   id: string

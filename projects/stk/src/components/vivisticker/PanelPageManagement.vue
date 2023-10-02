@@ -13,9 +13,6 @@ div(class="panel-page-management")
 
 <script lang="ts">
 import i18n from '@/i18n'
-import { IFrame, IGroup } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
-import { LayerType } from '@nu/vivi-lib/store/types'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -25,7 +22,10 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent, PropType } from 'vue'
+import { IFrame, IGroup } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { LayerType } from '@nu/vivi-lib/store/types'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 interface IButton {
