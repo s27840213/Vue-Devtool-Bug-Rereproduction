@@ -203,6 +203,7 @@ class PageUtils {
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
       contentScaleRatio: 1,
+      iosImgUploadBuffer: { shadow: [] }
     }
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
   }

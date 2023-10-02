@@ -438,7 +438,6 @@ const actions: ActionTree<IUserModule, unknown> = {
           userId: data.data.user_id,
         })
       }
-      picWVUtils.updateLocale(data.data.locale)
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       if (generalUtils.isPic) {
@@ -490,6 +489,14 @@ const actions: ActionTree<IUserModule, unknown> = {
       return data
     } catch (error) {
       logUtils.setLogForError(error as Error)
+    }
+  },
+  async removeBgStk({ state }, { uuid, assetId, type }) {
+    try {
+      const { data } = await userApis.removeBgStk(uuid, assetId, type)
+      return data
+    } catch (error) {
+      console.log(error)
     }
   }
 }

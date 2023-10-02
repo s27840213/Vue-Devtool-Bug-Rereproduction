@@ -1,7 +1,7 @@
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
-import { IMobileEditorState } from '@/store/module/mobileEditor'
+import { IMobileEditorState } from '@nu/vivi-lib/store/module/mobileEditor'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 

@@ -26,7 +26,7 @@ div(class="bg-remove-area"
 
 <script lang="ts">
 import { IBgRemoveInfo } from '@/interfaces/image'
-import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
+import { bgRemoveMoveHandler } from '@nu/vivi-lib/store/module/bgRemove'
 import logUtils from '@/utils/logUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'

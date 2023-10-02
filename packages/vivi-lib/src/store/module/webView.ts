@@ -50,6 +50,9 @@ const mutations: MutationTree<IWebViewState> = {
   SET_inBrowserMode(state: IWebViewState, inBrowserMode: boolean) {
     state.inBrowserMode = inBrowserMode
   },
+  SET_inReviewMode(state: IWebViewState, inReviewMode: boolean) {
+    state.inReviewMode = inReviewMode
+  },
   UPDATE_addCallbackRecord(state: IWebViewState, callbackRecord: ICallbackRecord) {
     state.callbackRecords.push(callbackRecord)
   },

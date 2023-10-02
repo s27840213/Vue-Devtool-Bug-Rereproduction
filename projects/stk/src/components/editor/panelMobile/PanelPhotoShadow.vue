@@ -35,7 +35,7 @@ div(class="panel-shadow")
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import colorUtils from '@/utils/colorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'

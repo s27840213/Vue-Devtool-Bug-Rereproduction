@@ -113,7 +113,7 @@ const getters: GetterTree<IUnaplashState, any> = {
 
 export default {
   namespaced: true,
-  state: getDefaultState,
+  state: getDefaultState(),
   getters,
   mutations,
   actions

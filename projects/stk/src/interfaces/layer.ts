@@ -1,5 +1,5 @@
 import { IAdjustJsonProps } from '@/interfaces/adjust'
-import { LayerProcessType } from '@/store/types'
+import { LayerProcessType } from '@nu/vivi-lib/store/types'
 import { IOverlay } from '@/utils/overlayUtils'
 import { ITextBg, ITextEffect, ITextFill, ITextShape } from './format'
 import { SrcObj } from './gallery'

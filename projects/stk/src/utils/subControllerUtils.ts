@@ -1,6 +1,6 @@
 import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import store from '@/store'
-import { FunctionPanelType, IExtendLayerInfo, ILayerInfo, LayerType } from '@/store/types'
+import { FunctionPanelType, IExtendLayerInfo, ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import { nextTick } from 'vue'
 import colorUtils from './colorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'

@@ -45,6 +45,14 @@ import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
 import overlayUtils from '@/utils/overlayUtils'
 import { DESIGN_MENU_EVENTS, FOLDER_MENU_EVENTS } from '@/utils/designUtils'
+import background from '@/store/module/background'
+import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
+import font from '@/store/module/font'
+import markers from '@/store/module/markers'
+import objects from '@/store/module/objects'
+import templates from '@/store/module/templates'
+import textStock from '@/store/module/text'
+import unsplash from '@/store/module/unsplash'
 import { PopupSliderEventType, LineTemplatesType } from '@/store/types'
 import NativeEventTester from '@/views/NativeEventTester.vue'
 import SvgIconView from '@/views/SvgIconView.vue'
@@ -103,6 +111,14 @@ import * as payment from '@/interfaces/payment'
   overlayUtils,
   DESIGN_MENU_EVENTS,
   FOLDER_MENU_EVENTS,
+  background,
+  bgRemoveMoveHandler,
+  font,
+  markers,
+  objects,
+  templates,
+  textStock,
+  unsplash,
   PopupSliderEventType,
   LineTemplatesType,
   NativeEventTester,

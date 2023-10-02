@@ -2,7 +2,7 @@ import { IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import router from '@/router'
 import store from '@/store'
-import { IBrowserInfo } from '@/store/module/user'
+import { IBrowserInfo } from '@nu/vivi-lib/store/module/user'
 import _ from 'lodash'
 import { nextTick } from 'vue'
 import modalUtils from './modalUtils'
@@ -12,9 +12,9 @@ class GeneralUtils {
   flags: { [key: string]: boolean }[] = []
   flagsCallback: (() => void) | undefined = undefined
 
-  get isPic() { return process.env.VUE_APP_APP_NAME === 'vivipic' }
-  get isStk() { return process.env.VUE_APP_APP_NAME === 'vivisticker' }
-  get isCm() { return process.env.VUE_APP_APP_NAME === 'charmix' }
+  get isPic() { return process.env.VUE_APP_APP_NAME === 'pic' }
+  get isStk() { return process.env.VUE_APP_APP_NAME === 'stk' }
+  get isCm() { return process.env.VUE_APP_APP_NAME === 'cm' }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get isSuperUser() { return store.state.user.role === 0 }
   get browserInfo() {

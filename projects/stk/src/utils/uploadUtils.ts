@@ -25,7 +25,7 @@ import {
 } from '@/interfaces/upload'
 import router from '@/router'
 import store from '@/store'
-import { SidebarPanelType } from '@/store/types'
+import { SidebarPanelType } from '@nu/vivi-lib/store/types'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import imageUtils from '@/utils/imageUtils'
 import paymentUtils from '@/utils/paymentUtils'

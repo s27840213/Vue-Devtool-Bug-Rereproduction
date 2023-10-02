@@ -86,4 +86,5 @@ export interface IShadowProps {
     currentEffect: ShadowEffectType,
     effects: IShadowEffects
   }
+  cb?: () => void
 }

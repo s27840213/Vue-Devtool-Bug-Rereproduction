@@ -4,7 +4,7 @@ import { AllLayerTypes, IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph,
 import { IPage } from '@/interfaces/page'
 import { ITiptapSelection } from '@/interfaces/text'
 import store from '@/store'
-import { IEditorState, ILayerInfo, ISpecLayerData, LayerType } from '@/store/types'
+import { IEditorState, ILayerInfo, ISpecLayerData, LayerType } from '@nu/vivi-lib/store/types'
 import groupUtils from '@/utils/groupUtils'
 import logUtils from '@/utils/logUtils'
 import ZindexUtils from '@/utils/zindexUtils'

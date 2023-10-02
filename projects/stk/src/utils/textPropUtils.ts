@@ -3,7 +3,7 @@ import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } f
 import { ISelection } from '@/interfaces/text'
 import store from '@/store'
 import text from '@/store/text/index'
-import { LayerType } from '@/store/types'
+import { LayerType } from '@nu/vivi-lib/store/types'
 import controlUtils from '@/utils/controlUtils'
 import logUtils from '@/utils/logUtils'
 import _ from 'lodash'

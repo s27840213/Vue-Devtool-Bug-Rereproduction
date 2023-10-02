@@ -3,7 +3,7 @@
 import { ICoordinate } from '@/interfaces/frame'
 import { IImage, ILayer, IShape, IStyle, IText, ITmp, jsonVer as latestJsonVer } from '@/interfaces/layer'
 import store from '@/store'
-import { SidebarPanelType } from '@/store/types'
+import { SidebarPanelType } from '@nu/vivi-lib/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'

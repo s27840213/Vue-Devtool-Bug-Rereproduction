@@ -1,3 +1,4 @@
+import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import SnapUtils from '@/utils/snapUtils'
 import { ICoordinate } from './frame'
@@ -47,6 +48,9 @@ export interface IPage extends IPageSizeWithBleeds {
   },
   isEnableBleed: boolean,
   contentScaleRatio: number
+  iosImgUploadBuffer: {
+    shadow: Array<SrcObj>
+  }
 }
 
 export interface IPageState {

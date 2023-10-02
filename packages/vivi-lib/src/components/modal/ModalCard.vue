@@ -52,11 +52,11 @@ export default defineComponent({
       modalUtils.clearModalInfo()
     },
     confirmAction() {
-      this.modalInfo.confirmButton.action()
+      this.modalInfo.confirmButton.action?.()
       this.closePopup()
     },
     cancelAction() {
-      this.modalInfo.cancelButton.action()
+      this.modalInfo.cancelButton.action?.()
       this.closePopup()
     }
   }

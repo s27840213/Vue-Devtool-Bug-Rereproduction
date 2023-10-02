@@ -15,7 +15,7 @@ div(class="panel-page-management")
 import i18n from '@/i18n'
 import { IFrame, IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { LayerType } from '@/store/types'
+import { LayerType } from '@nu/vivi-lib/store/types'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'

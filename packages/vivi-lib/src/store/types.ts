@@ -83,7 +83,13 @@ export interface IEditorState {
   hasCopiedFormat: boolean,
   inGestureToolMode: boolean,
   isMobile: boolean
+  isTablet: boolean,
+  isLandscape: boolean,
   isLargeDesktop: boolean,
+  windowSize: {
+    width: number,
+    height: number
+  }
   isGlobalLoading: boolean,
   useMobileEditor: boolean,
   _3dEnabledPageIndex: number,
@@ -162,6 +168,10 @@ export interface ILayerInfo {
   pageIndex: number,
   layerIndex: number,
   subLayerIdx?: number
+}
+
+export interface IExtendLayerInfo extends ILayerInfo {
+  priPrimaryLayerIndex?: number
 }
 
 export enum LineTemplatesType {

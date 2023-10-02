@@ -3,7 +3,7 @@ import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/laye
 import { IPage } from '@/interfaces/page'
 import { IStep } from '@/interfaces/steps'
 import store from '@/store'
-import { FunctionPanelType } from '@/store/types'
+import { FunctionPanelType } from '@nu/vivi-lib/store/types'
 import generalUtils from '@/utils/generalUtils'
 import GroupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import { nextTick, reactive } from 'vue'

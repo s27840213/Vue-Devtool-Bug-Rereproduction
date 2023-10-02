@@ -1,6 +1,6 @@
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
-import { LineTemplatesType } from '@/store/types'
+import { LineTemplatesType } from '@nu/vivi-lib/store/types'
 import { EventEmitter } from 'events'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'

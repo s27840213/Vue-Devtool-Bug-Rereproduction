@@ -2,28 +2,28 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
-import { IListModuleState } from '@/interfaces/module'
+// import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
-import background from '@/store/module/background'
-import bgRemove, { IBgRemoveState } from '@/store/module/bgRemove'
-import color, { IColorState } from '@/store/module/color'
-import font from '@/store/module/font'
-import fontTag, { IFontTagState } from '@/store/module/fontTag'
-import imgControl, { IImgControlState } from '@/store/module/imgControl'
-import markers from '@/store/module/markers'
-import mobileEditor, { IMobileEditorState } from '@/store/module/mobileEditor'
-import modal, { IModalState } from '@/store/module/modal'
-import objects from '@/store/module/objects'
-import page, { IPageState as IPageStateModule } from '@/store/module/page'
-import popup, { IPopupState } from '@/store/module/popup'
-import shadow, { IShadowState } from '@/store/module/shadow'
-import templates from '@/store/module/templates'
-import textStock from '@/store/module/text'
-import unsplash, { IUnaplashState } from '@/store/module/unsplash'
-import user, { IUserModule } from '@/store/module/user'
-import webView, { IWebViewState } from '@/store/module/webView'
-import text, { ITextState } from '@/store/text'
+// import background from '@/store/module/background'
+import bgRemove from '@/store/module/bgRemove'
+import color from '@/store/module/color'
+// import font from '@/store/module/font'
+import fontTag from '@/store/module/fontTag'
+import imgControl from '@/store/module/imgControl'
+// import markers from '@/store/module/markers'
+import mobileEditor from '@/store/module/mobileEditor'
+import modal from '@/store/module/modal'
+// import objects from '@/store/module/objects'
+import page from '@/store/module/page'
+import popup from '@/store/module/popup'
+import shadow from '@/store/module/shadow'
+// import templates from '@/store/module/templates'
+// import textStock from '@/store/module/text'
+import unsplash from '@/store/module/unsplash'
+import user from '@/store/module/user'
+import webView from '@/store/module/webView'
+import text from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -33,6 +33,7 @@ import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
+import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 import brushPasteResized from '@/assets/img/svg/brush-paste-resized.svg'
@@ -115,7 +116,13 @@ const getDefaultState = (): IEditorState => ({
   hasCopiedFormat: false,
   inGestureToolMode: false,
   isMobile: generalUtils.getWidth() <= 768,
+  isTablet: window.matchMedia('screen and (min-width: 768px) and (orientation: portrait), screen and (min-height: 768px) and (orientation: landscape)').matches,
+  isLandscape: window.matchMedia('(orientation: landscape)').matches,
   isLargeDesktop: generalUtils.getWidth() >= 1440,
+  windowSize: {
+    width: window.outerWidth,
+    height: window.outerHeight
+  },
   isGlobalLoading: false,
   useMobileEditor: false,
   _3dEnabledPageIndex: -1,
@@ -486,7 +493,7 @@ const mutations: MutationTree<IEditorState> = {
     state.currFunctionPanelType = type
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
-    state.pageScaleRatio = ratio
+    state.pageScaleRatio = generalUtils.isPic ? ratio : 100
   },
   SET_pinchScaleRatio(state: IEditorState, ratio: number) {
     state.pinchScaleRatio = ratio
@@ -644,12 +651,32 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
+  DELETE_layerProps(state: IEditorState, updateInfo: {
+    pageIndex: number, layerIndex: number, propKeys: string[]
+  }) {
+    /**
+     * This Mutation is used to delete the layer's properties excluding styles
+     */
+    updateInfo.propKeys.forEach(propKey => {
+      if (state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex]) {
+        delete state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex][propKey]
+      }
+    })
+  },
   UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph | SrcObj } }) {
     const groupLayer = state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex] as IGroup
     if (!groupLayer || !groupLayer.layers) return
     const targetLayer = groupLayer.layers[updateInfo.targetIndex]
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       targetLayer[k] = v
+    })
+  },
+  DELETE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, propKeys: string[] }) {
+    const groupLayer = state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex] as IGroup
+    if (!groupLayer || !groupLayer.layers) return
+    const targetLayer = groupLayer.layers[updateInfo.targetIndex]
+    updateInfo.propKeys.forEach(propKey => {
+      delete targetLayer[propKey]
     })
   },
   UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj }, preprimaryLayerIndex: number }) {
@@ -853,7 +880,9 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, primaryLayerIndex, styles } = data
     const layers = state.pages[pageIndex].config.layers[primaryLayerIndex].clips as IImage[]
     for (const clip of layers) {
+      if (clip.srcObj.type !== 'frame') {
       Object.assign(clip.styles, generalUtils.deepCopy(styles))
+      }
     }
   },
   SET_subFrameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, targetIndex: number, styles: any }) {
@@ -908,7 +937,7 @@ const mutations: MutationTree<IEditorState> = {
       styles && Object.assign(targetLayer.styles, styles)
     }
   },
-  DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
+  DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex, forSticker = false }) {
     // check every pages background image
     for (const page of state.pages) {
       const bgImg = page.config.backgroundImage
@@ -927,7 +956,7 @@ const mutations: MutationTree<IEditorState> = {
     const handler = (l: IShape | IText | IImage | IGroup | IFrame | ITmp) => {
       switch (l.type) {
         case LayerType.image:
-          if ((l as IImage).srcObj.assetId === assetId && l.previewSrc) {
+          if (((l as IImage).srcObj.assetId === assetId || forSticker) && l.previewSrc) {
             /**
              * @Vue3Update
              */
@@ -939,7 +968,9 @@ const mutations: MutationTree<IEditorState> = {
               assetId: uploadUtils.isAdmin ? assetId : assetIndex
             })
             Object.assign(l, { previewSrc: '' })
-            uploadUtils.uploadDesign()
+            if (!forSticker) {
+              uploadUtils.uploadDesign()
+            }
           }
           break
         case LayerType.tmp:
@@ -1098,6 +1129,20 @@ const mutations: MutationTree<IEditorState> = {
         }
       })
   },
+  UPDATE_frameInGroup(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, layerIndex: number, clipIndex: number, props?: Partial<IImage>, styles?: { [key: string]: string | number | boolean } }) {
+    const { pageIndex, primaryLayerIndex, layerIndex, clipIndex, props = {}, styles = {} } = data
+    const frame = (state.pages[pageIndex].config.layers[primaryLayerIndex] as IGroup).layers[layerIndex] as IFrame
+    if (frame.type === LayerType.frame) {
+      Object.entries(props)
+        .forEach(([k, v]) => {
+          frame.clips[clipIndex][k] = v
+        })
+      Object.entries(styles)
+        .forEach(([k, v]) => {
+          frame.clips[clipIndex].styles[k] = v
+        })
+    }
+  },
   UPDATE_pageInitPos(state: IEditorState, data: { pageIndex: number, initPos: ICoordinate }) {
     const { pageIndex, initPos } = data
     const page = state.pages[pageIndex]
@@ -1110,6 +1155,14 @@ const mutations: MutationTree<IEditorState> = {
   SET_contentScaleRatio4Page(state: IEditorState, payload: { pageIndex: number, contentScaleRatio: number }) {
     const { pageIndex, contentScaleRatio } = payload
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
+  },
+  UPDATE_RWD(state: IEditorState) {
+    state.isMobile = generalUtils.getWidth() <= 768
+    state.isTablet = window.matchMedia('screen and (min-width: 768px) and (orientation: portrait), screen and (min-height: 768px) and (orientation: landscape)').matches
+    state.isLandscape = window.matchMedia('(orientation: landscape)').matches
+    state.isLargeDesktop = generalUtils.getWidth() >= 1440
+    state.windowSize.width = window.outerWidth
+    state.windowSize.height = window.outerHeight
   },
   ...imgShadowMutations,
   ADD_subLayer,
@@ -1126,28 +1179,28 @@ const mutations: MutationTree<IEditorState> = {
     state.isLargeDesktop = boolean
   },
 }
+window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500))
 
 export type IStoreRoot = IEditorState & {
-  user: IUserModule,
-  text: ITextState,
-  font: IListModuleState,
-  color: IColorState,
-  objects: IListModuleState,
-  templates: IListModuleState,
-  textStock: IListModuleState,
-  background: IListModuleState,
-  mobileEditor: IMobileEditorState,
-  modal: IModalState,
-  popup: IPopupState,
-  page: IPageStateModule,
-  layouts: IListModuleState,
-  markers: IListModuleState,
-  unsplash: IUnaplashState,
-  bgRemove: IBgRemoveState,
-  shadow: IShadowState,
-  fontTag: IFontTagState,
-  imgControl: IImgControlState,
-  webView: IWebViewState,
+  user: typeof user.state
+  text: typeof text.state
+  // font: IListModuleState
+  color: typeof color.state
+  // objects: IListModuleState
+  // templates: IListModuleState
+  // textStock: IListModuleState
+  // background: IListModuleState
+  mobileEditor: typeof mobileEditor.state
+  modal: typeof modal.state
+  popup: typeof popup.state
+  page: typeof page.state
+  // markers: IListModuleState
+  unsplash: typeof unsplash.state
+  bgRemove: typeof bgRemove.state
+  shadow: typeof shadow.state
+  fontTag: typeof fontTag.state
+  imgControl: typeof imgControl.state
+  webView: typeof webView.state
 }
 const store = createStore({
   state: state as IStoreRoot,
@@ -1155,18 +1208,18 @@ const store = createStore({
   mutations,
   modules: {
     user,
-    text,
-    font,
+    // text,
+    // font,
     color,
-    objects,
-    templates,
-    textStock,
-    background,
+    // objects,
+    // templates,
+    // textStock,
+    // background,
     mobileEditor,
     modal,
     popup,
     page,
-    markers,
+    // markers,
     unsplash,
     bgRemove,
     shadow,

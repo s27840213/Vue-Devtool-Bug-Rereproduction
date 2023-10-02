@@ -1,7 +1,7 @@
 import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
-import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
+import { FunctionPanelType, ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import { nextTick } from 'vue'
 import controlUtils from './controlUtils'
 import eventUtils, { PanelEvent } from './eventUtils'

@@ -7,7 +7,7 @@ import apiUtils from '@nu/vivi-lib/utils/apiUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { captureException } from '@sentry/browser'
 import _ from 'lodash'
-import { ActionTree, GetterTree, ModuleTree, MutationTree } from 'vuex'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 export interface IFileState {
   myfileImages: Array<IAssetPhoto>,
@@ -330,4 +330,4 @@ export default {
   getters,
   mutations,
   actions
-} as unknown as ModuleTree<IFileState>
+}

@@ -8,7 +8,7 @@ import store from '@/store'
 import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
-import { round } from 'lodash'
+import { get, round } from 'lodash'
 import { nextTick } from 'vue'
 import backgroundUtils from './backgroundUtils'
 import ControlUtils from './controlUtils'
@@ -839,7 +839,7 @@ class AssetUtils {
     const typeModule = this.getTypeModule(type)
     if (typeCategory && typeModule) {
       // @TODO 手動加入最近使用
-      const categories = generalUtils.deepCopy(store.state[typeModule].categories)
+      const categories = generalUtils.deepCopy(get(store.state, typeModule.split('/').concat('categories')))
       const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
       if (recentlyUsed) {
         const assetIndex = recentlyUsed.list.findIndex((asset: IListServiceContentDataItem) => asset.id === id)

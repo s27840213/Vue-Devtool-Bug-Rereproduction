@@ -59,7 +59,7 @@ div(class="color-panel"
 import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import { IPage } from '@/interfaces/page'
-import { ColorEventType } from '@/store/types'
+import { ColorEventType } from '@nu/vivi-lib/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import layerUtils from '@/utils/layerUtils'
