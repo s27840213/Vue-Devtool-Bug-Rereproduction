@@ -146,8 +146,6 @@ export class MovingUtils {
     if (eventType === 'pointer') {
       pointerEvtUtils.addPointer(event as PointerEvent)
     }
-    console.log(this.pageIndex, this.layerIndex)
-
     console.warn('moveStart', eventUtils.checkIsMultiTouch(event), store.getters['mobileEditor/getIsPinchingEditor'], store.getters.getControlState.type)
     if (this.isImgControl) return
     if (eventUtils.checkIsMultiTouch(event)) return

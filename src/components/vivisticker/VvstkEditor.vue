@@ -273,7 +273,9 @@ export default defineComponent({
     // this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
     selectEnd(e: PointerEvent) {
       if (this.pointerEvent.initPos) {
-        if (Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5) {
+        const isSingleTouch = pointerEvtUtils.pointers.length === 1
+        const isConsiderNotMoved = Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5
+        if (isSingleTouch && isConsiderNotMoved) {
           // the moveingEnd would consider the layer to be selected,
           // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
           // following code remove the moveEnd event.
