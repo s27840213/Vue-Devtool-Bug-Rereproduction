@@ -114,7 +114,6 @@ const getDefaultState = (): IEditorState => ({
     body: []
   },
   isMoving: false,
-  isPinchLayer: false,
   showRuler: localStorage.getItem('showRuler') === 'true' ?? false,
   showGuideline: true,
   lockGuideline: false,
@@ -355,9 +354,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsLargeDesktop(state: IEditorState) {
     return state.isLargeDesktop
-  },
-  getIsPinchLayer(state: IEditorState) {
-    return state.isPinchLayer
   },
   getControlState(state: IEditorState) {
     return state.controlState

@@ -232,6 +232,7 @@ export default defineComponent({
     },
     moving(event: MouseEvent | PointerEvent) {
       if (this.pointerId !== (event as PointerEvent).pointerId) return
+      if (eventUtils.checkIsMultiTouch(event)) return
 
       this.setCursorStyle('move')
       event.preventDefault()

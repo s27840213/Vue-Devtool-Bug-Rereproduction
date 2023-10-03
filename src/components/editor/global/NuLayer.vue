@@ -273,8 +273,7 @@ export default defineComponent({
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor',
       showPcPagePreivew: 'page/getIsShowPagePreview',
-      isDuringCopy: 'vivisticker/getIsDuringCopy',
-      isPinchLayer: 'getIsPinchLayer'
+      isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
     inAllPagesMode(): boolean {
       return this.mobilePagePreview || this.showPcPagePreivew
@@ -316,7 +315,7 @@ export default defineComponent({
           ...this.transformStyle
         }
       )
-      if (this.isPinchLayer) {
+      if (this.$store.getters.getControlState.type === 'pinch') {
         styles.willChange = 'transform'
       } else {
         styles.willChange = 'initial'

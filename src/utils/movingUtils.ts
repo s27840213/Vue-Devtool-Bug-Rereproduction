@@ -128,7 +128,7 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
-    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer) {
+    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type === 'pinch') {
       this.removeListener()
       return
     }
@@ -338,7 +338,7 @@ export class MovingUtils {
     const isPointer = eventUtils.getEventType(e) === 'pointer'
     const isStartedPointer = isPointer && this.pointerId === (e as PointerEvent).pointerId
     const isSinglePointer = pointerEvtUtils.pointers.length <= 1
-    if ((!isPointer || !isStartedPointer) || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getIsPinchLayer || this.initialPos === null) {
+    if ((!isPointer || !isStartedPointer) || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type === 'pinch' || this.initialPos === null) {
       if (store.getters.getControlState.type === 'pinch') {
         // if the pinch is started, the moving logic should be turn off
         // this.moveEnd(e)

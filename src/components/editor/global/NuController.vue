@@ -99,10 +99,12 @@ div(:layer-index="`${layerIndex}`"
               :key="`resizer-${index}`"
               :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+              @pointerleave.prevent.stop="pointerLeave"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
           div(class="control-point"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+              @pointerleave.prevent.stop="pointerLeave"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
         template(v-if="$isTouchDevice()" )
           div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
@@ -230,6 +232,7 @@ import mathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -350,6 +353,9 @@ export default defineComponent({
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       useMobileEditor: 'getUseMobileEditor'
     }),
+    isPinchLayer(): boolean {
+      return this.$store.getters.getControlState.type === 'pinch'
+    },
     isControllerShown(): boolean {
       return this.isActive && !this.controllerHidden
     },
@@ -565,6 +571,9 @@ export default defineComponent({
         tooShort: this.getLayerHeight() * totalScaleRatio < limit,
         tooNarrow: this.getLayerWidth() * totalScaleRatio < limit
       }
+    },
+    pointerLeave(e: PointerEvent) {
+      pointerEvtUtils.removePointer(e.pointerId)
     },
     addMovingListener() {
       const body = (this.$refs.body as HTMLElement[])[0]
@@ -817,7 +826,7 @@ export default defineComponent({
       window.addEventListener('keydown', this.handleScaleOffset)
     },
     scaling(event: PointerEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
       if (generalUtils.getEventType(event) !== 'touch') {
@@ -985,9 +994,6 @@ export default defineComponent({
       if (this.controlState.type === 'scale' && this.controlState.id === this.config.id) {
         this.setState({ controlState: { type: '' } })
       }
-      if (eventUtils.checkIsMultiTouch(event)) {
-        return
-      }
       this.isControlling = false
       // StepsUtils.record()
       if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
@@ -1049,7 +1055,7 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.lineEndMoveEnd)
     },
     lineEndMoving(event: MouseEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
       event.preventDefault()
@@ -1096,7 +1102,10 @@ export default defineComponent({
       this.$emit('setFocus')
       this.snapUtils.event.emit('clearSnapLines')
     },
-    resizeStart(event: MouseEvent, type: string) {
+    resizeStart(event: PointerEvent, type: string) {
+      if (event.type === 'pointerdown') {
+        pointerEvtUtils.addPointer(event)
+      }
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.controlState.type) {
         return
       }
@@ -1183,8 +1192,8 @@ export default defineComponent({
           ImageUtils.isHorizon = this.control.isHorizon
       }
     },
-    resizing(event: MouseEvent | TouchEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.$store.getters.getIsPinchLayer) {
+    resizing(event: PointerEvent) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
       event.preventDefault()
@@ -1305,9 +1314,6 @@ export default defineComponent({
       if (this.controlState.type === 'resize' && this.controlState.id === this.config.id) {
         this.setState({ controlState: { type: '' } })
       }
-      if (eventUtils.checkIsMultiTouch(event)) {
-        return
-      }
       ImageUtils.imgBuffer = {
         width: 0,
         height: 0,
@@ -1359,7 +1365,7 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
       if (!this.config.moved) {
@@ -1406,9 +1412,6 @@ export default defineComponent({
       }
     },
     rotateEnd(event: PointerEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
-        return
-      }
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1
@@ -1443,6 +1446,7 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.lineRotateEnd)
     },
     lineRotating(event: MouseEvent) {
+      if (this.isPinchLayer) return
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
