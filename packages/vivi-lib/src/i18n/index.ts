@@ -18,7 +18,7 @@ import { createI18n } from 'vue-i18n'
 
 export type LocaleName = 'us' | 'tw' | 'jp' | 'pt'
 
-const isProd = process.env.NODE_ENV === 'production'
+const isDev = process.env.NODE_ENV !== 'production'
 
 const us_shaked = process.env.VUE_APP_APP_NAME === 'stk' ? us_shaked_stk
   : (process.env.VUE_APP_APP_NAME === 'pic' ? us_shaked_pic
@@ -40,11 +40,11 @@ const i18n = createI18n({
   locale: process.env.VUE_APP_I18N_LOCALE || 'us',
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'us',
   messages: {
-    us: isProd ? us : us_shaked,
-    tw: isProd ? tw : tw_shaked,
-    jp: isProd ? jp : jp_shaked,
+    us: isDev ? us : us_shaked,
+    tw: isDev ? tw : tw_shaked,
+    jp: isDev ? jp : jp_shaked,
     ...(process.env.VUE_APP_APP_NAME === 'stk' ? {
-      pt: isProd ? pt : pt_shaked,
+      pt: isDev ? pt : pt_shaked,
     } : {})
   },
   globalInjection: true,
