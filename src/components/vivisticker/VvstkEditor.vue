@@ -295,8 +295,8 @@ export default defineComponent({
       pointerEvtUtils.removePointer(e.pointerId)
     },
     onPinch(e: AnyTouchEvent) {
-      console.log('this.$store.getters.getControlState', this.$store.getters.getControlState.type)
       // if (this.$store.getters.getControlState.type ) return
+      console.log('this.$store.getters.getControlState', this.$store.getters.getControlState.type, e.phase)
       if (e.phase === 'end' && this.isPinchInit) {
         // pinch end handling
         this.pinchHandler(e)

@@ -1,8 +1,9 @@
-import { IImage, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
 import store from '@/store'
 import { ILayerInfo } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
+import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -51,46 +52,58 @@ export default class PinchControlUtils {
     })
   }
 
+  initialize(e: AnyTouchEvent) {
+    if (layerUtils.layerIndex === -1) {
+      groupUtils.select(this.layerInfo.pageIndex, [this.layerInfo.layerIndex])
+    }
+    store.commit('SET_STATE', {
+      controlState: {
+        layerInfo: this.layerInfo,
+        type: 'pinch',
+        id: this.id
+      }
+    })
+    if (store.getters['vivisticker/getControllerHidden']) {
+      vivistickerUtils.showController()
+    }
+
+    this.init = {
+      pos: { x: e.x, y: e.y },
+      layerPos: { x: this.config.styles.x, y: this.config.styles.y },
+      size: { width: this.config.styles.width, height: this.config.styles.height },
+      scale: this.config.styles.scale,
+      rotate: this.config.styles.rotate,
+    }
+    if (this.config.type === 'image') {
+      this.init.img = {
+        imgWidth: (this.config as IImage).styles.imgWidth,
+        imgHeight: (this.config as IImage).styles.imgHeight,
+        imgX: (this.config as IImage).styles.imgX,
+        imgY: (this.config as IImage).styles.imgY,
+      }
+    } else if (this.config.type === 'frame' && frameUtils.isImageFrame(this.config as IFrame)) {
+      this.init.img = {
+        imgWidth: (this.config as IFrame).clips[0].styles.imgWidth,
+        imgHeight: (this.config as IFrame).clips[0].styles.imgHeight,
+        imgX: (this.config as IFrame).clips[0].styles.imgX,
+        imgY: (this.config as IFrame).clips[0].styles.imgY,
+      }
+    } else if (this.config.type === 'shape' && this.config.category === 'D') {
+      const { angle } = shapeUtils.lineDimension((this.config as any).point)
+      this.init.rotate = angle / Math.PI * 180
+    }
+    return this.init
+  }
+
   move(e: AnyTouchEvent) {
     // initialization
     if (this.init === null) {
-      if (layerUtils.layerIndex === -1) {
-        groupUtils.select(this.layerInfo.pageIndex, [this.layerInfo.layerIndex])
-      }
-      store.commit('SET_STATE', {
-        controlState: {
-          layerInfo: this.layerInfo,
-          type: 'pinch',
-          id: this.id
-        }
-      })
-      if (store.getters['vivisticker/getControllerHidden']) {
-        vivistickerUtils.showController()
-      }
-
-      this.init = {
-        pos: { x: e.x, y: e.y },
-        layerPos: { x: this.config.styles.x, y: this.config.styles.y },
-        size: { width: this.config.styles.width, height: this.config.styles.height },
-        scale: this.config.styles.scale,
-        rotate: this.config.styles.rotate,
-      }
-      if (this.config.type === 'image') {
-        this.init.img = {
-          imgWidth: (this.config as IImage).styles.imgWidth,
-          imgHeight: (this.config as IImage).styles.imgHeight,
-          imgX: (this.config as IImage).styles.imgX,
-          imgY: (this.config as IImage).styles.imgY,
-        }
-      } else if (this.config.type === 'shape' && this.config.category === 'D') {
-        const { angle } = shapeUtils.lineDimension((this.config as any).point)
-        this.init.rotate = angle / Math.PI * 180
-      }
+      this.init = this.initialize(e)
     }
 
     const evtScale = (e.nativeEvent as any).scale
     let evtAngle = (e.nativeEvent as any).rotation % 180
-    // following math demostrated as workround for anytouch e.angle always return integer,
+    // following math demostrated as a workround for anytouch e.angle always return integer,
     if (Math.abs(evtAngle - e.angle) > 90) {
       evtAngle -= 180
     }
@@ -128,11 +141,26 @@ export default class PinchControlUtils {
       y: this.init.layerPos.y + totalTranslate.y
     } as { [key: string]: number | undefined }
 
-    if (this.config.type === 'image' && this.init.img) {
-      styles.imgWidth = this.init.img.imgWidth * evtScale
-      styles.imgHeight = this.init.img.imgHeight * evtScale
-      styles.imgX = this.init.img.imgX * evtScale
-      styles.imgY = this.init.img.imgY * evtScale
+    if (this.init.img) {
+      const imgWidth = this.init.img.imgWidth * evtScale
+      const imgHeight = this.init.img.imgHeight * evtScale
+      const imgX = this.init.img.imgX * evtScale
+      const imgY = this.init.img.imgY * evtScale
+      if (this.config.type === 'image') {
+        styles.imgWidth = imgWidth
+        styles.imgHeight = imgHeight
+        styles.imgX = imgX
+        styles.imgY = imgY
+      } else if (frameUtils.isImageFrame(this.config as IFrame)) {
+        frameUtils.updateFrameLayerStyles(this.layerInfo.pageIndex, this.layerInfo.layerIndex, 0, {
+          width: newSize.width,
+          height: newSize.height,
+          imgWidth,
+          imgHeight,
+          imgX,
+          imgY
+        })
+      }
     } else if (this.config.type === 'shape' && this.config.category === 'D') {
       const shape = this.config as IShape
       const { point, dx, dy } = shapeUtils.lineCenterRotate(shape.point as number[], rotate, shape.size?.[0] ?? 1, false)
