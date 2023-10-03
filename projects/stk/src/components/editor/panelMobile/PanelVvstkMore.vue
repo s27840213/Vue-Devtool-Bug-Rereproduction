@@ -35,7 +35,7 @@ div(class="panel-vvstk-more")
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
 import localeUtils from '@/utils/localeUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 

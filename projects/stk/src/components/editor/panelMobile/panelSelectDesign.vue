@@ -21,7 +21,7 @@ div(class="panel-select-design")
 import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import modalUtils from '@/utils/modalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

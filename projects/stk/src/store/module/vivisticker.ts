@@ -1,7 +1,7 @@
 import { IAsset } from '@/interfaces/module'
 import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import _ from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 

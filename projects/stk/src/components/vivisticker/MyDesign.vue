@@ -46,7 +46,7 @@ import MyDesignTemplateItem from '@/components/vivisticker/mydesign/MyDesignTemp
 import MyDesignTextItem from '@/components/vivisticker/mydesign/MyDesignTextItem.vue'
 import { IMyDesign, IMyDesignTag } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 

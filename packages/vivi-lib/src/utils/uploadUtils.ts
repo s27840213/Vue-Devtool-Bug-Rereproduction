@@ -86,6 +86,7 @@ class UploadUtils {
 
   get token(): string { return store.getters['user/getToken'] }
   get userId(): string { return store.getters['user/getUserId'] }
+  get hostId(): string { return store.getters['vivisticker/getUserInfo'].hostId }
   get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
   get groupId(): string { return store.getters.getGroupId }
   get assetId(): string { return store.getters.getAssetId }
@@ -558,6 +559,45 @@ class UploadUtils {
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' })
+
+    formData.append('file', blob)
+
+    await new Promise<void>((resolve, reject) => {
+      xhr.open('POST', this.loginOutput.upload_log_map.url, true)
+      xhr.send(formData)
+      xhr.onerror = () => {
+        networkUtils.notifyNetworkError()
+        reject(new Error('upload to s3 failed'))
+      }
+      xhr.onload = () => {
+        resolve()
+      }
+    })
+  }
+
+  async uploadReportedDesign(design: object, { id = '' }: { id?: string }) {
+    await this.checkIfUrlExpires()
+    const formData = new FormData()
+    Object.keys(this.loginOutput.upload_log_map.fields).forEach((key) => {
+      formData.append(key, this.loginOutput.upload_log_map.fields[key])
+    })
+
+    const designName = `design-${id}-${generalUtils.generateTimeStamp()}.json`
+    formData.append(
+      'key',
+      `${this.loginOutput.upload_log_map.path}${this.hostId}/${designName}`
+    )
+    console.log(formData.get('key'))
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(designName)}`
+    )
+    formData.append('x-amz-meta-tn', this.hostId)
+    const xhr = new XMLHttpRequest()
+
+    const blob = new Blob([JSON.stringify(design)], {
+      type: 'application/json',
+    })
 
     formData.append('file', blob)
 
@@ -1315,6 +1355,46 @@ class UploadUtils {
     })
   }
 
+  prepareJsonToUpload(pages: IPage[], noCopy = false): IPage[] {
+    return pages.map((page: IPage) => {
+      const newPage = this.default(
+        noCopy ? page : generalUtils.deepCopy(page)
+      ) as IPage
+      for (const [i, layer] of newPage.layers.entries()) {
+        if (
+          layer.type === 'shape' &&
+          (layer.designId || layer.category === 'D' || layer.category === 'E')
+        ) {
+          newPage.layers[i] = this.layerInfoFilter(layer)
+        } else if (layer.type !== 'shape') {
+          newPage.layers[i] = this.layerInfoFilter(layer)
+        }
+      }
+      newPage.backgroundImage.config.imgControl = false
+      newPage.width = parseInt(newPage.width.toString(), 10)
+      newPage.height = parseInt(newPage.height.toString(), 10)
+
+      // remove NaN to prevent APP crash
+      Object.entries(newPage.backgroundImage).forEach(([key, value]) => {
+        if (typeof value !== 'number') return
+        if (isNaN(value)) {
+          (newPage.backgroundImage as { [key: string]: any })[key] = 0
+        }
+      })
+      Object.entries(newPage.backgroundImage.config.styles).forEach(
+        ([key, value]) => {
+          if (typeof value !== 'number') return
+          if (isNaN(value)) {
+            (newPage.backgroundImage.config.styles as { [key: string]: any })[
+              key
+            ] = 0
+          }
+        }
+      )
+      return newPage
+    })
+  }
+
   removeComputableInfo(layer: ILayer) {
     if (layer.type === 'shape') {
       switch (layer.category) {
@@ -1620,6 +1700,11 @@ class UploadUtils {
       return newPage
     })
     return pagesJSON
+  }
+
+  getSinglePageJson(page: IPage): any {
+    const pagesJSON = this.getPageJson([page])
+    return pagesJSON[0]
   }
 
   makeXhrRequest(method: string, url: string, data: FormData) {

@@ -9,7 +9,7 @@ import store from '@/store/index'
 import localStorageUtils from '@/utils/localStorageUtils'
 import logUtils from '@/utils/logUtils'
 import popupUtils from '@/utils/popupUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { cloneDeep, filter, find, map, pull } from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 

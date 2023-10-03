@@ -19,7 +19,7 @@ import pageUtils from './pageUtils'
 import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
-import vivistickerUtils from './vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IFrame>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER

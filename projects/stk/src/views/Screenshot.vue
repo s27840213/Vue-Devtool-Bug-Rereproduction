@@ -24,7 +24,7 @@ import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

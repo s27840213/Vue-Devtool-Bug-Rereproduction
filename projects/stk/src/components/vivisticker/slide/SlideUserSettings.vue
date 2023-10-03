@@ -44,7 +44,7 @@ div(class="slide-user-settings")
 </template>
 
 <script lang="ts">
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 

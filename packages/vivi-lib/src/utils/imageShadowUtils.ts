@@ -4,6 +4,7 @@ import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/laye
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { getDilate } from './canvasAlgorithms'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
@@ -824,6 +825,10 @@ class ImageShadowUtils {
     })
   }
 
+  updateIosShadowUploadBuffer(pageIndex: number, srcObjs: Array<SrcObj>, remove = false) {
+    store.commit('UPDATE_uploadShadowBuffer', { pageIndex, srcObjs, remove })
+  }
+
   updateShadowOld(layerInfo: ILayerInfo) {
     store.commit('SET_old', layerInfo)
   }
@@ -863,6 +868,48 @@ class ImageShadowUtils {
 
   addUploadImg(data: IUploadShadowImg) {
     store.commit('shadow/ADD_UPLOAD_IMG', data)
+  }
+
+  delIosOldImg(srcObjs: Array<SrcObj>, editorType = vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)) {
+    const promises = [] as Promise<{ key: string, flag: number, name: string }>[]
+    srcObjs.forEach(srcObj => {
+      if (srcObj.type !== 'ios') return
+      const key = `mydesign-${editorType}`
+      const designId = store.getters['vivisticker/getEditingDesignId']
+      const name = (srcObj.assetId as string).split('/').pop() || ''
+      promises.push(vivistickerUtils.deleteImage(key, name, 'png', designId) as Promise<{ key: string, flag: number, name: string }>)
+    })
+    return promises
+  }
+
+  /**
+   * This func used to delete the shadow image stored in ios app.
+   * It should be called before the design.config.json is saved.
+   */
+  iosImgDelHandler() {
+    const promises = [] as Promise<unknown>[]
+    const pages = pageUtils.getPages
+    pages.forEach((page, pageIndex) => {
+      const imgBuffs = [...page.iosImgUploadBuffer.shadow]
+      page.layers.forEach(l => {
+        if (l.type === LayerType.image) {
+          const index = imgBuffs.findIndex(imgBuff => imgBuff.assetId === l.styles.shadow.srcObj.assetId)
+          if (index !== -1) {
+            imgBuffs.splice(index, 1)
+          }
+        }
+      })
+      for (const p of this.delIosOldImg(imgBuffs)) {
+        promises.push(new Promise(resolve => {
+          p.then(data => {
+            const target = imgBuffs.find(b => (b.assetId as string).split('/').pop() === data.name)
+            this.updateIosShadowUploadBuffer(pageIndex, target ? [target] : [], true)
+            resolve(data)
+          })
+        }))
+      }
+    })
+    return Promise.all(promises)
   }
 
   TEST_showtTestCanvas(canvas: HTMLCanvasElement) {

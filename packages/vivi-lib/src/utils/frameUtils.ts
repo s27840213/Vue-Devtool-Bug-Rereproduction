@@ -4,13 +4,14 @@ import { SrcObj } from '@/interfaces/gallery'
 import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
 import store from '@/store'
-import { ILayerInfo, LayerType } from '@/store/types'
+import { IExtendLayerInfo, ILayerInfo, LayerType } from '@/store/types'
 import { notify } from '@kyvg/vue3-notification'
 import generalUtils from './generalUtils'
 import ImageUtils from './imageUtils'
 import layerFactary from './layerFactary'
 import LayerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
+import vivistickerUtils from './vivistickerUtils'
 import zindexUtils from './zindexUtils'
 
 class FrameUtils {
@@ -159,6 +160,47 @@ class FrameUtils {
       zindexUtils.reassignZindex(pageIndex)
       stepsUtils.record()
     }
+  }
+
+  iosPhotoSelect(layerInfo: IExtendLayerInfo, config: IImage) {
+    const { pageIndex, layerIndex, subLayerIdx = 0, priPrimaryLayerIndex = -1 } = layerInfo
+    return vivistickerUtils.getIosImg()
+      .then(async (images: Array<string>) => {
+        if (images.length) {
+          const { imgX, imgY, imgWidth, imgHeight } = await ImageUtils.getClipImgDimension(config, ImageUtils.getSrc({
+            type: 'ios',
+            assetId: images[0],
+            userId: ''
+          }))
+          if (priPrimaryLayerIndex === -1) {
+            this.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+            this.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
+              type: 'ios',
+              assetId: images[0],
+              userId: ''
+            })
+          } else {
+            LayerUtils.updateInGroupFrame(pageIndex, priPrimaryLayerIndex, layerIndex, subLayerIdx, {
+              srcObj: {
+                type: 'ios',
+                assetId: images[0],
+                userId: ''
+              }
+            }, {
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+          }
+          stepsUtils.record()
+        }
+      })
   }
 
   updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>) {

@@ -15,7 +15,7 @@ import shapeUtils from './shapeUtils'
 import TextPropUtils from './textPropUtils'
 import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
-import vivistickerUtils from './vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 
 class StepsUtils {
   steps: Array<IStep>

@@ -13,7 +13,7 @@ div(v-else class="panel-replace")
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import imageUtils from '@/utils/imageUtils'
 import { replaceImgInject } from '@/utils/textFillUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent, inject, PropType } from 'vue'
 
 export default defineComponent({

@@ -19,7 +19,7 @@ import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 import PanelTemplate from '@/components/vivisticker/PanelTemplate.vue'
 import PanelTemplateUs from '@/components/vivisticker/us/PanelTemplate.vue'
 
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

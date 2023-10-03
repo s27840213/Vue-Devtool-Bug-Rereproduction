@@ -17,7 +17,7 @@ div(class="page-preview" :style="styles()")
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 

@@ -15,7 +15,7 @@ div(class="nu-shape" :style="styles")
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { IFrame, IGroup, IShape } from '@nu/vivi-lib/interfaces/layer'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import { PropType, defineComponent } from 'vue'

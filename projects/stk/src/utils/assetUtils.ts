@@ -30,7 +30,7 @@ import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
 import unitUtils, { PRECISION } from './unitUtils'
-import vivistickerUtils from './vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import ZindexUtils from './zindexUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {

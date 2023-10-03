@@ -202,7 +202,12 @@ class GeneralUtils {
   }
 
   isTouchDevice(): boolean {
+    if (this.isStk && this.isIPadOS()) return true
     return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
+  }
+
+  isIPadOS(): boolean {
+    return /macintosh/i.test(navigator.userAgent.toLowerCase()) && navigator.maxTouchPoints > 0
   }
 
   isTablet(): boolean {

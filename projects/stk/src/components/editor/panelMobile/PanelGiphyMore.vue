@@ -16,7 +16,7 @@ div(class="p-giphy" v-click-outside="vcoConfig")
 import i18n from '@nu/vivi-lib/i18n'
 import { IGif } from '@/interfaces/giphy'
 import editorUtils from '@/utils/editorUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'

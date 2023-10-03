@@ -12,7 +12,7 @@ div(class="panel-text__item"
 import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 

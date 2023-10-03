@@ -3,7 +3,7 @@ import { IListServiceParams, IListServiceResponse } from '@nu/vivi-lib/interface
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 
 class ListService {
   getList(params: IListServiceParams) {

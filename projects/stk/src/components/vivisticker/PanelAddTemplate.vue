@@ -21,7 +21,7 @@ import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import pageUtils from '@/utils/pageUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 

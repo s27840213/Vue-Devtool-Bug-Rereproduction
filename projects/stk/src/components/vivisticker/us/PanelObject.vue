@@ -47,7 +47,7 @@ div(class="panel-objects")
 
 <script lang="ts">
 import SearchBar from '@/components/SearchBar.vue'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import PanelObject from '../PanelObject.vue'

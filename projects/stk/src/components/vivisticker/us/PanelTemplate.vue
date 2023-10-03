@@ -37,7 +37,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import PanelTemplate from '@/components/vivisticker/PanelTemplate.vue'
 import PanelTemplateContentUs from '@/components/vivisticker/us/PanelTemplateContent.vue'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

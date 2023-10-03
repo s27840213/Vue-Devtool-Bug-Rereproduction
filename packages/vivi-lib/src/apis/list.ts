@@ -34,6 +34,26 @@ class ListService {
     })
   }
 
+  getInfoList(type: string, designIds: string[], igLayout?: 'story' | 'post') {
+    const searchParams = {
+      token: '1',
+      type,
+      design_ids: designIds.join(','),
+      locale: localeUtils.currLocale(),
+      cache: true,
+      platform: window.location.host,
+      ver: store.getters['user/getVerApi'],
+      app: 1,
+      // for vivisticker template
+      ...(igLayout && { ig_layout: igLayout })
+    }
+    return axios.request<IListServiceResponse>({
+      url: '/list-design',
+      method: 'GET',
+      params: searchParams
+    })
+  }
+
   // For list factories
   getSvg(params: IListServiceParams) {
     params.type = 'svg'

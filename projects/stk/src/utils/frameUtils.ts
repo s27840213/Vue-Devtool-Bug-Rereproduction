@@ -11,7 +11,7 @@ import ImageUtils from './imageUtils'
 import layerFactary from './layerFactary'
 import LayerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
-import vivistickerUtils from './vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import zindexUtils from './zindexUtils'
 
 class FrameUtils {

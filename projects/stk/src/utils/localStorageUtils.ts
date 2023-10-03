@@ -1,7 +1,7 @@
 import i18n from '@nu/vivi-lib/i18n'
 import modalUtils from '@/utils/modalUtils'
 import _ from 'lodash'
-import vivistickerUtils from './vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 
 class LocalStorage {
   defaultValue = {

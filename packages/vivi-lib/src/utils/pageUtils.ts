@@ -3,7 +3,7 @@ import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
-import { IBleed, IPage, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
+import { IBleed, IPage, IPageSize, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import { LayerType } from '@/store/types'
 import { floor, round, throttle } from 'lodash'
@@ -900,16 +900,18 @@ class PageUtils {
     } as IBleed
   }
 
-  getDefaultBleedMap(pageIndex: number) {
+  getDefaultBleedMap(pageSize: IPageSize, pageIndex = -1) {
+    const isDetailPage = generalUtils.isPic ? this.isDetailPage
+      : pageIndex !== -1 && this.isDetailPage
     const defaultBleed = this.defaultBleed
     const toBleed = (val: number) => ({
-      top: this.isDetailPage && pageIndex !== 0 ? 0 : val,
-      bottom: this.isDetailPage && pageIndex !== store.getters.getPagesLength - 1 ? 0 : val,
+      top: isDetailPage && pageIndex !== 0 ? 0 : val,
+      bottom: isDetailPage && pageIndex !== store.getters.getPagesLength - 1 ? 0 : val,
       left: val,
       right: val
     } as IBleed)
-    const defaultPxBleed = this.getPageDefaultBleeds(this.getPageSize(pageIndex), 'px')
-    if (this.isDetailPage) {
+    const defaultPxBleed = this.getPageDefaultBleeds(pageSize, 'px')
+    if (isDetailPage) {
       if (pageIndex !== 0) defaultPxBleed.top = 0
       if (pageIndex !== store.getters.getPagesLength - 1) defaultPxBleed.bottom = 0
     }

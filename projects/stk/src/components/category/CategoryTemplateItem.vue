@@ -18,7 +18,7 @@ import assetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 

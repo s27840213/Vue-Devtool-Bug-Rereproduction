@@ -23,7 +23,7 @@ div(ref="main" class="full-page relative")
 
 <script lang="ts">
 import { IFullPageConfig } from '@/interfaces/vivisticker'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import Payment from './Payment.vue'

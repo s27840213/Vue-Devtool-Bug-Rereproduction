@@ -63,7 +63,7 @@ import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } f
 import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 import PanelText from '../PanelText.vue'

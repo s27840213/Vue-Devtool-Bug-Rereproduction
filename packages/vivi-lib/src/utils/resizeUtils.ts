@@ -157,6 +157,8 @@ class ResizeUtils {
    * @param format.unit Unit of new size, will be set to px if any of physical format unspecified
    */
   resizePage(pageIndex: number, page: IPage, format: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
+    const modifySourcePage = pageIndex === -1
+
     // set physical size to px size if not exist
     if (!(format.physicalWidth && format.physicalHeight && format.unit)) {
       format.physicalWidth = format.width
@@ -189,7 +191,7 @@ class ResizeUtils {
         const precision = newUnit === 'px' ? 0 : PRECISION
         const bleedDPI = (key: string): number => (key === 'left' || key === 'right') ? dpi.width : dpi.height
         const maxBleed = newUnit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', newUnit), precision)
-        const defaultBleedMap = pageUtils.getDefaultBleedMap(pageIndex)
+        const defaultBleedMap = pageUtils.getDefaultBleedMap(page, pageIndex)
         const isDefaultBleed = isEqual(defaultBleedMap[page.unit], physicalBleeds)
         const isFixPxSize = pageUtils.isDetailPage && newUnit !== 'px'
 
@@ -216,7 +218,10 @@ class ResizeUtils {
           const pxMaxBleed = floor(unitUtils.convert(maxBleed, newUnit, 'px', bleedDPI(key)))
           bleeds[key] = Math.min(bleeds[key], pxMaxBleed)
         })
-        store.commit('SET_bleeds', { pageIndex, bleeds, physicalBleeds })
+        if (modifySourcePage) {
+          page.bleeds = { ...bleeds }
+          page.physicalBleeds = { ...physicalBleeds }
+        } else store.commit('SET_bleeds', { pageIndex, bleeds, physicalBleeds })
       }
     }
 

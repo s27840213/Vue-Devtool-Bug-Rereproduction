@@ -4,7 +4,7 @@
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import textUtils from '@/utils/textUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
 import generalUtils from './generalUtils'
 
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
