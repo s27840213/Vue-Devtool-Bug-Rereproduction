@@ -12,21 +12,21 @@ bcolors = _bcolors
 prefix_pattern = re.compile(r'([A-Z]+)[0-9]{4}')
 ROOT = find_project_root(os.getcwd()) # parent folder of the parent folder of this file
 
-def getLocaleJsonPathsIter(project):
-  file_paths = glob.glob(f"{ROOT}/projects/{project}/src/locales/*.json")
+def getLocaleJsonPathsIter():
+  file_paths = glob.glob(f"{ROOT}/packages/vivi-lib/src/locales/*.json")
   for file_path in file_paths:
     if '_shaked' in file_path: continue
     yield file_path
 
-def getLocaleJsonsIter(project):
-  for file_path in getLocaleJsonPathsIter(project):
+def getLocaleJsonsIter():
+  for file_path in getLocaleJsonPathsIter():
     with open(file_path, mode="r", encoding="utf-8") as f:
       yield f, file_path
 
 class ShakedJson:
-  def __init__(self, config_path):
-    filename = config_path.split('.')[0]
-    self.shaked_file_path = f'{filename}_shaked.json'
+  def __init__(self, config_path, project):
+    locale = config_path.split('/')[-1].split('.')[0]
+    self.shaked_file_path = f'{ROOT}/packages/vivi-lib/src/locales/{project}/{locale}_shaked.json'
 
   def __enter__(self):
     self.f = open(self.shaked_file_path, mode="r", encoding="utf-8")
@@ -35,9 +35,9 @@ class ShakedJson:
   def __exit__(self, type, value, traceback):
     self.f.close()
 
-def findPrefixes(project):
+def findPrefixes():
   prefixes = set()
-  for f, _ in getLocaleJsonsIter(project):
+  for f, _ in getLocaleJsonsIter():
     config = json.load(f)
     for key in config.keys():
       match = prefix_pattern.match(key)
@@ -66,20 +66,23 @@ def process(project, extensions = ['vue', 'ts'], prefixes = set()):
   return used_keys
 
 def shake_files(project, used_keys):
-  for f, file_path in getLocaleJsonsIter(project):
-    filename = file_path.split('.')[0]
+  for f, file_path in getLocaleJsonsIter():
+    locale = file_path.split('/')[-1].split('.')[0]
     config = json.load(f)
     config = { key: value for key, value in config.items() if key in used_keys }
-    output_file_path = f'{filename}_shaked.json'
+    output_file_dir = f'{ROOT}/packages/vivi-lib/src/locales/{project}'
+    os.makedirs(output_file_dir, exist_ok=True)
+    output_filename = f'{locale}_shaked.json'
+    output_file_path = f'{output_file_dir}/{output_filename}'
     print(f'Generate shaked i18n config to {output_file_path}')
     with open(output_file_path, 'w', encoding='UTF-8') as f:
       json.dump(config, f, indent=2, ensure_ascii=False)
 
 def check_files(project, used_keys: set[str]):
   mismatch = False
-  for full, file_path in getLocaleJsonsIter(project):
+  for full, file_path in getLocaleJsonsIter():
     try:
-      with ShakedJson(file_path) as (f, config_path):
+      with ShakedJson(file_path, project) as (f, config_path):
         config = json.load(f)
         full_config = json.load(full)
         shaked_config = set(filter(lambda key: key in used_keys, full_config))
@@ -108,7 +111,7 @@ def main(args):
   any_mismatch = False
   for project in PROJECTS:
     print(f'\nProcessing: {project}\n')
-    prefixes = findPrefixes(project)
+    prefixes = findPrefixes()
     print(f'Found prefixes: {prefixes}\n')
     used_keys = process(project, prefixes=prefixes)
     if args.check:

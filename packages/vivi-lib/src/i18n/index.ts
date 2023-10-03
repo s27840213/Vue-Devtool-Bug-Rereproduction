@@ -1,17 +1,40 @@
+import jp_shaked_cm from '@/locales/charmix/jp_shaked.json'
+import pt_shaked_cm from '@/locales/charmix/pt_shaked.json'
+import tw_shaked_cm from '@/locales/charmix/tw_shaked.json'
+import us_shaked_cm from '@/locales/charmix/us_shaked.json'
 import jp from '@/locales/jp.json'
-import jp_shaked from '@/locales/jp_shaked.json'
 import pt from '@/locales/pt.json'
-import pt_shaked from '@/locales/pt_shaked.json'
+import jp_shaked_stk from '@/locales/stk/jp_shaked.json'
+import pt_shaked_stk from '@/locales/stk/pt_shaked.json'
+import tw_shaked_stk from '@/locales/stk/tw_shaked.json'
+import us_shaked_stk from '@/locales/stk/us_shaked.json'
 import tw from '@/locales/tw.json'
-import tw_shaked from '@/locales/tw_shaked.json'
 import us from '@/locales/us.json'
-import us_shaked from '@/locales/us_shaked.json'
-import generalUtils from '@/utils/generalUtils'
+import jp_shaked_pic from '@/locales/vivipic/jp_shaked.json'
+import pt_shaked_pic from '@/locales/vivipic/pt_shaked.json'
+import tw_shaked_pic from '@/locales/vivipic/tw_shaked.json'
+import us_shaked_pic from '@/locales/vivipic/us_shaked.json'
 import { createI18n } from 'vue-i18n'
 
 export type LocaleName = 'us' | 'tw' | 'jp' | 'pt'
 
 const isProd = process.env.NODE_ENV === 'production'
+
+const us_shaked = process.env.VUE_APP_APP_NAME === 'stk' ? us_shaked_stk
+  : (process.env.VUE_APP_APP_NAME === 'pic' ? us_shaked_pic
+    : us_shaked_cm)
+
+const tw_shaked = process.env.VUE_APP_APP_NAME === 'stk' ? tw_shaked_stk
+  : (process.env.VUE_APP_APP_NAME === 'pic' ? tw_shaked_pic
+    : tw_shaked_cm)
+
+const jp_shaked = process.env.VUE_APP_APP_NAME === 'stk' ? jp_shaked_stk
+  : (process.env.VUE_APP_APP_NAME === 'pic' ? jp_shaked_pic
+    : jp_shaked_cm)
+
+const pt_shaked = process.env.VUE_APP_APP_NAME === 'stk' ? pt_shaked_stk
+  : (process.env.VUE_APP_APP_NAME === 'pic' ? pt_shaked_pic
+    : pt_shaked_cm)
 
 const i18n = createI18n({
   locale: process.env.VUE_APP_I18N_LOCALE || 'us',
@@ -20,7 +43,7 @@ const i18n = createI18n({
     us: isProd ? us : us_shaked,
     tw: isProd ? tw : tw_shaked,
     jp: isProd ? jp : jp_shaked,
-    ...(generalUtils.isStk ? {
+    ...(process.env.VUE_APP_APP_NAME === 'stk' ? {
       pt: isProd ? pt : pt_shaked,
     } : {})
   },
