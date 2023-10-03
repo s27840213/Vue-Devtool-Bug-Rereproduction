@@ -89,7 +89,7 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: () => import('@/views/SvgIconView.vue')
+    component: () => import('@nu/vivi-lib/views/SvgIconView.vue')
   })
   // routes.push({
   //   path: 'copytool',
@@ -104,7 +104,7 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'nativeevttest',
     name: 'NativeEventTester',
-    component: () => import('@/views/NativeEventTester.vue')
+    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
   })
   routes.push({
     path: 'emoji',

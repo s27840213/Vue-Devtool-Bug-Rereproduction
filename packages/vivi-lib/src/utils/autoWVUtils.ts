@@ -1,6 +1,7 @@
+import { WebViewUtils, dummyWVUtils } from '@/utils/webViewUtils'
 import picWVUtils from '@/utils/picWVUtils'
-import generalUtils from './generalUtils'
-// import stkWVUtils from '@/utils/stkWVUtils' // uncomment this line when vivisticker merged
+import stkWVUtils from '@/utils/stkWVUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export enum appType {
   Vivipic,
@@ -10,5 +11,14 @@ export enum appType {
 
 export const app = (generalUtils.isPic ? appType.Vivipic : (generalUtils.isStk ? appType.Vivisticker : appType.Charmix)) as appType
 
-export default picWVUtils // comment out this line in vivisticker
-// export default stkWVUtils // uncomment this line when vivisticker merged
+let WVUtils = dummyWVUtils as WebViewUtils<{[key: string]: any}>
+switch (app) {
+  case appType.Vivipic:
+    WVUtils = picWVUtils
+    break
+  case appType.Vivisticker:
+    WVUtils = stkWVUtils
+    break
+}
+
+export default WVUtils

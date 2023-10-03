@@ -196,3 +196,9 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     }
   }
 }
+
+export const dummyWVUtils = new (class DummyWVUtils extends WebViewUtils<{ [key: string]: any }> {
+  STANDALONE_USER_INFO: { [key: string]: any } = {}
+  CALLBACK_MAPS: { [key: string]: string[] } = {}
+  getUserInfoFromStore(): { [key: string]: any } { return this.STANDALONE_USER_INFO }
+})
