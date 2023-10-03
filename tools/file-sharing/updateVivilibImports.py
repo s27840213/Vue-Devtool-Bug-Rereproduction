@@ -12,7 +12,7 @@ tpyesToSkip = [
 ]
 # ======= config =======
 
-sep = ", \n  "
+sep = ",\n  "
 
 def removePrefix(path: str):
   return path.replace('projects/vivipic/src', '@') \
