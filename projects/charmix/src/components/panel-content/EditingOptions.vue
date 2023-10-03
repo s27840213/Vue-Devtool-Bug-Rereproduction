@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="editing-options w-full h-full")
+div(class="editing-options w-full")
   div(
     v-if="inSelectionMode"
     class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 pl-24 pr-8")
@@ -26,6 +26,7 @@ div(class="editing-options w-full h-full")
   div(class="w-full flex justify-between items-center px-24" ref="editorContainerRef")
     div(
       v-for="tab in featureTabs"
+      :key="tab.icon"
       class="flex flex-col items-center justify-center gap-6"
       @click="handleTabAction(tab)"
       ref="tabRefs")

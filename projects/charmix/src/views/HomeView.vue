@@ -5,7 +5,7 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-24")
     cm-btn(
       :theme="'primary'"
       :hasIcon="true"
-      iconName="crown") {{ `${$t('CM0029')}`.toUpperCase() }}
+      iconName="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   highlight-section(
     :title="$t('CM0001')"
     :description="$t('CM0002')"

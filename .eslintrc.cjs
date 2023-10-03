@@ -20,16 +20,16 @@ module.exports = {
     '@vue/typescript/recommended',
     'plugin:cypress/recommended',
     '@vue/eslint-config-typescript',
-    '@vue/eslint-config-prettier/skip-formatting'
+    '@vue/eslint-config-prettier/skip-formatting',
   ],
   parserOptions: {
-    ecmaVersion: 'latest'
+    ecmaVersion: 'latest',
   },
   // to prevent commitlint.config.js to throw error
   env: {
     'cypress/globals': true,
     node: true,
-    'vue/setup-compiler-macros': true
+    'vue/setup-compiler-macros': true,
   },
   rules: {
     'no-console': 'off',
@@ -60,9 +60,9 @@ module.exports = {
       {
         groups: ['props', 'data', 'computed', 'methods'],
         deepData: true,
-        ignorePublicMembers: false
-      }
+        ignorePublicMembers: false,
+      },
     ],
-    'sonarjs/cognitive-complexity': [offInCommand('warn'), 15]
-  }
+    'sonarjs/cognitive-complexity': [offInCommand('warn'), 15],
+  },
 }

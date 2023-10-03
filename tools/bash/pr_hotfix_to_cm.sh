@@ -5,7 +5,7 @@ curl --request POST \
     --header "Content-Type: application/json" \
     --header "Authorization: Bearer ${BITBUCKET_API_TOKEN}" \
     --data '{
-      "title": "Pull request to vivisticker by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+      "title": "Pull request to charmix by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
       "source": {
         "branch": {
           "name": "'"${BITBUCKET_BRANCH}"'"
@@ -23,7 +23,7 @@ curl --request POST \
     --header "Content-Type: application/json" \
     --header "Authorization: Bearer ${BITBUCKET_API_TOKEN}" \
     --data '{
-      "title": "Pull request to vivisticker-develop by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+      "title": "Pull request to develop by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
       "source": {
         "branch": {
           "name": "'"${BITBUCKET_BRANCH}"'"

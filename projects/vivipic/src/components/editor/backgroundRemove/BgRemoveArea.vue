@@ -117,6 +117,7 @@ export default defineComponent({
     pageUtils.fitPage()
   },
   unmounted() {
+    pageUtils.fitPage()
     window.removeEventListener('pointerup', this.drawEnd)
     window.removeEventListener('pointermove', this.setBrushPos)
     window.removeEventListener('pointermove', this.drawing)

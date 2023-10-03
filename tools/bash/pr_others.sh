@@ -6,14 +6,14 @@ export BITBUCKET_TRIGGERER_USERNAME=$(curl -X GET -g "https://api.bitbucket.org/
 
 if [[ "$BITBUCKET_BRANCH" == "qa" ]]
 then
-    echo "create pull request to master"
+    echo "create pull request to main/vivipic"
     curl --request POST \
         --url "https://api.bitbucket.org/2.0/repositories/mingchi/frontend-web/pullrequests" \
         --header "Accept: application/json" \
         --header "Content-Type: application/json" \
         --header "Authorization: Bearer ${BITBUCKET_API_TOKEN}" \
         --data '{
-          "title": "Pull request to master by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+          "title": "Pull request to main/vivipic by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
           "source": {
             "branch": {
               "name": "'"${BITBUCKET_BRANCH}"'"
@@ -25,7 +25,7 @@ then
             }
           }
         }'
-# for feature branch
+# for feature, test, bugfix branch
 else
     echo "create pull request to develop"
     echo "${BITBUCKET_BRANCH}"

@@ -17,6 +17,7 @@ div(class="brand-kit-tab-logo")
 import ImageList, { IImageListItem } from '@/components/image-gallery/ImageList.vue'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
@@ -93,6 +94,7 @@ export default defineComponent({
       this.menuOpenLogoId = ''
     },
     handleUploadLogo() {
+      if (!paymentUtils.checkPro({ plan: 1 }, 'brandkit')) return
       uploadUtils.chooseAssets('logo')
     },
     handleDownload({ logo }: IRenderedLogos) {

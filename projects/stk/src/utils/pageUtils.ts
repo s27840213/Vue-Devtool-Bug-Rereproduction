@@ -521,7 +521,8 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage(scrollToTop = false) {
+  fitPage(options?: { scrollToTop?: boolean }) {
+    const { scrollToTop = false } = options || {}
     // In these mode, don't fitPage.
 
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {

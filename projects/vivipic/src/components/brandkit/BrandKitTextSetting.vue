@@ -49,6 +49,7 @@ import { IBrandTextStyle } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vClickOutside from 'click-outside-vue3'
@@ -176,6 +177,7 @@ export default defineComponent({
       }
     },
     handleToggleConfig() {
+      if (!paymentUtils.checkPro({ plan: 1 }, 'brandkit')) return
       if (!this.isConfigOpen) {
         this.isConfigOpen = true
         this.refreshFontSizeBuffer()

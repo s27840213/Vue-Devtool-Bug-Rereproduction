@@ -32,7 +32,8 @@ div(class="vivisticker" :style="copyingStyles()")
   div(v-if="pushModalInfo && isShowPushModal" class="vivisticker__push-modal-container" :style="pushModalInfo?.backdropStyle")
     modal-card(v-model:show="isShowPushModal" :initModalInfo="pushModalInfo")
   transition(name="slide-left")
-    component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
+    template(v-if="isSlideShown")
+      component(:is="slideType" class="vivisticker__slide")
   transition(name="panel-up")
     tutorial(v-if="showTutorial")
   transition(name="panel-up")
@@ -57,6 +58,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IModalInfo } from '@/interfaces/modal'
 import { IPage } from '@/interfaces/page'
+import constantData from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import logUtils from '@/utils/logUtils'
@@ -282,7 +284,7 @@ export default defineComponent({
       this.setIsInMyDesign(false)
       this.setIsInSelectionMode(false)
       this.setCurrActiveTab(panelType)
-      if (['us', 'jp'].includes(this.$i18n.locale)) {
+      if (constantData.checkIfUseNewLogic()) {
         switch (panelType) {
           case 'text':
             if (!vivistickerUtils.tutorialFlags.text && !this.debugMode) {
@@ -510,7 +512,7 @@ export default defineComponent({
     transform: translateX(0);
   }
   &-leave-to,
-  &-enter {
+  &-enter-from {
     transform: translateX(100%);
   }
 }

@@ -43,7 +43,8 @@ export const minMaxHash = {
 const langMap = {
   tw: 'zh-TW',
   us: 'en-US',
-  jp: 'ja-JP'
+  jp: 'ja-JP',
+  pt: 'pt-BR'
 }
 
 class MappingUtils {

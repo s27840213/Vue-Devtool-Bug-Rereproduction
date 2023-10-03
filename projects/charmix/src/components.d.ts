@@ -20,8 +20,6 @@ declare module 'vue' {
     HighlightSection: typeof import('./components/home/HighlightSection.vue')['default']
     HomeTab: typeof import('./components/panel-content/HomeTab.vue')['default']
     ModalTemplate: typeof import('./components/panel-content/ModalTemplate.vue')['default']
-    NuBtn: (typeof import('./components/global/NuBtn.vue'))['default']
-    NuSvgIcon: (typeof import('./components/global/NuSvgIcon.vue'))['default']
     PromptArea: typeof import('./components/panel-content/PromptArea.vue')['default']
     PropsSlider: typeof import('./components/global/PropsSlider.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

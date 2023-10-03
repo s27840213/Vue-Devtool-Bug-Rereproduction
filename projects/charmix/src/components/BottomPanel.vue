@@ -1,12 +1,39 @@
 <template lang="pug">
 div(class="bottom-panel" ref="bottomPanelRef")
-  slot
+  slot(
+    name="content"
+    :setSlotRef="setSlotRef")
 </template>
 <script setup lang="ts">
+/**
+ * @Note bcz we cannot get the slot ref directly
+ * So we need to pass get the ref from the parent
+ * Here pass setSlotRef to the parent
+ * and parent use setSlotRef to pass the ref here
+ */
+import { useElementSize } from '@vueuse/core'
+
 const bottomPanelRef = ref<HTMLElement | null>(null)
+const slotRef = ref<HTMLElement | null>(null)
+
+const { height } = useElementSize(slotRef)
+const setSlotRef = (ref: HTMLElement) => {
+  slotRef.value = ref
+}
+
+watch(
+  () => height.value,
+  (newVal, oldVal) => {
+    // 20 is not important, modify it to make a good transition
+    const newHeight = newVal === 0 ? oldVal * 0.6 : newVal
+    if (newVal === oldVal || !bottomPanelRef.value) return
+    bottomPanelRef.value.style.height = `${newHeight + 32}px`
+  },
+)
 </script>
 <style lang="scss">
 .bottom-panel {
   @apply bg-app-tab-bg w-full rounded-t-[24px] py-16 box-border;
+  transition: height 0.3s;
 }
 </style>
