@@ -51,7 +51,7 @@ import Checkbox from '@/components/global/Checkbox.vue'
 import autoWVUtils, { app, appType } from '@/utils/autoWVUtils'
 import generalUtils from '@/utils/generalUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { ICallbackRecord } from '@nu/vivi-lib/interfaces/webView'
+import type { ICallbackRecord } from '@nu/vivi-lib/interfaces/webView'
 import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
 import { useStore } from 'vuex'
 
