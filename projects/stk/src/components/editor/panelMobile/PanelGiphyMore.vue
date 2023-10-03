@@ -13,7 +13,7 @@ div(class="p-giphy" v-click-outside="vcoConfig")
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IGif } from '@/interfaces/giphy'
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'

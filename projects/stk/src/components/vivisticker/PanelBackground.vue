@@ -108,7 +108,7 @@ import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import colorUtils from '@/utils/colorUtils'

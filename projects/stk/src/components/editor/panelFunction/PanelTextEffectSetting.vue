@@ -92,7 +92,7 @@ div(class="text-effect-setting")
 import CollapseTitle from '@/components/global/CollapseTitle.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOption, IEffectOptionRange, IEffectOptionSelect } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'

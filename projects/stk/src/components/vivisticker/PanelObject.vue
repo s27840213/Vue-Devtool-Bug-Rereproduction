@@ -25,7 +25,7 @@ div(class="panel-objects rwd-container")
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import PanelObjectGifs from '@/components/vivisticker/PanelObjectGifs.vue'
 import PanelObjectStatic from '@/components/vivisticker/PanelObjectStatic.vue'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import modalUtils from '@/utils/modalUtils'
 import { defineComponent } from 'vue'

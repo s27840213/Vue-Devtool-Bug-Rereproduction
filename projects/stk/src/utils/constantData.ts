@@ -1,4 +1,4 @@
-import i18n, { LocaleName } from '@/i18n'
+import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { tailPositions } from '@nu/vivi-lib/interfaces/format'
 import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import router from '@/router'

@@ -1,5 +1,5 @@
 import list from '@/apis/list'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IListServiceContentData, IListServiceData } from '@nu/vivi-lib/interfaces/api'
 import {
   IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, IPending, isICategory,

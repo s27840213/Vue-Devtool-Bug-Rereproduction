@@ -1,6 +1,6 @@
 import removeBgTestJSON from '@/assets/json/removeBgTest.json'
 import useCanvasUtils from '@/composable/useCanvasUtils'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo, ITrimmedCanvasInfo } from '@nu/vivi-lib/interfaces/image'
 import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'

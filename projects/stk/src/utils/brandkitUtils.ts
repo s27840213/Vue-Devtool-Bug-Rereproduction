@@ -1,4 +1,4 @@
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IUserFontContentData, IUserLogoContentData } from '@nu/vivi-lib/interfaces/api'
 import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle, IBrandTextStyleSetting, IDeletingItem } from '@nu/vivi-lib/interfaces/brandkit'
 import store from '@/store'

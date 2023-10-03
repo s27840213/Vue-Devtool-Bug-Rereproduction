@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IPaymentView, IPaymentWarningView } from '@nu/vivi-lib/interfaces/payment'
 import router from '@/router'
 import store from '@/store'

@@ -1,5 +1,5 @@
 import designApis from '@nu/vivi-lib/apis/design'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IAssetDesignParams, IUserDesignContentData, IUserFolderContentData } from '@nu/vivi-lib/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@nu/vivi-lib/interfaces/design'
 import { IBleed } from '@nu/vivi-lib/interfaces/page'

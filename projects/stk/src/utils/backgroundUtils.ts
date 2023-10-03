@@ -1,4 +1,4 @@
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IImage, IImageStyle } from '@nu/vivi-lib/interfaces/layer'
 import { IBackgroundImage, IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'

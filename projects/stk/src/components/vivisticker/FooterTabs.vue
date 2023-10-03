@@ -50,7 +50,7 @@ div(class="footer-tabs" ref="tabs")
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IFooterTab } from '@/interfaces/editor'
 import assetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'

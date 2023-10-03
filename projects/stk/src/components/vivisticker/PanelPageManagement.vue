@@ -12,7 +12,7 @@ div(class="panel-page-management")
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'

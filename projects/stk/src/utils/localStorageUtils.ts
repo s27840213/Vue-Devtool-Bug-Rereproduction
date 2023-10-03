@@ -1,4 +1,4 @@
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import modalUtils from '@/utils/modalUtils'
 import _ from 'lodash'
 import vivistickerUtils from './vivistickerUtils'

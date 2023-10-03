@@ -1,4 +1,4 @@
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@nu/vivi-lib/interfaces/layer'

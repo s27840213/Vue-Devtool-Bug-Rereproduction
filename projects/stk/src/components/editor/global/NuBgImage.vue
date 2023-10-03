@@ -40,7 +40,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import backgroundUtils from '@/utils/backgroundUtils'
 import cssConverter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'

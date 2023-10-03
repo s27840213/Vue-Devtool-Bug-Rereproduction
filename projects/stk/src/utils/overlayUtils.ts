@@ -1,4 +1,4 @@
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
 import { IAssetObject } from '@nu/vivi-lib/interfaces/shape'
 import backgroundUtils from '@/utils/backgroundUtils'

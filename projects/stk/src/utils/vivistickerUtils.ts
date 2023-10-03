@@ -1,6 +1,6 @@
 import listApis from '@/apis/list'
 import userApis from '@nu/vivi-lib/apis/user'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@nu/vivi-lib/interfaces/layer'

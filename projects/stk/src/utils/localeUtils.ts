@@ -1,4 +1,4 @@
-import i18n, { LocaleName } from '@/i18n'
+import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 export interface ILocale {
   abbreviation: string,
   code: string,

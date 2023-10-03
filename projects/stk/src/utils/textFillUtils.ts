@@ -1,5 +1,5 @@
 import textEffect, { IPutTextEffectResponse } from '@nu/vivi-lib/apis/textEffect'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@nu/vivi-lib/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
 import { ITextFill, ITextFillConfig, isITextFillCustom } from '@nu/vivi-lib/interfaces/format'

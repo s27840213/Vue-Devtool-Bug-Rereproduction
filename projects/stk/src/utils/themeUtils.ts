@@ -1,5 +1,5 @@
 import listService from '@/apis/list'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import store from '@/store'
 import PageUtils from '@/utils/pageUtils'

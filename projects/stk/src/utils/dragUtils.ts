@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
 import { IImage, IImageStyle, IShape } from '@nu/vivi-lib/interfaces/layer'

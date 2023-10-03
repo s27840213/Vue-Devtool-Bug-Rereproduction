@@ -1,4 +1,4 @@
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { IAdjustJsonProps } from '@nu/vivi-lib/interfaces/adjust'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import { IShadowProps, ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'

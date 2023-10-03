@@ -68,7 +68,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
