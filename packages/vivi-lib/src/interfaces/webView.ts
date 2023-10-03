@@ -18,5 +18,3 @@ export interface ICallbackRecord {
   id: string,
   args: any[]
 }
-
-export const webViewImport = 'webViewImport'
