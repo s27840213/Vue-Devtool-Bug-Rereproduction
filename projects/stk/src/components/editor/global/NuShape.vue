@@ -15,7 +15,7 @@ div(class="nu-shape" :style="styles")
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { IFrame, IGroup, IShape } from '@nu/vivi-lib/interfaces/layer'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import { PropType, defineComponent } from 'vue'
@@ -437,32 +437,32 @@ export default defineComponent({
           if (this.priPrimaryLayerIndex !== -1 && (this.config as IShape).frameDecType) {
             switch ((this.config as IShape).frameDecType) {
               case 'decoration':
-                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'd' })
+                stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'd' })
                 break
               case 'decorationTop':
-                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'dt' })
+                stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'dt' })
                 break
               case 'blend':
-                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
+                stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
                 break
             }
           } else {
             switch ((this.config as IShape).frameDecType) {
               case 'decoration':
-                vivistickerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'd' })
+                stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'd' })
                 break
               case 'decorationTop':
-                vivistickerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'dt' })
+                stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'dt' })
                 break
               case 'blend':
-                vivistickerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'b', v: this.subLayerIndex })
+                stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'b', v: this.subLayerIndex })
                 break
             }
           }
         })
       } else {
         this.$nextTick(() => {
-          vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
         })
       }
     },

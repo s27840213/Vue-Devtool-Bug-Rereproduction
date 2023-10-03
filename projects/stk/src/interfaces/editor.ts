@@ -1,4 +1,4 @@
-import { IViviStickerProFeatures } from '@nu/vivi-lib/utils/vivistickerUtils'
+import { IViviStickerProFeatures } from '@nu/vivi-lib/utils/stkWVUtils'
 import { IFrame, IGroup, IImage, IShape, IText } from '@nu/vivi-lib/interfaces/layer'
 
 export interface ICurrSelectedInfo {

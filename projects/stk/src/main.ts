@@ -3,7 +3,7 @@ import PropertyBar from '@/components/global/PropertyBar.vue'
 import SvgIcon from '@/components/global/SvgIcon.vue'
 import colorUtils from '@/utils/colorUtils'
 import modalUtils from '@/utils/modalUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
 import Notifications, { notify } from '@kyvg/vue3-notification'
@@ -41,7 +41,7 @@ window.onerror = function (msg, url, line, colno, error) {
     console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
     // if (store.getters['vivisticker/getDebugMode'] && (window.location.hostname !== 'sticker.vivipic.com' || store.getters.getShowGlobalErrorModal))
     if (store.getters['vivisticker/getDebugMode']) {
-      const hint = `${vivistickerUtils.getUserInfoFromStore().hostId}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+      const hint = `${stkWVUtils.getUserInfoFromStore().hostId}, ${generalUtils.generateTimeStamp()}, ${errorId}`
       modalUtils.setModalInfo(
         i18n.global.t('NN0866'),
         hint,

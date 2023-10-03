@@ -59,7 +59,7 @@ import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import _ from 'lodash'
 import { computed, defineComponent } from 'vue'
@@ -307,7 +307,7 @@ export default defineComponent({
       }
     },
     rightTabs(): TabConfig[] {
-      const downloadTab = vivistickerUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
+      const downloadTab = stkWVUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
       if (this.isInMultiPageShare) {
         return []
       } else if (this.isInTemplateShare) {
@@ -348,7 +348,7 @@ export default defineComponent({
         return []
       } else {
         return this.isProcessing ? [] : [
-          ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
+          ...(stkWVUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
           { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
         ]
       }
@@ -442,7 +442,7 @@ export default defineComponent({
     },
     handleSwitchBg() {
       this.switchBg()
-      vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
+      stkWVUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     async handleEndEditing(forceModal = false) {
       if (this.currActivePanel === 'photo-shadow') {
@@ -459,14 +459,14 @@ export default defineComponent({
       if (bgRemoveUtils.autoRemoveResult !== null) {
         this.clearBgRemoveState()
       }
-      if (vivistickerUtils.checkVersion('1.13')) {
-        if (vivistickerUtils.userSettings.autoSave && !forceModal) {
+      if (stkWVUtils.checkVersion('1.13')) {
+        if (stkWVUtils.userSettings.autoSave && !forceModal) {
           if (this.isSavingAsMyDesign) return
           this.isSavingAsMyDesign = true
-          vivistickerUtils.saveAsMyDesign().catch((err) => {
+          stkWVUtils.saveAsMyDesign().catch((err) => {
             console.warn(err.message)
           }).finally(() => {
-            vivistickerUtils.endEditing()
+            stkWVUtils.endEditing()
             this.isSavingAsMyDesign = false
           })
         } else {
@@ -506,10 +506,10 @@ export default defineComponent({
               action: () => {
                 if (this.isSavingAsMyDesign) return
                 this.isSavingAsMyDesign = true
-                vivistickerUtils.saveAsMyDesign().catch((err) => {
+                stkWVUtils.saveAsMyDesign().catch((err) => {
                   console.warn(err.message)
                 }).finally(() => {
-                  vivistickerUtils.endEditing()
+                  stkWVUtils.endEditing()
                   this.isSavingAsMyDesign = false
                 })
 
@@ -525,13 +525,13 @@ export default defineComponent({
               msg: `${this.$t('STK0011')}`,
               action: () => {
                 if (forceModal) {
-                  vivistickerUtils.uploadReportedDesign()
+                  stkWVUtils.uploadReportedDesign()
                 }
                 imageShadowUtils.iosImgDelHandlerAsNoSave()
-                vivistickerUtils.endEditing()
+                stkWVUtils.endEditing()
                 const { id, key } = this.bgRemoveSrcInfo
                 if (id && key) {
-                  vivistickerUtils.deleteAsset(key, id)
+                  stkWVUtils.deleteAsset(key, id)
                 }
               },
               style: {
@@ -542,7 +542,7 @@ export default defineComponent({
             options)
         }
       } else {
-        vivistickerUtils.endEditing()
+        stkWVUtils.endEditing()
       }
     },
     getCopyCallback(modalText: string, onSuccess?: () => void): (flag: string) => void {
@@ -598,25 +598,25 @@ export default defineComponent({
         `${this.$t('STK0018')}`,
         () => {
           if (['object', 'objectGroup'].includes(this.editorType)) {
-            vivistickerUtils.handleIos16Video()
+            stkWVUtils.handleIos16Video()
           }
         }
       )
       if (this.inBgRemoveMode) {
         bgRemoveUtils.screenshot()
-      } else if (vivistickerUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
-        vivistickerUtils.copyWithScreenshotUrl(
-          vivistickerUtils.createUrlForJSON({ source: 'editor' }),
+      } else if (stkWVUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
+        stkWVUtils.copyWithScreenshotUrl(
+          stkWVUtils.createUrlForJSON({ source: 'editor' }),
           copyCallback
         )
-      } else if (vivistickerUtils.checkVersion('1.3')) {
-        vivistickerUtils.copyEditor(copyCallback)
+      } else if (stkWVUtils.checkVersion('1.3')) {
+        stkWVUtils.copyEditor(copyCallback)
       } else {
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ source: 'editor' }))
+        stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrlForJSON({ source: 'editor' }))
       }
     },
     handleDownload() {
-      if (!vivistickerUtils.checkVersion('1.34')) return
+      if (!stkWVUtils.checkVersion('1.34')) return
       if (this.isUploadingShadowImg) {
         notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
@@ -632,7 +632,7 @@ export default defineComponent({
         this.$store.commit('shadow/SET_UPLOADING_CB', {
           id: (layerUtils.getCurrConfig as IImage).id,
           cb: () => {
-            const task = () => vivistickerUtils.downloadEditor(downloadCallback)
+            const task = () => stkWVUtils.downloadEditor(downloadCallback)
             if (this.isProcessShadowImg) {
               let time = 0
               const interval = setInterval(() => {
@@ -651,12 +651,12 @@ export default defineComponent({
       }
 
       if (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1) {
-        vivistickerUtils.downloadWithScreenshotUrl(
-          vivistickerUtils.createUrlForJSON({ source: 'editor' }),
+        stkWVUtils.downloadWithScreenshotUrl(
+          stkWVUtils.createUrlForJSON({ source: 'editor' }),
           downloadCallback
         )
       } else {
-        vivistickerUtils.downloadEditor(downloadCallback)
+        stkWVUtils.downloadEditor(downloadCallback)
       }
     },
     async addImage(srcObj: SrcObj, aspectRatio: number) {
@@ -665,7 +665,7 @@ export default defineComponent({
       })
     },
     handleBgRemoveNext() {
-      if (!vivistickerUtils.checkVersion('1.35')) {
+      if (!stkWVUtils.checkVersion('1.35')) {
         this.handleBgRemoveNextOldVer()
         return
       }
@@ -673,7 +673,7 @@ export default defineComponent({
       if (!this.isInEditor) {
         const designId = generalUtils.generateAssetId()
         this.setEditorType('image')
-        vivistickerUtils.startEditing(
+        stkWVUtils.startEditing(
           'image',
           { plan: 0, assetId: '' },
           async () => {
@@ -781,7 +781,7 @@ export default defineComponent({
     // this is used for old version(< 1.35)
     handleBgRemoveNextOldVer() {
       if (!this.isInEditor) {
-        vivistickerUtils.startEditing(
+        stkWVUtils.startEditing(
           'image',
           { plan: 0, assetId: '' },
           async () => {

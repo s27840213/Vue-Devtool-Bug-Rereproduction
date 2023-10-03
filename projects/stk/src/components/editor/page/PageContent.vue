@@ -62,7 +62,7 @@ import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { SidebarPanelType } from '@nu/vivi-lib/store/types'
@@ -256,7 +256,7 @@ export default defineComponent({
       }
     },
     pageClickHandler(): void {
-      vivistickerUtils.deselect()
+      stkWVUtils.deselect()
     },
     onRightClick(event: MouseEvent) {
       if (this.$isTouchDevice()) {

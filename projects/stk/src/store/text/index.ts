@@ -6,7 +6,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
@@ -230,7 +230,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
   const routeName = router.currentRoute.value.name
   const isInPreview = routeName === 'Preview'
   const isInScreenshot = routeName === 'Screenshot'
-  const isFonLoaded = await vivistickerUtils.checkFontLoaded(face)
+  const isFonLoaded = await stkWVUtils.checkFontLoaded(face)
   const noArgo = 'https://template.vivipic.com/'
   const argo = 'https://media.vivipic.cc/'
   const isArgoAvailable = store.getters['text/getIsArgoAvailable']
@@ -241,7 +241,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) {
-          await vivistickerUtils.recordLoadedFont(face)
+          await stkWVUtils.recordLoadedFont(face)
           return cssUrl
         }
         throw Error(response.status.toString())
@@ -258,7 +258,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) {
-          await vivistickerUtils.recordLoadedFont(face)
+          await stkWVUtils.recordLoadedFont(face)
           return cssUrl
         }
         throw Error(response.status.toString())

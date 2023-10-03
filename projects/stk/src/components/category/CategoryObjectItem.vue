@@ -21,7 +21,7 @@ import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
@@ -58,24 +58,24 @@ export default defineComponent({
       // if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
       // console.log(generalUtils.deepCopy(this.item))
       if (this.item.type === 8 || this.item.has_frame) {
-        if (!vivistickerUtils.checkPro(this.item, 'frame')) return
+        if (!stkWVUtils.checkPro(this.item, 'frame')) return
         this.handleEditObject()
         return
       }
       if (this.item.type === 16) { // Giphy
         const item = this.item as any as IGif
-        vivistickerUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
+        stkWVUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
           type: 'gif',
           url: item.src.replace('-preview', item.has_d ? '-downsized' : '')
         })
         assetUtils.addAssetToRecentlyUsed(this.item, 'giphy')
-        vivistickerUtils.handleIos16Video()
+        stkWVUtils.handleIos16Video()
       } else if (!this.isInEditor) {
-        if (!vivistickerUtils.checkPro(this.item, 'object')) return
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
+        if (!stkWVUtils.checkPro(this.item, 'object')) return
+        stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrl(this.item))
         assetUtils.addAssetToRecentlyUsed(this.item, 'objects', 'svg')
-        vivistickerUtils.handleIos16Video()
-      } else vivistickerUtils.checkPro(this.item, 'object') && this.handleEditObject()
+        stkWVUtils.handleIos16Video()
+      } else stkWVUtils.checkPro(this.item, 'object') && this.handleEditObject()
     },
     click4in1(event: Event) {
       doubleTapUtils.click(event, {
@@ -90,23 +90,23 @@ export default defineComponent({
       })
     },
     handleEditObject() {
-      if (!vivistickerUtils.checkPro(this.item, 'object')) return
+      if (!stkWVUtils.checkPro(this.item, 'object')) return
       if (this.item.type === 7 || this.item.has_frame) {
         if (this.isInEditor) return assetUtils.addAsset(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects')
-        vivistickerUtils.startEditing('objectGroup', {
+        stkWVUtils.startEditing('objectGroup', {
           plan: this.item.plan,
           assetId: this.item.id,
           isFrame: this.item.has_frame,
           fit: this.item.fit ?? 0,
-        }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects'), vivistickerUtils.getAssetCallback(this.item))
+        }, stkWVUtils.getAssetInitiator(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects'), stkWVUtils.getAssetCallback(this.item))
       } else {
         if (this.isInEditor) return assetUtils.addAsset(this.item, { db: 'svg' })
-        vivistickerUtils.startEditing('object', {
+        stkWVUtils.startEditing('object', {
           plan: this.item.plan,
           isFrame: this.item.type === 8,
           assetId: this.item.id,
           fit: this.item.fit ?? 0,
-        }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg' }), vivistickerUtils.getAssetCallback(this.item))
+        }, stkWVUtils.getAssetInitiator(this.item, { db: 'svg' }), stkWVUtils.getAssetCallback(this.item))
       }
     },
     openGiphyMore() {

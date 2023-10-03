@@ -11,7 +11,7 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import logUtils from '@/utils/logUtils'
 import popupUtils from '@/utils/popupUtils'
 import themeUtils from '@/utils/themeUtils'
-import vivistickerUtils, { MODULE_TYPE_MAPPING } from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils, { MODULE_TYPE_MAPPING } from '@nu/vivi-lib/utils/stkWVUtils'
 import { captureException } from '@sentry/browser'
 import { cloneDeep, filter, find, pull } from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
@@ -134,7 +134,7 @@ export default function (this: any) {
             if (keyword) {
               commit('SET_STATE', { keyword })
             }
-            await vivistickerUtils.listAsset(key)
+            await stkWVUtils.listAsset(key)
           }
         } else {
           commit('SET_pending', { recently: false })
@@ -189,7 +189,7 @@ export default function (this: any) {
         result.content = recently.content.concat(category.content)
         commit('SET_CATEGORIES', result)
         if (key) {
-          await vivistickerUtils.listAsset(key)
+          await stkWVUtils.listAsset(key)
         }
         if (category.content.length === 0) {
           dispatch('getMoreContent')

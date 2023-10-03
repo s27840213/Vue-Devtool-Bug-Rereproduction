@@ -104,7 +104,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils, { isFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import { isTextFill } from '@nu/vivi-lib/interfaces/format'
 import { ColorEventType } from '@nu/vivi-lib/store/types'
@@ -291,7 +291,7 @@ export default defineComponent({
       }
     },
     async onEffectClick(effect: IEffect): Promise<void> {
-      if (!vivistickerUtils.checkPro(effect, 'text')) return
+      if (!stkWVUtils.checkPro(effect, 'text')) return
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
 
@@ -301,7 +301,7 @@ export default defineComponent({
       }
     },
     async handleSelectInput(attrs: IEffectOptionSelect['select'][number]) {
-      if (!vivistickerUtils.checkPro(attrs, 'text')) return
+      if (!stkWVUtils.checkPro(attrs, 'text')) return
       await this.setEffect({ effect: attrs.preset })
       this.recordChange()
     },

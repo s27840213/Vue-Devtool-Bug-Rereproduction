@@ -67,7 +67,7 @@ import generalUtils from '@/utils/generalUtils'
 import ImageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -152,7 +152,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration }, this.subLayerIndex)
         }
       } else if (!json.decoration && config.decoration) {
-        vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'd' })
+        stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'd' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: undefined }, this.subLayerIndex)
       }
 
@@ -176,7 +176,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop }, this.subLayerIndex)
         }
       } else if (!json.decorationTop && config.decorationTop) {
-        vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'dt' })
+        stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'dt' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: undefined }, this.subLayerIndex)
       }
 
@@ -236,8 +236,8 @@ export default defineComponent({
         })
       }
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
-      vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
-    } else vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+    } else stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
   },
   mounted() {
     if (this.config.clips.length === 1) {

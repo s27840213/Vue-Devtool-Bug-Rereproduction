@@ -3,7 +3,7 @@ import { IListServiceParams, IListServiceResponse } from '@nu/vivi-lib/interface
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 
 class ListService {
   getList(params: IListServiceParams) {
@@ -117,7 +117,7 @@ class ListService {
 
   // For other usage
   addDesign(id: string, type: string, params: IListServiceParams = {}) {
-    if (vivistickerUtils.addDesignDisabled()) return new Promise<{ flag: number }>(resolve => resolve({ flag: 0 }))
+    if (stkWVUtils.addDesignDisabled()) return new Promise<{ flag: number }>(resolve => resolve({ flag: 0 }))
     const data = {
       token: '1',
       type,
@@ -144,12 +144,12 @@ class ListService {
   }
 
   getRecentlyUsedColor() {
-    return vivistickerUtils.listAsset('color')
+    return stkWVUtils.listAsset('color')
   }
 
   addRecentlyUsedColor(color: string) {
-    vivistickerUtils.addAsset('color', { id: color })
-    if (vivistickerUtils.addDesignDisabled()) return
+    stkWVUtils.addAsset('color', { id: color })
+    if (stkWVUtils.addDesignDisabled()) return
     axios.request<IListServiceResponse>({
       url: '/add-design',
       method: 'POST',

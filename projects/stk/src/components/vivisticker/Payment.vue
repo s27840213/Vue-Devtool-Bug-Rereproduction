@@ -75,7 +75,7 @@ import ToggleBtn from '@/components/global/ToggleBtn.vue'
 import { IPaymentPending, IPrices, isV1_42 } from '@/interfaces/vivisticker'
 import constantData from '@/utils/constantData'
 import networkUtils from '@/utils/networkUtils'
-import vivistickerUtils, { IViviStickerProFeatures } from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils, { IViviStickerProFeatures } from '@nu/vivi-lib/utils/stkWVUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
@@ -172,7 +172,7 @@ export default defineComponent({
     }
   },
   created() {
-    const userInfo = vivistickerUtils.getUserInfoFromStore()
+    const userInfo = stkWVUtils.getUserInfoFromStore()
     const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(this.$i18n.locale)
     this.defaultTrialToggled = this.payment.trialCountry.includes(locale) || this.isOldPrice
     this.isTrialToggled = this.defaultTrialToggled
@@ -265,7 +265,7 @@ export default defineComponent({
       return this.planSelected === 'monthly' || this.isPaymentPending
     },
     isOldPrice() {
-      return vivistickerUtils.isOldPrice
+      return stkWVUtils.isOldPrice
     }
   },
   methods: {
@@ -288,11 +288,11 @@ export default defineComponent({
       if (this.isPaymentPending) return
       if (option === 'annually' && (this.isTrialDisabled || !this.isTrialToggled)) option = 'com.nuphototw.vivisticker.yearly_free0'
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
-      vivistickerUtils.sendToIOS('SUBSCRIBE', { option })
+      stkWVUtils.sendToIOS('SUBSCRIBE', { option })
       if (timeout) {
         setTimeout(() => {
           this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: false })
-          vivistickerUtils.appToast('Network timeout error')
+          stkWVUtils.appToast('Network timeout error')
         }, timeout)
       }
     },

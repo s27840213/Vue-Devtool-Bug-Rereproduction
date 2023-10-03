@@ -32,7 +32,7 @@ import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -92,7 +92,7 @@ export default defineComponent({
       this.isInEditor ? this.handleCurrSelectedImage(type) : this.handleIOSImage(type)
     },
     handleIOSImage(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
-      vivistickerUtils.getIosImg()
+      stkWVUtils.getIosImg()
         .then(async (images: Array<string>) => {
           if (images.length) {
             const src = imageUtils.getSrc({

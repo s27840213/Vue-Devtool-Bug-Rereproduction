@@ -15,7 +15,7 @@ import shapeUtils from './shapeUtils'
 import TextPropUtils from './textPropUtils'
 import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -265,7 +265,7 @@ class StepsUtils {
       this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
       this.currStep = this.steps.length - 1
       // Don't upload the design when initialize the steps
-      vivistickerUtils.saveDesign()
+      stkWVUtils.saveDesign()
     }
     // console.warn(generalUtils.deepCopy(this.steps))
   }
@@ -291,7 +291,7 @@ class StepsUtils {
       })
     }
 
-    vivistickerUtils.saveDesign()
+    stkWVUtils.saveDesign()
   }
 
   delayedRecord(key: string, interval = 300) {
@@ -323,7 +323,7 @@ class StepsUtils {
       }
     })
 
-    vivistickerUtils.saveDesign()
+    stkWVUtils.saveDesign()
   }
 
   updateHead(pageIndex: number, layerIndex: number, props: any, subLayerIdx = -1) {

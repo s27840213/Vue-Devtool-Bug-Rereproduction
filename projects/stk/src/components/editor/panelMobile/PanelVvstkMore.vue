@@ -35,7 +35,7 @@ div(class="panel-vvstk-more")
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
 import localeUtils from '@/utils/localeUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -82,7 +82,7 @@ export default defineComponent({
       return this.userInfo.hostId
     },
     mainOptions(): OptionConfig[] {
-      return [...vivistickerUtils.checkOSVersion('16.0') ? [
+      return [...stkWVUtils.checkOSVersion('16.0') ? [
         {
           text: `${this.$t('STK0032')}`,
           icon: 'vivisticker_play-circle',
@@ -97,7 +97,7 @@ export default defineComponent({
       {
         text: 'Vivisticker Pro',
         icon: 'pro',
-        action: () => { vivistickerUtils.openPayment() }
+        action: () => { stkWVUtils.openPayment() }
       },
       {
         text: `${this.$t('NN0174')}`,
@@ -253,7 +253,7 @@ export default defineComponent({
       editorUtils.setCloseMobilePanelFlag(true)
     },
     handleShowIOS16Tutorial() {
-      vivistickerUtils.openFullPageVideo('iOS')
+      stkWVUtils.openFullPageVideo('iOS')
     },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')
@@ -276,7 +276,7 @@ export default defineComponent({
     },
     handleUpdateLocale(locale: string) {
       if (locale === this.$i18n.locale) return
-      vivistickerUtils.updateLocale(locale).then((success) => {
+      stkWVUtils.updateLocale(locale).then((success) => {
         success && location.reload()
       })
     },
@@ -297,19 +297,19 @@ export default defineComponent({
     },
     toggleDebugMode() {
       this.debugMode = !this.debugMode
-      vivistickerUtils.setState('debugMode', { value: this.debugMode })
+      stkWVUtils.setState('debugMode', { value: this.debugMode })
       if (this.debugMode) {
-        vivistickerUtils.recordDebugModeEntrance()
+        stkWVUtils.recordDebugModeEntrance()
       }
     },
     switchDomain(domain: string) {
-      vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain })
+      stkWVUtils.sendToIOS('SWITCH_DOMAIN', { domain })
     },
     sendTestEvent(option: string) {
-      vivistickerUtils.sendToIOS('EVENT_TEST', { option })
+      stkWVUtils.sendToIOS('EVENT_TEST', { option })
     },
     handleImportDesign() {
-      vivistickerUtils.importDesign()
+      stkWVUtils.importDesign()
       editorUtils.setCloseMobilePanelFlag(true)
     },
     iconWidth(icon: string): string {

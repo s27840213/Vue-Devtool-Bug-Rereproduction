@@ -11,7 +11,7 @@ import ImageUtils from './imageUtils'
 import layerFactary from './layerFactary'
 import LayerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
-import vivistickerUtils from './vivistickerUtils'
+import stkWVUtils from './stkWVUtils'
 import zindexUtils from './zindexUtils'
 
 class FrameUtils {
@@ -164,7 +164,7 @@ class FrameUtils {
 
   iosPhotoSelect(layerInfo: IExtendLayerInfo, config: IImage) {
     const { pageIndex, layerIndex, subLayerIdx = 0, priPrimaryLayerIndex = -1 } = layerInfo
-    return vivistickerUtils.getIosImg()
+    return stkWVUtils.getIosImg()
       .then(async (images: Array<string>) => {
         if (images.length) {
           const { imgX, imgY, imgWidth, imgHeight } = await ImageUtils.getClipImgDimension(config, ImageUtils.getSrc({

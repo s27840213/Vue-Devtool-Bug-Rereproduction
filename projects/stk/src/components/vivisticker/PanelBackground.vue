@@ -115,7 +115,7 @@ import colorUtils from '@/utils/colorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
@@ -309,7 +309,7 @@ export default defineComponent({
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
         await this.getRecAndCate({ reset, key: 'background' })
-        await vivistickerUtils.listAsset('backgroundColor')
+        await stkWVUtils.listAsset('backgroundColor')
       })
     colorUtils.setCurrEvent(ColorEventType.background)
   },
@@ -333,7 +333,7 @@ export default defineComponent({
     currActivePanel(newVal, oldVal) {
       if (oldVal === 'color-picker') {
         if (newVal === 'none') {
-          vivistickerUtils.commitNewBgColor()
+          stkWVUtils.commitNewBgColor()
         }
         this.setHasNewBgColor(false)
       }
@@ -413,8 +413,8 @@ export default defineComponent({
           pageIndex: pageUtils.currFocusPageIndex,
           color: color
         })
-      } else vivistickerUtils.sendScreenshotUrl(this.getColorUrl(color, false))
-      vivistickerUtils.addAsset('backgroundColor', { id: color.replace('#', '') })
+      } else stkWVUtils.sendScreenshotUrl(this.getColorUrl(color, false))
+      stkWVUtils.addAsset('backgroundColor', { id: color.replace('#', '') })
       this.addRecentlyBgColor(color)
     },
     getColorOverlappingWhite(color: string): string {
@@ -456,13 +456,13 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          vivistickerUtils.setShowAllRecently('background', true)
+          stkWVUtils.setShowAllRecently('background', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        vivistickerUtils.setIsInCategory('background', true)
+        stkWVUtils.setIsInCategory('background', true)
       } else {
-        vivistickerUtils.setShowAllRecently('background', false)
+        stkWVUtils.setShowAllRecently('background', false)
       }
     },
     handleLoadMore() {
@@ -482,33 +482,33 @@ export default defineComponent({
       this.setIsInBgShare(true)
     },
     handleSave() {
-      vivistickerUtils.sendScreenshotUrl(
-        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, false),
+      stkWVUtils.sendScreenshotUrl(
+        this.shareItem ? stkWVUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, false),
         'download'
       )
       if (this.shareItem) {
         assetUtils.addAssetToRecentlyUsed(this.shareItem, 'background')
       } else {
-        vivistickerUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
+        stkWVUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
         this.addRecentlyBgColor(this.shareColor)
       }
     },
     handleStory() {
-      vivistickerUtils.sendScreenshotUrl(
-        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, true),
+      stkWVUtils.sendScreenshotUrl(
+        this.shareItem ? stkWVUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, true),
         'IGStory'
       )
       if (this.shareItem) {
         assetUtils.addAssetToRecentlyUsed(this.shareItem, 'background')
       } else {
-        vivistickerUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
+        stkWVUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
         this.addRecentlyBgColor(this.shareColor)
       }
     },
     handleOpenColorPicker() {
       if (this.isInEditor) return this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
       this.$emit('openColorPicker')
-      vivistickerUtils.setHasNewBgColor(true)
+      stkWVUtils.setHasNewBgColor(true)
     },
     handleShowAllRecentlyBgColors(bool: boolean) {
       this.showAllRecentlyBgColors = bool

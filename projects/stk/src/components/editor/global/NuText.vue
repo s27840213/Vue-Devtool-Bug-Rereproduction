@@ -47,7 +47,7 @@ import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import _, { isEqual, max, omit, round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -302,7 +302,7 @@ export default defineComponent({
           await this.resizeCallback()
           await this.drawTextBg() // Redraw TextBg after resize.
           if (this.$route.name === 'Screenshot') {
-            vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+            stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           }
           if (!this.isCurveText) {
             generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)

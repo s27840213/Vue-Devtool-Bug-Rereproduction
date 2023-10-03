@@ -9,7 +9,7 @@ import store from '@/store/index'
 import localStorageUtils from '@/utils/localStorageUtils'
 import logUtils from '@/utils/logUtils'
 import popupUtils from '@/utils/popupUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { cloneDeep, filter, find, map, pull } from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
@@ -140,7 +140,7 @@ function keyword2tag(_keyword: string): { keyword: string, type: 0 | 1 } {
 const actions: ActionTree<IGiphyState, unknown> = {
   async initGiphy({ commit, dispatch }) {
     dispatch('getCategories').then(() => {
-      vivistickerUtils.listAsset('giphy')
+      stkWVUtils.listAsset('giphy')
     })
 
     commit('SET_pending', { favorites: true })

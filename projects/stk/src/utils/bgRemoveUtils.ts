@@ -9,7 +9,7 @@ import { IUploadAssetResponse } from '@nu/vivi-lib/interfaces/upload'
 import store from '@/store'
 import { LayerProcessType, LayerType, SidebarPanelType } from '@nu/vivi-lib/store/types'
 import logUtils from '@/utils/logUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
@@ -335,7 +335,7 @@ class BgRemoveUtils {
 
   screenshot() {
     const src = this.canvas.toDataURL('image/png;base64')
-    vivistickerUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
+    stkWVUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
       type: 'png',
       url: src
     })
@@ -349,7 +349,7 @@ class BgRemoveUtils {
     const src = trimedCanvas.toDataURL('image/png;base64')
 
     const assetId = generalUtils.generateAssetId()
-    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'bgRemove', name: assetId, toast: false }, 'save-image-from-url').then((data) => {
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'bgRemove', name: assetId, toast: false }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
       if (callback) {
         return callback(_data, assetId, width / height, trimmedCanvasInfo)
@@ -365,8 +365,8 @@ class BgRemoveUtils {
 
     const name = generalUtils.generateAssetId()
 
-    const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
-    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId }, 'save-image-from-url').then((data) => {
+    const key = `mydesign-${stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
       if (callback) {
         return callback(_data, `${key}/${designId}/${name}`, width / height, trimmedCanvasInfo)
@@ -375,10 +375,10 @@ class BgRemoveUtils {
   }
 
   moveOldBgRemoveImages(src: string, callback?: (path: string) => void) {
-    const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
+    const key = `mydesign-${stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const name = generalUtils.generateAssetId()
-    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId: editingDesignId }, 'save-image-from-url').then((data) => {
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId: editingDesignId }, 'save-image-from-url').then((data) => {
       if (callback) {
         const path = `${key}/${editingDesignId}/${name}`
         return callback(path)

@@ -21,7 +21,7 @@ import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import pageUtils from '@/utils/pageUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 
@@ -40,10 +40,10 @@ export default defineComponent({
   methods: {
     addTemplate(photo = false) {
       if (photo) {
-        vivistickerUtils.getIosImg()
+        stkWVUtils.getIosImg()
           .then(async (images: Array<string>) => {
             if (!images.length) return
-            vivistickerUtils.startEditing(
+            stkWVUtils.startEditing(
               this.igLayout,
               { plan: 0, assetId: '' },
               async () => {
@@ -67,17 +67,17 @@ export default defineComponent({
                 })
                 return true
               },
-              vivistickerUtils.getEmptyCallback()
+              stkWVUtils.getEmptyCallback()
             )
           })
       } else {
-        vivistickerUtils.startEditing(
+        stkWVUtils.startEditing(
           this.igLayout,
           { plan: 0, assetId: '' },
           async () => {
             return true
           },
-          vivistickerUtils.getEmptyCallback()
+          stkWVUtils.getEmptyCallback()
         )
       }
       editorUtils.setShowMobilePanel(false)

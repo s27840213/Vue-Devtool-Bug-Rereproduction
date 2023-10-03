@@ -4,7 +4,7 @@
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
 import textUtils from '@/utils/textUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import generalUtils from './generalUtils'
 
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
@@ -121,7 +121,7 @@ class CssConveter {
       const insertIndex = fontFaces.indexOf(anchor)
       fontFaces = [
         ...fontFaces.slice(0, insertIndex),
-        vivistickerUtils.userSettings.emojiSetting,
+        stkWVUtils.userSettings.emojiSetting,
         ...fontFaces.slice(insertIndex),
       ]
     }

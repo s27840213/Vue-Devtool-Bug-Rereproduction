@@ -30,7 +30,7 @@ import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
 import unitUtils, { PRECISION } from './unitUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import ZindexUtils from './zindexUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
@@ -210,7 +210,7 @@ class AssetUtils {
     }
     GroupUtils.deselect()
     store.commit('SET_currActivePageIndex', targetPageIndex)
-    vivistickerUtils.scrollIntoPage(targetPageIndex, 300)
+    stkWVUtils.scrollIntoPage(targetPageIndex, 300)
     if (recordStep) {
       stepsUtils.record()
     }
@@ -757,7 +757,7 @@ class AssetUtils {
         layerUtils.setAutoResizeNeededForLayersInPages(jsonDataList, true)
         pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         nextTick(() => {
-          vivistickerUtils.scrollIntoPage(targetIndex, 300)
+          stkWVUtils.scrollIntoPage(targetIndex, 300)
           if (isDetailPage && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
             const { width: pageWidth = 1000, physicalWidth: pagePhysicalWidth = pageWidth, unit: pageUnit = 'px' } = this.getPage(pageUtils.currFocusPageIndex)
@@ -936,7 +936,7 @@ class AssetUtils {
         recentlyUsed.list.unshift(item)
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
-      if (key) vivistickerUtils.addAsset(key, item)
+      if (key) stkWVUtils.addAsset(key, item)
       const params = {} as { [key: string]: any }
       if (typeCategory === 'font') {
         params.is_asset = (src === 'private' || src === 'admin') ? 1 : 0

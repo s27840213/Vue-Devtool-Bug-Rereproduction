@@ -44,7 +44,7 @@ div(class="slide-user-settings")
 </template>
 
 <script lang="ts">
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
@@ -59,7 +59,7 @@ export default defineComponent({
       userSettings: 'vivisticker/getUserSettings'
     }),
     userSettingKeys(): string[] {
-      return Object.keys(vivistickerUtils.getDefaultUserSettings())
+      return Object.keys(stkWVUtils.getDefaultUserSettings())
     },
     inInitialState(): boolean {
       return this.state === 'initial'
@@ -80,13 +80,13 @@ export default defineComponent({
       }
     },
     getDescription(key: string) {
-      return this.transformText(vivistickerUtils.getUserSettingDescription(key))
+      return this.transformText(stkWVUtils.getUserSettingDescription(key))
     },
     getIsList(key: string) {
-      return vivistickerUtils.getUserSettingIsList(key)
+      return stkWVUtils.getUserSettingIsList(key)
     },
     getListOptions(key: string) {
-      return vivistickerUtils.getUserSettingOptions(key)
+      return stkWVUtils.getUserSettingOptions(key)
     },
     getOptionDescription(key: string, option: string) {
       return this.transformText(this.getListOptions(key).find(o => o.val === option)?.description ?? '<P>')
@@ -110,7 +110,7 @@ export default defineComponent({
     handleSelect(key: string, val: any) {
       this.updateUserSettings({ [key]: val })
       if (key === 'emojiSetting') {
-        vivistickerUtils.addFontForEmoji()
+        stkWVUtils.addFontForEmoji()
       }
     }
   }

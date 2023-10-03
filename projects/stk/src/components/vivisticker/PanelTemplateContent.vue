@@ -76,7 +76,7 @@ import assetUtils from '@/utils/assetUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -345,13 +345,13 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          vivistickerUtils.setShowAllRecently('template', true)
+          stkWVUtils.setShowAllRecently('template', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        vivistickerUtils.setIsInCategory('template', true)
+        stkWVUtils.setIsInCategory('template', true)
       } else {
-        vivistickerUtils.setShowAllRecently('template', false)
+        stkWVUtils.setShowAllRecently('template', false)
       }
     },
     handleLoadMore() {
@@ -387,20 +387,20 @@ export default defineComponent({
     },
     addGroupTemplate() {
       if (!this.currentGroup) return
-      if (!vivistickerUtils.checkPro(this.currentGroup, 'template')) return
-      if (pageUtils.getPages.length + this.currentGroup.content_ids.length > vivistickerUtils.MAX_PAGE_NUM) return vivistickerUtils.showMaxPageNumModal()
+      if (!stkWVUtils.checkPro(this.currentGroup, 'template')) return
+      if (pageUtils.getPages.length + this.currentGroup.content_ids.length > stkWVUtils.MAX_PAGE_NUM) return stkWVUtils.showMaxPageNumModal()
       const cb = async () => {
-        await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, vivistickerUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`, !this.isInEditor)
+        await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, stkWVUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`, !this.isInEditor)
         return true
       }
       if (this.isInEditor) {
         cb()
       } else {
-        vivistickerUtils.startEditing(
+        stkWVUtils.startEditing(
           this.igLayout, {
             plan: this.currentGroup.plan,
             assetId: this.currentGroup.id
-          }, cb, vivistickerUtils.getAssetCallback(this.currentGroup as any)
+          }, cb, stkWVUtils.getAssetCallback(this.currentGroup as any)
         )
       }
     },

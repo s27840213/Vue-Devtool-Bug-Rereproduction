@@ -45,7 +45,7 @@ import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -64,10 +64,10 @@ export default defineComponent({
       myDesignBuffer: 'vivisticker/getMyDesignBuffer'
     }) as { myDesignBuffer: () => IMyDesign },
     isTemplate() {
-      return vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type) === 'template'
+      return stkWVUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type) === 'template'
     },
     showDownload() {
-      return vivistickerUtils.checkVersion('1.34') && !this.isTemplate
+      return stkWVUtils.checkVersion('1.34') && !this.isTemplate
     }
   },
   methods: {
@@ -76,19 +76,19 @@ export default defineComponent({
       addDesign: 'vivisticker/UPDATE_addDesign'
     }),
     handleEdit() {
-      if (this.myDesignBuffer.type === 'object' && !vivistickerUtils.checkPro(this.myDesignBuffer.assetInfo, this.myDesignBuffer.assetInfo.isFrame ? 'frame' : 'object')) return
+      if (this.myDesignBuffer.type === 'object' && !stkWVUtils.checkPro(this.myDesignBuffer.assetInfo, this.myDesignBuffer.assetInfo.isFrame ? 'frame' : 'object')) return
       const mydesign = generalUtils.deepCopy(this.myDesignBuffer)
       editorUtils.setCloseMobilePanelFlag(true)
       setTimeout(() => {
-        vivistickerUtils.initWithMyDesign(mydesign, {
+        stkWVUtils.initWithMyDesign(mydesign, {
           callback: (pages: Array<IPage>) => {
             if (mydesign.assetInfo.isFrame) {
               const page = pages[0]
               page.layers.forEach(l => {
                 l.initFromMydesign = true
               })
-              vivistickerUtils.initLoadingFlags(page, () => {
-                vivistickerUtils.handleFrameClipError(page, true)
+              stkWVUtils.initLoadingFlags(page, () => {
+                stkWVUtils.handleFrameClipError(page, true)
               })
             }
           }
@@ -96,16 +96,16 @@ export default defineComponent({
       }, 300)
     },
     handleDuplicate() {
-      vivistickerUtils.fetchMyDesign(this.myDesignBuffer).then((data) => {
+      stkWVUtils.fetchMyDesign(this.myDesignBuffer).then((data) => {
         const json = {
           ...this.myDesignBuffer,
           id: generalUtils.generateAssetId(),
           updateTime: new Date(Date.now()).toISOString()
         }
-        vivistickerUtils.addAsset(`mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type)}`, json, 0, {
+        stkWVUtils.addAsset(`mydesign-${stkWVUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type)}`, json, 0, {
           config: { pages: data.pages }
         }).then(() => {
-          vivistickerUtils.callIOSAsAPI('CLONE_IMAGE', { type: 'mydesign', srcId: this.myDesignBuffer.id, desId: json.id }, `screenshot-mydesign-${this.myDesignBuffer.id}-${json.id}`).then((data) => {
+          stkWVUtils.callIOSAsAPI('CLONE_IMAGE', { type: 'mydesign', srcId: this.myDesignBuffer.id, desId: json.id }, `screenshot-mydesign-${this.myDesignBuffer.id}-${json.id}`).then((data) => {
             this.addDesign({
               tab: 'template',
               list: [json]
@@ -116,25 +116,25 @@ export default defineComponent({
       })
     },
     handleDownload() {
-      vivistickerUtils.fetchMyDesign(this.myDesignBuffer).then(data => {
-        if (['object', 'objectGroup'].includes(this.myDesignBuffer.type) && vivistickerUtils.checkForEmptyFrame(data.pages)) {
+      stkWVUtils.fetchMyDesign(this.myDesignBuffer).then(data => {
+        if (['object', 'objectGroup'].includes(this.myDesignBuffer.type) && stkWVUtils.checkForEmptyFrame(data.pages)) {
           editorUtils.setCloseMobilePanelFlag(true)
           // handle Dialog and File-selector
-          vivistickerUtils.initWithMyDesign(this.myDesignBuffer, {
+          stkWVUtils.initWithMyDesign(this.myDesignBuffer, {
             callback: (pages: Array<IPage>) => {
               const page = pages[0]
               page.layers.forEach(l => {
                 l.initFromMydesign = true
               })
-              vivistickerUtils.initLoadingFlags(page, () => {
-                vivistickerUtils.handleFrameClipError(page, true)
+              stkWVUtils.initLoadingFlags(page, () => {
+                stkWVUtils.handleFrameClipError(page, true)
               })
             },
             tab: ''
           })
         } else {
           const pages = generalUtils.deepCopy(data.pages)
-          vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign', asset: this.myDesignBuffer }), 'download')
+          stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrlForJSON({ page: pages[0], source: 'mydesign', asset: this.myDesignBuffer }), 'download')
         }
       })
     },
@@ -157,15 +157,15 @@ export default defineComponent({
       )
     },
     async handleReport() {
-      vivistickerUtils.setLoadingOverlay([this.$t('STK0087')])
+      stkWVUtils.setLoadingOverlay([this.$t('STK0087')])
       const {
         id,
         type,
         assetInfo
       } = this.myDesignBuffer
-      const data = await vivistickerUtils.fetchMyDesign(this.myDesignBuffer)
+      const data = await stkWVUtils.fetchMyDesign(this.myDesignBuffer)
       await uploadUtils.uploadReportedDesign({ id, editorType: type, assetInfo, pages: data.pages } as ITempDesign, { id: this.myDesignBuffer.id })
-      vivistickerUtils.setLoadingOverlayShow(false)
+      stkWVUtils.setLoadingOverlayShow(false)
       modalUtils.setModalInfo(
         `${this.$t('STK0089')}`,
         [`${this.$t('STK0090')}`],
@@ -175,7 +175,7 @@ export default defineComponent({
       )
     },
     confirmDeletion() {
-      vivistickerUtils.deleteAsset(`mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type)}`, this.myDesignBuffer.id, 'mydesign')
+      stkWVUtils.deleteAsset(`mydesign-${stkWVUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type)}`, this.myDesignBuffer.id, 'mydesign')
       editorUtils.setCloseMobilePanelFlag(true)
     }
   }

@@ -83,7 +83,7 @@ import i18n from '@nu/vivi-lib/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IGif, IGifCategory, IGifCategoryExtend, isIGifCategory, isITag, ITagExtend } from '@/interfaces/giphy'
 import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
@@ -370,15 +370,15 @@ export default defineComponent({
         this.resetCategoryContent()
         this.resetTagContent()
         if (!categoryName) {
-          vivistickerUtils.setShowAllRecently('object', false)
+          stkWVUtils.setShowAllRecently('object', false)
           return
         }
 
         const isRecent = categoryName === this.$t('NN0024')
         if (!isRecent) this.getCategoryContent(categoryName)
-        vivistickerUtils.setShowAllRecently('object', isRecent)
+        stkWVUtils.setShowAllRecently('object', isRecent)
       }
-      vivistickerUtils.setIsInCategory('object', true)
+      stkWVUtils.setIsInCategory('object', true)
     },
     handleLoadMore() {
       if (this.isSearchingTag) {
@@ -391,7 +391,7 @@ export default defineComponent({
     },
     click4in1(target: unknown) {
       this.searchFavorites(target)
-      vivistickerUtils.setIsInCategory('object', true)
+      stkWVUtils.setIsInCategory('object', true)
     },
     toggleFavorites4in1(target: ITagExtend | IGifCategoryExtend) {
       if (isITag(target)) {

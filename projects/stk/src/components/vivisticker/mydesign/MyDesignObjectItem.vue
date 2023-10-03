@@ -22,7 +22,7 @@ import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -42,7 +42,7 @@ export default defineComponent({
       selectedDesigns: 'vivisticker/getSelectedDesigns'
     }),
     src(): string {
-      return vivistickerUtils.getThumbSrc('mydesign', this.item.id, this.item.ver)
+      return stkWVUtils.getThumbSrc('mydesign', this.item.id, this.item.ver)
     }
   },
   methods: {
@@ -60,32 +60,32 @@ export default defineComponent({
         return
       }
       if (this.item.assetInfo.isFrame) {
-        if (!vivistickerUtils.checkPro(this.item.assetInfo, 'frame')) return
-        vivistickerUtils.fetchMyDesign(this.item).then(data => {
-          if (vivistickerUtils.checkForEmptyFrame(data.pages)) {
+        if (!stkWVUtils.checkPro(this.item.assetInfo, 'frame')) return
+        stkWVUtils.fetchMyDesign(this.item).then(data => {
+          if (stkWVUtils.checkForEmptyFrame(data.pages)) {
             // handle Dialog and File-selector
-            vivistickerUtils.initWithMyDesign(this.item, {
+            stkWVUtils.initWithMyDesign(this.item, {
               callback: (pages: Array<IPage>) => {
                 const page = pages[0]
                 page.layers.forEach(l => {
                   l.initFromMydesign = true
                 })
-                vivistickerUtils.initLoadingFlags(page, () => {
-                  vivistickerUtils.handleFrameClipError(page, true)
+                stkWVUtils.initLoadingFlags(page, () => {
+                  stkWVUtils.handleFrameClipError(page, true)
                 })
               },
               tab: ''
             })
           } else {
             const pages = generalUtils.deepCopy(data.pages)
-            vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign', asset: this.item }))
+            stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrlForJSON({ page: pages[0], source: 'mydesign', asset: this.item }))
           }
         })
       } else {
-        if (!vivistickerUtils.checkPro(this.item.assetInfo, 'object')) return
-        vivistickerUtils.fetchMyDesign(this.item).then(data => {
+        if (!stkWVUtils.checkPro(this.item.assetInfo, 'object')) return
+        stkWVUtils.fetchMyDesign(this.item).then(data => {
           const pages = generalUtils.deepCopy(data.pages)
-          vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign' }))
+          stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrlForJSON({ page: pages[0], source: 'mydesign' }))
         })
       }
     },

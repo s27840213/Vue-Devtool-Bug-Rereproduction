@@ -21,7 +21,7 @@ div(class="my-design-text-item" @click="editTemplate")
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -38,7 +38,7 @@ export default defineComponent({
       selectedDesigns: 'vivisticker/getSelectedDesigns'
     }),
     src(): string {
-      return vivistickerUtils.getThumbSrc('mydesign', this.item.id, this.item.ver)
+      return stkWVUtils.getThumbSrc('mydesign', this.item.id, this.item.ver)
     },
     strPageIndex(): string {
       return `${this.item.assetInfo.pageNum}`
@@ -68,7 +68,7 @@ export default defineComponent({
         this.handleToggleDesignSelected()
         return
       }
-      vivistickerUtils.initWithMyDesign(this.item, {
+      stkWVUtils.initWithMyDesign(this.item, {
         callback: (pages: Array<IPage>) => {
           pages.forEach((page: IPage) => {
             page.layers.forEach(l => {

@@ -119,7 +119,7 @@ class CssConveter {
     //   const insertIndex = fontFaces.indexOf(anchor)
     //   fontFaces = [
     //     ...fontFaces.slice(0, insertIndex),
-    //     vivistickerUtils.userSettings.emojiSetting,
+    //     stkWVUtils.userSettings.emojiSetting,
     //     ...fontFaces.slice(insertIndex),
     //   ]
     // }

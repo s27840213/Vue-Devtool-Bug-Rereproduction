@@ -24,7 +24,7 @@ import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -74,7 +74,7 @@ export default defineComponent({
   },
   created() {
     window.fetchDesign = this.fetchDesign
-    vivistickerUtils.registerCallbacks('screenshot')
+    stkWVUtils.registerCallbacks('screenshot')
   },
   computed: {
     ...(mapGetters({
@@ -168,7 +168,7 @@ export default defineComponent({
               assetId: id
             }
 
-            vivistickerUtils.initLoadingFlagsForOneLayer(() => {
+            stkWVUtils.initLoadingFlagsForOneLayer(() => {
               this.onload()
             })
 
@@ -206,7 +206,7 @@ export default defineComponent({
 
             const scaleRatio = photoWidth / boundingWidth
 
-            vivistickerUtils.initLoadingFlagsForOneLayer(() => {
+            stkWVUtils.initLoadingFlagsForOneLayer(() => {
               this.onload()
             })
 
@@ -235,7 +235,7 @@ export default defineComponent({
           //   const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
           //   layerUtils.setAutoResizeNeededForLayersInPage(page, true)
           //   pageUtils.setPages([page])
-          //   vivistickerUtils.initLoadingFlags({ layers: [json] }, () => {
+          //   stkWVUtils.initLoadingFlags({ layers: [json] }, () => {
           //     this.onload()
           //   })
 
@@ -298,11 +298,11 @@ export default defineComponent({
               return
             }
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-            vivistickerUtils.initLoadingFlags(page, () => {
+            stkWVUtils.initLoadingFlags(page, () => {
               this.onload()
             }, () => this.onTimeout(`screenshot-${query}`), noBg)
             pageUtils.setPages([page])
-            if (vivistickerUtils.checkVersion('1.31')) {
+            if (stkWVUtils.checkVersion('1.31')) {
               const newSize = {
                 width: page.width * 2,
                 height: page.height * 2
@@ -328,7 +328,7 @@ export default defineComponent({
             }
             resizeUtils.resizePage(-1, page, newSize)
             const genThumb = () => {
-              vivistickerUtils.callIOSAsAPI('GEN_THUMB', {
+              stkWVUtils.callIOSAsAPI('GEN_THUMB', {
                 type: 'mydesign',
                 id: designId,
                 width: page.width,
@@ -337,7 +337,7 @@ export default defineComponent({
                 y: 0,
                 needCrop: 0
               }, 'gen-thumb', { timeout: -1 }).then(data => {
-                vivistickerUtils.sendToIOS('INFORM_WEB', {
+                stkWVUtils.sendToIOS('INFORM_WEB', {
                   info: {
                     event: 'gen-thumb-done',
                     flag: data?.flag ?? '1',
@@ -357,7 +357,7 @@ export default defineComponent({
               return
             }
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-            vivistickerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false, 10000)
+            stkWVUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false, 10000)
             pageUtils.setPages([page])
             this.usingJSON = true
             break
@@ -398,16 +398,16 @@ export default defineComponent({
       this.pageTranslate = { x: 0, y: 0 }
       this.pageScale = 1
       this.JSONcontentSize = { width: 0, height: 0 }
-      vivistickerUtils.isAnyIOSImgOnError = false
+      stkWVUtils.isAnyIOSImgOnError = false
       this.extraData = undefined
       pageUtils.setPages()
     },
     onload() {
       console.log('loaded')
       if (this.mode === ScreenShotMode.PAGE) {
-        if (vivistickerUtils.isAnyIOSImgOnError) {
+        if (stkWVUtils.isAnyIOSImgOnError) {
           // Inform UIWeb to handle missing img
-          vivistickerUtils.sendToIOS('INFORM_WEB', {
+          stkWVUtils.sendToIOS('INFORM_WEB', {
             info: {
               event: 'missing-image',
               key: this.extraData.key,
@@ -417,19 +417,19 @@ export default defineComponent({
             to: 'UI'
           })
         } else {
-          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, this.params, this.toast)
+          stkWVUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, this.params, this.toast)
         }
       } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
         const element = this.$refs.target
         const target: HTMLElement = (element as any).$el ? (element as any).$el : element
         const { width, height } = target.getBoundingClientRect()
-        vivistickerUtils.sendDoneLoading(width, height, this.options, this.params, this.toast)
+        stkWVUtils.sendDoneLoading(width, height, this.options, this.params, this.toast)
       } else {
-        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params, this.toast)
+        stkWVUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params, this.toast)
       }
     },
     onTimeout(srcEvent: string) {
-      vivistickerUtils.sendToIOS('INFORM_WEB', {
+      stkWVUtils.sendToIOS('INFORM_WEB', {
         info: {
           event: 'screenshot-timeout',
           srcEvent

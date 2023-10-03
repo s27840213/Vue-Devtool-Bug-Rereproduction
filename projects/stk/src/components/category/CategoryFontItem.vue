@@ -32,7 +32,7 @@ import logUtils from '@/utils/logUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -183,7 +183,7 @@ export default defineComponent({
           ver: this.item.ver
         })
 
-        vivistickerUtils.setState('recentFont', updateItem)
+        stkWVUtils.setState('recentFont', updateItem)
 
         const currLayerIndex = layerUtils.getCurrPage.layers
           .findIndex(l => l.id === id)

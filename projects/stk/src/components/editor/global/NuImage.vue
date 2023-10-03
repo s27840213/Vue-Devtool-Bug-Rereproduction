@@ -81,7 +81,7 @@ import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@nu/vivi-lib/interfaces/layer'
@@ -165,14 +165,14 @@ export default defineComponent({
     //           }
     const { assetId, type } = config.srcObj
 
-    if (vivistickerUtils.checkVersion('1.35')) {
+    if (stkWVUtils.checkVersion('1.35')) {
       if (type === 'ios' && (assetId as string).includes('bgRemove')) {
         const imageName = (assetId as string).split('/')[1]
         const src = imageUtils.getSrc(config.srcObj)
 
         generalUtils.toDataURL(src, (dataUrl) => {
           bgRemoveUtils.moveOldBgRemoveImages(dataUrl, (path) => {
-            vivistickerUtils.deleteImage('bgRemove', imageName, 'png')
+            stkWVUtils.deleteImage('bgRemove', imageName, 'png')
 
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
               srcObj: {
@@ -182,7 +182,7 @@ export default defineComponent({
               },
             })
 
-            vivistickerUtils.saveAsMyDesign()
+            stkWVUtils.saveAsMyDesign()
           })
         })
       }
@@ -608,11 +608,11 @@ export default defineComponent({
             })
             this.src = imageUtils.getSrc(this.config)
             window.requestAnimationFrame(() => {
-              vivistickerUtils.isAnyIOSImgOnError = true
+              stkWVUtils.isAnyIOSImgOnError = true
               if (this.priPrimaryLayerIndex !== -1) {
-                vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+                stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
               } else {
-                vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+                stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
               }
             })
           } else {
@@ -673,8 +673,8 @@ export default defineComponent({
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            if (this.priPrimaryLayerIndex !== -1) vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
-            else vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+            if (this.priPrimaryLayerIndex !== -1) stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+            else stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -692,9 +692,9 @@ export default defineComponent({
     onLoad(e: Event, type?: string) {
       if (type === 'main' && !this.isAdjustImage) {
         if (this.priPrimaryLayerIndex !== -1) {
-          vivistickerUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+          stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
         } else {
-          vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
         }
       }
       this.isOnError = false

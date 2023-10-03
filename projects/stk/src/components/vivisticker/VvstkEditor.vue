@@ -45,7 +45,7 @@ import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import { defineComponent } from 'vue'
@@ -134,7 +134,7 @@ export default defineComponent({
       editorUtils.setInBgSettingMode(false)
     },
     currActivePageIndex(newVal) {
-      if (newVal === -1) this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+      if (newVal === -1) this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
     },
     showMobilePanel(val) {
       if (val) {
@@ -200,7 +200,7 @@ export default defineComponent({
       }
     },
     isPageNumMax(): boolean {
-      return this.pagesState.length >= vivistickerUtils.MAX_PAGE_NUM
+      return this.pagesState.length >= stkWVUtils.MAX_PAGE_NUM
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
@@ -251,7 +251,7 @@ export default defineComponent({
           movingUtils.moveStart(e)
         } else {
           if (this.isInEditor) {
-            vivistickerUtils.deselect()
+            stkWVUtils.deselect()
           }
         }
       }
@@ -265,7 +265,7 @@ export default defineComponent({
 
       // resize all pages
       this.pagesState.forEach((pageState: IPageState, pageIndex: number) => {
-        resizeUtils.resizePage(pageIndex, pageState.config, vivistickerUtils.getPageSize(this.editorType))
+        resizeUtils.resizePage(pageIndex, pageState.config, stkWVUtils.getPageSize(this.editorType))
       })
 
       // update margin-top
@@ -282,22 +282,22 @@ export default defineComponent({
       // reset initial step to prevent wrong size of page when undo
       if (stepsUtils.steps.length === 1) stepsUtils.reset()
 
-      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0) })
+      this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0) })
     },
     handleSwipe(dir: string) {
       if (this.hasSelectedLayer || this.isBgImgCtrl || this.isImgCtrl || this.isInTemplateShare) return
       if (dir === 'right') {
         if (!this.isInPageAdd) this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
         this.isInPageAdd = false
-        this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+        this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
       } else if (dir === 'left') {
         if (pageUtils.currFocusPageIndex === this.pagesState.length - 1) {
           if (!this.editorTypeTemplate || this.isPageNumMax) return
           this.isInPageAdd = true
-          vivistickerUtils.scrollIntoPage(this.pagesState.length, 300)
+          stkWVUtils.scrollIntoPage(this.pagesState.length, 300)
         } else {
           this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
-          this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+          this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
         }
       }
     },
@@ -328,7 +328,7 @@ export default defineComponent({
         unit: lastPage.unit
       }), this.pagesState.length)
       this.setCurrActivePageIndex(this.pagesState.length - 1)
-      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(this.pagesState.length - 1, 500) })
+      this.$nextTick(() => { stkWVUtils.scrollIntoPage(this.pagesState.length - 1, 500) })
       stepsUtils.record()
     }
   }

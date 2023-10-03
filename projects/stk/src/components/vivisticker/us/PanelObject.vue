@@ -47,7 +47,7 @@ div(class="panel-objects")
 
 <script lang="ts">
 import SearchBar from '@/components/SearchBar.vue'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import PanelObject from '../PanelObject.vue'
@@ -131,8 +131,8 @@ export default defineComponent({
       }
     },
     handleRecent() {
-      vivistickerUtils.setShowAllRecently('object', true)
-      vivistickerUtils.setIsInCategory('object', true)
+      stkWVUtils.setShowAllRecently('object', true)
+      stkWVUtils.setIsInCategory('object', true)
     },
     handleCancel() {
       this.isShowSearchBar = false

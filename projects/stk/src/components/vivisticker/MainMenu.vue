@@ -19,7 +19,7 @@ import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 import PanelTemplate from '@/components/vivisticker/PanelTemplate.vue'
 import PanelTemplateUs from '@/components/vivisticker/us/PanelTemplate.vue'
 
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -53,7 +53,7 @@ export default defineComponent({
   },
   watch: {
     currActiveTab(newVal: string) {
-      vivistickerUtils.setState('recentPanel', { value: newVal })
+      stkWVUtils.setState('recentPanel', { value: newVal })
     }
   },
   methods: {

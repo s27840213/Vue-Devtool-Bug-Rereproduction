@@ -1,4 +1,4 @@
-import { IViviStickerProFeatures } from '@/utils/vivistickerUtils'
+import { IViviStickerProFeatures } from '@/utils/stkWVUtils'
 import { IPage } from '@/interfaces/page'
 
 export interface IUserInfoV1_0 {

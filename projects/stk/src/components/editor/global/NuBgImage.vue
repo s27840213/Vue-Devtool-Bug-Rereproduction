@@ -53,7 +53,7 @@ import imageUtils from '@/utils/imageUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import { IImage } from '@nu/vivi-lib/interfaces/layer'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
@@ -326,7 +326,7 @@ export default defineComponent({
             previewSrc: ''
           })
           this.src = ''
-          vivistickerUtils.setLoadingFlag(-1)
+          stkWVUtils.setLoadingFlag(-1)
           const modalBtn = {
             msg: i18n.global.t('STK0023') as string,
           }
@@ -507,7 +507,7 @@ export default defineComponent({
         if (!elImg) return
         if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
           // Render complete
-          vivistickerUtils.setLoadingFlag(-1)
+          stkWVUtils.setLoadingFlag(-1)
         } else {
           // Rendering
           window.requestAnimationFrame(rendering)
@@ -521,7 +521,7 @@ export default defineComponent({
         this.imgNaturalSize.width = img.width
         this.imgNaturalSize.height = img.height
       }
-      vivistickerUtils.setLoadingFlag(-1)
+      stkWVUtils.setLoadingFlag(-1)
     }
   }
 })

@@ -92,7 +92,7 @@ import { IEffect, IEffectCategory } from '@/utils/constantData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import _ from 'lodash'
 import { defineComponent, PropType } from 'vue'
 import PanelTextEffectSetting from '../panelFunction/PanelTextEffectSetting.vue'
@@ -165,7 +165,7 @@ export default defineComponent({
       }
     },
     async onEffectClick(category: IEffectCategory, effect: IEffect): Promise<void> {
-      if (!vivistickerUtils.checkPro(effect, 'text')) return
+      if (!stkWVUtils.checkPro(effect, 'text')) return
       const chooseImgkey = effect.options.find(op => op.type === 'img')?.key ?? ''
 
       if (effect.key !== this.currentStyle.name) {

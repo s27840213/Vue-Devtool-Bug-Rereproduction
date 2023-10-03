@@ -5,7 +5,7 @@ import { IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'
 import { IUploadShadowImg } from '@nu/vivi-lib/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@nu/vivi-lib/store/types'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { getDilate } from './canvasAlgorithms'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
@@ -671,7 +671,7 @@ class ImageShadowUtils {
   saveToIOSOld(canvas: HTMLCanvasElement, callback?: (data: { flag: string, msg: string, imageId: string }, path: string) => void) {
     const name = 'img-shadow-' + generalUtils.generateAssetId()
     const src = canvas.toDataURL('image/png;base64')
-    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'shadow', name, toast: false }, 'save-image-from-url').then((data) => {
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'shadow', name, toast: false }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
       if (callback) {
         return callback(_data, `shadow/${name}`)
@@ -680,12 +680,12 @@ class ImageShadowUtils {
   }
 
   saveToIOS(canvas: HTMLCanvasElement, callback?: (data: { flag: string, msg: string, imageId: string }, path: string) => void) {
-    if (!vivistickerUtils.checkVersion('1.35')) {
+    if (!stkWVUtils.checkVersion('1.35')) {
       return this.saveToIOSOld(canvas, callback)
     }
     const name = 'img-shadow-' + generalUtils.generateAssetId()
     const src = canvas.toDataURL('image/png;base64')
-    const key = `mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)}`
+    const key = `mydesign-${stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
     const designId = (() => {
       if (store.getters['vivisticker/getEditingDesignId']) {
         return store.getters['vivisticker/getEditingDesignId']
@@ -696,7 +696,7 @@ class ImageShadowUtils {
       }
     })()
 
-    return vivistickerUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId }, 'save-image-from-url').then((data) => {
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId }, 'save-image-from-url').then((data) => {
       const _data = data as { flag: string, msg: string, imageId: string }
       if (callback) {
         return callback(_data, `${key}/${designId}/${name}`)
@@ -906,14 +906,14 @@ class ImageShadowUtils {
     store.commit('shadow/ADD_UPLOAD_IMG', data)
   }
 
-  delIosOldImg(srcObjs: Array<SrcObj>, editorType = vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)) {
+  delIosOldImg(srcObjs: Array<SrcObj>, editorType = stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)) {
     const promises = [] as Promise<{ key: string, flag: number, name: string }>[]
     srcObjs.forEach(srcObj => {
       if (srcObj.type !== 'ios') return
       const key = `mydesign-${editorType}`
       const designId = store.getters['vivisticker/getEditingDesignId']
       const name = (srcObj.assetId as string).split('/').pop() || ''
-      promises.push(vivistickerUtils.deleteImage(key, name, 'png', designId) as Promise<{ key: string, flag: number, name: string }>)
+      promises.push(stkWVUtils.deleteImage(key, name, 'png', designId) as Promise<{ key: string, flag: number, name: string }>)
     })
     return promises
   }
@@ -954,10 +954,10 @@ class ImageShadowUtils {
   async iosImgDelHandlerAsNoSave() {
     const newShadowBuffImgs = pageUtils.getPages.flatMap(p => p.iosImgUploadBuffer.shadow)
 
-    const type = vivistickerUtils.mapEditorType2MyDesignKey(vivistickerUtils.editorType)
+    const type = stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)
     const key = `mydesign-${type}`
     const designId = store.getters['vivisticker/getEditingDesignId']
-    const data = await vivistickerUtils.getAsset(key, designId, 'config')
+    const data = await stkWVUtils.getAsset(key, designId, 'config')
     const oldPages = pageUtils.newPages(data.pages) as Array<IPage>
 
     const oldShadowImgs = oldPages.flatMap(p => {

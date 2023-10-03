@@ -20,7 +20,7 @@ import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { IFrame, IGroup } from '@nu/vivi-lib/interfaces/layer'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
@@ -128,7 +128,7 @@ export default defineComponent({
         unit: this.currPage.unit
       }), pageUtils.currFocusPageIndex + 1)
       this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 500) })
+      this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 500) })
       stepsUtils.record()
     },
     duplicatePage() {
@@ -151,7 +151,7 @@ export default defineComponent({
       page.id = generalUtils.generateRandomString(8)
       pageUtils.addPageToPos(page, pageUtils.currFocusPageIndex + 1)
       this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 500) })
+      this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 500) })
       stepsUtils.record()
     },
     deletePage() {
@@ -164,7 +164,7 @@ export default defineComponent({
       }
       this.$nextTick(() => {
         pageUtils.deletePage(pageIndex)
-        vivistickerUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 500)
+        stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 500)
         stepsUtils.record()
       })
     },
@@ -176,8 +176,8 @@ export default defineComponent({
       else editorUtils.setShowMobilePanel(false)
     },
     checkMaxPageNum() {
-      if (this.pages.length >= vivistickerUtils.MAX_PAGE_NUM) {
-        vivistickerUtils.showMaxPageNumModal()
+      if (this.pages.length >= stkWVUtils.MAX_PAGE_NUM) {
+        stkWVUtils.showMaxPageNumModal()
         return false
       }
       return true

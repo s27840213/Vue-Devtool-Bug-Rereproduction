@@ -71,7 +71,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@nu/vivi-lib/interfaces/layer'
 import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
@@ -251,7 +251,7 @@ export default defineComponent({
         { icon: 'objects', text: `${this.$tc('STK0085', 2)}`, panelType: 'object' },
         { icon: this.$i18n.locale === 'us' ? 'fonts' : 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
-        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !vivistickerUtils.isTemplateSupported },
+        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template', hidden: !stkWVUtils.isTemplateSupported },
         { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove' }
       ]
     },
@@ -676,7 +676,7 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
-      if (!vivistickerUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, tab.plan)) return
+      if (!stkWVUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, tab.plan)) return
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
       }
@@ -850,7 +850,7 @@ export default defineComponent({
         case 'replace': {
           if (tab.panelType !== undefined) break
           const { getCurrLayer: layer } = layerUtils
-          vivistickerUtils.getIosImg()
+          stkWVUtils.getIosImg()
             .then(async (images: Array<string>) => {
               if (images.length) {
                 const srcObj = {
@@ -942,7 +942,7 @@ export default defineComponent({
           colorUtils.setCurrEvent(tab?.props?.currColorEvent as string)
           break
         case 'camera': {
-          vivistickerUtils.getIosImg()
+          stkWVUtils.getIosImg()
             .then(async (images: Array<string>) => {
               if (images.length) {
                 const src = imageUtils.getSrc({

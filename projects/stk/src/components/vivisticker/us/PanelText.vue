@@ -63,7 +63,7 @@ import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } f
 import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 import PanelText from '../PanelText.vue'
@@ -176,16 +176,16 @@ export default defineComponent({
       }
     },
     addText(item: any) {
-      if (!vivistickerUtils.checkPro(item, 'text')) return
+      if (!stkWVUtils.checkPro(item, 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(item).then(() => {
           textPropUtils.updateTextPropsState()
         })
       } else {
-        vivistickerUtils.startEditing('text', {
+        stkWVUtils.startEditing('text', {
           plan: item.plan,
           assetId: item.id
-        }, vivistickerUtils.getAssetInitiator(item), vivistickerUtils.getAssetCallback(item))
+        }, stkWVUtils.getAssetInitiator(item), stkWVUtils.getAssetCallback(item))
       }
     }
   }

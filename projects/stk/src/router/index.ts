@@ -11,7 +11,7 @@ import overlayUtils from '@/utils/overlayUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
 import Screenshot from '../views/Screenshot.vue'
@@ -27,29 +27,29 @@ const routes: Array<RouteRecordRaw> = [
     component: ViviSticker,
     beforeEnter: async (to, from, next) => {
       try {
-        if (vivistickerUtils.checkVersion('1.5')) {
-          await vivistickerUtils.fetchDebugModeEntrance()
-          await vivistickerUtils.fetchLoadedFonts()
-          await vivistickerUtils.fetchTutorialFlags()
+        if (stkWVUtils.checkVersion('1.5')) {
+          await stkWVUtils.fetchDebugModeEntrance()
+          await stkWVUtils.fetchLoadedFonts()
+          await stkWVUtils.fetchTutorialFlags()
 
           // set default tab to show when first update to target app version
-          const isTargetLocale = ['us', 'jp'].includes(vivistickerUtils.getUserInfoFromStore().locale)
-          const appVer = vivistickerUtils.getUserInfoFromStore().appVer
-          const lastAppVer = (await vivistickerUtils.getState('lastAppVer'))?.value ?? '0.0'
+          const isTargetLocale = ['us', 'jp'].includes(stkWVUtils.getUserInfoFromStore().locale)
+          const appVer = stkWVUtils.getUserInfoFromStore().appVer
+          const lastAppVer = (await stkWVUtils.getState('lastAppVer'))?.value ?? '0.0'
           const targetVer = '1.34'
-          if (isTargetLocale && vivistickerUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) await vivistickerUtils.setState('recentPanel', { value: 'template' })
-          if (appVer !== lastAppVer) await vivistickerUtils.setState('lastAppVer', { value: appVer })
+          if (isTargetLocale && stkWVUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) await stkWVUtils.setState('recentPanel', { value: 'template' })
+          if (appVer !== lastAppVer) await stkWVUtils.setState('lastAppVer', { value: appVer })
 
-          const recentPanel = await vivistickerUtils.getState('recentPanel')
-          const userSettings = await vivistickerUtils.getState('userSettings')
+          const recentPanel = await stkWVUtils.getState('recentPanel')
+          const userSettings = await stkWVUtils.getState('userSettings')
           if (userSettings) {
             store.commit('vivisticker/UPDATE_userSettings', userSettings)
-            vivistickerUtils.addFontForEmoji()
+            stkWVUtils.addFontForEmoji()
           }
-          const hasCopied = await vivistickerUtils.getState('hasCopied')
-          vivistickerUtils.hasCopied = hasCopied?.data ?? false
-          vivistickerUtils.setState('hasCopied', { data: vivistickerUtils.hasCopied })
-          vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
+          const hasCopied = await stkWVUtils.getState('hasCopied')
+          stkWVUtils.hasCopied = hasCopied?.data ?? false
+          stkWVUtils.setState('hasCopied', { data: stkWVUtils.hasCopied })
+          stkWVUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
         }
         next()
       } catch (error) {
@@ -64,7 +64,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         store.commit('user/SET_STATE', { userId: 'backendRendering' })
-        vivistickerUtils.hideController()
+        stkWVUtils.hideController()
         next()
       } catch (error) {
         logUtils.setLogForError(error as Error)
@@ -121,18 +121,18 @@ router.addRoute({
   },
   async beforeEnter(to, from, next) {
     if (to.name === 'NativeEventTester') {
-      vivistickerUtils.enterEventTestMode()
+      stkWVUtils.enterEventTestMode()
     }
-    vivistickerUtils.registerCallbacks('router')
+    stkWVUtils.registerCallbacks('router')
     const urlParams = new URLSearchParams(window.location.search)
     const standalone = urlParams.get('standalone')
     if (standalone) {
-      vivistickerUtils.enterStandaloneMode()
-      vivistickerUtils.setDefaultLocale()
+      stkWVUtils.enterStandaloneMode()
+      stkWVUtils.setDefaultLocale()
     } else {
-      vivistickerUtils.detectIfInApp()
+      stkWVUtils.detectIfInApp()
     }
-    const userInfo = await vivistickerUtils.getUserInfo()
+    const userInfo = await stkWVUtils.getUserInfo()
     if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
     }
@@ -171,7 +171,7 @@ router.addRoute({
       store.commit('vivisticker/SET_editorBg', editorBg)
     }
     picWVUtils.updateLocale(i18n.global.locale)
-    vivistickerUtils.setDefaultPrices()
+    stkWVUtils.setDefaultPrices()
 
     // document.title = to.meta?.title as string || i18n.global.t('SE0001')
     next()
@@ -265,7 +265,7 @@ router.beforeEach(async (to, from, next) => {
                     plan,
                     {
                       value: price,
-                      text: vivistickerUtils.formatPrice(price, currency)
+                      text: stkWVUtils.formatPrice(price, currency)
                     },
                   ]),
                 ),

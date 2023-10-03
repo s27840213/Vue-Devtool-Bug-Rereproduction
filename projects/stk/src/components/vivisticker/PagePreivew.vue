@@ -17,7 +17,7 @@ div(class="page-preview" :style="styles()")
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -101,7 +101,7 @@ export default defineComponent({
     },
     handlePageClick(pageIndex: number) {
       this.setCurrActivePageIndex(pageIndex)
-      this.$nextTick(() => { vivistickerUtils.scrollIntoPage(pageIndex, 300) })
+      this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageIndex, 300) })
       this.setIsInPagePreview(false)
       editorUtils.setShowMobilePanel(false)
     }

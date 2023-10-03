@@ -1,7 +1,7 @@
 import i18n from '@nu/vivi-lib/i18n'
 import modalUtils from '@/utils/modalUtils'
 import _ from 'lodash'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 
 class LocalStorage {
   defaultValue = {
@@ -106,19 +106,19 @@ class LocalStorage {
   }
 
   appReset(category: string) {
-    if (vivistickerUtils.isStandaloneMode) {
+    if (stkWVUtils.isStandaloneMode) {
       return this.reset(category)
     }
-    vivistickerUtils.setState(category, this.defaultValue[category])
+    stkWVUtils.setState(category, this.defaultValue[category])
   }
 
   async appSet(category: string, key: string, value: unknown) {
-    if (vivistickerUtils.isStandaloneMode) {
+    if (stkWVUtils.isStandaloneMode) {
       this.set(category, key, value)
       return
     }
 
-    let item = await vivistickerUtils.getState(category)
+    let item = await stkWVUtils.getState(category)
     if (item === undefined) { // init
       this.appReset(category)
       item = this.defaultValue[category]
@@ -127,15 +127,15 @@ class LocalStorage {
       return
     }
     _.set(item, key, value)
-    vivistickerUtils.setState(category, item)
+    stkWVUtils.setState(category, item)
   }
 
   async appGet(category: string, key: string): Promise<unknown> {
-    if (vivistickerUtils.isStandaloneMode) {
+    if (stkWVUtils.isStandaloneMode) {
       return this.get(category, key)
     }
 
-    const item = await vivistickerUtils.getState(category)
+    const item = await stkWVUtils.getState(category)
     if (item) {
       return _.get(item, key)
     } else if (item === undefined) { // init
@@ -148,7 +148,7 @@ class LocalStorage {
   }
 
   async appUpdate<T>(category: string, key: string, fn: (old: T) => T) {
-    if (vivistickerUtils.isStandaloneMode) {
+    if (stkWVUtils.isStandaloneMode) {
       return this.update(category, key, fn)
     }
 

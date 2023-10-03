@@ -112,7 +112,7 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import { replaceImgInject } from '@/utils/textFillUtils'
-import vivistickerUtils from '@nu/vivi-lib/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
@@ -587,7 +587,7 @@ export default defineComponent({
       }
       if (this.currActivePanel === 'color-picker') {
         return () => {
-          vivistickerUtils.setHasNewBgColor(false)
+          stkWVUtils.setHasNewBgColor(false)
           this.closeMobilePanel()
         }
       }
@@ -652,7 +652,7 @@ export default defineComponent({
           }
 
           case 'color-picker': {
-            vivistickerUtils.commitNewBgColor()
+            stkWVUtils.commitNewBgColor()
             break
           }
         }
