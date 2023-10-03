@@ -652,6 +652,21 @@ class ImageUtils {
     }
     return src
   }
+
+  // this func solve the problem of private img cors error caused by xtra 307 redirect
+  // it replace the xtra src in file/editorView from 'https://template.vivipic.com/asset/image...' to 'https://asset.vivipic.com/...'
+  handlePrivateXtraErr(config: IImage, img?: HTMLImageElement) {
+    if (img) {
+      if (img.src.includes('xtra') && config.srcObj.type === 'private' && img.src.includes('https://template.vivipic.com/')) {
+        store.commit('file/UPDATE_IMAGE_XTRA', {
+          assetId: config.srcObj.assetId,
+          src: 'https://' + img?.src.slice('https://template.vivipic.com/'.length)
+        })
+        return true
+      }
+    }
+    return false
+  }
 }
 
 export default new ImageUtils()
