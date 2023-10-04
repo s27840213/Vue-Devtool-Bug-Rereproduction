@@ -1,6 +1,6 @@
-@use '@/assets/scss/utils/variables.scss' as *;
-@use '@/assets/scss/utils/functions.scss' as *;
-@use '@/assets/scss/utils/formatStyle.scss' as *;
+@use './variables.scss' as *;
+@use './functions.scss' as *;
+@use './formatStyle.scss' as *;
 
 @mixin size($w, $h: $w) {
   width: $w;

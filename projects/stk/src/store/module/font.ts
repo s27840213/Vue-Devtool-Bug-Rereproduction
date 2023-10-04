@@ -1,4 +1,4 @@
-import list from '@/apis/list'
+import list from '@nu/vivi-lib/apis/list'
 import { IListServiceContentDataItem, IListServiceData, IListServiceParams } from '@nu/vivi-lib/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'

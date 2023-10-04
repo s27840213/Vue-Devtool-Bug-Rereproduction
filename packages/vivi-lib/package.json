@@ -11,7 +11,15 @@
   "types": "./dist/index.d.ts",
   "exports": {
     "./css": "./dist/style.css",
-    "./*": ["./dist/src/*/index.es.js", "./dist/src/*.es.js"]
+    "./assets/scss/*": [
+      "./dist/src/assets/scss/*/index.scss",
+      "./dist/src/assets/scss/*.scss",
+      "./dist/src/assets/scss/*"
+    ],
+    "./*": [
+      "./dist/src/*/index.es.js",
+      "./dist/src/*.es.js"
+    ]
   },
   "scripts": {
     "dev": "vite",

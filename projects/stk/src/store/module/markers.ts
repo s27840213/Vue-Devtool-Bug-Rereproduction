@@ -1,4 +1,4 @@
-import list from '@/apis/list'
+import list from '@nu/vivi-lib/apis/list'
 import { IListServiceParams } from '@nu/vivi-lib/interfaces/api'
 import listFactory from './listFactory'
 

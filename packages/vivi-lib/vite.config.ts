@@ -5,6 +5,7 @@ import * as path from 'path'
 import { defineConfig } from 'vite'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
 import svgSpritePlugin from 'vite-plugin-svg-sprite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -29,6 +30,12 @@ export default defineConfig({
       svgo: false,
       include: '**/src/assets/icon/**/*.svg'
     }),
+    viteStaticCopy({
+      targets: [{
+        src: path.resolve(__dirname, 'src/assets/scss'),
+        dest: 'src/assets',
+      }]
+    })
   ],
   build: {
     lib: {

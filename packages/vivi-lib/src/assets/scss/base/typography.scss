@@ -1,5 +1,5 @@
-@use "@/assets/scss/utils/formatStyle.scss" as *;
-@use "@/assets/scss/utils/mixins.scss" as *;
+@use "../utils/formatStyle.scss" as *;
+@use "../utils/mixins.scss" as *;
 
 @mixin heading-1 {
 	font-size: 72px;

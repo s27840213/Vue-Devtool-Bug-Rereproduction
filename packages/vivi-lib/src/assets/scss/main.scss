@@ -1,6 +1,6 @@
-@forward "@/assets/scss/base";
-@forward "@/assets/scss/components";
-// @import "@/assets/scss/components/tmpFonts";
+@forward "./base";
+@forward "./components";
+// @import "./components/tmpFonts";
 @import '~vue-virtual-scroller/dist/vue-virtual-scroller.css';
 @import '~floating-vue/dist/style.css';
 
