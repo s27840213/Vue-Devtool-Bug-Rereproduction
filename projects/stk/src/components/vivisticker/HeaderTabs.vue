@@ -40,9 +40,9 @@ div(class="header-bar relative" @pointerdown.stop)
 
 <script lang="ts">
 import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
-import useCanvasUtils from '@/composable/useCanvasUtils'
+import useCanvasUtils from '@nu/vivi-lib/composable/useCanvasUtils'
 import i18n from '@nu/vivi-lib/i18n'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@nu/vivi-lib/interfaces/layer'

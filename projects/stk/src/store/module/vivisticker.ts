@@ -1,5 +1,5 @@
 import { IAsset } from '@/interfaces/module'
-import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import _ from 'lodash'

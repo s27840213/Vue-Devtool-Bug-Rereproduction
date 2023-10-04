@@ -15,7 +15,7 @@ div(class="my-design-text-item"
 </template>
 
 <script lang="ts">
-import { IMyDesign } from '@/interfaces/vivisticker'
+import { IMyDesign } from '@nu/vivi-lib/interfaces/vivisticker'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'

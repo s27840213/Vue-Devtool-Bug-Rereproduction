@@ -101,7 +101,7 @@ import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 import i18n from '@nu/vivi-lib/i18n'
-import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
+import { ICurrSelectedInfo, IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils from '@nu/vivi-lib/utils/eventUtils'

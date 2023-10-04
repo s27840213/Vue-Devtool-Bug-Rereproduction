@@ -53,7 +53,7 @@ div(class="nu-layer flex-center"
 <script lang="ts">
 import SquareLoading from '@/components/global/SqureLoading.vue'
 import i18n from '@nu/vivi-lib/i18n'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import CssConveter from '@nu/vivi-lib/utils/cssConverter'
 import doubleTapUtils from '@nu/vivi-lib/utils/doubleTapUtils'

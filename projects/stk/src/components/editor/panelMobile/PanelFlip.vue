@@ -13,7 +13,7 @@ div(class="panel-flip bg-white")
 </template>
 
 <script lang="ts">
-import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
 import MappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { defineComponent } from 'vue'

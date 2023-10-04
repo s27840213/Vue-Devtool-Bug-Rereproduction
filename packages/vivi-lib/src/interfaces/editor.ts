@@ -1,4 +1,5 @@
-import { IFrame, IGroup, IImage, IShape, IText } from './layer'
+import { IViviStickerProFeatures } from '@/utils/stkWVUtils'
+import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 
 export interface ICurrSelectedInfo {
   pageIndex: number,
@@ -23,7 +24,9 @@ export interface IFooterTab {
   panelType?: string,
   hidden?: boolean,
   disabled?: boolean,
-  props?: IFooterTabProps
+  props?: IFooterTabProps,
+  forPro?: boolean,
+  plan?: IViviStickerProFeatures
 }
 
 export interface CustomElementConfig {

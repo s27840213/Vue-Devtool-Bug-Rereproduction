@@ -11,7 +11,7 @@ import background from '@/store/module/background'
 import markers from '@/store/module/markers'
 import { IListModuleState } from '@/interfaces/module'
 // Other need merge:
-import text from '@/store/text'
+import text from '@nu/vivi-lib/store/text'
 
 store.registerModule('giphy', giphy)
 store.registerModule('vivisticker', vivisticker)

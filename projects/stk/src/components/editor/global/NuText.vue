@@ -32,7 +32,7 @@ div(class="nu-text" draggable="false" :style="textWrapperStyle()")
 <script lang="ts">
 import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
-import { CustomElementConfig } from '@/interfaces/editor'
+import { CustomElementConfig } from '@nu/vivi-lib/interfaces/editor'
 import { isTextFill } from '@nu/vivi-lib/interfaces/format'
 import { IGroup, IText } from '@nu/vivi-lib/interfaces/layer'
 import { IPage } from '@nu/vivi-lib/interfaces/page'

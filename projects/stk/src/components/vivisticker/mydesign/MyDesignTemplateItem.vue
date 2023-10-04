@@ -19,7 +19,7 @@ div(class="my-design-text-item" @click="editTemplate")
 
 <script lang="ts">
 import { IPage } from '@nu/vivi-lib/interfaces/page'
-import { IMyDesign } from '@/interfaces/vivisticker'
+import { IMyDesign } from '@nu/vivi-lib/interfaces/vivisticker'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'

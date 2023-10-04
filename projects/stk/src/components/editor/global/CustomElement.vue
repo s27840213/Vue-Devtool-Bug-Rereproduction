@@ -6,7 +6,7 @@ component(:is="config.tag" v-bind="config.attrs" :style="config.style")
 </template>
 
 <script lang="ts">
-import { CustomElementConfig } from '@/interfaces/editor'
+import { CustomElementConfig } from '@nu/vivi-lib/interfaces/editor'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({

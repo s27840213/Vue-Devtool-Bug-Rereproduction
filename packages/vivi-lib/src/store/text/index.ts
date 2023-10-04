@@ -6,6 +6,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
@@ -79,7 +80,7 @@ const state = getDefaultState()
 const getters: GetterTree<ITextState, unknown> = {
   getDefaultFonts(state): string {
     return state.defaultFonts
-      .map(font => font.face).join(',')
+      .map(font => font.face).join(', ')
   },
   getDefaultFontFacesList(state): string[] {
     return state.defaultFonts.map(font => font.face)
@@ -226,17 +227,25 @@ const actions: ActionTree<ITextState, unknown> = {
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
   let cssUrl
   let response
-  const isInPreview = router.currentRoute.value.name === 'Preview'
+  const routeName = router.currentRoute.value.name
+  const isInPreview = routeName === 'Preview'
+  const isInScreenshot = routeName === 'Screenshot'
+  const isFonLoaded = generalUtils.isStk ? await stkWVUtils.checkFontLoaded(face) : false
   const noArgo = 'https://template.vivipic.com/'
   const argo = 'https://media.vivipic.cc/'
   const isArgoAvailable = store.getters['text/getIsArgoAvailable']
   switch (type) {
     case 'public':
       cssUrl = addPlatform(`${(isInPreview || !isArgoAvailable) ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`)
-      if (isInPreview) return cssUrl
+      if (isInPreview || isInScreenshot || isFonLoaded) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
-        if (response.ok) return cssUrl
+        if (response.ok) {
+          if (generalUtils.isStk) {
+            await stkWVUtils.recordLoadedFont(face)
+          }
+          return cssUrl
+        }
         throw Error(response.status.toString())
       } catch (error) {
         if (error instanceof Error && error.message === '404') {
@@ -247,10 +256,15 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       return ''
     case 'admin':
       cssUrl = addPlatform(`https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`)
-      if (isInPreview) return cssUrl
+      if (isInPreview || isInScreenshot || isFonLoaded) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
-        if (response.ok) return cssUrl
+        if (response.ok) {
+          if (generalUtils.isStk) {
+            await stkWVUtils.recordLoadedFont(face)
+          }
+          return cssUrl
+        }
         throw Error(response.status.toString())
       } catch (error) {
         if (error instanceof Error && error.message === '404') {
@@ -277,7 +291,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       return url
   }
   cssUrl = `${(isInPreview || !isArgoAvailable) ? noArgo : argo}font/${face}/subset/font.css?ver=${ver}&origin=true`
-  if (isInPreview) return cssUrl
+  if (isInPreview || isInScreenshot || isFonLoaded) return cssUrl
   try {
     response = await fetch(cssUrl)
     if (response.ok) return cssUrl

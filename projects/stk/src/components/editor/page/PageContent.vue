@@ -51,7 +51,7 @@ div(class="overflow-container"
 <script lang="ts">
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import i18n from '@nu/vivi-lib/i18n'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import doubleTapUtils from '@nu/vivi-lib/utils/doubleTapUtils'
 import DragUtils from '@nu/vivi-lib/utils/dragUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
