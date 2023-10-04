@@ -51,7 +51,7 @@ div(class="nu-layer flex-center"
 </template>
 
 <script lang="ts">
-import SquareLoading from '@/components/global/SqureLoading.vue'
+import SquareLoading from '@nu/vivi-lib/components/global/SqureLoading.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'

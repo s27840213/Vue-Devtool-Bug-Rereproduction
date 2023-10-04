@@ -39,7 +39,7 @@ div(class="panel-fonts")
 <script lang="ts">
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
-import FontTag from '@/components/global/Tags.vue'
+import FontTag from '@nu/vivi-lib/components/global/Tags.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'

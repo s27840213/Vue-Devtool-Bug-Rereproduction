@@ -15,7 +15,7 @@ div(class="category-object-item" v-touch)
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import { IGif } from '@/interfaces/giphy'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'

@@ -1,6 +1,6 @@
 import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
-import SvgIcon from '@/components/global/SvgIcon.vue'
+import SvgIcon from '@nu/vivi-lib/components/global/SvgIcon.vue'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
@@ -155,7 +155,7 @@ app.component('nubtn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Nubtn.vue')
 ))
 app.component('spinner', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Spinner.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/global/Spinner.vue')
 ))
 app.component('hint', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Hint.vue')

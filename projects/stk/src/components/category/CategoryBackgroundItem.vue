@@ -14,7 +14,7 @@ div(class="panel-bg__item"
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'

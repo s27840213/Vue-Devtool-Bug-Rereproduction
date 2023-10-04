@@ -57,7 +57,7 @@ div(class="overflow-container full-size rwd-container")
 
 <script lang="ts">
 import { CCategoryList } from '@/components/category/CategoryList.vue'
-import ProItem from '@/components/payment/ProItem.vue'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import CategoryTextPreview from '@/components/vivisticker/us/CategoryTextPreview.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import AssetUtils from '@nu/vivi-lib/utils/assetUtils'

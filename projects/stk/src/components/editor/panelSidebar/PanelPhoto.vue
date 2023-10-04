@@ -23,7 +23,7 @@ div(class="panel-photo")
 </template>
 
 <script lang="ts">
-import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
+import ImageGallery, { CImageGallery } from '@nu/vivi-lib/components/image-gallery/ImageGallery.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { defineComponent } from 'vue'

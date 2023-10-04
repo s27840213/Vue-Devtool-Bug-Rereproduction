@@ -7,6 +7,7 @@ img(v-if="!inReviewMode"
 </template>
 
 <script lang="ts">
+import generalUtils from '@/utils/generalUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent, PropType } from 'vue'
 
@@ -20,8 +21,8 @@ export default defineComponent({
   name: 'ProItem',
   props: {
     theme: {
-      type: String as PropType<'default' | 'roundedRect'>,
-      default: 'default',
+      type: String as PropType<'default' | 'roundedRect' | 'vivisticker' | 'top-right-corner'>,
+      default: generalUtils.isStk ? 'vivisticker' : 'default',
     }
   },
   data() {
@@ -34,6 +35,9 @@ export default defineComponent({
       switch (this.theme) {
         case 'roundedRect':
           return 'pro-rounded-rect.svg'
+        case 'vivisticker':
+        case 'top-right-corner':
+          return 'pro_vivisticker.svg'
         default:
           return 'pro.svg'
       }
@@ -53,6 +57,19 @@ export default defineComponent({
   &.default {
     width: 24px;
     height: 24px;
+  }
+  &.vivisticker {
+    width: 24px;
+    height: 24px;
+    top: -1px; // (2px - 3px). The img contains spaces (3px in top and bottom, so to compensate the space, the top should be reduced by 3px)
+    left: 2px;
+  }
+  &.top-right-corner {
+    width: 24px;
+    height: 24px;
+    top: -1px;
+    right: 2px;
+    left: unset;
   }
   &.roundedRect {
     width: 22px;

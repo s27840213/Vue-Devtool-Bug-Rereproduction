@@ -13,7 +13,7 @@ div(class="tags" v-click-outside="clickOutsideHandler")
         @click="onClickMore")
         div(class="tags__tag") {{ `${$t('NN0082')}...` }}
   template(v-else)
-    div(class="tags__container-mobile")
+    div(class="tags__container-mobile" ref="container")
       div(class="tags__flex-container-mobile")
         div(v-for="tag in tags" :active="tag.active || undefined"
           :key="tag.label"
@@ -26,7 +26,7 @@ div(class="tags" v-click-outside="clickOutsideHandler")
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 
-interface ITag {
+export interface ITag {
   label: string
   value: string
   active: boolean
@@ -44,6 +44,10 @@ export default defineComponent({
     theme: {
       type: String,
       default: 'light'
+    },
+    scrollLeft: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -51,7 +55,26 @@ export default defineComponent({
       showMore: false
     }
   },
-  emits: ['search', 'showMore'],
+  emits: ['search', 'showMore', 'scroll'],
+  mounted() {
+    const elContainer = this.$refs.container as HTMLElement
+    elContainer.scrollLeft = this.scrollLeft
+    elContainer.onscroll = () => {
+      this.$emit('scroll', elContainer.scrollLeft)
+    }
+  },
+  beforeUnmount() {
+    const elContainer = this.$refs.container as HTMLElement
+    elContainer.onscroll = null
+  },
+  watch: {
+    tagsOrScrollLeftChange() {
+      this.$nextTick(() => {
+        const elContainer = this.$refs.container as HTMLElement
+        if (this.scrollLeft >= 0 && this.scrollLeft <= elContainer.scrollWidth - elContainer.clientWidth) elContainer.scrollLeft = this.scrollLeft
+      })
+    }
+  },
   computed: {
     containerStyle(): Record<string, string|number> {
       return this.showMore ? {
@@ -65,6 +88,10 @@ export default defineComponent({
         maxHeight: '43px',
         margin: '0 -5px 0 -5px'
       }
+    },
+    tagsOrScrollLeftChange() {
+      const { tags, scrollLeft } = this
+      return { tags, scrollLeft }
     }
   },
   methods: {
@@ -113,6 +140,15 @@ export default defineComponent({
     &.light {
       color: black;
       background-color: white;
+    }
+    &.dark {
+      color: setColor(black-5);
+      background-color: setColor(black-3);
+      border: none;
+      &[active] {
+        color: setColor(gray-1);
+        background-color: setColor(gray-4);
+      }
     }
   }
   &__tag-wrapper + &__tag-wrapper {

@@ -43,7 +43,7 @@ div(id="app" :style="appStyles()")
 <script lang="ts">
 import DebugTool from '@/components/componentLog/DebugTool.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
-import ResInfo from '@/components/modal/ResInfo.vue'
+import ResInfo from '@nu/vivi-lib/components/modal/ResInfo.vue'
 import Popup from '@/components/popup/Popup.vue'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'

@@ -67,7 +67,7 @@ import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTempla
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
-import Tags, { ITag } from '@/components/global/Tags.vue'
+import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'

@@ -9,7 +9,7 @@ div(class="panel-text__item"
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import AssetUtils from '@nu/vivi-lib/utils/assetUtils'
 import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'

@@ -13,7 +13,7 @@ div(class="panel-font-size")
 </template>
 
 <script lang="ts">
-import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
+import FontSizeSelector from '@nu/vivi-lib/components/input/FontSizeSelector.vue'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
