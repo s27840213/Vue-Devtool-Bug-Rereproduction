@@ -133,7 +133,6 @@ export default defineComponent({
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     logUtils.setLog(`set image element src: ${this.imgSrc}`)
-    logUtils.setLog(`set image element: ${JSON.stringify(this.imageElement)}`)
 
     this.initImageElement = new Image()
     this.initImageElement.onload = () => {
@@ -362,11 +361,8 @@ export default defineComponent({
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       logUtils.setLog('setup contentCtx')
-      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.contentCtx = ctx
-      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       // this.ctx.globalCompositeOperation = 'destination-out'
-      logUtils.setLog(`ctx: ${JSON.stringify(this.contentCtx)}`)
 
       this.drawImageToCtx()
       this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -504,8 +500,6 @@ export default defineComponent({
       this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
     },
     drawImageToCtx(img?: HTMLImageElement) {
-      logUtils.setLog('draw imag to ctx: ')
-      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.setCompositeOperationMode('source-over')
       this.contentCtx.drawImage(img ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       this._setCanvas(this.contentCanvas)
@@ -516,7 +510,6 @@ export default defineComponent({
       }
     },
     drawInClearMode(e: MouseEvent) {
-      logUtils.setLog('draw in clear mode')
       this.cyReady = false
       this.setCompositeOperationMode('source-over', this.contentCtx)
       this.contentCtx.filter = 'none'
@@ -531,7 +524,6 @@ export default defineComponent({
       this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
-      logUtils.setLog('draw in restore mode')
       this.clearCtx(this.blurCtx)
       this.drawLine(e, this.blurCtx)
       this.setCompositeOperationMode('source-in', this.blurCtx)
@@ -556,8 +548,7 @@ export default defineComponent({
        * @Note GlobalCompositeOperation type has some problems
        */
       logUtils.setLog('setCompositeOperationMode: ' + mode)
-      logUtils.setLog('ctx: ' + JSON.stringify(ctx))
-      logUtils.setLog('contenCtxx: ' + JSON.stringify(this.contentCtx))
+
       if (ctx) {
         ctx.globalCompositeOperation = mode as any
       } else {
@@ -718,7 +709,7 @@ export default defineComponent({
     pointer-events: none;
     border-radius: 50%;
     opacity: 0.6;
-    will-change: left, top;
+    will-change: transform;
   }
 
   &__loading {

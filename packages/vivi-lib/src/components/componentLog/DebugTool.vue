@@ -18,7 +18,7 @@ div(class="fps")
   div(class="fps__value")
     span(@click="showGraph") FPS: {{ fps }}
     span(v-if="jsHeapSize !== -1") JS-Heap: {{ jsHeapSize }}MB
-    span {{ `Current envs: ${currentEnv}` }}
+    span {{ `Current env: ${currentEnv}` }}
 </template>
 
 <script lang="ts">

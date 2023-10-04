@@ -1274,6 +1274,8 @@ importers:
         specifier: ^2.2.1
         version: 2.3.1
 
+  tools: {}
+
 packages:
 
   /@aashutoshrathi/word-wrap@1.2.6:

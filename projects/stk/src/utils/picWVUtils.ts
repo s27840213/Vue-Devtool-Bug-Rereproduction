@@ -11,7 +11,6 @@ const WHITE_STATUS_BAR_ROUTES = [
 
 class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
-  toSendStatistics = false
   STANDALONE_USER_INFO: IUserInfo = {
     hostId: '',
     appVer: '100.0',
@@ -173,10 +172,13 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
 
   async sendStatistics(countryReady = false, country?: string): Promise<void> {
     if (this.inBrowserMode || countryReady) {
+      const complete = store.getters['user/getComplete'] as number
+      if (complete === 1) return
       const data = {
         token: store.getters['user/getToken'] as string,
         device: store.getters['user/getDevice'] as number,
       }
+      if (!data.token || data.token === '') return
       await store.dispatch('user/updateUser', {
         ...data,
         app: this.inBrowserMode ? 0 : 1,
@@ -185,9 +187,6 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
         // otherwise country will be provided in arguments when called from getUserInfo
         // (if app doesn't provide it (in older versions), it will be undefined)
       }) // If country is not provided, back-end will use the information provided by CloudFlare.
-      this.toSendStatistics = false
-    } else {
-      this.toSendStatistics = true
     }
   }
 

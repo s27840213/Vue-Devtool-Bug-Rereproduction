@@ -399,7 +399,19 @@ export default defineComponent({
             resolve(img)
           }
         }, {
-          error: () => {
+          error: (img) => {
+            if (imageUtils.handlePrivateXtraErr(this.image.config, img)) {
+              const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+              imageUtils.imgLoadHandler(newSrc, (img) => {
+                if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+                  this.src = newSrc
+                  this.imgNaturalSize.width = img.width
+                  this.imgNaturalSize.height = img.height
+                }
+              })
+              return
+            }
+
             reject(new Error(`cannot load the current image, src: ${src}`))
             this._onError(true)
           },
@@ -418,7 +430,7 @@ export default defineComponent({
       editorUtils.setInBgSettingMode(true)
       groupUtils.deselect()
     },
-    handleDimensionUpdate(newVal: number, oldVal: number) {
+    handleDimensionUpdate(newVal: number | string, oldVal: number) {
       if (this.isBlurImg) return
 
       const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
@@ -427,7 +439,8 @@ export default defineComponent({
         imageUtils.imgLoadHandler(currUrl, async () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
             this.src = currUrl
-            if (newVal > oldVal) {
+            // @TODO considering string case
+            if (typeof newVal === 'number' && typeof oldVal === 'number' && newVal > oldVal) {
               await this.preLoadImg('next', newVal)
               this.preLoadImg('pre', newVal)
             } else {
@@ -435,7 +448,21 @@ export default defineComponent({
               this.preLoadImg('next', newVal)
             }
           }
-        }, { crossOrigin: true })
+        }, {
+          crossOrigin: true,
+          error: (img) => {
+            if (imageUtils.handlePrivateXtraErr(this.image.config, img)) {
+              const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
+              imageUtils.imgLoadHandler(newSrc, (img) => {
+                if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+                  this.src = newSrc
+                  this.imgNaturalSize.width = img.width
+                  this.imgNaturalSize.height = img.height
+                }
+              })
+            }
+          }
+        })
       }
     },
     logImgError(error: unknown, ...infos: Array<string>) {

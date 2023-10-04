@@ -37,7 +37,9 @@ const routes: Array<RouteRecordRaw> = [
           const appVer = stkWVUtils.getUserInfoFromStore().appVer
           const lastAppVer = (await stkWVUtils.getState('lastAppVer'))?.value ?? '0.0'
           const targetVer = '1.34'
-          if (isTargetLocale && stkWVUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) await stkWVUtils.setState('recentPanel', { value: 'template' })
+          if (isTargetLocale && stkWVUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) {
+            if (stkWVUtils.isTemplateSupported) await stkWVUtils.setState('recentPanel', { value: 'template' })
+          }
           if (appVer !== lastAppVer) await stkWVUtils.setState('lastAppVer', { value: appVer })
 
           const recentPanel = await stkWVUtils.getState('recentPanel')

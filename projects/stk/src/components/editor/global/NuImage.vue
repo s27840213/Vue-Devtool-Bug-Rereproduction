@@ -780,7 +780,19 @@ export default defineComponent({
             resolve(img)
           }
         }, {
-          error: () => {
+          error: (img) => {
+            if (imageUtils.handlePrivateXtraErr(this.config as IImage, img)) {
+              const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+              imageUtils.imgLoadHandler(newSrc, (img) => {
+                if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+                  this.src = newSrc
+                  this.imgNaturalSize.width = img.width
+                  this.imgNaturalSize.height = img.height
+                }
+              })
+              return
+            }
+
             reject(new Error(`cannot load the current image, src: ${this.src}`))
             this._onError(true)
           },
@@ -809,7 +821,21 @@ export default defineComponent({
               this.preLoadImg('next', this.getImgDimension)
             }
           }
-        }, { crossOrigin: true })
+        }, {
+          crossOrigin: true,
+          error: (img) => {
+            if (imageUtils.handlePrivateXtraErr(this.config as IImage, img)) {
+              const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, newVal))
+              imageUtils.imgLoadHandler(newSrc, (img) => {
+                if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+                  this.src = newSrc
+                  this.imgNaturalSize.width = img.width
+                  this.imgNaturalSize.height = img.height
+                }
+              })
+            }
+          }
+        })
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
