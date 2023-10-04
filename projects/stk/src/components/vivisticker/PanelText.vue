@@ -57,7 +57,7 @@ div(class="overflow-container full-size rwd-container")
 </template>
 
 <script lang="ts">
-import listApi from '@/apis/list'
+import listApi from '@nu/vivi-lib/apis/list'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'

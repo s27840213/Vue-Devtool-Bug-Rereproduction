@@ -1,6 +1,6 @@
 import designApis from '@nu/vivi-lib/apis/design'
 import designInfoApis from '@nu/vivi-lib/apis/design-info'
-import listService from '@/apis/list'
+import listService from '@nu/vivi-lib/apis/list'
 import i18n from '@nu/vivi-lib/i18n'
 import {
   IAssetPhoto,

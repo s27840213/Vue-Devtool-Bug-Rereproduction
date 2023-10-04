@@ -3,6 +3,9 @@ import { IListServiceParams, IListServiceResponse } from '@/interfaces/api'
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
 import authToken from './auth-token'
+import uploadUtils from '@/utils/uploadUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
+import generalUtils from '@/utils/generalUtils'
 
 class ListService {
   getList(params: IListServiceParams) {
@@ -13,6 +16,8 @@ class ListService {
       page_index: params.pageIndex,
       list_all: params.listAll,
       list_category: params.listCategory,
+      list_tag: params.listTag,
+      category_ids: params.categoryIds,
       keyword: params.keyword,
       font_list: params.fontList,
       theme: params.theme,
@@ -23,8 +28,15 @@ class ListService {
       // [2022.01.19] uncached: font, layout
       all_theme: params.all_theme,
       ...(params.shuffle === 1 && { shuffle: params.shuffle }),
+      // app: 0: vivipic (default), 1: vivisticker
       // If admin and url have 'app=1', bring app:1 to api.
-      ...store.getters['user/isAdmin'] && /app=1/.test(window.location.href) ? { app: 1 } : {}
+      ...generalUtils.isStk || 
+        (store.getters['user/isAdmin'] && /app=1/.test(window.location.href))
+        ? { app: 1 } : {},
+      // for vivisticker text panel of US version
+      col_num: params.colNum,
+      // for vivisticker template
+      ig_layout: params.igLayout
     }
 
     return axios.request<IListServiceResponse>({
@@ -57,27 +69,32 @@ class ListService {
   // For list factories
   getSvg(params: IListServiceParams) {
     params.type = 'svg'
+    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getTemplate(params: IListServiceParams) {
     params.type = 'template'
+    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getText(params: IListServiceParams) {
     params.type = 'text'
+    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getBackground(params: IListServiceParams) {
     params.type = 'background'
+    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getFont(params: IListServiceParams) {
     params.type = 'font'
     params.fontList = 2
+    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
@@ -105,11 +122,15 @@ class ListService {
 
   // For other usage
   addDesign(id: string, type: string, params: IListServiceParams = {}) {
+    if (generalUtils.isStk && stkWVUtils.addDesignDisabled()) {
+      return new Promise<{ flag: number }>(resolve => resolve({ flag: 0 }))
+    }
     const data = {
-      token: authToken().token,
+      token: generalUtils.isPic ? authToken().token : '1',
       type,
       design_id: id,
       locale: localeUtils.currLocale(),
+      ...generalUtils.isStk && { host_id: uploadUtils.hostId },
       ...params
     }
     if (!data.token) return new Promise(resolve => resolve({ flag: 1 }))
@@ -130,22 +151,29 @@ class ListService {
   }
 
   getRecentlyUsedColor() {
-    return this.getList({
-      token: authToken().token || '',
-      locale: localeUtils.currLocale(),
-      type: 'color'
-    })
+    if (generalUtils.isPic) {
+      return this.getList({
+        token: authToken().token || '',
+        locale: localeUtils.currLocale(),
+        type: 'color'
+      })
+    } else if (generalUtils.isStk) {
+      stkWVUtils.listAsset('color')
+    }
   }
 
   addRecentlyUsedColor(color: string) {
-    return axios.request<IListServiceResponse>({
+    generalUtils.isStk && stkWVUtils.addAsset('color', { id: color })
+    if (generalUtils.isStk && stkWVUtils.addDesignDisabled()) return
+    axios.request<IListServiceResponse>({
       url: '/add-design',
       method: 'POST',
       data: {
-        token: authToken().token || '',
+        token: generalUtils.isPic ? (authToken().token || '') : '1',
         type: 'color',
         design_id: color,
-        locale: localeUtils.currLocale()
+        locale: localeUtils.currLocale(),
+        ...generalUtils.isStk && { host_id: uploadUtils.hostId },
       }
     })
   }

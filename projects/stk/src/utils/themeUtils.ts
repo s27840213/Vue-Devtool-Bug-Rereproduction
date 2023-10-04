@@ -1,4 +1,4 @@
-import listService from '@/apis/list'
+import listService from '@nu/vivi-lib/apis/list'
 import i18n from '@nu/vivi-lib/i18n'
 import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import store from '@/store'

@@ -13,11 +13,11 @@ $appName: None !default;
   $picOpacity: $opacity,
   $stkOpacity: $opacity,
   $cmOpacity: $opacity) {
-  @if $appName == 'vivipic' {
+  @if $appName == 'pic' {
     @return rgba(map-get($colors, $picColor), $picOpacity);
-  } @else if $appName == 'vivisticker' {
+  } @else if $appName == 'stk' {
     @return rgba(map-get($colors, $stkColor), $stkOpacity);
-  } @else if $appName == 'charmix' {
+  } @else if $appName == 'cm' {
     @return rgba(map-get($colors, $cmColor), $cmOpacity);
   }
 }

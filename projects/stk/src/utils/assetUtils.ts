@@ -1,4 +1,4 @@
-import listApi from '@/apis/list'
+import listApi from '@nu/vivi-lib/apis/list'
 import { IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IStyle, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'

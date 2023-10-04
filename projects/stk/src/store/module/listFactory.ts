@@ -1,4 +1,4 @@
-import list from '@/apis/list'
+import list from '@nu/vivi-lib/apis/list'
 import i18n from '@nu/vivi-lib/i18n'
 import { IListServiceContentData, IListServiceData } from '@nu/vivi-lib/interfaces/api'
 import {
