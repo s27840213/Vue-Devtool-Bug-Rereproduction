@@ -81,6 +81,7 @@ div(class="nu-footer text-black" :style="rootStyles")
           iconName="email-black"
           :iconWidth="'25px'")
     div(class="nu-footer__bottom-info")
+      //- For i18n shake: NN0714 NN0715 NN0716 NN0717 NN0718
       span(v-for="index in 5" :key="index") {{$t(`NN07${13+index}`)}}
   div(class="nu-footer__bottom-mobile")
     div(class="nu-footer__bottom-mobile-icons")
@@ -103,6 +104,7 @@ div(class="nu-footer text-black" :style="rootStyles")
       :style="{ 'margin-bottom': isHome ? '70px' : 0 }")
       span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
       div(class="nu-footer__bottom-mobile-info")
+        //- For i18n shake: NN0714 NN0715 NN0716 NN0717 NN0718
         span(v-for="index in 5" :key="index") {{$t(`NN07${13+index}`)}}
 </template>
 
