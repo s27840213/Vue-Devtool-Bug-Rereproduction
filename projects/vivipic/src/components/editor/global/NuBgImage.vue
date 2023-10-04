@@ -31,7 +31,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
         :height="imgNaturalSize.height"
         @error="onError"
         @load="onAdjustImgLoad"
-        :xlink:href="finalSrc" )
+        :xlink:href="finalSrc")
   div(:style="filterContainerStyles()" class="filter-container")
     component(v-for="(elm, idx) in cssFilterElms"
       :key="`cssFilter${idx}`"
@@ -404,9 +404,9 @@ export default defineComponent({
               const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
               imageUtils.imgLoadHandler(newSrc, (img) => {
                 if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
-                  this.src = newSrc
                   this.imgNaturalSize.width = img.width
                   this.imgNaturalSize.height = img.height
+                  this.src = newSrc
                 }
               })
               return
@@ -455,9 +455,9 @@ export default defineComponent({
               const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
               imageUtils.imgLoadHandler(newSrc, (img) => {
                 if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
-                  this.src = newSrc
                   this.imgNaturalSize.width = img.width
                   this.imgNaturalSize.height = img.height
+                  this.src = newSrc
                 }
               })
             }
