@@ -185,7 +185,7 @@ export default defineComponent({
 })
 </script>
 <style lang="scss">
-@use "@/assets/scss/main.scss";
+@use "@nu/vivi-lib/assets/scss/main.scss";
 
 #app{
   @include size(100%, 100%);

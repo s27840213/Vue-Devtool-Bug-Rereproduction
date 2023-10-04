@@ -651,7 +651,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use "@/assets/scss/base/transition.scss";
+@use "@nu/vivi-lib/assets/scss/base/transition.scss";
 
 .template-center {
   @include size(100%, 100%);
