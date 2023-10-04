@@ -16,6 +16,7 @@ import TextPropUtils from './textPropUtils'
 import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
+import stkWVUtils from './stkWVUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -265,8 +266,12 @@ class StepsUtils {
       this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
       this.currStep = this.steps.length - 1
       // Don't upload the design when initialize the steps
-      if (uploadUtils.isLogin) {
-        uploadUtils.uploadDesign()
+      if (generalUtils.isPic) {
+        if (uploadUtils.isLogin) {
+          uploadUtils.uploadDesign()
+        }
+      } else if (generalUtils.isStk) {
+        stkWVUtils.saveDesign()
       }
     }
     // console.warn(generalUtils.deepCopy(this.steps))
@@ -284,34 +289,37 @@ class StepsUtils {
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    // console.warn(generalUtils.deepCopy(this.steps[this.currStep]))
-    const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
-    let layers: (IShape | IText | IImage | IGroup | IFrame)[]
-    if (pages[pageIndex]) {
-      const selectedLayer = pages[pageIndex].layers[index]
-      if (selectedLayer) {
-        if (selectedLayer.type === 'tmp') {
-          layers = (selectedLayer as ITmp).layers
+    if (generalUtils.isPic) {
+      // console.warn(generalUtils.deepCopy(this.steps[this.currStep]))
+      const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
+      let layers: (IShape | IText | IImage | IGroup | IFrame)[]
+      if (pages[pageIndex]) {
+        const selectedLayer = pages[pageIndex].layers[index]
+        if (selectedLayer) {
+          if (selectedLayer.type === 'tmp') {
+            layers = (selectedLayer as ITmp).layers
+          } else {
+            layers = [selectedLayer]
+          }
         } else {
-          layers = [selectedLayer]
+          layers = []
         }
       } else {
         layers = []
       }
+  
+      if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
+        store.commit('SET_currActivePageIndex', pageIndex)
+        pageUtils.scrollIntoPage(pageIndex)
+      } else if (pageIndex === -1) {
+        // If the pageIndex be reset e.g. deleting the background-Img,
+        // however, the activePageIndex should remain the same for a better UX
+        store.commit('SET_currActivePageIndex', activePageIndex)
+      }
+      GroupUtils.set(pageIndex, index, layers)
     } else {
-      layers = []
+      GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
     }
-
-    if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
-      store.commit('SET_currActivePageIndex', pageIndex)
-      pageUtils.scrollIntoPage(pageIndex)
-    } else if (pageIndex === -1) {
-      // If the pageIndex be reset e.g. deleting the background-Img,
-      // however, the activePageIndex should remain the same for a better UX
-      store.commit('SET_currActivePageIndex', activePageIndex)
-    }
-    GroupUtils.set(pageIndex, index, layers)
-
     if (this.currStep > 0) {
       nextTick(() => {
         if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
@@ -347,39 +355,46 @@ class StepsUtils {
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
-    let layers: (IShape | IText | IImage | IGroup | IFrame)[]
-    if (pages[pageIndex]) {
-      const selectedLayer = pages[pageIndex].layers[index]
-      if (selectedLayer) {
-        if (selectedLayer.type === 'tmp') {
-          layers = (selectedLayer as ITmp).layers
+    if (generalUtils.isPic) {
+      const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
+      let layers: (IShape | IText | IImage | IGroup | IFrame)[]
+      if (pages[pageIndex]) {
+        const selectedLayer = pages[pageIndex].layers[index]
+        if (selectedLayer) {
+          if (selectedLayer.type === 'tmp') {
+            layers = (selectedLayer as ITmp).layers
+          } else {
+            layers = [selectedLayer]
+          }
         } else {
-          layers = [selectedLayer]
+          layers = []
         }
       } else {
         layers = []
       }
+
+      if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
+        store.commit('SET_currActivePageIndex', pageIndex)
+        pageUtils.scrollIntoPage(pageIndex)
+      } else if (pageIndex === -1) {
+        store.commit('SET_currActivePageIndex', activePageIndex)
+      }
+      GroupUtils.set(pageIndex, index, layers)
     } else {
-      layers = []
+      GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
     }
-
-    if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
-      store.commit('SET_currActivePageIndex', pageIndex)
-      pageUtils.scrollIntoPage(pageIndex)
-    } else if (pageIndex === -1) {
-      store.commit('SET_currActivePageIndex', activePageIndex)
-    }
-    GroupUtils.set(pageIndex, index, layers)
-
     nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
         TextPropUtils.updateTextPropsState()
       }
     })
 
-    if (uploadUtils.isLogin) {
-      uploadUtils.uploadDesign()
+    if (generalUtils.isPic) {
+      if (uploadUtils.isLogin) {
+        uploadUtils.uploadDesign()
+      }
+    } else if (generalUtils.isStk) {
+      stkWVUtils.saveDesign()
     }
   }
 

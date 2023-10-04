@@ -216,9 +216,9 @@ class GeneralUtils {
 
   getListRowItemSize(): number {
     return !this.isTouchDevice() ? 145
-      : window.innerWidth >= 600
-        ? (window.innerWidth - 50) / 3
-        : (window.innerWidth - 40) / 2
+      : window.outerWidth >= 600
+        ? (window.outerWidth - 50) / 3
+        : (window.outerWidth - 40) / 2
   }
 
   getEventType(e: MouseEvent | TouchEvent) {
@@ -262,7 +262,7 @@ class GeneralUtils {
     return new Blob([u8arr], { type: mime })
   }
 
-  toDataURL(src: string, callback: (dataUrl: string) => void) {
+  toDataURL(src: string, callback?: (dataUrl: string) => void) {
     const image = new Image()
     image.crossOrigin = 'Anonymous'
     image.onload = () => {
@@ -272,7 +272,7 @@ class GeneralUtils {
       canvas.width = image.naturalWidth
       context?.drawImage(image, 0, 0)
       const dataURL = canvas.toDataURL('image/png')
-      callback(dataURL)
+      callback && callback(dataURL)
     }
     image.src = src
   }

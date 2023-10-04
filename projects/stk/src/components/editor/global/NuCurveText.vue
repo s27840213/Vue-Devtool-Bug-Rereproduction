@@ -11,12 +11,12 @@ p(class="nu-curve-text__p")
 
 <script lang="ts">
 import { IGroup, ISpan, ISpanStyle, IText } from '@nu/vivi-lib/interfaces/layer'
-import generalUtils from '@/utils/generalUtils'
-import LayerUtils from '@/utils/layerUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
-import textUtils from '@/utils/textUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import LayerUtils from '@nu/vivi-lib/utils/layerUtils'
+import textEffectUtils from '@nu/vivi-lib/utils/textEffectUtils'
+import textShapeUtils from '@nu/vivi-lib/utils/textShapeUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
+import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 

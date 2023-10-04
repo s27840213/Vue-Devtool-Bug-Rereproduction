@@ -102,14 +102,18 @@ class EditorUtils {
     const PAGE_SIZE_H = (this.mobileSize.height || Number.MAX_SAFE_INTEGER) * 0.926
 
     if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
-      if (width >= height) {
-        return PAGE_SIZE_W / width
-      } else {
-        const scale = PAGE_SIZE_H / height
-        if (width * scale > PAGE_SIZE_W) {
+      if (generalUtils.isPic) {
+        if (width >= height) {
           return PAGE_SIZE_W / width
+        } else {
+          const scale = PAGE_SIZE_H / height
+          if (width * scale > PAGE_SIZE_W) {
+            return PAGE_SIZE_W / width
+          }
+          return scale
         }
-        return scale
+      } else {
+        return Math.max(Math.min(PAGE_SIZE_W / width, PAGE_SIZE_H / height), 0.1)
       }
     } else {
       return 1
@@ -120,6 +124,7 @@ class EditorUtils {
     if (generalUtils.isTouchDevice()) {
       const page = pageUtils.getPage(pageIndex)
       const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
+      console.warn('contentScaleRatio', contentScaleRatio)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
       const pos = {
         x: (editorUtils.mobileSize.width - page.width * this.contentScaleRatio) * 0.5,

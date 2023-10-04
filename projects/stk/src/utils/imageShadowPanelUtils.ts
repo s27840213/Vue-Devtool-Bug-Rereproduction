@@ -3,13 +3,13 @@ import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@nu/vivi-lib/inte
 import store from '@/store'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@nu/vivi-lib/store/types'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import colorUtils from './colorUtils'
-import generalUtils from './generalUtils'
-import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SPACE, fieldRange, setMark } from './imageShadowUtils'
-import imageUtils from './imageUtils'
-import layerUtils from './layerUtils'
-import logUtils from './logUtils'
-import pageUtils from './pageUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SPACE, fieldRange, setMark } from '@nu/vivi-lib/utils/imageShadowUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 
 export default new class ImageShadowPanelUtils {
   private get fieldRange() {

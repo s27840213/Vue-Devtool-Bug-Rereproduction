@@ -16,8 +16,8 @@ div(class="my-design-text-item"
 
 <script lang="ts">
 import { IMyDesign } from '@/interfaces/vivisticker'
-import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'

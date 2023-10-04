@@ -1,5 +1,6 @@
 import { IText } from '@/interfaces/layer'
 import logUtils from '@/utils/logUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import textUtils, { ITextHW } from '@/utils/textUtils'
 
 export interface IRunResult {
@@ -109,6 +110,11 @@ export class AutoResizeByHeight extends AutoResize {
     this.minDiff = Number.MAX_VALUE
     this.minDiffWidLimit = -1
     this.minDiffDimension = -1
+
+    const maxFontSize = textEffectUtils.getLayerFontSize(config.paragraphs) * 1.33333
+    if (maxFontSize < this.TOLERANCE) {
+      this.TOLERANCE = maxFontSize
+    }
   }
 
   static getDiff(config: IText, result: IRunResult, initSize: IInitSize) {

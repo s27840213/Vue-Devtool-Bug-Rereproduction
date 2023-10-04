@@ -27,11 +27,10 @@ div(class="panel-remove-bg" ref="panelRemoveBg")
 <script lang="ts">
 import BgRemoveContainer from '@/components/vivisticker/BgRemoveContainer.vue'
 import { IImage } from '@nu/vivi-lib/interfaces/layer'
-import bgRemoveUtils from '@/utils/bgRemoveUtils'
-import generalUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
-import layerUtils from '@/utils/layerUtils'
-import uploadUtils from '@/utils/uploadUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -52,7 +51,6 @@ export default defineComponent({
       mobilePanelHeight: 0,
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
-      debugMode: false,
       previewSrc: '',
       mounted: false
     }
@@ -84,11 +82,6 @@ export default defineComponent({
       setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     removeBg(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
-      if (this.debugMode) {
-        bgRemoveUtils.removeBgStkDebug()
-        return
-      }
-
       this.isInEditor ? this.handleCurrSelectedImage(type) : this.handleIOSImage(type)
     },
     handleIOSImage(type: 'stk-bg-remove' | 'stk-bg-remove-face') {

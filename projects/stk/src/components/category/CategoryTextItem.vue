@@ -10,8 +10,8 @@ div(class="panel-text__item"
 
 <script lang="ts">
 import ProItem from '@/components/payment/ProItem.vue'
-import AssetUtils from '@/utils/assetUtils'
-import textPropUtils from '@/utils/textPropUtils'
+import AssetUtils from '@nu/vivi-lib/utils/assetUtils'
+import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'

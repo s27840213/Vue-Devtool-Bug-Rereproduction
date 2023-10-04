@@ -8,7 +8,7 @@ div(class="panel-color-picker")
 
 <script lang="ts">
 import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
-import colorUtils from '@/utils/colorUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

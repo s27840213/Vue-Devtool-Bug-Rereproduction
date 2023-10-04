@@ -555,53 +555,53 @@ class TextBg {
         bStroke: 0, // unadjustable
         bRadius: 0, // unadjustable
         bColor: 'transparent', // unadjustable
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 20,
+        pStrokeX: generalUtils.isPic ? 20 : 13, // unadjustable in all effects
+        pStrokeY: generalUtils.isPic ? 20 : 5,
         pColor: 'fontColorL+-40/BC/00'
       },
       'rounded-borderless': {
         opacity: 100,
         bStroke: 0, // unadjustable
-        bRadius: 35,
+        bRadius: generalUtils.isPic ? 35 : 10,
         bColor: 'transparent', // unadjustable
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 20,
+        pStrokeX: generalUtils.isPic ? 20 : 13, // unadjustable in all effects
+        pStrokeY: generalUtils.isPic ? 20 : 5,
         pColor: 'fontColorL+-40/BC/00'
       },
       'square-hollow': {
         opacity: 100,
-        bStroke: 8,
+        bStroke: generalUtils.isPic ? 8 : 3,
         bRadius: 0, // unadjustable
         bColor: 'fontColorL+-40/BC/00',
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 10, // unadjustable
+        pStrokeX: generalUtils.isPic ? 20 : 13, // unadjustable in all effects
+        pStrokeY: generalUtils.isPic ? 10 : 5, // unadjustable
         pColor: 'transparent' // unadjustable
       },
       'rounded-hollow': {
         opacity: 100,
-        bStroke: 8,
-        bRadius: 35,
+        bStroke: generalUtils.isPic ? 8 : 3,
+        bRadius: generalUtils.isPic ? 35 : 10,
         bColor: 'fontColorL+-40/BC/00',
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 10, // unadjustable
+        pStrokeX: generalUtils.isPic ? 20 : 13, // unadjustable in all effects
+        pStrokeY: generalUtils.isPic ? 10 : 5, // unadjustable
         pColor: 'transparent' // unadjustable
       },
       'square-both': {
         opacity: 100,
-        bStroke: 8,
+        bStroke: generalUtils.isPic ? 8 : 3,
         bRadius: 0, // unadjustable
         bColor: 'fontColor',
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 10,
+        pStrokeX: generalUtils.isPic ? 20 : 13, // unadjustable in all effects
+        pStrokeY: generalUtils.isPic ? 10 : 5,
         pColor: 'fontColorL+-40/BC/00'
       },
       'rounded-both': {
         opacity: 100,
-        bStroke: 8,
-        bRadius: 35,
+        bStroke: generalUtils.isPic ? 8 : 3,
+        bRadius: generalUtils.isPic ? 35 : 10,
         bColor: 'fontColor',
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 10,
+        pStrokeX: generalUtils.isPic ? 20 : 13, // unadjustable in all effects
+        pStrokeY: generalUtils.isPic ? 10 : 5,
         pColor: 'fontColorL+-40/BC/00'
       },
       'speech-bubble': {
@@ -630,8 +630,8 @@ class TextBg {
         color: 'fontColorL+-40/F1D289'
       },
       gooey: {
-        distance: 20,
-        bRadius: 40,
+        distance: generalUtils.isPic ? 20 : 10,
+        bRadius: generalUtils.isPic ? 40 : 15,
         opacity: 100,
         color: 'fontColorL+-40/BC/00'
       },

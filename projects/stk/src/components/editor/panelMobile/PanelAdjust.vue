@@ -15,11 +15,11 @@ div(class="panel-adjust")
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import { IFrame, IImage } from '@nu/vivi-lib/interfaces/layer'
-import backgroundUtils from '@/utils/backgroundUtils'
-import frameUtils from '@/utils/frameUtils'
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import layerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
+import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import imageAdjustUtil from '@nu/vivi-lib/utils/imageAdjustUtil'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 

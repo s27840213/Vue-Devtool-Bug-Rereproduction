@@ -14,8 +14,8 @@ div(class="panel-flip bg-white")
 
 <script lang="ts">
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import backgroundUtils from '@/utils/backgroundUtils'
-import MappingUtils from '@/utils/mappingUtils'
+import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import MappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

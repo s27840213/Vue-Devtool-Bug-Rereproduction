@@ -85,8 +85,10 @@ class PageUtils {
 
   get currFocusPageInViewRatio(): number {
     const focusPage = document.getElementsByClassName('nu-page')[this.currFocusPageIndex]
+    // Skip in view ratio check if no nu-page found in vvstk.
+    if (!focusPage) return 1
     const rect = focusPage.getBoundingClientRect()
-    const windowHeight = window.innerHeight
+    const windowHeight = window.outerHeight
     const topInView = Math.max(rect.top, 0)
     const bottomInView = Math.min(rect.bottom, windowHeight)
     return (bottomInView - topInView) / rect.height
@@ -189,8 +191,7 @@ class PageUtils {
         posY: -1
       },
       name: '',
-      layers: [
-      ],
+      layers: [],
       documentColors: [],
       designId: '',
       id: generalUtils.generateRandomString(8),
@@ -291,17 +292,15 @@ class PageUtils {
 
   setPageSize(index: number, width: number, height: number, physicalWidth = width, physicalHeight = height, unit = 'px') {
     store.commit('SET_pageSize', { index, width, height, physicalWidth, physicalHeight, unit })
-    if (!this.getPage(index).isEnableBleed) this.resetBleeds(index)
+    const page = this.getPage(index)
+    if (!page.isEnableBleed) this.resetBleeds(page, index)
   }
 
   resizePage(format: { width: number, height: number }) {
     resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
     this.updatePageProps({
-      pageIndex: pageUtils.currFocusPageIndex,
-      props: {
         width: format.width,
         height: format.height
-      }
     })
   }
 
@@ -728,16 +727,20 @@ class PageUtils {
    ** unit: unit of physical size for page and bleeds
    */
   removeBleedsFromPageSize(pageSize: IPageSizeWithBleeds): IPageSizeWithBleeds {
-    const { width, height, physicalWidth, physicalHeight, bleeds, physicalBleeds, unit } = pageSize
-    if (!(bleeds && physicalBleeds)) return pageSize
-    return {
-      width: width - bleeds.left - bleeds.right,
-      height: height - bleeds.top - bleeds.bottom,
-      physicalWidth: physicalWidth - physicalBleeds.left - physicalBleeds.right,
-      physicalHeight: physicalHeight - physicalBleeds.top - physicalBleeds.bottom,
-      bleeds,
-      physicalBleeds,
-      unit
+    if (generalUtils.isStk) {
+      return pageSize // bleeds are disabled in vivisticker
+    } else {
+      const { width, height, physicalWidth, physicalHeight, bleeds, physicalBleeds, unit } = pageSize
+      if (!(bleeds && physicalBleeds)) return pageSize
+      return {
+        width: width - bleeds.left - bleeds.right,
+        height: height - bleeds.top - bleeds.bottom,
+        physicalWidth: physicalWidth - physicalBleeds.left - physicalBleeds.right,
+        physicalHeight: physicalHeight - physicalBleeds.top - physicalBleeds.bottom,
+        bleeds,
+        physicalBleeds,
+        unit
+      }
     }
   }
 
@@ -762,19 +765,23 @@ class PageUtils {
     store.commit('SET_bleeds', { pageIndex, bleeds: newBleeds, physicalBleeds: newPhysicalBleeds })
   }
 
-  resetBleeds(pageIndex: number) {
-    const page = this.getPage(pageIndex)
+  resetBleeds(page: IPage, pageIndex = -1) {
+    const isDetailPage = generalUtils.isPic ? this.isDetailPage
+      : pageIndex !== -1 && this.isDetailPage
     const defaultBleeds = this.getPageDefaultBleeds(page, 'px')
     const unit = page.unit ?? 'px'
     const pagesLength = store.getters.getPagesLength
-    defaultBleeds.top = this.isDetailPage && pageIndex !== 0 ? 0 : defaultBleeds.top
-    defaultBleeds.bottom = this.isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultBleeds.bottom
+    defaultBleeds.top = isDetailPage && pageIndex !== 0 ? 0 : defaultBleeds.top
+    defaultBleeds.bottom = isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultBleeds.bottom
     const defaultPhysicalBleeds = unit === 'px' ? defaultBleeds : this.getPageDefaultBleeds(page)
     if (unit !== 'px') {
-      defaultPhysicalBleeds.top = this.isDetailPage && pageIndex !== 0 ? 0 : defaultPhysicalBleeds.top
-      defaultPhysicalBleeds.bottom = this.isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultPhysicalBleeds.bottom
+      defaultPhysicalBleeds.top = isDetailPage && pageIndex !== 0 ? 0 : defaultPhysicalBleeds.top
+      defaultPhysicalBleeds.bottom = isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultPhysicalBleeds.bottom
     }
-    store.commit('SET_bleeds', { pageIndex, bleeds: defaultBleeds, physicalBleeds: defaultPhysicalBleeds })
+    if (pageIndex === -1) {
+      page.bleeds = defaultBleeds
+      page.physicalBleeds = defaultPhysicalBleeds
+    } else store.commit('SET_bleeds', { pageIndex, bleeds: defaultBleeds, physicalBleeds: defaultPhysicalBleeds })
   }
 
   /**

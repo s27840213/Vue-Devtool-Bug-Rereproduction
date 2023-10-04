@@ -61,11 +61,11 @@ class MouseUtils {
     return { x, y }
   }
 
-  getMousePosInTarget(e: MouseEvent | TouchEvent | PointerEvent, target: HTMLElement): { x: number, y: number, xPercentage: number, yPercentage: number } {
+  getMousePosInTarget(e: MouseEvent | TouchEvent | PointerEvent, target: HTMLElement, extraScaleRatio = 1): { x: number, y: number, xPercentage: number, yPercentage: number } {
     const mouseRelPos = this.getMouseRelPoint(e, target)
     return {
-      x: mouseRelPos.x / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio / 100),
-      y: mouseRelPos.y / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio / 100),
+      x: mouseRelPos.x / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio * extraScaleRatio / 100),
+      y: mouseRelPos.y / (store.getters.getPageScaleRatio * editorUtils.contentScaleRatio * extraScaleRatio / 100),
       xPercentage: mouseRelPos.x / target.clientWidth,
       yPercentage: mouseRelPos.y / target.clientHeight,
 
@@ -217,6 +217,7 @@ class MouseUtils {
       imgY: -img.height / 2 + clipperStyles.height / 2
     }
     Object.assign(layer.styles, newStyles)
+    clipPath = clipPath ?? ''
     layer.clipPath = clipPath.substring(0, 4) === 'path' ? clipPath : `path('${clipPath}')`
     return layer
   }

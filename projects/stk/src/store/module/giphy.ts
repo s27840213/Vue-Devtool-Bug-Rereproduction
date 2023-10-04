@@ -6,9 +6,9 @@ import {
   IGiphyFavoriteTagContent, isIGifCategory, isITag, ITag, ITagContentApiParams, ITagExtend
 } from '@/interfaces/giphy'
 import store from '@/store/index'
-import localStorageUtils from '@/utils/localStorageUtils'
-import logUtils from '@/utils/logUtils'
-import popupUtils from '@/utils/popupUtils'
+import localStorageUtils from '@nu/vivi-lib/utils/localStorageUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { cloneDeep, filter, find, map, pull } from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'

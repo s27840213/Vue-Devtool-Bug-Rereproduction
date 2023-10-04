@@ -16,14 +16,14 @@ div(class="panel-font-format")
 
 <script lang="ts">
 import { IGroup, ILayer, IParagraph, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
-import generalUtils from '@/utils/generalUtils'
-import layerUtils from '@/utils/layerUtils'
-import mappingUtils from '@/utils/mappingUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import textPropUtils from '@/utils/textPropUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
-import textUtils from '@/utils/textUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
+import textShapeUtils from '@nu/vivi-lib/utils/textShapeUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
+import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 

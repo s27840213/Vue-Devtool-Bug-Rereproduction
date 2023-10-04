@@ -6,6 +6,7 @@ import { ITiptapSelection } from '@/interfaces/text'
 import store from '@/store'
 import { IEditorState, ILayerInfo, ISpecLayerData, LayerType } from '@/store/types'
 import groupUtils from '@/utils/groupUtils'
+import logUtils from '@/utils/logUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import { round } from 'lodash'
 import { nextTick } from 'vue'
@@ -18,6 +19,7 @@ import shapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import uploadUtils from './uploadUtils'
+import generalUtils from './generalUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -53,7 +55,7 @@ class LayerUtils {
         case 'group':
           return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
         case 'frame':
-          return subLayerIdx !== -1 ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
+          return subLayerIdx !== -1 && (!generalUtils.isStk || !store.getters['vivisticker/getControllerHidden']) ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
         default:
           return this.currSelectedInfo.layers[0].styles.opacity
       }
@@ -246,6 +248,18 @@ class LayerUtils {
     }
   }
 
+  deleteLayerProps(pageIndex: number, layerIndex: number, propKeys: string[], subLayerIdx = -1) {
+    if (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') {
+      store.commit('DELETE_layerProps', {
+        pageIndex,
+        layerIndex,
+        propKeys
+      })
+    } else {
+      this.deleteSubLayerProps(pageIndex, layerIndex, subLayerIdx, propKeys)
+    }
+  }
+
   updateAllGroupStyles(styles: { [key: string]: string | number | boolean }) {
     store.commit('UPDATE_groupLayerStyles', {
       styles
@@ -268,11 +282,22 @@ class LayerUtils {
   }
 
   updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: Partial<IImage | IText | IGroup | IShape | ITmp> | { [index: string]: number | string | boolean | number[] | IParagraph[] | SrcObj }) {
+    if (targetIndex === -1) return
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
       layerIndex,
       targetIndex,
       props
+    })
+  }
+
+  deleteSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, propKeys: string[]) {
+    if (targetIndex === -1) return
+    store.commit('DELETE_subLayerProps', {
+      pageIndex,
+      layerIndex,
+      targetIndex,
+      propKeys
     })
   }
 
@@ -587,6 +612,14 @@ class LayerUtils {
     }
     /**  If the layerIndex === -1 means the layer is grouped or deleted */
     if (layerIndex === -1) {
+      logUtils.setLogAndConsoleLog(
+        'debugInfo@getLayerInfoById',
+        JSON.stringify({
+          pageIndex,
+          pageId,
+          pages: pageUtils.getPages.map(page => page.id)
+        })
+      )
       layerIndex = (pages ? pages[pageIndex] : pageUtils.getPage(pageIndex)).layers
         .findIndex(l => [LayerType.group, LayerType.tmp].includes(l.type as LayerType) && (l as IGroup).layers.find(subLayer => subLayer.id === layerId))
       subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, layerId, pages)
@@ -632,7 +665,7 @@ class LayerUtils {
       value = 100
     }
     const { getCurrLayer: currLayer, subLayerIdx, layerIndex } = this
-    if (subLayerIdx === -1) {
+    if (subLayerIdx === -1 || (generalUtils.isStk && store.getters['vivisticker/getControllerHidden'])) {
       if (this.currSelectedInfo.layers.length === 1) {
         this.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
           opacity: value

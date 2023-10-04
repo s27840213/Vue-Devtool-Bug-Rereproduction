@@ -8,7 +8,7 @@ div(class="hint")
 </template>
 
 <script lang="ts">
-import hintUtils from '@/utils/hintUtils'
+import hintUtils from '@nu/vivi-lib/utils/hintUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

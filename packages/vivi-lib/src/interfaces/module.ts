@@ -18,7 +18,7 @@ export interface IAsset {
     original: string
     json: string
   }
-  signed_url?: { [key: string]: string },
+  signed_url?: { [key: string]: string }
   content_ids?: IListServiceContentDataItem[]
   match_cover?: {
     height: number
@@ -26,11 +26,13 @@ export interface IAsset {
     theme: string
     width: number
     ver: number
-  },
-  src?: string,
-  user_id?: string,
-  asset_id?: string,
+  }
+  src?: string
+  user_id?: string
+  asset_id?: string
   asset_index?: number
+  has_frame?: boolean
+  fit?: number
 }
 
 export interface ITag {
@@ -104,8 +106,8 @@ export interface IListModuleState {
   // preview: string
   // preview2?: string
   locale: string
-  error: string,
-  sum?: number,
+  error: string
+  sum?: number
   favorites: {
     // Should sync with local storage:
     items: IFavorite
@@ -124,10 +126,10 @@ export interface IListModuleState {
 }
 
 export interface IAssetProps {
-  db?: string,
-  ver?: number,
+  db?: string
+  ver?: number
   pageIndex?: number
-  styles?: Partial<IStyle>,
+  styles?: Partial<IStyle>
   // the following props are used for preview image during polling process
   isPreview?: boolean,
   assetId?: string | number,
@@ -136,7 +138,9 @@ export interface IAssetProps {
   height?: number,
   previewSrc?: string,
   imgSrcSize?: {
-    width: number,
+    width: number
     height: number
   }
+  has_frame?: number | boolean
+  fit?: number
 }

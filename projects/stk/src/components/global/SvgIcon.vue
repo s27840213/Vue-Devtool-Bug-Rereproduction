@@ -11,7 +11,7 @@ svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
 </template>
 
 <script lang="ts">
-import svgIconUtils from '@/utils/svgIconUtils'
+import svgIconUtils from '@nu/vivi-lib/utils/svgIconUtils'
 import { defineComponent } from 'vue'
 
 // eslint-disable-next-line no-undef

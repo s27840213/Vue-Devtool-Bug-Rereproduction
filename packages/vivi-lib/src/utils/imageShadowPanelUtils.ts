@@ -3,6 +3,7 @@ import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/laye
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import store from '@/store'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import stkWVUtils from '@/utils/stkWVUtils'
 import colorUtils from './colorUtils'
 import generalUtils from './generalUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SPACE, fieldRange, logMark, setMark } from './imageShadowUtils'
@@ -110,6 +111,7 @@ export default new class ImageShadowPanelUtils {
   }
 
   async _handleShadowUpload(_layerData?: any, forceUpload = false) {
+    console.warn('_handleShadowUpload')
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     let layerData = (() => {
       const handleId = store.state.shadow.handleId

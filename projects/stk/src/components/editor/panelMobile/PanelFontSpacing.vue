@@ -20,8 +20,8 @@ div(class="panel-spacing")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import mappingUtils from '@/utils/mappingUtils'
-import textUtils from '@/utils/textUtils'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 

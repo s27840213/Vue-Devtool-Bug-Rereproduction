@@ -11,7 +11,7 @@ div(class="control-point__action-icon")
 </template>
 
 <script setup lang="ts">
-import generalUtils from '@/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import type { PropType } from 'vue'
 
 defineProps({

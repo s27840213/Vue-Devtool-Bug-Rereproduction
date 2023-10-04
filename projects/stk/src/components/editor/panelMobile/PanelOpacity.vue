@@ -11,8 +11,8 @@ div(class="panel-opacity")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import layerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { mapGetters, mapMutations } from 'vuex'
 export default defineComponent({
   emits: [],

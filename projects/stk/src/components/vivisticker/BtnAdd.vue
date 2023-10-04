@@ -6,7 +6,7 @@ div(class="btn-add" ref="btnAdd" :style="`font-family: ${localeFont()}`")
 </template>
 
 <script lang="ts">
-import AssetUtils from '@/utils/assetUtils'
+import AssetUtils from '@nu/vivi-lib/utils/assetUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'

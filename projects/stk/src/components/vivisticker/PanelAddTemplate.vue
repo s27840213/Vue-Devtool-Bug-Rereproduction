@@ -16,11 +16,11 @@ div(class="panel-add-template")
 </template>
 
 <script lang="ts">
-import backgroundUtils from '@/utils/backgroundUtils'
-import editorUtils from '@/utils/editorUtils'
-import imageUtils from '@/utils/imageUtils'
-import layerFactary from '@/utils/layerFactary'
-import pageUtils from '@/utils/pageUtils'
+import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerFactary from '@nu/vivi-lib/utils/layerFactary'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'

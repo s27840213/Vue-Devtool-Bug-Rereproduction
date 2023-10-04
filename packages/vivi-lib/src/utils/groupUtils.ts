@@ -1,6 +1,7 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
@@ -12,11 +13,13 @@ import ZindexUtils from '@/utils/zindexUtils'
 import _ from 'lodash'
 import backgroundUtils from './backgroundUtils'
 import editorUtils from './editorUtils'
+import frameUtils from './frameUtils'
 import ImageUtils from './imageUtils'
 import pageUtils from './pageUtils'
 import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
+import stkWVUtils from './stkWVUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IFrame>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -118,7 +121,8 @@ class GroupUtils {
             widthLimit: writingMode.includes('vertical') ? height : width,
             isTyping: false,
             shown: false,
-            moved: false
+            moved: false,
+            inAutoRescaleMode: false, // turn off auto rescale mode when forming a group
           })
         }
       })
@@ -242,6 +246,9 @@ class GroupUtils {
     if (backgroundUtils.inBgSettingMode) {
       editorUtils.setInBgSettingMode(false)
     }
+    if (generalUtils.isStk) {
+      stkWVUtils.showController()
+    }
     store.commit('SET_currActivePageIndex', pageIndex)
   }
 
@@ -258,15 +265,39 @@ class GroupUtils {
     if (this.currSelectedInfo.index !== -1) {
       const currSelectedLayers = store.getters.getCurrSelectedLayers
       if (currSelectedLayers.length === 1) {
-        const { pageIndex, index: layerIndex } = this.currSelectedInfo
-        if (currSelectedLayers[0].type === 'text' && textUtils.isEmptyText(currSelectedLayers[0])) {
-          store.commit('DELETE_selectedLayer')
-          store.commit('SET_lastSelectedLayerIndex', -1)
+        if (generalUtils.isPic) {
+          const { pageIndex, index: layerIndex } = this.currSelectedInfo
+          if (currSelectedLayers[0].type === 'text' && textUtils.isEmptyText(currSelectedLayers[0])) {
+            store.commit('DELETE_selectedLayer')
+            store.commit('SET_lastSelectedLayerIndex', -1)
+          } else {
+            LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+              active: false
+            })
+            ImageUtils.setImgControlDefault()
+          }
         } else {
-          LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-            active: false
-          })
-          ImageUtils.setImgControlDefault()
+          const { pageIndex, layerIndex, subLayerIdx } = LayerUtils
+          if (currSelectedLayers[0].type === LayerType.text) {
+            if (textUtils.isEmptyText(currSelectedLayers[0])) {
+              store.commit('DELETE_selectedLayer')
+              store.commit('SET_lastSelectedLayerIndex', -1)
+            }
+            LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+              active: false,
+              inAutoRescaleMode: false
+            })
+          } else {
+            LayerUtils.updateLayerProps(pageIndex, layerIndex, { active: false })
+            ImageUtils.setImgControlDefault()
+            switch (LayerUtils.getLayer(pageIndex, layerIndex).type) {
+              case LayerType.frame:
+                frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { active: false })
+                break
+              case LayerType.group:
+                LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, { active: false })
+            }
+          }
         }
       } else {
         const tmpLayer = this.tmpLayer as ITmp
@@ -275,6 +306,11 @@ class GroupUtils {
             if (l.type === LayerType.image) {
               LayerUtils.updateLayerStyles(this.pageIndex, LayerUtils.layerIndex, {
                 scale: l.styles.scale * tmpLayer.styles.scale
+              }, i)
+            }
+            if (l.type === LayerType.text) {
+              LayerUtils.updateLayerProps(this.pageIndex, LayerUtils.layerIndex, {
+                inAutoRescaleMode: false
               }, i)
             }
             LayerUtils.updateLayerProps(this.pageIndex, LayerUtils.layerIndex, {
@@ -352,6 +388,35 @@ class GroupUtils {
       types: this.calcType(currSelectedLayers),
       id: LayerUtils.getLayer(currSelectedPageIndex, currSelectedIndex).id || ''
     })
+  }
+
+  setBySelectedInfo(currSelectedInfo: ICurrSelectedInfo, pages: IPage[], activePageIndex: number) {
+    const { pageIndex, index } = currSelectedInfo
+    let layers: (IShape | IText | IImage | IGroup | IFrame)[]
+    if (pages[pageIndex]) {
+      const selectedLayer = pages[pageIndex].layers[index]
+      if (selectedLayer) {
+        if (selectedLayer.type === 'tmp') {
+          layers = (selectedLayer as ITmp).layers
+        } else {
+          layers = [selectedLayer]
+        }
+      } else {
+        layers = []
+      }
+    } else {
+      layers = []
+    }
+
+    if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
+      store.commit('SET_currActivePageIndex', pageIndex)
+      pageUtils.scrollIntoPage(pageIndex)
+    } else if (pageIndex === -1) {
+      // If the pageIndex be reset e.g. deleting the background-Img,
+      // however, the activePageIndex should remain the same for a better UX
+      store.commit('SET_currActivePageIndex', activePageIndex)
+    }
+    this.set(pageIndex, index, layers)
   }
 
   reset() {

@@ -2,6 +2,8 @@
  * @Note this could be used only in moible
  */
 
+import generalUtils from "./generalUtils"
+
 interface SwipeOptions {
   tolerance: number
   velocityLimit: number
@@ -55,7 +57,7 @@ export default class SwipeDetector {
       if (
         ['all', 'horizontal'].includes(this.swipeOptions.targetDirection) &&
         Math.abs(swipeX) > Math.abs(swipeY) &&
-        Math.abs(swipeY) > this.swipeOptions.tolerance &&
+        Math.abs(generalUtils.isStk ? swipeX : swipeY) > this.swipeOptions.tolerance &&
         vx > this.swipeOptions.velocityLimit
       ) {
         if (swipeX > 0) {

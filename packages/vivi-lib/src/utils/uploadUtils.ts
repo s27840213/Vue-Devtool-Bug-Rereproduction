@@ -10,7 +10,8 @@ import { IUploadAssetFontResponse, IUploadAssetLogoResponse, IUploadAssetRespons
 import router from '@/router'
 import store from '@/store'
 import { SidebarPanelType } from '@/store/types'
-import ImageUtils from '@/utils/imageUtils'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import imageUtils from '@/utils/imageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import { PRECISION } from '@/utils/unitUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -36,14 +37,14 @@ import imagePreview from '@/assets/img/svg/image-preview.svg'
 enum PutAssetDesignType {
   UPDATE_DB,
   UPDATE_PREV,
-  UPDATE_BOTH
+  UPDATE_BOTH,
 }
 
 // 0 for upload new one, 1 for update prev
 enum GroupDesignUpdateFlag {
   UPLOAD,
   UPDATE_GROUP,
-  UPDATE_COVER
+  UPDATE_COVER,
 }
 
 enum GetDesignType {
@@ -51,7 +52,7 @@ enum GetDesignType {
   TEXT = 'text',
   ASSET_DESIGN = 'design',
   NEW_DESIGN_TEMPLATE = 'new-design-template',
-  PRODUCT_PAGE_TEMPLATE = 'product-page-template'
+  PRODUCT_PAGE_TEMPLATE = 'product-page-template',
 }
 /**
  * @todo do the house keeping for upload and update logic
@@ -73,9 +74,9 @@ class UploadUtils {
    */
 
   getDesignInfo: {
-    flag: number,
-    type: string,
-    id: string,
+    flag: number
+    type: string
+    id: string
     teamId: string
   }
 
@@ -101,7 +102,7 @@ class UploadUtils {
       flag: 0,
       type: GetDesignType.ASSET_DESIGN,
       id: '',
-      teamId: ''
+      teamId: '',
     }
     this.event = new EventEmitter()
     this.eventHash = {}
@@ -110,7 +111,7 @@ class UploadUtils {
 
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
-    if (this.getDesignInfo.flag) {
+    if (generalUtils.isPic && this.getDesignInfo.flag) {
       this.getDesign(this.getDesignInfo.type, { designId: this.getDesignInfo.id, teamId: this.getDesignInfo.teamId })
     }
   }
@@ -148,21 +149,31 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo', addToPage = false) {
+  chooseAssets(type:
+    | 'image'
+    | 'font'
+    | 'avatar'
+    | 'logo'
+    | 'stk-bg-remove'
+    | 'stk-bg-remove-face', addToPage = false) {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
       avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
-      logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
+      logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
+      'stk-bg-remove': '.jpg,.jpeg,.png,.tiff,.tif,.heic',
+      'stk-bg-remove-face': '.jpg,.jpeg,.png,.tiff,.tif,.heic',
     }
     const inputNode = document.createElement('input')
     document.body.appendChild(inputNode)
     inputNode.setAttribute('class', 'inputNode')
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptHash[type])
-    inputNode.setAttribute('multiple', `${type === 'image'}`)
+    if (type === 'image') {
+      inputNode.setAttribute('multiple', `${type === 'image'}`)
+    }
     inputNode.id = 'upload'
     inputNode.click()
 
@@ -173,6 +184,9 @@ class UploadUtils {
       if (type === 'logo') {
         params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
+        if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
+          store.commit('bgRemove/SET_isProcessing', true)
+        }
       this.uploadAsset(type, files as FileList, Object.assign(params, { addToPage }))
       document.body.removeChild(inputNode)
     }, false)
@@ -256,11 +270,25 @@ class UploadUtils {
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
                       assetId: assetId,
-                      progress: 100
+                      progress: 100,
                     })
-                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, width, height })
-                    store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
-                    store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
+                    store.commit('file/UPDATE_IMAGE_URLS', {
+                      assetId,
+                      urls: json.url,
+                      assetIndex: asset_index,
+                      width,
+                      height,
+                    })
+                    store.commit('DELETE_previewSrc', {
+                      type: this.isAdmin ? 'public' : 'private',
+                      userId: this.userId,
+                      assetId,
+                      assetIndex: json.data.asset_index,
+                    })
+                    store.commit('file/SET_UPLOADING_IMGS', {
+                      id: assetId,
+                      adding: false,
+                    })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
                     this.uploadDesign()
@@ -280,15 +308,32 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false, pollingJsonName = 'result.json' }: {
-    addToPage?: boolean,
-    id?: string,
-    pollingCallback?: (json: IUploadAssetResponse) => void,
-    needCompressed?: boolean,
-    brandId?: string
-    isShadow?: boolean,
-    pollingJsonName?: string
-  } = {}) {
+  uploadAsset(type:
+    | 'image'
+    | 'font'
+    | 'avatar'
+    | 'logo'
+    | 'stk-bg-remove'
+    | 'stk-bg-remove-face',
+    files: FileList | Array<string>,
+    {
+      addToPage = false,
+      id,
+      pollingCallback,
+      needCompressed = true,
+      brandId,
+      isShadow = false,
+      pollingJsonName = 'result.json',
+    }: {
+      addToPage?: boolean
+      id?: string
+      pollingCallback?: (json: IUploadAssetResponse) => void
+      needCompressed?: boolean
+      brandId?: string
+      isShadow?: boolean
+      pollingJsonName?: string
+    } = {}
+  ) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
@@ -320,23 +365,51 @@ class UploadUtils {
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
       const assetId = id ?? generalUtils.generateAssetId()
+      const uuid = store.getters['vivisticker/getUuid']
+        ? store.getters['vivisticker/getUuid']
+        : generalUtils.generateAssetId()
+
+      // for horizontal image test
+      // const assetId = '230511154035471yNJGiW58'
+      // const uuid = '230511154035471qUvA6TTT'
       const formData = new FormData()
-      Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
-        formData.append(key, this.loginOutput.upload_map.fields[key])
-      })
-      if (type === 'avatar') {
-        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
-      } else if (type === 'font') {
-        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.global.locale}_original`)
-      } else if (type === 'logo') {
-        if (!brandId) return
-        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`)
+
+      if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
+        Object.keys(this.loginOutput.ul_removebg_map.fields).forEach((key) => {
+          formData.append(key, this.loginOutput.ul_removebg_map.fields[key])
+        })
       } else {
-        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
+        Object.keys(this.loginOutput.upload_map.fields).forEach((key) => {
+          formData.append(key, this.loginOutput.upload_map.fields[key])
+        })
       }
+
+      let key = ''
+      switch (type) {
+        case 'avatar':
+          key = `${this.loginOutput.upload_map.path}asset/${type}/original`
+          break
+        case 'font':
+          key = `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.global.locale}_original`
+          break
+        case 'stk-bg-remove':
+          key = `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bg`
+          break
+        case 'stk-bg-remove-face':
+          key = `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bgf`
+          break
+        case 'logo':
+          if (!brandId) return
+          key = `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`
+          break
+        default:
+          key = `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`
+      }
+
+      formData.append('key', key)
+
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original')}`)
       formData.append('x-amz-meta-tn', needCompressed ? this.userId : (isShadow ? `${this.userId},2` : `${this.userId},1`))
-      const xhr = new XMLHttpRequest()
 
       const file = isFile ? files[i] : generalUtils.dataURLtoBlob(files[i] as string)
       if (formData.has('file')) {
@@ -346,6 +419,7 @@ class UploadUtils {
       }
 
       const assetHandler = (src: string, imgType?: string) => {
+        const xhr = new XMLHttpRequest()
         if (type === 'image') {
           const img = new Image()
           img.src = src
@@ -354,7 +428,7 @@ class UploadUtils {
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
-              pageIndex: pageUtils.currFocusPageIndex
+              pageIndex: pageUtils.currFocusPageIndex,
             })
             if (addToPage) {
               assetUtils.addImage(src, isUnknown ? 1 : img.width / img.height, {
@@ -372,13 +446,13 @@ class UploadUtils {
                 width: isUnknown ? 250 : img.width,
                 height: isUnknown ? 250 : img.height,
                 src,
-                assetId: assetId
+                assetId: assetId,
               })
               xhr.upload.onprogress = (event) => {
                 const uploadProgress = Math.floor(event.loaded / event.total * 100)
                 store.commit('file/UPDATE_PROGRESS', {
                   assetId: assetId,
-                  progress: uploadProgress / 2
+                  progress: uploadProgress / 2,
                 })
                 if (uploadProgress === 100) {
                   increaseInterval = window.setInterval(() => {
@@ -409,12 +483,25 @@ class UploadUtils {
                           if (!isShadow) {
                             store.commit('file/UPDATE_PROGRESS', {
                               assetId: assetId,
-                              progress: 100
+                              progress: 100,
                             })
-                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, ...(isUnknown && { width, height }) })
+                            store.commit('file/UPDATE_IMAGE_URLS', {
+                              assetId,
+                              urls: json.url,
+                              assetIndex: asset_index,
+                              ...(isUnknown && { width, height }),
+                            })
                           }
-                          store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
-                          store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
+                          store.commit('DELETE_previewSrc', {
+                            type: this.isAdmin ? 'public' : 'private',
+                            userId: this.userId,
+                            assetId,
+                            assetIndex: json.data.asset_index,
+                          })
+                          store.commit('file/SET_UPLOADING_IMGS', {
+                            id: assetId,
+                            adding: false,
+                          })
                           if (pollingCallback) {
                             pollingCallback(json)
                           }
@@ -488,7 +575,7 @@ class UploadUtils {
                         prev_4x: `https://template.vivipic.com/admin/${this.teamId || this.userId}/asset/avatar/prev_4x`
                       } : json.url
                       store.commit('user/SET_STATE', {
-                        avatar: targetUrls
+                        avatar: targetUrls,
                       })
                       modalUtils.setModalInfo(`${i18n.global.t('NN0224')}`, [])
                     } else {
@@ -517,7 +604,7 @@ class UploadUtils {
                     if (json.flag === 0) {
                       notify({
                         group: 'copy',
-                        text: `${i18n.global.t('NN0135')}`
+                        text: `${i18n.global.t('NN0135')}`,
                       })
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceLogo(tempId, json.data, brandId)
@@ -529,6 +616,22 @@ class UploadUtils {
                 }
               })
             }, 2000)
+          }
+        } else if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
+          xhr.open('POST', this.loginOutput.ul_removebg_map.url, true)
+          xhr.send(formData)
+          xhr.onerror = networkUtils.notifyNetworkError
+          xhr.onload = () => {
+            imageUtils.getImageSize(src, 0, 0).then(({ width, height }) => {
+              bgRemoveUtils.removeBgStk(
+                uuid,
+                assetId,
+                src,
+                width,
+                height,
+                type
+              )
+            })
           }
         }
       }
@@ -545,6 +648,136 @@ class UploadUtils {
     }
   }
 
+  async assetHandler(type: string, formData: FormData, assetId: string, params: {
+    imgType?: string
+    addToPage?: boolean,
+    isShadow?: boolean,
+    pollingJsonName?: string,
+    pollingCallback?: (json: IUploadAssetResponse) => void
+  }) {
+    switch (type) {
+      case 'image': {
+        this.uploadImage(type, formData, assetId, params)
+      }
+    }
+  }
+
+  async uploadImage(src: string, formData: FormData, assetId: string, { imgType, addToPage, isShadow, pollingJsonName, pollingCallback }: {
+    imgType?: string,
+    addToPage?: boolean,
+    isShadow?: boolean,
+    pollingJsonName?: string,
+    pollingCallback?: (json: IUploadAssetResponse) => void
+  }) {
+    const img = new Image()
+    img.src = src
+    const isUnknown = imgType === 'unknown'
+    const imgCallBack = async (src: string) => {
+      store.commit('file/SET_UPLOADING_IMGS', {
+        id: assetId,
+        adding: true,
+        pageIndex: pageUtils.currFocusPageIndex,
+      })
+      if (addToPage) {
+        assetUtils.addImage(src, isUnknown ? 1 : img.width / img.height, {
+          pageIndex: pageUtils.currFocusPageIndex,
+          // The following props is used for preview image during polling process
+          isPreview: true,
+          assetId,
+        })
+      }
+      try {
+        await this.sendRequest('POST', this.loginOutput.upload_map.url, formData, {
+          trackProgress: true,
+          uploadProgressCallback: (progress: number) => {
+            store.commit('file/UPDATE_PROGRESS', {
+              assetId: assetId,
+              progress: progress / 2,
+            })
+            if (progress === 100) {
+              increaseInterval = window.setInterval(() => {
+                const targetIndex = this.images.findIndex(
+                  (img: IAssetPhoto) => {
+                    return img.id === assetId
+                  }
+                )
+                const curr = this.images[targetIndex].progress as number
+                const increaseNum = (90 - curr) * 0.05
+                this.images[targetIndex].progress = curr + increaseNum
+              }, 10)
+            }
+          }
+        })
+
+        // polling the JSON file of uploaded image
+        const interval = window.setInterval(() => {
+          const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId
+            }/${assetId}/${pollingJsonName}?ver=${generalUtils.generateRandomString(
+              6
+            )}`
+          fetch(pollingTargetSrc).then((response) => {
+            if (response.status === 200) {
+              clearInterval(interval)
+              clearInterval(increaseInterval)
+              response.json().then((json: IUploadAssetResponse) => {
+                if (json.flag === 0) {
+                  const { width, height, asset_index } = json.data
+                  if (!isShadow) {
+                    store.commit('file/UPDATE_PROGRESS', {
+                      assetId: assetId,
+                      progress: 100,
+                    })
+                    store.commit('file/UPDATE_IMAGE_URLS', {
+                      assetId,
+                      urls: json.url,
+                      assetIndex: asset_index,
+                      ...(isUnknown && { width, height }),
+                    })
+                  }
+                  store.commit('DELETE_previewSrc', {
+                    type: this.isAdmin ? 'public' : 'private',
+                    userId: this.userId,
+                    assetId,
+                    assetIndex: json.data.asset_index,
+                  })
+                  store.commit('file/SET_UPLOADING_IMGS', {
+                    id: assetId,
+                    adding: false,
+                  })
+                  if (pollingCallback) {
+                    pollingCallback(json)
+                  }
+                } else {
+                  store.commit('file/DEL_PREVIEW', { assetId })
+                  layerUtils.deleteLayerByAssetId(assetId)
+                  paymentUtils.errorHandler(json.msg)
+                }
+              })
+            }
+          })
+        }, 2000)
+      } catch (error) {
+        networkUtils.notifyNetworkError()
+      }
+      let increaseInterval = undefined as any
+      if (!isShadow) {
+        store.commit('file/ADD_PREVIEW', {
+          width: isUnknown ? 250 : img.width,
+          height: isUnknown ? 250 : img.height,
+          src,
+          assetId: assetId,
+        })
+      }
+    }
+    if (!isUnknown) {
+      img.onload = (evt) => {
+        imgCallBack(img.src)
+      }
+    } else {
+      imgCallBack(require('@/assets/img/svg/image-preview.svg'))
+    }
+  }
+
   async uploadLog(logContent: string) {
     await this.checkIfUrlExpires()
     const formData = new FormData()
@@ -553,9 +786,10 @@ class UploadUtils {
     })
 
     const logName = `log-${generalUtils.generateTimeStamp()}.txt`
-    formData.append('key', `${this.loginOutput.upload_log_map.path}${this.userId}/${logName}`)
+    formData.append('key', `${this.loginOutput.upload_log_map.path}${generalUtils.isStk ? this.hostId : this.userId}/${logName}`)
+    console.log(formData.get('key'))
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`)
-    formData.append('x-amz-meta-tn', this.userId)
+    formData.append('x-amz-meta-tn', generalUtils.isStk ? this.hostId : this.userId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' })
@@ -640,7 +874,13 @@ class UploadUtils {
       type = 'design'
       designId = assetId
       teamId = this.teamId
-      router.replace({ query: Object.assign({}, router.currentRoute.value.query, { type, design_id: designId, team_id: teamId }) })
+      router.replace({
+        query: Object.assign({}, router.currentRoute.value.query, {
+          type,
+          design_id: designId,
+          team_id: teamId,
+        }),
+      })
       isNewDesign = true
     }
 
@@ -685,7 +925,7 @@ class UploadUtils {
       pages: pagesJSON,
       groupId: store.state.groupId,
       groupType: store.state.groupType,
-      exportIds: this.exportIds
+      exportIds: this.exportIds,
     }
 
     const formData = new FormData()
@@ -717,7 +957,7 @@ class UploadUtils {
           const resPutAssetDesign = await store.dispatch('user/putAssetDesign', {
             assetId,
             type: putAssetDesignType,
-            wait: 1
+            wait: 1,
           })
           const { flag } = resPutAssetDesign
           if (flag !== 0) {
@@ -765,6 +1005,7 @@ class UploadUtils {
         // Error: 403: Forbidden
         logUtils.setLog('uploadDesign failed:')
         logUtils.setLogForError(error as Error)
+        networkUtils.notifyNetworkError()
         await store.dispatch('user/login', { token: this.token })
       })
   }
@@ -825,7 +1066,7 @@ class UploadUtils {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
 
     layerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
-      designId: designId
+      designId,
     })
 
     const formData = new FormData()
@@ -982,7 +1223,7 @@ class UploadUtils {
         update,
         list,
         group_id: groupId,
-        ecomm
+        ecomm,
       } as IGroupDesignInputParams)
     }
 
@@ -993,8 +1234,9 @@ class UploadUtils {
         token: this.token,
         update,
         group_id: groupId,
-        cover
-      } as IGroupDesignInputParams).then(() => {
+          cover,
+        } as IGroupDesignInputParams)
+        .then(() => {
         // console.log(groupId)
       })
     }
@@ -1012,7 +1254,7 @@ class UploadUtils {
     const parentId = page.designId ?? ''
     store.commit('SET_pageDesignId', {
       pageIndex: pageIndex,
-      designId: designId
+      designId: designId,
     })
 
     const pageJSON = this.default(page)
@@ -1121,7 +1363,18 @@ class UploadUtils {
   async checkIfUrlExpires() {
     const expire = new Date(Date.parse(this.loginOutput.upload_log_map.expire + 'Z'))
     if (new Date() >= expire) {
-      await store.dispatch('user/login', { token: store.getters['user/getToken'] })
+      if (generalUtils.isPic) {
+        await store.dispatch('user/login', { token: store.getters['user/getToken'] })
+      }
+      if (generalUtils.isStk) {
+        const response = await fetch(
+          `https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(
+            6
+          )}`
+        )
+        const json = await response.json()
+        this.setLoginOutput({ upload_log_map: json.ul_log_map })
+      }
     }
   }
 
@@ -1140,12 +1393,12 @@ class UploadUtils {
 
     if (page.backgroundImage.config.src) {
       const src = page.backgroundImage.config.src as string
-      const type = ImageUtils.getSrcType(page.backgroundImage.config.src as any)
+      const type = imageUtils.getSrcType(page.backgroundImage.config.src as any)
       page.backgroundImage.config.srcObj = {
         type,
-        userId: ImageUtils.getUserId(src, type),
-        assetId: ImageUtils.getAssetId(src, type),
-        brandId: ImageUtils.getBrandId(src, type)
+        userId: imageUtils.getUserId(src, type),
+        assetId: imageUtils.getAssetId(src, type),
+        brandId: imageUtils.getBrandId(src, type),
       }
       delete page.backgroundImage.config.src
     }
@@ -1232,7 +1485,7 @@ class UploadUtils {
               type: 6,
               ver: 0,
               content_ids: content[0].list,
-              group_id: designId
+              group_id: designId,
             })
           })
           .then(() => {
@@ -1438,7 +1691,7 @@ class UploadUtils {
       zindex: styles.zindex,
       opacity: styles.opacity,
       horizontalFlip: styles.horizontalFlip,
-      verticalFlip: styles.verticalFlip
+      verticalFlip: styles.verticalFlip,
     }
     switch (type) {
       case 'image':
@@ -1462,7 +1715,7 @@ class UploadUtils {
           textFill: styles.textFill,
           textShape: styles.textShape,
           type: styles.type,
-          userId: styles.userId
+          userId: styles.userId,
         }
       case 'frame':
         return {
@@ -1473,7 +1726,7 @@ class UploadUtils {
       case 'shape': {
         return {
           ...general,
-          blendMode: styles.blendMode
+          blendMode: styles.blendMode,
         }
       }
       default:
@@ -1499,7 +1752,7 @@ class UploadUtils {
           srcObj,
           trace,
           overlay,
-          styles: this.styleFilter(styles, 'image')
+          styles: this.styleFilter(styles, 'image'),
         }
       }
       case 'shape': {
@@ -1572,22 +1825,22 @@ class UploadUtils {
               return {
                 ...this.layerInfoFilter(img),
                 isFrameImg,
-                styles: this.styleFilter(img.styles, 'image')
+                styles: this.styleFilter(img.styles, 'image'),
               }
-            })
+            }),
           ],
           ...(decoration && {
             decoration: {
-              color: decoration.color
-            }
+              color: decoration.color,
+            },
           }),
           ...(decorationTop && {
             decorationTop: {
-              color: decorationTop.color
-            }
+              color: decorationTop.color,
+            },
           }),
           ...(blendLayers && {
-            blendLayers: blendLayers.map(function (l) { return { color: l.color } })
+            blendLayers: blendLayers.map(function (l) { return { color: l.color } }),
           }),
           styles: this.styleFilter(styles, 'frame')
         }
@@ -1660,7 +1913,7 @@ class UploadUtils {
       const resultJSON = {
         pages: pagesJSON,
         groupId: store.state.groupId,
-        groupType: store.state.groupType
+        groupType: store.state.groupType,
       }
       const blob = new Blob([JSON.stringify(resultJSON)], { type: 'application/json' })
       if (formData.has('file')) {
@@ -1688,15 +1941,20 @@ class UploadUtils {
       newPage.backgroundImage.config.imgControl = false
       newPage.width = _.round(newPage.width)
       newPage.height = _.round(newPage.height)
-      Object.keys(newPage.bleeds).forEach(key => {
-        newPage.bleeds[key] = _.round(newPage.bleeds[key])
-      })
+      newPage.bleeds &&
+        Object.keys(newPage.bleeds).forEach((key) => {
+          newPage.bleeds[key] = _.round(newPage.bleeds[key])
+        })
       const precision = newPage.unit === 'px' ? 0 : PRECISION
       newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
       newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
-      Object.keys(newPage.physicalBleeds).forEach(key => {
-        newPage.physicalBleeds[key] = _.round(newPage.physicalBleeds[key], precision)
-      })
+      newPage.physicalBleeds &&
+        Object.keys(newPage.physicalBleeds).forEach((key) => {
+          newPage.physicalBleeds[key] = _.round(
+            newPage.physicalBleeds[key],
+            precision
+          )
+        })
       return newPage
     })
     return pagesJSON
@@ -1725,7 +1983,92 @@ class UploadUtils {
     })
   }
 
-  polling(targetSrc: string, callback: (json: any) => boolean, retryLimit = this.DEFAULT_POLLING_RETRY_LIMIT, retryTime = 0) {
+  async sendRequest(method: string, uploadMapUrl: string, data: FormData, { trackProgress = false, uploadProgressCallback }: {
+    trackProgress?: boolean,
+    uploadProgressCallback?: (progress: number) => void
+  }): Promise<IUploadAssetResponse> {
+    try {
+      if (trackProgress) {
+        // Use XMLHttpRequest to track upload progress
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest()
+
+          xhr.open(method, uploadMapUrl, true)
+
+          xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              const response = xhr.response
+              resolve(response)
+            } else {
+              reject(new Error(`${xhr.status}: ${xhr.statusText}`))
+            }
+          }
+
+          xhr.onerror = function () {
+            reject(new Error('XMLHttpRequest error'))
+          }
+
+          xhr.upload.onprogress = function (event) {
+            const uploadProgress = Math.floor((event.loaded / event.total) * 100)
+            if (uploadProgressCallback) {
+              uploadProgressCallback(uploadProgress)
+            }
+          }
+
+          xhr.send(data)
+        })
+      } else {
+        // Use fetch API for regular requests
+        const response = await fetch(uploadMapUrl, {
+          method: method,
+          body: data,
+        })
+
+        if (!response.ok) {
+          throw new Error(`${response.status}: ${response.statusText}`)
+        }
+
+        return await response.json()
+      }
+    } catch (error) {
+      throw new Error('Request error: ' + error)
+    }
+  }
+
+  async pollingNew(targetSrc: string, retryLimit = this.DEFAULT_POLLING_RETRY_LIMIT, retryTime = 0) {
+    return new Promise((resolve, reject) => {
+      const interval = window.setInterval(async () => {
+        if (retryTime === retryLimit) {
+          clearInterval(interval)
+          reject(new Error('Polling failed: reach retry limits'))
+          return
+        }
+
+        retryTime += 1
+        try {
+          const response = await fetch(`${targetSrc}?ver=${generalUtils.generateRandomString(6)}`)
+
+          if (response.ok) {
+            const json: IUploadAssetResponse = await response.json()
+            resolve(json)
+            clearInterval(interval)
+          }
+        } catch (error) {
+          // Handle any errors that occur during fetch or JSON parsing.
+          console.error('Polling error:', error)
+          reject(error)
+          clearInterval(interval)
+        }
+      }, 2000)
+    })
+  }
+
+  polling(
+    targetSrc: string,
+    callback: (json: any) => boolean,
+    retryLimit = this.DEFAULT_POLLING_RETRY_LIMIT,
+    retryTime = 0
+  ) {
     const interval = window.setInterval(() => {
       if (retryTime === retryLimit) {
         clearInterval(interval)

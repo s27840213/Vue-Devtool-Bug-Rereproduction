@@ -20,9 +20,9 @@ div(class="nu-tmp"
 <script lang="ts">
 import { ILayer, ITmp } from '@nu/vivi-lib/interfaces/layer'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
-import layerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
-import textPropUtils from '@/utils/textPropUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
 import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({

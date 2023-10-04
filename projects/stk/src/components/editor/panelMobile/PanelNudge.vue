@@ -51,8 +51,8 @@ div(class="panel-nudge text-left")
 
 <script lang="ts">
 import SlideToggle from '@/components/global/SlideToggle.vue'
-import eventUtils from '@/utils/eventUtils'
-import shortcutUtils from '@/utils/shortcutUtils'
+import eventUtils from '@nu/vivi-lib/utils/eventUtils'
+import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

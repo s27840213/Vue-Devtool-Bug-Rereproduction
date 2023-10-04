@@ -11,8 +11,8 @@ div(v-else class="panel-replace")
 
 <script lang="ts">
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
-import imageUtils from '@/utils/imageUtils'
-import { replaceImgInject } from '@/utils/textFillUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, inject, PropType } from 'vue'
 

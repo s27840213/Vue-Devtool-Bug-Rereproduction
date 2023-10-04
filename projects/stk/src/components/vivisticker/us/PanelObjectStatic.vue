@@ -99,7 +99,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
 import { CCategoryList } from '@/components/category/CategoryList.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IAsset, isITag, ITagExtend } from '@/interfaces/module'
-import generalUtils from '@/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 import PanelObjectStatic from '../PanelObjectStatic.vue'

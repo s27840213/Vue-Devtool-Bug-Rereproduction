@@ -25,7 +25,7 @@ div(class="panel-photo")
 <script lang="ts">
 import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import generalUtils from '@/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 

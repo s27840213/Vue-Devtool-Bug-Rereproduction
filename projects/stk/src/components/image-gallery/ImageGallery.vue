@@ -17,7 +17,7 @@ recycle-scroller(class="image-gallery" id="recycle"
 </template>
 
 <script lang="ts">
-import GalleryUtils from '@/utils/galleryUtils'
+import GalleryUtils from '@nu/vivi-lib/utils/galleryUtils'
 import GalleryPhoto from '@nu/vivi-lib/components/GalleryPhoto.vue'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@nu/vivi-lib/interfaces/api'

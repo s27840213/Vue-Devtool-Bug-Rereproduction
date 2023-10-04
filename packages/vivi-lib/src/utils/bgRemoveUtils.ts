@@ -1,12 +1,14 @@
 import useCanvasUtils from '@/composable/useCanvasUtils'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { IBgRemoveInfo } from '@/interfaces/image'
+import { IBgRemoveInfo, ITrimmedCanvasInfo } from '@/interfaces/image'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import store from '@/store'
 import { LayerProcessType, LayerType, SidebarPanelType } from '@/store/types'
+import logUtils from '@/utils/logUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
@@ -59,6 +61,10 @@ class BgRemoveUtils {
 
   setInBgRemoveMode(inBgRemoveMode: boolean) {
     store.commit('bgRemove/SET_inBgRemoveMode', inBgRemoveMode)
+  }
+
+  setPreviewImage(previewImage: { src: string, width: number, height: number }) {
+    store.commit('bgRemove/SET_previewImage', previewImage)
   }
 
   private setLoading(bool: boolean) {
@@ -153,6 +159,30 @@ class BgRemoveUtils {
         paymentUtils.errorHandler(data.msg)
       }
     })
+  }
+
+  async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string): Promise<void> {
+    this.setIsProcessing(true)
+    this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
+    logUtils.setLog('start removing bg')
+    const data = await store.dispatch('user/removeBgStk', { uuid, assetId, type })
+    logUtils.setLog('finish removing bg')
+    logUtils.setLog(`remove bg result: ${JSON.stringify(data)}`)
+
+    if (data.flag === 0) {
+      editorUtils.setCurrActivePanel('remove-bg')
+      const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
+      logUtils.setLog(`autoRemoveResult: ${JSON.stringify(autoRemoveResult)}`)
+      this.setAutoRemoveResult(autoRemoveResult)
+      this.setInBgRemoveMode(true)
+      this.setIsProcessing(false)
+    } else {
+      notify({ group: 'error', text: data.msg })
+      this.setIsProcessing(false)
+      this.setPreviewImage({ src: '', width: 0, height: 0 })
+    }
+
+    // return data
   }
 
   cancel() {
@@ -279,6 +309,75 @@ class BgRemoveUtils {
         pollingJsonName: 'result2.json'
       })
     }
+  }
+
+  downloadCanvas() {
+    const src = this.canvas.toDataURL('image/png;base64')
+
+    generalUtils.downloadImage(src, `vivistiker-${generalUtils.generateRandomString}.png`)
+  }
+
+  getBgRemoveResultSrc() {
+    return this.canvas.toDataURL('image/png;base64')
+  }
+
+  getTrimmedCanvasInfo(targetLayerStyle?: IImageStyle) {
+    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const trimmedCanvasInfo = trimCanvas(this.canvas)
+    return trimmedCanvasInfo
+  }
+
+  screenshot() {
+    const src = this.canvas.toDataURL('image/png;base64')
+    stkWVUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
+      type: 'png',
+      url: src
+    })
+  }
+
+  // this is for IOS version < 1.35
+  saveToIOSOld(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
+    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const trimmedCanvasInfo = trimCanvas(this.canvas)
+    const { canvas: trimedCanvas, width, height, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+    const src = trimedCanvas.toDataURL('image/png;base64')
+
+    const assetId = generalUtils.generateAssetId()
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'bgRemove', name: assetId, toast: false }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      if (callback) {
+        return callback(_data, assetId, width / height, trimmedCanvasInfo)
+      }
+    })
+  }
+
+  saveToIOS(designId:string, callback?: (data: { flag: string, msg: string, imageId: string }, path: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
+    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const trimmedCanvasInfo = trimCanvas(this.canvas)
+    const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
+    const src = trimedCanvas.toDataURL('image/png;base64')
+
+    const name = generalUtils.generateAssetId()
+
+    const key = `mydesign-${stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      if (callback) {
+        return callback(_data, `${key}/${designId}/${name}`, width / height, trimmedCanvasInfo)
+      }
+    })
+  }
+
+  moveOldBgRemoveImages(src: string, callback?: (path: string) => void) {
+    const key = `mydesign-${stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
+    const editingDesignId = store.getters['vivisticker/getEditingDesignId']
+    const name = generalUtils.generateAssetId()
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId: editingDesignId }, 'save-image-from-url').then((data) => {
+      if (callback) {
+        const path = `${key}/${editingDesignId}/${name}`
+        return callback(path)
+      }
+    })
   }
 }
 

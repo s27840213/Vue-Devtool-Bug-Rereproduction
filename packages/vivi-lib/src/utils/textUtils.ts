@@ -534,6 +534,82 @@ class TextUtils {
     }
   }
 
+  getAutoRescaleResult(
+    config: IText,
+    textHW: { width: number, height: number },
+    x: number,
+    y: number,
+    { forceFull = true, onlyCentralize = true } = {},
+    pageIndex = layerUtils.pageIndex
+  ): {
+    textHW: { width: number, height: number },
+    x: number,
+    y: number,
+    scale: number
+  } {
+    const isVertical = config.styles.writingMode.includes('vertical')
+    const page = pageUtils.getPage(pageIndex) as IPage
+    const pageSize = page[isVertical ? 'height' : 'width']
+    const newTmpTextSize = textHW[isVertical ? 'height' : 'width']
+    const initScale = config.initScale
+    const oldCenter = mathUtils.getCenter({
+      x: 0,
+      y: 0,
+      width: page.width,
+      height: page.height
+    })
+    let scale = config.styles.scale
+    if (!onlyCentralize && config.widthLimit === -1 && (newTmpTextSize >= pageSize || forceFull)) {
+      let rescale = pageSize / newTmpTextSize
+      scale = config.styles.scale * rescale
+      if (scale > initScale) {
+        rescale = initScale / config.styles.scale
+        scale = initScale
+      }
+      textHW = {
+        width: textHW.width * rescale,
+        height: textHW.height * rescale
+      }
+      x = isVertical ? x : 0
+      y = isVertical ? 0 : y
+    }
+    const newCenter = mathUtils.getCenter({
+      width: textHW.width,
+      height: textHW.height,
+      x,
+      y
+    })
+
+    const offset = { x: oldCenter.x - newCenter.x, y: oldCenter.y - newCenter.y }
+    x += offset.x
+    y += offset.y
+    return { textHW, x, y, scale }
+  }
+
+  handleAutoRescale(options?: { forceFull?: boolean, onlyCentralize?: boolean }, pageIndex = layerUtils.pageIndex, layerIndex = layerUtils.layerIndex) {
+    const config = layerUtils.getLayer(pageIndex, layerIndex) as AllLayerTypes
+    if (config?.type !== LayerType.text) return
+    if (config.styles.rotate !== 0 || !config.inAutoRescaleMode || textShapeUtils.isCurvedText(config.styles.textShape)) return
+    const { textHW, x, y, scale } = this.getAutoRescaleResult(
+      config,
+      this.getTextHW(config, config.widthLimit),
+      config.styles.x,
+      config.styles.y,
+      options,
+      pageIndex
+    )
+    layerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height, scale })
+  }
+
+  turnOffAutoRescaleMode() {
+    const { getCurrLayer: config, pageIndex, layerIndex } = layerUtils
+    if (config.type === LayerType.text && config.inAutoRescaleMode) {
+      layerUtils.updateLayerProps(pageIndex, layerIndex, {
+        inAutoRescaleMode: false
+      })
+    }
+  }
+
   updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
     const targetLayer = layerUtils.getLayer(pageIndex, layerIndex)
     if (subLayerIndex === -1) { // single text layer
@@ -632,7 +708,7 @@ class TextUtils {
     this.fixGroupYCoordinates(pageIndex, layerIndex)
   }
 
-  getAddPosition(width: number, height: number, pageIndex?: number) {
+  getAddPosition(width: number, height: number, pageIndex?: number): { x: number, y: number, center: boolean } {
     const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const page = layerUtils.getPage(targePageIndex)
     const x = (page.width - width) / 2
@@ -644,11 +720,11 @@ class TextUtils {
         const specx = currLayer.styles.x + (currLayer.styles.width - width) / 2
         const specy = currLayer.styles.y + currLayer.styles.height
         if ((specy + height) < page.height) {
-          return { x: specx, y: specy }
+          return { x: specx, y: specy, center: false }
         }
       }
     }
-    return { x, y }
+    return { x, y, center: true }
   }
 
   // TODO: In addStandardText call resetTextField, textLayer is Partial<IText>, need more type check here.

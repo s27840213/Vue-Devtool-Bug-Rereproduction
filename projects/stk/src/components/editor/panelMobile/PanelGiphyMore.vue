@@ -15,7 +15,7 @@ div(class="p-giphy" v-click-outside="vcoConfig")
 <script lang="ts">
 import i18n from '@nu/vivi-lib/i18n'
 import { IGif } from '@/interfaces/giphy'
-import editorUtils from '@/utils/editorUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'

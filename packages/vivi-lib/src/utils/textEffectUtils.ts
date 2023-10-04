@@ -8,6 +8,7 @@ import mathUtils from '@/utils/mathUtils'
 import { debounce, max } from 'lodash'
 import { reactive } from 'vue'
 import tiptapUtils from './tiptapUtils'
+import generalUtils from './generalUtils'
 
 type ITextShadowCSS = {
   '--base-stroke'?: string
@@ -30,13 +31,9 @@ class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
   private currColorKey = ''
-  effectDefaultOptions = {} as Record<string, Record<string, string | number>>
   focus = 'none' as IFocusState
-  constructor() {
-    this.effectDefaultOptions = this.getDefaultEffects()
-  }
 
-  getDefaultEffects() {
+  get effectDefaultOptions(): Record<string, Record<string, string | number>> {
     return {
       none: {},
       shadow: { // 陰影
@@ -65,14 +62,14 @@ class Controller {
         color: 'fontColor'
       },
       funky3d: { // 立體延伸
-        distance: 10,
+        distance: generalUtils.isPic ? 10 : 3,
         distanceInverse: 0,
         angle: 45,
         opacity: 100,
         color: 'fontColorL+-40/BC/00'
       },
       bold3d: { // 3D立體
-        distance: 20,
+        distance: generalUtils.isPic ? 20 : 10,
         angle: 0,
         opacity: 100,
         textStrokeColor: 'fontColorL+-40/BC/00',

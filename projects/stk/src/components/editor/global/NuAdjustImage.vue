@@ -22,8 +22,8 @@ svg(:viewBox="svgViewBox"
 
 <script lang="ts">
 import { IImage } from '@nu/vivi-lib/interfaces/layer'
-import GeneralUtils from '@/utils/generalUtils'
-import ImageAdjustUtil from '@/utils/imageAdjustUtil'
+import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
+import ImageAdjustUtil from '@nu/vivi-lib/utils/imageAdjustUtil'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

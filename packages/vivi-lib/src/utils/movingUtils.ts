@@ -1,7 +1,8 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
+import { nextTick } from 'vue'
 import controlUtils from './controlUtils'
 import editorUtils from './editorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
@@ -47,6 +48,7 @@ export class MovingUtils {
   private get scaleRatio(): number { return store.getters.getPageScaleRatio }
   private get currHoveredPageIndex(): number { return store.getters.getCurrHoveredPageIndex }
   private get isActive(): boolean { return this.config.active }
+  private get isControllerShown(): boolean { return this.isActive && (!generalUtils.isStk || !store.getters['vivisticker/getControllerHidden']) }
   private get getLayerType(): string { return this.config.type }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
@@ -221,7 +223,7 @@ export class MovingUtils {
      * @Note - in Mobile version, we can't select the layer directly, we should make it active first
      * The exception is that we are in multi-selection mode
      */
-    if (this.isTouchDevice && !this.isActive && !this.isLocked && !this.inMultiSelectionMode) {
+    if (this.isTouchDevice && !this.isControllerShown && !this.isLocked && !this.inMultiSelectionMode) {
       this.eventTarget.addEventListener('touchstart', this.disableTouchEvent)
       this.initialPos = mouseUtils.getMouseAbsPoint(event)
       this._moving = this.moving.bind(this)
@@ -250,12 +252,12 @@ export class MovingUtils {
         const isMover = targetClassList.contains('control-point__mover')
 
         // if the text layer is already active and contentEditable
-        if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar && !isMover) {
+        if (this.isControllerShown && !inSelectionMode && this.contentEditable && !isMoveBar && !isMover) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isDraggingCursor: true })
           this._cursorDragEnd = this.onCursorDragEnd.bind(this)
           eventUtils.addPointerEvent('pointerup', this._cursorDragEnd)
           return
-        } else if (!this.isActive) {
+        } else if (!this.isControllerShown) {
           let targetIndex = this.layerIndex
           if (!inSelectionMode && !inMultiSelectionMode) {
             groupUtils.deselect()
@@ -303,13 +305,13 @@ export class MovingUtils {
     }
     if (this.config.type !== 'tmp') {
       let targetIndex = this.layerIndex
-      if (this.isActive && this.currSelectedInfo.layers.length === 1) {
+      if (this.isControllerShown && this.currSelectedInfo.layers.length === 1) {
         if (inSelectionMode) {
           groupUtils.deselect()
           targetIndex = this.config.styles.zindex - 1
           this.setLastSelectedLayerIndex(this.layerIndex)
         }
-      } else if (!this.isActive) {
+      } else if (!this.isControllerShown) {
         // already have selected layer
         if (this.currSelectedInfo.index >= 0) {
           // Did not press shift/cmd/ctrl key -> deselect selected layers first
@@ -352,7 +354,7 @@ export class MovingUtils {
       updateConfigData.dragging = true
       // this.component && this.component.$emit('isDragging', this.layerIndex)
     }
-    if (this.isActive) {
+    if (this.isControllerShown) {
       if (generalUtils.getEventType(e) !== 'touch') {
         e.preventDefault()
       }
@@ -381,7 +383,7 @@ export class MovingUtils {
         }
       }
     }
-    if (!this.isActive) {
+    if (!this.isControllerShown) {
       // this condition will only happen in Mobile
       const posDiff = {
         x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
@@ -398,18 +400,18 @@ export class MovingUtils {
             return
           }
         }
-        // const { pageRect, editorRect } = pageUtils.getEditorRenderSize
-        // const isPageFullyInsideEditor = pageRect.width + 30 < editorRect.width
-        const { mobileSize } = editorUtils
-        const { getCurrPage: page, scaleRatio } = pageUtils
-        const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
-          page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
-        // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
-        if (!isPageFullyInsideEditor) {
-          // if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
-          window.requestAnimationFrame(() => {
-            this.pageMovingHandler(e)
-          })
+        if (generalUtils.isPic) {
+          const { mobileSize } = editorUtils
+          const { getCurrPage: page, scaleRatio } = pageUtils
+          const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
+            page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
+          // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
+          if (!isPageFullyInsideEditor) {
+            // if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
+            window.requestAnimationFrame(() => {
+              this.pageMovingHandler(e)
+            })
+          }
         }
       } else {
         if (posDiff.x < 1 && posDiff.y < 1) {
@@ -477,6 +479,7 @@ export class MovingUtils {
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (!generalUtils.isPic) return
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
       return
     }
@@ -544,7 +547,7 @@ export class MovingUtils {
     const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
 
-    if (this.isActive) {
+    if (this.isControllerShown) {
       if (hasActualMove) {
         shortcutUtils.offsetCount = 0
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex === -1) {
@@ -573,6 +576,19 @@ export class MovingUtils {
           if (!(this.config as IImage).isHoveringFrame) {
             stepsUtils.record()
           }
+          // turn off text layer's auto rescale mode after moving
+          switch (this.getLayerType) {
+            case 'text':
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { inAutoRescaleMode: false })
+              break
+            case 'tmp':
+              for (const [subLayerIdx, subLayer] of (this.config as ITmp).layers.entries()) {
+                if (subLayer.type === 'text') {
+                  layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { inAutoRescaleMode: false }, subLayerIdx)
+                }
+              }
+              break
+          }
         }
       } else {
         if (this.getLayerType === 'text') {
@@ -587,7 +603,13 @@ export class MovingUtils {
             }
           }
           if (this.config.contentEditable) {
-            tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
+            if (generalUtils.isPic) {
+              tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
+            } else {
+              nextTick(() => {
+                tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
+              })
+            }
             if (!this.config.isEdited) {
               setTimeout(() => {
                 tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
@@ -598,11 +620,11 @@ export class MovingUtils {
         if (this.inMultiSelectionMode) {
           if (this.config.type !== 'tmp') {
             let targetIndex = this.layerIndex
-            if (this.isActive && this.currSelectedInfo.layers.length === 1) {
+            if (this.isControllerShown && this.currSelectedInfo.layers.length === 1) {
               groupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedLayerIndex(this.layerIndex)
-            } else if (!this.isActive) {
+            } else if (!this.isControllerShown) {
               // already have selected layer
               if (this.currSelectedInfo.index >= 0) {
                 // this if statement is used to prevent select the layer in another page
@@ -622,10 +644,10 @@ export class MovingUtils {
       this.setCursorStyle(e, '')
     }
 
-    if (!this.isActive) {
+    if (!this.isControllerShown) {
       if (hasActualPageMove) {
         return
-      } else if (!this.isDoingGestureAction && !this.isActive && !hasActualMove) {
+      } else if (!this.isDoingGestureAction && !this.isControllerShown && !hasActualMove) {
         this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
         if (!this.inMultiSelectionMode) {
           groupUtils.deselect()

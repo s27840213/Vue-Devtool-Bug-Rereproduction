@@ -34,7 +34,7 @@ div(ref="main" class="tutorial relative" v-touch
 </template>
 
 <script lang="ts">
-import constantData from '@/utils/constantData'
+import constantData from '@nu/vivi-lib/utils/constantData'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'

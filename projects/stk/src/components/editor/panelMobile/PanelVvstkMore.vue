@@ -33,8 +33,8 @@ div(class="panel-vvstk-more")
 </template>
 
 <script lang="ts">
-import editorUtils from '@/utils/editorUtils'
-import localeUtils from '@/utils/localeUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'

@@ -37,7 +37,7 @@ div(class="mobile-slider")
 </template>
 
 <script lang="ts">
-import stepsUtils from '@/utils/stepsUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

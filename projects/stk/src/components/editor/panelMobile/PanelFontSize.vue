@@ -14,9 +14,9 @@ div(class="panel-font-size")
 
 <script lang="ts">
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
-import generalUtils from '@/utils/generalUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import textPropUtils from '@/utils/textPropUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'

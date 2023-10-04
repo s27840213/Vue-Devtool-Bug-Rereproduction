@@ -17,7 +17,7 @@ div(class="fps")
 </template>
 
 <script lang="ts">
-import { Path, Point } from '@/utils/mathUtils'
+import { Path, Point } from '@nu/vivi-lib/utils/mathUtils'
 import { filter, range } from 'lodash'
 import { defineComponent } from 'vue'
 

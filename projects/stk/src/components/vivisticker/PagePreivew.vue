@@ -16,7 +16,7 @@ div(class="page-preview" :style="styles()")
 <script lang="ts">
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
-import editorUtils from '@/utils/editorUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'

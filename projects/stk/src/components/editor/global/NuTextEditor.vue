@@ -4,9 +4,9 @@ editor-content(:editor="(editor as Editor)")
 
 <script lang="ts">
 import { IGroup, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
-import layerUtils from '@/utils/layerUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
 import { PropType, defineComponent } from 'vue'

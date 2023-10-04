@@ -1,8 +1,8 @@
 import axios from '@nu/vivi-lib/apis'
 import { IListServiceParams, IListServiceResponse } from '@nu/vivi-lib/interfaces/api'
 import store from '@/store'
-import localeUtils from '@/utils/localeUtils'
-import uploadUtils from '@/utils/uploadUtils'
+import localeUtils from '@nu/vivi-lib/utils/localeUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 
 class ListService {

@@ -4,6 +4,8 @@
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
 import textUtils from '@/utils/textUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
+import generalUtils from '@/utils/generalUtils'
 
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
@@ -114,15 +116,15 @@ class CssConveter {
         skipInserting = true
       }
     }
-    // if (generalUtils.isStk) {
-    //   const anchor = 'gXgHEvSNTPg2mhrpNOUb' // Unicode default: DejaVuSans
-    //   const insertIndex = fontFaces.indexOf(anchor)
-    //   fontFaces = [
-    //     ...fontFaces.slice(0, insertIndex),
-    //     stkWVUtils.userSettings.emojiSetting,
-    //     ...fontFaces.slice(insertIndex),
-    //   ]
-    // }
+    if (generalUtils.isStk) {
+      const anchor = 'gXgHEvSNTPg2mhrpNOUb' // Unicode default: DejaVuSans
+      const insertIndex = fontFaces.indexOf(anchor)
+      fontFaces = [
+        ...fontFaces.slice(0, insertIndex),
+        stkWVUtils.userSettings.emojiSetting,
+        ...fontFaces.slice(insertIndex),
+      ]
+    }
     if (!skipInserting) {
       fontFaces = [font, ...fontFaces]
     }

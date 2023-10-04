@@ -19,6 +19,17 @@ import frameDefaultImg from '@/assets/img/svg/frame.svg'
 const APP_VER_FOR_REFRESH_CACHE = 'v7576'
 
 class ImageUtils {
+  get imageSizeMap(): { [key: string]: number } {
+    return {
+      larg: 1600,
+      full: 1200,
+      midd: 766,
+      smal: 510,
+      tiny: 320,
+      prev: 150
+    }
+  }
+
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: (img?: HTMLImageElement) => void, crossOrigin?: boolean }) {
     const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve, reject) => {
@@ -62,7 +73,8 @@ class ImageUtils {
   }
 
   appendQuery(src: string, name: string, value: string) {
-    if (src === '' || src.includes('data:image/')) return ''
+    if (src === '') return ''
+    if (src.includes('data:image/')) return src
     if (src.includes('?')) {
       return src + `&${name}=${value}`
     } else {
@@ -91,6 +103,10 @@ class ImageUtils {
     }
     if (size === 'xtra' && maxSize && maxSize !== 'xtra') {
       size = maxSize
+    }
+
+    if (typeof size === 'string' && ['unsplash', 'pexels'].includes(type)) {
+      size = this.imageSizeMap[size]
     }
 
     let res = ''
@@ -146,8 +162,13 @@ class ImageUtils {
         res = ''
         break
       }
+      case 'local':
+        return assetId as string
       case 'svg':
         res = `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
+        break
+      case 'ios':
+        res = `vvstk://${assetId}`
         break
       default:
         res = ''
@@ -198,6 +219,7 @@ class ImageUtils {
     if (src.includes('template.vivipic.com/admin')) {
       return src.includes('logo') ? 'logo-public' : 'public'
     }
+    if (src.includes('vvstk')) return 'ios'
     if (src.includes('asset.vivipic')) {
       return src.includes('logo') ? 'logo-private' : 'private'
     }
@@ -250,6 +272,10 @@ class ImageUtils {
       case 'svg': {
         const keyStart = 'svg/'
         return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
+      }
+      case 'ios': {
+        const keyStart = 'vvstk://'
+        return src.substring(keyStart.length)
       }
       case 'logo-private':
       case 'private':
@@ -604,6 +630,28 @@ class ImageUtils {
         midd: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/midd` : image.signed_url?.midd ?? '',
         smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/smal` : image.signed_url?.smal ?? '',
         tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/tiny` : image.signed_url?.tiny ?? ''
+      },
+      initSrc
+    }
+  }
+
+  async getBgRemoveInfoStk(url: string, initSrc: string) {
+    const { width, height } = await this.getImageSize(url, 1000, 1000)
+    url = this.appendRandomQuery(url)
+    return {
+      width: width,
+      height: height,
+      id: '',
+      assetIndex: -1,
+      teamId: '',
+      urls: {
+        prev: url,
+        full: url,
+        larg: url,
+        original: url,
+        midd: url,
+        smal: url,
+        tiny: url,
       },
       initSrc
     }

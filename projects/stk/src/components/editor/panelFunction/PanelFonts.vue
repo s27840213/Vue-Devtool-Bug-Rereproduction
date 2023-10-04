@@ -42,7 +42,7 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import FontTag from '@/components/global/Tags.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
-import generalUtils from '@/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 

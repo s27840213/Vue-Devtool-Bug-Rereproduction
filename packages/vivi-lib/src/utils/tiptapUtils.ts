@@ -12,6 +12,8 @@ import Text from '@tiptap/extension-text'
 import TextStyle from '@tiptap/extension-text-style'
 import { Editor, EditorEvents, FocusPosition, JSONContent } from '@tiptap/vue-3'
 import { EventEmitter } from 'events'
+import { Slice } from 'prosemirror-model'
+import { EditorView } from 'prosemirror-view'
 import shortcutUtils from './shortcutUtils'
 import textBgUtils from './textBgUtils'
 import textUtils from './textUtils'
@@ -40,7 +42,7 @@ interface ITiptapJson extends JSONContent {
 
 class TiptapUtils {
   event: any
-  eventHandler: undefined | ((toRecord: boolean) => void)
+  eventHandler: undefined | ((toRecord: boolean, keepCenter: boolean) => void)
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
   prevJSON: any | undefined = undefined
@@ -62,12 +64,13 @@ class TiptapUtils {
       ],
       editorProps: {
         attributes: {
-          class: 'non-selectable'
+          class: 'non-selectable',
+          draggable: 'false'
         },
         handleScrollToSelection: () => {
           return this.editor?.storage.nuTextStyle.pasting
         },
-        handlePaste: (view, event: ClipboardEvent, slice) => {
+        handlePaste: (view: EditorView, event: ClipboardEvent, slice: Slice) => {
           if (!event.clipboardData) return false
           const items = event.clipboardData.items
           for (let i = items.length - 1; i >= 0; i--) {
@@ -108,9 +111,9 @@ class TiptapUtils {
     this.agent(editor => editor.on(event, handler))
   }
 
-  onForceUpdate(handler: (editor: Editor, toRecord: boolean) => void): void {
-    const fullHandler = (toRecord: boolean) => {
-      this.agent(editor => handler(editor, toRecord))
+  onForceUpdate(handler: (editor: Editor, toRecord: boolean, keepCenter: boolean) => void): void {
+    const fullHandler = (toRecord: boolean, keepCenter: boolean) => {
+      this.agent(editor => handler(editor, toRecord, keepCenter))
     }
     if (this.eventHandler) {
       this.event.off('update', this.eventHandler)
@@ -119,8 +122,8 @@ class TiptapUtils {
     this.event.on('update', fullHandler)
   }
 
-  forceUpdate(toRecord = false) {
-    this.event.emit('update', toRecord)
+  forceUpdate(toRecord = false, keepCenter = false) {
+    this.event.emit('update', toRecord, keepCenter)
   }
 
   textStylesRaw(styles: any): { [key: string]: any } {

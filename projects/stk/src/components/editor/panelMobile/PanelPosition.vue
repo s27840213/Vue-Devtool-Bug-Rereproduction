@@ -13,7 +13,7 @@ div(class="panel-position bg-white")
 </template>
 
 <script lang="ts">
-import MappingUtils from '@/utils/mappingUtils'
+import MappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

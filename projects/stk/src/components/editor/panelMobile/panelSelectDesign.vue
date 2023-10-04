@@ -19,8 +19,8 @@ div(class="panel-select-design")
 
 <script lang="ts">
 import { IMyDesign } from '@/interfaces/vivisticker'
-import editorUtils from '@/utils/editorUtils'
-import modalUtils from '@/utils/modalUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'

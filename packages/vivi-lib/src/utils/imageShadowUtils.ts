@@ -1,6 +1,7 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
@@ -542,8 +543,8 @@ class ImageShadowUtils {
     if (layerInfo) {
       timeout && this.setIsProcess(layerInfo, false)
     }
+    console.log('finish draw shadow')
     this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-    const stime = Date.now()
     cb && cb()
     setMark('shadow', 4)
     logMark('shadow')
@@ -665,6 +666,43 @@ class ImageShadowUtils {
       })
       this.storeEffectsAttrs(layer)
     }
+  }
+
+  // this is for IOS version < 1.35
+  saveToIOSOld(canvas: HTMLCanvasElement, callback?: (data: { flag: string, msg: string, imageId: string }, path: string) => void) {
+    const name = 'img-shadow-' + generalUtils.generateAssetId()
+    const src = canvas.toDataURL('image/png;base64')
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key: 'shadow', name, toast: false }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      if (callback) {
+        return callback(_data, `shadow/${name}`)
+      }
+    })
+  }
+
+  saveToIOS(canvas: HTMLCanvasElement, callback?: (data: { flag: string, msg: string, imageId: string }, path: string) => void) {
+    if (!stkWVUtils.checkVersion('1.35')) {
+      return this.saveToIOSOld(canvas, callback)
+    }
+    const name = 'img-shadow-' + generalUtils.generateAssetId()
+    const src = canvas.toDataURL('image/png;base64')
+    const key = `mydesign-${stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
+    const designId = (() => {
+      if (store.getters['vivisticker/getEditingDesignId']) {
+        return store.getters['vivisticker/getEditingDesignId']
+      } else {
+        const _designId = generalUtils.generateAssetId()
+        store.commit('vivisticker/SET_editingDesignId', _designId)
+        return _designId
+      }
+    })()
+
+    return stkWVUtils.callIOSAsAPI('SAVE_IMAGE_FROM_URL', { type: 'png', url: src, key, name, toast: false, designId }, 'save-image-from-url').then((data) => {
+      const _data = data as { flag: string, msg: string, imageId: string }
+      if (callback) {
+        return callback(_data, `${key}/${designId}/${name}`)
+      }
+    })
   }
 
   getImgEdgeWidth(canvas: HTMLCanvasElement) {
@@ -910,6 +948,33 @@ class ImageShadowUtils {
       }
     })
     return Promise.all(promises)
+  }
+
+  /**
+   * This func used to delete the shadow image stored in ios app at the timimg as no save the config.json
+   */
+  async iosImgDelHandlerAsNoSave() {
+    const newShadowBuffImgs = pageUtils.getPages.flatMap(p => p.iosImgUploadBuffer.shadow)
+
+    const type = stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)
+    const key = `mydesign-${type}`
+    const designId = store.getters['vivisticker/getEditingDesignId']
+    const data = await stkWVUtils.getAsset(key, designId, 'config')
+    const oldPages = pageUtils.newPages(data.pages) as Array<IPage>
+
+    const oldShadowImgs = oldPages.flatMap(p => {
+      return p.layers.flatMap(l => {
+        if (l.type === LayerType.image && l.styles.shadow.srcObj.type === 'ios') {
+          return [l.styles.shadow.srcObj]
+        } else return []
+      })
+    })
+
+    newShadowBuffImgs.forEach(newImg => {
+      if (!oldShadowImgs.some(oldImg => oldImg.assetId === newImg.assetId)) {
+        this.delIosOldImg([newImg], type)
+      }
+    })
   }
 
   TEST_showtTestCanvas(canvas: HTMLCanvasElement) {

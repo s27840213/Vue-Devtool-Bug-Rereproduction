@@ -6,7 +6,7 @@ class LogUtils {
   isUploadingLog = false
 
   async uploadLog() {
-    if (!uploadUtils.isLogin) return
+    if (!generalUtils.isStk && !uploadUtils.isLogin) return
     const log = this.getLog()
     this.isUploadingLog = true
     try {
@@ -44,7 +44,7 @@ class LogUtils {
     } catch (error) {
       if ((error as Error).name.includes('QuotaExceededError')) {
         // log can only be uploaded when user is logged in, otherwise, discard the log to avoid quota exceeded error.
-        if (!uploadUtils.isLogin) {
+        if (!generalUtils.isStk && !uploadUtils.isLogin) {
           this.clearLog()
           return
         }

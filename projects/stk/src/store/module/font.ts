@@ -4,7 +4,7 @@ import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 import listFactory from './listFactory'
-import logUtils from '@/utils/logUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const SET_MORE_CATEGORY = 'SET_MORE_CATEGORY' as const
 

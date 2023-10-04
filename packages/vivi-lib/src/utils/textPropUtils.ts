@@ -841,7 +841,11 @@ class TextPropUtils {
           const sAttrs = tiptapUtils.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
           sAttrs.size = modifier(sAttrs.size)
           editor.storage.nuTextStyle.spanStyle = tiptapUtils.textStyles(sAttrs)
-          editor.chain().focus().setMark('textStyle', sAttrs).run()
+          if (generalUtils.isPic) {
+            editor.chain().focus().setMark('textStyle', sAttrs).run()
+          } else {
+            editor.chain().setMark('textStyle', sAttrs).run()
+          }
           this.updateTextPropsState({ fontSize: sAttrs.size * scale })
         } else {
           const from = selection.$from
@@ -924,10 +928,14 @@ class TextPropUtils {
               pAttrs.size = modifier(pAttrs.size)
             }
           }
-          editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
+          if (generalUtils.isPic) {
+            editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
+          } else {
+            editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).selectPrevious().run()
+          }
           // nextTick removed becuz seems not required and messing up the update timing
           // but needs attension for if there are problems occurring after this and review would be needed for the necessity
-          tiptapUtils.forceUpdate()
+          tiptapUtils.forceUpdate(false, !generalUtils.isPic)
           this.updateTextPropsState()
         }
       })
@@ -1469,7 +1477,7 @@ class TextPropUtils {
       }
       textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex)
     }
-    tiptapUtils.forceUpdate(toRecord)
+    tiptapUtils.forceUpdate(toRecord, !generalUtils.isPic)
     this.updateTextPropsState({ fontSize: value.toString() })
     textEffectUtils.refreshSize()
     tiptapUtils.updateHtml()

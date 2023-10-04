@@ -44,7 +44,7 @@ div(v-show="modalInfo.imgSrc ? isImgLoaded : show" class="modal-card" :style="mo
 
 <script lang="ts">
 import { IModalInfo } from '@nu/vivi-lib/interfaces/modal'
-import modalUtils from '@/utils/modalUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 

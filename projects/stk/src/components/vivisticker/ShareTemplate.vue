@@ -46,7 +46,7 @@ div(class="share-template")
 import PageContent from '@/components/editor/page/PageContent.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
-import pageUtils from '@/utils/pageUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
