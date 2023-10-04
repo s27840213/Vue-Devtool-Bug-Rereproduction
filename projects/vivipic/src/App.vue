@@ -41,7 +41,6 @@ div(id="app" :style="appStyles()")
 </template>
 
 <script lang="ts">
-import DebugTool from '@/components/componentLog/DebugTool.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import Popup from '@/components/popup/Popup.vue'
@@ -60,7 +59,9 @@ export default defineComponent({
     Popup,
     ResInfo,
     ModalCard,
-    DebugTool,
+    DebugTool: defineAsyncComponent(
+      () => import('@/components/componentLog/DebugTool.vue'),
+    ),
     ...generalUtils.isPic && {
       HomeFooterTabs: defineAsyncComponent(
         () => import('@/components/homepage/HomeFooterTabs.vue'),
