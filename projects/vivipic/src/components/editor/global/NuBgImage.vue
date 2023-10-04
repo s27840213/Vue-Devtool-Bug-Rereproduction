@@ -402,9 +402,11 @@ export default defineComponent({
           error: (img) => {
             if (imageUtils.handlePrivateXtraErr(this.image.config, img)) {
               const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
-              imageUtils.imgLoadHandler(newSrc, () => {
+              imageUtils.imgLoadHandler(newSrc, (img) => {
                 if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
                   this.src = newSrc
+                  this.imgNaturalSize.width = img.width
+                  this.imgNaturalSize.height = img.height
                 }
               })
               return
@@ -451,9 +453,11 @@ export default defineComponent({
           error: (img) => {
             if (imageUtils.handlePrivateXtraErr(this.image.config, img)) {
               const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
-              imageUtils.imgLoadHandler(newSrc, () => {
+              imageUtils.imgLoadHandler(newSrc, (img) => {
                 if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
                   this.src = newSrc
+                  this.imgNaturalSize.width = img.width
+                  this.imgNaturalSize.height = img.height
                 }
               })
             }
