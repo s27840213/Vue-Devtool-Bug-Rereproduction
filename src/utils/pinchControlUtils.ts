@@ -152,6 +152,7 @@ export default class PinchControlUtils {
         styles.imgX = imgX
         styles.imgY = imgY
       } else if (frameUtils.isImageFrame(this.config as IFrame)) {
+        console.warn('is frame image')
         frameUtils.updateFrameLayerStyles(this.layerInfo.pageIndex, this.layerInfo.layerIndex, 0, {
           width: newSize.width,
           height: newSize.height,

@@ -1,6 +1,7 @@
 import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, IExtendLayerInfo, ILayerInfo, LayerType } from '@/store/types'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import { nextTick } from 'vue'
 import colorUtils from './colorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
@@ -19,7 +20,6 @@ export default class SubControllerUtils {
   private _config = { config: null as unknown as ILayer, primaryLayer: null as unknown as IGroup | ITmp | IFrame }
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as IExtendLayerInfo
   private dblTapFlag = false
-  private touches = new Set()
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
   private _cursorDragEnd = null as unknown
@@ -51,7 +51,7 @@ export default class SubControllerUtils {
   }
 
   onPointerdown(e: PointerEvent) {
-    // e.stopPropagation()
+    pointerEvtUtils.addPointer(e)
     this.initTranslate = {
       x: this.primaryLayer.styles?.x || 0,
       y: this.primaryLayer.styles?.y || 0
@@ -73,20 +73,16 @@ export default class SubControllerUtils {
     }
     if (e.button !== 0) return
 
-    if (!this.touches.has(e.pointerId)) {
-      this.touches.add(e.pointerId)
-    }
-
     if (imageUtils.isImgControl()) {
       imageUtils.setImgControlDefault()
     }
     if (generalUtils.isTouchDevice()) {
       if (!this.dblTapFlag && this.config.active && this.config.type === 'image') {
         const touchtime = Date.now()
-        const interval = 500
+        const interval = 300
         const doubleTap = (e: PointerEvent) => {
           e.preventDefault()
-          if (Date.now() - touchtime < interval && !this.dblTapFlag && this.touches.size === 1) {
+          if (Date.now() - touchtime < interval && !this.dblTapFlag && pointerEvtUtils.pointerIds.length < 2) {
             /**
              * This is the dbl-click callback block
              */
@@ -150,8 +146,6 @@ export default class SubControllerUtils {
   }
 
   onMouseup(e: PointerEvent) {
-    this.touches.delete(e.pointerId)
-
     eventUtils.removePointerEvent('pointerup', this._onMouseup)
     e.stopPropagation()
     if (!this.primaryLayer.styles) return

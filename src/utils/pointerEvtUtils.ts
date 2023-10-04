@@ -1,3 +1,5 @@
+import store from '@/store'
+
 class PointerEventUtils {
   // this utils used for tracing pinters for pointerdown event
   private _pointers: Array<PointerEvent> = []
@@ -22,6 +24,11 @@ class PointerEventUtils {
     if (i !== -1) {
       this._pointers.splice(i, 1)
       console.error('remvoe Pointer', pointerId, this.pointerIds)
+      // if the there is no pointers stay on the screen,
+      // reset the control state
+      if (this._pointers.length === 0) {
+        store.commit('SET_STATE', { controlState: { type: '' } })
+      }
     }
   }
 }

@@ -57,6 +57,7 @@ import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -363,12 +364,14 @@ export default defineComponent({
         }
       }
     },
+    // the reason to use pointerdown/up to detect a tap,
+    // is bcz the moving feature now enable moving the layer without touches direct attached on the target layer
     bgPointerDown(e: PointerEvent) {
       this.pointerEvent.initPos = { x: e.x, y: e.y }
     },
     bgPointerUp(e: PointerEvent) {
       if (this.pointerEvent.initPos) {
-        if (Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5) {
+        if (Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5 && layerUtils.layerIndex === -1) {
           this.setInBgSettingMode()
         }
         this.pointerEvent.initPos = null
