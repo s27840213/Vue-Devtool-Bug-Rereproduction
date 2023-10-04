@@ -272,10 +272,11 @@ export default defineComponent({
     // is bcz the native click/tap event is triggered as the event happen in a-short-time even the layer has moved a little position,
     // this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
     selectEnd(e: PointerEvent) {
+      console.warn('select end')
       if (this.pointerEvent.initPos) {
         const isSingleTouch = pointerEvtUtils.pointers.length === 1
         const isConsiderNotMoved = Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5
-        if (isSingleTouch && isConsiderNotMoved) {
+        if (isSingleTouch && isConsiderNotMoved && !this.$store.getters['imgControl/isImgCtrl']) {
           // the moveingEnd would consider the layer to be selected,
           // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
           // following code remove the moveEnd event.
@@ -287,6 +288,7 @@ export default defineComponent({
         }
         this.pointerEvent.initPos = null
       }
+      pointerEvtUtils.removePointer(e.pointerId)
     },
     recordPointer(e: PointerEvent) {
       pointerEvtUtils.addPointer(e)
@@ -295,8 +297,7 @@ export default defineComponent({
       pointerEvtUtils.removePointer(e.pointerId)
     },
     onPinch(e: AnyTouchEvent) {
-      // if (this.$store.getters.getControlState.type ) return
-      console.log('this.$store.getters.getControlState', this.$store.getters.getControlState.type, e.phase)
+      console.log('onPinch this.$store.getters.getControlState', this.$store.getters.getControlState.type, e.phase, pointerEvtUtils.pointerIds.length)
       if (e.phase === 'end' && this.isPinchInit) {
         // pinch end handling
         this.pinchHandler(e)
@@ -308,7 +309,7 @@ export default defineComponent({
         if (!this.isPinchInit) {
           // first pinch initialization
           this.isPinchInit = true
-          return this.pinchStart(e, layerUtils.layerIndex)
+          return this.pinchStart(e)
         } else {
           // pinch move handling
           this.pinchHandler(e)
@@ -318,22 +319,27 @@ export default defineComponent({
     pinchHandler(e: AnyTouchEvent) {
       this.pinchControlUtils?.pinch(e)
     },
-    pinchStart(e: AnyTouchEvent, targetIndex: number) {
-      const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, targetIndex) } as unknown as { config: ILayer }
+    pinchStart(e: AnyTouchEvent) {
+      const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
 
       if (_config.config.type === 'text') {
         if ((_config.config as IText).contentEditable) return
       }
 
-      const  layerInfo = {
+      const  layerInfo = new Proxy({
         pageIndex: layerUtils.pageIndex,
-        layerIndex: targetIndex
-      } as ILayerInfo
+        layerIndex: layerUtils.layerIndex
+      }, {
+        get(_, key) {
+          if (key === 'pageIndex') return layerUtils.pageIndex
+          else if (key === 'layerIndex') return layerUtils.layerIndex
+        }
+      }) as ILayerInfo
       const movingUtils = new MovingUtils({
         _config,
         layerInfo,
         snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${targetIndex}_-1`) as HTMLElement
+        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
       })
       const data = {
         layerInfo,
