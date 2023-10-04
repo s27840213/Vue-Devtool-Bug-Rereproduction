@@ -283,8 +283,11 @@ export default defineComponent({
           if (this.$store.getters.getControlState.type === 'move') {
             this.$store.commit('SET_STATE', { controlState: { type: '' } })
           }
-          groupUtils.deselect()
-          this.movingUtils?.removeListener()
+          const layer = layerUtils.getCurrLayer
+          if (layer.type !== 'text' || !controlUtils.isClickOnController(e, layer)) {
+            groupUtils.deselect()
+            this.movingUtils?.removeListener()
+          }
         }
         this.pointerEvent.initPos = null
       }
