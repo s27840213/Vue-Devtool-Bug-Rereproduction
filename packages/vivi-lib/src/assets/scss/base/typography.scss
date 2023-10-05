@@ -214,6 +214,9 @@
   &-H6 {
     @include text-H6
   }
+	&-H7 {
+		@include text-H7
+	}
 }
 
 .body {
@@ -274,4 +277,8 @@
 
 .default-input {
   @include default-input;
+}
+
+.rwd-container {
+	@include rwd-container;
 }

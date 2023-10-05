@@ -3,7 +3,7 @@
 
 
 $buttons: (
-	primary: setColor(blue-1),
+	primary: setColor(blue-1), // Will be black-2 for stk
 	secondary: setColor(blue-2),
 	tertiary: setColor(blue-3),
 	gray: setColor(gray-6),
@@ -12,11 +12,13 @@ $buttons: (
 	icon: none,
 	light: setColor(white),
 	transparent: transparent,
-	red: setColor(red)
+	red: setColor(red),
+	stk-active: setColor(gray-2),
+	stk-inactive: setColor(gray-5),
 );
 
 $hoveredColor: (
-	primary: setColor(blue-hover),
+	primary: setColor(blue-hover), // Will be black-2 for stk
 	secondary: setColor(blue-2),
 	tertiary: setColor(blue-3),
 	gray: setColor(gray-6),
@@ -25,7 +27,9 @@ $hoveredColor: (
 	icon: none,
 	light: setColor(white),
 	transparent: transparent,
-	red: #FC5757
+	red: #FC5757,
+	stk-active: setColor(gray-2),
+	stk-inactive: setColor(gray-5),
 );
 
 $textColor: (
@@ -38,7 +42,9 @@ $textColor: (
 	icon: none,
 	light: setColor(blue-1),
 	transparent: setColor(white),
-	red: setColor(white)
+	red: setColor(white),
+	stk-active: setColor(white),
+	stk-inactive: setColor(gray-2)
 );
 
 $borderColor: (
@@ -51,7 +57,9 @@ $borderColor: (
 	icon: transparent,
 	light: setColor(blue-1),
 	transparent: setColor(white),
-	red: transparent
+	red: transparent,
+	stk-active: transparent,
+	stk-inactive: transparent
 );
 
 $padding: (
@@ -85,6 +93,13 @@ $color in $buttons {
 			@include label-sm();
 			@include flexCenter();
 			background-color: $color;
+			@include stk {
+				@if $type == 'primary' {
+					// Weight of this rule > :hover bg-color.
+					// So no need to writh :hover rule to overwrite.
+					background-color: setColor(black-2);
+				}
+			}
 			color: map-get($textColor, $type);
 			padding: 6px 12px;
 			border-radius: 0.25rem;
@@ -102,6 +117,11 @@ $color in $buttons {
 			@include label-mid();
 			@include flexCenter();
 			background-color: $color;
+			@include stk {
+				@if $type == 'primary' {
+					background-color: setColor(black-2);
+				}
+			}
 			color: map-get($textColor, $type);
 			padding: 10px 20px;
 			border-radius: 0.25rem;
@@ -119,6 +139,11 @@ $color in $buttons {
 			@include body-2();
 			@include flexCenter();
 			background-color: $color;
+			@include stk {
+				@if $type == 'primary' {
+					background-color: setColor(black-2);
+				}
+			}
 			color: map-get($textColor, $type);
 			padding: 10px 20px;
 			border-radius: 0.25rem;
@@ -136,6 +161,11 @@ $color in $buttons {
 			@include label-lg();
 			@include flexCenter();
 			background-color: $color;
+			@include stk {
+				@if $type == 'primary' {
+					background-color: setColor(black-2);
+				}
+			}
 			color: map-get($textColor, $type);
 			padding: 15px 30px;
 			border-radius: 0.25rem;
@@ -157,6 +187,11 @@ $color in $buttons {
 			@include label-sm();
 			@include flexCenter();
 			background-color: $color;
+			@include stk {
+				@if $type == 'primary' {
+					background-color: setColor(black-2);
+				}
+			}
 			color: map-get($textColor, $type);
 			padding: 6px;
 			border-radius: 0.25rem;
@@ -174,6 +209,11 @@ $color in $buttons {
 			@include label-mid();
 			@include flexCenter();
 			background-color: $color;
+			@include stk {
+				@if $type == 'primary' {
+					background-color: setColor(black-2);
+				}
+			}
 			color: map-get($textColor, $type);
 			padding: 10px;
 			border-radius: 0.25rem;
@@ -191,6 +231,11 @@ $color in $buttons {
 			@include body-2();
 			@include flexCenter();
 			background-color: $color;
+			@include stk {
+				@if $type == 'primary' {
+					background-color: setColor(black-2);
+				}
+			}
 			color: map-get($textColor, $type);
 			padding: 10px;
 			border-radius: 0.25rem;
@@ -208,6 +253,11 @@ $color in $buttons {
 			@include label-lg();
 			@include flexCenter();
 			background-color: $color;
+			@include stk {
+				@if $type == 'primary' {
+					background-color: setColor(black-2);
+				}
+			}
 			color: map-get($textColor, $type);
 			padding: 15px;
 			border-radius: 0.25rem;
