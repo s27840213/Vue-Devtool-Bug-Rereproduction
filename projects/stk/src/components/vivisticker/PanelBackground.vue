@@ -103,7 +103,7 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
-import SearchBar from '@/components/SearchBar.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'

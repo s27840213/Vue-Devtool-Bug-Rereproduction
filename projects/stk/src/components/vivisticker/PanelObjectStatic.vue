@@ -79,7 +79,7 @@ import CategoryList, { CCategoryList } from '@/components/category/CategoryList.
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
-import SearchBar from '@/components/SearchBar.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IAsset, ICategoryExtend, isICategory, isITag, ITagExtend } from '@/interfaces/module'
