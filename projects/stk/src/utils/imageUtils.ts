@@ -708,7 +708,7 @@ class ImageUtils {
     return new Promise<string>(resolve => {
       this.imgLoadHandler(src, () => {
         // replace the xtra src in file/editorView with newSrc
-        const newSrc = this.privateXtraExtract(src) + 'ver=' + generalUtils.generateRandomString(4)
+        const newSrc = this.appendQuery(this.privateXtraExtract(src), 'ver', generalUtils.generateRandomString(4))
         store.commit('file/UPDATE_IMAGE_XTRA', {
           assetId: config.srcObj.assetId,
           src: newSrc
