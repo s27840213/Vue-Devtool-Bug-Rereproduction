@@ -169,6 +169,11 @@ export const _IPaymentWarningView = [
 ] as const
 export type IPaymentWarningView = typeof _IPaymentWarningView[number]
 
+export const _IMobilePaymentWarningView = [
+  'bgrm', 'pro-template', 'pro-object', 'pro-text', 'pro-bg', 'page-resize', 'export-pdf-print'
+] as const
+export type IMobilePaymentWarningView = typeof _IMobilePaymentWarningView[number]
+
 export const _IPaymentPayingView = [
   'step1-coupon', 'step1', 'step2-coupon', 'step2', 'finish',
   'switch1', 'switch2', 'cancel1', 'cancel2'
