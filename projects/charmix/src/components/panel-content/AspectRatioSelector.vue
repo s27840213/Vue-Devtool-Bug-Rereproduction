@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full h-full pl-24")
+div(class="w-full pl-24")
   div(class="typo-btn-lg text-app-text-secondary") {{ $t('CM0013') }}
   scrollable-container(:px="0")
     div(

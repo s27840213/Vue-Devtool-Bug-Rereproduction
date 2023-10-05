@@ -18,7 +18,7 @@ div(class="footer-tabs" ref="tabs")
             :style="textIconStyle")
           span(class="no-wrap click-disabled text-capitalize"
             :class="`text-${tabColor(tab)}`") {{tab.text}}
-          pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
+          pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false" :style="{right: 'unset', transform: 'translateX(100%)'}")
     transition(name="panel-up")
       div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs" :style="subTabStyles()")
         div(class="footer-tabs__unfold"

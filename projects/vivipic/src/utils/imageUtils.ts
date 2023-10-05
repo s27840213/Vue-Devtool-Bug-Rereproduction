@@ -19,7 +19,7 @@ const APP_VER_FOR_REFRESH_CACHE = 'v7576'
 
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: (img?: HTMLImageElement) => void, crossOrigin?: boolean }) {
-    const { error, crossOrigin = false } = options || {}
+    const { error, crossOrigin = true } = options || {}
     return new Promise<T>((resolve, reject) => {
       const image = new Image()
       if (crossOrigin && !src.includes('data:image/png;base64')) {
@@ -108,6 +108,7 @@ class ImageUtils {
         const editorImg = store.getters['file/getEditorViewImages']
         const query = forBgRemove ? `&rand_ver=${generalUtils.generateRandomString(6)}` : '&origin=true'
         res = editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
+        res = this.privateXtraExtract(res)
         break
       }
       case 'logo-public':
@@ -649,6 +650,41 @@ class ImageUtils {
   appendCompQueryForVivipic(src: string): string {
     if (src.includes('asset.vivipic.com') || src.includes('template.vivipic.com')) {
       return this.appendCompQuery(src)
+    }
+    return src
+  }
+
+  async handlePrivateXtraErr(config: IImage) {
+    const editorImg = store.getters['file/getEditorViewImages']
+    const src = editorImg(config.srcObj.assetId).xtra
+    // calling the resize-image-api
+    return new Promise<string>(resolve => {
+      this.imgLoadHandler(src, () => {
+        // replace the xtra src in file/editorView with newSrc
+        const newSrc = this.appendQuery(this.privateXtraExtract(src), 'ver', generalUtils.generateRandomString(4))
+        store.commit('file/UPDATE_IMAGE_XTRA', {
+          assetId: config.srcObj.assetId,
+          src: newSrc
+        })
+        resolve(newSrc)
+      }, {
+        crossOrigin: false,
+        error: (img) => {
+          console.error('hanlePrivateXtraErr error', img)
+        }
+      })
+    })
+  }
+
+  privateXtraExtract(src: string) {
+    // if the src meet the following condition,
+    // means the img is private img with xtra size,
+    // the actuall src should be extract as the following
+    // However, if the xtra image is not produced yet,
+    // this returned src would bump into 404 ERROR,
+    // then the func 'handlePrivateXtraErr' should be called.
+    if (src.includes('xtra') && src.includes('https://template.vivipic.com/')) {
+      return 'https://' + src.slice('https://template.vivipic.com/'.length)
     }
     return src
   }

@@ -304,6 +304,11 @@ const mutations: MutationTree<IFileState> = {
       index !== -1 && state.uploadingAssets.splice(index, 1)
     }
   },
+  UPDATE_IMAGE_XTRA(state: IFileState, { assetId, src }) {
+    if (assetId && src) {
+      state.editorViewImages[assetId].xtra = src
+    }
+  }
 }
 
 const getters: GetterTree<IFileState, any> = {
