@@ -1208,7 +1208,7 @@ const store = createStore({
   mutations,
   modules: {
     user,
-    // text,
+    text,
     // font,
     color,
     // objects,

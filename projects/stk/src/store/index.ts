@@ -10,8 +10,6 @@ import textStock from '@/store/module/text'
 import background from '@/store/module/background'
 import markers from '@/store/module/markers'
 import { IListModuleState } from '@/interfaces/module'
-// Other need merge:
-import text from '@nu/vivi-lib/store/text'
 
 store.registerModule('giphy', giphy)
 store.registerModule('vivisticker', vivisticker)
@@ -22,8 +20,6 @@ store.registerModule('templates', templates)
 store.registerModule('textStock', textStock)
 store.registerModule('background', background)
 store.registerModule('markers', markers)
-// Other need merge:
-store.registerModule('text', text)
 
 const newStore = store as Store<IStoreRoot & {
   giphy: typeof giphy.state
@@ -35,8 +31,6 @@ const newStore = store as Store<IStoreRoot & {
   textStock: IListModuleState
   background: IListModuleState
   markers: IListModuleState
-  // Other need merge
-  // text: typeof text.state
 }>
 
 export default newStore

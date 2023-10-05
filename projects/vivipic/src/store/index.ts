@@ -15,8 +15,6 @@ import templates from '@nu/vivi-lib/store/module/templates'
 import textStock from '@nu/vivi-lib/store/module/text'
 import background from '@nu/vivi-lib/store/module/background'
 import markers from '@nu/vivi-lib/store/module/markers'
-// Other need merge:
-import text from '@nu/vivi-lib/store/text'
 
 store.registerModule('homeTemplate', homeTemplate)
 store.registerModule('design', design)
@@ -32,8 +30,6 @@ store.registerModule('templates', templates)
 store.registerModule('textStock', textStock)
 store.registerModule('background', background)
 store.registerModule('markers', markers)
-// Other need merge:
-store.registerModule('text', text)
 
 const newStore = store as Store<IStoreRoot & {
   homeTemplate: typeof homeTemplate.state
@@ -50,8 +46,6 @@ const newStore = store as Store<IStoreRoot & {
   textStock: IListModuleState
   background: IListModuleState
   markers: IListModuleState
-  // Other need merge
-  // text: typeof text.state
 }>
 
 export default newStore
