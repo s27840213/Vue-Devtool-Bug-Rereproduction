@@ -131,7 +131,8 @@ const getDefaultState = (): IEditorState => ({
   isPageScaling: false,
   isGettingDesign: false,
   showGlobalErrorModal: false,
-  newTemplateShownMode: true
+  newTemplateShownMode: true,
+  modalInfo: {},
 })
 
 const state = getDefaultState()
@@ -344,6 +345,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsLargeDesktop(state: IEditorState) {
     return state.isLargeDesktop
+  },
+  getModalInfo(state: IEditorState): { [key: string]: string } {
+    return state.modalInfo
   },
 }
 
@@ -1131,6 +1135,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_isLargeDesktop(state: IEditorState, boolean: boolean) {
     state.isLargeDesktop = boolean
   },
+  SET_modalInfo(state: IEditorState, modalInfo: { [key: string]: any }) {
+    state.modalInfo = modalInfo
+  }
 }
 
 type IStoreRoot = IEditorState & {

@@ -95,6 +95,7 @@ export interface IEditorState {
   isGettingDesign: boolean,
   showGlobalErrorModal: boolean,
   newTemplateShownMode: boolean,
+  modalInfo: { [key: string]: any },
 }
 
 export enum SidebarPanelType {
