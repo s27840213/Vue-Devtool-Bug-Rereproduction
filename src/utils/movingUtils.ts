@@ -1,5 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import pointerEvtUtils from '@/utils/pointerEvtUtils'
@@ -22,9 +22,10 @@ export class MovingUtils {
   private component = undefined as any | undefined
   // private component = undefined as Vue | undefined
   private eventTarget = null as unknown as HTMLElement
-  private dblTabsFlag = false
   private _config = { config: null as unknown as ILayer }
   private initialPos = { x: 0, y: 0 } as ICoordinate | null
+  // this flag used to indicate the real initial position of at the beginning of moveStart
+  private _initPos = { x: 0, y: 0 } as ICoordinate | null
   private initTranslate = { x: 0, y: 0 }
   private pointerId = 0
   // private initPageTranslate = { x: 0, y: 0 }
@@ -167,6 +168,7 @@ export class MovingUtils {
 
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
+    this._initPos = mouseUtils.getMouseAbsPoint(event)
     this.initPageTranslate.x = pageUtils.getCurrPage.x
     this.initPageTranslate.y = pageUtils.getCurrPage.y
     const currLayerIndex = layerUtils.layerIndex
@@ -329,7 +331,7 @@ export class MovingUtils {
         }
       }
     }
-    console.log('move start end')
+    console.log('move start end', (event as any).pointerId, this.initialPos?.x, this.initialPos?.y)
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
@@ -538,7 +540,7 @@ export class MovingUtils {
     }
 
     const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
-    if (pointerEvtUtils.pointerIds.length > 1 || this.initialPos === null || !isLayerExist) {
+    if (pointerEvtUtils.pointerIds.length > 1 || this._initPos === null || !isLayerExist) {
       this.isControlling = false
       return this.removeListener()
     }
@@ -553,8 +555,8 @@ export class MovingUtils {
      * Vivipic won't update the initialPos in moving, but Vivisticker will.
      */
     const posDiff = this.isTouchDevice ? {
-      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
-      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initPos.x),
+      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initPos.y)
     } : {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
@@ -566,6 +568,7 @@ export class MovingUtils {
     const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
 
+    console.log('hasActualMove', hasActualMove)
     if (this.isControllerShown) {
       if (hasActualMove) {
         shortcutUtils.offsetCount = 0
@@ -610,7 +613,7 @@ export class MovingUtils {
           }
         }
       } else {
-        if (this.getLayerType === 'text') {
+        if (this.getLayerType === 'text' && controlUtils.isClickOnController(e as PointerEvent, this.config as AllLayerTypes)) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
           if (this.isTouchDevice) {
             if (!this.movingByControlPoint) {

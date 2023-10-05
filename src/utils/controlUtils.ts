@@ -554,7 +554,7 @@ class Controller {
     return [width, height]
   }
 
-  isClickOnController(e: MouseEvent, layer?: AllLayerTypes): boolean {
+  isClickOnController(e: MouseEvent | PointerEvent, layer?: AllLayerTypes): boolean {
     layer = layer ?? layerUtils.getCurrLayer
     if (Object.keys(layer).length > 0) {
       let layerPolygonConfig

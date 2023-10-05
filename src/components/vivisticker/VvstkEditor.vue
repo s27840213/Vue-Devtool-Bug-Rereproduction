@@ -241,6 +241,7 @@ export default defineComponent({
     },
     selectStart(e: PointerEvent) {
       this.recordPointer(e)
+      console.log('select start')
       if (this.inBgRemoveMode || this.isInBgRemoveSection) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
       const isClickOnController = controlUtils.isClickOnController(e)
@@ -284,7 +285,12 @@ export default defineComponent({
             this.$store.commit('SET_STATE', { controlState: { type: '' } })
           }
           const layer = layerUtils.getCurrLayer
-          if (layer.type !== 'text' || !controlUtils.isClickOnController(e, layer)) {
+          // if (layer.type !== 'text' || !controlUtils.isClickOnController(e, layer)) {
+          //   groupUtils.deselect()
+          //   this.movingUtils?.removeListener()
+          //   console.log(123)
+          // }
+          if (!controlUtils.isClickOnController(e, layer)) {
             groupUtils.deselect()
             this.movingUtils?.removeListener()
           }
