@@ -64,7 +64,7 @@ div(class="popup-window")
                       div(class="payment__btn-plan__content__title")
                         div(class="payment__btn-plan__content__title__main caption-LG") {{ btnPlan.label }}
                         div(class="payment__btn-plan__content__title__sub")
-                          span {{ "14 Day Free Trial" }}
+                          span {{ $t('STK0048', { day: 14 }) }}
                       div(class="payment__btn-plan__content__price text-H6") {{ getLocalizedPrice(plans[planSelected][btnPlan.value].nextPaid) }}
                     div(v-if="btnPlan.value === userPeriod && btnPlan.value === 'yearly'" class="payment__btn-plan__content__tag")
                       span(class="caption-SM") {{ getLocalizedTag(plans[planSelected][btnPlan.value].now) }}
@@ -214,37 +214,37 @@ export default defineComponent({
       carouselItems: [
         {
           key: 'pro-template',
-          title: 'Premium Selection of Templates',
+          title: this.$t('NN0905'),
           img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/pro-template.jpg`)
         },
         {
           key: 'pro-text',
-          title: 'Various Styles of Texts & Fonts',
+          title: this.$t('NN0906'),
           img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/pro-text.jpg`)
         },
         {
           key: 'pro-object',
-          title: 'Library of Beautiful Stickers',
+          title: this.$t('NN0907'),
           img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/pro-object.jpg`)
         },
         {
           key: 'page-resize',
-          title: 'Instant Design Resizer',
+          title: this.$t('NN0908'),
           img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/page-resize.jpg`)
         },
         {
           key: 'export-pdf-print',
-          title: 'Best File Type for High-Quality Printing',
+          title: this.$t('NN0909'),
           img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/export-pdf-print.jpg`)
         },
         {
           key: 'pro-bg',
-          title: 'Collection of Pro Background Images',
+          title: this.$t('NN0910'),
           img: require(`@/assets/img/jpg/pricing-mobile/pro-bg.jpg`)
         },
         {
           key: 'bgrm',
-          title: 'BG Remover with Shadow Effects',
+          title: this.$t('NN0911'),
           img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/remover.jpg`)
         }
       ] as CarouselItem[],
