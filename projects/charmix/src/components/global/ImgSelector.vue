@@ -44,7 +44,7 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
         v-for="album in smartAlbum"
         :key="album.albumId"
         class="display flex gap-12"
-        @click="selectAlbum(album.albumId)")
+        @click="selectAlbum(album)")
         img(
           class="object-cover aspect-square w-80"
           :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
@@ -56,7 +56,7 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
         v-for="album in myAlbum"
         :key="album.albumId"
         class="display flex gap-12"
-        @click="selectAlbum(album.albumId)")
+        @click="selectAlbum(album)")
         img(
           class="object-cover aspect-square w-80"
           :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
@@ -96,13 +96,21 @@ webViewUtils.getAlbumList().then((res) => {
     console.log(res)
     myAlbum.push(...res.myAlbum)
 
-    const recentAlbum = smartAlbum.find((album) => album.title.toLowerCase() === 'recents')
+    const recentAlbum = smartAlbum.find((album) =>
+      ['recents', '最近項目'].includes(album.title.toLowerCase()),
+    )
     Object.assign(currAlbum, recentAlbum)
+    isLoadingContent.value = true
     if (recentAlbum?.albumId) {
-      isLoadingContent.value = true
-      getAlbumContent(recentAlbum.albumId).then(() => {
+      getAlbumContent(recentAlbum).then(() => {
         initLoaded.value = true
       })
+    } else {
+      if (smartAlbum.length > 0) {
+        getAlbumContent(smartAlbum[0]).then(() => {
+          initLoaded.value = true
+        })
+      }
     }
   }
 })
@@ -111,8 +119,11 @@ const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
 }
 
-const getAlbumContent = async (albumId: string) => {
+const getAlbumContent = async (album: IAlbum) => {
+  const { albumId } = album
   isLoadingContent.value = true
+
+  Object.assign(currAlbum, album)
   webViewUtils.getAlbumContent(albumId, nextPage.value).then((res) => {
     console.log(res)
     currAlbumContent.push(...res.content)
@@ -127,14 +138,14 @@ const getAlbumContent = async (albumId: string) => {
 }
 const handleLoadMore = () => {
   console.log(nextPage.value)
-  getAlbumContent(currAlbumId.value)
+  getAlbumContent(currAlbum)
 }
 
-const selectAlbum = (id: string) => {
+const selectAlbum = (album: IAlbum) => {
   nextPage.value = 0
   currAlbumContent.length = 0
   noMoreContent.value = false
-  getAlbumContent(id)
+  getAlbumContent(album)
   isAlbumOpened.value = true
 }
 </script>
