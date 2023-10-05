@@ -17,7 +17,8 @@ div(class="popup-window")
           //- case step1 or switch1
           template(v-if="['step1', 'switch1', 'step1-coupon'].includes(view)")
             template(v-if="!isMobileView")
-              coupon-input(v-if="view === 'step1-coupon'" class="payment-left-content-coupon")
+              div(class="payment-left-content-coupon")
+                coupon-input(v-if="view === 'step1-coupon'")
               div(v-for="p in periodInput"
                   :key="p.label"
                   :isSelected="p.value === userPeriod"
@@ -693,7 +694,7 @@ input {
   }
 }
 .payment-left-content-coupon {
-  margin-bottom: 15px;
+  height: 84px;
 }
 .payment-left-content-period {
   display: flex;
@@ -743,10 +744,17 @@ input {
   > svg,
   > div {
     flex-shrink: 0;
-    margin-right: 15px;
+    margin: 0 15px 0 4px;
   }
   &__other {
     margin-top: 10px;
+  }
+  .radio-btn {
+    display: flex;
+    align-items: center;
+  }
+  :deep(.radio-btn__hover-effect) {
+    top: unset;
   }
 }
 
