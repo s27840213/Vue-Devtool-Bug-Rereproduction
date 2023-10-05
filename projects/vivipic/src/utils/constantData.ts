@@ -409,6 +409,7 @@ class ConstantData {
             key,
             plan: 0,
             img: require(`@/assets/img/text-effect/select/endpoint-${key}.svg`),
+            // For i18n shake: NN0730, NN0731, NN0732
             label: i18n.global.tc(`NN073${i}`),
             preset: { endpoint: key },
           }))

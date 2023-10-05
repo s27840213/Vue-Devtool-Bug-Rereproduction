@@ -31,7 +31,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
         :height="imgNaturalSize.height"
         @error="onError"
         @load="onAdjustImgLoad"
-        :xlink:href="finalSrc" )
+        :xlink:href="finalSrc")
   div(:style="filterContainerStyles()" class="filter-container")
     component(v-for="(elm, idx) in cssFilterElms"
       :key="`cssFilter${idx}`"
@@ -121,13 +121,28 @@ export default defineComponent({
     },
     isBlurImg(val) {
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.getSrc(this.image.config, val ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
+      const srcSize = val ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension
+      const src = imageUtils.getSrc(this.image.config, srcSize)
       imageUtils.imgLoadHandler(src, () => {
         // bcz this is an async operation, need to check if isBlurImg is the same val
         if (this.isBlurImg === val) {
           this.src = src
         }
-      }, { crossOrigin: true })
+      }, {
+        crossOrigin: true,
+        error: () => {
+          if (this.image.config.srcObj.type === 'private' && srcSize === 'xtra') {
+            imageUtils.handlePrivateXtraErr(this.image.config)
+              .then((newSrc) => {
+                imageUtils.imgLoadHandler(newSrc, (img) => {
+                  this.imgNaturalSize.width = img.width
+                  this.imgNaturalSize.height = img.height
+                  this.src = newSrc
+                })
+              })
+          }
+        }
+       })
     }
   },
   async created() {
@@ -384,7 +399,8 @@ export default defineComponent({
           })
       }
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+      const srcSize = this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, srcSize))
       if (!src || src === config.previewSrc) return preImg as HTMLImageElement | undefined
 
       return new Promise<HTMLImageElement | undefined>((resolve, reject) => {
@@ -400,6 +416,19 @@ export default defineComponent({
           }
         }, {
           error: () => {
+            if (this.image.config.srcObj.type === 'private' && srcSize === 'xtra') {
+              imageUtils.handlePrivateXtraErr(this.image.config)
+                .then((newSrc) => {
+                  imageUtils.imgLoadHandler(newSrc, (img) => {
+                    if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+                      this.imgNaturalSize.width = img.width
+                      this.imgNaturalSize.height = img.height
+                      this.src = newSrc
+                    }
+                  })
+                })
+              return
+            }
             reject(new Error(`cannot load the current image, src: ${src}`))
             this._onError(true)
           },
@@ -418,7 +447,7 @@ export default defineComponent({
       editorUtils.setInBgSettingMode(true)
       groupUtils.deselect()
     },
-    handleDimensionUpdate(newVal: number, oldVal: number) {
+    handleDimensionUpdate(newVal: number | string, oldVal: number) {
       if (this.isBlurImg) return
 
       const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
@@ -427,7 +456,8 @@ export default defineComponent({
         imageUtils.imgLoadHandler(currUrl, async () => {
           if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
             this.src = currUrl
-            if (newVal > oldVal) {
+            // @TODO considering string case
+            if (typeof newVal === 'number' && typeof oldVal === 'number' && newVal > oldVal) {
               await this.preLoadImg('next', newVal)
               this.preLoadImg('pre', newVal)
             } else {
@@ -435,7 +465,23 @@ export default defineComponent({
               this.preLoadImg('next', newVal)
             }
           }
-        }, { crossOrigin: true })
+        }, {
+          crossOrigin: true,
+          error: () => {
+            if (this.image.config.srcObj.type === 'private' && newVal === 'xtra') {
+              imageUtils.handlePrivateXtraErr(this.image.config)
+                .then((newSrc) => {
+                  imageUtils.imgLoadHandler(newSrc, (img) => {
+                    if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+                      this.imgNaturalSize.width = img.width
+                      this.imgNaturalSize.height = img.height
+                      this.src = newSrc
+                    }
+                  })
+                })
+            }
+          }
+        })
       }
     },
     logImgError(error: unknown, ...infos: Array<string>) {

@@ -11,16 +11,17 @@ div(class="fps")
         :key="valley.text"
         :style="{color: valley.color}") {{valley.text}}
   div(class="fps__value")
-    span(@click="showGraph") FPS: {{fps}}
-    span(v-if="jsHeapSize !== -1") JS-Heap: {{jsHeapSize}}MB
-    span {{ `Current node env: ${currentEnv}` }}
-    //- mobile-props-toggle(class="py-5" :title="'切換模板顯示樣式'" v-model="newTemplateShownMode")
+    span(@click="showGraph") FPS: {{ fps }}
+    span(v-if="jsHeapSize !== -1") JS-Heap: {{ jsHeapSize }}MB
+    span {{ `Current envs: ${currentEnv}` }}
+    span {{ `Current log num: ${logCount}` }}
 </template>
 
 <script lang="ts">
+import logUtils from '@/utils/logUtils'
 import { Path, Point } from '@/utils/mathUtils'
 import { filter, range } from 'lodash'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 
 class Valley {
   min: number
@@ -67,6 +68,15 @@ interface IFpsGraph {
 export default defineComponent({
   name: 'DebugTool',
   components: {
+  },
+  setup() {
+    const logCount = computed(()=> {
+      return logUtils.setLogCount
+    })
+
+    return {
+      logCount
+    }
   },
   data() {
     return {

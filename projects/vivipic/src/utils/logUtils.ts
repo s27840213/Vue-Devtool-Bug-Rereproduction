@@ -1,10 +1,11 @@
+import { reactive } from 'vue'
 import generalUtils from './generalUtils'
 import uploadUtils from './uploadUtils'
 
 class LogUtils {
   logBuffer = ''
   isUploadingLog = false
-
+  setLogCount = 0
   async uploadLog() {
     if (!uploadUtils.isLogin) return
     const log = this.getLog()
@@ -40,6 +41,7 @@ class LogUtils {
       } else if (this.logBuffer) { // when log is not uploading, append the log buffer back to localStorage
         this.appendBuffer()
       }
+      this.setLogCount++
       localStorage.setItem('log', `${this.getLog()}\n${newContent}`)
     } catch (error) {
       if ((error as Error).name.includes('QuotaExceededError')) {
@@ -75,6 +77,7 @@ class LogUtils {
   }
 
   clearLog() {
+    this.setLogCount = 0
     localStorage.setItem('log', '')
   }
 
@@ -92,4 +95,4 @@ const logUtils = new LogUtils()
 window.consoleLog = logUtils.consoleLog.bind(logUtils)
 window.consoleLogBuffer = logUtils.consoleLogBuffer.bind(logUtils)
 
-export default logUtils
+export default reactive(logUtils)
