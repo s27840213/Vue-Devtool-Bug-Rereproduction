@@ -89,7 +89,7 @@ div(class="popup-window")
                   div(class="payment__panel__comparison__list")
                     template(v-for="comparison in comparisons" :key="comparison.feature")
                       div(class="payment__panel__comparison__splitter")
-                      div(class="payment__panel__comparison__item  first-column") {{ comparison.feature }}
+                      div(class="payment__panel__comparison__item first-column") {{ comparison.feature }}
                       div(class="payment__panel__comparison__item")
                         svg-icon(v-if="comparison.free === true" iconName="check" iconWidth="36px" iconColor="blue-1")
                         template(v-else) {{ comparison.free }}
@@ -1121,6 +1121,9 @@ input {
           &__list {
             overflow-y: auto;
             max-height: calc(100vh - 230px);
+            .first-column {
+              @include body-SM;
+            }
           }
           
           &__splitter{
@@ -1143,7 +1146,7 @@ input {
             display: flex;
             align-items: center;
             justify-content: center;
-            @include body-SM;
+            @include caption-LG;
           }
         }
         .first-column {
