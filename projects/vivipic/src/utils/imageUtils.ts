@@ -19,7 +19,7 @@ const APP_VER_FOR_REFRESH_CACHE = 'v7576'
 
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: (img?: HTMLImageElement) => void, crossOrigin?: boolean }) {
-    const { error, crossOrigin = false } = options || {}
+    const { error, crossOrigin = true } = options || {}
     return new Promise<T>((resolve, reject) => {
       const image = new Image()
       if (crossOrigin && !src.includes('data:image/png;base64')) {
@@ -108,6 +108,7 @@ class ImageUtils {
         const editorImg = store.getters['file/getEditorViewImages']
         const query = forBgRemove ? `&rand_ver=${generalUtils.generateRandomString(6)}` : '&origin=true'
         res = editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
+        res = this.privateXtraExtract(res)
         break
       }
       case 'logo-public':
@@ -653,19 +654,39 @@ class ImageUtils {
     return src
   }
 
-  // this func solve the problem of private img cors error caused by xtra 307 redirect
-  // it replace the xtra src in file/editorView from 'https://template.vivipic.com/asset/image...' to 'https://asset.vivipic.com/...'
-  handlePrivateXtraErr(config: IImage, img?: HTMLImageElement) {
-    if (img) {
-      if (img.src.includes('xtra') && config.srcObj.type === 'private' && img.src.includes('https://template.vivipic.com/')) {
+  async handlePrivateXtraErr(config: IImage) {
+    const editorImg = store.getters['file/getEditorViewImages']
+    const src = editorImg(config.srcObj.assetId).xtra
+    // calling the resize-image-api
+    return new Promise<string>(resolve => {
+      this.imgLoadHandler(src, () => {
+        // replace the xtra src in file/editorView with newSrc
+        const newSrc = this.privateXtraExtract(src) + 'ver=' + generalUtils.generateRandomString(4)
         store.commit('file/UPDATE_IMAGE_XTRA', {
           assetId: config.srcObj.assetId,
-          src: 'https://' + img?.src.slice('https://template.vivipic.com/'.length)
+          src: newSrc
         })
-        return true
-      }
+        resolve(newSrc)
+      }, {
+        crossOrigin: false,
+        error: (img) => {
+          console.error('hanlePrivateXtraErr error', img)
+        }
+      })
+    })
+  }
+
+  privateXtraExtract(src: string) {
+    // if the src meet the following condition,
+    // means the img is private img with xtra size,
+    // the actuall src should be extract as the following
+    // However, if the xtra image is not produced yet,
+    // this returned src would bump into 404 ERROR,
+    // then the func 'handlePrivateXtraErr' should be called.
+    if (src.includes('xtra') && src.includes('https://template.vivipic.com/')) {
+      return 'https://' + src.slice('https://template.vivipic.com/'.length)
     }
-    return false
+    return src
   }
 }
 

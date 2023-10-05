@@ -125,13 +125,28 @@ export default defineComponent({
     },
     isBlurImg(val) {
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.getSrc(this.image.config, val ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension)
+      const srcSize = val ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension
+      const src = imageUtils.getSrc(this.image.config, srcSize)
       imageUtils.imgLoadHandler(src, () => {
         // bcz this is an async operation, need to check if isBlurImg is the same val
         if (this.isBlurImg === val) {
           this.src = src
         }
-      }, { crossOrigin: true })
+      }, {
+        crossOrigin: true,
+        error: () => {
+          if (this.image.config.srcObj.type === 'private' && srcSize === 'xtra') {
+            imageUtils.handlePrivateXtraErr(this.image.config)
+              .then((newSrc) => {
+                imageUtils.imgLoadHandler(newSrc, (img) => {
+                  this.imgNaturalSize.width = img.width
+                  this.imgNaturalSize.height = img.height
+                  this.src = newSrc
+                })
+              })
+          }
+        }
+       })
     }
   },
   async created() {
@@ -408,7 +423,8 @@ export default defineComponent({
           })
       }
       const { imgWidth, imgHeight } = this.image.config.styles
-      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+      const srcSize = this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, srcSize))
       if (!src || src === config.previewSrc) return preImg as HTMLImageElement | undefined
 
       return new Promise<HTMLImageElement | undefined>((resolve, reject) => {
@@ -423,16 +439,18 @@ export default defineComponent({
             resolve(img)
           }
         }, {
-          error: (img) => {
-            if (imageUtils.handlePrivateXtraErr(this.image.config, img)) {
-              const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.isBlurImg ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
-              imageUtils.imgLoadHandler(newSrc, (img) => {
-                if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
-                  this.src = newSrc
-                  this.imgNaturalSize.width = img.width
-                  this.imgNaturalSize.height = img.height
-                }
-              })
+          error: () => {
+            if (this.image.config.srcObj.type === 'private' && srcSize === 'xtra') {
+              imageUtils.handlePrivateXtraErr(this.image.config)
+                .then((newSrc) => {
+                  imageUtils.imgLoadHandler(newSrc, (img) => {
+                    if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+                      this.imgNaturalSize.width = img.width
+                      this.imgNaturalSize.height = img.height
+                      this.src = newSrc
+                    }
+                  })
+                })
               return
             }
 
@@ -474,16 +492,18 @@ export default defineComponent({
           }
         }, {
           crossOrigin: true,
-          error: (img) => {
-            if (imageUtils.handlePrivateXtraErr(this.image.config, img)) {
-              const newSrc = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
-              imageUtils.imgLoadHandler(newSrc, (img) => {
-                if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
-                  this.src = newSrc
-                  this.imgNaturalSize.width = img.width
-                  this.imgNaturalSize.height = img.height
-                }
-              })
+          error: () => {
+            if (this.image.config.srcObj.type === 'private' && newVal === 'xtra') {
+              imageUtils.handlePrivateXtraErr(this.image.config)
+                .then((newSrc) => {
+                  imageUtils.imgLoadHandler(newSrc, (img) => {
+                    if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+                      this.imgNaturalSize.width = img.width
+                      this.imgNaturalSize.height = img.height
+                      this.src = newSrc
+                    }
+                  })
+                })
             }
           }
         })
