@@ -11,6 +11,7 @@ router-link(
 </template>
 <script setup lang="ts">
 import useStateInfo from '@/composable/useStateInfo'
+import { useImgSelectorStore } from '@/stores/imgSelector'
 import { useModalStore } from '@/stores/modal'
 import { storeToRefs } from 'pinia'
 
@@ -22,9 +23,20 @@ const { closeModal, openModal, setNormalModalInfo } = modalStore
 const { isModalOpen } = storeToRefs(modalStore)
 // #endregion
 
+// #region img selector
+const imgSelectorStore = useImgSelectorStore()
+const { setShowImgSelector } = imgSelectorStore
+const { showImgSelector } = storeToRefs(imgSelectorStore)
+// #endregion
+
 const { t } = useI18n()
 
 const handleBackAction = (navagate: () => void) => {
+  if (showImgSelector.value) {
+    setShowImgSelector(false)
+    return
+  }
+
   if (showEditingOpstions.value || showPromptArea.value) {
     setNormalModalInfo({
       title: t('CM0025'),

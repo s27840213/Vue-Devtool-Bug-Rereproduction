@@ -1,4 +1,5 @@
 import { useEditorStore } from '@/stores/editor'
+import { useImgSelectorStore } from '@/stores/imgSelector'
 import { storeToRefs } from 'pinia'
 
 const useStateInfo = () => {
@@ -15,10 +16,15 @@ const useStateInfo = () => {
   // #region editor state
   const showHomeTabs = computed(() => atHome.value || atMyDesign.value)
   const showAspectRatioSelector = computed(
-    () => atEditor.value && editorState.value === 'aspectRatio'
+    () => atEditor.value && editorState.value === 'aspectRatio',
   )
   const showEditingOpstions = computed(() => atEditor.value && editorState.value === 'editing')
   const showPromptArea = computed(() => atEditor.value && editorState.value === 'prompt')
+  // #endregion
+
+  // #region img selector state
+  const imgSelectorStore = useImgSelectorStore()
+  const { showImgSelector } = storeToRefs(imgSelectorStore)
   // #endregion
 
   return {
@@ -28,7 +34,8 @@ const useStateInfo = () => {
     showHomeTabs,
     showAspectRatioSelector,
     showEditingOpstions,
-    showPromptArea
+    showPromptArea,
+    showImgSelector,
   }
 }
 

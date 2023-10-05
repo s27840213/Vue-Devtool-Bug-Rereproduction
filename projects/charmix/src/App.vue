@@ -1,10 +1,5 @@
 <template lang="pug">
-div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
-  div(
-    v-if="isModalOpen"
-    class="mask"
-    ref="maskRef"
-    @click.stop="closeModal")
+div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto] relative")
   router-view(class="pb-12" v-slot="{ Component }")
     transition(
       :name="routeTransitionName"
@@ -16,6 +11,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
         name="bottom-panel-transition"
         mode="out-in")
         component(:is="bottomPanelComponent" :ref="(el: any) => setSlotRef(el)")
+  div(
+    v-if="isModalOpen"
+    class="mask"
+    ref="maskRef"
+    @click.stop="closeModal")
+  transition(name="bottom-up")
+    img-selector(v-if="showImgSelector" class="absolute top-0 left-0 w-full h-full z-30")
   //- div(class="fixed bottom-1/4 left-4 text-app-selection") {{ atHome }} {{ atMyDesign }} {{ routeInfo.atHome }}
 </template>
 
@@ -37,6 +39,7 @@ const {
   showPromptArea,
   atHome,
   atMyDesign,
+  showImgSelector,
 } = stateInfo
 // #endregion
 
@@ -164,6 +167,21 @@ const closeModal = () => {
   &-leave-to {
     opacity: 0;
     transform: translateY(5px);
+  }
+}
+
+.bottom-up {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(100%);
   }
 }
 </style>

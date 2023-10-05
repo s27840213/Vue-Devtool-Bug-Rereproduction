@@ -12,7 +12,7 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-24")
     :btnText="$t('CM0003')"
     :theme="'powerful-fill'"
     iconName="brush"
-    @clickBtn="goToEditor")
+    @clickBtn="openImgSelecotr")
   div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
   div(class="feature-section")
     feature-card(
@@ -55,11 +55,17 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-24")
     iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
+import { useImgSelectorStore } from '@/stores/imgSelector'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const { setShowImgSelector } = useImgSelectorStore()
 const goToEditor = () => {
   router.push('/editor')
+}
+
+const openImgSelecotr = () => {
+  setShowImgSelector(true)
 }
 </script>
 <style scoped lang="scss">
