@@ -13,7 +13,7 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
         span(class="text-app-tab-default typo-btn-lg") {{ currAlbumName }}
         div(
           class="transition-transform duration-300"
-          :style="{ transform: isAlbumOpened ? 'rotate(0deg)' : 'rotate(180deg)' }")
+          :style="{ transform: isAlbumOpened ? 'rotate(180deg)' : 'rotate(0deg)' }")
           cm-svg-icon(
             class="text-app-tab-default"
             :iconName="'chevron-up'"
@@ -55,7 +55,14 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
       div(
         v-for="album in myAlbum"
         :key="album.albumId"
-        class="aspect-square text-app-tab-default") {{ album.title }}
+        class="display flex gap-12"
+        @click="selectAlbum(album.albumId)")
+        img(
+          class="object-cover aspect-square w-80"
+          :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
+        div(class="flex flex-col items-start justify-evenly")
+          span(class="text-app-tab-default") {{ album.title }}
+          span(class="text-app-tab-default") {{ album.albumSize }}
 </template>
 <script lang="ts" setup>
 import type { IAlbum } from '@/utils/webViewUtils'
