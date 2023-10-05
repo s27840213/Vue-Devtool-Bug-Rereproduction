@@ -322,7 +322,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getContentScaleRatio(state: IEditorState) {
     const pageIndex = layerUtils.pageIndex === -1 ? 0 : layerUtils.pageIndex
-    return state.pages[pageIndex].config.contentScaleRatio
+    return generalUtils.isTouchDevice() ? state.pages[pageIndex].config.contentScaleRatio : 1
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state.useMobileEditor ? -1 : state._3dEnabledPageIndex

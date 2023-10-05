@@ -124,6 +124,7 @@ class ImageUtils {
         const editorImg = store.getters['file/getEditorViewImages']
         const query = forBgRemove ? `&rand_ver=${generalUtils.generateRandomString(6)}` : '&orPigin=true'
         res = editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
+        res = this.privateXtraExtract(res)
         break
       }
       case 'logo-public':

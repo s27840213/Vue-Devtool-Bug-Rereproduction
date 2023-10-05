@@ -146,7 +146,7 @@ export default defineComponent({
               })
           }
         }
-       })
+      })
     }
   },
   async created() {
