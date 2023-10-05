@@ -244,3 +244,40 @@
 @mixin selection-border($width, $color: blue-1) {
   box-shadow: 0 0 0 $width setColor($color);;
 }
+
+@mixin pic {
+  #app.pic & {
+    @content;
+  }
+}
+
+@mixin stk() {
+  #app.stk & {
+    @content;
+  }
+}
+
+@mixin cm() {
+  #app.cm & {
+    @content;
+  }
+}
+
+@mixin setColors(
+  $picColor,
+  $stkColor: $picColor,
+  $cmColor: $picColor,
+  $opacity: 1,
+  $picOpacity: $opacity,
+  $stkOpacity: $opacity,
+  $cmOpacity: $opacity) {
+  @include pic {
+    @content(setColor($picColor, $picOpacity));
+  }
+  @include stk {
+    @content(setColor($stkColor, $stkOpacity));
+  }
+  @include cm {
+    @content(setColor($cmColor, $cmOpacity));
+  }
+}

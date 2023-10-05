@@ -38,14 +38,16 @@ const component = defineComponent({
 })
 export default component
 export type CCategoryList = InstanceType<typeof component>
+
 </script>
 
 <style lang="scss" scoped>
   .category-list {
-    @if $appName == 'pic' {
+    @include pic {
       @include push-scrollbar10;
       @include hover-scrollbar(dark);
-    } @else if $appName == 'stk' {
+    }
+    @include stk {
       @include no-scrollbar;
     }
     &__header {

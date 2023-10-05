@@ -71,7 +71,8 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         // https://sass-lang.com/documentation/at-rules/use/#configuration
-        additionalData: `@use "@/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`
+        // additionalData: `@use "@/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`,
+        additionalData: `@use "@/assets/scss/utils" as *;`,
       },
     },
   },

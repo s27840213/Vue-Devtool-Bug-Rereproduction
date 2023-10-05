@@ -1,26 +1,29 @@
 @use './variables.scss' as *;
-$appName: None !default;
+// $appName: None !default;
 
 @function setColor($color, $opacity: 1) {
   @return rgba(map-get($colors, $color), $opacity);
 }
 
-@function setColors(
-  $picColor,
-  $stkColor: $picColor,
-  $cmColor: $picColor,
-  $opacity: 1,
-  $picOpacity: $opacity,
-  $stkOpacity: $opacity,
-  $cmOpacity: $opacity) {
-  @if $appName == 'pic' {
-    @return rgba(map-get($colors, $picColor), $picOpacity);
-  } @else if $appName == 'stk' {
-    @return rgba(map-get($colors, $stkColor), $stkOpacity);
-  } @else if $appName == 'cm' {
-    @return rgba(map-get($colors, $cmColor), $cmOpacity);
-  }
-}
+// Deprecated: because vivi-lib cannot get $appName
+// @function appColors(
+//   $picColor,
+//   $stkColor: $picColor,
+//   $cmColor: $picColor,
+//   $opacity: 1,
+//   $picOpacity: $opacity,
+//   $stkOpacity: $opacity,
+//   $cmOpacity: $opacity) {
+//   @if $appName == 'pic' {
+//     @return setColor($picColor, $picOpacity);
+//   } @else if $appName == 'stk' {
+//     @return setColor($stkColor, $stkOpacity);
+//   } @else if $appName == 'cm' {
+//     @return setColor($cmColor, $cmOpacity);
+//   } @else {
+//     @return 'Var $appName not found';
+//   }
+// }
 
 @function setZindex($value) {
   @return index($zindex, $value);
