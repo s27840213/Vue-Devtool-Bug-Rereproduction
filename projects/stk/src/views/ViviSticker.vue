@@ -29,8 +29,6 @@ div(class="vivisticker" :style="copyingStyles()")
     :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
     :inAllPagesMode="false")
   div(id="vivisticker__mobile-panel-bottom")
-  div(v-if="pushModalInfo && isShowPushModal" class="vivisticker__push-modal-container" :style="pushModalInfo?.backdropStyle")
-    modal-card(v-model:show="isShowPushModal" :initModalInfo="pushModalInfo")
   transition(name="slide-left")
     template(v-if="isSlideShown")
       component(:is="slideType" class="vivisticker__slide")
@@ -42,7 +40,6 @@ div(class="vivisticker" :style="copyingStyles()")
 </template>
 
 <script lang="ts">
-import ModalCard from '@/components/modal/ModalCard.vue'
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
 import FullPage from '@/components/vivisticker/FullPage.vue'
 import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
@@ -56,12 +53,12 @@ import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
-import { IModalInfo } from '@/interfaces/modal'
 import { IPage } from '@/interfaces/page'
 import constantData from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
@@ -86,8 +83,7 @@ export default defineComponent({
     FullPage,
     SlideUserSettings,
     ShareTemplate,
-    LoadingOverlay,
-    ModalCard
+    LoadingOverlay
   },
   data() {
     return {
@@ -100,8 +96,6 @@ export default defineComponent({
       footerTabsRef: undefined as unknown as HTMLElement,
       mounted: false,
       isMobilePanelBottom: false,
-      pushModalInfo: undefined as IModalInfo | undefined,
-      isShowPushModal: true
     }
   },
   created() {
@@ -199,6 +193,7 @@ export default defineComponent({
       modalInfo: 'vivisticker/getModalInfo',
       debugMode: 'vivisticker/getDebugMode',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
+      modalOpen: 'modal/getModalOpen',
     }),
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
@@ -355,7 +350,7 @@ export default defineComponent({
         this.showMobilePanelAfterTransitoin = false
       }, 300)
     },
-    async getPushModalInfo() {
+    async showPushModalInfo(): Promise<boolean> {
       // parse modal info
       let locale = this.userInfo.locale
       if (!['us', 'tw', 'jp'].includes(locale)) {
@@ -373,7 +368,7 @@ export default defineComponent({
       const lastModalMsg = await vivistickerUtils.getState('lastModalMsg')
       const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
       const btn_txt = modalInfo.btn_txt
-      if (!btn_txt || shown) return
+      if (!btn_txt || shown) return false
 
       const options = {
         imgSrc: modalInfo.img_url,
@@ -388,10 +383,10 @@ export default defineComponent({
         checked: false,
         onCheckedChange: (checked: boolean) => { console.log(checked) }
       }
-      this.pushModalInfo = {
-        title: modalInfo.title,
-        content: [modalInfo.msg],
-        confirmButton: {
+      modalUtils.setModalInfo(
+        modalInfo.title,
+        [modalInfo.msg],
+        {
           msg: btn_txt,
           class: 'btn-black-mid',
           style: {
@@ -402,7 +397,7 @@ export default defineComponent({
             if (url) { window.open(url, '_blank') }
           }
         },
-        cancelButton: {
+        {
           msg: modalInfo.btn2_txt || '',
           class: 'btn-light-mid',
           style: {
@@ -411,12 +406,12 @@ export default defineComponent({
             backgroundColor: '#D3D3D3'
           }
         },
-        ...options
-      }
-      await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
+        options
+      )
+      vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
+      return true
     },
     async showInitPopups() {
-      this.getPushModalInfo()
       const isFirstOpen = this.userInfo.isFirstOpen
       const subscribed = (await vivistickerUtils.getState('subscribeInfo'))?.subscribe ?? false
       const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
@@ -428,12 +423,24 @@ export default defineComponent({
       const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
         : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
       const isShowTutorial = isFirstOpen && this.$i18n.locale !== 'us'
-      if (isShowPaymentView) {
-        vivistickerUtils.openPayment()
-        vivistickerUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
-      } else vivistickerUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
-      if (isShowTutorial) this.setShowTutorial(true)
-      if (!isShowPaymentView && !isShowTutorial) vivistickerUtils.sendAppLoaded()
+      const show = () =>{
+        if (isShowPaymentView) {
+          vivistickerUtils.openPayment()
+          vivistickerUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+        } else vivistickerUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
+        if (isShowTutorial) this.setShowTutorial(true)
+        if (!isShowPaymentView && !isShowTutorial) vivistickerUtils.sendAppLoaded()
+      }
+
+      const isPushModalShown = await this.showPushModalInfo()
+      if (isPushModalShown) {
+        vivistickerUtils.sendAppLoaded()
+        const unwatch = this.$watch('modalOpen', (newVal) => {
+          if(!newVal) show()
+          unwatch()
+        })
+      }
+      else show()
     }
   }
 })

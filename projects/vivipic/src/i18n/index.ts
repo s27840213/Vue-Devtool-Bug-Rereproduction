@@ -73,6 +73,7 @@ const i18n = createI18n({
         .replace(/<newline>/g, '<br/ > ')
     } else return translated
   },
+  warnHtmlInMessage: 'off', // or use: 'warnHtmlMessage: false', https://github.com/intlify/vue-i18n-next/issues/853#issuecomment-1277631080
 })
 
 export default i18n
