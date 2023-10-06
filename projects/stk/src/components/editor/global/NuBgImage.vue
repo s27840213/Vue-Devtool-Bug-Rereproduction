@@ -583,7 +583,6 @@ export default defineComponent({
   right: 0;
   bottom: 0;
   left: 0;
-  border-radius: 10px;
   &__picture {
     object-fit: cover;
     width: 100%;
