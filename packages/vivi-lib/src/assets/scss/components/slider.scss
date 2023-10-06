@@ -1,73 +1,73 @@
 @use '../utils' as *;
 
 @mixin inputType($type: '') {
-    &__slider {
-        &--range {
-            @include setColors(blue-1, black-5) using ($color) {
-                @include progressSlider(
-                    $height: 3px,
-                    $thumbSize: 16px,
-                    $marginTop: -6.5px,
-                    $thumbColor: setColor(white),
-                    $border: 2px solid $color,
-                    $boxShadow: none
-                );
-            };
+  &__slider {
+    &--range {
+      @include setColors(blue-1, black-5) using ($color) {
+        @include progressSlider(
+          $height: 3px,
+          $thumbSize: 16px,
+          $marginTop: -6.5px,
+          $thumbColor: setColor(white),
+          $border: 2px solid $color,
+          $boxShadow: none
+        );
+      };
 
-            @if $type=='top' {
-                &::-webkit-slider-thumb {
-                    width: 40px;
-                    height: 40px;
-                    margin-top: -18.5px;
-                }
-
-                &::-moz-range-thumb {
-                    width: 40px;
-                    height: 40px;
-                    margin-top: -18.5px;
-                }
-            }
-
-            margin: auto;
-            @include setColors(blue-1, black-5) using ($color) {
-                --lower-color: #{$color};
-            }
-            @include setColors(gray-4, black-6) using ($color) {
-                --upper-color: #{$color};
-    
-                &[disabled] {
-                    &::-webkit-slider-thumb {
-                        border: 2px solid $color;
-                    }
-    
-                    &::-moz-range-thumb {
-                        border: 2px solid $color;
-                    }
-    
-                    --lower-color: #{$color};
-                }
-            }
-
-            // @media screen and (max-width: 976px) {
-            // }
+      @if $type=='top' {
+        &::-webkit-slider-thumb {
+          width: 40px;
+          height: 40px;
+          margin-top: -18.5px;
         }
 
-        &--text {
-            box-sizing: border-box;
-            text-align: center;
-            border: 1px solid setColor(gray-4);
-            color: setColor(gray-3);
-            border-radius: 0.25rem;
+        &::-moz-range-thumb {
+          width: 40px;
+          height: 40px;
+          margin-top: -18.5px;
         }
+      }
+
+      margin: auto;
+      @include setColors(blue-1, black-5) using ($color) {
+        --lower-color: #{$color};
+      }
+      @include setColors(gray-4, black-6) using ($color) {
+        --upper-color: #{$color};
+  
+        &[disabled] {
+          &::-webkit-slider-thumb {
+            border: 2px solid $color;
+          }
+  
+          &::-moz-range-thumb {
+            border: 2px solid $color;
+          }
+  
+          --lower-color: #{$color};
+        }
+      }
+
+      // @media screen and (max-width: 976px) {
+      // }
     }
+
+    &--text {
+      box-sizing: border-box;
+      text-align: center;
+      border: 1px solid setColor(gray-4);
+      color: setColor(gray-3);
+      border-radius: 0.25rem;
+    }
+  }
 }
 
 .input {
-    @include inputType;
+  @include inputType;
 }
 
 .input-top {
-    @include inputType('top');
+  @include inputType('top');
 }
 
 // .input {
