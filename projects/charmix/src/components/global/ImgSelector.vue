@@ -30,14 +30,10 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
         v-for="item in currAlbumContent"
         :key="item"
         class="aspect-square")
-        lazy-load(
-          class="lazy-load w-full h-full"
-          target=".img-grid"
-          :anamationEnabled="true"
-          :rootMargin="'1000px 0px 1000px 0px'")
-          img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?type=thumb`")
+        img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?type=thumb`")
       observer-sentinel(
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
+        :rootMargin="'400px 0px 0px 0px'"
         @callback="handleLoadMore")
     div(v-else class="flex flex-col gap-8")
       div(
@@ -68,13 +64,9 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
 import type { IAlbum } from '@/utils/webViewUtils'
 import webViewUtils from '@/utils/webViewUtils'
 
+// #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
 const myAlbum = reactive<IAlbum[]>([])
-
-const nextPage = ref(0)
-const noMoreContent = ref(false)
-const isLoadingContent = ref(false)
-
 const currAlbumContent = reactive<string[]>([])
 const currAlbum = reactive<IAlbum>({
   albumId: '',
@@ -83,38 +75,18 @@ const currAlbum = reactive<IAlbum>({
   thumbId: '',
 })
 const currAlbumName = computed(() => currAlbum.title)
-const currAlbumId = ref('')
+// const currAlbumId = computed(() => currAlbum.albumId)
+// #endregion
+
+// #region album states
+const nextPage = ref(0)
+const noMoreContent = ref(false)
 const isAlbumOpened = ref(true)
+const isLoadingContent = ref(false)
 const initLoaded = ref(false)
+// #endregion
 
-// get the first image content
-webViewUtils.getAlbumList().then((res) => {
-  if (res.flag === 1) {
-    console.error(res.msg)
-  } else {
-    smartAlbum.push(...res.smartAlbum)
-    console.log(res)
-    myAlbum.push(...res.myAlbum)
-
-    const recentAlbum = smartAlbum.find((album) =>
-      ['recents', '最近項目'].includes(album.title.toLowerCase()),
-    )
-    Object.assign(currAlbum, recentAlbum)
-    isLoadingContent.value = true
-    if (recentAlbum?.albumId) {
-      getAlbumContent(recentAlbum).then(() => {
-        initLoaded.value = true
-      })
-    } else {
-      if (smartAlbum.length > 0) {
-        getAlbumContent(smartAlbum[0]).then(() => {
-          initLoaded.value = true
-        })
-      }
-    }
-  }
-})
-
+// #region methods
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
 }
@@ -124,20 +96,23 @@ const getAlbumContent = async (album: IAlbum) => {
   isLoadingContent.value = true
 
   Object.assign(currAlbum, album)
-  webViewUtils.getAlbumContent(albumId, nextPage.value).then((res) => {
-    console.log(res)
-    currAlbumContent.push(...res.content)
-    if (res.nextPage) {
-      nextPage.value = res.nextPage
-    } else {
-      noMoreContent.value = true
-    }
-    currAlbumId.value = albumId
-    isLoadingContent.value = false
-  })
+  webViewUtils
+    .getAlbumContent(albumId, nextPage.value)
+    .then((res) => {
+      currAlbumContent.push(...res.content)
+      if (res.nextPage) {
+        nextPage.value = res.nextPage
+      } else {
+        noMoreContent.value = true
+      }
+      isLoadingContent.value = false
+    })
+    .catch((err) => {
+      console.error(err)
+      isLoadingContent.value = false
+    })
 }
 const handleLoadMore = () => {
-  console.log(nextPage.value)
   getAlbumContent(currAlbum)
 }
 
@@ -148,5 +123,39 @@ const selectAlbum = (album: IAlbum) => {
   getAlbumContent(album)
   isAlbumOpened.value = true
 }
+// #endregion
+
+// get the first image content
+webViewUtils
+  .getAlbumList()
+  .then((res) => {
+    if (res.flag === 1) {
+      console.error(res.msg)
+    } else {
+      smartAlbum.push(...res.smartAlbum)
+      myAlbum.push(...res.myAlbum)
+
+      const recentAlbum = smartAlbum.find((album) =>
+        ['recents', '最近項目'].includes(album.title.toLowerCase()),
+      )
+      Object.assign(currAlbum, recentAlbum)
+      isLoadingContent.value = true
+      if (recentAlbum?.albumId) {
+        getAlbumContent(recentAlbum).then(() => {
+          initLoaded.value = true
+        })
+      } else {
+        if (smartAlbum.length > 0) {
+          getAlbumContent(smartAlbum[0]).then(() => {
+            initLoaded.value = true
+          })
+        }
+      }
+    }
+  })
+  .catch((err) => {
+    console.error(err)
+    isLoadingContent.value = false
+  })
 </script>
 <style lang="scss"></style>
