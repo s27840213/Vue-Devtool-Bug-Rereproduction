@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="panel-color px-5")
   div(v-if="showDocumentColors")
-    div(class="text-left") {{$t('NN0798')}}
+    div(class="panel-color__title text-left") {{$t('NN0798')}}
     div(class="panel-color__shape-colors" :style="colorsStyle"
         @scroll.passive="updateColorsOverflow" ref="colors")
       color-btn(v-for="(color, index) in getDocumentColors"
@@ -36,6 +36,7 @@ import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType } from '@/store/types'
 import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -47,7 +48,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { cloneDeep } from 'lodash'
 import { PropType, defineComponent } from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   data() {
@@ -80,11 +81,11 @@ export default defineComponent({
   },
   beforeUnmount() {
     // When closing panel, if user has changed the color, add it to recently.
-    if (colorUtils.currColor !== this.initColor) {
-      this.addRecentlyColors(colorUtils.currColor)
-    }
+    this.addToRecently()
+
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
+    colorUtils.setCurrEvent('')
   },
   watch: {
     // For switch PanelColor event target without close MobilePanel. Ex: shape color and text color in group
@@ -93,7 +94,13 @@ export default defineComponent({
       colorUtils.offStop(oldVal, this.recordChange)
       colorUtils.on(newVal, this.handleColorUpdate)
       colorUtils.onStop(newVal, this.recordChange)
-    }
+    },
+    showColorPicker(newVal, oldVal) {
+      // Back from color-picker, add recently.
+      if (!newVal && oldVal) {
+        this.addToRecently()
+      }
+    },
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -146,7 +153,7 @@ export default defineComponent({
     colorsStyle(): Record<string, string> {
       // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
       return {
-        gridTemplateColumns: `repeat(${this.getDocumentColors.length}, calc((100% - 30px) / 7))`,
+        gridTemplateColumns: `repeat(${this.getDocumentColors.length}, calc((100% - 60px) / 7))`,
         maskImage: `linear-gradient(to right, transparent 0, black ${this.leftOverflow ? '48px' : 0}, black calc(100% - ${this.rightOverflow ? '48px' : '0px'}), transparent 100%)`
       }
     },
@@ -155,6 +162,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor',
+    }),
     ...mapActions({
       addRecentlyColors: 'color/addRecentlyColors',
     }),
@@ -258,7 +268,8 @@ export default defineComponent({
       }
     },
     handleFrameColorUpdate(newColor: string) {
-      const { decoration, decorationTop } = layerUtils.getCurrConfig as IFrame
+      const { getCurrConfig: targetLayer, getCurrLayer: currLayer } = layerUtils
+      const { decoration, decorationTop } = (targetLayer.type === 'image' ? currLayer : targetLayer) as IFrame
       let color = [] as Array<string>
       let key = ''
       if (decoration && decorationTop && decoration.color.length && decorationTop.color.length) {
@@ -281,11 +292,28 @@ export default defineComponent({
         }
         color[this.currSelectedColorIndex] = newColor
       }
-      frameUtils.updateFrameDecorColor({
-        pageIndex: layerUtils.pageIndex,
-        layerIndex: layerUtils.layerIndex,
-        subLayerIdx: layerUtils.subLayerIdx
-      }, { [key]: color })
+      if (targetLayer.type === 'frame' || targetLayer.type === 'group') {
+        frameUtils.updateFrameDecorColor({
+          pageIndex: layerUtils.pageIndex,
+          layerIndex: layerUtils.layerIndex,
+          subLayerIdx: layerUtils.subLayerIdx
+        }, { [key]: color })
+      } else if (targetLayer.type === 'image') {
+        // as the clip is selected
+        frameUtils.updateFrameDecorColor({
+          pageIndex: layerUtils.pageIndex,
+          layerIndex: layerUtils.layerIndex,
+          subLayerIdx: -1
+        }, { [key]: color })
+      }
+    },
+    addToRecently() {
+      if (colorUtils.currColor === this.initColor) return
+
+      if (editorUtils.currActivePanel === 'background' || this.currEvent === ColorEventType.background) {
+        this.addRecentlyBgColor(colorUtils.currColor)
+      } else this.addRecentlyColors(colorUtils.currColor)
+      this.initColor = colorUtils.currColor
     },
     recordChange() {
       stepsUtils.record()
@@ -313,20 +341,24 @@ export default defineComponent({
   grid-template-rows: auto minmax(0, 1fr);
   grid-auto-columns: 100%;
 
+  &__title {
+    @include body-SM;
+    color: setColor(gray-2);
+  }
+
   &__shape-colors {
     @include no-scrollbar;
     width: 100%;
-    padding: 10px 0 16px 0;
+    padding: 10px 12px 16px 12px;
+    box-sizing: border-box;
     display: grid;
-    gap: 5px;
+    gap: 10px;
     overflow-x: auto;
   }
   &__hr {
     height: 1px;
     background-color: setColor(gray-4);
-  }
-  & .show-document-colors:deep(.color-panel__scroll) {
-    padding-top: 16px;
+    margin-bottom: 16px;
   }
 }
 </style>

@@ -10,13 +10,13 @@ div(class="color-panel"
     //- Recently colors
     div(class="color-panel__colors"
         :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-      div(class="text-left mb-5")
+      div(class="text-left")
         div(class="flex-center")
           svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
                 iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
                 class="mr-5" @click="lessRecently()")
           span {{$t('NN0679')}}
-        span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
+        span(v-if="!showAllRecentlyColor" class="btn-XS" @click="moreRecently()") {{$t('NN0082')}}
       div
         color-btn(color="add" :active="openColorPicker"
                   @click="openColorPanel($event)")
@@ -52,7 +52,7 @@ div(class="color-panel"
       //- Document colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-        div(class="text-left mb-5")
+        div(class="text-left")
           span {{$t('NN0091')}}
         div
           color-btn(v-for="color in documentColors" :color="color" :key="color"
@@ -61,7 +61,7 @@ div(class="color-panel"
       //- Preset Colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-        div(class="text-left mb-5")
+        div(class="text-left")
           span {{$t('NN0089')}}
         div
           color-btn(v-for="color in defaultColors" :color="color" :key="color"
@@ -302,7 +302,7 @@ export default defineComponent({
         const colorPanel = this.$refs.colorPanel as HTMLElement
         const colorPicker = (this.$refs.colorPicker as any).$el as HTMLElement
         const [width, height] = [colorPicker.offsetWidth, colorPicker.offsetHeight]
-        const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
+        const [vw, vh] = [window.outerWidth || document.documentElement.clientWidth, window.outerHeight || document.documentElement.clientHeight]
         const mousePos = mouseUtils.getMouseAbsPoint(event)
         const { top, left, right } = (event.target as HTMLElement).getBoundingClientRect()
 
@@ -350,7 +350,7 @@ export default defineComponent({
       padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
     }
     > div + div {
-      margin-top: 8px;
+      margin-top: 20px;
     }
   }
   &__brand-settings {
@@ -371,16 +371,21 @@ export default defineComponent({
       width: 100%;
       display: flex;
       justify-content: space-between;
+      @include body-SM;
+      color: setColor(gray-2);
+      margin-bottom: 16px;
     }
     > div:nth-child(2) {
       width: 100%;
       display: grid;
       grid-auto-rows: auto;
       grid-template-columns: repeat(7, 1fr);
-      row-gap: 5px;
-      column-gap: 5px;
+      column-gap: 12px;
+      row-gap: 12px;
+      padding: 0 12px 4px 12px;
       justify-content: center;
       align-items: center;
+      box-sizing: border-box;
     }
   }
 
