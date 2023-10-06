@@ -87,7 +87,7 @@ const routes: Array<RouteRecordRaw> = [
   }
 ]
 
-if (window.location.host !== 'vivipic.com') {
+if (window.location.host !== 'sticker.vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
