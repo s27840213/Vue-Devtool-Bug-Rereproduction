@@ -2,13 +2,13 @@
 div(class="panel-nudge text-left")
   div(class="panel-nudge__top-section")
     span(class="body-XS"
-      :class="[forVivisticker ? 'text-gray-2' : '']") {{ $t('NN0888') }}
+      :class="[$isStk ? 'text-gray-2' : '']") {{ $t('NN0888') }}
     slide-toggle(:options="options"
       v-model="currOption"
       :bgColor="'gray-6'"
       :switchColor="'white'"
-      :activeColor="forVivisticker ? 'gray-2' : 'blue-1'"
-      :inActiveColor="forVivisticker ? 'black-5' : 'gray-2'"
+      :activeColor="$isStk ? 'gray-2' : 'blue-1'"
+      :inActiveColor="$isStk ? 'black-5' : 'gray-2'"
       :optionWidth="'50px'"
       :optionHeight="'30px'")
   div(class="panel-nudge__content")
@@ -50,18 +50,12 @@ div(class="panel-nudge text-left")
 </template>
 
 <script lang="ts">
-import SlideToggle from '@/components/global/SlideToggle.vue'
+import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import eventUtils from '@nu/vivi-lib/utils/eventUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  props: {
-    forVivisticker: {
-      type: Boolean,
-      default: false
-    }
-  },
   components: {
     SlideToggle
   },
