@@ -1,5 +1,5 @@
 import App from '@/App.vue'
-import PropertyBar from '@/components/global/PropertyBar.vue'
+import PropertyBar from '@nu/vivi-lib/components/global/PropertyBar.vue'
 import SvgIcon from '@nu/vivi-lib/components/global/SvgIcon.vue'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
@@ -119,7 +119,7 @@ app.component('btn', defineAsyncComponent(() =>
  */
 app.component('property-bar', PropertyBar)
 app.component('dropdown', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Dropdown.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/global/Dropdown.vue')
 ))
 app.component('nu-image', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImage.vue')
@@ -152,13 +152,13 @@ app.component('nu-frame', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuFrame.vue')
 ))
 app.component('nubtn', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Nubtn.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/global/Nubtn.vue')
 ))
 app.component('spinner', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/global/Spinner.vue')
 ))
 app.component('hint', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Hint.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/global/Hint.vue')
 ))
 
 app.directive('hint', {
