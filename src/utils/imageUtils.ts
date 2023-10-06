@@ -57,7 +57,7 @@ class ImageUtils {
   }
 
   isSrcObj(srcObj: Partial<IImage> | SrcObj): srcObj is SrcObj {
-    return typeof srcObj.assetId !== 'undefined' && typeof srcObj.userId !== 'undefined' && typeof srcObj.type !== 'undefined'
+    return typeof srcObj.assetId !== 'undefined' && typeof srcObj.type !== 'undefined'
   }
 
   appendQuery(src: string, name: string, value: string) {
@@ -93,7 +93,6 @@ class ImageUtils {
     }
 
     let res = ''
-
     switch (type) {
       case 'public': {
         if (typeof size === 'string' && (size as string).includes('ext')) {
