@@ -105,7 +105,7 @@ describe('Testing SidebarPanel', () => {
 
     for (const panel of sidebarData('has.search')) {
       cy.get(panel.icon).click()
-      cy.get('.search-bar > .svg-close').click()
+      cy.get('.search-bar .svg-close').click()
       cy.get('.vue-recycle-scroller:visible')
         .invoke('prop', 'scrollTop')
         .should('eq', 300)

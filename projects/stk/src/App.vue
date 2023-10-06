@@ -1,7 +1,7 @@
 <template lang="pug">
 metainfo
   template(v-slot:title ="{ content }") {{ content ? `${content}` : `${$t('SE0001')}` }}
-div(id="app" :style="appStyles()" class="stk")
+div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.googleapis.com")
   link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
   link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
@@ -186,7 +186,7 @@ export default defineComponent({
 })
 </script>
 <style lang="scss">
-@use "@/assets/scss/main.scss";
+@use "@nu/vivi-lib/assets/scss/main.scss";
 
 #app{
   @include size(100%, 100%);

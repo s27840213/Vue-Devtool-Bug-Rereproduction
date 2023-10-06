@@ -298,7 +298,8 @@ module.exports = defineConfig({
             scss: {
                 // https://webpack.js.org/loaders/sass-loader/#function-1
                 // https://sass-lang.com/documentation/at-rules/use/#configuration
-                additionalData: `@use "@/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`
+                // additionalData: `@use "@nu/vivi-lib/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`,
+                additionalData: `@use "@nu/vivi-lib/assets/scss/utils" as *;`,
             }
         }
     },

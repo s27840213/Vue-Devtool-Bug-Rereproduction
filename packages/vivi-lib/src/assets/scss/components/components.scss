@@ -45,10 +45,14 @@
   }
 
   &.active {
-    background-color: setColor(blue-3);
+    @include setColors(blue-3, gray-4) using ($color) {
+      background-color: $color;
+    }
   }
 
-  &:not(.disabled):hover {
-    background-color: setColor(blue-4);
+  @include pic {
+    &:not(.disabled):hover {
+      background-color: setColor(blue-4);
+    }
   }
 }

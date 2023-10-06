@@ -58,6 +58,7 @@ export default defineComponent({
   emits: ['search', 'showMore', 'scroll'],
   mounted() {
     const elContainer = this.$refs.container as HTMLElement
+    if (!elContainer) return
     elContainer.scrollLeft = this.scrollLeft
     elContainer.onscroll = () => {
       this.$emit('scroll', elContainer.scrollLeft)
@@ -65,12 +66,14 @@ export default defineComponent({
   },
   beforeUnmount() {
     const elContainer = this.$refs.container as HTMLElement
+    if (!elContainer) return
     elContainer.onscroll = null
   },
   watch: {
     tagsOrScrollLeftChange() {
       this.$nextTick(() => {
         const elContainer = this.$refs.container as HTMLElement
+        if (!elContainer) return
         if (this.scrollLeft >= 0 && this.scrollLeft <= elContainer.scrollWidth - elContainer.clientWidth) elContainer.scrollLeft = this.scrollLeft
       })
     }

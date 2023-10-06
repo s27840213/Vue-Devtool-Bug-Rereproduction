@@ -5,7 +5,7 @@
   @return rgba(map-get($colors, $color), $opacity);
 }
 
-// Deprecated: because vivi-lib cannot get $appName
+// Deprecated: Because vivi-lib cannot get $appName
 // @function appColors(
 //   $picColor,
 //   $stkColor: $picColor,
