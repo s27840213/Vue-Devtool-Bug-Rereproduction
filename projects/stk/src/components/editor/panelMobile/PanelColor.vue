@@ -30,7 +30,7 @@ div(class="panel-color px-5")
 
 <script lang="ts">
 import ColorSlips from '@/components/editor/ColorSlips.vue'
-import ColorBtn from '@/components/global/ColorBtn.vue'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
 import colorUtils, { checkAndConvertToHex } from '@nu/vivi-lib/utils/colorUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'

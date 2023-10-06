@@ -48,7 +48,7 @@ div(class="footer-tabs" ref="tabs")
               pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
 </template>
 <script lang="ts">
-import ColorBtn from '@/components/global/ColorBtn.vue'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
 import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { IFooterTab } from '@nu/vivi-lib/interfaces/editor'

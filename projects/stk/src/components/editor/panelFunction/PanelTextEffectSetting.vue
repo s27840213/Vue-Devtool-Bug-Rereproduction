@@ -90,7 +90,7 @@ div(class="text-effect-setting")
 <!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
 import CollapseTitle from '@/components/global/CollapseTitle.vue'
-import ColorBtn from '@/components/global/ColorBtn.vue'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
 import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
