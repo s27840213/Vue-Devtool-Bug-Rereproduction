@@ -58,6 +58,18 @@ export default defineComponent({
   mounted() {
     imageShadowPanelUtils.mount()
   },
+  beforeUnmount() {
+    if (this.$isStk && colorUtils.currEvent !== ColorEventType.photoShadow) {
+      imageShadowPanelUtils.handleShadowUpload()
+      setTimeout(() => {
+        const cb = (this.$store.getters['shadow/uploadingCallback'] as Map<string, () => void>).get(layerUtils.getCurrConfig.id)
+        if (cb) {
+          cb()
+          this.$store.commit('shadow/SET_UPLOADING_CB', { id: layerUtils.getCurrConfig.id })
+        }
+      }, 300)
+    }
+  },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -159,7 +171,9 @@ export default defineComponent({
       border-radius: 5px;
       border: 2px solid transparent;
       &--selected {
-        border-color: setColor(blue-1);
+        @include setColors(blue-1, black-5) using ($color) {
+          border-color: $color;
+        }
       }
       &-font {
         box-sizing: border-box;
@@ -205,7 +219,9 @@ export default defineComponent({
   }
   &__reset {
     > button {
-      color: setColor(blue-1);
+      @include setColors(blue-1, black-3) using ($color) {
+        color: $color;
+      }
       font-size: 14px;
       padding: 0;
     }
