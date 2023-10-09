@@ -2,26 +2,40 @@
 div(class="panel-remove-bg")
   div(class="panel-remove-bg__btns")
     btn(class="full-width"
-      :type="clearMode ? 'gray-active-sm' :'gray-sm'"
+      :type="clearMode && !movingMode ? activeBtnType : inactiveBtnType"
       :hasIcon="true"
       :iconName="'clear'"
       :iconMargin="4"
       :flexDir="'column'"
       @click="setClearMode(true)") {{ $t('NN0385') }}
     btn(class="full-width"
-      :type="clearMode ? 'gray-sm' :'gray-active-sm'"
+      :type="clearMode || movingMode ? inactiveBtnType : activeBtnType"
       :hasIcon="true"
       :iconName="'preserve'"
       :iconMargin="4"
       :flexDir="'column'"
       @click="setClearMode(false)") {{ $t('NN0386') }}
-    btn(class="btn-recover full-width"
-      type="gray-sm"
+    btn(v-if="supportMovingMode" class="full-width"
+      :type="movingMode ? activeBtnType : inactiveBtnType"
+      :hasIcon="true"
+      :iconName="'move-cross'"
+      :iconMargin="4"
+      :flexDir="'column'"
+      @click="setMovingMode(true)") {{ $t('NN0872') }}
+    btn(v-else class="btn-recover full-width"
+      :type="inactiveBtnType"
       :hasIcon="true"
       :iconName="'reset'"
       :iconMargin="4"
       :flexDir="'column'"
       @click="restoreInitState()") {{$t('NN0389')}}
+  btn(v-if="supportMovingMode" class="btn-recover full-width my-10"
+    :type="inactiveBtnType"
+    :hasIcon="true"
+    :iconName="'reset'"
+    :iconMargin="4"
+    :flexDir="'column'"
+    @click="restoreInitState()") {{$t('NN0389')}}
   div(class="panel-remove-bg__slider full my-10")
     mobile-slider(
       :title="`${$t('NN0387')}`"
@@ -50,7 +64,10 @@ export default defineComponent({
   data() {
     return {
       minBrushSize: 1,
-      maxBrushSize: 300
+      maxBrushSize: 300,
+      activeBtnType: this.$isStk ? 'stk-active-sm' : 'gray-active-sm',
+      inactiveBtnType: this.$isStk ? 'stk-inactive-sm' : 'gray-sm',
+      supportMovingMode: this.$isStk,
     }
   },
   components: {
@@ -60,6 +77,7 @@ export default defineComponent({
     ...mapGetters({
       useMobileEditor: 'getUseMobileEditor',
       clearMode: 'bgRemove/getClearMode',
+      movingMode: 'bgRemove/getMovingMode',
       showInitImage: 'bgRemove/getShowInitImage',
       modifiedFlag: 'bgRemove/getModifiedFlag',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -71,13 +89,23 @@ export default defineComponent({
       _brushSize: 'bgRemove/getBrushSize'
     }),
   },
+  unmounted() {
+    this.setMovingMode(false)
+    this.updatePinchState({ initPos: { x: -1, y: -1 }, x: 0, y: 0 })
+  },
   methods: {
     ...mapMutations({
       setBrushSize: 'bgRemove/SET_brushSize',
       setRestoreInitState: 'bgRemove/SET_restoreInitState',
-      setClearMode: 'bgRemove/SET_clearMode',
+      _setClearMode: 'bgRemove/SET_clearMode',
+      setMovingMode: 'bgRemove/SET_movingMode',
       setShowInitImage: 'bgRemove/SET_showInitImage',
+      updatePinchState: 'bgRemove/UPDATE_pinchState'
     }),
+    setClearMode(bool: boolean) {
+      this._setClearMode(bool)
+      this.setMovingMode(false)
+    },
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)
     },
@@ -93,7 +121,9 @@ export default defineComponent({
   position: relative;
   text-align: center;
   &__btns {
-    margin-top: 15px;
+    @include pic {
+      margin-top: 15px;
+    }
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-auto-rows: 1fr;

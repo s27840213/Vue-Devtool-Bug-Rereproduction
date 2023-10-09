@@ -3,7 +3,7 @@ div(class="panel-text-effect")
   //- To choose effect category and effect.
   tabs(v-if="state === 'effects'"
       :tabs="textEffects.map(t => t.label)"
-      v-model="currTabIndex" theme="light")
+      v-model="currTabIndex" :theme="$isStk ? 'light-stk' : 'light'")
   div(v-if="state === 'effects'"
       class="panel-text-effect__effects")
     div(v-for="effect in effectList"
@@ -93,6 +93,7 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import _ from 'lodash'
 import { defineComponent, PropType } from 'vue'
 import PanelTextEffectSetting from '../panelFunction/PanelTextEffectSetting.vue'
@@ -165,7 +166,8 @@ export default defineComponent({
       }
     },
     async onEffectClick(category: IEffectCategory, effect: IEffect): Promise<void> {
-      if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      if (this.$isPic && !paymentUtils.checkPro(effect, 'pro-text')) return
+      if (this.$isStk && !stkWVUtils.checkPro(effect, 'text')) return
       const chooseImgkey = effect.options.find(op => op.type === 'img')?.key ?? ''
 
       if (effect.key !== this.currentStyle.name) {
@@ -240,7 +242,9 @@ export default defineComponent({
       border-radius: 5px;
       overflow: hidden;
       &.selected {
-        @include selection-border(2px);
+        @include setColors(blue-1, black-5) using ($color) {
+          @include selection-border(2px, $color);
+        }
       }
       .panel-text-effect__effects--icon {
         background-color: setColor(gray-5);
@@ -308,7 +312,9 @@ export default defineComponent({
       border-radius: 5px;
       background-color: setColor(gray-5);
       &.selected {
-        @include selection-border(2px);
+        @include setColors(blue-1, black-5) using ($color) {
+          @include selection-border(2px, $color);
+        }
       }
       > img {
         margin-right: 8px;
@@ -338,7 +344,9 @@ export default defineComponent({
         transition: all 0.3s;
         pointer-events: none;
         &.selected {
-          @include selection-border(2px);
+          @include setColors(blue-1, black-5) using ($color) {
+            @include selection-border(2px, $color);
+          }
         }
       }
       .pro {
@@ -376,7 +384,9 @@ export default defineComponent({
 
   &__reset {
     @include btn-SM;
-    color: setColor(blue-1);
+    @include setColors(blue-1, black-3) using ($color) {
+      color: $color;
+    }
     text-align: center;
   }
 }

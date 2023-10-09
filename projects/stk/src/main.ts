@@ -111,7 +111,7 @@ app.component('RecycleScroller', RecycleScroller)
 
 app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/global/Btn.vue')
 ))
 /**
  * bcz this components use slot, and some components need to get its ref in mounted,
