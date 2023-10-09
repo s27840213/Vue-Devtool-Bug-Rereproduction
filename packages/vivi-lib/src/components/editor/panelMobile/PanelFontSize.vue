@@ -20,6 +20,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
+
 export default defineComponent({
   emits: [],
   components: {
@@ -44,6 +45,10 @@ export default defineComponent({
       set(value: number): void {
         value = generalUtils.boundValue(value, this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         textPropUtils.fontSizeHandler(value, false)
+        // don't delete below, it's disabled temporarily only
+        // if (this.$isStk) {
+        //   textUtils.turnOffAutoRescaleMode()
+        // }
       }
     }
   },
@@ -62,6 +67,7 @@ export default defineComponent({
   grid-template-rows: auto;
   grid-template-columns: 3fr 7fr;
   column-gap: 20px;
+  align-items: center;
 
   &__range-input-button {
     width: fit-content;

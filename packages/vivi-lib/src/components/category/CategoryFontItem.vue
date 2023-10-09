@@ -32,6 +32,7 @@ import logUtils from '@/utils/logUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -141,7 +142,7 @@ export default defineComponent({
           original: '',
           json: ''
         }
-      })
+      }, this.$isStk ? 'font' : undefined)
     },
     async setEditorFont() {
       if (this.pending) return
@@ -182,6 +183,10 @@ export default defineComponent({
           face: this.item.id,
           ver: this.item.ver
         })
+
+        if (this.$isStk) {
+          stkWVUtils.setState('recentFont', updateItem)
+        }
 
         const currLayerIndex = layerUtils.getCurrPage.layers
           .findIndex(l => l.id === id)
@@ -225,7 +230,7 @@ export default defineComponent({
               original: '',
               json: ''
             }
-          })
+          }, this.$isStk ? 'font' : undefined)
           // StepsUtils.record()
           if (subLayerIdx === -1) { // no sub layer is selected
             const group = layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup
@@ -293,7 +298,7 @@ export default defineComponent({
             original: '',
             json: ''
           }
-        })
+        }, this.$isStk ? 'font' : undefined)
         TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
           const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')

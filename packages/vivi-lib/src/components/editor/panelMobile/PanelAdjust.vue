@@ -14,16 +14,19 @@ div(class="panel-adjust")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import { IFrame } from '@/interfaces/layer'
+import { IFrame, IImage } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
+import controllerHiddenMixin from '@/mixin/controllerHidden'
 
 export default defineComponent({
   emits: [],
+  mixins: [controllerHiddenMixin],
   components: {
     MobileSlider
   },
@@ -44,7 +47,7 @@ export default defineComponent({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
-      currSelectedLayers: 'getCurrSelectedLayers'
+      currSelectedLayers: 'getCurrSelectedLayers',
     }),
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]
@@ -94,14 +97,16 @@ export default defineComponent({
     },
     handleAdjust(adjust: any) {
       const { types } = this.currSelectedInfo
-      const { index, type } = this.currSubSelectedInfo
+      // const { index, type } = this.currSubSelectedInfo
+      const { type } = this.currSubSelectedInfo
+      const { subLayerIdx: index } = layerUtils
       if (index === -1 && backgroundUtils.inBgSettingMode) {
         backgroundUtils.handleChangeBgAdjust(adjust)
         return
       }
       if (types.has('frame') || (types.has('group') && type === 'frame')) {
         if (types.has('frame')) {
-          if (index >= 0) {
+          if (index >= 0 && !this.controllerHidden && (layerUtils.getCurrConfig as IImage).srcObj.type !== 'frame') {
             // case 1: one clip in one frame layer, index = clip index
             return frameUtils.updateFrameLayerStyles(
               pageUtils.currFocusPageIndex,

@@ -1,8 +1,16 @@
 <template lang="pug">
 div(class="panel-nudge text-left")
   div(class="panel-nudge__top-section")
-    span(class="body-XS") {{ $t('NN0888') }}
-    slide-toggle(:options="options" v-model="currOption" :bgColor="'gray-6'" :switchColor="'white'" :optionWidth="'50px'" :optionHeight="'30px'")
+    span(class="body-XS"
+      :class="[$isStk ? 'text-gray-2' : '']") {{ $t('NN0888') }}
+    slide-toggle(:options="options"
+      v-model="currOption"
+      :bgColor="'gray-6'"
+      :switchColor="'white'"
+      :activeColor="$isStk ? 'gray-2' : 'blue-1'"
+      :inActiveColor="$isStk ? 'black-5' : 'gray-2'"
+      :optionWidth="'50px'"
+      :optionHeight="'30px'")
   div(class="panel-nudge__content")
     div(class="panel-nudge__btn"
         v-tap-animation="{'bgColor': 'blue-3'}"

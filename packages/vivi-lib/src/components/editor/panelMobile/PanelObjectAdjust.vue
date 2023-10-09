@@ -5,7 +5,7 @@ div(class="panel-object-adjust")
       div(v-for="(option,index) in lineOptions"
           :key="option"
           class="panel-object-adjust__option"
-          :class="currMode === index ? 'bg-blue-1' : 'bg-gray-5'")
+          :class="currMode === index ? bgActiveColor : 'bg-gray-5'")
         svg-icon(
           :iconName="option"
           iconWidth="24px"
@@ -21,28 +21,28 @@ div(class="panel-object-adjust")
         @update="setLineWidth")
       div(v-if="currMode === 1" class="panel-object-adjust__line-dash")
         div(class="panel-object-adjust__line-dash__option bg-gray-5"
-            :class="{'border-blue-1': isNormalDash}"
+            :class="{[borderActiveColor]: isNormalDash}"
             @pointerdown="handleLineDash(0)")
           svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
         div(class="panel-object-adjust__line-dash__option bg-gray-5"
-            :class="{'border-blue-1': !isNormalDash}"
+            :class="{[borderActiveColor]: !isNormalDash}"
             @pointerdown="handleLineDash(1)")
           svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
         div(class="vr")
         div(class="panel-object-adjust__line-dash__option bg-gray-5"
-            :class="{'border-blue-1': isLineCapButt}"
+            :class="{[borderActiveColor]: isLineCapButt}"
             @pointerdown="handleLineEdge(0)")
           svg-icon(class="mr-5" iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
           div(class="shape-setting__value-selector__button-text body-2") {{$t('NN0084')}}
         div(class="panel-object-adjust__line-dash__option bg-gray-5"
-            :class="{'border-blue-1': !isLineCapButt}"
+            :class="{[borderActiveColor]: !isLineCapButt}"
             @pointerdown="handleLineEdge(1)")
           svg-icon(class="mr-5" iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
           div(class="shape-setting__value-selector__button-text body-2") {{$t('NN0085')}}
       div(v-if="currMode === 2" class="panel-object-adjust__markers")
           template(v-for="markerslot in makeSlots" :key="markerslot.marker")
             div(class="panel-object-adjust__option bg-gray-5"
-                :class="{'outline-blue-1': startMarker === markerslot.marker}"
+                :class="{[outlineActiveColor]: startMarker === markerslot.marker}"
                 @pointerup="handleStartMarkerUpdate(markerslot.marker)")
               marker-icon(iconWidth="18px" iconColor="#474A57" iconHeight="12px"
                 :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
@@ -53,7 +53,7 @@ div(class="panel-object-adjust")
       div(v-if="currMode === 3" class="panel-object-adjust__markers")
         template(v-for="markerslot in makeSlots" :key="markerslot.marker")
           div(class="panel-object-adjust__option bg-gray-5"
-              :class="{'outline-blue-1': endMarker === markerslot.marker}"
+              :class="{[outlineActiveColor]: endMarker === markerslot.marker}"
               @pointerup="handleEndMarkerUpdate(markerslot.marker)")
             marker-icon(iconWidth="18px" iconColor="#474A57" iconHeight="12px"
               :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
@@ -67,14 +67,14 @@ div(class="panel-object-adjust")
       div(v-for="(option,index) in ['line-width', 'non-filled']"
           :key="option"
           class="panel-object-adjust__option"
-          :class="currMode === index ? 'bg-blue-1' : 'bg-gray-5'"
+          :class="currMode === index ? bgActiveColor : 'bg-gray-5'"
           @pointerdown="switchMode(index)")
         svg-icon(
           :iconName="option"
           iconWidth="24px"
           :iconColor="currMode === index ? 'white' :'gray-2'")
       div(class="panel-object-adjust__option panel-object-adjust__option--with-val"
-          :class="corRadDisabled ? 'bg-gray-6 text-gray-4 click-disabled' : currMode === 2 ? 'bg-blue-1 text-white' : 'bg-gray-5 text-gray-2'"
+          :class="corRadDisabled ? 'bg-gray-6 text-gray-4 click-disabled' : currMode === 2 ? bgActiveColor + ' text-white' : 'bg-gray-5 text-gray-2'"
           @pointerdown="switchMode(2)")
         svg-icon(
           :iconName="'rounded-corner'"
@@ -92,12 +92,12 @@ div(class="panel-object-adjust")
         @update="setLineWidth")
       div(v-if="currMode === 1" class="panel-object-adjust__fill")
         div(class="panel-object-adjust__fill__option bg-gray-5"
-            :class="{'border-blue-1': !filled}"
+            :class="{[borderActiveColor]: !filled}"
             @pointerdown="handleBasicShapeFilledUpdate(false)")
           svg-icon(iconName="non-filled" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
           div(class="ml-25 body-2") {{$t('NN0088')}}
         div(class="panel-object-adjust__fill__option bg-gray-5"
-            :class="{'border-blue-1': filled}"
+            :class="{[borderActiveColor]: filled}"
             @pointerdown="handleBasicShapeFilledUpdate(true)")
           svg-icon(iconName="filled" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
           div(class="ml-25 body-2") {{$t('NN0087')}}
@@ -149,7 +149,10 @@ export default defineComponent({
         }
       } as { [key: string]: IMarker }),
       lineWidthMin,
-      lineWidthMax
+      lineWidthMax,
+      bgActiveColor: this.$isStk ? 'bg-gray-2' : 'bg-blue-1',
+      borderActiveColor: this.$isStk ? 'border-black-5' : 'border-blue-1',
+      outlineActiveColor: this.$isStk ? 'outline-black-5' : 'outline-blue-1',
     }
   },
   props: {

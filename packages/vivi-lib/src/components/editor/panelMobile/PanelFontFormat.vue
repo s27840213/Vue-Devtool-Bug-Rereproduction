@@ -6,12 +6,12 @@ div(class="panel-font-format")
       :class="{ pointer: iconClickable(icon)}"
       :key="`gp-action-icon-${index}`"
       :id="`icon-${icon}`"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? 'blue-1' :iconClickable(icon) ? 'gray-2' : 'gray-4'" @touchstart="onPropertyClick(icon)")
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? activeColor :iconClickable(icon) ? inactiveColor : 'gray-4'" @touchstart="onPropertyClick(icon)")
   div(class="panel-font-format__bar")
     svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
       class="pointer feature-button p-5"
       :key="`gp-action-icon-${index}`"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? 'blue-1'  :'gray-2'" @touchstart="onParaPropsClick(icon)")
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? activeColor  : inactiveColor" @touchstart="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">
@@ -22,11 +22,19 @@ import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
+
 export default defineComponent({
   emits: [],
+  data() {
+    return {
+      activeColor: this.$isStk ? 'gray-2' : 'blue-1',
+      inactiveColor: this.$isStk ? 'black-5' : 'gray-2',
+    }
+  },
   computed: {
     ...mapState('text', ['sel', 'props']),
     hasCurveText(): boolean {
@@ -109,6 +117,11 @@ export default defineComponent({
       if (iconName === 'font-vertical') {
         if (this.hasCurveText) return
         textPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
+        // don't delete below, it's disabled temporarily only
+        // if (this.$isStk) {
+        //   textUtils.handleAutoRescale({ onlyCentralize: true })
+        // }
+        textUtils.handleAutoRescale()
       } else {
         switch (iconName) {
           case 'bold':
