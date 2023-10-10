@@ -210,7 +210,7 @@ div(:layer-index="`${layerIndex}`"
 
 <script lang="ts">
 import ActionIcon from '@/components/editor/controlPoint/ActionIcon.vue'
-import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import NuTextEditor from '@nu/vivi-lib/components/editor/global/NuTextEditor.vue'
 import ControlUtils from '@nu/vivi-lib/utils/controlUtils'
 import cssConverter from '@nu/vivi-lib/utils/cssConverter'
 import eventUtils from '@nu/vivi-lib/utils/eventUtils'

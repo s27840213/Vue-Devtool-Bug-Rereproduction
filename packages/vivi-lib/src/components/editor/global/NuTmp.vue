@@ -79,7 +79,7 @@ export default defineComponent({
     },
     subLayerStyles(layer: ILayer) {
       const primaryScale = this.config.styles.scale
-      return (layer.type === 'shape' && layer.category === 'D') ? {} : { outline: `${2 / primaryScale}px solid #7190CC` }
+      return (layer.type === 'shape' && layer.category === 'D') ? {} : { outline: `${2 / primaryScale}px solid ${this.$isPic ? "#7190CC" : "#9C9C9C"}` }
     }
   }
 })

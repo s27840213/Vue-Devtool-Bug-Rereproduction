@@ -128,13 +128,13 @@ app.component('nu-layer', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuLayer.vue')
 ))
 app.component('nu-text', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuText.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuText.vue')
 ))
 app.component('nu-group', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuGroup.vue')
 ))
 app.component('nu-tmp', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuTmp.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuTmp.vue')
 ))
 app.component('nu-controller', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuController.vue')

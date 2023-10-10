@@ -41,12 +41,14 @@ import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import _, { isEqual, max, omit, round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 
@@ -114,6 +116,11 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
+    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+      isDuringCopy: false
+    }, {
+      isDuringCopy: 'vivisticker/getIsDuringCopy'
+    }),
     isCurveText(): boolean {
       return textShapeUtils.isCurvedText(this.config.styles.textShape)
     },
@@ -197,6 +204,7 @@ export default defineComponent({
       return this.config.isAutoResizeNeeded
     },
     getOpacity() {
+      if (this.isDuringCopy) return 1
       const { active, contentEditable } = this.config
       const checkTextFill = isTextFill(this.config.styles.textFill)
       if (active && !this.isLocked && !this.inPreview) {
@@ -218,6 +226,9 @@ export default defineComponent({
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const textEffectStyles = omit(textEffectUtils.convertTextEffect(this.config), ['duplicatedTexts'])
+      if (['shadow', 'lift'].includes(this.config.styles.textEffect.name)) {
+        Object.assign(textEffectStyles, { willChange: 'filter' })
+      }
       const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
       const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
       const textFillStyle = textFillUtils.convertTextEffect(this.config, ratio)
@@ -290,7 +301,10 @@ export default defineComponent({
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(async () => {
           await this.resizeCallback()
-          this.drawTextBg() // Redraw TextBg after resize.
+          await this.drawTextBg() // Redraw TextBg after resize.
+          if (this.$isStk && this.$route.name === 'Screenshot') {
+            stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          }
           if (!this.isCurveText) {
             generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
           }

@@ -41,7 +41,7 @@ div(class="nu-sub-controller")
 </template>
 
 <script lang="ts">
-import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import NuTextEditor from '@nu/vivi-lib/components/editor/global/NuTextEditor.vue'
 import cssConverter from '@nu/vivi-lib/utils/cssConverter'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
