@@ -47,6 +47,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import vuexUtils from '@/utils/vuexUtils'
 
 export default defineComponent({
   components: {
@@ -72,7 +73,7 @@ export default defineComponent({
   mounted() {
     this.getRecently(this.$isStk ? { key: 'font' } : undefined)
     if (this.privateFonts.length === 0 && this.isBrandkitAvailable) {
-      this.$store.dispatch('brandkit/fetchFonts')
+      this.fetchFonts()
     }
     if (this.tags.length === 0) {
       this.addFontTags()
@@ -113,12 +114,13 @@ export default defineComponent({
     pending() {
       return this.$isPic ? this.$store.state.font.pending : this.$store.getters['font/pending']
     },
-    privateFonts(): IBrandFont[] {
-      return this.$isPic ? this.$store.getters['brandkit/getFonts'] : []
-    },
-    fontsPageIndex(): number {
-      return this.$isPic ? this.$store.getters['brandkit/getFontsPageIndex'] : -1
-    },
+    ...vuexUtils.mapGetters(() => generalUtils.isPic, {
+      privateFonts: [] as IBrandFont[],
+      fontsPageIndex: -1
+    }, 'brandkit', {
+      privateFonts: 'getFonts',
+      fontsPageIndex: 'getFontsPageIndex'
+    }),
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
     },
@@ -245,6 +247,10 @@ export default defineComponent({
       'getMoreCategory',
       'resetSearch'
     ]),
+    ...mapActions('brandkit', [
+      'fetchFonts',
+      'fetchMoreFonts'
+    ]),
     closeFontsPanel() {
       // don't reset content for panelTextSetting preview to use ver looked-up from content
       // this.resetContent()
@@ -253,7 +259,7 @@ export default defineComponent({
     },
     handleLoadMore(moreType: string | undefined) {
       if (this.$isPic && moreType === 'asset') {
-        this.$store.dispatch('brandkit/fetchMoreFonts')
+        this.fetchMoreFonts()
         return
       }
       const { keyword } = this

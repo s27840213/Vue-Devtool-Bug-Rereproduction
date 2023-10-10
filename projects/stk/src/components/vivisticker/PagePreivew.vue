@@ -14,7 +14,7 @@ div(class="page-preview" :style="styles()")
 </template>
 
 <script lang="ts">
-import PageContent from '@/components/editor/page/PageContent.vue'
+import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
