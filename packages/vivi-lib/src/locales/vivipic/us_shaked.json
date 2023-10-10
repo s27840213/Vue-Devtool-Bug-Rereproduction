@@ -802,6 +802,7 @@
   "STK0074": "Your file has reached its maximum of {num} pages. To design more pages, please create a new file.",
   "STK0084": "Saving to My designs...",
   "STK0085": "sticker|stickers",
+  "STK0086": "Unable to load photo - The design had a photo that has been deleted from your phone’s album.",
   "STK0091": "Next to Fonts",
   "STK0092": "Next to Backgrounds",
   "STK0093": "Let's explore",

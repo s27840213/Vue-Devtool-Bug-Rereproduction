@@ -394,7 +394,7 @@ export default defineComponent({
       return { width, height }
     },
     outlineStyles() {
-      const outlineColor = this.config.locked ? '#EB5757' : (this.$isPic ? '#7190CC' : '#9C9C9C')
+      const outlineColor = this.config.locked ? '#EB5757' : generalUtils.getOutlineColor()
       const isRectFrameClip = layerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
       if (layerUtils.getCurrLayer.type === 'frame' && !isRectFrameClip) return 'none'
 

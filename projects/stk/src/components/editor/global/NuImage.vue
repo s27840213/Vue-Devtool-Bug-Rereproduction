@@ -92,7 +92,7 @@ import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@nu/
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import NuAdjustImage from './NuAdjustImage.vue'
+import NuAdjustImage from '@nu/vivi-lib/components/editor/global/NuAdjustImage.vue'
 
 export default defineComponent({
   emits: ['onload'],

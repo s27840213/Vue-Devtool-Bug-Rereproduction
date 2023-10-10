@@ -48,6 +48,10 @@ class GeneralUtils {
     }).length === 1
   }
 
+  getOutlineColor(): string {
+    return this.isPic ? '#7190CC' : '#9C9C9C'
+  }
+
   scaleFromCenter(el: HTMLElement) {
     const scrollCenterX = (2 * el.scrollLeft + el.clientWidth)
     const scrollCenterY = (2 * el.scrollTop + el.clientHeight)

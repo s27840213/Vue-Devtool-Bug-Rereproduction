@@ -464,7 +464,6 @@ export default defineComponent({
         return
       }
       this.isControlling = false
-      pageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
       pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
