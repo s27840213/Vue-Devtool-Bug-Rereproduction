@@ -1,14 +1,16 @@
 <template lang="pug">
 div(class="mobile-slider")
-  div(class="mobile-slider__top")
+  div(class="mobile-slider__top"  :class="theme")
     span(class="mobile-slider__name no-wrap") {{title}}
     input(class="mobile-slider__number"
+      :class="theme"
       type="number"
       v-model.number="propsVal"
       :name="name"
       @change="handleChangeStop")
   div(class="mobile-slider__range-input-wrapper")
-    input(class="input__slider--range"
+    input(class="mobile-slider__range-input input__slider--range"
+      :class="theme"
       v-progress
       :style="{ 'pointer-events': 'none' }"
       v-model.number="propsVal"
@@ -21,6 +23,7 @@ div(class="mobile-slider")
       :disabled="disabled")
     input(
       class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
+      :class="theme"
       v-model.number="propsVal"
       :name="name"
       :max="max"
@@ -66,6 +69,10 @@ export default defineComponent({
     step: {
       default: 1,
       type: Number
+    },
+    theme: {
+      type: String,
+      default: 'dark'
     },
     autoRecord: {
       type: Boolean,
@@ -116,6 +123,9 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     align-items: center;
+    &.light {
+      color: setColor(white);
+    }
   }
 
   &__number {
@@ -129,10 +139,24 @@ export default defineComponent({
     text-align: center;
     border-radius: 0.25rem;
     background: transparent;
+    &.light {
+      color: setColor(white);
+    }
   }
 
   &__range-input-wrapper {
     position: relative;
+  }
+
+  &__range-input.light {
+    --lower-color: #{setColor(gray-6)};
+    --upper-color: #{setColor(gray-2)};
+    &::-webkit-slider-thumb {
+      border-color: setColor(white);
+    }
+    &::-moz-range-thumb {
+      border-color: setColor(white);
+    }
   }
 
   &__range-input-top {
