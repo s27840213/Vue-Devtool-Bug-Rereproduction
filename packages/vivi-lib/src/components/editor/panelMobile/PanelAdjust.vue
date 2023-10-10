@@ -17,16 +17,16 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import { IFrame, IImage } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
 import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
-import controllerHiddenMixin from '@/mixin/controllerHidden'
 
 export default defineComponent({
   emits: [],
-  mixins: [controllerHiddenMixin],
   components: {
     MobileSlider
   },
@@ -48,6 +48,11 @@ export default defineComponent({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
+    }),
+    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+      controllerHidden: false
+    }, {
+      controllerHidden: 'vivisticker/getControllerHidden'
     }),
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]
