@@ -42,9 +42,13 @@ div(class="nu-sub-controller")
 
 <script lang="ts">
 import NuTextEditor from '@nu/vivi-lib/components/editor/global/NuTextEditor.vue'
+import { isTextFill } from '@nu/vivi-lib/interfaces/format'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import cssConverter from '@nu/vivi-lib/utils/cssConverter'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
-import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -56,10 +60,6 @@ import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@nu/vivi-lib/utils/textShapeUtils'
 import TextUtils from '@nu/vivi-lib/utils/textUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
-import { isTextFill } from '@nu/vivi-lib/interfaces/format'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
-import { IPage } from '@nu/vivi-lib/interfaces/page'
-import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -449,7 +449,7 @@ export default defineComponent({
       const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const { srcObj, previewSrc } = this.config
-        const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
+        const clips = generalUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
         const clip = clips[this.layerIndex]
 
         Object.assign(this.imgBuff, {
