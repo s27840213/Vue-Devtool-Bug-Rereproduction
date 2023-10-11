@@ -266,7 +266,7 @@ export default defineComponent({
       useMobileEditor: 'getUseMobileEditor',
       showPcPagePreivew: 'page/getIsShowPagePreview',
     }),
-    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+    ...vuexUtils.mapGetters('stk', {
       controllerHidden: false,
       isDuringCopy: false,
     }, {

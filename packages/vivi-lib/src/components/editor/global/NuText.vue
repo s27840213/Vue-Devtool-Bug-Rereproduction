@@ -116,7 +116,7 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
-    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+    ...vuexUtils.mapGetters('stk', {
       isDuringCopy: false
     }, {
       isDuringCopy: 'vivisticker/getIsDuringCopy'

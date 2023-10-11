@@ -114,7 +114,7 @@ export default defineComponent({
     pending() {
       return this.$isPic ? this.$store.state.font.pending : this.$store.getters['font/pending']
     },
-    ...vuexUtils.mapGetters(() => generalUtils.isPic, {
+    ...vuexUtils.mapGetters('pic', {
       privateFonts: [] as IBrandFont[],
       fontsPageIndex: -1
     }, 'brandkit', {

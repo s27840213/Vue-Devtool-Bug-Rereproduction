@@ -1,11 +1,38 @@
 import store from "@/store"
+import generalUtils from "./generalUtils"
 
-type Condition = () => boolean
+type Condition = (() => boolean) | string
 type Context<T> = string | {[k in keyof T]: string}
 type Mutation = (...args: any[]) => void
 type Action = (...args: any[]) => any
 
 export default new (class VuexUtils {
+  checkCondition(condition: Condition): boolean {
+    if (typeof condition === 'string') {
+      let achieve = false
+      for (const app of ['pic', 'stk', 'cm']) {
+        if (condition.includes(app)) {
+          let conditionRes = false
+          switch (app) {
+            case 'pic':
+              conditionRes = generalUtils.isPic
+              break
+            case 'stk':
+              conditionRes = generalUtils.isStk
+              break
+            case 'cm':
+              conditionRes = generalUtils.isCm
+              break
+          }
+          achieve = achieve || conditionRes
+        }
+      }
+      return achieve
+    } else {
+      return condition()
+    }
+  }
+
   checkContext<T>(context: Context<T>): context is string {
     return typeof context === 'string'
   }
@@ -26,10 +53,10 @@ export default new (class VuexUtils {
     return Object.fromEntries(
       (Object.keys(defaultValues) as (keyof T)[]).map(k => {
         if (this.checkContext(context)) {
-          return [k, () => condition() ? ((store.state as any)[context][contextDetails![k]] as T[typeof k]) : defaultValues[k]]
+          return [k, () => this.checkCondition(condition) ? ((store.state as any)[context][contextDetails![k]] as T[typeof k]) : defaultValues[k]]
         } else {
           const [prefix, key] = context[k].split('/')
-          return [k, () => condition() ? ((store.state as any)[prefix][key] as T[typeof k]) : defaultValues[k]]
+          return [k, () => this.checkCondition(condition) ? ((store.state as any)[prefix][key] as T[typeof k]) : defaultValues[k]]
         }
       })
     ) as {[k in keyof T]: () => T[k]}
@@ -41,9 +68,9 @@ export default new (class VuexUtils {
     return Object.fromEntries(
       (Object.keys(defaultValues) as (keyof T)[]).map(k => {
         if (this.checkContext(context)) {
-          return [k, () => condition() ? (store.getters[this.getKey(k, context, contextDetails!)] as T[typeof k]) : defaultValues[k]]
+          return [k, () => this.checkCondition(condition) ? (store.getters[this.getKey(k, context, contextDetails!)] as T[typeof k]) : defaultValues[k]]
         } else {
-          return [k, () => condition() ? (store.getters[this.getKey(k, context)] as T[typeof k]) : defaultValues[k]]
+          return [k, () => this.checkCondition(condition) ? (store.getters[this.getKey(k, context)] as T[typeof k]) : defaultValues[k]]
         }
       })
     ) as {[k in keyof T]: () => T[k]}
@@ -57,9 +84,9 @@ export default new (class VuexUtils {
     return Object.fromEntries(
       (Object.keys(config) as (keyof T)[]).map(k => {
         if (isContextPrefix) {
-          return [k, (...args: any[]) => condition() ? (store.commit(this.getKey(k, context, contextDetails!), ...args) as T[typeof k]) : undefined]
+          return [k, (...args: any[]) => this.checkCondition(condition) ? (store.commit(this.getKey(k, context, contextDetails!), ...args) as T[typeof k]) : undefined]
         } else {
-          return [k, (...args: any[]) => condition() ? (store.commit(this.getKey(k, context), ...args) as T[typeof k]) : undefined]
+          return [k, (...args: any[]) => this.checkCondition(condition) ? (store.commit(this.getKey(k, context), ...args) as T[typeof k]) : undefined]
         }
       })
     ) as {[k in keyof T]: Mutation}
@@ -73,9 +100,9 @@ export default new (class VuexUtils {
     return Object.fromEntries(
       (Object.keys(config) as (keyof T)[]).map(k => {
         if (isContextPrefix) {
-          return [k, (...args: any[]) => condition() ? (store.dispatch(this.getKey(k, context, contextDetails!), ...args) as T[typeof k]) : undefined]
+          return [k, (...args: any[]) => this.checkCondition(condition) ? (store.dispatch(this.getKey(k, context, contextDetails!), ...args) as T[typeof k]) : undefined]
         } else {
-          return [k, (...args: any[]) => condition() ? (store.dispatch(this.getKey(k, context), ...args) as T[typeof k]) : undefined]
+          return [k, (...args: any[]) => this.checkCondition(condition) ? (store.dispatch(this.getKey(k, context), ...args) as T[typeof k]) : undefined]
         }
       })
     ) as {[k in keyof T]: Action}

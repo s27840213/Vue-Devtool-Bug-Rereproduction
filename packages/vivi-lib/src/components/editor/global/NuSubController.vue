@@ -199,7 +199,7 @@ export default defineComponent({
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
     }),
-    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+    ...vuexUtils.mapGetters('stk', {
       controllerHidden: false
     }, {
       controllerHidden: 'vivisticker/getControllerHidden'

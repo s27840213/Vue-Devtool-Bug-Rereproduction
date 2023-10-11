@@ -348,7 +348,7 @@ export default defineComponent({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor',
     }),
-    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+    ...vuexUtils.mapGetters('stk', {
       controllerHidden: false,
       editorTypeTextLike: false,
       editorTypeTemplate: false,

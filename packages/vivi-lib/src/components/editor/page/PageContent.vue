@@ -119,7 +119,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...vuexUtils.mapGetters(() => generalUtils.isPic, {
+    ...vuexUtils.mapGetters('pic', {
       setLayersDone: false
     }, {
       setLayersDone: 'file/getSetLayersDone',

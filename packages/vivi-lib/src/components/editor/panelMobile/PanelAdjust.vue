@@ -49,7 +49,7 @@ export default defineComponent({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
     }),
-    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+    ...vuexUtils.mapGetters('stk', {
       controllerHidden: false
     }, {
       controllerHidden: 'vivisticker/getControllerHidden'
