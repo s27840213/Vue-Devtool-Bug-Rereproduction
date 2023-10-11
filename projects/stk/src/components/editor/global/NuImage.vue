@@ -27,7 +27,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
         draggable="false"
-        crossorigin="anonymous"
+        :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
         @error="onError"
         @load="onLoad($event, 'main')"
         :src="finalSrc")
@@ -54,7 +54,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
-          crossorigin="anonymous"
+          :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
           draggable="false"
           @error="onError"
           @load="onAdjustImgLoad($event, 'main')"
@@ -822,7 +822,7 @@ export default defineComponent({
       if (this.config.srcObj.type === 'ios') return
       if (this.isBlurImg) return
 
-      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
+      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, newVal))
       if (!this.isOnError && currUrl) {
         const { type } = this.config.srcObj
         if (type === 'background') return
@@ -893,17 +893,20 @@ export default defineComponent({
             this.handleIsTransparent(img)
           })
       } else {
+      // backendRendering DO NOT USE cross-origin
         const { imgWidth, imgHeight } = this.config.styles
-        const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension))
+        const srcSize = this.isBlurImg ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension
+        const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, srcSize))
         if (this.isAdjustImage) {
           // adjust-image need to check if the image is transparent
-          imageUtils.imgLoadHandler(src, (img) => {
-            this.handleIsTransparent(img)
-            this.src = src
-          }, { crossOrigin: true })
-        } else {
-          this.src = src
+          const tinyImg = imageUtils.appendQuery(imageUtils.getSrc(this.config.srcObj, imageUtils.getSrcSize(this.config.srcObj, 100)), 'ver', generalUtils.generateRandomString(4))
+          await imageUtils.imgLoadHandler(tinyImg, (img) => this.handleIsTransparent(img), { crossOrigin: true })
         }
+        imageUtils.imgLoadHandler(src, (img) => {
+          this.imgNaturalSize.width = img.width
+          this.imgNaturalSize.height = img.height
+            this.src = src
+        }, { crossOrigin: false })
       }
       this.initialized = true
     },
