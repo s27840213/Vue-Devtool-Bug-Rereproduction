@@ -81,10 +81,6 @@ export default defineComponent({
     if (generalUtils.isTouchDevice()) {
       const page = document.getElementById(`nu-page-wrapper_${this.pageIndex}`) as HTMLElement
       const rect = page.getBoundingClientRect()
-      pageUtils.setMobilePhysicalPage({
-        pageIndex: this.pageIndex,
-        originSize: { width: rect.width, height: rect.height }
-      })
     }
   },
   unmounted() {

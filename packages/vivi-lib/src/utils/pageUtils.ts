@@ -2,7 +2,6 @@ import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
-import { ISize } from '@/interfaces/math'
 import { IBleed, IPage, IPageSize, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import { LayerType } from '@/store/types'
@@ -946,10 +945,6 @@ class PageUtils {
       pageIndex,
       initPos
     })
-  }
-
-  setMobilePhysicalPage(payload: { pageIndex: number, originSize?: ISize }) {
-    store.commit('SET_pagePhysicalSize', payload)
   }
 
   logPageIndexInfo() {
