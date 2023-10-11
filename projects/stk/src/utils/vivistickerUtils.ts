@@ -343,6 +343,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const _action = isLast && action === 'IGPost' ? 'IGPost' : 'download'
       const toast = action === 'download' ? isLast : false
       const query = this.createUrlForJSON({ page: pageUtils.getPage(pageIndex[idx]), noBg: false, toast })
+      if (this.isStandaloneMode) {
+        const url = `${window.location.origin}/screenshot/?${query}`
+        window.open(url, '_blank')
+        cbProgress(idx + 1)
+        continue
+      }
       const data = await this.callIOSAsAPI('SCREENSHOT', { params: query, action: _action, finalAction: action }, `screenshot-${query}`, { timeout: -1 })
       const succeeded = data?.flag === '0'
       if (succeeded) cbProgress(idx + 1)

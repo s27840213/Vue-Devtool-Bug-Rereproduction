@@ -68,7 +68,7 @@ class ImageUtils {
   }
 
   isSrcObj(srcObj: Partial<IImage> | SrcObj): srcObj is SrcObj {
-    return typeof srcObj.assetId !== 'undefined' && typeof srcObj.userId !== 'undefined' && typeof srcObj.type !== 'undefined'
+    return typeof srcObj.assetId !== 'undefined' && typeof srcObj.type !== 'undefined'
   }
 
   appendQuery(src: string, name: string, value: string) {
@@ -109,7 +109,6 @@ class ImageUtils {
     }
 
     let res = ''
-
     switch (type) {
       case 'public': {
         if (typeof size === 'string' && (size as string).includes('ext')) {
@@ -731,7 +730,7 @@ class ImageUtils {
     // However, if the xtra image is not produced yet,
     // this returned src would bump into 404 ERROR,
     // then the func 'handlePrivateXtraErr' should be called.
-    if (src.includes('xtra') && src.includes('https://template.vivipic.com/')) {
+    if (src.includes('xtra') && src.includes('https://template.vivipic.com/') && store.state.user.userId !== 'backendRendering') {
       return 'https://' + src.slice('https://template.vivipic.com/'.length)
     }
     return src
