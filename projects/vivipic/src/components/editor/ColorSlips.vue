@@ -10,13 +10,13 @@ div(class="color-panel"
     //- Recently colors
     div(class="color-panel__colors"
         :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-      div(class="text-left")
+      div(class="text-left" :class="{'mb-5': !$isTouchDevice()}")
         div(class="flex-center")
           svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
                 iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
                 class="mr-5" @click="lessRecently()")
           span {{$t('NN0679')}}
-        span(v-if="!showAllRecentlyColor" class="btn-XS" @click="moreRecently()") {{$t('NN0082')}}
+        span(v-if="!showAllRecentlyColor" :class="`btn-${$isTouchDevice() ? 'XS' : 'LG'}`" @click="moreRecently()") {{$t('NN0082')}}
       div
         color-btn(color="add" :active="openColorPicker"
                   @click="openColorPanel($event)")
@@ -52,7 +52,7 @@ div(class="color-panel"
       //- Document colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-        div(class="text-left")
+        div(class="text-left" :class="{'mb-5': !$isTouchDevice()}")
           span {{$t('NN0091')}}
         div
           color-btn(v-for="color in documentColors" :color="color" :key="color"
@@ -61,7 +61,7 @@ div(class="color-panel"
       //- Preset Colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-        div(class="text-left")
+        div(class="text-left" :class="{'mb-5': !$isTouchDevice()}")
           span {{$t('NN0089')}}
         div
           color-btn(v-for="color in defaultColors" :color="color" :key="color"
@@ -350,7 +350,10 @@ export default defineComponent({
       padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
     }
     > div + div {
-      margin-top: 20px;
+      margin-top: 8px;
+      @include layout-mobile-width {
+        margin-top: 20px;
+      }
     }
   }
   &__brand-settings {
@@ -371,21 +374,27 @@ export default defineComponent({
       width: 100%;
       display: flex;
       justify-content: space-between;
-      @include body-SM;
-      color: setColor(gray-2);
-      margin-bottom: 16px;
+      @include layout-mobile-width {
+        @include body-SM;
+        color: setColor(gray-2);
+        margin-bottom: 16px;
+      }
     }
     > div:nth-child(2) {
       width: 100%;
       display: grid;
       grid-auto-rows: auto;
       grid-template-columns: repeat(7, 1fr);
-      column-gap: 12px;
-      row-gap: 12px;
-      padding: 0 12px 4px 12px;
+      row-gap: 5px;
+      column-gap: 5px;
+      @include layout-mobile-width {
+        column-gap: 12px;
+        row-gap: 12px;
+        padding: 0 12px 4px 12px;
+        box-sizing: border-box;
+      }
       justify-content: center;
       align-items: center;
-      box-sizing: border-box;
     }
   }
 

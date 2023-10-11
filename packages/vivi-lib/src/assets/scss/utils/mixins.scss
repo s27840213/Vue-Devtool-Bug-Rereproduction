@@ -19,6 +19,12 @@
   }
 }
 
+@mixin layout-mobile-width {
+  @media screen and (max-width: 767px) {
+    @content;
+  }
+}
+
 // for vivisticker
 @mixin layout-tablet {
 
@@ -271,7 +277,8 @@
 }
 
 @mixin selection-border($width, $color: blue-1) {
-  box-shadow: 0 0 0 $width setColor($color);;
+  box-shadow: 0 0 0 $width setColor($color);
+  ;
 }
 
 @mixin pic {
@@ -292,8 +299,7 @@
   }
 }
 
-@mixin setColors(
-  $picColor,
+@mixin setColors($picColor,
   $stkColor: $picColor,
   $cmColor: $picColor,
   $opacity: 1,
@@ -303,9 +309,11 @@
   @include pic {
     @content(setColor($picColor, $picOpacity));
   }
+
   @include stk {
     @content(setColor($stkColor, $stkOpacity));
   }
+
   @include cm {
     @content(setColor($cmColor, $cmOpacity));
   }
