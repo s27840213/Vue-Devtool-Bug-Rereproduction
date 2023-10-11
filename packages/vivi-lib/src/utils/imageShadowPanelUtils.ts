@@ -186,9 +186,8 @@ export default new class ImageShadowPanelUtils {
       const uploadAssetId = generalUtils.generateRandomString(6)
       this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId)
       const assetId = generalUtils.generateAssetId()
+      stepsUtils.record()
       if (generalUtils.isPic) {
-        stepsUtils.record() // TODO: check with HsingChi, why stk doesn't record here.
-
         store.commit('file/SET_UPLOADING_IMGS', {
           id: assetId,
           adding: true,
