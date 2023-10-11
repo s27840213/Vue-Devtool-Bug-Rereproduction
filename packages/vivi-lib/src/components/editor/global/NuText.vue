@@ -226,9 +226,6 @@ export default defineComponent({
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const textEffectStyles = omit(textEffectUtils.convertTextEffect(this.config), ['duplicatedTexts'])
-      if (['shadow', 'lift'].includes(this.config.styles.textEffect.name)) {
-        Object.assign(textEffectStyles, { willChange: 'filter' })
-      }
       const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
       const ratio = this.contentScaleRatio * pageUtils.getImageDpiRatio(this.page)
       const textFillStyle = textFillUtils.convertTextEffect(this.config, ratio)

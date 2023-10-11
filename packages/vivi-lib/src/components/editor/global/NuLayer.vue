@@ -313,7 +313,6 @@ export default defineComponent({
           ...this.transformStyle
         }
       )
-      styles.willChange = 'initial'
       if (this.primaryLayer?.type === 'frame' && this.config.type === 'image') {
         if (this.$isTouchDevice()) {
           styles.transform += `scale(${this.$store.state.pageScaleRatio / 100})`
