@@ -140,7 +140,7 @@ app.component('nu-controller', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuController.vue')
 ))
 app.component('nu-sub-controller', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuSubController.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuSubController.vue')
 ))
 app.component('nu-shape', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuShape.vue')
