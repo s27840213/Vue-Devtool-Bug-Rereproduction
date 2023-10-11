@@ -115,14 +115,12 @@ export default defineComponent({
       isControlling: false,
       isComposing: false,
       layerSizeBuff: -1,
-      posDiff: { x: 0, y: 0 },
       parentId: '',
       imgBuff: {} as {
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
         previewSrc: ''
       },
-      isPrimaryActive: false,
     }
   },
   mounted() {
@@ -333,28 +331,6 @@ export default defineComponent({
     onPointerdown(e: PointerEvent) {
       this.subLayerCtrlUtils.onPointerdown(e)
     },
-    onMouseup(e: PointerEvent) {
-      e.stopPropagation()
-      if (this.config.type === 'text') {
-        this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
-        this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
-        if (this.posDiff.x !== 0 || this.posDiff.y !== 0) {
-          layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
-        } else {
-          if (this.config.contentEditable) {
-            layerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
-            if (this.$isTouchDevice()) {
-              tiptapUtils.focus({ scrollIntoView: false }, 'end')
-            } else {
-              tiptapUtils.focus({ scrollIntoView: false })
-            }
-          }
-        }
-      }
-      eventUtils.removePointerEvent('pointerup', this.onMouseup)
-      this.isControlling = false
-      this.onClickEvent(e)
-    },
     positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
@@ -462,12 +438,6 @@ export default defineComponent({
       layerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
       TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
       TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
-    },
-    onClickEvent(e: MouseEvent) {
-      if (!this.isPrimaryActive) return
-
-      colorUtils.event.emit('closeColorPanel', false)
-      this.$emit('clickSubController', this.layerIndex, this.config.type, generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     onFrameMouseEnter(e: MouseEvent) {
       if (this.config.type !== LayerType.image || this.type !== LayerType.frame) {
