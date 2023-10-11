@@ -4,6 +4,7 @@ import * as path from 'path'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
+import extractImg from '../../tools/vite-plugin-lib-extract-img'
 import svgSpritePlugin from 'vite-plugin-svg-sprite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 
@@ -35,7 +36,9 @@ export default defineConfig({
         src: path.resolve(__dirname, 'src/assets/scss'),
         dest: 'src/assets',
       }]
-    })
+    }),
+    // Extracts resource files referenced in lib mode instead of embedded them as base64.
+    extractImg,
   ],
   build: {
     lib: {
