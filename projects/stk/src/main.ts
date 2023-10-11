@@ -122,7 +122,7 @@ app.component('dropdown', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/global/Dropdown.vue')
 ))
 app.component('nu-image', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImage.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuImage.vue')
 ))
 app.component('nu-layer', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuLayer.vue')
@@ -149,7 +149,7 @@ app.component('nu-img-controller', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuImgController.vue')
 ))
 app.component('nu-frame', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuFrame.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuFrame.vue')
 ))
 app.component('nubtn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/global/Nubtn.vue')

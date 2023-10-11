@@ -20,11 +20,12 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
     :key="`layer-${layer.id}`"
     :pageIndex="pageIndex"
     :page="page"
-    :layerIndex="layerIndex"
+    :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
     :inFrame="true"
     :inImageFrame="inImageFrame()"
     :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
+    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
     :primaryLayer="config"
     :config="layer"
     :isSubLayer="true")
@@ -66,6 +67,8 @@ import generalUtils from '@/utils/generalUtils'
 import ImageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -99,6 +102,10 @@ export default defineComponent({
     primaryLayer: {
       default: undefined,
       type: Object as PropType<IGroup | ITmp>
+    },
+    inPreview: {
+      default: false,
+      type: Boolean
     }
   },
   async created() {
@@ -146,6 +153,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration }, this.subLayerIndex)
         }
       } else if (!json.decoration && config.decoration) {
+        if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'd' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: undefined }, this.subLayerIndex)
       }
 
@@ -169,6 +177,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop }, this.subLayerIndex)
         }
       } else if (!json.decorationTop && config.decorationTop) {
+        if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'dt' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: undefined }, this.subLayerIndex)
       }
 
@@ -227,7 +236,41 @@ export default defineComponent({
           }
         })
       }
-      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false })
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
+      if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+    } else {
+      if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+    }
+  },
+  mounted() {
+    if (!this.$isStk) return
+    if (this.config.clips.length === 1) {
+      if (!this.editorTypeTemplate && this.$route.name !== 'Screenshot') frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
+      if (this.config.clips[0].srcObj.type === 'frame') {
+        /**
+         * If the frame contain only one clip, and is not in template editor or init from mydesign or in preview auto popping the photo-selector
+         */
+        if (!(this.editorTypeTemplate || this.config.initFromMydesign || this.inPreview || this.inScreenshotPreview)) {
+          window.requestAnimationFrame(() => {
+            if (this.primaryLayer) {
+              frameUtils.iosPhotoSelect({
+                pageIndex: this.pageIndex,
+                priPrimaryLayerIndex: this.layerIndex,
+                layerIndex: this.subLayerIndex,
+                subLayerIdx: 0,
+              }, (this.config as IFrame).clips[0])
+            } else {
+              frameUtils.iosPhotoSelect({
+                pageIndex: this.pageIndex,
+                layerIndex: this.layerIndex,
+                subLayerIdx: 0,
+              }, (this.config as IFrame).clips[0])
+            }
+          })
+        } else {
+          layerUtils.deleteLayerProps(this.pageIndex, this.layerIndex, ['initFromMydesign'], this.subLayerIndex)
+        }
+      }
     }
   },
   watch: {
@@ -240,39 +283,46 @@ export default defineComponent({
         } as IListServiceContentDataItem
         AssetUtils.get(asset).then((res) => {
           const json = res.jsonData as IFrame
-          // eslint-disable-next-line vue/no-mutating-props
-          this.config.clips = generalUtils.deepCopy(this.config.clips)
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { clips: generalUtils.deepCopy(this.config.clips) }, this.subLayerIndex)
           if (this.config.decoration && json.decoration) {
             json.decoration.color = [...this.config.decoration.color] as [string]
-            // eslint-disable-next-line vue/no-mutating-props
-            this.config.decoration = layerFactary.newShape({
-              ...json.decoration,
-              vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
-              styles: {
-                width: this.config.styles.initWidth,
-                height: this.config.styles.initHeight,
-                initWidth: this.config.styles.initWidth,
-                initHeight: this.config.styles.initHeight
-              }
-            })
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              decoration: layerFactary.newShape({
+                ...json.decoration,
+                vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
+                styles: {
+                  width: this.config.styles.initWidth,
+                  height: this.config.styles.initHeight,
+                  initWidth: this.config.styles.initWidth,
+                  initHeight: this.config.styles.initHeight
+                }
+              })
+            }, this.subLayerIndex)
           }
           if (this.config.decorationTop && json.decorationTop) {
             json.decorationTop.color = [...this.config.decorationTop.color] as [string]
-            // eslint-disable-next-line vue/no-mutating-props
-            this.config.decorationTop = layerFactary.newShape({
-              ...json.decorationTop,
-              vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
-              styles: {
-                width: this.config.styles.initWidth,
-                height: this.config.styles.initHeight,
-                initWidth: this.config.styles.initWidth,
-                initHeight: this.config.styles.initHeight
-              }
-            })
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              decorationTop: layerFactary.newShape({
+                ...json.decorationTop,
+                vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
+                styles: {
+                  width: this.config.styles.initWidth,
+                  height: this.config.styles.initHeight,
+                  initWidth: this.config.styles.initWidth,
+                  initHeight: this.config.styles.initHeight
+                }
+              })
+            }, this.subLayerIndex)
           }
-          // eslint-disable-next-line vue/no-mutating-props
-          this.config.needFetch = false
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
         })
+      }
+    },
+    controllerHidden(val) {
+      if (!val) {
+        if (!this.editorTypeTemplate && this.config.active && this.config.clips.length === 1) {
+          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
+        }
       }
     }
   },
@@ -280,7 +330,15 @@ export default defineComponent({
     ...mapGetters('user', ['getVerUni']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      inScreenshotPreview: 'getInScreenshotPreview',
+    }),
+    ...vuexUtils.mapGetters('stk', {
+      controllerHidden: false,
+      editorTypeTemplate: false,
+    }, {
+      controllerHidden: 'vivisticker/getControllerHidden',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),
     hasDecor(): boolean {
       const config = this.config as IFrame

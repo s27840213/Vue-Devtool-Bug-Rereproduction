@@ -18,7 +18,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       draggable="false"
       :src="shadowSrc"
       @load='onLoadShadowImg($event)'
-      @error="onError")
+      @error="onShadowError()")
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
       :style="imgStyles()")
@@ -29,7 +29,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         draggable="false"
         crossorigin="anonymous"
         @error="onError"
-        @load="onLoad"
+        @load="onLoad($event, 'main')"
         :src="finalSrc")
       svg(v-if="isAdjustImage"
         :style="flipStyles"
@@ -57,7 +57,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
           crossorigin="anonymous"
           draggable="false"
           @error="onError"
-          @load="onAdjustImgLoad"
+          @load="onAdjustImgLoad($event, 'main')"
           :xlink:href="finalSrc")
   template(v-if="hasHalation()")
     component(v-for="(elm, idx) in cssFilterElms()"
@@ -90,6 +90,10 @@ import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
+import stkWVUtils from '@/utils/stkWVUtils'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import vuexUtils from '@/utils/vuexUtils'
+import modalUtils from '@/utils/modalUtils'
 
 export default defineComponent({
   emits: ['onload'],
@@ -133,6 +137,10 @@ export default defineComponent({
       type: Object,
       default: () => { return undefined }
     },
+    priPrimaryLayerIndex: {
+      type: Number,
+      default: -1
+    },
     inPreview: {
       default: false,
       type: Boolean
@@ -143,6 +151,43 @@ export default defineComponent({
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
       this.handleShadowInit()
+    }
+  },
+  mounted() {
+    if (!this.$isStk) return
+    const config = this.config as IImage
+    /**
+     * bcz bg removing saving place has benn changed
+     * the below code is used to update old version design to new version
+     */
+    //  const srcObj = {
+    //             type: 'ios',
+    //             userId: '',
+    //             assetId: path,
+    //           }
+    const { assetId, type } = config.srcObj
+
+    if (stkWVUtils.checkVersion('1.35')) {
+      if (type === 'ios' && (assetId as string).includes('bgRemove')) {
+        const imageName = (assetId as string).split('/')[1]
+        const src = imageUtils.getSrc(config.srcObj)
+
+        generalUtils.toDataURL(src, (dataUrl) => {
+          bgRemoveUtils.moveOldBgRemoveImages(dataUrl, (path) => {
+            stkWVUtils.deleteImage('bgRemove', imageName, 'png')
+
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              srcObj: {
+                type: 'ios',
+                userId: '',
+                assetId: path
+              },
+            })
+
+            stkWVUtils.saveAsMyDesign()
+          })
+        })
+      }
     }
   },
   beforeUnmount() {
@@ -242,9 +287,10 @@ export default defineComponent({
           this.setImgConfig(this.layerInfo())
         }
       } else {
+        groupUtils.deselect()
         this.setImgConfig(undefined)
-        setTimeout(() => {
-          if (layerUtils.layerIndex === -1) {
+        this.$nextTick(() => {
+          const reSelecting = () => {
             const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
             const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
             groupUtils.deselect()
@@ -258,7 +304,22 @@ export default defineComponent({
               }
             }
           }
-        }, 0)
+          if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
+            reSelecting()
+          }
+          if (this.isDuringCopy) {
+            const start = Date.now()
+            const timer = setInterval(() => {
+              if (Date.now() - start > 10000) {
+                clearInterval(timer)
+              }
+              if (!this.isDuringCopy) {
+                reSelecting()
+                clearInterval(timer)
+              }
+            }, 300)
+          }
+        })
         this.handleDimensionUpdate()
       }
       if (this.forRender) {
@@ -317,7 +378,14 @@ export default defineComponent({
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+    }),
+    ...vuexUtils.mapState('stk', {
+      isDuringCopy: false,
+    },
+    'vivisticker',
+    {
+      isDuringCopy: 'isDuringCopy'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
@@ -337,10 +405,14 @@ export default defineComponent({
       return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
     },
     finalSrc(): string {
+      let src = this.src
       if (this.$route.name === 'Preview') {
-        return imageUtils.appendCompQueryForVivipic(this.src)
+        return imageUtils.appendCompQueryForVivipic(src)
       }
-      return this.src
+      if (!this.config.previewSrc) {
+        src = imageUtils.appendQuery(src, 'ver', generalUtils.generateRandomString(4))
+      }
+      return src
     },
     shadowSrc(): string {
       if (!this.shadow() || !this.shadow().srcObj) {
@@ -435,7 +507,8 @@ export default defineComponent({
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
       const styles = {
-        ...(this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        // in vivisticker the following code would lead the non-fluent UX
+        ...(!this.$isStk && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -454,8 +527,8 @@ export default defineComponent({
       let renderH = imgHeight * this.contentScaleRatio
       const primaryLayer = this.primaryLayer
       const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
-      if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg) {
-        const { scale } = this.config.parentLayerStyles || primaryLayer?.styles || { scale: 1 }
+      if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg && srcObj.type !== 'ios') {
+        const { scale = 1 } = this.config.parentLayerStyles || primaryLayer?.styles || {}
         renderW *= scale
         renderH *= scale
       }
@@ -479,6 +552,16 @@ export default defineComponent({
     getErrorSrcIdentifier(config: IImage) {
       const { srcObj, styles } = config
       return srcObj.type + srcObj.assetId + srcObj.userId + (styles.adjust.blur > 0 ? '_blur' : '')
+    },
+    onShadowError() {
+      const shadow = this.config.styles.shadow
+      if (shadow.srcObj.type === 'ios') {
+        const layerData = {
+          config: this.config,
+          layerInfo: this.layerInfo()
+        }
+        imageShadowPanelUtils.handleShadowUpload(layerData, true)
+      }
     },
     onError() {
       this._onError()
@@ -514,6 +597,57 @@ export default defineComponent({
         case 'logo-private':
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([srcObj.assetId]) })
           break
+        case 'ios': {
+          if (this.primaryLayer?.type === LayerType.frame) {
+            frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
+              {
+                type: 'frame',
+                assetId: '',
+                userId: ''
+              }
+            )
+            frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+              imgWidth: (this.config as IImage).styles.width,
+              imgHeight: (this.config as IImage).styles.height,
+              imgX: 0,
+              imgY: 0,
+              opacity: 100,
+              adjust: {}
+            })
+            this.src = imageUtils.getSrc(this.config)
+            window.requestAnimationFrame(() => {
+              stkWVUtils.isAnyIOSImgOnError = true
+              if (this.priPrimaryLayerIndex !== -1) {
+                stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+              } else {
+                stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+              }
+            })
+          } else {
+            // replace error image
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              srcObj: {
+                type: 'frame',
+                assetId: '',
+                userId: ''
+              }
+            }, this.subLayerIndex)
+            layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+              imgWidth: (this.config as IImage).styles.width,
+              imgHeight: (this.config as IImage).styles.height,
+              imgX: 0,
+              imgY: 0,
+              opacity: 100,
+              adjust: {}
+            }, this.subLayerIndex)
+            this.src = imageUtils.getSrc(this.config)
+          }
+
+          const modalBtn = {
+            msg: i18n.global.t('STK0023') as string,
+          }
+          modalUtils.setModalInfo(i18n.global.t('STK0024') as string, i18n.global.t('STK0086') as string, modalBtn)
+        }
       }
 
       if (updater !== undefined) {
@@ -539,7 +673,23 @@ export default defineComponent({
         }
       }
     },
-    onAdjustImgLoad(e: Event) {
+    onAdjustImgLoad(e: Event, type?: string) {
+      if (this.$isStk && type === 'main') {
+        // detect if SVG image rendered
+        const rendering = () => {
+          const elImg = this.$refs['adjust-img'] as SVGImageElement
+          if (!elImg) return
+          if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
+            // Render complete
+            if (this.priPrimaryLayerIndex !== -1) stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+            else stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          } else {
+            // Rendering
+            window.requestAnimationFrame(rendering)
+          }
+        }
+        window.requestAnimationFrame(rendering)
+      }
       imageUtils.imgLoadHandler(this.src, (img) => {
         if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
           this.imgNaturalSize.width = img.width
@@ -547,7 +697,14 @@ export default defineComponent({
         }
       }, { crossOrigin: true })
     },
-    onLoad(e: Event) {
+    onLoad(e: Event, type?: string) {
+      if (this.$isStk && type === 'main' && !this.isAdjustImage) {
+        if (this.priPrimaryLayerIndex !== -1) {
+          stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+        } else {
+          stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+        }
+      }
       this.isOnError = false
       const img = e.target as HTMLImageElement
       if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
@@ -652,6 +809,7 @@ export default defineComponent({
       })
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
+      if (this.config.srcObj.type === 'ios') return
       if (this.isBlurImg) return
 
       const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
@@ -791,9 +949,16 @@ export default defineComponent({
 
       let img = new Image()
       if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
-        const res = await imageUtils.getImgSize(this.config.srcObj, false)
-        if (res) {
-          this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
+        // normally, we should get the image size from srcObj, but if in vivisticker bg removing, we didn't actually upload the bg remove result to the server
+        if ((this.config as IImage).srcObj.type === 'ios') {
+          await imageUtils.imgLoadHandler(imageUtils.getSrc(this.config as IImage), (img) => {
+            this.shadowBuff.MAXSIZE = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
+          })
+        } else {
+          const res = await imageUtils.getImgSize(this.config.srcObj, false)
+          if (res) {
+            this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
+          }
         }
       } else if (['unsplash', 'pixels'].includes(this.config.srcObj.type)) {
         this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
@@ -806,11 +971,7 @@ export default defineComponent({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (!shadowBuff.canvasShadowImg) {
-            if (this.config.previewSrc && this.config.previewSrc.includes('data:image/png;base64')) {
-              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
-            }
             img.crossOrigin = 'anonymous'
-            img.src = imageUtils.getSrc(this.config, ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal')
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 console.log('img load error')
@@ -832,6 +993,12 @@ export default defineComponent({
                   resolve()
                 }
               }
+              if (this.config.previewSrc) {
+                img.src = this.config.previewSrc
+              } else {
+                const src = imageUtils.getSrc(this.config, ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal')
+                img.src = imageUtils.appendQuery(src, 'ver', generalUtils.generateRandomString(6))
+              }
             })
           } else {
             img = shadowBuff.canvasShadowImg as HTMLImageElement
@@ -842,6 +1009,7 @@ export default defineComponent({
           imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
           imageShadowUtils.setProcessId()
           imageShadowUtils.clearLayerData()
+          console.log('ShadowEffectType.none')
           return
       }
 
@@ -909,6 +1077,10 @@ export default defineComponent({
         drawCanvasH: _drawCanvasH,
         layerInfo: layerInfo(),
         cb: () => {
+          if (this.config.styles.shadow.cb) {
+            this.config.styles.shadow.cb()
+            this.$store.commit('SET_shadowCallback', { layerInfo: this.layerInfo(), cb: undefined })
+          }
           this.clearShadowSrc()
         }
       }
