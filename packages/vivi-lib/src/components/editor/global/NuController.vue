@@ -27,7 +27,7 @@ div(:layer-index="`${layerIndex}`"
       :primaryLayerZindex="primaryLayerZindex()"
       :isMoved="isMoved"
       :contentScaleRatio="contentScaleRatio")
-  div(v-show="isActive && !isImgControl" :style="contentStyles" class="nu-controller__content")
+  div(v-show="isControllerShown && !isImgControl" :style="contentStyles" class="nu-controller__content")
     div(v-show="!isLocked()"
         class="nu-controller__ctrl-points"
         :style="ctrlPtrStyles"
@@ -160,7 +160,7 @@ div(:layer-index="`${layerIndex}`"
                   @touchstart="disableTouchEvent")
                 svg-icon(class="control-point__action-svg"
                   iconName="move2" iconWidth="24px"
-                  iconColor="blue-2")
+                  :iconColor="actionColor")
           template(v-else)
             template(v-if="!$isTouchDevice()")
               action-icon(iconName="rotate2"
@@ -178,7 +178,7 @@ div(:layer-index="`${layerIndex}`"
                   @touchstart="disableTouchEvent")
                 svg-icon(class="control-point__action-svg"
                   iconName="move2" iconWidth="24px"
-                  iconColor="blue-2")
+                  :iconColor="actionColor")
     action-icon(v-if="isActive && isLocked() && (scaleRatio > 20)"
                 class="control-point__bottom-right-icon"
                 iconName="lock"
@@ -189,7 +189,7 @@ div(:layer-index="`${layerIndex}`"
                 @action="MappingUtils.mappingIconAction('lock')")
     template(v-if="$isTouchDevice() && isActive && !isLocked()")
       div(v-show="!isMoving")
-        action-icon(class="control-point__top-left-icon"
+        action-icon(v-if="showCloseAction" class="control-point__top-left-icon"
                     iconName="close"
                     iconSize="18px"
                     theme="border"
@@ -237,6 +237,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -313,7 +314,8 @@ export default defineComponent({
       cornerRotaterbaffles: undefined as ReturnType<typeof ControlUtils.getControlPoints>['cornerRotaters'] | undefined,
       eventTarget: null as unknown as HTMLElement,
       movingUtils: null as unknown as MovingUtils,
-      moveStart: null as any
+      moveStart: null as any,
+      actionColor: this.$isStk ? 'black-1' : 'blue-2',
     }
   },
   mounted() {
@@ -344,8 +346,20 @@ export default defineComponent({
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
       currFunctionPanelType: 'getCurrFunctionPanelType',
-      useMobileEditor: 'getUseMobileEditor'
+      useMobileEditor: 'getUseMobileEditor',
     }),
+    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+      controllerHidden: false,
+      editorTypeTextLike: false,
+      editorTypeTemplate: false,
+    }, {
+      controllerHidden: 'vivisticker/getControllerHidden',
+      editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
+      editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
+    }),
+    isControllerShown(): boolean {
+      return this.isActive && !this.controllerHidden
+    },
     ctrlPtrStyles(): Record<string, number | string> {
       if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
         return {
@@ -417,7 +431,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.config.active ? 'transform' : '',
+        willChange: this.isControllerShown ? 'transform' : '',
         ...this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -470,12 +484,18 @@ export default defineComponent({
     getLayerType(): string {
       return this.config.type
     },
+    needAutoRescale(): boolean {
+      return this.config.inAutoRescaleMode && this.getLayerRotate() === 0 && !textShapeUtils.isCurvedText(this.config.styles.textShape)
+    },
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
     tooSmall(): boolean {
       const { tooShort, tooNarrow } = this.checkLimits(this.$isTouchDevice(), !this.resizerProfile.hasHorizontal && !this.resizerProfile.hasVertical)
       return tooShort || tooNarrow
+    },
+    showCloseAction(): boolean {
+      return !this.$isStk || this.editorTypeTextLike || this.editorTypeTemplate
     }
   },
   watch: {
@@ -625,6 +645,7 @@ export default defineComponent({
       const { tooShort, tooNarrow } = this.checkLimits()
       const tooSmall = this.getLayerType === 'text'
         ? (this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort) : false
+
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
       const scale = isTouchArea ? 2 : 1
@@ -643,6 +664,9 @@ export default defineComponent({
       return Object.assign(resizerStyle, HW)
     },
     getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
+      if (this.config.type === LayerType.image && (this.config as IImage).styles.shadow.currentEffect !== 'none') {
+        return []
+      }
       let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
       resizers = textMoveBar
         ? resizers.slice(this.resizerProfile.moveBarStart, this.resizerProfile.moveBarEnd)
@@ -669,7 +693,9 @@ export default defineComponent({
     },
     getScaler(scalers: any) {
       return this.tooSmall ? scalers.slice(2, 3)
-        : (this.$isTouchDevice() ? scalers.slice(1, 2) : scalers)
+        : (this.$isTouchDevice()
+            ? (this.showCloseAction ? scalers.slice(1, 2) : scalers.slice(0, 2))
+            : scalers)
     },
     getCornerRotaters(scalers: any) {
       return (this.tooSmall) ? scalers.slice(2, 3) : scalers
@@ -718,7 +744,7 @@ export default defineComponent({
         } else if (this.isLocked()) {
           return '#EB5757'
         } else {
-          return '#7190CC'
+          return generalUtils.getOutlineColor()
         }
       })()
 
@@ -726,7 +752,7 @@ export default defineComponent({
 
       if ((this.isLine() && !this.$isTouchDevice()) || (this.isMoving && this.currSelectedInfo.index !== this.layerIndex)) {
         outline = 'none'
-      } else if (this.isShown() || this.isActive) {
+      } else if (this.isShown() || this.isControllerShown) {
         outline = `2px solid ${outlineColor}`
       } else {
         outline = 'none'
@@ -791,6 +817,10 @@ export default defineComponent({
 
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
+
+      if (this.config.type === LayerType.text && this.config.inAutoRescaleMode) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { inAutoRescaleMode: false })
       }
 
       let width = this.getLayerWidth()
@@ -1126,6 +1156,11 @@ export default defineComponent({
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
+
+      if (this.config.type === LayerType.text && this.config.inAutoRescaleMode) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { inAutoRescaleMode: false })
+      }
+
       let width = this.getLayerWidth()
       let height = this.getLayerHeight()
       const initWidth = this.initSize.width
@@ -1471,6 +1506,7 @@ export default defineComponent({
         const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
         if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
         TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+        TextUtils.handleAutoRescale()
       })
     },
     waitFontLoadingAndResize() {
@@ -1481,19 +1517,20 @@ export default defineComponent({
           const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
           TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+          TextUtils.handleAutoRescale()
         }, 100)
       })
     },
     checkIfCurve(config: IText): boolean {
       return textShapeUtils.isCurvedText(config.styles.textShape)
     },
-    calcSize(config: IText, composing: boolean) {
-      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing)
+    calcSize(config: IText, composing: boolean, keepCenter = false) {
+      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing, keepCenter)
     },
-    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
+    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean, keepCenter?: boolean }) {
       const config = generalUtils.deepCopy(this.config)
       config.paragraphs = payload.paragraphs
-      this.calcSize(config as IText, !!tiptapUtils.editor?.view?.composing)
+      this.calcSize(config as IText, !!tiptapUtils.editor?.view?.composing, payload.keepCenter)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       if (payload.toRecord) {
         this.waitFontLoadingAndRecord()
@@ -1515,25 +1552,24 @@ export default defineComponent({
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-        this.textSizeRefresh(this.config as IText, false)
+        this.textSizeRefresh(this.config as IText, false, false)
       }
       if (toRecord) {
         this.waitFontLoadingAndRecord()
       }
     },
-    textSizeRefresh(text: IText, composing: boolean) {
+    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const getSize = () => isVertical ? this.getLayerHeight() : this.getLayerWidth()
+      const oldCenter = mathUtils.getCenter(text.styles)
 
-      let widthLimit = this.getLayerRotate() ? getSize() : this.config.widthLimit
+      let widthLimit = this.needAutoRescale ? -1 : (this.getLayerRotate() ? getSize() : this.config.widthLimit)
       let textHW = TextUtils.getTextHW(text, widthLimit)
       let layerX = this.getLayerPos().x
       let layerY = this.getLayerPos().y
 
       if (widthLimit === -1) {
         const pageSize = (pageUtils.getPage(this.pageIndex) as IPage)[isVertical ? 'height' : 'width']
-        const _pageSize = (this.$parent?.$el as HTMLElement)
-          .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio * 0.01)
         const currTextSize = textHW[isVertical ? 'height' : 'width']
 
         let layerPos = this.getLayerPos()[isVertical ? 'y' : 'x'] - (currTextSize - getSize()) / 2
@@ -1541,11 +1577,25 @@ export default defineComponent({
         const reachRightLimit = layerPos + currTextSize >= pageSize
 
         if (reachLeftLimit && reachRightLimit) {
+          // don't delete below for stk, it's disabled temporarily only
+          // if (composing) this.widthLimitSetDuringComposition = true
+          // if (!this.needAutoRescale) {
+          //   textHW = TextUtils.getTextHW(text, pageSize)
+          //   layerPos = 0
+          //   widthLimit = pageSize
+          // }
           if (composing) this.widthLimitSetDuringComposition = true
           textHW = TextUtils.getTextHW(text, pageSize)
           layerPos = 0
           widthLimit = pageSize
         } else if (reachLeftLimit || reachRightLimit) {
+          // don't delete below for stk, it's disabled temporarily only
+          // if (composing) this.widthLimitSetDuringComposition = true
+          // if (!this.needAutoRescale) {
+          //   widthLimit = getSize()
+          //   textHW = TextUtils.getTextHW(text, widthLimit)
+          //   layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
+          // }
           if (composing) this.widthLimitSetDuringComposition = true
           widthLimit = getSize()
           textHW = TextUtils.getTextHW(text, widthLimit)
@@ -1580,12 +1630,40 @@ export default defineComponent({
       }
 
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-        width: textHW.width,
-        height: textHW.height,
-        x: layerX,
-        y: layerY
-      })
+
+      if (this.needAutoRescale) {
+        const { textHW: newTextHW, x: newX, y: newY, scale } = TextUtils.getAutoRescaleResult(text, textHW, layerX, layerY, undefined, this.pageIndex)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          width: newTextHW.width,
+          height: newTextHW.height,
+          x: newX,
+          y: newY,
+          scale
+        })
+      } else if (keepCenter) {
+        const newCenter = mathUtils.getCenter({
+          width: textHW.width,
+          height: textHW.height,
+          x: layerX,
+          y: layerY
+        })
+
+        const offset = { x: oldCenter.x - newCenter.x, y: oldCenter.y - newCenter.y }
+
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          width: textHW.width,
+          height: textHW.height,
+          x: layerX + offset.x,
+          y: layerY + offset.y,
+        })
+      } else {
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          width: textHW.width,
+          height: textHW.height,
+          x: layerX,
+          y: layerY,
+        })
+      }
     },
     curveTextSizeRefresh(text: IText) {
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))

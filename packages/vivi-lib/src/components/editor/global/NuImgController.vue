@@ -29,6 +29,7 @@ import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
+import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import LayerUtils from '@/utils/layerUtils'
 import MathUtils from '@/utils/mathUtils'
@@ -125,8 +126,7 @@ export default defineComponent({
         transform: `translate(${pos.x * _f}px, ${pos.y * _f}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * _f}px`,
         height: `${this.config.styles.imgHeight * _f}px`,
-        // outline: '2px solid #7190CC',
-        outline: `${2 * (this.$isTouchDevice() ? 1 : 100 / this.scaleRatio)}px solid #7190CC`,
+        outline: `${2 * (this.$isTouchDevice() ? 1 : 100 / this.scaleRatio)}px solid ${generalUtils.getOutlineColor()}`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
@@ -180,8 +180,7 @@ export default defineComponent({
         // transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width * _f}px`,
         height: `${this.config.styles.height * _f}px`,
-        // outline: '2px solid #7190CC'
-        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
+        outline: `${2 * (100 / this.scaleRatio)}px solid ${generalUtils.getOutlineColor()}`
       }
     },
     scalerStyles(scaler: { [key: string]: string | number }) {

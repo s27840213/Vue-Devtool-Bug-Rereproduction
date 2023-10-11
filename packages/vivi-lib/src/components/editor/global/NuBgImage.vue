@@ -58,6 +58,10 @@ import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
+import stkWVUtils from '@/utils/stkWVUtils'
+import i18n from '@/i18n'
+import modalUtils from '@/utils/modalUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
 
 export default defineComponent({
   emits: [],
@@ -205,7 +209,7 @@ export default defineComponent({
     },
     imageSize(): { width: number, height: number, x: number, y: number } {
       const { image } = this
-      const offset = 1
+      const offset = this.$isStk ? 0 : 1 // no need to scale bg image in vivisticker
       const aspectRatio = image.config.styles.imgWidth / image.config.styles.imgHeight
       const width = image.config.styles.imgWidth + (aspectRatio < 1 ? offset * 2 : offset * 2 * aspectRatio)
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
@@ -310,6 +314,24 @@ export default defineComponent({
         case 'logo-private':
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
           break
+        case 'ios': {
+          // replace error image
+          this.$store.commit('SET_backgroundImageSrc', {
+            pageIndex: this.pageIndex,
+            srcObj: {
+              type: '',
+              userId: '',
+              assetId: ''
+            },
+            previewSrc: ''
+          })
+          this.src = ''
+          stkWVUtils.setLoadingFlag(-1)
+          const modalBtn = {
+            msg: i18n.global.t('STK0023') as string,
+          }
+          modalUtils.setModalInfo(i18n.global.t('STK0024') as string, i18n.global.t('STK0086') as string, modalBtn)
+        }
       }
 
       if (updater !== undefined) {
@@ -336,9 +358,11 @@ export default defineComponent({
       }
     },
     dblTap(e: PointerEvent) {
+      this.setInBgSettingMode()
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
+            if (backgroundUtils.backgroundLocked) return backgroundUtils.handleLockedNotify()
             this.setBgImageControl({
               pageIndex: this.pageIndex,
               imgControl: true
@@ -504,12 +528,30 @@ export default defineComponent({
           this.imgNaturalSize.height = img.height
         }
       }, { crossOrigin: true })
+      if (this.$isStk) {
+        // detect if SVG image rendered
+        const rendering = () => {
+          const elImg = this.$refs['adjust-img'] as SVGImageElement
+          if (!elImg) return
+          if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
+            // Render complete
+            stkWVUtils.setLoadingFlag(-1)
+          } else {
+            // Rendering
+            window.requestAnimationFrame(rendering)
+          }
+        }
+        window.requestAnimationFrame(rendering)
+      }
     },
     onLoad(e: Event) {
       const img = e.target as HTMLImageElement
       if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
         this.imgNaturalSize.width = img.width
         this.imgNaturalSize.height = img.height
+      }
+      if (this.$isStk) {
+        stkWVUtils.setLoadingFlag(-1)
       }
     }
   }
@@ -525,6 +567,9 @@ export default defineComponent({
   right: 0;
   bottom: 0;
   left: 0;
+  @include stk {
+    border-radius: 10px;
+  }
   &__picture {
     object-fit: cover;
     width: 100%;

@@ -12,13 +12,13 @@ div(class="nu-shape" :style="styles")
 </template>
 
 <script lang="ts">
+import { IFrame, IGroup, IShape } from '@nu/vivi-lib/interfaces/layer'
+import { LayerType } from '@nu/vivi-lib/store/types'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import shapeUtils from '@nu/vivi-lib/utils/shapeUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import { IFrame, IGroup, IShape } from '@nu/vivi-lib/interfaces/layer'
-import { LayerType } from '@nu/vivi-lib/store/types'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { useRoute } from 'vue-router'
 
 const FILTER_X = '$fx'

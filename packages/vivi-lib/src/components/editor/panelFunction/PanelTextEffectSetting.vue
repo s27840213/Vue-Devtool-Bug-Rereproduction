@@ -104,6 +104,7 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils, { isFocusState } from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
@@ -296,7 +297,8 @@ export default defineComponent({
       }
     },
     async onEffectClick(effect: IEffect): Promise<void> {
-      if (!paymentUtils.checkPro(effect, 'pro-text')) return
+      if (this.$isPic && !paymentUtils.checkPro(effect, 'pro-text')) return
+      if (this.$isStk && !stkWVUtils.checkPro(effect, 'text')) return
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
 
@@ -306,7 +308,8 @@ export default defineComponent({
       }
     },
     async handleSelectInput(attrs: IEffectOptionSelect['select'][number]) {
-      if (!paymentUtils.checkPro(attrs, 'pro-text')) return
+      if (this.$isPic && !paymentUtils.checkPro(attrs, 'pro-text')) return
+      if (this.$isStk && !stkWVUtils.checkPro(attrs, 'text')) return
       await this.setEffect({ effect: attrs.preset })
       this.recordChange()
     },

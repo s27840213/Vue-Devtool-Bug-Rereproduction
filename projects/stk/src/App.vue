@@ -41,7 +41,7 @@ div(id="app" :style="appStyles()")
 </template>
 
 <script lang="ts">
-import DebugTool from '@/components/componentLog/DebugTool.vue'
+import DebugTool from '@nu/vivi-lib/components/componentLog/DebugTool.vue'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import ResInfo from '@nu/vivi-lib/components/modal/ResInfo.vue'
 import Popup from '@/components/popup/Popup.vue'

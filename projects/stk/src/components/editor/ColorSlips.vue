@@ -56,7 +56,7 @@ div(class="color-panel"
 </template>
 
 <script lang="ts">
-import ColorBtn from '@/components/global/ColorBtn.vue'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'

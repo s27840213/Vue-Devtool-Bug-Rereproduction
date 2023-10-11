@@ -6,7 +6,10 @@ div(class="color-btn" :style="wrapperStyle")
     svg-icon(v-else-if="disable" iconName="disable" iconWidth="16px")
     div(v-else :style="{backgroundColor: color}"
         :class="`color-btn__color color-${color.replace('#', '')}`")
-    svg-icon(v-if="focus" iconName="item-check" iconWidth="40%")
+    svg-icon(v-if="focus"
+        iconName="item-check"
+        :iconColor="$isStk ? 'black-3' : 'blue-1'"
+        iconWidth="40%")
 </template>
 
 <script lang="ts">
@@ -98,10 +101,14 @@ export default defineComponent({
       }
     }
     &.focus, &.active {
-      border: 2px solid setColor(blue-1);
+      @include setColors(blue-1, black-5) using ($color) {
+        border: 2px solid $color;
+      }
     }
     &:not(.mobile):hover {
-      border: 2px solid setColor(blue-hover);
+      @include setColors(blue-hover, black-5) using ($color) {
+        border: 2px solid $color;
+      }
     }
     .svg-item-check {
       position: absolute;

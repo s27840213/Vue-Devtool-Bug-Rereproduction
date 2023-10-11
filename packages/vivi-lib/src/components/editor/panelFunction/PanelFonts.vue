@@ -12,6 +12,7 @@ div(class="panel-fonts")
   search-bar(placeholder="Search font"
     clear
     :defaultKeyword="keywordLabel"
+    :vivisticker="$isStk ? 'white' : undefined"
     @search="handleSearch")
   div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
   font-tag(v-if="!keyword" :tags="tags"
@@ -46,6 +47,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import vuexUtils from '@/utils/vuexUtils'
 
 export default defineComponent({
   components: {
@@ -69,7 +71,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.getRecently()
+    this.getRecently(this.$isStk ? { key: 'font' } : undefined)
     if (this.privateFonts.length === 0 && this.isBrandkitAvailable) {
       this.fetchFonts()
     }
@@ -85,7 +87,6 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
     }),
     ...mapState('fontTag', {
@@ -94,10 +95,6 @@ export default defineComponent({
     }),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
-    ...mapGetters('brandkit', {
-      privateFonts: 'getFonts',
-      fontsPageIndex: 'getFontsPageIndex'
-    }),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
     }),
@@ -114,6 +111,16 @@ export default defineComponent({
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
+    pending() {
+      return this.$isPic ? this.$store.state.font.pending : this.$store.getters['font/pending']
+    },
+    ...vuexUtils.mapGetters(() => generalUtils.isPic, {
+      privateFonts: [] as IBrandFont[],
+      fontsPageIndex: -1
+    }, 'brandkit', {
+      privateFonts: 'getFonts',
+      fontsPageIndex: 'getFontsPageIndex'
+    }),
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
     },
@@ -251,7 +258,7 @@ export default defineComponent({
       this.setShowMore(false)
     },
     handleLoadMore(moreType: string | undefined) {
-      if (moreType === 'asset') {
+      if (this.$isPic && moreType === 'asset') {
         this.fetchMoreFonts()
         return
       }
@@ -296,6 +303,10 @@ export default defineComponent({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  @include stk {
+    padding: 0 8px;
+  }
   &__title {
     position: relative;
     text-align: center;

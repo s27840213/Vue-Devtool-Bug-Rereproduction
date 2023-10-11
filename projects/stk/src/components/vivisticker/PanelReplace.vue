@@ -10,7 +10,7 @@ div(v-else class="panel-replace")
 </template>
 
 <script lang="ts">
-import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
+import PanelPhoto from '@nu/vivi-lib/components/editor/panelSidebar/PanelPhoto.vue'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'

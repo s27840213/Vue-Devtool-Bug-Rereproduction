@@ -20,6 +20,7 @@ div(class="nu-tmp"
 <script lang="ts">
 import { ILayer, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'
@@ -79,7 +80,7 @@ export default defineComponent({
     },
     subLayerStyles(layer: ILayer) {
       const primaryScale = this.config.styles.scale
-      return (layer.type === 'shape' && layer.category === 'D') ? {} : { outline: `${2 / primaryScale}px solid #7190CC` }
+      return (layer.type === 'shape' && layer.category === 'D') ? {} : { outline: `${2 / primaryScale}px solid ${generalUtils.getOutlineColor()}` }
     }
   }
 })

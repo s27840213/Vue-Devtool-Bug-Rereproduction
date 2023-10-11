@@ -106,11 +106,11 @@ export default defineComponent({
       tiptapUtils.prevText = newText
       tiptapUtils.prevJSON = newJSON
     })
-    tiptapUtils.onForceUpdate((editor, toRecord) => {
-      this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
+    tiptapUtils.onForceUpdate((editor, toRecord, keepCenter) => {
+      this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord, keepCenter })
     })
     tiptapUtils.on('create', ({ editor }) => {
-      if (this.config?.contentEditable && !this.$isTouchDevice()) {
+      if (this.config?.contentEditable && (!this.$isTouchDevice() || this.$isStk)) {
         editor.commands.focus()
       }
       const editorDiv = editor.view.dom as HTMLDivElement

@@ -43,7 +43,7 @@ div(class="share-template")
 </template>
 
 <script lang="ts">
-import PageContent from '@/components/editor/page/PageContent.vue'
+import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'

@@ -74,7 +74,7 @@ import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageAdjustUtil from '@nu/vivi-lib/utils/imageAdjustUtil'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SIZE, CANVAS_SPACE } from '@nu/vivi-lib/utils/imageShadowUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -92,7 +92,7 @@ import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@nu/
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import NuAdjustImage from './NuAdjustImage.vue'
+import NuAdjustImage from '@nu/vivi-lib/components/editor/global/NuAdjustImage.vue'
 
 export default defineComponent({
   emits: ['onload'],

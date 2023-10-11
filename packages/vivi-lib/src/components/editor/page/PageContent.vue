@@ -15,7 +15,9 @@ div(class="overflow-container"
         @tap="tapPageContent")
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
       div(class="content full-size" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
-        nu-bg-image(
+        div(v-if="noBg" class="page-content__pseudo-bg"
+          @mousedown.left.stop="pageClickHandler()")
+        nu-bg-image(v-else
             :image="config.backgroundImage"
             :pageIndex="pageIndex"
             :page="config"
@@ -66,7 +68,9 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -85,6 +89,10 @@ export default defineComponent({
     pageIndex: {
       type: Number,
       required: true
+    },
+    noBg: {
+      type: Boolean,
+      default: false
     },
     contentScaleRatio: {
       default: 1,
@@ -105,14 +113,18 @@ export default defineComponent({
   },
   data() {
     return {
-      imgLoaded: false,
+      imgLoaded: !this.$isPic,
       imgLoading: false,
       dragUtils: new DragUtils()
     }
   },
   computed: {
-    ...mapGetters({
+    ...vuexUtils.mapGetters(() => generalUtils.isPic, {
+      setLayersDone: false
+    }, {
       setLayersDone: 'file/getSetLayersDone',
+    }),
+    ...mapGetters({
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -153,7 +165,7 @@ export default defineComponent({
       if (this.userId === 'backendRendering') return false
       return this.config.isEnableBleed
     },
-    contentStyles() {
+    contentStyles(): {[key: string]: string} {
       if (!this.config.isEnableBleed) {
         return {
           padding: [
@@ -175,7 +187,7 @@ export default defineComponent({
         ].join(' ')
       }
     },
-    bleedLineStyles() {
+    bleedLineStyles(): {[key: string]: string} {
       return {
         top: (this.config.bleeds.top - 1) * this.contentScaleRatio + 'px',
         bottom: (this.config.bleeds.bottom - 1) * this.contentScaleRatio + this.margin.bottom + 'px',
@@ -185,7 +197,7 @@ export default defineComponent({
         boxShadow: this.userId === 'backendRendering' ? 'none' : '0 0 3px 1px rgba(0, 0, 0, 0.15)'
       }
     },
-    trimStyles() {
+    trimStyles(): {[key: string]: {[key: string]: string}} {
       return {
         tl: {
           top: '-2px',
@@ -288,6 +300,10 @@ export default defineComponent({
       }
     },
     pageClickHandler(): void {
+      if (this.$isStk) {
+        stkWVUtils.deselect()
+        return
+      }
       if (!this.isImgCtrl) {
         groupUtils.deselect()
         editorUtils.setInMultiSelectionMode(false)
@@ -351,6 +367,13 @@ export default defineComponent({
   position: absolute;
   box-sizing: border-box;
   background-repeat: no-repeat;
+  &__pseudo-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .pages-loading {

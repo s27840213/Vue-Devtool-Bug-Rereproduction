@@ -16,8 +16,8 @@ div(class="page-card" :id="`page-card-${pageIndex}`" :style="styles('card')")
 </template>
 
 <script lang="ts">
-import DimBackground from '@/components/editor/page/DimBackground.vue'
-import PageContent from '@/components/editor/page/PageContent.vue'
+import DimBackground from '@nu/vivi-lib/components/editor/page/DimBackground.vue'
+import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
 import { ILayer } from '@nu/vivi-lib/interfaces/layer'
 import { IPage, IPageState } from '@nu/vivi-lib/interfaces/page'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'

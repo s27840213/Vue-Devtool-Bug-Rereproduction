@@ -12,10 +12,12 @@ div(class="nu-shape" :style="styles")
 </template>
 
 <script lang="ts">
-import { IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IShape } from '@/interfaces/layer'
+import { LayerType } from '@/store/types'
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -68,6 +70,10 @@ export default defineComponent({
     },
     subLayerIndex: {
       type: Number
+    },
+    priPrimaryLayerIndex: {
+      type: Number,
+      default: -1
     },
     contentScaleRatio: {
       type: Number,
@@ -420,6 +426,47 @@ export default defineComponent({
       const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       this.updateStyleNode(styleText)
       this.paramsReady = true
+      if (this.$isStk) {
+        let primaryLayer
+        if (this.priPrimaryLayerIndex !== -1) {
+          primaryLayer = (layerUtils.getLayer(this.pageIndex, this.priPrimaryLayerIndex) as IGroup).layers[this.layerIndex] as IFrame
+        } else {
+          primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame
+        }
+        if (primaryLayer.type === LayerType.frame) {
+          this.$nextTick(() => {
+            if (this.priPrimaryLayerIndex !== -1 && (this.config as IShape).frameDecType) {
+              switch ((this.config as IShape).frameDecType) {
+                case 'decoration':
+                  stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'd' })
+                  break
+                case 'decorationTop':
+                  stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'dt' })
+                  break
+                case 'blend':
+                  stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
+                  break
+              }
+            } else {
+              switch ((this.config as IShape).frameDecType) {
+                case 'decoration':
+                  stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'd' })
+                  break
+                case 'decorationTop':
+                  stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'dt' })
+                  break
+                case 'blend':
+                  stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'b', v: this.subLayerIndex })
+                  break
+              }
+            }
+          })
+        } else {
+          this.$nextTick(() => {
+            stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          })
+        }
+      }
     },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {

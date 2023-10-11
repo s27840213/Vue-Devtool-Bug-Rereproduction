@@ -50,10 +50,10 @@ import colorUtils from '@/utils/colorUtils'
 import cssConverter from '@/utils/cssConverter'
 import eventUtils from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
-import GeneralUtils from '@/utils/generalUtils'
+import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
-import LayerUtils from '@/utils/layerUtils'
+import layerUtils from '@/utils/layerUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -62,6 +62,7 @@ import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -182,7 +183,7 @@ export default defineComponent({
       }
 
       if (this.config.type === LayerType.text) {
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           editing: true
         })
       }
@@ -198,8 +199,16 @@ export default defineComponent({
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
-      isHandleShadow: 'shadow/isHandling'
+      isHandleShadow: 'shadow/isHandling',
     }),
+    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+      controllerHidden: false
+    }, {
+      controllerHidden: 'vivisticker/getControllerHidden'
+    }),
+    isControllerShown(): boolean {
+      return this.config?.active && !this.controllerHidden
+    },
     wrapperStyles(): any {
       const scale = this.primaryLayer.styles.scale
       return {
@@ -230,7 +239,7 @@ export default defineComponent({
       return this.config.isFlipping
     },
     isTextEditing(): boolean {
-      return !this.isControlling && this.config?.active
+      return !this.isControlling && this.isControllerShown
     },
     isDraggingCursor(): boolean {
       return this.config.isDraggingCursor
@@ -250,7 +259,7 @@ export default defineComponent({
   watch: {
     isTextEditing(editing) {
       if (this.config.type === 'text') {
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
+        layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
       }
     },
     isComposing(val) {
@@ -271,16 +280,16 @@ export default defineComponent({
           editor.setEditable(newVal)
         })
       }
-      !this.$isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
+      !this.$isTouchDevice() && StepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
     }
   },
   unmounted() {
     // the condition indicates the primaryLayer transform from group-layer to tmp-layer
     if (this.config.type === 'text') {
       if (this.primaryLayer && this.primaryLayer.id === this.parentId) {
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false, isTyping: false })
+        layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false, isTyping: false })
       }
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+      layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
         contentEditable: false
       })
       this.isControlling = false
@@ -330,10 +339,10 @@ export default defineComponent({
         this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
         if (this.posDiff.x !== 0 || this.posDiff.y !== 0) {
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
+          layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         } else {
           if (this.config.contentEditable) {
-            LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
+            layerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
             if (this.$isTouchDevice()) {
               tiptapUtils.focus({ scrollIntoView: false }, 'end')
             } else {
@@ -385,11 +394,11 @@ export default defineComponent({
       return { width, height }
     },
     outlineStyles() {
-      const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
-      const isRectFrameClip = LayerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
-      if (LayerUtils.getCurrLayer.type === 'frame' && !isRectFrameClip) return 'none'
+      const outlineColor = this.config.locked ? '#EB5757' : generalUtils.getOutlineColor()
+      const isRectFrameClip = layerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
+      if (layerUtils.getCurrLayer.type === 'frame' && !isRectFrameClip) return 'none'
 
-      if (this.config?.active) {
+      if (this.isControllerShown) {
         return `${2.5 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
       } else {
         return 'none'
@@ -400,7 +409,7 @@ export default defineComponent({
       const layerId = this.primaryLayer.id
       const subLayerId = this.config.id
       TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
-        const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+        const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
         if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
         TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
       })
@@ -411,7 +420,7 @@ export default defineComponent({
       const subLayerId = this.config.id
       TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
         setTimeout(() => {
-          const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+          const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
           TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
         }, 100)
@@ -424,7 +433,7 @@ export default defineComponent({
       this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
+      layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.calcSize(this.config as IText)
       if (payload.toRecord) {
         this.waitFontLoadingAndRecord()
@@ -450,7 +459,7 @@ export default defineComponent({
     curveTextSizeRefresh(text: IText) {
       const { height: heightOri } = text.styles
       const curveTextHW = textShapeUtils.getCurveTextHW(text)
-      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
+      layerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
       TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
       TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
     },
@@ -458,26 +467,26 @@ export default defineComponent({
       if (!this.isPrimaryActive) return
 
       colorUtils.event.emit('closeColorPanel', false)
-      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
+      this.$emit('clickSubController', this.layerIndex, this.config.type, generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     onFrameMouseEnter(e: MouseEvent) {
       if (this.config.type !== LayerType.image || this.type !== LayerType.frame) {
         return
       }
-      if (LayerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
+      if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
         return
       }
       if (this.primaryLayer.locked && !this.isDraggedPanelPhoto()) {
         return
       }
-      if ((LayerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
+      if ((layerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
         return
       }
       e.stopPropagation()
-      const currLayer = LayerUtils.getCurrLayer as IImage
+      const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const { srcObj, previewSrc } = this.config
-        const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
+        const clips = generalUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
         const clip = clips[this.layerIndex]
 
         Object.assign(this.imgBuff, {
@@ -498,11 +507,11 @@ export default defineComponent({
           srcObj: { ...currLayer.srcObj },
           ...((currLayer as IImage).previewSrc && { previewSrc: (currLayer as IImage).previewSrc as string })
         })
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
-        LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: true })
+        layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { opacity: 35 })
+        layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: true })
 
         const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
-          .clipperHandler(LayerUtils.getCurrLayer as IImage, clip.clipPath, clip.styles).styles
+          .clipperHandler(layerUtils.getCurrLayer as IImage, clip.clipPath, clip.styles).styles
 
         frameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           adjust: { ...currLayer.styles.adjust },
@@ -522,10 +531,10 @@ export default defineComponent({
         return
       }
       e.stopPropagation()
-      const currLayer = LayerUtils.getCurrLayer as IImage
+      const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving) {
-        LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
-        LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: false })
+        layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { opacity: 100 })
+        layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: false })
         frameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...this.imgBuff.srcObj }
         })
@@ -540,10 +549,10 @@ export default defineComponent({
     },
     onFrameMouseUp(e: MouseEvent) {
       if (this.isDraggedPanelPhoto()) return
-      const currLayer = LayerUtils.getCurrLayer as IImage
+      const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image) {
-        LayerUtils.deleteLayer(LayerUtils.pageIndex, LayerUtils.layerIndex)
-        const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
+        layerUtils.deleteLayer(layerUtils.pageIndex, layerUtils.layerIndex)
+        const newIndex = this.primaryLayerIndex > layerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer as IFrame])
         frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
         StepsUtils.record()

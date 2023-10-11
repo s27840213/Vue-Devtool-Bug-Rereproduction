@@ -111,7 +111,7 @@ app.component('RecycleScroller', RecycleScroller)
 
 app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/global/Btn.vue')
 ))
 /**
  * bcz this components use slot, and some components need to get its ref in mounted,
@@ -125,28 +125,28 @@ app.component('nu-image', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImage.vue')
 ))
 app.component('nu-layer', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuLayer.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuLayer.vue')
 ))
 app.component('nu-text', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuText.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuText.vue')
 ))
 app.component('nu-group', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuGroup.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuGroup.vue')
 ))
 app.component('nu-tmp', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuTmp.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuTmp.vue')
 ))
 app.component('nu-controller', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuController.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuController.vue')
 ))
 app.component('nu-sub-controller', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuSubController.vue')
 ))
 app.component('nu-shape', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuShape.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuShape.vue')
 ))
 app.component('nu-img-controller', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImgController.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/vivi-lib/components/editor/global/NuImgController.vue')
 ))
 app.component('nu-frame', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuFrame.vue')

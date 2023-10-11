@@ -2,7 +2,13 @@
 // $appName: None !default;
 
 @function setColor($color, $opacity: 1) {
-  @return rgba(map-get($colors, $color), $opacity);
+  @if map-has-key($map: $colors, $key: $color) {
+    @return rgba(map-get($colors, $color), $opacity);
+  }
+
+  @else {
+    @return rgba($color, $opacity);
+  }
 }
 
 // Deprecated: Because vivi-lib cannot get $appName

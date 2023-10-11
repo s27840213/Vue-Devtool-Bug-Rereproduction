@@ -38,7 +38,7 @@ class BrandKitUtils {
   get isBrandkitAvailable(): boolean {
     // return store.getters['user/isAdmin']
     // return true // for testing private assets
-    return !generalUtils.isTouchDevice()
+    return !generalUtils.isTouchDevice() && generalUtils.isPic
   }
 
   createTestingDefaultBrand(): IBrand {

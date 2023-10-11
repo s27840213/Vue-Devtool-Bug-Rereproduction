@@ -31,6 +31,7 @@ div(class="nu-layer flex-center"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :page="page"
             :primaryLayer="primaryLayer"
+            :priPrimaryLayerIndex="priPrimaryLayerIndex"
             :forRender="forRender"
             :inPreview="inPreview")
           svg(v-if="showSvgContour"
@@ -76,6 +77,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { notify } from '@kyvg/vue3-notification'
 import Svgpath from 'svgpath'
 import { defineComponent, PropType } from 'vue'
@@ -136,6 +138,12 @@ export default defineComponent({
       default: false,
       type: Boolean
     },
+    // Used by this.$props.priPrimaryLayerIndex in mounted
+    // eslint-disable-next-line vue/no-unused-properties
+    priPrimaryLayerIndex: {
+      default: -1,
+      type: Number
+    },
     inPreview: {
       default: false,
       type: Boolean
@@ -178,6 +186,11 @@ export default defineComponent({
         get() {
           return props.subLayerIndex
         }
+      }
+    })
+    Object.defineProperty(layerInfo, 'priPrimaryLayerIndex', {
+      get() {
+        return props.priPrimaryLayerIndex
       }
     })
     const _config = { config: this.config }
@@ -251,7 +264,14 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor',
-      showPcPagePreivew: 'page/getIsShowPagePreview'
+      showPcPagePreivew: 'page/getIsShowPagePreview',
+    }),
+    ...vuexUtils.mapGetters(() => generalUtils.isStk, {
+      controllerHidden: false,
+      isDuringCopy: false,
+    }, {
+      controllerHidden: 'vivisticker/getControllerHidden',
+      isDuringCopy: 'vivisticker/getIsDuringCopy',
     }),
     inAllPagesMode(): boolean {
       return this.mobilePagePreview || this.showPcPagePreivew
@@ -293,6 +313,7 @@ export default defineComponent({
           ...this.transformStyle
         }
       )
+      styles.willChange = 'initial'
       if (this.primaryLayer?.type === 'frame' && this.config.type === 'image') {
         if (this.$isTouchDevice()) {
           styles.transform += `scale(${this.$store.state.pageScaleRatio / 100})`
@@ -328,11 +349,11 @@ export default defineComponent({
       return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     frameClipStyles(): any {
-      const isRectFrameClip = this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
+      const isRectFrameClip = this.config.type === 'image' && this.config.clipPath && frameUtils.checkIsRect(this.config.clipPath)
       return {
         ...(this.primaryLayer?.type === 'frame' && this.config.type === 'image' && this.$isTouchDevice() && { transform: `scale(${100 / this.scaleRatio})` }),
         fill: '#00000000',
-        stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
+        stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : generalUtils.getOutlineColor()) : 'none',
         strokeWidth: `${7 / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
         // strokeWidth: `${(this.$isTouchDevice() ? 14 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
       }
@@ -373,7 +394,7 @@ export default defineComponent({
     },
     showSvgContour(): boolean {
       const { config } = this
-      return config.active && config.isFrame && !config.isFrameImg && config.type === 'image' && !this.forRender && !frameUtils.checkIsRect(this.config.clipPath)
+      return config.active && config.isFrame && !config.isFrameImg && config.type === 'image' && !this.forRender && this.config.clipPath && !frameUtils.checkIsRect(this.config.clipPath) && !this.isDuringCopy
     }
   },
   methods: {
@@ -417,7 +438,7 @@ export default defineComponent({
     },
     outlineStyles() {
       if (this.primaryLayer && this.primaryLayer.type === 'tmp') {
-        return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
+        return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${generalUtils.getOutlineColor()}`
       } else {
         return ''
       }

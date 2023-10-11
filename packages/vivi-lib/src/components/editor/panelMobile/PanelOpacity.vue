@@ -55,7 +55,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .panel-opacity {
+  padding-top: 3px;
   width: 100%;
-  padding-bottom: 12px;
 }
 </style>
