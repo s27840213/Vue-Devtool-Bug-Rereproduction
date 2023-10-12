@@ -116,6 +116,7 @@ type IExtraPanelName = '' | 'color' | 'replace'
 
 export default defineComponent({
   name: 'mobile-panel',
+  emits: ['panelHeight', 'switchTab'],
   props: {
     currActivePanel: {
       default: 'none',
@@ -133,7 +134,6 @@ export default defineComponent({
       type: HTMLElement
     },
   },
-  emits: ['panelHeight', 'switchTab'],
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -370,24 +370,28 @@ export default defineComponent({
       }
 
       switch (this.currActivePanel) {
-        case 'fonts':
+        case 'fonts': {
           return {
             showTitle: false
           }
-        case 'download':
+        }
+        case 'download': {
           return {
             hideContainer: true,
             pageIndex: pageUtils.currFocusPageIndex,
             panelHistory: this.panelHistory
           }
-        case 'text-effect':
+        }
+        case 'text-effect': {
           return {
             panelHistory: this.panelHistory
           }
-        case 'color':
+        }
+        case 'color': {
           return {
             panelHistory: this.panelHistory
           }
+        }
         case 'brand-list': {
           const brandDefaultVal = {
             panelHistory: this.panelHistory
@@ -404,14 +408,16 @@ export default defineComponent({
           }
           return brandDefaultVal
         }
-        case 'brand':
+        case 'brand': {
           return {
             maxheight: this.panelParentHeight()
           }
-        case 'more':
+        }
+        case 'more': {
           return {
             panelHistory: this.panelHistory
           }
+        }
         case 'overlay-dark':
         case 'overlay-light':
           return {
@@ -609,7 +615,7 @@ export default defineComponent({
     }),
     vcoConfig() {
       return {
-        handler: (e: Event) => {
+        handler: () => {
           if (!this.isImgCtrl && !this.isBgImgCtrl && !this.inMultiSelectionMode && !this.bgRemoveMode) {
             this.closeMobilePanel()
           }

@@ -5,7 +5,7 @@ div(class="mobile-panel"
     v-click-outside="vcoConfig()"
     ref="panel")
   div(v-if="!noHeaderTheme" class="mobile-panel__top-section"
-    :class="{'self-padding': noPaddingTheme }")
+    :class="{'self-padding': noPaddingTheme}")
     div(class="mobile-panel__drag-bar"
       :class="{'visible-hidden': (!insertTheme && !isUs && panelTitle !== '') || fixSize || extraFixSizeCondition}"
       @pointerdown.stop="dragPanelStart"
@@ -39,28 +39,29 @@ div(class="mobile-panel"
           :class="{'insert-right': insertTheme}"
           @pointerdown.stop="rightButtonAction"
           @touchstart.stop="disableTouchEvent")
-    tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
-        :tabs="innerTabs.label" v-model="innerTabIndex")
   div(class="mobile-panel__bottom-section")
-    //- keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-file']")
-    //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-    component(v-if="dynamicBindIs && !hideDynamicComp"
-      class="border-box"
-      :is="dynamicBindIs"
-      :key="dynamicBindIs"
-      :currPage="currPage"
-      v-bind="dynamicBindProps"
-      v-on="dynamicBindMethod"
-      @close="closeMobilePanel"
-      @fitPage="fitPage")
+    tabs(v-if="innerTabs.label" theme="light"
+      :tabs="innerTabs.label" v-model="innerTabIndex")
+    keep-alive(:include="[]")
+      //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
+      component(v-if="dynamicBindIs && !hideDynamicComp"
+        class="border-box"
+        :is="dynamicBindIs"
+        :key="dynamicBindIs"
+        :currPage="currPage"
+        v-bind="dynamicBindProps"
+        v-on="dynamicBindMethod"
+        @close="closeMobilePanel")
   transition(name="panel-up")
     mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
       :currActivePanel="currActiveSubPanel"
+      :currColorEvent="currSubColorEvent"
       :isSubPanel="true"
       :currPage="currPage"
       @switchTab="switchTab"
       @close="closeMobilePanel")
 </template>
+
 <script lang="ts">
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
@@ -107,7 +108,6 @@ import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils from '@nu/vivi-lib/utils/eventUtils'
 import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -127,7 +127,7 @@ type IExtraPanelName = '' | 'color' | 'replace'
 
 export default defineComponent({
   name: 'mobile-panel',
-  emits: ['switchTab', 'panelHeight', 'bottomThemeChange'],
+  emits: ['panelHeight', 'switchTab', 'bottomThemeChange'],
   props: {
     currActivePanel: {
       default: 'none',
@@ -199,6 +199,7 @@ export default defineComponent({
       replaceImg: (() => { /**/ }) as (img: IAssetPhoto | IPhotoItem) => void,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
+      currSubColorEvent: '',
       innerTabIndex: 0,
       resizeObserver: null as unknown as ResizeObserver
     }
@@ -232,6 +233,12 @@ export default defineComponent({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
+    historySize(): number {
+      return this.panelHistory.length
+    },
+    currHistory(): string {
+      return this.panelHistory[this.historySize - 1]
+    },
     isUs(): boolean {
       return this.$i18n.locale === 'us'
     },
@@ -250,6 +257,10 @@ export default defineComponent({
     isTextShowAllRecently(): boolean {
       return this.isShowAllRecently('text')
     },
+    backgroundLocked(): boolean {
+      const { locked } = pageUtils.currFocusPage.backgroundImage.config
+      return locked
+    },
     selectedLayerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
@@ -263,7 +274,7 @@ export default defineComponent({
         'multiple-select', 'nudge']
 
       if (this.extraPanel === 'replace' &&
-        this.panelHistory[this.panelHistory.length - 1] === 'stock') return false
+        this.currHistory === 'stock') return false
       return this.extraPanel !== '' || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
@@ -576,7 +587,7 @@ export default defineComponent({
       }
       if (this.extraPanel === 'replace') {
         return () => {
-          if (this.panelHistory[this.panelHistory.length - 1] === 'stock') this.panelHistory.pop()
+          if (this.currHistory === 'stock') this.panelHistory.pop()
           else this.extraPanel = ''
         }
       }
@@ -653,10 +664,6 @@ export default defineComponent({
         }
         this.closeMobilePanel()
       }
-    },
-    backgroundLocked(): boolean {
-      const { locked } = pageUtils.currFocusPage.backgroundImage.config
-      return locked
     }
   },
   watch: {
@@ -731,15 +738,16 @@ export default defineComponent({
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
       const target = event.target as HTMLElement
-      return !(target.matches('.header-bar .panel-icon *') || // Skip header-bar icon
-        target.matches('.modal-container, .modal-container *') || // Skip modal-card
+      return !(target.matches?.('.header-bar .panel-icon *') || // Skip header-bar icon
+        target.matches?.('.modal-container, .modal-container *') || // Skip modal-card
         target.className.includes?.('footer-tabs') || // Skip footer-bar icon
         target.className === 'inputNode' ||
         this.currActivePanel === 'select-design'
       )
     },
     closeMobilePanel() {
-      editorUtils.setShowMobilePanel(false)
+      if (this.isSubPanel) editorUtils.setCurrActiveSubPanel('none')
+      else editorUtils.setShowMobilePanel(false)
     },
     initPanelHeight() {
       // 40 = height of preserved gap
@@ -786,25 +794,25 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }
+    },
+    handleLockedNotify() {
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActiveSubPanel === panelType) {
         this.setCurrActiveSubPanel('none')
       } else {
         this.setCurrActiveSubPanel(panelType)
+        if (props) {
+          if (panelType === 'color' && props.currColorEvent) {
+            this.currSubColorEvent = props.currColorEvent
+          }
+        }
       }
-    },
-    fitPage() {
-      this.$nextTick(() => {
-        pageUtils.fitPage()
-      })
-    },
-    handleLockedNotify() {
-      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     }
   }
 })
