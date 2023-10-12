@@ -331,7 +331,7 @@ export class MovingUtils {
         }
       }
     }
-    console.log('move start end', (event as any).pointerId, this.initialPos?.x, this.initialPos?.y)
+    // console.log('move start end', (event as any).pointerId, this.initialPos?.x, this.initialPos?.y)
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
@@ -568,7 +568,7 @@ export class MovingUtils {
     const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
 
-    console.log('hasActualMove', hasActualMove)
+    // console.log('hasActualMove', hasActualMove)
     if (this.isControllerShown) {
       if (hasActualMove) {
         shortcutUtils.offsetCount = 0

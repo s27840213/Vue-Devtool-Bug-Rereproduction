@@ -826,6 +826,13 @@ export default defineComponent({
       window.addEventListener('keydown', this.handleScaleOffset)
     },
     scaling(event: PointerEvent) {
+      // find out as the scaling-action-icon is controlling,
+      // if the other pointer is touchs at the screen at the same time, the addPointer might not be called
+      // as the pointerdown-evt in nu-layer is not triggered as expected (might be browser bug)
+      // hence, following workaround detect if there is a untracked pointer, and registing it.
+      if (!pointerEvtUtils.pointerIds.includes(event.pointerId)) {
+        pointerEvtUtils.addPointer(event)
+      }
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
@@ -991,6 +998,13 @@ export default defineComponent({
       }
     },
     scaleEnd(event: PointerEvent) {
+      eventUtils.removePointerEvent('pointermove', this.scaling)
+      eventUtils.removePointerEvent('pointerup', this.scaleEnd)
+      this.snapUtils.event.emit('clearSnapLines')
+      StepsUtils.asyncRecord()
+
+      if (this.isPinchLayer) return
+
       if (this.controlState.type === 'scale' && this.controlState.id === this.config.id) {
         this.setState({ controlState: { type: '' } })
       }
@@ -1006,15 +1020,11 @@ export default defineComponent({
         }
         tiptapUtils.updateHtml()
       }
-      StepsUtils.asyncRecord()
 
       this.setCursorStyle('')
-      eventUtils.removePointerEvent('pointermove', this.scaling)
-      eventUtils.removePointerEvent('pointerup', this.scaleEnd)
       window.removeEventListener('keyup', this.handleScaleOffset)
       window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
-      this.snapUtils.event.emit('clearSnapLines')
     },
     lineEndMoveStart(event: MouseEvent) {
       if (eventUtils.checkIsMultiTouch(event) || this.controlState.type) {

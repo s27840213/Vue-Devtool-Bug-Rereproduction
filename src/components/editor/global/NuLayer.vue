@@ -73,7 +73,6 @@ import layerUtils from '@/utils/layerUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
-import PinchControlUtils from '@/utils/pinchControlUtils'
 import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
@@ -81,7 +80,6 @@ import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
-import AnyTouch from 'any-touch'
 import Svgpath from 'svgpath'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -786,31 +784,7 @@ export default defineComponent({
           addToPage: true
         })
       }
-    },
-    addPinchHandler() {
-      // only add handler to primary-layer, not sub-layer
-      if (this.primaryLayer) return null
-
-      const data = {
-        layerInfo: new Proxy({
-          pageIndex: this.pageIndex,
-          layerIndex: this.layerIndex
-        }, {
-          get: (_, key) => {
-            if (key === 'pageIndex') {
-              return this.$props.pageIndex
-            } else if (key === 'layerIndex') {
-              return this.$props.layerIndex
-            }
-          }
-        }) as ILayerInfo,
-        config: this.config as ILayer,
-        movingUtils: this.movingUtils as MovingUtils
-      }
-
-      const at = new AnyTouch(this.$refs.body as HTMLElement)
-      at.on('pinch', new PinchControlUtils(data).pinch)
-    },
+    }
     // recordPointer(e: PointerEvent) {
     //   pointerEvtUtils.addPointer(e)
     // },

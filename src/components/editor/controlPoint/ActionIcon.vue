@@ -1,13 +1,11 @@
 <template lang="pug">
 div(class="control-point__action-icon")
   div(v-if="$isTouchDevice()" class="control-point__touch-area"
-      @pointerdown.prevent.stop="pointerDown"
-      @pointerleave.prevent.stop="pointerLeave")
+      @pointerdown.prevent.stop="pointerDown")
   div(class="control-point__action"
       :class="[theme, ...extraClasses]"
       :style="extraStyle"
       @pointerdown.prevent.stop="pointerDown"
-      @pointerleave.prevent.stop="pointerLeave"
       @touchstart="disableTouchEvent")
     svg-icon(class="control-point__action-svg" :iconName="iconName" :iconWidth="iconSize" :iconColor="iconColor")
 </template>
@@ -49,9 +47,6 @@ const emit = defineEmits<{(event: 'action', e: PointerEvent): void}>()
 const pointerDown = (e: PointerEvent) => {
   pointerEvtUtils.addPointer(e)
   emit('action', e)
-}
-const pointerLeave = (e: PointerEvent) => {
-  pointerEvtUtils.removePointer(e.pointerId)
 }
 const disableTouchEvent = (e: TouchEvent) => {
   if (generalUtils.isTouchDevice()) {

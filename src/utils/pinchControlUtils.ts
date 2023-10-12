@@ -180,16 +180,16 @@ export default class PinchControlUtils {
   }
 
   end(e: AnyTouchEvent) {
+    this.init = null
     if (store.getters.getControlState.id === this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })
-    }
-    this.init = null
-    const nativeEvt = e.nativeEvent as TouchEvent
-    const isHasOnePtrEvt = pointerEvtUtils.pointers.length === 1
-    const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
-    console.log('pinch end', pointerEvtUtils.pointers, pointerEvtUtils.pointers[0], nativeEvt.touches.length)
-    if (isHasOnePtrEvt && isLayerExist) {
-      this.movingUtils.moveStart(nativeEvt, pointerEvtUtils.pointerIds[0] ?? 0)
+      const nativeEvt = e.nativeEvent as TouchEvent
+      const isHasOnePtrEvt = pointerEvtUtils.pointers.length === 1
+      const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
+      // console.log('pinch end', pointerEvtUtils.pointers, pointerEvtUtils.pointers[0], nativeEvt.touches.length)
+      if (isHasOnePtrEvt && isLayerExist) {
+        this.movingUtils.moveStart(nativeEvt, pointerEvtUtils.pointerIds[0] ?? 0)
+      }
     }
   }
 }
