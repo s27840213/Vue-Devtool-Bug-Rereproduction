@@ -2,7 +2,7 @@
 div(class="page-card" :id="`page-card-${pageIndex}`" :style="styles('card')")
   div(v-if="!isOutOfBound" :id="`nu-page-wrapper_${pageIndex}`" :class="`page-card__pseudo-page`" :style="styles('page')")
     div(class="page-card__scale-container" :style="styles('scale')")
-      page-content(:id="`vvstk-page-${pageIndex}`" class="page-content" :config="config" :pageIndex="pageIndex" :noBg="noBg" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+      page-content(:id="`vvstk-page-${pageIndex}`" class="page-content" :config="config" :pageIndex="pageIndex" :noBg="noBg" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils" :style="styles('page-content')")
       dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
     div(class="page-control" :style="styles('control')")
       nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
@@ -143,11 +143,16 @@ export default defineComponent({
             ...(this.isPageDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {}),
             ...(backgroundUtils.inBgSettingMode && { boxShadow: '0 0 0 2px #7190CC' })
           }
+        case 'page-content':
+          return {
+            ...(this.isPageDuringCopy ? { clipPath : 'none' } : {}),
+          }
         case 'scale':
           return {
             width: `${this.config.width}px`,
             height: `${this.config.height}px`,
-            transform: `scale(${1 / this.contentScaleRatio})`
+            transform: `scale(${1 / this.contentScaleRatio})`,
+            ...(this.isPageDuringCopy ? { clipPath: 'none' } : {}),
           }
       }
     }
@@ -162,9 +167,9 @@ export default defineComponent({
     position: relative;
     transform-style: preserve-3d;
     user-select: none;
+    margin: 0 auto;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     border-radius: 10px;
-    margin: 0 auto;
   }
   &__scale-container {
     width: 0px;
@@ -176,8 +181,10 @@ export default defineComponent({
 }
 
 .page-content {
-  overflow: hidden;
-  border-radius: v-bind("isDuringCopy ? '0' : '10px'");
+  // use clip-path and translateZ(0) to prevent bg color bleed at rounded corners of page
+  // https://stackoverflow.com/questions/17202128/rounded-cornes-border-radius-safari-issue
+  clip-path: inset(0 round 10px);
+  transform: translateZ(0);
 }
 
 .page-control {
