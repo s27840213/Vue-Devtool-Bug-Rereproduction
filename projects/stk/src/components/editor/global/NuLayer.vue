@@ -600,8 +600,8 @@ export default defineComponent({
           imgHeight,
           imgX,
           imgY,
-          horizontalFlip: layerUtils.getCurrLayer.styles.horizontalFlip,
-          verticalFlip: layerUtils.getCurrLayer.styles.verticalFlip
+          horizontalFlip: this.primaryLayer && layerUtils.getCurrLayer.styles.horizontalFlip !== this.primaryLayer.styles.horizontalFlip,
+          verticalFlip: this.primaryLayer && layerUtils.getCurrLayer.styles.verticalFlip !== this.primaryLayer.styles.verticalFlip
         })
         const body = this.$refs.body as HTMLElement
         body.addEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
