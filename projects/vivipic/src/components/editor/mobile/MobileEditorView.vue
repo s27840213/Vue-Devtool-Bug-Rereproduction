@@ -169,6 +169,7 @@ export default defineComponent({
           y: rect.top
         }
       })
+      editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
     }
 
     this.$nextTick(() => {
