@@ -671,7 +671,7 @@ export default defineComponent({
     handleDimensionUpdate(newVal = 0 as number | string, oldVal = 0 as number | string) {
       if (this.isBlurImg) return
 
-      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, newVal))
+      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
       if (!this.isOnError && currUrl) {
         const { type } = this.config.srcObj
         if (type === 'background') return
