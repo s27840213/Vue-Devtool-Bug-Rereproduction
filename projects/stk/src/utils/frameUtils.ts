@@ -67,8 +67,8 @@ class FrameUtils {
           y: currLayer.styles.y + (clip.styles.y + height / 4) * currLayer.styles.scale,
           width: imgWidth * currLayer.styles.scale,
           height: imgHeight * currLayer.styles.scale,
-          horizontalFlip: currLayer.styles.horizontalFlip,
-          verticalFlip: currLayer.styles.verticalFlip,
+          horizontalFlip: clip.styles.horizontalFlip,
+          verticalFlip: clip.styles.verticalFlip,
           opacity: clip.styles.opacity,
           adjust // inherit adjust to the new layer,
         }
@@ -91,14 +91,10 @@ class FrameUtils {
 
       const clipper = document.getElementById(`nu-clipper-${layerIndex}`) as HTMLElement
       clipper && clipper.classList.remove('layer-flip')
-      LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, {
-        horizontalFlip: currLayer.styles.horizontalFlip,
-        verticalFlip: currLayer.styles.verticalFlip
-      })
-      LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, {
-        horizontalFlip: false,
-        verticalFlip: false
-      })
+      // LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, {
+      //   horizontalFlip: false,
+      //   verticalFlip: false
+      // })
       setTimeout(() => {
         const clipper = document.getElementById(`nu-clipper-${layerIndex}`) as HTMLElement
         clipper && clipper.classList.add('layer-flip')
