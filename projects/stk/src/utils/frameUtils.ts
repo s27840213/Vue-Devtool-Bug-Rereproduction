@@ -91,10 +91,10 @@ class FrameUtils {
 
       const clipper = document.getElementById(`nu-clipper-${layerIndex}`) as HTMLElement
       clipper && clipper.classList.remove('layer-flip')
-      LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, {
-        horizontalFlip: false,
-        verticalFlip: false
-      })
+      // LayerUtils.updateLayerStyles(LayerUtils.pageIndex, layerIndex, {
+      //   horizontalFlip: false,
+      //   verticalFlip: false
+      // })
       setTimeout(() => {
         const clipper = document.getElementById(`nu-clipper-${layerIndex}`) as HTMLElement
         clipper && clipper.classList.add('layer-flip')
