@@ -121,15 +121,16 @@ export default defineComponent({
     },
     handleDeleteAssets() {
       modalUtils.setModalInfo('', this.$t('NN0912'), {
+        msg: this.$t('NN0203'),
+        class: 'btn-light-outline-mid',
+        action: () => {
+          return false
+        }
+      }, {
         msg: this.$t('NN0034'),
         action: () => {
           this.deleteAssets()
         },
-      }, {
-        msg: this.$t('NN0203'),
-        action: () => {
-          return false
-        }
       })
     }
   }
