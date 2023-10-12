@@ -310,7 +310,7 @@ export default defineComponent({
     addToRecently() {
       if (colorUtils.currColor === this.initColor) return
 
-      if (editorUtils.currActivePanel === 'background' || this.currEvent === ColorEventType.background) {
+      if (this.$isStk && editorUtils.currActivePanel === 'background' || this.currEvent === ColorEventType.background) {
         this.addRecentlyBgColor(colorUtils.currColor)
       } else this.addRecentlyColors(colorUtils.currColor)
       this.initColor = colorUtils.currColor
