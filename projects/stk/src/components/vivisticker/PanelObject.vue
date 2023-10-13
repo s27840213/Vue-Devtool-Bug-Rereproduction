@@ -30,7 +30,7 @@ import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { CCategoryList } from '../category/CategoryList.vue'
+import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 
 export default defineComponent({
   name: 'panel-object',
