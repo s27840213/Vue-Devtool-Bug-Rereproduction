@@ -74,8 +74,8 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
 </template>
 
 <script lang="ts">
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'

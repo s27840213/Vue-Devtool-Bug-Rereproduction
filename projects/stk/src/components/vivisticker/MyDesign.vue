@@ -40,7 +40,7 @@ div(class="my-design")
 </template>
 
 <script lang="ts">
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import MyDesignObjectItem from '@/components/vivisticker/mydesign/MyDesignObjectItem.vue'
 import MyDesignTemplateItem from '@/components/vivisticker/mydesign/MyDesignTemplateItem.vue'
 import MyDesignTextItem from '@/components/vivisticker/mydesign/MyDesignTextItem.vue'

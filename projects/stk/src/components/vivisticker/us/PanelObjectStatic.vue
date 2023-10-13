@@ -96,7 +96,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
-import { CCategoryList } from '@/components/category/CategoryList.vue'
+import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IAsset, isITag, ITagExtend } from '@/interfaces/module'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'

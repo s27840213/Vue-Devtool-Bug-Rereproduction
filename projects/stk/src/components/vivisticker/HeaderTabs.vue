@@ -39,7 +39,7 @@ div(class="header-bar relative" @pointerdown.stop)
 </template>
 
 <script lang="ts">
-import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
+import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import useCanvasUtils from '@nu/vivi-lib/composable/useCanvasUtils'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'

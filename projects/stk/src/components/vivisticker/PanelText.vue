@@ -58,8 +58,8 @@ div(class="overflow-container full-size rwd-container")
 
 <script lang="ts">
 import listApi from '@nu/vivi-lib/apis/list'
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'

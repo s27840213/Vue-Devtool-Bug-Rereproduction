@@ -1,16 +1,16 @@
 <template lang="pug">
 div(class="category-row")
-  div(v-if="prevIcon"
+  div(v-if="prevIcon && showIcon"
     class="category-row__move category-row__move--left"
     @click="handlePrev")
     div(class="category-row__icon")
       svg-icon(iconName="arrow-left" iconWidth="20px" iconColor="gray-1")
-  div(v-if="nextIcon"
+  div(v-if="nextIcon && showIcon"
     class="category-row__move category-row__move--right"
     @click="handleNext")
     div(class="category-row__icon")
       svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
-  div(class="category-row__items" ref="items" @scroll.passive="handleScroll")
+  div(class="category-row__items" ref="items" :style="itemsStyles" @scroll.passive="handleScroll")
     slot
 </template>
 
@@ -19,15 +19,27 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
+  props: {
+    gap: {
+      type: Number,
+      default: 10
+    }
+  },
   computed: {
     items(): HTMLElement {
       return this.$refs.items as HTMLElement
+    },
+    itemsStyles(): {[key: string]: string} {
+      return {
+        columnGap: this.gap + 'px'
+      }
     }
   },
   data() {
     return {
       prevIcon: true,
-      nextIcon: true
+      nextIcon: true,
+      showIcon: this.$isPic,
     }
   },
   mounted() {
@@ -70,7 +82,7 @@ export default defineComponent({
     display: grid;
     column-gap: 10px;
     grid-template-columns: auto;
-    justify-content: start;
+    justify-content: flex-start;
     grid-auto-flow: column;
     scroll-behavior: smooth;
     text-align: left;

@@ -64,8 +64,8 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
 
 <script lang="ts">
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'

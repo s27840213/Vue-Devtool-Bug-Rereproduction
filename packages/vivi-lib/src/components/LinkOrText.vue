@@ -4,7 +4,6 @@ span(:class="{'link-or-text__link-text': url !== ''}" @click.stop="openUrl") {{ 
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
 const props = defineProps({
   title: {
     type: String,

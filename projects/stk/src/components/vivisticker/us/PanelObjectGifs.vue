@@ -83,7 +83,7 @@ div(class="panel-gifs" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
-import { CCategoryList } from '@/components/category/CategoryList.vue'
+import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
