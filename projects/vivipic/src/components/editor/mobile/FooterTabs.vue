@@ -1,4 +1,6 @@
 <script lang="ts">
+import { notify } from '@kyvg/vue3-notification'
+import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { IFooterTab } from '@nu/vivi-lib/interfaces/editor'
 import { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
@@ -21,8 +23,6 @@ import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
-import { notify } from '@kyvg/vue3-notification'
-import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

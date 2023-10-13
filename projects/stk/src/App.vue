@@ -41,14 +41,13 @@ div(id="app" :style="appStyles()")
 </template>
 
 <script lang="ts">
-import DebugTool from '@nu/vivi-lib/components/componentLog/DebugTool.vue'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import ResInfo from '@nu/vivi-lib/components/modal/ResInfo.vue'
 import Popup from '@/components/popup/Popup.vue'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
 import { throttle } from 'lodash'
-import { defineComponent } from 'vue'
+import { defineComponent, defineAsyncComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import networkUtils from '@nu/vivi-lib/utils/networkUtils'
@@ -60,7 +59,9 @@ export default defineComponent({
     Popup,
     ResInfo,
     ModalCard,
-    DebugTool,
+    DebugTool: defineAsyncComponent(
+      () => import('@nu/vivi-lib/components/componentLog/DebugTool.vue'),
+    ),
   },
   directives: {
     clickOutside: vClickOutside.directive

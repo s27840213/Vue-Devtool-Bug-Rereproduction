@@ -2,24 +2,24 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
-// import { IListModuleState } from '@/interfaces/module'
+import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
-// import background from '@/store/module/background'
+import background from '@/store/module/background'
 import bgRemove from '@/store/module/bgRemove'
 import color from '@/store/module/color'
-// import font from '@/store/module/font'
+import font from '@/store/module/font'
 import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
-// import markers from '@/store/module/markers'
+import markers from '@/store/module/markers'
 import mobileEditor from '@/store/module/mobileEditor'
 import modal from '@/store/module/modal'
-// import objects from '@/store/module/objects'
+import objects from '@/store/module/objects'
 import page from '@/store/module/page'
 import popup from '@/store/module/popup'
 import shadow from '@/store/module/shadow'
-// import templates from '@/store/module/templates'
-// import textStock from '@/store/module/text'
+import templates from '@/store/module/templates'
+import textStock from '@/store/module/text'
 import unsplash from '@/store/module/unsplash'
 import user from '@/store/module/user'
 import webView from '@/store/module/webView'
@@ -320,7 +320,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getContentScaleRatio(state: IEditorState) {
     const pageIndex = layerUtils.pageIndex === -1 ? 0 : layerUtils.pageIndex
-    return state.pages[pageIndex].config.contentScaleRatio
+    return generalUtils.isTouchDevice() ? state.pages[pageIndex].config.contentScaleRatio : 1
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state.useMobileEditor ? -1 : state._3dEnabledPageIndex
@@ -1184,17 +1184,17 @@ window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500
 export type IStoreRoot = IEditorState & {
   user: typeof user.state
   text: typeof text.state
-  // font: IListModuleState
+  font: IListModuleState
   color: typeof color.state
-  // objects: IListModuleState
-  // templates: IListModuleState
-  // textStock: IListModuleState
-  // background: IListModuleState
+  objects: IListModuleState
+  templates: IListModuleState
+  textStock: IListModuleState
+  background: IListModuleState
   mobileEditor: typeof mobileEditor.state
   modal: typeof modal.state
   popup: typeof popup.state
   page: typeof page.state
-  // markers: IListModuleState
+  markers: IListModuleState
   unsplash: typeof unsplash.state
   bgRemove: typeof bgRemove.state
   shadow: typeof shadow.state
@@ -1209,17 +1209,17 @@ const store = createStore({
   modules: {
     user,
     text,
-    // font,
+    font,
     color,
-    // objects,
-    // templates,
-    // textStock,
-    // background,
+    objects,
+    templates,
+    textStock,
+    background,
     mobileEditor,
     modal,
     popup,
     page,
-    // markers,
+    markers,
     unsplash,
     bgRemove,
     shadow,

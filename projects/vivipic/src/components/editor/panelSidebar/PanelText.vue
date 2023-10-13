@@ -116,6 +116,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
+      pending: 'textStock/pending',
       scaleRatio: 'getPageScaleRatio',
       isDefaultSelected: 'brandkit/getIsDefaultSelected',
       currentBrand: 'brandkit/getCurrentBrand'
@@ -124,7 +125,6 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
     }),
     keywordLabel():string {

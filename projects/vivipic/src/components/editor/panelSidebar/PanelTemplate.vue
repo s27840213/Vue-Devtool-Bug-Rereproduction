@@ -151,13 +151,13 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword',
       theme: 'theme',
       sum: 'sum'
     }),
     ...mapState('user', ['userId']),
     ...mapGetters({
+      pending: 'templates/pending',
       editorThemes: 'getEditThemes'
     }),
     ...mapGetters({

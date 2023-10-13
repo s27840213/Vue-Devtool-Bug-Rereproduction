@@ -72,7 +72,7 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState, mapGetters } from 'vuex'
 
 export default defineComponent({
   name: 'PanelBackground',
@@ -106,8 +106,10 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
+    }),
+    ...mapGetters({
+      pending: 'background/pending',
     }),
     itemWidth(): number {
       const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
@@ -227,6 +229,7 @@ export default defineComponent({
         pageIndex: pageUtils.addAssetTargetPageIndex,
         color: color
       })
+      stepsUtils.record()
     },
     async handleSearch(keyword: string) {
       this.resetSearch()

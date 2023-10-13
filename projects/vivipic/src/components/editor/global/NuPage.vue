@@ -170,6 +170,7 @@ import i18n from '@nu/vivi-lib/i18n'
 import { IFrame, IGroup, IImage, ILayer, IText } from '@nu/vivi-lib/interfaces/layer'
 import { IPage, IPageState } from '@nu/vivi-lib/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@nu/vivi-lib/store/types'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils from '@nu/vivi-lib/utils/eventUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -248,6 +249,9 @@ export default defineComponent({
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
     })
+    if (this.config.x === 0 || this.config.y === 0) {
+      editorUtils.handleContentScaleRatio(this.pageIndex)
+    }
   },
   watch: {
     pageIndex(val) {
