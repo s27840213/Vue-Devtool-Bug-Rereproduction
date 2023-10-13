@@ -17,6 +17,7 @@ import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import DebugTool from '@/components/componentLog/DebugTool.vue'
+import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
@@ -204,6 +205,7 @@ import SvgIconView from '@/views/SvgIconView.vue'
   CategoryTextItem,
   ColorPicker,
   DebugTool,
+  FooterTabs,
   HeaderTabs,
   MobilePanel,
   MobileSlider,
