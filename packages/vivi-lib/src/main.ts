@@ -3,6 +3,7 @@ import PropertyBar from '@/components/global/PropertyBar.vue'
 import SvgIcon from '@/components/global/SvgIcon.vue'
 import colorUtils from '@/utils/colorUtils'
 import modalUtils from '@/utils/modalUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
 import Notifications, { notify } from '@kyvg/vue3-notification'
@@ -52,9 +53,12 @@ window.onerror = function (msg, url, line, colno, error) {
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
     console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
-    // if (store.getters['user/isAdmin'] && (window.location.hostname !== 'vivipic.com' || store.getters.getShowGlobalErrorModal))
-    if (store.getters['user/isAdmin']) {
-      const hint = `${store.getters['user/getUserId']}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+    if ((generalUtils.isPic && store.getters['user/isAdmin']) ||
+        (generalUtils.isStk && store.getters['vivisticker/getDebugMode'])) {
+      const id = generalUtils.isPic 
+        ? store.getters['user/getUserId']
+        : stkWVUtils.getUserInfoFromStore().hostId
+      const hint = `${id}, ${generalUtils.generateTimeStamp()}, ${errorId}`
       modalUtils.setModalInfo(
         i18n.global.t('NN0866'),
         hint,
@@ -226,7 +230,13 @@ app.directive('touch', {
    * If you want to prevetDefault, use: div(v-touch="true" ...)
    */
   mounted: (el, binding, vnode) => {
-    anyTouchWeakMap.set(el, new AnyTouch(el, { preventDefault: Boolean(binding.value) }))
+    // pass preventDefault as function to fix tap event issue of apple pencil for unknown reason
+    const preventDefault = () => {
+      return Boolean(binding.value)
+    }
+    const at = new AnyTouch(el, { preventDefault })
+    at.get('tap').maxDistance = 10 // raise max move distance to trigger double tap event more easily for apple pencil
+    anyTouchWeakMap.set(el, at)
   },
   unmounted: (el, binding, vnode) => {
     (anyTouchWeakMap.get(el) as AnyTouch).destroy()
@@ -326,28 +336,6 @@ app.directive('progress', {
   }
 })
 
-/**
- * move to the SvgIcon.vue component
- */
-// document.addEventListener('DOMContentLoaded', async () => {
-//   const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-//   const req = require.context('@/assets/icon', true, /\.svg$/)
-
-//   if (window.location.host !== 'vivipic.com') {
-//     svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-//       return context.default?.id ?? ''
-//     }))
-//   } else {
-//     requireAll(req)
-//   }
-// }, false)
-
-// add temporarily for testing
-// if (window.location.href.indexOf('logout') > -1) {
-//   localStorage.setItem('token', '')
-//   router.push({ name: 'Login' })
-// }
-
 let token = localStorage.getItem('token') || ''
 
 // if token is contained in queryString, it would be used
@@ -360,33 +348,5 @@ if (urlParams.has('token')) {
   }
 }
 
-// if (['production'].includes(process.env.NODE_ENV)) {
-//   const Sentry = require('@sentry/vue')
-//   const { Integrations } = require('@sentry/tracing')
-//   Sentry.init({
-//     Vue,
-//     trackComponents: true,
-//     maxBreadcrumbs: 10,
-//     tracesSampleRate: 1.0,
-//     environment: process.env.NODE_ENV,
-//     dsn: process.env.VUE_APP_SENTRY_DSN,
-//     release: process.env.VUE_APP_SENTRY_RELEASE,
-//     integrations: [
-//       new Integrations.BrowserTracing({
-//         routingInstrumentation: Sentry.vueRouterInstrumentation(router)
-//       })
-//     ],
-//     beforeBreadcrumb(breadcrumb: any, hint: any) {
-//       if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
-//         const { __sentry_xhr__: request, response } = hint.xhr
-//         Object.assign(breadcrumb.data, { response, requestBody: request.body })
-//       }
-//       return breadcrumb
-//     }
-//   })
-//   // app.config.devtools = false
-// }
-// app.mount('#app')
 return app
 }
-// export default app
