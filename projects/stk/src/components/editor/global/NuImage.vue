@@ -822,7 +822,7 @@ export default defineComponent({
       if (this.config.srcObj.type === 'ios') return
       if (this.isBlurImg) return
 
-      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, newVal))
+      const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
       if (!this.isOnError && currUrl) {
         const { type } = this.config.srcObj
         if (type === 'background') return
