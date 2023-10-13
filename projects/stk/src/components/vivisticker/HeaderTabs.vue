@@ -1,28 +1,11 @@
 <template lang="pug">
-div(class="header-bar relative" @pointerdown.stop)
-  div(class="header-bar__left" :class="{ editor: isInEditor }")
-    div(v-for="tab in leftTabs"
-        :key="tab.icon"
-        :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
-        :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
-        @click.prevent.stop="handleTabAction(tab.action)"
-        v-press="() => handleTabAction(tab.longPressAction)")
-      svg-icon(:iconName="tab.icon"
-                :iconWidth="`${tab.width}px`"
-                :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
-                :iconColor="tab.disabled ? 'gray-2' : 'white'")
-  div(class="header-bar__center")
-    link-or-text(:title="centerTitle" :url="isInCategory && !isInEditor ? titleInfo.url : ''")
-  div(class="header-bar__right")
-    div(v-for="tab in rightTabs"
-        :key="tab.icon"
-        :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
-        :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
-        @click.prevent.stop="handleTabAction(tab.action)")
-      svg-icon(:iconName="tab.icon"
-                :iconWidth="`${tab.width}px`"
-                :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
-                :iconColor="tab.disabled ? 'gray-2' : 'white'")
+header-tabs(:rootStyles="rootStyles"
+            :isInEditor="isInEditor"
+            :leftTabs="leftTabs"
+            :centerTitle="centerTitle"
+            :centerUrl="centerUrl"
+            :rightTabs="rightTabs")
+  template(v-slot="")
     div(v-if="isInEditor && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleCopy")
         svg-icon(iconName="copy"
                   iconWidth="18px"
@@ -39,8 +22,8 @@ div(class="header-bar relative" @pointerdown.stop)
 </template>
 
 <script lang="ts">
-import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
-import useCanvasUtils from '@nu/vivi-lib/composable/useCanvasUtils'
+import HeaderTabs from '@nu/vivi-lib/components/editor/mobile/HeaderTabs.vue'
+import { TabConfig } from '@nu/vivi-lib/components/editor/mobile/HeaderTab.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
@@ -65,33 +48,19 @@ import _ from 'lodash'
 import { computed, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-type TabConfig = {
-  icon: string,
-  logo?: boolean,
-  disabled?: boolean,
-  width: number,
-  height?: number,
-  action?: () => void,
-  longPressAction?: () => void,
-  // If isPanelIcon is true, MobilePanel v-out will not be triggered by this icon.
-  isPanelIcon?: boolean
-}
-
 export default defineComponent({
   setup() {
     const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
     const isInLastStep = computed(() => stepsUtils.isInLastStep)
     const isSavingAsMyDesign = false
-    const { trimCanvas } = useCanvasUtils()
     return {
       isInFirstStep,
       isInLastStep,
       isSavingAsMyDesign,
-      trimCanvas
     }
   },
   components: {
-    LinkOrText
+    HeaderTabs,
   },
   data() {
     return {
@@ -154,6 +123,12 @@ export default defineComponent({
     },
     showAllRecently(): boolean {
       return this.isCurrentShowAllRecently(this.currActiveTab)
+    },
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: '9px',
+        paddingBottom: '9px',
+      }
     },
     isCropping(): boolean {
       return imageUtils.isImgControl()
@@ -306,6 +281,9 @@ export default defineComponent({
         return ''
       }
     },
+    centerUrl(): string {
+      return this.isInCategory && !this.isInEditor ? this.titleInfo.url : ''
+    },
     rightTabs(): TabConfig[] {
       const downloadTab = stkWVUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
       if (this.isInMultiPageShare) {
@@ -405,11 +383,6 @@ export default defineComponent({
     }),
     resetTemplatesSearch(params = {}) {
       this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
-    },
-    handleTabAction(action?: () => void) {
-      if (action) {
-        action()
-      }
     },
     clearCategory() {
       this.setIsInCategory({ tab: this.currActiveTab, bool: false })
@@ -943,75 +916,25 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .header-bar {
-  @include size(100%, 44px);
-  background-color: setColor(black-1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0px 24px;
-  box-sizing: border-box;
-  z-index: setZindex("editor-header");
-
-  &__feature-icon {
-    transition: background-color 0.1s;
-    padding: 4px;
-    border-radius: 3px;
+  .btn-feature{
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    gap: 4px;
+    background-color: white;
+    border-radius: 100px;
+    > svg {
+      padding: 2px;
+    }
     &:active {
-      background-color: setColor(gray-2);
-    }
-    &.btn-feature{
-      display: flex;
-      align-items: center;
-      padding: 4px 8px;
-      gap: 4px;
-      background-color: white;
-      border-radius: 100px;
-      >svg {
-        padding: 2px;
-      }
-      &:active {
-        background-color: setColor(black-6);
-      }
+      background-color: setColor(black-6);
     }
   }
-
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    &.editor {
-      gap: 24px;
-    }
-    & > div {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-
-  &__center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-weight: 600;
-    font-size: 18px;
-    line-height: 140%;
+  &__right-text {
     color: white;
-    white-space: nowrap;
-  }
-
-  &__right {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    &-text {
-      color: white;
-      font-weight: 600;
-      font-size: 14px;
-      line-height: 140%;
-    }
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
   }
 }
 </style>

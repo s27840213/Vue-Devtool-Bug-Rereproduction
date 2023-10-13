@@ -17,6 +17,8 @@ import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import DebugTool from '@/components/componentLog/DebugTool.vue'
+import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
+import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
@@ -47,7 +49,6 @@ import SlideToggle from '@/components/global/SlideToggle.vue'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
-import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -203,6 +204,8 @@ import SvgIconView from '@/views/SvgIconView.vue'
   CategoryTextItem,
   ColorPicker,
   DebugTool,
+  HeaderTabs,
+  MobilePanel,
   MobileSlider,
   DimBackground,
   PageContent,
@@ -233,7 +236,6 @@ import SvgIconView from '@/views/SvgIconView.vue'
   ImageGallery,
   FontSizeSelector,
   LazyLoad,
-  MobilePanel,
   ModalCard,
   ResInfo,
   ObserverSentinel,
