@@ -1,73 +1,7 @@
-<template lang="pug">
-div(class="mobile-panel"
-    :class="{'panel-padding': !noPaddingTheme, 'not-rounded': noRoundTheme, 'at-bottom': bottomTheme}"
-    :style="panelStyle"
-    v-click-outside="vcoConfig()"
-    ref="panel")
-  div(v-if="!noHeaderTheme" class="mobile-panel__top-section"
-    :class="{'self-padding': noPaddingTheme}")
-    div(class="mobile-panel__drag-bar"
-      :class="{'visible-hidden': (!insertTheme && !isUs && panelTitle !== '') || fixSize || extraFixSizeCondition}"
-      @pointerdown.stop="dragPanelStart"
-      @touchstart.stop="disableTouchEvent")
-        div
-    div(v-if="showLeftBtn || showRightBtn")
-      div(class="mobile-panel__btn mobile-panel__left-btn"
-          :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn, 'insert': insertTheme, 'us': isUs}")
-        svg-icon(
-          class="click-disabled"
-          :iconName="leftBtnName"
-          :iconColor="'white'"
-          :iconWidth="insertTheme ? '32px' : '20px'")
-        div(class="mobile-panel__btn-click-zone"
-          :class="{'insert-left': insertTheme}"
-          @pointerdown.stop="leftButtonAction"
-          @touchstart.stop="disableTouchEvent")
-      div(class="mobile-panel__title")
-        span(class="mobile-panel__title-text body-1 mr-10"
-          :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
-        div(v-if="currActivePanel === 'multiple-select'" class="mobile-panel__layer-num")
-          span(class="label-sm text-white") {{selectedLayerNum}}
-      div(class="mobile-panel__btn mobile-panel__right-btn"
-          :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn, 'insert': insertTheme, 'us': isUs}")
-        svg-icon(
-          class="click-disabled"
-          :iconName="rightBtnName"
-          :iconColor="'white'"
-          :iconWidth="insertTheme ? '24px' : '20px'")
-        div(class="mobile-panel__btn-click-zone"
-          :class="{'insert-right': insertTheme}"
-          @pointerdown.stop="rightButtonAction"
-          @touchstart.stop="disableTouchEvent")
-  div(class="mobile-panel__bottom-section")
-    tabs(v-if="innerTabs.label" theme="light"
-      :tabs="innerTabs.label" v-model="innerTabIndex")
-    keep-alive(:include="[]")
-      //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-      component(v-if="dynamicBindIs && !hideDynamicComp"
-        class="border-box"
-        :is="dynamicBindIs"
-        :key="dynamicBindIs"
-        :currPage="currPage"
-        v-bind="dynamicBindProps"
-        v-on="dynamicBindMethod"
-        @close="closeMobilePanel")
-  transition(name="panel-up")
-    mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
-      :currActivePanel="currActiveSubPanel"
-      :currColorEvent="currSubColorEvent"
-      :isSubPanel="true"
-      :currPage="currPage"
-      @switchTab="switchTab"
-      @close="closeMobilePanel")
-</template>
-
 <script lang="ts">
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
-// import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
-// import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
 import PanelFlip from '@nu/vivi-lib/components/editor/panelMobile/PanelFlip.vue'
@@ -75,7 +9,6 @@ import PanelFontFormat from '@nu/vivi-lib/components/editor/panelMobile/PanelFon
 import PanelFontSize from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSize.vue'
 import PanelFontSpacing from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSpacing.vue'
 import PanelGiphyMore from '@/components/editor/panelMobile/PanelGiphyMore.vue'
-// import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
 import PanelMyDesignMore from '@/components/editor/panelMobile/PanelMyDesignMore.vue'
 import PanelNudge from '@nu/vivi-lib/components/editor/panelMobile/PanelNudge.vue'
 import PanelObjectAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelObjectAdjust.vue'
@@ -84,15 +17,10 @@ import PanelOrder from '@nu/vivi-lib/components/editor/panelMobile/PanelOrder.vu
 import PanelPhotoShadow from '@nu/vivi-lib/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PanelPosition from '@nu/vivi-lib/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@nu/vivi-lib/components/editor/panelMobile/PanelRemoveBg.vue'
-// import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
 import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextEffect from '@nu/vivi-lib/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
-// import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
-// import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@nu/vivi-lib/components/editor/panelSidebar/PanelPhoto.vue'
-// import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
-// import PopupDownload from '@/components/popup/PopupDownload.vue'
 import PanelAddTemplate from '@/components/vivisticker/PanelAddTemplate.vue'
 import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
 import PanelObject from '@/components/vivisticker/PanelObject.vue'
@@ -101,11 +29,10 @@ import PanelReplace from '@/components/vivisticker/PanelReplace.vue'
 import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
-import i18n from '@nu/vivi-lib/i18n'
-import { ICurrSelectedInfo, IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
+import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
+import mobilePanelMixin from '@nu/vivi-lib/mixin/mobilePanel'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
-import eventUtils from '@nu/vivi-lib/utils/eventUtils'
 import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
@@ -113,51 +40,21 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import { notify } from '@kyvg/vue3-notification'
-import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
-import { IPage } from '@nu/vivi-lib/interfaces/page'
-import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
-import vClickOutside from 'click-outside-vue3'
-import { computed, defineComponent, PropType, provide } from 'vue'
+import { computed, defineComponent, provide } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-type IExtraPanelName = '' | 'color' | 'replace'
-
 export default defineComponent({
-  name: 'mobile-panel',
-  emits: ['panelHeight', 'switchTab', 'bottomThemeChange'],
-  props: {
-    currActivePanel: {
-      default: 'none',
-      type: String
-    },
-    isSubPanel: {
-      default: false,
-      type: Boolean
-    },
-    currPage: {
-      type: Object as PropType<IPage>,
-      required: true
-    },
-    footerTabsRef: {
-      type: HTMLElement
-    },
-  },
-  directives: {
-    clickOutside: vClickOutside.directive
-  },
+  extends: MobilePanel,
+  mixins: [mobilePanelMixin],
+  emits: ['bottomThemeChange'],
   components: {
-    // PanelTemplate,
     PanelPhoto,
     PanelObject,
     PanelBackground,
     PanelText,
     PanelTextUs,
-    // PanelFile,
-    // PanelBrand,
-    // PanelPage,
     ColorPanel,
     PanelPosition,
     PanelFlip,
@@ -168,22 +65,17 @@ export default defineComponent({
     PanelFontFormat,
     PanelFontSpacing,
     PanelNudge,
-    // PanelResize,
-    // PopupDownload,
-    // PanelMore,
     PanelColor,
     PanelAdjust,
     PanelTextEffect,
     PanelPhotoShadow,
     PanelObjectAdjust,
-    // PanelBrandList,
     PanelVvstkMore,
     PanelGiphyMore,
     PanelColorPicker,
     PanelMyDesignMore,
     panelSelectDesign,
     PanelAddTemplate,
-    Tabs,
     PanelRemoveBg,
     PanelPageManagement,
     PanelTemplateContent,
@@ -191,18 +83,37 @@ export default defineComponent({
   },
   data() {
     return {
-      panelHistory: [] as Array<string>,
-      // If fixSize is true, panelDragHeight take no effect.
-      panelDragHeight: 0,
-      lastPointerY: 0,
-      extraPanel: '' as IExtraPanelName,
-      replaceImg: (() => { /**/ }) as (img: IAssetPhoto | IPhotoItem) => void,
-      extraColorEvent: ColorEventType.text,
-      isDraggingPanel: false,
-      currSubColorEvent: '',
-      innerTabIndex: 0,
-      resizeObserver: null as unknown as ResizeObserver
+      // Used in extended vivi-lib MobilePanel
+      // eslint-disable-next-line vue/no-unused-properties
+      keepAlivePanels: ['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText'],
+      // eslint-disable-next-line vue/no-unused-properties
+      noPaddingPanels: ['text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'],
+      // eslint-disable-next-line vue/no-unused-properties
+      whiteThemePanels: [
+        'replace', 'crop', 'bgRemove', 'position', 'flip', 'remove-bg',
+        'opacity', 'order', 'fonts', 'font-size', 'text-effect',
+        'font-format', 'font-spacing', 'download', 'more', 'color',
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
+        'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design',
+        'multiple-select', 'nudge'],
+      // eslint-disable-next-line vue/no-unused-properties
+      fixSizePanels: [
+        'crop', 'bgRemove', 'position', 'flip', 'opacity',
+        'order', 'font-size', 'font-format',
+        'font-spacing', 'download', 'more', 'object-adjust',
+        'brand-list', 'vvstk-more', 'select-design', 'multiple-select', 'remove-bg'],
+      // eslint-disable-next-line vue/no-unused-properties
+      hideDynamicCompPanels: ['crop', 'copy-style', 'multiple-select'],
+      // eslint-disable-next-line vue/no-unused-properties
+      noRowGapPanels: ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template', 'multiple-select'],
+      // eslint-disable-next-line vue/no-unused-properties
+      hideFooterPanels: ['remove-bg'],
     }
+  },
+  watch: {
+    bottomTheme(newVal) {
+      this.$emit('bottomThemeChange', newVal)
+    },
   },
   created() {
     // Provide props to descendant component, https://vuejs.org/guide/components/provide-inject.html
@@ -217,28 +128,16 @@ export default defineComponent({
       templatesIgLayout: 'igLayout'
     }),
     ...mapGetters({
-      currSelectedInfo: 'getCurrSelectedInfo',
-      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
-      showMobilePanel: 'mobileEditor/getShowMobilePanel',
       isInCategory: 'vivisticker/getIsInCategory',
       isShowAllRecently: 'vivisticker/getShowAllRecently',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
-      bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
-    historySize(): number {
-      return this.panelHistory.length
-    },
-    currHistory(): string {
-      return this.panelHistory[this.historySize - 1]
-    },
     isUs(): boolean {
       return this.$i18n.locale === 'us'
     },
@@ -257,61 +156,29 @@ export default defineComponent({
     isTextShowAllRecently(): boolean {
       return this.isShowAllRecently('text')
     },
-    backgroundLocked(): boolean {
-      const { locked } = pageUtils.currFocusPage.backgroundImage.config
-      return locked
+    // Used in extended vivi-lib MobilePanel
+    // eslint-disable-next-line vue/no-unused-properties
+    whiteThemePanelExceptions(): boolean {
+      return this.extraPanel === 'replace' && this.currHistory === 'stock'
     },
-    selectedLayerNum(): number {
-      return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
+    // eslint-disable-next-line vue/no-unused-properties
+    hideDragBar(): boolean {
+      return (!this.insertTheme && !this.isUs && this.panelTitle !== '') || this.fixSize || this.extraFixSizeCondition
     },
-    whiteTheme(): boolean {
-      const whiteThemePanel = [
-        'replace', 'crop', 'bgRemove', 'position', 'flip', 'remove-bg',
-        'opacity', 'order', 'fonts', 'font-size', 'text-effect',
-        'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
-        'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design',
-        'multiple-select', 'nudge']
-
-      if (this.extraPanel === 'replace' &&
-        this.currHistory === 'stock') return false
-      return this.extraPanel !== '' || whiteThemePanel.includes(this.currActivePanel)
-    },
-    noPaddingTheme(): boolean {
-      return this.extraPanel === '' &&
-      ['brand-list', 'text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'].includes(this.currActivePanel)
-    },
-    noHeaderTheme(): boolean {
+    // eslint-disable-next-line vue/no-unused-properties
+    hideTopSection(): boolean {
       return ['select-design', 'page-management'].includes(this.currActivePanel)
     },
+    // eslint-disable-next-line vue/no-unused-properties
     bottomTheme(): boolean {
       return ['add-template', 'page-management'].includes(this.currActivePanel)
     },
     glassTheme(): boolean {
       return ['page-management'].includes(this.currActivePanel)
     },
+    // eslint-disable-next-line vue/no-unused-properties
     noRoundTheme(): boolean {
       return ['add-template', 'page-management'].includes(this.currActivePanel)
-    },
-    fixSize(): boolean {
-      return [
-        'crop', 'bgRemove', 'position', 'flip', 'opacity',
-        'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust',
-        'brand-list', 'vvstk-more', 'select-design', 'multiple-select', 'remove-bg'].includes(this.currActivePanel)
-    },
-    trueWholeSize(): boolean {
-      return false // ['text', 'template-content'].includes(this.currActivePanel)
-    },
-    extraFixSizeCondition(): boolean {
-      switch (this.currActivePanel) {
-        default: {
-          return false
-        }
-      }
-    },
-    halfSizeInInitState(): boolean {
-      return this.extraPanel !== '' || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -338,9 +205,11 @@ export default defineComponent({
     insertTheme(): boolean {
       return this.extraPanel === '' && ['text', 'object', 'background', 'photo', 'template-content', 'add-template', 'page-management'].includes(this.currActivePanel)
     },
+    // eslint-disable-next-line vue/no-unused-properties
     showRightBtn(): boolean {
       return this.currActivePanel !== 'none' && this.currActivePanel !== 'remove-bg'
     },
+    // eslint-disable-next-line vue/no-unused-properties
     showLeftBtn(): boolean {
       if (this.whiteTheme) return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.extraPanel !== ''
       if (this.extraPanel === 'replace') return true
@@ -350,63 +219,18 @@ export default defineComponent({
       if (this.currActivePanel === 'template-content' && (this.isTemplateInCategory || this.isInGroupTemplate)) return true
       return false
     },
-    hideDynamicComp(): boolean {
-      return ['crop', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
+    // eslint-disable-next-line vue/no-unused-properties
+    panelBg(): string {
+      return this.glassTheme ? 'rgba(20, 20, 20, 0.8)' : '#141414'
     },
-    noRowGap(): boolean {
-      return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template', 'multiple-select'].includes(this.currActivePanel)
-    },
-    panelStyle(): { [index: string]: string } {
-      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts', 'template-content', 'replace'].includes(this.currActivePanel)
-      const footerTabsHeight = this.footerTabsRef?.clientHeight || 0
-      return Object.assign({ bottom: this.hideFooter ? -1 * footerTabsHeight + 'px' : '0' },
-        (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
-        {
-          'row-gap': this.noRowGap ? '0px' : '10px',
-          backgroundColor: this.whiteTheme ? 'white'
-            : this.glassTheme ? 'rgba(20, 20, 20, 0.8)'
-              : '#141414',
-          backdropFilter: this.glassTheme ? 'blur(5px)' : 'none',
-          maxHeight: this.isDuringCopy ? '0' : (
-            this.fixSize || this.extraFixSizeCondition
-              ? '100%' : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px'
-          ),
-          ...(this.hideFooter && { zIndex: '100' })
-        },
-        isSidebarPanel ? { height: '100%' } : {},
-        this.isDuringCopy ? { padding: '0' } : {}
-      )
-    },
-    // panelStyle(): { [index: string]: string } {
-    //   const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
-    //   return Object.assign({ bottom: this.hideFooter ? -1 * footerTabsHeight + 'px' : '0' },
-    //   (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
-    //   {
-    //     'row-gap': this.noRowGap ? '0px' : '10px',
-    //     backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
-    //     maxHeight: this.fixSize || this.extraFixSizeCondition
-    //       ? '100%' : this.panelDragHeight + 'px',
-    //     ...(this.hideFooter && { zIndex: '100' }),
-    //     ...(this.hideFooter && { paddingBottom: `${this.userInfo.homeIndicatorHeight + 8}px` })
-    //   },
-    //   // Prevent MobilePanel collapse
-    //   isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {},
-    //   )
-    // },
-    // innerTab(): string {
-    //   return this.innerTabs.key[this.innerTabIndex]
-    // },
-    innerTabs(): Record<string, string[]> {
-      switch (this.currActivePanel) {
-        default:
-          return {
-            key: ['']
-          }
+    // eslint-disable-next-line vue/no-unused-properties
+    specialPanelStyle(): { [index: string]: string } {
+      return {
+        backdropFilter: this.glassTheme ? 'blur(5px)' : 'none',
+        ...(this.isDuringCopy && { maxHeight: '0', padding: '0'}),
       }
     },
-    hideFooter(): boolean {
-      return ['remove-bg'].includes(this.currActivePanel)
-    },
+    // eslint-disable-next-line vue/no-unused-properties
     dynamicBindIs(): string {
       switch (this.extraPanel) {
         case 'color':
@@ -431,6 +255,7 @@ export default defineComponent({
         }
       }
     },
+    // eslint-disable-next-line vue/no-unused-properties
     dynamicBindProps(): { [index: string]: any } {
       if (this.extraPanel === 'color') {
         return {
@@ -445,12 +270,6 @@ export default defineComponent({
             showTitle: false
           }
         }
-        case 'download': {
-          return {
-            hideContainer: true,
-            pageIndex: pageUtils.currFocusPageIndex
-          }
-        }
         case 'text-effect': {
           return {
             panelHistory: this.panelHistory
@@ -459,27 +278,6 @@ export default defineComponent({
         case 'color': {
           return {
             panelHistory: this.panelHistory
-          }
-        }
-        case 'brand-list': {
-          const brandDefaultVal = {
-            panelHistory: this.panelHistory
-          }
-          if (editorUtils.currActivePanel === 'text') {
-            return {
-              defaultOption: true
-            }
-          }
-          if (editorUtils.currActivePanel === 'brand') {
-            return {
-              hasAddBrand: true
-            }
-          }
-          return brandDefaultVal
-        }
-        case 'brand': {
-          return {
-            maxheight: this.panelParentHeight()
           }
         }
         case 'vvstk-more': {
@@ -492,23 +290,9 @@ export default defineComponent({
         }
       }
     },
+    // eslint-disable-next-line vue/no-unused-properties
     dynamicBindMethod(): { [index: string]: any } {
-      const pushHistory = (history: string) => {
-        this.panelHistory.push(history)
-      }
-      const leaveExtraPanel = () => {
-        this.extraPanel = ''
-      }
-      const openExtraColorModal = (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-        this.extraPanel = 'color'
-        this.extraColorEvent = colorEventType
-        this.panelHistory.push(initColorPanelType)
-      }
-      const openExtraPanelReplace = (replaceImg: (img: IAssetPhoto | IPhotoItem) => void) => {
-        this.extraPanel = 'replace'
-        this.replaceImg = replaceImg
-        this.panelHistory.push('replace')
-      }
+      const { pushHistory, leaveExtraPanel, openExtraColorModal, openExtraPanelReplace } = this.getBasicBindMethods()
       switch (this.currActivePanel) {
         case 'color':
           return { pushHistory }
@@ -530,6 +314,7 @@ export default defineComponent({
           return {}
       }
     },
+    // eslint-disable-next-line vue/no-unused-properties
     leftBtnName(): string {
       if (this.insertTheme) {
         return 'vivisticker_back'
@@ -537,6 +322,7 @@ export default defineComponent({
         return 'back-circle'
       }
     },
+    // eslint-disable-next-line vue/no-unused-properties
     rightBtnName(): string {
       if (this.insertTheme) {
         return 'vivisticker_close'
@@ -546,6 +332,7 @@ export default defineComponent({
         return 'close-circle'
       }
     },
+    // eslint-disable-next-line vue/no-unused-properties
     leftButtonAction(): (e: PointerEvent) => void {
       if (this.currActivePanel === 'text' && this.isTextInCategory) {
         return () => {
@@ -607,6 +394,7 @@ export default defineComponent({
         }
       }
     },
+    // eslint-disable-next-line vue/no-unused-properties
     rightButtonAction(): () => void {
       return () => {
         switch (this.currActivePanel) {
@@ -666,49 +454,6 @@ export default defineComponent({
       }
     }
   },
-  watch: {
-    selectedLayerNum(newVal: number) {
-      if (newVal === 0) {
-        editorUtils.setInMultiSelectionMode(false)
-      }
-    },
-    currActivePanel(newVal, oldVal) {
-      this.panelHistory = []
-      this.innerTabIndex = 0
-      // Use v-show to show MobilePanel will cause
-      // mounted not triggered, use watch to reset height.
-      if ((oldVal === 'none' || newVal === 'text') || (newVal === 'photo-shadow' && this.inEffectEditingMode)) { // Prevent reset height when switch panel
-        this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
-      }
-    },
-    showMobilePanel(newVal) {
-      if (!newVal) {
-        // Reset extraPanel after panel close animation
-        setTimeout(() => {
-          this.extraPanel = ''
-        }, 1000)
-      }
-    },
-    bottomTheme(newVal) {
-      this.$emit('bottomThemeChange', newVal)
-    }
-  },
-  mounted() {
-    this.panelDragHeight = this.currActivePanel === 'none'
-      ? 0 : this.initPanelHeight()
-    this.resizeObserver = new ResizeObserver(() => {
-      this.$emit('panelHeight', this.currPanelHeight())
-      // No fit page in mobile now
-      // Prevent fitPage when full size panel open, ex: SidebarPanel
-      // if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
-      //   this.fitPage()
-      // }
-    })
-    this.resizeObserver.observe(this.$refs.panel as Element)
-  },
-  beforeUnmount() {
-    this.resizeObserver && this.resizeObserver.disconnect()
-  },
   methods: {
     ...mapMutations({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
@@ -724,240 +469,22 @@ export default defineComponent({
       resetObjectsFavSearch: 'objects/resetFavoritesSearch',
       resetBackgroundSearch: 'background/resetSearch',
     }),
-    vcoConfig() {
-      return {
-        handler: () => {
-          if (!(this.bgRemoveMode || this.isInPagePreview || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)) {
-            this.closeMobilePanel()
-          }
-        },
-        middleware: this.middleware,
-        events: ['touchstart', 'pointerdown',
-          ...window.location.host === 'localhost:8080' ? [] : ['contextmenu']]
-      }
+    // eslint-disable-next-line vue/no-unused-properties
+    notKeepPanel(): boolean {
+      return !(this.bgRemoveMode || this.isInPagePreview || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)
     },
-    middleware(event: MouseEvent | TouchEvent | PointerEvent) {
-      const target = event.target as HTMLElement
-      return !(target.matches?.('.header-bar .panel-icon *') || // Skip header-bar icon
-        target.matches?.('.modal-container, .modal-container *') || // Skip modal-card
-        target.className.includes?.('footer-tabs') || // Skip footer-bar icon
-        target.className === 'inputNode' ||
-        this.currActivePanel === 'select-design'
-      )
+    // eslint-disable-next-line vue/no-unused-properties
+    middlewareCondition() {
+      return this.currActivePanel === 'select-design'
     },
-    closeMobilePanel() {
-      if (this.isSubPanel) editorUtils.setCurrActiveSubPanel('none')
-      else editorUtils.setShowMobilePanel(false)
+    // eslint-disable-next-line vue/no-unused-properties
+    headerbarHeight() {
+      return document.querySelector('.vivisticker .header-bar')?.clientHeight ?? 0
     },
-    initPanelHeight() {
-      // 40 = height of preserved gap
-      const parentElementHeight = this.panelParentHeight()
-      if (this.halfSizeInInitState) return parentElementHeight * 0.5
-      return parentElementHeight - 40
+    // eslint-disable-next-line vue/no-unused-properties
+    _panelParentHeight() {
+      return document.querySelector('.vivisticker .vivisticker__top')?.clientHeight ?? 0
     },
-    currPanelHeight() {
-      return (this.$refs.panel as HTMLElement).clientHeight
-    },
-    panelParentHeight() {
-      // 40 = height of preserved gap
-      if (!this.$el) return window.innerHeight
-      return (this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)
-    },
-    dragPanelStart(event: MouseEvent | PointerEvent) {
-      if (this.fixSize) {
-        return
-      }
-      this.isDraggingPanel = true
-      this.lastPointerY = event.clientY
-      this.panelDragHeight = this.currPanelHeight()
-      eventUtils.addPointerEvent('pointermove', this.dragingPanel)
-      eventUtils.addPointerEvent('pointerup', this.dragPanelEnd)
-    },
-    dragingPanel(event: MouseEvent | PointerEvent) {
-      this.panelDragHeight -= event.clientY - this.lastPointerY
-      this.lastPointerY = event.clientY
-    },
-    dragPanelEnd() {
-      this.isDraggingPanel = false
-      const panelParentHeight = this.panelParentHeight()
-      if (this.panelDragHeight < panelParentHeight * 0.25) {
-        this.closeMobilePanel()
-      } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
-        this.panelDragHeight = panelParentHeight - 40
-        this.$emit('panelHeight', this.panelDragHeight + 30) // 30 = 15 padding * 2
-      } else {
-        this.panelDragHeight = panelParentHeight * 0.5
-        this.$emit('panelHeight', this.panelDragHeight + 30)
-      }
-
-      eventUtils.removePointerEvent('pointermove', this.dragingPanel)
-      eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
-    },
-    disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice()) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-    },
-    handleLockedNotify() {
-      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
-    },
-    switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActiveSubPanel === panelType) {
-        this.setCurrActiveSubPanel('none')
-      } else {
-        this.setCurrActiveSubPanel(panelType)
-        if (props) {
-          if (panelType === 'color' && props.currColorEvent) {
-            this.currSubColorEvent = props.currColorEvent
-          }
-        }
-      }
-    }
   }
 })
 </script>
-
-<style lang="scss" scoped>
-.mobile-panel {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  box-sizing: border-box;
-  z-index: setZindex(mobile-panel);
-  border-radius: 10px 10px 0 0;
-  // box-shadow: 0px -2px 5px setColor(gray-4, 0.5);
-  box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto minmax(0, 1fr);
-  justify-items: center;
-
-  &.not-rounded {
-    border-radius: 0;
-  }
-
-  &.panel-padding {
-    padding: 16px;
-  }
-
-  &.at-bottom {
-    z-index: setZindex(mobile-panel-bottom);
-  }
-
-  &__top-section {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-    &.self-padding {
-      padding: 15px;
-      padding-bottom: 0;
-      box-sizing: border-box;
-    }
-    > div:nth-child(2) {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  }
-
-  .tabs {
-    margin-bottom: 14px;
-  }
-
-  &__btn {
-    position: relative;
-  }
-
-  &__left-btn.insert {
-    transform: translate(-2px, -6px);
-    &.us{
-      transform: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-
-  &__right-btn.insert {
-    transform: translate(-6px, -4px);
-    &.us{
-      transform: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-
-  &__btn-click-zone {
-    position: absolute;
-    width: 28px;
-    height: 28px;
-    top: 0;
-    left: 0;
-    transform: translate(-4px, -4px);
-    border-radius: 50%;
-    touch-action: manipulation;
-    &.insert-left {
-      width: 32px;
-      height: 32px;
-      transform: none;
-      border-radius: 5px;
-      &:active {
-        background: rgba(255, 255, 255, 0.2);
-      }
-    }
-    &.insert-right {
-      width: 32px;
-      height: 32px;
-      border-radius: 5px;
-      &:active {
-        background: rgba(255, 255, 255, 0.2);
-      }
-    }
-  }
-
-  &__bottom-section {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-    grid-auto-columns: minmax(0, 1fr);
-    width: 100%;
-    height: 100%;
-    overflow-y: v-bind("insertTheme ? 'hidden' : 'scroll'");
-    overflow-x: hidden;
-    @include no-scrollbar;
-    > *:last-child { // panel-* always take minmax(0, 1fr) grid layout.
-      grid-row: 2 / 3;
-    }
-  }
-
-  &__title {
-    @include flexCenter();
-    font-weight: bold;
-  }
-
-  &__layer-num {
-    @include size(20px);
-    @include flexCenter();
-    background-color: setColor(black-5);
-    border-radius: 50%;
-  }
-
-  &__drag-bar {
-    position: absolute;
-    touch-action: manipulation;
-    top: 2px;
-    padding: 10px 20px 20px 20px;
-    border-radius: 5px;
-    > div {
-      background-color: setColor(gray-4);
-      height: 3px;
-      width: 24px;
-    }
-  }
-}
-</style>

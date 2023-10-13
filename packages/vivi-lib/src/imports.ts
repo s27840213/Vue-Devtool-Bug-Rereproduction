@@ -47,6 +47,7 @@ import SlideToggle from '@/components/global/SlideToggle.vue'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
+import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -232,6 +233,7 @@ import SvgIconView from '@/views/SvgIconView.vue'
   ImageGallery,
   FontSizeSelector,
   LazyLoad,
+  MobilePanel,
   ModalCard,
   ResInfo,
   ObserverSentinel,
