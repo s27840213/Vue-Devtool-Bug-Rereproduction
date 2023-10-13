@@ -71,9 +71,6 @@ window.onerror = function (msg, url, line, colno, error) {
   })
 }
 
-// const app = createApp(App).use(i18n).use(router).use(store)
-app.use(i18n)
-
 store.commit('user/SET_BroswerInfo', {
   name: platform.name,
   version: platform.version,

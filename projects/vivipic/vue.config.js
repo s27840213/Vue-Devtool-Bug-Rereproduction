@@ -301,4 +301,18 @@ module.exports = defineConfig({
       fullInstall: true,
     },
   },
+
+  configureWebpack: {
+    resolve: {
+      alias: {
+        // Use shaked i18n JSON for prod.
+        '@i18n': path.resolve(
+          __dirname,
+          'src/i18n/',
+          process.env.NODE_ENV === 'production' ? 'shaked/' : 'full/'
+        ),
+        '@': path.resolve(__dirname, 'src/'),
+      }
+    }
+  }
 })

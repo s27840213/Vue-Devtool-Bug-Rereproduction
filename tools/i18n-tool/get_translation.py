@@ -52,8 +52,8 @@ for lang in langs:
         all_result.append(keys)
     all_result.append(values)
     
-    output_dir_path = '/src/locales/'
-    output_full_path = f'{ROOT}/packages/vivi-lib{output_dir_path}'
+    output_full_path = f"{ROOT}/tools/i18n-tool/result/"
+
     print('Output '+lang+ ' to:'   + output_full_path)
     if not os.path.exists(output_full_path):
         os.makedirs(output_full_path)

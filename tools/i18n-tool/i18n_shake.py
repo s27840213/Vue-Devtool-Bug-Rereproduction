@@ -13,7 +13,7 @@ prefix_pattern = re.compile(r'([A-Z]+)[0-9]{4}')
 ROOT = find_project_root(os.getcwd()) # parent folder of the parent folder of this file
 
 def getLocaleJsonPathsIter():
-  file_paths = glob.glob(f"{ROOT}/packages/vivi-lib/src/locales/*.json")
+  file_paths = glob.glob(f"{ROOT}/tools/i18n-tool/result/*.json")
   for file_path in file_paths:
     if '_shaked' in file_path: continue
     yield file_path
@@ -26,7 +26,7 @@ def getLocaleJsonsIter():
 class ShakedJson:
   def __init__(self, config_path, project):
     locale = config_path.split('/')[-1].split('.')[0]
-    self.shaked_file_path = f'{ROOT}/packages/vivi-lib/src/locales/{project}/{locale}_shaked.json'
+    self.shaked_file_path = f'{ROOT}/projects/{project}/src/i18n/shaked/{locale}.json'
 
   def __enter__(self):
     self.f = open(self.shaked_file_path, mode="r", encoding="utf-8")
@@ -70,9 +70,9 @@ def shake_files(project, used_keys):
     locale = file_path.split('/')[-1].split('.')[0]
     config = json.load(f)
     config = { key: value for key, value in config.items() if key in used_keys }
-    output_file_dir = f'{ROOT}/packages/vivi-lib/src/locales/{project}'
+    output_file_dir = f'{ROOT}/projects/{project}/src/i18n/shaked'
     os.makedirs(output_file_dir, exist_ok=True)
-    output_filename = f'{locale}_shaked.json'
+    output_filename = f'{locale}.json'
     output_file_path = f'{output_file_dir}/{output_filename}'
     print(f'Generate shaked i18n config to {output_file_path}')
     with open(output_file_path, 'w', encoding='UTF-8') as f:

@@ -26,6 +26,7 @@
         "./src/*",
         "../../packages/vivi-lib/src/*"
       ],
+      "@i18n/*": ["./src/i18n/full/*"],
       "@nu/vivi-lib/*": [
         "../../packages/vivi-lib/src/*",
         "../../packages/vivi-lib/src/index"
