@@ -287,13 +287,27 @@ export default defineComponent({
           }
           case 'json': {
             const page = layerFactary.newTemplate(JSON.parse(id ?? '')) as IPage
-            const hasBg = !noBg && page.backgroundImage.config.srcObj?.assetId !== ''
-            if (page.layers.length === 0 && !hasBg) {
-              this.JSONcontentSize = {
-                width: page.width,
-                height: page.height
+            const hasBgImg = !noBg && page.backgroundImage.config.srcObj?.assetId !== ''
+            const renderPage = () => {
+              pageUtils.setPages([page])
+              if (stkWVUtils.checkVersion('1.31')) {
+                const newSize = {
+                  width: page.width * 2,
+                  height: page.height * 2
+                }
+                resizeUtils.resizePage(0, page, newSize)
+                this.JSONcontentSize = newSize
+              } else {
+                this.JSONcontentSize = {
+                  width: page.width,
+                  height: page.height
+                }
               }
               this.usingJSON = true
+            }
+            if (page.layers.length === 0 && !hasBgImg) {
+              // TODO: check for transparent bg color
+              renderPage() // for bg color
               this.onload()
               return
             }
@@ -301,22 +315,7 @@ export default defineComponent({
             stkWVUtils.initLoadingFlags(page, () => {
               this.onload()
             }, () => this.onTimeout(`screenshot-${query}`), noBg)
-            pageUtils.setPages([page])
-            if (stkWVUtils.checkVersion('1.31')) {
-              const newSize = {
-                width: page.width * 2,
-                height: page.height * 2
-              }
-              resizeUtils.resizePage(0, page, newSize)
-              this.JSONcontentSize = newSize
-              this.usingJSON = true
-            } else {
-              this.JSONcontentSize = {
-                width: page.width,
-                height: page.height
-              }
-              this.usingJSON = true
-            }
+            renderPage()
             break
           }
           case 'gen-thumb': {

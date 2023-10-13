@@ -229,6 +229,7 @@ export default defineComponent({
         pageIndex: pageUtils.addAssetTargetPageIndex,
         color: color
       })
+      stepsUtils.record()
     },
     async handleSearch(keyword: string) {
       this.resetSearch()

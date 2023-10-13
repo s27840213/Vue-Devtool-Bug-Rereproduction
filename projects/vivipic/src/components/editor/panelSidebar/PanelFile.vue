@@ -29,7 +29,7 @@ div(class="panel-file"
           :iconName="'trash'"
           :iconColor="'white'"
           :iconWidth="'24px'"
-          @click="deleteAssets()")
+          @click="handleDeleteAssets()")
       span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`${$t('NN0130')}(${checkedAssets.length})`}}
 </template>
 
@@ -118,6 +118,20 @@ export default defineComponent({
           modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
         }
       }
+    },
+    handleDeleteAssets() {
+      modalUtils.setModalInfo('', this.$t('NN0912'), {
+        msg: this.$t('NN0203'),
+        class: 'btn-light-outline-mid',
+        action: () => {
+          return false
+        }
+      }, {
+        msg: this.$t('NN0034'),
+        action: () => {
+          this.deleteAssets()
+        },
+      })
     }
   }
 })
