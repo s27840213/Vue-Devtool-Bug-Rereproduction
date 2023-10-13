@@ -80,13 +80,13 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
+      pending: 'objects/pending',
       showAdminTool: 'user/showAdminTool'
     }),
     ...mapState('objects', {
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
     }),
     keywordLabel():string {
