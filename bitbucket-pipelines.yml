@@ -36,12 +36,6 @@ pipelines:
             caches: #set caches for node modules to speed up building
               - node
             image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/vivi-lib/**"
             script:
               - corepack enable
               - corepack prepare pnpm@latest-8 --activate
@@ -59,12 +53,6 @@ pipelines:
             name: "vivipic to dev5 (Alan)"
             deployment: dev5
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -95,12 +83,6 @@ pipelines:
             name: "vivipic to dev4 (Gary)"
             deployment: dev4
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -131,12 +113,6 @@ pipelines:
             name: "vivipic to dev3 (HsingChi)"
             deployment: dev3
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -167,12 +143,6 @@ pipelines:
             name: "vivipic to dev2 (TingAn)"
             deployment: dev2
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -203,12 +173,6 @@ pipelines:
             name: "vivipic to dev1 (Nathan)"
             deployment: dev1
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -239,12 +203,6 @@ pipelines:
             name: "vivipic to dev0 (ZhengYan)"
             deployment: dev0
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -275,12 +233,6 @@ pipelines:
             name: "vivipic to dev5s (Alan)"
             deployment: dev5s
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -311,12 +263,6 @@ pipelines:
             name: "vivipic to dev4s (Gary)"
             deployment: dev4s
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -347,12 +293,6 @@ pipelines:
             name: "vivipic to dev3s (HsingChi)"
             deployment: dev3s
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -383,12 +323,6 @@ pipelines:
             name: "vivipic to dev2s (TingAn)"
             deployment: dev2s
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -419,12 +353,6 @@ pipelines:
             name: "vivipic to dev1s (Nathan)"
             deployment: dev1s
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -455,12 +383,6 @@ pipelines:
             name: "vivipic to dev0s (ZhengYan)"
             deployment: dev0s
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -491,12 +413,6 @@ pipelines:
             name: "sticker to dev5 (Alan)"
             deployment: stkdev5
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/stk/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -527,12 +443,6 @@ pipelines:
             name: "sticker to dev4 (Gary)"
             deployment: stkdev4
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/stk/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -563,12 +473,6 @@ pipelines:
             name: "sticker to dev3 (HsingChi)"
             deployment: stkdev3
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/stk/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -599,12 +503,6 @@ pipelines:
             name: "sticker to dev2 (TingAn)"
             deployment: stkdev2
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/stk/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -635,12 +533,6 @@ pipelines:
             name: "sticker to dev1 (Nathan)"
             deployment: stkdev1
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/stk/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -671,12 +563,6 @@ pipelines:
             name: "sticker to dev0 (ZhengYan)"
             deployment: stkdev0
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/stk/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -707,12 +593,6 @@ pipelines:
             name: "charmix to dev5 (Alan)"
             deployment: cmdev5
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/charmix/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -743,12 +623,6 @@ pipelines:
             name: "charmix to dev4 (Gary)"
             deployment: cmdev4
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/charmix/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -779,12 +653,6 @@ pipelines:
             name: "charmix to dev3 (HsingChi)"
             deployment: cmdev3
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/charmix/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -815,12 +683,6 @@ pipelines:
             name: "charmix to dev2 (TingAn)"
             deployment: cmdev2
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/charmix/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -851,12 +713,6 @@ pipelines:
             name: "charmix to dev1 (Nathan)"
             deployment: cmdev1
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/charmix/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -887,12 +743,6 @@ pipelines:
             name: "charmix to dev0 (ZhengYan)"
             deployment: cmdev0
             trigger: manual
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/charmix/**"
-                  - "packages/**"
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
@@ -1090,12 +940,6 @@ pipelines:
               caches: #set caches for node modules to speed up building
                 - node
               image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - "projects/vivipic/**"
-                    - "packages/vivi-lib/**"
               script:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
@@ -1113,13 +957,6 @@ pipelines:
               name: "deploy vivipic to rd"
               deployment: vivipicrd
               trigger: manual
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - 'tools/**'
-                    - "projects/vivipic/**"
-                    - "packages/**"
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
@@ -1150,13 +987,6 @@ pipelines:
               name: "deploy vivisticker to stkrd"
               deployment: stkrd
               trigger: manual
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - 'tools/**'
-                    - "projects/stk/**"
-                    - "packages/**"
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
@@ -1187,13 +1017,6 @@ pipelines:
               name: "deploy charmix to cmrd"
               deployment: cmrd
               trigger: manual
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - 'tools/**'
-                    - "projects/charmix/**"
-                    - "packages/**"
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
@@ -1223,37 +1046,16 @@ pipelines:
           - step:
               name: "pull request to qa (Vivipic)"
               trigger: manual
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - 'tools/**'
-                    - "projects/vivipic/**"
-                    - "packages/**"            
               script:
                 - ./tools/bash/pr_develop_to_qa.sh
           - step:
               name: "pull request to main/stk (Vivisticker)"
               trigger: manual
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - 'tools/**'
-                    - "projects/stk/**"
-                    - "packages/**"            
               script:
                 - ./tools/bash/pr_develop_to_stk.sh
           - step:
               name: "pull request to main/cm (Charmix)"
               trigger: manual
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - 'tools/**'
-                    - "projects/charmix/**"
-                    - "packages/**"            
               script:
                 - ./tools/bash/pr_develop_to_cm.sh
     hotfix:
@@ -1285,12 +1087,6 @@ pipelines:
             caches: #set caches for node modules to speed up building
               - node
             image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
-            condition:
-              changesets:
-                includePaths:
-                  - '*'
-                  - "projects/vivipic/**"
-                  - "packages/vivi-lib/**"
             script:
               - corepack enable
               - corepack prepare pnpm@latest-8 --activate
@@ -1312,37 +1108,16 @@ pipelines:
           - step:
               name: "pull request to main/vivipic (Vivipic)"
               trigger: manual
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - 'tools/**'
-                    - "projects/vivipic/**"
-                    - "packages/**"            
               script:
                 - ./tools/bash/pr_hotfix_to_vivipic.sh
           - step:
               name: "pull request to main/stk (Vivisticker)"
               trigger: manual
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - 'tools/**'
-                    - "projects/stk/**"
-                    - "packages/**"            
               script:
                 - ./tools/bash/pr_hotfix_to_stk.sh
           - step:
               name: "pull request to main/cm (Charmix)"
               trigger: manual
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - 'tools/**'
-                    - "projects/charmix/**"
-                    - "packages/**"            
               script:
                 - ./tools/bash/pr_hotfix_to_cm.sh
     qa:
@@ -1374,12 +1149,6 @@ pipelines:
               caches: #set caches for node modules to speed up building
                 - node
               image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
-              condition:
-                changesets:
-                  includePaths:
-                    - '*'
-                    - "projects/vivipic/**"
-                    - "packages/vivi-lib/**"
               script:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
