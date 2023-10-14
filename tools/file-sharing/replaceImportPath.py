@@ -29,12 +29,42 @@ def path2SubPath(path: str):
 libPaths = glob.glob('packages/vivi-lib/src/**/*.vue', recursive=True) \
   + glob.glob('packages/vivi-lib/src/**/*.ts', recursive=True)
 libPaths.sort()
-# libPaths.reverse()
+libPaths.reverse()
 
 picPaths = glob.glob(f'projects/{project}/src/**/*.vue', recursive=True) \
   + glob.glob(f'projects/{project}/src/**/*.ts', recursive=True)
 
+skip_list = """
+  .d.ts
+  i18n/index.ts
+  module/text
+  module/templates
+  module/objects
+  module/markers
+  module/background
+  module/listFactory
+  module/font
+  store/index
+  router/index
+  main.ts
+  interfaces/module
+  Popup.vue
+  PanelColor.vue
+  CategoryTextItem.vue
+  CategoryTemplateItem.vue
+  CategoryObjectItem.vue
+  CategoryGroupTemplateItem.vue
+  CategoryFontItem.vue
+  CategoryBackgroundItem.vue
+""".split('\n')
+
+skip_list = list(filter(lambda x: x != '', map(lambda x: x.strip(), skip_list)))
+
 for libPath in libPaths:
+  to_skip = False
+  for skip in skip_list:
+    if skip in libPath: to_skip = True
+  if to_skip: continue
   path = libPath.replace('packages/vivi-lib/', '')
 
   if not os.path.isfile(f'projects/{project}/{path}'):

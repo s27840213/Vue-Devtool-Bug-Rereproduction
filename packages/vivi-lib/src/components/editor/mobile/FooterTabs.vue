@@ -258,7 +258,7 @@ export default defineComponent({
       return {}
     },
     contentStyles(): { [index: string]: string }  {
-      // should not be overrided, use customContentStyles to change styles instead
+      // should not be overridden, use customContentStyles to change styles instead
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`,
@@ -425,7 +425,7 @@ export default defineComponent({
       return {}
     },
     containerStyles(isSubContainer = false): { [index: string]: string } {
-      // should not be overrided, use customContainerStyles to change styles instead
+      // should not be overridden, use customContainerStyles to change styles instead
       return {
         ...(!isSubContainer && !this.isInEditor && { gridTemplateColumns: `repeat(${this.mainTabsSize}, 1fr)` }),
         ...this.innerContainerStyles,
