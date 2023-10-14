@@ -253,12 +253,16 @@ export default defineComponent({
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable
     },
-    contentStyles() {
+    customContentStyles(): { [index: string]: string }  {
+      // used by extending class for their custom styles
+      return {}
+    },
+    contentStyles(): { [index: string]: string }  {
+      // should not be overrided, use customContentStyles to change styles instead
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`,
-        borderTop: !this.contentEditable && this.isSettingTabsOpen ? '0.5px solid #D9DBE1' : 'none',
-        boxShadow: !this.contentEditable && this.isSettingTabsOpen ? '0px 0px 6px 0px  #3C3C3C0D' : 'none',
+        ...this.customContentStyles
       }
     },
     innerContainerStyles(): { [index: string]: string } {
@@ -438,7 +442,7 @@ export default defineComponent({
 <style lang="scss">
 .footer-tabs {
   overflow: hidden;
-  @include setColors(gray-5, black-1) using ($color) {
+  @include setColors(gray-5, black-2) using ($color) {
     background-color: $color;
   }
   -webkit-touch-callout: none;

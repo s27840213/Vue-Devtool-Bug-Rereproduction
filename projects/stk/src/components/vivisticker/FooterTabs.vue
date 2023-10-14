@@ -1,7 +1,10 @@
 <script lang="ts">
+import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { IFooterTab } from '@nu/vivi-lib/interfaces/editor'
+import { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
+import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
 import assetUtils, { RESIZE_RATIO_IMAGE } from '@nu/vivi-lib/utils/assetUtils'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
@@ -19,11 +22,8 @@ import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import { notify } from '@kyvg/vue3-notification'
-import { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
-import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
+import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { startCase } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -434,14 +434,6 @@ export default defineComponent({
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
     },
-    // eslint-disable-next-line vue/no-unused-properties
-    contentStyles(): { [index: string]: string } {
-      return {}
-    },
-    // eslint-disable-next-line vue/no-unused-properties
-    innerContainerStyles(): { [index: string]: string } {
-      return {}
-    }
   },
   methods: {
     ...mapMutations({
@@ -793,7 +785,6 @@ export default defineComponent({
     customContainerStyles(isSubContainer: boolean): { [index: string]: string } {
       // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
       return {
-        ...(!isSubContainer && { backgroundColor: '#14182A' }),
         backgroundColor: '#141414',
         ...(this.isSettingTabsOpen === isSubContainer && {
           maskImage: this.contentEditable ? 'none'

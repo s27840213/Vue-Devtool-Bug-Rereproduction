@@ -32,6 +32,13 @@ export default defineComponent({
     isSettingTabsOpen(): boolean {
       return this.settingTabs.length > 0 || this.inBgRemoveMode
     },
+    // eslint-disable-next-line vue/no-unused-properties
+    customContentStyles() {
+      return {
+        borderTop: !this.contentEditable && this.isSettingTabsOpen ? '0.5px solid #D9DBE1' : 'none',
+        boxShadow: !this.contentEditable && this.isSettingTabsOpen ? '0px 0px 6px 0px  #3C3C3C0D' : 'none',
+      }
+    },
     groupTab(): IFooterTab {
       return {
         icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
