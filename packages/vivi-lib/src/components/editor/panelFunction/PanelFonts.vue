@@ -37,17 +37,17 @@ div(class="panel-fonts")
 </template>
 
 <script lang="ts">
+import SearchBar from '@/components/SearchBar.vue'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import FontTag from '@/components/global/Tags.vue'
-import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import vuexUtils from '@/utils/vuexUtils'
 
 export default defineComponent({
   components: {
@@ -303,7 +303,6 @@ export default defineComponent({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
   @include stk {
     padding: 0 8px;
   }
@@ -352,9 +351,18 @@ export default defineComponent({
       color: setColor(blue-1);
     }
   }
-}
-.category-list::-webkit-scrollbar-thumb {
-  border: 3px solid #ffffff;
+
+  @include pic {
+    & .category-list::-webkit-scrollbar-thumb {
+      border: 3px solid #ffffff;
+    }
+  }
+  .mobile-panel & {
+    & .category-list {
+      @include no-scrollbar;
+      margin-right: 0;
+    }
+  }
 }
 .cover-background {
   position: absolute;
