@@ -93,7 +93,7 @@ import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 // TODO: Extract common part.
@@ -376,7 +376,6 @@ export default defineComponent({
       justify-content: space-between;
       @include layout-mobile-width {
         @include body-SM;
-        color: setColor(gray-2);
         margin-bottom: 16px;
       }
     }
