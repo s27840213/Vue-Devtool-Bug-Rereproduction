@@ -43,10 +43,9 @@ div(class="footer-tabs" :style="footerTabsStyles")
 <script lang="ts" setup>
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
+import router from '@/router'
 
-const route = useRoute()
 const store = useStore()
 
 const userInfo = computed(() => store.getters['webView/getUserInfo'])
@@ -56,7 +55,7 @@ const footerTabsStyles = computed((): { [index: string]: string } => {
     paddingBottom: `${userInfo.value.homeIndicatorHeight}px`
   }
 })
-const activeRouteName = computed(() => route.name)
+const activeRouteName = computed(() => router.currentRoute.value.name)
 // const sizeMenuOpened = ref(false)
 </script>
 
