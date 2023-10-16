@@ -3,10 +3,10 @@ import * as path from 'path'
 // import AutoImport from 'unplugin-auto-import/vite'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
-import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
-import extractImg from '../../tools/vite-plugin-lib-extract-img'
-import svgSpritePlugin from 'vite-plugin-svg-sprite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
+import svgSpritePlugin from 'vite-plugin-svg-sprite'
+import extractImg from '../../tools/vite-plugin-lib-extract-img'
+import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -33,7 +33,7 @@ export default defineConfig({
     }),
     viteStaticCopy({
       targets: [{
-        src: path.resolve(__dirname, 'src/assets/scss'),
+        src: path.resolve(__dirname, 'src/assets/scss').replace(/\\/g, '/'),
         dest: 'src/assets',
       }]
     }),

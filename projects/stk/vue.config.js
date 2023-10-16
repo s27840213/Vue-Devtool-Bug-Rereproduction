@@ -335,8 +335,7 @@ module.exports = defineConfig({
         // Use shaked i18n JSON for prod.
         '@i18n': path.resolve(
           __dirname,
-          'src/i18n/',
-          process.env.NODE_ENV === 'production' ? 'shaked/' : 'full/'
+          process.env.NODE_ENV === 'production' ? 'src/i18n/shaked/' : '../../tools/i18n-tool/result'
         ),
         '@': path.resolve(__dirname, 'src/'),
       }
