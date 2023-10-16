@@ -108,18 +108,18 @@ export default defineComponent({
       const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
       const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
       const isFirstOpen = this.userInfo.isFirstOpen
+      const subscribed = paymentUtils.isPro
       const showPaymentInfo = await picWVUtils.getState('showPaymentInfo')
       const showPaymentTime = showPaymentInfo?.timestamp ?? 0
       const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
       const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
       const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
-        : showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
+        : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
       if (isShowPaymentView) {
-        if (!paymentUtils.checkPro({ plan: 1 }, 'pro-template')) picWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
-        else picWVUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
-      }
+        paymentUtils.openPayment('step1')
+        picWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+      } else picWVUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
       picWVUtils.sendAppLoaded()
-      console.log(isFirstOpen, m, n, showPaymentTime, showPaymentCount, diffShowPaymentTime, isShowPaymentView);
     })
     /**
      * @Note the function below is moved from the index.ts store

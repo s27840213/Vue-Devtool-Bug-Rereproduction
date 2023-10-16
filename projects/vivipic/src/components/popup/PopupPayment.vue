@@ -346,7 +346,7 @@ export default defineComponent({
   mounted() {
     window.addEventListener('resize', this.handleResize)
     if (!this.isLogin) {
-      this.$router.push({ name: 'Login', query: { redirect: this.$route.fullPath } })
+      this.$router.push({ name: 'Login', query: { redirect: this.$route.fullPath, type: 'payment' } })
       this.closePopup()
     } else if (this.initView === 'step1-coupon') {
       paymentUtils.checkCoupon() ? this.changeView('step1-coupon') : this.closePopup()
