@@ -294,6 +294,7 @@ class UploadUtils {
           pageIndex: pageUtils.currFocusPageIndex,
           // The following props is used for preview image during polling process
           isPreview: true,
+          previewSrc: img.src,
           assetId,
         })
         xhr.open('POST', this.loginOutput.upload_map.url, true)
