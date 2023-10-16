@@ -78,7 +78,7 @@ div(class="popup-window")
                     span(v-if="idx > 0" class="payment__footer__splitter")
                     span(class="body-XXS" @tap="footerLink.action") {{ footerLink.title }}
               div(class="payment__panel" :class="{close: !isPanelUp}" ref="panel")
-                div(class="payment__panel__chevron" ref="chevron" @tap="togglePanel()" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)" @panstart.stop="dragPanelStart" @panmove.stop="dragingPanel" @panend.stop="dragPanelEnd" @pointerdown.stop="panelAniProgress = 0")
+                div(class="payment__panel__chevron" ref="chevron" @tap="togglePanel()" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)" @pointerdown.stop="panelAniProgress = 0")
                   svg-icon(iconName="chevron-up" iconWidth="14px")
                   div(class="payment__panel__chevron__title") {{ $t('STK0042') }}
                 div(class="payment__panel__comparison")
@@ -150,7 +150,7 @@ import { IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarning
 import paymentData from '@/utils/constantData'
 import paymentUtils from '@/utils/paymentUtils'
 import { notify } from '@kyvg/vue3-notification'
-import AnyTouch, { AnyTouchEvent } from 'any-touch'
+import AnyTouch from 'any-touch'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -206,12 +206,12 @@ export default defineComponent({
       canShow: false,
       idxCurrImg: 0,
       windowWidth: window.innerWidth,
-      initPanelUp: false,
+      // initPanelUp: false,
       isPanelUp: false,
       isDraggingPanel: false,
-      panelDragHeight: 0,
+      // panelDragHeight: 0,
       panelAniProgress: 1,
-      lastPointerY: 0,
+      // lastPointerY: 0,
       carouselItems: [
         {
           key: 'pro-template',
@@ -551,51 +551,54 @@ export default defineComponent({
       this.windowWidth = window.innerWidth
     },
     togglePanel(up?: boolean) {
-      if (up === undefined) {
-        if (this.panelAniProgress !== 0 && this.panelAniProgress !== 1) return
-        this.isPanelUp = !this.isPanelUp
-        return
-      }
-      if (this.isPanelUp !== up) this.panelAniProgress = 1 - this.panelAniProgress
-      this.isPanelUp = up
+      if (this.panelAniProgress !== 0 && this.panelAniProgress !== 1) return
+      this.isPanelUp = up === undefined ? !this.isPanelUp : up
+      // if (up === undefined) {
+      //   if (this.panelAniProgress !== 0 && this.panelAniProgress !== 1) return
+      //   this.isPanelUp = !this.isPanelUp
+      //   return
+      // }
+      // if (this.isPanelUp !== up) this.panelAniProgress = 1 - this.panelAniProgress
+      // this.isPanelUp = up
     },
-    bezier(t: number, initial: number, p1: number, p2: number, final: number) {
-      return (
-        (1 - t) * (1 - t) * (1 - t) * initial +
-        3 * (1 - t) * (1 - t) * t * p1 +
-        3 * (1 - t) * t * t * p2 +
-        t * t * t * final
-      )
-    },
-    dragPanelStart(event: AnyTouchEvent) {
-      if (this.isDraggingPanel) return // this event will be triggered on dragging direction change
-      this.isDraggingPanel = true
-      this.lastPointerY = event.y
-      this.panelDragHeight = 0
-      this.panelAniProgress = 0
-      this.initPanelUp = this.isPanelUp
-      this.dragingPanel(event)
-    },
-    dragingPanel(event: AnyTouchEvent) {
-      this.panelDragHeight -= event.y - this.lastPointerY
-      this.lastPointerY = event.y
-      const newProgress = Math.max(Math.min((this.initPanelUp ? -this.panelDragHeight : this.panelDragHeight) / ((this.$refs.panel as HTMLElement).clientHeight - 36), 1), 0)
-      if (newProgress > 0) {
-        this.isPanelUp = !this.initPanelUp
-        this.panelAniProgress = newProgress
-      } else {
-        this.isPanelUp = this.initPanelUp
-        this.panelAniProgress = 1
-      }
-    },
-    dragPanelEnd() {
-      this.isDraggingPanel = false
-      if (this.initPanelUp !== this.isPanelUp && this.panelAniProgress < 0.5) {
-        this.isPanelUp = this.initPanelUp
-        this.panelAniProgress = 1 - this.panelAniProgress
-      }
-      this.panelAniProgress = this.bezier(this.panelAniProgress, 0.0, 0.42, 0.58, 1.0) // css ease-in-out function
-    },
+    // TODO: fix performance issue when dragging comparison panel
+    // bezier(t: number, initial: number, p1: number, p2: number, final: number) {
+    //   return (
+    //     (1 - t) * (1 - t) * (1 - t) * initial +
+    //     3 * (1 - t) * (1 - t) * t * p1 +
+    //     3 * (1 - t) * t * t * p2 +
+    //     t * t * t * final
+    //   )
+    // },
+    // dragPanelStart(event: AnyTouchEvent) {
+    //   if (this.isDraggingPanel) return // this event will be triggered on dragging direction change
+    //   this.isDraggingPanel = true
+    //   this.lastPointerY = event.y
+    //   this.panelDragHeight = 0
+    //   this.panelAniProgress = 0
+    //   this.initPanelUp = this.isPanelUp
+    //   this.dragingPanel(event)
+    // },
+    // dragingPanel(event: AnyTouchEvent) {
+    //   this.panelDragHeight -= event.y - this.lastPointerY
+    //   this.lastPointerY = event.y
+    //   const newProgress = Math.max(Math.min((this.initPanelUp ? -this.panelDragHeight : this.panelDragHeight) / ((this.$refs.panel as HTMLElement).clientHeight - 36), 1), 0)
+    //   if (newProgress > 0) {
+    //     this.isPanelUp = !this.initPanelUp
+    //     this.panelAniProgress = newProgress
+    //   } else {
+    //     this.isPanelUp = this.initPanelUp
+    //     this.panelAniProgress = 1
+    //   }
+    // },
+    // dragPanelEnd() {
+    //   this.isDraggingPanel = false
+    //   if (this.initPanelUp !== this.isPanelUp && this.panelAniProgress < 0.5) {
+    //     this.isPanelUp = this.initPanelUp
+    //     this.panelAniProgress = 1 - this.panelAniProgress
+    //   }
+    //   this.panelAniProgress = this.bezier(this.panelAniProgress, 0.0, 0.42, 0.58, 1.0) // css ease-in-out function
+    // },
     getLocalizedPrice(price: number): string {
       const currencyMap = new Map([
         ['tw', '元'],
