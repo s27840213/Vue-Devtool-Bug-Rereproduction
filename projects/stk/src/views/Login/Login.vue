@@ -203,6 +203,7 @@ import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import loginUtils from '@/utils/loginUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
@@ -238,13 +239,15 @@ export default defineComponent({
       isResetClicked: false as boolean,
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
       hideBackButton: false,
-      isLoading: false
+      isLoading: false,
+      type: '' as string | null
     }
   },
   created() {
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.has('type')) {
-      if (urlParams.get('type') === 'forgot') {
+      this.type = urlParams.get('type')
+      if (this.type === 'forgot') {
         this.currentPageIndex = 1
         this.hideBackButton = true
       }
@@ -388,6 +391,7 @@ export default defineComponent({
           gtmUtils.signUp(gtmTitle)
         }
         store.dispatch('user/loginSetup', { data: data })
+        this.popPayment()
         this.$router.push(this.redirect || redirect || '/')
       } else {
         logUtils.setLogAndConsoleLog(`${loginType} login failed`)
@@ -396,11 +400,10 @@ export default defineComponent({
       this.isLoading = false
     },
     onSignupClicked() {
-      if (this.redirect) {
-        this.$router.push({ name: 'SignUp', query: { redirect: this.redirect } })
-      } else {
-        this.$router.push({ name: 'SignUp' })
-      }
+      const query = {}
+      if (this.redirect) Object.assign(query, { redirect: this.redirect })
+      if (this.type) Object.assign(query, { type: this.type })
+      this.$router.push({ name: 'SignUp', query })
     },
     async onLogInClicked() {
       logUtils.setLogAndConsoleLog('Click Email login')
@@ -417,6 +420,7 @@ export default defineComponent({
       }
       const data = await store.dispatch('user/login', { token: '', account: this.email, password: this.password })
       if (data.flag === 0) {
+        this.popPayment()
         this.$router.push(this.redirect || '/')
       } else {
         this.password = ''
@@ -594,6 +598,9 @@ export default defineComponent({
         this.isLoading = false
         this.handleLoginResult(data, 'Google', 'google')
       }
+    },
+    popPayment() {
+      if (this.type === 'payment') paymentUtils.checkPro({ plan: 1 }, 'pro-template')
     }
   }
 })

@@ -154,6 +154,7 @@ import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import loginUtils from '@/utils/loginUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
@@ -344,6 +345,7 @@ export default defineComponent({
           gtmUtils.signUp(gtmTitle)
         }
         store.dispatch('user/loginSetup', { data: data })
+        this.popPayment()
         this.$router.push(this.redirect || redirect || '/')
       } else {
         logUtils.setLogAndConsoleLog(`${loginType} login failed`)
@@ -462,6 +464,7 @@ export default defineComponent({
         logUtils.setLogAndConsoleLog('Verify Vcode and register success')
         gtmUtils.signUp('Vivipic')
         await store.dispatch('user/login', { token: data.token })
+        this.popPayment()
         this.$router.push(this.redirect || '/')
         this.currentPageIndex = 0
       } else {
@@ -492,6 +495,10 @@ export default defineComponent({
         this.isLoading = false
         this.handleLoginResult(data, 'Google', 'google')
       }
+    },
+    popPayment() {
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.has('type') && urlParams.get('type') === 'payment') paymentUtils.checkPro({ plan: 1 }, 'pro-template')
     }
   }
 })
