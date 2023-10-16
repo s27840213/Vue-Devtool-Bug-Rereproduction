@@ -11,6 +11,7 @@ $buttons: (
 	inactive: setColor(gray-4),
 	icon: none,
 	light: setColor(white),
+	light-outline: setColor(white),
 	transparent: transparent,
 	red: setColor(red)
 );
@@ -24,6 +25,7 @@ $hoveredColor: (
 	inactive: setColor(gray-4),
 	icon: none,
 	light: setColor(white),
+	light-outline: setColor(gray-4),
 	transparent: transparent,
 	red: #FC5757
 );
@@ -37,6 +39,7 @@ $textColor: (
 	inactive: setColor(white),
 	icon: none,
 	light: setColor(blue-1),
+	light-outline: setColor(gray-2),
 	transparent: setColor(white),
 	red: setColor(white)
 );
@@ -50,6 +53,7 @@ $borderColor: (
 	inactive: setColor(white),
 	icon: transparent,
 	light: setColor(blue-1),
+	light-outline: setColor(gray-4),
 	transparent: setColor(white),
 	red: transparent
 );

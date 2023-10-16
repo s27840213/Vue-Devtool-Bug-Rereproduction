@@ -469,7 +469,7 @@ export default defineComponent({
     },
     isInFrame(): boolean {
       const layer = layerUtils.getCurrLayer
-      return layer.type === LayerType.frame && (layer as IFrame).clips[0].srcObj.assetId !== ''
+      return layer.type === LayerType.frame && (layer as IFrame).clips[Math.max(layerUtils.subLayerIdx || 0, 0)].srcObj.assetId !== ''
     },
     showPhotoTabs(): boolean {
       return (!this.isFontsPanelOpened &&

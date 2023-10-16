@@ -123,7 +123,8 @@ export default defineComponent({
       pagesState: 'getPagesState',
       pagesLength: 'getPagesLength',
       currFocusPageIndex: 'getCurrFocusPageIndex',
-      fullPageType: 'vivisticker/getFullPageType'
+      fullPageType: 'vivisticker/getFullPageType',
+      editorBg: 'vivisticker/getEditorBg',
     }),
     config(): IPage {
       return pageUtils.currFocusPage
@@ -181,7 +182,8 @@ export default defineComponent({
     },
     pageStyles(): {[key: string]: string} {
       return {
-        transform: `translateX(-${this.previewOffset}px)`
+        transform: `translateX(-${this.previewOffset}px)`,
+        backgroundColor: this.editorBg
       }
     },
     bgPageStyles(): {[key: string]: string} {
