@@ -121,15 +121,15 @@ export default defineComponent({
       }
       return list
     },
-    categoryListArray(): ICategoryList[] {
+    categoryListArray() {
       return [{
         content: this.searchResult,
         show: this.keyword,
-        key: 'searchResult'
+        key: 'searchResult' as const
       }, {
         content: this.mainContent,
         show: !this.keyword,
-        key: 'mainContent'
+        key: 'mainContent' as const
       }]
     },
     emptyResultMessage(): string {

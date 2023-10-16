@@ -146,15 +146,15 @@ export default defineComponent({
       }
       return list
     },
-    categoryListArray(): ICategoryList[] {
+    categoryListArray() {
       return [{
         content: this.searchResult,
         show: this.keyword && this.showImageTab,
-        key: 'searchResult'
+        key: 'searchResult' as const
       }, {
         content: this.mainContent,
         show: !this.keyword && this.showImageTab,
-        key: 'mainContent'
+        key: 'mainContent' as const
       }]
     },
     currentPageBackgroundLocked(): boolean {
