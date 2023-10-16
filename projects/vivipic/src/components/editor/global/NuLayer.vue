@@ -565,7 +565,9 @@ export default defineComponent({
             imgY: clip.styles.imgY,
             imgWidth: clip.styles.imgWidth,
             imgHeight: clip.styles.imgHeight,
-            adjust: clip.styles.adjust
+            adjust: clip.styles.adjust,
+            horizontalFlip: clip.styles.horizontalFlip,
+            verticalFlip: clip.styles.verticalFlip
           }
         })
 
@@ -665,7 +667,9 @@ export default defineComponent({
               imgY: clip.styles.imgY,
               imgWidth: clip.styles.imgWidth,
               imgHeight: clip.styles.imgHeight,
-              adjust: clip.styles.adjust
+              adjust: clip.styles.adjust,
+              horizontalFlip: clip.styles.horizontalFlip,
+              verticalFlip: clip.styles.verticalFlip
             }
           })
           frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.currDraggedPhoto.srcObj)
@@ -679,7 +683,9 @@ export default defineComponent({
             imgWidth,
             imgHeight,
             imgX,
-            imgY
+            imgY,
+            horizontalFlip: this.primaryLayer && this.primaryLayer.styles.horizontalFlip,
+            verticalFlip: this.primaryLayer && this.primaryLayer.styles.verticalFlip
           })
         }
       }

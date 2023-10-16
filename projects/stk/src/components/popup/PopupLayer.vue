@@ -87,6 +87,7 @@ div(class=" popup-layer bg-gray-6"
 <script lang="ts">
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IPopupOptions } from '@/interfaces/popup'
+import { LayerType } from '@/store/types'
 import backgroundUtils from '@/utils/backgroundUtils'
 import frameUtils from '@/utils/frameUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -164,7 +165,14 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('image')
     },
     isFrame(): boolean {
-      return this.currSelectedInfo.layers.length === 1 && this.getType.includes('frame')
+      const currLayer = layerUtils.getCurrLayer
+      if (currLayer.type === LayerType.frame) {
+        const isSingClipFrame = currLayer.clips.length === 1
+        const isMultiClipsFrame = currLayer.clips.length > 1 && layerUtils.subLayerIdx !== -1
+        return isSingClipFrame || isMultiClipsFrame
+      } else {
+        return false
+      }
     },
     hasLayerDesignId(): boolean {
       return this.currSelectedInfo.layers[0] ? this.currSelectedInfo.layers[0].designId !== '' : false
