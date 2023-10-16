@@ -4,5 +4,6 @@ import { IPage } from './page'
 export interface IStep {
   pages: Array<IPage>,
   lastSelectedLayerIndex: number,
-  currSelectedInfo: ICurrSelectedInfo
+  currSelectedInfo: ICurrSelectedInfo,
+  currActivePageIndex: number
 }

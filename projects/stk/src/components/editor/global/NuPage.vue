@@ -572,7 +572,6 @@ export default defineComponent({
       }
       GroupUtils.deselect()
       const page = generalUtils.deepCopy(this.pageState.config) as IPage
-      this.$store.commit('SET_currSelectedInfo', { pageIndex: this.pageIndex + 1 })
       page.layers.forEach(l => {
         l.id = generalUtils.generateRandomString(8)
         if (l.type === LayerType.frame) {

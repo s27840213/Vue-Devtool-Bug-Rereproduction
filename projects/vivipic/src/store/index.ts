@@ -511,7 +511,10 @@ const mutations: MutationTree<IEditorState> = {
     state.currActivePageIndex = index
 
     const { pageIndex } = state.currSelectedInfo
+    // If current-active-page-index is -1 (none active page existing), doing the if statement as following:
     if (pageIndex === -1 && state.currFocusPageIndex !== index) {
+      // if the new active-page-index is not reset to -1, set FocusPageIndex to it,
+      // otherwise set FocusPageIndex to the middlemost one.
       state.currFocusPageIndex = index === -1 ? state.middlemostPageIndex : index
     }
   },
