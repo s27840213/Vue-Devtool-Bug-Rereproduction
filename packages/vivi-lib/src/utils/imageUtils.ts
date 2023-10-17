@@ -1,5 +1,5 @@
 import imageApi from '@/apis/image-api'
-import { IImageSize, IUserImageContentData } from '@/interfaces/api'
+import { IAssetPhoto, IImageSize, IPhotoItem, IUserImageContentData, isIAssetPhoto } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage } from '@/interfaces/layer'
@@ -9,12 +9,15 @@ import store from '@/store'
 import { IShadowAsset } from '@/store/module/shadow'
 import { AxiosPromise } from 'axios'
 import { cloneDeep, findLastIndex } from 'lodash'
-import FrameUtils from './frameUtils'
-import generalUtils from './generalUtils'
-import LayerUtils from './layerUtils'
-import mouseUtils from './mouseUtils'
-import pageUtils from './pageUtils'
+import FrameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import LayerUtils from '@/utils/layerUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import pageUtils from '@/utils/pageUtils'
 import frameDefaultImg from '@/assets/img/svg/frame.svg'
+import { LayerType } from '@/store/types'
+import { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 const APP_VER_FOR_REFRESH_CACHE = 'v7576'
 
@@ -223,7 +226,7 @@ class ImageUtils {
     if (src.includes('asset.vivipic')) {
       return src.includes('logo') ? 'logo-private' : 'private'
     }
-    return ''
+    throw Error(`Unexpected getSrcType result for src '${src}'.`)
   }
 
   getUserId(src: string, type: string) {
@@ -245,43 +248,25 @@ class ImageUtils {
   getAssetId(src: string, type = this.getSrcType(src)) {
     switch (type) {
       case 'logo-public': {
-        const keyStart = 'logo/'
-        const keyEnd = '/full'
-        const brandIdAndAssetId = src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
-        return brandIdAndAssetId.split('/')[1]
+        return src.match(/logo\/\w+\/(\w+)\//)?.[1] ?? ''
       }
       case 'public': {
-        const keyStart = 'image/'
-        const keyEnd = '/full'
-        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
+        return src.match(/image\/(\w+)\//)?.[1] ?? ''
       }
       case 'unsplash': {
-        const keyStart = 'com/'
-        const keyEnd = '?'
-        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
-      }
-      case 'pexels': {
-        const keyStart = 'photos/'
-        const keyEnd = '/pexels'
-        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
+        return src.match(/com\/([\w-]+)\?/)?.[1] ?? ''
       }
       case 'background': {
-        const keyStart = 'background/'
-        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
+        return src.match(/background\/(\w+)\//)?.[1] ?? ''
       }
       case 'svg': {
-        const keyStart = 'svg/'
-        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
+        return src.match(/svg\/(\w+)\//)?.[1] ?? ''
       }
       case 'ios': {
-        const keyStart = 'vvstk://'
-        return src.substring(keyStart.length)
+        return src.match(/vvstk:\/\/(\w+)/)?.[1] ?? ''
       }
-      case 'logo-private':
-      case 'private':
-        return src
       default:
-        return ''
+        throw Error(`Unexpected getAssetId type '${type}' for src '${src}'.`)
     }
   }
 
@@ -339,6 +324,23 @@ class ImageUtils {
     if (type !== 'logo-public') return
     const tokens = src.split('/')
     return tokens[tokens.length - 3]
+  }
+
+  toSrcObj(asset: IAssetPhoto | IPhotoItem) {
+    if (!isIAssetPhoto(asset)) {
+      return { type: 'unsplash', userId: '', assetId: asset.id }
+    }
+
+    const src = asset.urls.full
+    const type = this.getSrcType(src)
+    const assetIndex = ['logo-private', 'private'].includes(type)
+      ? asset.assetIndex : undefined
+    return {
+      type,
+      userId: this.getUserId(src, type),
+      assetId: assetIndex ?? this.getAssetId(src, type),
+      brandId: this.getBrandId(src, type)
+    }
   }
 
   setImgControlDefault(deselect = true) {
@@ -735,6 +737,48 @@ class ImageUtils {
       return 'https://' + src.slice('https://template.vivipic.com/'.length)
     }
     return src
+  }
+
+  replaceImg(photo: IAssetPhoto | IPhotoItem, previewSrc: string) {
+    const { getCurrLayer: layer, getCurrConfig: _config, pageIndex, layerIndex, subLayerIdx } = LayerUtils
+    if (_config.type !== LayerType.image && _config.type !== LayerType.frame) return
+
+    const srcObj = this.toSrcObj(photo)
+
+    const resizeRatio = RESIZE_RATIO_IMAGE
+    const pageSize = pageUtils.currFocusPageSize
+    const pageAspectRatio = pageSize.width / pageSize.height
+    const photoAspectRatio = photo.width / photo.height
+    const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+    const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+
+    const isPrimaryLayerFrame = layer.type === LayerType.frame
+    const config = isPrimaryLayerFrame ? ((layer as IFrame).clips.find(c => c.active) ?? (layer as IFrame).clips[0]) : _config as IImage
+    const { imgWidth, imgHeight } = config.styles
+    const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
+    const styles = {
+      ...config.styles,
+      ...mouseUtils.clipperHandler({
+        styles: {
+          width: photoWidth,
+          height: photoHeight
+        }
+      } as unknown as IImage, path, config.styles).styles,
+      ...{
+        initWidth: config.styles.initWidth,
+        initHeight: config.styles.initHeight
+      }
+    }
+    if (isPrimaryLayerFrame) {
+      FrameUtils.updateFrameLayerStyles(pageIndex, layerIndex, Math.max(subLayerIdx, 0), styles)
+      FrameUtils.updateFrameClipSrc(pageIndex, layerIndex, Math.max(subLayerIdx, 0), srcObj)
+      FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { previewSrc })
+    } else {
+      LayerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+      LayerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, previewSrc }, subLayerIdx)
+    }
+    store.commit('mobileEditor/SET_closeMobilePanelFlag', true)
+    stepsUtils.record()
   }
 }
 

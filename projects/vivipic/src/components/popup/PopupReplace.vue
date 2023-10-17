@@ -74,10 +74,10 @@ export default defineComponent({
     ...mapState('unsplash', {
       _unsplashImages: 'content',
       searchResult: 'searchResult',
+      unsplashLoading: 'pending',
       keyword: 'keyword'
     }),
     ...mapGetters('unsplash', {
-      unsplashLoading: 'unsplash/pending',
       upsplashNextParams: 'getNextParams',
     }),
     inMyfile() {

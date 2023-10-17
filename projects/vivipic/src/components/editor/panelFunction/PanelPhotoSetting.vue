@@ -44,6 +44,8 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@nu/vivi-lib/interfaces/api'
 
 interface IBtn {
   name: string
@@ -62,6 +64,12 @@ export default defineComponent({
       show: '',
       isSvgImage: false,
       btns: [[
+        {
+          name: 'replaceImg',
+          label: this.$t('NN0913'),
+          extraClass: 'grid-full',
+          show: 'replaceImg',
+        }], [
         {
           name: 'overlay',
           label: this.$t('NN0899'),
@@ -196,7 +204,7 @@ export default defineComponent({
     //   return this.currLayer.previewSrc !== undefined
     // },
     isUploadingImg(): boolean {
-      return !(this.currLayer.srcObj.type && this.currLayer.srcObj.assetId && imageUtils.getSrc(this.currLayer.srcObj))
+      return !(this.currLayer.srcObj.type && this.currLayer.srcObj.assetId && imageUtils.getSrc(this.currLayer.srcObj, 'prev'))
     }
   },
   watch: {
@@ -255,6 +263,15 @@ export default defineComponent({
     },
     handleShow(name: string) {
       switch (name) {
+        case 'replaceImg':
+          popupUtils.openPopup('replace', undefined, {
+            replaceImg: (img: IAssetPhoto | IPhotoItem) => {
+              const url = isIAssetPhoto(img) ? img.urls.prev
+                : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 'prev')
+              imageUtils.replaceImg(img, url)
+            }
+          })
+          return
         case 'panel-photo-shadow': {
           if (this.isUploadImgShadow) {
             return

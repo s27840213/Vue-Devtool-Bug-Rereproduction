@@ -33,19 +33,15 @@ div(class="gallery-photo" :class="{border: deletable}")
 <script lang="ts">
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
 import { IAssetPhoto } from '@/interfaces/api'
-import { IFrame, IImage } from '@/interfaces/layer'
-import { FunctionPanelType, LayerType } from '@/store/types'
+import { IImage } from '@/interfaces/layer'
+import { FunctionPanelType } from '@/store/types'
 import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import DragUtils from '@/utils/dragUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import frameUtils from '@/utils/frameUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
-import mouseUtils from '@/utils/mouseUtils'
 import networkUtils from '@/utils/networkUtils'
-import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import { replaceImgInject } from '@/utils/textFillUtils'
 import { PropType, defineComponent, inject } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -146,9 +142,6 @@ export default defineComponent({
       setCurrDraggedPhoto: 'SET_currDraggedPhoto',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
-    pageSize(): { width: number, height: number } {
-      return this.getPageSize(pageUtils.currFocusPageIndex)
-    },
     dragStart(e: DragEvent, photo: any) {
       if (!networkUtils.check()) {
         networkUtils.notifyNetworkError()
@@ -217,61 +210,12 @@ export default defineComponent({
       if (this.replaceImgInject) {
         this.replaceImgInject(photo)
       } else if (this.$isTouchDevice() && this.mobilePanel === 'replace') { // Replace frame and img frame.
-        this.replaceImg(photo)
+        imageUtils.replaceImg(photo, this.previewSrc)
       } else if (this.multiSelectMode === 'on' || this.hasCheckedAssets) {
         this.modifyCheckedAssets(photo.assetIndex as number)
       } else {
         this.addImage(photo)
       }
-    },
-    replaceImg(photo: IAssetPhoto) {
-      const { getCurrLayer: layer, getCurrConfig: _config, pageIndex, layerIndex, subLayerIdx } = layerUtils
-      if (_config.type !== LayerType.image && _config.type !== LayerType.frame) return
-
-      const url = this.isUploading ? (photo as IAssetPhoto).urls.prev : this.fullSrc
-      const type = imageUtils.getSrcType(url)
-      const assetIndex = (this.inFilePanel || this.inLogoPanel) && !photo.id ? photo.assetIndex : undefined
-      const srcObj = {
-        type,
-        userId: imageUtils.getUserId(url, type),
-        assetId: assetIndex ?? (imageUtils.getAssetId(url, type)),
-        brandId: imageUtils.getBrandId(url, type)
-      }
-
-      const resizeRatio = RESIZE_RATIO_IMAGE
-      const pageSize = this.pageSize()
-      const pageAspectRatio = pageSize.width / pageSize.height
-      const photoAspectRatio = photo.width / photo.height
-      const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
-
-      const isPrimaryLayerFrame = layer.type === LayerType.frame
-      const config = isPrimaryLayerFrame ? ((layer as IFrame).clips.find(c => c.active) ?? (layer as IFrame).clips[0]) : _config as IImage
-      const { imgWidth, imgHeight } = config.styles
-      const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
-      const styles = {
-        ...config.styles,
-        ...mouseUtils.clipperHandler({
-          styles: {
-            width: photoWidth,
-            height: photoHeight
-          }
-        } as unknown as IImage, path, config.styles).styles,
-        ...{
-          initWidth: config.styles.initWidth,
-          initHeight: config.styles.initHeight
-        }
-      }
-      if (isPrimaryLayerFrame) {
-        frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, Math.max(subLayerIdx, 0), styles)
-        frameUtils.updateFrameClipSrc(pageIndex, layerIndex, Math.max(subLayerIdx, 0), srcObj)
-        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { previewSrc: this.previewSrc })
-      } else {
-        layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, previewSrc: this.previewSrc }, subLayerIdx)
-      }
-      this.setCloseMobilePanelFlag(true)
-      stepsUtils.record()
     },
     addImage(photo: IAssetPhoto) {
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {

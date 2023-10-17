@@ -12,6 +12,7 @@ import layerUtils from './layerUtils'
 import pageUtils from './pageUtils'
 import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
+import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 
 class BackgroundUtils {
   get inBgSettingMode(): boolean {
@@ -190,6 +191,37 @@ class BackgroundUtils {
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
     pageUtils.updateBackgroundImageMode(pageIndex, true)
     shortcutUtils.del()
+
+    if (generalUtils.isTouchDevice()) {
+      editorUtils.setInBgSettingMode(true)
+    }
+  }
+
+  replaceBgImg(photo: IAssetPhoto | IPhotoItem, previewSrc: string) {
+    const pageIndex = layerUtils.pageIndex
+    const srcObj = imageUtils.toSrcObj(photo)
+    
+    store.commit('SET_backgroundImageSrc', {
+      pageIndex: pageIndex,
+      srcObj: srcObj,
+      previewSrc: previewSrc
+    })
+    const { width, height, posX, posY } = imageUtils.adaptToPage(
+      photo,
+      store.getters.getPage(pageIndex)
+    )
+    pageUtils.updateBackgroundImageStyles(pageIndex, {
+      width,
+      height,
+      adjust: {},
+      horizontalFlip: false,
+      verticalFlip: false,
+      imgWidth: width,
+      imgHeight: height,
+      scale: 1
+    })
+    pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
+    pageUtils.updateBackgroundImageMode(pageIndex, true)
 
     if (generalUtils.isTouchDevice()) {
       editorUtils.setInBgSettingMode(true)

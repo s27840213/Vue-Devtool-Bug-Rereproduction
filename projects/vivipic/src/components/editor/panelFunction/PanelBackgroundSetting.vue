@@ -24,6 +24,10 @@ div(class="bg-setting")
       @click="handleDeleteBackground"
       v-hint="$t('NN0034')"
     )
+  div
+    nubtn(theme="edit" size="mid-full"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="handleShow('replaceImg')") {{$t('NN0913')}}
   div(:class="{ 'bg-setting__grid': isAdmin }")
     nubtn(theme="edit" size="mid-full"
       :disabled="!isShowImage || backgroundLocked"
@@ -82,6 +86,8 @@ import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@nu/vivi-lib/interfaces/api'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 export default defineComponent({
   components: {
@@ -213,6 +219,16 @@ export default defineComponent({
     },
     handleShow(name: string) {
       if (this.backgroundLocked) return this.handleLockedNotify()
+      if (name === 'replaceImg') {
+        popupUtils.openPopup('replace', undefined, {
+          replaceImg: (img: IAssetPhoto | IPhotoItem) => {
+            const url = isIAssetPhoto(img) ? img.urls.prev
+              : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 'prev')
+            backgroundUtils.replaceBgImg(img, url)
+          }
+        })
+        return
+      }
       this.show = this.show.includes(name) ? '' : name
     },
     handleColorPicker() {
