@@ -700,7 +700,8 @@ class AssetUtils {
     let assetId = '' as string | number | undefined
     if (typeof url === 'string') {
       const type = ImageUtils.getSrcType(url)
-      assetId = isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
+      assetId = ['logo-private', 'private'].includes(type) ? assetIndex
+        : isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
       srcObj = {
         type,
         userId: ImageUtils.getUserId(url, type),
