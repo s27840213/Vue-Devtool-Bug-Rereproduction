@@ -87,7 +87,11 @@ export default new class ImageShadowPanelUtils {
         (
           shadow.srcState.layerSrcObj.type === config.srcObj.type &&
           shadow.srcState.layerSrcObj.userId === config.srcObj.userId &&
-          shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId
+          shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId &&
+          shadow.srcState.layerState?.imgX === config.styles.imgX &&
+          shadow.srcState.layerState?.imgY === config.styles.imgY &&
+          shadow.srcState.layerState?.imgWidth === config.styles.imgWidth &&
+          shadow.srcState.layerState?.imgHeight === config.styles.imgHeight
         )
 
       return shadow.currentEffect === shadow.srcState.effect &&
@@ -109,7 +113,7 @@ export default new class ImageShadowPanelUtils {
     }
   }
 
-  async _handleShadowUpload(_layerData?: any, forceUpload = false) {
+  async _handleShadowUpload(_layerData?: any, forceUpload = false, errorCount = 1) {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     let layerData = (() => {
       const handleId = store.state.shadow.handleId
@@ -153,6 +157,7 @@ export default new class ImageShadowPanelUtils {
 
       const isSameSrc = config.styles.shadow.srcState && config.styles.shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId
       if (!forceUpload && isSameSrc && this.checkIfSameEffect(config)) {
+        console.warn('checkIfSameEffect')
         /**
          * Check if the state of the shadow is the same
          */
@@ -162,20 +167,14 @@ export default new class ImageShadowPanelUtils {
           layerIndex: _layerIndex,
           subLayerIdx: _subLayerIdx
         }
-        imageShadowUtils.clearLayerData()
         imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
         imageShadowUtils.setUploadProcess(false)
-        imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
-        imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
-        imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+        this.resetHandleState()
         return
       }
 
       if (shadow.currentEffect === ShadowEffectType.none) {
-        imageShadowUtils.clearLayerData()
-        imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
-        imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
-        imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+        this.resetHandleState()
         imageShadowUtils.setUploadProcess(false)
         return
       }
@@ -198,7 +197,11 @@ export default new class ImageShadowPanelUtils {
       })
 
       imageShadowUtils.setUploadProcess(true)
-      imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
+      imageShadowUtils.setHandleId({
+        pageId: pageId,
+        layerId: primarylayerId || config.id || '',
+        subLayerId: primarylayerId ? config.id || '' : ''
+      })
       imageShadowUtils.setUploadId({
         pageId: pageId,
         layerId: primarylayerId || config.id || '',
@@ -213,35 +216,77 @@ export default new class ImageShadowPanelUtils {
         (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
 
       setMark('upload', 1)
-      const img = new Image()
-      img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
-        `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      await new Promise<void>((resolve, reject) => {
-        img.onload = async () => {
-          const isSVG = await this.isSVG(img.src, config)
-          if (isSVG) {
-            await this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
-              img.onload = () => {
-                resolve()
-              }
+      // const img = new Image()
+      // img.crossOrigin = 'anonynous'
+      // img.src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
+      //   `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      const src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg')
+      // const src = imageUtils.appendQuery(imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg'), 'ver', generalUtils.generateRandomString(6))
+
+      const img = await imageUtils.imgLoadHandler(src, async (img) => {
+        const isSVG = await this.isSVG(img.src, config)
+        if (isSVG) {
+          await new Promise<void>((resolve, reject) => {
+            this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
               img.onerror = () => {
                 const log = 'error: isSVG img loading error, src: ' + img.src
                 logUtils.setLog(log)
-                console.log(log)
+                reject(console.log(log))
+              }
+              img.onload = () => {
+                resolve(console.log('svg onload callback', img.naturalWidth, img.naturalHeight))
               }
             })
+          })
+        }
+        return img
+      }, {
+        error: (img) => {
+          const log = 'error: img is svg check error, can not load img. ' + 'img.src: ' + img?.src
+          logUtils.setLog(log)
+          if (errorCount <= 3) {
+            setTimeout(() => {
+              this._handleShadowUpload(undefined, undefined, errorCount + 1)
+            }, 1000)
           } else {
-            resolve()
+            return this.resetHandleState()
           }
         }
-        img.onerror = (e) => {
-          const log = 'error: img is svg check error, can not load img. ' + 'img.src: ' + img.src + 'error:' + e.toString()
-          logUtils.setLog(log)
-          console.log(log, e)
-          reject(e)
-        }
       })
+
+      // await new Promise<void>((resolve, reject) => {
+      //   img.onload = async () => {
+      //     const isSVG = await this.isSVG(img.src, config)
+      //     if (isSVG) {
+      //       await this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
+      //         img.onload = () => {
+      //           resolve()
+      //         }
+      //         img.onerror = () => {
+      //           const log = 'error: isSVG img loading error, src: ' + img.src
+      //           logUtils.setLog(log)
+      //           console.log(log)
+      //         }
+      //       })
+      //     } else {
+      //       resolve()
+      //     }
+      //   }
+      //   img.onerror = () => {
+      //     const log = 'error: img is svg check error, can not load img. ' + 'img.src: ' + img.src
+      //     logUtils.setLog(log)
+      //     reject(log)
+      //   }
+      // }).catch ((e: string) => {
+      //   console.log(e, errorCount)
+      //   if (errorCount <= 3) {
+      //     setTimeout(() => {
+      //       this._handleShadowUpload(undefined, undefined, errorCount + 1)
+      //     }, 1000)
+      //   } else {
+      //     this.resetHandleState()
+      //   }
+      // })
       logUtils.setLog('phase: finish load max size img')
 
       setMark('upload', 2)
@@ -304,112 +349,110 @@ export default new class ImageShadowPanelUtils {
       logUtils.setLog('phase: start uploading result')
       const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 1)]
       setMark('upload', 5)
-      uploadUtils.uploadAsset('image', uploadImg, {
-        addToPage: false,
-        needCompressed: false,
-        id: assetId,
-        isShadow: true,
-        pollingCallback: (json: IUploadAssetResponse) => {
-          logUtils.setLog('phase: finish uploading')
-          setMark('upload', 6)
-          const isAdmin = store.getters['user/isAdmin']
-          const srcObj = {
-            type: isAdmin ? 'public' : 'shadow-private',
-            userId: json.data.team_id || '',
-            assetId: isAdmin ? json.data.id || json.data.asset_index : json.data.asset_index
-          }
-          const _width = config.styles.width / config.styles.scale
-          const _height = config.styles.height / config.styles.scale
-          const newWidth = Math.ceil((updateCanvas.width - right - left) / drawCanvasW * _width)
-          const newHeight = Math.ceil((updateCanvas.height - top - bottom) / drawCanvasH * _height)
-          let newX = newWidth * 0.5 - _width * (leftShadowThickness + 0.5)
-          let newY = newHeight * 0.5 - _height * (topShadowThickness + 0.5)
-          if ([ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect) && !shadow.isTransparent) {
-            newX = 0
-            newY = 0
-          }
-          new Promise<void>((resolve) => {
-            if (!isAdmin) {
-              store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })
-                .then(() => resolve())
-            } else {
-              resolve()
+      try {
+        uploadUtils.uploadAsset('image', uploadImg, {
+          addToPage: false,
+          needCompressed: false,
+          id: assetId,
+          isShadow: true,
+          pollingCallback: (json: IUploadAssetResponse) => {
+            logUtils.setLog('phase: finish uploading')
+            setMark('upload', 6)
+            const isAdmin = store.getters['user/isAdmin']
+            const srcObj = {
+              type: isAdmin ? 'public' : 'shadow-private',
+              userId: json.data.team_id || '',
+              assetId: isAdmin ? json.data.id || json.data.asset_index : json.data.asset_index
             }
-          }).then(async () => {
-            return await imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight))), () => {
-              try {
-                if ((_config as IImage).styles.shadow.currentEffect === (config as IImage).styles.shadow.currentEffect) {
-                  const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-                  layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
-                  const shadowImgStyles = {
-                    imgWidth: newWidth,
-                    imgHeight: newHeight,
-                    imgX: newX,
-                    imgY: newY
-                  }
-                  /** update the upload img in shadow module */
-                  imageShadowUtils.addUploadImg({
-                    id: uploadAssetId,
-                    owner: { pageId, layerId, subLayerId },
-                    srcObj,
-                    styles: shadowImgStyles
-                  })
-                  const shadow = config.styles.shadow
-                  imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
-                  imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
-                  imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, {
-                    effect: shadow.currentEffect,
-                    effects: shadow.effects,
-                    shadowSrcObj: srcObj,
-                    layerSrcObj: config.srcObj,
-                    layerState: {
-                      imgWidth: config.styles.imgWidth,
-                      imgHeight: config.styles.imgHeight,
-                      imgX: config.styles.imgX,
-                      imgY: config.styles.imgY
-                    }
-                  })
-
-                  logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
-                  src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))}
-                  pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIdx}
-                  pageId: ${pageId}, layerId: ${layerId}, subLayerId: ${subLayerId}`)
-                  setMark('upload', 7)
-                  logMark('upload')
-                }
-              } catch (e) {
-                console.error('exception fallback: save to main page as uploading img')
-                logUtils.setLog('error' + 'exception fallback: save to main page as uploading img')
+            const _width = config.styles.width / config.styles.scale
+            const _height = config.styles.height / config.styles.scale
+            const newWidth = Math.ceil((updateCanvas.width - right - left) / drawCanvasW * _width)
+            const newHeight = Math.ceil((updateCanvas.height - top - bottom) / drawCanvasH * _height)
+            let newX = newWidth * 0.5 - _width * (leftShadowThickness + 0.5)
+            let newY = newHeight * 0.5 - _height * (topShadowThickness + 0.5)
+            if ([ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect) && !shadow.isTransparent) {
+              newX = 0
+              newY = 0
+            }
+            new Promise<void>((resolve) => {
+              if (!isAdmin) {
+                store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })
+                  .then(() => resolve())
+              } else {
+                resolve()
               }
-            }, {
-              error: () => {
-                console.error('can not load the uploaded image shadow')
-                logUtils.setLog('error' + 'can not load the uploaded image shadow')
+            }).then(async () => {
+              const shadowSrc = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))
+              imageUtils.imgLoadHandler(shadowSrc, () => {
+                try {
+                  if ((_config as IImage).styles.shadow.currentEffect === (config as IImage).styles.shadow.currentEffect) {
+                    const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+                    layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
+                    const shadowImgStyles = {
+                      imgWidth: newWidth,
+                      imgHeight: newHeight,
+                      imgX: newX,
+                      imgY: newY
+                    }
+                    /** update the upload img in shadow module */
+                    imageShadowUtils.addUploadImg({
+                      id: uploadAssetId,
+                      owner: { pageId, layerId, subLayerId },
+                      srcObj,
+                      styles: shadowImgStyles
+                    })
+                    const shadow = config.styles.shadow
+                    imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+                    imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+                    imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, {
+                      effect: shadow.currentEffect,
+                      effects: shadow.effects,
+                      shadowSrcObj: srcObj,
+                      layerSrcObj: config.srcObj,
+                      layerState: {
+                        imgWidth: config.styles.imgWidth,
+                        imgHeight: config.styles.imgHeight,
+                        imgX: config.styles.imgX,
+                        imgY: config.styles.imgY
+                      }
+                    })
 
-                const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-                imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', assetId: '', userId: '' })
-                imageShadowUtils.updateEffectState({ pageIndex, layerIndex, subLayerIdx }, ShadowEffectType.none)
+                    logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
+                    src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))}
+                    pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIdx}
+                    pageId: ${pageId}, layerId: ${layerId}, subLayerId: ${subLayerId}`)
+                    setMark('upload', 7)
+                    logMark('upload')
+                  }
+                } catch (e) {
+                  console.error('exception fallback: save to main page as uploading img')
+                  logUtils.setLog('error' + 'exception fallback: save to main page as uploading img')
+                }
+              }, {
+                crossOrigin: false,
+                error: (img) => {
+                  logUtils.setLog('error' + 'can not load the uploaded image shadow, src:' + img?.src)
+                  const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+                  imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', assetId: '', userId: '' })
+                  imageShadowUtils.updateEffectState({ pageIndex, layerIndex, subLayerIdx }, ShadowEffectType.none)
+                }
+              })
+            }).finally(() => {
+              this.resetHandleState()
+              imageShadowUtils.setUploadProcess(false)
+              if (uploadUtils.isLogin) {
+                uploadUtils.uploadDesign()
               }
             })
-          }).catch((e: Error) => {
-            console.error(e)
-            logUtils.setLog('error' + e.message)
-          }).finally(() => {
-            imageShadowUtils.clearLayerData()
-            imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
-            imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
-            imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-            imageShadowUtils.setUploadProcess(false)
-          })
-        }
-      })
+          }
+        })
+      } catch (e) {
+        this.resetHandleState()
+        imageShadowUtils.setUploadProcess(false)
+      }
     } else {
       logUtils.setLog('layerData is undefined')
-      console.log('layerData is undefined')
-      imageShadowUtils.clearLayerData()
-      imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
-      imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
-      imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+      this.resetHandleState()
     }
   }
 
@@ -508,5 +551,12 @@ export default new class ImageShadowPanelUtils {
       assetId: id,
       userId: ''
     })
+  }
+
+  resetHandleState() {
+    imageShadowUtils.clearLayerData()
+    imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+    imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+    imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
   }
 }()

@@ -137,9 +137,9 @@ class ImageShadowUtils {
   }
 
   getImageMatchedIdentifier(config: IImage) {
-    const { styles: { shadow: { effects, currentEffect } } } = config
+    const { styles: { shadow: { effects, currentEffect }, imgWidth, imgHeight, imgX, imgY } } = config
     const { radius, size } = (effects as any)[currentEffect] as IImageMatchedEffect
-    return config.srcObj.type + config.srcObj.assetId + config.srcObj.userId + '-' + radius.toString() + '-' + size.toString()
+    return [config.srcObj.type, config.srcObj.assetId, config.srcObj.userId, radius, size, imgWidth, imgHeight, imgX, imgY].join()
   }
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
@@ -322,7 +322,7 @@ class ImageShadowUtils {
     logMark('floating', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
   }
 
-  drawImageMatchedShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+  async drawImageMatchedShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) {
       if (canvas) {
@@ -337,15 +337,15 @@ class ImageShadowUtils {
     }
 
     const { timeout = DRAWING_TIMEOUT } = params
+    const handlerId = generalUtils.generateRandomString(6)
+    this.handlerId = handlerId
     if (timeout) {
       clearTimeout(this._draw)
-      const handlerId = generalUtils.generateRandomString(6)
-      this.handlerId = handlerId
       this._draw = window.setTimeout(() => {
         this.imageMathcedHandler(canvas_s, img, config, params, handlerId)
       }, timeout)
     } else {
-      this.imageMathcedHandler(canvas_s, img, config, params)
+      await this.imageMathcedHandler(canvas_s, img, config, params, handlerId)
     }
   }
 
@@ -391,13 +391,11 @@ class ImageShadowUtils {
     if (layerInfo && timeout) {
       this.setIsProcess(layerInfo, true)
     }
-
     ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasW as number, drawCanvasH as number)
 
     ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
     const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     setMark('imageMatched', 1)
-    // const bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.ceil(radius * 1.5))
     let bluredData
     if (this.imageDataCache.identifier === this.getImageMatchedIdentifier(config)) {
       bluredData = this.imageDataCache.data
@@ -410,7 +408,7 @@ class ImageShadowUtils {
         return
       }
     }
-    // const bluredData = imageDataRGBA(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1)
+
     setMark('imageMatched', 2)
     const xFactor = layerWidth / _imgWidth
     const yFactor = layerHeight / _imgHeight
@@ -854,7 +852,6 @@ class ImageShadowUtils {
   }
 
   setHandleId(id?: ILayerIdentifier) {
-    // console.warn('set handle id', id?.pageId)
     if (!id) {
       id = { pageId: '', layerId: '', subLayerId: '' }
     }
@@ -872,7 +869,7 @@ class ImageShadowUtils {
     const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
     ctxText.drawImage(canvas, 0, 0)
     document.body.appendChild(canvasTest)
-    setTimeout(() => document.body.removeChild(canvasTest), 10000)
+    setTimeout(() => document.body.removeChild(canvasTest), 3000)
     canvasTest.style.position = 'absolute'
     canvasTest.style.top = '0'
     canvasTest.style.zIndex = '10000'
