@@ -1,6 +1,14 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
-  headerbar
+  headerbar(class="px-24" :hide="showPromptArea")
+    template(#left)
+      back-btn
+    template(#right)
+      cm-btn(
+        v-if="atEditor"
+        theme="primary"
+        size="md"
+        @click="handleNextAction") {{ $t('CM0012') }}
   div(class="flex justify-center items-center" ref="editorContainerRef")
     div(class="w-full h-full box-border overflow-scroll flex justify-center items-center")
       div(
@@ -45,8 +53,16 @@ onMounted(() => {
 // #region Stores
 const { showEditingOpstions, showPromptArea, atEditor } = useStateInfo()
 const editorStore = useEditorStore()
-const { setPageScaleRatio, setImgAspectRatio } = editorStore
-const { editingPage, pageSize, pageScaleRatio } = storeToRefs(editorStore)
+const { setPageScaleRatio, setImgAspectRatio, setEditorState } = editorStore
+const { editingPage, pageSize, pageScaleRatio, editorState } = storeToRefs(editorStore)
+
+const handleNextAction = function () {
+  if (editorState.value === 'aspectRatio') {
+    setEditorState('editing')
+  } else if (editorState.value === 'editing') {
+    setEditorState('prompt')
+  }
+}
 // #endregion
 
 onBeforeRouteLeave((to, from) => {

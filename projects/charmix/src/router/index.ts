@@ -52,6 +52,10 @@ router.beforeEach((to, from, next) => {
   if (from.name === 'MyDesign' && to.name === 'Home') {
     to.meta.transition = 'fade-right-in'
   }
+
+  if (from.name === 'Settings' && to.name === 'MyDesign') {
+    to.meta.transition = 'fade-top-in'
+  }
   next()
 })
 
