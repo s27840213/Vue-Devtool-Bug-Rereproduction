@@ -119,6 +119,7 @@ export default defineComponent({
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
+      isUploadShadow: 'shadow/isUploading',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat',
       userInfo: 'webView/getUserInfo',
@@ -223,7 +224,7 @@ export default defineComponent({
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
           hidden: this.isInFrame,
-          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+          disabled: (this.isHandleShadow || this.isUploadShadow) && this.mobilePanel !== 'photo-shadow'
         },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
@@ -240,7 +241,7 @@ export default defineComponent({
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
           hidden: this.isInFrame,
-          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+          disabled: (this.isHandleShadow || this.isUploadShadow) && this.mobilePanel !== 'photo-shadow'
         },
         ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-light' }] : [],
         ...this.genearlLayerTabs,
@@ -469,7 +470,7 @@ export default defineComponent({
     },
     isInFrame(): boolean {
       const layer = layerUtils.getCurrLayer
-      return layer.type === LayerType.frame && (layer as IFrame).clips[0].srcObj.assetId !== ''
+      return layer.type === LayerType.frame && (layer as IFrame).clips[Math.max(layerUtils.subLayerIdx || 0, 0)].srcObj.assetId !== ''
     },
     showPhotoTabs(): boolean {
       return (!this.isFontsPanelOpened &&

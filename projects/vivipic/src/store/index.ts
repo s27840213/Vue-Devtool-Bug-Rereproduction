@@ -319,7 +319,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getContentScaleRatio(state: IEditorState) {
     const pageIndex = layerUtils.pageIndex === -1 ? 0 : layerUtils.pageIndex
-    return state.pages[pageIndex].config.contentScaleRatio
+    return generalUtils.isTouchDevice() ? state.pages[pageIndex].config.contentScaleRatio : 1
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state.useMobileEditor ? -1 : state._3dEnabledPageIndex
@@ -511,7 +511,10 @@ const mutations: MutationTree<IEditorState> = {
     state.currActivePageIndex = index
 
     const { pageIndex } = state.currSelectedInfo
+    // If current-active-page-index is -1 (none active page existing), doing the if statement as following:
     if (pageIndex === -1 && state.currFocusPageIndex !== index) {
+      // if the new active-page-index is not reset to -1, set FocusPageIndex to it,
+      // otherwise set FocusPageIndex to the middlemost one.
       state.currFocusPageIndex = index === -1 ? state.middlemostPageIndex : index
     }
   },

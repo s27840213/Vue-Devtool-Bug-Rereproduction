@@ -68,10 +68,6 @@ export default defineComponent({
     },
     subLayerIndex: {
       type: Number
-    },
-    contentScaleRatio: {
-      type: Number,
-      default: 1
     }
   },
   data() {
@@ -273,10 +269,24 @@ export default defineComponent({
     },
     styles() {
       if (this.paramsReady) {
-        const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.$store.state.pageScaleRatio * 0.01 : 1)
+        let size
+        switch (this.config.category) {
+          case 'D': {
+            size = {
+              width: `${this.config.styles.initWidth}px`,
+              height: `${this.config.styles.initHeight}px`
+            }
+            break
+          }
+          default: {
+            size = {
+              width: `${this.config.vSize[0] + this.config.pDiff[0]}px`,
+              height: `${this.config.vSize[1] + this.config.pDiff[1]}px`
+            }
+          }
+        }
         return {
-          width: `${((this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])) * _f}px`,
-          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1]) * _f}px`,
+          ...size,
           ...(this.config.wkf && useRoute().path === '/preview' && { '-webkit-filter': 'opacity(1)' }),
           ...(shapeUtils.isLine(this.config) ? { pointerEvents: 'none' } : {})
         }

@@ -253,7 +253,7 @@ class StepsUtils {
 
     // There's not any steps before, create the initial step first
     if (this.currStep < 0) {
-      this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
+      this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo, currActivePageIndex: store.getters.getCurrActivePageIndex })
       // this.pageSteps.push(middlemostPageIndex)
       this.currStep++
     } else {
@@ -262,7 +262,7 @@ class StepsUtils {
       if (this.steps.length === this.MAX_STORAGE_COUNT) {
         this.steps.shift()
       }
-      this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
+      this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo, currActivePageIndex: store.getters.getCurrActivePageIndex })
       this.currStep = this.steps.length - 1
       // Don't upload the design when initialize the steps
       if (uploadUtils.isLogin) {

@@ -170,6 +170,7 @@ import i18n from '@/i18n'
 import { IFrame, IGroup, IImage, ILayer, IText } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
+import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -248,6 +249,9 @@ export default defineComponent({
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
     })
+    if (this.config.x === 0 || this.config.y === 0) {
+      editorUtils.handleContentScaleRatio(this.pageIndex)
+    }
   },
   watch: {
     pageIndex(val) {
@@ -568,7 +572,6 @@ export default defineComponent({
       }
       GroupUtils.deselect()
       const page = generalUtils.deepCopy(this.pageState.config) as IPage
-      this.$store.commit('SET_currSelectedInfo', { pageIndex: this.pageIndex + 1 })
       page.layers.forEach(l => {
         l.id = generalUtils.generateRandomString(8)
         if (l.type === LayerType.frame) {
