@@ -87,6 +87,7 @@ div(class=" popup-layer bg-gray-6"
 <script lang="ts">
 import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import { IPopupOptions } from '@nu/vivi-lib/interfaces/popup'
+import { LayerType } from '@nu/vivi-lib/store/types'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
@@ -164,7 +165,14 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('image')
     },
     isFrame(): boolean {
-      return this.currSelectedInfo.layers.length === 1 && this.getType.includes('frame')
+      const currLayer = layerUtils.getCurrLayer
+      if (currLayer.type === LayerType.frame) {
+        const isSingClipFrame = currLayer.clips.length === 1
+        const isMultiClipsFrame = currLayer.clips.length > 1 && layerUtils.subLayerIdx !== -1
+        return isSingClipFrame || isMultiClipsFrame
+      } else {
+        return false
+      }
     },
     hasLayerDesignId(): boolean {
       return this.currSelectedInfo.layers[0] ? this.currSelectedInfo.layers[0].designId !== '' : false

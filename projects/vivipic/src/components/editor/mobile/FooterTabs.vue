@@ -74,7 +74,7 @@ export default defineComponent({
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
           hidden: this.isInFrame,
-          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+          disabled: (this.isHandleShadow || this.isUploadShadow) && this.mobilePanel !== 'photo-shadow'
         },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
@@ -91,7 +91,7 @@ export default defineComponent({
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
           hidden: this.isInFrame,
-          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+          disabled: (this.isHandleShadow || this.isUploadShadow) && this.mobilePanel !== 'photo-shadow'
         },
         ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-light' }] : [],
         ...this.genearlLayerTabs,

@@ -785,7 +785,7 @@ export default defineComponent({
             this._onError(true)
           }
           console.warn('img preview cannot be loaded!')
-        }).finally(() => { return undefined })
+        })
 
       if (!src || src === previewSrc) return preImg as HTMLImageElement | undefined
 
@@ -898,7 +898,9 @@ export default defineComponent({
       if (this.userId !== 'backendRendering') {
         await this.previewAsLoading()
           .then((img) => {
-            this.handleIsTransparent(img)
+            if (img) {
+              this.handleIsTransparent(img)
+            }
           })
       } else {
       // backendRendering DO NOT USE cross-origin

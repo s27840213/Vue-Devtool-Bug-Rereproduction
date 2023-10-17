@@ -117,6 +117,7 @@ export default defineComponent({
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
+      isUploadShadow: 'shadow/isUploading',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat',
       userInfo: 'webView/getUserInfo',

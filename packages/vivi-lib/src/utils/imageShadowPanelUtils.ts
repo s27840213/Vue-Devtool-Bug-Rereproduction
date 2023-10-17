@@ -89,7 +89,11 @@ export default new class ImageShadowPanelUtils {
         (
           shadow.srcState.layerSrcObj.type === config.srcObj.type &&
           shadow.srcState.layerSrcObj.userId === config.srcObj.userId &&
-          shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId
+          shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId &&
+          shadow.srcState.layerState?.imgX === config.styles.imgX &&
+          shadow.srcState.layerState?.imgY === config.styles.imgY &&
+          shadow.srcState.layerState?.imgWidth === config.styles.imgWidth &&
+          shadow.srcState.layerState?.imgHeight === config.styles.imgHeight
         )
 
       return shadow.currentEffect === shadow.srcState.effect &&
@@ -111,7 +115,7 @@ export default new class ImageShadowPanelUtils {
     }
   }
 
-  async _handleShadowUpload(_layerData?: any, forceUpload = false) {
+  async _handleShadowUpload(_layerData?: any, forceUpload = false, errorCount = 1) {
     console.warn('_handleShadowUpload')
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     let layerData = (() => {
@@ -166,13 +170,13 @@ export default new class ImageShadowPanelUtils {
           subLayerIdx: _subLayerIdx
         }
         imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
-        this.clearer()
+        this.resetHandleState()
         imageShadowUtils.setUploadProcess(false)
         return
       }
 
       if (shadow.currentEffect === ShadowEffectType.none) {
-        this.clearer()
+        this.resetHandleState()
         imageShadowUtils.setUploadProcess(false)
         return
       }
@@ -211,33 +215,35 @@ export default new class ImageShadowPanelUtils {
         (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
 
       setMark('upload', 1)
-      const img = new Image()
-      img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
-        `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      await new Promise<void>((resolve, reject) => {
-        img.onload = async () => {
-          const isSVG = await this.isSVG(img.src, config)
-          if (isSVG) {
-            await this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
-              img.onload = () => {
-                resolve()
-              }
+      const src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg')
+      const img = await imageUtils.imgLoadHandler(src, async (img) => {
+        const isSVG = await this.isSVG(img.src, config)
+        if (isSVG) {
+          await new Promise<void>((resolve, reject) => {
+            this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
               img.onerror = () => {
                 const log = 'error: isSVG img loading error, src: ' + img.src
                 logUtils.setLog(log)
-                console.log(log)
+                reject(console.log(log))
+              }
+              img.onload = () => {
+                resolve(console.log('svg onload callback', img.naturalWidth, img.naturalHeight))
               }
             })
-          } else {
-            resolve()
-          }
+          })
         }
-        img.onerror = (e) => {
-          const log = 'error: img is svg check error, can not load img. ' + 'img.src: ' + img.src + 'error:' + e.toString()
+        return img
+      }, {
+        error: (img) => {
+          const log = 'error: img is svg check error, can not load img. ' + 'img.src: ' + img?.src
           logUtils.setLog(log)
-          console.log(log, e)
-          reject(e)
+          if (errorCount <= 3) {
+            setTimeout(() => {
+              this._handleShadowUpload(undefined, undefined, errorCount + 1)
+            }, 1000)
+          } else {
+            return this.resetHandleState()
+          }
         }
       })
       logUtils.setLog('phase: finish load max size img')
@@ -344,6 +350,7 @@ export default new class ImageShadowPanelUtils {
       }
 
       if (generalUtils.isPic) {
+        try {
         uploadUtils.uploadAsset('image', uploadImg, {
           addToPage: false,
           needCompressed: false,
@@ -367,7 +374,8 @@ export default new class ImageShadowPanelUtils {
                 resolve()
               }
             }).then(async () => {
-              return await imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight))), () => {
+              const shadowSrc = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))
+              return imageUtils.imgLoadHandler(shadowSrc, () => {
                 try {
                   if ((_config as IImage).styles.shadow.currentEffect === (config as IImage).styles.shadow.currentEffect) {
                     const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
@@ -394,24 +402,24 @@ export default new class ImageShadowPanelUtils {
                   logUtils.setLog('error' + 'exception fallback: save to main page as uploading img')
                 }
               }, {
-                error: () => {
-                  console.error('can not load the uploaded image shadow')
-                  logUtils.setLog('error' + 'can not load the uploaded image shadow')
-  
+                crossOrigin: false,
+                error: (img) => {
+                  logUtils.setLog('error' + 'can not load the uploaded image shadow, src:' + img?.src)
                   const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
                   imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', assetId: '', userId: '' })
                   imageShadowUtils.updateEffectState({ pageIndex, layerIndex, subLayerIdx }, ShadowEffectType.none)
                 }
               })
-            }).catch((e: Error) => {
-              console.error(e)
-              logUtils.setLog('error' + e.message)
             }).finally(() => {
-              this.clearer()
+              this.resetHandleState()
               imageShadowUtils.setUploadProcess(false)
             })
           }
         })
+      } catch (e) {
+        this.resetHandleState()
+        imageShadowUtils.setUploadProcess(false)
+      }
       }
       if (generalUtils.isStk) {
         imageShadowUtils.saveToIOS(uploadCanvas, (data, path) => {
@@ -426,22 +434,14 @@ export default new class ImageShadowPanelUtils {
           imageShadowUtils.updateIosShadowUploadBuffer(pageIndex, [srcObj])
           shadowUpdater(pageIndex, layerIndex, subLayerIdx, shadow, srcObj, shadowImgStyles)
           stkWVUtils.saveDesign()
-          this.clearer()
+          this.resetHandleState()
           imageShadowUtils.setUploadProcess(false)
         })
       }
     } else {
       logUtils.setLog('layerData is undefined')
-      console.log('layerData is undefined')
-      this.clearer()
+      this.resetHandleState()
     }
-  }
-
-  clearer() {
-    imageShadowUtils.clearLayerData()
-    imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
-    imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
-    imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
   }
 
   async isSVG(src: string, config: IImage) {
@@ -539,5 +539,12 @@ export default new class ImageShadowPanelUtils {
       assetId: id,
       userId: ''
     })
+  }
+
+  resetHandleState() {
+    imageShadowUtils.clearLayerData()
+    imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+    imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+    imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
   }
 }()

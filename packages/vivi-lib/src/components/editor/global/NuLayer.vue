@@ -452,14 +452,33 @@ export default defineComponent({
 
       if (!isImgType) {
         const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
-        const transform = `scale(${scale * (type === 'text' ? _f : 1)}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
+        let transform
+        if (type === 'text' || (type === 'shape' && this.config.category !== 'D')) {
+          transform = `scale(${scale * _f}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
+        } else {
+          transform = `scale(${scale}) ${scaleX !== 1 ? `scaleX(${scaleX})` : ''} ${scaleY !== 1 ? `scaleY(${scaleY})` : ''}`
+        }
         if (transform !== 'scale(1)') {
-          if (this.config.type === LayerType.text) {
-            styles.width = `${this.config.styles.width / this.config.styles.scale}px`
-            styles.height = `${this.config.styles.height / this.config.styles.scale}px`
-          } else {
-            styles.width = `${this.config.styles.initWidth * _f}px`
-            styles.height = `${this.config.styles.initHeight * _f}px`
+          switch (this.config.type) {
+            case LayerType.shape: {
+              if (this.config.category === 'D') {
+                styles.width = `${this.config.styles.initWidth * _f}px`
+                styles.height = `${this.config.styles.initHeight * _f}px`
+              } else {
+                styles.width = `${this.config.styles.initWidth}px`
+                styles.height = `${this.config.styles.initHeight}px`
+              }
+              break
+            }
+            case LayerType.text: {
+              styles.width = `${this.config.styles.width / this.config.styles.scale}px`
+              styles.height = `${this.config.styles.height / this.config.styles.scale}px`
+              break
+            }
+            default: {
+              styles.width = `${this.config.styles.initWidth * _f}px`
+              styles.height = `${this.config.styles.initHeight * _f}px`
+            }
           }
           styles.transform = transform
         }
@@ -585,7 +604,9 @@ export default defineComponent({
             imgY: clip.styles.imgY,
             imgWidth: clip.styles.imgWidth,
             imgHeight: clip.styles.imgHeight,
-            adjust: clip.styles.adjust
+            adjust: clip.styles.adjust,
+            horizontalFlip: clip.styles.horizontalFlip,
+            verticalFlip: clip.styles.verticalFlip
           }
         })
 
@@ -685,7 +706,9 @@ export default defineComponent({
               imgY: clip.styles.imgY,
               imgWidth: clip.styles.imgWidth,
               imgHeight: clip.styles.imgHeight,
-              adjust: clip.styles.adjust
+              adjust: clip.styles.adjust,
+              horizontalFlip: clip.styles.horizontalFlip,
+              verticalFlip: clip.styles.verticalFlip
             }
           })
           frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.currDraggedPhoto.srcObj)
@@ -699,7 +722,9 @@ export default defineComponent({
             imgWidth,
             imgHeight,
             imgX,
-            imgY
+            imgY,
+            horizontalFlip: this.primaryLayer && this.primaryLayer.styles.horizontalFlip,
+            verticalFlip: this.primaryLayer && this.primaryLayer.styles.verticalFlip
           })
         }
       }

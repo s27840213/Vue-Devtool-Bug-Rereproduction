@@ -79,7 +79,7 @@ export default defineComponent({
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
           hidden: !this.editorTypeTemplate || this.isInFrame,
-          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+          disabled: (this.isHandleShadow || this.isUploadShadow) && this.mobilePanel !== 'photo-shadow'
         },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: !this.editorTypeTemplate || this.isInFrame }
