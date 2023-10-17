@@ -1,3 +1,5 @@
+import generalUtils from "./generalUtils"
+
 class DoubleTapUtils {
   prev: {
     el: EventTarget | null
@@ -19,6 +21,8 @@ class DoubleTapUtils {
     delay = 500,
     clickWaitForDelay = true
   }) {
+    if(!generalUtils.isTouchDevice()) return
+
     if (event.type === 'click') {
       console.error('!! Don\'t use click event in doubleTapUtils. Use pointerdown instead. !!')
     }
