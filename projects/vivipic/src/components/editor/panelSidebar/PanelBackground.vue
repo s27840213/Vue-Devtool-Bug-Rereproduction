@@ -54,25 +54,25 @@ div(class="panel-bg")
 </template>
 
 <script lang="ts">
-import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryBackgroundItem from '@nu/vivi-lib/components/category/CategoryBackgroundItem.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
 import Url from '@/components/global/Url.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import Tabs from '@/components/Tabs.vue'
-import i18n from '@/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IPage } from '@/interfaces/page'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
-import generalUtils from '@/utils/generalUtils'
-import groupUtils from '@/utils/groupUtils'
-import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import i18n from '@nu/vivi-lib/i18n'
+import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState, mapGetters } from 'vuex'
 
 export default defineComponent({
   name: 'PanelBackground',
@@ -106,8 +106,10 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
+    }),
+    ...mapGetters({
+      pending: 'background/pending',
     }),
     itemWidth(): number {
       const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
@@ -144,15 +146,15 @@ export default defineComponent({
       }
       return list
     },
-    categoryListArray(): ICategoryList[] {
+    categoryListArray() {
       return [{
         content: this.searchResult,
         show: this.keyword && this.showImageTab,
-        key: 'searchResult'
+        key: 'searchResult' as const
       }, {
         content: this.mainContent,
         show: !this.keyword && this.showImageTab,
-        key: 'mainContent'
+        key: 'mainContent' as const
       }]
     },
     currentPageBackgroundLocked(): boolean {

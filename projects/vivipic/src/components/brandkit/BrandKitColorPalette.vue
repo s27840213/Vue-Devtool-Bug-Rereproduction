@@ -41,10 +41,10 @@ div(class="brand-kit-color-palette")
 </template>
 
 <script lang="ts">
-import ColorPicker from '@/components/ColorPicker.vue'
-import { IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
-import generalUtils from '@/utils/generalUtils'
+import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
+import { IBrandColor, IBrandColorPalette } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 

@@ -35,8 +35,8 @@ div(class="trash-design-view")
 <script lang="ts">
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
-import { IQueueItem } from '@/interfaces/design'
-import designUtils, { DESIGN_MENU_EVENTS, FOLDER_MENU_EVENTS, IDesignMenuEvents, IFolderMenuEvents } from '@/utils/designUtils'
+import { IQueueItem } from '@nu/vivi-lib/interfaces/design'
+import designUtils, { DESIGN_MENU_EVENTS, FOLDER_MENU_EVENTS, IDesignMenuEvents, IFolderMenuEvents } from '@nu/vivi-lib/utils/designUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'

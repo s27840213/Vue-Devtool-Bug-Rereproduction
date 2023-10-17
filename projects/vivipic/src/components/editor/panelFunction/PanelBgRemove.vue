@@ -44,7 +44,7 @@ div(class="panel-background-remove")
 
 <script lang="ts">
 import store from '@/store'
-import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

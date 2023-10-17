@@ -43,11 +43,11 @@ div(class="share-template")
 </template>
 
 <script lang="ts">
-import PageContent from '@/components/editor/page/PageContent.vue'
-import Tabs from '@/components/Tabs.vue'
-import { IPage } from '@/interfaces/page'
-import pageUtils from '@/utils/pageUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -101,10 +101,10 @@ export default defineComponent({
       })
     },
     loadingOverlayMsgs(newVal) {
-      vivistickerUtils.setLoadingOverlayMsgs(newVal)
+      stkWVUtils.setLoadingOverlayMsgs(newVal)
     },
     pending(newVal) {
-      vivistickerUtils.setLoadingOverlayShow(newVal)
+      stkWVUtils.setLoadingOverlayShow(newVal)
     }
   },
   computed: {
@@ -215,9 +215,9 @@ export default defineComponent({
     },
     share() {
       if (this.isInMultiPageShare && this.templateShareType === 'post') {
-        if (!vivistickerUtils.tutorialFlags.template) {
-          vivistickerUtils.openFullPageVideo('tutorial5', { delayedClose: 5000 })
-          vivistickerUtils.updateTutorialFlags({ template: true })
+        if (!stkWVUtils.tutorialFlags.template) {
+          stkWVUtils.openFullPageVideo('tutorial5', { delayedClose: 5000 })
+          stkWVUtils.updateTutorialFlags({ template: true })
           const unwatch = this.$watch('fullPageType', (newVal) => {
             if (!newVal || newVal === 'none') {
               unwatch()
@@ -233,19 +233,19 @@ export default defineComponent({
           post: 'IGPost'
         } as Record<string, string>
         const action = mapAction[this.templateShareType]
-        const query = vivistickerUtils.createUrlForJSON({ noBg: false })
+        const query = stkWVUtils.createUrlForJSON({ noBg: false })
         this.selectedPages = new Set()
         this.pending = true
-        vivistickerUtils.callIOSAsAPI('SCREENSHOT', { params: query, action, finalAction: action }, `screenshot-${query}`, { timeout: -1 }).then((data) => {
-          if (data?.flag !== '0') vivistickerUtils.appToast('share failed')
+        stkWVUtils.callIOSAsAPI('SCREENSHOT', { params: query, action, finalAction: action }, `screenshot-${query}`, { timeout: -1 }).then((data) => {
+          if (data?.flag !== '0') stkWVUtils.appToast('share failed')
           this.pending = false
         })
       } else this.setIsInMultiPageShare(true)
     },
     multiPageScreenShot(action: 'IGPost' | 'download') {
       this.pending = true
-      vivistickerUtils.multiPageDownload(action, this.selectedPageIndexes, (progress: number) => { this.downloadProgress = progress }).then((success) => {
-        if (!success) vivistickerUtils.appToast(`${action === 'download' ? 'save' : 'share'} failed`)
+      stkWVUtils.multiPageDownload(action, this.selectedPageIndexes, (progress: number) => { this.downloadProgress = progress }).then((success) => {
+        if (!success) stkWVUtils.appToast(`${action === 'download' ? 'save' : 'share'} failed`)
         this.pending = false
         this.downloadProgress = 0
       })

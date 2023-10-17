@@ -52,10 +52,10 @@ div(class="bleed-settings")
 </template>
 
 <script lang="ts">
-import { IBleed, IPage } from '@/interfaces/page'
-import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import { IBleed, IPage } from '@nu/vivi-lib/interfaces/page'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import unitUtils, { PRECISION } from '@nu/vivi-lib/utils/unitUtils'
 import { floor, isEqual, round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'

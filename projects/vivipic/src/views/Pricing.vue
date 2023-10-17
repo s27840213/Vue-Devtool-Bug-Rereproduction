@@ -56,12 +56,12 @@ div(class="pricing")
 </template>
 
 <script lang="ts">
-import CollapseTitle from '@/components/global/CollapseTitle.vue'
-import SlideToggle from '@/components/global/SlideToggle.vue'
+import CollapseTitle from '@nu/vivi-lib/components/global/CollapseTitle.vue'
+import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import NuHeader from '@/components/NuHeader.vue'
-import paymentData from '@/utils/constantData'
-import paymentUtils from '@/utils/paymentUtils'
+import paymentData from '@nu/vivi-lib/utils/constantData'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import { pull } from 'lodash'
 import { defineComponent } from 'vue'
 import { Collapse } from 'vue-collapsed'

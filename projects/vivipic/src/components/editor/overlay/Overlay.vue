@@ -55,14 +55,14 @@ div(v-else class="overlay mobile" :class="theme")
 </template>
 
 <script lang="ts">
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import MobileSlider from '@nu/vivi-lib/components/editor/mobile/MobileSlider.vue'
 import OverlayItem from '@/components/editor/overlay/OverlayItem.vue'
-import CollapseTitle from '@/components/global/CollapseTitle.vue'
-import Tabs from '@/components/Tabs.vue'
-import { IAsset } from '@/interfaces/module'
-import assetUtils from '@/utils/assetUtils'
-import overlayUtils, { IOverlayItem } from '@/utils/overlayUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import CollapseTitle from '@nu/vivi-lib/components/global/CollapseTitle.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import { IAsset } from '@nu/vivi-lib/interfaces/module'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import overlayUtils, { IOverlayItem } from '@nu/vivi-lib/utils/overlayUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { find } from 'lodash'
 import { defineComponent, PropType } from 'vue'
 import { Collapse } from 'vue-collapsed'

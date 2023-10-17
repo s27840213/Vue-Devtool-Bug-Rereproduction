@@ -13,8 +13,8 @@ div(class="download-btn"
 
 <script lang="ts">
 import PopupDownload from '@/components/popup/PopupDownload.vue'
-import { FunctionPanelType } from '@/store/types'
-import modalUtils from '@/utils/modalUtils'
+import { FunctionPanelType } from '@nu/vivi-lib/store/types'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

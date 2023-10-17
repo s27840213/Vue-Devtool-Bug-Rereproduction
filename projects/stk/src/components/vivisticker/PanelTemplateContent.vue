@@ -64,19 +64,19 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
 
 <script lang="ts">
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
-import Tags, { ITag } from '@/components/global/Tags.vue'
-import SearchBar from '@/components/SearchBar.vue'
+import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
-import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IContentTemplate } from '@/interfaces/template'
-import assetUtils from '@/utils/assetUtils'
-import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
-import pageUtils from '@/utils/pageUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IContentTemplate } from '@nu/vivi-lib/interfaces/template'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -345,13 +345,13 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          vivistickerUtils.setShowAllRecently('template', true)
+          stkWVUtils.setShowAllRecently('template', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        vivistickerUtils.setIsInCategory('template', true)
+        stkWVUtils.setIsInCategory('template', true)
       } else {
-        vivistickerUtils.setShowAllRecently('template', false)
+        stkWVUtils.setShowAllRecently('template', false)
       }
     },
     handleLoadMore() {
@@ -387,20 +387,20 @@ export default defineComponent({
     },
     addGroupTemplate() {
       if (!this.currentGroup) return
-      if (!vivistickerUtils.checkPro(this.currentGroup, 'template')) return
-      if (pageUtils.getPages.length + this.currentGroup.content_ids.length > vivistickerUtils.MAX_PAGE_NUM) return vivistickerUtils.showMaxPageNumModal()
+      if (!stkWVUtils.checkPro(this.currentGroup, 'template')) return
+      if (pageUtils.getPages.length + this.currentGroup.content_ids.length > stkWVUtils.MAX_PAGE_NUM) return stkWVUtils.showMaxPageNumModal()
       const cb = async () => {
-        await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, vivistickerUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`, !this.isInEditor)
+        await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, stkWVUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`, !this.isInEditor)
         return true
       }
       if (this.isInEditor) {
         cb()
       } else {
-        vivistickerUtils.startEditing(
+        stkWVUtils.startEditing(
           this.igLayout, {
             plan: this.currentGroup.plan,
             assetId: this.currentGroup.id
-          }, cb, vivistickerUtils.getAssetCallback(this.currentGroup as any)
+          }, cb, stkWVUtils.getAssetCallback(this.currentGroup as any)
         )
       }
     },

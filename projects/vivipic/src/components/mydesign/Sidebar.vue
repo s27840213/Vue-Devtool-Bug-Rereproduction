@@ -65,8 +65,8 @@ div(class="sidebar")
 
 <script lang="ts">
 import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
-import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import { IDesign, IFolder, IQueueItem } from '@nu/vivi-lib/interfaces/design'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

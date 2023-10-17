@@ -1,5 +1,5 @@
-import { IAssetTemplate } from '@/interfaces/api'
-import { ITemplate } from '@/interfaces/template'
+import { IAssetTemplate } from '@nu/vivi-lib/interfaces/api'
+import { ITemplate } from '@nu/vivi-lib/interfaces/template'
 
 class TemplateCenterUtils {
   generateWaterfall(templates: any, columns: number, scale = 4): ITemplate[][] {

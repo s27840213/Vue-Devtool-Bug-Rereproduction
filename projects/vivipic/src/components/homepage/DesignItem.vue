@@ -16,10 +16,10 @@ div(class="design-item")
 </template>
 
 <script lang="ts">
-import { IDesign } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
-import imageUtils from '@/utils/imageUtils'
-import modalUtils from '@/utils/modalUtils'
+import { IDesign } from '@nu/vivi-lib/interfaces/design'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapMutations } from 'vuex'

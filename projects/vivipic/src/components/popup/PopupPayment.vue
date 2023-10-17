@@ -74,14 +74,14 @@ div(class="popup-window")
 
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
-import { INubtnThemes } from '@/components/global/Nubtn.vue'
+import { INubtnThemes } from '@nu/vivi-lib/components/global/Nubtn.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
 import CouponInput from '@/components/payment/CouponInput.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
-import { IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView } from '@/interfaces/payment'
-import paymentData from '@/utils/constantData'
-import paymentUtils from '@/utils/paymentUtils'
+import { IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView } from '@nu/vivi-lib/interfaces/payment'
+import paymentData from '@nu/vivi-lib/utils/constantData'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'

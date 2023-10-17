@@ -36,11 +36,11 @@ div(class="popup-line-template bg-white")
 </template>
 
 <script lang="ts">
-import { IPage } from '@/interfaces/page'
-import { LineTemplatesType } from '@/store/types'
-import MappingUtils from '@/utils/mappingUtils'
-import popupUtils from '@/utils/popupUtils'
-import rulerUtils from '@/utils/rulerUtils'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { LineTemplatesType } from '@nu/vivi-lib/store/types'
+import MappingUtils from '@nu/vivi-lib/utils/mappingUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import rulerUtils from '@nu/vivi-lib/utils/rulerUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 

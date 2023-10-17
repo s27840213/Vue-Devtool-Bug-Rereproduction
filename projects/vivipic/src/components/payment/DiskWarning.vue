@@ -22,7 +22,7 @@ div(v-if="!cur.hidden && !isAdmin" class="warning")
 </template>
 
 <script lang="ts">
-import paymentUtils from '@/utils/paymentUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 

@@ -30,11 +30,11 @@ div(class="template-waterfall__wrapper")
 </template>
 
 <script lang="ts">
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import ProItem from '@/components/payment/ProItem.vue'
+import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
-import { ITemplate } from '@/interfaces/template'
-import { Itheme } from '@/interfaces/theme'
+import { ITemplate } from '@nu/vivi-lib/interfaces/template'
+import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 

@@ -21,8 +21,8 @@ div(class="brand-kit-tab-color")
 <script lang="ts">
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import BrandKitColorPalette from '@/components/brandkit/BrandKitColorPalette.vue'
-import { IBrand, IBrandColorPalette, IDeletingItem } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
+import { IBrand, IBrandColorPalette, IDeletingItem } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 

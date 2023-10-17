@@ -75,21 +75,21 @@ div(class="panel-text")
 </template>
 
 <script lang="ts">
-import listApi from '@/apis/list'
+import listApi from '@nu/vivi-lib/apis/list'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
-import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
+import CategoryTextItem from '@nu/vivi-lib/components/category/CategoryTextItem.vue'
 import Url from '@/components/global/Url.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
-import AssetUtils from '@/utils/assetUtils'
-import brandkitUtils from '@/utils/brandkitUtils'
-import DragUtils from '@/utils/dragUtils'
-import generalUtils from '@/utils/generalUtils'
-import textUtils from '@/utils/textUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
+import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@nu/vivi-lib/interfaces/brandkit'
+import AssetUtils from '@nu/vivi-lib/utils/assetUtils'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import DragUtils from '@nu/vivi-lib/utils/dragUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
+import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { defineComponent } from 'vue'
 import VueI18n from 'vue-i18n'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -116,6 +116,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
+      pending: 'textStock/pending',
       scaleRatio: 'getPageScaleRatio',
       isDefaultSelected: 'brandkit/getIsDefaultSelected',
       currentBrand: 'brandkit/getCurrentBrand'
@@ -124,7 +125,6 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
     }),
     keywordLabel():string {
@@ -182,15 +182,15 @@ export default defineComponent({
       }
       return list
     },
-    categoryListArray(): ICategoryList[] {
+    categoryListArray() {
       return [{
         content: this.searchResult,
         show: this.keyword,
-        key: 'searchResult'
+        key: 'searchResult' as const
       }, {
         content: this.mainContent,
         show: !this.keyword,
-        key: 'mainContent'
+        key: 'mainContent' as const
       }]
     },
     emptyResultMessage(): string {

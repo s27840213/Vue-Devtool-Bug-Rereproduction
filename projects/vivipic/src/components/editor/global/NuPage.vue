@@ -162,29 +162,29 @@ div(ref="page-wrapper" :id="`nu-page-wrapper_${pageIndex}`"
 </template>
 
 <script lang="ts">
-import DimBackground from '@/components/editor/page/DimBackground.vue'
-import PageContent from '@/components/editor/page/PageContent.vue'
+import DimBackground from '@nu/vivi-lib/components/editor/page/DimBackground.vue'
+import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
-import i18n from '@/i18n'
-import { IFrame, IGroup, IImage, ILayer, IText } from '@/interfaces/layer'
-import { IPage, IPageState } from '@/interfaces/page'
-import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
-import editorUtils from '@/utils/editorUtils'
-import eventUtils from '@/utils/eventUtils'
-import frameUtils from '@/utils/frameUtils'
-import generalUtils from '@/utils/generalUtils'
-import GroupUtils from '@/utils/groupUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
-import ImageUtils from '@/utils/imageUtils'
-import layerUtils from '@/utils/layerUtils'
-import MouseUtils from '@/utils/mouseUtils'
-import pageUtils from '@/utils/pageUtils'
-import popupUtils from '@/utils/popupUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
-import SnapUtils from '@/utils/snapUtils'
-import StepsUtils from '@/utils/stepsUtils'
-import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
+import i18n from '@nu/vivi-lib/i18n'
+import { IFrame, IGroup, IImage, ILayer, IText } from '@nu/vivi-lib/interfaces/layer'
+import { IPage, IPageState } from '@nu/vivi-lib/interfaces/page'
+import { FunctionPanelType, LayerType, SidebarPanelType } from '@nu/vivi-lib/store/types'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import eventUtils from '@nu/vivi-lib/utils/eventUtils'
+import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import GroupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageShadowUtils from '@nu/vivi-lib/utils/imageShadowUtils'
+import ImageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import MouseUtils from '@nu/vivi-lib/utils/mouseUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import ShortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
+import SnapUtils from '@nu/vivi-lib/utils/snapUtils'
+import StepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import unitUtils, { PRECISION } from '@nu/vivi-lib/utils/unitUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { floor, round } from 'lodash'
 import { defineComponent, PropType } from 'vue'
@@ -572,7 +572,6 @@ export default defineComponent({
       }
       GroupUtils.deselect()
       const page = generalUtils.deepCopy(this.pageState.config) as IPage
-      this.$store.commit('SET_currSelectedInfo', { pageIndex: this.pageIndex + 1 })
       page.layers.forEach(l => {
         l.id = generalUtils.generateRandomString(8)
         if (l.type === LayerType.frame) {

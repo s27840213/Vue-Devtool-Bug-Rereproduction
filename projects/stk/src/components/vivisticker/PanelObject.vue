@@ -22,15 +22,15 @@ div(class="panel-objects rwd-container")
 </template>
 
 <script lang="ts">
-import Tabs from '@/components/Tabs.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import PanelObjectGifs from '@/components/vivisticker/PanelObjectGifs.vue'
 import PanelObjectStatic from '@/components/vivisticker/PanelObjectStatic.vue'
-import i18n from '@/i18n'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import modalUtils from '@/utils/modalUtils'
+import i18n from '@nu/vivi-lib/i18n'
+import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { CCategoryList } from '../category/CategoryList.vue'
+import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 
 export default defineComponent({
   name: 'panel-object',

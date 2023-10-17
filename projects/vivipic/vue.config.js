@@ -282,7 +282,8 @@ module.exports = defineConfig({
       scss: {
         // https://webpack.js.org/loaders/sass-loader/#function-1
         // https://sass-lang.com/documentation/at-rules/use/#configuration
-        additionalData: `@use "@/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`,
+        // additionalData: `@use "@nu/vivi-lib/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`,
+        additionalData: '@use "@nu/vivi-lib/assets/scss/utils" as *;',
       },
     },
   },
@@ -300,4 +301,18 @@ module.exports = defineConfig({
       fullInstall: true,
     },
   },
+
+  configureWebpack: {
+    resolve: {
+      alias: {
+        // Use shaked i18n JSON for prod.
+        '@i18n': path.resolve(
+          __dirname,
+          process.env.NODE_ENV === 'production' ? 'src/i18n/shaked/' : '../../tools/i18n-tool/result'
+        ),
+        '@': path.resolve(__dirname, 'src/'),
+      },
+      extensions: ['.ts', '.vue', '.json']
+    }
+  }
 })

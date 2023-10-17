@@ -9,10 +9,10 @@ div(class="panel-group mb-10")
 </template>
 
 <script lang="ts">
-import { LayerType } from '@/store/types'
-import frameUtils from '@/utils/frameUtils'
-import layerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
+import { LayerType } from '@nu/vivi-lib/store/types'
+import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

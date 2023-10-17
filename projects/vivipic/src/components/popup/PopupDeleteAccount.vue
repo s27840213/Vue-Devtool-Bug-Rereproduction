@@ -21,8 +21,8 @@ div(class="popup-window")
 </template>
 
 <script lang="ts">
-import user from '@/apis/user'
-import i18n from '@/i18n'
+import user from '@nu/vivi-lib/apis/user'
+import i18n from '@nu/vivi-lib/i18n'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 

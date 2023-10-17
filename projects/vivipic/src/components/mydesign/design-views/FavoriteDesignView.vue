@@ -11,7 +11,7 @@ div(class="favorite-design-view")
 </template>
 
 <script lang="ts">
-import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@nu/vivi-lib/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'

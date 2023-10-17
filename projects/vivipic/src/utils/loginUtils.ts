@@ -1,4 +1,4 @@
-import picWVUtils from '@/utils/picWVUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 
 class LoginUtils {
   onFacebookClicked(redirect?: string) {

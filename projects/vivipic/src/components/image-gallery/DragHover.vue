@@ -8,7 +8,7 @@ div(class="dim-background" :style="{ pointerEvents: 'none' }")
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({

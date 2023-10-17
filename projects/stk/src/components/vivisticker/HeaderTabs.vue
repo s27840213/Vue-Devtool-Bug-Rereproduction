@@ -1,28 +1,11 @@
 <template lang="pug">
-div(class="header-bar relative" @pointerdown.stop)
-  div(class="header-bar__left" :class="{ editor: isInEditor }")
-    div(v-for="tab in leftTabs"
-        :key="tab.icon"
-        :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
-        :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
-        @click.prevent.stop="handleTabAction(tab.action)"
-        v-press="() => handleTabAction(tab.longPressAction)")
-      svg-icon(:iconName="tab.icon"
-                :iconWidth="`${tab.width}px`"
-                :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
-                :iconColor="tab.disabled ? 'gray-2' : 'white'")
-  div(class="header-bar__center")
-    link-or-text(:title="centerTitle" :url="isInCategory && !isInEditor ? titleInfo.url : ''")
-  div(class="header-bar__right")
-    div(v-for="tab in rightTabs"
-        :key="tab.icon"
-        :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
-        :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
-        @click.prevent.stop="handleTabAction(tab.action)")
-      svg-icon(:iconName="tab.icon"
-                :iconWidth="`${tab.width}px`"
-                :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
-                :iconColor="tab.disabled ? 'gray-2' : 'white'")
+header-tabs(:rootStyles="rootStyles"
+            :isInEditor="isInEditor"
+            :leftTabs="leftTabs"
+            :centerTitle="centerTitle"
+            :centerUrl="centerUrl"
+            :rightTabs="rightTabs")
+  template(v-slot="")
     div(v-if="isInEditor && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleCopy")
         svg-icon(iconName="copy"
                   iconWidth="18px"
@@ -39,59 +22,45 @@ div(class="header-bar relative" @pointerdown.stop)
 </template>
 
 <script lang="ts">
-import LinkOrText from '@/components/vivisticker/LinkOrText.vue'
-import useCanvasUtils from '@/composable/useCanvasUtils'
-import i18n from '@/i18n'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { SrcObj } from '@/interfaces/gallery'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IImage, IImageStyle } from '@/interfaces/layer'
-import assetUtils from '@/utils/assetUtils'
-import backgroundUtils from '@/utils/backgroundUtils'
-import bgRemoveUtils from '@/utils/bgRemoveUtils'
-import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
-import imageShadowUtils, { CANVAS_MAX_SIZE } from '@/utils/imageShadowUtils'
-import imageUtils from '@/utils/imageUtils'
-import layerUtils from '@/utils/layerUtils'
-import mappingUtils from '@/utils/mappingUtils'
-import modalUtils from '@/utils/modalUtils'
-import pageUtils from '@/utils/pageUtils'
-import shortcutUtils from '@/utils/shortcutUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import HeaderTabs from '@nu/vivi-lib/components/editor/mobile/HeaderTabs.vue'
+import { TabConfig } from '@nu/vivi-lib/components/editor/mobile/HeaderTab.vue'
+import i18n from '@nu/vivi-lib/i18n'
+import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
+import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
+import { IImage, IImageStyle } from '@nu/vivi-lib/interfaces/layer'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageShadowUtils, { CANVAS_MAX_SIZE } from '@nu/vivi-lib/utils/imageShadowUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import _ from 'lodash'
 import { computed, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-
-type TabConfig = {
-  icon: string,
-  logo?: boolean,
-  disabled?: boolean,
-  width: number,
-  height?: number,
-  action?: () => void,
-  longPressAction?: () => void,
-  // If isPanelIcon is true, MobilePanel v-out will not be triggered by this icon.
-  isPanelIcon?: boolean
-}
 
 export default defineComponent({
   setup() {
     const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
     const isInLastStep = computed(() => stepsUtils.isInLastStep)
     const isSavingAsMyDesign = false
-    const { trimCanvas } = useCanvasUtils()
     return {
       isInFirstStep,
       isInLastStep,
       isSavingAsMyDesign,
-      trimCanvas
     }
   },
   components: {
-    LinkOrText
+    HeaderTabs,
   },
   data() {
     return {
@@ -154,6 +123,12 @@ export default defineComponent({
     },
     showAllRecently(): boolean {
       return this.isCurrentShowAllRecently(this.currActiveTab)
+    },
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: '9px',
+        paddingBottom: '9px',
+      }
     },
     isCropping(): boolean {
       return imageUtils.isImgControl()
@@ -306,8 +281,11 @@ export default defineComponent({
         return ''
       }
     },
+    centerUrl(): string {
+      return this.isInCategory && !this.isInEditor ? this.titleInfo.url : ''
+    },
     rightTabs(): TabConfig[] {
-      const downloadTab = vivistickerUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
+      const downloadTab = stkWVUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
       if (this.isInMultiPageShare) {
         return []
       } else if (this.isInTemplateShare) {
@@ -348,7 +326,7 @@ export default defineComponent({
         return []
       } else {
         return this.isProcessing ? [] : [
-          ...(vivistickerUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
+          ...(stkWVUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
           { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
         ]
       }
@@ -406,11 +384,6 @@ export default defineComponent({
     resetTemplatesSearch(params = {}) {
       this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, params)
     },
-    handleTabAction(action?: () => void) {
-      if (action) {
-        action()
-      }
-    },
     clearCategory() {
       this.setIsInCategory({ tab: this.currActiveTab, bool: false })
       this.setShowAllRecently({ tab: this.currActiveTab, bool: false })
@@ -442,7 +415,7 @@ export default defineComponent({
     },
     handleSwitchBg() {
       this.switchBg()
-      vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
+      stkWVUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     async handleEndEditing(forceModal = false) {
       if (this.currActivePanel === 'photo-shadow') {
@@ -459,14 +432,14 @@ export default defineComponent({
       if (bgRemoveUtils.autoRemoveResult !== null) {
         this.clearBgRemoveState()
       }
-      if (vivistickerUtils.checkVersion('1.13')) {
-        if (vivistickerUtils.userSettings.autoSave && !forceModal) {
+      if (stkWVUtils.checkVersion('1.13')) {
+        if (stkWVUtils.userSettings.autoSave && !forceModal) {
           if (this.isSavingAsMyDesign) return
           this.isSavingAsMyDesign = true
-          vivistickerUtils.saveAsMyDesign().catch((err) => {
+          stkWVUtils.saveAsMyDesign().catch((err) => {
             console.warn(err.message)
           }).finally(() => {
-            vivistickerUtils.endEditing()
+            stkWVUtils.endEditing()
             this.isSavingAsMyDesign = false
           })
         } else {
@@ -506,10 +479,10 @@ export default defineComponent({
               action: () => {
                 if (this.isSavingAsMyDesign) return
                 this.isSavingAsMyDesign = true
-                vivistickerUtils.saveAsMyDesign().catch((err) => {
+                stkWVUtils.saveAsMyDesign().catch((err) => {
                   console.warn(err.message)
                 }).finally(() => {
-                  vivistickerUtils.endEditing()
+                  stkWVUtils.endEditing()
                   this.isSavingAsMyDesign = false
                 })
 
@@ -525,13 +498,13 @@ export default defineComponent({
               msg: `${this.$t('STK0011')}`,
               action: () => {
                 if (forceModal) {
-                  vivistickerUtils.uploadReportedDesign()
+                  stkWVUtils.uploadReportedDesign()
                 }
                 imageShadowUtils.iosImgDelHandlerAsNoSave()
-                vivistickerUtils.endEditing()
+                stkWVUtils.endEditing()
                 const { id, key } = this.bgRemoveSrcInfo
                 if (id && key) {
-                  vivistickerUtils.deleteAsset(key, id)
+                  stkWVUtils.deleteAsset(key, id)
                 }
               },
               style: {
@@ -542,7 +515,7 @@ export default defineComponent({
             options)
         }
       } else {
-        vivistickerUtils.endEditing()
+        stkWVUtils.endEditing()
       }
     },
     getCopyCallback(modalText: string, onSuccess?: () => void): (flag: string) => void {
@@ -598,25 +571,25 @@ export default defineComponent({
         `${this.$t('STK0018')}`,
         () => {
           if (['object', 'objectGroup'].includes(this.editorType)) {
-            vivistickerUtils.handleIos16Video()
+            stkWVUtils.handleIos16Video()
           }
         }
       )
       if (this.inBgRemoveMode) {
         bgRemoveUtils.screenshot()
-      } else if (vivistickerUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
-        vivistickerUtils.copyWithScreenshotUrl(
-          vivistickerUtils.createUrlForJSON({ source: 'editor' }),
+      } else if (stkWVUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
+        stkWVUtils.copyWithScreenshotUrl(
+          stkWVUtils.createUrlForJSON({ source: 'editor' }),
           copyCallback
         )
-      } else if (vivistickerUtils.checkVersion('1.3')) {
-        vivistickerUtils.copyEditor(copyCallback)
+      } else if (stkWVUtils.checkVersion('1.3')) {
+        stkWVUtils.copyEditor(copyCallback)
       } else {
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ source: 'editor' }))
+        stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrlForJSON({ source: 'editor' }))
       }
     },
     handleDownload() {
-      if (!vivistickerUtils.checkVersion('1.34')) return
+      if (!stkWVUtils.checkVersion('1.34')) return
       if (this.isUploadingShadowImg) {
         notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
@@ -632,7 +605,7 @@ export default defineComponent({
         this.$store.commit('shadow/SET_UPLOADING_CB', {
           id: (layerUtils.getCurrConfig as IImage).id,
           cb: () => {
-            const task = () => vivistickerUtils.downloadEditor(downloadCallback)
+            const task = () => stkWVUtils.downloadEditor(downloadCallback)
             if (this.isProcessShadowImg) {
               let time = 0
               const interval = setInterval(() => {
@@ -651,12 +624,12 @@ export default defineComponent({
       }
 
       if (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1) {
-        vivistickerUtils.downloadWithScreenshotUrl(
-          vivistickerUtils.createUrlForJSON({ source: 'editor' }),
+        stkWVUtils.downloadWithScreenshotUrl(
+          stkWVUtils.createUrlForJSON({ source: 'editor' }),
           downloadCallback
         )
       } else {
-        vivistickerUtils.downloadEditor(downloadCallback)
+        stkWVUtils.downloadEditor(downloadCallback)
       }
     },
     async addImage(srcObj: SrcObj, aspectRatio: number) {
@@ -665,7 +638,7 @@ export default defineComponent({
       })
     },
     handleBgRemoveNext() {
-      if (!vivistickerUtils.checkVersion('1.35')) {
+      if (!stkWVUtils.checkVersion('1.35')) {
         this.handleBgRemoveNextOldVer()
         return
       }
@@ -673,7 +646,7 @@ export default defineComponent({
       if (!this.isInEditor) {
         const designId = generalUtils.generateAssetId()
         this.setEditorType('image')
-        vivistickerUtils.startEditing(
+        stkWVUtils.startEditing(
           'image',
           { plan: 0, assetId: '' },
           async () => {
@@ -781,7 +754,7 @@ export default defineComponent({
     // this is used for old version(< 1.35)
     handleBgRemoveNextOldVer() {
       if (!this.isInEditor) {
-        vivistickerUtils.startEditing(
+        stkWVUtils.startEditing(
           'image',
           { plan: 0, assetId: '' },
           async () => {
@@ -943,75 +916,25 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .header-bar {
-  @include size(100%, 44px);
-  background-color: setColor(black-1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0px 24px;
-  box-sizing: border-box;
-  z-index: setZindex("editor-header");
-
-  &__feature-icon {
-    transition: background-color 0.1s;
-    padding: 4px;
-    border-radius: 3px;
+  .btn-feature{
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    gap: 4px;
+    background-color: white;
+    border-radius: 100px;
+    > svg {
+      padding: 2px;
+    }
     &:active {
-      background-color: setColor(gray-2);
-    }
-    &.btn-feature{
-      display: flex;
-      align-items: center;
-      padding: 4px 8px;
-      gap: 4px;
-      background-color: white;
-      border-radius: 100px;
-      >svg {
-        padding: 2px;
-      }
-      &:active {
-        background-color: setColor(black-6);
-      }
+      background-color: setColor(black-6);
     }
   }
-
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    &.editor {
-      gap: 24px;
-    }
-    & > div {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-
-  &__center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-weight: 600;
-    font-size: 18px;
-    line-height: 140%;
+  &__right-text {
     color: white;
-    white-space: nowrap;
-  }
-
-  &__right {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    &-text {
-      color: white;
-      font-weight: 600;
-      font-size: 14px;
-      line-height: 140%;
-    }
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
   }
 }
 </style>

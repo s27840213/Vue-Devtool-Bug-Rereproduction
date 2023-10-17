@@ -21,10 +21,10 @@ div(class="all-pages")
 
 <script lang="ts">
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
-import editorUtils from '@/utils/editorUtils'
-import pageUtils from '@/utils/pageUtils'
-import { globalQueue } from '@/utils/queueUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import { globalQueue } from '@nu/vivi-lib/utils/queueUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

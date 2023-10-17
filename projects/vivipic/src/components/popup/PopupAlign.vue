@@ -33,9 +33,9 @@ div(class="popup-align bg-white")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
+import MappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { mapGetters } from 'vuex'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 
 export default defineComponent({
   emits: [],

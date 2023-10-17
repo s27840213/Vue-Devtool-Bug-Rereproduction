@@ -1,7 +1,7 @@
 <template lang="pug">
-div(class="footer-tabs" :style="footerTabsStyles")
+div(class="home-footer-tabs" :style="footerTabsStyles")
   router-link(:to="'/'" custom v-slot="{navigate, isExactActive}")
-    div(class="footer-tabs__item" @click="navigate")
+    div(class="home-footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
         :iconName="isExactActive ? 'home-tap' :'home'"
         :iconColor="isExactActive ? 'blue-1' : 'gray-2'"
@@ -9,21 +9,21 @@ div(class="footer-tabs" :style="footerTabsStyles")
       span(class="body-XXS no-wrap click-disabled"
       :class="isExactActive ? 'text-blue-1' : 'text-gray-2'") {{$t('NN0846')}}
   router-link(:to="'/templates'" custom v-slot="{navigate, isExactActive}")
-    div(class="footer-tabs__item" @click="navigate")
+    div(class="home-footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
         :iconName="isExactActive ? 'template-tap' :'template'"
         :iconColor="isExactActive ? 'blue-1' : 'gray-2'"
         :iconWidth="'22px'")
       span(class="body-XXS no-wrap click-disabled"
       :class="isExactActive ? 'text-blue-1' : 'text-gray-2'") {{$tc('NN0001', 1)}}
-  btn-new-design(class="footer-tabs__plus" v-slot="slotProps")
+  btn-new-design(class="home-footer-tabs__plus" v-slot="slotProps")
     svg-icon(
       :iconName="'insert-cross'"
       :iconColor="'blue-1'"
       :iconWidth="'56px'"
       @click="slotProps.openPopup")
   router-link(:to="'/mydesign'" custom v-slot="{navigate}")
-    div(class="footer-tabs__item" @click="navigate")
+    div(class="home-footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
         :iconName="activeRouteName === 'MyDesign' ? 'folder-tap' : 'folder'"
         :iconColor="activeRouteName === 'MyDesign' ? 'blue-1' : 'gray-2'"
@@ -31,7 +31,7 @@ div(class="footer-tabs" :style="footerTabsStyles")
       span(class="body-XXS no-wrap click-disabled"
       :class="activeRouteName === 'MyDesign' ? 'text-blue-1' : 'text-gray-2'") {{$t('NN0080')}}
   router-link(:to="'/settings'" custom v-slot="{navigate}")
-    div(class="footer-tabs__item" @click="navigate")
+    div(class="home-footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
         :iconName="'menu'"
         :iconColor="activeRouteName === 'Settings' ? 'blue-1' : 'gray-2'"
@@ -41,12 +41,11 @@ div(class="footer-tabs" :style="footerTabsStyles")
 </template>
 
 <script lang="ts" setup>
-import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useStore } from 'vuex'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue';
+import router from '@/router';
+import { computed } from 'vue';
+import { useStore } from 'vuex';
 
-const route = useRoute()
 const store = useStore()
 
 const userInfo = computed(() => store.getters['webView/getUserInfo'])
@@ -56,12 +55,12 @@ const footerTabsStyles = computed((): { [index: string]: string } => {
     paddingBottom: `${userInfo.value.homeIndicatorHeight}px`
   }
 })
-const activeRouteName = computed(() => route.name)
+const activeRouteName = computed(() => router.currentRoute.value.name)
 // const sizeMenuOpened = ref(false)
 </script>
 
 <style lang="scss" scoped>
-.footer-tabs {
+.home-footer-tabs {
   position: relative;
   -webkit-touch-callout: none;
   -webkit-user-select: none;

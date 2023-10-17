@@ -28,8 +28,8 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="mobile-folder-galler
 
 <script lang="ts">
 import MobileFolderItem from '@/components/mydesign/MobileFolderItem.vue'
-import { IFolder } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import { IFolder } from '@nu/vivi-lib/interfaces/design'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

@@ -17,7 +17,7 @@ div(class="all-design-view")
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
-import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@nu/vivi-lib/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 

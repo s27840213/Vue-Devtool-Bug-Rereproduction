@@ -1,0 +1,40 @@
+@use './variables.scss' as *;
+// $appName: None !default;
+
+@function setColor($color, $opacity: 1) {
+  @if map-has-key($map: $colors, $key: $color) {
+    @return rgba(map-get($colors, $color), $opacity);
+  }
+
+  @else {
+    @return rgba($color, $opacity);
+  }
+}
+
+// Deprecated: Because vivi-lib cannot get $appName
+// @function appColors(
+//   $picColor,
+//   $stkColor: $picColor,
+//   $cmColor: $picColor,
+//   $opacity: 1,
+//   $picOpacity: $opacity,
+//   $stkOpacity: $opacity,
+//   $cmOpacity: $opacity) {
+//   @if $appName == 'pic' {
+//     @return setColor($picColor, $picOpacity);
+//   } @else if $appName == 'stk' {
+//     @return setColor($stkColor, $stkOpacity);
+//   } @else if $appName == 'cm' {
+//     @return setColor($cmColor, $cmOpacity);
+//   } @else {
+//     @return 'Var $appName not found';
+//   }
+// }
+
+@function setZindex($value) {
+  @return index($zindex, $value);
+}
+
+@function setLinearGradient($gradient) {
+  @return map-get($linear-gradient, $gradient)
+}

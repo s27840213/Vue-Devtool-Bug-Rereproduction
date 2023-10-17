@@ -47,7 +47,7 @@ recycle-scroller(class="image-list" :items="images2d" :itemSize="140" ref="recyc
 </template>
 
 <script lang="ts">
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 
