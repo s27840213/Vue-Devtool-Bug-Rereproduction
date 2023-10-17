@@ -421,8 +421,8 @@ export default defineComponent({
             }
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, props, this.subLayerIndex)
             layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-              initWidth: shape.vSize[0],
-              initHeight: shape.vSize[1]
+              initWidth: shape.vSize[0] + this.config.pDiff[0],
+              initHeight: shape.vSize[1] + this.config.pDiff[1]
             }, this.subLayerIndex)
           }
         }
