@@ -53,7 +53,7 @@ import CategoryObjectItem from '@nu/vivi-lib/components/category/CategoryObjectI
 import Url from '@/components/global/Url.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import i18n from '@nu/vivi-lib/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
@@ -121,15 +121,15 @@ export default defineComponent({
       }
       return list
     },
-    categoryListArray(): ICategoryList[] {
+    categoryListArray() {
       return [{
         content: this.searchResult,
         show: this.keyword,
-        key: 'searchResult'
+        key: 'searchResult' as const
       }, {
         content: this.mainContent,
         show: !this.keyword,
-        key: 'mainContent'
+        key: 'mainContent' as const
       }]
     },
     emptyResultMessage(): string {

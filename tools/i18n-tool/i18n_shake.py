@@ -25,7 +25,8 @@ def getLocaleJsonsIter():
 
 class ShakedJson:
   def __init__(self, config_path, project):
-    locale = config_path.split('/')[-1].split('.')[0]
+    locale = os.path.basename(config_path).split('.')[0]
+    print(f'{ROOT}/projects/{project}/src/i18n/shaked/{locale}.json')
     self.shaked_file_path = f'{ROOT}/projects/{project}/src/i18n/shaked/{locale}.json'
 
   def __enter__(self):

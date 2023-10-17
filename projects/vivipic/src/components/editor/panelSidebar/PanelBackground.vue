@@ -62,7 +62,7 @@ import Url from '@/components/global/Url.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import i18n from '@nu/vivi-lib/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
@@ -146,15 +146,15 @@ export default defineComponent({
       }
       return list
     },
-    categoryListArray(): ICategoryList[] {
+    categoryListArray() {
       return [{
         content: this.searchResult,
         show: this.keyword && this.showImageTab,
-        key: 'searchResult'
+        key: 'searchResult' as const
       }, {
         content: this.mainContent,
         show: !this.keyword && this.showImageTab,
-        key: 'mainContent'
+        key: 'mainContent' as const
       }]
     },
     currentPageBackgroundLocked(): boolean {

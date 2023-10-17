@@ -85,7 +85,7 @@ import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTempl
 import Url from '@/components/global/Url.vue'
 import PopupTheme from '@/components/popup/PopupTheme.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
-import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IAssetTemplate, ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import GalleryUtils from '@nu/vivi-lib/utils/galleryUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -197,15 +197,15 @@ export default defineComponent({
       }
       return list
     },
-    categoryListArray(): ICategoryList[] {
+    categoryListArray() {
       return [{
         content: this.searchResult,
         show: this.keyword,
-        key: 'searchResult'
+        key: 'searchResult' as const
       }, {
         content: this.mainContent,
         show: !this.keyword,
-        key: 'mainContent'
+        key: 'mainContent' as const
       }]
     },
     resultGroupCounter(): number {

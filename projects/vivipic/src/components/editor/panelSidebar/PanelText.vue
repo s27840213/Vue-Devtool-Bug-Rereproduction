@@ -82,7 +82,7 @@ import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.
 import CategoryTextItem from '@nu/vivi-lib/components/category/CategoryTextItem.vue'
 import Url from '@/components/global/Url.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@nu/vivi-lib/interfaces/brandkit'
 import AssetUtils from '@nu/vivi-lib/utils/assetUtils'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
@@ -182,15 +182,15 @@ export default defineComponent({
       }
       return list
     },
-    categoryListArray(): ICategoryList[] {
+    categoryListArray() {
       return [{
         content: this.searchResult,
         show: this.keyword,
-        key: 'searchResult'
+        key: 'searchResult' as const
       }, {
         content: this.mainContent,
         show: !this.keyword,
-        key: 'mainContent'
+        key: 'mainContent' as const
       }]
     },
     emptyResultMessage(): string {
