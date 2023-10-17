@@ -3,7 +3,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
   div(class="main-page-headerbar w-full flex justify-between items-center px-16"
       ref="headerbarRef"
       :style="headerbarStyles")
-    img(src="@/assets/img/logo.png" class="w-44")
+    router-link(
+      custom
+      :to="'/'"
+      v-slot="{ navigate }")
+      img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
     div(class="flex justify-center items-center gap-18")
       transition(
           name="fade-in"
@@ -21,7 +25,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
         iconName="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(class="pb-12" v-slot="{ Component, route }")
     transition(
-      :name="route.meta.transition"
+      :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
   bottom-panel(class="z-20")

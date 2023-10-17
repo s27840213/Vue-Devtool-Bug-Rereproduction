@@ -17,7 +17,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
           div(class="typo-body-md") {{ $t('CM0033') }}
           div(class="typo-body-md") {{ $t('CM0034') }}
           div(class="typo-body-md") {{ $t('CM0035') }}
-        img(src="src/assets/img/crown-3d.png" class="w-128 h-128")
+        img(:src="'src/assets/img/crown-3d.png'" class="w-128 h-128")
       cm-btn(
         theme="primary"
         :hasIcon="true"
