@@ -282,19 +282,19 @@
 }
 
 @mixin pic {
-  html.pic & {
+  *:where(.app-pic) & {
     @content;
   }
 }
 
 @mixin stk {
-  html.stk & {
+  *:where(.app-stk) & {
     @content;
   }
 }
 
 @mixin cm {
-  html.cm & {
+  *:where(.app-cm) & {
     @content;
   }
 }
