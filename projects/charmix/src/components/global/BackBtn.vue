@@ -1,7 +1,7 @@
 <template lang="pug">
 router-link(
   custom
-  to="/"
+  :to="toTarget"
   v-slot="{ navigate }")
   cm-svg-icon(
     icon-color="app-icon-light"
@@ -15,7 +15,7 @@ import { useImgSelectorStore } from '@/stores/imgSelector'
 import { useModalStore } from '@/stores/modal'
 import { storeToRefs } from 'pinia'
 
-const { showPromptArea, showEditingOpstions } = useStateInfo()
+const { showPromptArea, showEditingOpstions, atSettings } = useStateInfo()
 
 // #region modal
 const modalStore = useModalStore()
@@ -30,6 +30,10 @@ const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #endregion
 
 const { t } = useI18n()
+
+const toTarget = computed(() => {
+  return atSettings ? '/mydesign' : '/home'
+})
 
 const handleBackAction = (navagate: () => void) => {
   if (showImgSelector.value) {

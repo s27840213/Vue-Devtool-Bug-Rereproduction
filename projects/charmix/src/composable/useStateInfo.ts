@@ -10,6 +10,8 @@ const useStateInfo = () => {
   // #region routing state
   const atHome = computed(() => path.value === '/')
   const atMyDesign = computed(() => path.value === '/mydesign')
+  const atSettings = computed(() => path.value === '/settings')
+  const atMainPage = computed(() => atHome.value || atMyDesign.value)
   const atEditor = computed(() => path.value === '/editor')
   // #endregion
 
@@ -31,6 +33,8 @@ const useStateInfo = () => {
     atHome,
     atMyDesign,
     atEditor,
+    atSettings,
+    atMainPage,
     showHomeTabs,
     showAspectRatioSelector,
     showEditingOpstions,

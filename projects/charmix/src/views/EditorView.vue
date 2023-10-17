@@ -7,18 +7,15 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         class="wrapper relative"
         :style="wrapperStyles"
         ref="editorWrapperRef")
-        transition(
-          name="fade-right-in"
-          mode="out-in")
-          div(
-            class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
-            :style="pageStyles")
-            img(class="h-full object-contain" src="@/assets/img/test.jpg")
-            canvas-section(
-              v-if="showEditingOpstions"
-              class="absolute top-0 left-0 w-full h-full"
-              :containerDOM="editorContainerRef"
-              :wrapperDOM="editorWrapperRef")
+        div(
+          class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
+          :style="pageStyles")
+          img(class="h-full object-contain" src="@/assets/img/test.jpg")
+          canvas-section(
+            v-if="showEditingOpstions"
+            class="absolute top-0 left-0 w-full h-full"
+            :containerDOM="editorContainerRef"
+            :wrapperDOM="editorWrapperRef")
         div(
           v-if="isChangingBrushSize"
           class="demo-brush"

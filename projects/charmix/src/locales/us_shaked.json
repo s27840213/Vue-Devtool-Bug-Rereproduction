@@ -27,5 +27,7 @@
   "CM0027": "Quit",
   "CM0028": "Stay",
   "CM0029": "Clear",
-  "CM0030": "Pro"
+  "CM0030": "Pro",
+  "CM0031": "You have no projects.",
+  "CM0032": "Try PRO now!"
 }

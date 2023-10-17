@@ -1,18 +1,12 @@
 <template lang="pug">
-div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-24")
-  div(class="w-full mb-20 flex justify-between items-center")
-    img(src="@/assets/img/logo.png" class="w-44")
-    cm-btn(
-      :theme="'primary'"
-      :hasIcon="true"
-      iconName="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
+div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
   highlight-section(
     :title="$t('CM0001')"
     :description="$t('CM0002')"
     :btnText="$t('CM0003')"
     :theme="'powerful-fill'"
     iconName="brush"
-    @clickBtn="openImgSelecotr")
+    @clickBtn="goToEditor")
   div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
   div(class="feature-section")
     feature-card(

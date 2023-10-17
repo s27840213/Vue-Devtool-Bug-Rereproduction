@@ -33,7 +33,7 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
         img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?type=thumb`")
       observer-sentinel(
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
-        :rootMargin="'400px 0px 0px 0px'"
+        :rootMargin="'600px 0px 0px 0px'"
         @callback="handleLoadMore")
     div(v-else class="flex flex-col gap-8")
       div(
@@ -47,22 +47,23 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
         div(class="flex flex-col items-start justify-evenly")
           span(class="text-app-tab-default") {{ album.title }}
           span(class="text-app-tab-default") {{ album.albumSize }}
-      div(class="text-left text-app-tab-default") Ｍy Albums
-      div(
-        v-for="album in myAlbum"
-        :key="album.albumId"
-        class="display flex gap-12"
-        @click="selectAlbum(album)")
-        img(
-          class="object-cover aspect-square w-80"
-          :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
-        div(class="flex flex-col items-start justify-evenly")
-          span(class="text-app-tab-default") {{ album.title }}
-          span(class="text-app-tab-default") {{ album.albumSize }}
+      template(v-if="myAlbum.length > 0")
+        div(class="text-left text-app-tab-default") Ｍy Albums
+        div(
+          v-for="album in myAlbum"
+          :key="album.albumId"
+          class="display flex gap-12"
+          @click="selectAlbum(album)")
+          img(
+            class="object-cover aspect-square w-80"
+            :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
+          div(class="flex flex-col items-start justify-evenly")
+            span(class="text-app-tab-default") {{ album.title }}
+            span(class="text-app-tab-default") {{ album.albumSize }}
 </template>
 <script lang="ts" setup>
-import type { IAlbum } from '@/utils/webViewUtils'
-import webViewUtils from '@/utils/webViewUtils'
+import type { IAlbum } from '@/utils/webViewUtils';
+import webViewUtils from '@/utils/webViewUtils';
 
 // #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
