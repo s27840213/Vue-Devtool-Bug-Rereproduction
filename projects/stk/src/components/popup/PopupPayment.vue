@@ -44,8 +44,7 @@ div(class="popup-window")
                   div(class="payment__carousel-item")
                     img(class="payment__carousel-item__img"
                         draggable="false"
-                        :src="item.img"
-                        @load="handleImgLoad(item.key)")
+                        :src="item.img")
                     div(class="payment__carousel-item__overlay")
                     div(class="payment__carousel-item__title text-black text-H4" v-html="item.title")
               div(class="payment__content")
@@ -77,8 +76,8 @@ div(class="popup-window")
                   template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
                     span(v-if="idx > 0" class="payment__footer__splitter")
                     span(class="body-XXS" @tap="footerLink.action") {{ footerLink.title }}
-              div(class="payment__panel" :class="{close: !isPanelUp}" ref="panel")
-                div(class="payment__panel__chevron" ref="chevron" @tap="togglePanel()" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)" @pointerdown.stop="panelAniProgress = 0")
+              div(class="payment__panel" :class="{open: !isDraggingPanel && isPanelUp, close: !isDraggingPanel && !isPanelUp}" ref="panel" :style="panelStyles()")
+                div(class="payment__panel__chevron" ref="chevron" @tap="togglePanel()" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)" @panstart.stop="dragPanelStart" @panmove.stop="dragingPanel" @panend.stop="dragPanelEnd")
                   svg-icon(iconName="chevron-up" iconWidth="14px")
                   div(class="payment__panel__chevron__title") {{ $t('STK0042') }}
                 div(class="payment__panel__comparison")
@@ -150,7 +149,7 @@ import { IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarning
 import paymentData from '@/utils/constantData'
 import paymentUtils from '@/utils/paymentUtils'
 import { notify } from '@kyvg/vue3-notification'
-import AnyTouch from 'any-touch'
+import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -203,15 +202,12 @@ export default defineComponent({
       // User input
       reasonIndex: '-1',
       otherReason: '',
-      canShow: false,
       idxCurrImg: 0,
       windowWidth: window.innerWidth,
-      // initPanelUp: false,
       isPanelUp: false,
       isDraggingPanel: false,
-      // panelDragHeight: 0,
-      panelAniProgress: 1,
-      // lastPointerY: 0,
+      panelDragHeight: 0,
+      lastPointerY: 0,
       carouselItems: [
         {
           key: 'pro-template',
@@ -319,10 +315,10 @@ export default defineComponent({
         : this.otherReason
     },
     showPanelTitle() {
-      return !this.isDraggingPanel ? !this.isPanelUp : !this.isPanelUp && this.panelAniProgress === 1
+      return !this.isDraggingPanel && !this.isPanelUp
     },
     isMobileView(): boolean {
-      return this.$isTouchDevice() && ['step1'].includes(this.view)
+      return this.$isTouchDevice() && this.view === 'step1'
     },
     isRoundedBtn(): boolean {
       return this.$isTouchDevice() && ['step1', 'step1-coupon', 'step2', 'step2-coupon', 'finish'].includes(this.view)
@@ -409,7 +405,6 @@ export default defineComponent({
             func: () => this.changeView('step1')
           }]
           this.isPanelUp = false
-          this.panelAniProgress = 1
           break
         case 'step1-coupon':
           this.getPrice(this.userCountryUi)
@@ -427,7 +422,6 @@ export default defineComponent({
           }]
           this.img = 'remover.jpg'
           this.isPanelUp = false
-          this.panelAniProgress = 1
           break
         case 'step1':
           this.getPrice(this.userCountryUi)
@@ -446,7 +440,6 @@ export default defineComponent({
           }]
           this.img = 'remover.jpg'
           this.isPanelUp = false
-          this.panelAniProgress = 1
           break
         case 'step2-coupon':
         case 'step2':
@@ -538,67 +531,31 @@ export default defineComponent({
       this.$emit('close')
       this.resetCouponResult()
     },
-    handleImageChange(index: number) {
+        handleImageChange(index: number) {
       this.idxCurrImg = index
-    },
-    handleImgLoad(key: string) {
-      if (!this.canShow && key === this.carouselItems[0].key) {
-        this.canShow = true
-        this.$emit('canShow')
-      }
     },
     handleResize() {
       this.windowWidth = window.innerWidth
     },
     togglePanel(up?: boolean) {
-      if (this.panelAniProgress !== 0 && this.panelAniProgress !== 1) return
       this.isPanelUp = up === undefined ? !this.isPanelUp : up
-      // if (up === undefined) {
-      //   if (this.panelAniProgress !== 0 && this.panelAniProgress !== 1) return
-      //   this.isPanelUp = !this.isPanelUp
-      //   return
-      // }
-      // if (this.isPanelUp !== up) this.panelAniProgress = 1 - this.panelAniProgress
-      // this.isPanelUp = up
     },
-    // TODO: fix performance issue when dragging comparison panel
-    // bezier(t: number, initial: number, p1: number, p2: number, final: number) {
-    //   return (
-    //     (1 - t) * (1 - t) * (1 - t) * initial +
-    //     3 * (1 - t) * (1 - t) * t * p1 +
-    //     3 * (1 - t) * t * t * p2 +
-    //     t * t * t * final
-    //   )
-    // },
-    // dragPanelStart(event: AnyTouchEvent) {
-    //   if (this.isDraggingPanel) return // this event will be triggered on dragging direction change
-    //   this.isDraggingPanel = true
-    //   this.lastPointerY = event.y
-    //   this.panelDragHeight = 0
-    //   this.panelAniProgress = 0
-    //   this.initPanelUp = this.isPanelUp
-    //   this.dragingPanel(event)
-    // },
-    // dragingPanel(event: AnyTouchEvent) {
-    //   this.panelDragHeight -= event.y - this.lastPointerY
-    //   this.lastPointerY = event.y
-    //   const newProgress = Math.max(Math.min((this.initPanelUp ? -this.panelDragHeight : this.panelDragHeight) / ((this.$refs.panel as HTMLElement).clientHeight - 36), 1), 0)
-    //   if (newProgress > 0) {
-    //     this.isPanelUp = !this.initPanelUp
-    //     this.panelAniProgress = newProgress
-    //   } else {
-    //     this.isPanelUp = this.initPanelUp
-    //     this.panelAniProgress = 1
-    //   }
-    // },
-    // dragPanelEnd() {
-    //   this.isDraggingPanel = false
-    //   if (this.initPanelUp !== this.isPanelUp && this.panelAniProgress < 0.5) {
-    //     this.isPanelUp = this.initPanelUp
-    //     this.panelAniProgress = 1 - this.panelAniProgress
-    //   }
-    //   this.panelAniProgress = this.bezier(this.panelAniProgress, 0.0, 0.42, 0.58, 1.0) // css ease-in-out function
-    // },
+    dragPanelStart(event: AnyTouchEvent) {
+      if (this.isDraggingPanel) return // this event will be triggered on dragging direction change
+      this.isDraggingPanel = true
+      this.lastPointerY = event.y
+      this.panelDragHeight = 0
+      this.isPanelUp = !this.isPanelUp
+      this.dragingPanel(event)
+    },
+    dragingPanel(event: AnyTouchEvent) {
+      this.panelDragHeight -= event.y - this.lastPointerY
+      this.lastPointerY = event.y
+    },
+    dragPanelEnd() {
+      this.isDraggingPanel = false
+      this.isPanelUp = this.getPanelDragProgress().progress > 0.5
+    },
     getLocalizedPrice(price: number): string {
       const currencyMap = new Map([
         ['tw', '元'],
@@ -609,6 +566,27 @@ export default defineComponent({
     },
     getLocalizedTag(price: number): string {
       return (this.locale === 'tw' ? '' : '$') + price + this.$t('NN0516').replace('/', ' / ')
+    },
+    panelStyles() {
+      if (!this.isDraggingPanel) return {}
+      const { offset, progress } = this.getPanelDragProgress()
+      const margin = 24 * (1 - progress)
+      return {
+        transform: `translateY(calc(100% - ${offset}px))`,
+        padding: `16px ${24 * progress}px 0`,
+        left: `${margin}px`,
+        right: `${margin}px`,
+        bottom: `${14 + 20 * progress}px`
+      }
+    },
+    getPanelDragProgress(): { offset: number, progress: number } {
+      const bottom = 56;
+      const elPanel = this.$refs.panel as HTMLElement
+      if(!elPanel) return {offset: bottom, progress: 0}
+      const panelHeight = elPanel.clientHeight
+      const offset = Math.max(Math.min(this.isPanelUp ? this.panelDragHeight + 56 : panelHeight + this.panelDragHeight, panelHeight), 56)
+      const progress = (offset - 56) / (panelHeight - 56)
+      return {offset, progress}
     }
   }
 })
@@ -1073,13 +1051,21 @@ input {
         background-color: setColor(gray-6);
         border-radius: 10px 10px 0px 0px;
         z-index: setZindex("popup");
-        animation: open-panel 300ms v-bind("isDraggingPanel ? 'linear' : 'ease-in-out'") forwards;
-        animation-play-state: v-bind("isDraggingPanel ? 'paused' : 'running'");
-        animation-delay: calc(v-bind(panelAniProgress) * -300ms);
+        &.open {
+          transition: all 0.3s ease-in-out;
+          transform: translateY(0);
+          padding: 16px 24px 0px;
+          left: 0px;
+          right: 0px;
+          bottom: 34px;
+        }
         &.close {
-          animation: close-panel 300ms v-bind("isDraggingPanel ? 'linear' : 'ease-in-out'") forwards;
-          animation-play-state: v-bind("isDraggingPanel ? 'paused' : 'running'");
-          animation-delay: calc(v-bind(panelAniProgress) * -300ms);
+          transition: all 0.3s ease-in-out;
+          transform: translateY(calc(100% - 56px));
+          padding: 16px 0 0 0;
+          left: 24px;
+          right: 24px;
+          bottom: 14px;
         }
         &__chevron {
           position: absolute;
@@ -1158,40 +1144,6 @@ input {
         }
       }
     }
-  }
-}
-
-@keyframes open-panel {
-  from {
-    padding: 16px 0 0 0;
-    left: 24px;
-    right: 24px;
-    bottom: 14px;
-    transform: translateY(calc(100% - 56px));
-  }
-  to {
-    padding: 16px 24px 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 34px;
-    transform: none;
-  }
-}
-
-@keyframes close-panel {
-  from {
-    padding: 16px 24px 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 34px;
-    transform: none;
-  }
-  to {
-    padding: 16px 0 0 0;
-    left: 24px;
-    right: 24px;
-    bottom: 14px;
-    transform: translateY(calc(100% - 56px));
   }
 }
 </style>
