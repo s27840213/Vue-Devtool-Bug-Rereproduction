@@ -50,13 +50,13 @@ div(class="panel-group mb-10")
 </template>
 
 <script lang="ts">
-import { IFrame, IGroup } from '@/interfaces/layer'
-import { PopupSliderEventType } from '@/store/types'
-import formatUtils from '@/utils/formatUtils'
-import layerUtils from '@/utils/layerUtils'
-import MappingUtils from '@/utils/mappingUtils'
-import popupUtils from '@/utils/popupUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
+import { IFrame, IGroup } from '@nu/vivi-lib/interfaces/layer'
+import { PopupSliderEventType } from '@nu/vivi-lib/store/types'
+import formatUtils from '@nu/vivi-lib/utils/formatUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import MappingUtils from '@nu/vivi-lib/utils/mappingUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import ShortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

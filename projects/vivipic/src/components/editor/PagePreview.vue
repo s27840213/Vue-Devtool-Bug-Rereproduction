@@ -20,8 +20,8 @@ div(class="page-preview" ref="container")
 <script lang="ts">
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
-import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { floor } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'

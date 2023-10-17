@@ -9,7 +9,7 @@ div(class="mobile-list-design-view")
 
 <script lang="ts">
 import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
-import designUtils from '@/utils/designUtils'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 

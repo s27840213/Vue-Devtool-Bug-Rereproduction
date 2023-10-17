@@ -48,13 +48,13 @@ div(class="brand-kit-tab-text")
 </template>
 
 <script lang="ts">
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import BrandKitTextSetting from '@/components/brandkit/BrandKitTextSetting.vue'
-import { IBrand, IBrandFont, IBrandTextStyleSetting } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
-import paymentUtils from '@/utils/paymentUtils'
-import textUtils from '@/utils/textUtils'
-import uploadUtils from '@/utils/uploadUtils'
+import { IBrand, IBrandFont, IBrandTextStyleSetting } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'

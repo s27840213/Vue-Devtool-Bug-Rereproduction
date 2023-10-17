@@ -40,20 +40,20 @@ div(class="my-design")
 </template>
 
 <script lang="ts">
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import MyDesignObjectItem from '@/components/vivisticker/mydesign/MyDesignObjectItem.vue'
 import MyDesignTemplateItem from '@/components/vivisticker/mydesign/MyDesignTemplateItem.vue'
 import MyDesignTextItem from '@/components/vivisticker/mydesign/MyDesignTextItem.vue'
-import { IMyDesign, IMyDesignTag } from '@/interfaces/vivisticker'
-import editorUtils from '@/utils/editorUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IMyDesign, IMyDesignTag } from '@nu/vivi-lib/interfaces/vivisticker'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'my-design',
   data() {
-    const tags = vivistickerUtils.getMyDesignTags()
+    const tags = stkWVUtils.getMyDesignTags()
     return {
       tags,
       scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0]))
@@ -93,7 +93,7 @@ export default defineComponent({
       windowSize: 'windowSize'
     }),
     tagsToShow(): IMyDesignTag[] {
-      return this.tags.filter(tag => !(tag.tab === 'template' && !vivistickerUtils.isTemplateSupported))
+      return this.tags.filter(tag => !(tag.tab === 'template' && !stkWVUtils.isTemplateSupported))
     },
     list(): IMyDesign[] {
       return this.myDesignFileList(this.myDesignTab) as IMyDesign[]
@@ -213,7 +213,7 @@ export default defineComponent({
     },
     isInEditor(newVal) {
       if (newVal) {
-        this.resetMyDesignFileList(vivistickerUtils.mapEditorType2MyDesignKey(this.editorType))
+        this.resetMyDesignFileList(stkWVUtils.mapEditorType2MyDesignKey(this.editorType))
       } else if (this.isInMyDesign) {
         this.refreshDesigns(this.myDesignTab)
       }
@@ -237,12 +237,12 @@ export default defineComponent({
     }),
     async refreshDesigns(tab: string): Promise<boolean> {
       if (this.myDesignFileList(tab).length !== 0) return false
-      await vivistickerUtils.listAsset(`mydesign-${tab}`)
+      await stkWVUtils.listAsset(`mydesign-${tab}`)
       return true
     },
     handleLoadMore(tab: string) {
       const nextPage = this.myDesignNextPage(tab)
-      vivistickerUtils.listMoreAsset(`mydesign-${tab}`, nextPage)
+      stkWVUtils.listMoreAsset(`mydesign-${tab}`, nextPage)
     },
     checkTagSelected(tag: IMyDesignTag) {
       return this.myDesignTab === tag.tab

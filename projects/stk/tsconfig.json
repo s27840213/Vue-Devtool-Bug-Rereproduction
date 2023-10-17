@@ -18,11 +18,20 @@
     "types": [
       "webpack-env",
       "resize-observer-browser",
-      "tpdirect"
+      "tpdirect",
+      "vite/client"
     ],
     "paths": {
       "@/*": [
-        "./src/*"
+        "./src/*",
+        "../../packages/vivi-lib/src/*"
+      ],
+      "@i18n/*": [
+        "./src/i18n/shaked/*"
+      ],
+      "@nu/vivi-lib/*": [
+        "../../packages/vivi-lib/src/*",
+        "../../packages/vivi-lib/src/index"
       ]
     },
     "lib": [

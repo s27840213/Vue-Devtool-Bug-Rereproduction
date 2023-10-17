@@ -76,20 +76,20 @@ div(class="panel-template" ref="panel")
 </template>
 
 <script lang="ts">
-import listService from '@/apis/list'
-import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
-import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
+import listService from '@nu/vivi-lib/apis/list'
+import CategoryGroupTemplateItem from '@nu/vivi-lib/components/category/CategoryGroupTemplateItem.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
+import CategoryTemplateItem from '@nu/vivi-lib/components/category/CategoryTemplateItem.vue'
 import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
 import Url from '@/components/global/Url.vue'
 import PopupTheme from '@/components/popup/PopupTheme.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { Itheme } from '@/interfaces/theme'
-import GalleryUtils from '@/utils/galleryUtils'
-import generalUtils from '@/utils/generalUtils'
-import themeUtils from '@/utils/themeUtils'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
+import { IAssetTemplate, ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { Itheme } from '@nu/vivi-lib/interfaces/theme'
+import GalleryUtils from '@nu/vivi-lib/utils/galleryUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import themeUtils from '@nu/vivi-lib/utils/themeUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -151,13 +151,13 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword',
       theme: 'theme',
       sum: 'sum'
     }),
     ...mapState('user', ['userId']),
     ...mapGetters({
+      pending: 'templates/pending',
       editorThemes: 'getEditThemes'
     }),
     ...mapGetters({
@@ -197,15 +197,15 @@ export default defineComponent({
       }
       return list
     },
-    categoryListArray(): ICategoryList[] {
+    categoryListArray() {
       return [{
         content: this.searchResult,
         show: this.keyword,
-        key: 'searchResult'
+        key: 'searchResult' as const
       }, {
         content: this.mainContent,
         show: !this.keyword,
-        key: 'mainContent'
+        key: 'mainContent' as const
       }]
     },
     resultGroupCounter(): number {

@@ -8,7 +8,7 @@ div(class="my-design")
 import { defineComponent } from 'vue'
 import MyDesignPc from '@/components/mydesign/MyDesignPC.vue'
 import MyDesignMobile from '@/components/mydesign/MyDesignMobile.vue'
-import generalUtils from '@/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 
 export default defineComponent({
   emits: [],

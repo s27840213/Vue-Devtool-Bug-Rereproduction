@@ -1,7 +1,7 @@
 import store from '@/store'
 import download from '@/apis/download'
-import { IDownloadTypeAttrs, IDownloadServiceParams } from '@/interfaces/download'
-import GeneralUtils from './generalUtils'
+import { IDownloadTypeAttrs, IDownloadServiceParams } from '@nu/vivi-lib/interfaces/download'
+import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
 
 class DownloadUtil {
   get fileAttrs() {

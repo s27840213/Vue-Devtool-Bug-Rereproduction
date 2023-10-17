@@ -11,9 +11,9 @@ div(class="brand-kit-color-palette")
 </template>
 
 <script lang="ts">
-import ColorBtn from '@/components/global/ColorBtn.vue'
-import { IBrandColorPalette } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
+import { IBrandColorPalette } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({

@@ -45,8 +45,8 @@ div(class="btnList" :style="BGstyle")
 </template>
 
 <script lang="ts">
-import Checkbox from '@/components/global/Checkbox.vue'
-import { INubtnSize, INubtnThemes } from '@/components/global/Nubtn.vue'
+import Checkbox from '@nu/vivi-lib/components/global/Checkbox.vue'
+import { INubtnSize, INubtnThemes } from '@nu/vivi-lib/components/global/Nubtn.vue'
 import Options from '@/components/global/Options.vue'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from '@/apis'
-import apiUtils from '@/utils/apiUtils'
+import axios from '@nu/vivi-lib/apis'
+import apiUtils from '@nu/vivi-lib/utils/apiUtils'
 import store from '@/store'
-import { IBrand, IBrandParams } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
-import i18n from '@/i18n'
-import logUtils from '@/utils/logUtils'
+import { IBrand, IBrandParams } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import i18n from '@nu/vivi-lib/i18n'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 export default {
   getToken(): string {

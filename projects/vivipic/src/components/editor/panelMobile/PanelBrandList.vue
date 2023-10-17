@@ -38,9 +38,9 @@ div(class="panel-brand-list" :class="{'new-brand': lastHistory === 'new-brand'}"
 </template>
 
 <script lang="ts">
-import { IBrand } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
-import editorUtils from '@/utils/editorUtils'
+import { IBrand } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

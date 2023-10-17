@@ -18,10 +18,10 @@ div(class="panel-select-design")
 </template>
 
 <script lang="ts">
-import { IMyDesign } from '@/interfaces/vivisticker'
-import editorUtils from '@/utils/editorUtils'
-import modalUtils from '@/utils/modalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IMyDesign } from '@nu/vivi-lib/interfaces/vivisticker'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -86,7 +86,7 @@ export default defineComponent({
     },
     confirmDeletion() {
       for (const design of Object.values(this.selectedDesigns) as IMyDesign[]) {
-        vivistickerUtils.deleteAsset(`mydesign-${this.myDesignTab}`, design.id, 'mydesign')
+        stkWVUtils.deleteAsset(`mydesign-${this.myDesignTab}`, design.id, 'mydesign')
       }
       this.deleteDesigns(this.myDesignTab)
       this.leaveSelectionMode()

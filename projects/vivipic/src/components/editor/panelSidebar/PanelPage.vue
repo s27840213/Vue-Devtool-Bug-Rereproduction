@@ -17,8 +17,8 @@ div(class="panel-page")
 <script lang="ts">
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PanelPagePlus from '@/components/editor/pagePreview/PanelPagePlus.vue'
-import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

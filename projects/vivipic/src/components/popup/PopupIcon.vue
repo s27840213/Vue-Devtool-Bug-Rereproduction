@@ -5,7 +5,7 @@ transition(name="fade-in-out")
 </template>
 
 <script lang="ts">
-import popupUtils from '@/utils/popupUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

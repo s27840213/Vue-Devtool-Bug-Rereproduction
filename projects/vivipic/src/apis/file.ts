@@ -1,7 +1,7 @@
-import axios from '@/apis'
-import authToken from './auth-token'
+import axios from '@nu/vivi-lib/apis'
+import authToken from '@nu/vivi-lib/apis/auth-token'
 import { AxiosPromise } from 'axios'
-import { IUserAssetsData } from '@/interfaces/api'
+import { IUserAssetsData } from '@nu/vivi-lib/interfaces/api'
 
 class PhotoService {
   getFiles (params: {pageIndex: number}): AxiosPromise {

@@ -13,9 +13,9 @@ div(class="popup-flip")
 </template>
 
 <script lang="ts">
-import { LayerType } from '@/store/types'
-import layerUtils from '@/utils/layerUtils'
-import MappingUtils from '@/utils/mappingUtils'
+import { LayerType } from '@nu/vivi-lib/store/types'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import MappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

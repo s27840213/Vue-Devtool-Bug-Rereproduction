@@ -1,9 +1,9 @@
-import axios from '@/apis'
-import i18n from '@/i18n'
-import * as type from '@/interfaces/payment'
+import axios from '@nu/vivi-lib/apis'
+import i18n from '@nu/vivi-lib/i18n'
+import * as type from '@nu/vivi-lib/interfaces/payment'
 import store from '@/store'
 import { AxiosPromise } from 'axios'
-import authToken from './auth-token'
+import authToken from '@nu/vivi-lib/apis/auth-token'
 
 class Payment {
   planList(country: string) {

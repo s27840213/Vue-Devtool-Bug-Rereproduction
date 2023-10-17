@@ -19,10 +19,10 @@ div(class="page-preview-plus"
 </template>
 
 <script lang="ts">
-import GeneralUtils from '@/utils/generalUtils'
-import GroupUtils from '@/utils/groupUtils'
-import pageUtils from '@/utils/pageUtils'
-import StepsUtils from '@/utils/stepsUtils'
+import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
+import GroupUtils from '@nu/vivi-lib/utils/groupUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import StepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

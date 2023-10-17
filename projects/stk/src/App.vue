@@ -9,7 +9,6 @@ div(id="app" :style="appStyles()")
   div(class="main-content")
     div(class="main-content__router-view")
       router-view
-    home-footer-tabs(v-if="showHomeFooterTabs")
   div(class="popup-area")
     popup
     res-info(v-show="currSelectedResInfo.type"
@@ -42,17 +41,17 @@ div(id="app" :style="appStyles()")
 </template>
 
 <script lang="ts">
-import ModalCard from '@/components/modal/ModalCard.vue'
-import ResInfo from '@/components/modal/ResInfo.vue'
+import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
+import ResInfo from '@nu/vivi-lib/components/modal/ResInfo.vue'
 import Popup from '@/components/popup/Popup.vue'
-import generalUtils from '@/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
 import { throttle } from 'lodash'
-import { defineAsyncComponent, defineComponent } from 'vue'
+import { defineComponent, defineAsyncComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import localeUtils from './utils/localeUtils'
-import networkUtils from './utils/networkUtils'
-import picWVUtils from './utils/picWVUtils'
+import localeUtils from '@nu/vivi-lib/utils/localeUtils'
+import networkUtils from '@nu/vivi-lib/utils/networkUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 
 export default defineComponent({
   emits: [],
@@ -61,13 +60,8 @@ export default defineComponent({
     ResInfo,
     ModalCard,
     DebugTool: defineAsyncComponent(
-      () => import('@/components/componentLog/DebugTool.vue'),
+      () => import('@nu/vivi-lib/components/componentLog/DebugTool.vue'),
     ),
-    ...generalUtils.isPic && {
-      HomeFooterTabs: defineAsyncComponent(
-        () => import('@/components/homepage/HomeFooterTabs.vue'),
-      ),
-    },
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -149,9 +143,6 @@ export default defineComponent({
     currLocale(): string {
       return localeUtils.currLocale()
     },
-    showHomeFooterTabs (): boolean {
-      return ['Home', 'TemplateCenter', 'MyDesign', 'Settings'].includes(this.$route.name as string) && this.$isTouchDevice()
-    }
   },
   methods: {
     ...mapMutations('text', {
@@ -196,7 +187,7 @@ export default defineComponent({
 })
 </script>
 <style lang="scss">
-@use "@/assets/scss/main.scss";
+@use "@nu/vivi-lib/assets/scss/main.scss";
 
 #app{
   @include size(100%, 100%);

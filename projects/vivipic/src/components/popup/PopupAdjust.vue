@@ -24,8 +24,8 @@ div(class="popup-adjust p-10")
 </template>
 
 <script lang="ts">
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import stepsUtils from '@/utils/stepsUtils'
+import imageAdjustUtil from '@nu/vivi-lib/utils/imageAdjustUtil'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

@@ -12,13 +12,13 @@ div(class="category-template-item")
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import { IAsset } from '@/interfaces/module'
-import assetUtils from '@/utils/assetUtils'
-import DragUtils from '@/utils/dragUtils'
-import pageUtils from '@/utils/pageUtils'
-import paymentUtils from '@/utils/paymentUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import DragUtils from '@nu/vivi-lib/utils/dragUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
@@ -74,24 +74,24 @@ export default defineComponent({
       })
     },
     addTemplate() {
-      if (this.groupItem && !vivistickerUtils.checkPro(this.groupItem, 'template')) return
-      else if (!this.groupItem && !vivistickerUtils.checkPro(this.item, 'template')) return
-      if (pageUtils.getPages.length + (this.groupItem ? this.groupItem.content_ids.length : 1) > vivistickerUtils.MAX_PAGE_NUM) return vivistickerUtils.showMaxPageNumModal()
+      if (this.groupItem && !stkWVUtils.checkPro(this.groupItem, 'template')) return
+      else if (!this.groupItem && !stkWVUtils.checkPro(this.item, 'template')) return
+      if (pageUtils.getPages.length + (this.groupItem ? this.groupItem.content_ids.length : 1) > stkWVUtils.MAX_PAGE_NUM) return stkWVUtils.showMaxPageNumModal()
       const currPageIndex = pageUtils.currFocusPageIndex
-      const attrs = { pageIndex: this.isInEditor ? currPageIndex + 1 : currPageIndex, ...vivistickerUtils.getPageSize(this.igLayout) }
+      const attrs = { pageIndex: this.isInEditor ? currPageIndex + 1 : currPageIndex, ...stkWVUtils.getPageSize(this.igLayout) }
       const moduleKey = `templates/${this.igLayout}`
       const cb = this.groupItem ? async () => {
         await assetUtils.addGroupTemplate(this.groupItem as any, this.item.id, attrs, moduleKey, !this.isInEditor)
         return true
-      } : vivistickerUtils.getAssetInitiator(this.item as IAsset, attrs, moduleKey)
+      } : stkWVUtils.getAssetInitiator(this.item as IAsset, attrs, moduleKey)
       if (this.isInEditor) {
         cb()
       } else {
-        vivistickerUtils.startEditing(
+        stkWVUtils.startEditing(
           this.igLayout, {
             plan: this.item.plan,
             assetId: this.item.id
-          }, cb, vivistickerUtils.getAssetCallback(this.item as IAsset)
+          }, cb, stkWVUtils.getAssetCallback(this.item as IAsset)
         )
       }
     }

@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
-import axios from '@/apis'
-import i18n from '@/i18n'
-import { IFbTrackingData } from '@/interfaces/api'
+import axios from '@nu/vivi-lib/apis'
+import i18n from '@nu/vivi-lib/i18n'
+import { IFbTrackingData } from '@nu/vivi-lib/interfaces/api'
 import store from '@/store'
 
 export default {

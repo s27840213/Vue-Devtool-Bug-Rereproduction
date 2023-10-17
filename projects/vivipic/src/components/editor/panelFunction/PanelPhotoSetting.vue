@@ -28,22 +28,24 @@ div(class="photo-setting")
 import Overlay from '@/components/editor/overlay/Overlay.vue'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup, IImage } from '@/interfaces/layer'
+import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
+import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
+import { IFrame, IGroup, IImage } from '@nu/vivi-lib/interfaces/layer'
 import store from '@/store'
-import { FunctionPanelType, LayerType } from '@/store/types'
-import bgRemoveUtils from '@/utils/bgRemoveUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import frameUtils from '@/utils/frameUtils'
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import imageUtils from '@/utils/imageUtils'
-import layerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
-import picWVUtils from '@/utils/picWVUtils'
+import { FunctionPanelType, LayerType } from '@nu/vivi-lib/store/types'
+import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
+import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
+import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import imageAdjustUtil from '@nu/vivi-lib/utils/imageAdjustUtil'
+import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@nu/vivi-lib/interfaces/api'
 
 interface IBtn {
   name: string
@@ -62,6 +64,12 @@ export default defineComponent({
       show: '',
       isSvgImage: false,
       btns: [[
+        {
+          name: 'replaceImg',
+          label: this.$t('NN0913'),
+          extraClass: 'grid-full',
+          show: 'replaceImg',
+        }], [
         {
           name: 'overlay',
           label: this.$t('NN0899'),
@@ -196,7 +204,7 @@ export default defineComponent({
     //   return this.currLayer.previewSrc !== undefined
     // },
     isUploadingImg(): boolean {
-      return !(this.currLayer.srcObj.type && this.currLayer.srcObj.assetId && imageUtils.getSrc(this.currLayer.srcObj))
+      return !(this.currLayer.srcObj.type && this.currLayer.srcObj.assetId && imageUtils.getSrc(this.currLayer.srcObj, 'prev'))
     }
   },
   watch: {
@@ -255,6 +263,15 @@ export default defineComponent({
     },
     handleShow(name: string) {
       switch (name) {
+        case 'replaceImg':
+          popupUtils.openPopup('replace', undefined, {
+            replaceImg: (img: IAssetPhoto | IPhotoItem) => {
+              const url = isIAssetPhoto(img) ? img.urls.prev
+                : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 'prev')
+              imageUtils.replaceImg(img, url)
+            }
+          })
+          return
         case 'panel-photo-shadow': {
           if (this.isUploadImgShadow) {
             return

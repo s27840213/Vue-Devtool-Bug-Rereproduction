@@ -74,16 +74,16 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
 </template>
 
 <script lang="ts">
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
-import Tags, { ITag } from '@/components/global/Tags.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import i18n from '@/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
+import i18n from '@nu/vivi-lib/i18n'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IGif, IGifCategory, IGifCategoryExtend, isIGifCategory, isITag, ITagExtend } from '@/interfaces/giphy'
-import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
@@ -370,15 +370,15 @@ export default defineComponent({
         this.resetCategoryContent()
         this.resetTagContent()
         if (!categoryName) {
-          vivistickerUtils.setShowAllRecently('object', false)
+          stkWVUtils.setShowAllRecently('object', false)
           return
         }
 
         const isRecent = categoryName === this.$t('NN0024')
         if (!isRecent) this.getCategoryContent(categoryName)
-        vivistickerUtils.setShowAllRecently('object', isRecent)
+        stkWVUtils.setShowAllRecently('object', isRecent)
       }
-      vivistickerUtils.setIsInCategory('object', true)
+      stkWVUtils.setIsInCategory('object', true)
     },
     handleLoadMore() {
       if (this.isSearchingTag) {
@@ -391,7 +391,7 @@ export default defineComponent({
     },
     click4in1(target: unknown) {
       this.searchFavorites(target)
-      vivistickerUtils.setIsInCategory('object', true)
+      stkWVUtils.setIsInCategory('object', true)
     },
     toggleFavorites4in1(target: ITagExtend | IGifCategoryExtend) {
       if (isITag(target)) {

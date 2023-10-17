@@ -56,9 +56,9 @@ div(class="popup-updateDesign")
 </template>
 
 <script lang="ts">
-import designApis from '@/apis/design-info'
+import designApis from '@nu/vivi-lib/apis/design-info'
 import store from '@/store'
-import GeneralUtils from '@/utils/generalUtils'
+import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'

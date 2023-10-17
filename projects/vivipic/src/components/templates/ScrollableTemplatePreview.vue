@@ -15,8 +15,8 @@ div(ref="box"
 </template>
 
 <script lang="ts">
-import { IContentTemplate } from '@/interfaces/template'
-import mouseUtils from '@/utils/mouseUtils'
+import { IContentTemplate } from '@nu/vivi-lib/interfaces/template'
+import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import { defineComponent } from 'vue'
 

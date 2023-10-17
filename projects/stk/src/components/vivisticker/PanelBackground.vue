@@ -103,26 +103,26 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import Tabs from '@/components/Tabs.vue'
-import i18n from '@/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
+import MobileSlider from '@nu/vivi-lib/components/editor/mobile/MobileSlider.vue'
+import i18n from '@nu/vivi-lib/i18n'
 import { IAsset } from '@/interfaces/module'
-import { IPage } from '@/interfaces/page'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
-import assetUtils from '@/utils/assetUtils'
-import colorUtils from '@/utils/colorUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
-import pageUtils from '@/utils/pageUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
+import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import { round } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -309,7 +309,7 @@ export default defineComponent({
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
         await this.getRecAndCate({ reset, key: 'background' })
-        await vivistickerUtils.listAsset('backgroundColor')
+        await stkWVUtils.listAsset('backgroundColor')
       })
     colorUtils.setCurrEvent(ColorEventType.background)
   },
@@ -333,7 +333,7 @@ export default defineComponent({
     currActivePanel(newVal, oldVal) {
       if (oldVal === 'color-picker') {
         if (newVal === 'none') {
-          vivistickerUtils.commitNewBgColor()
+          stkWVUtils.commitNewBgColor()
         }
         this.setHasNewBgColor(false)
       }
@@ -413,8 +413,8 @@ export default defineComponent({
           pageIndex: pageUtils.currFocusPageIndex,
           color: color
         })
-      } else vivistickerUtils.sendScreenshotUrl(this.getColorUrl(color, false))
-      vivistickerUtils.addAsset('backgroundColor', { id: color.replace('#', '') })
+      } else stkWVUtils.sendScreenshotUrl(this.getColorUrl(color, false))
+      stkWVUtils.addAsset('backgroundColor', { id: color.replace('#', '') })
       this.addRecentlyBgColor(color)
     },
     getColorOverlappingWhite(color: string): string {
@@ -456,13 +456,13 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          vivistickerUtils.setShowAllRecently('background', true)
+          stkWVUtils.setShowAllRecently('background', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        vivistickerUtils.setIsInCategory('background', true)
+        stkWVUtils.setIsInCategory('background', true)
       } else {
-        vivistickerUtils.setShowAllRecently('background', false)
+        stkWVUtils.setShowAllRecently('background', false)
       }
     },
     handleLoadMore() {
@@ -482,33 +482,33 @@ export default defineComponent({
       this.setIsInBgShare(true)
     },
     handleSave() {
-      vivistickerUtils.sendScreenshotUrl(
-        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, false),
+      stkWVUtils.sendScreenshotUrl(
+        this.shareItem ? stkWVUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, false),
         'download'
       )
       if (this.shareItem) {
         assetUtils.addAssetToRecentlyUsed(this.shareItem, 'background')
       } else {
-        vivistickerUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
+        stkWVUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
         this.addRecentlyBgColor(this.shareColor)
       }
     },
     handleStory() {
-      vivistickerUtils.sendScreenshotUrl(
-        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, true),
+      stkWVUtils.sendScreenshotUrl(
+        this.shareItem ? stkWVUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, true),
         'IGStory'
       )
       if (this.shareItem) {
         assetUtils.addAssetToRecentlyUsed(this.shareItem, 'background')
       } else {
-        vivistickerUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
+        stkWVUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
         this.addRecentlyBgColor(this.shareColor)
       }
     },
     handleOpenColorPicker() {
       if (this.isInEditor) return this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
       this.$emit('openColorPicker')
-      vivistickerUtils.setHasNewBgColor(true)
+      stkWVUtils.setHasNewBgColor(true)
     },
     handleShowAllRecentlyBgColors(bool: boolean) {
       this.showAllRecentlyBgColors = bool

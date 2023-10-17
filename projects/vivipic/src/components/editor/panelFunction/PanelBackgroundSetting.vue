@@ -24,6 +24,10 @@ div(class="bg-setting")
       @click="handleDeleteBackground"
       v-hint="$t('NN0034')"
     )
+  div
+    nubtn(theme="edit" size="mid-full"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="handleShow('replaceImg')") {{$t('NN0913')}}
   div(:class="{ 'bg-setting__grid': isAdmin }")
     nubtn(theme="edit" size="mid-full"
       :disabled="!isShowImage || backgroundLocked"
@@ -66,22 +70,24 @@ div(class="bg-setting")
 
 <script lang="ts">
 import Overlay from '@/components/editor/overlay/Overlay.vue'
-import ColorBtn from '@/components/global/ColorBtn.vue'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
-import i18n from '@/i18n'
-import { IPage } from '@/interfaces/page'
-import { ColorEventType, PopupSliderEventType } from '@/store/types'
-import backgroundUtils from '@/utils/backgroundUtils'
-import colorUtils from '@/utils/colorUtils'
-import editorUtils from '@/utils/editorUtils'
-import MappingUtils from '@/utils/mappingUtils'
-import pageUtils from '@/utils/pageUtils'
-import popupUtils from '@/utils/popupUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import i18n from '@nu/vivi-lib/i18n'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ColorEventType, PopupSliderEventType } from '@nu/vivi-lib/store/types'
+import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import MappingUtils from '@nu/vivi-lib/utils/mappingUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@nu/vivi-lib/interfaces/api'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 export default defineComponent({
   components: {
@@ -213,6 +219,16 @@ export default defineComponent({
     },
     handleShow(name: string) {
       if (this.backgroundLocked) return this.handleLockedNotify()
+      if (name === 'replaceImg') {
+        popupUtils.openPopup('replace', undefined, {
+          replaceImg: (img: IAssetPhoto | IPhotoItem) => {
+            const url = isIAssetPhoto(img) ? img.urls.prev
+              : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 'prev')
+            backgroundUtils.replaceBgImg(img, url)
+          }
+        })
+        return
+      }
       this.show = this.show.includes(name) ? '' : name
     },
     handleColorPicker() {

@@ -38,9 +38,9 @@ div(class="component-log"
 
 <script lang="ts">
 import ComponentLogItem from '@/components/componentLog/ComponentLogItem.vue'
-import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
-import eventUtils from '@/utils/eventUtils'
-import mouseUtils from '@/utils/mouseUtils'
+import { IComponentUpdatedLog } from '@nu/vivi-lib/interfaces/componentUpdateLog'
+import eventUtils from '@nu/vivi-lib/utils/eventUtils'
+import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import { debounce } from 'lodash'
 import { defineComponent, PropType } from 'vue'
 

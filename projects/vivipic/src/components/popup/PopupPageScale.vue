@@ -15,8 +15,8 @@ div(class="popup-page-scale bg-gray-6"
 </template>
 
 <script lang="ts">
-import pageUtils from '@/utils/pageUtils'
-import popupUtils from '@/utils/popupUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import { defineComponent } from 'vue'
 import { mapMutations } from 'vuex'
 

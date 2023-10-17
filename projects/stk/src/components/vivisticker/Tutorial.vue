@@ -34,8 +34,8 @@ div(ref="main" class="tutorial relative" v-touch
 </template>
 
 <script lang="ts">
-import constantData from '@/utils/constantData'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import constantData from '@nu/vivi-lib/utils/constantData'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapMutations } from 'vuex'
@@ -84,7 +84,7 @@ export default defineComponent({
     },
     handleVideoLoaded() {
       console.log('loaded')
-      vivistickerUtils.sendAppLoaded()
+      stkWVUtils.sendAppLoaded()
     },
     handleSwipeLeft(e: AnyTouchEvent) {
       console.log('left')

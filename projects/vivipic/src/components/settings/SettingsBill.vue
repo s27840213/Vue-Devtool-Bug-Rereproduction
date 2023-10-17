@@ -53,8 +53,8 @@ div(class="bill")
 </template>
 
 <script lang="ts">
-import * as type from '@/interfaces/payment'
-import generalUtils from '@/utils/generalUtils'
+import * as type from '@nu/vivi-lib/interfaces/payment'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
 // import ObserverSentinel from '@/components/ObserverSentinel.vue'

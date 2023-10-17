@@ -23,7 +23,7 @@ div(class="sidebar")
 
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
-import paymentData from '@/utils/constantData'
+import paymentData from '@nu/vivi-lib/utils/constantData'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 

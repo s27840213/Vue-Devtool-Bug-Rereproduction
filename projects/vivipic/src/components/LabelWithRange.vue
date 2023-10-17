@@ -18,9 +18,9 @@ div(class="label-with-range")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import vClickOutside from 'click-outside-vue3'
-import popupUtils from '@/utils/popupUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import generalUtils from '@/utils/generalUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 
 export default defineComponent({
   directives: {

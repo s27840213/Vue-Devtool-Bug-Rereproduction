@@ -8,12 +8,12 @@ div(class="editor")
 <script lang="ts">
 import DesktopEditor from '@/components/editor/editor/DesktopEditor.vue'
 import MobileEditor from '@/components/editor/editor/MobileEditor.vue'
-import { IPage } from '@/interfaces/page'
-import editorUtils from '@/utils/editorUtils'
-import logUtils from '@/utils/logUtils'
-import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import uploadUtils from '@/utils/uploadUtils'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

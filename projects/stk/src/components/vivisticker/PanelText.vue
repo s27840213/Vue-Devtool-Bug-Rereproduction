@@ -57,19 +57,19 @@ div(class="overflow-container full-size rwd-container")
 </template>
 
 <script lang="ts">
-import listApi from '@/apis/list'
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import listApi from '@nu/vivi-lib/apis/list'
+import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
+import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import Tags, { ITag } from '@/components/global/Tags.vue'
-import SearchBar from '@/components/SearchBar.vue'
+import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
-import i18n from '@/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import AssetUtils from '@/utils/assetUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import i18n from '@nu/vivi-lib/i18n'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import AssetUtils from '@nu/vivi-lib/utils/assetUtils'
+import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -301,11 +301,11 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          vivistickerUtils.setShowAllRecently('text', true)
+          stkWVUtils.setShowAllRecently('text', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        vivistickerUtils.setIsInCategory('text', true)
+        stkWVUtils.setIsInCategory('text', true)
       }
     },
     handleLoadMore() {
@@ -314,10 +314,10 @@ export default defineComponent({
     async addStandardText() {
       listApi.addDesign('add_text', 'text')
       let recentFont
-      if (vivistickerUtils.checkVersion('1.5')) {
-        recentFont = await vivistickerUtils.getState('recentFont')
+      if (stkWVUtils.checkVersion('1.5')) {
+        recentFont = await stkWVUtils.getState('recentFont')
       }
-      const color = vivistickerUtils.getContrastColor(this.editorBg)
+      const color = stkWVUtils.getContrastColor(this.editorBg)
       await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {
         size: 21,
         color,
@@ -329,7 +329,7 @@ export default defineComponent({
       if (this.isInEditor) {
         this.addStandardText()
       } else {
-        vivistickerUtils.startEditing(
+        stkWVUtils.startEditing(
           'text',
           { plan: 0, assetId: '' },
           async () => {
@@ -337,7 +337,7 @@ export default defineComponent({
             await this.addStandardText()
             return true
           },
-          vivistickerUtils.getEmptyCallback()
+          stkWVUtils.getEmptyCallback()
         )
       }
     },

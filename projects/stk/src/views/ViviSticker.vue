@@ -51,18 +51,18 @@ import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
 import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
-import { CustomWindow } from '@/interfaces/customWindow'
-import { IFooterTabProps } from '@/interfaces/editor'
+import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
+import { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
 import { IPage } from '@/interfaces/page'
-import constantData from '@/utils/constantData'
-import editorUtils from '@/utils/editorUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import logUtils from '@/utils/logUtils'
-import modalUtils from '@/utils/modalUtils'
-import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import textUtils from '@/utils/textUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import constantData from '@nu/vivi-lib/utils/constantData'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { find } from 'lodash'
 import VConsole from 'vconsole'
 import { defineComponent } from 'vue'
@@ -101,22 +101,22 @@ export default defineComponent({
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
     textUtils.loadDefaultFonts()
-    vivistickerUtils.registerCallbacks('vvstk')
+    stkWVUtils.registerCallbacks('vvstk')
   },
   async mounted() {
     this.mounted = true
-    const tempDesign = await vivistickerUtils.fetchDesign()
+    const tempDesign = await stkWVUtils.fetchDesign()
     if (tempDesign) {
       try {
-        vivistickerUtils.initWithTempDesign(tempDesign)
+        stkWVUtils.initWithTempDesign(tempDesign)
       } catch (error) {
         logUtils.setLogAndConsoleLog(error)
       }
     }
 
-    if (!vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0')) {
-      vivistickerUtils.showUpdateModal(true)
-      vivistickerUtils.sendAppLoaded()
+    if (!stkWVUtils.checkVersion(this.modalInfo.ver_min || '0')) {
+      stkWVUtils.showUpdateModal(true)
+      stkWVUtils.sendAppLoaded()
     } else this.showInitPopups()
 
     stepsUtils.MAX_STORAGE_COUNT = 15
@@ -147,7 +147,7 @@ export default defineComponent({
     }, false)
     document.addEventListener('scroll', this.handleScroll)
 
-    const debugMode = process.env.NODE_ENV === 'development' ? true : (await vivistickerUtils.getState('debugMode'))?.value ?? false
+    const debugMode = process.env.NODE_ENV === 'development' ? true : (await stkWVUtils.getState('debugMode'))?.value ?? false
     this.setDebugMode(debugMode)
     this.footerTabsRef = (this.$refs.footerTabs as any).$el as HTMLElement
 
@@ -282,28 +282,28 @@ export default defineComponent({
       if (constantData.checkIfUseNewLogic()) {
         switch (panelType) {
           case 'text':
-            if (!vivistickerUtils.tutorialFlags.text && !this.debugMode) {
-              vivistickerUtils.openFullPageVideo('tutorial2', { delayedClose: 5000 })
-              vivistickerUtils.updateTutorialFlags({ text: true })
+            if (!stkWVUtils.tutorialFlags.text && !this.debugMode) {
+              stkWVUtils.openFullPageVideo('tutorial2', { delayedClose: 5000 })
+              stkWVUtils.updateTutorialFlags({ text: true })
             }
             break
           case 'background':
-            if (!vivistickerUtils.tutorialFlags.background && !this.debugMode) {
-              vivistickerUtils.openFullPageVideo('tutorial4', { delayedClose: 5000 })
-              vivistickerUtils.updateTutorialFlags({ background: true })
+            if (!stkWVUtils.tutorialFlags.background && !this.debugMode) {
+              stkWVUtils.openFullPageVideo('tutorial4', { delayedClose: 5000 })
+              stkWVUtils.updateTutorialFlags({ background: true })
             }
             break
         }
       }
       if (this.currActivePanel === 'color-picker') {
-        vivistickerUtils.setHasNewBgColor(false)
+        stkWVUtils.setHasNewBgColor(false)
         this.switchTab('none')
       }
     },
     outerClick() {
       console.log('outer click')
       if (this.isInEditor) {
-        vivistickerUtils.deselect()
+        stkWVUtils.deselect()
       }
     },
     handleScroll() {
@@ -365,7 +365,7 @@ export default defineComponent({
       )
 
       // show popup
-      const lastModalMsg = await vivistickerUtils.getState('lastModalMsg')
+      const lastModalMsg = await stkWVUtils.getState('lastModalMsg')
       const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
       const btn_txt = modalInfo.btn_txt
       if (!btn_txt || shown) return false
@@ -408,15 +408,15 @@ export default defineComponent({
         },
         options
       )
-      vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
+      stkWVUtils.setState('lastModalMsg', { value: modalInfo.msg })
       return true
     },
     async showInitPopups() {
       const isFirstOpen = this.userInfo.isFirstOpen
-      const subscribed = (await vivistickerUtils.getState('subscribeInfo'))?.subscribe ?? false
+      const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
       const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
       const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
-      const showPaymentInfo = await vivistickerUtils.getState('showPaymentInfo')
+      const showPaymentInfo = await stkWVUtils.getState('showPaymentInfo')
       const showPaymentTime = showPaymentInfo?.timestamp ?? 0
       const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
       const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
@@ -425,16 +425,16 @@ export default defineComponent({
       const isShowTutorial = isFirstOpen && this.$i18n.locale !== 'us'
       const show = () =>{
         if (isShowPaymentView) {
-          vivistickerUtils.openPayment()
-          vivistickerUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
-        } else vivistickerUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
+          stkWVUtils.openPayment()
+          stkWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+        } else stkWVUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
         if (isShowTutorial) this.setShowTutorial(true)
-        if (!isShowPaymentView && !isShowTutorial) vivistickerUtils.sendAppLoaded()
+        if (!isShowPaymentView && !isShowTutorial) stkWVUtils.sendAppLoaded()
       }
 
       const isPushModalShown = await this.showPushModalInfo()
       if (isPushModalShown) {
-        vivistickerUtils.sendAppLoaded()
+        stkWVUtils.sendAppLoaded()
         const unwatch = this.$watch('modalOpen', (newVal) => {
           if(!newVal) show()
           unwatch()

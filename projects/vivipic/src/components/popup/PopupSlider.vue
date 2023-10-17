@@ -18,9 +18,9 @@ div(class="popup-slider"
 </template>
 
 <script lang="ts">
-import { PopupSliderEventType } from '@/store/types'
-import popupUtils from '@/utils/popupUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import { PopupSliderEventType } from '@nu/vivi-lib/store/types'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

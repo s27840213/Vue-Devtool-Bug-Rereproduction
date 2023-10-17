@@ -22,11 +22,11 @@ div(class="panel-group-template py-20 px-10 flex flex-column" :style="panelStyle
 </template>
 
 <script lang="ts">
-import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
-import assetUtils from '@/utils/assetUtils'
-import editorUtils from '@/utils/editorUtils'
-import modalUtils from '@/utils/modalUtils'
-import paymentUtils from '@/utils/paymentUtils'
+import CategoryTemplateItem from '@nu/vivi-lib/components/category/CategoryTemplateItem.vue'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

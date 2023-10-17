@@ -25,8 +25,8 @@ section
 </template>
 
 <script lang="ts">
-import { IFolder } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import { IFolder } from '@nu/vivi-lib/interfaces/design'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapMutations } from 'vuex'
 

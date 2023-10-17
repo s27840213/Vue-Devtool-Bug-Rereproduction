@@ -12,11 +12,11 @@ div(class="brand-kit-tab-text" :style="minHeightStyles()")
 </template>
 
 <script lang="ts">
-import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
-import assetUtils from '@/utils/assetUtils'
-import brandkitUtils from '@/utils/brandkitUtils'
-import textUtils from '@/utils/textUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@nu/vivi-lib/interfaces/brandkit'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
+import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

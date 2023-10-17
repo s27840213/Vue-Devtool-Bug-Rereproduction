@@ -1,6 +1,6 @@
-import { IPage } from '@/interfaces/page'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'
-import pageUtils from '@/utils/pageUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 export type ICypressState = {
