@@ -75,7 +75,8 @@ div(class="popup-window")
                 div(class="payment__footer text-gray-3")
                   template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
                     span(v-if="idx > 0" class="payment__footer__splitter")
-                    span(class="body-XXS" @tap="footerLink.action") {{ footerLink.title }}
+                    url(:url="footerLink.url")
+                      span(class="body-XXS text-gray-3") {{ footerLink.title }}
               div(class="payment__panel" :class="{open: !isDraggingPanel && isPanelUp, close: !isDraggingPanel && !isPanelUp}" ref="panel" :style="panelStyles()")
                 div(class="payment__panel__chevron" ref="chevron" @tap="togglePanel()" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)" @panstart.stop="dragPanelStart" @panmove.stop="dragingPanel" @panend.stop="dragPanelEnd")
                   svg-icon(iconName="chevron-up" iconWidth="14px")
@@ -154,6 +155,7 @@ import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
+import Url from '@/components/global/Url.vue'
 
 interface CarouselItem {
   key: IMobilePaymentWarningView
@@ -180,7 +182,8 @@ export default defineComponent({
     Animation,
     CardInfo,
     CouponInput,
-    Carousel
+    Carousel,
+    Url
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -247,19 +250,14 @@ export default defineComponent({
       ] as CarouselItem[],
       footerLinks: [
         {
-          key: 'restorePurchase',
-          title: this.$t('STK0045'),
-          action: () => this.handleSubscribe('restore', 30000)
-        },
-        {
           key: 'termsOfService',
           title: this.$t('NN0160'),
-          action: () => window.open(this.$t('NN0858'), '_blank')
+          url: this.$t('NN0858')
         },
         {
           key: 'privacyPolicy',
           title: this.$t('NN0161'),
-          action: () => window.open(this.$t('NN0857'), '_blank')
+          url: this.$t('NN0857')
         }
       ],
       comparisons: [] as IComparison[]
