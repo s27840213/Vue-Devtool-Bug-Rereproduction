@@ -4,7 +4,7 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
     div
       back-btn
   div(
-    class="bg-app-tab-bg w-full h-full rounded-t-[24px] pt-16 box-border grid grid-rows-[auto,auto,minmax(0,1fr)] grid-cols-1")
+    class="bg-app-tab-bg w-full h-full rounded-t-[24px] py-16 box-border grid grid-rows-[auto,auto,minmax(0,1fr)] grid-cols-1")
     div(class="tabs flex justify-around pb-8")
       span(class="text-app-tab-active typo-btn-lg") Photos
       span(class="text-app-tab-disable typo-btn-lg") Stocks
@@ -20,32 +20,25 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
             :iconWidth="'12px'")
     div(
       v-if="isAlbumOpened"
-      class="img-selector__img-grid bg-app-bg overflow-scroll"
+      class="img-grid h-full bg-app-bg grid grid-cols-3 grid-flow-row overflow-scroll gap-4"
       @scroll.stop
       @touchstart.stop)
-      div(class="grid grid-cols-3 grid-flow-row content-start gap-4")
-        div(class="aspect-square flex flex-col items-center justify-center")
-          cm-svg-icon(class="text-app-tab-default mb-10" :iconName="'camera'")
-          span(class="text-app-tab-default") Camera
-        div(
-          v-for="item in currAlbumContent"
-          :key="item"
-          class="aspect-square")
-          lazy-load(
-            class="lazy-load w-full h-full"
-            target=".img-selector__img-grid"
-            :rootMargin="'1000px 0px 1000px 0px'")
-            img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?ssize=200`")
+      div(class="aspect-square flex flex-col items-center justify-center")
+        cm-svg-icon(class="text-app-tab-default mb-10" :iconName="'camera'")
+        span(class="text-app-tab-default") Camera
+      div(
+        v-for="item in currAlbumContent"
+        :key="item"
+        class="aspect-square")
+        lazy-load(
+          class="lazy-load w-full h-full"
+          target=".img-grid"
+          :anamationEnabled="true"
+          :rootMargin="'1000px 0px 1000px 0px'")
+          img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?type=thumb`")
       observer-sentinel(
-        class="flex justify-center py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
-        :target="'.img-selector__img-grid'"
-        :rootMargin="'1000px 0px 1000px 0px'"
         @callback="handleLoadMore")
-        cm-svg-icon(
-          class="text-app-tab-default mb-10"
-          :iconName="'loading'"
-          iconColor="app-text-secondary")
     div(v-else class="flex flex-col gap-8")
       div(
         v-for="album in smartAlbum"
@@ -58,27 +51,30 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
         div(class="flex flex-col items-start justify-evenly")
           span(class="text-app-tab-default") {{ album.title }}
           span(class="text-app-tab-default") {{ album.albumSize }}
-      template(v-if="myAlbum.length > 0")
-        div(class="text-left text-app-tab-default") Ｍy Albums
-        div(
-          v-for="album in myAlbum"
-          :key="album.albumId"
-          class="display flex gap-12"
-          @click="selectAlbum(album)")
-          img(
-            class="object-cover aspect-square w-80"
-            :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
-          div(class="flex flex-col items-start justify-evenly")
-            span(class="text-app-tab-default") {{ album.title }}
-            span(class="text-app-tab-default") {{ album.albumSize }}
+      div(class="text-left text-app-tab-default") Ｍy Albums
+      div(
+        v-for="album in myAlbum"
+        :key="album.albumId"
+        class="display flex gap-12"
+        @click="selectAlbum(album)")
+        img(
+          class="object-cover aspect-square w-80"
+          :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
+        div(class="flex flex-col items-start justify-evenly")
+          span(class="text-app-tab-default") {{ album.title }}
+          span(class="text-app-tab-default") {{ album.albumSize }}
 </template>
 <script lang="ts" setup>
 import type { IAlbum } from '@/utils/webViewUtils'
 import webViewUtils from '@/utils/webViewUtils'
 
-// #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
 const myAlbum = reactive<IAlbum[]>([])
+
+const nextPage = ref(0)
+const noMoreContent = ref(false)
+const isLoadingContent = ref(false)
+
 const currAlbumContent = reactive<string[]>([])
 const currAlbum = reactive<IAlbum>({
   albumId: '',
@@ -87,18 +83,38 @@ const currAlbum = reactive<IAlbum>({
   thumbId: '',
 })
 const currAlbumName = computed(() => currAlbum.title)
-// const currAlbumId = computed(() => currAlbum.albumId)
-// #endregion
-
-// #region album states
-const nextPage = ref(0)
-const noMoreContent = ref(false)
+const currAlbumId = ref('')
 const isAlbumOpened = ref(true)
-const isLoadingContent = ref(false)
 const initLoaded = ref(false)
-// #endregion
 
-// #region methods
+// get the first image content
+webViewUtils.getAlbumList().then((res) => {
+  if (res.flag === 1) {
+    console.error(res.msg)
+  } else {
+    smartAlbum.push(...res.smartAlbum)
+    console.log(res)
+    myAlbum.push(...res.myAlbum)
+
+    const recentAlbum = smartAlbum.find((album) =>
+      ['recents', '最近項目'].includes(album.title.toLowerCase()),
+    )
+    Object.assign(currAlbum, recentAlbum)
+    isLoadingContent.value = true
+    if (recentAlbum?.albumId) {
+      getAlbumContent(recentAlbum).then(() => {
+        initLoaded.value = true
+      })
+    } else {
+      if (smartAlbum.length > 0) {
+        getAlbumContent(smartAlbum[0]).then(() => {
+          initLoaded.value = true
+        })
+      }
+    }
+  }
+})
+
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
 }
@@ -108,25 +124,20 @@ const getAlbumContent = async (album: IAlbum) => {
   isLoadingContent.value = true
 
   Object.assign(currAlbum, album)
-  webViewUtils
-    .getAlbumContent(albumId, nextPage.value)
-    .then((res) => {
-      currAlbumContent.push(...res.content)
-      if (res.nextPage) {
-        nextPage.value = res.nextPage
-      } else {
-        console.log('no more content')
-        noMoreContent.value = true
-      }
-      isLoadingContent.value = false
-    })
-    .catch((err) => {
-      console.error(err)
-      isLoadingContent.value = false
-    })
+  webViewUtils.getAlbumContent(albumId, nextPage.value).then((res) => {
+    console.log(res)
+    currAlbumContent.push(...res.content)
+    if (res.nextPage) {
+      nextPage.value = res.nextPage
+    } else {
+      noMoreContent.value = true
+    }
+    currAlbumId.value = albumId
+    isLoadingContent.value = false
+  })
 }
 const handleLoadMore = () => {
-  console.log('handle load more')
+  console.log(nextPage.value)
   getAlbumContent(currAlbum)
 }
 
@@ -137,39 +148,5 @@ const selectAlbum = (album: IAlbum) => {
   getAlbumContent(album)
   isAlbumOpened.value = true
 }
-// #endregion
-
-// get the first image content
-webViewUtils
-  .getAlbumList()
-  .then((res) => {
-    if (res.flag === 1) {
-      console.error(res.msg)
-    } else {
-      smartAlbum.push(...res.smartAlbum)
-      myAlbum.push(...res.myAlbum)
-
-      const recentAlbum = smartAlbum.find((album) =>
-        ['recents', '最近項目'].includes(album.title.toLowerCase()),
-      )
-      Object.assign(currAlbum, recentAlbum)
-      isLoadingContent.value = true
-      if (recentAlbum?.albumId) {
-        getAlbumContent(recentAlbum).then(() => {
-          initLoaded.value = true
-        })
-      } else {
-        if (smartAlbum.length > 0) {
-          getAlbumContent(smartAlbum[0]).then(() => {
-            initLoaded.value = true
-          })
-        }
-      }
-    }
-  })
-  .catch((err) => {
-    console.error(err)
-    isLoadingContent.value = false
-  })
 </script>
 <style lang="scss"></style>
