@@ -51,6 +51,7 @@ import { defineComponent, defineAsyncComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import networkUtils from '@nu/vivi-lib/utils/networkUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import HomeFooterTabs from '@/components/homepage/HomeFooterTabs.vue'
 
@@ -100,7 +101,23 @@ export default defineComponent({
       })(window, document, 'script', 'dataLayer', 'GTM-T7LDWBP')
     }
 
-    this.$router.isReady().then(() => { picWVUtils.sendAppLoaded() })
+    this.$router.isReady().then(async () => {
+      const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
+      const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
+      const isFirstOpen = this.userInfo.isFirstOpen
+      const subscribed = paymentUtils.isPro
+      const showPaymentInfo = await picWVUtils.getState('showPaymentInfo')
+      const showPaymentTime = showPaymentInfo?.timestamp ?? 0
+      const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
+      const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
+      const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
+        : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
+      if (isShowPaymentView) {
+        paymentUtils.openPayment('step1')
+        picWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+      } else picWVUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
+      picWVUtils.sendAppLoaded()
+    })
     /**
      * @Note the function below is moved from the index.ts store
      * Why I moved to here is bcz it work trigger properly
@@ -134,7 +151,8 @@ export default defineComponent({
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
       userInfo: 'webView/getUserInfo',
-      browserInfo: 'user/getBrowserInfo'
+      browserInfo: 'user/getBrowserInfo',
+      modalInfo: 'getModalInfo',
     }),
     currLocale(): string {
       return localeUtils.currLocale()

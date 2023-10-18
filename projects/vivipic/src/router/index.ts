@@ -381,6 +381,7 @@ router.beforeEach(async (to, from, next) => {
         }
         store.commit('text/UPDATE_DEFAULT_FONT', { font })
       })
+    store.commit('SET_modalInfo', json.modal)
   }
 
   if (!MOBILE_ROUTES.includes(String(to.name) ?? '') && (to.name === 'Editor' || !localStorage.getItem('not-mobile'))) {

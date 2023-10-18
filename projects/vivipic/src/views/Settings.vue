@@ -90,6 +90,11 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
         //-   :title="$tc('NN0642',1)"
         //-   :iconName="'chevron-right'")
         //- hr
+        mobile-jump-btn(
+          :title="$t('NN0697')"
+          :iconName="'chevron-right'"
+          @click="onCouponClicked")
+        hr
         url(:url="$t('NN0858')")
           mobile-jump-btn(
             :title="$t('NN0160')"
@@ -280,6 +285,9 @@ export default defineComponent({
     },
     onLogoutClicked() {
       loginUtils.logout()
+    },
+    onCouponClicked() {
+      paymentUtils.openPayment('step1-coupon')
     },
     buy() {
       paymentUtils.openPayment('step1')
