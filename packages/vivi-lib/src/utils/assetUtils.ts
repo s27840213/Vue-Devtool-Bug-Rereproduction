@@ -379,8 +379,9 @@ class AssetUtils {
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
     const svgRatio = json.width / json.height
+    const pageRatio = currentPage.width / currentPage.height
     const resizeRatio = generalUtils.isStk ? (attrs.fit === 1 ? Math.min(currentPage.width / json.width, currentPage.height / json.height) : 300 / (Math.max(json.width, json.height)))
-     : ((svgRatio > 1 ? currentPage.width : currentPage.height) * 0.7) / (svgRatio > 1 ? json.width : json.height)
+     : (((svgRatio > pageRatio ? currentPage.width : currentPage.height) * 0.7) / (svgRatio > pageRatio ? json.width : json.height))
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
 
