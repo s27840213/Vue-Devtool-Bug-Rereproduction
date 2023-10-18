@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full flex justify-between items-center py-10")
+div(class="w-full flex justify-between items-center py-10" :class="{ 'bg-app-icon-dark': active }")
   div(class="flex items-center gap-10" :class="`${textColor} ${textSize}`")
     cm-svg-icon(
       :iconName="iconName"
@@ -21,12 +21,14 @@ withDefaults(
     textColor?: ColorSlip
     textSize?: string
     iconName?: string
+    active?: boolean
   }>(),
   {
     title: 'Test',
     textColor: 'app-tab-default',
     textSize: 'typo-h5',
     iconName: 'chevron-right',
+    active: false,
   },
 )
 </script>

@@ -17,7 +17,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
           div(class="typo-body-md") {{ $t('CM0033') }}
           div(class="typo-body-md") {{ $t('CM0034') }}
           div(class="typo-body-md") {{ $t('CM0035') }}
-        img(:src="'src/assets/img/crown-3d.png'" class="w-128 h-128")
+        img(src="@/assets/img/crown-3d.png" class="w-128 h-128")
       cm-btn(
         theme="primary"
         :hasIcon="true"
@@ -66,6 +66,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         :key="index"
         :title="data.title"
         :iconName="data.iconName"
+        :active="data.title.includes(hostname)"
         @click="data.action")
 </template>
 <script setup lang="ts">
@@ -77,7 +78,7 @@ const scrollContainer = ref<HTMLElement | null>(null)
 
 const { t } = useI18n()
 const router = useRouter()
-
+const hostname = window.location.hostname
 // #region userInfo
 const domain = `${window.location.hostname.replace('.vivipic.com', '')}`
 const buildNumber = computed(() => {
@@ -107,9 +108,6 @@ const domainOptions = computed((): OptionConfig[] => {
     {
       title: 'rd(nuphoto.co)',
       iconName: 'global',
-      selected: () => {
-        return window.location.hostname === 'stkrd.vivipic.com'
-      },
       action: () => {
         webViewUtils.switchDomain('https://nuphoto.co')
       },
@@ -117,9 +115,6 @@ const domainOptions = computed((): OptionConfig[] => {
     {
       title: 'localhost:8080',
       iconName: 'global',
-      selected: () => {
-        return window.location.hostname === 'https://localhost:8080'
-      },
       action: () => {
         webViewUtils.switchDomain('localhost:8080')
       },
@@ -131,11 +126,8 @@ const domainOptions = computed((): OptionConfig[] => {
         return {
           title: host,
           iconName: 'global',
-          selected: () => {
-            return window.location.hostname === `${host}.vivipic.com`
-          },
           action: () => {
-            webViewUtils.switchDomain(`https://dev${index}.vivipic.com`)
+            webViewUtils.switchDomain(`https://stkdev${index}.vivipic.com`)
           },
         }
       }),
