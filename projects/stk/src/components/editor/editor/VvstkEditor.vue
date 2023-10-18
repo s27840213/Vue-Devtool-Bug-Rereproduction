@@ -20,7 +20,7 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
   div(v-if="editorTypeTemplate && !isDuringCopy" class="page-pill" @click="showPanelPageManagement")
     svg-icon(iconName="pages" iconWidth="20px" iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5 no-wrap") {{ strPagePill }}
-  page-preivew(v-if="isInPagePreview" :pagesState="pagesState")
+  page-preview(v-if="isInPagePreview" :pagesState="pagesState")
   share-template(v-if="isInTemplateShare" :isMultiPage="pagesState.length > 1")
   div(v-if="isInBgRemoveSection"
       class="vvstk-editor__bg-remove-container")
@@ -32,10 +32,12 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown=
 </template>
 
 <script lang="ts">
-import PageCard from '@/components/vivisticker/PageCard.vue'
-import PagePreivew from '@/components/vivisticker/PagePreivew.vue'
-import PanelRemoveBg from '@/components/vivisticker/PanelRemoveBg.vue'
-import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
+import PageCard from '@/components/editor/mobile/PageCard.vue'
+import ShareTemplate from '@/components/editor/mobile/ShareTemplate.vue'
+import PagePreview from '@/components/editor/pagePreview/PagePreview.vue'
+import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
+import { IPageState } from '@nu/vivi-lib/interfaces/page'
+import { LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
@@ -46,15 +48,13 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import resizeUtils from '@nu/vivi-lib/utils/resizeUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import { IPageState } from '@nu/vivi-lib/interfaces/page'
-import { LayerType } from '@nu/vivi-lib/store/types'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
     PageCard,
-    PagePreivew,
+    PagePreview,
     ShareTemplate,
     PanelRemoveBg
   },

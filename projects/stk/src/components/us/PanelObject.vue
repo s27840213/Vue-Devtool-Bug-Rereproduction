@@ -51,8 +51,8 @@ import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import PanelObject from '@/components/editor/panelMobile/PanelObject.vue'
-import PanelObjectGifsUs from '@/components/vivisticker/us/PanelObjectGifs.vue'
-import PanelObjectStaticUs from '@/components/vivisticker/us/PanelObjectStatic.vue'
+import PanelObjectGifsUs from '@/components/us/PanelObjectGifs.vue'
+import PanelObjectStaticUs from '@/components/us/PanelObjectStatic.vue'
 
 export default defineComponent({
   name: 'panel-object-us',

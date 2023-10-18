@@ -41,9 +41,9 @@ div(class="my-design")
 
 <script lang="ts">
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
-import MyDesignObjectItem from '@/components/vivisticker/mydesign/MyDesignObjectItem.vue'
-import MyDesignTemplateItem from '@/components/vivisticker/mydesign/MyDesignTemplateItem.vue'
-import MyDesignTextItem from '@/components/vivisticker/mydesign/MyDesignTextItem.vue'
+import MyDesignObjectItem from '@/components/mydesign/MyDesignObjectItem.vue'
+import MyDesignTemplateItem from '@/components/mydesign/MyDesignTemplateItem.vue'
+import MyDesignTextItem from '@/components/mydesign/MyDesignTextItem.vue'
 import { IMyDesign, IMyDesignTag } from '@nu/vivi-lib/interfaces/vivisticker'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'

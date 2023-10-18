@@ -40,17 +40,16 @@ div(class="vivisticker" :style="copyingStyles()")
 </template>
 
 <script lang="ts">
+import VvstkEditor from '@/components/editor/editor/VvstkEditor.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
-import FullPage from '@/components/vivisticker/FullPage.vue'
-import LoadingOverlay from '@/components/vivisticker/LoadingOverlay.vue'
-import MainMenu from '@/components/vivisticker/MainMenu.vue'
-import MyDesign from '@/components/vivisticker/MyDesign.vue'
-import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
-import Tutorial from '@/components/vivisticker/Tutorial.vue'
-import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
-import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
+import FullPage from '@/components/fullPage/FullPage.vue'
+import LoadingOverlay from '@/components/global/LoadingOverlay.vue'
+import MainMenu from '@/components/mainMenu/MainMenu.vue'
+import MyDesign from '@/components/mydesign/MyDesign.vue'
+import SlideUserSettings from '@/components/slide/SlideUserSettings.vue'
+import Tutorial from '@/components/tutorial/Tutorial.vue'
 import { IPage } from '@/interfaces/page'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
@@ -82,7 +81,6 @@ export default defineComponent({
     Tutorial,
     FullPage,
     SlideUserSettings,
-    ShareTemplate,
     LoadingOverlay
   },
   data() {

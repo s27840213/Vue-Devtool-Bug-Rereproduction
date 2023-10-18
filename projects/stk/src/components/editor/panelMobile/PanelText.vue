@@ -57,13 +57,13 @@ div(class="overflow-container full-size rwd-container")
 </template>
 
 <script lang="ts">
+import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
+import BtnAdd from '@/components/mainMenu/BtnAdd.vue'
 import listApi from '@nu/vivi-lib/apis/list'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
-import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
-import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import AssetUtils from '@nu/vivi-lib/utils/assetUtils'

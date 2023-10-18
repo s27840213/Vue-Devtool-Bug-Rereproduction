@@ -64,12 +64,12 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
 
 <script lang="ts">
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
+import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
+import BtnAdd from '@/components/mainMenu/BtnAdd.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
-import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
-import BtnAdd from '@/components/vivisticker/BtnAdd.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IContentTemplate } from '@nu/vivi-lib/interfaces/template'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'

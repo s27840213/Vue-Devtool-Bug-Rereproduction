@@ -13,7 +13,7 @@ div(class="panel-template rwd-container")
 <script lang="ts">
 import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
-import PanelTemplateContent from '@/components/vivisticker/PanelTemplateContent.vue'
+import PanelTemplateContent from '@/components/editor/panelMobile/PanelTemplateContent.vue'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'

@@ -57,7 +57,7 @@ div(class="overflow-container full-size rwd-container")
 
 <script lang="ts">
 import PanelText from '@/components/editor/panelMobile/PanelText.vue'
-import CategoryTextPreview from '@/components/vivisticker/us/CategoryTextPreview.vue'
+import CategoryTextPreview from '@/components/us/CategoryTextPreview.vue'
 import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
