@@ -86,6 +86,13 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
 
     return albumList as IAlbumContentResponse
   }
+
+  async switchDomain(url: string): Promise<void> {
+    // if (this.inBrowserMode) return this.getUserInfoFromStore()
+    await this.callIOSAsAPI('SWITCH_DOMAIN', {
+      url,
+    })
+  }
 }
 
 export default new WebViewUtils()

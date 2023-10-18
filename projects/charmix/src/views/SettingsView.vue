@@ -65,10 +65,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         v-for="(data, index) in domainOptions"
         :key="index"
         :title="data.title"
-        :iconName="data.iconName")
+        :iconName="data.iconName"
+        @click="data.action")
 </template>
 <script setup lang="ts">
 import { useGlobalStore } from '@/stores/global'
+import webViewUtils from '@/utils/webViewUtils'
 import { storeToRefs } from 'pinia'
 
 const scrollContainer = ref<HTMLElement | null>(null)
@@ -92,34 +94,34 @@ type OptionConfig = {
 
 const domainOptions = computed((): OptionConfig[] => {
   return [
+    // {
+    //   title: 'production',
+    //   iconName: 'global',
+    //   selected: () => {
+    //     return window.location.hostname === 'sticker.vivipic.com'
+    //   },
+    //   action: () => {
+    //     // this.switchDomain('sticker')
+    //   },
+    // },
     {
-      title: 'production',
-      iconName: 'global',
-      selected: () => {
-        return window.location.hostname === 'sticker.vivipic.com'
-      },
-      action: () => {
-        // this.switchDomain('sticker')
-      },
-    },
-    {
-      title: 'rd',
+      title: 'rd(nuphoto.co)',
       iconName: 'global',
       selected: () => {
         return window.location.hostname === 'stkrd.vivipic.com'
       },
       action: () => {
-        // this.switchDomain('stkrd')
+        webViewUtils.switchDomain('https://nuphoto.co')
       },
     },
     {
-      title: 'localhost',
+      title: 'localhost:8080',
       iconName: 'global',
       selected: () => {
-        return window.location.hostname === 'localhost:8080'
+        return window.location.hostname === 'https://localhost:8080'
       },
       action: () => {
-        // this.switchDomain('localhost')
+        webViewUtils.switchDomain('localhost:8080')
       },
     },
     ...Array(6)
@@ -133,7 +135,7 @@ const domainOptions = computed((): OptionConfig[] => {
             return window.location.hostname === `${host}.vivipic.com`
           },
           action: () => {
-            // this.switchDomain(host)
+            webViewUtils.switchDomain(`https://dev${index}.vivipic.com`)
           },
         }
       }),

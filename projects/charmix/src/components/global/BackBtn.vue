@@ -15,6 +15,15 @@ import { useImgSelectorStore } from '@/stores/imgSelector'
 import { useModalStore } from '@/stores/modal'
 import { storeToRefs } from 'pinia'
 
+/**
+ * @Note - how to use this component?
+ * You have two options
+ * 1. use toTarget props to determine the target route
+ * 2. use customCallback to do your own callback
+ *
+ * Precedence: customCallback > toTarget
+ */
+
 const { toTarget, customCallback } = withDefaults(
   defineProps<{ toTarget?: string; customCallback?: () => void }>(),
   {

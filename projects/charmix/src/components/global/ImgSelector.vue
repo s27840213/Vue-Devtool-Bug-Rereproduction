@@ -4,7 +4,7 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
     div
       back-btn
   div(
-    class="bg-app-tab-bg w-full h-full rounded-t-[24px] py-16 box-border grid grid-rows-[auto,auto,minmax(0,1fr)] grid-cols-1")
+    class="bg-app-tab-bg w-full h-full rounded-t-[24px] pt-16 box-border grid grid-rows-[auto,auto,minmax(0,1fr)] grid-cols-1")
     div(class="tabs flex justify-around pb-8")
       span(class="text-app-tab-active typo-btn-lg") Photos
       span(class="text-app-tab-disable typo-btn-lg") Stocks
@@ -62,8 +62,8 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
             span(class="text-app-tab-default") {{ album.albumSize }}
 </template>
 <script lang="ts" setup>
-import type { IAlbum } from '@/utils/webViewUtils';
-import webViewUtils from '@/utils/webViewUtils';
+import type { IAlbum } from '@/utils/webViewUtils'
+import webViewUtils from '@/utils/webViewUtils'
 
 // #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
