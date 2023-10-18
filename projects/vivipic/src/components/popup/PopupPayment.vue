@@ -63,15 +63,15 @@ div(class="popup-window")
                     div(class="payment__btn-plan__content")
                       div(class="payment__btn-plan__content__title")
                         div(class="payment__btn-plan__content__title__main caption-LG") {{ btnPlan.label }}
-                        div(class="payment__btn-plan__content__title__sub")
+                        div(v-if="isTrialAvailable" class="payment__btn-plan__content__title__sub")
                           span {{ $t('STK0048', { day: 14 }) }}
                       div(class="payment__btn-plan__content__price text-H6") {{ getLocalizedPrice(plans[planSelected][btnPlan.value].nextPaid) }}
                     div(v-if="btnPlan.value === userPeriod && btnPlan.value === 'yearly'" class="payment__btn-plan__content__tag")
                       span(class="caption-SM") {{ getLocalizedTag(plans[planSelected][btnPlan.value].now) }}
                 div(class="payment__btn-subscribe" @touchend="changeView('step2')")
-                  div(class="payment__btn-subscribe__text") {{ $t('STK0046') }}
+                  div(class="payment__btn-subscribe__text") {{ isTrialAvailable ? $t('STK0046') : $t('STK0047') }}
                 div(class="payment__notice text-gray-3" ref="notice")
-                  div(class="payment__notice__text body-XXS" ref="txtNotice") {{ $t('STK0057', { day: 14 }) }}
+                  div(class="payment__notice__text body-XXS" ref="txtNotice") {{ isTrialAvailable ? $t('STK0057', { day: 14 }) : $t('STK0056') }}
                 div(class="payment__footer text-gray-3")
                   template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
                     span(v-if="idx > 0" class="payment__footer__splitter")
@@ -324,6 +324,9 @@ export default defineComponent({
     target(): string {
       return _IPaymentWarningView.includes(this.initView) ? this.initView : 'pro-template'
     },
+    isTrialAvailable(): boolean {
+      return this.trialStatus === 'not used'
+    }
   },
   watch: {
     isMobileView(newVal) {
@@ -427,7 +430,7 @@ export default defineComponent({
           this.currentStep = 1
           this.totalStep = 2
           this.title = this.$tc('NN0545')
-          this.description = this.trialStatus === 'not used'
+          this.description = this.isTrialAvailable
             ? this.$tc('NN0546')
             : this.$tc('NN0547')
           this.buttons = [{
