@@ -264,7 +264,7 @@ class ImageUtils {
         return src.match(/svg\/(\w+)\//)?.[1] ?? ''
       }
       case 'ios': {
-        return src.match(/vvstk:\/\/(\w+)/)?.[1] ?? ''
+        return src.match(/vvstk:\/\/(.+)/)?.[1] ?? ''
       }
       default:
         if (type === '' && src.startsWith('data:image')) return ''
