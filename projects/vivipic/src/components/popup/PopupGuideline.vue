@@ -11,8 +11,8 @@ div(class="popup-page bg-gray-6"
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import popupUtils from '@/utils/popupUtils'
-import rulerUtils from '@/utils/rulerUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import rulerUtils from '@nu/vivi-lib/utils/rulerUtils'
 
 export default defineComponent({
   emits: [],

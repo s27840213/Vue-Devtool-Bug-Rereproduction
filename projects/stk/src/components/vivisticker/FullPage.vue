@@ -22,8 +22,8 @@ div(ref="main" class="full-page relative")
 </template>
 
 <script lang="ts">
-import { IFullPageConfig } from '@/interfaces/vivisticker'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IFullPageConfig } from '@nu/vivi-lib/interfaces/vivisticker'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import Payment from './Payment.vue'
@@ -88,7 +88,7 @@ export default defineComponent({
       this.clearFullPageConfig()
     },
     sendAppLoaded() {
-      vivistickerUtils.sendAppLoaded()
+      stkWVUtils.sendAppLoaded()
     },
     handleEnded() {
       if (this.showOnVideoFinish) {

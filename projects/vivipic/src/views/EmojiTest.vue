@@ -18,8 +18,8 @@ div(class="emoji-test")
 
 <script setup lang="ts">
 import emojisRaw from '@/assets/json/result.json'
-import fileUtils from '@/utils/fileUtils'
-import textUtils from '@/utils/textUtils'
+import fileUtils from '@nu/vivi-lib/utils/fileUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { reactive, ref } from 'vue'
 import { useStore } from 'vuex'
 

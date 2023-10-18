@@ -125,8 +125,8 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
-import { ICategoryItem, IListServiceContentData } from '@/interfaces/api'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { ICategoryItem, IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import PanelBackground from '../PanelBackground.vue'
 
@@ -172,8 +172,8 @@ export default defineComponent({
       this.handleSearch('')
     },
     handleRecent() {
-      vivistickerUtils.setShowAllRecently('background', true)
-      vivistickerUtils.setIsInCategory('background', true)
+      stkWVUtils.setShowAllRecently('background', true)
+      stkWVUtils.setIsInCategory('background', true)
     },
     showSearchBar() {
       this.isShowSearchBar = true

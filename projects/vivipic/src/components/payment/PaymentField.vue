@@ -38,8 +38,8 @@ div(class="field")
 
 <script lang="ts">
 import Options from '@/components/global/Options.vue'
-import paymentData from '@/utils/constantData'
-import mappingUtils from '@/utils/mappingUtils'
+import paymentData from '@nu/vivi-lib/utils/constantData'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { Stripe, StripeElements, StripePaymentElementOptions } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js/pure'

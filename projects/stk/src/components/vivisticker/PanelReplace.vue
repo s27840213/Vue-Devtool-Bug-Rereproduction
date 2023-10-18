@@ -10,10 +10,10 @@ div(v-else class="panel-replace")
 </template>
 
 <script lang="ts">
-import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
-import imageUtils from '@/utils/imageUtils'
-import { replaceImgInject } from '@/utils/textFillUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import PanelPhoto from '@nu/vivi-lib/components/editor/panelSidebar/PanelPhoto.vue'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, inject, PropType } from 'vue'
 
 export default defineComponent({
@@ -40,7 +40,7 @@ export default defineComponent({
   },
   methods: {
     openPhoto() {
-      vivistickerUtils.getIosImg().then(async (images: Array<string>) => {
+      stkWVUtils.getIosImg().then(async (images: Array<string>) => {
         if (!images.length) return
         const src = imageUtils.getSrc({
           type: 'ios',

@@ -140,15 +140,15 @@ div(class="popup-window")
 
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
+import { INubtnThemes } from '@nu/vivi-lib/components/global/Nubtn.vue'
 import Carousel from '@/components/global/Carousel.vue'
-import { INubtnThemes } from '@/components/global/Nubtn.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
 import CouponInput from '@/components/payment/CouponInput.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
-import { IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView, IMobilePaymentWarningView, _IMobilePaymentWarningView } from '@/interfaces/payment'
-import paymentData from '@/utils/constantData'
-import paymentUtils from '@/utils/paymentUtils'
+import { IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView } from '@nu/vivi-lib/interfaces/payment'
+import paymentData from '@nu/vivi-lib/utils/constantData'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import { notify } from '@kyvg/vue3-notification'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import vClickOutside from 'click-outside-vue3'
@@ -158,7 +158,7 @@ import { createHelpers } from 'vuex-map-fields'
 import Url from '@/components/global/Url.vue'
 
 interface CarouselItem {
-  key: IMobilePaymentWarningView
+  key: IPaymentWarningView
   title: string
   img: string
 }
@@ -322,7 +322,7 @@ export default defineComponent({
       return this.$isTouchDevice() && ['step1', 'step1-coupon', 'step2', 'step2-coupon', 'finish'].includes(this.view)
     },
     target(): string {
-      return _IMobilePaymentWarningView.includes(this.initView) ? this.initView : 'pro-template'
+      return _IPaymentWarningView.includes(this.initView) ? this.initView : 'pro-template'
     },
   },
   watch: {
@@ -344,7 +344,7 @@ export default defineComponent({
       this.closePopup()
     } else if (this.initView === 'step1-coupon') {
       paymentUtils.checkCoupon() ? this.changeView('step1-coupon') : this.closePopup()
-    } else if (this.$isTouchDevice() && _IMobilePaymentWarningView.includes(this.initView)) { 
+    } else if (this.$isTouchDevice() && _IPaymentWarningView.includes(this.initView)) { 
       this.changeView('step1')
     } else {
       this.changeView(this.initView)

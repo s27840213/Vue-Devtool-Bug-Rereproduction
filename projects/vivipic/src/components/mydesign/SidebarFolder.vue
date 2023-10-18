@@ -53,8 +53,8 @@ section
 </template>
 
 <script lang="ts">
-import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import { IDesign, IFolder, IQueueItem } from '@nu/vivi-lib/interfaces/design'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
 import vClickOutside from 'click-outside-vue3'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'

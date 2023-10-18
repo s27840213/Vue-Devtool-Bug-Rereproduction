@@ -13,7 +13,7 @@ div(class="btn-new-design")
 <script lang="ts">
 import PanelSize from '@/components/new-design/PanelSize.vue'
 import PopupSize from '@/components/new-design/PopupSize.vue'
-import generalUtils from '@/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({

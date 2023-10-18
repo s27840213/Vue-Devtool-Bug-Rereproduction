@@ -55,11 +55,11 @@ transition-group(class="brand-kit-tab-logo" name="logo-list" tag="div")
 </template>
 
 <script lang="ts">
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
-import paymentUtils from '@/utils/paymentUtils'
-import uploadUtils from '@/utils/uploadUtils'
+import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
+import { IBrand, IBrandLogo } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'

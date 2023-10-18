@@ -58,9 +58,9 @@ div(class="brand-selector relative"
 </template>
 
 <script lang="ts">
-import { IBrand } from '@/interfaces/brandkit'
-import brandkitUtils from '@/utils/brandkitUtils'
-import editorUtils from '@/utils/editorUtils'
+import { IBrand } from '@nu/vivi-lib/interfaces/brandkit'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'

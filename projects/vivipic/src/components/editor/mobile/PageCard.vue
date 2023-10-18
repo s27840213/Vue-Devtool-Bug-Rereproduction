@@ -14,9 +14,9 @@ div(class="page-card"
 
 <script lang="ts">
 import NuPage from '@/components/editor/global/NuPage.vue'
-import { IPageState } from '@/interfaces/page'
-import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
+import { IPageState } from '@nu/vivi-lib/interfaces/page'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 

@@ -19,10 +19,10 @@ div(class="popup-theme text-left"
 </template>
 
 <script lang="ts">
-import Checkbox from '@/components/global/Checkbox.vue'
-import { Itheme } from '@/interfaces/theme'
-import pageUtils from '@/utils/pageUtils'
-import themeUtils from '@/utils/themeUtils'
+import Checkbox from '@nu/vivi-lib/components/global/Checkbox.vue'
+import { Itheme } from '@nu/vivi-lib/interfaces/theme'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import themeUtils from '@nu/vivi-lib/utils/themeUtils'
 import vClickOutside from 'click-outside-vue3'
 import { mapValues } from 'lodash'
 import { defineComponent } from 'vue'

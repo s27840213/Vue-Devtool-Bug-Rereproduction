@@ -41,8 +41,8 @@ div(class="mobile-design-gallery")
 <script lang="ts">
 import MobileDesignItem, { CMobileDesignitem } from '@/components/mydesign/MobileDesignItem.vue'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import { IDesign } from '@/interfaces/design'
+import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
+import { IDesign } from '@nu/vivi-lib/interfaces/design'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

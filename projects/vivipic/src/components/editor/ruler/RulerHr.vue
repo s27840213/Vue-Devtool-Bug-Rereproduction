@@ -11,10 +11,10 @@ div(class="ruler-hr"
 </template>
 
 <script lang="ts">
-import { IPage } from '@/interfaces/page'
-import pageUtils from '@/utils/pageUtils'
-import rulerUtils from '@/utils/rulerUtils'
-import unitUtils from '@/utils/unitUtils'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import rulerUtils from '@nu/vivi-lib/utils/rulerUtils'
+import unitUtils from '@nu/vivi-lib/utils/unitUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

@@ -1,10 +1,10 @@
-import designApis from '@/apis/design'
-import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
-import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
+import designApis from '@nu/vivi-lib/apis/design'
+import { IUserDesignContentData, IUserFolderContentData } from '@nu/vivi-lib/interfaces/api'
+import { IDesign, IFolder, IPathedFolder } from '@nu/vivi-lib/interfaces/design'
 import router from '@/router'
-import designUtils from '@/utils/designUtils'
-import generalUtils from '@/utils/generalUtils'
-import logUtils from '@/utils/logUtils'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 export interface IDesignState {

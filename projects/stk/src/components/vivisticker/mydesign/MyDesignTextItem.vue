@@ -15,10 +15,10 @@ div(class="my-design-text-item"
 </template>
 
 <script lang="ts">
-import { IMyDesign } from '@/interfaces/vivisticker'
-import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IMyDesign } from '@nu/vivi-lib/interfaces/vivisticker'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -35,7 +35,7 @@ export default defineComponent({
       selectedDesigns: 'vivisticker/getSelectedDesigns'
     }),
     src(): string {
-      return vivistickerUtils.getThumbSrc('mydesign', this.item.id, this.item.ver)
+      return stkWVUtils.getThumbSrc('mydesign', this.item.id, this.item.ver)
     }
   },
   methods: {
@@ -52,9 +52,9 @@ export default defineComponent({
         this.handleToggleDesignSelected()
         return
       }
-      vivistickerUtils.fetchMyDesign(this.item).then(data => {
+      stkWVUtils.fetchMyDesign(this.item).then(data => {
         const pages = generalUtils.deepCopy(data.pages)
-        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON({ page: pages[0], source: 'mydesign' }))
+        stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrlForJSON({ page: pages[0], source: 'mydesign' }))
       })
     },
     handleMoreActions() {

@@ -47,8 +47,8 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
 
 <script lang="ts">
 import FolderItem from '@/components/mydesign/FolderItem.vue'
-import { IFolder, IQueueItem } from '@/interfaces/design'
-import designUtils, { FOLDER_MENU_EVENTS, IFolderMenuEvents } from '@/utils/designUtils'
+import { IFolder, IQueueItem } from '@nu/vivi-lib/interfaces/design'
+import designUtils, { FOLDER_MENU_EVENTS, IFolderMenuEvents } from '@nu/vivi-lib/utils/designUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

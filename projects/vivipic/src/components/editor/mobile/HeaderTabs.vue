@@ -1,60 +1,23 @@
 <template lang="pug">
-div(class="header-bar" :style="rootStyles" @pointerdown.stop)
-  div(class="header-bar__left")
-    div(class="header-bar__feature-icon mr-20"
-        @pointerdown="backBtnAction()")
-      svg-icon(
-        :iconName="'chevron-left'"
-        :iconColor="'white'"
-        :iconWidth="'22px'")
-    template(v-if="!isShowDownloadPanel")
-      div(class="header-bar__feature-icon mr-15"
-          :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping}"
-          @pointerdown="undo()")
-        svg-icon(:iconName="'undo'"
-          :iconColor="(inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping ? 'gray-2' :'white' "
-          :iconWidth="'22px'")
-      div(class="header-bar__feature-icon"
-          :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping}"
-          @pointerdown="redo()")
-        svg-icon(:iconName="'redo'"
-          :iconColor="(inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping ? 'gray-2' : 'white'"
-          :iconWidth="'22px'")
-  div(class="header-bar__right")
-    div(v-for="(tab, index) in rightTabs" :key="`${tab.icon}-${index}`")
-      div(v-if="!tab.isHidden" class="header-bar__feature-icon"
-        :class="{'click-disabled': tab.disable, 'panel-icon': tab.isPanelIcon }"
-        @pointerdown="handleIconAction(tab.icon)")
-        svg-icon(
-          :iconName="tab.icon"
-          :iconColor="iconColor(tab)"
-          :iconWidth="'22px'")
+header-tabs(:rootStyles="rootStyles" :leftTabs="leftTabs" :rightTabs="rightTabs")
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
-import backgroundUtils from '@/utils/backgroundUtils'
-import imageUtils from '@/utils/imageUtils'
-import layerUtils from '@/utils/layerUtils'
-import mappingUtils from '@/utils/mappingUtils'
-import picWVUtils from '@/utils/picWVUtils'
-import shotcutUtils from '@/utils/shortcutUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import HeaderTabs from '@nu/vivi-lib/components/editor/mobile/HeaderTabs.vue'
+import { TabConfig } from '@nu/vivi-lib/components/editor/mobile/HeaderTab.vue'
+import i18n from '@nu/vivi-lib/i18n'
+import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { computed, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
-interface IIcon {
-  icon: string,
-  // If isPanelIcon is true, MobilePanel v-out will not be triggered by this icon.
-  isPanelIcon?: boolean
-  isHidden?: boolean
-  disable?: boolean
-}
-
 export default defineComponent({
-  components: {
-  },
   props: {
     currTab: {
       default: 'none',
@@ -71,12 +34,11 @@ export default defineComponent({
     const isInLastStep = computed(() => stepsUtils.isInLastStep)
     return {
       isInFirstStep,
-      isInLastStep
+      isInLastStep,
     }
   },
-  data() {
-    return {
-    }
+  components: {
+    HeaderTabs,
   },
   computed: {
     ...mapGetters({
@@ -104,36 +66,53 @@ export default defineComponent({
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
-    layerTabs(): IIcon[] {
+    leftTabs(): TabConfig[] {
+      const retTabs = [
+        { icon: 'chevron-left', width: 22, action: this.backBtnAction }
+      ] as TabConfig[]
+      if (!this.isShowDownloadPanel) {
+        retTabs.push({
+          icon: 'group',
+          width: 0,
+          tabs: [{
+            icon: 'undo', width: 22, action: this.undo, disabled: (this.inBgRemoveMode ? this.inBgRemoveFirstStep : this.isInFirstStep) || this.isCropping
+          }, {
+            icon: 'redo', width: 22, action: this.redo, disabled: (this.inBgRemoveMode ? this.inBgRemoveLastStep : this.isInLastStep) || this.isCropping
+          }]
+        })
+      }
+      return retTabs
+    },
+    layerTabs(): TabConfig[] {
       return [
-        { icon: 'copy', disable: this.isLocked },
-        { icon: this.isLocked ? 'lock' : 'unlock' },
-        { icon: 'trash', disable: this.isLocked }
+        this.createRightTab({ icon: 'copy', disabled: this.isLocked }),
+        this.createRightTab({ icon: this.isLocked ? 'lock' : 'unlock' }),
+        this.createRightTab({ icon: 'trash', disabled: this.isLocked })
       ]
     },
-    bgSettingTabs(): IIcon[] {
+    bgSettingTabs(): TabConfig[] {
       return [
-        { icon: backgroundUtils.backgroundLocked ? 'lock' : 'unlock' },
-        { icon: 'trash', disable: this.isLocked }
+        this.createRightTab({ icon: backgroundUtils.backgroundLocked ? 'lock' : 'unlock' }),
+        this.createRightTab({ icon: 'trash', disabled: this.isLocked })
       ]
     },
-    rightTabs(): IIcon[] {
+    rightTabs(): TabConfig[] {
       if (this.inBgRemoveMode) {
         return []
       } else if (this.isShowDownloadPanel) {
-        return [{ icon: 'home' }]
+        return [this.createRightTab({ icon: 'home' })]
       } else if (this.selectedLayerNum > 0) {
         return this.layerTabs
       } else if (this.inBgSettingMode) {
         return this.bgSettingTabs
       } else {
         return [
-          { icon: 'bleed', isPanelIcon: true, isHidden: !this.hasBleed },
-          { icon: 'resize', isPanelIcon: true },
-          { icon: 'all-pages' },
-          { icon: 'download', isPanelIcon: true, disable: (this.uploadingImgs as unknown[]).length > 0 },
-          { icon: 'more', isPanelIcon: true }
-        ] as IIcon[]
+          this.createRightTab({ icon: 'bleed', isPanelIcon: true, isHidden: !this.hasBleed }),
+          this.createRightTab({ icon: 'resize', isPanelIcon: true }),
+          this.createRightTab({ icon: 'all-pages', isActive: (icon: string) => this.inAllPagesMode }),
+          this.createRightTab({ icon: 'download', isPanelIcon: true, disabled: (this.uploadingImgs as unknown[]).length > 0 }),
+          this.createRightTab({ icon: 'more', isPanelIcon: true })
+        ] as TabConfig[]
       }
     },
     selectedLayerNum(): number {
@@ -147,11 +126,18 @@ export default defineComponent({
     }
   },
   methods: {
-    iconColor(tab: IIcon): string {
-      if (tab.icon === 'all-pages') {
-        return this.inAllPagesMode ? 'blue-1' : 'white'
-      }
-      return tab.disable ? 'gray-2' : this.currTab === tab.icon ? 'blue-1' : 'white'
+    createRightTab(configs: Pick<TabConfig, 'icon'> & Partial<TabConfig>): TabConfig {
+      return Object.assign({
+        width: 22,
+        isActive: this.isTabActive,
+        color: { active: 'blue-1' },
+        action: () => {
+          this.handleIconAction(configs.icon)
+        }
+      }, configs)
+    },
+    isTabActive(icon: string): boolean {
+      return this.currTab === icon
     },
     goHome() {
       this.$router.push({ name: 'Home' })
@@ -196,7 +182,7 @@ export default defineComponent({
           break
         }
         case 'copy': {
-          shotcutUtils.duplicate()
+          shortcutUtils.duplicate()
           break
         }
         case 'bleed': {
@@ -221,7 +207,7 @@ export default defineComponent({
         })
         window.dispatchEvent(event)
       } else {
-        shotcutUtils.undo()
+        shortcutUtils.undo()
       }
     },
     redo() {
@@ -235,48 +221,9 @@ export default defineComponent({
         })
         window.dispatchEvent(event)
       } else {
-        shotcutUtils.redo()
+        shortcutUtils.redo()
       }
     }
   }
 })
 </script>
-
-<style lang="scss" scoped>
-.header-bar {
-  height: 26px;
-  position: relative;
-  background-color: setColor(nav);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-left: 16px;
-  padding-right: 16px;
-  z-index: setZindex("header");
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-
-  &__feature-icon {
-    width: 22px;
-    height: 22px;
-    transition: background-color 0.1s;
-    padding: 2px;
-    border-radius: 3px;
-    &:active {
-      background-color: setColor(gray-2);
-    }
-  }
-
-  &__left {
-    display: flex;
-  }
-  &__right {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: auto;
-    grid-auto-columns: auto;
-    column-gap: 12px;
-  }
-}
-</style>

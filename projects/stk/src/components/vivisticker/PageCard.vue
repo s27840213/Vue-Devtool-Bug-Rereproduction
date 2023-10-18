@@ -16,14 +16,14 @@ div(class="page-card" :id="`page-card-${pageIndex}`" :style="styles('card')")
 </template>
 
 <script lang="ts">
-import DimBackground from '@/components/editor/page/DimBackground.vue'
-import PageContent from '@/components/editor/page/PageContent.vue'
-import { ILayer } from '@/interfaces/layer'
-import { IPage, IPageState } from '@/interfaces/page'
-import backgroundUtils from '@/utils/backgroundUtils'
-import layerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
-import SnapUtils from '@/utils/snapUtils'
+import DimBackground from '@nu/vivi-lib/components/editor/page/DimBackground.vue'
+import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
+import { ILayer } from '@nu/vivi-lib/interfaces/layer'
+import { IPage, IPageState } from '@nu/vivi-lib/interfaces/page'
+import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import SnapUtils from '@nu/vivi-lib/utils/snapUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 

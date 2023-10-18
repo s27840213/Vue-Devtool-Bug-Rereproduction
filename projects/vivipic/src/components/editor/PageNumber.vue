@@ -5,8 +5,8 @@ div(class="page-number"
 </template>
 
 <script lang="ts">
-import editorUtils from '@/utils/editorUtils'
-import pageUtils from '@/utils/pageUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 export default defineComponent({

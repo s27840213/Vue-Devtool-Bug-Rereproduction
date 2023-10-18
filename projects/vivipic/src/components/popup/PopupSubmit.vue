@@ -9,10 +9,10 @@ div(class="popup-submit bg-white")
 </template>
 
 <script lang="ts">
-import layerUtils from '@/utils/layerUtils'
-import modalUtils from '@/utils/modalUtils'
-import popupUtils from '@/utils/popupUtils'
-import uploadUtils from '@/utils/uploadUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

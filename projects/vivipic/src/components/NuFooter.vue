@@ -109,12 +109,12 @@ div(class="nu-footer text-black" :style="rootStyles")
 </template>
 
 <script lang="ts">
-import { Itheme } from '@/interfaces/theme'
+import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import store from '@/store'
-import designUtils from '@/utils/designUtils'
-import localeUtils, { ILocale } from '@/utils/localeUtils'
-import paymentUtils from '@/utils/paymentUtils'
-import themeUtils from '@/utils/themeUtils'
+import designUtils from '@nu/vivi-lib/utils/designUtils'
+import localeUtils, { ILocale } from '@nu/vivi-lib/utils/localeUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
+import themeUtils from '@nu/vivi-lib/utils/themeUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

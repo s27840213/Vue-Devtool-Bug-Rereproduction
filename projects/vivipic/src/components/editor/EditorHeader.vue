@@ -30,10 +30,10 @@ div(class="editor-header" ref="header"
 
 <script lang="ts">
 import store from '@/store'
-import networkUtils from '@/utils/networkUtils'
-import pageUtils from '@/utils/pageUtils'
-import rulerUtils from '@/utils/rulerUtils'
-import uploadUtils from '@/utils/uploadUtils'
+import networkUtils from '@nu/vivi-lib/utils/networkUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import rulerUtils from '@nu/vivi-lib/utils/rulerUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 

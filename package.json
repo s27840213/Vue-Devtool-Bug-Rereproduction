@@ -8,6 +8,7 @@
     "pic": "nx serve @nu/pic",
     "stk": "nx serve @nu/stk",
     "lib": "nx dev @nu/shared-lib",
+    "watch": "nx watch --projects=@nu/*-lib -- nx run \\$NX_PROJECT_NAME:build",
     "install-all": "pnpm install",
     "cyrun": "npx cypress run --browser chromium --env preserveOriginalScreenshot=true",
     "cyopen": "npx cypress open --e2e -b chrome",
@@ -77,7 +78,10 @@
     "unplugin-auto-import": "^0.16.6",
     "unplugin-vue-components": "^0.25.1",
     "vite": "^4.4.6",
-    "vite-plugin-svg-sprite-component": "^1.0.10"
+    "vite-plugin-svg-sprite-component": "^1.0.10",
+    "vite-plugin-svg-sprite": "^0.5.0",
+    "vite-plugin-static-copy": "0.17.0",
+    "@laynezh/vite-plugin-lib-assets": "0.5.5"
   },
   "config": {
     "commitizen": {

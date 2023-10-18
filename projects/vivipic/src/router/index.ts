@@ -1,20 +1,21 @@
 import appJson from '@/assets/json/app.json'
-import i18n from '@/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 import store from '@/store'
-import { LayerType } from '@/store/types'
-import assetUtils from '@/utils/assetUtils'
-import brandkitUtils from '@/utils/brandkitUtils'
-import generalUtils from '@/utils/generalUtils'
-import localeUtils from '@/utils/localeUtils'
-import logUtils from '@/utils/logUtils'
-import overlayUtils from '@/utils/overlayUtils'
-import picWVUtils from '@/utils/picWVUtils'
-import textFillUtils from '@/utils/textFillUtils'
+import { LayerType } from '@nu/vivi-lib/store/types'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import localeUtils from '@nu/vivi-lib/utils/localeUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import overlayUtils from '@nu/vivi-lib/utils/overlayUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
 import Editor from '@/views/Editor.vue'
 import Home from '@/views/Home.vue'
 import { h, resolveComponent } from 'vue'
-import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
+import { RouteRecordRaw } from 'vue-router'
 import { editorRouteHandler } from './handler'
+import router from '@nu/vivi-lib/router'
 
 const MOBILE_ROUTES = [
   'Home',
@@ -223,7 +224,7 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: () => import('@/views/SvgIconView.vue')
+    component: () => import('@nu/vivi-lib/views/SvgIconView.vue')
   })
   routes.push({
     path: 'copytool',
@@ -238,79 +239,68 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'nativeevttest',
     name: 'NativeEventTester',
-    component: () => import('@/views/NativeEventTester.vue')
-  })
-  routes.push({
-    path: 'emoji',
-    name: 'EmojiTest',
-    component: () => import('@/views/EmojiTest.vue')
+    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
   })
 }
 
-const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-
-  routes: [
-    {
-      // Include the locales you support between ()
-      path: `/:locale${localeUtils.getLocaleRegex()}?`,
-      component: {
-        render() { return h(resolveComponent('router-view')) }
-      },
-      async beforeEnter(to, from, next) {
-        if (to.name === 'NativeEventTester') {
-          picWVUtils.enterEventTestMode()
-        }
-        if (logUtils.getLog()) {
-          logUtils.uploadLog()
-        }
-        logUtils.setLog('App Start')
-        if (!picWVUtils.inBrowserMode) {
-          picWVUtils.registerCallbacks('router')
-        }
-        await picWVUtils.getUserInfo()
-        let argoError = false
-        try {
-          const status = (await fetch(`https://media.vivipic.cc/hello.txt?ver=${generalUtils.generateRandomString(12)}`)).status
-          if (status !== 200) {
-            argoError = true
-            logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
-          }
-        } catch (error) {
-          argoError = true
-          logUtils.setLogForError(error as Error)
-          logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
-        } finally {
-          store.commit('text/SET_isArgoAvailable', !argoError)
-        }
-        let locale = localStorage.getItem('locale') as '' | 'tw' | 'us' | 'jp'
-        // if local storage is empty
-        if (locale === '' || !locale) {
-          locale = to.params.locale as '' | 'tw' | 'us' | 'jp'
-          // without locale param, determine the locale with browser language
-          if (locale === '' || !locale) {
-            i18n.global.locale = localeUtils.getBrowserLang()
-          } else {
-            i18n.global.locale = locale as 'tw' | 'us' | 'jp'
-          }
-        } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.global.locale) {
-          // if local storage has been set
-          i18n.global.locale = locale
-          localStorage.setItem('locale', locale)
-        }
-        picWVUtils.updateLocale(i18n.global.locale)
-
-        // document.title = to.meta?.title as string || i18n.global.t('SE0001')
-        next()
-        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
-          // Delete locale in url, will be ignore by prerender.
-          delete router.currentRoute.value.params.locale
-          router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
-        }
-      },
-      children: routes
+router.addRoute({
+  // Include the locales you support between ()
+  path: `/:locale${localeUtils.getLocaleRegex()}?`,
+  component: {
+    render() { return h(resolveComponent('router-view')) }
+  },
+  async beforeEnter(to, from, next) {
+    if (to.name === 'NativeEventTester') {
+      picWVUtils.enterEventTestMode()
     }
-  ]
+    if (logUtils.getLog()) {
+      logUtils.uploadLog()
+    }
+    logUtils.setLog('App Start')
+    if (!picWVUtils.inBrowserMode) {
+      picWVUtils.registerCallbacks('router')
+    }
+    await picWVUtils.getUserInfo()
+    let argoError = false
+    try {
+      const status = (await fetch(`https://media.vivipic.cc/hello.txt?ver=${generalUtils.generateRandomString(12)}`)).status
+      if (status !== 200) {
+        argoError = true
+        logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
+      }
+    } catch (error) {
+      argoError = true
+      logUtils.setLogForError(error as Error)
+      logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
+    } finally {
+      store.commit('text/SET_isArgoAvailable', !argoError)
+    }
+    let locale = localStorage.getItem('locale') as '' | 'tw' | 'us' | 'jp'
+    // if local storage is empty
+    if (locale === '' || !locale) {
+      locale = to.params.locale as '' | 'tw' | 'us' | 'jp'
+      // without locale param, determine the locale with browser language
+      if (locale === '' || !locale) {
+        i18n.global.locale = localeUtils.getBrowserLang()
+      } else {
+        i18n.global.locale = locale as 'tw' | 'us' | 'jp'
+      }
+    } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.global.locale) {
+      // if local storage has been set
+      i18n.global.locale = locale
+      localStorage.setItem('locale', locale)
+    }
+    picWVUtils.updateLocale(i18n.global.locale)
+
+    // document.title = to.meta?.title as string || i18n.global.t('SE0001')
+    next()
+    if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
+      // Delete locale in url, will be ignore by prerender.
+      delete router.currentRoute.value.params.locale
+      router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
+    }
+  },
+  children: routes
 })
 
 router.beforeEach(async (to, from, next) => {

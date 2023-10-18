@@ -33,11 +33,11 @@ div(class="panel-template rwd-container")
 </template>
 
 <script lang="ts">
-import SearchBar from '@/components/SearchBar.vue'
-import Tabs from '@/components/Tabs.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import PanelTemplate from '@/components/vivisticker/PanelTemplate.vue'
 import PanelTemplateContentUs from '@/components/vivisticker/us/PanelTemplateContent.vue'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -97,8 +97,8 @@ export default defineComponent({
       this.handleSearch('')
     },
     handleRecent() {
-      vivistickerUtils.setShowAllRecently('template', true)
-      vivistickerUtils.setIsInCategory('template', true)
+      stkWVUtils.setShowAllRecently('template', true)
+      stkWVUtils.setIsInCategory('template', true)
     },
     showSearchBar() {
       if (!this.isInCategory) {

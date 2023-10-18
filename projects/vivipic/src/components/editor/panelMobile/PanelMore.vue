@@ -51,14 +51,14 @@ div(class="panel-more")
 </template>
 
 <script lang="ts">
-import { IUserInfo } from '@/interfaces/webView'
-import generalUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
+import { IUserInfo } from '@nu/vivi-lib/interfaces/webView'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import loginUtils from '@/utils/loginUtils'
-import pageUtils from '@/utils/pageUtils'
-import picWVUtils from '@/utils/picWVUtils'
-import shortcutHandler from '@/utils/shortcutUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import shortcutHandler from '@nu/vivi-lib/utils/shortcutUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import testUtils from '@/utils/testUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
