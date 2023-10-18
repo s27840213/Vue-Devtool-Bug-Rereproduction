@@ -1,5 +1,5 @@
 <template lang="pug">
-header-tabs(:rootStyles="rootStyles"
+header-tabs(:rootStyles="{}"
             :isInEditor="isInEditor"
             :leftTabs="leftTabs"
             :centerTitle="centerTitle"
@@ -22,8 +22,9 @@ header-tabs(:rootStyles="rootStyles"
 </template>
 
 <script lang="ts">
-import HeaderTabs from '@nu/vivi-lib/components/editor/mobile/HeaderTabs.vue'
+import { notify } from '@kyvg/vue3-notification'
 import { TabConfig } from '@nu/vivi-lib/components/editor/mobile/HeaderTab.vue'
+import HeaderTabs from '@nu/vivi-lib/components/editor/mobile/HeaderTabs.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
@@ -43,7 +44,6 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import { notify } from '@kyvg/vue3-notification'
 import _ from 'lodash'
 import { computed, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -123,12 +123,6 @@ export default defineComponent({
     },
     showAllRecently(): boolean {
       return this.isCurrentShowAllRecently(this.currActiveTab)
-    },
-    rootStyles(): {[key: string]: string} {
-      return {
-        paddingTop: '9px',
-        paddingBottom: '9px',
-      }
     },
     isCropping(): boolean {
       return imageUtils.isImgControl()
