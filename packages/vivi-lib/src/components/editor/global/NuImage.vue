@@ -75,6 +75,7 @@ import { IPage } from '@/interfaces/page'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import { IBrowserInfo } from '@/store/module/user'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -84,16 +85,15 @@ import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SIZE, CANVAS_SPACE } from '@/
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import stkWVUtils from '@/utils/stkWVUtils'
-import bgRemoveUtils from '@/utils/bgRemoveUtils'
-import vuexUtils from '@/utils/vuexUtils'
-import modalUtils from '@/utils/modalUtils'
 
 export default defineComponent({
   emits: ['onload'],
@@ -972,7 +972,6 @@ export default defineComponent({
         !hasShadowSrc && imageShadowUtils.setIsProcess(layerInfo(), true)
       }
 
-      let img = new Image()
       if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
         // normally, we should get the image size from srcObj, but if in vivisticker bg removing, we didn't actually upload the bg remove result to the server
         if ((this.config as IImage).srcObj.type === 'ios') {
@@ -989,6 +988,7 @@ export default defineComponent({
         this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
       }
 
+      let img
       switch (currentEffect) {
         case ShadowEffectType.imageMatched:
         case ShadowEffectType.floating:
@@ -996,35 +996,31 @@ export default defineComponent({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (!shadowBuff.canvasShadowImg) {
-            img.crossOrigin = 'anonymous'
-            await new Promise<void>((resolve) => {
-              img.onerror = () => {
-                console.log('img load error')
+            /**
+             * @Note need to review with steve
+             */
+            const src = imageUtils.getSrc(this.config, ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal')
+            img = await imageUtils.imgLoadHandler(src, (_img) => _img, {
+              error: (_img) => {
+                console.log('img load error', _img?.src)
                 notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
-                resolve()
               }
-              img.onload = async () => {
-                this.shadowBuff.canvasShadowImg = img
-                const isSVG = await imageShadowPanelUtils.isSVG(img.src, this.config as IImage)
-                if (isSVG) {
-                  imageShadowPanelUtils.svgImageSizeFormatter(img, 510, () => {
+            }).then(async (_img) => {
+              const isSVG = await imageShadowPanelUtils.isSVG(_img.src, this.config as IImage)
+              if (isSVG) {
+                await new Promise<void>((resolve)  => {
+                  imageShadowPanelUtils.svgImageSizeFormatter(_img, 510, () => {
                     /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
-                    img.onload = () => {
+                    _img.onload = () => {
                       this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
                       resolve()
                     }
                   })
-                } else {
-                  resolve()
-                }
+                })
               }
-              if (this.config.previewSrc) {
-                img.src = this.config.previewSrc
-              } else {
-                const src = imageUtils.getSrc(this.config, ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal')
-                img.src = imageUtils.appendQuery(src, 'ver', generalUtils.generateRandomString(6))
-              }
+              return _img
             })
+            this.shadowBuff.canvasShadowImg = img
           } else {
             img = shadowBuff.canvasShadowImg as HTMLImageElement
           }
@@ -1114,13 +1110,13 @@ export default defineComponent({
         case ShadowEffectType.shadow:
         case ShadowEffectType.frame:
         case ShadowEffectType.blur:
-          imageShadowUtils.drawShadow(canvasList, img, this.config as IImage, params)
+          imageShadowUtils.drawShadow(canvasList, this.config as IImage, params)
           break
         case ShadowEffectType.imageMatched:
           imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config as IImage, params)
           break
         case ShadowEffectType.floating: {
-          imageShadowUtils.drawFloatingShadow(canvasList, img, this.config as IImage, params)
+          imageShadowUtils.drawFloatingShadow(canvasList, this.config as IImage, params)
           break
         }
       }
@@ -1156,7 +1152,7 @@ export default defineComponent({
           case ShadowEffectType.blur:
           case ShadowEffectType.frame:
             if (shadowBuff.canvasShadowImg as HTMLImageElement) {
-              imageShadowUtils.drawShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config as IImage, {
+              imageShadowUtils.drawShadow(canvasList, this.config as IImage, {
                 layerInfo,
                 drawCanvasW,
                 drawCanvasH,
@@ -1176,7 +1172,7 @@ export default defineComponent({
             break
           case ShadowEffectType.floating:
             if (shadowBuff.canvasShadowImg as HTMLImageElement) {
-              imageShadowUtils.drawFloatingShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config as IImage, {
+              imageShadowUtils.drawFloatingShadow(canvasList, this.config as IImage, {
                 layerInfo,
                 drawCanvasW,
                 drawCanvasH,

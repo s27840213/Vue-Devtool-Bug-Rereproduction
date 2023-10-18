@@ -220,7 +220,7 @@ class ImageShadowUtils {
     }
   }
 
-  async drawFloatingShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+  async drawFloatingShadow(canvas_s: HTMLCanvasElement[], config: IImage, params: DrawParams) {
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) {
       if (canvas) {
@@ -235,17 +235,17 @@ class ImageShadowUtils {
     }
 
     const { timeout = DRAWING_TIMEOUT } = params
+    clearTimeout(this._draw)
     if (timeout) {
-      clearTimeout(this._draw)
       this._draw = window.setTimeout(() => {
-        this.floatingHandler(canvas_s, img, config, params)
+        this.floatingHandler(canvas_s, config, params)
       }, timeout)
     } else {
-      this.floatingHandler(canvas_s, img, config, params)
+      this.floatingHandler(canvas_s, config, params)
     }
   }
 
-  floatingHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+  floatingHandler(canvas_s: HTMLCanvasElement[], config: IImage, params: DrawParams) {
     logUtils.setLog('canvas drawing: floatingHandler start:')
     const canvas = canvas_s[0] || undefined
     setMark('floating', 0)
@@ -341,13 +341,13 @@ class ImageShadowUtils {
     const { timeout = DRAWING_TIMEOUT } = params
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
+    clearTimeout(this._draw)
     if (timeout) {
-      clearTimeout(this._draw)
       this._draw = window.setTimeout(() => {
         this.imageMathcedHandler(canvas_s, img, config, params, handlerId)
       }, timeout)
     } else {
-      await this.imageMathcedHandler(canvas_s, img, config, params)
+      await this.imageMathcedHandler(canvas_s, img, config, params, handlerId)
     }
   }
 
@@ -436,9 +436,9 @@ class ImageShadowUtils {
     logMark('imageMatched', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
   }
 
-  drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+  drawShadow(canvas_s: HTMLCanvasElement[], config: IImage, params: DrawParams) {
     const canvas = canvas_s[0] || undefined
-    const { timeout = DRAWING_TIMEOUT, cb } = params
+    const { timeout = DRAWING_TIMEOUT } = params
     const { shadow } = config.styles
     const { currentEffect } = shadow
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) {
@@ -460,17 +460,17 @@ class ImageShadowUtils {
       return
     }
 
+    clearTimeout(this._draw)
     if (timeout) {
-      clearTimeout(this._draw)
       this._draw = window.setTimeout(() => {
-        this.shadowHandler(canvas_s, img, config, params)
+        this.shadowHandler(canvas_s, config, params)
       }, timeout)
     } else {
-      this.shadowHandler(canvas_s, img, config, params)
+      this.shadowHandler(canvas_s, config, params)
     }
   }
 
-  shadowHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+  shadowHandler(canvas_s: HTMLCanvasElement[], config: IImage, params: DrawParams) {
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
@@ -526,7 +526,6 @@ class ImageShadowUtils {
     setMark('shadow', 3)
 
     ctxT.globalCompositeOperation = 'source-in'
-    // ctxT.globalAlpha = opacity * 0.01
     ctxT.fillStyle = (currentEffect === ShadowEffectType.frame ? effects.frameColor || effects.color : effects.color) + percentToHex(opacity)
     ctxT.fillRect(0, 0, canvasT.width, canvasT.height)
     ctxT.globalAlpha = 1
@@ -540,15 +539,10 @@ class ImageShadowUtils {
     if (layerInfo) {
       timeout && this.setIsProcess(layerInfo, false)
     }
-    console.log('finish draw shadow')
     this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
     cb && cb()
     setMark('shadow', 4)
     logMark('shadow')
-  }
-
-  clearHandler() {
-    clearTimeout(this._draw)
   }
 
   async asyncProcessing(cb: () => void, disable = false) {
