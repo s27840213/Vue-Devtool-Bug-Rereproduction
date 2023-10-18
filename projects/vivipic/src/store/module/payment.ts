@@ -1,14 +1,14 @@
 import paymentApi from '@/apis/payment'
+import store from '@/store'
+import fbPixelUtils from '@/utils/fbPixelUtils'
+import { notify } from '@kyvg/vue3-notification'
 import i18n from '@nu/vivi-lib/i18n'
 import * as type from '@nu/vivi-lib/interfaces/payment'
-import fbPixelUtils from '@/utils/fbPixelUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import gtmUtils from '@nu/vivi-lib/utils/gtmUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 import { getField, updateField } from 'vuex-map-fields'
-import store from '..'
 
 export interface IPaymentState {
   isLoading: boolean

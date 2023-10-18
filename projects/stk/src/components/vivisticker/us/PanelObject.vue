@@ -50,9 +50,9 @@ import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import PanelObject from '../PanelObject.vue'
-import PanelObjectGifsUs from './PanelObjectGifs.vue'
-import PanelObjectStaticUs from './PanelObjectStatic.vue'
+import PanelObject from '@/components/editor/panelMobile/PanelObject.vue'
+import PanelObjectGifsUs from '@/components/vivisticker/us/PanelObjectGifs.vue'
+import PanelObjectStaticUs from '@/components/vivisticker/us/PanelObjectStatic.vue'
 
 export default defineComponent({
   name: 'panel-object-us',

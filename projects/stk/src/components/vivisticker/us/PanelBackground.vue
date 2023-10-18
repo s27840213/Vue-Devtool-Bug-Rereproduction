@@ -125,10 +125,10 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
+import PanelBackground from '@/components/editor/panelMobile/PanelBackground.vue'
 import { ICategoryItem, IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
-import PanelBackground from '../PanelBackground.vue'
 
 export default defineComponent({
   name: 'panel-background-us',

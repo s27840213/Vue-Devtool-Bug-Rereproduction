@@ -87,7 +87,7 @@ import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
-import PanelObjectGifs from '../PanelObjectGifs.vue'
+import PanelObjectGifs from '@/components/editor/panelMobile/PanelObjectGifs.vue'
 
 export default defineComponent({
   extends: PanelObjectGifs,

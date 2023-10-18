@@ -33,10 +33,10 @@ div(class="panel-template rwd-container")
 </template>
 
 <script lang="ts">
+import PanelTemplate from '@/components/editor/panelMobile/PanelTemplate.vue'
+import PanelTemplateContentUs from '@/components/vivisticker/us/PanelTemplateContent.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
-import PanelTemplate from '@/components/vivisticker/PanelTemplate.vue'
-import PanelTemplateContentUs from '@/components/vivisticker/us/PanelTemplateContent.vue'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'

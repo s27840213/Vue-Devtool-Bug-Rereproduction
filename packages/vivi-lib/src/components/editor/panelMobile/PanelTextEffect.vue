@@ -96,7 +96,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import _ from 'lodash'
 import { defineComponent, PropType } from 'vue'
-import PanelTextEffectSetting from '../panelFunction/PanelTextEffectSetting.vue'
+import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 
 export default defineComponent({
   name: 'MobilePanelTextEffectSetting',

@@ -56,17 +56,17 @@ div(class="overflow-container full-size rwd-container")
 </template>
 
 <script lang="ts">
+import PanelText from '@/components/editor/panelMobile/PanelText.vue'
+import CategoryTextPreview from '@/components/vivisticker/us/CategoryTextPreview.vue'
 import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
-import CategoryTextPreview from '@/components/vivisticker/us/CategoryTextPreview.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import AssetUtils from '@nu/vivi-lib/utils/assetUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
-import PanelText from '../PanelText.vue'
 
 export default defineComponent({
   name: 'panel-text-us',

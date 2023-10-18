@@ -9,15 +9,15 @@ div(class="main-menu"
 </template>
 
 <script lang="ts">
-import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
-import PanelObject from '@/components/vivisticker/PanelObject.vue'
+import PanelBackground from '@/components/editor/panelMobile/PanelBackground.vue'
+import PanelObject from '@/components/editor/panelMobile/PanelObject.vue'
+import PanelTemplate from '@/components/editor/panelMobile/PanelTemplate.vue'
+import PanelText from '@/components/editor/panelMobile/PanelText.vue'
 import PanelRemoveBg from '@/components/vivisticker/PanelRemoveBg.vue'
-import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelBackgroundUs from '@/components/vivisticker/us/PanelBackground.vue'
 import PanelObjectUs from '@/components/vivisticker/us/PanelObject.vue'
-import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
-import PanelTemplate from '@/components/vivisticker/PanelTemplate.vue'
 import PanelTemplateUs from '@/components/vivisticker/us/PanelTemplate.vue'
+import PanelTextUs from '@/components/vivisticker/us/PanelText.vue'
 
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
