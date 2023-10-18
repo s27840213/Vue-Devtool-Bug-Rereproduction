@@ -6,6 +6,8 @@ import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
 import store from '@/store'
 import logUtils from '@/utils/logUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
 import { get, round } from 'lodash'
@@ -28,9 +30,7 @@ import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
 import unitUtils, { PRECISION } from './unitUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import ZindexUtils from './zindexUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
@@ -378,7 +378,9 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = attrs.fit === 1 && generalUtils.isStk ? Math.min(currentPage.width / json.width, currentPage.height / json.height) : 300 / (Math.max(json.width, json.height))
+    const svgRatio = json.width / json.height
+    const resizeRatio = generalUtils.isStk ? (attrs.fit === 1 ? Math.min(currentPage.width / json.width, currentPage.height / json.height) : 300 / (Math.max(json.width, json.height)))
+     : ((svgRatio > 1 ? currentPage.width : currentPage.height) * 0.7) / (svgRatio > 1 ? json.width : json.height)
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
 
