@@ -566,7 +566,7 @@ importers:
         specifier: ^2.2.1
         version: 2.3.1
 
-  projects/charmix:
+  projects/cm:
     dependencies:
       '@nu/shared-lib':
         specifier: workspace:^0.0.1
@@ -940,7 +940,7 @@ importers:
         specifier: ^2.2.1
         version: 2.3.1
 
-  projects/vivipic:
+  projects/pic:
     dependencies:
       '@ctrl/tinycolor':
         specifier: ^3.5.0

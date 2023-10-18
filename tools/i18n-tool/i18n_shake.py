@@ -108,7 +108,7 @@ def main(args):
   if args.no_color:
     global bcolors
     bcolors = nocolors
-  PROJECTS = ['vivipic', 'stk', 'charmix']
+  PROJECTS = ['pic', 'stk', 'cm']
   any_mismatch = False
   for project in PROJECTS:
     print(f'\nProcessing: {project}\n')

@@ -31,7 +31,7 @@ deactivate
 ## How to set soft link to i18n result folder
 1. `cd` to target folder, it is necessary.
 ```
-cd projects/vivipic/src/i18n
+cd projects/pic/src/i18n
 ```
 2. ln -s source target
 ```

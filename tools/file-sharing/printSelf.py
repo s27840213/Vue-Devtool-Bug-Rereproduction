@@ -5,8 +5,8 @@ import re
 # ======= config =======
 mode = 'insert' # 'insert' | 'erase'
 # mode = 'erase' # 'insert' | 'erase'
-project = 'vivipic' # 'vivipic' | 'stk' | 'charmix'
-# project = 'stk' # 'vivipic' | 'stk' | 'charmix'
+project = 'pic' # 'pic' | 'stk' | 'cm'
+# project = 'stk' # 'pic' | 'stk' | 'cm'
 # ======= config =======
 
 
