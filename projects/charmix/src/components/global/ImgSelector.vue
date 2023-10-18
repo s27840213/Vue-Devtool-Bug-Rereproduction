@@ -20,21 +20,32 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
             :iconWidth="'12px'")
     div(
       v-if="isAlbumOpened"
-      class="img-grid h-full bg-app-bg grid grid-cols-3 grid-flow-row overflow-scroll gap-4"
+      class="img-selector__img-grid bg-app-bg overflow-scroll"
       @scroll.stop
       @touchstart.stop)
-      div(class="aspect-square flex flex-col items-center justify-center")
-        cm-svg-icon(class="text-app-tab-default mb-10" :iconName="'camera'")
-        span(class="text-app-tab-default") Camera
-      div(
-        v-for="item in currAlbumContent"
-        :key="item"
-        class="aspect-square")
-        img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?type=thumb`")
+      div(class="grid grid-cols-3 grid-flow-row content-start gap-4")
+        div(class="aspect-square flex flex-col items-center justify-center")
+          cm-svg-icon(class="text-app-tab-default mb-10" :iconName="'camera'")
+          span(class="text-app-tab-default") Camera
+        div(
+          v-for="item in currAlbumContent"
+          :key="item"
+          class="aspect-square")
+          lazy-load(
+            class="lazy-load w-full h-full"
+            target=".img-selector__img-grid"
+            :rootMargin="'1000px 0px 1000px 0px'")
+            img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?ssize=200`")
       observer-sentinel(
+        class="flex justify-center py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
-        :rootMargin="'600px 0px 0px 0px'"
+        :target="'.img-selector__img-grid'"
+        :rootMargin="'1000px 0px 1000px 0px'"
         @callback="handleLoadMore")
+        cm-svg-icon(
+          class="text-app-tab-default mb-10"
+          :iconName="'loading'"
+          iconColor="app-text-secondary")
     div(v-else class="flex flex-col gap-8")
       div(
         v-for="album in smartAlbum"
@@ -104,6 +115,7 @@ const getAlbumContent = async (album: IAlbum) => {
       if (res.nextPage) {
         nextPage.value = res.nextPage
       } else {
+        console.log('no more content')
         noMoreContent.value = true
       }
       isLoadingContent.value = false
@@ -114,6 +126,7 @@ const getAlbumContent = async (album: IAlbum) => {
     })
 }
 const handleLoadMore = () => {
+  console.log('handle load more')
   getAlbumContent(currAlbum)
 }
 
