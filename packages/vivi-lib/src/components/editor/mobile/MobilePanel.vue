@@ -64,9 +64,9 @@ div(class="mobile-panel"
 </template>
 
 <script lang="ts">
-import Tabs from '@/components/Tabs.vue'
-import mobilePanelMixin from '@/mixin/mobilePanel'
-import { defineComponent } from 'vue'
+import Tabs from '@/components/Tabs.vue';
+import mobilePanelMixin from '@/mixin/mobilePanel';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'mobile-panel',
@@ -89,7 +89,7 @@ export default defineComponent({
     box-shadow: 0px -2px 5px rgba(60, 60, 60, 0.1);
   }
   @include stk {
-    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.3);
   }
   display: grid;
   grid-template-columns: 1fr;

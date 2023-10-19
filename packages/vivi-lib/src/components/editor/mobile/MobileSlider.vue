@@ -37,6 +37,7 @@ div(class="mobile-slider")
 </template>
 
 <script lang="ts">
+import generalUtils from '@/utils/generalUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
 
@@ -72,7 +73,7 @@ export default defineComponent({
     },
     theme: {
       type: String,
-      default: 'dark'
+      default: generalUtils.isStk ? 'light' : 'dark'
     },
     autoRecord: {
       type: Boolean,
