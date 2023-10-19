@@ -26,8 +26,8 @@ import { IFullPageConfig } from '@nu/vivi-lib/interfaces/vivisticker'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import Payment from './Payment.vue'
-import Welcome from './Welcome.vue'
+import Payment from '@/components/fullPage/Payment.vue'
+import Welcome from '@/components/fullPage/Welcome.vue'
 
 export default defineComponent({
   components: {

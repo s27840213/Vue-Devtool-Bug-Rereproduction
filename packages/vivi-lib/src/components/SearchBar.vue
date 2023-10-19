@@ -144,7 +144,7 @@ export default defineComponent({
     clickHeart() {
       this.$emit('favorite')
     },
-    // can be called by @/components/vivisticker/us/PanelObject.vue and @/components/vivisticker/us/PanelBackground.vue
+    // can be called by @/components/us/PanelObject.vue and @/components/us/PanelBackground.vue
     focus() {
       (this.$refs.searchbar as HTMLInputElement).focus()
     }

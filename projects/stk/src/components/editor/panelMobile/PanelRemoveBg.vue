@@ -25,13 +25,13 @@ div(class="panel-remove-bg" ref="panelRemoveBg")
 </template>
 
 <script lang="ts">
-import BgRemoveContainer from '@/components/vivisticker/BgRemoveContainer.vue'
+import BgRemoveContainer from '@/components/editor/backgroundRemove/BgRemoveContainer.vue'
 import { IImage } from '@nu/vivi-lib/interfaces/layer'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
-import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
