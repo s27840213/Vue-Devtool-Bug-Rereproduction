@@ -7,6 +7,9 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
+      "@i18n/*": [
+        "./src/i18n/shaked/*"
+      ],
       "@/*": ["./src/*"],
       "@nu/shared-lib/*": ["../../packages/shared-lib/src/*"],
       "@nu/shared-lib": ["../../packages/shared-lib/src/index"]

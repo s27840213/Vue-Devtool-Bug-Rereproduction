@@ -7,7 +7,7 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 import extractImg from '../../tools/vite-plugin-lib-extract-img'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
 
-function resolve(...dir) {
+function resolve(...dir: string[]) {
   return path.join(__dirname, ...dir)
 }
 
