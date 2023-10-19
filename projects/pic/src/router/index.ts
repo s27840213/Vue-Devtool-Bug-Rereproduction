@@ -1,4 +1,4 @@
-import appJson from '@/assets/json/app.json'
+import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n from '@nu/vivi-lib/i18n'
 import store from '@/store'
 import { LayerType } from '@nu/vivi-lib/store/types'

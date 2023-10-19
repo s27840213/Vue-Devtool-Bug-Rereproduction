@@ -31,12 +31,8 @@ export default defineConfig({
     // })
     viteStaticCopy({
       targets: [{
-        src: [
-          resolve('src/assets/scss').replace(/\\/g, '/'),
-          resolve('src/assets/icon').replace(/\\/g, '/'),
-          resolve('src/assets/img').replace(/\\/g, '/'),
-        ],
-        dest: 'src/assets',
+        src: [resolve('src/assets').replace(/\\/g, '/')],
+        dest: 'src',
       }]
     }),
     // Extracts resource files referenced in lib mode instead of embedded them as base64.

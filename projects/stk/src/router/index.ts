@@ -1,4 +1,4 @@
-import appJson from '@/assets/json/app.json'
+import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
