@@ -36,7 +36,7 @@ const path = require('path')
 // const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 // const PrerenderSPAPlugin = require('@dreysolano/prerender-spa-plugin')
 // const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
-// const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
@@ -111,7 +111,9 @@ module.exports = defineConfig({
     config.module
       .rule('svg-sprite-loader')
       .test(/\.svg$/)
-      .include.add(resolve('src/assets/icon'))
+      .include
+        .add(resolve('src/assets/icon'))
+        .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
       .end()
       .use('svg-sprite-loader')
       .loader('svg-sprite-loader')
@@ -141,7 +143,9 @@ module.exports = defineConfig({
     config.module
       .rule('image-assets')
       .test(/\.(png|jpg|gif|svg|mp4)$/)
-      .exclude.add(resolve('src/assets/icon'))
+      .exclude
+        .add(resolve('src/assets/icon'))
+        .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
       .end()
       .type('asset/resource')
     // config.module

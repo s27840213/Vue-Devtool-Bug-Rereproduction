@@ -33,7 +33,10 @@ export default defineConfig({
     }),
     viteStaticCopy({
       targets: [{
-        src: path.resolve(__dirname, 'src/assets/scss').replace(/\\/g, '/'),
+        src: [
+          path.resolve(__dirname, 'src/assets/scss').replace(/\\/g, '/'),
+          path.resolve(__dirname, 'src/assets/icon').replace(/\\/g, '/'),
+        ],
         dest: 'src/assets',
       }]
     }),
