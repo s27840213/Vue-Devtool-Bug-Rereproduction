@@ -17,7 +17,6 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import { IFrame, IImage } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
 import frameUtils from '@/utils/frameUtils'
-import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -164,7 +163,9 @@ export default defineComponent({
   &__reset {
     margin-top: 1.25rem;
     > button {
-      color: #4eabe6;
+      @include setColors(blue-1, black-3) using ($color) {
+        color: $color;
+      }
       font-size: 14px;
       padding: 0;
     }
