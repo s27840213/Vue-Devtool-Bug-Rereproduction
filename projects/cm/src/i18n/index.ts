@@ -1,16 +1,11 @@
-import tw from '@/i18n/full/tw.json'
-import tw_shaked from '@/i18n/shaked/tw.json'
-import us from '@/i18n/full/us.json'
-import us_shaked from '@/i18n/shaked/us.json'
-import { createI18n } from 'vue-i18n'
+import jp from '@i18n/jp.json'
+import tw from '@i18n/tw.json'
+import us from '@i18n/us.json'
+import i18n, { LocaleName as _LocaleName } from '@nu/vivi-lib/i18n'
 
-export default createI18n({
-  legacy: false,
-  locale: 'us',
-  fallbackLocale: 'us',
-  messages: {
-    us: import.meta.env.PROD ? us_shaked : us,
-    zh: import.meta.env.PROD ? tw_shaked : tw,
-  },
-  globalInjection: true,
-})
+i18n.global.setLocaleMessage('us', us)
+i18n.global.setLocaleMessage('tw', tw)
+i18n.global.setLocaleMessage('jp', jp)
+
+export type LocaleName = _LocaleName
+export default i18n
