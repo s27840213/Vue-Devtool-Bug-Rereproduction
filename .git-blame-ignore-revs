@@ -7,3 +7,9 @@
 b1482342bb71bb87ed85463b78f7031280a0fbc0 # 2023-02-15 [Nathan] refactor: decrease pug indent for conflict files
 9da42c12148bc88101ac93c97abe9be0f3d64caf # 2022-11-22 [Alan] fix: fix pug template problems (for brandkit)
 5c17ea1ebe8fa878fd7949c532b3007ee17c3706 # 2022-09-12 [Daniel] fix: indent issue
+0fd3e24a37e2b3b9633ac103f7a9f8350f717a6b # 2023-10-03 [Nathan] refactor: rename stkWVUtils
+c93296733ddc98761fa242750dd95761a719a23d # 2023-10-06 [Nathan] refactor: fix scss indent space
+d0c1d63e68de816a73223fc11c7764d243a4da7f # 2023-10-16 [Nathan] refactor: refactor stk vue.config.js
+52c28c6ee2a4f63ffc917b5bc0401b77db32ad87 # 2023-10-18 [Daniel] refactor: move stk and pic same name diff place files to same place and rel import -> abs import
+8accb232e90a6960970f6b06c60993ce6ebb03ed # 2023-10-18 [Daniel] refactor: move files under components/vivisticker to their own directories
+1be0a2bbb0d3cd1b1637b095aecd3121ff718fba # 2023-10-18 [Daniel] refactor: rename vivipic to pic and charmix to cm

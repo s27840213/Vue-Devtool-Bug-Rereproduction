@@ -22,7 +22,7 @@ console.log(all)
 每個py檔案上方有一段config區域
 需要改這邊的設定來使用
 每個設定都有project選項 需要放projects/(project)的(project)部分
-例如vivipic stk charmix
+例如pic stk cm
 
 1. 把project中每個asnyc import的vue檔案都改成sync
 2. 執行printSelf.py在各檔案中插入console.log

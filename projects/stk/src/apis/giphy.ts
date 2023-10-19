@@ -1,5 +1,5 @@
-import axios from '@/apis'
-import i18n from '@/i18n'
+import axios from '@nu/vivi-lib/apis'
+import i18n from '@nu/vivi-lib/i18n'
 import { ICategoryContentApiParams, IGifResponse, ITagContentApiParams } from '@/interfaces/giphy'
 import store from '@/store'
 

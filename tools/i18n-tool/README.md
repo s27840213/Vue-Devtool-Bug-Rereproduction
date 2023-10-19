@@ -28,6 +28,16 @@ python get_translation.py
 deactivate
 ```
 
+## How to set soft link to i18n result folder
+1. `cd` to target folder, it is necessary.
+```
+cd projects/pic/src/i18n
+```
+2. ln -s source target
+```
+ln -s ../../../../tools/i18n-tool/result full
+```
+
 ## Related Reference
 
 [brew](https://brew.sh/index_zh-tw)

@@ -3,7 +3,7 @@ import re
 
 # ======= config =======
 target1 = 'stk'
-target2 = 'vivipic'
+target2 = 'pic'
 # ======= config =======
 
 with open(f"tools/file-sharing/{target1}Used.json") as file:

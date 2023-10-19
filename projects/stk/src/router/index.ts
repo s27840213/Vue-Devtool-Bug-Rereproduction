@@ -1,21 +1,22 @@
 import appJson from '@/assets/json/app.json'
-import i18n, { LocaleName } from '@/i18n'
-import { CustomWindow } from '@/interfaces/customWindow'
-import { IPrices } from '@/interfaces/vivisticker'
+import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
+import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
+import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
 import store from '@/store'
-import constantData from '@/utils/constantData'
-import generalUtils from '@/utils/generalUtils'
-import localeUtils from '@/utils/localeUtils'
-import logUtils from '@/utils/logUtils'
-import overlayUtils from '@/utils/overlayUtils'
-import picWVUtils from '@/utils/picWVUtils'
-import textFillUtils from '@/utils/textFillUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import constantData from '@nu/vivi-lib/utils/constantData'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import localeUtils from '@nu/vivi-lib/utils/localeUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import overlayUtils from '@nu/vivi-lib/utils/overlayUtils'
+import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { h, resolveComponent } from 'vue'
-import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
-import Screenshot from '../views/Screenshot.vue'
-import ViviSticker from '../views/ViviSticker.vue'
+import { RouteRecordRaw } from 'vue-router'
+import Screenshot from '@/views/Screenshot.vue'
+import ViviSticker from '@/views/ViviSticker.vue'
+import router from '@nu/vivi-lib/router'
 
 declare let window: CustomWindow
 
@@ -26,31 +27,31 @@ const routes: Array<RouteRecordRaw> = [
     component: ViviSticker,
     beforeEnter: async (to, from, next) => {
       try {
-        if (vivistickerUtils.checkVersion('1.5')) {
-          await vivistickerUtils.fetchDebugModeEntrance()
-          await vivistickerUtils.fetchLoadedFonts()
-          await vivistickerUtils.fetchTutorialFlags()
+        if (stkWVUtils.checkVersion('1.5')) {
+          await stkWVUtils.fetchDebugModeEntrance()
+          await stkWVUtils.fetchLoadedFonts()
+          await stkWVUtils.fetchTutorialFlags()
 
           // set default tab to show when first update to target app version
-          const isTargetLocale = ['us', 'jp'].includes(vivistickerUtils.getUserInfoFromStore().locale)
-          const appVer = vivistickerUtils.getUserInfoFromStore().appVer
-          const lastAppVer = (await vivistickerUtils.getState('lastAppVer'))?.value ?? '0.0'
+          const isTargetLocale = ['us', 'jp'].includes(stkWVUtils.getUserInfoFromStore().locale)
+          const appVer = stkWVUtils.getUserInfoFromStore().appVer
+          const lastAppVer = (await stkWVUtils.getState('lastAppVer'))?.value ?? '0.0'
           const targetVer = '1.34'
-          if (isTargetLocale && vivistickerUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) {
-            if (vivistickerUtils.isTemplateSupported) await vivistickerUtils.setState('recentPanel', { value: 'template' })
+          if (isTargetLocale && stkWVUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) {
+            if (stkWVUtils.isTemplateSupported) await stkWVUtils.setState('recentPanel', { value: 'template' })
           }
-          if (appVer !== lastAppVer) await vivistickerUtils.setState('lastAppVer', { value: appVer })
+          if (appVer !== lastAppVer) await stkWVUtils.setState('lastAppVer', { value: appVer })
 
-          const recentPanel = await vivistickerUtils.getState('recentPanel')
-          const userSettings = await vivistickerUtils.getState('userSettings')
+          const recentPanel = await stkWVUtils.getState('recentPanel')
+          const userSettings = await stkWVUtils.getState('userSettings')
           if (userSettings) {
             store.commit('vivisticker/UPDATE_userSettings', userSettings)
-            vivistickerUtils.addFontForEmoji()
+            stkWVUtils.addFontForEmoji()
           }
-          const hasCopied = await vivistickerUtils.getState('hasCopied')
-          vivistickerUtils.hasCopied = hasCopied?.data ?? false
-          vivistickerUtils.setState('hasCopied', { data: vivistickerUtils.hasCopied })
-          vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
+          const hasCopied = await stkWVUtils.getState('hasCopied')
+          stkWVUtils.hasCopied = hasCopied?.data ?? false
+          stkWVUtils.setState('hasCopied', { data: stkWVUtils.hasCopied })
+          stkWVUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
         }
         next()
       } catch (error) {
@@ -65,7 +66,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         store.commit('user/SET_STATE', { userId: 'backendRendering' })
-        vivistickerUtils.hideController()
+        stkWVUtils.hideController()
         next()
       } catch (error) {
         logUtils.setLogForError(error as Error)
@@ -86,26 +87,26 @@ const routes: Array<RouteRecordRaw> = [
   }
 ]
 
-if (window.location.host !== 'vivipic.com') {
+if (window.location.host !== 'sticker.vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: () => import('@/views/SvgIconView.vue')
+    component: () => import('@nu/vivi-lib/views/SvgIconView.vue')
   })
-  routes.push({
-    path: 'copytool',
-    name: 'CopyTool',
-    component: () => import('@/views/CopyTool.vue')
-  })
-  routes.push({
-    path: 'nubtnlist',
-    name: 'NubtnList',
-    component: () => import('@/views/NubtnList.vue')
-  })
+  // routes.push({
+  //   path: 'copytool',
+  //   name: 'CopyTool',
+  //   component: () => import('@/views/CopyTool.vue')
+  // })
+  // routes.push({
+  //   path: 'nubtnlist',
+  //   name: 'NubtnList',
+  //   component: () => import('@/views/NubtnList.vue')
+  // })
   routes.push({
     path: 'nativeevttest',
     name: 'NativeEventTester',
-    component: () => import('@/views/NativeEventTester.vue')
+    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
   })
   routes.push({
     path: 'emoji',
@@ -114,81 +115,75 @@ if (window.location.host !== 'vivipic.com') {
   })
 }
 
-const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-
-  routes: [
-    {
-      // Include the locales you support between ()
-      path: `/:locale${localeUtils.getLocaleRegex()}?`,
-      component: {
-        render() { return h(resolveComponent('router-view')) }
-      },
-      async beforeEnter(to, from, next) {
-        if (to.name === 'NativeEventTester') {
-          vivistickerUtils.enterEventTestMode()
-        }
-        vivistickerUtils.registerCallbacks('router')
-        const urlParams = new URLSearchParams(window.location.search)
-        const standalone = urlParams.get('standalone')
-        if (standalone) {
-          vivistickerUtils.enterStandaloneMode()
-          vivistickerUtils.setDefaultLocale()
-        } else {
-          vivistickerUtils.detectIfInApp()
-        }
-        const userInfo = await vivistickerUtils.getUserInfo()
-        if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
-          await logUtils.uploadLog()
-        }
-        logUtils.setLog('App Start')
-        let argoError = false
-        try {
-          const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
-          if (status !== 200) {
-            argoError = true
-            logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
-          }
-        } catch (error) {
-          argoError = true
-          logUtils.setLogForError(error as Error)
-          logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
-        } finally {
-          store.commit('text/SET_isArgoAvailable', !argoError)
-        }
-        let locale = 'us'
-        if (userInfo.appVer === '1.28') {
-          const localLocale = localStorage.getItem('locale')
-          if (localLocale) {
-            locale = localLocale
-          } else {
-            locale = localeUtils.getBrowserLang()
-          }
-        } else {
-          locale = userInfo.locale
-        }
-        logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
-        // locale = 'pt' // TODO: remove this line since it's only for testing
-        i18n.global.locale = locale as LocaleName
-        localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only disabled for testing
-        const editorBg = userInfo.editorBg
-        if (editorBg) {
-          store.commit('vivisticker/SET_editorBg', editorBg)
-        }
-        picWVUtils.updateLocale(i18n.global.locale)
-        vivistickerUtils.setDefaultPrices()
-
-        // document.title = to.meta?.title as string || i18n.global.t('SE0001')
-        next()
-        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
-          // Delete locale in url, will be ignore by prerender.
-          delete router.currentRoute.value.params.locale
-          router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
-        }
-      },
-      children: routes
+router.addRoute({
+  // Include the locales you support between ()
+  path: `/:locale${localeUtils.getLocaleRegex()}?`,
+  component: {
+    render() { return h(resolveComponent('router-view')) }
+  },
+  async beforeEnter(to, from, next) {
+    if (to.name === 'NativeEventTester') {
+      stkWVUtils.enterEventTestMode()
     }
-  ]
+    stkWVUtils.registerCallbacks('router')
+    const urlParams = new URLSearchParams(window.location.search)
+    const standalone = urlParams.get('standalone')
+    if (standalone) {
+      stkWVUtils.enterStandaloneMode()
+      stkWVUtils.setDefaultLocale()
+    } else {
+      stkWVUtils.detectIfInApp()
+    }
+    const userInfo = await stkWVUtils.getUserInfo()
+    if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
+      await logUtils.uploadLog()
+    }
+    logUtils.setLog('App Start')
+    let argoError = false
+    try {
+      const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
+      if (status !== 200) {
+        argoError = true
+        logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
+      }
+    } catch (error) {
+      argoError = true
+      logUtils.setLogForError(error as Error)
+      logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
+    } finally {
+      store.commit('text/SET_isArgoAvailable', !argoError)
+    }
+    let locale = 'us'
+    if (userInfo.appVer === '1.28') {
+      const localLocale = localStorage.getItem('locale')
+      if (localLocale) {
+        locale = localLocale
+      } else {
+        locale = localeUtils.getBrowserLang()
+      }
+    } else {
+      locale = userInfo.locale
+    }
+    logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
+    // locale = 'pt' // TODO: remove this line since it's only for testing
+    i18n.global.locale = locale as LocaleName
+    localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only disabled for testing
+    const editorBg = userInfo.editorBg
+    if (editorBg) {
+      store.commit('vivisticker/SET_editorBg', editorBg)
+    }
+    picWVUtils.updateLocale(i18n.global.locale)
+    stkWVUtils.setDefaultPrices()
+
+    // document.title = to.meta?.title as string || i18n.global.t('SE0001')
+    next()
+    if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
+      // Delete locale in url, will be ignore by prerender.
+      delete router.currentRoute.value.params.locale
+      router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
+    }
+  },
+  children: routes
 })
 
 router.beforeEach(async (to, from, next) => {
@@ -272,7 +267,7 @@ router.beforeEach(async (to, from, next) => {
                     plan,
                     {
                       value: price,
-                      text: vivistickerUtils.formatPrice(price, currency)
+                      text: stkWVUtils.formatPrice(price, currency)
                     },
                   ]),
                 ),
