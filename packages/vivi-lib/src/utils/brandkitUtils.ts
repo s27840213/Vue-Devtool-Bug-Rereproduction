@@ -7,7 +7,7 @@ import generalUtils from './generalUtils'
 import imageUtils from './imageUtils'
 
 const imports = import.meta.glob(
-  '@/assets/img/png/brandkit/logo-*',
+  '@img/png/brandkit/logo-*',
   { eager: true, import: 'default' }
 ) as Record<string, string>
 

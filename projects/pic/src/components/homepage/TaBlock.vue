@@ -6,7 +6,7 @@ div(class="block" :style="blockStyle")
       img(v-for="(cb, index) in content.colorBlock.filter((i)=>!i.ref)"
         :key="`${cb.name}-${index}`"
         class="block__colorBlock"
-        :src="require('@/assets/img/svg/color-block/' + cb.name)"
+        :src="require('@img/svg/color-block/' + cb.name)"
         :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
     div(class="block-text__description text-gray-2")
       span {{content.description}}
@@ -22,7 +22,7 @@ div(class="block" :style="blockStyle")
     img(v-for="(cb, index) in content.colorBlock.filter((i)=>i.ref)"
       :key="`${cb.name}-${index}`"
       class="block__colorBlock"
-      :src="require('@/assets/img/svg/color-block/' + cb.name)"
+      :src="require('@img/svg/color-block/' + cb.name)"
       :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
 </template>
 
@@ -77,7 +77,7 @@ export default defineComponent({
     dir(): string {
       return this.content.img?.name.endsWith('json')
         ? '/lottie'
-        : '@/assets/img/svg/homepage'
+        : '@img/svg/homepage'
     },
     toFile(): string {
       return this.content.img?.name.endsWith('json')

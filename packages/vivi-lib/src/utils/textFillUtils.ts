@@ -1,6 +1,6 @@
 import textEffect, { IPutTextEffectResponse } from '@/apis/textEffect'
-import imagePreview from '@/assets/img/svg/image-preview.svg'
-import textFillMask from '@/assets/img/text-effect/text-fill-mask-image.svg'
+import imagePreview from '@img/svg/image-preview.svg'
+import textFillMask from '@img/text-effect/text-fill-mask-image.svg'
 import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'

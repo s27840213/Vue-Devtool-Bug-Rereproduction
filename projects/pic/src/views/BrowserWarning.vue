@@ -2,9 +2,9 @@
 div(class="browser-warning")
   div(class="browser-warning__logo")
     img(class="browser-warning__image"
-        :src="require('@/assets/img/png/chrome.png')")
+        :src="require('@img/png/chrome.png')")
     img(class="browser-warning__image"
-        :src="require('@/assets/img/png/edge.png')")
+        :src="require('@img/png/edge.png')")
   div(class="text-H6")
     span {{  $t('NN0834') }}
   div(class="body-SM browser-warning__text")

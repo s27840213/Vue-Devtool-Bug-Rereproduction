@@ -1,5 +1,5 @@
 import imageApi from '@/apis/image-api'
-import frameDefaultImg from '@/assets/img/svg/frame.svg'
+import frameDefaultImg from '@img/svg/frame.svg'
 import { IAssetPhoto, IImageSize, IPhotoItem, IUserImageContentData, isIAssetPhoto } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'

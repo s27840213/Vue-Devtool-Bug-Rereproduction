@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="template-no-result")
   img(class="template-no-result__img"
-    :src="require('@/assets/img/svg/templates/templates-not-found.svg')")
+    :src="require('@img/svg/templates/templates-not-found.svg')")
   div(class="template-no-result__title") {{ $t('NN0810') }}
   div(class="template-no-result__description") {{ $t('NN0811', { keyword }) }}
   nubtn(size="mid-center" @click="handlePrimaryBtn") {{ allHashTagAll ? templateRequestText : $t('NN0812') }}

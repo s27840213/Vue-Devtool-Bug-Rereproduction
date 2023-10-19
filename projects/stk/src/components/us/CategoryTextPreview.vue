@@ -35,7 +35,7 @@ export default defineComponent({
   methods: {
     handleNotFound() {
       if (!this.prevSrc) this.prevSrc = `https://template.vivipic.com/text/${this.item.id}/prev_2x?ver=${this.item.ver}`
-      else this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      else this.fallbackSrc = require('@img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     }
   }
 })

@@ -4,7 +4,7 @@ div(style="position: relative;")
     div(v-if="currentPageIndex === 0"
       class="login login-p0")
       div(class="login-p0__img")
-        img(:src="require('@/assets/img/svg/signup.svg')"
+        img(:src="require('@img/svg/signup.svg')"
           style="width: 180px; height: 133px;")
       div(class="login-p0__title text-center")
         span(class="text-blue-1 heading-5") {{$tc('NN0168',2)}}
@@ -12,12 +12,12 @@ div(style="position: relative;")
         div(class="login-p0__fb")
           btn(@click="onFacebookClicked()"
             :type="'icon-mid-body'")
-          img(:src="require('@/assets/img/png/facebook.png')")
+          img(:src="require('@img/png/facebook.png')")
           span(class="body-2") {{$t('NN0178', {media:'Facebook'})}}
         div(class="login-p0__google")
           btn(@click="onGoogleClicked()"
             :type="'icon-mid-body'")
-          img(:src="require('@/assets/img/png/google.png')")
+          img(:src="require('@img/png/google.png')")
           span(class="body-2") {{$t('NN0178', {media:'Google'})}}
         div(class="login-p0__hr")
           span {{$t('NN0179')}}

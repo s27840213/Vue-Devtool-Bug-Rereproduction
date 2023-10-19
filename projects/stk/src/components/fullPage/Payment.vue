@@ -122,27 +122,27 @@ export default defineComponent({
         {
           key: 'template',
           title: this.$t('STK0071'),
-          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-template.png`)
+          img: require(`@img/png/pricing/${this.$i18n.locale}/vivisticker_pro-template.png`)
         },
         {
           key: 'frame',
           title: this.$t('STK0049'),
-          img: require('@/assets/img/png/pricing/vivisticker_frame.png')
+          img: require('@img/png/pricing/vivisticker_frame.png')
         },
         {
           key: 'object',
           title: this.$t('STK0051'),
-          img: require('@/assets/img/png/pricing/vivisticker_pro-object.png')
+          img: require('@img/png/pricing/vivisticker_pro-object.png')
         },
         {
           key: 'text',
           title: this.$t('STK0050'),
-          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-text.png`)
+          img: require(`@img/png/pricing/${this.$i18n.locale}/vivisticker_pro-text.png`)
         },
         {
           key: 'bg-remove',
           title: this.$t('STK0083'),
-          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-bg-remove.png`)
+          img: require(`@img/png/pricing/${this.$i18n.locale}/vivisticker_pro-bg-remove.png`)
         }
       ] as CarouselItem[],
       footerLinks: [
