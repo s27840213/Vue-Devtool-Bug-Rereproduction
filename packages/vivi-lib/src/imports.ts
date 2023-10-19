@@ -3,10 +3,7 @@ import axios from '@/apis'
 import authToken from '@/apis/auth-token'
 import design from '@/apis/design'
 import designInfo from '@/apis/design-info'
-import errorHandle from '@/apis/errorHandle'
-import imageApi from '@/apis/image-api'
 import list from '@/apis/list'
-import textEffect from '@/apis/textEffect'
 import userApis from '@/apis/user'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
@@ -47,9 +44,11 @@ import ColorBtn from '@/components/global/ColorBtn.vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
+import Tags from '@/components/global/Tags.vue'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
+import LinkOrText from '@/components/LinkOrText.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -63,42 +62,24 @@ import {
   isIAssetPhoto,
 } from '@/interfaces/api'
 import {
-  isITextBox,
-  isITextFillCustom,
-  isITextGooey,
-  isITextLetterBg,
-  isITextSpeechBubble,
-  isITextUnderline,
-  isTextFill,
-  tailPositions,
-  textStyleCopiedFormatKeys,
-} from '@/interfaces/format'
-import {
   ShadowEffectType,
 } from '@/interfaces/imgShadow'
 import {
-  jsonVer,
-} from '@/interfaces/layer'
-import {
   _IPaymentWarningView,
 } from '@/interfaces/payment'
+import {
+  isV1_42,
+} from '@/interfaces/vivisticker'
+import mobilePanel from '@/mixin/mobilePanel'
 import router from '@/router'
 import store from '@/store'
-import background from '@/store/module/background'
 import {
   bgRemoveMoveHandler,
 } from '@/store/module/bgRemove'
-import font from '@/store/module/font'
 import listFactory from '@/store/module/listFactory'
-import markers from '@/store/module/markers'
-import objects from '@/store/module/objects'
-import templates from '@/store/module/templates'
-import textStock from '@/store/module/text'
-import text from '@/store/text'
 import {
   ColorEventType,
   FunctionPanelType,
-  LayerProcessType,
   LayerType,
   LineTemplatesType,
   MobileColorPanelType,
@@ -106,7 +87,9 @@ import {
   SidebarPanelType,
 } from '@/store/types'
 import apiUtils from '@/utils/apiUtils'
-import assetUtils from '@/utils/assetUtils'
+import assetUtils, {
+  RESIZE_RATIO_IMAGE,
+} from '@/utils/assetUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -137,6 +120,7 @@ import hintUtils from '@/utils/hintUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, {
+  CANVAS_MAX_SIZE,
   fieldRange,
   shadowPropI18nMap,
 } from '@/utils/imageShadowUtils'
@@ -144,6 +128,7 @@ import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import localeUtils from '@/utils/localeUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
 import logUtils from '@/utils/logUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import mathUtils from '@/utils/mathUtils'
@@ -167,6 +152,8 @@ import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import snapUtils from '@/utils/snapUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
+import svgIconUtils from '@/utils/svgIconUtils'
 import swipeDetector from '@/utils/SwipeDetector'
 import textFillUtils, {
   replaceImgInject,
@@ -183,6 +170,7 @@ import unitUtils, {
   STR_UNITS,
 } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import EmojiTest from '@/views/EmojiTest.vue'
 import NativeEventTester from '@/views/NativeEventTester.vue'
 import SvgIconView from '@/views/SvgIconView.vue'
 
@@ -191,10 +179,7 @@ import SvgIconView from '@/views/SvgIconView.vue'
   authToken,
   design,
   designInfo,
-  errorHandle,
-  imageApi,
   list,
-  textEffect,
   userApis,
   CategoryBackgroundItem,
   CategoryGroupTemplateItem,
@@ -235,9 +220,11 @@ import SvgIconView from '@/views/SvgIconView.vue'
   ImageCarousel,
   MarkerIcon,
   SlideToggle,
+  Tags,
   ImageGallery,
   FontSizeSelector,
   LazyLoad,
+  LinkOrText,
   ModalCard,
   ResInfo,
   ObserverSentinel,
@@ -248,32 +235,16 @@ import SvgIconView from '@/views/SvgIconView.vue'
   ValueSelector,
   i18n,
   isIAssetPhoto,
-  isITextBox,
-  isITextFillCustom,
-  isITextGooey,
-  isITextLetterBg,
-  isITextSpeechBubble,
-  isITextUnderline,
-  isTextFill,
-  tailPositions,
-  textStyleCopiedFormatKeys,
   ShadowEffectType,
-  jsonVer,
   _IPaymentWarningView,
+  isV1_42,
+  mobilePanel,
   router,
   store,
-  background,
   bgRemoveMoveHandler,
-  font,
   listFactory,
-  markers,
-  objects,
-  templates,
-  textStock,
-  text,
   ColorEventType,
   FunctionPanelType,
-  LayerProcessType,
   LayerType,
   LineTemplatesType,
   MobileColorPanelType,
@@ -281,6 +252,7 @@ import SvgIconView from '@/views/SvgIconView.vue'
   SidebarPanelType,
   apiUtils,
   assetUtils,
+  RESIZE_RATIO_IMAGE,
   backgroundUtils,
   bgRemoveUtils,
   brandkitUtils,
@@ -308,12 +280,14 @@ import SvgIconView from '@/views/SvgIconView.vue'
   imageAdjustUtil,
   imageShadowPanelUtils,
   imageShadowUtils,
+  CANVAS_MAX_SIZE,
   fieldRange,
   shadowPropI18nMap,
   imageUtils,
   layerFactary,
   layerUtils,
   localeUtils,
+  localStorageUtils,
   logUtils,
   mappingUtils,
   mathUtils,
@@ -333,6 +307,8 @@ import SvgIconView from '@/views/SvgIconView.vue'
   shortcutUtils,
   snapUtils,
   stepsUtils,
+  stkWVUtils,
+  svgIconUtils,
   swipeDetector,
   textFillUtils,
   replaceImgInject,
@@ -346,6 +322,7 @@ import SvgIconView from '@/views/SvgIconView.vue'
   PRECISION,
   STR_UNITS,
   uploadUtils,
+  EmojiTest,
   NativeEventTester,
   SvgIconView,
 )

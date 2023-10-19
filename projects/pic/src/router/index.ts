@@ -241,6 +241,11 @@ if (window.location.host !== 'vivipic.com') {
     name: 'NativeEventTester',
     component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
   })
+  routes.push({
+    path: 'emoji',
+    name: 'EmojiTest',
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
+  })
 }
 
 router.addRoute({

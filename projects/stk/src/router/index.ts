@@ -111,7 +111,7 @@ if (window.location.host !== 'sticker.vivipic.com') {
   routes.push({
     path: 'emoji',
     name: 'EmojiTest',
-    component: () => import('@/views/EmojiTest.vue')
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
   })
 }
 
