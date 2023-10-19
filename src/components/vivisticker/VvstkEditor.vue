@@ -270,7 +270,7 @@ export default defineComponent({
       }
     },
     // the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
-    // is bcz the native click/tap event is triggered as the event happen in a-short-time even the layer has moved a little position,
+    // is bcz the native click/tap event is triggered as the event happened in a-short-time even the layer has moved a little position,
     // this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
     selectEnd(e: PointerEvent) {
       console.warn('select end')
@@ -285,11 +285,6 @@ export default defineComponent({
             this.$store.commit('SET_STATE', { controlState: { type: '' } })
           }
           const layer = layerUtils.getCurrLayer
-          // if (layer.type !== 'text' || !controlUtils.isClickOnController(e, layer)) {
-          //   groupUtils.deselect()
-          //   this.movingUtils?.removeListener()
-          //   console.log(123)
-          // }
           if (!controlUtils.isClickOnController(e, layer)) {
             groupUtils.deselect()
             this.movingUtils?.removeListener()

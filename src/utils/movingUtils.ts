@@ -38,6 +38,7 @@ export class MovingUtils {
   private _moveEnd = null as unknown
   private _cursorDragEnd = null as unknown
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
+  private isFollowByPinch = false
 
   private isTouchDevice = generalUtils.isTouchDevice()
   private isClickOnController = false
@@ -142,7 +143,8 @@ export class MovingUtils {
     this.removeListener()
   }
 
-  moveStart(event: MouseEvent | TouchEvent | PointerEvent, pointerId?: number) {
+  moveStart(event: MouseEvent | TouchEvent | PointerEvent, params?: { pointerId?: number, isFollowByPinch?: boolean }) {
+    const { pointerId, isFollowByPinch = false } = params || {}
     const eventType = eventUtils.getEventType(event)
     if (eventType === 'pointer') {
       pointerEvtUtils.addPointer(event as PointerEvent)
@@ -166,6 +168,7 @@ export class MovingUtils {
       this.pointerId = (event as PointerEvent).pointerId
     }
 
+    this.isFollowByPinch = isFollowByPinch
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
     this._initPos = mouseUtils.getMouseAbsPoint(event)
@@ -565,10 +568,12 @@ export class MovingUtils {
       x: Math.abs(pageUtils.getCurrPage.x - this.initPageTranslate.x),
       y: Math.abs(pageUtils.getCurrPage.y - this.initPageTranslate.y)
     }
+    console.log((e as any).x, this._initPos.x)
+    console.log((e as any).y, this._initPos.y)
     const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
 
-    // console.log('hasActualMove', hasActualMove)
+    console.log('hasActualMove', hasActualMove)
     if (this.isControllerShown) {
       if (hasActualMove) {
         shortcutUtils.offsetCount = 0
@@ -613,7 +618,7 @@ export class MovingUtils {
           }
         }
       } else {
-        if (this.getLayerType === 'text' && controlUtils.isClickOnController(e as PointerEvent, this.config as AllLayerTypes)) {
+        if (this.getLayerType === 'text' && controlUtils.isClickOnController(e as PointerEvent, this.config as AllLayerTypes) && !this.isFollowByPinch) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
           if (this.isTouchDevice) {
             if (!this.movingByControlPoint) {
@@ -687,7 +692,6 @@ export class MovingUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
       })
-      // this.component && this.component.$emit('isDragging', -1)
     }
 
     this.isDoingGestureAction = false

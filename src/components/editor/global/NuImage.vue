@@ -50,7 +50,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :is="child.tag"
                 v-bind="child.attrs")
         image(ref="img"
-          :filter="`url(#${filterId})`"
+          :filter="`url(#${!isCurrLayerPinched ? filterId : ''})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
@@ -387,6 +387,12 @@ export default defineComponent({
         (this.$isTouchDevice() && this.showCanvas) // Wait for mobile shadow process/upload/download/load, for imageShadow command.
       ) return false
       return true
+    },
+    isCurrLayerPinched(): boolean {
+      const controlState = this.$store.getters.getControlState
+      if (controlState.layerInfo) {
+        return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
+      } else return false
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config

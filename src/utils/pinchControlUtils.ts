@@ -188,7 +188,7 @@ export default class PinchControlUtils {
       const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
       // console.log('pinch end', pointerEvtUtils.pointers, pointerEvtUtils.pointers[0], nativeEvt.touches.length)
       if (isHasOnePtrEvt && isLayerExist) {
-        this.movingUtils.moveStart(nativeEvt, pointerEvtUtils.pointerIds[0] ?? 0)
+        this.movingUtils.moveStart(nativeEvt, { pointerId: pointerEvtUtils.pointerIds[0] ?? 0, isFollowByPinch: true })
       }
     }
   }

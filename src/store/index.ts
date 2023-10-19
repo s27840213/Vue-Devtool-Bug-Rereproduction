@@ -367,9 +367,6 @@ const mutations: MutationTree<IEditorState> = {
     keys
       .forEach(key => {
         if (key in state) {
-          // if (key === 'controlState') {
-          //   console.error('controlState!!', newState[key])
-          // }
           (state[key] as unknown) = newState[key]
         }
       })
