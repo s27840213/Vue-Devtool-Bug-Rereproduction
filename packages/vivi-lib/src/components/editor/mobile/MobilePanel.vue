@@ -17,7 +17,7 @@ div(class="mobile-panel"
         svg-icon(
           class="click-disabled"
           :iconName="leftBtnName"
-          :iconColor="'white'"
+          :iconColor="whiteTheme ? 'gray-2' : 'white'"
           :iconWidth="insertTheme ? '32px' : '20px'")
         div(class="mobile-panel__btn-click-zone"
           :class="{'insert-left': insertTheme}"
@@ -33,7 +33,7 @@ div(class="mobile-panel"
         svg-icon(
           class="click-disabled"
           :iconName="rightBtnName"
-          :iconColor="'white'"
+          :iconColor="whiteTheme ? 'gray-2' : 'white'"
           :iconWidth="insertTheme ? '24px' : '20px'")
         div(class="mobile-panel__btn-click-zone"
           :class="{'insert-right': insertTheme}"

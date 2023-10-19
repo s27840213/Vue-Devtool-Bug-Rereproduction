@@ -1,18 +1,18 @@
 <script lang="ts">
 import ColorPanel from '@/components/editor/ColorSlips.vue'
+import PanelAddTemplate from '@/components/editor/panelMobile/PanelAddTemplate.vue'
 import PanelBackground from '@/components/editor/panelMobile/PanelBackground.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
 import PanelGiphyMore from '@/components/editor/panelMobile/PanelGiphyMore.vue'
 import PanelMyDesignMore from '@/components/editor/panelMobile/PanelMyDesignMore.vue'
 import PanelObject from '@/components/editor/panelMobile/PanelObject.vue'
-import PanelText from '@/components/editor/panelMobile/PanelText.vue'
-import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
-import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
-import PanelAddTemplate from '@/components/editor/panelMobile/PanelAddTemplate.vue'
 import PanelPageManagement from '@/components/editor/panelMobile/PanelPageManagement.vue'
 import PanelReplace from '@/components/editor/panelMobile/PanelReplace.vue'
 import PanelTemplateContent from '@/components/editor/panelMobile/PanelTemplateContent.vue'
+import PanelText from '@/components/editor/panelMobile/PanelText.vue'
+import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
+import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import PanelTextUs from '@/components/us/PanelText.vue'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
@@ -88,14 +88,14 @@ export default defineComponent({
       keepAlivePanels: ['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText'],
       // eslint-disable-next-line vue/no-unused-properties
       noPaddingPanels: ['text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'],
-      // eslint-disable-next-line vue/no-unused-properties
-      whiteThemePanels: [
-        'replace', 'crop', 'bgRemove', 'position', 'flip', 'remove-bg',
-        'opacity', 'order', 'fonts', 'font-size', 'text-effect',
-        'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
-        'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design',
-        'multiple-select', 'nudge'],
+      // // eslint-disable-next-line vue/no-unused-properties
+      // whiteThemePanels: [
+      //   'replace', 'crop', 'bgRemove', 'position', 'flip', 'remove-bg',
+      //   'opacity', 'order', 'fonts', 'font-size', 'text-effect',
+      //   'font-format', 'font-spacing', 'download', 'more', 'color',
+      //   'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
+      //   'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design',
+      //   'multiple-select', 'nudge'],
       // eslint-disable-next-line vue/no-unused-properties
       fixSizePanels: [
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
@@ -211,13 +211,12 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     showLeftBtn(): boolean {
-      if (this.whiteTheme) return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.extraPanel !== ''
       if (this.extraPanel === 'replace') return true
       if (this.currActivePanel === 'text' && this.isTextInCategory) return true
       if (this.currActivePanel === 'object' && this.isObjectInCategory) return true
       if (this.currActivePanel === 'background' && this.isBackgroundInCategory) return true
       if (this.currActivePanel === 'template-content' && (this.isTemplateInCategory || this.isInGroupTemplate)) return true
-      return false
+      return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.extraPanel !== ''
     },
     // eslint-disable-next-line vue/no-unused-properties
     panelBg(): string {
@@ -319,17 +318,17 @@ export default defineComponent({
       if (this.insertTheme) {
         return 'vivisticker_back'
       } else {
-        return 'back-circle'
+        return 'panel-back'
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
     rightBtnName(): string {
       if (this.insertTheme) {
         return 'vivisticker_close'
-      } else if (this.currActivePanel === 'color-picker') {
-        return 'check-mobile-circle'
+      } else if (this.bgRemoveMode || (this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['color-picker'].includes(this.currActivePanel)) {
+        return 'panel-done'
       } else {
-        return 'close-circle'
+        return 'panel-close'
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
