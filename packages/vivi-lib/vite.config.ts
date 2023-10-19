@@ -8,6 +8,10 @@ import svgSpritePlugin from 'vite-plugin-svg-sprite'
 import extractImg from '../../tools/vite-plugin-lib-extract-img'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
 
+function resolve(...dir: string[]) {
+  return path.join(__dirname, ...dir)
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
