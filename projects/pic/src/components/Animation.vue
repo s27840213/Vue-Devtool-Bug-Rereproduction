@@ -5,7 +5,7 @@ div(class="animation")
     :style="lottieStyle" ref="lavContainer")
   video(v-if="isMp4"
     class="video"
-    :src="require(`@/assets/img/svg/homepage/${mp4FileName}`)"
+    :src="require(`@img/svg/homepage/${mp4FileName}`)"
     :width="width"
     :height="height"
     type="video/mp4"

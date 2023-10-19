@@ -4,7 +4,6 @@ import * as path from 'path'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
-import svgSpritePlugin from 'vite-plugin-svg-sprite'
 import extractImg from '../../tools/vite-plugin-lib-extract-img'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
 
@@ -26,16 +25,12 @@ export default defineConfig({
     //   imports: ['vue', 'vue-router', 'vue-i18n'],
     //   dts: 'src/auto-import.d.ts'
     // })
-    svgSpritePlugin({
-      symbolId: '[name]',
-      svgo: false,
-      include: '**/src/assets/icon/**/*.svg'
-    }),
     viteStaticCopy({
       targets: [{
         src: [
           path.resolve(__dirname, 'src/assets/scss').replace(/\\/g, '/'),
           path.resolve(__dirname, 'src/assets/icon').replace(/\\/g, '/'),
+          path.resolve(__dirname, 'src/assets/img').replace(/\\/g, '/'),
         ],
         dest: 'src/assets',
       }]

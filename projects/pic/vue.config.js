@@ -41,8 +41,8 @@ const CopyPlugin = require('copy-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
 
-function resolve(dir) {
-  return path.join(__dirname, dir)
+function resolve(...dir) {
+  return path.join(__dirname, ...dir)
 }
 
 module.exports = defineConfig({
@@ -207,7 +207,7 @@ module.exports = defineConfig({
         if (err) console.error(err)
       })
       config.plugin('html').tap((args) => {
-        args[0].template = path.join(__dirname, 'public', 'index.html')
+        args[0].template = resolve('public', 'index.html')
         args[0].filename = 'app.html'
         return args
       })
@@ -223,8 +223,8 @@ module.exports = defineConfig({
     //   config.plugin('prerender').use(PrerenderSPAPlugin, [
     //     {
     //       // Tell the Pre-SPA plugin not to use index.html as its template file.
-    //       indexPath: path.join(__dirname, 'dist', 'app.html'),
-    //       staticDir: path.join(__dirname, 'dist'),
+    //       indexPath: resolve('dist', 'app.html'),
+    //       staticDir: resolve('dist'),
     //       routes: [
     //         '/',
     //         '/tw',
@@ -310,13 +310,14 @@ module.exports = defineConfig({
     resolve: {
       alias: {
         // Use shaked i18n JSON for prod.
-        '@i18n': path.resolve(
-          __dirname,
-          process.env.NODE_ENV === 'production' ? 'src/i18n/shaked/' : '../../tools/i18n-tool/result'
+        '@i18n': resolve(
+          process.env.NODE_ENV === 'production' 
+            ? 'src/i18n/shaked/'
+            : '../../tools/i18n-tool/result'
         ),
-        '@': path.resolve(__dirname, 'src/'),
+        '@img': resolve('../../packages/vivi-lib/dist/src/assets/img'),
+        '@': resolve('src/'),
       },
-      extensions: ['.ts', '.vue', '.json']
     }
   }
 })
