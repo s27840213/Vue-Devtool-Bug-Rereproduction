@@ -262,16 +262,25 @@
   align-items: center;
   padding: 8px 16px;
   border-radius: 0.25rem;
-  background-color: setColor(gray-5);
-  color: setColor(gray-1);
+
+  @include setColors(gray-5, black-3) using ($color) {
+    background-color: $color;
+  }
+
+  @include setColors(gray-1, white) using ($color) {
+    color: $color;
+  }
+
   transition: color 0.2s;
 
-  &:active {
-    color: setColor(blue-1);
-    font-weight: bold;
+  @include setColors(blue-1, black-5) using ($color) {
+    &:active {
+      color: $color;
+      font-weight: bold;
 
-    &:deep(.svg-icon) {
-      color: setColor(blue-1);
+      &:deep(.svg-icon) {
+        color: $color;
+      }
     }
   }
 }
