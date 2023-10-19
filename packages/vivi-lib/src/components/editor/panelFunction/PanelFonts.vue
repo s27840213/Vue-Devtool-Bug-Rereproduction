@@ -94,7 +94,7 @@ export default defineComponent({
       showMore: 'showMore',
     }),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
-    ...mapGetters('font', ['hasNextPage']),
+    ...mapGetters('font', ['hasNextPage', 'pending']),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
     }),
@@ -110,9 +110,6 @@ export default defineComponent({
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
-    },
-    pending() {
-      return this.$isPic ? this.$store.state.font.pending : this.$store.getters['font/pending']
     },
     ...vuexUtils.mapGetters('pic', {
       privateFonts: [] as IBrandFont[],

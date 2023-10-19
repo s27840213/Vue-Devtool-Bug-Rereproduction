@@ -1,3 +1,4 @@
+import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IUploadAssetResponse } from '@/interfaces/upload'
@@ -11,9 +12,8 @@ import layerUtils from './layerUtils'
 import logUtils from './logUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
-import uploadUtils from './uploadUtils'
 import stkWVUtils from './stkWVUtils'
-import { SrcObj } from '@/interfaces/gallery'
+import uploadUtils from './uploadUtils'
 
 export default new class ImageShadowPanelUtils {
   private get fieldRange() {
@@ -150,7 +150,7 @@ export default new class ImageShadowPanelUtils {
     logUtils.setLog('phase: start upload shadow')
     setMark('upload', 0)
     if (layerData) {
-      imageShadowUtils.clearHandler()
+      // imageShadowUtils.clearHandler()
       const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
       const layerId = primarylayerId || config.id || ''
@@ -275,14 +275,15 @@ export default new class ImageShadowPanelUtils {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
         case ShadowEffectType.frame: {
-          await imageShadowUtils.drawShadow([updateCanvas], img, config, params)
+          await imageShadowUtils.drawShadow([updateCanvas], config, params)
           break
         }
         case ShadowEffectType.imageMatched:
           await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, params)
+
           break
         case ShadowEffectType.floating:
-          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, params)
+          await imageShadowUtils.drawFloatingShadow([updateCanvas], config, params)
           break
         case ShadowEffectType.none:
           return
@@ -389,7 +390,7 @@ export default new class ImageShadowPanelUtils {
                     })
                     const shadow = config.styles.shadow
                     shadowUpdater(pageIndex, layerIndex, subLayerIdx, shadow, srcObj, shadowImgStyles)
-  
+
                     logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
                     src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))}
                     pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIdx}
@@ -451,8 +452,13 @@ export default new class ImageShadowPanelUtils {
       } else {
         src += `?isSvgRand=${generalUtils.generateRandomString(6)}`
       }
-      const res = await new Promise<Response>((resolve) => resolve(fetch(src, { method: 'HEAD' })))
-      return await res.headers.get('Content-Type') === 'image/svg+xml'
+      const res = await new Promise<Response | undefined>((resolve) => resolve(fetch(src, { method: 'HEAD' })))
+        .catch(() => {
+          console.log('fetch isSvg error')
+        })
+      if (res) {
+        return await res.headers.get('Content-Type') === 'image/svg+xml'
+      } else return false
     } else return false
   }
 

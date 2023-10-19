@@ -14,8 +14,8 @@ import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
-import Screenshot from '../views/Screenshot.vue'
-import ViviSticker from '../views/ViviSticker.vue'
+import Screenshot from '@/views/Screenshot.vue'
+import ViviSticker from '@/views/ViviSticker.vue'
 import router from '@nu/vivi-lib/router'
 
 declare let window: CustomWindow

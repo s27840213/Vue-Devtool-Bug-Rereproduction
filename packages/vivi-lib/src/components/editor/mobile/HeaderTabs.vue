@@ -10,9 +10,9 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
 </template>
 
 <script lang="ts">
-import LinkOrText from '@/components/LinkOrText.vue'
-import HeaderTab, { TabConfig } from '@/components/editor/mobile/HeaderTab.vue'
-import { PropType, defineComponent } from 'vue'
+import LinkOrText from '@/components/LinkOrText.vue';
+import HeaderTab, { TabConfig } from '@/components/editor/mobile/HeaderTab.vue';
+import { PropType, defineComponent } from 'vue';
 
 export default defineComponent({
   props: {
@@ -63,6 +63,8 @@ export default defineComponent({
     padding-right: 16px;
   }
   @include stk {
+    height: 44px;
+    box-sizing: border-box;
     padding-left: 24px;
     padding-right: 24px;
   }

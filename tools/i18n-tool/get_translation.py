@@ -6,7 +6,7 @@ import numpy as np
 from i18n_shake import main as shake
 from util import bcolors, find_project_root
 
-PROJECTS = ['vivipic', 'stk', 'charmix']
+PROJECTS = ['pic', 'stk', 'cm']
 
 ROOT = find_project_root(os.getcwd())
 

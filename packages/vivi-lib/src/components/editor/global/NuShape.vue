@@ -18,7 +18,7 @@ import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
 
 const FILTER_X = '$fx'
@@ -74,6 +74,10 @@ export default defineComponent({
     priPrimaryLayerIndex: {
       type: Number,
       default: -1
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
     }
   },
   data() {
@@ -279,8 +283,8 @@ export default defineComponent({
         switch (this.config.category) {
           case 'D': {
             size = {
-              width: `${this.config.styles.initWidth}px`,
-              height: `${this.config.styles.initHeight}px`
+              width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
+              height: `${this.config.styles.initHeight * this.contentScaleRatio}px`
             }
             break
           }
