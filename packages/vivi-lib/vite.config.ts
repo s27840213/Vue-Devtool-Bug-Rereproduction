@@ -7,6 +7,10 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 import extractImg from '../../tools/vite-plugin-lib-extract-img'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
 
+function resolve(...dir) {
+  return path.join(__dirname, ...dir)
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -28,9 +32,9 @@ export default defineConfig({
     viteStaticCopy({
       targets: [{
         src: [
-          path.resolve(__dirname, 'src/assets/scss').replace(/\\/g, '/'),
-          path.resolve(__dirname, 'src/assets/icon').replace(/\\/g, '/'),
-          path.resolve(__dirname, 'src/assets/img').replace(/\\/g, '/'),
+          resolve('src/assets/scss').replace(/\\/g, '/'),
+          resolve('src/assets/icon').replace(/\\/g, '/'),
+          resolve('src/assets/img').replace(/\\/g, '/'),
         ],
         dest: 'src/assets',
       }]
@@ -65,7 +69,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src')
+      '@img': resolve('src/assets/img'),
+      '@': resolve('src')
     }
   },
   css: {
