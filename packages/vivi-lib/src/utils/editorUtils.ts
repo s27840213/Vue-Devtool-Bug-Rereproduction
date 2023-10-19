@@ -124,7 +124,6 @@ class EditorUtils {
     if (generalUtils.isTouchDevice()) {
       const page = pageUtils.getPage(pageIndex)
       const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
-      console.warn('contentScaleRatio', contentScaleRatio)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
       const pos = {
         x: (editorUtils.mobileSize.width - page.width * this.contentScaleRatio) * 0.5,

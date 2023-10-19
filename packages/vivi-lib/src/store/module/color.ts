@@ -1,8 +1,8 @@
 import list from '@/apis/list'
 import _ from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
-import store from '..'
-import { IEditorState } from '../types'
+import store from '@/store'
+import { IEditorState } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 
 export interface IColorState {

@@ -17,8 +17,9 @@
       "./dist/src/assets/scss/*"
     ],
     "./*": [
-      "./dist/src/*/index.es.js",
-      "./dist/src/*.es.js"
+      "./dist/src/*.es.js",
+      "./dist/src/*",
+      "./dist/src/*/index.es.js"
     ]
   },
   "scripts": {

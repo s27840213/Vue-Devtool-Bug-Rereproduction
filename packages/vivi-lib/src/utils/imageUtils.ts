@@ -1,4 +1,5 @@
 import imageApi from '@/apis/image-api'
+import frameDefaultImg from '@/assets/img/svg/frame.svg'
 import { IAssetPhoto, IImageSize, IPhotoItem, IUserImageContentData, isIAssetPhoto } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
@@ -7,17 +8,16 @@ import { IBounding, ISize } from '@/interfaces/math'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IShadowAsset } from '@/store/module/shadow'
-import { AxiosPromise } from 'axios'
-import { cloneDeep, findLastIndex } from 'lodash'
+import { LayerType } from '@/store/types'
+import { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
-import frameDefaultImg from '@/assets/img/svg/frame.svg'
-import { LayerType } from '@/store/types'
-import { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import { AxiosPromise } from 'axios'
+import { cloneDeep, findLastIndex } from 'lodash'
 
 const APP_VER_FOR_REFRESH_CACHE = 'v7576'
 
@@ -226,6 +226,7 @@ class ImageUtils {
     if (src.includes('asset.vivipic')) {
       return src.includes('logo') ? 'logo-private' : 'private'
     }
+    if (src.startsWith('data:image')) return ''
     throw Error(`Unexpected getSrcType result for src '${src}'.`)
   }
 
@@ -263,9 +264,10 @@ class ImageUtils {
         return src.match(/svg\/(\w+)\//)?.[1] ?? ''
       }
       case 'ios': {
-        return src.match(/vvstk:\/\/(\w+)/)?.[1] ?? ''
+        return src.match(/vvstk:\/\/(.+)/)?.[1] ?? ''
       }
       default:
+        if (type === '' && src.startsWith('data:image')) return ''
         throw Error(`Unexpected getAssetId type '${type}' for src '${src}'.`)
     }
   }

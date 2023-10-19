@@ -7,7 +7,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { GetterTree, MutationTree } from 'vuex'
-import { IEditorState, ILayerInfo, LayerType } from '../types'
+import { IEditorState, ILayerInfo, LayerType } from '@/store/types'
 
 const SET_CONFIG = 'SET_CONFIG' as const
 const SET_BG_CONFIG = 'SET_BG_CONFIG' as const

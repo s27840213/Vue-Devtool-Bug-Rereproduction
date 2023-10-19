@@ -603,13 +603,9 @@ export class MovingUtils {
             }
           }
           if (this.config.contentEditable) {
-            if (generalUtils.isPic) {
+            nextTick(() => {
               tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
-            } else {
-              nextTick(() => {
-                tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
-              })
-            }
+            })
             if (!this.config.isEdited) {
               setTimeout(() => {
                 tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())

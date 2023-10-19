@@ -8,7 +8,7 @@ const i18n = createI18n({
   messages: {} as Record<LocaleName, Record<string, string>>,
   globalInjection: true,
   legacy: true,
-  postTranslation: (translated: unknown) => {
+  postTranslation: (translated: string | unknown[] | unknown[]) => {
     if (typeof translated === 'string') {
       return translated
         .replace(/<blue>/g, '<span class="text-blue-1">')
