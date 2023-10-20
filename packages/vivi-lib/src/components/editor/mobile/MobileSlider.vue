@@ -149,17 +149,6 @@ export default defineComponent({
     position: relative;
   }
 
-  &__range-input.light {
-    --lower-color: #{setColor(gray-6)};
-    --upper-color: #{setColor(gray-2)};
-    &::-webkit-slider-thumb {
-      border-color: setColor(white);
-    }
-    &::-moz-range-thumb {
-      border-color: setColor(white);
-    }
-  }
-
   &__range-input-top {
     position: absolute;
     top: 50%;

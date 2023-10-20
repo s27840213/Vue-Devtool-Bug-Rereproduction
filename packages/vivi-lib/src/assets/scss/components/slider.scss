@@ -4,15 +4,15 @@
   &__slider {
     &--range {
       @include setColors(blue-1, black-5) using ($color) {
-        @include progressSlider(
-          $height: 3px,
+        @include progressSlider($height: 3px,
           $thumbSize: 16px,
           $marginTop: -6.5px,
           $thumbColor: setColor(white),
           $border: 2px solid $color,
-          $boxShadow: none
-        );
-      };
+          $boxShadow: none);
+      }
+
+      ;
 
       @if $type=='top' {
         &::-webkit-slider-thumb {
@@ -29,22 +29,37 @@
       }
 
       margin: auto;
+
       @include setColors(blue-1, black-5) using ($color) {
         --lower-color: #{$color};
       }
+
       @include setColors(gray-4, black-6) using ($color) {
         --upper-color: #{$color};
-  
+
         &[disabled] {
           &::-webkit-slider-thumb {
             border: 2px solid $color;
           }
-  
+
           &::-moz-range-thumb {
             border: 2px solid $color;
           }
-  
+
           --lower-color: #{$color};
+        }
+      }
+
+      &.light {
+        --lower-color: #{setColor(white)};
+        --upper-color: #{setColor(black-3-5)};
+
+        &::-webkit-slider-thumb {
+          border-color: setColor(white);
+        }
+
+        &::-moz-range-thumb {
+          border-color: setColor(white);
         }
       }
 
