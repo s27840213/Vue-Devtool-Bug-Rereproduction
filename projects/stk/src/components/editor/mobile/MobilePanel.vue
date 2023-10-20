@@ -87,7 +87,7 @@ export default defineComponent({
       // eslint-disable-next-line vue/no-unused-properties
       keepAlivePanels: ['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText'],
       // eslint-disable-next-line vue/no-unused-properties
-      noPaddingPanels: ['text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'select-design', 'text-effect', 'add-template', 'page-management'],
+      noPaddingPanels: ['text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'giphy-more', 'select-design', 'text-effect', 'add-template', 'page-management'],
       // // eslint-disable-next-line vue/no-unused-properties
       // whiteThemePanels: [
       //   'replace', 'crop', 'bgRemove', 'position', 'flip', 'remove-bg',
