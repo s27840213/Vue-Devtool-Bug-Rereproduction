@@ -16,8 +16,12 @@ export const useModalStore = defineStore('modal', () => {
     content: 'tmp tmp tmp tmp',
     confirmText: '1234',
     cancelText: '4567',
-    confirm: () => {},
-    cancel: () => {}
+    confirm: () => {
+      console.log('confirm')
+    },
+    cancel: () => {
+      console.log('cancel')
+    },
   })
 
   const setNormalModalInfo = (newModalInfo: INormalModal) => {
@@ -38,8 +42,12 @@ export const useModalStore = defineStore('modal', () => {
       content: '',
       confirmText: '',
       cancelText: '',
-      confirm: () => {},
-      cancel: () => {}
+      confirm: () => {
+        console.log('confirm')
+      },
+      cancel: () => {
+        console.log('cancel')
+      },
     })
   }
   return { isModalOpen, modalInfo, setNormalModalInfo, closeModal, openModal }

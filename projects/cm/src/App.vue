@@ -1,13 +1,31 @@
 <template lang="pug">
-div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
-  div(
-    v-if="isModalOpen"
-    class="mask"
-    ref="maskRef"
-    @click.stop="closeModal")
-  router-view(class="pb-12" v-slot="{ Component }")
+div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative")
+  div(class="main-page-headerbar w-full flex justify-between items-center px-16"
+      ref="headerbarRef"
+      :style="headerbarStyles")
+    router-link(
+      custom
+      :to="'/'"
+      v-slot="{ navigate }")
+      img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
+    div(class="flex justify-center items-center gap-18")
+      transition(
+          name="fade-in"
+          mode="out-in")
+        div(v-if="atMyDesign" )
+          router-link(
+            custom
+            to="/settings"
+            v-slot="{ navigate }")
+            cm-svg-icon(iconName="settings"
+              :iconColor="'app-tab-default'" @click="navigate")
+      cm-btn(
+        :theme="'primary'"
+        :hasIcon="true"
+        iconName="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
+  router-view(class="pb-12" v-slot="{ Component, route }")
     transition(
-      :name="routeTransitionName"
+      :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
   bottom-panel(class="z-20")
@@ -16,7 +34,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[minmax(0,1fr),auto]")
         name="bottom-panel-transition"
         mode="out-in")
         component(:is="bottomPanelComponent" :ref="(el: any) => setSlotRef(el)")
-  //- div(class="fixed bottom-1/4 left-4 text-app-selection") {{ atHome }} {{ atMyDesign }} {{ routeInfo.atHome }}
+  div(
+    v-if="isModalOpen"
+    class="mask"
+    ref="maskRef"
+    @click.stop="closeModal")
+  transition(name="bottom-up")
+    img-selector(v-if="showImgSelector" class="absolute top-0 left-0 w-full h-full z-30")
 </template>
 
 <script setup lang="ts">
@@ -35,25 +59,22 @@ const {
   showHomeTabs,
   showEditingOpstions,
   showPromptArea,
-  atHome,
   atMyDesign,
+  atSettings,
+  atMainPage,
+  showImgSelector,
 } = stateInfo
 // #endregion
 
 const modalStore = useModalStore()
 const { isModalOpen } = storeToRefs(modalStore)
 
-const routeTransitionName = computed(() => {
-  if (atHome.value) return 'fade-left-in'
-  if (atMyDesign.value) return 'fade-right-in'
-  return 'fade-right-in'
-})
-
 const bottomPanelComponent = computed(() => {
   switch (true) {
     case isModalOpen.value:
       return ModalTemplate
     case showHomeTabs.value:
+    case atSettings.value:
       return HomeTab
     case showAspectRatioSelector.value:
       return AspectRatioSelector
@@ -69,101 +90,27 @@ const bottomPanelComponent = computed(() => {
 const closeModal = () => {
   modalStore.closeModal()
 }
+
+const headerbarRef = ref<HTMLElement | null>(null)
+const headerbarStyles = computed(() => {
+  return {
+    height: atMainPage.value ? '72px' : '0px',
+    opacity: atMainPage.value ? 1 : 0,
+  }
+})
 </script>
 
 <style lang="scss">
+@import '@/assets/scss/transitions.scss';
 .mask {
   @apply w-full h-full fixed top-0 left-0 z-10  backdrop-blur-sm;
   transition: backdrop-filter 0.25;
   background-color: rgba(#050505, 0.5);
 }
 
-.fade-right-in {
-  &-enter-active,
-  &-leave-active {
-    transition:
-      opacity 0.25s,
-      transform 0.25s;
-  }
-
-  &-enter-from {
-    opacity: 0;
-    transform: translateX(50%);
-  }
-  &-leave-to {
-    opacity: 0;
-    transform: translateX(-50%);
-  }
-}
-
-.fade-right-in-out {
-  &-enter-active,
-  &-leave-active {
-    transition:
-      opacity 0.25s,
-      transform 0.25s;
-  }
-
-  &-enter-from,
-  &-leave-to {
-    opacity: 0;
-    transform: translateX(50%);
-  }
-}
-
-.fade-left-in {
-  &-enter-active {
-    transition:
-      opacity 0.25s,
-      transform 0.25s;
-  }
-  &-leave-active {
-    transition:
-      opacity 0.25s,
-      transform 0.25s;
-  }
-
-  &-enter-from {
-    opacity: 0;
-    transform: translateX(-50%);
-  }
-  &-leave-to {
-    opacity: 0;
-    transform: translateX(50%);
-  }
-}
-
-.fade-left-in-out {
-  &-enter-active,
-  &-leave-active {
-    transition:
-      opacity 0.25s,
-      transform 0.25s;
-  }
-
-  &-enter-from,
-  &-leave-to {
-    opacity: 0;
-    transform: translateX(-50%);
-  }
-}
-
-.bottom-panel-transition {
-  &-enter-active {
-    transition:
-      opacity 0.25s 0.1s,
-      transform 0.25s 0.1s;
-  }
-  &-leave-active {
-    transition:
-      opacity 0.25s,
-      transform 0.25s;
-  }
-
-  &-enter-from,
-  &-leave-to {
-    opacity: 0;
-    transform: translateY(5px);
-  }
+.main-page-headerbar {
+  transition:
+    height 0.25s,
+    opacity 0.25s;
 }
 </style>

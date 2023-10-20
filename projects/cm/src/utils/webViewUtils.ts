@@ -18,11 +18,26 @@ export interface IAlbum {
   thumbId: string
 }
 
-export interface IAlbumList {
+export interface IAlbumListResponse {
   flag: number
   msg?: string
   smartAlbum: IAlbum[]
   myAlbum: IAlbum[]
+}
+
+export interface IAlbumContentResponse {
+  flag: number
+  msg?: string
+  content: string[]
+  pageIndex: number
+  nextPage?: number
+}
+
+export interface IIosResponse<T> {
+  errorMsg: string
+  eventId: string
+  hasInternalError: boolean
+  output: T
 }
 
 class WebViewUtils extends nativeAPIUtils<IUserInfo> {
@@ -55,11 +70,28 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     return userInfo as IUserInfo
   }
 
-  async getAlbumList(): Promise<IAlbumList> {
+  async getAlbumList(): Promise<IAlbumListResponse> {
     // if (this.inBrowserMode) return this.getUserInfoFromStore()
     const albumList = await this.callIOSAsAPI('GET_ALBUM_LIST', this.getEmptyMessage())
 
-    return albumList as IAlbumList
+    return albumList as IAlbumListResponse
+  }
+
+  async getAlbumContent(albumId: string, pageIndex: number): Promise<IAlbumContentResponse> {
+    // if (this.inBrowserMode) return this.getUserInfoFromStore()
+    const albumList = await this.callIOSAsAPI('GET_ALBUM_CONTENT', {
+      albumId,
+      pageIndex,
+    })
+
+    return albumList as IAlbumContentResponse
+  }
+
+  async switchDomain(url: string): Promise<void> {
+    // if (this.inBrowserMode) return this.getUserInfoFromStore()
+    await this.callIOSAsAPI('SWITCH_DOMAIN', {
+      url,
+    })
   }
 }
 

@@ -20,6 +20,7 @@ function keepVar(v: unknown) {
 keepVar(libType)
 keepVar(svgs)
 webViewUtils.setupAPIInterface()
+webViewUtils.getUserInfo()
 
 app.use(createPinia())
 app.use(router)
