@@ -157,14 +157,14 @@ export default defineComponent({
     const themeStyles: IThemeStyles = this.$isStk ? {
       bgActiveColor: 'bg-black-6',
       bgInactiveColor: 'bg-black-3',
-      bgDisabledColor: 'bg-black-5',
+      bgDisabledColor: 'bg-black-3',
       optionActiveClass: 'bg-black-6',
       optionInactiveClass: 'bg-black-3',
       markerActiveClass: 'bg-black-6',
       markerInactiveClass: 'bg-black-3',
       iconActiveColor: 'black-2',
       iconInactiveColor: 'white',
-      iconDisabledColor: 'black-3-5',
+      iconDisabledColor: 'black-5',
       markerActiveColor: '#1F1F1F',
       markerInactiveColor: 'white',
     } : {
