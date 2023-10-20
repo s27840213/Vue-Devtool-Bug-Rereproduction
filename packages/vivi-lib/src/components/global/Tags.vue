@@ -145,12 +145,12 @@ export default defineComponent({
       background-color: white;
     }
     &.dark {
-      color: setColor(black-5);
+      color: white;
       background-color: setColor(black-3);
       border: none;
       &[active] {
-        color: setColor(gray-1);
-        background-color: setColor(gray-4);
+        color: setColor(black-2);
+        background-color: setColor(black-6);
       }
     }
   }

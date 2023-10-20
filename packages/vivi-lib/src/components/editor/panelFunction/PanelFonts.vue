@@ -12,10 +12,10 @@ div(class="panel-fonts")
   search-bar(placeholder="Search font"
     clear
     :defaultKeyword="keywordLabel"
-    :vivisticker="$isStk ? 'white' : undefined"
+    :vivisticker="$isStk ? 'dark' : undefined"
     @search="handleSearch")
   div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
-  font-tag(v-if="!keyword" :tags="tags"
+  font-tag(v-if="!keyword" :tags="tags" :theme="$isStk ? 'dark' : 'light'"
           @search="handleSearch" @showMore="setShowMore")
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
@@ -24,7 +24,7 @@ div(class="panel-fonts")
     template(v-if="pending" #after)
       div(class="text-center")
         svg-icon(iconName="loading"
-          iconColor="gray-1"
+          :iconColor="$isStk ? 'white' : 'gray-1'"
           iconWidth="20px")
     template(v-slot:title="{ title }")
       div(class="panel-fonts__category-title") {{ title }}
@@ -328,10 +328,11 @@ export default defineComponent({
     margin-left: auto;
   }
   &__category-title {
-    color: setColor(gray-3);
+    @include caption-LG;
+    @include setColors(gray-3, black-5) using ($color) {
+      color: $color;
+    }
     text-align: left;
-    font-size: 14px;
-    line-height: 36px;
   }
 
   &__upload {
