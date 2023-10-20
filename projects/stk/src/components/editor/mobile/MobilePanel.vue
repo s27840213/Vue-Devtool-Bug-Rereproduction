@@ -101,7 +101,8 @@ export default defineComponent({
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust',
-        'brand-list', 'vvstk-more', 'select-design', 'multiple-select', 'remove-bg'],
+        'vvstk-more', 'select-design', 'multiple-select',
+        'remove-bg', 'nudge'],
       // eslint-disable-next-line vue/no-unused-properties
       hideDynamicCompPanels: ['crop', 'copy-style', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
