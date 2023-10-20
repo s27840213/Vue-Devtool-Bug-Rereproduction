@@ -310,6 +310,7 @@ export default defineComponent({
       width: 100%;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       @include caption-LG;
       margin-bottom: 18px;
     }

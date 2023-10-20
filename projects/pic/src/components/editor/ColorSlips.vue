@@ -372,6 +372,7 @@ export default defineComponent({
       width: 100%;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       @include layout-mobile-width {
         @include caption-LG;
         margin-bottom: 18px;
