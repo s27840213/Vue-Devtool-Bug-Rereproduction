@@ -2,8 +2,8 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import { IEditorState, ILayerInfo } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
-import { IEditorState, ILayerInfo } from '../types'
 
 const UPDATE_shadowEffect = 'UPDATE_shadowEffect' as const
 const UPDATE_shadowProps = 'UPDATE_shadowProps' as const

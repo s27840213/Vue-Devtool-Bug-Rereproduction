@@ -1,9 +1,8 @@
-import appJson from '@/assets/json/app.json'
-import store from '@/store'
+import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
-import router from '@nu/vivi-lib/router'
+import store from '@/store'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
@@ -15,8 +14,9 @@ import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
-import Screenshot from '../views/Screenshot.vue'
-import ViviSticker from '../views/ViviSticker.vue'
+import Screenshot from '@/views/Screenshot.vue'
+import ViviSticker from '@/views/ViviSticker.vue'
+import router from '@nu/vivi-lib/router'
 
 declare let window: CustomWindow
 
@@ -112,7 +112,7 @@ if (window.location.host !== 'sticker.vivipic.com') {
   routes.push({
     path: 'emoji',
     name: 'EmojiTest',
-    component: () => import('@/views/EmojiTest.vue')
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
   })
 }
 

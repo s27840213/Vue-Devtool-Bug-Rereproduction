@@ -76,11 +76,11 @@ export default defineComponent({
     border-radius: 4px;
   }
   &__add-color {
-    background-image: url("~@/assets/img/svg/addColor.svg");
+    background-image: url("~@img/svg/addColor.svg");
     background-size: cover;
   }
   &__multi-color {
-    background-image: url("~@/assets/img/jpg/multi-color.jpg");
+    background-image: url("~@img/jpg/multi-color.jpg");
     background-size: cover;
   }
   &__color {

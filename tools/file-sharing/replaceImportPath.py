@@ -6,7 +6,7 @@ import subprocess
 project = 'stk'
 
 def removePrefix(path: str):
-  return path.replace('projects/vivipic/src', '@') \
+  return path.replace('projects/pic/src', '@') \
     .replace('packages/vivi-lib/src', '@') \
     .replace('projects/stk/src', '@') \
     .replace('src/', '@/')

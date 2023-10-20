@@ -5,7 +5,7 @@ import subprocess
 sep = ",\n  "
 
 def removePrefix(path: str):
-  return path.replace('projects/vivipic/src', '@') \
+  return path.replace('projects/pic/src', '@') \
     .replace('packages/vivi-lib/src', '@') \
     .replace('projects/stk/src', '@') \
     .replace('src/', '@/') \
@@ -54,7 +54,7 @@ libPaths = glob.glob('../packages/vivi-lib/src/**/*.vue', recursive=True) \
 libPaths.sort(key=lambda s: path2Target(s.lower()))
 
 paths = []
-for proj in ['vivipic', 'stk']:
+for proj in ['pic', 'stk']:
   paths.extend(glob.glob(f'../projects/{proj}/src/**/*.vue', recursive=True))
   paths.extend(glob.glob(f'../projects/{proj}/src/**/*.ts', recursive=True))
 

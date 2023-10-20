@@ -1,0 +1,124 @@
+
+.fade-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.35s,
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+  }
+}
+
+
+.fade-bottom-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.35s,
+      transform 0.35s;
+  }
+
+  &-enter-from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(-25px);
+  }
+}
+
+.fade-top-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.35s,
+      transform 0.35s;
+  }
+
+  &-enter-from {
+    opacity: 0;
+    transform: translateY(-25px);
+  }
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+}
+
+.fade-right-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from {
+    opacity: 0;
+    transform: translateX(50%);
+  }
+  &-leave-to {
+    opacity: 0;
+    transform: translateX(-50%);
+  }
+}
+
+.fade-left-in {
+  &-enter-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from {
+    opacity: 0;
+    transform: translateX(-50%);
+  }
+  &-leave-to {
+    opacity: 0;
+    transform: translateX(50%);
+  }
+}
+
+.bottom-panel-transition {
+  &-enter-active {
+    transition:
+      opacity 0.35s 0.15s,
+      transform 0.35s 0.15s;
+  }
+  &-leave-active {
+    // transition:
+    //   opacity 0.25s,
+    //   transform 0.25s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.bottom-up {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}

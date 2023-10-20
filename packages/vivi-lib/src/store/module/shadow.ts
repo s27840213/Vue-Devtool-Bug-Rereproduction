@@ -2,10 +2,10 @@ import authToken from '@/apis/auth-token'
 import user from '@/apis/user'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import store from '@/store'
+import { IEditorState } from '@/store/types'
 import apiUtils from '@/utils/apiUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
-import store from '..'
-import { IEditorState } from '../types'
 
 const SET_UPLOAD_ID = 'SET_UPLOAD_ID' as const
 const SET_PROCESS_ID = 'SET_PROCESS_ID' as const
