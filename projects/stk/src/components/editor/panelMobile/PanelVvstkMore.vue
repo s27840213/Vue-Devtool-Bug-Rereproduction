@@ -9,14 +9,14 @@ div(class="panel-vvstk-more")
         div(class="panel-vvstk-more__option-icon")
           svg-icon(:iconName="option.icon"
                     :iconWidth="iconWidth(option.icon)"
-                    iconColor="gray-2")
+                    iconColor="white")
         div(class="panel-vvstk-more__option-title") {{ option.text }}
     div(class="horizontal-rule")
     div(class="panel-vvstk-more__option version" @pointerdown.prevent="handleDebugMode")
       div(class="panel-vvstk-more__option-icon")
         svg-icon(iconName="vivisticker_version"
                   iconWidth="24px"
-                  iconColor="gray-3")
+                  iconColor="black-5")
       span(class="panel-vvstk-more__option-title version") {{ `${userInfo.appVer}/${userInfo.osVer}/${userInfo.modelName} ${buildNumber}${domain} ${hostId}` }}
   template(v-else)
     div(class="panel-vvstk-more__options")
@@ -28,7 +28,7 @@ div(class="panel-vvstk-more")
         div(class="panel-vvstk-more__option-icon")
           svg-icon(:iconName="option.icon"
                     iconWidth="24px"
-                    iconColor="gray-2")
+                    iconColor="white")
         div(class="panel-vvstk-more__option-title") {{ option.text }}
 </template>
 
@@ -355,14 +355,10 @@ export default defineComponent({
   }
   &__option-title {
     @include body-SM;
-    color: setColor(gray-2);
+    color: setColor(white);
     &.version {
-      color: setColor(gray-3);
+      color: setColor(black-5);
     }
-  }
-  &__option-link {
-    @include body-SM;
-    color: setColor(gray-1);
   }
 }
 
