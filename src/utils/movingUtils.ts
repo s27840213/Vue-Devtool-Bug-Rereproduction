@@ -144,12 +144,13 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent, params?: { pointerId?: number, isFollowByPinch?: boolean }) {
+    console.warn('move start')
     const { pointerId, isFollowByPinch = false } = params || {}
     const eventType = eventUtils.getEventType(event)
     if (eventType === 'pointer') {
       pointerEvtUtils.addPointer(event as PointerEvent)
     }
-    console.warn('moveStart', eventUtils.checkIsMultiTouch(event), store.getters['mobileEditor/getIsPinchingEditor'], store.getters.getControlState.type)
+    // console.warn('moveStart', eventUtils.checkIsMultiTouch(event), store.getters['mobileEditor/getIsPinchingEditor'], store.getters.getControlState.type)
     if (this.isImgControl) return
     if (eventUtils.checkIsMultiTouch(event)) return
     if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type) return
@@ -547,7 +548,6 @@ export class MovingUtils {
       this.isControlling = false
       return this.removeListener()
     }
-    console.warn('move end triggered', e)
     this.isControlling = false
     this.removeListener()
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
@@ -568,12 +568,9 @@ export class MovingUtils {
       x: Math.abs(pageUtils.getCurrPage.x - this.initPageTranslate.x),
       y: Math.abs(pageUtils.getCurrPage.y - this.initPageTranslate.y)
     }
-    console.log((e as any).x, this._initPos.x)
-    console.log((e as any).y, this._initPos.y)
     const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
 
-    console.log('hasActualMove', hasActualMove)
     if (this.isControllerShown) {
       if (hasActualMove) {
         shortcutUtils.offsetCount = 0

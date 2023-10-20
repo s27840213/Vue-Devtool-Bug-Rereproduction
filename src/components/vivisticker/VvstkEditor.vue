@@ -241,7 +241,6 @@ export default defineComponent({
     },
     selectStart(e: PointerEvent) {
       this.recordPointer(e)
-      console.log('select start')
       if (this.inBgRemoveMode || this.isInBgRemoveSection) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
       const isClickOnController = controlUtils.isClickOnController(e)
@@ -273,7 +272,6 @@ export default defineComponent({
     // is bcz the native click/tap event is triggered as the event happened in a-short-time even the layer has moved a little position,
     // this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
     selectEnd(e: PointerEvent) {
-      console.warn('select end')
       if (this.pointerEvent.initPos) {
         const isSingleTouch = pointerEvtUtils.pointers.length === 1
         const isConsiderNotMoved = Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5
@@ -301,7 +299,7 @@ export default defineComponent({
       pointerEvtUtils.removePointer(e.pointerId)
     },
     onPinch(e: AnyTouchEvent) {
-      console.log('onPinch this.$store.getters.getControlState', this.$store.getters.getControlState.type, e.phase, pointerEvtUtils.pointerIds.length)
+      // console.log('onPinch this.$store.getters.getControlState', this.$store.getters.getControlState.type, e.phase, pointerEvtUtils.pointerIds.length)
       if (e.phase === 'end' && this.isPinchInit) {
         // pinch end handling
         this.pinchHandler(e)

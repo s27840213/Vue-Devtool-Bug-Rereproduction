@@ -180,6 +180,7 @@ export default class PinchControlUtils {
   }
 
   end(e: AnyTouchEvent) {
+    console.warn('pinch end', store.getters.getControlState.id, this.id)
     this.init = null
     if (store.getters.getControlState.id === this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })

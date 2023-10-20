@@ -14,8 +14,11 @@ class PointerEventUtils {
 
   addPointer(pointer: PointerEvent) {
     if (!this.pointerIds.includes(pointer.pointerId)) {
+      if (pointer.isPrimary && this._pointers.length >= 1) {
+        this._pointers = []
+      }
       this._pointers.push(pointer)
-      console.warn('record Pointer', this.pointers)
+      // console.warn('record Pointer', this.pointers)
     }
   }
 
@@ -23,7 +26,7 @@ class PointerEventUtils {
     const i = this._pointers.findIndex(p => p.pointerId === pointerId)
     if (i !== -1) {
       this._pointers.splice(i, 1)
-      console.error('remvoe Pointer', pointerId, this.pointerIds)
+      // console.error('remvoe Pointer', pointerId, this.pointerIds)
       // if the there is no pointers stay on the screen,
       // reset the control state
       if (this._pointers.length === 0) {

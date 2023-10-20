@@ -51,6 +51,13 @@ export default class SubControllerUtils {
   }
 
   onPointerdown(e: PointerEvent) {
+    if (store.getters.getControlState.type === 'pinch') {
+      return
+    }
+
+    eventUtils.removePointerEvent('pointerup', this._onMouseup)
+    this._onMouseup = this.onMouseup.bind(this)
+
     pointerEvtUtils.addPointer(e)
     this.initTranslate = {
       x: this.primaryLayer.styles?.x || 0,
@@ -61,16 +68,11 @@ export default class SubControllerUtils {
         groupUtils.deselectTargetLayer(this.subLayerIdx)
       }
       if (groupUtils.inMultiSelecitonMode) {
-        this._onMouseup = this.onMouseup.bind(this)
         eventUtils.addPointerEvent('pointerup', this._onMouseup)
       }
       return
     }
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
-    if (groupUtils.inMultiSelecitonMode && ['tmp', 'frame'].includes(this.primaryLayer.type)) {
-      this._onMouseup = this.onMouseup.bind(this)
-      eventUtils.addPointerEvent('pointerup', this._onMouseup)
-    }
     if (e.button !== 0) return
 
     if (imageUtils.isImgControl()) {
@@ -128,15 +130,12 @@ export default class SubControllerUtils {
         eventUtils.addPointerEvent('pointerup', this._cursorDragEnd)
         return
       } else if (!this.config?.active) {
-        // this.isControlling = true
         layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { contentEditable: false })
-        this._onMouseup = this.onMouseup.bind(this)
         eventUtils.addPointerEvent('pointerup', this._onMouseup)
         return
       }
       layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { contentEditable: true })
     }
-    this._onMouseup = this.onMouseup.bind(this)
     eventUtils.addPointerEvent('pointerup', this._onMouseup)
   }
 
@@ -234,6 +233,7 @@ export default class SubControllerUtils {
       const isGroupSub = this.primaryLayer.type === LayerType.group && !(this.primaryLayer as IGroup).layers[this.subLayerIdx].active
       if (isFrameSub || isGroupSub) {
         if (this.isControllerShown) {
+          console.log('group click')
           updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { active: true })
           layerUtils.setCurrSubSelectedInfo(this.subLayerIdx, this.config.type)
         } else {
