@@ -61,6 +61,18 @@
         &::-moz-range-thumb {
           border-color: setColor(white);
         }
+
+        &[disabled] {
+          &::-webkit-slider-thumb {
+            border: 2px solid setColor(black-3-5);
+          }
+
+          &::-moz-range-thumb {
+            border: 2px solid setColor(black-3-5);
+          }
+
+          --lower-color: #{setColor(black-3-5)};
+        }
       }
 
       // @media screen and (max-width: 976px) {

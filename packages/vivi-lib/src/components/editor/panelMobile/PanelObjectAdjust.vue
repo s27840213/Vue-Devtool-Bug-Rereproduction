@@ -164,7 +164,7 @@ export default defineComponent({
       markerInactiveClass: 'bg-black-3',
       iconActiveColor: 'black-2',
       iconInactiveColor: 'white',
-      iconDisabledColor: 'black-5',
+      iconDisabledColor: 'black-3-5',
       markerActiveColor: '#1F1F1F',
       markerInactiveColor: 'white',
     } : {
