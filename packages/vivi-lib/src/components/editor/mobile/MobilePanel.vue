@@ -222,7 +222,9 @@ export default defineComponent({
     padding: 10px calc(50% - 47px);
     border-radius: 5px;
     > div {
-      background-color: setColor(gray-4);
+      @include setColors(gray-4, black-4) using ($color) {
+        background-color: $color;
+      }
       height: 3px;
       width: 24px;
     }

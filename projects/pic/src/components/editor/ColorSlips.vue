@@ -16,7 +16,7 @@ div(class="color-panel"
                 iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
                 class="mr-5" @click="lessRecently()")
           span {{$t('NN0679')}}
-        span(v-if="!showAllRecentlyColor" :class="`btn-${$isTouchDevice() ? 'XS' : 'LG'}`" @click="moreRecently()") {{$t('NN0082')}}
+        span(v-if="!showAllRecentlyColor" :class="`${$isTouchDevice() ? 'body-XS' : 'btn-LG'}`" @click="moreRecently()") {{$t('NN0082')}}
       div
         color-btn(color="add" :active="openColorPicker"
                   @click="openColorPanel($event)")
@@ -332,13 +332,11 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .color-panel {
-  @include body-MD;
   position: relative;
   width: 100%;
   height: 100%;
   z-index: setZindex(color-panel);
   box-sizing: border-box;
-  filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
   &__scroll {
     .mobile-panel & { // only for mobile editor
       @include no-scrollbar;
@@ -375,8 +373,8 @@ export default defineComponent({
       display: flex;
       justify-content: space-between;
       @include layout-mobile-width {
-        @include body-SM;
-        margin-bottom: 16px;
+        @include caption-LG;
+        margin-bottom: 18px;
       }
     }
     > div:nth-child(2) {
@@ -387,9 +385,8 @@ export default defineComponent({
       row-gap: 5px;
       column-gap: 5px;
       @include layout-mobile-width {
-        column-gap: 12px;
+        column-gap: 16px;
         row-gap: 12px;
-        padding: 0 12px 4px 12px;
         box-sizing: border-box;
       }
       justify-content: center;

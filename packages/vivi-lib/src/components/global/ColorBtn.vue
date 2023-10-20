@@ -7,13 +7,12 @@ div(class="color-btn" :style="wrapperStyle")
     div(v-else :style="{backgroundColor: color}"
         :class="`color-btn__color color-${color.replace('#', '')}`")
     svg-icon(v-if="focus"
-        iconName="item-check"
-        :iconColor="$isStk ? 'black-3' : 'blue-1'"
-        iconWidth="40%")
+        :iconName="`check-mobile-circle${$isStk ? '-black' : ''}`"
+        iconWidth="50%")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'ColorBtn',
@@ -101,16 +100,16 @@ export default defineComponent({
       }
     }
     &.focus, &.active {
-      @include setColors(blue-1, black-5) using ($color) {
+      @include setColors(blue-1, white) using ($color) {
         border: 2px solid $color;
       }
     }
     &:not(.mobile):hover {
-      @include setColors(blue-hover, black-5) using ($color) {
+      @include setColors(blue-hover, white) using ($color) {
         border: 2px solid $color;
       }
     }
-    .svg-item-check {
+    .svg-icon {
       position: absolute;
       right: -11%;
       bottom: -11%;
