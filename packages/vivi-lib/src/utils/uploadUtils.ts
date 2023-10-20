@@ -31,7 +31,7 @@ import pageUtils from './pageUtils'
 import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import themeUtils from './themeUtils'
-import imagePreview from '@/assets/img/svg/image-preview.svg'
+import imagePreview from '@img/svg/image-preview.svg'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -775,7 +775,7 @@ class UploadUtils {
         imgCallBack(img.src)
       }
     } else {
-      imgCallBack(require('@/assets/img/svg/image-preview.svg'))
+      imgCallBack(require('@img/svg/image-preview.svg'))
     }
   }
 

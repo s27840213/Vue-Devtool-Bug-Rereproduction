@@ -4,7 +4,7 @@ div(class="color-panel"
     v-click-outside="vcoConfig"
     ref="colorPanel")
   img(v-if="showPanelBtn" class="color-panel__btn"
-    :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
+    :src="require(`@img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
     @click="closePanel()")
   div(class="color-panel__scroll" :class="{'p-0': noPadding}")
     //- Recently colors
@@ -69,7 +69,7 @@ div(class="color-panel"
                     @click="handleColorEvent(color)")
           img(v-if="selectingBg"
             class="full-width full-height"
-            src="@/assets/img/svg/transparent.svg"
+            src="@img/svg/transparent.svg"
             @click="handleColorEvent('#ffffff00')")
   color-picker(v-if="openColorPicker"
     class="color-panel__color-picker"

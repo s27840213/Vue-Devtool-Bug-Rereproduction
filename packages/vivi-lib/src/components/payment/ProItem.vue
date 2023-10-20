@@ -12,7 +12,7 @@ import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent, PropType } from 'vue'
 
 const imports = import.meta.glob(
-  `@/assets/img/svg/pricing/pro*.svg`,
+  `@img/svg/pricing/pro*.svg`,
   { eager: true, import: 'default' }
 ) as Record<string, string>
 

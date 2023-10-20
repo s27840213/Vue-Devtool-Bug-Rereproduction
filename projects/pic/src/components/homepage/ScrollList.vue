@@ -35,7 +35,7 @@ div(class="list")
         div(v-if="!$isTouchDevice()" class="list-content-items__theme-item")
           btn-new-design(v-slot="slotProps")
             img(class="list-content-items__theme-item-new pointer"
-              :src="require('@/assets/img/svg/plus-origin.svg')"
+              :src="require('@img/svg/plus-origin.svg')"
               @click="slotProps.openPopup")
             span(class="body-XS text-gray-1") {{$t('NN0023')}}
         div(v-for="item in themeData"
@@ -116,7 +116,7 @@ export default defineComponent({
       isLoading: true,
       title: '',
       moreLink: '',
-      fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
+      fallbackSrc: require('@img/svg/image-preview.svg'),
       themeData: [] as Itheme[],
       templateData: [] as IAssetTemplate[]
     }

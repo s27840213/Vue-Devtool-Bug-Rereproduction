@@ -56,7 +56,7 @@ export default defineComponent({
   },
   methods: {
     handleNotFound() {
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = require('@img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
       if (!stkWVUtils.checkPro(this.item, 'object')) return

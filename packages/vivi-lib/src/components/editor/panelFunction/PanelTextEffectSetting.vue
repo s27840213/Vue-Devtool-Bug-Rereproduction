@@ -115,7 +115,7 @@ import { Collapse } from 'vue-collapsed'
 import { mapGetters, mapState } from 'vuex'
 
 const imports = import.meta.glob(
-  `@/assets/img/text-effect/icon/*.png`,
+  `@img/text-effect/icon/*.png`,
   { eager: true, import: 'default' }
 ) as Record<string, string>
 
