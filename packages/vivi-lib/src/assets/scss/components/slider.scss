@@ -64,10 +64,12 @@
 
         &[disabled] {
           &::-webkit-slider-thumb {
+            background-color: setColor(black-3-5);
             border: 2px solid setColor(black-3-5);
           }
 
           &::-moz-range-thumb {
+            background-color: setColor(black-3-5);
             border: 2px solid setColor(black-3-5);
           }
 
