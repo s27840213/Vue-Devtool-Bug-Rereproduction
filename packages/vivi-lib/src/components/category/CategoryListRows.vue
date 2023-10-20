@@ -17,7 +17,7 @@ import LinkOrText from '@/components/LinkOrText.vue'
 import { ICategoryItem } from '@/interfaces/api'
 import CategoryListRow from './CategoryListRow.vue'
 import { defineComponent, PropType } from 'vue'
-import imagePreview from '@/assets/img/svg/image-preview.svg'
+import imagePreview from '@img/svg/image-preview.svg'
 
 export default defineComponent({
   emits: ['action'],

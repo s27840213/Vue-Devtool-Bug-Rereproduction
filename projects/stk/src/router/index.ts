@@ -1,4 +1,4 @@
-import appJson from '@/assets/json/app.json'
+import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
@@ -111,7 +111,7 @@ if (window.location.host !== 'sticker.vivipic.com') {
   routes.push({
     path: 'emoji',
     name: 'EmojiTest',
-    component: () => import('@/views/EmojiTest.vue')
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
   })
 }
 

@@ -644,7 +644,7 @@ export default defineComponent({
     border: 1px solid setColor(gray-0, 0.2);
     &.add-color {
       padding-top: 100%;
-      background-image: url("~@/assets/img/svg/addColor.svg");
+      background-image: url("~@img/svg/addColor.svg");
       background-size: cover;
       border: none;
     }

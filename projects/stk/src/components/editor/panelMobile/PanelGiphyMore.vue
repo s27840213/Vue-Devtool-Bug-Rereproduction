@@ -9,7 +9,7 @@ div(class="p-giphy" v-click-outside="vcoConfig")
       span(class="p-giphy__action--desc") {{$t('NN0889')}}
   div(class="p-giphy__hr")
   div(class="p-giphy__tips") {{`${$t('NN0763')} : ${$t('NN0764')}`}}
-  img(class="p-giphy__logo" src="@/assets/img/svg/power-by-giphy.svg")
+  img(class="p-giphy__logo" src="@img/svg/power-by-giphy.svg")
 </template>
 
 <script lang="ts">

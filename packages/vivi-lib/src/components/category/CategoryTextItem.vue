@@ -21,7 +21,7 @@ import paymentUtils from '@/utils/paymentUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
-import imagePreview from '@/assets/img/svg/image-preview.svg'
+import imagePreview from '@img/svg/image-preview.svg'
 
 export default defineComponent({
   emits: [],

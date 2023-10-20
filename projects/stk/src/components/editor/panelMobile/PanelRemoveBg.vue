@@ -8,7 +8,7 @@ div(class="panel-remove-bg" ref="panelRemoveBg")
     transition(name="fade-down-up")
       div(v-if="mounted" class="btn" @click="removeBg('stk-bg-remove')")
         div(class="btn__content-section")
-          img(class="img-object-cutout" :src="require('@/assets/img/png/bgRemove/object-cutout.png')")
+          img(class="img-object-cutout" :src="require('@img/png/bgRemove/object-cutout.png')")
         div(class="btn__text-section")
           span(class="text-H7") {{ $t('STK0060') }}
           span(class="text-black-5 body-XXS btn__description") {{ $t('STK0061') }}
@@ -17,8 +17,8 @@ div(class="panel-remove-bg" ref="panelRemoveBg")
           :style="{ 'transition-delay': '0.2s' }"
           @click="removeBg('stk-bg-remove-face')")
         div(class="btn__content-section btn__content-section--bgf")
-          img(:src="require('@/assets/img/png/bgRemove/face-cutout-body.png')")
-          img(:src="require('@/assets/img/png/bgRemove/face-cutout.png')")
+          img(:src="require('@img/png/bgRemove/face-cutout-body.png')")
+          img(:src="require('@img/png/bgRemove/face-cutout.png')")
         div(class="btn__text-section")
           span(class="text-H7 no-wrap") {{ $t('STK0059') }}
           span(class="text-black-5 body-XXS btn__description") {{ $t('STK0062') }}

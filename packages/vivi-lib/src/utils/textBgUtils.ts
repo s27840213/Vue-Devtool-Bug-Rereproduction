@@ -16,7 +16,7 @@ import generalUtils from './generalUtils'
 import textUtils from './textUtils'
 
 const imports = import.meta.glob(
-  `@/assets/img/text-effect/LetterBG/*.svg`,
+  `@img/text-effect/LetterBG/*.svg`,
   { eager: true, import: 'default' }
 ) as Record<string, string>
 

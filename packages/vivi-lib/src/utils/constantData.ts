@@ -12,7 +12,7 @@ import picWVUtils from './picWVUtils'
 import themeUtils from './themeUtils'
 
 const imports = import.meta.glob(
-  `@/assets/img/text-effect/select/*`,
+  `@img/text-effect/select/*`,
   { eager: true, import: 'default' }
 ) as Record<string, string>
 

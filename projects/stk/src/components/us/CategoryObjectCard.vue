@@ -44,7 +44,7 @@ export default defineComponent({
   },
   data() {
     return {
-      fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
+      fallbackSrc: require('@img/svg/image-preview.svg'),
       coverPos: 50,
       elRecycleScrollerView: null as HTMLElement | null,
       elRecycleScrollerWrapper: null as HTMLElement | null,

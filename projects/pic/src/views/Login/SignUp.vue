@@ -4,7 +4,7 @@ div(style="position:relative;")
     div(v-if="currentPageIndex === 0"
       class="signup signup-p0")
       div(class="signup-p0__img")
-        img(:src="require('@/assets/img/svg/signup.svg')"
+        img(:src="require('@img/svg/signup.svg')"
           style="width: 180px; height: 133px;")
       div(class="signup-p0__title text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0300')}}
@@ -15,11 +15,11 @@ div(style="position:relative;")
         div(class="signup-p0__fb")
           btn(@click="onFacebookClicked()"
             :type="'icon-mid-body'")
-          img(:src="require('@/assets/img/png/facebook.png')")
+          img(:src="require('@img/png/facebook.png')")
           span(class="body-2") {{$t('NN0303', {media:'Facebook'})}}
         div(class="signup-p0__google")
           btn(@click="onGoogleClicked()" :type="'icon-mid-body'")
-          img(:src="require('@/assets/img/png/google.png')")
+          img(:src="require('@img/png/google.png')")
           span(class="body-2") {{$t('NN0303', {media:'Google'})}}
       div(class="signup-p0__mail")
         btn(@click="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $tc('NN0173', 2)})}}
