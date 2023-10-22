@@ -88,14 +88,6 @@ export default defineComponent({
       keepAlivePanels: ['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText'],
       // eslint-disable-next-line vue/no-unused-properties
       noPaddingPanels: ['text', 'object', 'background', 'template-content', 'vvstk-more', 'my-design-more', 'giphy-more', 'select-design', 'text-effect', 'add-template', 'page-management'],
-      // // eslint-disable-next-line vue/no-unused-properties
-      // whiteThemePanels: [
-      //   'replace', 'crop', 'bgRemove', 'position', 'flip', 'remove-bg',
-      //   'opacity', 'order', 'fonts', 'font-size', 'text-effect',
-      //   'font-format', 'font-spacing', 'download', 'more', 'color',
-      //   'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
-      //   'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design',
-      //   'multiple-select', 'nudge'],
       // eslint-disable-next-line vue/no-unused-properties
       fixSizePanels: [
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
@@ -160,7 +152,7 @@ export default defineComponent({
     // Used in extended vivi-lib MobilePanel
     // eslint-disable-next-line vue/no-unused-properties
     whiteThemePanelExceptions(): boolean {
-      return this.extraPanel === 'replace' && this.currHistory === 'stock'
+      return true // all stk panels are in dark theme
     },
     // eslint-disable-next-line vue/no-unused-properties
     hideDragBar(): boolean {
