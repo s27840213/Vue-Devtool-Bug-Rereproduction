@@ -71,7 +71,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .p-giphy {
-  padding: 0 24px;
   &__actions {
     display: flex;
     flex-direction: column;
@@ -80,29 +79,30 @@ export default defineComponent({
   &__action {
     display: flex;
     align-items: center;
-    padding: 8px 2px;
+    padding: 8px 26px;
     color: setColor(white);
     &--desc {
       padding-left: 12px;
     }
     &:active {
-      background: setColor(black-6);
+      background: setColor(black-3-5);
     }
   }
   &__hr {
     border: 0.5px solid setColor(black-3-5);
-    margin: 10px 0px;
+    margin: 10px 24px;
   }
   &__tips {
     @include body-SM;
     text-align: left;
+    padding: 0 24px;
     color: setColor(black-5);
     &--title {
       font-weight: 600;
     }
   }
   &__logo {
-    padding: 10px 0px;
+    padding: 10px 24px;
     height: 22px;
   }
 }

@@ -341,10 +341,10 @@ export default defineComponent({
     align-items: center;
     justify-content: flex-start;
     &:not(.version):active {
-      background: setColor(black-6);
+      background: setColor(black-3-5);
     }
     &.selected {
-      background: setColor(black-6);
+      background: setColor(black-3-5);
     }
   }
   &__option-icon {

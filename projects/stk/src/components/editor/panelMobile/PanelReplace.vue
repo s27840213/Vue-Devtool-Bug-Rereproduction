@@ -2,18 +2,18 @@
 panel-photo(v-if="showStock")
 div(v-else class="panel-replace")
   div(class="panel-replace__item" @click="openPhoto()")
-    svg-icon(iconName="cameraroll" iconWidth="24px" iconColor="gray-2")
+    svg-icon(iconName="cameraroll" iconWidth="24px" iconColor="white")
     span {{ $t('STK0067') }}
   div(class="panel-replace__item" @click="openStock()")
-    svg-icon(iconName="photo" iconWidth="24px" iconColor="gray-2")
+    svg-icon(iconName="photo" iconWidth="24px" iconColor="white")
     span {{ $t('STK0069') }}
 </template>
 
 <script lang="ts">
 import PanelPhoto from '@nu/vivi-lib/components/editor/panelSidebar/PanelPhoto.vue'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
-import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
 import { defineComponent, inject, PropType } from 'vue'
 
 export default defineComponent({
@@ -83,7 +83,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .panel-replace {
   @include body-SM;
-  color: setColor(gray-2);
+  color: setColor(white);
   margin: 0 8px;
   &__item {
     display: flex;
