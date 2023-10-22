@@ -141,6 +141,7 @@ export default defineComponent({
     border-radius: 0.25rem;
     background: transparent;
     &.light {
+      border: 1px solid setColor(black-5);
       color: setColor(white);
     }
   }

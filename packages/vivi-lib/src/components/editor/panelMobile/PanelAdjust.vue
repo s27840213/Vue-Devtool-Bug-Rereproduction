@@ -163,7 +163,7 @@ export default defineComponent({
   &__reset {
     margin-top: 1.25rem;
     > button {
-      @include setColors(blue-1, black-3) using ($color) {
+      @include setColors(blue-1, white) using ($color) {
         color: $color;
       }
       font-size: 14px;
