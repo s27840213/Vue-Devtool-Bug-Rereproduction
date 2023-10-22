@@ -20,24 +20,24 @@ div(class="panel-object-adjust")
         :max="lineWidthMax"
         @update="setLineWidth")
       div(v-if="currMode === 1" class="panel-object-adjust__line-dash")
-        div(class="panel-object-adjust__line-dash__option bg-gray-5"
+        div(class="panel-object-adjust__line-dash__option"
             :class="isNormalDash ? optionActiveClass : optionInactiveClass"
             @pointerdown="handleLineDash(0)")
           svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px"
                     :iconColor="isNormalDash ? iconActiveColor : iconInactiveColor")
-        div(class="panel-object-adjust__line-dash__option bg-gray-5"
+        div(class="panel-object-adjust__line-dash__option"
             :class="!isNormalDash ? optionActiveClass : optionInactiveClass"
             @pointerdown="handleLineDash(1)")
           svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px"
                     :iconColor="!isNormalDash ? iconActiveColor : iconInactiveColor")
         div(class="vr")
-        div(class="panel-object-adjust__line-dash__option bg-gray-5"
+        div(class="panel-object-adjust__line-dash__option"
             :class="isLineCapButt ? optionActiveClass : optionInactiveClass"
             @pointerdown="handleLineEdge(0)")
           svg-icon(class="mr-5" iconName="panel-butt" iconWidth="12px" iconHeight="10px"
                     :iconColor="isLineCapButt ? iconActiveColor : iconInactiveColor")
           div(:class="`text-${isLineCapButt ? iconActiveColor : iconInactiveColor}`") {{$t('NN0084')}}
-        div(class="panel-object-adjust__line-dash__option bg-gray-5"
+        div(class="panel-object-adjust__line-dash__option"
             :class="!isLineCapButt ? optionActiveClass : optionInactiveClass"
             @pointerdown="handleLineEdge(1)")
           svg-icon(class="mr-5" iconName="panel-round" iconWidth="12px" iconHeight="10px"
@@ -45,10 +45,10 @@ div(class="panel-object-adjust")
           div(:class="`text-${!isLineCapButt ? iconActiveColor : iconInactiveColor}`") {{$t('NN0085')}}
       div(v-if="currMode === 2" class="panel-object-adjust__markers")
           template(v-for="markerslot in makeSlots" :key="markerslot.marker")
-            div(class="panel-object-adjust__option bg-gray-5"
+            div(class="panel-object-adjust__option"
                 :class="startMarker === markerslot.marker ? markerActiveClass : markerInactiveClass"
                 @pointerup="handleStartMarkerUpdate(markerslot.marker)")
-              marker-icon(iconWidth="18px" :iconColor="startMarker === markerslot.marker ? markerActiveColor: markerInactiveColor" iconHeight="12px"
+              marker-icon(iconWidth="18px" :iconColor="startMarker === markerslot.marker ? markerActiveColor : markerInactiveColor" iconHeight="12px"
                 :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
                 :svg="markerContentMap[markerslot.marker].svg"
                 :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
@@ -56,10 +56,10 @@ div(class="panel-object-adjust")
                 :trimOffset="markerContentMap[markerslot.marker].trimOffset")
       div(v-if="currMode === 3" class="panel-object-adjust__markers")
         template(v-for="markerslot in makeSlots" :key="markerslot.marker")
-          div(class="panel-object-adjust__option bg-gray-5"
+          div(class="panel-object-adjust__option"
               :class="endMarker === markerslot.marker ? markerActiveClass : markerInactiveClass"
               @pointerup="handleEndMarkerUpdate(markerslot.marker)")
-            marker-icon(iconWidth="18px" :iconColor="endMarker === markerslot.marker ? markerActiveColor: markerInactiveColor" iconHeight="12px"
+            marker-icon(iconWidth="18px" :iconColor="endMarker === markerslot.marker ? markerActiveColor : markerInactiveColor" iconHeight="12px"
               :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
               :svg="markerContentMap[markerslot.marker].svg"
               :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
@@ -95,13 +95,13 @@ div(class="panel-object-adjust")
         :max="lineWidthMax"
         @update="setLineWidth")
       div(v-if="currMode === 1" class="panel-object-adjust__fill")
-        div(class="panel-object-adjust__fill__option bg-gray-5"
+        div(class="panel-object-adjust__fill__option"
             :class="!filled ? optionActiveClass : optionInactiveClass"
             @pointerdown="handleBasicShapeFilledUpdate(false)")
           svg-icon(iconName="non-filled" iconWidth="25px" iconHeight="20px"
                     :iconColor="!filled ? iconActiveColor : iconInactiveColor")
           div(class="ml-25" :class="`text-${!filled ? iconActiveColor : iconInactiveColor}`") {{$t('NN0088')}}
-        div(class="panel-object-adjust__fill__option bg-gray-5"
+        div(class="panel-object-adjust__fill__option"
             :class="filled ? optionActiveClass : optionInactiveClass"
             @pointerdown="handleBasicShapeFilledUpdate(true)")
           svg-icon(iconName="filled" iconWidth="25px" iconHeight="20px"
@@ -171,14 +171,14 @@ export default defineComponent({
       bgActiveColor: 'bg-blue-1',
       bgInactiveColor: 'bg-gray-5',
       bgDisabledColor: 'bg-gray-6',
-      optionActiveClass: 'border-blue-1',
-      optionInactiveClass: '',
-      markerActiveClass: 'outline-blue-1',
-      markerInactiveClass: '',
+      optionActiveClass: 'bg-blue-1',
+      optionInactiveClass: 'bg-gray-5',
+      markerActiveClass: 'bg-blue-1',
+      markerInactiveClass: 'bg-gray-5',
       iconActiveColor: 'white',
       iconInactiveColor: 'gray-2',
       iconDisabledColor: 'gray-4',
-      markerActiveColor: '#474A57',
+      markerActiveColor: 'white',
       markerInactiveColor: '#474A57',
     }
     return {
