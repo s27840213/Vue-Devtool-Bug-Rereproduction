@@ -26,7 +26,7 @@ export default defineComponent({
     },
     theme: {
       type: String as PropType<
-        'dark' | 'light' | 'dark-rect' | 'dark-narrow' | 'light-narrow' | 'light-stk'
+        'dark' | 'light' | 'dark-rect' | 'dark-narrow' | 'light-narrow' | 'light-stk' | 'dark-stk'
       >,
       default: 'dark',
     },
@@ -39,8 +39,8 @@ export default defineComponent({
     themeColor(): 'dark' | 'light' {
       return this.theme.split('-')[0] as 'dark' | 'light'
     },
-    themeType(): 'default' | 'rect' | 'narrow' {
-      return (this.theme.split('-')[1] as 'rect' | 'narrow' | undefined) ?? 'default'
+    themeType(): 'default' | 'rect' | 'narrow' | 'stk' {
+      return (this.theme.split('-')[1] as 'rect' | 'narrow' | 'stk' | undefined) ?? 'default'
     },
     colors() {
       switch (this.theme) {
@@ -70,6 +70,11 @@ export default defineComponent({
           return {
             active: '#FFFFFF',
             inactive: '#969BAB',
+          }
+        case 'dark-stk':
+          return {
+            active: 'white',
+            inactive: '#9C9C9C',
           }
         case 'dark':
         default:

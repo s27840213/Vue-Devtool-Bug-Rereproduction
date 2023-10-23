@@ -25,7 +25,7 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
         :key="btnPlan.key"
         :class="{selected: btnPlan.key === planSelected, disabled: pending.purchase}"
         @tap="handleBtnPlanClick(btnPlan.key)")
-        svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="black-3")
+        svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker_check" iconWidth="20px" iconColor="black-3")
         div(v-else class="payment__btn-plan__radio")
         div(class="payment__btn-plan__content")
           div(class="payment__btn-plan__content__title")
@@ -59,10 +59,10 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
         div(class="payment__panel__comparison__splitter")
         div(class="payment__panel__comparison__item  first-column") {{ comparison.feature }}
         div(class="payment__panel__comparison__item")
-          svg-icon(v-if="comparison.free" iconName="vivisticker-check" iconWidth="36px" iconColor="white")
+          svg-icon(v-if="comparison.free" iconName="vivisticker_check" iconWidth="36px" iconColor="white")
           template(v-else) -
         div(class="payment__panel__comparison__item")
-          svg-icon(v-if="comparison.pro" iconName="vivisticker-check" iconWidth="36px" iconColor="white")
+          svg-icon(v-if="comparison.pro" iconName="vivisticker_check" iconWidth="36px" iconColor="white")
           template(v-else) -
   Transition(name="fade")
     div(v-if="pending.info || pending.restore" class="payment__spinner")

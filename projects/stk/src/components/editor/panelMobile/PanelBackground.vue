@@ -83,7 +83,6 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
           :value="opacity"
           :min="0"
           :max="100"
-          theme="light"
           @update="updateOpacity")
         div(v-if="!isInEditor" class="panel-bg__color-controller__hint")
           p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
@@ -103,24 +102,24 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
+import { IAsset } from '@/interfaces/module'
+import { notify } from '@kyvg/vue3-notification'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import MobileSlider from '@nu/vivi-lib/components/editor/mobile/MobileSlider.vue'
 import i18n from '@nu/vivi-lib/i18n'
-import { IAsset } from '@/interfaces/module'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import { notify } from '@kyvg/vue3-notification'
-import Tabs from '@nu/vivi-lib/components/Tabs.vue'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
-import { IPage } from '@nu/vivi-lib/interfaces/page'
-import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'

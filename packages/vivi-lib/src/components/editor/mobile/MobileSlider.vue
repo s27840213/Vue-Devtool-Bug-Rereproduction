@@ -37,6 +37,7 @@ div(class="mobile-slider")
 </template>
 
 <script lang="ts">
+import generalUtils from '@/utils/generalUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
 
@@ -72,7 +73,7 @@ export default defineComponent({
     },
     theme: {
       type: String,
-      default: 'dark'
+      default: generalUtils.isStk ? 'light' : 'dark'
     },
     autoRecord: {
       type: Boolean,
@@ -140,23 +141,13 @@ export default defineComponent({
     border-radius: 0.25rem;
     background: transparent;
     &.light {
+      border: 1px solid setColor(black-5);
       color: setColor(white);
     }
   }
 
   &__range-input-wrapper {
     position: relative;
-  }
-
-  &__range-input.light {
-    --lower-color: #{setColor(gray-6)};
-    --upper-color: #{setColor(gray-2)};
-    &::-webkit-slider-thumb {
-      border-color: setColor(white);
-    }
-    &::-moz-range-thumb {
-      border-color: setColor(white);
-    }
   }
 
   &__range-input-top {

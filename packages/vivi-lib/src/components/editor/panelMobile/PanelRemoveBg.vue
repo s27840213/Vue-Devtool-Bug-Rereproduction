@@ -45,9 +45,9 @@ div(class="panel-remove-bg")
       :min="minBrushSize"
       :max="maxBrushSize"
       @update="setBrushSize")
-  div(class="full flex items-center")
+  div(class="panel-remove-bg__original full flex items-center")
     svg-icon(class="mr-5"
-      :iconColor="showInitImage ? 'blue-1' : 'light-gray'"
+      :iconColor="showInitImage ? showInitColor : hideInitColor"
       :iconName="showInitImage ? 'checkbox-checked' : 'checkbox'"
       :iconWidth="'16px'"
       @click="toggleShowInitImage(showInitImage)")
@@ -67,6 +67,8 @@ export default defineComponent({
       maxBrushSize: 300,
       activeBtnType: this.$isStk ? 'stk-active-sm' : 'gray-active-sm',
       inactiveBtnType: this.$isStk ? 'stk-inactive-sm' : 'gray-sm',
+      showInitColor: this.$isStk ? 'black-3' : 'blue-1',
+      hideInitColor: this.$isStk ? 'white' : 'light-gray',
       supportMovingMode: this.$isStk,
     }
   },
@@ -146,6 +148,12 @@ export default defineComponent({
       grid-template-rows: 1fr;
       grid-template-columns: 0.75fr 0.25fr;
       column-gap: 25px;
+    }
+  }
+
+  &__original {
+    @include setColors(gray-2, white) using ($color) {
+      color: $color;
     }
   }
 }
