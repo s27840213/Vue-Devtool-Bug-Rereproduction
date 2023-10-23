@@ -11,186 +11,222 @@ export const textLetterBgName = [
   'cat', 'cat-custom', 'rabbit', 'rabbit-custom', 'dog', 'dog-custom',
   'star', 'baby', 'paper-tap', 'paper-tap-point', 'paper-tap-stripe',
   'paper-tap-grid', 'triangle-flag', 'triangle-flag-custom',
-  'rectangle-flag', 'rectangle-flag-custom',
+  'rectangle-flag', 'rectangle-flag-custom', 'stretch-dog', 'stretch-rabbit',
+  'stretch-cat', 'stretch-dragon',
 ] as const
+
+export type ITextLetterBgName = typeof textLetterBgName[number]
 
 class LetterBGData {
   getEffects() {
-    const toOptions = constantData.toOptions
+    const noColor = constantData.toOptions([
+      'xOffset200',
+      'yOffset200',
+      'size',
+      'opacity',
+      'fontSpacing',
+      'lineHeight'
+    ])
+    const withColor = constantData.toOptions([
+      'xOffset200',
+      'yOffset200',
+      'size',
+      'opacity',
+      'fontSpacing',
+      'lineHeight',
+      'color'
+    ])
+
     return [{
       key: 'rainbow',
       label: i18n.global.tc('NN0816'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'rainbow-dark',
       label: i18n.global.tc('NN0817'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'circle',
       label: i18n.global.tc('NN0820'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'heart',
       label: i18n.global.tc('NN0847'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'heart-warm',
       label: i18n.global.tc('NN0848'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'heart-custom',
       label: i18n.global.tc('NN0849'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'cloud',
       label: i18n.global.tc('NN0818'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'text-book',
       label: i18n.global.tc('NN0819'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'penguin',
       label: i18n.global.tc('NN0821'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'planet',
       label: i18n.global.tc('NN0822'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'leaf',
       label: i18n.global.tc('NN0851'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'gummybear',
       label: i18n.global.tc('NN0850'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'butter-flower',
       label: i18n.global.tc('NN0852'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'flower-frame',
       label: i18n.global.tc('NN0853'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'flower-frame-custom',
       label: i18n.global.tc('NN0854'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'vintage-flower',
       label: i18n.global.tc('NN0855'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'vintage-flower-custom',
       label: i18n.global.tc('NN0856'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'cat-paw',
       label: i18n.global.tc('NN0864'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'bread',
       label: i18n.global.tc('NN0865'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'bear',
       label: i18n.global.tc('NN0874'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'bear-custom',
       label: i18n.global.tc('NN0875'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'cat',
       label: i18n.global.tc('NN0876'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'cat-custom',
       label: i18n.global.tc('NN0877'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'rabbit',
       label: i18n.global.tc('NN0878'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'rabbit-custom',
       label: i18n.global.tc('NN0879'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'dog',
       label: i18n.global.tc('NN0880'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'dog-custom',
       label: i18n.global.tc('NN0881'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'star',
       label: i18n.global.tc('NN0882'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'baby',
       label: i18n.global.tc('NN0883'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'paper-tap',
       label: i18n.global.tc('NN0895'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'paper-tap-point',
       label: i18n.global.tc('NN0896'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'paper-tap-stripe',
       label: i18n.global.tc('NN0897'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'paper-tap-grid',
       label: i18n.global.tc('NN0898'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'triangle-flag',
       label: i18n.global.tc('NN0900'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'triangle-flag-custom',
       label: i18n.global.tc('NN0901'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
     }, {
       key: 'rectangle-flag',
       label: i18n.global.tc('NN0902'),
       plan: 1,
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      options: noColor,
     }, {
       key: 'rectangle-flag-custom',
       label: i18n.global.tc('NN0903'),
-      options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      options: withColor,
+    }, {
+      key: 'stretch-dog',
+      label: i18n.global.tc('NN0903'),
+      options: noColor,
+    }, {
+      key: 'stretch-rabbit',
+      label: i18n.global.tc('NN0903'),
+      options: noColor,
+    }, {
+      key: 'stretch-cat',
+      label: i18n.global.tc('NN0903'),
+      options: noColor,
+    }, {
+      key: 'stretch-dragon',
+      label: i18n.global.tc('NN0903'),
+      options: noColor,
     }]
   }
 
@@ -257,6 +293,10 @@ class LetterBGData {
       case 'paper-tap-point':
       case 'paper-tap-stripe':
       case 'paper-tap-grid':
+      case 'stretch-dog':
+      case 'stretch-rabbit':
+      case 'stretch-cat':
+      case 'stretch-dragon':
         href += head ? '-head' : tail ? '-tail' : '0'
         break
       // text-book, *-custom
@@ -265,7 +305,7 @@ class LetterBGData {
     return { href, color }
   }
 
-  getDeafultOptions() {
+  getDeafultOptions(): Record<ITextLetterBgName, Record<string, number | boolean | string>> {
     const letterBgDefault = {
       xOffset200: 0,
       yOffset200: 0,
@@ -455,6 +495,26 @@ class LetterBGData {
         size: 155,
         color: '#FFBBD0'
       },
+      'stretch-dog': {
+        ...letterBgDefault,
+        yOffset200: 12,
+        size: 180,
+      },
+      'stretch-rabbit': {
+        ...letterBgDefault,
+        yOffset200: 12,
+        size: 180,
+      },
+      'stretch-cat': {
+        ...letterBgDefault,
+        yOffset200: 12,
+        size: 180,
+      },
+      'stretch-dragon': {
+        ...letterBgDefault,
+        yOffset200: 12,
+        size: 220,
+      },
     }
   }
 
@@ -571,6 +631,18 @@ class LetterBGData {
       'rectangle-flag-custom': {
         lineHeight: 1.96, fontSpacing: 1010
       },
+      'stretch-dog': {
+        lineHeight: 1.96, fontSpacing: 395,
+      },
+      'stretch-rabbit': {
+        lineHeight: 1.96, fontSpacing: 285,
+      },
+      'stretch-cat': {
+        lineHeight: 1.96, fontSpacing: 300,
+      },
+      'stretch-dragon': {
+        lineHeight: 1.96, fontSpacing: 190,
+      },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
@@ -578,8 +650,15 @@ class LetterBGData {
     }
   }
 
-  fixedHeadTail(name: ITextLetterBg['name']) {
-    return /(paper-tap)/
+  // The beginning and end of the text BG are fixed, only the middle loops.
+  fixedHeadTail(name: ITextLetterBgName) {
+    return /(paper-tap|stretch-)/
+      .test(name)
+  }
+
+  // Need to add BG to head and tail.
+  extraHeadTail(name: ITextLetterBgName) {
+    return /(stretch-)/
       .test(name)
   }
 
@@ -588,7 +667,7 @@ class LetterBGData {
       .test(href)
   }
 
-  bgNeedRotate(name: typeof textLetterBgName[number]) {
+  bgNeedRotate(name: ITextLetterBgName) {
     return /(paper-tap)/.test(name)
   }
 }

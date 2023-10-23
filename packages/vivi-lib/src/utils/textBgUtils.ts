@@ -940,6 +940,15 @@ class TextBg {
       const pos = [] as (Record<'i' | 'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
       let [i, spaceCount] = [0, 0]
       rows.forEach((row) => {
+        if (letterBgData.extraHeadTail(textBg.name)) {
+          let last = row.spanData.length - 1
+          row.spanData.push(cloneDeep(row.spanData[last]))
+          row.spanData.unshift(cloneDeep(row.spanData[0]))
+          last = row.spanData.length - 1
+          row.spanData[last].x = row.spanData[last].x + row.spanData[last].width
+          row.spanData[0].x = row.spanData[0].x - row.spanData[0].width
+        }
+
         row.spanData.forEach((span, spanIndex) => {
           const { x, y, width, height, text } = span
           if (text === ' ' && !letterBgData.fixedHeadTail(textBg.name)) spaceCount += 1
