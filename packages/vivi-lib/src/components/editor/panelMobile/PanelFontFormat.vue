@@ -6,12 +6,12 @@ div(class="panel-font-format")
       :class="{ pointer: iconClickable(icon)}"
       :key="`gp-action-icon-${index}`"
       :id="`icon-${icon}`"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? activeColor :iconClickable(icon) ? inactiveColor : 'gray-4'" @touchstart="onPropertyClick(icon)")
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon) ? activeColor : iconClickable(icon) ? inactiveColor : disabledColor" @touchstart="onPropertyClick(icon)")
   div(class="panel-font-format__bar")
     svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
       class="pointer feature-button p-5"
       :key="`gp-action-icon-${index}`"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? activeColor  : inactiveColor" @touchstart="onParaPropsClick(icon)")
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon) ? activeColor : inactiveColor" @touchstart="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">
@@ -31,8 +31,9 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      activeColor: this.$isStk ? 'gray-2' : 'blue-1',
+      activeColor: this.$isStk ? 'white' : 'blue-1',
       inactiveColor: this.$isStk ? 'black-5' : 'gray-2',
+      disabledColor: this.$isStk ? 'black-3-5' : 'gray-4',
     }
   },
   computed: {
@@ -236,7 +237,10 @@ export default defineComponent({
 
   &__bar {
     display: flex;
-    background-color: setColor(gray-7);
+    border-radius: 5px;
+    @include setColors(gray-7, black-3) using ($color) {
+      background-color: $color;
+    }
     justify-content: space-around;
     padding: 4px;
   }

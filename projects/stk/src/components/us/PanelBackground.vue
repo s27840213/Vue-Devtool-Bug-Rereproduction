@@ -105,7 +105,6 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
           :value="opacity"
           :min="0"
           :max="100"
-          theme="light"
           @update="updateOpacity")
         div(class="panel-bg__color-controller__hint")
           p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
@@ -306,7 +305,7 @@ export default defineComponent({
     border: 1px solid setColor(gray-0, 0.2);
     &.add-color {
       padding-top: 100%;
-      background-image: url("~@/assets/img/svg/addColor.svg");
+      background-image: url("~@img/svg/addColor.svg");
       background-size: cover;
       border: none;
     }

@@ -128,7 +128,7 @@ div(class="popup-window")
               @click="button.func()") {{button.label}}
       div(class="payment-right")
         img(class="payment-right-bg" loading="lazy"
-            :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
+            :src="require(`@img/jpg/pricing/${locale}/${img}`)")
         img(v-if="view === 'pro-template'"
             class="payment-right-temp"  :src="templateImg")
       div(v-if="view === 'finish'" class="payment-finish")
@@ -215,37 +215,37 @@ export default defineComponent({
         {
           key: 'pro-template',
           title: this.$t('NN0905'),
-          img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/pro-template.jpg`)
+          img: require(`@img/jpg/pricing-mobile/${this.$i18n.locale}/pro-template.jpg`)
         },
         {
           key: 'pro-text',
           title: this.$t('NN0906'),
-          img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/pro-text.jpg`)
+          img: require(`@img/jpg/pricing-mobile/${this.$i18n.locale}/pro-text.jpg`)
         },
         {
           key: 'pro-object',
           title: this.$t('NN0907'),
-          img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/pro-object.jpg`)
+          img: require(`@img/jpg/pricing-mobile/${this.$i18n.locale}/pro-object.jpg`)
         },
         {
           key: 'page-resize',
           title: this.$t('NN0908'),
-          img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/page-resize.jpg`)
+          img: require(`@img/jpg/pricing-mobile/${this.$i18n.locale}/page-resize.jpg`)
         },
         {
           key: 'export-pdf-print',
           title: this.$t('NN0909'),
-          img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/export-pdf-print.jpg`)
+          img: require(`@img/jpg/pricing-mobile/${this.$i18n.locale}/export-pdf-print.jpg`)
         },
         {
           key: 'pro-bg',
           title: this.$t('NN0910'),
-          img: require(`@/assets/img/jpg/pricing-mobile/pro-bg.jpg`)
+          img: require(`@img/jpg/pricing-mobile/pro-bg.jpg`)
         },
         {
           key: 'bgrm',
           title: this.$t('NN0911'),
-          img: require(`@/assets/img/jpg/pricing-mobile/${this.$i18n.locale}/remover.jpg`)
+          img: require(`@img/jpg/pricing-mobile/${this.$i18n.locale}/remover.jpg`)
         }
       ] as CarouselItem[],
       footerLinks: [

@@ -25,7 +25,7 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
         :key="btnPlan.key"
         :class="{selected: btnPlan.key === planSelected, disabled: pending.purchase}"
         @tap="handleBtnPlanClick(btnPlan.key)")
-        svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="black-3")
+        svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker_check" iconWidth="20px" iconColor="black-3")
         div(v-else class="payment__btn-plan__radio")
         div(class="payment__btn-plan__content")
           div(class="payment__btn-plan__content__title")
@@ -59,10 +59,10 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
         div(class="payment__panel__comparison__splitter")
         div(class="payment__panel__comparison__item  first-column") {{ comparison.feature }}
         div(class="payment__panel__comparison__item")
-          svg-icon(v-if="comparison.free" iconName="vivisticker-check" iconWidth="36px" iconColor="white")
+          svg-icon(v-if="comparison.free" iconName="vivisticker_check" iconWidth="36px" iconColor="white")
           template(v-else) -
         div(class="payment__panel__comparison__item")
-          svg-icon(v-if="comparison.pro" iconName="vivisticker-check" iconWidth="36px" iconColor="white")
+          svg-icon(v-if="comparison.pro" iconName="vivisticker_check" iconWidth="36px" iconColor="white")
           template(v-else) -
   Transition(name="fade")
     div(v-if="pending.info || pending.restore" class="payment__spinner")
@@ -122,27 +122,27 @@ export default defineComponent({
         {
           key: 'template',
           title: this.$t('STK0071'),
-          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-template.png`)
+          img: require(`@img/png/pricing/${this.$i18n.locale}/vivisticker_pro-template.png`)
         },
         {
           key: 'frame',
           title: this.$t('STK0049'),
-          img: require('@/assets/img/png/pricing/vivisticker_frame.png')
+          img: require('@img/png/pricing/vivisticker_frame.png')
         },
         {
           key: 'object',
           title: this.$t('STK0051'),
-          img: require('@/assets/img/png/pricing/vivisticker_pro-object.png')
+          img: require('@img/png/pricing/vivisticker_pro-object.png')
         },
         {
           key: 'text',
           title: this.$t('STK0050'),
-          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-text.png`)
+          img: require(`@img/png/pricing/${this.$i18n.locale}/vivisticker_pro-text.png`)
         },
         {
           key: 'bg-remove',
           title: this.$t('STK0083'),
-          img: require(`@/assets/img/png/pricing/${this.$i18n.locale}/vivisticker_pro-bg-remove.png`)
+          img: require(`@img/png/pricing/${this.$i18n.locale}/vivisticker_pro-bg-remove.png`)
         }
       ] as CarouselItem[],
       footerLinks: [
@@ -235,7 +235,7 @@ export default defineComponent({
           key: 'annually',
           title: this.$t('NN0515'),
           subTitle: this.isOldPrice ? this.$t('STK0048', { day: 3 }) : '',
-          price: this.payment.prices.annually.text,
+          price: (!stkWVUtils.isOldPrice && !this.isTrialToggled) ? this.payment.prices.annuallyFree0.text : this.payment.prices.annually.text,
           tag: this.localizedTag
         }
       ]
@@ -286,7 +286,10 @@ export default defineComponent({
         return
       }
       if (this.isPaymentPending) return
-      if (option === 'annually' && (this.isTrialDisabled || !this.isTrialToggled)) option = 'com.nuphototw.vivisticker.yearly_free0'
+      if (!stkWVUtils.isOldPrice) {
+        if (option === 'monthly') option = this.payment.planId.monthly
+        else if (option === 'annually') option = (this.isTrialDisabled || !this.isTrialToggled) ? this.payment.planId.annuallyFree0 : this.payment.planId.annually
+      }
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
       stkWVUtils.sendToIOS('SUBSCRIBE', { option })
       if (timeout) {

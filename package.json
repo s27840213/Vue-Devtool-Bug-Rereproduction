@@ -79,7 +79,6 @@
     "unplugin-vue-components": "^0.25.1",
     "vite": "^4.4.6",
     "vite-plugin-svg-sprite-component": "^1.0.10",
-    "vite-plugin-svg-sprite": "^0.5.0",
     "vite-plugin-static-copy": "0.17.0",
     "@laynezh/vite-plugin-lib-assets": "0.5.5"
   },

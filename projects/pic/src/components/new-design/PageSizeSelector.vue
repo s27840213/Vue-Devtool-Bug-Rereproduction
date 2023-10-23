@@ -73,7 +73,7 @@ div(class="page-size-selector")
           :key="format.id"
           class="page-size-selector__body-row item pointer"
           @click="selectFormat(`recent-${index}`)")
-        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.title === '' ? 'custom' : format.icon}.svg`)")
+        img(class="page-size-selector__body-row__icon" :src="require(`@img/svg/page-selector/${format.title === '' ? 'custom' : format.icon}.svg`)")
         div(class="page-size-selector__body-row__content")
           span(class="page-size-selector__body__recently body-SM pointer"
                 :class="selectedFormatKey === `recent-${index}` ? 'text-blue-1' : 'text-gray-2'") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
@@ -85,7 +85,7 @@ div(class="page-size-selector")
           :key="format.id"
           class="page-size-selector__body-row item pointer"
           @click="selectFormat(`preset-${index}`)")
-        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.icon}.svg`)")
+        img(class="page-size-selector__body-row__icon" :src="require(`@img/svg/page-selector/${format.icon}.svg`)")
         div(class="page-size-selector__body-row__content")
           span(class="page-size-selector__body__recently body-SM pointer"
                 :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : 'text-gray-2'") {{ format.title }}

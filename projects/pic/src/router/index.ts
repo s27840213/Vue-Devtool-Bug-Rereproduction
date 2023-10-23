@@ -1,4 +1,4 @@
-import appJson from '@/assets/json/app.json'
+import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n from '@nu/vivi-lib/i18n'
 import store from '@/store'
 import { LayerType } from '@nu/vivi-lib/store/types'
@@ -240,6 +240,11 @@ if (window.location.host !== 'vivipic.com') {
     path: 'nativeevttest',
     name: 'NativeEventTester',
     component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
+  })
+  routes.push({
+    path: 'emoji',
+    name: 'EmojiTest',
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
   })
 }
 

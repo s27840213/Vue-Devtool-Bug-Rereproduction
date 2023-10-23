@@ -1,4 +1,4 @@
-import appJson from '@/assets/json/app.json'
+import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
@@ -9,9 +9,9 @@ import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import overlayUtils from '@nu/vivi-lib/utils/overlayUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
 import Screenshot from '@/views/Screenshot.vue'
@@ -28,6 +28,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         if (stkWVUtils.checkVersion('1.5')) {
+          if(stkWVUtils.isGetProductsSupported) stkWVUtils.getSubscribeInfo()
           await stkWVUtils.fetchDebugModeEntrance()
           await stkWVUtils.fetchLoadedFonts()
           await stkWVUtils.fetchTutorialFlags()
@@ -111,7 +112,7 @@ if (window.location.host !== 'sticker.vivipic.com') {
   routes.push({
     path: 'emoji',
     name: 'EmojiTest',
-    component: () => import('@/views/EmojiTest.vue')
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
   })
 }
 
@@ -252,6 +253,7 @@ router.beforeEach(async (to, from, next) => {
     store.commit('vivisticker/SET_modalInfo', json.modal)
 
     if (json.default_price && Object.keys(json.default_price).length) {
+      const planPostfix = json.default_price.plan_id ? '_' + json.default_price.plan_id : ''
       store.commit('vivisticker/UPDATE_payment', {
         defaultPrices: Object.fromEntries(
           Object.entries(
@@ -276,7 +278,12 @@ router.beforeEach(async (to, from, next) => {
           }),
         ) as { [key: string]: IPrices },
         trialDays: json.default_price.trial_days,
-        trialCountry: json.default_price.trial_country
+        trialCountry: json.default_price.trial_country,
+        planId: {
+          monthly: constantData.planId.monthly,
+          annually: constantData.planId.annually + planPostfix,
+          annuallyFree0: constantData.planId.annuallyFree0 + planPostfix
+        }
       })
     }
 

@@ -4,9 +4,12 @@ import * as path from 'path'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
-import svgSpritePlugin from 'vite-plugin-svg-sprite'
 import extractImg from '../../tools/vite-plugin-lib-extract-img'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
+
+function resolve(...dir: string[]) {
+  return path.join(__dirname, ...dir)
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -26,15 +29,10 @@ export default defineConfig({
     //   imports: ['vue', 'vue-router', 'vue-i18n'],
     //   dts: 'src/auto-import.d.ts'
     // })
-    svgSpritePlugin({
-      symbolId: '[name]',
-      svgo: false,
-      include: '**/src/assets/icon/**/*.svg'
-    }),
     viteStaticCopy({
       targets: [{
-        src: path.resolve(__dirname, 'src/assets/scss').replace(/\\/g, '/'),
-        dest: 'src/assets',
+        src: [resolve('src/assets').replace(/\\/g, '/')],
+        dest: 'src',
       }]
     }),
     // Extracts resource files referenced in lib mode instead of embedded them as base64.
@@ -67,7 +65,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src')
+      '@img': resolve('src/assets/img'),
+      '@': resolve('src')
     }
   },
   css: {

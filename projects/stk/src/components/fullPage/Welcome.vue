@@ -1,7 +1,7 @@
 <template lang="pug">
 div(v-show="imgLoaded" class="welcome")
   div(class="welcome__img")
-    img(:src="require(`@/assets/img/png/pricing/vivisticker_welcome.png`)" :load="imgLoaded = true")
+    img(:src="require(`@img/png/pricing/vivisticker_welcome.png`)" :load="imgLoaded = true")
     div(class="welcome__img__overlay")
   div(class="welcome__text body-MD text-white") {{ $t('STK0054') }}
   div(class="welcome__btn-start text-H6" @click.prevent.stop="handleClose")

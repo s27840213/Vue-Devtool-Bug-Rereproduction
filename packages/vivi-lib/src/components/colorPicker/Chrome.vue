@@ -127,13 +127,13 @@
 </template>
 
 <script>
-import editableInput from './common/EditableInput.vue'
-import saturation from './common/Saturation.vue'
-import hue from './common/Hue.vue'
+import { TinyColor } from '@ctrl/tinycolor'
+import { defineComponent } from 'vue'
 import alpha from './common/Alpha.vue'
 import checkboard from './common/Checkboard.vue'
-import { defineComponent } from 'vue'
-import { TinyColor } from '@ctrl/tinycolor'
+import editableInput from './common/EditableInput.vue'
+import hue from './common/Hue.vue'
+import saturation from './common/Saturation.vue'
 
 function tinycolor (...args) {
   return new TinyColor(...args)
@@ -388,11 +388,9 @@ export default defineComponent({
 
 <style>
 .vc-chrome {
-  background: #fff;
   border-radius: 2px;
   box-sizing: initial;
   font-family: Menlo;
-  background-color: #fff;
   display: flex;
   flex-direction: column;
 }
@@ -471,15 +469,14 @@ export default defineComponent({
 }
 .vc-chrome-hue-wrap .vc-hue-picker,
 .vc-chrome-alpha-wrap .vc-alpha-picker {
-  width: 12px;
-  height: 12px;
-  border-radius: 6px;
-  transform: translate(-6px, -2px);
-  background-color: rgb(248, 248, 248);
-  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
+  width: 10px;
+  height: 14px;
+  border-radius: 8px;
+  transform: translate(-5px, -2px);
+  background-color: transparent;
+  box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.15);
 }
 .vc-chrome-body {
-  background-color: #fff;
 }
 .vc-chrome-saturation-wrap {
   width: 100%;
@@ -487,8 +484,8 @@ export default defineComponent({
   overflow: hidden;
 }
 .vc-chrome-saturation-wrap .vc-saturation-circle {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
 }
 
 .vc-chrome-fields .vc-input__input {

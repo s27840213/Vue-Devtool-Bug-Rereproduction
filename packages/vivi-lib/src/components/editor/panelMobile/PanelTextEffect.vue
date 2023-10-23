@@ -3,7 +3,7 @@ div(class="panel-text-effect")
   //- To choose effect category and effect.
   tabs(v-if="state === 'effects'"
       :tabs="textEffects.map(t => t.label)"
-      v-model="currTabIndex" :theme="$isStk ? 'light-stk' : 'light'")
+      v-model="currTabIndex" :theme="$isStk ? 'dark-stk' : 'light'")
   div(v-if="state === 'effects'"
       class="panel-text-effect__effects")
     div(v-for="effect in effectList"
@@ -82,21 +82,21 @@ div(class="panel-text-effect")
 </template>
 
 <script lang="ts">
+import Tabs from '@/components/Tabs.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import Tabs from '@/components/Tabs.vue'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import { IEffect, IEffectCategory } from '@/utils/constantData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import _ from 'lodash'
-import { defineComponent, PropType } from 'vue'
-import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'MobilePanelTextEffectSetting',
@@ -199,7 +199,9 @@ export default defineComponent({
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
-  color: setColor(gray-2);
+  @include setColors(gray-2, white) using ($color) {
+    color: $color;
+  }
   text-align: left;
 
   :deep(.tabs) {
@@ -241,9 +243,18 @@ export default defineComponent({
       margin: 0px auto;
       border-radius: 5px;
       overflow: hidden;
+      box-sizing: border-box;
+      transition: border 0.3s;
       &.selected {
-        @include setColors(blue-1, black-5) using ($color) {
-          @include selection-border(2px, $color);
+        @include setColors(blue-1, white) using ($color) {
+          border: 2px solid $color;
+        }
+        & > img, & > svg {
+          transform: scale(0.85);
+        }
+        & > div {
+          width: 47.6px;
+          height: 47.6px;
         }
       }
       .panel-text-effect__effects--icon {
@@ -251,6 +262,7 @@ export default defineComponent({
         border-radius: 5px;
         object-fit: cover;
         pointer-events: none;
+        transition: transform 0.3s;
         &.svg-icon {
           padding: 16px;
         }
@@ -261,13 +273,15 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       position: absolute;
-      top: 0px;
-      left: 0px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 56px;
       height: 56px;
       border-radius: 3px;
       background: rgba(71, 74, 87, 0.6);
       backdrop-filter: blur(2px);
+      transition: width 0.3s, height 0.3s;
     }
   }
 
@@ -282,14 +296,18 @@ export default defineComponent({
   &__field {
     &.disabled {
       :deep(*) {
-        color: setColor(gray-4);
+        @include setColors(gray-4, black-3-5) using ($color) {
+          color: $color;
+        }
         pointer-events: none;
       }
     }
   }
 
   &__effect-name {
-    color: setColor(gray-1);
+    @include setColors(gray-1, white) using ($color) {
+      color: $color;
+    }
     text-align: center;
   }
 
@@ -312,7 +330,7 @@ export default defineComponent({
       border-radius: 5px;
       background-color: setColor(gray-5);
       &.selected {
-        @include setColors(blue-1, black-5) using ($color) {
+        @include setColors(blue-1, white) using ($color) {
           @include selection-border(2px, $color);
         }
       }
@@ -344,7 +362,7 @@ export default defineComponent({
         transition: all 0.3s;
         pointer-events: none;
         &.selected {
-          @include setColors(blue-1, black-5) using ($color) {
+          @include setColors(blue-1, white) using ($color) {
             @include selection-border(2px, $color);
           }
         }
@@ -384,7 +402,7 @@ export default defineComponent({
 
   &__reset {
     @include btn-SM;
-    @include setColors(blue-1, black-3) using ($color) {
+    @include setColors(blue-1, white) using ($color) {
       color: $color;
     }
     text-align: center;
