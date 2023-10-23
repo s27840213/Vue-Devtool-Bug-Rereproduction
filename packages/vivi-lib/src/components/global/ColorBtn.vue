@@ -84,11 +84,15 @@ export default defineComponent({
   }
   &__color {
     box-sizing: border-box;
-    border: 1px solid setColor(gray-0, 0.2);
+    @include setColors(gray-0, white) using ($color) {
+      border: 1px solid setColor($color, 0.2);
+    }
   }
   .svg-disable {
     padding: calc((100% - 18px) / 2);
-    border: 1px solid setColor(gray-0, 0.2);
+    @include setColors(gray-0, white) using ($color) {
+      border: 1px solid setColor($color, 0.2);
+    }
     border-radius: 4px;
   }
   &__wrapper {
