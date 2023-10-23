@@ -7,6 +7,11 @@ import vuei18n from '@intlify/unplugin-vue-i18n/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import svgSpritePlugin from 'vite-plugin-svg-sprite-component'
+
+function resolve(...dir: string[]) {
+  return path.join(__dirname, ...dir)
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -32,6 +37,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '@i18n': resolve(
+        process.env.NODE_ENV === 'production' 
+          ? 'src/i18n/shaked/'
+          : '../../tools/i18n-tool/result'
+      ),
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },

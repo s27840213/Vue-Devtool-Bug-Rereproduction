@@ -11,17 +11,7 @@ svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
 </template>
 
 <script lang="ts">
-import svgIconUtils from '@/utils/svgIconUtils'
 import { defineComponent } from 'vue'
-
-const svgs = import.meta.glob('@/assets/icon/**/*.svg', { eager: true }) as
-  Record<string, { default: string, size: { height: number, width: number} }>
-
-if (window.location.host !== 'vivipic.com') {
-  Object.values(svgs).forEach((svg) => {
-    svgIconUtils.pushIcon(svg.default)
-  })
-}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {

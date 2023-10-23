@@ -1,7 +1,7 @@
 <template lang="pug">
 router-link(
   custom
-  to="/"
+  :to="toTarget"
   v-slot="{ navigate }")
   cm-svg-icon(
     icon-color="app-icon-light"
@@ -11,20 +11,50 @@ router-link(
 </template>
 <script setup lang="ts">
 import useStateInfo from '@/composable/useStateInfo'
+import { useImgSelectorStore } from '@/stores/imgSelector'
 import { useModalStore } from '@/stores/modal'
 import { storeToRefs } from 'pinia'
 
-const { showPromptArea, showEditingOpstions } = useStateInfo()
+/**
+ * @Note - how to use this component?
+ * You have two options
+ * 1. use toTarget props to determine the target route
+ * 2. use customCallback to do your own callback
+ *
+ * Precedence: customCallback > toTarget
+ */
+
+const { toTarget, customCallback } = withDefaults(
+  defineProps<{ toTarget?: string; customCallback?: () => void }>(),
+  {
+    toTarget: '/',
+  },
+)
+const { showPromptArea, showEditingOpstions, atSettings } = useStateInfo()
 
 // #region modal
 const modalStore = useModalStore()
 const { closeModal, openModal, setNormalModalInfo } = modalStore
-const { isModalOpen } = storeToRefs(modalStore)
+// #endregion
+
+// #region img selector
+const imgSelectorStore = useImgSelectorStore()
+const { setShowImgSelector } = imgSelectorStore
+const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #endregion
 
 const { t } = useI18n()
 
 const handleBackAction = (navagate: () => void) => {
+  if (customCallback) {
+    customCallback()
+    return
+  }
+  if (showImgSelector.value) {
+    setShowImgSelector(false)
+    return
+  }
+
   if (showEditingOpstions.value || showPromptArea.value) {
     setNormalModalInfo({
       title: t('CM0025'),

@@ -6,35 +6,35 @@ div(class="panel-my-design-more")
       div(class="panel-my-design-more__option-icon")
         svg-icon(iconName="pen"
                   iconWidth="18px"
-                  iconColor="gray-2")
+                  iconColor="white")
       div(class="panel-my-design-more__option-title") {{ $t('NN0504') }}
     div(v-if="isTemplate" class="panel-my-design-more__option"
         @click.prevent.stop="handleDuplicate")
       div(class="panel-my-design-more__option-icon")
         svg-icon(iconName="duplicate"
                   iconWidth="18px"
-                  iconColor="gray-2")
+                  iconColor="white")
       div(class="panel-my-design-more__option-title") {{ $t('NN0251') }}
     div(v-if="showDownload" class="panel-my-design-more__option"
         @click.prevent.stop="handleDownload")
       div(class="panel-my-design-more__option-icon")
         svg-icon(iconName="download_flat"
                   iconWidth="18px"
-                  iconColor="gray-2")
+                  iconColor="white")
       div(class="panel-my-design-more__option-title") {{ $t('NN0889') }}
     div(class="panel-my-design-more__option"
         @click.prevent.stop="handleDelete")
       div(class="panel-my-design-more__option-icon")
         svg-icon(iconName="trash"
                   iconWidth="18px"
-                  iconColor="gray-2")
+                  iconColor="white")
       div(class="panel-my-design-more__option-title") {{ $t('NN0034') }}
     div(class="panel-my-design-more__option"
         @click.prevent.stop="handleReport")
       div(class="panel-my-design-more__option-icon")
         svg-icon(iconName="error"
                   iconWidth="22px"
-                  iconColor="gray-2")
+                  iconColor="white")
       div(class="panel-my-design-more__option-title") {{ $t('STK0088') }}
 </template>
 
@@ -44,8 +44,8 @@ import { IMyDesign, ITempDesign } from '@nu/vivi-lib/interfaces/vivisticker'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
-import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -196,11 +196,11 @@ export default defineComponent({
     gap: 16px;
     align-items: center;
     justify-content: flex-start;
-    &:not(.version):active {
-      background: setColor(black-6);
+    &:active {
+      background: setColor(black-3-5);
     }
     &.selected {
-      background: setColor(black-6);
+      background: setColor(black-3-5);
     }
   }
   &__option-icon {
@@ -211,10 +211,7 @@ export default defineComponent({
   }
   &__option-title {
     @include body-SM;
-    color: setColor(gray-2);
-    &.version {
-      color: setColor(gray-3);
-    }
+    color: setColor(white);
   }
 }
 </style>

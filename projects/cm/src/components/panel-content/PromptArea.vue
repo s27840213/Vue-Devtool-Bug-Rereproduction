@@ -21,10 +21,13 @@ div(class="flex flex-col justify-center items-center w-full px-24")
         span {{ $t('CM0029') }}
 </template>
 <script setup lang="ts">
+import webViewUtils from '@/utils/webViewUtils';
+
 const promptText = ref('')
 const promptLen = computed(() => promptText.value.length)
 const handleGenerate = () => {
   console.log('generate')
+  webViewUtils.sendCopyEditor()
 }
 const clearPromt = () => {
   promptText.value = ''

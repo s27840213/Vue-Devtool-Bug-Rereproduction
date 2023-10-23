@@ -7,7 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    Accordion: typeof import('./components/accordion/Accordion.vue')['default']
     AspectRatioSelector: typeof import('./components/panel-content/AspectRatioSelector.vue')['default']
     BackBtn: typeof import('./components/global/BackBtn.vue')['default']
     BottomPanel: typeof import('./components/BottomPanel.vue')['default']
@@ -16,10 +15,14 @@ declare module 'vue' {
     CmSvgIcon: typeof import('./components/global/CmSvgIcon.vue')['default']
     EditingOptions: typeof import('./components/panel-content/EditingOptions.vue')['default']
     FeatureCard: typeof import('./components/home/FeatureCard.vue')['default']
+    FunctionBar: typeof import('./components/global/FunctionBar.vue')['default']
     Headerbar: typeof import('./components/Headerbar.vue')['default']
     HighlightSection: typeof import('./components/home/HighlightSection.vue')['default']
     HomeTab: typeof import('./components/panel-content/HomeTab.vue')['default']
+    ImgSelector: typeof import('./components/global/ImgSelector.vue')['default']
+    LazyLoad: typeof import('./components/global/LazyLoad.vue')['default']
     ModalTemplate: typeof import('./components/panel-content/ModalTemplate.vue')['default']
+    ObserverSentinel: typeof import('./components/global/ObserverSentinel.vue')['default']
     PromptArea: typeof import('./components/panel-content/PromptArea.vue')['default']
     PropsSlider: typeof import('./components/global/PropsSlider.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

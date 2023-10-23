@@ -64,7 +64,7 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
           :key="format.id"
           class="page-size-selector__body-row item pointer"
           @click="selectFormat(`recent-${index}`)")
-        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.title === '' || format.icon === 'custom' ? isDarkTheme ? 'custom-white' : 'custom-white' : format.icon}.svg`)")
+        img(class="page-size-selector__body-row__icon" :src="require(`@img/svg/page-selector/${format.title === '' || format.icon === 'custom' ? isDarkTheme ? 'custom-white' : 'custom-white' : format.icon}.svg`)")
         div(class="page-size-selector__body-row__text-content")
           span(class="page-size-selector__body__page-text body-SM pointer"
                 :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}
@@ -79,7 +79,7 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
           :key="format.id"
           class="page-size-selector__body-row item pointer"
           @click="selectFormat(`preset-${index}`)")
-        img(class="page-size-selector__body-row__icon" :src="require(`@/assets/img/svg/page-selector/${format.icon}.svg`)")
+        img(class="page-size-selector__body-row__icon" :src="require(`@img/svg/page-selector/${format.icon}.svg`)")
         div(class="page-size-selector__body-row__text-content")
           span(class="page-size-selector__body__page-text body-SM pointer"
                 :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title === '' || format.icon === 'custom' ? $t('NN0023') : format.title }}

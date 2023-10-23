@@ -36,7 +36,7 @@ import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
-import brushPasteResized from '@/assets/img/svg/brush-paste-resized.svg'
+import brushPasteResized from '@img/svg/brush-paste-resized.svg'
 
 const getDefaultState = (): IEditorState => ({
   sessionId: generalUtils.generateRandomString(12),

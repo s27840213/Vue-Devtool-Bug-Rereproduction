@@ -11,7 +11,7 @@ div(class="panel-select-design")
       :class="{disabled: !isAnySelected}"
       @click.prevent.stop="handleDeleteSelected")
     div(class="panel-select-design__right__icon")
-      svg-icon(iconName="trash" :iconColor="isAnySelected ? 'white' : 'gray-2'" iconWidth="19.5px")
+      svg-icon(iconName="trash" :iconColor="isAnySelected ? 'black-2-5' : 'black-3-5'" iconWidth="19.5px")
     div(class="panel-select-design__right__text"
         :class="{disabled: !isAnySelected}")
       span {{ $t('NN0034') }}
@@ -123,13 +123,13 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       &.checked {
-        background: setColor(black-3);
+        background: setColor(black-3-5);
         border: none;
       }
     }
     &__text {
       @include body-SM;
-      color: setColor(gray-2);
+      color: setColor(white);
     }
   }
   &__right {
@@ -137,12 +137,12 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: setColor(black-2);
+    background: setColor(white);
     border-radius: 10px;
     height: 42px;
     padding: 0 16px;
     &.disabled {
-      background: setColor(black-6);
+      background: setColor(black-3);
     }
     &__icon {
       @include size(19.5px);
@@ -153,9 +153,9 @@ export default defineComponent({
     &__text {
       @include body-SM;
       transition: color 0.2s;
-      color: setColor(white);
+      color: setColor(black-2-5);
       &.disabled {
-        color: setColor(gray-2);
+        color: setColor(black-3-5);
       }
     }
   }

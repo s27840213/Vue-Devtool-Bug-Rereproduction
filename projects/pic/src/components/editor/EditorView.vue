@@ -35,14 +35,14 @@ div(class="editor-view bg-gray-5"
       class="editor-view__guidelines-area"
       ref="guidelinesArea")
     div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
-        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
+        :style="{'cursor': `url(${require('@img/svg/ruler-v.svg')}) 16 16, pointer`}"
         @pointerdown.left.stop="lockGuideline ? null: dragStartV($event)"
         @mouseout.stop="closeGuidelineV()"
         @pointerup.right.stop.prevent="openGuidelinePopup($event)")
       div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
         span {{rulerVPos}}
     div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
-        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
+        :style="{'cursor': `url(${require('@img/svg/ruler-h.svg')}) 16 16, pointer`}"
         @pointerdown.left.stop="lockGuideline ? null : dragStartH($event)"
         @mouseout.stop="closeGuidelineH()"
         @pointerup.right.stop.prevent="openGuidelinePopup($event)")

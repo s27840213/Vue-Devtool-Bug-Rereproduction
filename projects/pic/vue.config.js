@@ -36,13 +36,13 @@ const path = require('path')
 // const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 // const PrerenderSPAPlugin = require('@dreysolano/prerender-spa-plugin')
 // const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
-// const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
 
-function resolve(dir) {
-  return path.join(__dirname, dir)
+function resolve(...dir) {
+  return path.join(__dirname, ...dir)
 }
 
 module.exports = defineConfig({
@@ -111,7 +111,9 @@ module.exports = defineConfig({
     config.module
       .rule('svg-sprite-loader')
       .test(/\.svg$/)
-      .include.add(resolve('src/assets/icon'))
+      .include
+        .add(resolve('src/assets/icon'))
+        .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
       .end()
       .use('svg-sprite-loader')
       .loader('svg-sprite-loader')
@@ -141,7 +143,9 @@ module.exports = defineConfig({
     config.module
       .rule('image-assets')
       .test(/\.(png|jpg|gif|svg|mp4)$/)
-      .exclude.add(resolve('src/assets/icon'))
+      .exclude
+        .add(resolve('src/assets/icon'))
+        .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
       .end()
       .type('asset/resource')
     // config.module
@@ -203,7 +207,7 @@ module.exports = defineConfig({
         if (err) console.error(err)
       })
       config.plugin('html').tap((args) => {
-        args[0].template = path.join(__dirname, 'public', 'index.html')
+        args[0].template = resolve('public', 'index.html')
         args[0].filename = 'app.html'
         return args
       })
@@ -219,8 +223,8 @@ module.exports = defineConfig({
     //   config.plugin('prerender').use(PrerenderSPAPlugin, [
     //     {
     //       // Tell the Pre-SPA plugin not to use index.html as its template file.
-    //       indexPath: path.join(__dirname, 'dist', 'app.html'),
-    //       staticDir: path.join(__dirname, 'dist'),
+    //       indexPath: resolve('dist', 'app.html'),
+    //       staticDir: resolve('dist'),
     //       routes: [
     //         '/',
     //         '/tw',
@@ -306,13 +310,14 @@ module.exports = defineConfig({
     resolve: {
       alias: {
         // Use shaked i18n JSON for prod.
-        '@i18n': path.resolve(
-          __dirname,
-          process.env.NODE_ENV === 'production' ? 'src/i18n/shaked/' : '../../tools/i18n-tool/result'
+        '@i18n': resolve(
+          process.env.NODE_ENV === 'production' 
+            ? 'src/i18n/shaked/'
+            : '../../tools/i18n-tool/result'
         ),
-        '@': path.resolve(__dirname, 'src/'),
+        '@img': resolve('../../packages/vivi-lib/dist/src/assets/img'),
+        '@': resolve('src/'),
       },
-      extensions: ['.ts', '.vue', '.json']
     }
   }
 })

@@ -1,11 +1,12 @@
 <template lang="pug">
 div(:class="`tabs ${themeColor} ${themeType}`")
-  div(v-for="(tab,index) in tabs"
-      :key="tab"
-      class="tabs__item"
-      :style="tabStyle(index)"
-      @click="switchTab(index)")
-    span {{tab}}
+  div(
+    v-for="(tab, index) in tabs"
+    :key="tab"
+    class="tabs__item"
+    :style="tabStyle(index)"
+    @click="switchTab(index)")
+    span {{ tab }}
     div(v-if="['default', 'narrow', 'stk'].includes(themeType)" class="tabs__underline")
 </template>
 
@@ -16,17 +17,19 @@ export default defineComponent({
   props: {
     tabs: {
       type: Array as PropType<string[]>,
-      default: [] as string[]
+      default: [] as string[],
     },
     // Use v-model to bind tabIndex.
     modelValue: {
       type: Number,
-      required: true
+      required: true,
     },
     theme: {
-      type: String as PropType<'dark' | 'light' | 'dark-rect' | 'dark-narrow' | 'light-narrow' | 'light-stk'>,
-      default: 'dark'
-    }
+      type: String as PropType<
+        'dark' | 'light' | 'dark-rect' | 'dark-narrow' | 'light-narrow' | 'light-stk' | 'dark-stk'
+      >,
+      default: 'dark',
+    },
   },
   emits: ['update:modelValue'],
   computed: {
@@ -36,43 +39,48 @@ export default defineComponent({
     themeColor(): 'dark' | 'light' {
       return this.theme.split('-')[0] as 'dark' | 'light'
     },
-    themeType(): 'default' | 'rect' | 'narrow' {
-      return this.theme.split('-')[1] as 'rect' | 'narrow' | undefined ?? 'default'
+    themeType(): 'default' | 'rect' | 'narrow' | 'stk' {
+      return (this.theme.split('-')[1] as 'rect' | 'narrow' | 'stk' | undefined) ?? 'default'
     },
     colors() {
       switch (this.theme) {
         case 'light':
           return {
             active: '#4EABE6',
-            inactive: '#969BAB'
+            inactive: '#969BAB',
           }
         case 'light-stk':
           return {
             active: '#141414',
-            inactive: '#969BAB'
+            inactive: '#969BAB',
           }
         case 'dark-rect':
           return {
             active: '#18191F',
             activeBG: '#E8E8E8',
             inactive: '#9C9C9C',
-            inactiveBG: '#2E2E2E'
+            inactiveBG: '#2E2E2E',
           }
         case 'light-narrow':
           return {
             active: '#474A57',
-            inactive: '#969BAB'
+            inactive: '#969BAB',
           }
         case 'dark-narrow':
           return {
             active: '#FFFFFF',
-            inactive: '#969BAB'
+            inactive: '#969BAB',
+          }
+        case 'dark-stk':
+          return {
+            active: 'white',
+            inactive: '#9C9C9C',
           }
         case 'dark':
         default:
           return {
             active: 'white',
-            inactive: '#9C9C9C'
+            inactive: '#9C9C9C',
           }
       }
     },
@@ -92,7 +100,7 @@ export default defineComponent({
             height: '36px',
             borderRadius: '10px',
             color: this.colors[activeMode],
-            backgroundColor: this.colors[`${activeMode}BG`]
+            backgroundColor: this.colors[`${activeMode}BG`],
           }
         case 'narrow':
           return {
@@ -103,14 +111,14 @@ export default defineComponent({
           return {
             color: this.colors[activeMode],
             '--border-color': isActive ? this.colors[activeMode] : 'transparent',
-            width: `${100 / this.tabs.length / 2}%`
+            width: `${100 / this.tabs.length / 2}%`,
           }
       }
     },
     switchTab(tabIndex: number) {
       this.$emit('update:modelValue', tabIndex)
-    }
-  }
+    },
+  },
 })
 </script>
 
@@ -133,7 +141,9 @@ export default defineComponent({
     border-radius: 1px;
   }
 
-  &.default, &.rect, &.stk {
+  &.default,
+  &.rect,
+  &.stk {
     @include text-H6;
   }
   &.narrow {
@@ -141,7 +151,8 @@ export default defineComponent({
     justify-content: initial;
     gap: 16px;
   }
-  &.default, &.stk {
+  &.default,
+  &.stk {
     .tabs__item {
       min-width: fit-content;
     }

@@ -9,10 +9,12 @@ div(class="w-full box-border p-24 rounded-[20px] flex items-center justify-betwe
       :iconName="btnIconName"
       :full="true"
       @click="handleClick") {{ btnText }}
-  img(:src="`src/assets/img/${iconName}.png`" class="w-128")
+  img(:src="imgSrc" class="w-128")
 </template>
 <script setup lang="ts">
-defineProps<{
+import useImageUtils from '@/composable/useImageUtils'
+
+const props = defineProps<{
   btnIconName?: string
   btnText: string
   title: string
@@ -26,6 +28,12 @@ const emits = defineEmits(['clickBtn'])
 const handleClick = () => {
   emits('clickBtn')
 }
+
+const { getImageUrl } = useImageUtils()
+
+const imgSrc = computed(() => {
+  return getImageUrl(props.iconName)
+})
 </script>
 <style lang="scss">
 .bg__powerful-fill {
