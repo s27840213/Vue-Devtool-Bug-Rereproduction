@@ -497,22 +497,21 @@ class LetterBGData {
       },
       'stretch-dog': {
         ...letterBgDefault,
-        yOffset200: 12,
+        yOffset200: 10,
         size: 180,
       },
       'stretch-rabbit': {
         ...letterBgDefault,
-        yOffset200: 12,
         size: 180,
       },
       'stretch-cat': {
         ...letterBgDefault,
-        yOffset200: 12,
+        yOffset200: 5,
         size: 180,
       },
       'stretch-dragon': {
         ...letterBgDefault,
-        yOffset200: 12,
+        yOffset200: 10,
         size: 220,
       },
     }
@@ -632,13 +631,13 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 1010
       },
       'stretch-dog': {
-        lineHeight: 1.96, fontSpacing: 395,
+        lineHeight: 1.96, fontSpacing: 350,
       },
       'stretch-rabbit': {
-        lineHeight: 1.96, fontSpacing: 285,
+        lineHeight: 1.96, fontSpacing: 280,
       },
       'stretch-cat': {
-        lineHeight: 1.96, fontSpacing: 300,
+        lineHeight: 1.96, fontSpacing: 270,
       },
       'stretch-dragon': {
         lineHeight: 1.96, fontSpacing: 190,
