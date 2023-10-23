@@ -1,3 +1,4 @@
+import webViewUtils from '@/utils/webViewUtils'
 import HomeView from '@/views/HomeView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -49,6 +50,9 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  webViewUtils.setupAPIInterface()
+  webViewUtils.detectIfInApp()
+  webViewUtils.getUserInfo()
   if (from.name === 'MyDesign' && to.name === 'Home') {
     to.meta.transition = 'fade-right-in'
   }

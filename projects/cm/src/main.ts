@@ -1,5 +1,4 @@
 import '@/assets/css/main.css'
-import webViewUtils from '@/utils/webViewUtils'
 import componentPlugin from '@nu/shared-lib/plugin'
 import libType from '@nu/shared-lib/types'
 import { createPinia } from 'pinia'
@@ -19,8 +18,6 @@ function keepVar(v: unknown) {
 // the *.d.ts file for the global components in shared-lib
 keepVar(libType)
 keepVar(svgs)
-webViewUtils.setupAPIInterface()
-webViewUtils.getUserInfo()
 
 app.use(createPinia())
 app.use(router)

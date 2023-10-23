@@ -16,6 +16,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :style="wrapperStyles"
         ref="editorWrapperRef")
         div(
+          id="editor-page"
           class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
           :style="pageStyles")
           img(class="h-full object-contain" src="@/assets/img/test.jpg")
