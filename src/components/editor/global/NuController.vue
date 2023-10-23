@@ -509,7 +509,7 @@ export default defineComponent({
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
-          editor.setEditable(newVal)
+          editor.setEditable(newVal, false)
         })
       }
       !this.$isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
