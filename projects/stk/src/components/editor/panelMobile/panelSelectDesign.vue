@@ -11,7 +11,7 @@ div(class="panel-select-design")
       :class="{disabled: !isAnySelected}"
       @click.prevent.stop="handleDeleteSelected")
     div(class="panel-select-design__right__icon")
-      svg-icon(iconName="trash" :iconColor="isAnySelected ? 'black-2-5' : 'black-5'" iconWidth="19.5px")
+      svg-icon(iconName="trash" :iconColor="isAnySelected ? 'black-2-5' : 'black-3-5'" iconWidth="19.5px")
     div(class="panel-select-design__right__text"
         :class="{disabled: !isAnySelected}")
       span {{ $t('NN0034') }}
@@ -155,7 +155,7 @@ export default defineComponent({
       transition: color 0.2s;
       color: setColor(black-2-5);
       &.disabled {
-        color: setColor(black-5);
+        color: setColor(black-3-5);
       }
     }
   }

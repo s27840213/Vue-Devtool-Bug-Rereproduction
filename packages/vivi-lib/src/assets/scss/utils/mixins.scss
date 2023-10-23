@@ -271,15 +271,18 @@
     color: $color;
   }
 
-  transition: color 0.2s;
+  transition: 0.4s;
 
-  @include setColors(blue-1, black-5) using ($color) {
-    &:active {
-      color: $color;
-      font-weight: bold;
+  &:active {
+    @include setColors(blue-1, black-5) using ($color) {
+      background-color: $color;
+    }
+
+    @include pic {
+      color: white;
 
       &:deep(.svg-icon) {
-        color: $color;
+        color: white;
       }
     }
   }
