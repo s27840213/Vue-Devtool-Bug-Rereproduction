@@ -3,7 +3,7 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     // Auto fix eslint error/warn.
-    "source.fixAll.eslint": false,
+    "source.fixAll.eslint": true,
     // Auto sort import.
     "source.organizeImports": true
   },
