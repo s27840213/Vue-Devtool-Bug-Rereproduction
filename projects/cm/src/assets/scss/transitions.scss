@@ -92,8 +92,8 @@
 .bottom-panel-transition {
   &-enter-active {
     transition:
-      opacity 0.35s 0.15s,
-      transform 0.35s 0.15s;
+      opacity 0.25s 0.15s,
+      transform 0.25s 0.15s;
   }
   &-leave-active {
     // transition:
@@ -104,7 +104,7 @@
   &-enter-from,
   &-leave-to {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(5px);
   }
 }
 
@@ -120,5 +120,21 @@
   &-leave-to {
     opacity: 0;
     transform: translateY(100%);
+  }
+}
+
+
+.rotate-right-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      transform 0.25s,
+      opacity 0.25s,
+  }
+
+  &-enter-from,
+  &-leave-to {
+    transform: rotate(45deg);
+    opacity: 0;
   }
 }

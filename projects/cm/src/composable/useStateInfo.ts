@@ -20,8 +20,7 @@ const useStateInfo = () => {
   const showAspectRatioSelector = computed(
     () => atEditor.value && editorState.value === 'aspectRatio',
   )
-  const showEditingOpstions = computed(() => atEditor.value && editorState.value === 'editing')
-  const showPromptArea = computed(() => atEditor.value && editorState.value === 'prompt')
+  const isEditing = computed(() => atEditor.value && editorState.value === 'editing')
   // #endregion
 
   // #region img selector state
@@ -37,8 +36,7 @@ const useStateInfo = () => {
     atMainPage,
     showHomeTabs,
     showAspectRatioSelector,
-    showEditingOpstions,
-    showPromptArea,
+    isEditing,
     showImgSelector,
   }
 }

@@ -10,7 +10,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
     div(class="flex justify-center items-center gap-18")
       transition(
-          name="fade-in"
+          name="rotate-right-in"
           mode="out-in")
         div(v-if="atMyDesign" )
           router-link(
@@ -46,7 +46,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
-import EditingOptions from './components/panel-content/EditingOptions.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
@@ -57,8 +56,7 @@ const stateInfo = useStateInfo()
 const {
   showAspectRatioSelector,
   showHomeTabs,
-  showEditingOpstions,
-  showPromptArea,
+  isEditing,
   atMyDesign,
   atSettings,
   atMainPage,
@@ -78,9 +76,7 @@ const bottomPanelComponent = computed(() => {
       return HomeTab
     case showAspectRatioSelector.value:
       return AspectRatioSelector
-    case showEditingOpstions.value:
-      return EditingOptions
-    case showPromptArea.value:
+    case isEditing.value:
       return PromptArea
     default:
       return ModalTemplate

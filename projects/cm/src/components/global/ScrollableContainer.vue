@@ -18,15 +18,15 @@ const { direction, gap, px, py } = withDefaults(
     direction: 'hr',
     gap: 12,
     px: 8,
-    py: 12
-  }
+    py: 12,
+  },
 )
 
 const containerStyles = computed(() => {
   return {
     gridAutoFlow: direction === 'hr' ? 'column' : 'row',
     columnGap: `${gap}px`,
-    padding: `${py}px ${px}px`
+    padding: `${py}px ${px}px`,
   }
 })
 </script>
