@@ -235,7 +235,7 @@ export default defineComponent({
           key: 'annually',
           title: this.$t('NN0515'),
           subTitle: this.isOldPrice ? this.$t('STK0048', { day: 3 }) : '',
-          price: this.payment.prices.annually.text,
+          price: (!stkWVUtils.isOldPrice && !this.isTrialToggled) ? this.payment.prices.annuallyFree0.text : this.payment.prices.annually.text,
           tag: this.localizedTag
         }
       ]
@@ -286,7 +286,10 @@ export default defineComponent({
         return
       }
       if (this.isPaymentPending) return
-      if (option === 'annually' && (this.isTrialDisabled || !this.isTrialToggled)) option = 'com.nuphototw.vivisticker.yearly_free0'
+      if (!stkWVUtils.isOldPrice) {
+        if (option === 'monthly') option = this.payment.planId.monthly
+        else if (option === 'annually') option = (this.isTrialDisabled || !this.isTrialToggled) ? this.payment.planId.annuallyFree0 : this.payment.planId.annually
+      }
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
       stkWVUtils.sendToIOS('SUBSCRIBE', { option })
       if (timeout) {

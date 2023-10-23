@@ -1269,6 +1269,15 @@ class ConstantData {
     ['JPN', 'JPY'],
     ['TWN', 'TWD'],
   ])
+
+  // plan id for vivisticker payment
+  get planId() {
+    return {
+      monthly: 'com.nuphototw.vivisticker.monthly',
+      annually: 'com.nuphototw.vivisticker.annually',
+      annuallyFree0: 'com.nuphototw.vivisticker.yearly_free0'
+    }
+  }
 }
 
 export default new ConstantData()
