@@ -322,6 +322,8 @@ export default defineComponent({
       this.pinchControlUtils?.pinch(e)
     },
     pinchStart(e: AnyTouchEvent) {
+      if (this.$store.getters['imgControl/isImgCtrl'] || this.$store.getters['imgControl/isImgCtrl']) return
+
       const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
 
       if (_config.config.type === 'text') {
