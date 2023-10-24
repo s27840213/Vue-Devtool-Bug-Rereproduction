@@ -1,7 +1,14 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "src/**/*.json", "../../packages/*/src/*"],
-  "exclude": ["src/**/__tests__/*", "../../packages/vivi-lib"],
+  "include": [
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.vue",
+    "src/**/*.json",
+  ],
+  "exclude": [
+    "src/**/__tests__/*"
+  ],
   "compilerOptions": {
     "rootDir": "../../",
     "composite": true,
@@ -10,17 +17,30 @@
       "@i18n/*": [
         "./src/i18n/shaked/*"
       ],
-      "@/*": ["./src/*"],
-      "@nu/shared-lib/*": ["../../packages/shared-lib/src/*"],
-      "@nu/shared-lib": ["../../packages/shared-lib/src/index"]
+      "@/*": [
+        "./src/*",
+      ],
+      "@nu/shared-lib/*": [
+        "../../packages/shared-lib/src/*"
+      ],
+      "@nu/shared-lib": [
+        "../../packages/shared-lib/src/index"
+      ]
     },
-    "types": ["vite/client"],
+    "types": [
+      "vite/client"
+    ],
     "resolveJsonModule": true,
-    "lib": ["ESNext", "DOM"],
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
     "target": "ESNext",
     "module": "ESNext"
   },
   "vueCompilerOptions": {
-    "plugins": ["@vue/language-plugin-pug"]
+    "plugins": [
+      "@vue/language-plugin-pug"
+    ]
   }
 }

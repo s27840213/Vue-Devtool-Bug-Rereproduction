@@ -5,9 +5,10 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
       back-btn(:customCallback="handleBackAction")
     template(#middle)
       span(class="typo-h5 text-app-text-secondary") {{ headerbarTitle }}
+    template(#right)
   div(
     v-if="showInitOptions"
-    class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] pt-10 overflow-scroll"
+    class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] pt-10 overflow-scroll scrollbar-hide"
     ref="scrollContainer")
     div(
       class="w-full box-border p-24 rounded-[20px] flex flex-col items-center justify-between gap-16 gradient--yellow")
@@ -70,9 +71,9 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         @click="data.action")
 </template>
 <script setup lang="ts">
-import { useGlobalStore } from '@/stores/global'
-import webViewUtils from '@/utils/webViewUtils'
-import { storeToRefs } from 'pinia'
+import { useGlobalStore } from '@/stores/global';
+import webViewUtils from '@/utils/webViewUtils';
+import { storeToRefs } from 'pinia';
 
 const scrollContainer = ref<HTMLElement | null>(null)
 

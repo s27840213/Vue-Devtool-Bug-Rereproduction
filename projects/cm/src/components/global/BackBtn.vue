@@ -30,7 +30,7 @@ const { toTarget, customCallback } = withDefaults(
     toTarget: '/',
   },
 )
-const { showPromptArea, showEditingOpstions, atSettings } = useStateInfo()
+const { isEditing, atSettings } = useStateInfo()
 
 // #region modal
 const modalStore = useModalStore()
@@ -55,7 +55,7 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  if (showEditingOpstions.value || showPromptArea.value) {
+  if (isEditing.value) {
     setNormalModalInfo({
       title: t('CM0025'),
       content: t('CM0026'),

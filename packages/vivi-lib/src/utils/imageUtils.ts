@@ -249,19 +249,19 @@ class ImageUtils {
   getAssetId(src: string, type = this.getSrcType(src)) {
     switch (type) {
       case 'logo-public': {
-        return src.match(/logo\/\w+\/(\w+)\//)?.[1] ?? ''
+        return src.match(/logo\/[^/]+\/([^/]+)\//)?.[1] ?? ''
       }
       case 'public': {
-        return src.match(/image\/(\w+)\//)?.[1] ?? ''
+        return src.match(/image\/([^/]+)\//)?.[1] ?? ''
       }
       case 'unsplash': {
-        return src.match(/com\/([\w-]+)\?/)?.[1] ?? ''
+        return src.match(/com\/([^?]+)\?/)?.[1] ?? ''
       }
       case 'background': {
-        return src.match(/background\/(\w+)\//)?.[1] ?? ''
+        return src.match(/background\/([^/]+)\//)?.[1] ?? ''
       }
       case 'svg': {
-        return src.match(/svg\/(\w+)\//)?.[1] ?? ''
+        return src.match(/svg\/([^/]+)\//)?.[1] ?? ''
       }
       case 'ios': {
         return src.match(/vvstk:\/\/(.+)/)?.[1] ?? ''

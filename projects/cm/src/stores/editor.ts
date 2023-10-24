@@ -1,5 +1,5 @@
 import { AppColors } from '@/types/color'
-import type { EditorState, EditorType, PowerfulFillMode } from '@/types/editor'
+import type { EditorFeature, EditorState, EditorType, PowerfulFillCanvasMode } from '@/types/editor'
 import { defineStore } from 'pinia'
 import { useCanvasStore } from './canvas'
 export interface IPage {
@@ -24,13 +24,16 @@ interface IEditorStore {
   editingPage: Page
   pageScaleRatio: number
   editorState: EditorState
+  currActiveFeature: EditorFeature
   editorType: EditorType
-  editorMode: PowerfulFillMode
+  canvasMode: PowerfulFillCanvasMode
   isAdjustingBottomPanel: boolean
   firstPaintArea: {
     width: number
     height: number
   }
+  maskCanvas: HTMLCanvasElement
+  maskDataUrl: string
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -39,27 +42,30 @@ export const useEditorStore = defineStore('editor', {
     editingPage: new Page(900, 1600),
     pageScaleRatio: 0.1,
     editorState: 'aspectRatio',
+    currActiveFeature: 'none',
     editorType: 'powerful-fill',
-    editorMode: 'brush',
+    canvasMode: 'brush',
     isAdjustingBottomPanel: true,
     firstPaintArea: {
       width: 0,
-      height: 0
-    }
+      height: 0,
+    },
+    maskCanvas: document.createElement('canvas'),
+    maskDataUrl: '',
   }),
   getters: {
     pageSize(): { width: number; height: number } {
       return {
         width: this.editingPage.width,
-        height: this.editingPage.height
+        height: this.editingPage.height,
       }
-    }
+    },
   },
   actions: {
     setPageSize(width: number, height: number) {
       useCanvasStore().setCanvasStoreState({
         canvasWidth: width,
-        canvasHeight: height
+        canvasHeight: height,
       })
 
       this.editingPage.width = width
@@ -79,14 +85,24 @@ export const useEditorStore = defineStore('editor', {
     setEditorState(state: EditorState) {
       this.editorState = state
     },
+    setCurrActiveFeature(feature: EditorFeature) {
+      this.currActiveFeature = feature
+    },
     setEditorType(state: EditorState) {
       this.editorState = state
     },
-    setEditorMode(mode: PowerfulFillMode) {
-      this.editorMode = mode
+    setCanvasMode(mode: PowerfulFillCanvasMode) {
+      this.canvasMode = mode
     },
     setFirstPaintArea(width: number, height: number) {
       Object.assign(this.firstPaintArea, { width, height })
-    }
-  }
+      console.log(this.firstPaintArea)
+    },
+    setMaskCanvas(canvas: HTMLCanvasElement) {
+      this.maskCanvas = canvas
+    },
+    setMaskCanvasDataUrl(dataUrl: string) {
+      this.maskDataUrl = dataUrl
+    },
+  },
 })

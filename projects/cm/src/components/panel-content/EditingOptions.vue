@@ -1,18 +1,6 @@
 <template lang="pug">
 div(class="editing-options w-full")
-  div(
-    v-if="inSelectionMode"
-    class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 pl-24 pr-8")
-    span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('CM0015') }}
-    scrollable-container(:gap="20")
-      cm-svg-icon(
-        v-for="shape in shapeTypes"
-        :key="shape"
-        icon-color="primary-light-active"
-        :icon-name="shape"
-        icon-height="32px"
-        :same-size="false")
-  div(v-else class="mb-16 px-24") 
+  div(class="mb-16 px-24") 
     props-slider(
       :title="`${$t('CM0001')}`"
       :borderTouchArea="true"
@@ -56,8 +44,8 @@ interface IFeatureTab {
   forPro?: boolean
 }
 const editorStore = useEditorStore()
-const { setEditorMode } = editorStore
-const { editorMode } = storeToRefs(editorStore)
+const { setCanvasMode } = editorStore
+const { canvasMode } = storeToRefs(editorStore)
 
 const { reverseSelection } = useCanvasUtils()
 const canvasStore = useCanvasStore()
@@ -76,18 +64,13 @@ const shapeTypes = ['square', 'rectangle', 'circle', 'triangle', 'pentagon', 'he
 // #region feature tab section
 const tabRefs = ref<Array<HTMLElement | null>>([])
 
-const selectedTab = computed(() => editorMode.value)
+const selectedTab = computed(() => canvasMode.value)
 
-const inSelectionMode = computed(() => editorMode.value === 'selection')
 const inCavnasDrawMode = computed(
-  () => editorMode.value === 'erase' || editorMode.value === 'brush',
+  () => canvasMode.value === 'erase' || canvasMode.value === 'brush',
 )
 
 const featureTabs = reactive<Array<IFeatureTab>>([
-  {
-    icon: 'selection',
-    text: t('CM0016'),
-  },
   {
     icon: 'brush',
     text: t('CM0017'),
@@ -123,11 +106,10 @@ const handleTabAction = (tab: IFeatureTab) => {
    */
   if (tab.disabled) return
   switch (tab.icon) {
-    case 'selection':
     case 'brush':
     case 'erase':
     case 'move': {
-      setEditorMode(tab.icon)
+      setCanvasMode(tab.icon)
       return
     }
     case 'reverse':
