@@ -213,19 +213,22 @@ class LetterBGData {
       options: withColor,
     }, {
       key: 'stretch-dog',
-      label: i18n.global.tc('NN0903'),
+      label: i18n.global.tc('NN0914'),
+      plan: 1,
       options: noColor,
     }, {
       key: 'stretch-rabbit',
-      label: i18n.global.tc('NN0903'),
+      label: i18n.global.tc('NN0915'),
+      plan: 1,
       options: noColor,
     }, {
       key: 'stretch-cat',
-      label: i18n.global.tc('NN0903'),
+      label: i18n.global.tc('NN0916'),
+      plan: 1,
       options: noColor,
     }, {
       key: 'stretch-dragon',
-      label: i18n.global.tc('NN0903'),
+      label: i18n.global.tc('NN0917'),
       options: noColor,
     }]
   }
