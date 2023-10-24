@@ -911,6 +911,10 @@
   "NN0911": "BG Remover with Shadow Effects",
   "NN0912": "If you delete a photo, the design files that contain this photo will be unable to display it. Please delete the photo when it is no longer needed in all the design files.",
   "NN0913": "Replace image",
+  "NN0914": "Stretch Dog",
+  "NN0915": "Stretch Cat",
+  "NN0916": "Stretch Rabbit",
+  "NN0917": "Stretch Dragon",
   "STK0001": "Add a text",
   "STK0002": "Tap to copy",
   "STK0003": "Press and hold to share",
@@ -1052,7 +1056,7 @@
   "CM0010": "Surreal Scene",
   "CM0011": "AI Reflection",
   "CM0012": "Next",
-  "CM0013": "Aspect Ratio",
+  "CM0013": "Set Expanded Photo Ratio",
   "CM0014": "Original",
   "CM0015": "Shape",
   "CM0016": "Selection",
@@ -1086,5 +1090,11 @@
   "CM0044": "Rate us",
   "CM0045": "Feedback",
   "CM0046": "Term of Service & Privacy Policy",
-  "CM0047": "Settings"
+  "CM0047": "Settings",
+  "CM0048": "Add",
+  "CM0049": "Sticker",
+  "CM0050": "Image",
+  "CM0051": "Select",
+  "CM0052": "Auto Fill",
+  "CM0053": "Canvas"
 }

@@ -10,7 +10,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
     div(class="flex justify-center items-center gap-18")
       transition(
-          name="fade-in"
+          name="rotate-right-in"
           mode="out-in")
         div(v-if="atMyDesign" )
           router-link(
@@ -57,8 +57,8 @@ const stateInfo = useStateInfo()
 const {
   showAspectRatioSelector,
   showHomeTabs,
-  showEditingOpstions,
-  showPromptArea,
+  isEditing,
+  showBrushOptions,
   atMyDesign,
   atSettings,
   atMainPage,
@@ -78,9 +78,9 @@ const bottomPanelComponent = computed(() => {
       return HomeTab
     case showAspectRatioSelector.value:
       return AspectRatioSelector
-    case showEditingOpstions.value:
+    case showBrushOptions.value:
       return EditingOptions
-    case showPromptArea.value:
+    case isEditing.value:
       return PromptArea
     default:
       return ModalTemplate

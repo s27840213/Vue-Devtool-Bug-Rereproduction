@@ -1,5 +1,6 @@
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import { generalUtils } from '@nu/shared-lib'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import useMouseUtils from './useMouseUtils'
@@ -11,13 +12,14 @@ export interface ICanvasParams {
 const useCanvasUtils = (
   targetCanvas?: Ref<HTMLCanvasElement | null>,
   wrapperRef?: Ref<HTMLElement | null>,
-  editorContainerRef?: Ref<HTMLElement | null>
+  editorContainerRef?: Ref<HTMLElement | null>,
 ) => {
   // #region MouseUtils Store & Editor Store
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { editorMode, firstPaintArea } = storeToRefs(editorStore)
+  const { canvasMode, firstPaintArea, maskCanvas, maskDataUrl, currActiveFeature } =
+    storeToRefs(editorStore)
   // #endregion
 
   // #region canvasStore
@@ -34,15 +36,18 @@ const useCanvasUtils = (
     canvasWidth,
     canvasHeight,
     isDrawing,
-    canvasCtx
+    canvasCtx,
   } = storeToRefs(canvasStore)
 
   const { setCanvasStoreState } = canvasStore
   // #endregion
 
   const disableTouchEvent = (e: TouchEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    const enableTouchEventFlag = (e.target as HTMLElement).classList.contains('sidebar__tab')
+    if (isManupulatingCanvas.value && !enableTouchEventFlag) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
   }
 
   // #region Canvas States
@@ -56,7 +61,7 @@ const useCanvasUtils = (
     backgroundColor: '#fcaea9',
     width: '16px',
     height: '16px',
-    transform: 'translate(0,0)'
+    transform: 'translate(0,0)',
   })
 
   watch(brushSize, (newVal) => {
@@ -68,16 +73,20 @@ const useCanvasUtils = (
     }
   })
 
+  const isManupulatingCanvas = computed(() => {
+    return currActiveFeature.value === 'brush'
+  })
+
   const isBrushMode = computed(() => {
-    return editorMode.value === 'brush'
+    return canvasMode.value === 'brush'
   })
 
   const isEraseMode = computed(() => {
-    return editorMode.value === 'erase'
+    return canvasMode.value === 'erase'
   })
 
   const isMovingMode = computed(() => {
-    return editorMode.value === 'erase'
+    return canvasMode.value === 'erase'
   })
 
   const brushColor = computed(() => {
@@ -110,7 +119,7 @@ const useCanvasUtils = (
       canvasCtx.value.stroke()
       Object.assign(initPos, {
         x,
-        y
+        y,
       })
     }
   }
@@ -124,6 +133,7 @@ const useCanvasUtils = (
 
   const drawStart = (e: PointerEvent) => {
     if (
+      isManupulatingCanvas.value &&
       (isBrushMode.value || isEraseMode.value) &&
       !loading.value &&
       wrapperRef &&
@@ -134,7 +144,7 @@ const useCanvasUtils = (
       pointerStartPos.y = e.clientY
       Object.assign(initPos, {
         x,
-        y
+        y,
       })
 
       showBrush.value = true
@@ -246,9 +256,24 @@ const useCanvasUtils = (
     }
   }
 
+  const downloadMaskCanvas = () => {
+    if (maskCanvas && maskCanvas.value) {
+      const dataUrl = maskCanvas.value.toDataURL('image/png')
+      generalUtils.downloadImage(dataUrl, 'mask.png')
+    }
+  }
+
+  const getMaskDaraUrl = () => {
+    if (maskCanvas && maskCanvas.value) {
+      return maskCanvas.value.toDataURL('image/png')
+    }
+  }
+
   return {
     setCanvasStoreState,
     reverseSelection,
+    downloadMaskCanvas,
+    getMaskDaraUrl,
     brushSize,
     brushColor,
     brushStyle,
@@ -260,7 +285,7 @@ const useCanvasUtils = (
     isProcessing,
     loading,
     steps,
-    isChangingBrushSize
+    isChangingBrushSize,
   }
 }
 
