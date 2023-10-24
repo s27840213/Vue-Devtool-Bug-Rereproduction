@@ -29,6 +29,7 @@ const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5'
 const selectedType = ref('9_16')
 
 const selectAspectRatio = (type: string) => {
+  console.log('select aspect ratio')
   selectedType.value = type
 
   if (type === 'original') {

@@ -9,6 +9,7 @@ div(class="absolute top-0 left-0")
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtils'
 import { useEditorStore } from '@/stores/editor'
+import { generalUtils } from '@nu/shared-lib'
 import { storeToRefs } from 'pinia'
 // #region data section
 const props = defineProps<{
@@ -18,6 +19,7 @@ const props = defineProps<{
 
 const { containerDOM, wrapperDOM } = toRefs(props)
 const editorStore = useEditorStore()
+const { setMaskCanvas } = editorStore
 const { pageSize } = storeToRefs(editorStore)
 // #endregion
 
@@ -25,5 +27,22 @@ const { pageSize } = storeToRefs(editorStore)
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const { brushStyle, showBrush } = useCanvasUtils(canvasRef, wrapperDOM, containerDOM)
 // #endregion
+
+const getCanvasDataUrl = () => {
+  if (!canvasRef.value) return ''
+  const dataURL = canvasRef.value.toDataURL('image/png')
+  return dataURL
+}
+
+const downloadCanvas = () => {
+  if (!canvasRef.value) return ''
+
+  generalUtils.downloadImage(getCanvasDataUrl(), 'test.png')
+}
+
+defineExpose({
+  getCanvasDataUrl,
+  downloadCanvas,
+})
 </script>
 <style lang="scss"></style>

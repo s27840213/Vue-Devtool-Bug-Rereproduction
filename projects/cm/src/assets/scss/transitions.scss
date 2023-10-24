@@ -92,8 +92,8 @@
 .bottom-panel-transition {
   &-enter-active {
     transition:
-      opacity 0.25s 0.15s,
-      transform 0.25s 0.15s;
+      opacity 0.4s,
+      transform 0.4s;
   }
   &-leave-active {
     // transition:

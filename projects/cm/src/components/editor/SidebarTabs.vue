@@ -1,32 +1,37 @@
 <template lang="pug">
-div(class="flex flex-col items-center justify-center gap-4 p-2")
+div(class="flex flex-col items-center justify-center gap-4 p-2 z-50")
   div(
     v-for="(tab, index) in defaultEditorTabs"
     :key="`${tab.icon}-${index}`"
-    class="flex flex-col items-center justify-center gap-2 p-4")
+    class="sidebar__tab flex flex-col items-center justify-center gap-2 p-4"
+    @click.stop="handleTabAction(tab)")
     cm-svg-icon(
+      class="pointer-events-none"
       :iconName="tab.icon"
       :iconColor="'app-btn-primary-text'"
       iconWidth="20px")
     span(
-      class="typo-btn-sm whitespace-nowrap"
+      class="typo-btn-sm whitespace-nowrap pointer-events-none"
       :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ tab.text }}
-    div(
-      v-if="tab.subTabs"
-      class="flex flex-col items-center justify-center gap-2 p-4 bg-app-tab-disable bg-opa rounded-full")
-      div(
-        v-for="(subTab, index) in tab.subTabs"
-        :key="`${subTab.icon}-${index}`"
-        class="flex flex-col items-center justify-center gap-2 p-4")
-        cm-svg-icon(
-          :iconName="subTab.icon"
-          :iconColor="'app-btn-primary-text'"
-          iconWidth="20px")
-        span(
-          class="typo-btn-sm whitespace-nowrap"
-          :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
+    //- div(
+    //-   v-if="tab.subTabs"
+    //-   class="flex flex-col items-center justify-center gap-2 p-4 bg-app-tab-disable bg-opa rounded-full")
+    //-   div(
+    //-     v-for="(subTab, index) in tab.subTabs"
+    //-     :key="`${subTab.icon}-${index}`"
+    //-     class="flex flex-col items-center justify-center gap-2 p-4")
+    //-     cm-svg-icon(
+    //-       :iconName="subTab.icon"
+    //-       :iconColor="'app-btn-primary-text'"
+    //-       iconWidth="20px")
+    //-     span(
+    //-       class="typo-btn-sm whitespace-nowrap"
+    //-       :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
 </template>
 <script setup lang="ts">
+import { useEditorStore } from '@/stores/editor'
+import { storeToRefs } from 'pinia'
+
 interface ISidebarTab {
   icon: string
   text?: string
@@ -38,6 +43,9 @@ interface ISidebarTab {
 }
 
 const { t } = useI18n()
+const editorStore = useEditorStore()
+const { setCurrActiveFeature } = editorStore
+const { currActiveFeature } = storeToRefs(editorStore)
 
 const addSubTabs = computed(() => {
   return [
@@ -125,5 +133,17 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
     },
   ]
 })
+
+const handleTabAction = (tab: ISidebarTab) => {
+  switch (tab.icon) {
+    // case 'selection':
+    case 'brush':
+      if (currActiveFeature.value === tab.icon) {
+        setCurrActiveFeature('none')
+      } else {
+        setCurrActiveFeature(tab.icon)
+      }
+  }
+}
 </script>
 <style lang="scss"></style>

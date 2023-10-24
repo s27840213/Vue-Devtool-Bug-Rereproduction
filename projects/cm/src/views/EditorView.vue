@@ -16,6 +16,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         iconWidth="20px")
     template(#right)
       cm-btn(
+        v-if="isEditing"
+        theme="primary"
+        size="md"
+        @click="downloadCanvas") 下載 Mask
+      cm-btn(
         v-if="showAspectRatioSelector"
         theme="primary"
         size="md"
@@ -35,7 +40,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
             v-if="isEditing"
             class="absolute top-0 left-0 w-full h-full"
             :containerDOM="editorContainerRef"
-            :wrapperDOM="editorWrapperRef")
+            :wrapperDOM="editorWrapperRef"
+            ref="canvasRef")
         div(
           v-if="isChangingBrushSize"
           class="demo-brush"
@@ -52,6 +58,7 @@ import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useElementSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
+import type { VNodeRef } from 'vue'
 
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
@@ -144,6 +151,17 @@ const demoBrushSizeStyles = computed(() => {
 })
 // #endregion
 
+const canvasRef = ref<VNodeRef | null>(null)
+const downloadCanvas = () => {
+  if (!canvasRef.value) return
+
+  canvasRef.value.downloadCanvas()
+}
+const getCanvasDataUrl = () => {
+  if (!canvasRef.value) return
+
+  canvasRef.value.getCanvasDataUrl()
+}
 /**
  * fitPage
  */
