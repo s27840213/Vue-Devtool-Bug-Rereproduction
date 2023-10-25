@@ -32,7 +32,7 @@ export default new (class GenImageUtils {
   }
 
   async uploadEditorAsImage(userId: string, requestId: string) {
-    const { flag, imageId } = await webViewUtils.sendCopyEditor()
+    const { flag, imageId } = await webViewUtils.copyEditor()
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')

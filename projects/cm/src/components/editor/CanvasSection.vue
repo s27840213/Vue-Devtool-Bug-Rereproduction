@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="absolute top-0 left-0")
-  canvas(class="canvas-section w-full h-full opacity-30" ref="canvasRef")
+  canvas(v-show="!isDuringCopy" class="canvas-section w-full h-full opacity-30" ref="canvasRef")
   div(
     v-if="showBrush"
     class="absolute top-0 left-0 pointer-events-none rounded-full opacity-60"
@@ -9,6 +9,7 @@ div(class="absolute top-0 left-0")
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtils';
 import { useEditorStore } from '@/stores/editor';
+import { useWebViewStore } from '@/stores/webView';
 import { generalUtils } from '@nu/shared-lib';
 import { storeToRefs } from 'pinia';
 // #region data section
@@ -26,6 +27,11 @@ const { pageSize } = storeToRefs(editorStore)
 // #region Canvas feature section
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const { brushStyle, showBrush } = useCanvasUtils(canvasRef, wrapperDOM, containerDOM)
+// #endregion
+
+// #region WebView feature section
+const webViewStore = useWebViewStore()
+const { isDuringCopy } = storeToRefs(webViewStore)
 // #endregion
 
 const getCanvasDataUrl = () => {

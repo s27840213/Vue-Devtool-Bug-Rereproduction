@@ -151,6 +151,8 @@ const demoBrushSizeStyles = computed(() => {
   }
 })
 // #endregion
+
+// #region Canvas functions
 const bus = useEventBus<string>('generation')
 const unsubcribe = bus.on((event: string, { callback }) => {
   if (event === 'genMaskUrl') {
@@ -173,6 +175,7 @@ const getCanvasDataUrl = () => {
 
   return canvasRef.value.getCanvasDataUrl()
 }
+// #endregion
 /**
  * fitPage
  */
