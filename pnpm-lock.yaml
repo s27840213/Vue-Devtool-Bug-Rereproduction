@@ -614,9 +614,6 @@ importers:
       '@kyvg/vue3-notification':
         specifier: ^2.7.0
         version: 2.9.1(vue@3.3.4)
-      '@nu/vivi-lib':
-        specifier: workspace:^
-        version: link:../../packages/vivi-lib
       '@pixi/filter-kawase-blur':
         specifier: ^5.1.1
         version: 5.1.1(@pixi/core@7.2.4)
@@ -954,9 +951,6 @@ importers:
       '@kyvg/vue3-notification':
         specifier: ^2.7.0
         version: 2.9.1(vue@3.3.4)
-      '@nu/vivi-lib':
-        specifier: workspace:^
-        version: link:../../packages/vivi-lib
       '@pixi/filter-kawase-blur':
         specifier: ^5.1.1
         version: 5.1.1(@pixi/core@7.2.4)

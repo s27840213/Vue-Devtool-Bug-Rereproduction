@@ -40,6 +40,7 @@ const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
 // const { StatsWriterPlugin } = require('webpack-stats-plugin');
+const DynamicAliasResolvePlugin = require('../../tools/webpack-plugin-dynamic-alias')
 
 function resolve(...dir) {
   return path.join(__dirname, ...dir)
@@ -279,6 +280,7 @@ module.exports = defineConfig({
     //     outputFormat: 'humanVerbose',
     //     loaderTopFiles: 5
     // }])
+    config.resolve.alias.delete('@')
   },
 
   devServer: {
@@ -342,9 +344,23 @@ module.exports = defineConfig({
             ? 'src/i18n/shaked/'
             : '../../tools/i18n-tool/result'
         ),
-        '@img': resolve('../../packages/vivi-lib/dist/src/assets/img'),
-        '@': resolve('src/'),
+        '@img': resolve('../../packages/vivi-lib/src/assets/img'),
+        '@json': resolve('../../packages/vivi-lib/src/assets/json'),
+        '@nu/vivi-lib': resolve('../../packages/vivi-lib/src'),
       },
+      plugins: [
+        new DynamicAliasResolvePlugin({
+          alias: '@',
+          dynamic: (request) => {
+            if (request.path.includes('/packages/')) {
+              return resolve('../../packages/vivi-lib/src')
+            }
+            return resolve('src')
+          },
+          pattern: /^@\//,
+          extensions: ['.ts', '/index.ts'],
+        })
+      ]
     }
   }
 })
