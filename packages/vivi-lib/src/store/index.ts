@@ -33,10 +33,10 @@ import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
+import brushPasteResized from '@img/svg/brush-paste-resized.svg'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
-import brushPasteResized from '@img/svg/brush-paste-resized.svg'
 
 const getDefaultState = (): IEditorState => ({
   sessionId: generalUtils.generateRandomString(12),
@@ -539,10 +539,12 @@ const mutations: MutationTree<IEditorState> = {
       state.pages[pageIndex].config.backgroundColor = '#ffffff'
     }
   },
-  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '', panelPreviewSrc: '' }) {
+  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc?: string, panelPreviewSrc: '' }) {
     const { pageIndex, srcObj, previewSrc, panelPreviewSrc } = updateInfo
     Object.assign(state.pages[pageIndex].config.backgroundImage.config.srcObj, srcObj)
-    previewSrc && (state.pages[pageIndex].config.backgroundImage.config.previewSrc = previewSrc)
+    if (typeof previewSrc !== undefined) {
+      state.pages[pageIndex].config.backgroundImage.config.previewSrc = previewSrc
+    }
     panelPreviewSrc && (state.pages[pageIndex].config.backgroundImage.config.panelPreviewSrc = panelPreviewSrc)
     state.pages[pageIndex].config.backgroundColor = '#ffffff'
     // state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
