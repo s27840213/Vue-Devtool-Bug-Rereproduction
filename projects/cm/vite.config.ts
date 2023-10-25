@@ -35,7 +35,6 @@ export default defineConfig({
     }),
     svgSpritePlugin({
       symbolId: '[name]',
-      svgo: false,
       include: '**/src/assets/icon/**/*.svg',
     }),
   ],
@@ -54,6 +53,7 @@ export default defineConfig({
     host: true,
   },
   define: {
+    // used to solve some errors
     'process.env': {},
   },
 })

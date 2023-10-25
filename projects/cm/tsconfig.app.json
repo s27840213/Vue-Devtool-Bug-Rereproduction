@@ -5,11 +5,11 @@
     "src/**/*",
     "src/**/*.vue",
     "src/**/*.json",
-    "../../packages/vivi-lib/src/**/*",
-    "../../packages/shared-lib/src/**/*"
+    "../../packages/shared-lib/src/**/*.vue",
+    "../../packages/shared-lib/src/**/*.ts"
   ],
   "exclude": [
-    "src/**/__tests__/*"
+    "src/**/__tests__/*",
   ],
   "compilerOptions": {
     "rootDir": "../../",
@@ -42,7 +42,8 @@
       "DOM"
     ],
     "target": "ESNext",
-    "module": "ESNext"
+    "module": "ESNext",
+    "allowJs": true
   },
   "vueCompilerOptions": {
     "plugins": [
