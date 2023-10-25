@@ -17,10 +17,10 @@ div(class="text-effect-setting")
               class="text-effect-setting__effect pointer"
               :class="{'selected': getStyle(category).name === effect.key }"
               @click="onEffectClick(effect)")
-            svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
+            svg-icon(v-if="['custom-fill-img', 'none'].includes(effect.key)"
               :iconName="effectIcon(category, effect).name"
               :iconWidth="effectIcon(category, effect).size"
-              iconColor="white"
+              iconColor="gray-2"
               v-hint="effect.label")
             img(v-else :src="effectIcon(category, effect).name"
               :width="effectIcon(category, effect).size"
@@ -114,10 +114,16 @@ import { defineComponent } from 'vue'
 import { Collapse } from 'vue-collapsed'
 import { mapGetters, mapState } from 'vuex'
 
-const imports = import.meta.glob(
-  `@img/text-effect/icon/*.png`,
-  { eager: true, import: 'default' }
-) as Record<string, string>
+const imports = Object.assign(
+  import.meta.glob(
+    `@img/text-effect/light_icon/*.png`,
+    { eager: true, import: 'default' }
+  ) as Record<string, string>,
+  import.meta.glob(
+    `@img/text-effect/dark_icon/*.png`,
+    { eager: true, import: 'default' }
+  ) as Record<string, string>
+)
 
 export default defineComponent({
   name: 'PanelTextEffectSetting',
@@ -133,6 +139,7 @@ export default defineComponent({
       currTab: localStorageUtils.get('textEffectSetting', 'tab') as string,
       textEffects: constantData.textEffects(),
       colorTarget: '',
+      theme: this.$isStk ? 'dark' : 'light',
     }
   },
   computed: {
@@ -189,10 +196,16 @@ export default defineComponent({
           size: '56',
         }
       }
+      if (effect.key === 'none') {
+        return {
+          name: 'no-effect',
+          size: '24px',
+        }
+      }
       switch (effect.key) {
         case 'text-book':
           return {
-            name: imports[`/src/assets/img/text-effect/icon/${category.name}-${effect.key}-${i18n.global.locale}.png`],
+            name: imports[`/src/assets/img/text-effect/${this.theme}_icon/${category.name}-${effect.key}-${i18n.global.locale}.png`],
             size: '56',
           }
         case 'custom-fill-img': // svg-icon
@@ -202,7 +215,7 @@ export default defineComponent({
           }
         default:
           return {
-            name: imports[`/src/assets/img/text-effect/icon/${category.name}-${effect.key}.png`],
+            name: imports[`/src/assets/img/text-effect/${this.theme}_icon/${category.name}-${effect.key}.png`],
             size: '56',
           }
       }
