@@ -7,10 +7,10 @@ div(class="absolute top-0 left-0")
     :style="brushStyle")
 </template>
 <script setup lang="ts">
-import useCanvasUtils from '@/composable/useCanvasUtils'
-import { useEditorStore } from '@/stores/editor'
-import { generalUtils } from '@nu/shared-lib'
-import { storeToRefs } from 'pinia'
+import useCanvasUtils from '@/composable/useCanvasUtils';
+import { useEditorStore } from '@/stores/editor';
+import { generalUtils } from '@nu/shared-lib';
+import { storeToRefs } from 'pinia';
 // #region data section
 const props = defineProps<{
   containerDOM: HTMLElement | null

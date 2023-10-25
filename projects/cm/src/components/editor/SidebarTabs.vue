@@ -1,32 +1,36 @@
 <template lang="pug">
-div(class="flex flex-col items-center justify-center gap-4 p-2 z-50")
+div(class="sidebar-tabs flex flex-col items-center gap-4 z-50 h-[350px] overflow-scroll scrollbar-hide mr-4")
   div(
     v-for="(tab, index) in defaultEditorTabs"
     :key="`${tab.icon}-${index}`"
-    class="sidebar__tab flex flex-col items-center justify-center gap-2 p-4"
-    @click.stop="handleTabAction(tab)")
-    cm-svg-icon(
-      class="pointer-events-none"
-      :iconName="tab.icon"
-      :iconColor="'app-btn-primary-text'"
-      iconWidth="20px")
-    span(
-      class="typo-btn-sm whitespace-nowrap pointer-events-none"
-      :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ tab.text }}
-    //- div(
-    //-   v-if="tab.subTabs"
-    //-   class="flex flex-col items-center justify-center gap-2 p-4 bg-app-tab-disable bg-opa rounded-full")
-    //-   div(
-    //-     v-for="(subTab, index) in tab.subTabs"
-    //-     :key="`${subTab.icon}-${index}`"
-    //-     class="flex flex-col items-center justify-center gap-2 p-4")
-    //-     cm-svg-icon(
-    //-       :iconName="subTab.icon"
-    //-       :iconColor="'app-btn-primary-text'"
-    //-       iconWidth="20px")
-    //-     span(
-    //-       class="typo-btn-sm whitespace-nowrap"
-    //-       :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
+    class="w-44")
+    div(
+      class="sidebar__tab flex flex-col items-center justify-center gap-2 p-4"
+      @click.stop="handleTabAction(tab)")
+      cm-svg-icon(
+        class="pointer-events-none"
+        :style="tab.styles"
+        :iconName="tab.icon"
+        :iconColor="currActiveFeature === tab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
+        iconWidth="20px")
+      span(
+        class="typo-btn-sm whitespace-nowrap pointer-events-none"
+        :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ tab.text }}
+    div(
+      v-if="tab.icon === currActiveFeature && tab.subTabs"
+      class="flex flex-col items-center justify-center gap-2 bg-app-tab-disable rounded-full")
+      div(
+        v-for="(subTab, index) in tab.subTabs"
+        :key="`${subTab.icon}-${index}`"
+        class="flex flex-col items-center justify-center gap-2 p-4 box-border")
+        cm-svg-icon(
+          :style="subTab.styles"
+          :iconName="subTab.icon"
+          :iconColor="currActiveFeature === subTab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
+          iconWidth="20px")
+        span(
+          class="typo-btn-sm whitespace-nowrap"
+          :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
 </template>
 <script setup lang="ts">
 import { useEditorStore } from '@/stores/editor'
@@ -40,6 +44,9 @@ interface ISidebarTab {
   disabled?: boolean
   forPro?: boolean
   subTabs?: Array<ISidebarTab>
+  styles?: {
+    [key: string]: string
+  }
 }
 
 const { t } = useI18n()
@@ -81,16 +88,13 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       hidden: false,
       disabled: false,
       subTabs: addSubTabs.value,
+      styles: {
+        transform: currActiveFeature.value === 'add' ? 'rotate(45deg)' : '',
+        transition: 'transform 0.2s ease-in-out',
+      },
     },
     {
       icon: 'selection',
-      text: t('CM0051'),
-      panelType: '',
-      hidden: false,
-      disabled: false,
-    },
-    {
-      icon: 'brush',
       text: t('CM0051'),
       panelType: '',
       hidden: false,
@@ -136,14 +140,32 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
 
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
-    // case 'selection':
+    case 'selection':
     case 'brush':
+    case 'add': {
       if (currActiveFeature.value === tab.icon) {
         setCurrActiveFeature('none')
       } else {
         setCurrActiveFeature(tab.icon)
       }
+    }
   }
 }
 </script>
-<style lang="scss"></style>
+<style lang="scss" scoped>
+.sub-tabs {
+  transition:
+    grid-template-rows 0.3s ease-in-out,
+    height 0.3s ease-in-out;
+}
+
+.open {
+  grid-template-rows: 1fr;
+  height: auto;
+}
+
+.close {
+  grid-template-rows: 0fr;
+  height: 0px;
+}
+</style>
