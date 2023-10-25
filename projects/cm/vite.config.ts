@@ -1,7 +1,7 @@
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 import path from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 // https://vue-i18n.intlify.dev/guide/advanced/optimization.html
 import vuei18n from '@intlify/unplugin-vue-i18n/vite'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -32,6 +32,7 @@ export default defineConfig({
     AutoImport({
       imports: ['vue', 'vue-router', 'vue-i18n'],
       dts: 'src/auto-import.d.ts',
+      ignore: ['h'], // To solve: https://www.jianshu.com/p/1739e6bcb543
     }),
     svgSpritePlugin({ symbolId: (name) => name }),
   ],
@@ -48,5 +49,10 @@ export default defineConfig({
   server: {
     port: 8082,
     host: true,
+  },
+  define: {
+    // process not define in vite, inject it here.
+    // Ref: https://stackoverflow.com/a/66389044/22514709, https://stackoverflow.com/a/73012106/22514709
+    'process.env': loadEnv('production', process.cwd(), 'VUE_APP'),
   },
 })

@@ -5,6 +5,10 @@
     "src/**/*",
     "src/**/*.vue",
     "src/**/*.json",
+    "../../packages/vivi-lib/src/*.vue",
+    "../../packages/vivi-lib/src/*.ts",
+    "../../packages/shared-lib/src/*.vue",
+    "../../packages/shared-lib/src/*.ts"
   ],
   "exclude": [
     "src/**/__tests__/*"
@@ -18,13 +22,17 @@
         "./src/i18n/shaked/*"
       ],
       "@/*": [
-        "./src/*",
+        "./src/*"
       ],
       "@nu/shared-lib/*": [
         "../../packages/shared-lib/src/*"
       ],
       "@nu/shared-lib": [
         "../../packages/shared-lib/src/index"
+      ],
+      "@nu/vivi-lib/*": [
+        "../../packages/vivi-lib/src/*",
+        "../../packages/vivi-lib/src/index"
       ]
     },
     "types": [

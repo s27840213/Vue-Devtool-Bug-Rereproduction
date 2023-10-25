@@ -4,7 +4,7 @@ import * as path from 'path'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
-import extractImg from '../../tools/vite-plugin-lib-extract-img'
+// import extractImg from '../../tools/vite-plugin-lib-extract-img'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
 
 function resolve(...dir: string[]) {
@@ -35,8 +35,9 @@ export default defineConfig({
         dest: 'src',
       }]
     }),
+    // TODO: Use vite-plugin-lib-extract-img for cm.
     // Extracts resource files referenced in lib mode instead of embedded them as base64.
-    extractImg,
+    // extractImg,
   ],
   build: {
     lib: {
@@ -65,6 +66,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@json': resolve('src/assets/json'),
       '@img': resolve('src/assets/img'),
       '@': resolve('src')
     }
