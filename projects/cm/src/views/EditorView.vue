@@ -151,7 +151,15 @@ const demoBrushSizeStyles = computed(() => {
   }
 })
 // #endregion
-const bus = useEventBus<string>('test')
+const bus = useEventBus<string>('generation')
+const unsubcribe = bus.on((event: string, { callback }) => {
+  if (event === 'genMaskUrl') {
+    callback(getCanvasDataUrl())
+  }
+})
+onBeforeUnmount(() => {
+  unsubcribe()
+})
 
 const canvasRef = ref<VNodeRef | null>(null)
 const downloadCanvas = () => {
@@ -163,7 +171,7 @@ const downloadCanvas = () => {
 const getCanvasDataUrl = () => {
   if (!canvasRef.value) return
 
-  canvasRef.value.getCanvasDataUrl()
+  return canvasRef.value.getCanvasDataUrl()
 }
 /**
  * fitPage

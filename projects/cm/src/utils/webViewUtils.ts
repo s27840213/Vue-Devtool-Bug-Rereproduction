@@ -117,9 +117,12 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     })
   }
 
-  async sendCopyEditor(): Promise<string> {
+  async sendCopyEditor(): Promise<{flag: string; imageId: string}> {
     const imageId = generalUtils.generateAssetId()
-    return await this.sendCopyEditorCore('editorSave', imageId)
+    return {
+      flag: await this.sendCopyEditorCore('editorSave', imageId),
+      imageId
+    }
   }
 
   async sendCopyEditorCore(action: 'editorSave', imageId: string, imagePath?: string): Promise<string>
