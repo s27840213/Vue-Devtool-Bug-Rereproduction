@@ -35,7 +35,6 @@
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
     "@intlify/unplugin-vue-i18n": "^0.12.2",
-    "@laynezh/vite-plugin-lib-assets": "0.5.5",
     "@nx/js": "16.7.4",
     "@nx/storybook": "^16.7.4",
     "@nx/vite": "16.7.4",
@@ -80,10 +79,10 @@
     "unplugin-auto-import": "^0.16.6",
     "unplugin-vue-components": "^0.25.1",
     "vite": "^4.4.6",
-    "vite-plugin-dts": "^3.6.1",
+    "vite-plugin-svg-sprite-component": "^1.0.10",
     "vite-plugin-static-copy": "0.17.0",
-    "vite-plugin-svg-sprite": "^0.5.0",
-    "vite-plugin-svg-sprite-component": "^1.0.10"
+    "@laynezh/vite-plugin-lib-assets": "0.5.5",
+    "vite-plugin-svg-sprite": "^0.5.0"
   },
   "config": {
     "commitizen": {

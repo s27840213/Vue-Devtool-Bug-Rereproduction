@@ -3,10 +3,10 @@ import * as path from 'path'
 // import AutoImport from 'unplugin-auto-import/vite'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
-import dts from 'vite-plugin-dts'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import extractImg from '../../tools/vite-plugin-lib-extract-img'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
+
 function resolve(...dir: string[]) {
   return path.join(__dirname, ...dir)
 }
@@ -19,10 +19,6 @@ export default defineConfig({
     // https://github.com/vitejs/vite-plugin-vue/issues/18#issuecomment-1719035794
     removePugAssertion(),
     vue(),
-    dts({
-      outDir: 'dist/types',
-      insertTypesEntry: true,
-    }),
     // Components({
     //   dirs: ['src/components'],
     //   extensions: ['vue'],
@@ -34,12 +30,10 @@ export default defineConfig({
     //   dts: 'src/auto-import.d.ts'
     // })
     viteStaticCopy({
-      targets: [
-        {
-          src: [resolve('src/assets').replace(/\\/g, '/')],
-          dest: 'src',
-        },
-      ],
+      targets: [{
+        src: [resolve('src/assets').replace(/\\/g, '/')],
+        dest: 'src',
+      }]
     }),
     // Extracts resource files referenced in lib mode instead of embedded them as base64.
     extractImg,
@@ -52,7 +46,7 @@ export default defineConfig({
       // To reduce build time, only compile es files, not both es & cjs.
       formats: ['es'],
       // formats: ['es', 'cjs'],
-      fileName: (format, entry) => `${entry}.${format}.js`,
+      fileName: (format, entry) => `${entry}.${format}.js`
     },
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled into your library
@@ -60,20 +54,20 @@ export default defineConfig({
       output: {
         exports: 'named',
         globals: {
-          vue: 'Vue',
+          vue: 'Vue'
         },
         // preserveModules can keep dist folder structure
         // https://github.com/vitejs/vite/discussions/2447#discussioncomment-6768114
         preserveModules: true,
         preserveModulesRoot: './',
-      },
-    },
+      }
+    }
   },
   resolve: {
     alias: {
       '@img': resolve('src/assets/img'),
-      '@': resolve('src'),
-    },
+      '@': resolve('src')
+    }
   },
   css: {
     preprocessorOptions: {
