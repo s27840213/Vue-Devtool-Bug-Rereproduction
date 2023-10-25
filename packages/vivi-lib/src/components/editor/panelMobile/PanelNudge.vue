@@ -2,50 +2,51 @@
 div(class="panel-nudge text-left")
   div(class="panel-nudge__top-section")
     span(class="body-XS"
-      :class="[$isStk ? 'text-gray-2' : '']") {{ $t('NN0888') }}
+      :class="$isStk ? 'text-white' : ''") {{ $t('NN0888') }}
     slide-toggle(:options="options"
       v-model="currOption"
-      :bgColor="'gray-6'"
+      :bgColor="$isStk ? 'black-3-5' : 'gray-6'"
       :switchColor="'white'"
-      :activeColor="$isStk ? 'gray-2' : 'blue-1'"
-      :inActiveColor="$isStk ? 'black-5' : 'gray-2'"
+      :activeColor="$isStk ? 'black-2' : 'blue-1'"
+      :inActiveColor="$isStk ? 'white' : 'gray-2'"
       :optionWidth="'50px'"
-      :optionHeight="'30px'")
+      :optionHeight="'30px'"
+      textSize="caption-MD")
   div(class="panel-nudge__content")
     div(class="panel-nudge__btn"
-        v-tap-animation="{'bgColor': 'blue-3'}"
+        v-tap-animation="{'bgColor': $isStk ? 'black-5' : 'blue-3'}"
         @pointerdown="moveStepping('left')"
         @contextmenu.prevent)
       svg-icon(
         :iconName="'left-arrow'"
-        :iconColor="'gray-2'"
+        :iconColor="$isStk ? 'white' : 'gray-2'"
         :iconWidth="'24px'")
     div(class="panel-nudge__btn"
-        v-tap-animation="{'bgColor': 'blue-3'}"
+        v-tap-animation="{'bgColor': $isStk ? 'black-5' : 'blue-3'}"
         @pointerdown="moveStepping('up')"
         @contextmenu.prevent)
       svg-icon(
         :style="{transform: 'rotate(90deg)'}"
         :iconName="'left-arrow'"
-        :iconColor="'gray-2'"
+        :iconColor="$isStk ? 'white' : 'gray-2'"
         :iconWidth="'24px'")
     div(class="panel-nudge__btn"
-        v-tap-animation="{'bgColor': 'blue-3'}"
+        v-tap-animation="{'bgColor': $isStk ? 'black-5' : 'blue-3'}"
         @pointerdown="moveStepping('down')"
         @contextmenu.prevent)
       svg-icon(
         :style="{transform: 'rotate(-90deg)'}"
         :iconName="'left-arrow'"
-        :iconColor="'gray-2'"
+        :iconColor="$isStk ? 'white' : 'gray-2'"
         :iconWidth="'24px'")
     div(class="panel-nudge__btn"
-        v-tap-animation="{'bgColor': 'blue-3'}"
+        v-tap-animation="{'bgColor': $isStk ? 'black-5' : 'blue-3'}"
         @pointerdown="moveStepping('right')"
         @contextmenu.prevent)
       svg-icon(
         :style="{transform: 'rotate(180deg)'}"
         :iconName="'left-arrow'"
-        :iconColor="'gray-2'"
+        :iconColor="$isStk ? 'white' : 'gray-2'"
         :iconWidth="'24px'")
 </template>
 
@@ -141,14 +142,18 @@ export default defineComponent({
   }
 
   &__btn {
-    background-color: setColor(gray-6);
+    @include setColors(gray-6, black-3) using ($color) {
+      background-color: $color;
+    }
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 8px;
     border-radius: 4px;
     box-sizing: border-box;
-    border: 1px solid setColor(gray-4);
+    @include pic {
+      border: 1px solid setColor(gray-4);
+    }
   }
 }
 

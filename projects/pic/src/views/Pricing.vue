@@ -7,7 +7,7 @@ div(class="pricing")
       span(class="body-LG text-gray-2") {{$t('NN0506')}}
       img(v-for="cb in colorBlock" class="pricing-top__cb"
         :key="cb.name"
-        :src="require('@/assets/img/svg/color-block/' + cb.name)"
+        :src="require('@img/svg/color-block/' + cb.name)"
         :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
     div(class="pricing-plan")
       div(class="pricing-plan-left")
@@ -28,7 +28,7 @@ div(class="pricing")
                       bgColor="gray-6"
                       textSize="body-XS")
           img(class="pricing-plan-right__off"
-              :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
+              :src="require(`@img/svg/pricing/${off}.svg`)")
         div(class="pricing-plan-right-price")
           span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][periodUi].original}${$t('NN0516')}`}}
           br

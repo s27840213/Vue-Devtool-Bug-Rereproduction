@@ -1,6 +1,6 @@
-from argparse import Namespace
 import json
 import os
+from argparse import Namespace
 
 import gspread
 import numpy as np
@@ -80,16 +80,18 @@ all_result = all_result[skip_mask]
 unique, index, count = np.unique(
     all_result[:, 1:], axis=0, return_counts=True, return_index=True)
 duplicate_index = index[count > 1]
-duplicate = np.empty((0, 4))
+duplicate = np.empty((0, 5))
 
 for i in duplicate_index:
+    if (all_result[i, 1:] == '').all():
+        continue
     duplicate = np.append(duplicate, all_result[i:i+1], axis=0)
     for j in range(i+1, len(all_result)):
         if (all_result[i, 1:] == all_result[j, 1:]).all():
             duplicate = np.append(duplicate, all_result[j:j+1], axis=0)
 
 # If duplicate print error msg
-if duplicate_index.shape[0] > 0:
+if duplicate.shape[0] > 0:
     print(f'\n{bcolors.FAIL}Duplicated translation:\n{duplicate}\n{bcolors.ENDC}')
 else:
     print(f'\n{bcolors.OKGREEN}No new duplicated translation found.{bcolors.ENDC}')

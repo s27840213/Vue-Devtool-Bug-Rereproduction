@@ -4,7 +4,7 @@ import fs from 'fs'
 import * as path from 'path'
 
 const libAssetsPluginOptions = {
-  include: 'src/assets/img/**/*',
+  include: 'src/assets/{img,json}/**/*',
   exclude: '**/*.{css,scss,vue}',
 }
 const libAssetsPlugin = libAssetsPluginF({

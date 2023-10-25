@@ -17,7 +17,7 @@ div(class="mobile-panel"
         svg-icon(
           class="click-disabled"
           :iconName="leftBtnName"
-          :iconColor="'white'"
+          :iconColor="whiteTheme ? 'gray-2' : 'white'"
           :iconWidth="insertTheme ? '32px' : '20px'")
         div(class="mobile-panel__btn-click-zone"
           :class="{'insert-left': insertTheme}"
@@ -33,7 +33,7 @@ div(class="mobile-panel"
         svg-icon(
           class="click-disabled"
           :iconName="rightBtnName"
-          :iconColor="'white'"
+          :iconColor="whiteTheme ? 'gray-2' : 'white'"
           :iconWidth="insertTheme ? '24px' : '20px'")
         div(class="mobile-panel__btn-click-zone"
           :class="{'insert-right': insertTheme}"
@@ -64,9 +64,9 @@ div(class="mobile-panel"
 </template>
 
 <script lang="ts">
-import Tabs from '@/components/Tabs.vue'
-import mobilePanelMixin from '@/mixin/mobilePanel'
-import { defineComponent } from 'vue'
+import Tabs from '@/components/Tabs.vue';
+import mobilePanelMixin from '@/mixin/mobilePanel';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'mobile-panel',
@@ -89,7 +89,7 @@ export default defineComponent({
     box-shadow: 0px -2px 5px rgba(60, 60, 60, 0.1);
   }
   @include stk {
-    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.3);
   }
   display: grid;
   grid-template-columns: 1fr;
@@ -222,7 +222,9 @@ export default defineComponent({
     padding: 10px calc(50% - 47px);
     border-radius: 5px;
     > div {
-      background-color: setColor(gray-4);
+      @include setColors(gray-4, black-4) using ($color) {
+        background-color: $color;
+      }
       height: 3px;
       width: 24px;
     }

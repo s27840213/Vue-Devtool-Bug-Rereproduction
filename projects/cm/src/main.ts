@@ -1,7 +1,7 @@
 import '@/assets/css/main.css'
-import webViewUtils from '@/utils/webViewUtils'
 import componentPlugin from '@nu/shared-lib/plugin'
 import libType from '@nu/shared-lib/types'
+import '@nu/vivi-lib/css' // Import all CSS rules from vivi-lib
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'
@@ -19,8 +19,6 @@ function keepVar(v: unknown) {
 // the *.d.ts file for the global components in shared-lib
 keepVar(libType)
 keepVar(svgs)
-webViewUtils.setupAPIInterface()
-webViewUtils.getUserInfo()
 
 app.use(createPinia())
 app.use(router)

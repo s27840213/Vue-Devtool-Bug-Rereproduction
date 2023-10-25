@@ -1,4 +1,19 @@
-import { nativeAPIUtils } from '@nu/shared-lib'
+import { useEditorStore } from '@/stores/editor'
+import { useGlobalStore } from '@/stores/global'
+import { useWebViewStore } from '@/stores/webView'
+import { generalUtils, nativeAPIUtils } from '@nu/shared-lib'
+import { storeToRefs } from 'pinia'
+
+export interface IGeneralSuccessResponse {
+  flag: '0'
+}
+
+export interface IGeneralFailureResponse {
+  flag: string
+  msg: string
+}
+
+type GeneralResponse = IGeneralSuccessResponse | IGeneralFailureResponse
 
 export interface IUserInfo {
   hostId: string
@@ -58,27 +73,54 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     return this.STANDALONE_USER_INFO
   }
 
+  get globalStore() {
+    return storeToRefs(useGlobalStore())
+  }
+
+  get webViewStore() {
+    return storeToRefs(useWebViewStore())
+  }
+
+  get isStandaloneMode() {
+    const { standaloneMode } = this.globalStore
+    return standaloneMode.value
+  }
+
+  get isDuringCopy() {
+    const { isDuringCopy } = this.webViewStore
+    return isDuringCopy.value
+  }
+
+  setDuringCopy(bool: boolean) {
+    const { setDuringCopy } = useWebViewStore()
+    setDuringCopy(bool) 
+  }
+
+  detectIfInApp() {
+    if (window.webkit?.messageHandlers?.REQUEST === undefined) {
+      this.enterStandaloneMode()
+    }
+  }
+
+  enterStandaloneMode() {
+    const globalStore = useGlobalStore()
+    const { setStandaloneMode } = globalStore
+    setStandaloneMode(true)
+  }
+
   async getUserInfo(): Promise<IUserInfo> {
-    // if (this.inBrowserMode) return this.getUserInfoFromStore()
+    if (this.isStandaloneMode) return this.STANDALONE_USER_INFO
     const userInfo = await this.callIOSAsAPI('APP_LAUNCH', this.getEmptyMessage())
-    // if (!userInfo) return this.getDefaultUserInfo()
-    // store.commit('webView/SET_userInfo', userInfo)
-    // const appCaps = await fetch(`https://template.vivipic.com/static/appCaps.json?ver=${generalUtils.generateRandomString(6)}`)
-    // const jsonCaps = await appCaps.json() as { review_ver: string }
-    // store.commit('webView/UPDATE_detectIfInReviewMode', jsonCaps.review_ver)
-    // this.sendStatistics(true, userInfo.country)
     return userInfo as IUserInfo
   }
 
   async getAlbumList(): Promise<IAlbumListResponse> {
-    // if (this.inBrowserMode) return this.getUserInfoFromStore()
     const albumList = await this.callIOSAsAPI('GET_ALBUM_LIST', this.getEmptyMessage())
 
     return albumList as IAlbumListResponse
   }
 
   async getAlbumContent(albumId: string, pageIndex: number): Promise<IAlbumContentResponse> {
-    // if (this.inBrowserMode) return this.getUserInfoFromStore()
     const albumList = await this.callIOSAsAPI('GET_ALBUM_CONTENT', {
       albumId,
       pageIndex,
@@ -88,10 +130,95 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   }
 
   async switchDomain(url: string): Promise<void> {
-    // if (this.inBrowserMode) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('SWITCH_DOMAIN', {
       url,
     })
+  }
+
+  async copyEditorCore(sender: () => Promise<{flag: string, imageId: string}>) {
+    return new Promise<{flag: string, imageId: string}>(resolve => {
+      const executor = () => {
+        nextTick(() => {
+          this.preCopyEditor()
+          setTimeout(() => {
+            sender().then(({ flag, imageId }) => {
+              this.postCopyEditor()
+              resolve({ flag, imageId })
+            })
+          }, 500) // wait for soft keyboard to close
+        })
+      }
+      executor()
+    })
+  }
+
+  async copyEditor(): Promise<{flag: string, imageId: string}> {
+    return await this.copyEditorCore(this.sendCopyEditor.bind(this))
+  }
+
+  preCopyEditor() {
+    this.setDuringCopy(true)
+  }
+
+  postCopyEditor() {
+    this.setDuringCopy(false)
+  }
+
+  async sendCopyEditor(): Promise<{flag: string, imageId: string}> {
+    const imageId = generalUtils.generateAssetId()
+    return {
+      flag: await this.sendCopyEditorCore('editorSave', imageId),
+      imageId
+    }
+  }
+
+  async sendCopyEditorCore(action: 'editorSave', imageId: string, imagePath?: string): Promise<string>
+  async sendCopyEditorCore(action: 'editorDownload'): Promise<string>
+  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', imageId?: string, imagePath?: string): Promise<string> {
+    if (this.isStandaloneMode) {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return '0'
+    }
+    const { x, y, width, height } = this.getEditorDimensions()
+    const data = await this.callIOSAsAPI('SCREENSHOT', {
+      action,
+      width,
+      height,
+      x,
+      y,
+      ...(imageId && { imageId }),
+      ...(imagePath && { imagePath }),
+    }, { timeout: -1 }) as GeneralResponse | null | undefined
+    return (data?.flag as string) ?? '0'
+  }
+
+  getEditorDimensions(): { x: number; y: number; width: number; height: number } {
+    const { pageSize, pageScaleRatio } = useEditorStore()
+    const { width: pageWidth, height: pageHeight } = pageSize
+    const editorEle = document.getElementById('editor-page') as HTMLElement
+    const defaultDimensions = {
+      x: 0,
+      y: 0,
+      width: pageWidth * pageScaleRatio,
+      height: pageHeight * pageScaleRatio,
+    }
+    if (!editorEle) {
+      return defaultDimensions
+    }
+    let { width, height, x, y } = editorEle.getBoundingClientRect()
+    if (width <= 0) {
+      width = defaultDimensions.width
+    }
+    if (height <= 0) {
+      height = defaultDimensions.height
+    }
+    if (x <= 0) {
+      x = defaultDimensions.x
+    }
+    if (y <= 0) {
+      y = defaultDimensions.y
+    }
+    return { x, y, width, height }
   }
 }
 

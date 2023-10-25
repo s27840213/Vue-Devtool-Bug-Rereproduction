@@ -6,7 +6,7 @@ div(class="panel-remove-bg__rm-section" id="rmSection" ref="rmSection"
     div(class="panel-remove-bg__preview-section")
       img(:src="previewImage.src ? previewImage.src  : previewSrc")
       div(class="gray-mask")
-      img(class="loading" :src="require('@/assets/img/gif/gray-loading.gif')")
+      img(class="loading" :src="require('@img/gif/gray-loading.gif')")
   bg-remove-area(v-else :cotainerRef="containerRef"
     :teleportTarget="'.panel-remove-bg__rm-section'"
     :inVivisticker="true"

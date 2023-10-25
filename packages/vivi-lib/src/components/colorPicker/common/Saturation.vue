@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { throttle, clamp } from 'lodash'
+import { clamp, throttle } from 'lodash'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -115,10 +115,10 @@ export default defineComponent({
 }
 .vc-saturation-circle {
   cursor: head;
-  width: 4px;
-  height: 4px;
-  box-shadow: 0 0 0 1.5px #fff, inset 0 0 1px 1px rgba(0,0,0,.3), 0 0 1px 2px rgba(0,0,0,.4);
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 0 0 3px #fff, inset 0 0 1px 0px rgba(0,0,0,.3), 0 0 1px 3px rgba(0,0,0,.4);
   border-radius: 50%;
-  transform: translate(-2px, -2px);
+  transform: translate(-7px, -7px);
 }
 </style>

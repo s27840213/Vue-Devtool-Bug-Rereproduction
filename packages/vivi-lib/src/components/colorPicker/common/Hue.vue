@@ -174,12 +174,14 @@ export default defineComponent({
 }
 .vc-hue-picker {
   cursor: pointer;
-  margin-top: 1px;
-  width: 4px;
-  border-radius: 1px;
-  height: 8px;
-  box-shadow: 0 0 2px rgba(0, 0, 0, .6);
+  width: 10px;
+  height: 14px;
+  background-color: transparent;
+  border: 2px solid #FFF;
+  border-radius: 8px;
+  box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
   background: #fff;
-  transform: translateX(-2px) ;
+  transform: translateX(-5px, -2px) ;
 }
 </style>

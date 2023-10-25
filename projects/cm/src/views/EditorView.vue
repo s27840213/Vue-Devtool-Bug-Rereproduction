@@ -1,44 +1,70 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
-  headerbar(class="px-24" :hide="showPromptArea")
+  headerbar(class="px-24" :middGap="32")
     template(#left)
       back-btn
+    template(
+      v-if="isEditing"
+      #middle)
+      cm-svg-icon(
+        iconName="undo"
+        :iconColor="'app-btn-primary-text'"
+        iconWidth="20px")
+      cm-svg-icon(
+        iconName="redo"
+        :iconColor="'app-btn-primary-text'"
+        iconWidth="20px")
     template(#right)
       cm-btn(
-        v-if="atEditor"
+        v-if="isEditing"
+        theme="primary"
+        size="md"
+        @click="downloadCanvas") 下載 Mask
+      cm-btn(
+        v-if="showAspectRatioSelector"
         theme="primary"
         size="md"
         @click="handleNextAction") {{ $t('CM0012') }}
-  div(class="flex justify-center items-center" ref="editorContainerRef")
+  div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
     div(class="w-full h-full box-border overflow-scroll flex justify-center items-center")
       div(
         class="wrapper relative"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         div(
+          id="editor-page"
           class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
           :style="pageStyles")
           img(class="h-full object-contain" src="@/assets/img/test.jpg")
           canvas-section(
-            v-if="showEditingOpstions"
+            v-if="isEditing"
             class="absolute top-0 left-0 w-full h-full"
             :containerDOM="editorContainerRef"
-            :wrapperDOM="editorWrapperRef")
+            :wrapperDOM="editorWrapperRef"
+            ref="canvasRef")
         div(
           v-if="isChangingBrushSize"
           class="demo-brush"
           :style="demoBrushSizeStyles")
+    sidebar-tabs(
+      v-if="isEditing"
+      class="absolute top-1/2 right-0 z-10 -translate-y-1/2"
+      ref="sidebarTabsRef")
 </template>
 <script setup lang="ts">
 import useImageUtils from '@/composable/useImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
-import { useElementSize } from '@vueuse/core'
+import mathUtils from '@nu/vivi-lib/utils/mathUtils'
+import { useElementSize, useEventBus } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
+import type { VNodeRef } from 'vue'
 
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
+const sidebarTabsRef = ref<HTMLElement | null>(null)
+const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementSize(editorContainerRef)
@@ -51,7 +77,7 @@ onMounted(() => {
   })
 })
 // #region Stores
-const { showEditingOpstions, showPromptArea, atEditor } = useStateInfo()
+const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
 const editorStore = useEditorStore()
 const { setPageScaleRatio, setImgAspectRatio, setEditorState } = editorStore
 const { editingPage, pageSize, pageScaleRatio, editorState } = storeToRefs(editorStore)
@@ -90,7 +116,7 @@ const fitScaleRatio = computed(() => {
   const newWidth = pageAspectRatio > 1 ? 1600 : 1600 * pageAspectRatio
   const newHeight = pageAspectRatio > 1 ? 1600 / pageAspectRatio : 1600
 
-  const widhtRatio = editorContainerWidth.value / newWidth
+  const widhtRatio = (editorContainerWidth.value - sidebarTabsWidth.value - 24) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
 
   const ratio = Math.min(widhtRatio, heightRatio) * 0.9
@@ -126,10 +152,35 @@ const demoBrushSizeStyles = computed(() => {
 })
 // #endregion
 
+// #region Canvas functions
+const bus = useEventBus<string>('generation')
+const unsubcribe = bus.on((event: string, { callback }) => {
+  if (event === 'genMaskUrl') {
+    callback(getCanvasDataUrl())
+  }
+})
+onBeforeUnmount(() => {
+  unsubcribe()
+})
+
+const canvasRef = ref<VNodeRef | null>(null)
+const downloadCanvas = () => {
+  if (!canvasRef.value) return
+
+  canvasRef.value.downloadCanvas()
+}
+
+const getCanvasDataUrl = () => {
+  if (!canvasRef.value) return
+
+  return canvasRef.value.getCanvasDataUrl()
+}
+// #endregion
 /**
  * fitPage
  */
 
+console.log(mathUtils.sin(800))
 watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {

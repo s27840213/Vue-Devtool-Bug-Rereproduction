@@ -5,16 +5,16 @@ div(class="w-full pl-24")
     div(
       v-for="aspectRatio in aspectRatioTypes"
       :key="aspectRatio"
-      :class="{ 'mr-12': aspectRatio === 'original' }"
+      class="w-56 flex flex-col justify-center items-center gap-4"
       @click="selectAspectRatio(aspectRatio)")
       cm-svg-icon(
-        :icon-color="selectedType === aspectRatio ? 'primary-light-active' : aspectRatio === 'original' ? 'app-text-secondary' : 'transparent'"
-        :stroke-color="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
-        :icon-width="aspectRatio === 'original' ? '40px' : '56px'"
-        :icon-height="'56px'"
-        :icon-name="aspectRatio")
+        :iconColor="selectedType === aspectRatio ? 'primary-light-active' : aspectRatio === 'original' ? 'app-text-secondary' : 'transparent'"
+        :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
+        iconWidth="32px"
+        iconHeight="32px"
+        :iconName="aspectRatio")
       span(
-        class="typo-btn-sm transition-colors duration-300"
+        class="typo-btn-sm transition-colors duration-300 capitalize"
         :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
 </template>
 <script setup lang="ts">
@@ -29,6 +29,7 @@ const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5'
 const selectedType = ref('9_16')
 
 const selectAspectRatio = (type: string) => {
+  console.log('select aspect ratio')
   selectedType.value = type
 
   if (type === 'original') {

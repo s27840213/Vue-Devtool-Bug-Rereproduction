@@ -22,7 +22,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
       :style="imgStyles()")
-      img(ref="img"
+      img(v-if="finalSrc" ref="img"
         :style="flipStyles"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
@@ -49,7 +49,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        image(ref="adjust-img"
+        image(v-if="finalSrc" ref="adjust-img"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
@@ -582,7 +582,7 @@ export default defineComponent({
       this._onError()
     },
     _onError(imgLoadHandlerError = false) {
-      if (!this.src && !imgLoadHandlerError) return
+      if (!this.src && !imgLoadHandlerError && this.userId !== 'backendRendering') return
       if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {
         if (this.errorSrcIdentifier.retry === 3) {
           return
@@ -592,7 +592,6 @@ export default defineComponent({
         this.errorSrcIdentifier.identifier = this.getErrorSrcIdentifier(this.config as IImage)
         this.errorSrcIdentifier.retry = 1
       }
-
       const { srcObj, styles: { width, height } } = this.config
       this.isOnError = true
       let updater
@@ -915,8 +914,12 @@ export default defineComponent({
         imageUtils.imgLoadHandler(src, (img) => {
           this.imgNaturalSize.width = img.width
           this.imgNaturalSize.height = img.height
-            this.src = src
-        }, { crossOrigin: false })
+          this.src = src
+        }, {
+          crossOrigin: false,
+          error: () => {
+            this._onError()
+        } })
       }
       this.initialized = true
     },
@@ -1030,7 +1033,6 @@ export default defineComponent({
           imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
           imageShadowUtils.setProcessId()
           imageShadowUtils.clearLayerData()
-          console.log('ShadowEffectType.none')
           return
       }
 

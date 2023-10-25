@@ -153,7 +153,7 @@ export default defineComponent({
     colorsStyle(): Record<string, string> {
       // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
       return {
-        gridTemplateColumns: `repeat(${this.getDocumentColors.length}, calc((100% - 60px) / 7))`,
+        gridTemplateColumns: `repeat(${this.getDocumentColors.length}, calc((100% - 96px) / 7))`,
         maskImage: `linear-gradient(to right, transparent 0, black ${this.leftOverflow ? '48px' : 0}, black calc(100% - ${this.rightOverflow ? '48px' : '0px'}), transparent 100%)`
       }
     },
@@ -340,24 +340,29 @@ export default defineComponent({
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   grid-auto-columns: 100%;
+  padding: 0 8px;
 
   &__title {
-    @include body-SM;
-    color: setColor(gray-2);
+    @include caption-LG;
+    @include setColors(gray-2, white) using ($color) {
+      color: $color;
+    }
   }
 
   &__shape-colors {
     @include no-scrollbar;
     width: 100%;
-    padding: 10px 12px 16px 12px;
+    padding: 16px 0;
     box-sizing: border-box;
     display: grid;
-    gap: 10px;
+    gap: 16px;
     overflow-x: auto;
   }
   &__hr {
     height: 1px;
-    background-color: setColor(gray-4);
+    @include setColors(gray-4, black-3-5) using ($color) {
+      background-color: $color;
+    }
     margin-bottom: 16px;
   }
 }

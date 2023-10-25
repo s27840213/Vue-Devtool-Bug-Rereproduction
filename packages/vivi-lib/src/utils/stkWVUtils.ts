@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -139,6 +139,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getStateResult',
     'setStateDone',
     'subscribeInfo',
+    'subscribeResult',
     'internalError',
     'validJsonResult'
   ]
@@ -154,7 +155,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getAssetResult',
     'uploadImageURL',
     'informWebResult',
-    'subscribeResult',
     'screenshotDone',
     'cloneImageDone',
     'saveImageDone'
@@ -205,6 +205,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   get isOldPrice(): boolean {
     return !this.checkVersion('1.42')
+  }
+
+  get isGetProductsSupported(): boolean {
+    return this.checkVersion('1.45')
   }
 
   get isTemplateSupported(): boolean {
@@ -292,8 +296,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const userInfo = this.getUserInfoFromStore()
     const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(i18n.global.locale) ?? 'USA'
     const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
-    const subscribeInfo = await this.getState('subscribeInfo')
-    store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] })
+    const localPrices = this.isGetProductsSupported ? await this.getState('prices') : (await this.getState('subscribeInfo'))?.prices
+    store.commit('vivisticker/UPDATE_payment', { prices: localPrices ?? defaultPrices[locale] })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
@@ -1472,22 +1476,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
     const isSubscribed = subscribe === '1'
-
-    const subscribeInfo = {
-      subscribe: isSubscribed,
-      prices: {
-        currency: priceCurrency,
-        monthly: {
-          value: parseFloat(monthly.priceValue),
-          text: this.formatPrice(monthly.priceValue, priceCurrency, monthly.priceText)
-        },
-        annually: {
-          value: parseFloat(annually.priceValue),
-          text: this.formatPrice(annually.priceValue, priceCurrency, annually.priceText)
+    const prices = { currency: priceCurrency }
+    const planIds = store.getters['vivisticker/getPayment'].planId
+    data.planInfo.forEach(p => {
+      const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
+      if (!plan) return
+      Object.assign(prices, {
+        [plan]: {
+          value: parseFloat(p.priceValue),
+          text: this.formatPrice(p.priceValue, priceCurrency, p.priceText)
         }
-      }
-    }
-
+      })
+    })
+    const subscribeInfo =  {subscribe: isSubscribed, prices}
     store.commit('vivisticker/UPDATE_payment', subscribeInfo)
     store.commit('vivisticker/SET_paymentPending', { info: false })
     this.getState('subscribeInfo').then(subscribeInfo => {
@@ -1500,25 +1501,61 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  subscribeResult(data: ISubscribeResult) {
-    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if is timeout
+  getSubscribeInfo() {
+    const planIds = store.getters['vivisticker/getPayment'].planId
+    this.sendToIOS('SUBSCRIBE', { option: 'checkState' })
+    this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: Object.values(planIds) })
+  }
+
+  subscribeResult(data: ISubscribeResult | ISubscribeResultV1_45) {
     if (this.isPaymentDisabled) return
-    if (data.reason) {
-      store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
+    if (this.isGetProductsSupported) {
+      data = data as ISubscribeResultV1_45
+      if (data.reason) return
+      if (isGetProducts(data)) {
+        const { planInfo, priceCurrency } = data
+        const planIds = store.getters['vivisticker/getPayment'].planId
+        if(planInfo.length !== Object.keys(planIds).length) return
+
+        const prices = { currency: priceCurrency }
+        planInfo.forEach(p => {
+          const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
+          if(!plan) return
+          Object.assign(prices, {
+            [plan]: {
+              value: parseFloat(p.priceValue),
+              text: this.formatPrice(p.priceValue, priceCurrency, p.priceText)
+            }
+          })
+        })
+        store.commit('vivisticker/UPDATE_payment', { prices })
+        this.setState('prices', prices)
+      }
+      else if (isCheckState(data)) {
+        const { subscribe, complete } = data
+        if (complete === '0') this.registerSticker()
+        const isSubscribed = subscribe === '1'
+        const subscribeInfo = { subscribe: isSubscribed }
+        store.commit('vivisticker/UPDATE_payment', subscribeInfo)
+        this.getState('subscribeInfo').then(subscribeInfo => {
+          if (subscribeInfo?.subscribe && !isSubscribed) {
+            this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
+          }
+        })
+        this.setState('subscribeInfo', subscribeInfo)
+      }
       return
     }
-    const { subscribe, reason } = data
-    const isSubscribed = subscribe === '1'
-    if (!reason) {
-      store.commit('vivisticker/UPDATE_payment', {
-        subscribe: isSubscribed,
+    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if is timeout
+    if (!data.reason) {
+      const isSubscribed = data.subscribe === '1'
+      store.commit('vivisticker/UPDATE_payment', { subscribe: isSubscribed })
+      if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
+      this.getState('subscribeInfo').then(subscribeInfo => {
+        this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
-    if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
-    this.getState('subscribeInfo').then(subscribeInfo => {
-      this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
-    })
   }
 
   async registerSticker() {

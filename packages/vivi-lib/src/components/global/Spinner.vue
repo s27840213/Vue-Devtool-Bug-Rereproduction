@@ -9,7 +9,7 @@ div(class="spinner popup-window")
 
 import i18n from '@/i18n'
 import { defineComponent } from 'vue'
-import rocketLoading from '@/assets/img/gif/rocket-loading.gif'
+import rocketLoading from '@img/gif/rocket-loading.gif'
 
 export default defineComponent({
   emits: [],

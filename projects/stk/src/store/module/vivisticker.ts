@@ -1,4 +1,5 @@
 import { IAsset } from '@/interfaces/module'
+import constantData from '@nu/vivi-lib/utils/constantData'
 import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
@@ -113,6 +114,10 @@ const getDefaultState = (): IViviStickerState => ({
         value: NaN,
         text: ''
       },
+      annuallyFree0: {
+        value: NaN,
+        text: ''
+      }
     },
     defaultPrices: {},
     trialDays: NaN,
@@ -121,6 +126,11 @@ const getDefaultState = (): IViviStickerState => ({
       info: true,
       purchase: false,
       restore: false
+    },
+    planId: {
+      monthly: constantData.planId.monthly,
+      annually: constantData.planId.annually,
+      annuallyFree0: constantData.planId.annuallyFree0
     }
   },
   uuid: '',

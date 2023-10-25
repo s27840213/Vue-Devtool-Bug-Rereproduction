@@ -4,6 +4,7 @@ div(class="nu-background-controller")
       ref="body"
       :style="styles"
       @pointerdown.stop="moveStart"
+      @pointerleave.stop="pointerLeave"
       @pinch="pinchHandler")
     div(v-for="(scaler, index) in controlPoints.scalers"
         class="controller-point"
@@ -72,9 +73,13 @@ export default defineComponent({
       initImgSize: { width: this.config.styles.imgWidth, height: this.config.styles.imgHeight },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1 },
+      translationRatio: { x: 0, y: 0 },
       initPinchPos: null as null | { x: number, y: number },
+      initPinchScale: 1,
       isPinching: false,
-      isMoving: false
+      isMoving: false,
+      isPinchInit: false,
+      pointers: [] as Array<number>
     }
   },
   mounted() {
@@ -126,41 +131,47 @@ export default defineComponent({
       scalerStyle.transform += ` scale(${100 / this.scaleRatio})`
       return scalerStyle
     },
+    pinchInit(event: AnyTouchEvent) {
+      this.isPinchInit = true
+      this.isPinching = true
+      this.initImgPos = {
+        x: this.config.styles.imgX,
+        y: this.config.styles.imgY
+      }
+      this.initImgSize = {
+        width: this.config.styles.imgWidth,
+        height: this.config.styles.imgHeight
+      }
+      this.initPinchScale = event.scale
+      this.initPinchPos = { x: event.x, y: event.y }
+
+      const pageRenderSize = { width: this.page.width * this.page.contentScaleRatio, height: this.page.height * this.page.contentScaleRatio }
+      const posInConfig = {
+        x: (event.x - editorUtils.mobileCenterPos.x + pageRenderSize.width * 0.5) / this.page.contentScaleRatio - this.config.styles.imgX,
+        y: (event.y - editorUtils.mobileCenterPos.y + pageRenderSize.height * 0.5) / this.page.contentScaleRatio - this.config.styles.imgY
+      }
+      this.translationRatio = {
+        x: -posInConfig.x / this.config.styles.imgWidth,
+        y: -posInConfig.y / this.config.styles.imgHeight
+      }
+      return this.initPinchPos
+    },
     pinchHandler(event: AnyTouchEvent) {
+      window.requestAnimationFrame(() => this._pinchHandler(event))
+    },
+    _pinchHandler(event: AnyTouchEvent) {
       switch (event.phase) {
-        case 'start': {
-          this.isPinching = true
-          this.initImgPos = {
-            x: this.config.styles.imgX,
-            y: this.config.styles.imgY
-          }
-          this.initImgSize = {
-            width: this.config.styles.imgWidth,
-            height: this.config.styles.imgHeight
+        case 'move': {
+          if (!this.isPinchInit || !this.initPinchPos) {
+            return this.pinchInit(event)
           }
 
-          break
-        }
-        case 'move': {
-          this.isPinching = true
           const { contentScaleRatio } = this.page
-          const pageRenderSize = { width: this.page.width * contentScaleRatio, height: this.page.height * contentScaleRatio }
-          const { styles } = this.config
           const _sizeRatio = contentScaleRatio
-          if (!this.initPinchPos) {
-            this.initPinchPos = { x: event.x, y: event.y }
-          }
-          const posInConfig = {
-            x: (event.x - editorUtils.mobileCenterPos.x + pageRenderSize.width * 0.5) / _sizeRatio - styles.imgX,
-            y: (event.y - editorUtils.mobileCenterPos.y + pageRenderSize.height * 0.5) / _sizeRatio - styles.imgY
-          }
-          const translationRatio = {
-            x: -posInConfig.x / styles.imgWidth,
-            y: -posInConfig.y / styles.imgHeight
-          }
+          const scale = event.scale / this.initPinchScale
           const sizeDiff = {
-            width: this.initImgSize.width * (event.scale - 1) * 0.5,
-            height: this.initImgSize.height * (event.scale - 1) * 0.5
+            width: this.initImgSize.width * (scale - 1) * 0.5,
+            height: this.initImgSize.height * (scale - 1) * 0.5
           }
           const newSize = {
             width: this.initImgSize.width + sizeDiff.width,
@@ -171,23 +182,22 @@ export default defineComponent({
             y: (event.y - this.initPinchPos.y) / _sizeRatio
           }
           const newPos = {
-            x: this.initImgPos.x + (sizeDiff.width * translationRatio.x) + movingTraslate.x,
-            y: this.initImgPos.y + (sizeDiff.height * translationRatio.y) + movingTraslate.y,
+            x: this.initImgPos.x + (sizeDiff.width * this.translationRatio.x) + movingTraslate.x,
+            y: this.initImgPos.y + (sizeDiff.height * this.translationRatio.y) + movingTraslate.y,
           }
-          const { imgWidth, imgHeight, imgX, imgY } = this.imgPinchScaleClamp(newSize, newPos, translationRatio, movingTraslate)
+          const { imgWidth, imgHeight, imgX, imgY } = this.imgPinchScaleClamp(newSize, newPos, this.translationRatio, movingTraslate)
           this.updateConfig({ imgX, imgY, imgWidth, imgHeight })
           break
         }
         case 'end': {
           this.isPinching = false
+          this.isPinchInit = false
           if (!this.isMoving) {
-            Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
             eventUtils.addPointerEvent('pointermove', this.moving)
             eventUtils.addPointerEvent('pointerup', this.moveEnd)
             this.setCursorStyle('move')
           }
           this.initialPos = null
-
           this.initPinchPos = null
           this.initImgPos = {
             x: this.config.styles.imgX,
@@ -283,12 +293,18 @@ export default defineComponent({
         imgY: newPos.y
       }
     },
+    pointerLeave(e: PointerEvent) {
+      this.pointers.splice(this.pointers.indexOf(e.pointerId), 1)
+    },
     moveStart(event: PointerEvent) {
-      this.isPinching = false
-      this.isMoving = true
-      if (eventUtils.checkIsMultiTouch(event)) {
+      // if (eventUtils.checkIsMultiTouch(event)) {
+      if (!this.pointers.includes(event.pointerId)) {
+        this.pointers.push(event.pointerId)
+      }
+      if (this.isPinching || this.pointers.length > 1) {
         return
       }
+      this.isMoving = true
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
@@ -299,8 +315,8 @@ export default defineComponent({
       this.setCursorStyle('move')
     },
     moving(event: PointerEvent) {
-      if (this.isPinching) {
       // if (eventUtils.checkIsMultiTouch(event) || this.isPinching) {
+      if (this.isPinching || this.pointers.length > 1) {
         return
       }
       /**
@@ -342,17 +358,14 @@ export default defineComponent({
       }
     },
     moveEnd(event: PointerEvent) {
+      eventUtils.removePointerEvent('pointermove', this.moving)
+      eventUtils.removePointerEvent('pointerup', this.moveEnd)
       this.isMoving = false
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-      // pageUtils.setBackgroundImageControlDefault()
-      // stepsUtils.record()
-      // pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
 
-      eventUtils.removePointerEvent('pointermove', this.moving)
-      eventUtils.removePointerEvent('pointerup', this.moveEnd)
     },
     scaleStart(event: MouseEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {

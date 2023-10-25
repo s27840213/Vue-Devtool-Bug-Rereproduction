@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia'
 const useStateInfo = () => {
   const { path } = toRefs(useRoute())
   const editorStore = useEditorStore()
-  const { editorState } = storeToRefs(editorStore)
+  const { editorState, currActiveFeature } = storeToRefs(editorStore)
 
   // #region routing state
   const atHome = computed(() => path.value === '/')
@@ -20,8 +20,9 @@ const useStateInfo = () => {
   const showAspectRatioSelector = computed(
     () => atEditor.value && editorState.value === 'aspectRatio',
   )
-  const showEditingOpstions = computed(() => atEditor.value && editorState.value === 'editing')
-  const showPromptArea = computed(() => atEditor.value && editorState.value === 'prompt')
+
+  const showBrushOptions = computed(() => atEditor.value && currActiveFeature.value === 'brush')
+  const isEditing = computed(() => atEditor.value && editorState.value === 'editing')
   // #endregion
 
   // #region img selector state
@@ -37,8 +38,8 @@ const useStateInfo = () => {
     atMainPage,
     showHomeTabs,
     showAspectRatioSelector,
-    showEditingOpstions,
-    showPromptArea,
+    isEditing,
+    showBrushOptions,
     showImgSelector,
   }
 }

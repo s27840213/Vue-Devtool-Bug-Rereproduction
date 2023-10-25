@@ -1,7 +1,7 @@
 <template lang="pug">
 div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
-    img(v-show="!isAdjustImage" ref="img"
+    img(v-if="finalSrc" v-show="!isAdjustImage" ref="img"
         :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
         draggable="false"
         @error="onError"
@@ -23,7 +23,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
               :key="child.tag"
               :is="child.tag"
               v-bind="child.attrs")
-      image(ref="adjust-img"
+      image(v-if="finalSrc" ref="adjust-img"
         :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
         class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
@@ -40,10 +40,12 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { IBrowserInfo } from '@/store/module/user'
+import backgroundUtils from '@/utils/backgroundUtils'
 import cssConverter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -53,15 +55,13 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import stkWVUtils from '@/utils/stkWVUtils'
-import i18n from '@/i18n'
-import modalUtils from '@/utils/modalUtils'
-import backgroundUtils from '@/utils/backgroundUtils'
 
 export default defineComponent({
   emits: [],

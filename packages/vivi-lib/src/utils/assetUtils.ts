@@ -604,7 +604,7 @@ class AssetUtils {
   async addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     try {
-      const jsonData = await import(`@/assets/json/${type}.json`)
+      const jsonData = await import(`@/assets/json/standard-text/${type}.json`)
       const fieldMap = {
         heading: 'isHeading',
         subheading: 'isSubheading',
