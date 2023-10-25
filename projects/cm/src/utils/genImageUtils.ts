@@ -10,6 +10,7 @@ import { useEventBus } from '@vueuse/core'
 export default new (class GenImageUtils {
   async genImage(prompt: string): Promise<string> {
     const { userId } = useUserStore()
+    const { editorType } = useEditorStore()
     const requestId = generalUtils.generateAssetId()
     try {
       await Promise.all([
@@ -20,7 +21,7 @@ export default new (class GenImageUtils {
       logUtils.setLogForError(error as Error)
       throw new Error('Upload Images For /gen-image Failed')
     }
-    const res = (await genImageApis.genImage(userId, requestId, prompt, 'powerful-fill')).data
+    const res = (await genImageApis.genImage(userId, requestId, prompt, editorType)).data
     if (res.flag !== 0) {
       throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
     }
