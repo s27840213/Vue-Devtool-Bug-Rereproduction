@@ -1,6 +1,7 @@
 import '@/assets/css/main.css'
 import componentPlugin from '@nu/shared-lib/plugin'
 import libType from '@nu/shared-lib/types'
+import '@nu/vivi-lib/css' // Import all CSS rules from vivi-lib
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'

@@ -153,6 +153,7 @@ export default defineComponent({
       this.vConsole = new VConsole({ theme: 'dark' })
       this.vConsole.setSwitchPosition(25, 80)
     }
+    this.setEditorSizeInit()
   },
   unmounted() {
     document.removeEventListener('scroll', this.handleScroll)
@@ -439,7 +440,24 @@ export default defineComponent({
         })
       }
       else show()
-    }
+    },
+    setEditorSizeInit() {
+      const rect = (this.$refs.vivisticker__content as HTMLElement).getBoundingClientRect()
+      editorUtils.setMobilePhysicalData({
+        size: {
+          width: rect.width,
+          height: rect.height,
+        },
+        centerPos: {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        },
+        pos: {
+          x: rect.left,
+          y: rect.top
+        }
+      })
+    },
   }
 })
 </script>

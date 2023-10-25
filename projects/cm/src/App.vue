@@ -52,6 +52,7 @@ import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import useStateInfo from './composable/useStateInfo'
 import { useModalStore } from './stores/modal'
+
 // #region route info
 const stateInfo = useStateInfo()
 const {
