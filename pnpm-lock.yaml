@@ -231,9 +231,6 @@ importers:
       '@kyvg/vue3-notification':
         specifier: ^2.7.0
         version: 2.9.1(vue@3.3.4)
-      '@nu/shared-lib':
-        specifier: workspace:^0.0.1
-        version: link:../shared-lib
       '@pixi/filter-kawase-blur':
         specifier: ^5.1.1
         version: 5.1.1(@pixi/core@7.2.4)
