@@ -34,9 +34,9 @@ div(class="photo-effect-setting" ref="panel" tabindex="0" @keydown.stop)
       template(v-if="currentEffect !== 'none'")
         div(class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
-          div(class="photo-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
-            @click="handleColorModal")
+          color-btn(class="photo-effect-setting__color"
+                    :color="(currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color) || '#000000'"
+                    size="30px" @click="handleColorModal")
         div(class="photo-effect-setting__reset")
           button(@click="reset()") {{ $t('NN0754') }}
     div(class="flex-between photo-effect-setting__options mb-10")
@@ -73,14 +73,15 @@ div(class="photo-effect-setting" ref="panel" tabindex="0" @keydown.stop)
       div(v-if="!['none', 'imageMatched'].includes(currentEffect)"
         class="photo-effect-setting__field")
         div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
-        div(class="photo-effect-setting__value-input"
-          :style="{ backgroundColor: currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color || '#000000' }"
-          @click="handleColorModal")
+        color-btn(class="photo-effect-setting__color"
+                  :color="(currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color) || '#000000'"
+                  size="30px" @click="handleColorModal")
       div(class="photo-effect-setting__reset")
         button(@click="reset()") {{ $t('NN0754') }}
 </template>
 
 <script lang="ts">
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
 import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@nu/vivi-lib/interfaces/layer'
 import { ColorEventType, FunctionPanelType } from '@nu/vivi-lib/store/types'
@@ -99,6 +100,9 @@ export default defineComponent({
       shadowPropI18nMap,
       fieldRange
     }
+  },
+  components: {
+    ColorBtn,
   },
   mounted() {
     imageShadowPanelUtils.mount()
@@ -190,6 +194,13 @@ export default defineComponent({
 .photo-effect-setting {
   font-size: 14px;
   outline: none;
+
+  :deep(.color-btn__color) {
+    @include setColors(gray-4, black-5) using ($color) {
+      border-color: $color;
+    }
+  }
+
   &__form {
     background: #fff;
     padding: 12px;

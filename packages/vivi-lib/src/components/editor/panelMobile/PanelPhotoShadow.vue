@@ -1,18 +1,20 @@
 <template lang="pug">
 div(class="panel-shadow")
   div(class="flex-between photo-shadow__options mb-10")
-    div(v-for="icon in shadowOptions" :key="icon")
-      div(class="photo-shadow__options__option-wrapper"
-          :class="{ 'selected': currentEffect === icon }")
-        svg-icon(
-          :key="`shadow-${icon}`"
-          :iconName="`mobile-photo-shadow-${icon}`"
-          @click="onEffectClick(icon)"
-          class="photo-shadow__options__option pointer"
-          iconWidth="100%"
-          iconColor="gray-2")
-      div(class="photo-shadow__options__option-font") {{$t(shadowPropI18nMap[icon]._effectName)}}
+    div(v-for="icon in shadowOptions" :key="icon"
+        :class="{ 'selected': currentEffect === icon }"
+        @click="onEffectClick(icon)")
+      div(class="photo-shadow__options__icon-bg")
+      svg-icon(v-if="icon === 'none'"
+            iconName="no-effect"
+            iconWidth="24px"
+            class="photo-shadow__options--icon" :iconColor="theme === 'dark' ? 'white' : 'black-2'")
+      img(v-else :src="imgSrc(icon)"
+        class="photo-shadow__options--icon"
+        width="56"
+        height="56")
   div(class="photo-shadow__attrs" :style="shadowAttrsStyles")
+    span(class="photo-shadow__effect-name") {{$t(shadowPropI18nMap[currentEffect]._effectName)}}
     div(v-for="field in shadowFields" :key="field")
       mobile-slider(:title="`${$t(shadowPropI18nMap[currentEffect][field] as string)}`"
         :borderTouchArea="true"
@@ -44,6 +46,18 @@ import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageSh
 import layerUtils from '@/utils/layerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
+
+const imports = Object.assign(
+  import.meta.glob(
+    `@img/photo-shadow/light_icon/*.png`,
+    { eager: true, import: 'default' }
+  ) as Record<string, string>,
+  import.meta.glob(
+    `@img/photo-shadow/dark_icon/*.png`,
+    { eager: true, import: 'default' }
+  ) as Record<string, string>
+)
+
 export default defineComponent({
   components: {
     MobileSlider,
@@ -55,7 +69,8 @@ export default defineComponent({
       imageShadowPanelUtils,
       shadowPropI18nMap,
       fieldRange,
-      handleColor: false
+      handleColor: false,
+      theme: this.$isStk ? 'dark' : 'light'
     }
   },
   mounted() {
@@ -112,11 +127,17 @@ export default defineComponent({
       return {
         'max-height': this.currentEffect === ShadowEffectType.none ? '0' : '1000px'
       }
+    },
+    iconBgColor(): string {
+      return (this.theme === 'dark' ? colorUtils.colorMap.get('black-3') : colorUtils.colorMap.get('gray-5')) ?? 'white'
     }
   },
   methods: {
     getFieldValue(field: string): number {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
+    },
+    imgSrc(icon: string): string {
+      return imports[`/src/assets/img/photo-shadow/${this.theme}_icon/photo-shadow-${icon}.png`]
     },
     onEffectClick(effectName: ShadowEffectType): void {
       const alreadySetEffect = effectName === ShadowEffectType.none || Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
@@ -158,6 +179,12 @@ export default defineComponent({
   padding: 0 5px;
   width: 100%;
   height: 100%;
+
+  :deep(.color-btn__color) {
+    @include setColors(gray-4, black-5) using ($color) {
+      border-color: $color;
+    }
+  }
 }
 
 .photo-shadow {
@@ -169,39 +196,58 @@ export default defineComponent({
     overflow-x: scroll;
     @include no-scrollbar;
 
-    &__option {
-      border-radius: 4px;
-      background-color: setColor(gray-5);
-      display: block;
-      transition: transform 0.3s;
-      &-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 10px;
-        width: 56px;
-        height: 56px;
-        border-radius: 4px;
-        overflow: hidden;
-        box-sizing: border-box;
-        transition: border 0.3s;
-        &.selected {
-          @include setColors(blue-1, white) using ($color) {
-            border: 2px solid $color;
-          }
-          & > svg {
-            transform: scale(0.85);
-          }
+    > div {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      width: 56px;
+      height: 56px;
+      margin: 0px auto;
+      border-radius: 5px;
+      overflow: hidden;
+      box-sizing: border-box;
+      transition: border 0.3s;
+      &.selected {
+        @include setColors(blue-1, white) using ($color) {
+          border: 2px solid $color;
+        }
+        > img, > svg {
+          transform: scale(0.85);
+        }
+        > div {
+          border-radius: 3px;
+          width: 47.6px;
+          height: 47.6px;
         }
       }
-      &-font {
-        box-sizing: border-box;
-        font-size: 10px;
-        @include setColors(gray-2, white) using ($color) {
-          color: $color;
-        }
+      .photo-shadow__options--icon {
+        border-radius: 5px;
+        object-fit: cover;
+        pointer-events: none;
       }
     }
+    &__icon-bg {
+      z-index: -1;
+      border-radius: 5px;
+      background-color: v-bind(iconBgColor);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      transition: width 0.3s, height 0.3s;
+    }
+  }
+
+  &__effect-name {
+    @include body-SM;
+    @include setColors(gray-1, white) using ($color) {
+      color: $color;
+    }
+    text-align: center;
   }
 
   &__row {

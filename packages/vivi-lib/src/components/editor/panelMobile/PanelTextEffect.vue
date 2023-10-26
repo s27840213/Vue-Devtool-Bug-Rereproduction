@@ -10,7 +10,7 @@ div(class="panel-text-effect")
         :key="`${currCategoryName}-${effect.key}`"
         :class="{ 'selected': currEffect?.key === effect.key }"
         @click="onEffectClick(currCategory, effect)")
-      div(class="panel-text-effect__icon-bg")
+      div(class="panel-text-effect__effects__icon-bg")
       svg-icon(v-if="['custom-fill-img', 'none'].includes(effect.key)"
               :iconName="effectIcon(currCategory, effect).name"
               :iconWidth="effectIcon(currCategory, effect).size"
@@ -222,6 +222,12 @@ export default defineComponent({
     }
   }
 
+  :deep(.color-btn__color) {
+    @include setColors(gray-4, black-5) using ($color) {
+      border-color: $color;
+    }
+  }
+
   &__categories {
     @include no-scrollbar;
     width: 100%;
@@ -265,23 +271,23 @@ export default defineComponent({
           height: 47.6px;
         }
       }
-      > .panel-text-effect__icon-bg {
-        z-index: -1;
-        border-radius: 5px;
-        background-color: v-bind(iconBgColor);
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 56px;
-        height: 56px;
-        transition: width 0.3s, height 0.3s;
-      }
       .panel-text-effect__effects--icon {
         border-radius: 5px;
         object-fit: cover;
         pointer-events: none;
       }
+    }
+    &__icon-bg {
+      z-index: -1;
+      border-radius: 5px;
+      background-color: v-bind(iconBgColor);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      transition: width 0.3s, height 0.3s;
     }
     &--more {
       display: flex;
