@@ -17,7 +17,6 @@ div(class="panel-text-effect")
               class="panel-text-effect__effects--icon" :iconColor="theme === 'dark' ? 'white' : 'black-2'")
       img(v-else :src="effectIcon(currCategory, effect).name"
           class="panel-text-effect__effects--icon"
-          :class="{full: effect.img}"
           :width="effectIcon(currCategory, effect).size"
           :height="effectIcon(currCategory, effect).size")
       pro-item(v-if="effect.plan" theme="roundedRect")
@@ -257,7 +256,7 @@ export default defineComponent({
         @include setColors(blue-1, white) using ($color) {
           border: 2px solid $color;
         }
-        > img.full {
+        > img, > svg {
           transform: scale(0.85);
         }
         > div {
