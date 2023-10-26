@@ -200,7 +200,7 @@ export class AutoResizeByHeight extends AutoResize {
   }
 
   loopPrevCondition(): boolean {
-    this.log('loopPrevCondision')
+    this.log('loopPrevCondition')
     this.autoDimension = this.autoSize[this.dimension]
     const currDiff = Math.abs(this.autoDimension - this.originDimension)
     this.log(this.autoDimension, this.originDimension, currDiff, this.widthLimit, this.config.widthLimit)
@@ -387,7 +387,7 @@ export class AutoResizeBySpanDataList extends AutoResizeByHeight {
   }
 
   loopPrevCondition(): boolean {
-    this.log('loopPrevCondision')
+    this.log('loopPrevCondition')
     this.autoDimension = this.autoSize[this.dimension]
     if (!this.checkStructMatch(this.autoSize.spanDataList, this.initSize.spanDataList)) {
       this.log('spanData do not match')

@@ -12,7 +12,7 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
     :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
     :inFrame="true"
     :contentScaleRatio="contentScaleRatio"
-    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+    :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
     :primaryLayer="config"
     :config="config.decoration"
     :isSubLayer="true")
@@ -25,7 +25,7 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
     :inImageFrame="inImageFrame()"
     :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
-    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+    :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
     :primaryLayer="config"
     :config="layer"
     :isSubLayer="true")
@@ -37,7 +37,7 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
     :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
     :inFrame="true"
     :contentScaleRatio="contentScaleRatio"
-    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+    :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
     :primaryLayer="config"
     :config="config.decorationTop"
     :isSubLayer="true")
@@ -51,7 +51,7 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
       :inFrame="true"
       :subLayerIndex="index"
       :contentScaleRatio="contentScaleRatio"
-      :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+      :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
       :primaryLayer="config"
       :config="layer"
       :isSubLayer="true")
@@ -255,7 +255,7 @@ export default defineComponent({
             if (this.primaryLayer) {
               frameUtils.iosPhotoSelect({
                 pageIndex: this.pageIndex,
-                priPrimaryLayerIndex: this.layerIndex,
+                prePrimaryLayerIndex: this.layerIndex,
                 layerIndex: this.subLayerIndex,
                 subLayerIdx: 0,
               }, (this.config as IFrame).clips[0])

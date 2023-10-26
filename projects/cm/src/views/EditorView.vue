@@ -56,7 +56,8 @@ import useImageUtils from '@/composable/useImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
-import { useElementSize } from '@vueuse/core'
+import mathUtils from '@nu/vivi-lib/utils/mathUtils'
+import { useElementSize, useEventBus } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
 
@@ -151,21 +152,35 @@ const demoBrushSizeStyles = computed(() => {
 })
 // #endregion
 
+// #region Canvas functions
+const bus = useEventBus<string>('generation')
+const unsubcribe = bus.on((event: string, { callback }) => {
+  if (event === 'genMaskUrl') {
+    callback(getCanvasDataUrl())
+  }
+})
+onBeforeUnmount(() => {
+  unsubcribe()
+})
+
 const canvasRef = ref<VNodeRef | null>(null)
 const downloadCanvas = () => {
   if (!canvasRef.value) return
 
   canvasRef.value.downloadCanvas()
 }
+
 const getCanvasDataUrl = () => {
   if (!canvasRef.value) return
 
-  canvasRef.value.getCanvasDataUrl()
+  return canvasRef.value.getCanvasDataUrl()
 }
+// #endregion
 /**
  * fitPage
  */
 
+console.log(mathUtils.sin(800))
 watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {

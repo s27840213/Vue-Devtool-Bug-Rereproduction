@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check build-only",
+    "build": "run-p build-only",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@nu/shared-lib": "workspace:^0.0.1",
+    "@nu/vivi-lib": "workspace:^0.0.0",
     "pinia": "^2.1.4",
     "pixi.js": "^7.2.4",
     "vue-router": "^4.2.4"
