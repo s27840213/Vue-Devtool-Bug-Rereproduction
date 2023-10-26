@@ -31,7 +31,7 @@ div(class="nu-layer flex-center"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :page="page"
             :primaryLayer="primaryLayer"
-            :priPrimaryLayerIndex="priPrimaryLayerIndex"
+            :prePrimaryLayerIndex="prePrimaryLayerIndex"
             :forRender="forRender"
             :inPreview="inPreview")
           svg(v-if="showSvgContour"
@@ -138,9 +138,9 @@ export default defineComponent({
       default: false,
       type: Boolean
     },
-    // Used by this.$props.priPrimaryLayerIndex in mounted
+    // Used by this.$props.prePrimaryLayerIndex in mounted
     // eslint-disable-next-line vue/no-unused-properties
-    priPrimaryLayerIndex: {
+    prePrimaryLayerIndex: {
       default: -1,
       type: Number
     },
@@ -188,9 +188,9 @@ export default defineComponent({
         }
       }
     })
-    Object.defineProperty(layerInfo, 'priPrimaryLayerIndex', {
+    Object.defineProperty(layerInfo, 'prePrimaryLayerIndex', {
       get() {
-        return props.priPrimaryLayerIndex
+        return props.prePrimaryLayerIndex
       }
     })
     const _config = { config: this.config }
@@ -613,7 +613,7 @@ export default defineComponent({
         frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, {
           srcObj: { ...currLayer.srcObj },
           ...((currLayer as IImage).previewSrc && { previewSrc: (currLayer as IImage).previewSrc as string })
-        })
+        }, this.prePrimaryLayerIndex)
         layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { opacity: 35 })
         layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: true })
 
@@ -628,7 +628,7 @@ export default defineComponent({
           imgY,
           horizontalFlip: this.primaryLayer && layerUtils.getCurrLayer.styles.horizontalFlip !== this.primaryLayer.styles.horizontalFlip,
           verticalFlip: this.primaryLayer && layerUtils.getCurrLayer.styles.verticalFlip !== this.primaryLayer.styles.verticalFlip
-        })
+        }, this.prePrimaryLayerIndex)
         const body = this.$refs.body as HTMLElement
         body.addEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
         body.addEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)

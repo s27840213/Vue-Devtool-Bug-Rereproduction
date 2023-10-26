@@ -172,7 +172,7 @@ export interface ILayerInfo {
 }
 
 export interface IExtendLayerInfo extends ILayerInfo {
-  priPrimaryLayerIndex?: number
+  prePrimaryLayerIndex?: number
 }
 
 export enum LineTemplatesType {

@@ -155,7 +155,7 @@ class FrameUtils {
   }
 
   iosPhotoSelect(layerInfo: IExtendLayerInfo, config: IImage) {
-    const { pageIndex, layerIndex, subLayerIdx = 0, priPrimaryLayerIndex = -1 } = layerInfo
+    const { pageIndex, layerIndex, subLayerIdx = 0, prePrimaryLayerIndex = -1 } = layerInfo
     return stkWVUtils.getIosImg()
       .then(async (images: Array<string>) => {
         if (images.length) {
@@ -164,7 +164,7 @@ class FrameUtils {
             assetId: images[0],
             userId: ''
           }))
-          if (priPrimaryLayerIndex === -1) {
+          if (prePrimaryLayerIndex === -1) {
             this.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
               imgWidth,
               imgHeight,
@@ -177,7 +177,7 @@ class FrameUtils {
               userId: ''
             })
           } else {
-            LayerUtils.updateInGroupFrame(pageIndex, priPrimaryLayerIndex, layerIndex, subLayerIdx, {
+            LayerUtils.updateInGroupFrame(pageIndex, prePrimaryLayerIndex, layerIndex, subLayerIdx, {
               srcObj: {
                 type: 'ios',
                 assetId: images[0],
@@ -195,11 +195,12 @@ class FrameUtils {
       })
   }
 
-  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>) {
+  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>, preprimaryLayerIndex?: number) {
     store.commit('SET_frameLayerStyles', {
       pageIndex,
       primaryLayerIndex,
       subLayerIndex,
+      preprimaryLayerIndex,
       styles
     })
   }

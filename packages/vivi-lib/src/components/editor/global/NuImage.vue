@@ -137,7 +137,7 @@ export default defineComponent({
       type: Object,
       default: () => { return undefined }
     },
-    priPrimaryLayerIndex: {
+    prePrimaryLayerIndex: {
       type: Number,
       default: -1
     },
@@ -631,8 +631,8 @@ export default defineComponent({
             this.src = imageUtils.getSrc(this.config)
             window.requestAnimationFrame(() => {
               stkWVUtils.isAnyIOSImgOnError = true
-              if (this.priPrimaryLayerIndex !== -1) {
-                stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+              if (this.prePrimaryLayerIndex !== -1) {
+                stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
               } else {
                 stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
               }
@@ -695,7 +695,7 @@ export default defineComponent({
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            if (this.priPrimaryLayerIndex !== -1) stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+            if (this.prePrimaryLayerIndex !== -1) stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
             else stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           } else {
             // Rendering
@@ -713,8 +713,8 @@ export default defineComponent({
     },
     onLoad(e: Event, type?: string) {
       if (this.$isStk && type === 'main' && !this.isAdjustImage) {
-        if (this.priPrimaryLayerIndex !== -1) {
-          stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+        if (this.prePrimaryLayerIndex !== -1) {
+          stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
         } else {
           stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
         }
