@@ -1509,18 +1509,17 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   subscribeResult(data: ISubscribeResult | ISubscribeResultV1_45) {
     if (this.isPaymentDisabled) return
-    if (this.isGetProductsSupported) {
+    if (this.isGetProductsSupported && isGetProducts(data) || isCheckState(data)) {
       data = data as ISubscribeResultV1_45
       if (data.reason) return
       if (isGetProducts(data)) {
         const { planInfo, priceCurrency } = data
         const planIds = store.getters['vivisticker/getPayment'].planId
-        if(planInfo.length !== Object.keys(planIds).length) return
-
+        if (planInfo.length !== Object.keys(planIds).length) return
         const prices = { currency: priceCurrency }
         planInfo.forEach(p => {
           const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
-          if(!plan) return
+          if (!plan) return
           Object.assign(prices, {
             [plan]: {
               value: parseFloat(p.priceValue),
