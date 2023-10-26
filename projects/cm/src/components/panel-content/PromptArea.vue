@@ -22,12 +22,18 @@ div(class="flex flex-col justify-center items-center w-full px-24 gap-16")
     @click="handleGenerate") {{ $t('CM0023') }}
 </template>
 <script setup lang="ts">
-import webViewUtils from '@/utils/webViewUtils'
+import genImageUtils from '@/utils/genImageUtils';
+import { logUtils } from '@nu/shared-lib';
 
 const promptText = ref('')
 const promptLen = computed(() => promptText.value.length)
+
 const handleGenerate = () => {
-  webViewUtils.sendCopyEditor()
+  genImageUtils.genImage(promptText.value).then(url => {
+    console.log(url)
+  }).catch(error => {
+    logUtils.setLogForError(error as Error)
+  })
 }
 const clearPromt = () => {
   promptText.value = ''

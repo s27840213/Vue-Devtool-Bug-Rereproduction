@@ -7,7 +7,6 @@ import vuei18n from '@intlify/unplugin-vue-i18n/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import svgSpritePlugin from 'vite-plugin-svg-sprite'
-
 function resolve(...dir: string[]) {
   return path.join(__dirname, ...dir)
 }
@@ -30,7 +29,8 @@ export default defineConfig({
     }),
     // https://github.com/antfu/unplugin-auto-import
     AutoImport({
-      imports: ['vue', 'vue-router', 'vue-i18n'],
+      imports: ['vue', 'vue-router', 'vue-i18n', '@vueuse/core', 'pinia'],
+      ignore: ['h'],
       dts: 'src/auto-import.d.ts',
       ignore: ['h'], // To solve: https://www.jianshu.com/p/1739e6bcb543
     }),
@@ -43,10 +43,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@i18n': resolve(
-        process.env.NODE_ENV === 'production' 
-          ? 'src/i18n/shaked/'
-          : '../../tools/i18n-tool/result'
+        process.env.NODE_ENV === 'production' ? 'src/i18n/shaked/' : '../../tools/i18n-tool/result',
       ),
+      '@img': resolve('../../packages/vivi-lib/dist/src/assets/img'),
+
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },

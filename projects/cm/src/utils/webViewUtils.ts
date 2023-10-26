@@ -1,5 +1,6 @@
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
+import { useWebViewStore } from '@/stores/webView'
 import { generalUtils, nativeAPIUtils } from '@nu/shared-lib'
 import { storeToRefs } from 'pinia'
 
@@ -72,10 +73,27 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     return this.STANDALONE_USER_INFO
   }
 
+  get globalStore() {
+    return storeToRefs(useGlobalStore())
+  }
+
+  get webViewStore() {
+    return storeToRefs(useWebViewStore())
+  }
+
   get isStandaloneMode() {
-    const globalStore = useGlobalStore()
-    const { standaloneMode } = storeToRefs(globalStore)
+    const { standaloneMode } = this.globalStore
     return standaloneMode.value
+  }
+
+  get isDuringCopy() {
+    const { isDuringCopy } = this.webViewStore
+    return isDuringCopy.value
+  }
+
+  setDuringCopy(bool: boolean) {
+    const { setDuringCopy } = useWebViewStore()
+    setDuringCopy(bool) 
   }
 
   detectIfInApp() {
@@ -117,9 +135,41 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     })
   }
 
-  async sendCopyEditor(): Promise<string> {
+  async copyEditorCore(sender: () => Promise<{flag: string, imageId: string}>) {
+    return new Promise<{flag: string, imageId: string}>(resolve => {
+      const executor = () => {
+        nextTick(() => {
+          this.preCopyEditor()
+          setTimeout(() => {
+            sender().then(({ flag, imageId }) => {
+              this.postCopyEditor()
+              resolve({ flag, imageId })
+            })
+          }, 500) // wait for soft keyboard to close
+        })
+      }
+      executor()
+    })
+  }
+
+  async copyEditor(): Promise<{flag: string, imageId: string}> {
+    return await this.copyEditorCore(this.sendCopyEditor.bind(this))
+  }
+
+  preCopyEditor() {
+    this.setDuringCopy(true)
+  }
+
+  postCopyEditor() {
+    this.setDuringCopy(false)
+  }
+
+  async sendCopyEditor(): Promise<{flag: string, imageId: string}> {
     const imageId = generalUtils.generateAssetId()
-    return await this.sendCopyEditorCore('editorSave', imageId)
+    return {
+      flag: await this.sendCopyEditorCore('editorSave', imageId),
+      imageId
+    }
   }
 
   async sendCopyEditorCore(action: 'editorSave', imageId: string, imagePath?: string): Promise<string>
