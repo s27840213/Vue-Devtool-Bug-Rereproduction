@@ -657,6 +657,7 @@ export default defineComponent({
 .nu-shape {
   // display: relative;
   svg {
+    overflow: visible;
     display: block;
   }
 }

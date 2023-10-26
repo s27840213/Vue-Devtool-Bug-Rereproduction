@@ -414,6 +414,7 @@ export default defineComponent({
         case LayerType.shape: {
           return {
             // 'mix-blend-mode': this.config.styles.blendMode,
+            overflow: 'hidden',
             ...shapeUtils.isLine(this.config as AllLayerTypes) ? { pointerEvents: 'none' } : {}
           }
         }
