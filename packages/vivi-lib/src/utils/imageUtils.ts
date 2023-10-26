@@ -1,5 +1,4 @@
 import imageApi from '@/apis/image-api'
-import frameDefaultImg from '@img/svg/frame.svg'
 import { IAssetPhoto, IImageSize, IPhotoItem, IUserImageContentData, isIAssetPhoto } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
@@ -16,6 +15,7 @@ import LayerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import frameDefaultImg from '@img/svg/frame.svg'
 import { AxiosPromise } from 'axios'
 import { cloneDeep, findLastIndex } from 'lodash'
 
@@ -781,6 +781,16 @@ class ImageUtils {
     }
     store.commit('mobileEditor/SET_closeMobilePanelFlag', true)
     stepsUtils.record()
+  }
+
+  requireSrc(src: string) {
+    if(generalUtils.isCm) {
+      const res = new URL(`../assets/img/${src}`, import.meta.url).href
+      return res
+      return ''
+    } else {
+      return require(`@img/${src}`)
+    }
   }
 }
 
