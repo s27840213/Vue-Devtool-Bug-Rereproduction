@@ -657,7 +657,7 @@ export default defineComponent({
 .nu-shape {
   // display: relative;
   svg {
-    overflow: visible;
+    overflow: visible; // solving https://www.notion.so/vivipic/1-43-svg-9de4bd6782614852b503997f7e9256a2?pvs=4
     display: block;
   }
 }
