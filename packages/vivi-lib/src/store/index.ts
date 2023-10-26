@@ -877,10 +877,15 @@ const mutations: MutationTree<IEditorState> = {
     const layers = state.pages[pageIndex].config.layers[primaryLayerIndex].layers as (IShape | IText | IImage)[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
-  SET_frameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
-    const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
-    const layers = state.pages[pageIndex].config.layers[primaryLayerIndex].clips as IImage[]
-    Object.assign(layers[subLayerIndex].styles, styles)
+  SET_frameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any, preprimaryLayerIndex?: number }) {
+    const { pageIndex, primaryLayerIndex, subLayerIndex, styles, preprimaryLayerIndex = -1 } = data
+    let frame
+    if (preprimaryLayerIndex !== -1) {
+      frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[primaryLayerIndex] as IFrame
+    } else {
+      frame = state.pages[pageIndex].config.layers[primaryLayerIndex] as IFrame
+    }
+    Object.assign(frame.clips[subLayerIndex].styles, styles)
   },
   SET_frameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, styles } = data

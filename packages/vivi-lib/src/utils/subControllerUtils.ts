@@ -1,6 +1,7 @@
 import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, IExtendLayerInfo, ILayerInfo, LayerType } from '@/store/types'
+import { nextTick } from 'vue'
 import colorUtils from './colorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import formatUtils from './formatUtils'
@@ -10,7 +11,6 @@ import groupUtils from './groupUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
-import { nextTick } from 'vue'
 
 export default class SubControllerUtils {
   // private component = undefined as Vue | undefined
@@ -31,13 +31,13 @@ export default class SubControllerUtils {
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
-  private get priPrimaryLayerIndex(): number { return this.layerInfo.priPrimaryLayerIndex ?? -1 }
+  private get prePrimaryLayerIndex(): number { return this.layerInfo.prePrimaryLayerIndex ?? -1 }
   // private get primaryLayer(): IGroup | IFrame | ITmp {
   //   /**
-  //    * Only the frame inside a group would have the prop of priPrimaryLayerIndex
+  //    * Only the frame inside a group would have the prop of prePrimaryLayerIndex
   //    */
-  //   if (this.priPrimaryLayerIndex !== -1) {
-  //     return layerUtils.getLayer(this.pageIndex, this.priPrimaryLayerIndex) as IGroup
+  //   if (this.prePrimaryLayerIndex !== -1) {
+  //     return layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex) as IGroup
   //   }
   //   return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp
   // }
@@ -187,13 +187,13 @@ export default class SubControllerUtils {
           const primaryLayer = this.primaryLayer as IGroup
           primaryLayer.layers.forEach((l, i) => {
             if (l.active) {
-              layerUtils.updateLayerProps(this.pageIndex, this.priPrimaryLayerIndex, { active: false }, i)
+              layerUtils.updateLayerProps(this.pageIndex, this.prePrimaryLayerIndex, { active: false }, i)
             }
           })
-          layerUtils.updateLayerProps(this.pageIndex, this.priPrimaryLayerIndex, { active: true }, this.layerIndex)
+          layerUtils.updateLayerProps(this.pageIndex, this.prePrimaryLayerIndex, { active: true }, this.layerIndex)
           layerUtils.updateInGroupFrame(
             this.pageIndex,
-            this.priPrimaryLayerIndex,
+            this.prePrimaryLayerIndex,
             this.layerIndex,
             this.subLayerIdx,
             { active: true }
