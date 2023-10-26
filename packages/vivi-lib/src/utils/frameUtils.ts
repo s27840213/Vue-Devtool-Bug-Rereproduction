@@ -195,7 +195,7 @@ class FrameUtils {
       })
   }
 
-  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>, preprimaryLayerIndex?: number) {
+  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>, preprimaryLayerIndex = -1) {
     store.commit('SET_frameLayerStyles', {
       pageIndex,
       primaryLayerIndex,

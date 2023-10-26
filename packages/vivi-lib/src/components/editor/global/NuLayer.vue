@@ -507,7 +507,9 @@ export default defineComponent({
       }
 
       if (this.getLayerType === 'frame') {
-        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
+        if (this.prePrimaryLayerIndex === -1) {
+          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
+        }
       }
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
@@ -648,11 +650,11 @@ export default defineComponent({
         layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: false })
         frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, {
           srcObj: { ...this.imgBuff.srcObj }
-        })
+        }, this.prePrimaryLayerIndex)
 
         frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
           ...this.imgBuff.styles
-        })
+        }, this.prePrimaryLayerIndex)
       }
       const body = this.$refs.body as HTMLElement
       body.removeEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
@@ -666,7 +668,7 @@ export default defineComponent({
         layerUtils.deleteLayer(layerUtils.pageIndex, layerUtils.layerIndex)
         const newIndex = this.layerIndex > layerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer as IFrame])
-        frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.subLayerIndex, { active: true })
+        frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.subLayerIndex, { active: true }, this.prePrimaryLayerIndex)
         stepsUtils.record()
       }
       const body = this.$refs.body as HTMLElement
@@ -713,7 +715,7 @@ export default defineComponent({
             }
           })
           frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.currDraggedPhoto.srcObj)
-          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { previewSrc: this.currDraggedPhoto.previewSrc })
+          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { previewSrc: this.currDraggedPhoto.previewSrc }, this.prePrimaryLayerIndex)
 
           Object.assign(clip.srcObj, this.currDraggedPhoto.srcObj)
           const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
@@ -726,7 +728,7 @@ export default defineComponent({
             imgY,
             horizontalFlip: this.primaryLayer && this.primaryLayer.styles.horizontalFlip,
             verticalFlip: this.primaryLayer && this.primaryLayer.styles.verticalFlip
-          })
+          }, this.prePrimaryLayerIndex)
         }
       }
     },
@@ -739,8 +741,8 @@ export default defineComponent({
       const primaryLayer = this.primaryLayer as IFrame
       if (this.currDraggedPhoto.srcObj.type !== '' && !primaryLayer.locked) {
         frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.srcObj)
-        frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.styles)
-        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { previewSrc: this.imgBuff.previewSrc })
+        frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.styles, this.prePrimaryLayerIndex)
+        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { previewSrc: this.imgBuff.previewSrc }, this.prePrimaryLayerIndex)
       }
     },
     onFrameDrop(e: DragEvent) {
