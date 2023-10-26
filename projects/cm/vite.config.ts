@@ -30,7 +30,6 @@ export default defineConfig({
     // https://github.com/antfu/unplugin-auto-import
     AutoImport({
       imports: ['vue', 'vue-router', 'vue-i18n', '@vueuse/core', 'pinia'],
-      ignore: ['h'],
       dts: 'src/auto-import.d.ts',
       ignore: ['h'], // To solve: https://www.jianshu.com/p/1739e6bcb543
     }),

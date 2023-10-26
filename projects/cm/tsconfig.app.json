@@ -5,8 +5,8 @@
     "src/**/*",
     "src/**/*.vue",
     "src/**/*.json",
-    "../../packages/vivi-lib/src/*.vue",
-    "../../packages/vivi-lib/src/*.ts",
+    "../../packages/vivi-lib/src/**/*.vue",
+    "../../packages/vivi-lib/src/**/*.ts",
     "../../packages/shared-lib/src/*.vue",
     "../../packages/shared-lib/src/*.ts"
   ],
