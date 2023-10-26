@@ -113,8 +113,8 @@ module.exports = defineConfig({
       .rule('svg-sprite-loader')
       .test(/\.svg$/)
       .include
-        .add(resolve('src/assets/icon'))
-        .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
+        // .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
+        .add(resolve('../../packages/vivi-lib/src/assets/icon'))
       .end()
       .use('svg-sprite-loader')
       .loader('svg-sprite-loader')
@@ -145,8 +145,8 @@ module.exports = defineConfig({
       .rule('image-assets')
       .test(/\.(png|jpg|gif|svg|mp4)$/)
       .exclude
-        .add(resolve('src/assets/icon'))
-        .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
+        // .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
+        .add(resolve('../../packages/vivi-lib/src/assets/icon'))
       .end()
       .type('asset/resource')
     // config.module

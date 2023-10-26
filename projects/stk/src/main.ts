@@ -12,8 +12,7 @@ app.mount('#app')
 
 // Import svg icon
 const svgs = require.context(
-  // If we use '@nu/vivi-lib/assets/icon' here, webpack will throw an error: Module not found.
-  '../../../packages/vivi-lib/dist/src/assets/icon',
+  '@nu/vivi-lib/assets/icon',
   true,
   /^((?!pic\/).)*\.svg$/, // Skip pic only icon.
   'lazy-once'
