@@ -3,12 +3,11 @@ img(v-if="!inReviewMode"
     :class="`pro ${theme}`"
     loading="lazy"
     draggable="false"
-    :src="requireSrc(`svg/pricing/${iconFileName}`)")
+    :src="require(`@img/svg/pricing/${iconFileName}`)")
 </template>
 
 <script lang="ts">
 import generalUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent, PropType } from 'vue'
 
@@ -37,11 +36,6 @@ export default defineComponent({
       return picWVUtils.inReviewMode
     },
   },
-  methods:{
-    requireSrc(src: string): string {
-      return imageUtils.requireSrc(src)
-    },
-  }
 })
 </script>
 

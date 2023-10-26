@@ -782,16 +782,6 @@ class ImageUtils {
     store.commit('mobileEditor/SET_closeMobilePanelFlag', true)
     stepsUtils.record()
   }
-
-  requireSrc(src: string) {
-    if(generalUtils.isCm) {
-      const res = new URL(`../assets/img/${src}`, import.meta.url).href
-      return res
-      return ''
-    } else {
-      return require(`@img/${src}`)
-    }
-  }
 }
 
 export default new ImageUtils()
