@@ -877,10 +877,15 @@ const mutations: MutationTree<IEditorState> = {
     const layers = state.pages[pageIndex].config.layers[primaryLayerIndex].layers as (IShape | IText | IImage)[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
-  SET_frameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
-    const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
-    const layers = state.pages[pageIndex].config.layers[primaryLayerIndex].clips as IImage[]
-    Object.assign(layers[subLayerIndex].styles, styles)
+  SET_frameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any, preprimaryLayerIndex?: number }) {
+    const { pageIndex, primaryLayerIndex, subLayerIndex, styles, preprimaryLayerIndex = -1 } = data
+    let frame
+    if (preprimaryLayerIndex !== -1) {
+      frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[primaryLayerIndex] as IFrame
+    } else {
+      frame = state.pages[pageIndex].config.layers[primaryLayerIndex] as IFrame
+    }
+    Object.assign(frame.clips[subLayerIndex].styles, styles)
   },
   SET_frameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, styles } = data
@@ -1071,9 +1076,13 @@ const mutations: MutationTree<IEditorState> = {
   SET_shuffledThemesIds(state: IEditorState, themeIds: number[]) {
     state.shuffledThemesIds = themeIds
   },
-  UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
-    const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
-    Object.assign((state as any).pages[pageIndex].config.layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
+  UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number }, prePrimaryLayerIndex?: number }) {
+    const { pageIndex, subLayerIndex, layerIndex, srcObj, prePrimaryLayerIndex = -1 } = data
+    if (prePrimaryLayerIndex !== -1) {
+      Object.assign((((state as any).pages[pageIndex].config.layers[prePrimaryLayerIndex] as IGroup).layers[layerIndex] as IFrame).clips[subLayerIndex].srcObj, srcObj)
+    } else {
+      Object.assign((state as any).pages[pageIndex].config.layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
+    }
   },
   UPDATE_frameBlendLayer(state: IEditorState, data: { preprimaryLayerIndex?: number, pageIndex: number, layerIndex: number, subLayerIdx: number, shape: IShape }) {
     const { pageIndex, preprimaryLayerIndex = -1, layerIndex, subLayerIdx, shape } = data

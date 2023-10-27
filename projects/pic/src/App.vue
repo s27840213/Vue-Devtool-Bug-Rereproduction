@@ -102,20 +102,24 @@ export default defineComponent({
     }
 
     this.$router.isReady().then(async () => {
-      const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
-      const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
-      const isFirstOpen = this.userInfo.isFirstOpen
-      const subscribed = paymentUtils.isPro
-      const showPaymentInfo = await picWVUtils.getState('showPaymentInfo')
-      const showPaymentTime = showPaymentInfo?.timestamp ?? 0
-      const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
-      const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
-      const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
-        : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
-      if (isShowPaymentView) {
-        paymentUtils.openPayment('step1')
-        picWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
-      } else picWVUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
+      // pop payment view priodically
+      if (!picWVUtils.inReviewMode) {
+        const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
+        const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
+        const isFirstOpen = this.userInfo.isFirstOpen
+        const subscribed = paymentUtils.isPro
+        const showPaymentInfo = await picWVUtils.getState('showPaymentInfo')
+        const showPaymentTime = showPaymentInfo?.timestamp ?? 0
+        const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
+        const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
+        const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
+          : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
+        if (isShowPaymentView) {
+          paymentUtils.openPayment('step1')
+          picWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+        } else picWVUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
+      }
+
       picWVUtils.sendAppLoaded()
     })
     /**
