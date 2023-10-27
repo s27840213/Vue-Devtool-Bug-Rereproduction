@@ -307,7 +307,7 @@ class StepsUtils {
       } else {
         layers = []
       }
-  
+
       if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
         store.commit('SET_currActivePageIndex', pageIndex)
         pageUtils.scrollIntoPage(pageIndex)
@@ -319,7 +319,6 @@ class StepsUtils {
       GroupUtils.set(pageIndex, index, layers)
     } else {
       GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
-      stkWVUtils.showController()
     }
     if (this.currStep > 0) {
       nextTick(() => {
@@ -383,7 +382,6 @@ class StepsUtils {
       GroupUtils.set(pageIndex, index, layers)
     } else {
       GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
-      stkWVUtils.showController()
     }
     nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {

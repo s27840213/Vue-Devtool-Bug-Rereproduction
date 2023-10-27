@@ -688,8 +688,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault(false)
       }
+      this.hideController()
     }
-    this.hideController()
   }
 
   copyEditorCore(sender: () => Promise<string>, callback?: (flag: string) => void) {
@@ -1484,7 +1484,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         }
       })
     })
-    const subscribeInfo =  {subscribe: isSubscribed, prices}
+    const subscribeInfo = { subscribe: isSubscribed, prices }
     store.commit('vivisticker/UPDATE_payment', subscribeInfo)
     store.commit('vivisticker/SET_paymentPending', { info: false })
     this.getState('subscribeInfo').then(subscribeInfo => {
