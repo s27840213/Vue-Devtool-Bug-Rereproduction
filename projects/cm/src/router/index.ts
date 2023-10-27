@@ -59,6 +59,7 @@ router.beforeEach((to, from, next) => {
   webViewUtils.setupAPIInterface()
   webViewUtils.detectIfInApp()
   webViewUtils.getUserInfo()
+  webViewUtils.fetchTutorialFlags()
   if (from.name === 'MyDesign' && to.name === 'Home') {
     to.meta.transition = 'fade-right-in'
   }

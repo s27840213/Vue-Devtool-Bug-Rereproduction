@@ -1,5 +1,6 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative")
+  tutorial
   div(class="main-page-headerbar w-full flex justify-between items-center px-16"
       ref="headerbarRef"
       :style="headerbarStyles")

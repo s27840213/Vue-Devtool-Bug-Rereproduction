@@ -48,6 +48,12 @@ export interface IAlbumContentResponse {
   nextPage?: number
 }
 
+export interface IGetStateResponse {
+  flag: number
+  key: string
+  value: string
+}
+
 export interface IIosResponse<T> {
   errorMsg: string
   eventId: string
@@ -68,6 +74,8 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   }
 
   CALLBACK_MAPS = {}
+
+  tutorialFlags = {} as { [key: string]: boolean }
 
   getUserInfoFromStore(): IUserInfo {
     return this.STANDALONE_USER_INFO
@@ -219,6 +227,16 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
       y = defaultDimensions.y
     }
     return { x, y, width, height }
+  }
+
+  async fetchTutorialFlags() {
+    const res = await this.callIOSAsAPI('GET_STATE', { key: 'tutorialFlags' }) as IGetStateResponse
+    this.tutorialFlags = res.value ? JSON.parse(res.value) : {}
+  }
+
+  async updateTutorialFlags(updateItem: { [key: string]: boolean }) {
+    Object.assign(this.tutorialFlags, updateItem)
+    await this.callIOSAsAPI('SET_STATE', { key: 'tutorialFlags', value: this.tutorialFlags })
   }
 }
 

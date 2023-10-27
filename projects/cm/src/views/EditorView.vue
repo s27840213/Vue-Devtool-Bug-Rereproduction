@@ -28,7 +28,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
     div(class="w-full h-full box-border overflow-scroll flex justify-center items-center")
       div(
-        class="wrapper relative"
+        class="wrapper relative tutorial-powerful-fill-3"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         div(
@@ -56,6 +56,7 @@ import useImageUtils from '@/composable/useImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import tutorialUtils from '@/utils/tutorialUtils'
 import mathUtils from '@nu/vivi-lib/utils/mathUtils'
 import { useElementSize, useEventBus } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
@@ -85,6 +86,7 @@ const { editingPage, pageSize, pageScaleRatio, editorState } = storeToRefs(edito
 const handleNextAction = function () {
   if (editorState.value === 'aspectRatio') {
     setEditorState('editing')
+    tutorialUtils.runTutorial('powerful-fill')
   } else if (editorState.value === 'editing') {
     setEditorState('prompt')
   }
