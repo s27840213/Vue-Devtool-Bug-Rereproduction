@@ -12,11 +12,11 @@ import layerFactary from './layerFactary'
 import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
 import shapeUtils from './shapeUtils'
+import stkWVUtils from './stkWVUtils'
 import TextPropUtils from './textPropUtils'
 import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
-import stkWVUtils from './stkWVUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -319,6 +319,7 @@ class StepsUtils {
       GroupUtils.set(pageIndex, index, layers)
     } else {
       GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
+      stkWVUtils.showController()
     }
     if (this.currStep > 0) {
       nextTick(() => {
@@ -382,6 +383,7 @@ class StepsUtils {
       GroupUtils.set(pageIndex, index, layers)
     } else {
       GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
+      stkWVUtils.showController()
     }
     nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {

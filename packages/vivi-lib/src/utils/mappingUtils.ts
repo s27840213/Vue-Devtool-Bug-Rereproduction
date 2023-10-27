@@ -8,6 +8,7 @@ import layerUtils from './layerUtils'
 import OrderUtils from './orderUtils'
 import popupUtils from './popupUtils'
 import stepsUtils from './stepsUtils'
+import logUtils from './logUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
 const iconDistribute = ['distribute-horizontally', 'distribute-vertically']
@@ -190,7 +191,14 @@ class MappingUtils {
 
   mappingLayers(pageIndex: number, indexs: number[]) {
     const layers = store.getters.getLayers(pageIndex)
-    return indexs.map(index => layers[index])
+    const res = indexs.map(index => {
+      const layer = layers[index]
+      if (layer === undefined) {
+        logUtils.setLogAndConsoleLog(`index: ${index} is missing when mappingLayers for page: ${pageIndex}, layerNum: ${layers.length}`)
+      }
+      return layer
+    })
+    return res.filter(layer => layer !== undefined)
   }
 
   mappingMinMax(type: keyof typeof minMaxHash) {
