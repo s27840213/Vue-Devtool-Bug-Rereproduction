@@ -3,7 +3,7 @@ import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import type { GenImageResult } from '@/types/api'
 import uploadUtils from '@/utils/uploadUtils'
-import webViewUtils from '@/utils/webViewUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
 import { generalUtils, logUtils } from '@nu/shared-lib'
 import { useEventBus } from '@vueuse/core'
 
@@ -33,7 +33,7 @@ export default new (class GenImageUtils {
   }
 
   async uploadEditorAsImage(userId: string, requestId: string) {
-    const { flag, imageId } = await webViewUtils.copyEditor()
+    const { flag, imageId } = await cmWVUtils.copyEditor()
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')

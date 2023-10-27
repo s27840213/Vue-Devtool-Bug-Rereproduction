@@ -73,8 +73,8 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
             span(class="text-app-tab-default") {{ album.albumSize }}
 </template>
 <script lang="ts" setup>
-import type { IAlbum } from '@/utils/webViewUtils'
-import webViewUtils from '@/utils/webViewUtils'
+import type { IAlbum } from '@/utils/cmWVUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
 
 // #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
@@ -108,7 +108,7 @@ const getAlbumContent = async (album: IAlbum) => {
   isLoadingContent.value = true
 
   Object.assign(currAlbum, album)
-  webViewUtils
+  cmWVUtils
     .getAlbumContent(albumId, nextPage.value)
     .then((res) => {
       currAlbumContent.push(...res.content)
@@ -140,7 +140,7 @@ const selectAlbum = (album: IAlbum) => {
 // #endregion
 
 // get the first image content
-webViewUtils
+cmWVUtils
   .getAlbumList()
   .then((res) => {
     if (res.flag === 1) {

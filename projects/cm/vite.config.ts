@@ -1,5 +1,4 @@
 import vue from '@vitejs/plugin-vue'
-import { fileURLToPath, URL } from 'node:url'
 import path from 'path'
 import { defineConfig, loadEnv } from 'vite'
 // https://vue-i18n.intlify.dev/guide/advanced/optimization.html
@@ -45,8 +44,7 @@ export default defineConfig({
         process.env.NODE_ENV === 'production' ? 'src/i18n/shaked/' : '../../tools/i18n-tool/result',
       ),
       '@img': resolve('../../packages/vivi-lib/dist/src/assets/img'),
-
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@': resolve('src'),
     },
   },
   server: {
