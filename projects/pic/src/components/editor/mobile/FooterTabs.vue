@@ -93,7 +93,7 @@ export default defineComponent({
           panelType: 'photo-shadow',
           hidden: this.isInFrame,
           // empty type in srcObj means the image is being uploading
-          disabled: (this.isHandleShadow || this.isUploadShadow || !(layerUtils.getCurrConfig as IImage).srcObj.type) && this.mobilePanel !== 'photo-shadow'
+          disabled: (this.isHandleShadow || this.isUploadShadow || !(layerUtils.getCurrConfig as IImage).srcObj?.type) && this.mobilePanel !== 'photo-shadow'
         },
         ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-light' }] : [],
         ...this.genearlLayerTabs,
