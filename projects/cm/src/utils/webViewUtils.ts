@@ -55,6 +55,13 @@ export interface IIosResponse<T> {
   output: T
 }
 
+export interface ISaveAssetFromUrlResponse {
+  type: 'gif' | 'jpg' | 'png' | 'mp4',
+  flag: string,
+  msg?: string,
+  imageId?: string
+}
+
 class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   STANDALONE_USER_INFO: IUserInfo = {
     hostId: '',
@@ -93,7 +100,7 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
 
   setDuringCopy(bool: boolean) {
     const { setDuringCopy } = useWebViewStore()
-    setDuringCopy(bool) 
+    setDuringCopy(bool)
   }
 
   detectIfInApp() {
@@ -127,6 +134,10 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     })
 
     return albumList as IAlbumContentResponse
+  }
+
+  async saveAssetFromUrl(type: 'gif' | 'jpg' | 'png' | 'mp4', url: string): Promise<ISaveAssetFromUrlResponse> {
+    return this.callIOSAsAPI('SAVE_ASSET_FROM_URL', { type, url }) as Promise<ISaveAssetFromUrlResponse>
   }
 
   async switchDomain(url: string): Promise<void> {

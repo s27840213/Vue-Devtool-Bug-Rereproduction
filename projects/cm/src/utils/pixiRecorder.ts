@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js'
+import webViewUtils, { type ISaveAssetFromUrlResponse } from './webViewUtils'
 const ENABLE_RECORDING = true
 const RECORD_START_DELAY = 2000
 const IMG2_EXAMPLE =
@@ -310,6 +311,10 @@ class CanvasRecorder {
   onRecordStop() {
     console.warn('recorder stopped', this.chunks.length)
     const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
+    // webViewUtils.saveAssetFromUrl('mp4', url)
+    //   .then((data: ISaveAssetFromUrlResponse) => {
+    //     console.log('isave asset from url', data)
+    //   })
     const video = document.createElement('video')
     document.body.appendChild(video)
     video.addEventListener('ended', () => {
@@ -327,6 +332,14 @@ class CanvasRecorder {
     video.src = url
 
     this.blobToBase64(new Blob(this.chunks, { type: 'video/mp4' })).then((base64: string) => {
+      // webViewUtils.saveAssetFromUrl('png', 'https://template.vivipic.com/template/WZ3xxkwKHSnwOUcHhDsJ/prev_4x?ver=8')
+      // webViewUtils.saveAssetFromUrl('mp4', 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4')
+      webViewUtils.saveAssetFromUrl('mp4', base64)
+        .then((data: ISaveAssetFromUrlResponse) => {
+          console.log('save asset from url', data)
+        })
+
+
       const file = new Blob([base64], { type: 'text/plain' });
       const link = document.createElement("a")
       link.href = URL.createObjectURL(file)
