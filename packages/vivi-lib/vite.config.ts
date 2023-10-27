@@ -4,7 +4,7 @@ import * as path from 'path'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
-// import extractImg from '../../tools/vite-plugin-lib-extract-img'
+import extractImg from '../../tools/vite-plugin-lib-extract-img'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
 import { replaceCodePlugin } from 'vite-plugin-replace'
 
@@ -38,10 +38,10 @@ export default defineConfig({
     }),
     // TODO: Use vite-plugin-lib-extract-img for cm.
     // Extracts resource files referenced in lib mode instead of embedded them as base64.
-    // extractImg,
+    extractImg,
     replaceCodePlugin({
       replacements: [{
-        from: /require\(["'`]((@img\/|\/src\/assets\/im).+)["'`]\)/g,
+        from: /require\(["'`](@img\/.+)["'`]\)/g,
         to: (match: string, src: string) => {
           src = src.replace('@img/', '')
           return `new URL(\`/src/assets/img/${src}\`, import.meta.url).href`
