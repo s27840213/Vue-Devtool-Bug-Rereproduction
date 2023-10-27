@@ -789,11 +789,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async getUserInfo(): Promise<IUserInfo> {
     if (this.isStandaloneMode) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('LOGIN', this.getEmptyMessage(), 'login')
-    const userInfo = this.getUserInfoFromStore()
-    const appCaps = await fetch(`https://template.vivipic.com/static/appCaps_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
-    const jsonCaps = await appCaps.json() as { review_ver: string }
-    store.commit('webView/SET_inReviewMode', jsonCaps.review_ver === userInfo.appVer)
-    return userInfo
+    return this.getUserInfoFromStore()
   }
 
   loginResult(info: Omit<IUserInfo, 'modelName'> & { modelName?: string }) {
