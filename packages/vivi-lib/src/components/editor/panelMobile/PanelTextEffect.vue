@@ -78,8 +78,11 @@ div(class="panel-text-effect")
         img(:src="getStyleImg")
         div
         svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="32px")
-    span(class="panel-text-effect__reset"
-        @click="resetTextEffect()") {{$t('NN0754')}}
+    nubtn(class="panel-text-effect__reset"
+          theme="icon_pill"
+          :icon="['reset-sm', 'white']"
+          size="sm"
+          @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
@@ -422,11 +425,7 @@ export default defineComponent({
   }
 
   &__reset {
-    @include btn-SM;
-    @include setColors(blue-1, white) using ($color) {
-      color: $color;
-    }
-    text-align: center;
+    margin: 6px auto 0;
   }
 }
 </style>

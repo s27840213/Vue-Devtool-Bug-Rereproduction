@@ -30,8 +30,11 @@ div(class="panel-shadow")
                   :color="(currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color) || '#000000'"
                   size="30px" @click="handleColorModal")
     div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
-      div(class="photo-shadow__reset")
-        button(class="label-mid" @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
+      nubtn(class="photo-shadow__reset"
+            theme="icon_pill"
+            :icon="['reset-sm', 'white']"
+            size="sm"
+            @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
@@ -278,13 +281,7 @@ export default defineComponent({
     @include no-scrollbar;
   }
   &__reset {
-    > button {
-      @include setColors(blue-1, white) using ($color) {
-        color: $color;
-      }
-      font-size: 14px;
-      padding: 0;
-    }
+    margin: 6px auto 0;
   }
 }
 </style>
