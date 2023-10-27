@@ -71,7 +71,7 @@ export default defineComponent({
     subLayerIndex: {
       type: Number
     },
-    priPrimaryLayerIndex: {
+    prePrimaryLayerIndex: {
       type: Number,
       default: -1
     },
@@ -442,23 +442,23 @@ export default defineComponent({
       this.paramsReady = true
       if (this.$isStk) {
         let primaryLayer
-        if (this.priPrimaryLayerIndex !== -1) {
-          primaryLayer = (layerUtils.getLayer(this.pageIndex, this.priPrimaryLayerIndex) as IGroup).layers[this.layerIndex] as IFrame
+        if (this.prePrimaryLayerIndex !== -1) {
+          primaryLayer = (layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex) as IGroup).layers[this.layerIndex] as IFrame
         } else {
           primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame
         }
         if (primaryLayer.type === LayerType.frame) {
           this.$nextTick(() => {
-            if (this.priPrimaryLayerIndex !== -1 && (this.config as IShape).frameDecType) {
+            if (this.prePrimaryLayerIndex !== -1 && (this.config as IShape).frameDecType) {
               switch ((this.config as IShape).frameDecType) {
                 case 'decoration':
-                  stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'd' })
+                  stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'd' })
                   break
                 case 'decorationTop':
-                  stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'dt' })
+                  stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'dt' })
                   break
                 case 'blend':
-                  stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
+                  stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
                   break
               }
             } else {
