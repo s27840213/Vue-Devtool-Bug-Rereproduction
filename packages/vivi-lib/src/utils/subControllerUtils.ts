@@ -1,6 +1,7 @@
 import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, IExtendLayerInfo, ILayerInfo, LayerType } from '@/store/types'
+import { nextTick } from 'vue'
 import colorUtils from './colorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import formatUtils from './formatUtils'
@@ -10,7 +11,6 @@ import groupUtils from './groupUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
-import { nextTick } from 'vue'
 
 export default class SubControllerUtils {
   // private component = undefined as Vue | undefined
@@ -31,18 +31,14 @@ export default class SubControllerUtils {
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
-  private get priPrimaryLayerIndex(): number { return this.layerInfo.priPrimaryLayerIndex ?? -1 }
-  // private get primaryLayer(): IGroup | IFrame | ITmp {
-  //   /**
-  //    * Only the frame inside a group would have the prop of priPrimaryLayerIndex
-  //    */
-  //   if (this.priPrimaryLayerIndex !== -1) {
-  //     return layerUtils.getLayer(this.pageIndex, this.priPrimaryLayerIndex) as IGroup
-  //   }
-  //   return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp
-  // }
-
-  private get primaryActive(): boolean { return this.primaryLayer.active }
+  private get prePrimaryLayerIndex(): number { return this.layerInfo.prePrimaryLayerIndex ?? -1 }
+  private get isParentLayerLocked(): boolean {
+    if (this.prePrimaryLayerIndex !== -1) {
+      return layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex).locked
+    } else {
+      return layerUtils.getLayer(this.pageIndex, this.layerIndex).locked
+    }
+  }
 
   constructor({ _config, body, layerInfo }: { _config: { config: ILayer, primaryLayer: IGroup | ITmp | IFrame }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
     this._config = _config
@@ -51,7 +47,8 @@ export default class SubControllerUtils {
   }
 
   onPointerdown(e: PointerEvent) {
-    // e.stopPropagation()
+    if (this.isParentLayerLocked) return
+
     this.initTranslate = {
       x: this.primaryLayer.styles?.x || 0,
       y: this.primaryLayer.styles?.y || 0
@@ -187,13 +184,13 @@ export default class SubControllerUtils {
           const primaryLayer = this.primaryLayer as IGroup
           primaryLayer.layers.forEach((l, i) => {
             if (l.active) {
-              layerUtils.updateLayerProps(this.pageIndex, this.priPrimaryLayerIndex, { active: false }, i)
+              layerUtils.updateLayerProps(this.pageIndex, this.prePrimaryLayerIndex, { active: false }, i)
             }
           })
-          layerUtils.updateLayerProps(this.pageIndex, this.priPrimaryLayerIndex, { active: true }, this.layerIndex)
+          layerUtils.updateLayerProps(this.pageIndex, this.prePrimaryLayerIndex, { active: true }, this.layerIndex)
           layerUtils.updateInGroupFrame(
             this.pageIndex,
-            this.priPrimaryLayerIndex,
+            this.prePrimaryLayerIndex,
             this.layerIndex,
             this.subLayerIdx,
             { active: true }
@@ -225,7 +222,7 @@ export default class SubControllerUtils {
         layers = (this.primaryLayer as IFrame).clips
     }
 
-    if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
+    if (!store.getters['shadow/isHandling'] && this.primaryLayer.active && !store.state.isMoving) {
       if (groupUtils.inMultiSelecitonMode && this.primaryLayer.type !== 'frame') {
         groupUtils.deselectTargetLayer(this.subLayerIdx)
         return
