@@ -25,7 +25,7 @@ div(class="editing-options w-full")
       span(class="typo-body-sm transition-colors duration-300" :class="`text-${tabColor(tab)}`") {{ tab.text }}
 </template>
 <script setup lang="ts">
-import useCanvasUtils from '@/composable/useCanvasUtils'
+import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import useTapTransition from '@/composable/useTapTransition'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
@@ -47,7 +47,7 @@ const editorStore = useEditorStore()
 const { setCanvasMode } = editorStore
 const { canvasMode } = storeToRefs(editorStore)
 
-const { reverseSelection } = useCanvasUtils()
+const { reverseSelection } = useCanvasUtilsCm()
 const canvasStore = useCanvasStore()
 const { setCanvasStoreState } = canvasStore
 const { brushSize } = storeToRefs(canvasStore)

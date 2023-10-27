@@ -1,5 +1,5 @@
 import { useUserStore } from '@/stores/user'
-import uploadUtils from '@/utils/uploadUtils'
+import uploadUtilsCm from '@/utils/uploadUtilsCm'
 import cmWVUtils from '@/utils/cmWVUtils'
 import HomeView from '@/views/HomeView.vue'
 import { generalUtils } from '@nu/shared-lib'
@@ -55,7 +55,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const { setUserId } = useUserStore()
   setUserId(generalUtils.generateRandomString(20))
-  uploadUtils.getUrlMap()
+  uploadUtilsCm.getUrlMap()
   cmWVUtils.setupAPIInterface()
   cmWVUtils.detectIfInApp()
   cmWVUtils.getUserInfo()

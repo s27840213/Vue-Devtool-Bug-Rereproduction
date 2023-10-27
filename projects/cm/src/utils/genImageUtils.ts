@@ -2,7 +2,7 @@ import genImageApis from '@/apis/genImage'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import type { GenImageResult } from '@/types/api'
-import uploadUtils from '@/utils/uploadUtils'
+import uploadUtilsCm from '@/utils/uploadUtilsCm'
 import cmWVUtils from '@/utils/cmWVUtils'
 import { generalUtils, logUtils } from '@nu/shared-lib'
 import { useEventBus } from '@vueuse/core'
@@ -25,7 +25,7 @@ export default new (class GenImageUtils {
     if (res.flag !== 0) {
       throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
     }
-    const json = await uploadUtils.polling<GenImageResult>(`https://template.vivipic.com/charmix/${userId}/result/${requestId}.json`)
+    const json = await uploadUtilsCm.polling<GenImageResult>(`https://template.vivipic.com/charmix/${userId}/result/${requestId}.json`)
     if (json.flag !== 0) {
       throw new Error('Run /gen-image Failed,' + json.msg ?? '')
     }
@@ -44,7 +44,7 @@ export default new (class GenImageUtils {
     const imageRes = await fetch(`chmix://screenshot/${imageId}?lsize=${size}`)
     const imageBlob = await imageRes.blob()
     try {
-      await uploadUtils.uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
+      await uploadUtilsCm.uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
     } catch (error) {
       logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
       throw error
@@ -56,7 +56,7 @@ export default new (class GenImageUtils {
     return new Promise<void>((resolve, reject) => {
       bus.emit('genMaskUrl', { callback: async (maskUrl: string) => {
         try {
-          await uploadUtils.uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`)
+          await uploadUtilsCm.uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`)
           resolve()
         } catch (error) {
           logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
