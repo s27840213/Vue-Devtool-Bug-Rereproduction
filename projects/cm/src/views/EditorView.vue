@@ -69,10 +69,10 @@ const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementSize(editorContainerRef)
 
-const { imgLoadHandler, getImageUrl } = useImageUtils()
+const { imgLoadHandler } = useImageUtils()
 
 onMounted(() => {
-  imgLoadHandler(getImageUrl('test', 'jpg'), (img) => {
+  imgLoadHandler(require('test.jpg'), (img) => {
     setImgAspectRatio(img.width / img.height)
   })
 })

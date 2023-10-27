@@ -53,6 +53,9 @@ export default defineConfig({
     port: 8082,
     host: true,
   },
+  preview: {
+    port: 8082,
+  },
   define: {
     // process not define in vite, inject it here.
     // Ref: https://stackoverflow.com/a/66389044/22514709, https://stackoverflow.com/a/73012106/22514709
