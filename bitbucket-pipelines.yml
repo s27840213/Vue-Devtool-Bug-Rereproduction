@@ -596,8 +596,8 @@ pipelines:
             condition:
               changesets:
                 includePaths:
-                  - '*'
-                  - 'tools/**'
+                  - "*"
+                  - "tools/**"
                   - "projects/charmix/**"
                   - "packages/**"
             script:
@@ -1119,24 +1119,24 @@ pipelines:
                 - projects/*/dist/**
       - parallel:
           - step:
-            name: "Run E2E Tests"
-            size: 2x
-            caches: #set caches for node modules to speed up building
-              - node
-            image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
-            script:
-              - corepack enable
-              - corepack prepare pnpm@latest-8 --activate
-              - npx cypress install
-              - npx cypress -v
-              - cp -r projects/pic/dist projects/pic/dist-cy
-              - rm projects/pic/dist-cy/index.html
-              - mv projects/pic/dist-cy/app.html projects/pic/dist-cy/index.html
-              - (pnpm run --filter @nu/pic preview-cy &)
-              - npx cypress run --record --browser chrome
-            artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-              - cypress-visual-report/**
-              - cypress-visual-screenshots/**
+              name: "Run E2E Tests"
+              size: 2x
+              caches: #set caches for node modules to speed up building
+                - node
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              script:
+                - corepack enable
+                - corepack prepare pnpm@latest-8 --activate
+                - npx cypress install
+                - npx cypress -v
+                - cp -r projects/pic/dist projects/pic/dist-cy
+                - rm projects/pic/dist-cy/index.html
+                - mv projects/pic/dist-cy/app.html projects/pic/dist-cy/index.html
+                - (pnpm run --filter @nu/pic preview-cy &)
+                - npx cypress run --record --browser chrome
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - cypress-visual-report/**
+                - cypress-visual-screenshots/**
           - step:
               name: "pull request to all project"
               trigger: manual

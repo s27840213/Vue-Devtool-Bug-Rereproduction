@@ -8,6 +8,7 @@ import layerUtils from './layerUtils'
 import OrderUtils from './orderUtils'
 import popupUtils from './popupUtils'
 import stepsUtils from './stepsUtils'
+import logUtils from './logUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
 const iconDistribute = ['distribute-horizontally', 'distribute-vertically']
@@ -138,6 +139,9 @@ class MappingUtils {
         } else {
           const { index, pageIndex } = layerUtils.currSelectedInfo
           layerUtils.updateLayerProps(pageIndex, index, { locked: true })
+          if (layerUtils.subLayerIdx !== -1) {
+            layerUtils.updateLayerProps(pageIndex, layerUtils.layerIndex, { active: false }, layerUtils.subLayerIdx)
+          }
           stepsUtils.record()
         }
         break
@@ -146,12 +150,12 @@ class MappingUtils {
         if (backgroundUtils.inBgSettingMode) {
           backgroundUtils.handleLockBackground()
         } else {
-          const { currSelectedInfo: { index, pageIndex }, getCurrConfig } = layerUtils
+          const { pageIndex, layerIndex, getCurrConfig } = layerUtils
           const props = { locked: false } as { [key: string]: string | boolean | number }
           if (getCurrConfig.type === 'text') {
             props.editing = false
           }
-          layerUtils.updateLayerProps(pageIndex, index, props)
+          layerUtils.updateLayerProps(pageIndex, layerIndex, props)
           stepsUtils.record()
         }
         break
@@ -187,7 +191,14 @@ class MappingUtils {
 
   mappingLayers(pageIndex: number, indexs: number[]) {
     const layers = store.getters.getLayers(pageIndex)
-    return indexs.map(index => layers[index])
+    const res = indexs.map(index => {
+      const layer = layers[index]
+      if (layer === undefined) {
+        logUtils.setLogAndConsoleLog(`index: ${index} is missing when mappingLayers for page: ${pageIndex}, layerNum: ${layers.length}`)
+      }
+      return layer
+    })
+    return res.filter(layer => layer !== undefined)
   }
 
   mappingMinMax(type: keyof typeof minMaxHash) {

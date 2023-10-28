@@ -247,11 +247,12 @@ class FrameUtils {
     })
   }
 
-  updateFrameClipSrc(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, srcObj: SrcObj) {
+  updateFrameClipSrc(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, srcObj: SrcObj, prePrimaryLayerIndex = -1) {
     store.commit('UPDATE_frameClipSrc', {
       pageIndex: pageIndex,
       layerIndex: primaryLayerIndex,
       subLayerIndex: subLayerIndex,
+      prePrimaryLayerIndex,
       srcObj: { ...srcObj }
     })
   }

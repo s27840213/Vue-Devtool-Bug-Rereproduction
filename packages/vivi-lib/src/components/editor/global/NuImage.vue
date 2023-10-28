@@ -725,23 +725,24 @@ export default defineComponent({
         this.imgNaturalSize.width = img.width
         this.imgNaturalSize.height = img.height
       }
-      const physicalRatio = img.naturalWidth / img.naturalHeight
-      const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
-      if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1 && this.config.srcObj.type !== 'frame') {
-        const newW = this.config.styles.imgHeight * physicalRatio
-        const offsetW = this.config.styles.imgWidth - newW
-        if (this.primaryLayerType() === 'frame') {
-          frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
-            imgWidth: newW,
-            imgX: this.config.styles.imgX + offsetW / 2
-          })
-        } else {
-          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-            imgWidth: newW,
-            imgX: this.config.styles.imgX + offsetW / 2
-          }, this.subLayerIndex)
-        }
-      }
+      // const physicalRatio = img.naturalWidth / img.naturalHeight
+      // const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
+      // if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1 && this.config.srcObj.type !== 'frame') {
+      //   const newW = this.config.styles.imgHeight * physicalRatio
+      //   const offsetW = this.config.styles.imgWidth - newW
+      //   if (this.primaryLayerType() === 'frame') {
+      //     console.log(this.pageIndex, this.layerIndex, this.subLayerIndex, generalUtils.deepCopy(this.config))
+      //     frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+      //       imgWidth: newW,
+      //       imgX: this.config.styles.imgX + offsetW / 2
+      //     })
+      //   } else {
+      //     layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+      //       imgWidth: newW,
+      //       imgX: this.config.styles.imgX + offsetW / 2
+      //     }, this.subLayerIndex)
+      //   }
+      // }
       this.$emit('onload')
     },
     onLoadShadowImg(e: Event) {
@@ -1321,8 +1322,11 @@ export default defineComponent({
       return this.shadow().currentEffect
     },
     primaryLayerType(): string {
-      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-      return primaryLayer.type
+      if (this.prePrimaryLayerIndex === -1) {
+        return layerUtils.getLayer(this.pageIndex, this.layerIndex).type
+      } else {
+        return (layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex) as IGroup).layers[this.layerIndex].type
+      }
     },
     id(): ILayerIdentifier {
       return {
