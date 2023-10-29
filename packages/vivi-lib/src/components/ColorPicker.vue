@@ -179,6 +179,9 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   height: fit-content;
+  @include setColors(white, transparent) using ($color) {
+    background-color: $color;
+  }
   &:focus {
     outline: none;
   }

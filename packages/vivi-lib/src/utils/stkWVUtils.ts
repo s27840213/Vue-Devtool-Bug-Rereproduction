@@ -688,8 +688,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault(false)
       }
+      this.hideController()
     }
-    this.hideController()
   }
 
   copyEditorCore(sender: () => Promise<string>, callback?: (flag: string) => void) {
@@ -789,11 +789,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async getUserInfo(): Promise<IUserInfo> {
     if (this.isStandaloneMode) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('LOGIN', this.getEmptyMessage(), 'login')
-    const userInfo = this.getUserInfoFromStore()
-    const appCaps = await fetch(`https://template.vivipic.com/static/appCaps_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
-    const jsonCaps = await appCaps.json() as { review_ver: string }
-    store.commit('webView/SET_inReviewMode', jsonCaps.review_ver === userInfo.appVer)
-    return userInfo
+    return this.getUserInfoFromStore()
   }
 
   loginResult(info: Omit<IUserInfo, 'modelName'> & { modelName?: string }) {
@@ -1488,7 +1484,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         }
       })
     })
-    const subscribeInfo =  {subscribe: isSubscribed, prices}
+    const subscribeInfo = { subscribe: isSubscribed, prices }
     store.commit('vivisticker/UPDATE_payment', subscribeInfo)
     store.commit('vivisticker/SET_paymentPending', { info: false })
     this.getState('subscribeInfo').then(subscribeInfo => {

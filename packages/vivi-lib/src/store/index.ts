@@ -1417,20 +1417,13 @@ const mutations: MutationTree<IEditorState> = {
   SET_shuffledThemesIds(state: IEditorState, themeIds: number[]) {
     state.shuffledThemesIds = themeIds
   },
-  UPDATE_frameClipSrc(
-    state: IEditorState,
-    data: {
-      pageIndex: number
-      layerIndex: number
-      subLayerIndex: number
-      srcObj: { [key: string]: string | number }
-    },
-  ) {
-    const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
-    Object.assign(
-      (state as any).pages[pageIndex].config.layers[layerIndex].clips[subLayerIndex].srcObj,
-      srcObj,
-    )
+  UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number }, prePrimaryLayerIndex?: number }) {
+    const { pageIndex, subLayerIndex, layerIndex, srcObj, prePrimaryLayerIndex = -1 } = data
+    if (prePrimaryLayerIndex !== -1) {
+      Object.assign((((state as any).pages[pageIndex].config.layers[prePrimaryLayerIndex] as IGroup).layers[layerIndex] as IFrame).clips[subLayerIndex].srcObj, srcObj)
+    } else {
+      Object.assign((state as any).pages[pageIndex].config.layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
+    }
   },
   UPDATE_frameBlendLayer(
     state: IEditorState,

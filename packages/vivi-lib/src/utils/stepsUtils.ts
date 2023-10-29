@@ -12,11 +12,11 @@ import layerFactary from './layerFactary'
 import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
 import shapeUtils from './shapeUtils'
+import stkWVUtils from './stkWVUtils'
 import TextPropUtils from './textPropUtils'
 import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
-import stkWVUtils from './stkWVUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -307,7 +307,7 @@ class StepsUtils {
       } else {
         layers = []
       }
-  
+
       if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
         store.commit('SET_currActivePageIndex', pageIndex)
         pageUtils.scrollIntoPage(pageIndex)

@@ -32,17 +32,13 @@ export default class SubControllerUtils {
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
   private get prePrimaryLayerIndex(): number { return this.layerInfo.prePrimaryLayerIndex ?? -1 }
-  // private get primaryLayer(): IGroup | IFrame | ITmp {
-  //   /**
-  //    * Only the frame inside a group would have the prop of prePrimaryLayerIndex
-  //    */
-  //   if (this.prePrimaryLayerIndex !== -1) {
-  //     return layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex) as IGroup
-  //   }
-  //   return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp
-  // }
-
-  private get primaryActive(): boolean { return this.primaryLayer.active }
+  private get isParentLayerLocked(): boolean {
+    if (this.prePrimaryLayerIndex !== -1) {
+      return layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex).locked
+    } else {
+      return layerUtils.getLayer(this.pageIndex, this.layerIndex).locked
+    }
+  }
 
   constructor({ _config, body, layerInfo }: { _config: { config: ILayer, primaryLayer: IGroup | ITmp | IFrame }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
     this._config = _config
@@ -51,7 +47,8 @@ export default class SubControllerUtils {
   }
 
   onPointerdown(e: PointerEvent) {
-    // e.stopPropagation()
+    if (this.isParentLayerLocked) return
+
     this.initTranslate = {
       x: this.primaryLayer.styles?.x || 0,
       y: this.primaryLayer.styles?.y || 0
@@ -225,7 +222,7 @@ export default class SubControllerUtils {
         layers = (this.primaryLayer as IFrame).clips
     }
 
-    if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
+    if (!store.getters['shadow/isHandling'] && this.primaryLayer.active && !store.state.isMoving) {
       if (groupUtils.inMultiSelecitonMode && this.primaryLayer.type !== 'frame') {
         groupUtils.deselectTargetLayer(this.subLayerIdx)
         return
