@@ -18,24 +18,21 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
             class="text-app-tab-default"
             :iconName="'chevron-up'"
             :iconWidth="'12px'")
-    div(
-      v-if="isAlbumOpened"
-      class="img-selector__img-grid bg-app-bg overflow-scroll"
-      @scroll.stop
-      @touchstart.stop)
+    div(v-if="isAlbumOpened" class="img-selector__img-grid bg-app-bg overflow-scroll")
       div(class="grid grid-cols-3 grid-flow-row content-start gap-4")
         div(class="aspect-square flex flex-col items-center justify-center")
           cm-svg-icon(class="text-app-tab-default mb-10" :iconName="'camera'")
           span(class="text-app-tab-default") Camera
         div(
-          v-for="item in currAlbumContent"
-          :key="item"
-          class="aspect-square")
+          v-for="id in currAlbumContent"
+          :key="id"
+          class="aspect-square"
+          @click="selectImage(id, 'cameraroll')")
           lazy-load(
             class="lazy-load w-full h-full"
             target=".img-selector__img-grid"
             :rootMargin="'1000px 0px 1000px 0px'")
-            img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?ssize=200`")
+            img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${id}?ssize=200`")
       observer-sentinel(
         class="flex justify-center py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
@@ -75,6 +72,8 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
 <script lang="ts" setup>
 import type { IAlbum } from '@/utils/webViewUtils'
 import webViewUtils from '@/utils/webViewUtils'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 // #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
@@ -98,7 +97,7 @@ const isLoadingContent = ref(false)
 const initLoaded = ref(false)
 // #endregion
 
-// #region methods
+// #region album methods
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
 }
@@ -136,6 +135,24 @@ const selectAlbum = (album: IAlbum) => {
   noMoreContent.value = false
   getAlbumContent(album)
   isAlbumOpened.value = true
+}
+
+const selectImage = (id: string, type: 'cameraroll' | 'unsplash') => {
+  console.log('select image', id, type)
+  if (type === 'cameraroll') {
+    const src = imageUtils.getSrc({
+      type: 'ios',
+      assetId: `cameraroll/${id}`,
+      userId: '',
+    })
+
+    console.log(src)
+    imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+      const { naturalWidth, naturalHeight } = img
+      const photoAspectRatio = naturalWidth / naturalHeight
+      assetUtils.addImage(src, photoAspectRatio)
+    })
+  }
 }
 // #endregion
 

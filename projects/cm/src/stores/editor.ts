@@ -22,7 +22,6 @@ export class Page implements IPage {
 interface IEditorStore {
   imgAspectRatio: number
   editingPage: Page
-  pageScaleRatio: number
   editorState: EditorState
   currActiveFeature: EditorFeature
   editorType: EditorType
@@ -40,7 +39,6 @@ export const useEditorStore = defineStore('editor', {
   state: (): IEditorStore => ({
     imgAspectRatio: 9 / 16,
     editingPage: new Page(900, 1600),
-    pageScaleRatio: 0.1,
     editorState: 'aspectRatio',
     currActiveFeature: 'none',
     editorType: 'powerful-fill',
@@ -74,10 +72,6 @@ export const useEditorStore = defineStore('editor', {
 
     createNewPage(width: number, height: number) {
       this.editingPage = new Page(width, height)
-    },
-
-    setPageScaleRatio(ratio: number) {
-      this.pageScaleRatio = ratio
     },
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio

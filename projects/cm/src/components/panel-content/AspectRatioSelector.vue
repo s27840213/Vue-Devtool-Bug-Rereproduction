@@ -18,31 +18,33 @@ div(class="w-full pl-24")
         :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
 </template>
 <script setup lang="ts">
-import { useEditorStore } from '@/stores/editor'
-import { storeToRefs } from 'pinia'
-
+import { useEditorStore } from '@/stores/editor';
+import pageUtils from '@nu/vivi-lib/utils/pageUtils';
+import { storeToRefs } from 'pinia';
 const editorStore = useEditorStore()
-const { setPageSize, setFirstPaintArea } = editorStore
+const { setFirstPaintArea } = editorStore
+// #region vivi-lib vuex
+// #endregion
+
 const { imgAspectRatio, firstPaintArea, pageSize } = storeToRefs(editorStore)
 
 const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5', '5_4']
 const selectedType = ref('9_16')
 
 const selectAspectRatio = (type: string) => {
-  console.log('select aspect ratio')
   selectedType.value = type
 
   if (type === 'original') {
-    setPageSize(1600 * imgAspectRatio.value, 1600)
+    pageUtils.setPageSize(0, 1600 * imgAspectRatio.value, 1600)
   } else {
     const [w, h] = type.split('_')
     const width = parseInt(w)
     const height = parseInt(h)
 
     if (width > height) {
-      setPageSize(1600, (1600 * height) / width)
+      pageUtils.setPageSize(0, 1600, (1600 * height) / width)
     } else {
-      setPageSize((1600 * width) / height, 1600)
+      pageUtils.setPageSize(0, (1600 * width) / height, 1600)
     }
   }
 

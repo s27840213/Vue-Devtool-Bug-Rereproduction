@@ -104,7 +104,9 @@ const headerbarStyles = computed(() => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/transitions.scss';
+@use '@/assets/scss/main.scss';
+@use '@/assets/scss/transitions.scss';
+
 .mask {
   @apply w-full h-full fixed top-0 left-0 z-10  backdrop-blur-sm;
   transition: backdrop-filter 0.25;
