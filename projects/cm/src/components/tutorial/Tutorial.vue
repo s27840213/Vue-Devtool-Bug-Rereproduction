@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="step > 0" class="tutorial absolute w-screen h-screen" ref="overlayRef")
+div(v-if="step > 0" class="z-tutorial-overlay absolute w-screen h-screen " ref="overlayRef")
   component(v-if="highlightRefs.length" :is="tutorials(name + '-tutorial')" :step="step" :elHighlight="highlightRefs" :trackingFrame="trackingFrame" @nextStep="nextStep")
 </template>
 
@@ -9,6 +9,7 @@ import { useTutorialStore } from '@/stores/tutorial';
 import webViewUtils from '@/utils/webViewUtils';
 import { storeToRefs } from 'pinia';
 import PowerfulFillTutorial from './PowerfulFillTutorial.vue';
+
 const DEV = false // set to visualize clickable area
 const tutorials = (name: string) => {
   const tutorials = [
@@ -136,9 +137,8 @@ const insertBackdrops = (elTargets = highlightRefs.value) => {
         }
         const elBackdrop = document.createElement('div')
         const backdrop = { elBackdrop, elClip: currElement, elTarget }
-        backdrop.elBackdrop.classList.add('tutorial-backdrop')
+        backdrop.elBackdrop.classList.add('tutorial-backdrop', 'z-tutorial-highlight')
         backdrop.elBackdrop.style.pointerEvents = 'none'
-        backdrop.elBackdrop.style.zIndex = '999'
         backdrop.elBackdrop.style.position = 'absolute'
         backdrop.elBackdrop.style.outline = 'solid 9999px rgba(18, 18, 18, 0.7)'
         updateBackdropPosition(backdrop)
@@ -173,17 +173,17 @@ const { tutorialNextStep, resetTutorial } = tutorialStore
 const { name, step } = storeToRefs(tutorialStore)
 const highlightRefs = ref<HTMLElement[]>([])
 const clickableRefs = ref<HTMLElement[]>([])
-const prevTargetStyleBuckups = ref<{ el: HTMLElement, cssText: string }[]>([])
+const prevHighlightRefs = ref<HTMLElement[]>([])
 
-const restorePrevTargetStyle = () => {
-  while (prevTargetStyleBuckups.value.length > 0) {
-    prevTargetStyleBuckups.value[0].el.style.cssText = prevTargetStyleBuckups.value[0].cssText
-    prevTargetStyleBuckups.value.shift();
+const restorePrevHighlightStyle = () => {
+  while (prevHighlightRefs.value.length > 0) {
+    prevHighlightRefs.value[0].classList.remove('z-tutorial-highlight')
+    prevHighlightRefs.value.shift();
   }
 }
 
 const reset = () => {
-  restorePrevTargetStyle()
+  restorePrevHighlightStyle()
   stopTrackingClickableArea()
   removeClickableAreas()
   removeBackdrops()
@@ -204,8 +204,8 @@ const runStep = () => {
     return resetTutorial()
   }
   elHighlights.forEach(elHighlight => {
-    prevTargetStyleBuckups.value.push({ el: elHighlight, cssText: elHighlight.style.cssText })
-    elHighlight.style.zIndex = '999'
+    elHighlight.classList.add('z-tutorial-highlight')
+    prevHighlightRefs.value.push(elHighlight)
   })
   insertClickableAreas()
   insertBackdrops()
@@ -217,15 +217,7 @@ watch(() => step.value, () => nextTick(() => runStep()))
 </script>
 
 <style lang="scss">
-.tutorial {
-  z-index: 1000;
-}
-
 .tutorial-clickable-area.dev {
   border: solid 1px #009900;
-
-  &.disabled {
-    border: solid 1px #990000;
-  }
 }
 </style>

@@ -48,7 +48,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :style="demoBrushSizeStyles")
     sidebar-tabs(
       v-if="isEditing"
-      class="absolute top-1/2 right-0 z-10 -translate-y-1/2"
+      class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef")
 </template>
 <script setup lang="ts">

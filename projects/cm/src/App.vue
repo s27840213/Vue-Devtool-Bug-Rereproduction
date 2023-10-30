@@ -29,7 +29,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(class="z-20")
+  bottom-panel(class="z-bottom-panel")
     template(#content="{setSlotRef}")
       transition(
         name="bottom-panel-transition"
@@ -41,7 +41,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     ref="maskRef"
     @click.stop="closeModal")
   transition(name="bottom-up")
-    img-selector(v-if="showImgSelector" class="absolute top-0 left-0 w-full h-full z-30")
+    img-selector(v-if="showImgSelector" class="absolute top-0 left-0 w-full h-full z-img-selector")
 </template>
 
 <script setup lang="ts">
@@ -105,7 +105,7 @@ const headerbarStyles = computed(() => {
 <style lang="scss">
 @import '@/assets/scss/transitions.scss';
 .mask {
-  @apply w-full h-full fixed top-0 left-0 z-10  backdrop-blur-sm;
+  @apply w-full h-full fixed top-0 left-0 z-modal-mask  backdrop-blur-sm;
   transition: backdrop-filter 0.25;
   background-color: rgba(#050505, 0.5);
 }
