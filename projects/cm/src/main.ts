@@ -12,6 +12,8 @@ import router from './router';
 import vuex from './vuex';
 
 const svgs = import.meta.glob('./assets/icon/**/*.svg', { eager: true })
+const viviSvgs = import.meta.glob('../../../packages/vivi-lib/dist/src/assets/icon/**/*.svg', { eager: true })
+
 const app = initApp(createApp(App))
 
 // Implement require for vite. YOU CANNOT USE require BEFORE ASSIGN TO WINDOW.
@@ -33,6 +35,7 @@ function keepVar(v: unknown) {
 // the *.d.ts file for the global components in shared-lib
 keepVar(libType)
 keepVar(svgs)
+keepVar(viviSvgs)
 
 app.use(createPinia())
 app.use(vuex)

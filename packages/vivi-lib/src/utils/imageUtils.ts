@@ -103,19 +103,19 @@ class ImageUtils {
     let { type, userId, assetId, brandId, updateQuery, maxSize } = {} as SrcObj
     let ratio = 1
     if (this.isSrcObj(config)) {
-      ;({ type, userId, assetId, brandId, maxSize } = config)
+      ; ({ type, userId, assetId, brandId, maxSize } = config)
     } else {
       if (!config.srcObj && !config.src_obj) return ''
       const srcObj = config.srcObj || (config.src_obj as SrcObj)
-      ;({ type, userId, assetId, brandId, updateQuery, maxSize } = srcObj)
+        ; ({ type, userId, assetId, brandId, updateQuery, maxSize } = srcObj)
       if (typeof size === 'undefined' && config.styles) {
         const { imgWidth, imgHeight } = config.styles
         size = this.getSrcSize(
           srcObj,
           config.styles
             ? this.getSignificantDimension(imgWidth, imgHeight) *
-                store.getters.getPageScaleRatio *
-                0.01
+            store.getters.getPageScaleRatio *
+            0.01
             : 0,
         )
       }
@@ -138,9 +138,8 @@ class ImageUtils {
           const query = forBgRemove
             ? `?rand_ver=${generalUtils.generateRandomString(6)}`
             : '?origin=true'
-          res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${
-            size || 'midd'
-          }${query + (updateQuery || '')}`
+          res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'
+            }${query + (updateQuery || '')}`
         }
         break
       }
@@ -166,19 +165,16 @@ class ImageUtils {
         break
       }
       case 'unsplash':
-        res = `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${
-          size || 766
-        }&origin=true`
+        res = `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766
+          }&origin=true`
         break
       case 'pexels':
-        res = `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&${
-          ratio >= 1 ? 'h' : 'w'
-        }=${size || 766}&origin=true`
+        res = `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'
+          }=${size || 766}&origin=true`
         break
       case 'background':
-        res = `https://template.vivipic.com/background/${assetId}/${
-          size || 'full'
-        }?origin=true&ver=${store.getters['user/getVerUni']}`
+        res = `https://template.vivipic.com/background/${assetId}/${size || 'full'
+          }?origin=true&ver=${store.getters['user/getVerUni']}`
         break
       case 'frame':
         console.log(frameDefaultImg)
@@ -198,9 +194,8 @@ class ImageUtils {
       case 'local':
         return assetId as string
       case 'svg':
-        res = `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${
-          store.getters['user/getVerUni']
-        }`
+        res = `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']
+          }`
         break
       case 'ios':
         if (generalUtils.isCm) {
@@ -264,7 +259,7 @@ class ImageUtils {
     if (src.includes('asset.vivipic')) {
       return src.includes('logo') ? 'logo-private' : 'private'
     }
-    if (src.startsWith('data:image')) return ''
+    if (src.startsWith('data:image') || src.includes('localhost')) return ''
     throw Error(`Unexpected getSrcType result for src '${src}'.`)
   }
 
@@ -307,7 +302,7 @@ class ImageUtils {
         return src.match(/(vvstk|chmix):\/\/(.+)/)?.[2] ?? ''
       }
       default:
-        if (type === '' && src.startsWith('data:image')) return ''
+        if (type === '' && (src.startsWith('data:image') || src.includes('localhost'))) return ''
         throw Error(`Unexpected getAssetId type '${type}' for src '${src}'.`)
     }
   }
@@ -744,9 +739,8 @@ class ImageUtils {
           ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/larg`
           : image.signed_url?.larg ?? '',
         original: isAdmin
-          ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${
-              image.id
-            }/original`
+          ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id
+          }/original`
           : image.signed_url?.original ?? '',
         midd: isAdmin
           ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/midd`

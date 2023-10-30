@@ -104,7 +104,7 @@ console.log(pageScaleRatio)
 const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
 const editorStore = useEditorStore()
 const { setImgAspectRatio, setEditorState } = editorStore
-const { editingPage, pageSize, editorState } = storeToRefs(editorStore)
+const { pageSize, editorState } = storeToRefs(editorStore)
 
 const handleNextAction = function () {
   if (editorState.value === 'aspectRatio') {
@@ -139,15 +139,15 @@ const fitScaleRatio = computed(() => {
 
 const wrapperStyles = computed(() => {
   return {
-    width: `${(editingPage.value.width * pageScaleRatio.value) / 100}px`,
-    height: `${(editingPage.value.height * pageScaleRatio.value) / 100}px`,
+    width: `${(pageSize.value.width * pageScaleRatio.value) / 100}px`,
+    height: `${(pageSize.value.height * pageScaleRatio.value) / 100}px`,
   }
 })
 
 const pageStyles = computed(() => {
   return {
-    width: `${editingPage.value.width}px`,
-    height: `${editingPage.value.height}px`,
+    width: `${pageSize.value.width}px`,
+    height: `${pageSize.value.height}px`,
     transform: `scale(${pageScaleRatio.value / 100})`,
   }
 })

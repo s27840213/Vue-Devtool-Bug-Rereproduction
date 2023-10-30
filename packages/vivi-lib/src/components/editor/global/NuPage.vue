@@ -392,7 +392,7 @@ export default defineComponent({
           transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px) scale(${pinchScale})`
         }
       } else {
-        margin = this.isDetailPage ? '0px auto' : '25px auto'
+        margin = this.isDetailPage || this.$isCm ? '0px auto' : '25px auto'
       }
       return {
         position,

@@ -6,13 +6,13 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     :btnText="$t('CM0003')"
     :theme="'powerful-fill'"
     iconName="brush"
-    @clickBtn="goToEditor")
-  cm-btn(
-    class="my-10"
-    :theme="'primary'"
-    :hasIcon="true"
-    iconName="crown"
-    @click="openImgSelecotr") Test Img Selector
+    @clickBtn="openImgSelecotr")
+  //- cm-btn(
+  //-   class="my-10"
+  //-   :theme="'primary'"
+  //-   :hasIcon="true"
+  //-   iconName="crown"
+  //-   @click="openImgSelecotr") Test Img Selector
   div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
   div(class="feature-section")
     feature-card(
@@ -55,17 +55,35 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
-import { useImgSelectorStore } from '@/stores/imgSelector'
-import { useRouter } from 'vue-router'
+import { useImgSelectorStore } from '@/stores/imgSelector';
+import vuex from '@/vuex';
+import assetUtils from '@nu/vivi-lib/utils/assetUtils';
+import { useRouter } from 'vue-router';
 
 const router = useRouter()
+const inBrowserMode = computed(() => vuex.getters['webView/getInBrowserMode'])
 const { setShowImgSelector } = useImgSelectorStore()
 const goToEditor = () => {
   router.push('/editor')
 }
 
 const openImgSelecotr = () => {
-  setShowImgSelector(true)
+  console.log(inBrowserMode.value)
+  if (!inBrowserMode.value) {
+    setShowImgSelector(true)
+  } else {
+    const src = require('test.jpg')
+    console.log(src)
+    goToEditor()
+    assetUtils.addImage(
+      require('test.jpg'),
+      1,
+      {
+        previewSrc: require('test.jpg'),
+        isPreview: true,
+      }
+    )
+  }
 }
 </script>
 <style scoped lang="scss">

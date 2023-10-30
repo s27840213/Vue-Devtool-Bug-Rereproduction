@@ -1,5 +1,5 @@
-import { AppColors } from '@/types/color'
 import type { EditorFeature, EditorState, EditorType, PowerfulFillCanvasMode } from '@/types/editor'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { defineStore } from 'pinia'
 import { useCanvasStore } from './canvas'
 export interface IPage {
@@ -8,20 +8,8 @@ export interface IPage {
   backgroundColor: string
 }
 
-export class Page implements IPage {
-  width: number
-  height: number
-  backgroundColor: string
-  constructor(width: number, height: number) {
-    this.width = width
-    this.height = height
-    this.backgroundColor = AppColors['primary-white']
-  }
-}
-
 interface IEditorStore {
   imgAspectRatio: number
-  editingPage: Page
   editorState: EditorState
   currActiveFeature: EditorFeature
   editorType: EditorType
@@ -38,7 +26,6 @@ interface IEditorStore {
 export const useEditorStore = defineStore('editor', {
   state: (): IEditorStore => ({
     imgAspectRatio: 9 / 16,
-    editingPage: new Page(900, 1600),
     editorState: 'aspectRatio',
     currActiveFeature: 'none',
     editorType: 'powerful-fill',
@@ -53,10 +40,7 @@ export const useEditorStore = defineStore('editor', {
   }),
   getters: {
     pageSize(): { width: number; height: number } {
-      return {
-        width: this.editingPage.width,
-        height: this.editingPage.height,
-      }
+      return pageUtils.getPageSize(0)
     },
   },
   actions: {
@@ -66,12 +50,11 @@ export const useEditorStore = defineStore('editor', {
         canvasHeight: height,
       })
 
-      this.editingPage.width = width
-      this.editingPage.height = height
+      pageUtils.setPageSize(0, width, height)
     },
 
     createNewPage(width: number, height: number) {
-      this.editingPage = new Page(width, height)
+      pageUtils.setPages([pageUtils.newPage({ width, height})])
     },
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio

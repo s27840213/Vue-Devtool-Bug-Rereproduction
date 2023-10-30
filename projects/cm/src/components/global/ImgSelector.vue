@@ -70,10 +70,15 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
             span(class="text-app-tab-default") {{ album.albumSize }}
 </template>
 <script lang="ts" setup>
-import type { IAlbum } from '@/utils/webViewUtils'
-import webViewUtils from '@/utils/webViewUtils'
-import assetUtils from '@nu/vivi-lib/utils/assetUtils'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import { useEditorStore } from '@/stores/editor';
+import { useImgSelectorStore } from '@/stores/imgSelector';
+import type { IAlbum } from '@/utils/webViewUtils';
+import webViewUtils from '@/utils/webViewUtils';
+import assetUtils from '@nu/vivi-lib/utils/assetUtils';
+import groupUtils from '@nu/vivi-lib/utils/groupUtils';
+import imageUtils from '@nu/vivi-lib/utils/imageUtils';
+
+const router = useRouter()
 
 // #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
@@ -96,6 +101,11 @@ const isAlbumOpened = ref(true)
 const isLoadingContent = ref(false)
 const initLoaded = ref(false)
 // #endregion
+
+const editorStore = useEditorStore()
+const { editorType } = storeToRefs(editorStore)
+const { setShowImgSelector } = useImgSelectorStore()
+
 
 // #region album methods
 const toggleAlbum = () => {
@@ -138,20 +148,29 @@ const selectAlbum = (album: IAlbum) => {
 }
 
 const selectImage = (id: string, type: 'cameraroll' | 'unsplash') => {
-  console.log('select image', id, type)
-  if (type === 'cameraroll') {
-    const src = imageUtils.getSrc({
-      type: 'ios',
-      assetId: `cameraroll/${id}`,
-      userId: '',
-    })
-
-    console.log(src)
-    imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
-      const { naturalWidth, naturalHeight } = img
-      const photoAspectRatio = naturalWidth / naturalHeight
-      assetUtils.addImage(src, photoAspectRatio)
-    })
+  switch(editorType.value) {
+    case 'powerful-fill': {
+      if (type === 'cameraroll') {
+        const src = imageUtils.getSrc({
+          type: 'ios',
+          assetId: `cameraroll/${id}`,
+          userId: '',
+        })
+    
+        console.log(src)
+        imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+          const { naturalWidth, naturalHeight } = img
+          const photoAspectRatio = naturalWidth / naturalHeight
+          
+          setShowImgSelector(false)
+          router.push({
+            name: 'Editor'
+          })
+          assetUtils.addImage(src, photoAspectRatio)
+          groupUtils.deselect()
+        })
+      }
+    }
   }
 }
 // #endregion
