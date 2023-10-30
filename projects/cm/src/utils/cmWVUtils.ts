@@ -193,14 +193,15 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   }
 
   getEditorDimensions(): { x: number; y: number; width: number; height: number } {
-    const { pageSize, pageScaleRatio } = useEditorStore()
-    const { width: pageWidth, height: pageHeight } = pageSize
-    const editorEle = document.getElementById('editor-page') as HTMLElement
+    const store = useEditorStore()
+    const {pageScaleRatio, pageSize} = storeToRefs(store)
+    const { width: pageWidth, height: pageHeight } = pageSize.value
+    const editorEle = document.getElementById('screenshot-target') as HTMLElement
     const defaultDimensions = {
       x: 0,
       y: 0,
-      width: pageWidth * pageScaleRatio,
-      height: pageHeight * pageScaleRatio,
+      width: pageWidth * pageScaleRatio.value,
+      height: pageHeight * pageScaleRatio.value,
     }
     if (!editorEle) {
       return defaultDimensions

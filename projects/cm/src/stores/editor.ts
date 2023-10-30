@@ -1,5 +1,5 @@
-import { AppColors } from '@/types/color'
 import type { EditorFeature, EditorState, EditorType, PowerfulFillCanvasMode } from '@/types/editor'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { defineStore } from 'pinia'
 import { useCanvasStore } from './canvas'
 export interface IPage {
@@ -8,57 +8,43 @@ export interface IPage {
   backgroundColor: string
 }
 
-export class Page implements IPage {
-  width: number
-  height: number
-  backgroundColor: string
-  constructor(width: number, height: number) {
-    this.width = width
-    this.height = height
-    this.backgroundColor = AppColors['primary-white']
-  }
-}
-
 interface IEditorStore {
   imgAspectRatio: number
-  editingPage: Page
-  pageScaleRatio: number
   editorState: EditorState
   currActiveFeature: EditorFeature
   editorType: EditorType
   canvasMode: PowerfulFillCanvasMode
   isAdjustingBottomPanel: boolean
-  firstPaintArea: {
-    width: number
-    height: number
-  }
   maskCanvas: HTMLCanvasElement
-  maskDataUrl: string
+  maskDataUrl: string,
+  isGenerating: boolean,
+  generatedResult: string,
+  showGenResult: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
   state: (): IEditorStore => ({
     imgAspectRatio: 9 / 16,
-    editingPage: new Page(900, 1600),
-    pageScaleRatio: 0.1,
     editorState: 'aspectRatio',
     currActiveFeature: 'none',
     editorType: 'powerful-fill',
     canvasMode: 'brush',
     isAdjustingBottomPanel: true,
-    firstPaintArea: {
-      width: 0,
-      height: 0,
-    },
     maskCanvas: document.createElement('canvas'),
     maskDataUrl: '',
+    isGenerating: false,
+    generatedResult: '',
+    showGenResult: false
   }),
   getters: {
     pageSize(): { width: number; height: number } {
-      return {
-        width: this.editingPage.width,
-        height: this.editingPage.height,
-      }
+      return pageUtils.getPageSize(0)
+    },
+    pageAspectRatio(): number {
+      return this.pageSize.width / this.pageSize.height
+    },
+    pageScaleRatio(): number{
+      return pageUtils.scaleRatio / 100
     },
   },
   actions: {
@@ -68,16 +54,11 @@ export const useEditorStore = defineStore('editor', {
         canvasHeight: height,
       })
 
-      this.editingPage.width = width
-      this.editingPage.height = height
+      pageUtils.setPageSize(0, width, height)
     },
 
     createNewPage(width: number, height: number) {
-      this.editingPage = new Page(width, height)
-    },
-
-    setPageScaleRatio(ratio: number) {
-      this.pageScaleRatio = ratio
+      pageUtils.setPages([pageUtils.newPage({ width, height })])
     },
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
@@ -94,15 +75,20 @@ export const useEditorStore = defineStore('editor', {
     setCanvasMode(mode: PowerfulFillCanvasMode) {
       this.canvasMode = mode
     },
-    setFirstPaintArea(width: number, height: number) {
-      Object.assign(this.firstPaintArea, { width, height })
-      console.log(this.firstPaintArea)
-    },
     setMaskCanvas(canvas: HTMLCanvasElement) {
       this.maskCanvas = canvas
     },
     setMaskCanvasDataUrl(dataUrl: string) {
       this.maskDataUrl = dataUrl
     },
+    setIsGenerating(isGenerating: boolean) {
+      this.isGenerating = isGenerating
+    },
+    setGeneratedResult(result: string) {
+      this.generatedResult = result
+    },
+    setShowGenResult(show: boolean) {
+      this.showGenResult = show
+    }
   },
 })

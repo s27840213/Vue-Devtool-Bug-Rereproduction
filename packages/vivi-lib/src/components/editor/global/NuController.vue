@@ -315,7 +315,7 @@ export default defineComponent({
       eventTarget: null as unknown as HTMLElement,
       movingUtils: null as unknown as MovingUtils,
       moveStart: null as any,
-      actionColor: this.$isStk ? 'black-1' : 'blue-2',
+      actionColor: (this.$isStk || this.$isCm )? 'black-1' : 'blue-2',
     }
   },
   mounted() {

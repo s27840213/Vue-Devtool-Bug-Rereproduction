@@ -3,6 +3,7 @@ import picWVUtils from '@/utils/picWVUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
 export interface IWebViewState {
+  appLoadedTimeout: number,
   userInfo: IUserInfo
   inBrowserMode: boolean
   inReviewMode: boolean
@@ -11,6 +12,7 @@ export interface IWebViewState {
 }
 
 const getDefaultState = (): IWebViewState => ({
+  appLoadedTimeout: -1,
   userInfo: picWVUtils.getDefaultUserInfo(),
   inBrowserMode: true,
   inReviewMode: false,
@@ -20,6 +22,9 @@ const getDefaultState = (): IWebViewState => ({
 
 const state = getDefaultState()
 const getters: GetterTree<IWebViewState, unknown> = {
+  getAppLoadedTimeout(state: IWebViewState): number {
+    return state.appLoadedTimeout
+  },
   getUserInfo(state: IWebViewState): IUserInfo {
     return state.userInfo
   },
@@ -38,6 +43,9 @@ const getters: GetterTree<IWebViewState, unknown> = {
 }
 
 const mutations: MutationTree<IWebViewState> = {
+  SET_appLoadedTimeout(state: IWebViewState, appLoadedTimeout: number) {
+    state.appLoadedTimeout = appLoadedTimeout
+  },
   SET_userInfo(state: IWebViewState, userInfo: IUserInfo) {
     state.userInfo = userInfo
   },

@@ -1,26 +1,36 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": [
-    "env.d.ts",
-    "src/**/*",
+    "src/**/*.ts",
     "src/**/*.vue",
     "src/**/*.json",
-    "../../packages/vivi-lib/src/**/*",
-    "../../packages/shared-lib/src/**/*"
+    "../../packages/vivi-lib/src/**/*.vue",
+    "../../packages/vivi-lib/src/**/*.ts",
+    "../../packages/shared-lib/src/**/*.vue",
+    "../../packages/shared-lib/src/**/*.ts"
   ],
   "exclude": [
     "src/**/__tests__/*"
   ],
   "compilerOptions": {
-    "rootDir": "../../",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
     "composite": true,
+    "rootDir": "../../",
     "baseUrl": ".",
     "paths": {
       "@i18n/*": [
         "./src/i18n/shaked/*"
       ],
       "@/*": [
-        "./src/*"
+        "./src/*",
+        "../../packages/vivi-lib/src/*"
       ],
       "@nu/shared-lib/*": [
         "../../packages/shared-lib/src/*"
@@ -36,13 +46,11 @@
     "types": [
       "vite/client"
     ],
-    "resolveJsonModule": true,
     "lib": [
       "ESNext",
-      "DOM"
-    ],
-    "target": "ESNext",
-    "module": "ESNext"
+      "DOM",
+      "dom.iterable"
+    ]
   },
   "vueCompilerOptions": {
     "plugins": [
