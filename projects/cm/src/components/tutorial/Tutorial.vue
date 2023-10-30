@@ -125,7 +125,11 @@ const insertBackdrops = (elTargets = targetRefs.value) => {
   elTargets.forEach(elTarget => {
     let currElement = elTarget as HTMLElement | null
     while (currElement && currElement.id !== 'app') {
-      if (currElement === elTarget || window.getComputedStyle(currElement).overflow !== 'visible') {
+      const currElementStyles = window.getComputedStyle(currElement)
+      // if element trigger a new stacking context, outline can be clipped by overflow. https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Understanding_z-index/Stacking_context
+      const isNewStackingContext = currElementStyles.position !== 'static' || currElementStyles.transform !== 'none'
+      const isClipped = currElementStyles.overflow !== 'visible' && isNewStackingContext
+      if (currElement === elTarget || isClipped) {
         let isDuplicated = !!backdrops.value.find(backdrop => backdrop.elClip === currElement)
         for (const backdrop of backdrops.value) {
           if (currElement && backdrop.elClip === backdrop.elTarget && backdrop.elBackdrop.parentElement === currElement.parentElement) {
