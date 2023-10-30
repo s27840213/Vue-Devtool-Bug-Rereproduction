@@ -1,16 +1,20 @@
 import { useTutorialStore } from "@/stores/tutorial";
 import webViewUtils from "./webViewUtils";
 
-const tutorialStore = useTutorialStore()
-type tutorialName = 'powerful-fill'
+type ITutorialName = 'powerful-fill'
 
 export default new (class TutorialUtils {
-  runTutorial(tutorialName: tutorialName) {
-    if (webViewUtils.tutorialFlags['powerful-fill']) return
-    tutorialStore.showTutorial(tutorialName)
+  get isDuringTutorial() {
+    const { name } = storeToRefs(useTutorialStore())
+    return computed(() => !!name.value)
   }
 
-  nextStep(tutorialName: tutorialName) {
+  runTutorial(tutorialName: ITutorialName) {
+    if (webViewUtils.tutorialFlags['powerful-fill']) return
+    useTutorialStore().showTutorial(tutorialName)
+  }
+
+  nextStep(tutorialName: ITutorialName) {
     useTutorialStore().tutorialNextStep(tutorialName)
   }
 })

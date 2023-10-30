@@ -28,7 +28,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
     div(class="w-full h-full box-border overflow-scroll flex justify-center items-center")
       div(
-        class="wrapper relative tutorial-powerful-fill-3"
+        class="wrapper relative tutorial-powerful-fill-3--highlight"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         div(

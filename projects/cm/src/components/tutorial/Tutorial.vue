@@ -1,6 +1,6 @@
 <template lang="pug">
 div(v-if="step > 0" class="tutorial absolute w-screen h-screen" ref="overlayRef")
-  component(v-if="targetRefs.length" v-model:clickable="clickable" :is="tutorials(name + '-tutorial')" :step="step" :elTargets="targetRefs" :trackingFrame="trackingFrame" @nextStep="nextStep")
+  component(v-if="highlightRefs.length" :is="tutorials(name + '-tutorial')" :step="step" :elHighlight="highlightRefs" :trackingFrame="trackingFrame" @nextStep="nextStep")
 </template>
 
 <script setup lang="ts">
@@ -22,13 +22,11 @@ const overlayRef = ref<HTMLElement | null>(null)
 const clickableAreas = ref<{ el: HTMLElement, elTarget: HTMLElement }[]>([])
 const tmTrackingClickableArea = ref(0)
 const trackingFrame = ref(0)
-const clickable = ref(false)
 
-const insertClickableAreas = (elTargets = targetRefs.value) => {
+const insertClickableAreas = (elTargets = clickableRefs.value) => {
   const elOverlay = overlayRef.value
   if (!elTargets.length || !elOverlay) return
   const clcikableAreaMouseenter = (evt: MouseEvent) => {
-    if (!clickable.value) return
     elOverlay.style.pointerEvents = 'none';
     (evt.target as HTMLElement).style.pointerEvents = 'none'
   }
@@ -37,6 +35,7 @@ const insertClickableAreas = (elTargets = targetRefs.value) => {
       elOverlay.style.pointerEvents = 'auto';
       (evt.target as HTMLElement).style.pointerEvents = 'auto'
     })
+    nextStep()
   }
   elTargets.forEach((elTarget) => {
     const { top, left, width, height } = elTarget.getBoundingClientRect()
@@ -44,7 +43,6 @@ const insertClickableAreas = (elTargets = targetRefs.value) => {
     elClickableArea.classList.add('tutorial-clickable-area')
     if (DEV) {
       elClickableArea.classList.add('dev')
-      if (!clickable.value) elClickableArea.classList.add('disabled')
     }
     elClickableArea.style.position = 'absolute'
     elClickableArea.style.zIndex = '1000'
@@ -68,10 +66,6 @@ const updateClickableAreas = () => {
     el.style.left = `${left}px`
     el.style.width = `${width}px`
     el.style.height = `${height}px`
-    if (DEV) {
-      if (clickable.value) el.classList.remove('disabled')
-      else el.classList.add('disabled')
-    }
   })
 }
 
@@ -83,7 +77,6 @@ const removeClickableAreas = () => {
 }
 
 const trackClickableArea = () => {
-  if (!clickableAreas.value.length) return
   const update = () => {
     if (!tmTrackingClickableArea.value) return
     trackingFrame.value++
@@ -120,7 +113,7 @@ const updateBackdropPosition = (backdrop: IBackdrop) => {
   backdrop.elBackdrop.style.transform = window.getComputedStyle(backdrop.elClip).transform
 }
 
-const insertBackdrops = (elTargets = targetRefs.value) => {
+const insertBackdrops = (elTargets = highlightRefs.value) => {
   if (!elTargets.length) return
   elTargets.forEach(elTarget => {
     let currElement = elTarget as HTMLElement | null
@@ -178,15 +171,15 @@ const removeBackdrops = () => {
 const tutorialStore = useTutorialStore()
 const { tutorialNextStep, resetTutorial } = tutorialStore
 const { name, step } = storeToRefs(tutorialStore)
-const targetRefs = ref<HTMLElement[]>([])
+const highlightRefs = ref<HTMLElement[]>([])
+const clickableRefs = ref<HTMLElement[]>([])
 const prevTargetStyleBuckups = ref<{ el: HTMLElement, cssText: string }[]>([])
 
 const restorePrevTargetStyle = () => {
-  if (!prevTargetStyleBuckups.value.length) return
-  prevTargetStyleBuckups.value.forEach(({ el, cssText }) => {
-    el.style.cssText = cssText
-  })
-  prevTargetStyleBuckups.value = []
+  while (prevTargetStyleBuckups.value.length > 0) {
+    prevTargetStyleBuckups.value[0].el.style.cssText = prevTargetStyleBuckups.value[0].cssText
+    prevTargetStyleBuckups.value.shift();
+  }
 }
 
 const reset = () => {
@@ -202,16 +195,17 @@ const nextStep = () => {
 
 const runStep = () => {
   reset()
-  targetRefs.value = Array.from(document.getElementsByClassName(`tutorial-${name.value}-${step.value}`)) as HTMLElement[]
-  const elTargets = targetRefs.value
-  if (name.value && !elTargets.length) {
+  highlightRefs.value = Array.from(document.getElementsByClassName(`tutorial-${name.value}-${step.value}--highlight`)) as HTMLElement[]
+  clickableRefs.value = Array.from(document.getElementsByClassName(`tutorial-${name.value}-${step.value}--clickable`)) as HTMLElement[]
+  const elHighlights = highlightRefs.value
+  if (name.value && !elHighlights.length) {
     // finish tutorial
     webViewUtils.updateTutorialFlags({ [name.value]: true })
     return resetTutorial()
   }
-  elTargets.forEach(elTarget => {
-    prevTargetStyleBuckups.value.push({ el: elTarget, cssText: elTarget.style.cssText })
-    elTarget.style.zIndex = '999'
+  elHighlights.forEach(elHighlight => {
+    prevTargetStyleBuckups.value.push({ el: elHighlight, cssText: elHighlight.style.cssText })
+    elHighlight.style.zIndex = '999'
   })
   insertClickableAreas()
   insertBackdrops()

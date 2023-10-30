@@ -33,13 +33,13 @@ div(class="w-screen h-screen")
 <script setup lang="ts">
 import useImageUtils from '@/composable/useImageUtils';
 defineOptions({ name: 'powerful-fill-tutorial' })
-const emit = defineEmits(['nextStep', 'update:clickable'])
+const emit = defineEmits(['nextStep'])
 const props = defineProps({
   step: {
     type: Number,
     required: true
   },
-  elTargets: {
+  elHighlight: {
     type: Array<HTMLElement>,
     required: true
   },
@@ -48,7 +48,7 @@ const props = defineProps({
     required: true
   }
 })
-const { step, elTargets, trackingFrame } = toRefs(props)
+const { step, elHighlight, trackingFrame } = toRefs(props)
 
 const { t } = useI18n()
 const { getImageUrl } = useImageUtils()
@@ -57,8 +57,8 @@ const tutorialStyles = ref({})
 const touchStyles = ref({})
 const updateStyles = () => {
   if (step.value === 3) return
-  if (!elTargets.value.length) return
-  const elTopItem = elTargets.value.reduce((prev, curr) => prev.getBoundingClientRect().top < curr.getBoundingClientRect().top ? prev : curr);
+  if (!elHighlight.value.length) return
+  const elTopItem = elHighlight.value.reduce((prev, curr) => prev.getBoundingClientRect().top < curr.getBoundingClientRect().top ? prev : curr);
   const { top, left, bottom, width } = elTopItem.getBoundingClientRect()
   if (step.value === 1) {
     tutorialStyles.value = {
@@ -137,7 +137,6 @@ const iconSize = computed(() => {
   }
 })
 watch(() => step.value, (newVal) => nextTick(() => {
-  emit('update:clickable', newVal === 2)
   if (newVal === 3) window.setTimeout(() => {
     if (newVal !== 3) return
     emit('nextStep')
