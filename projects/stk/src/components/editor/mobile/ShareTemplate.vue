@@ -338,7 +338,7 @@ export default defineComponent({
     padding: 0 10%;
     box-sizing: border-box;
     margin-bottom: 24px;
-    &::v-deep .tabs__item {
+    &:deep(.tabs__item) {
       width: 40% !important;
     }
   }
