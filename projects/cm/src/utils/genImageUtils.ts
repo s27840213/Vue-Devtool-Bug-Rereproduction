@@ -41,28 +41,33 @@ export default new (class GenImageUtils {
     const { pageSize } = useEditorStore()
     const { width: pageWidth, height: pageHeight } = pageSize
     const size = Math.max(pageWidth, pageHeight)
-    const imageRes = await fetch(`chmix://screenshot/${imageId}?lsize=${size}`)
-    const imageBlob = await imageRes.blob()
-    try {
-      await uploadUtilsCm.uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
-    } catch (error) {
-      logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
-      throw error
-    }
+    return new Promise<void>(resolve => {
+      generalUtils.toDataURL(`chmix://screenshot/${imageId}?lsize=${size}`, (dataUrl) => {
+        const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
+        uploadUtilsCm.uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
+          .then(resolve)
+          .catch((error) => {
+            logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
+            throw error
+          })
+      })
+    })
   }
 
   async uploadMaskAsImage(userId: string, requestId: string) {
     const bus = useEventBus('generation')
     return new Promise<void>((resolve, reject) => {
-      bus.emit('genMaskUrl', { callback: async (maskUrl: string) => {
-        try {
-          await uploadUtilsCm.uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`)
-          resolve()
-        } catch (error) {
-          logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
-          reject(error)
+      bus.emit('genMaskUrl', {
+        callback: async (maskUrl: string) => {
+          try {
+            await uploadUtilsCm.uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`)
+            resolve()
+          } catch (error) {
+            logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
+            reject(error)
+          }
         }
-      }})
+      })
     })
   }
 })()
