@@ -28,7 +28,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(class="z-20")
+  bottom-panel(v-if="!showGenResult" class="z-20")
     template(#content="{setSlotRef}")
       transition(
         name="bottom-panel-transition"
@@ -51,6 +51,7 @@ import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import useStateInfo from './composable/useStateInfo'
+import { useEditorStore } from './stores/editor'
 import { useModalStore } from './stores/modal'
 
 // #region route info
@@ -99,10 +100,15 @@ const headerbarStyles = computed(() => {
     opacity: atMainPage.value ? 1 : 0,
   }
 })
+
+const editorStore = useEditorStore()
+const {showGenResult } = storeToRefs(editorStore)
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/transitions.scss';
+@use '@/assets/scss/main.scss';
+@use '@/assets/scss/transitions.scss';
+
 .mask {
   @apply w-full h-full fixed top-0 left-0 z-10  backdrop-blur-sm;
   transition: backdrop-filter 0.25;

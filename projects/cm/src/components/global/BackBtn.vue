@@ -10,10 +10,11 @@ router-link(
     @click="handleBackAction(() => navigate())")
 </template>
 <script setup lang="ts">
-import useStateInfo from '@/composable/useStateInfo'
-import { useImgSelectorStore } from '@/stores/imgSelector'
-import { useModalStore } from '@/stores/modal'
-import { storeToRefs } from 'pinia'
+import useStateInfo from '@/composable/useStateInfo';
+import { useEditorStore } from '@/stores/editor';
+import { useImgSelectorStore } from '@/stores/imgSelector';
+import { useModalStore } from '@/stores/modal';
+import { storeToRefs } from 'pinia';
 
 /**
  * @Note - how to use this component?
@@ -43,6 +44,10 @@ const { setShowImgSelector } = imgSelectorStore
 const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #endregion
 
+const editorStore = useEditorStore()
+const {setShowGenResult} = editorStore
+const { showGenResult } = storeToRefs(editorStore)
+
 const { t } = useI18n()
 
 const handleBackAction = (navagate: () => void) => {
@@ -50,6 +55,12 @@ const handleBackAction = (navagate: () => void) => {
     customCallback()
     return
   }
+
+  if(showGenResult.value) {
+    setShowGenResult(false)
+    return
+  }
+
   if (showImgSelector.value) {
     setShowImgSelector(false)
     return
