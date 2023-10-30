@@ -25,7 +25,7 @@ then
             }
           }
         }'
-else if [[ "$BITBUCKET_BRANCH" == "qa-stk" ]]
+elif [[ "$BITBUCKET_BRANCH" == "qa-stk" ]]
 then
     echo "create pull request to main/stk"
     curl --request POST \
