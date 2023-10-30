@@ -1094,7 +1094,7 @@ pipelines:
               name: "pr to qa-stk (Vivisticker)"
               trigger: manual
               script:
-                - ./tools/bash/pr_develop_to_stk.sh
+                - ./tools/bash/pr_others.sh
           - step:
               name: "pr to main/cm (Charmix)"
               trigger: manual
