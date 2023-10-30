@@ -18,7 +18,7 @@ const useCanvasUtils = (
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { canvasMode, firstPaintArea, maskCanvas, maskDataUrl, currActiveFeature } =
+  const { canvasMode,  maskCanvas, maskDataUrl, currActiveFeature } =
     storeToRefs(editorStore)
   // #endregion
 
@@ -225,7 +225,6 @@ const useCanvasUtils = (
       useEventListener(editorContainerRef, 'touchstart', disableTouchEvent)
       if (canvasCtx && canvasCtx.value) {
         canvasCtx.value.fillStyle = '#ff7262'
-        canvasCtx.value.fillRect(0, 0, firstPaintArea.value.width, firstPaintArea.value.height)
       }
 
       // reverseSelection()

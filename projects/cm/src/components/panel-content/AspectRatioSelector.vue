@@ -22,11 +22,10 @@ import { useEditorStore } from '@/stores/editor';
 import pageUtils from '@nu/vivi-lib/utils/pageUtils';
 import { storeToRefs } from 'pinia';
 const editorStore = useEditorStore()
-const { setFirstPaintArea } = editorStore
 // #region vivi-lib vuex
 // #endregion
 
-const { imgAspectRatio, firstPaintArea, pageSize } = storeToRefs(editorStore)
+const { imgAspectRatio } = storeToRefs(editorStore)
 
 const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5', '5_4']
 const selectedType = ref('9_16')
@@ -57,22 +56,6 @@ const selectAspectRatio = (type: string) => {
    * else fit inner content's height, and the inner content and outer content's height are the same
    *
    */
-  let wDiff = 0
-  let hDiff = 0
-  if (imgAspectRatio.value > pageSize.value.width / pageSize.value.height) {
-    const tmpW = pageSize.value.width
-    const tmpH = tmpW / imgAspectRatio.value
-
-    wDiff = pageSize.value.width - tmpW
-    hDiff = pageSize.value.height - tmpH
-    setFirstPaintArea(pageSize.value.width, hDiff / 2)
-  } else {
-    const tmpH = pageSize.value.height
-    const tmpW = tmpH * imgAspectRatio.value
-    wDiff = pageSize.value.width - tmpW
-    hDiff = pageSize.value.height - tmpH
-    setFirstPaintArea(wDiff / 2, pageSize.value.height)
-  }
 }
 
 /**

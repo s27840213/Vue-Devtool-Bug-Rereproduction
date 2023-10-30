@@ -15,10 +15,6 @@ interface IEditorStore {
   editorType: EditorType
   canvasMode: PowerfulFillCanvasMode
   isAdjustingBottomPanel: boolean
-  firstPaintArea: {
-    width: number
-    height: number
-  }
   maskCanvas: HTMLCanvasElement
   maskDataUrl: string
 }
@@ -31,10 +27,6 @@ export const useEditorStore = defineStore('editor', {
     editorType: 'powerful-fill',
     canvasMode: 'brush',
     isAdjustingBottomPanel: true,
-    firstPaintArea: {
-      width: 0,
-      height: 0,
-    },
     maskCanvas: document.createElement('canvas'),
     maskDataUrl: '',
   }),
@@ -70,10 +62,6 @@ export const useEditorStore = defineStore('editor', {
     },
     setCanvasMode(mode: PowerfulFillCanvasMode) {
       this.canvasMode = mode
-    },
-    setFirstPaintArea(width: number, height: number) {
-      Object.assign(this.firstPaintArea, { width, height })
-      console.log(this.firstPaintArea)
     },
     setMaskCanvas(canvas: HTMLCanvasElement) {
       this.maskCanvas = canvas
