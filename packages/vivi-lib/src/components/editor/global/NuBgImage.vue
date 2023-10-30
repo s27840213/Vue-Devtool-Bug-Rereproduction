@@ -392,7 +392,7 @@ export default defineComponent({
       })
     },
     handleIsTransparent(img? : HTMLImageElement) {
-      if (!this.$refs.img) return
+      if (!img && !this.$refs.img) return
 
       this.$store.commit('SET_backgroundImageStyles', {
         pageIndex: this.pageIndex,
