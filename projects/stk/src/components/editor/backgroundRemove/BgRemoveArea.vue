@@ -1,64 +1,64 @@
 <template lang="pug">
 div(class="bg-remove-area"
       :style="wrapperStyles"
+      id="bgRemoveArea"
       ref="bgRemoveArea")
   div(v-show="showInitImage"
     class="bg-remove-area__initPhoto"
     :style="initPhotoStyles")
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
+      id="bgRemoveScaleArea"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}"
       :ref="'scaleArea'")
-    canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
+    canvas(class="bg-remove-area__canvas" ref="canvas" :cy-ready="cyReady" @pointerdown="moveStart")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-teleport(:to="teleportTarget")
-  div(v-show="useMobileEditor || inVivisticker" class="magnify-area" :style="magnifyAreaStyle")
-    canvas(class="magnify-area__canvas"  ref="magnify")
-    div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
+//- teleport(v-if="useMobileEditor || inVivisticker" :to="teleportTarget")
+//-   div(class="magnify-area" :style="magnifyAreaStyle")
+//-     canvas(class="magnify-area__canvas"  ref="magnify")
+//-     div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
 </template>
 
 <script lang="ts">
-import { IBgRemoveInfo } from '@/interfaces/image'
-import logUtils from '@/utils/logUtils'
-import MagnifyUtils from '@/utils/magnifyUtils'
-import mouseUtils from '@/utils/mouseUtils'
-import pageUtils from '@/utils/pageUtils'
-import shortcutUtils from '@/utils/shortcutUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
+import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
+import { bgRemoveMoveHandler } from '@nu/vivi-lib/store/module/bgRemove'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
   props: {
-    editorViewCanvas: {
+    cotainerRef: {
       type: HTMLElement,
       required: true
     },
-    inVivisticker: {
-      default: false,
-      type: Boolean
-    },
+    // inVivisticker: {
+    //   default: false,
+    //   type: Boolean
+    // },
     fitScaleRatio: {
       default: 1,
       type: Number
-    },
-    teleportTarget: {
-      default: '.header-bar',
-      type: String
     }
+    // teleportTarget: {
+    //   default: '.header-bar',
+    //   type: String
+    // }
   },
   data() {
     return {
       cyReady: false,
       root: undefined as unknown as HTMLElement,
       scaleArea: undefined as unknown as HTMLElement,
-      canvasWidth: 1600,
-      canvasHeight: 1600,
       contentCanvas: undefined as unknown as HTMLCanvasElement,
       contentCtx: undefined as unknown as CanvasRenderingContext2D,
       initImgCanvas: undefined as unknown as HTMLCanvasElement,
@@ -67,8 +67,8 @@ export default defineComponent({
       blurCtx: undefined as unknown as CanvasRenderingContext2D,
       clearModeCanvas: undefined as unknown as HTMLCanvasElement,
       clearModeCtx: undefined as unknown as CanvasRenderingContext2D,
-      magnifyCanvas: undefined as unknown as HTMLCanvasElement,
-      magnifyCtx: undefined as unknown as CanvasRenderingContext2D,
+      // magnifyCanvas: undefined as unknown as HTMLCanvasElement,
+      // magnifyCtx: undefined as unknown as CanvasRenderingContext2D,
       initImageElement: undefined as unknown as HTMLImageElement,
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
@@ -85,21 +85,27 @@ export default defineComponent({
       stepsQueue: [] as Array<Promise<unknown>>,
       isProcessingStepsQueue: false,
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
-      magnifyUtils: null as unknown as MagnifyUtils,
-      showMagnifyAtRight: false,
-      clearModeShift: 4
+      // magnifyUtils: null as unknown as MagnifyUtils,
+      // showMagnifyAtRight: false,
+      clearModeShift: 4,
+      pointerStartX: 0,
+      pointerStartY: 0,
+      isDrawing: false,
+      loading: true,
     }
   },
   created() {
     logUtils.setLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
-    if (this.inVivisticker) {
-      this.canvasWidth = width
-      this.canvasHeight = height
-    } else {
+    if (aspectRatio > 1) {
+      this.canvasWidth = 1600
       this.canvasHeight = 1600 / aspectRatio
+    } else {
+      this.canvasWidth = 1600 * aspectRatio
+      this.canvasHeight = 1600
     }
+
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
     logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)
@@ -116,17 +122,17 @@ export default defineComponent({
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
-      this.$isTouchDevice() && this.initMagnifyCanvas()
+      // this.$isTouchDevice() && this.initMagnifyCanvas()
       this.cyReady = true
+      this.loading = false
     }
     this.imageElement.onerror = (ev) => {
       logUtils.setLog('imageElement onerror triggered')
       logUtils.setLog(`${JSON.stringify(ev)}`)
     }
-    this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     this.imageElement.src = this.imgSrc
+    this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     logUtils.setLog(`set image element src: ${this.imgSrc}`)
-    logUtils.setLog(`set image element: ${JSON.stringify(this.imageElement)}`)
 
     this.initImageElement = new Image()
     this.initImageElement.onload = () => {
@@ -137,29 +143,31 @@ export default defineComponent({
     this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
 
     if (this.$isTouchDevice()) {
-      this.editorViewCanvas.addEventListener('touchstart', this.touchEventHandler)
+      this.cotainerRef.addEventListener('touchstart', this.touchEventHandler)
     }
-    this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
+    this.cotainerRef.addEventListener('pointerdown', this.drawStart)
     window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
-      this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
-      this.editorViewCanvas.addEventListener('mouseleave', this.handleBrushLeave)
+      this.cotainerRef.addEventListener('mouseenter', this.handleBrushEnter)
+      this.cotainerRef.addEventListener('mouseleave', this.handleBrushLeave)
     }
     window.addEventListener('keydown', this.handleKeydown)
     this.setPrevPageScaleRatio(this.scaleRatio)
-    pageUtils.fitPage({ handleContentScale: false })
+    pageUtils.fitPage()
   },
   unmounted() {
+    pageUtils.fitPage()
     window.removeEventListener('pointerup', this.drawEnd)
     window.removeEventListener('pointermove', this.setBrushPos)
     window.removeEventListener('pointermove', this.drawing)
-    this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
-    this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
+    this.cotainerRef.removeEventListener('mouseenter', this.handleBrushEnter)
+    this.cotainerRef.removeEventListener('mouseleave', this.handleBrushLeave)
     if (this.$isTouchDevice()) {
-      this.editorViewCanvas.removeEventListener('touchstart', this.touchEventHandler)
+      this.cotainerRef.removeEventListener('touchstart', this.touchEventHandler)
     }
-    this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
+    this.cotainerRef.removeEventListener('pointerdown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
+    this.$store.commit('bgRemove/UPDATE_pinchState', { initPos: { x: -1, y: -1 }, x: 0, y: 0 })
   },
   computed: {
     ...mapGetters({
@@ -174,13 +182,32 @@ export default defineComponent({
       modifiedFlag: 'bgRemove/getModifiedFlag',
       steps: 'bgRemove/getSteps',
       currStep: 'bgRemove/getCurrStep',
+      pinchState: 'bgRemove/getPinchState',
+      isPinchInitialized: 'bgRemove/getIsPinchInitialized',
       inLastStep: 'bgRemove/inLastStep',
       inFirstStep: 'bgRemove/inFirstStep',
-      loading: 'bgRemove/getLoading',
       inGestureMode: 'getInGestureToolMode',
+      canvasSize: 'bgRemove/getCanvasSize',
       contentScaleRatio: 'getContentScaleRatio',
-      useMobileEditor: 'getUseMobileEditor'
+      useMobileEditor: 'getUseMobileEditor',
+      isPinching: 'bgRemove/getIsPinching'
     }),
+    canvasWidth: {
+      get(): number {
+        return this.canvasSize.width
+      },
+      set(width: number): void {
+        this.setCanvasSize({ width })
+      }
+    },
+    canvasHeight: {
+      get(): number {
+        return this.canvasSize.height
+      },
+      set(height: number): void {
+        this.setCanvasSize({ height })
+      }
+    },
     size(): { width: number, height: number } {
       return {
         width: this.canvasWidth,
@@ -197,18 +224,23 @@ export default defineComponent({
         willChange: this.inGestureMode ? 'transform' : ''
       }
     },
-    wrapperStyles(): { [index: string]: string } {
+    renderSize(): { [index: string]: string } {
       return {
         width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`
+        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+      }
+    },
+    wrapperStyles(): { [index: string]: string } {
+      return {
+        ...this.renderSize,
+        ...(this.isPinchInitialized && { transform: `translate(${this.pinchState.x}px, ${this.pinchState.y}px)` })
       }
     },
     initPhotoStyles(): { [index: string]: string } {
       const backgroundImage = this.showInitImage ? `url(${this.initImgSrc})` : ''
       const backgroundSize = this.showInitImage ? 'cover' : 'initial'
       return {
-        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio * this.fitScaleRatio / 100)}px`,
+        ...this.renderSize,
         backgroundImage,
         backgroundSize
       }
@@ -216,28 +248,30 @@ export default defineComponent({
     brushColor(): string {
       return this.clearMode ? '#fcaea9' : '#fdd033'
     },
-    magnifyAreaStyle(): { [index: string]: string } {
-      return !this.$isTouchDevice() ? {
-        bottom: '10px',
-        left: '80px'
-      } : {
-        bottom: this.inVivisticker ? 'none' : '-70px',
-        top: this.inVivisticker ? '20px' : 'none',
-        ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
-        visibility: this.showBrush ? 'visible' : 'hidden'
-      }
-    }
+    // magnifyAreaStyle(): { [index: string]: string } {
+    //   return !this.$isTouchDevice() ? {
+    //     bottom: '10px',
+    //     left: '80px'
+    //   } : {
+    //     bottom: this.inVivisticker ? 'none' : '-70px',
+    //     top: this.inVivisticker ? '20px' : 'none',
+    //     ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
+    //     visibility: this.showBrush ? 'visible' : 'hidden'
+    //   }
+    // }
   },
   watch: {
     brushSize(newVal: number) {
-      this.contentCtx.lineWidth = newVal
-      this.blurCtx.lineWidth = newVal
-      this.clearModeCtx.lineWidth = newVal
-      this.brushStyle.width = `${newVal + this.blurPx}px`
-      this.brushStyle.height = `${newVal + this.blurPx}px`
-      if (this.clearMode) {
-        this.blurPx = 1
-        this.contentCtx.filter = `blur(${this.blurPx}px)`
+      if (this.contentCtx) {
+        this.contentCtx.lineWidth = newVal
+        this.blurCtx.lineWidth = newVal
+        this.clearModeCtx.lineWidth = newVal
+        this.brushStyle.width = `${newVal + this.blurPx}px`
+        this.brushStyle.height = `${newVal + this.blurPx}px`
+        if (this.clearMode) {
+          this.blurPx = 1
+          this.contentCtx.filter = `blur(${this.blurPx}px)`
+        }
       }
     },
     restoreInitState(newVal) {
@@ -256,7 +290,7 @@ export default defineComponent({
         this.setRestoreInitState(false)
         this.setModifiedFlag(false)
         this.pushStep()
-        this.$isTouchDevice() && this.magnifyUtils.reset()
+        // this.$isTouchDevice() && this.magnifyUtils.reset()
         this.currCanvasImageElement = undefined as unknown as HTMLImageElement
       }
     },
@@ -270,6 +304,11 @@ export default defineComponent({
       } else {
         this.contentCtx.globalCompositeOperation = 'source-over'
         this.contentCtx.filter = 'none'
+      }
+    },
+    inGestureMode(val) {
+      if (val) {
+        this.showBrush = false
       }
     },
     brushColor(newVal) {
@@ -292,7 +331,12 @@ export default defineComponent({
         this.isProcessingStepsQueue = false
       },
       deep: true
-    }
+    },
+    // fitScaleRatio(newVal) {
+    //   if (this.magnifyUtils) {
+    //     this.magnifyUtils.updateFitScaleRatio(newVal)
+    //   }
+    // },
   },
   methods: {
     ...mapMutations({
@@ -303,6 +347,7 @@ export default defineComponent({
       setCurrStep: 'bgRemove/SET_currStep',
       setPrevPageScaleRatio: 'bgRemove/SET_prevPageScaleRatio',
       clearSteps: 'bgRemove/CLEAR_steps',
+      setCanvasSize: 'bgRemove/SET_canvasSize',
       setInGestureMode: 'SET_inGestureMode'
     }),
     initCanvas() {
@@ -316,11 +361,8 @@ export default defineComponent({
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       logUtils.setLog('setup contentCtx')
-      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.contentCtx = ctx
-      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       // this.ctx.globalCompositeOperation = 'destination-out'
-      logUtils.setLog(`ctx: ${JSON.stringify(this.contentCtx)}`)
 
       this.drawImageToCtx()
       this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -351,15 +393,14 @@ export default defineComponent({
 
       this.clearModeCtx = ctx
     },
-    initMagnifyCanvas() {
-      this.magnifyCanvas = this.$refs.magnify as HTMLCanvasElement
-      console.log(this.magnifyCanvas)
-      const ctx = this.magnifyCanvas.getContext('2d') as CanvasRenderingContext2D
+    // initMagnifyCanvas() {
+    //   this.magnifyCanvas = this.$refs.magnify as HTMLCanvasElement
+    //   const ctx = this.magnifyCanvas.getContext('2d') as CanvasRenderingContext2D
 
-      this.magnifyCtx = ctx
+    //   this.magnifyCtx = ctx
 
-      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
-    },
+    //   this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
+    // },
     createInitImageCtx() {
       logUtils.setLog('createInitImageCtx')
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
@@ -379,7 +420,7 @@ export default defineComponent({
       ctx.beginPath()
       ctx.moveTo(this.initPos.x + shift, this.initPos.y + shift)
       const { x, y, xPercentage, yPercentage } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
-      this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
+      // this.showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
       ctx.lineTo(x + shift, y + shift)
       ctx.stroke()
       Object.assign(this.initPos, {
@@ -389,24 +430,33 @@ export default defineComponent({
 
       this.setModifiedFlag(true)
     },
+    moveStart(evt: PointerEvent) {
+      if (this.movingMode && !this.isPinching) {
+        bgRemoveMoveHandler.moveStart(evt)
+      }
+    },
     // eslint-disable-next-line vue/no-unused-properties
     drawStart(e: PointerEvent) {
-      console.log(`in gesture mode: ${this.inGestureMode}`)
-      if (!this.inGestureMode && !this.movingMode) {
+      if (!this.inGestureMode && !this.movingMode && !this.loading) {
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
+        this.pointerStartX = e.clientX
+        this.pointerStartY = e.clientY
         Object.assign(this.initPos, {
           x,
           y
         })
-        if (this.clearMode) {
-          this.drawInClearMode(e)
-        } else {
-          this.drawInRestoreMode(e)
+        // if we trigger the drawing event in start phase, we couldn't draw the dot bcz it will conflict with the pinch behavior
+        if (!this.$isTouchDevice()) {
+          if (this.clearMode) {
+            this.drawInClearMode(e)
+          } else {
+            this.drawInRestoreMode(e)
+          }
         }
         if (this.$isTouchDevice()) {
           this.showBrush = true
           this.setBrushPos(e)
-          this.magnifyUtils.render(e)
+          // this.magnifyUtils && this.magnifyUtils.render(e)
         }
         window.addEventListener('pointerup', this.drawEnd)
         window.addEventListener('pointermove', this.drawing)
@@ -414,10 +464,24 @@ export default defineComponent({
     },
     drawing(e: MouseEvent) {
       if (!this.inGestureMode && !this.movingMode) {
-        if (this.clearMode) {
-          this.drawInClearMode(e)
-        } else {
-          this.drawInRestoreMode(e)
+        const pointerCurrentX = e.clientX
+        const pointerCurrentY = e.clientY
+
+        const distanceX = Math.abs(pointerCurrentX - this.pointerStartX)
+        const distanceY = Math.abs(pointerCurrentY - this.pointerStartY)
+
+        this.pointerStartX = pointerCurrentX
+        this.pointerStartY = pointerCurrentY
+
+        const threshold = 0.5
+        if (!this.$isTouchDevice() || this.isDrawing || distanceX > threshold || distanceY > threshold) {
+          this.isDrawing = true
+          // Trigger your pointermove event here
+          if (this.clearMode) {
+            this.drawInClearMode(e)
+          } else {
+            this.drawInRestoreMode(e)
+          }
         }
       }
     },
@@ -426,6 +490,7 @@ export default defineComponent({
       window.removeEventListener('pointermove', this.drawing)
       this._setCanvas(this.contentCanvas)
       this.pushStep()
+      this.isDrawing = false
       if (this.$isTouchDevice()) {
         this.showBrush = false
       }
@@ -435,8 +500,6 @@ export default defineComponent({
       this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
     },
     drawImageToCtx(img?: HTMLImageElement) {
-      logUtils.setLog('draw imag to ctx: ')
-      logUtils.setLog('contentCtx: ' + JSON.stringify(this.contentCtx))
       this.setCompositeOperationMode('source-over')
       this.contentCtx.drawImage(img ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       this._setCanvas(this.contentCanvas)
@@ -447,7 +510,6 @@ export default defineComponent({
       }
     },
     drawInClearMode(e: MouseEvent) {
-      logUtils.setLog('draw in clear mode')
       this.cyReady = false
       this.setCompositeOperationMode('source-over', this.contentCtx)
       this.contentCtx.filter = 'none'
@@ -462,7 +524,6 @@ export default defineComponent({
       this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
-      logUtils.setLog('draw in restore mode')
       this.clearCtx(this.blurCtx)
       this.drawLine(e, this.blurCtx)
       this.setCompositeOperationMode('source-in', this.blurCtx)
@@ -487,8 +548,7 @@ export default defineComponent({
        * @Note GlobalCompositeOperation type has some problems
        */
       logUtils.setLog('setCompositeOperationMode: ' + mode)
-      logUtils.setLog('ctx: ' + JSON.stringify(ctx))
-      logUtils.setLog('contenCtxx: ' + JSON.stringify(this.contentCtx))
+
       if (ctx) {
         ctx.globalCompositeOperation = mode as any
       } else {
@@ -581,9 +641,9 @@ export default defineComponent({
       this.showBrush = false
     },
     touchEventHandler(e: TouchEvent) {
-      if (this.movingMode) {
-        return
-      }
+      // if (this.movingMode) {
+      //   return
+      // }
       if (e.touches.length === 2) {
         this.setInGestureMode(true)
         return
@@ -599,9 +659,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .bg-remove-area {
-  position: relative;
+  position: absolute;
+  // position: relative;
   box-sizing: content-box;
-  margin: auto auto;
+  // margin: auto auto;
+
+  &__canvas {
+    position: relative;
+    box-sizing: content-box;
+  }
 
   &__initPhoto {
     position: absolute;
@@ -643,7 +709,7 @@ export default defineComponent({
     pointer-events: none;
     border-radius: 50%;
     opacity: 0.6;
-    will-change: left, top;
+    will-change: transform;
   }
 
   &__loading {
@@ -661,8 +727,8 @@ export default defineComponent({
 
 .magnify-area {
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 90px;
+  height: 90px;
   overflow:hidden;
   transform-origin: top left;
   border: 1px solid setColor(gray-2);
@@ -673,8 +739,8 @@ export default defineComponent({
 
   &__brush {
     position: absolute;
-    width: calc(100% *  (2/3) + 3px);
-    height: calc(100% *  (2/3) + 3px);
+    width: calc(100% *  (5/9) + 3px);
+    height: calc(100% *  (5/9) + 3px);
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);

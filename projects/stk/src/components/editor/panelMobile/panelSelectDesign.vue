@@ -11,17 +11,17 @@ div(class="panel-select-design")
       :class="{disabled: !isAnySelected}"
       @click.prevent.stop="handleDeleteSelected")
     div(class="panel-select-design__right__icon")
-      svg-icon(iconName="trash" :iconColor="isAnySelected ? 'white' : 'gray-2'" iconWidth="19.5px")
+      svg-icon(iconName="trash" :iconColor="isAnySelected ? 'black-2-5' : 'black-3-5'" iconWidth="19.5px")
     div(class="panel-select-design__right__text"
         :class="{disabled: !isAnySelected}")
       span {{ $t('NN0034') }}
 </template>
 
 <script lang="ts">
-import { IMyDesign } from '@/interfaces/vivisticker'
-import editorUtils from '@/utils/editorUtils'
-import modalUtils from '@/utils/modalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IMyDesign } from '@nu/vivi-lib/interfaces/vivisticker'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -86,7 +86,7 @@ export default defineComponent({
     },
     confirmDeletion() {
       for (const design of Object.values(this.selectedDesigns) as IMyDesign[]) {
-        vivistickerUtils.deleteAsset(`mydesign-${this.myDesignTab}`, design.id, 'mydesign')
+        stkWVUtils.deleteAsset(`mydesign-${this.myDesignTab}`, design.id, 'mydesign')
       }
       this.deleteDesigns(this.myDesignTab)
       this.leaveSelectionMode()
@@ -123,13 +123,13 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       &.checked {
-        background: setColor(black-3);
+        background: setColor(black-3-5);
         border: none;
       }
     }
     &__text {
       @include body-SM;
-      color: setColor(gray-2);
+      color: setColor(white);
     }
   }
   &__right {
@@ -137,12 +137,12 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: setColor(black-2);
+    background: setColor(white);
     border-radius: 10px;
     height: 42px;
     padding: 0 16px;
     &.disabled {
-      background: setColor(black-6);
+      background: setColor(black-3);
     }
     &__icon {
       @include size(19.5px);
@@ -153,9 +153,9 @@ export default defineComponent({
     &__text {
       @include body-SM;
       transition: color 0.2s;
-      color: setColor(white);
+      color: setColor(black-2-5);
       &.disabled {
-        color: setColor(gray-2);
+        color: setColor(black-3-5);
       }
     }
   }

@@ -29,10 +29,9 @@ div(class="vivisticker" :style="copyingStyles()")
     :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
     :inAllPagesMode="false")
   div(id="vivisticker__mobile-panel-bottom")
-  div(v-if="pushModalInfo && isShowPushModal" class="vivisticker__push-modal-container" :style="pushModalInfo?.backdropStyle")
-    modal-card(v-model:show="isShowPushModal" :initModalInfo="pushModalInfo")
   transition(name="slide-left")
-    component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
+    template(v-if="isSlideShown")
+      component(:is="slideType" class="vivisticker__slide")
   transition(name="panel-up")
     tutorial(v-if="showTutorial")
   transition(name="panel-up")
@@ -41,30 +40,28 @@ div(class="vivisticker" :style="copyingStyles()")
 </template>
 
 <script lang="ts">
-import ModalCard from '@/components/modal/ModalCard.vue'
-import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
-import FullPage from '@/components/vivisticker/FullPage.vue'
-import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
-import LoadingOverlay from '@/components/vivisticker/LoadingOverlay.vue'
-import MainMenu from '@/components/vivisticker/MainMenu.vue'
-import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
-import MyDesign from '@/components/vivisticker/MyDesign.vue'
-import ShareTemplate from '@/components/vivisticker/ShareTemplate.vue'
-import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
-import Tutorial from '@/components/vivisticker/Tutorial.vue'
-import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
-import { CustomWindow } from '@/interfaces/customWindow'
-import { IFooterTabProps } from '@/interfaces/editor'
-import { IModalInfo } from '@/interfaces/modal'
+import VvstkEditor from '@/components/editor/editor/VvstkEditor.vue'
+import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
+import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
+import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
+import FullPage from '@/components/fullPage/FullPage.vue'
+import LoadingOverlay from '@/components/global/LoadingOverlay.vue'
+import MainMenu from '@/components/mainMenu/MainMenu.vue'
+import MyDesign from '@/components/mydesign/MyDesign.vue'
+import SlideUserSettings from '@/components/slide/SlideUserSettings.vue'
+import Tutorial from '@/components/tutorial/Tutorial.vue'
 import { IPage } from '@/interfaces/page'
-import constantData from '@/utils/constantData'
-import editorUtils from '@/utils/editorUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import logUtils from '@/utils/logUtils'
-import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import textUtils from '@/utils/textUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
+import { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
+import constantData from '@nu/vivi-lib/utils/constantData'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { find } from 'lodash'
 import VConsole from 'vconsole'
 import { defineComponent } from 'vue'
@@ -84,9 +81,7 @@ export default defineComponent({
     Tutorial,
     FullPage,
     SlideUserSettings,
-    ShareTemplate,
-    LoadingOverlay,
-    ModalCard
+    LoadingOverlay
   },
   data() {
     return {
@@ -99,29 +94,27 @@ export default defineComponent({
       footerTabsRef: undefined as unknown as HTMLElement,
       mounted: false,
       isMobilePanelBottom: false,
-      pushModalInfo: undefined as IModalInfo | undefined,
-      isShowPushModal: true
     }
   },
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
     textUtils.loadDefaultFonts()
-    vivistickerUtils.registerCallbacks('vvstk')
+    stkWVUtils.registerCallbacks('vvstk')
   },
   async mounted() {
     this.mounted = true
-    const tempDesign = await vivistickerUtils.fetchDesign()
+    const tempDesign = await stkWVUtils.fetchDesign()
     if (tempDesign) {
       try {
-        vivistickerUtils.initWithTempDesign(tempDesign)
+        stkWVUtils.initWithTempDesign(tempDesign)
       } catch (error) {
         logUtils.setLogAndConsoleLog(error)
       }
     }
 
-    if (!vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0')) {
-      vivistickerUtils.showUpdateModal(true)
-      vivistickerUtils.sendAppLoaded()
+    if (!stkWVUtils.checkVersion(this.modalInfo.ver_min || '0')) {
+      stkWVUtils.showUpdateModal(true)
+      stkWVUtils.sendAppLoaded()
     } else this.showInitPopups()
 
     stepsUtils.MAX_STORAGE_COUNT = 15
@@ -152,7 +145,7 @@ export default defineComponent({
     }, false)
     document.addEventListener('scroll', this.handleScroll)
 
-    const debugMode = process.env.NODE_ENV === 'development' ? true : (await vivistickerUtils.getState('debugMode'))?.value ?? false
+    const debugMode = process.env.NODE_ENV === 'development' ? true : (await stkWVUtils.getState('debugMode'))?.value ?? false
     this.setDebugMode(debugMode)
     this.footerTabsRef = (this.$refs.footerTabs as any).$el as HTMLElement
 
@@ -160,6 +153,7 @@ export default defineComponent({
       this.vConsole = new VConsole({ theme: 'dark' })
       this.vConsole.setSwitchPosition(25, 80)
     }
+    this.setEditorSizeInit()
   },
   unmounted() {
     document.removeEventListener('scroll', this.handleScroll)
@@ -198,6 +192,7 @@ export default defineComponent({
       modalInfo: 'vivisticker/getModalInfo',
       debugMode: 'vivisticker/getDebugMode',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
+      modalOpen: 'modal/getModalOpen',
     }),
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
@@ -286,28 +281,28 @@ export default defineComponent({
       if (constantData.checkIfUseNewLogic()) {
         switch (panelType) {
           case 'text':
-            if (!vivistickerUtils.tutorialFlags.text && !this.debugMode) {
-              vivistickerUtils.openFullPageVideo('tutorial2', { delayedClose: 5000 })
-              vivistickerUtils.updateTutorialFlags({ text: true })
+            if (!stkWVUtils.tutorialFlags.text && !this.debugMode) {
+              stkWVUtils.openFullPageVideo('tutorial2', { delayedClose: 5000 })
+              stkWVUtils.updateTutorialFlags({ text: true })
             }
             break
           case 'background':
-            if (!vivistickerUtils.tutorialFlags.background && !this.debugMode) {
-              vivistickerUtils.openFullPageVideo('tutorial4', { delayedClose: 5000 })
-              vivistickerUtils.updateTutorialFlags({ background: true })
+            if (!stkWVUtils.tutorialFlags.background && !this.debugMode) {
+              stkWVUtils.openFullPageVideo('tutorial4', { delayedClose: 5000 })
+              stkWVUtils.updateTutorialFlags({ background: true })
             }
             break
         }
       }
       if (this.currActivePanel === 'color-picker') {
-        vivistickerUtils.setHasNewBgColor(false)
+        stkWVUtils.setHasNewBgColor(false)
         this.switchTab('none')
       }
     },
     outerClick() {
       console.log('outer click')
       if (this.isInEditor) {
-        vivistickerUtils.deselect()
+        stkWVUtils.deselect()
       }
     },
     handleScroll() {
@@ -354,7 +349,7 @@ export default defineComponent({
         this.showMobilePanelAfterTransitoin = false
       }, 300)
     },
-    async getPushModalInfo() {
+    async showPushModalInfo(): Promise<boolean> {
       // parse modal info
       let locale = this.userInfo.locale
       if (!['us', 'tw', 'jp'].includes(locale)) {
@@ -369,10 +364,10 @@ export default defineComponent({
       )
 
       // show popup
-      const lastModalMsg = await vivistickerUtils.getState('lastModalMsg')
+      const lastModalMsg = await stkWVUtils.getState('lastModalMsg')
       const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
       const btn_txt = modalInfo.btn_txt
-      if (!btn_txt || shown) return
+      if (!btn_txt || shown) return false
 
       const options = {
         imgSrc: modalInfo.img_url,
@@ -387,10 +382,10 @@ export default defineComponent({
         checked: false,
         onCheckedChange: (checked: boolean) => { console.log(checked) }
       }
-      this.pushModalInfo = {
-        title: modalInfo.title,
-        content: [modalInfo.msg],
-        confirmButton: {
+      modalUtils.setModalInfo(
+        modalInfo.title,
+        [modalInfo.msg],
+        {
           msg: btn_txt,
           class: 'btn-black-mid',
           style: {
@@ -401,7 +396,7 @@ export default defineComponent({
             if (url) { window.open(url, '_blank') }
           }
         },
-        cancelButton: {
+        {
           msg: modalInfo.btn2_txt || '',
           class: 'btn-light-mid',
           style: {
@@ -410,30 +405,59 @@ export default defineComponent({
             backgroundColor: '#D3D3D3'
           }
         },
-        ...options
-      }
-      await vivistickerUtils.setState('lastModalMsg', { value: modalInfo.msg })
+        options
+      )
+      stkWVUtils.setState('lastModalMsg', { value: modalInfo.msg })
+      return true
     },
     async showInitPopups() {
-      this.getPushModalInfo()
       const isFirstOpen = this.userInfo.isFirstOpen
-      const subscribed = (await vivistickerUtils.getState('subscribeInfo'))?.subscribe ?? false
+      const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
       const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
       const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
-      const showPaymentInfo = await vivistickerUtils.getState('showPaymentInfo')
+      const showPaymentInfo = await stkWVUtils.getState('showPaymentInfo')
       const showPaymentTime = showPaymentInfo?.timestamp ?? 0
       const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
       const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
       const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
         : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
       const isShowTutorial = isFirstOpen && this.$i18n.locale !== 'us'
-      if (isShowPaymentView) {
-        vivistickerUtils.openPayment()
-        vivistickerUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
-      } else vivistickerUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
-      if (isShowTutorial) this.setShowTutorial(true)
-      if (!isShowPaymentView && !isShowTutorial) vivistickerUtils.sendAppLoaded()
-    }
+      const show = () =>{
+        if (isShowPaymentView) {
+          stkWVUtils.openPayment()
+          stkWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+        } else stkWVUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
+        if (isShowTutorial) this.setShowTutorial(true)
+        if (!isShowPaymentView && !isShowTutorial) stkWVUtils.sendAppLoaded()
+      }
+
+      const isPushModalShown = await this.showPushModalInfo()
+      if (isPushModalShown) {
+        stkWVUtils.sendAppLoaded()
+        const unwatch = this.$watch('modalOpen', (newVal) => {
+          if(!newVal) show()
+          unwatch()
+        })
+      }
+      else show()
+    },
+    setEditorSizeInit() {
+      const rect = (this.$refs.vivisticker__content as HTMLElement).getBoundingClientRect()
+      editorUtils.setMobilePhysicalData({
+        size: {
+          width: rect.width,
+          height: rect.height,
+        },
+        centerPos: {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        },
+        pos: {
+          x: rect.left,
+          y: rect.top
+        }
+      })
+    },
   }
 })
 </script>
@@ -511,7 +535,7 @@ export default defineComponent({
     transform: translateX(0);
   }
   &-leave-to,
-  &-enter {
+  &-enter-from {
     transform: translateX(100%);
   }
 }

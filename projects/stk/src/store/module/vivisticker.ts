@@ -1,7 +1,8 @@
 import { IAsset } from '@/interfaces/module'
-import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
-import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import constantData from '@nu/vivi-lib/utils/constantData'
+import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import _ from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
@@ -64,8 +65,8 @@ function getDefaultDict<T>(defaultValue: T): { [key: string]: T } {
 } // T will be auto inferred from defaultValue without specifying in <T> when calling
 
 const getDefaultState = (): IViviStickerState => ({
-  userInfo: vivistickerUtils.getDefaultUserInfo(),
-  userSettings: vivistickerUtils.getDefaultUserSettings(),
+  userInfo: stkWVUtils.getDefaultUserInfo(),
+  userSettings: stkWVUtils.getDefaultUserSettings(),
   currActiveTab: 'object',
   currActiveObjectFavTab: '',
   currActiveBackgroundTab: '',
@@ -94,8 +95,8 @@ const getDefaultState = (): IViviStickerState => ({
   myDesignTab: 'text',
   isInSelectionMode: false,
   slideType: 'none',
-  myDesignFiles: vivistickerUtils.getDefaultMyDesignFiles(),
-  myDesignNextPages: vivistickerUtils.getDefaultMyDesignNextPages(),
+  myDesignFiles: stkWVUtils.getDefaultMyDesignFiles(),
+  myDesignNextPages: stkWVUtils.getDefaultMyDesignNextPages(),
   myDesignBuffer: undefined,
   editingDesignId: '',
   editingAssetInfo: {},
@@ -113,6 +114,10 @@ const getDefaultState = (): IViviStickerState => ({
         value: NaN,
         text: ''
       },
+      annuallyFree0: {
+        value: NaN,
+        text: ''
+      }
     },
     defaultPrices: {},
     trialDays: NaN,
@@ -121,6 +126,11 @@ const getDefaultState = (): IViviStickerState => ({
       info: true,
       purchase: false,
       restore: false
+    },
+    planId: {
+      monthly: constantData.planId.monthly,
+      annually: constantData.planId.annually,
+      annuallyFree0: constantData.planId.annuallyFree0
     }
   },
   uuid: '',
@@ -291,7 +301,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
 const actions: ActionTree<IViviStickerState, unknown> = {
   async updateUserSettings({ commit, getters }, settings: Partial<IUserSettings>) {
     commit('UPDATE_userSettings', settings)
-    await vivistickerUtils.setState('userSettings', getters.getUserSettings)
+    await stkWVUtils.setState('userSettings', getters.getUserSettings)
   }
 }
 

@@ -14,12 +14,12 @@ div(class="panel-bg__item"
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
-import i18n from '@/i18n'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
+import i18n from '@nu/vivi-lib/i18n'
 import { IAsset } from '@/interfaces/module'
-import assetUtils from '@/utils/assetUtils'
-import imageUtils from '@/utils/imageUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
@@ -56,10 +56,10 @@ export default defineComponent({
   },
   methods: {
     handleNotFound() {
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = require('@img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
-      if (!vivistickerUtils.checkPro(this.item, 'object')) return
+      if (!stkWVUtils.checkPro(this.item, 'object')) return
       if (this.isInEditor) {
         if (this.locked) {
           return notify({ group: 'copy', text: i18n.global.tc('NN0804') })
@@ -76,11 +76,11 @@ export default defineComponent({
         }
         return assetUtils.addAsset(this.item, { previewSrc, imgSrcSize }, 'background')
       }
-      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
+      stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrl(this.item))
       assetUtils.addAssetToRecentlyUsed(this.item, 'background')
     },
     handleShare() {
-      if (!vivistickerUtils.checkPro(this.item, 'object')) return
+      if (!stkWVUtils.checkPro(this.item, 'object')) return
       this.$emit('share', this.item)
     }
   }

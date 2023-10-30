@@ -9,10 +9,10 @@ div(class="panel-text__item"
 </template>
 
 <script lang="ts">
-import ProItem from '@/components/payment/ProItem.vue'
-import AssetUtils from '@/utils/assetUtils'
-import textPropUtils from '@/utils/textPropUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
+import AssetUtils from '@nu/vivi-lib/utils/assetUtils'
+import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -56,20 +56,20 @@ export default defineComponent({
   },
   methods: {
     handleNotFound(event: Event) {
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = require('@img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addText() {
-      if (!vivistickerUtils.checkPro(this.item, 'text')) return
+      if (!stkWVUtils.checkPro(this.item, 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(this.item).then(() => {
           textPropUtils.updateTextPropsState()
         })
       } else {
-        vivistickerUtils.startEditing('text', {
+        stkWVUtils.startEditing('text', {
           plan: this.item.plan,
           assetId: this.item.id,
           fit: this.item.fit ?? 0,
-        }, vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
+        }, stkWVUtils.getAssetInitiator(this.item), stkWVUtils.getAssetCallback(this.item))
       }
     }
   }

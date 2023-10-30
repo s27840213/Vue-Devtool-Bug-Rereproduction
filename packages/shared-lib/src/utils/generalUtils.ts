@@ -424,8 +424,7 @@ class GeneralUtils {
   // greaterThan actually means "greater than or equal to", the same as lessThan.
   // So { greaterThan: '16.0', lessThan: '16.3' } means 16.0 <= v <= 16.3.
   versionCheck(data: { greaterThan?: string; lessThan?: string; version: string }): boolean {
-    const { lessThan, greaterThan } = data
-    let { version } = data
+    const { lessThan, greaterThan, version } = data
 
     const vArr = version.split('.')
     if (lessThan) {

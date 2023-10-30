@@ -4,19 +4,19 @@ div(class="color-panel"
     v-click-outside="vcoConfig"
     ref="colorPanel")
   img(v-if="showPanelBtn" class="color-panel__btn"
-    :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
+    :src="require(`@img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
     @click="closePanel()")
   div(class="color-panel__scroll" :class="{'p-0': noPadding}")
     //- Recently colors
     div(class="color-panel__colors"
-        :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+        :style="{'color': whiteTheme ? '#474A57' : '#ffffff'}")
       div(class="text-left")
         div(class="flex-center")
           svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
                 iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
                 class="mr-5" @click="lessRecently()")
           span {{$t('NN0679')}}
-        span(v-if="!showAllRecentlyColor" class="btn-XS" @click="moreRecently()") {{$t('NN0082')}}
+        span(v-if="!showAllRecentlyColor" class="body-XS" @click="moreRecently()") {{$t('NN0082')}}
       div
         color-btn(color="add" :active="openColorPicker"
                   @click="openColorPanel($event)")
@@ -26,7 +26,7 @@ div(class="color-panel"
     template(v-if="!showAllRecentlyColor")
       //- Document colors
       div(class="color-panel__colors"
-          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+          :style="{'color': whiteTheme ? '#474A57' : '#ffffff'}")
         div(class="text-left")
           span {{$t('NN0091')}}
         div
@@ -35,7 +35,7 @@ div(class="color-panel"
                     @click="handleColorEvent(color)")
       //- Preset Colors
       div(class="color-panel__colors"
-          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+          :style="{'color': whiteTheme ? '#474A57' : '#ffffff'}")
         div(class="text-left")
           span {{$t('NN0089')}}
         div
@@ -44,7 +44,7 @@ div(class="color-panel"
                     @click="handleColorEvent(color)")
           img(v-if="selectingBg"
             class="full-width full-height"
-            src="@/assets/img/svg/transparent.svg"
+            src="@img/svg/transparent.svg"
             @click="handleColorEvent('#ffffff00')")
   color-picker(v-if="openColorPicker"
     class="color-panel__color-picker"
@@ -56,14 +56,14 @@ div(class="color-panel"
 </template>
 
 <script lang="ts">
-import ColorPicker from '@/components/ColorPicker.vue'
-import ColorBtn from '@/components/global/ColorBtn.vue'
-import { IPage } from '@/interfaces/page'
-import { ColorEventType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
-import editorUtils from '@/utils/editorUtils'
-import layerUtils from '@/utils/layerUtils'
-import mouseUtils from '@/utils/mouseUtils'
+import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { ColorEventType } from '@nu/vivi-lib/store/types'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -145,7 +145,7 @@ export default defineComponent({
       }
     },
     whiteTheme(): boolean {
-      return ['PanelColor'].includes(this.mode)
+      return false
     },
     noPadding(): boolean {
       return ['PanelColor', 'PanelBG'].includes(this.mode)
@@ -273,13 +273,11 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .color-panel {
-  @include body-MD;
   position: relative;
   width: 100%;
   height: 100%;
   z-index: setZindex(color-panel);
   box-sizing: border-box;
-  filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
   &__scroll {
     .mobile-panel & { // only for mobile editor
       @include no-scrollbar;
@@ -312,18 +310,17 @@ export default defineComponent({
       width: 100%;
       display: flex;
       justify-content: space-between;
-      @include body-SM;
-      color: setColor(gray-2);
-      margin-bottom: 16px;
+      align-items: center;
+      @include caption-LG;
+      margin-bottom: 18px;
     }
     > div:nth-child(2) {
       width: 100%;
       display: grid;
       grid-auto-rows: auto;
       grid-template-columns: repeat(7, 1fr);
-      column-gap: 12px;
+      column-gap: 16px;
       row-gap: 12px;
-      padding: 0 12px 4px 12px;
       justify-content: center;
       align-items: center;
       box-sizing: border-box;

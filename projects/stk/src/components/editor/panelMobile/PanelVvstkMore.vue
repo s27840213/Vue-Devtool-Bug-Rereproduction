@@ -9,14 +9,14 @@ div(class="panel-vvstk-more")
         div(class="panel-vvstk-more__option-icon")
           svg-icon(:iconName="option.icon"
                     :iconWidth="iconWidth(option.icon)"
-                    iconColor="gray-2")
+                    iconColor="white")
         div(class="panel-vvstk-more__option-title") {{ option.text }}
     div(class="horizontal-rule")
     div(class="panel-vvstk-more__option version" @pointerdown.prevent="handleDebugMode")
       div(class="panel-vvstk-more__option-icon")
         svg-icon(iconName="vivisticker_version"
                   iconWidth="24px"
-                  iconColor="gray-3")
+                  iconColor="black-5")
       span(class="panel-vvstk-more__option-title version") {{ `${userInfo.appVer}/${userInfo.osVer}/${userInfo.modelName} ${buildNumber}${domain} ${hostId}` }}
   template(v-else)
     div(class="panel-vvstk-more__options")
@@ -28,14 +28,14 @@ div(class="panel-vvstk-more")
         div(class="panel-vvstk-more__option-icon")
           svg-icon(:iconName="option.icon"
                     iconWidth="24px"
-                    iconColor="gray-2")
+                    iconColor="white")
         div(class="panel-vvstk-more__option-title") {{ option.text }}
 </template>
 
 <script lang="ts">
-import editorUtils from '@/utils/editorUtils'
-import localeUtils from '@/utils/localeUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import localeUtils from '@nu/vivi-lib/utils/localeUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -82,7 +82,7 @@ export default defineComponent({
       return this.userInfo.hostId
     },
     mainOptions(): OptionConfig[] {
-      return [...vivistickerUtils.checkOSVersion('16.0') ? [
+      return [...stkWVUtils.checkOSVersion('16.0') ? [
         {
           text: `${this.$t('STK0032')}`,
           icon: 'vivisticker_play-circle',
@@ -97,7 +97,7 @@ export default defineComponent({
       {
         text: 'Vivisticker Pro',
         icon: 'pro',
-        action: () => { vivistickerUtils.openPayment() }
+        action: () => { stkWVUtils.openPayment() }
       },
       {
         text: `${this.$t('NN0174')}`,
@@ -253,10 +253,11 @@ export default defineComponent({
       editorUtils.setCloseMobilePanelFlag(true)
     },
     handleShowIOS16Tutorial() {
-      vivistickerUtils.openFullPageVideo('iOS')
+      stkWVUtils.openFullPageVideo('iOS')
     },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')
+      editorUtils.setCloseMobilePanelFlag(true)
     },
     handleList(listType: string) {
       this.$emit('pushHistory', listType)
@@ -275,7 +276,7 @@ export default defineComponent({
     },
     handleUpdateLocale(locale: string) {
       if (locale === this.$i18n.locale) return
-      vivistickerUtils.updateLocale(locale).then((success) => {
+      stkWVUtils.updateLocale(locale).then((success) => {
         success && location.reload()
       })
     },
@@ -296,19 +297,19 @@ export default defineComponent({
     },
     toggleDebugMode() {
       this.debugMode = !this.debugMode
-      vivistickerUtils.setState('debugMode', { value: this.debugMode })
+      stkWVUtils.setState('debugMode', { value: this.debugMode })
       if (this.debugMode) {
-        vivistickerUtils.recordDebugModeEntrance()
+        stkWVUtils.recordDebugModeEntrance()
       }
     },
     switchDomain(domain: string) {
-      vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain })
+      stkWVUtils.sendToIOS('SWITCH_DOMAIN', { domain })
     },
     sendTestEvent(option: string) {
-      vivistickerUtils.sendToIOS('EVENT_TEST', { option })
+      stkWVUtils.sendToIOS('EVENT_TEST', { option })
     },
     handleImportDesign() {
-      vivistickerUtils.importDesign()
+      stkWVUtils.importDesign()
       editorUtils.setCloseMobilePanelFlag(true)
     },
     iconWidth(icon: string): string {
@@ -340,10 +341,10 @@ export default defineComponent({
     align-items: center;
     justify-content: flex-start;
     &:not(.version):active {
-      background: setColor(black-6);
+      background: setColor(black-3-5);
     }
     &.selected {
-      background: setColor(black-6);
+      background: setColor(black-3-5);
     }
   }
   &__option-icon {
@@ -354,14 +355,10 @@ export default defineComponent({
   }
   &__option-title {
     @include body-SM;
-    color: setColor(gray-2);
+    color: setColor(white);
     &.version {
-      color: setColor(gray-3);
+      color: setColor(black-5);
     }
-  }
-  &__option-link {
-    @include body-SM;
-    color: setColor(gray-1);
   }
 }
 

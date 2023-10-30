@@ -14,8 +14,8 @@ div(class="category-template-item" @click="handleClickGroup")
 </template>
 
 <script lang="ts">
-import ImageCarousel from '@/components/global/ImageCarousel.vue'
-import ProItem from '@/components/payment/ProItem.vue'
+import ImageCarousel from '@nu/vivi-lib/components/global/ImageCarousel.vue'
+import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -53,7 +53,7 @@ export default defineComponent({
   },
   methods: {
     handleNotFound(event: Event) {
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = require('@img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     handleCarouselIdx (idx: number) {
       this.carouselIdx = idx
