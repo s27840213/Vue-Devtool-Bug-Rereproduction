@@ -200,7 +200,7 @@ const runStep = () => {
   reset()
   targetRefs.value = Array.from(document.getElementsByClassName(`tutorial-${name.value}-${step.value}`)) as HTMLElement[]
   const elTargets = targetRefs.value
-  if (!elTargets.length) {
+  if (name.value && !elTargets.length) {
     // finish tutorial
     webViewUtils.updateTutorialFlags({ [name.value]: true })
     return resetTutorial()
