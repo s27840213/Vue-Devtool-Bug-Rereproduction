@@ -807,7 +807,7 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
-            name: "create pull request to develop"
+            name: "create pr to develop"
             trigger: manual
             script:
               - ./tools/bash/pr_others.sh
@@ -1081,17 +1081,22 @@ pipelines:
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
-              name: "pull request to qa (Vivipic)"
+              name: "pr to qa (Vivipic)"
               trigger: manual
               script:
                 - ./tools/bash/pr_develop_to_qa.sh
+          # - step:
+          #     name: "pr to main/stk (Vivisticker)"
+          #     trigger: manual
+          #     script:
+          #       - ./tools/bash/pr_develop_to_stk.sh
           - step:
-              name: "pull request to main/stk (Vivisticker)"
+              name: "pr to qa-stk (Vivisticker)"
               trigger: manual
               script:
-                - ./tools/bash/pr_develop_to_stk.sh
+                - ./tools/bash/pr_others.sh
           - step:
-              name: "pull request to main/cm (Charmix)"
+              name: "pr to main/cm (Charmix)"
               trigger: manual
               script:
                 - ./tools/bash/pr_develop_to_cm.sh
@@ -1138,22 +1143,22 @@ pipelines:
                 - cypress-visual-report/**
                 - cypress-visual-screenshots/**
           - step:
-              name: "pull request to all project"
+              name: "pr to all project"
               trigger: manual
               script:
                 - ./tools/bash/pr_hotfix_to_all.sh
           - step:
-              name: "pull request to main/vivipic (Vivipic)"
+              name: "pr to main/vivipic (Vivipic)"
               trigger: manual
               script:
                 - ./tools/bash/pr_hotfix_to_vivipic.sh
           - step:
-              name: "pull request to main/stk (Vivisticker)"
+              name: "pr to main/stk (Vivisticker)"
               trigger: manual
               script:
                 - ./tools/bash/pr_hotfix_to_stk.sh
           - step:
-              name: "pull request to main/cm (Charmix)"
+              name: "pr to main/cm (Charmix)"
               trigger: manual
               script:
                 - ./tools/bash/pr_hotfix_to_cm.sh
@@ -1227,6 +1232,64 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_VIVIPIC_TEST
                     S3_BUCKET: "qa.vivipic.com"
                     LOCAL_PATH: "projects/pic/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
+                    DELETE_FLAG: "true"
+          - step:
+              name: "create pull request"
+              trigger: manual
+              script:
+                - ./tools/bash/pr_others.sh
+    qa-stk:
+      - parallel:
+          - step:
+              name: "Verify build environment"
+              script: #show node and pnpm version
+                - corepack enable
+                - corepack prepare pnpm@latest-8 --activate
+                - node -v
+                - pnpm -v
+          - step:
+              name: "Start build with node module cache"
+              size: 2x
+              caches: #set caches for node modules to speed up building
+                - node
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              script:
+                - corepack enable
+                - corepack prepare pnpm@latest-8 --activate
+                - pnpm install
+                - pnpm run build-all # Replace with your build/test…etc. commands
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - projects/pic/dist/**
+      - parallel:
+          - step:
+              name: "deploy to qa-stk"
+              deployment: qa-stk
+              trigger: manual
+              script:
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: "stktest.vivipic.com"
+                    LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: "stktest.vivipic.com"
+                    LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: "stktest.vivipic.com"
+                    LOCAL_PATH: "projects/stk/dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
