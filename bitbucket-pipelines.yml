@@ -26,7 +26,7 @@ pipelines:
               - corepack enable
               - corepack prepare pnpm@latest-8 --activate
               - pnpm install
-              - pnpm run build-all # Replace with your build/test…etc. commands
+              - pnpm run build-skip-cache # Replace with your build/test…etc. commands
             artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
               - projects/*/dist/**
     - parallel:
@@ -831,7 +831,7 @@ pipelines:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
                 - pnpm install
-                - pnpm run build-all # Replace with your build/test…etc. commands
+                - pnpm run build-skip-cache # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/pic/dist/**
       - step:
@@ -914,7 +914,7 @@ pipelines:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
                 - pnpm install
-                - pnpm run build-all # Replace with your build/test…etc. commands
+                - pnpm run build-skip-cache # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/stk/dist/**
       - step:
@@ -967,7 +967,7 @@ pipelines:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
                 - pnpm install
-                - pnpm run build-all # Replace with your build/test…etc. commands
+                - pnpm run build-skip-cache # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/*/dist/**
       - parallel:
@@ -1094,7 +1094,7 @@ pipelines:
               name: "pr to qa-stk (Vivisticker)"
               trigger: manual
               script:
-                - ./tools/bash/pr_develop_to_stk.sh
+                - ./tools/bash/pr_others.sh
           - step:
               name: "pr to main/cm (Charmix)"
               trigger: manual
@@ -1119,7 +1119,7 @@ pipelines:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
                 - pnpm install
-                - pnpm run build-all # Replace with your build/test…etc. commands
+                - pnpm run build-skip-cache # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/*/dist/**
       - parallel:
@@ -1181,7 +1181,7 @@ pipelines:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
                 - pnpm install
-                - pnpm run build-all # Replace with your build/test…etc. commands
+                - pnpm run build-skip-cache # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/pic/dist/**
       - parallel:
@@ -1258,7 +1258,7 @@ pipelines:
                 - corepack enable
                 - corepack prepare pnpm@latest-8 --activate
                 - pnpm install
-                - pnpm run build-all # Replace with your build/test…etc. commands
+                - pnpm run build-skip-cache # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/pic/dist/**
       - parallel:
