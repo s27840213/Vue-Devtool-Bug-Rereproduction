@@ -466,15 +466,15 @@ export default defineComponent({
         transform: translateY(-49px) translateZ(0);
       }
     }
-    &::v-deep .vue-recycle-scroller__item-wrapper {
+    &:deep(.vue-recycle-scroller__item-wrapper) {
       margin-bottom: 49px;
     }
-    &::v-deep .tags__flex-container-mobile {
+    &:deep(.tags__flex-container-mobile) {
       width: max-content;
       padding-right: 42px;
     }
   }
-  &.in-category, &.in-group-template::v-deep .vue-recycle-scroller__item-wrapper {
+  &.in-category, &.in-group-template:deep(.vue-recycle-scroller__item-wrapper) {
     margin-top: 24px;
   }
   &__header {

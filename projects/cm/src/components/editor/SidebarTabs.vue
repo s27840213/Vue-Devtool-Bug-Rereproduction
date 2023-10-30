@@ -11,11 +11,11 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 z-50 h-[350px] overflow
         class="pointer-events-none"
         :style="tab.styles"
         :iconName="tab.icon"
-        :iconColor="currActiveFeature === tab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
+        :iconColor="tab.disabled ? 'app-icon-dark' : currActiveFeature === tab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
         iconWidth="20px")
       span(
         class="typo-btn-sm whitespace-nowrap pointer-events-none"
-        :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ tab.text }}
+        :class="tab.disabled ? 'text-app-icon-dark' : 'text-app-btn-primary-text'") {{ tab.text }}
     div(
       v-if="tab.icon === currActiveFeature && tab.subTabs"
       class="flex flex-col items-center justify-center gap-2 bg-app-tab-disable rounded-full")
@@ -33,8 +33,11 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 z-50 h-[350px] overflow
           :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
 </template>
 <script setup lang="ts">
-import { useEditorStore } from '@/stores/editor'
-import { storeToRefs } from 'pinia'
+import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
+import { useEditorStore } from '@/stores/editor';
+import groupUtils from '@nu/vivi-lib/utils/groupUtils';
+import { storeToRefs } from 'pinia';
+const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
   icon: string
@@ -86,7 +89,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       text: t('CM0048'),
       panelType: '',
       hidden: false,
-      disabled: false,
+      disabled: true,
       subTabs: addSubTabs.value,
       styles: {
         transform: currActiveFeature.value === 'add' ? 'rotate(45deg)' : '',
@@ -98,7 +101,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       text: t('CM0051'),
       panelType: '',
       hidden: false,
-      disabled: false,
+      disabled: true,
     },
     {
       icon: 'brush',
@@ -133,10 +136,12 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       text: t('CM0053'),
       panelType: '',
       hidden: false,
-      disabled: false,
+      disabled: true,
     },
   ]
 })
+
+const { clearCtx, reverseSelection, autoFill } = useCanvasUtilsCm()
 
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
@@ -148,6 +153,25 @@ const handleTabAction = (tab: ISidebarTab) => {
       } else {
         setCurrActiveFeature(tab.icon)
       }
+
+      groupUtils.deselect()
+      break
+    }
+    case 'auto-fill': {
+      autoFill()
+      break
+    }
+    case 'reverse': {
+      reverseSelection()
+      break
+    }
+    case 'ban': {
+      clearCtx()
+      break
+    }
+    case 'canvas': {
+      console.log('download mask')
+      emits('downloadMask')
     }
   }
 }

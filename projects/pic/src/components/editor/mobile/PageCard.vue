@@ -13,7 +13,7 @@ div(class="page-card"
 </template>
 
 <script lang="ts">
-import NuPage from '@/components/editor/global/NuPage.vue'
+import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'

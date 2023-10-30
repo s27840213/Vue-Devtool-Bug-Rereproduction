@@ -1,6 +1,6 @@
-import axios from '@/apis'
+import axios from '@nu/vivi-lib/apis/index'
 import type { ApiResponse } from '@/types/api'
-import apiUtils from '@/utils/apiUtils'
+import apiUtils from '@nu/vivi-lib/utils/apiUtils'
 
 export default new (class Utils {
   async genImage(userId: string, requestId: string, prompt: string, action: string) {

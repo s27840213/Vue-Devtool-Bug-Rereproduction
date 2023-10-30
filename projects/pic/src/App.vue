@@ -1,59 +1,69 @@
 <template lang="pug">
 metainfo
-  template(v-slot:title ="{ content }") {{ content ? `${content}` : `${$t('SE0001')}` }}
+  template(v-slot:title="{ content }") {{ content ? `${content}` : `${$t('SE0001')}` }}
 div(id="app" :style="appStyles()")
-  link(rel="preconnect" href="https://fonts.googleapis.com")
-  link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
-  link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
-  link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
+  link(
+    rel="preconnect"
+    href="https://fonts.googleapis.com")
+  link(
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin="")
+  link(
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap"
+    rel="stylesheet")
+  link(
+    href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
+    rel="stylesheet"
+    type="text/css")
   div(class="main-content")
     div(class="main-content__router-view")
       router-view
     home-footer-tabs(v-if="showHomeFooterTabs")
   div(class="popup-area")
     popup
-    res-info(v-show="currSelectedResInfo.type"
+    res-info(
+      v-show="currSelectedResInfo.type"
       :info="currSelectedResInfo"
       @blur="setCurrSelectedResInfo()"
       tabindex="0")
   debug-tool(v-if="!inScreenshotPreview && showAllAdminTool")
-  div(class="modal-container"
-      v-if="isModalOpen")
+  div(class="modal-container" v-if="isModalOpen")
     modal-card
-  notifications(group="copy"
+  notifications(
+    group="copy"
     position="top center"
     :style="notificationStyles()"
     width="300px"
     :max="2"
     :duration="2000")
     template(v-slot:body="{ item }")
-      div(class="notification copy"
-        v-html="item.text")
-  notifications(group="error"
+      div(class="notification copy" v-html="item.text")
+  notifications(
+    group="error"
     position="top center"
     :style="notificationStyles()"
     width="300px"
     :max="1"
     :duration="5000")
     template(v-slot:body="{ item }")
-      div(class="notification error"
-        v-html="item.text")
+      div(class="notification error" v-html="item.text")
 </template>
 
 <script lang="ts">
+import HomeFooterTabs from '@/components/homepage/HomeFooterTabs.vue'
+import Popup from '@/components/popup/Popup.vue'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import ResInfo from '@nu/vivi-lib/components/modal/ResInfo.vue'
-import Popup from '@/components/popup/Popup.vue'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import vClickOutside from 'click-outside-vue3'
-import { throttle } from 'lodash'
-import { defineComponent, defineAsyncComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import networkUtils from '@nu/vivi-lib/utils/networkUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
-import HomeFooterTabs from '@/components/homepage/HomeFooterTabs.vue'
+import vClickOutside from 'click-outside-vue3'
+import { throttle } from 'lodash'
+import { defineAsyncComponent, defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -67,11 +77,11 @@ export default defineComponent({
     ),
   },
   directives: {
-    clickOutside: vClickOutside.directive
+    clickOutside: vClickOutside.directive,
   },
   metaInfo() {
     return {
-      title: `${this.$t('SE0001')}`
+      title: `${this.$t('SE0001')}`,
     }
   },
   data() {
@@ -90,14 +100,18 @@ export default defineComponent({
     picWVUtils.registerCallbacks('main')
 
     if (this.$isPic && picWVUtils.inBrowserMode) {
-      (function (w:any, d:any, s:any, l:any, i:any) {
-        w[l] = w[l] || []; w[l].push({
-          'gtm.start':
-            new Date().getTime(),
-          event: 'gtm.js'
-        }); const f = d.getElementsByTagName(s)[0]
-        const j = d.createElement(s); const dl = l !== 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
-            'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f)
+      ;(function (w: any, d: any, s: any, l: any, i: any) {
+        w[l] = w[l] || []
+        w[l].push({
+          'gtm.start': new Date().getTime(),
+          event: 'gtm.js',
+        })
+        const f = d.getElementsByTagName(s)[0]
+        const j = d.createElement(s)
+        const dl = l !== 'dataLayer' ? '&l=' + l : ''
+        j.async = true
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl
+        f.parentNode.insertBefore(j, f)
       })(window, document, 'script', 'dataLayer', 'GTM-T7LDWBP')
     }
 
@@ -112,12 +126,17 @@ export default defineComponent({
         const showPaymentTime = showPaymentInfo?.timestamp ?? 0
         const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
         const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
-        const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
+        const isShowPaymentView = isFirstOpen
+          ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
           : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
         if (isShowPaymentView) {
           paymentUtils.openPayment('step1')
           picWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
-        } else picWVUtils.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
+        } else
+          picWVUtils.setState('showPaymentInfo', {
+            count: showPaymentCount,
+            timestamp: showPaymentTime || Date.now(),
+          })
       }
 
       picWVUtils.sendAppLoaded()
@@ -161,19 +180,22 @@ export default defineComponent({
     currLocale(): string {
       return localeUtils.currLocale()
     },
-    showHomeFooterTabs (): boolean {
-      return ['Home', 'TemplateCenter', 'MyDesign', 'Settings'].includes(this.$route.name as string) && this.$isTouchDevice()
-    }
+    showHomeFooterTabs(): boolean {
+      return (
+        ['Home', 'TemplateCenter', 'MyDesign', 'Settings'].includes(this.$route.name as string) &&
+        this.$isTouchDevice()
+      )
+    },
   },
   methods: {
     ...mapMutations('text', {
-      updateDefaultFonts: 'UPDATE_DEFAULT_FONT'
+      updateDefaultFonts: 'UPDATE_DEFAULT_FONT',
     }),
     ...mapMutations({
       setIsMobile: 'SET_isMobile',
       setIsLargeDesktop: 'SET_isLargeDesktop',
       setDropdown: 'popup/SET_STATE',
-      _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
+      _setCurrSelectedResInfo: 'SET_currSelectedResInfo',
     }),
     appStyles(): Record<string, string> {
       if (this.$route.name === 'Preview') {
@@ -183,7 +205,7 @@ export default defineComponent({
           alignItems: 'center',
           height: '100vh',
           '-webkit-font-smoothing': 'antialiased',
-          transformStyle: 'preserve-3d'
+          transformStyle: 'preserve-3d',
         }
       } else {
         if (this.currLocale === 'tw' || this.currLocale === 'jp') {
@@ -201,16 +223,16 @@ export default defineComponent({
     notificationStyles() {
       return {
         margin: this.$isTouchDevice() ? `${48 + this.userInfo.statusBarHeight}px 5px 0 0` : '',
-        fontSize: this.$isTouchDevice() ? '12px' : '16px'
+        fontSize: this.$isTouchDevice() ? '12px' : '16px',
       }
-    }
-  }
+    },
+  },
 })
 </script>
 <style lang="scss">
-@use "@nu/vivi-lib/assets/scss/main.scss";
+@use '@nu/vivi-lib/assets/scss/main.scss';
 
-#app{
+#app {
   @include size(100%, 100%);
   position: relative;
   max-height: 100%;
