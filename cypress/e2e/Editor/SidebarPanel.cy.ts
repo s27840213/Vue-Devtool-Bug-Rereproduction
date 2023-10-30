@@ -233,6 +233,9 @@ describe('Testing SidebarPanel', () => {
     cy.visit('/editor')
     for (let i = 1; i < 5; i++) {
       cy.addAsset(panel, i, 0)
+      // Wait for NuImage process, or isTransparent will throw error.
+      cy.get('.nu-layer .nu-image')
+        .invoke('attr', 'cy-ready').should('eq', 'true')
       cy.deleteAllLayers()
     }
   })

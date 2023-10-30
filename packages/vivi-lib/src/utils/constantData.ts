@@ -11,11 +11,6 @@ import { TranslateResult } from 'vue-i18n'
 import picWVUtils from './picWVUtils'
 import themeUtils from './themeUtils'
 
-const imports = import.meta.glob(
-  `@img/text-effect/select/*`,
-  { eager: true, import: 'default' }
-) as Record<string, string>
-
 interface BillingInfoInput {
   label: TranslateResult
   ph?: TranslateResult
@@ -435,7 +430,7 @@ class ConstantData {
           (option as IEffectOptionSelect).select = ['triangle', 'rounded', 'square'].map((key, i) => ({
             key,
             plan: 0,
-            img: imports[`/src/assets/img/text-effect/select/endpoint-${key}.svg`],
+            img: require(`@img/text-effect/select/endpoint-${key}.svg`),
             // For i18n shake: NN0730, NN0731, NN0732
             label: i18n.global.tc(`NN073${i}`),
             preset: { endpoint: key },
@@ -446,7 +441,7 @@ class ConstantData {
           (option as IEffectOptionSelect).select = tailPositions.map((key) => ({
             key,
             plan: 0,
-            img: imports[`/src/assets/img/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`],
+            img: require(`@img/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
             label: key,
             preset: { tailPosition: key },
           }))

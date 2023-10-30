@@ -27,11 +27,10 @@ div(class="w-screen h-screen")
             :iconHeight="iconSize.height"
           )
     Transition(name='slide')
-      img(v-if="step === 2" class="absolute w-52 h-66" :src="touchUrl" :style="touchStyles")
+      img(v-if="step === 2" class="absolute w-52 h-66" src="@/assets/img/touch.png" :style="touchStyles")
 </template>
 
 <script setup lang="ts">
-import useImageUtils from '@/composable/useImageUtils';
 defineOptions({ name: 'powerful-fill-tutorial' })
 const emit = defineEmits(['nextStep'])
 const props = defineProps({
@@ -51,8 +50,6 @@ const props = defineProps({
 const { step, elHighlight, trackingFrame } = toRefs(props)
 
 const { t } = useI18n()
-const { getImageUrl } = useImageUtils()
-const touchUrl = getImageUrl('touch')
 const tutorialStyles = ref({})
 const touchStyles = ref({})
 const updateStyles = () => {

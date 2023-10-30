@@ -1,5 +1,5 @@
 import { useTutorialStore } from "@/stores/tutorial";
-import webViewUtils from "./webViewUtils";
+import cmWVUtils from '@/utils/cmWVUtils'
 
 type ITutorialName = 'powerful-fill'
 
@@ -10,7 +10,7 @@ export default new (class TutorialUtils {
   }
 
   runTutorial(tutorialName: ITutorialName) {
-    if (webViewUtils.tutorialFlags['powerful-fill']) return
+    if (cmWVUtils.tutorialFlags['powerful-fill']) return
     useTutorialStore().showTutorial(tutorialName)
   }
 

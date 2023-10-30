@@ -10,17 +10,13 @@ router-link(
     span(class="typo-h5 text-primary-white") {{ title }}
 </template>
 <script setup lang="ts">
-import useImageUtils from '@/composable/useImageUtils';
-
 const props = defineProps<{
   bgImg: string
   title: string
 }>()
 
-const { getImageUrl } = useImageUtils()
-
 const cardStyles = computed(() => {
-  const targetUrl = getImageUrl(props.bgImg)
+  const targetUrl = require(`${props.bgImg}.png`)
   return {
     backgroundImage: `linear-gradient(0deg, rgba(0%, 0%, 0%, 0.85) 3%, transparent 40%), url(${targetUrl}`
   }

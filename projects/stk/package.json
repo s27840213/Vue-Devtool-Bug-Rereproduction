@@ -16,7 +16,6 @@
   },
   "main": "./dist/nueditor.common.js",
   "dependencies": {
-    "@nu/vivi-lib": "workspace:^",
     "@ctrl/tinycolor": "^3.5.0",
     "@dreysolano/prerender-spa-plugin": "^1.0.3",
     "@flatten-js/core": "^1.3.3",

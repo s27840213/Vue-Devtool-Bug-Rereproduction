@@ -6,7 +6,7 @@ div(v-if="step > 0" class="z-tutorial-overlay absolute w-screen h-screen " ref="
 <script setup lang="ts">
 // bg-neutral-dark bg-opacity-70
 import { useTutorialStore } from '@/stores/tutorial';
-import webViewUtils from '@/utils/webViewUtils';
+import cmWVUtils from '@/utils/cmWVUtils'
 import { storeToRefs } from 'pinia';
 import PowerfulFillTutorial from './PowerfulFillTutorial.vue';
 
@@ -200,7 +200,7 @@ const runStep = () => {
   const elHighlights = highlightRefs.value
   if (name.value && !elHighlights.length) {
     // finish tutorial
-    webViewUtils.updateTutorialFlags({ [name.value]: true })
+    cmWVUtils.updateTutorialFlags({ [name.value]: true })
     return resetTutorial()
   }
   elHighlights.forEach(elHighlight => {

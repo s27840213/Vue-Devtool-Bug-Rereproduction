@@ -1,8 +1,11 @@
+import store from '@/store'
+import Screenshot from '@/views/Screenshot.vue'
+import ViviSticker from '@/views/ViviSticker.vue'
 import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
-import store from '@/store'
+import router from '@nu/vivi-lib/router'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
@@ -14,9 +17,6 @@ import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
-import Screenshot from '@/views/Screenshot.vue'
-import ViviSticker from '@/views/ViviSticker.vue'
-import router from '@nu/vivi-lib/router'
 
 declare let window: CustomWindow
 
@@ -28,7 +28,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         if (stkWVUtils.checkVersion('1.5')) {
-          if(stkWVUtils.isGetProductsSupported) stkWVUtils.getSubscribeInfo()
+          if (stkWVUtils.isGetProductsSupported) stkWVUtils.getSubscribeInfo()
           await stkWVUtils.fetchDebugModeEntrance()
           await stkWVUtils.fetchLoadedFonts()
           await stkWVUtils.fetchTutorialFlags()
@@ -136,6 +136,15 @@ router.addRoute({
       stkWVUtils.detectIfInApp()
     }
     const userInfo = await stkWVUtils.getUserInfo()
+    const appLoadedTimeout = store.getters['vivisticker/getAppLoadedTimeout']
+    if (appLoadedTimeout > 0) {
+      window.setTimeout(() => {
+        if (!stkWVUtils.appLoadedSent) {
+          logUtils.setLogAndConsoleLog(`Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`)
+        }
+        stkWVUtils.sendAppLoaded()
+      }, appLoadedTimeout)
+    }
     if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
     }
@@ -217,6 +226,8 @@ router.beforeEach(async (to, from, next) => {
     // const json = appJson as any
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    store.commit('vivisticker/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8000)
 
     store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
 

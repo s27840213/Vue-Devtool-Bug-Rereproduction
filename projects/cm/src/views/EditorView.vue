@@ -6,50 +6,62 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     template(
       v-if="isEditing"
       #middle)
-      cm-svg-icon(
-        iconName="undo"
-        :iconColor="'app-btn-primary-text'"
-        iconWidth="20px")
-      cm-svg-icon(
-        iconName="redo"
-        :iconColor="'app-btn-primary-text'"
-        iconWidth="20px")
+      //- cm-svg-icon(
+      //-   iconName="undo"
+      //-   :iconColor="'app-btn-primary-text'"
+      //-   iconWidth="20px")
+      //- cm-svg-icon(
+      //-   iconName="redo"
+      //-   :iconColor="'app-btn-primary-text'"
+      //-   iconWidth="20px")
     template(#right)
-      cm-btn(
-        v-if="isEditing"
-        theme="primary"
-        size="md"
-        @click="downloadCanvas") 下載 Mask
+      //- cm-btn(
+      //-   v-if="isEditing"
+      //-   theme="primary"
+      //-   size="md"
+      //-   @click="downloadCanvas") 下載 Mask
       cm-btn(
         v-if="showAspectRatioSelector"
         theme="primary"
         size="md"
         @click="handleNextAction") {{ $t('CM0012') }}
   div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
-    div(class="w-full h-full box-border overflow-scroll flex justify-center items-center")
+    div(
+      class="w-full h-full box-border overflow-scroll flex justify-center items-center"
+      @click.self="handleOuterClick")
       div(
+        id="screenshot-target"
         class="wrapper relative tutorial-powerful-fill-3--highlight"
         :style="wrapperStyles"
         ref="editorWrapperRef")
-        div(
-          id="editor-page"
-          class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
-          :style="pageStyles")
-          img(class="h-full object-contain" src="@/assets/img/test.jpg")
-          canvas-section(
-            v-if="isEditing"
-            class="absolute top-0 left-0 w-full h-full"
-            :containerDOM="editorContainerRef"
-            :wrapperDOM="editorWrapperRef"
-            ref="canvasRef")
+        //- div(
+        //-   id="editor-page"
+        //-   class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
+        //-   :style="pageStyles")
+          //- img(class="h-full object-contain" src="@/assets/img/test.jpg")
+        nu-page(v-show="!showGenResult"
+          class="z-page"
+          :pageIndex="0"
+          :pageState="pageState[0]"
+          :overflowContainer="editorContainerRef")
+        canvas-section(
+          v-if="isEditing"
+          class="absolute top-0 left-0 w-full h-full"
+          :class="isManipulatingCanvas ? '' : 'pointer-events-none' "
+          :containerDOM="editorContainerRef"
+          :wrapperDOM="editorWrapperRef"
+          ref="canvasRef")
         div(
           v-if="isChangingBrushSize"
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="isEditing"
+      v-if="isEditing && !showGenResult"
       class="absolute top-1/2 right-0 -translate-y-1/2"
-      ref="sidebarTabsRef")
+      ref="sidebarTabsRef"
+      @downloadMask="downloadCanvas")
+    div(v-if="showGenResult" class="absolute top-0 left-0 z-page flex justify-center items-center w-full h-full bg-app-bg")
+        img(:src="generatedResult" class="w-240")
 </template>
 <script setup lang="ts">
 import useImageUtils from '@/composable/useImageUtils'
@@ -57,10 +69,13 @@ import useStateInfo from '@/composable/useStateInfo'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import tutorialUtils from '@/utils/tutorialUtils'
-import mathUtils from '@nu/vivi-lib/utils/mathUtils'
+import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { useElementSize, useEventBus } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
+import { useStore } from 'vuex'
 
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
@@ -70,28 +85,7 @@ const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementSize(editorContainerRef)
 
-const { imgLoadHandler, getImageUrl } = useImageUtils()
-
-onMounted(() => {
-  imgLoadHandler(getImageUrl('test', 'jpg'), (img) => {
-    setImgAspectRatio(img.width / img.height)
-  })
-})
-// #region Stores
-const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
-const editorStore = useEditorStore()
-const { setPageScaleRatio, setImgAspectRatio, setEditorState } = editorStore
-const { editingPage, pageSize, pageScaleRatio, editorState } = storeToRefs(editorStore)
-
-const handleNextAction = function () {
-  if (editorState.value === 'aspectRatio') {
-    setEditorState('editing')
-    tutorialUtils.runTutorial('powerful-fill')
-  } else if (editorState.value === 'editing') {
-    setEditorState('prompt')
-  }
-}
-// #endregion
+const { imgLoadHandler } = useImageUtils()
 
 onBeforeRouteLeave((to, from) => {
   if (from.name === 'Editor') {
@@ -104,7 +98,28 @@ onBeforeRouteLeave((to, from) => {
   }
 })
 
-// #region computed
+const store = useStore()
+const pageState = computed(() => store.getters.getPagesState)
+const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
+
+// #region Stores
+const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
+const editorStore = useEditorStore()
+const { setEditorState } = editorStore
+const { pageSize, editorState, currActiveFeature, generatedResult, showGenResult } = storeToRefs(editorStore)
+const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
+
+const handleNextAction = function () {
+  if (editorState.value === 'aspectRatio') {
+    setEditorState('editing')
+    tutorialUtils.runTutorial('powerful-fill')
+  } else if (editorState.value === 'editing') {
+    setEditorState('prompt')
+  }
+}
+// #endregion
+
+// #region page related
 const fitScaleRatio = computed(() => {
   if (
     editorContainerWidth.value === 0 ||
@@ -123,23 +138,20 @@ const fitScaleRatio = computed(() => {
 
   const ratio = Math.min(widhtRatio, heightRatio) * 0.9
 
-  return ratio
+  return ratio * 100
 })
 
 const wrapperStyles = computed(() => {
   return {
-    width: `${editingPage.value.width * fitScaleRatio.value}px`,
-    height: `${editingPage.value.height * fitScaleRatio.value}px`,
+    width: `${(pageSize.value.width * pageScaleRatio.value) / 100}px`,
+    height: `${(pageSize.value.height * pageScaleRatio.value) / 100}px`,
   }
 })
 
-const pageStyles = computed(() => {
-  return {
-    width: `${editingPage.value.width}px`,
-    height: `${editingPage.value.height}px`,
-    transform: `scale(${pageScaleRatio.value})`,
-  }
-})
+const handleOuterClick = () => {
+  groupUtils.deselect()
+}
+
 // #endregion
 
 // #region demo brush size section
@@ -148,8 +160,8 @@ const { brushSize, isChangingBrushSize } = storeToRefs(canvasStore)
 
 const demoBrushSizeStyles = computed(() => {
   return {
-    width: `${brushSize.value * pageScaleRatio.value}px`,
-    height: `${brushSize.value * pageScaleRatio.value}px`,
+    width: `${(brushSize.value * pageScaleRatio.value) / 100}px`,
+    height: `${(brushSize.value * pageScaleRatio.value) / 100}px`,
   }
 })
 // #endregion
@@ -182,12 +194,11 @@ const getCanvasDataUrl = () => {
  * fitPage
  */
 
-console.log(mathUtils.sin(800))
 watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value) return
-    setPageScaleRatio(newVal)
+    pageUtils.setScaleRatio(newVal)
   },
   // useDebounceFn((newVal, oldVal) => {
   //   if (newVal === oldVal || !atEditor.value) return
