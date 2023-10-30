@@ -1264,7 +1264,7 @@ pipelines:
       - parallel:
           - step:
               name: "deploy to qa-stk"
-              deployment: qa-stk
+              deployment: qastk
               trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
