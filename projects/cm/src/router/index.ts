@@ -1,6 +1,6 @@
 import { useUserStore } from '@/stores/user'
-import uploadUtils from '@/utils/uploadUtils'
-import webViewUtils from '@/utils/webViewUtils'
+import uploadUtilsCm from '@/utils/uploadUtilsCm'
+import cmWVUtils from '@/utils/cmWVUtils'
 import HomeView from '@/views/HomeView.vue'
 import { generalUtils } from '@nu/shared-lib'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -55,10 +55,10 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const { setUserId } = useUserStore()
   setUserId(generalUtils.generateRandomString(20))
-  uploadUtils.getUrlMap()
-  webViewUtils.setupAPIInterface()
-  webViewUtils.detectIfInApp()
-  webViewUtils.getUserInfo()
+  uploadUtilsCm.getUrlMap()
+  cmWVUtils.setupAPIInterface()
+  cmWVUtils.detectIfInApp()
+  cmWVUtils.getUserInfo()
   if (from.name === 'MyDesign' && to.name === 'Home') {
     to.meta.transition = 'fade-right-in'
   }

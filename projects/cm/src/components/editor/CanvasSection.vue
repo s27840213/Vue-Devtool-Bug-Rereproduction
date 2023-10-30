@@ -7,7 +7,7 @@ div(class="absolute top-0 left-0")
     :style="brushStyle")
 </template>
 <script setup lang="ts">
-import useCanvasUtils from '@/composable/useCanvasUtils';
+import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
 import { useEditorStore } from '@/stores/editor';
 import { useWebViewStore } from '@/stores/webView';
 import { generalUtils } from '@nu/shared-lib';
@@ -26,7 +26,7 @@ const { pageSize } = storeToRefs(editorStore)
 
 // #region Canvas feature section
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const { brushStyle, showBrush } = useCanvasUtils(canvasRef, wrapperDOM, containerDOM)
+const { brushStyle, showBrush } = useCanvasUtilsCm(canvasRef, wrapperDOM, containerDOM)
 // #endregion
 
 // #region WebView feature section

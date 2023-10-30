@@ -72,8 +72,8 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
 <script lang="ts" setup>
 import { useEditorStore } from '@/stores/editor';
 import { useImgSelectorStore } from '@/stores/imgSelector';
-import type { IAlbum } from '@/utils/webViewUtils';
-import webViewUtils from '@/utils/webViewUtils';
+import type { IAlbum } from '@/utils/cmWVUtils';
+import cmWVUtils from '@/utils/cmWVUtils';
 import assetUtils from '@nu/vivi-lib/utils/assetUtils';
 import groupUtils from '@nu/vivi-lib/utils/groupUtils';
 import imageUtils from '@nu/vivi-lib/utils/imageUtils';
@@ -117,7 +117,7 @@ const getAlbumContent = async (album: IAlbum) => {
   isLoadingContent.value = true
 
   Object.assign(currAlbum, album)
-  webViewUtils
+  cmWVUtils
     .getAlbumContent(albumId, nextPage.value)
     .then((res) => {
       currAlbumContent.push(...res.content)
@@ -176,7 +176,7 @@ const selectImage = (id: string, type: 'cameraroll' | 'unsplash') => {
 // #endregion
 
 // get the first image content
-webViewUtils
+cmWVUtils
   .getAlbumList()
   .then((res) => {
     if (res.flag === 1) {

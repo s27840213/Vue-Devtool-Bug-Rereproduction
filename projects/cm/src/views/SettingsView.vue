@@ -72,7 +72,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
 </template>
 <script setup lang="ts">
 import { useGlobalStore } from '@/stores/global';
-import webViewUtils from '@/utils/webViewUtils';
+import cmWVUtils from '@/utils/cmWVUtils';
 import { storeToRefs } from 'pinia';
 
 const scrollContainer = ref<HTMLElement | null>(null)
@@ -110,14 +110,14 @@ const domainOptions = computed((): OptionConfig[] => {
       title: 'rd(nuphoto.co)',
       iconName: 'global',
       action: () => {
-        webViewUtils.switchDomain('https://nuphoto.co')
+        cmWVUtils.switchDomain('https://nuphoto.co')
       },
     },
     {
       title: 'localhost:8080',
       iconName: 'global',
       action: () => {
-        webViewUtils.switchDomain('localhost:8080')
+        cmWVUtils.switchDomain('localhost:8080')
       },
     },
     ...Array(6)
@@ -128,7 +128,7 @@ const domainOptions = computed((): OptionConfig[] => {
           title: host,
           iconName: 'global',
           action: () => {
-            webViewUtils.switchDomain(`https://stkdev${index}.vivipic.com`)
+            cmWVUtils.switchDomain(`https://stkdev${index}.vivipic.com`)
           },
         }
       }),
