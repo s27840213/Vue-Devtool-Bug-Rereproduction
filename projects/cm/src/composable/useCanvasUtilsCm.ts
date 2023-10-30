@@ -1,8 +1,10 @@
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { generalUtils } from '@nu/shared-lib'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
+import { useStore } from 'vuex'
 import useMouseUtils from './useMouseUtils'
 
 export interface ICanvasParams {
@@ -18,9 +20,11 @@ const useCanvasUtils = (
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { canvasMode, firstPaintArea, maskCanvas, maskDataUrl, currActiveFeature } =
-    storeToRefs(editorStore)
+  const { canvasMode, maskCanvas, maskDataUrl, currActiveFeature } = storeToRefs(editorStore)
   // #endregion
+
+  const store = useStore()
+  const pageScaleRatio = computed(() => store.getters.getPageScaleRatio / 100)
 
   // #region canvasStore
   const canvasStore = useCanvasStore()
@@ -65,8 +69,8 @@ const useCanvasUtils = (
   })
 
   watch(brushSize, (newVal) => {
-    brushStyle.width = `${newVal}px`
-    brushStyle.height = `${newVal}px`
+    brushStyle.width = `${newVal * pageScaleRatio.value}px`
+    brushStyle.height = `${newVal * pageScaleRatio.value}px`
 
     if (canvasCtx && canvasCtx.value) {
       canvasCtx.value.lineWidth = newVal
@@ -127,7 +131,9 @@ const useCanvasUtils = (
   const setBrushPos = (e: PointerEvent) => {
     if (wrapperRef && wrapperRef.value) {
       const { x, y } = getMousePosInTarget(e, wrapperRef.value)
-      brushStyle.transform = `translate(${x - brushSize.value / 2}px, ${y - brushSize.value / 2}px)`
+      brushStyle.transform = `translate(${
+        x * pageScaleRatio.value - (brushSize.value * pageScaleRatio.value) / 2
+      }px, ${y * pageScaleRatio.value - (brushSize.value * pageScaleRatio.value) / 2}px)`
     }
   }
 
@@ -225,7 +231,6 @@ const useCanvasUtils = (
       useEventListener(editorContainerRef, 'touchstart', disableTouchEvent)
       if (canvasCtx && canvasCtx.value) {
         canvasCtx.value.fillStyle = '#ff7262'
-        canvasCtx.value.fillRect(0, 0, firstPaintArea.value.width, firstPaintArea.value.height)
       }
 
       // reverseSelection()
@@ -256,6 +261,22 @@ const useCanvasUtils = (
     }
   }
 
+  const autoFill = () => {
+    if (canvasCtx && canvasCtx.value) {
+      clearCtx()
+      const currLayer = layerUtils.getLayer(0,0)
+      const {x,y,width,height} = currLayer.styles 
+      console.log(currLayer.styles)
+
+      const preserveArea = canvasCtx.value.getImageData(x,y,width,height)
+
+      canvasCtx.value.fillRect(0,0, canvasWidth.value, canvasHeight.value)
+      canvasCtx.value.putImageData(preserveArea, x, y)
+    }
+  }
+
+
+
   const downloadMaskCanvas = () => {
     if (maskCanvas && maskCanvas.value) {
       const dataUrl = maskCanvas.value.toDataURL('image/png')
@@ -274,6 +295,8 @@ const useCanvasUtils = (
     reverseSelection,
     downloadMaskCanvas,
     getMaskDaraUrl,
+    clearCtx,
+    autoFill,
     brushSize,
     brushColor,
     brushStyle,

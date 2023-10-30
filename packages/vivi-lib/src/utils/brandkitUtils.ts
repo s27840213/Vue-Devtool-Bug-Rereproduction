@@ -6,11 +6,6 @@ import { STANDARD_TEXT_FONT } from './assetUtils'
 import generalUtils from './generalUtils'
 import imageUtils from './imageUtils'
 
-const imports = import.meta.glob(
-  '@img/png/brandkit/logo-*',
-  { eager: true, import: 'default' }
-) as Record<string, string>
-
 const TAB_NAMES = {
   logo: 'NN0399',
   color: 'NN0401',
@@ -53,13 +48,13 @@ class BrandKitUtils {
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 30)).toISOString(),
         signed_url: {
-          full: imports['/src/assets/img/png/brandkit/logo-horizontal.png'],
-          larg: imports['/src/assets/img/png/brandkit/logo-horizontal.png'],
-          midd: imports['/src/assets/img/png/brandkit/logo-horizontal.png'],
-          original: imports['/src/assets/img/png/brandkit/logo-horizontal.png'],
-          prev: imports['/src/assets/img/png/brandkit/logo-horizontal.png'],
-          smal: imports['/src/assets/img/png/brandkit/logo-horizontal.png'],
-          tiny: imports['/src/assets/img/png/brandkit/logo-horizontal.png']
+          full: require('@img/png/brandkit/logo-horizontal.png'),
+          larg: require('@img/png/brandkit/logo-horizontal.png'),
+          midd: require('@img/png/brandkit/logo-horizontal.png'),
+          original: require('@img/png/brandkit/logo-horizontal.png'),
+          prev: require('@img/png/brandkit/logo-horizontal.png'),
+          smal: require('@img/png/brandkit/logo-horizontal.png'),
+          tiny: require('@img/png/brandkit/logo-horizontal.png')
         },
         asset_index: 0,
         width: 171,
@@ -71,13 +66,13 @@ class BrandKitUtils {
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 20)).toISOString(),
         signed_url: {
-          full: imports['/src/assets/img/png/brandkit/logo-square.png'],
-          larg: imports['/src/assets/img/png/brandkit/logo-square.png'],
-          midd: imports['/src/assets/img/png/brandkit/logo-square.png'],
-          original: imports['/src/assets/img/png/brandkit/logo-square.png'],
-          prev: imports['/src/assets/img/png/brandkit/logo-square.png'],
-          smal: imports['/src/assets/img/png/brandkit/logo-square.png'],
-          tiny: imports['/src/assets/img/png/brandkit/logo-square.png']
+          full: require('@img/png/brandkit/logo-square.png'),
+          larg: require('@img/png/brandkit/logo-square.png'),
+          midd: require('@img/png/brandkit/logo-square.png'),
+          original: require('@img/png/brandkit/logo-square.png'),
+          prev: require('@img/png/brandkit/logo-square.png'),
+          smal: require('@img/png/brandkit/logo-square.png'),
+          tiny: require('@img/png/brandkit/logo-square.png')
         },
         asset_index: 1,
         width: 131,
@@ -89,13 +84,13 @@ class BrandKitUtils {
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 10)).toISOString(),
         signed_url: {
-          full: imports['/src/assets/img/png/brandkit/logo-vertical.png'],
-          larg: imports['/src/assets/img/png/brandkit/logo-vertical.png'],
-          midd: imports['/src/assets/img/png/brandkit/logo-vertical.png'],
-          original: imports['/src/assets/img/png/brandkit/logo-vertical.png'],
-          prev: imports['/src/assets/img/png/brandkit/logo-vertical.png'],
-          smal: imports['/src/assets/img/png/brandkit/logo-vertical.png'],
-          tiny: imports['/src/assets/img/png/brandkit/logo-vertical.png']
+          full: require('@img/png/brandkit/logo-vertical.png'),
+          larg: require('@img/png/brandkit/logo-vertical.png'),
+          midd: require('@img/png/brandkit/logo-vertical.png'),
+          original: require('@img/png/brandkit/logo-vertical.png'),
+          prev: require('@img/png/brandkit/logo-vertical.png'),
+          smal: require('@img/png/brandkit/logo-vertical.png'),
+          tiny: require('@img/png/brandkit/logo-vertical.png')
         },
         asset_index: 2,
         width: 75,
