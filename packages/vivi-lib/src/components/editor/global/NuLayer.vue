@@ -310,7 +310,6 @@ export default defineComponent({
           pointerEvents,
           clipPath,
           'mix-blend-mode': this.config.styles.blendMode,
-          ...(this.getLayerType === 'shape' && { overflow: 'hidden' }), // solving https://www.notion.so/vivipic/1-43-svg-9de4bd6782614852b503997f7e9256a2?pvs=4
           ...this.transformStyle
         }
       )
