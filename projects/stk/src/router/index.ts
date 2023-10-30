@@ -140,10 +140,10 @@ router.addRoute({
     if (appLoadedTimeout > 0) {
       window.setTimeout(() => {
         if (!stkWVUtils.appLoadedSent) {
-          logUtils.setLogAndConsoleLog(`Timeout for APP_LOADED after ${appLoadedTimeout}s, send APP_LOADED anyway`)
+          logUtils.setLogAndConsoleLog(`Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`)
         }
         stkWVUtils.sendAppLoaded()
-      }, appLoadedTimeout * 1000)
+      }, appLoadedTimeout)
     }
     if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
@@ -227,7 +227,7 @@ router.beforeEach(async (to, from, next) => {
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 
-    store.commit('vivisticker/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8)
+    store.commit('vivisticker/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8000)
 
     store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
 
