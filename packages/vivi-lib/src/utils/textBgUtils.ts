@@ -15,11 +15,6 @@ import _, { cloneDeep, isEqual, maxBy, omit, sum } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
 
-const imports = import.meta.glob(
-  `@img/text-effect/LetterBG/*.svg`,
-  { eager: true, import: 'default' }
-) as Record<string, string>
-
 export class Rect {
   bodyRect = new DOMRect()
   vertical = false
@@ -986,7 +981,7 @@ class TextBg {
             tag: colorChangeable ? 'use' : 'image',
             attrs: {
               href: colorChangeable ? `#${p.href}`
-                : imports[`/src/assets/img/text-effect/LetterBG/${p.href}.svg`],
+                : require(`@img/text-effect/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
               ...!withShape && { x, y },

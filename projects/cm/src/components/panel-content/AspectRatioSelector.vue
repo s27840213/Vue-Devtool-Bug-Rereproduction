@@ -18,33 +18,45 @@ div(class="w-full pl-24")
         :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
 </template>
 <script setup lang="ts">
-import { useEditorStore } from '@/stores/editor'
-import { storeToRefs } from 'pinia'
-
+import { useEditorStore } from '@/stores/editor';
+import layerUtils from '@nu/vivi-lib/utils/layerUtils';
+import pageUtils from '@nu/vivi-lib/utils/pageUtils';
+import { storeToRefs } from 'pinia';
 const editorStore = useEditorStore()
-const { setPageSize, setFirstPaintArea } = editorStore
-const { imgAspectRatio, firstPaintArea, pageSize } = storeToRefs(editorStore)
+
+const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)
 
 const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5', '5_4']
 const selectedType = ref('9_16')
 
 const selectAspectRatio = (type: string) => {
-  console.log('select aspect ratio')
   selectedType.value = type
 
   if (type === 'original') {
-    setPageSize(1600 * imgAspectRatio.value, 1600)
+    if (imgAspectRatio.value > 1) {
+      pageUtils.setPageSize(0, 1600, 1600 / imgAspectRatio.value)
+    } else {
+      pageUtils.setPageSize(0, 1600 * imgAspectRatio.value, 1600)
+      layerUtils.updateLayerStyles(0,0, {
+        width: 1600 * imgAspectRatio.value,
+        height: 1600 
+      })
+    }
+
   } else {
     const [w, h] = type.split('_')
     const width = parseInt(w)
     const height = parseInt(h)
+    const pageAspectRatio = width / height
 
-    if (width > height) {
-      setPageSize(1600, (1600 * height) / width)
+    if (pageAspectRatio >= 1) {
+      pageUtils.setPageSize(0, 1600, (1600 * height) / width)
     } else {
-      setPageSize((1600 * width) / height, 1600)
+      pageUtils.setPageSize(0, (1600 * width) / height, 1600)
     }
   }
+
+  updateLayerStyleToFitPage()
 
   /**
    * @Note - width > height -> aspectRatio > 1
@@ -55,23 +67,38 @@ const selectAspectRatio = (type: string) => {
    * else fit inner content's height, and the inner content and outer content's height are the same
    *
    */
-  let wDiff = 0
-  let hDiff = 0
-  if (imgAspectRatio.value > pageSize.value.width / pageSize.value.height) {
-    const tmpW = pageSize.value.width
-    const tmpH = tmpW / imgAspectRatio.value
+}
 
-    wDiff = pageSize.value.width - tmpW
-    hDiff = pageSize.value.height - tmpH
-    setFirstPaintArea(pageSize.value.width, hDiff / 2)
+const updateLayerStyleToFitPage = () => {
+  console.log(imgAspectRatio.value, pageAspectRatio.value)
+  if(imgAspectRatio.value > pageAspectRatio.value) {
+    layerUtils.updateLayerStyles(0,0, {
+      width: pageSize.value.width,
+      height: pageSize.value.width / imgAspectRatio.value,
+      imgWidth: pageSize.value.width,
+      imgHeight: pageSize.value.width / imgAspectRatio.value,
+      initWidth: pageSize.value.width,
+      initHeight: pageSize.value.width / imgAspectRatio.value,
+      // to page center
+      x: (pageSize.value.width - pageSize.value.width) / 2,
+      y: (pageSize.value.height - pageSize.value.width / imgAspectRatio.value) / 2
+    })
   } else {
-    const tmpH = pageSize.value.height
-    const tmpW = tmpH * imgAspectRatio.value
-    wDiff = pageSize.value.width - tmpW
-    hDiff = pageSize.value.height - tmpH
-    setFirstPaintArea(wDiff / 2, pageSize.value.height)
+    layerUtils.updateLayerStyles(0,0, {
+      width: pageSize.value.height * imgAspectRatio.value,
+      height: pageSize.value.height ,
+      imgWidth: pageSize.value.height * imgAspectRatio.value,
+      imgHeight: pageSize.value.height,
+      initWidth: pageSize.value.height * imgAspectRatio.value,
+      initHeight: pageSize.value.height,
+      // to page center
+      x: (pageSize.value.width - pageSize.value.height * imgAspectRatio.value) / 2,
+      y: (pageSize.value.height - pageSize.value.height) / 2
+    })
   }
 }
+
+
 
 /**
  * Once the image was loaded

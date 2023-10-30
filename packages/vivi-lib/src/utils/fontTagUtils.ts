@@ -1,7 +1,6 @@
 import axios from '@/apis'
 import localeUtils from './localeUtils'
 import store from '@/store'
-import { IListServiceResponse } from '@/interfaces/api'
 
 class FontTagUtils {
   getFontTags() {
@@ -13,7 +12,12 @@ class FontTagUtils {
       platform: window.location.host,
       ver: store.getters['user/getVerApi']
     }
-    return axios.request<IListServiceResponse>({
+    return axios.request<{
+      data: {
+        content: string[]
+      }
+      flag: number
+    }>({
       url: '/list-design',
       method: 'GET',
       params

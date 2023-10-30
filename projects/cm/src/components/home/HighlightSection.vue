@@ -12,8 +12,6 @@ div(class="w-full box-border p-24 rounded-[20px] flex items-center justify-betwe
   img(:src="imgSrc" class="w-128")
 </template>
 <script setup lang="ts">
-import useImageUtils from '@/composable/useImageUtils'
-
 const props = defineProps<{
   btnIconName?: string
   btnText: string
@@ -29,10 +27,8 @@ const handleClick = () => {
   emits('clickBtn')
 }
 
-const { getImageUrl } = useImageUtils()
-
 const imgSrc = computed(() => {
-  return getImageUrl(props.iconName)
+  return require(props.iconName + '.png')
 })
 </script>
 <style lang="scss">

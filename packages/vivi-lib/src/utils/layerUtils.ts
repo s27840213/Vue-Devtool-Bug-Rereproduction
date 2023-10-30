@@ -12,6 +12,7 @@ import { round } from 'lodash'
 import { nextTick } from 'vue'
 import controlUtils from './controlUtils'
 import frameUtils from './frameUtils'
+import generalUtils from './generalUtils'
 import mathUtils from './mathUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
@@ -19,7 +20,6 @@ import shapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import uploadUtils from './uploadUtils'
-import generalUtils from './generalUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -28,6 +28,7 @@ class LayerUtils {
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): AllLayerTypes { return this.getLayer(this.pageIndex, this.layerIndex) }
+  get getCurrLayerStyles(): IStyle { return this.getLayer(this.pageIndex, this.layerIndex).styles }
   get getPage(): (pageInde: number) => IPage { return store.getters.getPage }
   get getCurrPage(): IPage { return this.getPage(this.pageIndex) }
   get getLayer(): (pageIndex: number, layerIndex: number) => AllLayerTypes {
