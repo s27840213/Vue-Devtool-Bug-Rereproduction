@@ -34,6 +34,9 @@ export const useEditorStore = defineStore('editor', {
     pageSize(): { width: number; height: number } {
       return pageUtils.getPageSize(0)
     },
+    pageScaleRatio(): number{
+      return pageUtils.scaleRatio / 100
+    },
   },
   actions: {
     setPageSize(width: number, height: number) {
