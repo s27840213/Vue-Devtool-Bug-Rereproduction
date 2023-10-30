@@ -55,9 +55,9 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
-import { useImgSelectorStore } from '@/stores/imgSelector'
-import vuex from '@/vuex'
-import { useRouter } from 'vue-router'
+import { useImgSelectorStore } from '@/stores/imgSelector';
+import vuex from '@/vuex';
+import { useRouter } from 'vue-router';
 
 const router = useRouter()
 const inBrowserMode = computed(() => vuex.getters['webView/getInBrowserMode'])
@@ -66,7 +66,8 @@ const goToEditor = () => {
   router.push('/editor')
 }
 
-const openImgSelecotr = () => {
+const openImgSelecotr = () => { 
+
   setShowImgSelector(true)
   /**
    * @Note below codes is used to test in the browser

@@ -3,6 +3,7 @@ import componentPlugin from '@nu/shared-lib/plugin';
 import libType from '@nu/shared-lib/types';
 import { initApp } from '@nu/vivi-lib/main';
 
+import Notifications from '@kyvg/vue3-notification';
 import '@nu/vivi-lib/css'; // Import all CSS rules from vivi-lib
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
@@ -42,4 +43,5 @@ app.use(vuex)
 app.use(router)
 app.use(i18n)
 app.use(componentPlugin)
+app.use(Notifications)
 app.mount('#app')
