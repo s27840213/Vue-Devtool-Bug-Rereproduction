@@ -70,13 +70,13 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
             span(class="text-app-tab-default") {{ album.albumSize }}
 </template>
 <script lang="ts" setup>
-import { useEditorStore } from '@/stores/editor';
-import { useImgSelectorStore } from '@/stores/imgSelector';
-import type { IAlbum } from '@/utils/cmWVUtils';
-import cmWVUtils from '@/utils/cmWVUtils';
-import assetUtils from '@nu/vivi-lib/utils/assetUtils';
-import groupUtils from '@nu/vivi-lib/utils/groupUtils';
-import imageUtils from '@nu/vivi-lib/utils/imageUtils';
+import { useEditorStore } from '@/stores/editor'
+import { useImgSelectorStore } from '@/stores/imgSelector'
+import type { IAlbum } from '@/utils/cmWVUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const router = useRouter()
 
@@ -103,9 +103,9 @@ const initLoaded = ref(false)
 // #endregion
 
 const editorStore = useEditorStore()
+const { createNewPage, setImgAspectRatio } = editorStore
 const { editorType } = storeToRefs(editorStore)
 const { setShowImgSelector } = useImgSelectorStore()
-
 
 // #region album methods
 const toggleAlbum = () => {
@@ -148,7 +148,7 @@ const selectAlbum = (album: IAlbum) => {
 }
 
 const selectImage = (id: string, type: 'cameraroll' | 'unsplash') => {
-  switch(editorType.value) {
+  switch (editorType.value) {
     case 'powerful-fill': {
       if (type === 'cameraroll') {
         const src = imageUtils.getSrc({
@@ -156,18 +156,24 @@ const selectImage = (id: string, type: 'cameraroll' | 'unsplash') => {
           assetId: `cameraroll/${id}`,
           userId: '',
         })
-    
-        console.log(src)
-        imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+
+        imageUtils.imgLoadHandler(src, async (img: HTMLImageElement) => {
           const { naturalWidth, naturalHeight } = img
           const photoAspectRatio = naturalWidth / naturalHeight
-          
+
+          setImgAspectRatio(photoAspectRatio)
+
           setShowImgSelector(false)
-          router.push({
-            name: 'Editor'
+          await router.push({
+            name: 'Editor',
           })
-          assetUtils.addImage(src, photoAspectRatio)
-          groupUtils.deselect()
+          createNewPage(900, 1600)
+          nextTick(() => {
+            assetUtils.addImage(src, photoAspectRatio, {
+              fit: 1,
+            })
+            groupUtils.deselect()
+          })
         })
       }
     }

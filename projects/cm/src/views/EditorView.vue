@@ -26,9 +26,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         size="md"
         @click="handleNextAction") {{ $t('CM0012') }}
   div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
-    div(class="w-full h-full box-border overflow-scroll flex justify-center items-center")
+    div(
+      class="w-full h-full box-border overflow-scroll flex justify-center items-center"
+      @click.self="handleOuterClick")
       div(
+        id="editor-page-wrapper"
         class="wrapper relative"
+        :class="showAspectRatioSelector ? 'pointer-events-none' : ''"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         //- div(
@@ -41,12 +45,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :pageIndex="0"
           :pageState="pageState[0]"
           :overflowContainer="editorContainerRef")
-          //- canvas-section(
-          //-   v-if="isEditing"
-          //-   class="absolute top-0 left-0 w-full h-full"
-          //-   :containerDOM="editorContainerRef"
-          //-   :wrapperDOM="editorWrapperRef"
-          //-   ref="canvasRef")
+        canvas-section(
+          v-if="isEditing"
+          class="absolute top-0 left-0 w-full h-full"
+          :containerDOM="editorContainerRef"
+          :wrapperDOM="editorWrapperRef"
+          ref="canvasRef")
         div(
           v-if="isChangingBrushSize"
           class="demo-brush"
@@ -62,6 +66,7 @@ import useStateInfo from '@/composable/useStateInfo'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { useElementSize, useEventBus } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
@@ -78,11 +83,6 @@ const { width: editorContainerWidth, height: editorContainerHeight } =
 
 const { imgLoadHandler } = useImageUtils()
 
-onMounted(() => {
-  imgLoadHandler(require('test.jpg'), (img) => {
-    setImgAspectRatio(img.width / img.height)
-  })
-})
 onBeforeRouteLeave((to, from) => {
   if (from.name === 'Editor') {
     setTimeout(() => {
@@ -96,14 +96,12 @@ onBeforeRouteLeave((to, from) => {
 
 const store = useStore()
 const pageState = computed(() => store.getters.getPagesState)
-console.log(pageState.value)
 const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
-console.log(pageScaleRatio)
 
 // #region Stores
 const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
 const editorStore = useEditorStore()
-const { setImgAspectRatio, setEditorState } = editorStore
+const { setEditorState } = editorStore
 const { pageSize, editorState } = storeToRefs(editorStore)
 
 const handleNextAction = function () {
@@ -115,7 +113,7 @@ const handleNextAction = function () {
 }
 // #endregion
 
-// #region computed
+// #region page related
 const fitScaleRatio = computed(() => {
   if (
     editorContainerWidth.value === 0 ||
@@ -144,13 +142,10 @@ const wrapperStyles = computed(() => {
   }
 })
 
-const pageStyles = computed(() => {
-  return {
-    width: `${pageSize.value.width}px`,
-    height: `${pageSize.value.height}px`,
-    transform: `scale(${pageScaleRatio.value / 100})`,
-  }
-})
+const handleOuterClick = () => {
+  groupUtils.deselect()
+}
+
 // #endregion
 
 // #region demo brush size section

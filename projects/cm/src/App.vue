@@ -19,7 +19,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
             v-slot="{ navigate }")
             cm-svg-icon(iconName="settings"
               :iconColor="'app-tab-default'" @click="navigate")
-      pro-item
       cm-btn(
         :theme="'primary'"
         :hasIcon="true"
@@ -45,7 +44,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 </template>
 
 <script setup lang="ts">
-import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import { storeToRefs } from 'pinia'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import EditingOptions from './components/panel-content/EditingOptions.vue'

@@ -19,11 +19,10 @@ div(class="w-full pl-24")
 </template>
 <script setup lang="ts">
 import { useEditorStore } from '@/stores/editor';
+import layerUtils from '@nu/vivi-lib/utils/layerUtils';
 import pageUtils from '@nu/vivi-lib/utils/pageUtils';
 import { storeToRefs } from 'pinia';
 const editorStore = useEditorStore()
-// #region vivi-lib vuex
-// #endregion
 
 const { imgAspectRatio } = storeToRefs(editorStore)
 
@@ -34,7 +33,12 @@ const selectAspectRatio = (type: string) => {
   selectedType.value = type
 
   if (type === 'original') {
-    pageUtils.setPageSize(0, 1600 * imgAspectRatio.value, 1600)
+    console.log(imgAspectRatio.value)
+    if (imgAspectRatio.value > 1) {
+      pageUtils.setPageSize(0, 1600, 1600 / imgAspectRatio.value)
+    } else {
+      pageUtils.setPageSize(0, 1600 * imgAspectRatio.value, 1600)
+    }
   } else {
     const [w, h] = type.split('_')
     const width = parseInt(w)
@@ -42,10 +46,13 @@ const selectAspectRatio = (type: string) => {
 
     if (width > height) {
       pageUtils.setPageSize(0, 1600, (1600 * height) / width)
+      layerUtils.updateLayerStyles(0, 0, {})
     } else {
       pageUtils.setPageSize(0, (1600 * width) / height, 1600)
     }
   }
+
+  layerUtils.resizeLayerConfig(0, layerUtils.getCurrLayer, true)
 
   /**
    * @Note - width > height -> aspectRatio > 1

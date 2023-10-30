@@ -35,8 +35,8 @@ export default defineConfig({
     svgSpritePlugin({
       symbolId: '[name]',
       svgo: false,
-      include: '**/src/assets/icon/**/*.svg'
-    })
+      include: '**/src/assets/icon/**/*.svg',
+    }),
   ],
   resolve: {
     alias: {

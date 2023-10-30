@@ -55,10 +55,9 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
-import { useImgSelectorStore } from '@/stores/imgSelector';
-import vuex from '@/vuex';
-import assetUtils from '@nu/vivi-lib/utils/assetUtils';
-import { useRouter } from 'vue-router';
+import { useImgSelectorStore } from '@/stores/imgSelector'
+import vuex from '@/vuex'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const inBrowserMode = computed(() => vuex.getters['webView/getInBrowserMode'])
@@ -68,22 +67,21 @@ const goToEditor = () => {
 }
 
 const openImgSelecotr = () => {
-  console.log(inBrowserMode.value)
-  if (!inBrowserMode.value) {
-    setShowImgSelector(true)
-  } else {
-    const src = require('test.jpg')
-    console.log(src)
-    goToEditor()
-    assetUtils.addImage(
-      require('test.jpg'),
-      1,
-      {
-        previewSrc: require('test.jpg'),
-        isPreview: true,
-      }
-    )
-  }
+  setShowImgSelector(true)
+  /**
+   * @Note below codes is used to test in the browser
+   */
+  // const src = require('test.jpg')
+  // console.log(src)
+  // goToEditor()
+  // assetUtils.addImage(
+  //   require('test.jpg'),
+  //   1,
+  //   {
+  //     previewSrc: require('test.jpg'),
+  //     isPreview: true,
+  //   }
+  // )
 }
 </script>
 <style scoped lang="scss">

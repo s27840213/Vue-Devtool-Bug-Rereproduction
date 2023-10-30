@@ -46,7 +46,7 @@ export const useEditorStore = defineStore('editor', {
     },
 
     createNewPage(width: number, height: number) {
-      pageUtils.setPages([pageUtils.newPage({ width, height})])
+      pageUtils.setPages([pageUtils.newPage({ width, height })])
     },
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
