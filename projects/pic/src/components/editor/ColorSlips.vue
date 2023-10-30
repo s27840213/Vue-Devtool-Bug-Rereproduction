@@ -9,7 +9,7 @@ div(class="color-panel"
   div(class="color-panel__scroll" :class="{'p-0': noPadding}")
     //- Recently colors
     div(class="color-panel__colors"
-        :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+        :style="{'color': whiteTheme ? '#474A57' : '#ffffff'}")
       div(class="text-left" :class="{'mb-5': !$isTouchDevice()}")
         div(class="flex-center")
           svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
@@ -40,7 +40,7 @@ div(class="color-panel"
           div(v-for="palette in currentPalettes"
               :key="palette.id"
               class="color-panel__colors"
-              :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+              :style="{'color': whiteTheme ? '#474A57' : '#ffffff'}")
             div(class="text-left mb-5")
               span {{getDisplayedPaletteName(palette)}}
             div
@@ -51,7 +51,7 @@ div(class="color-panel"
                 @click="handleColorEvent(color.color)")
       //- Document colors
       div(class="color-panel__colors"
-          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+          :style="{'color': whiteTheme ? '#474A57' : '#ffffff'}")
         div(class="text-left" :class="{'mb-5': !$isTouchDevice()}")
           span {{$t('NN0091')}}
         div
@@ -60,7 +60,7 @@ div(class="color-panel"
                     @click="handleColorEvent(color)")
       //- Preset Colors
       div(class="color-panel__colors"
-          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+          :style="{'color': whiteTheme ? '#474A57' : '#ffffff'}")
         div(class="text-left" :class="{'mb-5': !$isTouchDevice()}")
           span {{$t('NN0089')}}
         div

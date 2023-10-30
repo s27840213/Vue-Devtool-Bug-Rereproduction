@@ -2,6 +2,11 @@
 // $appName: None !default;
 
 @function setColor($color, $opacity: 1) {
+  // Because rgba don't accept transparent.
+  @if $color == transparent {
+    @return transparent
+  }
+
   @if map-has-key($map: $colors, $key: $color) {
     @return rgba(map-get($colors, $color), $opacity);
   }
