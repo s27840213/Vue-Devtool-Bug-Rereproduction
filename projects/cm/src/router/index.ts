@@ -1,6 +1,6 @@
 import { useUserStore } from '@/stores/user'
-import uploadUtilsCm from '@/utils/uploadUtilsCm'
 import cmWVUtils from '@/utils/cmWVUtils'
+import uploadUtilsCm from '@/utils/uploadUtilsCm'
 import HomeView from '@/views/HomeView.vue'
 import { generalUtils } from '@nu/shared-lib'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -48,6 +48,17 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('@/views/SettingsView.vue'),
+    },
+    {
+      path: '/test',
+      name: 'Test',
+      meta: {
+        transition: 'fade-bottom-in',
+      },
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('@/views/TestResult.vue'),
     },
   ],
 })

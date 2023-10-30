@@ -6,20 +6,20 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     template(
       v-if="isEditing"
       #middle)
-      cm-svg-icon(
-        iconName="undo"
-        :iconColor="'app-btn-primary-text'"
-        iconWidth="20px")
-      cm-svg-icon(
-        iconName="redo"
-        :iconColor="'app-btn-primary-text'"
-        iconWidth="20px")
+      //- cm-svg-icon(
+      //-   iconName="undo"
+      //-   :iconColor="'app-btn-primary-text'"
+      //-   iconWidth="20px")
+      //- cm-svg-icon(
+      //-   iconName="redo"
+      //-   :iconColor="'app-btn-primary-text'"
+      //-   iconWidth="20px")
     template(#right)
-      cm-btn(
-        v-if="isEditing"
-        theme="primary"
-        size="md"
-        @click="downloadCanvas") 下載 Mask
+      //- cm-btn(
+      //-   v-if="isEditing"
+      //-   theme="primary"
+      //-   size="md"
+      //-   @click="downloadCanvas") 下載 Mask
       cm-btn(
         v-if="showAspectRatioSelector"
         theme="primary"
@@ -30,9 +30,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       class="w-full h-full box-border overflow-scroll flex justify-center items-center"
       @click.self="handleOuterClick")
       div(
-        id="editor-page-wrapper"
+        id="screenshot-target"
         class="wrapper relative"
-        :class="showAspectRatioSelector ? 'pointer-events-none' : ''"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         //- div(
@@ -40,7 +39,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         //-   class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
         //-   :style="pageStyles")
           //- img(class="h-full object-contain" src="@/assets/img/test.jpg")
-        nu-page(
+        nu-page(v-show="!showGenResult"
           class="z-100"
           :pageIndex="0"
           :pageState="pageState[0]"
@@ -48,6 +47,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         canvas-section(
           v-if="isEditing"
           class="absolute top-0 left-0 w-full h-full"
+          :class="isManipulatingCanvas ? '' : 'pointer-events-none' "
           :containerDOM="editorContainerRef"
           :wrapperDOM="editorWrapperRef"
           ref="canvasRef")
@@ -56,9 +56,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="isEditing"
+      v-if="isEditing && !showGenResult"
       class="absolute top-1/2 right-0 z-10 -translate-y-1/2"
-      ref="sidebarTabsRef")
+      ref="sidebarTabsRef"
+      @downloadMask="downloadCanvas")
+    div(v-if="showGenResult" class="absolute top-0 left-0 z-100 flex justify-center items-center w-full h-full bg-app-bg")
+        img(:src="generatedResult" class="w-240")
 </template>
 <script setup lang="ts">
 import useImageUtils from '@/composable/useImageUtils'
@@ -102,7 +105,8 @@ const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
 const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
-const { pageSize, editorState } = storeToRefs(editorStore)
+const { pageSize, editorState, currActiveFeature, generatedResult, showGenResult } = storeToRefs(editorStore)
+const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
 
 const handleNextAction = function () {
   if (editorState.value === 'aspectRatio') {

@@ -16,7 +16,10 @@ interface IEditorStore {
   canvasMode: PowerfulFillCanvasMode
   isAdjustingBottomPanel: boolean
   maskCanvas: HTMLCanvasElement
-  maskDataUrl: string
+  maskDataUrl: string,
+  isGenerating: boolean,
+  generatedResult: string,
+  showGenResult: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -29,10 +32,16 @@ export const useEditorStore = defineStore('editor', {
     isAdjustingBottomPanel: true,
     maskCanvas: document.createElement('canvas'),
     maskDataUrl: '',
+    isGenerating: false,
+    generatedResult: '',
+    showGenResult: false
   }),
   getters: {
     pageSize(): { width: number; height: number } {
       return pageUtils.getPageSize(0)
+    },
+    pageAspectRatio(): number {
+      return this.pageSize.width / this.pageSize.height
     },
     pageScaleRatio(): number{
       return pageUtils.scaleRatio / 100
@@ -72,5 +81,14 @@ export const useEditorStore = defineStore('editor', {
     setMaskCanvasDataUrl(dataUrl: string) {
       this.maskDataUrl = dataUrl
     },
+    setIsGenerating(isGenerating: boolean) {
+      this.isGenerating = isGenerating
+    },
+    setGeneratedResult(result: string) {
+      this.generatedResult = result
+    },
+    setShowGenResult(show: boolean) {
+      this.showGenResult = show
+    }
   },
 })

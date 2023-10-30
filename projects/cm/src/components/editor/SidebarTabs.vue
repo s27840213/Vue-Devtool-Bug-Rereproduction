@@ -35,7 +35,9 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 z-50 h-[350px] overflow
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
 import { useEditorStore } from '@/stores/editor';
+import groupUtils from '@nu/vivi-lib/utils/groupUtils';
 import { storeToRefs } from 'pinia';
+const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
   icon: string
@@ -142,7 +144,6 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
 const { clearCtx, reverseSelection, autoFill } = useCanvasUtilsCm()
 
 const handleTabAction = (tab: ISidebarTab) => {
-  if (tab.disabled) return
   switch (tab.icon) {
     case 'selection':
     case 'brush':
@@ -152,6 +153,8 @@ const handleTabAction = (tab: ISidebarTab) => {
       } else {
         setCurrActiveFeature(tab.icon)
       }
+
+      groupUtils.deselect()
       break
     }
     case 'auto-fill': {
@@ -165,6 +168,10 @@ const handleTabAction = (tab: ISidebarTab) => {
     case 'ban': {
       clearCtx()
       break
+    }
+    case 'canvas': {
+      console.log('download mask')
+      emits('downloadMask')
     }
   }
 }
