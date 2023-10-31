@@ -1162,7 +1162,7 @@ class ConstantData {
     ]
   }
 
-  stickerTutorialSteps(): { title: string, description: string, video: string, btnText?: string }[] {
+  stickerTutorialSteps(): { title: string, description: string, video: string, thumbnail: string, btnText?: string }[] {
     const stickerVideoUrls = this.stickerVideoUrls()
     // TODO: after tw new videos are povided, remove title and description and make btnText required.
     return this.checkIfUseNewLogic() ? [
@@ -1170,40 +1170,47 @@ class ConstantData {
         title: '',
         description: '',
         video: stickerVideoUrls.tutorial1.video,
+        thumbnail: stickerVideoUrls.tutorial1.thumbnail,
         btnText: `${i18n.global.t('STK0091')}`
       },
       {
         title: '',
         description: '',
         video: stickerVideoUrls.tutorial2.video,
+        thumbnail: stickerVideoUrls.tutorial2.thumbnail,
         btnText: `${i18n.global.t('STK0092')}`
       },
       {
         title: '',
         description: '',
         video: stickerVideoUrls.tutorial4.video,
+        thumbnail: stickerVideoUrls.tutorial4.thumbnail,
         btnText: `${i18n.global.t('STK0093')}`
       }
     ] : [
       {
         title: `${i18n.global.t('NN0746')}`,
         description: `${i18n.global.t('NN0750')}`,
-        video: stickerVideoUrls.tutorial1.video
+        video: stickerVideoUrls.tutorial1.video,
+        thumbnail: stickerVideoUrls.tutorial1.thumbnail,
       },
       {
         title: `${i18n.global.t('NN0747')}`,
         description: `${i18n.global.t('NN0751')}`,
-        video: stickerVideoUrls.tutorial2.video
+        video: stickerVideoUrls.tutorial2.video,
+        thumbnail: stickerVideoUrls.tutorial2.thumbnail,
       },
       {
         title: `${i18n.global.t('NN0748')}`,
         description: `${i18n.global.t('NN0752')}`,
-        video: stickerVideoUrls.tutorial3.video
+        video: stickerVideoUrls.tutorial3.video,
+        thumbnail: stickerVideoUrls.tutorial3.thumbnail,
       },
       {
         title: `${i18n.global.t('NN0749')}`,
         description: `${i18n.global.t('NN0753')}`,
-        video: stickerVideoUrls.tutorial4.video
+        video: stickerVideoUrls.tutorial4.video,
+        thumbnail: stickerVideoUrls.tutorial4.thumbnail,
       }
     ]
   }
@@ -1248,7 +1255,7 @@ class ConstantData {
   get pinchTransitionTime() {
     return 250
   }
-  
+
   // map i18n locale to ISO 3166-1 alpha-3
   countryMap = new Map(
     [
