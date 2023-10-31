@@ -38,7 +38,7 @@ import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
 import { useEditorStore } from '@/stores/editor';
 import groupUtils from '@nu/vivi-lib/utils/groupUtils';
 import { storeToRefs } from 'pinia';
-const emits = defineEmits(['downloadMask']);
+const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
   icon: string

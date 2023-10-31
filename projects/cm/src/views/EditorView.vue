@@ -40,7 +40,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         //-   :style="pageStyles")
           //- img(class="h-full object-contain" src="@/assets/img/test.jpg")
         nu-page(v-show="!showGenResult"
-          class="z-page"
           :pageIndex="0"
           :pageState="pageState[0]"
           :overflowContainer="editorContainerRef")
@@ -60,7 +59,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
-    div(v-if="showGenResult" class="absolute top-0 left-0 z-page flex justify-center items-center w-full h-full bg-app-bg")
+    div(v-if="showGenResult" class="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-app-bg")
         img(:src="generatedResult" class="w-240")
 </template>
 <script setup lang="ts">
