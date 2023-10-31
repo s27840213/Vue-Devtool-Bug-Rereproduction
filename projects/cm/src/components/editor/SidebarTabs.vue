@@ -1,9 +1,10 @@
 <template lang="pug">
-div(class="sidebar-tabs flex flex-col items-center gap-4 z-50 h-[350px] overflow-scroll scrollbar-hide mr-4")
+div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide mr-4")
   div(
     v-for="(tab, index) in defaultEditorTabs"
     :key="`${tab.icon}-${index}`"
-    class="w-44")
+    class="w-44"
+    :class="{'tutorial-powerful-fill-1--highlight': [t('CM0052'), t('CM0017'), t('CM0051')].includes(tab.text ?? ''), 'tutorial-powerful-fill-2--highlight tutorial-powerful-fill-2--clickable': tab.text === t('CM0052')}")
     div(
       class="sidebar__tab flex flex-col items-center justify-center gap-2 p-4"
       @click.stop="handleTabAction(tab)")

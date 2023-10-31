@@ -5,9 +5,9 @@ div(class="flex flex-col justify-center items-center w-full px-24 gap-16")
     cm-svg-icon(v-if="false" iconName="settings" class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
-      class="w-full p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64"
+      class="w-full p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable"
       :placeholder="$t('CM0024')"
-      autofocus
+      :autofocus="!isDuringTutorial"
       v-model="promptText")
     transition(name="clear-btn-transition")
       div(
@@ -25,6 +25,7 @@ div(class="flex flex-col justify-center items-center w-full px-24 gap-16")
 <script setup lang="ts">
 import { useEditorStore } from '@/stores/editor';
 import genImageUtils from '@/utils/genImageUtils';
+import tutorialUtils from '@/utils/tutorialUtils';
 import logUtils from '@nu/vivi-lib/utils/logUtils';
 
 const editorStore = useEditorStore()
@@ -33,6 +34,7 @@ const {setIsGenerating, setGeneratedResult, setShowGenResult} = editorStore
 const { isGenerating } = storeToRefs(editorStore)
 const promptText = ref('')
 const promptLen = computed(() => promptText.value.length)
+const isDuringTutorial = tutorialUtils.isDuringTutorial
 
 const handleGenerate = () => {
   setIsGenerating(true)
