@@ -574,9 +574,6 @@ importers:
       '@nu/shared-lib':
         specifier: workspace:^0.0.1
         version: link:../../packages/shared-lib
-      '@nu/vivi-lib':
-        specifier: workspace:^0.0.0
-        version: link:../../packages/vivi-lib
       pinia:
         specifier: ^2.1.4
         version: 2.1.6(typescript@5.2.2)(vue@3.3.4)

@@ -31,7 +31,7 @@ import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import type { ColorSlip } from '@/types/color'
 import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 /**
  * @TODO - tidy up the codes
  */
