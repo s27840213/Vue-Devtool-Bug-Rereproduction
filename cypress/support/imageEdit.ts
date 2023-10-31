@@ -152,7 +152,7 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
           .togglePanel('陰影')
         for (const option of shadow.options) {
           if (option.name === 'color') {
-            cy.get('photo-effect-setting__color, .photo-shadow__color').click()
+            cy.get('.photo-effect-setting__color, .photo-shadow__color').click()
               .get(`.color-btn .color-${option.val}`).eq(0).click()
               .get('.color-panel__btn, .mobile-panel__left-btn').click()
           } else {
