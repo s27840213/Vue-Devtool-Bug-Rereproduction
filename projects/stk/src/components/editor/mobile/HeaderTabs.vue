@@ -103,6 +103,7 @@ export default defineComponent({
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isImgCtrl: 'imgControl/isImgCtrl',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currSelectedInfo: 'getCurrSelectedInfo',
       isUploadingShadowImg: 'shadow/isUploading',
@@ -901,6 +902,11 @@ export default defineComponent({
       if (this.isUploadingShadowImg) {
         notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
+      }
+      if (this.isBgImgCtrl) {
+        pageUtils.setBackgroundImageControlDefault()
+      } else if (this.isImgCtrl) {
+        imageUtils.setImgControlDefault()
       }
       this.setTemplateShareType(this.editorType)
     }
