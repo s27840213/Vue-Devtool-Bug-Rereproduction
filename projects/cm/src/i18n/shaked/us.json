@@ -35,6 +35,7 @@
   "NN0070": "Shape",
   "NN0071": "Curve",
   "NN0080": "My Designs",
+  "NN0081": "Add page name",
   "NN0082": "More",
   "NN0084": "Square",
   "NN0085": "Round",
@@ -53,9 +54,14 @@
   "NN0116": "Double Shadow",
   "NN0117": "None",
   "NN0118": "Curve",
+  "NN0134": "Page {num}",
   "NN0135": "Upload completed",
   "NN0136": "Uploading",
   "NN0137": "Upload failed",
+  "NN0138": "Guide Types",
+  "NN0139": "Add page",
+  "NN0140": "Duplicate",
+  "NN0141": "Delete",
   "NN0145": "Template Center",
   "NN0147": "FAQ",
   "NN0165": "Account settings",
@@ -390,5 +396,9 @@
   "CM0050": "Image",
   "CM0051": "Select",
   "CM0052": "Auto Fill",
-  "CM0053": "Canvas"
+  "CM0053": "Canvas",
+  "CM0054": "Use these tools to fill your target areas first.",
+  "CM0055": "Try it!",
+  "CM0056": "Type the scene to use for filling.",
+  "CM0057": "Okay, get it!"
 }

@@ -4,9 +4,11 @@
   pointer-events: auto;
   position: absolute;
   background-color: setColor(white);
-  @include setColors(blue-2, black-5) using ($color) {
+
+  @include setColors(blue-2, black-5, black-5) using ($color) {
     border: 2px solid $color;
   }
+
   box-sizing: border-box;
 
   &__resize-bar-wrapper {
@@ -66,9 +68,10 @@
     background-color: setColor(white);
 
     &.border {
-      @include setColors(blue-2, black-5) using ($color) {
+      @include setColors(blue-2, black-5, black-5) using ($color) {
         border: 2px solid $color;
       }
+
       box-sizing: border-box;
     }
 

@@ -1,6 +1,6 @@
 import { useUserStore } from '@/stores/user'
-import uploadUtils from '@/utils/uploadUtils'
-import webViewUtils from '@/utils/webViewUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
+import uploadUtilsCm from '@/utils/uploadUtilsCm'
 import HomeView from '@/views/HomeView.vue'
 import { generalUtils } from '@nu/shared-lib'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -49,16 +49,28 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('@/views/SettingsView.vue'),
     },
+    {
+      path: '/test',
+      name: 'Test',
+      meta: {
+        transition: 'fade-bottom-in',
+      },
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('@/views/TestResult.vue'),
+    },
   ],
 })
 
 router.beforeEach((to, from, next) => {
   const { setUserId } = useUserStore()
   setUserId(generalUtils.generateRandomString(20))
-  uploadUtils.getUrlMap()
-  webViewUtils.setupAPIInterface()
-  webViewUtils.detectIfInApp()
-  webViewUtils.getUserInfo()
+  uploadUtilsCm.getUrlMap()
+  cmWVUtils.setupAPIInterface()
+  cmWVUtils.detectIfInApp()
+  cmWVUtils.getUserInfo()
+  cmWVUtils.fetchTutorialFlags()
   if (from.name === 'MyDesign' && to.name === 'Home') {
     to.meta.transition = 'fade-right-in'
   }

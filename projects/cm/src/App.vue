@@ -1,5 +1,6 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative")
+  tutorial
   div(class="main-page-headerbar w-full flex justify-between items-center px-16"
       ref="headerbarRef"
       :style="headerbarStyles")
@@ -28,7 +29,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(class="z-20")
+  bottom-panel(v-if="!showGenResult" class="z-bottom-panel")
     template(#content="{setSlotRef}")
       transition(
         name="bottom-panel-transition"
@@ -40,7 +41,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     ref="maskRef"
     @click.stop="closeModal")
   transition(name="bottom-up")
-    img-selector(v-if="showImgSelector" class="absolute top-0 left-0 w-full h-full z-30")
+    img-selector(v-if="showImgSelector" class="absolute top-0 left-0 w-full h-full z-img-selector")
 </template>
 
 <script setup lang="ts">
@@ -51,6 +52,7 @@ import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import useStateInfo from './composable/useStateInfo'
+import { useEditorStore } from './stores/editor'
 import { useModalStore } from './stores/modal'
 
 // #region route info
@@ -99,12 +101,17 @@ const headerbarStyles = computed(() => {
     opacity: atMainPage.value ? 1 : 0,
   }
 })
+
+const editorStore = useEditorStore()
+const {showGenResult } = storeToRefs(editorStore)
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/transitions.scss';
+@use '@/assets/scss/main.scss';
+@use '@/assets/scss/transitions.scss';
+
 .mask {
-  @apply w-full h-full fixed top-0 left-0 z-10  backdrop-blur-sm;
+  @apply w-full h-full fixed top-0 left-0 z-modal-mask  backdrop-blur-sm;
   transition: backdrop-filter 0.25;
   background-color: rgba(#050505, 0.5);
 }

@@ -3,15 +3,21 @@ div(ref="main" class="tutorial relative" v-touch
     @swipeleft="handleSwipeLeft"
     @swiperight="handleSwipeRight")
   div(class="tutorial__video")
-    video(autoplay playsinline muted :src="videoSource" @ended="handleEnded" @canplay="handleVideoLoaded")
+    video(autoplay
+          playsinline
+          muted
+          :src="videoSource.video"
+          :poster="videoSource.thumbnail"
+          @ended="handleEnded"
+          @canplay="handleVideoLoaded")
   div(class="tutorial__content")
     div(class="tutorial__content__container")
       div(v-for="(stepConfig, index) in stepConfigs"
           class="tutorial__content__step"
           :key="stepConfig.title"
           :style="transformStyles()")
-        div(v-if="$i18n.locale !== 'us'" class="tutorial__content__title") {{ stepConfig.title }}
-        div(v-if="$i18n.locale !== 'us'" class="tutorial__content__description") {{ stepConfig.description }}
+        div(v-if="!['us', 'jp'].includes($i18n.locale)" class="tutorial__content__title") {{ stepConfig.title }}
+        div(v-if="!['us', 'jp'].includes($i18n.locale)" class="tutorial__content__description") {{ stepConfig.description }}
         div(class="tutorial__content__button-container")
           div(class="tutorial__content__button"
               @click.prevent.stop="handleNextStep")
@@ -49,8 +55,8 @@ export default defineComponent({
     }
   },
   computed: {
-    videoSource(): string {
-      return this.stepConfigs[this.step].video
+    videoSource() {
+      return this.stepConfigs[this.step]
     }
   },
   methods: {
