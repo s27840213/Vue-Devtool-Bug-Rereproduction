@@ -13,6 +13,12 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
   //-   :hasIcon="true"
   //-   iconName="crown"
   //-   @click="openImgSelecotr") Test Img Selector
+  cm-btn(
+    class="my-10"
+    :theme="'primary'"
+    :hasIcon="true"
+    iconName="crown"
+    @click="exportVedio") Test video Selector
   div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
   div(class="feature-section")
     feature-card(
@@ -55,9 +61,10 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
-import { useImgSelectorStore } from '@/stores/imgSelector'
-import vuex from '@/vuex'
-import { useRouter } from 'vue-router'
+import { useImgSelectorStore } from '@/stores/imgSelector';
+import PixiRecorder from '@/utils/pixiRecorder';
+import vuex from '@/vuex';
+import { useRouter } from 'vue-router';
 
 const router = useRouter()
 const inBrowserMode = computed(() => vuex.getters['webView/getInBrowserMode'])
@@ -82,6 +89,9 @@ const openImgSelecotr = () => {
   //     isPreview: true,
   //   }
   // )
+}
+const exportVedio = () => {
+  const pixiRecorder = new PixiRecorder()
 }
 </script>
 <style scoped lang="scss">
