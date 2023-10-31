@@ -1,6 +1,6 @@
 <template lang="pug">
 div(v-if="step > 0" class="z-tutorial-overlay absolute w-screen h-screen " ref="overlayRef")
-  component(v-if="highlightRefs.length" :is="tutorials(name + '-tutorial')" :step="step" :elHighlight="highlightRefs" :trackingFrame="trackingFrame" @nextStep="nextStep")
+  component(v-if="tutorialComponent && highlightRefs.length" :is="tutorialComponent" :step="step" :elHighlight="highlightRefs" :trackingFrame="trackingFrame" @nextStep="nextStep")
 </template>
 
 <script setup lang="ts">
@@ -11,12 +11,12 @@ import { storeToRefs } from 'pinia';
 import PowerfulFillTutorial from './PowerfulFillTutorial.vue';
 
 const DEV = false // set to visualize clickable area
-const tutorials = (name: string) => {
+const tutorialComponent = computed(() => {
   const tutorials = [
     PowerfulFillTutorial
   ]
-  return tutorials.find((t) => t.name === name)
-}
+  return tutorials.find((t) => t.name === name.value + '-tutorial')
+})
 
 // #region clickable area
 const overlayRef = ref<HTMLElement | null>(null)
