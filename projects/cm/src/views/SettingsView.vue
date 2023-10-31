@@ -71,9 +71,9 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         @click="data.action")
 </template>
 <script setup lang="ts">
-import { useGlobalStore } from '@/stores/global';
-import cmWVUtils from '@/utils/cmWVUtils';
-import { storeToRefs } from 'pinia';
+import { useGlobalStore } from '@/stores/global'
+import cmWVUtils from '@/utils/cmWVUtils'
+import { storeToRefs } from 'pinia'
 
 const scrollContainer = ref<HTMLElement | null>(null)
 
@@ -107,10 +107,10 @@ const domainOptions = computed((): OptionConfig[] => {
     //   },
     // },
     {
-      title: 'rd(nuphoto.co)',
+      title: 'rd',
       iconName: 'global',
       action: () => {
-        cmWVUtils.switchDomain('https://nuphoto.co')
+        cmWVUtils.switchDomain('https://cmrd.vivipic.com')
       },
     },
     {
