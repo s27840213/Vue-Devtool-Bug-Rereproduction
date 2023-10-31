@@ -26,6 +26,12 @@
       "@nu/vivi-lib/*": [
         "../../packages/vivi-lib/src/*",
         "../../packages/vivi-lib/src/index"
+      ],
+      "@nu/shared-lib/*": [
+        "../../packages/shared-lib/src/*"
+      ],
+      "@nu/shared-lib": [
+        "../../packages/shared-lib/src/index"
       ]
     },
     "lib": [
