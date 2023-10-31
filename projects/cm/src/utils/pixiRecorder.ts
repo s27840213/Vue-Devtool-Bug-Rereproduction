@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import webViewUtils, { type ISaveAssetFromUrlResponse } from './webViewUtils'
+import cmWVUtils from './cmWVUtils'
 const ENABLE_RECORDING = true
 const RECORD_START_DELAY = 2000
 const IMG2_EXAMPLE =
@@ -332,25 +332,12 @@ class CanvasRecorder {
     video.src = url
 
     this.blobToBase64(new Blob(this.chunks, { type: 'video/mp4' })).then((base64: string) => {
-      // webViewUtils.saveAssetFromUrl('png', 'https://template.vivipic.com/template/WZ3xxkwKHSnwOUcHhDsJ/prev_4x?ver=8')
+      cmWVUtils.saveAssetFromUrl('png', 'https://template.vivipic.com/template/WZ3xxkwKHSnwOUcHhDsJ/prev_4x?ver=8')
       // webViewUtils.saveAssetFromUrl('mp4', 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4')
-      webViewUtils.saveAssetFromUrl('mp4', base64)
-        .then((data: ISaveAssetFromUrlResponse) => {
-          console.log('save asset from url', data)
-        })
-
-
-      const file = new Blob([base64], { type: 'text/plain' });
-      const link = document.createElement("a")
-      link.href = URL.createObjectURL(file)
-
-      // Add file name
-      link.download = "base64-video.txt"
-
-      // Add click event to <a> tag to save file.
-      link.click()
-      console.log(link.href)
-      // URL.revokeObjectURL(link.href)
+      // cmWVUtils.saveAssetFromUrl('mp4', base64)
+      //   .then((data: ISaveAssetFromUrlResponse) => {
+      //     console.log('save asset from url', data)
+      //   })
     })
   }
 }
