@@ -59,7 +59,7 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import shortcutHandler from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import testUtils from '@/utils/testUtils'
+import testUtils from '@nu/vivi-lib/utils/testUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 

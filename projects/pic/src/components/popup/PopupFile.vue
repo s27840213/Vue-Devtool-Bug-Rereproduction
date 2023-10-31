@@ -81,7 +81,7 @@ import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import rulerUtils from '@nu/vivi-lib/utils/rulerUtils'
 import shortcutHandler from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import testUtils from '@/utils/testUtils'
+import testUtils from '@nu/vivi-lib/utils/testUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
