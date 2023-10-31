@@ -16,8 +16,8 @@ div(ref="main" class="tutorial relative" v-touch
           class="tutorial__content__step"
           :key="stepConfig.title"
           :style="transformStyles()")
-        div(v-if="$i18n.locale !== 'us'" class="tutorial__content__title") {{ stepConfig.title }}
-        div(v-if="$i18n.locale !== 'us'" class="tutorial__content__description") {{ stepConfig.description }}
+        div(v-if="!['us', 'jp'].includes($i18n.locale)" class="tutorial__content__title") {{ stepConfig.title }}
+        div(v-if="!['us', 'jp'].includes($i18n.locale)" class="tutorial__content__description") {{ stepConfig.description }}
         div(class="tutorial__content__button-container")
           div(class="tutorial__content__button"
               @click.prevent.stop="handleNextStep")
