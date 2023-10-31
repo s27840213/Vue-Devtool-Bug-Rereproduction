@@ -70,6 +70,7 @@ router.beforeEach((to, from, next) => {
   cmWVUtils.setupAPIInterface()
   cmWVUtils.detectIfInApp()
   cmWVUtils.getUserInfo()
+  cmWVUtils.fetchTutorialFlags()
   if (from.name === 'MyDesign' && to.name === 'Home') {
     to.meta.transition = 'fade-right-in'
   }
