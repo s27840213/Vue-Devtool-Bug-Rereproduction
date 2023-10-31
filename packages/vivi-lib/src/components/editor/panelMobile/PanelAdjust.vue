@@ -10,7 +10,7 @@ div(class="panel-adjust")
       @update="handleField")
   nubtn(class="panel-adjust__reset"
           theme="icon_pill"
-          :icon="['reset-sm', 'white']"
+          :icon="['reset', 'white']"
           size="sm"
           @click="reset") {{$t('NN0754')}}
 </template>

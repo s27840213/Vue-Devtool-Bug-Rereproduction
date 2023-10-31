@@ -33,7 +33,7 @@ div(class="panel-shadow")
     div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
       nubtn(class="photo-shadow__reset"
             theme="icon_pill"
-            :icon="['reset-sm', 'white']"
+            :icon="['reset', 'white']"
             size="sm"
             @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
 </template>
