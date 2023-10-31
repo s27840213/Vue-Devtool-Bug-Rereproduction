@@ -2,8 +2,9 @@
 div(class="panel-shadow")
   div(class="flex-between photo-shadow__options mb-10")
     div(v-for="icon in shadowOptions" :key="icon"
-        :class="{ 'selected': currentEffect === icon }"
+        :class="[`photo-shadow-${icon}`, {'selected': currentEffect === icon}]"
         @click="onEffectClick(icon)")
+      //- class photo-shadow-<icon> is for Cypress to query, don't remove it
       div(class="photo-shadow__options__icon-bg")
       svg-icon(v-if="icon === 'none'"
             iconName="no-effect"

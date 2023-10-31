@@ -4,8 +4,9 @@ div(class="photo-effect-setting" ref="panel" tabindex="0" @keydown.stop)
     div(v-for="(icon) in shadowOption.slice(0, 3)"
         :key="`shadow-${icon}`"
         class="photo-effect-setting__option pointer"
-        :class="{'selected': currentEffect === icon}"
+        :class="[`photo-shadow-${icon}`, {'selected': currentEffect === icon}]"
         @click="onEffectClick(icon)")
+      //- class photo-shadow-<icon> is for Cypress to query, don't remove it
       svg-icon(v-if="['none'].includes(icon)"
         iconName="no-effect"
         iconWidth="24px"
@@ -48,8 +49,9 @@ div(class="photo-effect-setting" ref="panel" tabindex="0" @keydown.stop)
     div(v-for="(icon) in shadowOption.slice(3)"
         :key="`shadow-${icon}`"
         class="photo-effect-setting__option pointer"
-        :class="{'selected': currentEffect === icon}"
+        :class="[`photo-shadow-${icon}`, {'selected': currentEffect === icon}]"
         @click="onEffectClick(icon)")
+      //- class photo-shadow-<icon> is for Cypress to query, don't remove it
       svg-icon(v-if="['none'].includes(icon)"
         iconName="no-effect"
         iconWidth="24px"

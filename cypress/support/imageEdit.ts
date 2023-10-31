@@ -141,7 +141,7 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
     .togglePanel('陰影')
     .then(() => {
       for (const shadow of shadowsOptions) {
-        cy.get(`.svg-photo-shadow-${shadow.name}, .svg-mobile-photo-shadow-${shadow.name}`).click()
+        cy.get(`.photo-shadow-${shadow.name}`).click()
           .get('.nu-layer .nu-layer__inProcess').should('not.exist')
         cy.contains('重置效果').click()
           // 30 = DRAWING_TIMEOUT in imageShadowUtils, debounce time of shadow setting
@@ -173,7 +173,7 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
       }
     })
     // Restore image to original state
-    .get('.svg-photo-shadow-none, .svg-mobile-photo-shadow-none').click()
+    .get('.photo-shadow-none').click()
     .isMobile(() => { cy.togglePanel('陰影') })
   return cy.wrap(subject)
 })
