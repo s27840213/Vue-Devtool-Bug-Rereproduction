@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="bottom-panel" ref="bottomPanelRef")
+div(class="bottom-panel tutorial-powerful-fill-4--highlight" ref="bottomPanelRef")
   slot(
     name="content"
     :setSlotRef="setSlotRef")
