@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-shape" :style="styles")
-  svg(:view-box.camel="viewBoxFormatter" preserveAspectRatio="none")
+  svg(:view-box.camel="viewBoxFormatter" preserveAspectRatio="none" :style="svgStyles")
     defs(v-if="config.category === 'E'" v-html="svgFormatter")
     defs
       filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
@@ -85,7 +85,7 @@ export default defineComponent({
       filterTemplate: '',
       paramsReady: false,
       styleTextContent: [] as string[],
-      transTextContent: [] as string[]
+      transTextContent: [] as string[],
     }
   },
   async created() {
@@ -188,6 +188,9 @@ export default defineComponent({
     }
   },
   computed: {
+    svgStyles(): {[key: string]: string} {
+      return this.$route.name !== 'Preview' ? { overflow: 'visible' } : {} // solving https://www.notion.so/vivipic/1-43-svg-9de4bd6782614852b503997f7e9256a2?pvs=4
+    },
     viewBoxFormatter(): string {
       if (this.paramsReady) {
         if (this.config.category === 'D') {
@@ -657,7 +660,6 @@ export default defineComponent({
 .nu-shape {
   // display: relative;
   svg {
-    overflow: visible; // solving https://www.notion.so/vivipic/1-43-svg-9de4bd6782614852b503997f7e9256a2?pvs=4
     display: block;
   }
 }
