@@ -20,7 +20,7 @@ const useTapTransition = (
       })
 
       useEventListener(el, 'touchend', (e) => {
-        timerId.value = setTimeout(() => {
+        timerId.value = window.setTimeout(() => {
           isRef(bool) ? (bool.value = false) : (bool = false)
         }, delayTime)
       })
@@ -35,7 +35,7 @@ const useTapTransition = (
         })
 
         useEventListener(element, 'touchend', (e) => {
-          timerId.value = setTimeout(() => {
+          timerId.value = window.setTimeout(() => {
             isRef(bool) ? (bool.value = false) : (bool = false)
           }, delayTime)
         })

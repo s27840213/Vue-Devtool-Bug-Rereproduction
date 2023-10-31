@@ -1,12 +1,13 @@
 import { IAsset } from '@/interfaces/module'
-import constantData from '@nu/vivi-lib/utils/constantData'
 import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
+import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import _ from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 interface IViviStickerState {
+  appLoadedTimeout: number,
   userInfo: IUserInfo,
   userSettings: IUserSettings,
   currActiveTab: string,
@@ -65,6 +66,7 @@ function getDefaultDict<T>(defaultValue: T): { [key: string]: T } {
 } // T will be auto inferred from defaultValue without specifying in <T> when calling
 
 const getDefaultState = (): IViviStickerState => ({
+  appLoadedTimeout: -1,
   userInfo: stkWVUtils.getDefaultUserInfo(),
   userSettings: stkWVUtils.getDefaultUserSettings(),
   currActiveTab: 'object',
@@ -145,6 +147,9 @@ const getDefaultState = (): IViviStickerState => ({
 
 const state = getDefaultState()
 const getters: GetterTree<IViviStickerState, unknown> = {
+  getAppLoadedTimeout(state: IViviStickerState): number {
+    return state.appLoadedTimeout
+  },
   getUserInfo(state: IViviStickerState): IUserInfo {
     return state.userInfo
   },
@@ -306,6 +311,9 @@ const actions: ActionTree<IViviStickerState, unknown> = {
 }
 
 const mutations: MutationTree<IViviStickerState> = {
+  SET_appLoadedTimeout(state: IViviStickerState, appLoadedTimeout: number) {
+    state.appLoadedTimeout = appLoadedTimeout
+  },
   SET_userInfo(state: IViviStickerState, userInfo: IUserInfo) {
     state.userInfo = userInfo
   },

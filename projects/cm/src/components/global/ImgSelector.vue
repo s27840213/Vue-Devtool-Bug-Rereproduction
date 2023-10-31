@@ -18,24 +18,21 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
             class="text-app-tab-default"
             :iconName="'chevron-up'"
             :iconWidth="'12px'")
-    div(
-      v-if="isAlbumOpened"
-      class="img-selector__img-grid bg-app-bg overflow-scroll"
-      @scroll.stop
-      @touchstart.stop)
+    div(v-if="isAlbumOpened" class="img-selector__img-grid bg-app-bg overflow-scroll")
       div(class="grid grid-cols-3 grid-flow-row content-start gap-4")
         div(class="aspect-square flex flex-col items-center justify-center")
           cm-svg-icon(class="text-app-tab-default mb-10" :iconName="'camera'")
           span(class="text-app-tab-default") Camera
         div(
-          v-for="item in currAlbumContent"
-          :key="item"
-          class="aspect-square")
+          v-for="id in currAlbumContent"
+          :key="id"
+          class="aspect-square"
+          @click="selectImage(id, 'cameraroll')")
           lazy-load(
             class="lazy-load w-full h-full"
             target=".img-selector__img-grid"
             :rootMargin="'1000px 0px 1000px 0px'")
-            img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?ssize=200`")
+            img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${id}?ssize=200`")
       observer-sentinel(
         class="flex justify-center py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
@@ -73,8 +70,15 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
             span(class="text-app-tab-default") {{ album.albumSize }}
 </template>
 <script lang="ts" setup>
-import type { IAlbum } from '@/utils/webViewUtils'
-import webViewUtils from '@/utils/webViewUtils'
+import { useEditorStore } from '@/stores/editor'
+import { useImgSelectorStore } from '@/stores/imgSelector'
+import type { IAlbum } from '@/utils/cmWVUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+
+const router = useRouter()
 
 // #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
@@ -98,7 +102,12 @@ const isLoadingContent = ref(false)
 const initLoaded = ref(false)
 // #endregion
 
-// #region methods
+const editorStore = useEditorStore()
+const { createNewPage, setImgAspectRatio } = editorStore
+const { editorType } = storeToRefs(editorStore)
+const { setShowImgSelector } = useImgSelectorStore()
+
+// #region album methods
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
 }
@@ -108,7 +117,7 @@ const getAlbumContent = async (album: IAlbum) => {
   isLoadingContent.value = true
 
   Object.assign(currAlbum, album)
-  webViewUtils
+  cmWVUtils
     .getAlbumContent(albumId, nextPage.value)
     .then((res) => {
       currAlbumContent.push(...res.content)
@@ -137,10 +146,43 @@ const selectAlbum = (album: IAlbum) => {
   getAlbumContent(album)
   isAlbumOpened.value = true
 }
+
+const selectImage = (id: string, type: 'cameraroll' | 'unsplash') => {
+  switch (editorType.value) {
+    case 'powerful-fill': {
+      if (type === 'cameraroll') {
+        const src = imageUtils.getSrc({
+          type: 'ios',
+          assetId: `cameraroll/${id}`,
+          userId: '',
+        })
+
+        imageUtils.imgLoadHandler(src, async (img: HTMLImageElement) => {
+          const { naturalWidth, naturalHeight } = img
+          const photoAspectRatio = naturalWidth / naturalHeight
+
+          setImgAspectRatio(photoAspectRatio)
+
+          setShowImgSelector(false)
+          await router.push({
+            name: 'Editor',
+          })
+          createNewPage(900, 1600)
+          nextTick(() => {
+            assetUtils.addImage(src, photoAspectRatio, {
+              fit: 1,
+            })
+            groupUtils.deselect()
+          })
+        })
+      }
+    }
+  }
+}
 // #endregion
 
 // get the first image content
-webViewUtils
+cmWVUtils
   .getAlbumList()
   .then((res) => {
     if (res.flag === 1) {
