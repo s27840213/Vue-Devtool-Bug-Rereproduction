@@ -1,7 +1,10 @@
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import cmWVUtils from '@/utils/cmWVUtils'
 import { generalUtils } from '@nu/shared-lib'
-import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useStore } from 'vuex'
@@ -262,20 +265,32 @@ const useCanvasUtils = (
   }
 
   const autoFill = () => {
-    if (canvasCtx && canvasCtx.value) {
-      clearCtx()
-      const currLayer = layerUtils.getLayer(0,0)
-      const {x,y,width,height} = currLayer.styles 
-      console.log(currLayer.styles)
+    groupUtils.deselect()
+    clearCtx()
+    mapEditorToCanvas(() => {
+      if (canvasCtx && canvasCtx.value) {
+        const pixels = canvasCtx.value.getImageData(0, 0, canvasWidth.value, canvasHeight.value)
+        // The total number of pixels (RGBA values).
+        const bufferSize = pixels.data.length
+        // Iterate over every pixel to find the boundaries of the non-transparent content.
+        for (let i = 0; i < bufferSize; i += 4) {
+          // Check the alpha (transparency) value of each pixel.
+          if (pixels.data[i] !== 5 && pixels.data[i + 1] !== 5 && pixels.data[i + 2] !== 5) {
+            // If the pixel is not transparent, set it to transparent.
+            pixels.data[i + 3] = 0
+          } else {
+            // If the pixel is transparent, set it to opaque.
+            pixels.data[i] = 255
+            pixels.data[i + 1] = 114
+            pixels.data[i + 2] = 98
+            pixels.data[i + 3] = 255
+          }
+        }
 
-      const preserveArea = canvasCtx.value.getImageData(x,y,width,height)
-
-      canvasCtx.value.fillRect(0,0, canvasWidth.value, canvasHeight.value)
-      canvasCtx.value.putImageData(preserveArea, x, y)
-    }
+        canvasCtx.value.putImageData(pixels, 0, 0)
+      }
+    })
   }
-
-
 
   const downloadMaskCanvas = () => {
     if (maskCanvas && maskCanvas.value) {
@@ -288,6 +303,23 @@ const useCanvasUtils = (
     if (maskCanvas && maskCanvas.value) {
       return maskCanvas.value.toDataURL('image/png')
     }
+  }
+
+  const mapEditorToCanvas = async (cb?: () => void) => {
+    const { flag, imageId } = await cmWVUtils.copyEditor()
+    if (flag !== '0') {
+      logUtils.setLogAndConsoleLog('Screenshot Failed')
+      throw new Error('Screenshot Failed')
+    }
+    const { pageSize } = useEditorStore()
+    const { width: pageWidth, height: pageHeight } = pageSize
+    const size = Math.max(pageWidth, pageHeight)
+    imageUtils.imgLoadHandler(`chmix://screenshot/${imageId}?lsize=${size}`, (img) => {
+      if (canvasCtx && canvasCtx.value) {
+        canvasCtx.value.drawImage(img, 0, 0, pageWidth, pageHeight)
+        cb && cb()
+      }
+    })
   }
 
   return {
