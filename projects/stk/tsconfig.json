@@ -16,6 +16,11 @@
       "vite/client"
     ],
     "paths": {
+      "//": ["Write @nu/vivi-lib/ paths before @/ for import auto complete."],
+      "@nu/vivi-lib/*": [
+        "../../packages/vivi-lib/src/*",
+        "../../packages/vivi-lib/src/index"
+      ],
       "@/*": [
         "./src/*",
         "../../packages/vivi-lib/src/*"
@@ -23,9 +28,11 @@
       "@i18n/*": [
         "./src/i18n/shaked/*"
       ],
-      "@nu/vivi-lib/*": [
-        "../../packages/vivi-lib/src/*",
-        "../../packages/vivi-lib/src/index"
+      "@img/*": [
+        "../../packages/vivi-lib/src/assets/img/*"
+      ],
+      "@json/*": [
+        "../../packages/vivi-lib/src/assets/json/*"
       ]
     },
     "lib": [

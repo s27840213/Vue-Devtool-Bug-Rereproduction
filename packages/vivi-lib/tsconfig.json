@@ -17,7 +17,9 @@
       "vite/client"
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@img/*": ["./src/assets/img/*"],
+      "@json/*": ["./src/assets/json/*"]
     },
     "lib": [
       "esnext",
