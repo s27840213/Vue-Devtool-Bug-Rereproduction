@@ -105,7 +105,7 @@ describe('Testing SidebarPanel', () => {
 
     for (const panel of sidebarData('has.search')) {
       cy.get(panel.icon).click()
-      cy.get('.search-bar > .svg-close').click()
+      cy.get('.search-bar .svg-close').click()
       cy.get('.vue-recycle-scroller:visible')
         .invoke('prop', 'scrollTop')
         .should('eq', 300)
@@ -200,6 +200,9 @@ describe('Testing SidebarPanel', () => {
     cy.visit('/editor')
     for (let i = 1; i < 5; i++) {
       cy.addAsset(panel, i, 0)
+      // Wait for NuImage process, or isTransparent will throw error.
+      cy.get('.nu-layer .nu-image')
+        .invoke('attr', 'cy-ready').should('eq', 'true')
       cy.deleteAllLayers()
     }
   })
@@ -233,6 +236,9 @@ describe('Testing SidebarPanel', () => {
     cy.visit('/editor')
     for (let i = 1; i < 5; i++) {
       cy.addAsset(panel, i, 0)
+      // Wait for NuImage process, or isTransparent will throw error.
+      cy.get('.nu-layer .nu-image')
+        .invoke('attr', 'cy-ready').should('eq', 'true')
       cy.deleteAllLayers()
     }
   })

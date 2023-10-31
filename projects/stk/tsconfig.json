@@ -1,0 +1,54 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "types": [
+      "webpack-env",
+      "resize-observer-browser",
+      "tpdirect",
+      "vite/client"
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*",
+        "../../packages/vivi-lib/src/*"
+      ],
+      "@i18n/*": [
+        "./src/i18n/shaked/*"
+      ],
+      "@nu/vivi-lib/*": [
+        "../../packages/vivi-lib/src/*",
+        "../../packages/vivi-lib/src/index"
+      ]
+    },
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ]
+  },
+  "vueCompilerOptions": {
+    "plugins": [
+      "@vue/language-plugin-pug"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

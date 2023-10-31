@@ -1,0 +1,201 @@
+<template lang="pug">
+div(class="page-card" :id="`page-card-${pageIndex}`" :style="styles('card')")
+  div(v-if="!isOutOfBound" :id="`nu-page-wrapper_${pageIndex}`" :class="`page-card__pseudo-page`" :style="styles('page')")
+    div(class="page-card__scale-container" :style="styles('scale')")
+      page-content(:id="`vvstk-page-${pageIndex}`" class="page-content" :config="config" :pageIndex="pageIndex" :noBg="noBg" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils" :style="styles('page-content')")
+      dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
+    div(class="page-control" :style="styles('control')")
+      nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
+        :key="`controller-${currLayer.id}`"
+        :layerIndex="currSelectedIndex"
+        :pageIndex="pageIndex"
+        :page="config"
+        :config="currLayer"
+        :snapUtils="snapUtils"
+        :contentScaleRatio="contentScaleRatio")
+</template>
+
+<script lang="ts">
+import DimBackground from '@nu/vivi-lib/components/editor/page/DimBackground.vue'
+import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
+import { ILayer } from '@nu/vivi-lib/interfaces/layer'
+import { IPage, IPageState } from '@nu/vivi-lib/interfaces/page'
+import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import SnapUtils from '@nu/vivi-lib/utils/snapUtils'
+import { PropType, defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
+
+export default defineComponent({
+  props: {
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    cardWidth: {
+      type: Number,
+      required: true
+    },
+    cardHeight: {
+      type: Number,
+      required: true
+    },
+    marginTop: {
+      type: Number,
+      required: true
+    },
+    pageState: {
+      type: Object as PropType<IPageState>,
+      required: true
+    },
+    noBg: {
+      type: Boolean,
+      default: false
+    },
+  },
+  data() {
+    return {
+    }
+  },
+  created() {
+    this.updateSnapUtilsIndex(this.pageIndex)
+  },
+  mounted() {
+    // console.warn('mounted')
+    // editorUtils.handleContentScaleRatio(this.pageIndex)
+  },
+  watch: {
+    pageIndex(val) {
+      this.updateSnapUtilsIndex(val)
+    },
+  },
+  computed: {
+    ...mapState({
+      windowSize: 'windowSize'
+    }),
+    ...mapGetters({
+      currSelectedInfo: 'getCurrSelectedInfo',
+      lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
+      getMiddlemostPageIndex: 'getMiddlemostPageIndex',
+      currActivePageIndex: 'getCurrActivePageIndex',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      currSelectedIndex: 'getCurrSelectedIndex',
+      getLayer: 'getLayer',
+      editorBg: 'vivisticker/getEditorBg',
+      editorType: 'vivisticker/getEditorType',
+      imgControlPageIdx: 'imgControl/imgControlPageIdx',
+      contentScaleRatio: 'getContentScaleRatio',
+      isDuringCopy: 'vivisticker/getIsDuringCopy',
+      isImgCtrl: 'imgControl/isImgCtrl',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
+    }),
+    config(): IPage {
+      return this.pageState.config
+    },
+    snapUtils(): SnapUtils {
+      return this.pageState.modules.snapUtils
+    },
+    currLayer(): ILayer {
+      return layerUtils.getCurrLayer
+    },
+    currFocusPageIndex(): number {
+      return pageUtils.currFocusPageIndex
+    },
+    selectedLayerCount(): number {
+      return this.currSelectedInfo.layers.length
+    },
+    isPageDuringCopy(): boolean {
+      return this.isDuringCopy && this.pageIndex === pageUtils.currFocusPageIndex
+    },
+    isOutOfBound(): boolean {
+      return this.pageIndex <= pageUtils.currFocusPageIndex - 2 || this.pageIndex >= pageUtils.currFocusPageIndex + 2
+    }
+  },
+  components: {
+    PageContent,
+    DimBackground
+  },
+  methods: {
+    ...mapMutations({
+      setCurrActivePageIndex: 'SET_currActivePageIndex',
+      updateSnapUtilsIndex: 'UPDATE_snapUtilsIndex'
+    }),
+    styles(type: string) {
+      switch (type) {
+        case 'card':
+          return {
+            width: `${this.cardWidth}px`,
+            height: `${this.cardHeight}px`,
+          }
+        case 'control':
+          return {
+            width: `${this.config.width}px`,
+            height: `${this.config.height}px`,
+            overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
+          }
+        case 'page':
+          return {
+            width: `${this.config.width}px`,
+            height: `${this.config.height}px`,
+            backgroundColor: this.isPageDuringCopy ? 'transparent' : this.editorBg,
+            marginTop: `${this.marginTop}px`,
+            ...(this.isPageDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {}),
+            ...(backgroundUtils.inBgSettingMode && { boxShadow: '0 0 0 2px #7190CC' })
+          }
+        case 'page-content':
+          return {
+            ...(this.isPageDuringCopy ? { clipPath : 'none' } : {}),
+          }
+        case 'scale':
+          return {
+            width: `${this.config.width}px`,
+            height: `${this.config.height}px`,
+            transform: `scale(${1 / this.contentScaleRatio})`,
+            ...(this.isPageDuringCopy ? { clipPath: 'none' } : {}),
+          }
+      }
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.page-card {
+  @include size(100%);
+  &__pseudo-page {
+    position: relative;
+    transform-style: preserve-3d;
+    user-select: none;
+    margin: 0 auto;
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    border-radius: 10px;
+  }
+  &__scale-container {
+    width: 0px;
+    height: 0px;
+    position: relative;
+    box-sizing: border-box;
+    transform-origin: 0 0;
+  }
+}
+
+.page-content {
+  // use clip-path and translateZ(0) to prevent bg color bleed at rounded corners of page
+  // https://stackoverflow.com/questions/17202128/rounded-cornes-border-radius-safari-issue
+  clip-path: inset(0 round 10px);
+  transform: translateZ(0);
+}
+
+.page-control {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  transform-style: preserve-3d;
+  // this css property will prevent the page-control div from blocking all the event of page-content
+  pointer-events: none;
+  :focus {
+    outline: none;
+  }
+}
+</style>
