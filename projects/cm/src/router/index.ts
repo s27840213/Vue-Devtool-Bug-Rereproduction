@@ -3,7 +3,7 @@ import cmWVUtils from '@/utils/cmWVUtils'
 import uploadUtilsCm from '@/utils/uploadUtilsCm'
 import HomeView from '@/views/HomeView.vue'
 import { generalUtils } from '@nu/shared-lib'
-import router from '@nu/vivi-lib/router/index'
+import router from '@nu/vivi-lib/router'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import { h, resolveComponent } from 'vue'
 

@@ -1,11 +1,11 @@
 import giphyApi from '@/apis/giphy'
-import i18n from '@nu/vivi-lib/i18n'
 import {
   ICategoryContentApiParams, IGif, IGifCategory, IGifCategoryContent, IGifCategoryExtend,
   IGifCategoryList, IGiphyFavorite, IGiphyFavoriteCategoryContent, IGiphyFavoritesSearchResult,
   IGiphyFavoriteTagContent, isIGifCategory, isITag, ITag, ITagContentApiParams, ITagExtend
 } from '@/interfaces/giphy'
-import store from '@/store/index'
+import store from '@/store'
+import i18n from '@nu/vivi-lib/i18n'
 import localStorageUtils from '@nu/vivi-lib/utils/localStorageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import popupUtils from '@nu/vivi-lib/utils/popupUtils'
