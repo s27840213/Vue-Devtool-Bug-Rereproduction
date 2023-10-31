@@ -50,17 +50,6 @@ import layerUtils from '@/utils/layerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
-const imports = Object.assign(
-  import.meta.glob(
-    `@img/photo-shadow/light_icon/*.png`,
-    { eager: true, import: 'default' }
-  ) as Record<string, string>,
-  import.meta.glob(
-    `@img/photo-shadow/dark_icon/*.png`,
-    { eager: true, import: 'default' }
-  ) as Record<string, string>
-)
-
 export default defineComponent({
   components: {
     MobileSlider,
@@ -140,7 +129,7 @@ export default defineComponent({
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
     imgSrc(icon: string): string {
-      return imports[`/src/assets/img/photo-shadow/${this.theme}_icon/photo-shadow-${icon}.png`]
+      return require(`@img/photo-shadow/${this.theme}_icon/photo-shadow-${icon}.png`)
     },
     onEffectClick(effectName: ShadowEffectType): void {
       const alreadySetEffect = effectName === ShadowEffectType.none || Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
@@ -182,12 +171,6 @@ export default defineComponent({
   padding: 0 5px;
   width: 100%;
   height: 100%;
-
-  :deep(.color-btn__color) {
-    @include setColors(gray-4, black-5) using ($color) {
-      border-color: $color;
-    }
-  }
 }
 
 .photo-shadow {

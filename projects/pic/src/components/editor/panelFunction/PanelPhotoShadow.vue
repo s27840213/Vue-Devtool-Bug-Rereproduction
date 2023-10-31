@@ -214,12 +214,6 @@ export default defineComponent({
   font-size: 14px;
   outline: none;
 
-  :deep(.color-btn__color) {
-    @include setColors(gray-4, black-5) using ($color) {
-      border-color: $color;
-    }
-  }
-
   &__form {
     background: #fff;
     margin: 0 10px;

@@ -225,12 +225,6 @@ export default defineComponent({
     }
   }
 
-  :deep(.color-btn__color) {
-    @include setColors(gray-4, black-5) using ($color) {
-      border-color: $color;
-    }
-  }
-
   &__categories {
     @include no-scrollbar;
     width: 100%;

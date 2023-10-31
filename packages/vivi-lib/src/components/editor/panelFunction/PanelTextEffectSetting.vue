@@ -360,12 +360,6 @@ export default defineComponent({
 .text-effect-setting {
   text-align: left;
 
-  :deep(.color-btn__color) {
-    @include setColors(gray-4, black-5) using ($color) {
-      border-color: $color;
-    }
-  }
-
   &__title {
     @include text-H6;
     color: setColor(blue-1);
