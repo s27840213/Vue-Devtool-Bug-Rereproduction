@@ -1,4 +1,4 @@
-import vuei18n from '@intlify/unplugin-vue-i18n/vite' // https://vue-i18n.intlify.dev/guide/advanced/optimization.html
+import vuei18n from '@intlify/unplugin-vue-i18n/vite'; // https://vue-i18n.intlify.dev/guide/advanced/optimization.html
 import vue from '@vitejs/plugin-vue'
 import fs from 'fs'
 import path from 'path'
@@ -6,7 +6,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig, loadEnv } from 'vite'
 import svgSpritePlugin from 'vite-plugin-svg-sprite'
-import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
+import transformPlugin from 'vite-plugin-transform'
 
 function resolve(...dir: string[]) {
   return path.join(__dirname, ...dir)
@@ -15,7 +15,15 @@ function resolve(...dir: string[]) {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    removePugAssertion(),
+    // When Using pug with option api, it will treat ts in pug as js,
+    // so remove type assertions to resolve the issue.
+    // https://github.com/vitejs/vite-plugin-vue/issues/18#issuecomment-1719035794
+    transformPlugin({
+      exclude: ['node_modules', /(?<!\.vue)$/],
+      callbackArray: [
+        (s: string) => s.replace(/(?<==".+)( as [\w<>|', ]+)/g, '')
+      ]
+    }),
     vue(),
     vuei18n({ // TODO: Check if this plugin will decrease bundle size.
       // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`

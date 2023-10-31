@@ -6,7 +6,7 @@
     "cypress.config.*",
     "nightwatch.conf.*",
     "playwright.config.*",
-    "../../tools/vite-plugin-remove-pug-type-assertion/index.ts"
+    "src/vite-plugin-transform.d.ts"
   ],
   "compilerOptions": {
     "composite": true,
