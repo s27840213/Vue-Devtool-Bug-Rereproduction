@@ -1,16 +1,16 @@
-import './_require' // Must be import first.
-import '@/assets/css/main.css';
-import componentPlugin from '@nu/shared-lib/plugin';
-import libType from '@nu/shared-lib/types';
-import { initApp } from '@nu/vivi-lib/main';
-import Notifications from '@kyvg/vue3-notification';
-// import '@nu/vivi-lib/css'; // Import all CSS rules from vivi-lib
-import { createPinia } from 'pinia';
-import { createApp } from 'vue';
-import App from './App.vue';
-import i18n from './i18n';
-import router from './router';
-import vuex from './vuex';
+import '@/_require' // Must be import first.
+import '@/assets/css/main.css'
+import Notifications from '@kyvg/vue3-notification'
+import componentPlugin from '@nu/shared-lib/plugin'
+import libType from '@nu/shared-lib/types'
+import { initApp } from '@nu/vivi-lib/main'
+import { createPinia } from 'pinia'
+import { createApp } from 'vue'
+import App from './App.vue'
+import i18n from './i18n'
+import router from './router'
+import vuex from './vuex'
+// import '@nu/vivi-lib/css' // Import all CSS rules from vivi-lib
 
 const svgs = import.meta.glob('./assets/icon/**/*.svg', { eager: true })
 const viviSvgs = import.meta.glob('../../../packages/vivi-lib/dist/src/assets/icon/**/*.svg', { eager: true })

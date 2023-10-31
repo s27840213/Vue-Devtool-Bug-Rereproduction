@@ -1,12 +1,11 @@
+import vuei18n from '@intlify/unplugin-vue-i18n/vite' // https://vue-i18n.intlify.dev/guide/advanced/optimization.html
 import vue from '@vitejs/plugin-vue'
+import fs from 'fs'
 import path from 'path'
-import { defineConfig, loadEnv } from 'vite'
-// https://vue-i18n.intlify.dev/guide/advanced/optimization.html
-import vuei18n from '@intlify/unplugin-vue-i18n/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
+import { defineConfig, loadEnv } from 'vite'
 import svgSpritePlugin from 'vite-plugin-svg-sprite'
-import fs from 'fs'
 import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
 
 function resolve(...dir: string[]) {
@@ -18,7 +17,7 @@ export default defineConfig({
   plugins: [
     removePugAssertion(),
     vue(),
-    vuei18n({
+    vuei18n({ // TODO: Check if this plugin will decrease bundle size.
       // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
       compositionOnly: false,
       runtimeOnly: false,
