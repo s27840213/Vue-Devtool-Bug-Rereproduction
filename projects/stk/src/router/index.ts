@@ -284,6 +284,10 @@ router.beforeEach(async (to, from, next) => {
                     },
                   ]),
                 ),
+                annuallyFree0: {
+                  value: prices.annually,
+                  text: stkWVUtils.formatPrice(prices.annually, currency)
+                }
               },
             ]
           }),
