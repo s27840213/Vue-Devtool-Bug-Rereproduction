@@ -1,19 +1,19 @@
 <template lang="pug">
-div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': showSearchBar}")
+div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar': showSearchBar}")
   //- Search bar
   search-bar(v-if="showSearchBar"
-    class="panel-gifs__searchbar"
-    :placeholder="$t('NN0092', { target: 'GIFs' })"
+    class="panel-static__searchbar"
+    :placeholder="$t('NN0092', { target: $tc('STK0085', 2) })"
     clear
     :defaultKeyword="keywordLabel"
     vivisticker="dark"
     :color="{close: 'black-5', search: 'black-5'}"
-    :isFavorite="checkTagFavorite(keyword)"
+    :isFavorite="keywordIsFavaorites"
     v-model:expanded="isSearchBarExpanded"
     @search="handleSearch"
     @favorite="toggleFavoritesTag")
   Tags(v-show="tags && tags.length"
-      class="panel-gifs__tags"
+      class="panel-static__tags"
       :class="{collapsed: !isSearchBarExpanded}"
       :tags="tags"
       :scrollLeft="isInCategory ? 0 : tagScrollLeft"
@@ -27,28 +27,29 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
                 :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="item.loadMore")
     template(#before)
-      div(class="panel-gifs__top-item")
+      div(class="panel-static__top-item")
       //- Search result empty msg
       div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
       //- Empty favorites view
       div(v-if="showFav && !item.content.length && !pending"
-          class="panel-gifs__favorites-empty")
+          class="panel-static__favorites-empty")
         svg-icon(iconName="favorites-empty" iconWidth="42px" iconColor="white")
-        span(class="panel-gifs__favorites-empty--title") {{$t('NN0765')}}
+        span(class="panel-static__favorites-empty--title") {{$t('NN0765')}}
         span(class="text-black-5") {{$t('NN0764')}}
-    template(v-slot:category-list-rows="{ list, title, isFavorite }")
+    template(v-slot:category-list-rows="{ list, title, url, isFavorite }")
       category-list-rows(
         :list="list"
         :title="title"
+        :url="url"
         :isFavorite="isFavorite")
         template(v-slot:action)
-          div(class="panel-gifs__list-rows-action")
+          div(class="panel-static__list-rows-action")
             svg-icon(v-if="isFavorite !== undefined" :class="{favorite: isFavorite}"
                     :iconName="isFavorite ? 'favorites-fill' : 'heart'"
                     iconWidth="24px" iconColor="black-5" @click="toggleFaovoritesCategoryByTitle(title)")
             span(@click="item.categorySearch && item.categorySearch(title)") {{$t('NN0082')}}
         template(v-slot:preview="{ item }")
-          category-object-item(class="panel-gifs__item"
+          category-object-item(class="panel-static__item"
             :src="item.src"
             :item="item"
             :style="itemStyles"
@@ -56,9 +57,9 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
             @dbclick4in1="toggleFavorites4in1"
             @dbclick="toggleFavoritesItem")
     template(v-slot:category-object-item="{ list }")
-      div(class="panel-gifs__items")
+      div(class="panel-static__items")
         category-object-item(v-for="item in list"
-          class="panel-gifs__item"
+          class="panel-static__item"
           :key="item.id"
           :src="item.src"
           :item="item"
@@ -74,16 +75,16 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
 </template>
 
 <script lang="ts">
-import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
-import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
-import CategoryObjectItem from '@nu/vivi-lib/components/category/CategoryRichObjectItem.vue'
-import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
-import i18n from '@nu/vivi-lib/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
-import { IGif, IGifCategory, IGifCategoryExtend, isIGifCategory, isITag, ITagExtend } from '@nu/vivi-lib/interfaces/giphy'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import SearchBar from '@/components/SearchBar.vue'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
+import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import CategoryObjectItem from '@/components/category/CategoryRichObjectItem.vue'
+import Tags, { ITag } from '@/components/global/Tags.vue'
+import i18n from '@/i18n'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IAsset, ICategoryExtend, ITagExtend, isICategory, isITag } from '@/interfaces/module'
+import generalUtils from '@/utils/generalUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
@@ -116,6 +117,9 @@ export default defineComponent({
       tagScrollLeft: 0
     }
   },
+  created() {
+    this.isSearchBarExpanded = !this.showFav && !!this.keyword
+  },
   computed: {
     ...mapGetters({
       isTabInCategory: 'vivisticker/getIsInCategory',
@@ -124,27 +128,28 @@ export default defineComponent({
     ...mapState({
       isTablet: 'isTablet'
     }),
-    ...mapState('giphy', {
-      rawPending: 'pending',
+    ...mapState('objects', {
       rawCategories: 'categories',
+      rawContent: 'content',
       rawSearchResult: 'searchResult',
-      nextTagContent: 'nextTagContent'
+      keyword: 'keyword',
+      rawPending: 'pending'
     }),
-    ...mapGetters('giphy', {
-      isSearchingCategory: 'isSearchingCategory',
-      isSearchingTag: 'isSearchingTag',
+    ...mapGetters('objects', {
       tagsBar: 'tagsBar',
       favoritesTagsBar: 'favoritesTagsBar',
-      keyword: 'keyword',
-      checkCategoryFavorite: 'checkCategoryFavorite',
-      checkTagFavorite: 'checkTagFavorite',
       favoritesItems: 'favoritesItems',
-      favoritesTags: 'favoritesTags',
       favoritesCategories: 'favoritesCategories',
-      rawFavoritesSearchResult: 'favoritesSearchResult'
+      favoritesTags: 'favoritesTags',
+      rawFavoritesSearchResult: 'favoritesSearchResult',
+      checkCategoryFavorite: 'checkCategoryFavorite',
+      checkTagFavorite: 'checkTagFavorite'
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
+    },
+    isInCategoryOrShowFav(): boolean {
+      return this.isInCategory || this.showFav
     },
     showSearchBar(): boolean {
       return !this.isInCategory && !this.showFav
@@ -154,11 +159,16 @@ export default defineComponent({
     },
     pending(): boolean {
       if (this.showFav) return this.rawPending.favorites
+      if (this.showAllRecently) return this.rawPending.recently
       if (this.isInCategory) return this.rawPending.content
       return this.rawPending.categories || this.rawPending.content
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
+    },
+    keywordIsFavaorites(): boolean|undefined {
+      return this.keywordLabel === '' ? undefined
+        : this.checkTagFavorite(this.keywordLabel)
     },
     listCategories(): ICategoryItem[] {
       return this.processListCategory(this.rawCategories)
@@ -185,7 +195,7 @@ export default defineComponent({
       return []
     },
     searchResult(): ICategoryItem[] {
-      const list = this.processListResult(this.rawSearchResult.content)
+      const list = this.processListResult(this.rawSearchResult.list)
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
@@ -254,7 +264,7 @@ export default defineComponent({
       if (!showFav && keyword && this.searchResult.length === 0) {
         return `${i18n.global.t('NN0393', {
           keyword: this.keywordLabel,
-          target: 'GIFs'
+          target: i18n.global.tc('STK0085', 2)
         })}`
       } else return ''
     },
@@ -281,11 +291,13 @@ export default defineComponent({
       })
       unwatch()
     })
-    generalUtils.panelInit('giphy',
+    if (this.rawCategories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
+    generalUtils.panelInit('object',
       this.handleSearch,
       this.handleCategorySearch,
-      async () => {
-        this.initGiphy()
+      async ({ reset }: {reset: boolean}) => {
+        await this.getRecAndCate({ reset, key: 'objects' })
+        this.initFavorites()
       }
     )
   },
@@ -314,12 +326,12 @@ export default defineComponent({
       this.$nextTick(() => {
         const ref = this.$refs as Record<string, CCategoryList[]>
         for (const name of this.targets) {
-          ref[name][0].$el.scrollTop = this.scrollTop[name]
+          if (ref[name].length) ref[name][0].$el.scrollTop = this.scrollTop[name]
         }
       })
     },
-    isInCategory() {
-      // skip transitions when entering or leaving category
+    isInCategoryOrShowFav() {
+      // skip transitions when entering or leaving category or favorites
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
@@ -327,16 +339,15 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapActions('giphy', [
-      'getCategories',
-      'getCategoryContent',
-      'getMoreCategoryContent',
-      'getMoreTagContent',
-      'searchTag',
-      'resetCategoryContent',
-      'resetTagContent',
+    ...mapActions('objects', [
+      'getContent',
+      'getTagContent',
+      'getRecently',
+      'getRecAndCate',
+      'getMoreContent',
+      'resetSearch',
       // favorites actions
-      'initGiphy',
+      'initFavorites',
       'toggleFavorite',
       'searchFavorites',
       'searchMoreFavorites',
@@ -348,7 +359,7 @@ export default defineComponent({
       for (const list of this.categoryListArray) {
         if (list.show) {
           const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
-          const top = categoryList.$el.querySelector('.panel-gifs__top-item') as HTMLElement
+          const top = categoryList.$el.querySelector('.panel-static__top-item') as HTMLElement
           top.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
         }
       }
@@ -357,59 +368,52 @@ export default defineComponent({
       if (this.showFav) {
         this.searchTagInFavoritesCategory(keyword)
       } else {
-        this.resetTagContent()
+        this.resetSearch({ keepSearchResult: true })
         if (keyword) {
-          this.searchTag(keyword)
+          this.getTagContent({ keyword })
           this.isSearchBarExpanded = true
         }
       }
     },
-    async handleCategorySearch(categoryName: string) {
-      if (this.showFav) this.searchFavorites(categoryName)
+    async handleCategorySearch(keyword: string, locale = '') {
+      if (this.showFav) this.searchFavorites(keyword)
       else {
-        this.resetCategoryContent()
-        this.resetTagContent()
-        if (!categoryName) {
+        this.resetSearch()
+        if (!keyword) {
           stkWVUtils.setShowAllRecently('object', false)
           return
         }
 
-        const isRecent = categoryName === this.$t('NN0024')
-        if (!isRecent) this.getCategoryContent(categoryName)
+        const isRecent = keyword === `${this.$t('NN0024')}`
+        if (!isRecent) this.getContent({ keyword, locale })
         stkWVUtils.setShowAllRecently('object', isRecent)
       }
       stkWVUtils.setIsInCategory('object', true)
     },
     handleLoadMore() {
-      if (this.isSearchingTag) {
-        this.getMoreTagContent()
-      } else if (this.isSearchingCategory) {
-        this.getMoreCategoryContent()
-      } else {
-        this.getCategories()
-      }
+      this.getMoreContent()
     },
     click4in1(target: unknown) {
       this.searchFavorites(target)
       stkWVUtils.setIsInCategory('object', true)
     },
-    toggleFavorites4in1(target: ITagExtend | IGifCategoryExtend) {
+    toggleFavorites4in1(target: ITagExtend | ICategoryExtend) {
       if (isITag(target)) {
-        this.toggleFavorite({ tags: target.id })
-      } else if (isIGifCategory(target)) {
-        this.toggleFavorite({ categories: target.id })
+        this.toggleFavorite({ tags: target })
+      } else if (isICategory(target)) {
+        this.toggleFavorite({ categories: target })
       }
     },
-    toggleFavoritesItem(target: IGif) {
+    toggleFavoritesItem(target: IAsset) {
       this.toggleFavorite({ items: target })
     },
     toggleFavoritesTag() {
-      this.toggleFavorite({ tags: `${this.nextTagContent.keyword}:${this.nextTagContent.type}` })
+      this.toggleFavorite({ tags: { keyword: this.keywordLabel, active: false } })
     },
     toggleFaovoritesCategoryByTitle(title: string) {
-      for (const category of this.rawCategories as IGifCategory[]) {
+      for (const category of this.rawCategories as IListServiceContentData[]) {
         if (category.title === title) {
-          this.toggleFavorite({ categories: category.id })
+          this.toggleFavorite({ categories: { id: category.id, title } })
           return
         }
       }
@@ -429,19 +433,20 @@ export default defineComponent({
           list: category.is_recent ? category.list.slice(0, 10) : category.list,
           title: category.title,
           isFavorite: category.id === -1 || category.is_recent ? undefined
-            : this.checkCategoryFavorite(category.id)
+            : this.checkCategoryFavorite(category.id),
+          url: category.url,
         }))
     },
-    processListResult(list = [] as IListServiceContentDataItem[]): ICategoryItem[] {
+    processListResult(list = [] as IListServiceContentDataItem[]|ITagExtend[]): ICategoryItem[] {
       const gap = this.isTablet ? 20 : 24
       return new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
           const rowItems = list.slice(idx * 3, idx * 3 + 3)
           return {
-            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            id: `result_${rowItems.map(item => isITag(item) ? item.keyword : item.id).join('_')}`,
             type: 'category-object-item',
-            list: rowItems,
+            list: rowItems as IAsset[],
             size: this.itemHeight + gap
           }
         })
@@ -462,7 +467,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.panel-gifs {
+.panel-static {
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
@@ -483,20 +488,18 @@ export default defineComponent({
   }
   &.with-search-bar {
     height: calc(100% + 49px); // 42px (serach bar height) + 7px (margin-top of tags) = 49px
-    .panel-gifs__tags {
+    .panel-static__tags {
       clip-path: inset(0 0 0 0);
-      transform: translateZ(0);
       transition: transform 200ms 100ms ease-in-out, clip-path 200ms 100ms ease-in-out;
       &.collapsed {
-        transform: translateY(-49px) translateZ(0);
+        transform: translateY(-49px);
         clip-path: inset(0 42px 0 0);
       }
     }
     .category-list {
       transition: transform 200ms 100ms ease-in-out;
-      transform: translateZ(0);
       &.collapsed{
-        transform: translateY(-49px) translateZ(0);
+        transform: translateY(-49px);
       }
     }
     &:deep(.vue-recycle-scroller__item-wrapper) {
