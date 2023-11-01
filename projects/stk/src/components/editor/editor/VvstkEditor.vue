@@ -39,10 +39,10 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()"
 <script lang="ts">
 import PageCard from '@/components/editor/mobile/PageCard.vue'
 import ShareTemplate from '@/components/editor/mobile/ShareTemplate.vue'
-import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
-import { ILayer, IText } from '@nu/vivi-lib/interfaces/layer'
 import PagePreview from '@/components/editor/pagePreview/PagePreview.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
+import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
+import { ILayer, IText } from '@nu/vivi-lib/interfaces/layer'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
 import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
@@ -297,8 +297,8 @@ export default defineComponent({
       pointerEvtUtils.removePointer(e.pointerId)
     },
     onPinch(e: AnyTouchEvent) {
-      // console.log('onPinch this.$store.getters.getControlState', this.$store.getters.getControlState.type, e.phase, pointerEvtUtils.pointerIds.length)
       if (e.phase === 'end' && this.isPinchInit) {
+        // console.log('onPinch this.$store.getters.getControlState', this.$store.getters.getControlState.type, e.phase, pointerEvtUtils.pointerIds.length)
         // pinch end handling
         this.pinchHandler(e)
         this.isPinchInit = false
@@ -309,6 +309,7 @@ export default defineComponent({
         if (!this.isPinchInit) {
           // first pinch initialization
           this.isPinchInit = true
+          // console.warn('init pinch')
           return this.pinchStart(e)
         } else {
           // pinch move handling

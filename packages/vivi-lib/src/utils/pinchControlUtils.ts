@@ -16,7 +16,9 @@ import { AnyTouchEvent } from 'any-touch'
 
 export default class PinchControlUtils {
   private init = null as null | {
-    pos: { x: number, y: number },
+    evtPos: { x: number, y: number },
+    evtScale: number,
+    evtAngle: number,
     layerPos: { x: number, y: number }
     scale: number,
     size: ISize,
@@ -68,7 +70,9 @@ export default class PinchControlUtils {
     }
 
     this.init = {
-      pos: { x: e.x, y: e.y },
+      evtPos: { x: e.x, y: e.y },
+      evtScale: (e.nativeEvent as any).scale,
+      evtAngle: (e.nativeEvent as any).rotation % 180,
       layerPos: { x: this.config.styles.x, y: this.config.styles.y },
       size: { width: this.config.styles.width, height: this.config.styles.height },
       scale: this.config.styles.scale,
@@ -101,8 +105,8 @@ export default class PinchControlUtils {
       this.init = this.initialize(e)
     }
 
-    const evtScale = (e.nativeEvent as any).scale
-    let evtAngle = (e.nativeEvent as any).rotation % 180
+    const evtScale = (e.nativeEvent as any).scale / this.init.evtScale
+    let evtAngle = (e.nativeEvent as any).rotation % 180 - this.init.evtAngle
     // following math demostrated as a workround for anytouch e.angle always return integer,
     if (Math.abs(evtAngle - e.angle) > 90) {
       evtAngle -= 180
@@ -117,8 +121,8 @@ export default class PinchControlUtils {
       height: this.init.size.height * evtScale
     }
     const movingTranslate = {
-      x: e.x - this.init.pos.x,
-      y: e.y - this.init.pos.y
+      x: e.x - this.init.evtPos.x,
+      y: e.y - this.init.evtPos.y
     }
     const compensateTranslate = {
       x: (this.init.size.width - newSize.width) * 0.5,
@@ -165,8 +169,6 @@ export default class PinchControlUtils {
     } else if (this.config.type === 'shape' && this.config.category === 'D') {
       const shape = this.config as IShape
       const { point, dx, dy } = shapeUtils.lineCenterRotate(shape.point as number[], rotate, shape.size?.[0] ?? 1, false)
-      // const newPoint = [0, 0, point[2] * e.deltaScale, point[3] * e.deltaScale]
-      // const [scaleDX, scaleDY] = [point[2] - newPoint[2], point[3] - newPoint[3]]
       styles = {
         x: this.config.styles.x + e.deltaX + dx,
         y: this.config.styles.y + e.deltaY + dy
@@ -177,6 +179,8 @@ export default class PinchControlUtils {
     if (this.layerInfo.pageIndex !== -1 && this.layerInfo.layerIndex !== -1) {
       layerUtils.updateLayerStyles(this.layerInfo.pageIndex, this.layerInfo.layerIndex, styles)
     }
+    // console.log(this.id, styles)
+    // console.log((e.nativeEvent as any).rotation)
   }
 
   end(e: AnyTouchEvent) {
