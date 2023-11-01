@@ -77,7 +77,7 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
 <script lang="ts">
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
-import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
+import CategoryObjectItem from '@/components/category/CategoryRichObjectItem.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import i18n from '@nu/vivi-lib/i18n'
