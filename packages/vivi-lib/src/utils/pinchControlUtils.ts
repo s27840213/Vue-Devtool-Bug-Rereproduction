@@ -1,4 +1,4 @@
-import { IFrame, IImage, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { ISize } from '@/interfaces/math'
 import store from '@/store'
 import { ILayerInfo } from '@/store/types'
@@ -13,6 +13,7 @@ import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { AnyTouchEvent } from 'any-touch'
+import textUtils from './textUtils'
 
 export default class PinchControlUtils {
   private init = null as null | {
@@ -143,7 +144,7 @@ export default class PinchControlUtils {
       rotate,
       x: this.init.layerPos.x + totalTranslate.x,
       y: this.init.layerPos.y + totalTranslate.y
-    } as { [key: string]: number | undefined }
+    } as { [key: string]: number }
 
     if (this.init.img) {
       const imgWidth = this.init.img.imgWidth * evtScale
@@ -186,15 +187,34 @@ export default class PinchControlUtils {
   end(e: AnyTouchEvent) {
     console.warn('pinch end', store.getters.getControlState.id, this.id)
     this.init = null
+    this.endLayerHandle()
+
     if (store.getters.getControlState.id === this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })
       const nativeEvt = e.nativeEvent as TouchEvent
       const isHasOnePtrEvt = pointerEvtUtils.pointers.length === 1
       const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
-      // console.log('pinch end', pointerEvtUtils.pointers, pointerEvtUtils.pointers[0], nativeEvt.touches.length)
       if (isHasOnePtrEvt && isLayerExist) {
         this.movingUtils.moveStart(nativeEvt, { pointerId: pointerEvtUtils.pointerIds[0] ?? 0, isFollowByPinch: true })
       }
+    }
+  }
+
+  endLayerHandle() {
+    if (this.config.type === 'text') {
+      const config = this.config as IText
+      if (config.styles.writingMode.includes('vertical')) {
+        const textHW = textUtils.getTextHW(this.config as IText, this.config.styles.height)
+        this.config.styles.width = textHW.width
+        controlUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { widthLimit: this.config.styles.height, spanDataList: textHW.spanDataList })
+      } else {
+        const textHW = textUtils.getTextHW(this.config as IText, this.config.styles.width)
+        this.config.styles.height = textHW.height
+        controlUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { widthLimit: this.config.styles.width, spanDataList: textHW.spanDataList })
+      }
+      const textInitWidth = this.config.styles.width / this.config.styles.scale
+      const textInitHeight = this.config.styles.height / this.config.styles.scale
+      controlUtils.updateLayerInitSize(this.layerInfo.pageIndex, this.layerInfo.layerIndex, textInitWidth, textInitHeight)
     }
   }
 }
