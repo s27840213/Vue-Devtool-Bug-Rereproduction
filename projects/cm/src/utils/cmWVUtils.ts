@@ -145,7 +145,7 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   }
 
   async saveAssetFromUrl(type: 'gif' | 'jpg' | 'png' | 'mp4', url: string): Promise<ISaveAssetFromUrlResponse> {
-    return this.callIOSAsAPI('SAVE_ASSET_FROM_URL', { type, url }) as Promise<ISaveAssetFromUrlResponse>
+    return this.callIOSAsAPI('SAVE_FILE_FROM_URL', { type, url }) as Promise<ISaveAssetFromUrlResponse>
   }
 
   async switchDomain(url: string): Promise<void> {
