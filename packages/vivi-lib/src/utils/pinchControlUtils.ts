@@ -106,7 +106,7 @@ export default class PinchControlUtils {
     }
 
     const evtScale = (e.nativeEvent as any).scale / this.init.evtScale
-    let evtAngle = (e.nativeEvent as any).rotation % 180 - this.init.evtAngle
+    let evtAngle = (e.nativeEvent as any).rotation % 180
     // following math demostrated as a workround for anytouch e.angle always return integer,
     if (Math.abs(evtAngle - e.angle) > 90) {
       evtAngle -= 180
