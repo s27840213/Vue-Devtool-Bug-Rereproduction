@@ -198,7 +198,7 @@ export default defineComponent({
       return this.getPage(pageUtils.currFocusPageIndex)
     },
     showFooterTabs(): boolean {
-      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview || this.isProcessing || this.isInBgRemoveSection)
+      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview || this.isProcessing || this.inBgRemoveMode)
     },
     showVConsole(): boolean {
       return false

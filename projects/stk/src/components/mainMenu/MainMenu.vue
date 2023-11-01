@@ -10,14 +10,14 @@ div(class="main-menu"
 
 <script lang="ts">
 import PanelBackground from '@/components/editor/panelMobile/PanelBackground.vue'
-import PanelObject from '@/components/editor/panelMobile/PanelObject.vue'
-import PanelTemplate from '@/components/editor/panelMobile/PanelTemplate.vue'
-import PanelText from '@/components/editor/panelMobile/PanelText.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
-import PanelBackgroundUs from '@/components/us/PanelBackground.vue'
-import PanelObjectUs from '@/components/us/PanelObject.vue'
-import PanelTemplateUs from '@/components/us/PanelTemplate.vue'
-import PanelTextUs from '@/components/us/PanelText.vue'
+import PanelTemplate from '@/components/editor/panelMobile/PanelTemplate.vue'
+import PanelBackgroundUs from '@/components/editor/panelMobileUs/PanelBackground.vue'
+import PanelTemplateUs from '@/components/editor/panelMobileUs/PanelTemplate.vue'
+import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
+import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
+import PanelObjectUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelObject.vue'
+import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'

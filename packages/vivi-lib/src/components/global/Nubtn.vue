@@ -2,7 +2,7 @@
 div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice()?'mobile':'desktop'}`"
     v-hint="hint"
     @click="click")
-  svg-icon(v-if="theme.includes('icon')"
+  svg-icon(v-if="theme.includes('icon') && iconName"
           :iconName="iconName" :iconWidth="iconSize" :iconColor="iconColor")
   span(v-if="!theme.includes('icon') || theme.includes('icon_')")
     slot
