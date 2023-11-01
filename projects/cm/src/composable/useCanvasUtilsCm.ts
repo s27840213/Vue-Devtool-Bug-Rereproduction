@@ -272,13 +272,14 @@ const useCanvasUtils = (
         const pixels = canvasCtx.value.getImageData(0, 0, canvasWidth.value, canvasHeight.value)
         // The total number of pixels (RGBA values).
         const bufferSize = pixels.data.length
+        
         // Iterate over every pixel to find the boundaries of the non-transparent content.
         for (let i = 0; i < bufferSize; i += 4) {
           // Check the alpha (transparency) value of each pixel.
-          if (pixels.data[i] !== 5 && pixels.data[i + 1] !== 5 && pixels.data[i + 2] !== 5) {
+          if (pixels.data[i+3] !== 0 && (pixels.data[i] !== 14 && pixels.data[i + 1] !== 14 && pixels.data[i + 2] !== 14) && (pixels.data[i] !== 5 && pixels.data[i + 1] !== 5 && pixels.data[i + 2] !== 5)) {
             // If the pixel is not transparent, set it to transparent.
-            pixels.data[i + 3] = 0
-          } else {
+            pixels.data[i + 3] = 0;
+          }else {
             // If the pixel is transparent, set it to opaque.
             pixels.data[i] = 255
             pixels.data[i + 1] = 114

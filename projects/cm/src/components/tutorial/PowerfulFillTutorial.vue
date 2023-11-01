@@ -137,7 +137,7 @@ watch(() => step.value, (newVal) => nextTick(() => {
   if (newVal === 3) window.setTimeout(() => {
     if (newVal !== 3) return
     emit('nextStep')
-  }, 1000)
+  }, 1500)
 }), { immediate: true })
 watch(() => trackingFrame.value, updateStyles)
 
