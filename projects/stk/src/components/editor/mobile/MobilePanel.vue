@@ -13,7 +13,7 @@ import PanelTemplateContent from '@/components/editor/panelMobile/PanelTemplateC
 import PanelText from '@/components/editor/panelMobile/PanelText.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
 import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
-import PanelTextUs from '@/components/us/PanelText.vue'
+import PanelTextUs from '@/components/editor/panelMobileUs/PanelText.vue'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'

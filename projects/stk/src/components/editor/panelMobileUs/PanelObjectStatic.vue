@@ -97,7 +97,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
 
 <script lang="ts">
 import PanelObjectStatic from '@/components/editor/panelMobile/PanelObjectStatic.vue'
-import CategoryObjectCard from '@/components/us/CategoryObjectCard.vue'
+import CategoryObjectCard from '@/components/editor/panelMobileUs/CategoryObjectCard.vue'
 import { IAsset, ITagExtend, isITag } from '@/interfaces/module'
 import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
