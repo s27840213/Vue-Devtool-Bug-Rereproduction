@@ -1,38 +1,40 @@
-import { useUserStore } from '@/stores/user'
-import type { UploadMap } from '@/types/api'
-import { generalUtils } from '@nu/shared-lib'
 import staticApis from '@/apis/static'
+import { useUploadStore } from '@/stores/upload'
+import { useUserStore } from '@/stores/user'
+import { generalUtils } from '@nu/shared-lib'
 
-export default new (class UploadUtils {
-  uploadMap: UploadMap | undefined
+const useUploadUtils = () => {
+  const { userId } = storeToRefs(useUserStore())
+  const uploadStore = useUploadStore()
+  const { setUploadMap } = uploadStore
+  const { uploadMap } = storeToRefs(uploadStore)
 
-  async getUrlMap() {
+  const getUrlMap = async () => {
     const res = (await staticApis.getStatic()).data
     if (res.flag !== 0) return
-    this.uploadMap = res.ul_map
+    setUploadMap(res.ul_map)
   }
 
-  getFileName(path: string): string {
+  const getFileName = (path: string): string => {
     return path.split('/').pop()!
   }
 
-  async uploadImage(file: Blob | string, path: string, filename?: string): Promise<void> {
-    if (this.uploadMap === undefined) {
+  const uploadImage = async (file: Blob | string, path: string, filename?: string): Promise<void> => {
+    if (uploadMap.value === undefined) {
       throw new Error('Upload map is not defined')
     }
-    const { userId } = useUserStore()
 
     const isFile = typeof file !== 'string'
     const formData = new FormData()
 
-    for (const key of Object.keys(this.uploadMap.fields)) {
-      formData.append(key, this.uploadMap.fields[key])
+    for (const key of Object.keys(uploadMap.value.fields)) {
+      formData.append(key, uploadMap.value.fields[key])
     }
 
-    formData.append('key', `${this.uploadMap.path}${path}`)
+    formData.append('key', `${uploadMap.value.path}${path}`)
 
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename || this.getFileName(path))}`)
-    formData.append('x-amz-meta-tn', userId)
+    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename || getFileName(path))}`)
+    formData.append('x-amz-meta-tn', userId.value)
 
     const target = isFile ? file : generalUtils.dataURLtoBlob(file as string)
     if (formData.has('file')) {
@@ -42,7 +44,7 @@ export default new (class UploadUtils {
     }
 
     const xhr = new XMLHttpRequest()
-    xhr.open('POST', this.uploadMap.url, true)
+    xhr.open('POST', uploadMap.value.url, true)
     return new Promise<void>((resolve, reject) => {
       xhr.onload = () => {
         resolve()
@@ -52,7 +54,7 @@ export default new (class UploadUtils {
     })
   }
 
-  async polling<T>(url: string) {
+  const polling = async<T> (url: string) => {
     return new Promise<T>((resolve, reject) => {
       let pollingTimes = 0
       const interval = window.setInterval(async () => {
@@ -72,4 +74,12 @@ export default new (class UploadUtils {
       }, 2000)
     })
   }
-})()
+
+  return {
+    getUrlMap,
+    uploadImage,
+    polling,
+  }
+}
+
+export default useUploadUtils

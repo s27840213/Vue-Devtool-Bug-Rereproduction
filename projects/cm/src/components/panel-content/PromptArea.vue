@@ -23,8 +23,8 @@ div(class="flex flex-col justify-center items-center w-full px-24 gap-16")
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
 <script setup lang="ts">
+import useGenImageUtils from '@/composable/useGenImageUtils';
 import { useEditorStore } from '@/stores/editor';
-import genImageUtils from '@/utils/genImageUtils';
 import tutorialUtils from '@/utils/tutorialUtils';
 import logUtils from '@nu/vivi-lib/utils/logUtils';
 
@@ -35,12 +35,13 @@ const { isGenerating } = storeToRefs(editorStore)
 const promptText = ref('')
 const promptLen = computed(() => promptText.value.length)
 const isDuringTutorial = tutorialUtils.isDuringTutorial
+const { genImage } = useGenImageUtils()
 
 const handleGenerate = () => {
   setIsGenerating(true)
   // setGeneratedResult('https://asset.vivipic.com/charmix/HVDSrQpG4iRTDHkqvU3Y/output/231030115145557ftqnuIbG.png?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1699242747&Signature=E8P5c%2B3fO9b%2BvF%2BhCi1IJdT79ik%3D&X-Amzn-Trace-Id=Root%3D1-653f287b-585cd2fd4f2337005d01b2fd%3BParent%3D78c0465c20c9e530%3BSampled%3D0%3BLineage%3Dee147589%3A0')
   // setShowGenResult(true)
-  genImageUtils.genImage(promptText.value).then(url => {
+  genImage(promptText.value).then(url => {
     setGeneratedResult(url)
     setShowGenResult(true)
     setIsGenerating(false)
