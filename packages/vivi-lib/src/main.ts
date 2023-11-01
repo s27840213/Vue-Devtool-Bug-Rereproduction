@@ -1,6 +1,5 @@
 // import App from '@/App.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
-import SvgIcon from '@/components/global/SvgIcon.vue'
 import colorUtils from '@/utils/colorUtils'
 import modalUtils from '@/utils/modalUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
@@ -17,12 +16,14 @@ import VueRecyclerviewNew from 'vue-recyclerview'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import i18n from './i18n'
 // import router from './router'
+import '@/imports'
+import componentPlugin from '@nu/shared-lib/plugin'
+import libType from '@nu/shared-lib/types'
 import store from './store'
 import generalUtils from './utils/generalUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
-import '@/imports'
 
 // Add variable that bind in vue this and its type define
 // Ex: div(v-if="$isTouchDevice()" ...) in pug
@@ -102,6 +103,10 @@ app.use(FloatingVue, {
   themes: tooltipUtils.themes
 })
 
+app.use(componentPlugin)
+// eslint-disable-next-line no-unused-expressions
+libType
+
 // app.use(VueGtm, {
 //   id: 'GTM-T7LDWBP',
 //   enabled: true,
@@ -111,7 +116,6 @@ app.use(FloatingVue, {
 
 app.component('RecycleScroller', RecycleScroller)
 
-app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
 ))

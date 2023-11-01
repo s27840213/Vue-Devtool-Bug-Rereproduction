@@ -24,11 +24,11 @@ div(class="panel-objects rwd-container")
 <script lang="ts">
 import PanelObjectGifs from '@/components/editor/panelMobile/PanelObjectGifs.vue'
 import PanelObjectStatic from '@/components/editor/panelMobile/PanelObjectStatic.vue'
-import Tabs from '@nu/vivi-lib/components/Tabs.vue'
-import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
-import i18n from '@nu/vivi-lib/i18n'
-import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
-import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import Tabs from '@/components/Tabs.vue'
+import { CCategoryList } from '@/components/category/CategoryList.vue'
+import i18n from '@/i18n'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import modalUtils from '@/utils/modalUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

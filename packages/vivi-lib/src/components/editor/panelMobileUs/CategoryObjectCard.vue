@@ -12,7 +12,7 @@ div(v-show="isShow" class="category-object-card" @click="$emit('cardClick', $eve
 </template>
 
 <script lang="ts">
-import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
+import LinkOrText from '@/components/LinkOrText.vue'
 import { throttle } from 'lodash'
 import { defineComponent } from 'vue'
 export default defineComponent({

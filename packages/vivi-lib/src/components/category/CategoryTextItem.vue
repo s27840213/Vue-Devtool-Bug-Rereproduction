@@ -1,9 +1,9 @@
 <template lang="pug">
 div(class="panel-text__item"
     draggable="true"
-    @dragstart="dragStart($event)"
+    @dragstart="$isPic ? dragStart($event) : null"
     @click="addText"
-    @click.right.prevent="openUpdateDesignPopup()")
+    @click.right.prevent="$isPic ? openUpdateDesignPopup() : null")
   img(class="panel-text__img"
     ref="img"
     :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
@@ -18,10 +18,12 @@ import store from '@/store'
 import AssetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import textPropUtils from '@/utils/textPropUtils'
+import vuexUtils from '@/utils/vuexUtils'
+import imagePreview from '@img/svg/image-preview.svg'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
-import imagePreview from '@img/svg/image-preview.svg'
 
 export default defineComponent({
   emits: [],
@@ -35,6 +37,10 @@ export default defineComponent({
     item: {
       type: Object as PropType<any>,
       required: true
+    },
+    itemWidth: {
+      type: Number,
+      default: NaN
     }
   },
   data() {
@@ -47,14 +53,18 @@ export default defineComponent({
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
     }),
+    ...vuexUtils.mapGetters('stk', {
+      isInEditor: true,
+    }, {
+      isInEditor: 'vivisticker/getIsInEditor'
+    }),
     itemStyle(): any {
       const { width } = this.item.preview || {
-        width: this.$isTouchDevice()
-          ? (window.innerWidth - 54) / 3 - 10 // ([window width] - [padding and gap]) / 3 - [item margin]
+        width: !isNaN(this.itemWidth) ? this.itemWidth
+          : this.$isTouchDevice() ? (window.outerWidth - (this.$isPic ? 54 : 68)) / 3 - 10 // ([window width] - [padding and gap]) / 3 - [item margin]
           : 135
       }
       return {
-        objectFit: 'contain',
         width: `${width}px`
       }
     },
@@ -71,11 +81,20 @@ export default defineComponent({
       }, img.src, { aspectRatio: img.naturalWidth / img.naturalHeight })
     },
     addText() {
-      if (!paymentUtils.checkPro(this.item, 'pro-text')) return
-      AssetUtils.addAsset(this.item)
-        .then(() => {
-          textPropUtils.updateTextPropsState()
-        })
+      if (this.$isPic && !paymentUtils.checkPro(this.item, 'pro-text')) return
+      if (this.$isStk && !stkWVUtils.checkPro(this.item, 'text')) return
+      if (this.isInEditor) {
+        AssetUtils.addAsset(this.item)
+          .then(() => {
+            textPropUtils.updateTextPropsState()
+          })
+      } else {
+        stkWVUtils.startEditing('text', {
+          plan: this.item.plan,
+          assetId: this.item.id,
+          fit: this.item.fit ?? 0,
+        }, stkWVUtils.getAssetInitiator(this.item), stkWVUtils.getAssetCallback(this.item))
+      }
     },
     openUpdateDesignPopup() {
       if (this.isAdmin) {
@@ -94,6 +113,8 @@ export default defineComponent({
   &__item {
     position: relative;
     cursor: pointer;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
   &__img {
     width: 80px;
@@ -101,6 +122,9 @@ export default defineComponent({
     margin: 0 5px;
     object-fit: contain;
     vertical-align: middle;
+    -webkit-touch-callout: none;
+    user-select: none;
+    pointer-events: none;
   }
 }
 </style>
