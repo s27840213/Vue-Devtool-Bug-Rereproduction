@@ -46,8 +46,8 @@ div(class="panel-objects")
 </template>
 
 <script lang="ts">
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import SearchBar from '@/components/SearchBar.vue'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import PanelObject from '@/components/editor/panelMobile/PanelObject.vue'
