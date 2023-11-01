@@ -337,6 +337,8 @@
   "STK0035": "Go to Tutorial ",
   "STK0036": "Never show this message again.",
   "STK0058": "Default emoji",
+  "STK0067": "Photo",
+  "STK0069": "Stock",
   "STK0073": "Maximum Page Limit",
   "STK0074": "Your file has reached its maximum of {num} pages. To design more pages, please create a new file.",
   "STK0084": "Saving to My designs...",
@@ -396,5 +398,7 @@
   "CM0050": "Image",
   "CM0051": "Select",
   "CM0052": "Auto Fill",
-  "CM0053": "Canvas"
+  "CM0053": "Canvas",
+  "CM0058": "Select {num} photo|Select {num} photos",
+  "CM0059": "My albums"
 }
