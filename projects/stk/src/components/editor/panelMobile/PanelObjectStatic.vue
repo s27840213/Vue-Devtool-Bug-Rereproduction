@@ -75,14 +75,14 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
 </template>
 
 <script lang="ts">
+import { IAsset, ICategoryExtend, ITagExtend, isICategory, isITag } from '@/interfaces/module'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
-import CategoryObjectItem from '@/components/category/CategoryRichObjectItem.vue'
+import CategoryObjectItem from '@nu/vivi-lib/components/category/CategoryRichObjectItem.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
-import { IAsset, ICategoryExtend, isICategory, isITag, ITagExtend } from '@/interfaces/module'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
