@@ -16,6 +16,7 @@ div(class="editing-options w-full")
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
 import { useCanvasStore } from '@/stores/canvas';
+import type { AllLayerTypes } from '@nu/vivi-lib/interfaces/layer';
 import assetUtils from '@nu/vivi-lib/utils/assetUtils';
 import imageUtils from '@nu/vivi-lib/utils/imageUtils';
 import layerUtils from '@nu/vivi-lib/utils/layerUtils';
@@ -39,17 +40,19 @@ const chooseSelectionOption = (icon: string) => {
           opacity: 30,
         },
         hideResizer: true,
-        ctrlUnmountCb: (pageIndex: number, layerIndex: number, config?: any ) => {
-          const target = document.querySelector(`[data-nu-image="nu-image-${config.id}"]`) as HTMLImageElement
-          drawImageToCtx(target, {
-            x: config.styles.x,
-            y: config.styles.y,
-            width: config.styles.width,
-            height: config.styles.height,
-            rotate: config.styles.rotate,
-          })
+        ctrlUnmountCb: (pageIndex: number, layerIndex: number, config?: AllLayerTypes ) => {
+          if(config) {
+            const target = document.querySelector(`[data-nu-image="nu-image-${config.id}"]`) as HTMLImageElement
+            drawImageToCtx(target, {
+              x: config.styles.x,
+              y: config.styles.y,
+              width: config.styles.width,
+              height: config.styles.height,
+              rotate: config.styles.rotate,
+            })
 
-          layerUtils.deleteLayer(pageIndex, layerIndex)
+            layerUtils.deleteLayer(pageIndex, layerIndex)
+          }
         },
       })
     })
