@@ -36,9 +36,9 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 z-50 h-[350px] overflow
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
 import { useEditorStore } from '@/stores/editor';
+import useI18n from '@nu/vivi-lib/i18n/useI18n';
 import groupUtils from '@nu/vivi-lib/utils/groupUtils';
 import { storeToRefs } from 'pinia';
-import useI18n from '@nu/vivi-lib/i18n/useI18n'
 const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
@@ -171,8 +171,6 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'canvas': {
-      console.log('download mask')
-      emits('downloadMask')
     }
   }
 }

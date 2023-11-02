@@ -300,7 +300,6 @@ const useCanvasUtils = (
       clearCtx()
       const currLayer = layerUtils.getLayer(0,0)
       const {x,y,width,height} = currLayer.styles 
-      console.log(currLayer.styles)
 
       const preserveArea = canvasCtx.value.getImageData(x,y,width,height)
 
