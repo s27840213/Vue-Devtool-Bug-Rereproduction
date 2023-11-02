@@ -28,6 +28,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScrollableContainer: typeof import('./components/global/ScrollableContainer.vue')['default']
+    SelectionOptions: typeof import('./components/panel-content/SelectionOptions.vue')['default']
     SidebarTabs: typeof import('./components/editor/SidebarTabs.vue')['default']
     SvgIconTest: typeof import('./components/global/SvgIconTest.vue')['default']
     UseTapTransition: typeof import('./components/global/UseTapTransition.vue')['default']

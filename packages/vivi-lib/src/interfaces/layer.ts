@@ -34,7 +34,7 @@ export interface IStyle {
   zindex: number,
   opacity: number,
   horizontalFlip: boolean,
-  verticalFlip: boolean
+  verticalFlip: boolean,
 }
 
 export interface IImageStyle extends IStyle {
@@ -54,12 +54,14 @@ export interface ILayer<T extends IStyle = IStyle> {
   locked: boolean,
   moved: boolean,
   moving: boolean,
+  hideResizer?: boolean,
   dragging: boolean,
   designId: string,
   styles: T,
   id: string,
   jsonVer: string,
   jsonVer_origin: string,
+  ctrlUnmountCb?: (pageIndex: number, layerIndex: number, config?: AllLayerTypes,) => void
 }
 
 export interface ITextStyle extends IStyle {

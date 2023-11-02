@@ -22,6 +22,7 @@ const useStateInfo = () => {
   )
 
   const showBrushOptions = computed(() => atEditor.value && currActiveFeature.value === 'brush')
+  const showSelectionOptions = computed(() => atEditor.value && currActiveFeature.value === 'selection')
   const isEditing = computed(() => atEditor.value && editorState.value === 'editing')
   // #endregion
 
@@ -40,6 +41,7 @@ const useStateInfo = () => {
     showAspectRatioSelector,
     isEditing,
     showBrushOptions,
+    showSelectionOptions,
     showImgSelector,
   }
 }

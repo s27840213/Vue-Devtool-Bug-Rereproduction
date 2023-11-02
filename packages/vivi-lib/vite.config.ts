@@ -7,7 +7,6 @@ import { replaceCodePlugin } from 'vite-plugin-replace'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import transformPlugin from 'vite-plugin-transform'
 import extractImg from '../../tools/vite-plugin-lib-extract-img'
-
 function resolve(...dir: string[]) {
   return path.join(__dirname, ...dir)
 }

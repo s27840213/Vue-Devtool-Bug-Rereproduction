@@ -66,6 +66,7 @@ import EditingOptions from './components/panel-content/EditingOptions.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
+import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useStateInfo from './composable/useStateInfo'
 import { useEditorStore } from './stores/editor'
 import { useModalStore } from './stores/modal'
@@ -77,6 +78,7 @@ const {
   showHomeTabs,
   isEditing,
   showBrushOptions,
+  showSelectionOptions,
   atMyDesign,
   atSettings,
   atMainPage,
@@ -98,6 +100,8 @@ const bottomPanelComponent = computed(() => {
       return AspectRatioSelector
     case showBrushOptions.value:
       return EditingOptions
+    case showSelectionOptions.value:
+      return SelectionOptions
     case isEditing.value:
       return PromptArea
     default:

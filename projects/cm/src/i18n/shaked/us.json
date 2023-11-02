@@ -362,6 +362,7 @@
   "CM0011": "AI Reflection",
   "CM0012": "Next",
   "CM0013": "Set Expanded Photo Ratio",
+  "CM0015": "Shape",
   "CM0017": "Brush",
   "CM0018": "Erase",
   "CM0019": "Reverse",
@@ -400,5 +401,6 @@
   "CM0052": "Auto Fill",
   "CM0053": "Canvas",
   "CM0058": "Select {num} photo|Select {num} photos",
-  "CM0059": "My albums"
+  "CM0059": "My albums",
+  "CM0060": "Camera"
 }

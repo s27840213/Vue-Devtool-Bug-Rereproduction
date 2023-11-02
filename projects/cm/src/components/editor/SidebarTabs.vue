@@ -6,7 +6,8 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 z-50 h-[350px] overflow
     class="w-44")
     div(
       class="sidebar__tab flex flex-col items-center justify-center gap-2 p-4"
-      @click.stop="handleTabAction(tab)")
+      @click.stop="handleTabAction(tab)"
+      @pointerdown.stop)
       cm-svg-icon(
         class="pointer-events-none"
         :style="tab.styles"
@@ -101,8 +102,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'selection',
       text: t('CM0051'),
       panelType: '',
-      hidden: false,
-      disabled: true,
+      hidden: false
     },
     {
       icon: 'brush',
