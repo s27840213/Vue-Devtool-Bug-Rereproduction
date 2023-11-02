@@ -249,7 +249,6 @@ class ImageUtils {
   }
 
   getSrcType(src: string) {
-    console.log(window)
     if (src.includes('unsplash')) return 'unsplash'
     if (src.includes('pexels')) return 'pexels'
     if (src.includes('template.vivipic.com/background')) return 'background'
@@ -262,7 +261,7 @@ class ImageUtils {
       return src.includes('logo') ? 'logo-private' : 'private'
     }
     if (src.startsWith('data:image')) return ''
-    if(src.includes('src/assets/img')) return 'local-img'
+    if(src.includes(window.location.hostname)) return 'local-img'
     throw Error(`Unexpected getSrcType result for src '${src}'.`)
   }
 
