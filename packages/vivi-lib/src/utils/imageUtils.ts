@@ -191,11 +191,6 @@ class ImageUtils {
         res = ''
         break
       }
-      /**
-       * @TODO need to ask Daniel what is this
-       */
-      case 'local':
-        return assetId as string
       case 'svg':
         res = `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']
           }`
@@ -208,7 +203,6 @@ class ImageUtils {
         }
         break
       case 'local-img': {
-        console.log(`local-img: ${assetId}`)
         return assetId as string
       }
       default:
@@ -255,6 +249,7 @@ class ImageUtils {
   }
 
   getSrcType(src: string) {
+    console.log(window)
     if (src.includes('unsplash')) return 'unsplash'
     if (src.includes('pexels')) return 'pexels'
     if (src.includes('template.vivipic.com/background')) return 'background'
