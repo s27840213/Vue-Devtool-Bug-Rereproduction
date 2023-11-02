@@ -89,7 +89,7 @@ export default defineComponent({
       const tabs:Array<IFooterTab> = [
         { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode || this.inImageEditor },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) && (layerUtils.getCurrLayer as IFrame).lenght !== 1}, // vivisticker can only crop frame besides template editor
         {
           icon: 'effect',
           text: `${this.$t('NN0429')}`,
@@ -362,7 +362,7 @@ export default defineComponent({
       } else if (this.editorTypeTemplate ? this.isGroupOrTmp : this.showGeneralTabs) {
         return [...this.genearlLayerTabs]
       } else if (this.showFrameTabs) {
-        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
+        if ((layerUtils.getCurrLayer as IFrame).clips.length === 1) {
           return this.photoTabs
         }
         return this.frameTabs
@@ -463,10 +463,8 @@ export default defineComponent({
                   layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
                   break
                 case 'frame':
-                  index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image' && l.active)
-                  if (index >= 0) {
-                    frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
-                  }
+                  index = Math.max((layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image' && l.active), 0)
+                  frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true, active: true })
                   break
                 case 'group':
                   if (layerUtils.getCurrConfig.type === LayerType.image) {
