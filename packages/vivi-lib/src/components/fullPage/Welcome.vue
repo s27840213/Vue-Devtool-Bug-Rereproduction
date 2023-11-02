@@ -21,7 +21,7 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      clearFullPageConfig: 'vivisticker/UPDATE_clearFullPageConfig'
+      clearFullPageConfig: 'UPDATE_clearFullPageConfig'
     }),
     handleClose() {
       this.clearFullPageConfig()

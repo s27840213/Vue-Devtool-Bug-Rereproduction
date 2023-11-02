@@ -1,5 +1,5 @@
 import { IAsset } from '@nu/vivi-lib/interfaces/module'
-import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
+import { ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
@@ -27,7 +27,6 @@ interface IViviStickerState {
   controllerHidden: boolean,
   isStandaloneMode: boolean,
   showTutorial: boolean,
-  fullPageConfig: IFullPageConfig,
   recentlyBgColors: string[],
   hasNewBgColor: boolean,
   isDuringCopy: boolean,
@@ -86,10 +85,6 @@ const getDefaultState = (): IViviStickerState => ({
   controllerHidden: false,
   isStandaloneMode: false,
   showTutorial: false,
-  fullPageConfig: {
-    type: 'none',
-    params: {}
-  },
   recentlyBgColors: [],
   hasNewBgColor: false,
   isDuringCopy: false,
@@ -221,15 +216,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getShowTutorial(state: IViviStickerState): boolean {
     return state.showTutorial
-  },
-  getFullPageConfig(state: IViviStickerState): IFullPageConfig {
-    return state.fullPageConfig
-  },
-  getFullPageType(state: IViviStickerState): IFullPageConfig['type'] {
-    return state.fullPageConfig.type
-  },
-  getFullPageParams(state: IViviStickerState): IFullPageConfig['params'] {
-    return state.fullPageConfig.params
   },
   getRecentlyBgColors(state: IViviStickerState): string[] {
     return state.recentlyBgColors
@@ -370,21 +356,6 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_showTutorial(state: IViviStickerState, showTutorial: boolean) {
     state.showTutorial = showTutorial
-  },
-  SET_fullPageType(state: IViviStickerState, fullPageType: IFullPageConfig['type']) {
-    state.fullPageConfig.type = fullPageType
-  },
-  SET_fullPageParams(state: IViviStickerState, fullPageParams: IFullPageConfig['params']) {
-    state.fullPageConfig.params = fullPageParams
-  },
-  SET_fullPageConfig(state: IViviStickerState, data: IFullPageConfig) {
-    state.fullPageConfig = data
-  },
-  UPDATE_clearFullPageConfig(state: IViviStickerState) {
-    state.fullPageConfig = {
-      type: 'none',
-      params: {}
-    }
   },
   SET_recentlyBgColors(state: IViviStickerState, recentlyBgColors: string[]) {
     state.recentlyBgColors = recentlyBgColors

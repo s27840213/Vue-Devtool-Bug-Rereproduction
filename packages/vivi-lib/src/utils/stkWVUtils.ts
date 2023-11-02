@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
+import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, IViviStickerProFeatures, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -32,8 +32,7 @@ import textPropUtils from './textPropUtils'
 import textUtils, { SYSTEM_FONTS } from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
-
-export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template' | 'bg-remove'
+import { IFullPageVideoConfigParams } from '@/interfaces/fullPage'
 
 declare let window: CustomWindow
 
@@ -1452,7 +1451,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.showUpdateModal()
       return
     }
-    store.commit('vivisticker/SET_fullPageConfig', { type: 'payment', params: { target } })
+    store.commit('SET_fullPageConfig', { type: 'payment', params: { target } })
   }
 
   checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
@@ -1545,7 +1544,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (!data.reason) {
       const isSubscribed = data.subscribe === '1'
       store.commit('vivisticker/UPDATE_payment', { subscribe: isSubscribed })
-      if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
+      if (isSubscribed) store.commit('SET_fullPageConfig', { type: 'welcome', params: {} })
       this.getState('subscribeInfo').then(subscribeInfo => {
         this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
@@ -1595,7 +1594,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   openFullPageVideo(key: keyof IStickerVideoUrls, { delayedClose = undefined, mediaPos = 'top' }: Pick<IFullPageVideoConfigParams, 'delayedClose' | 'mediaPos'> = {}) {
     const stickerVideoUrls = constantData.stickerVideoUrls()
-    store.commit('vivisticker/SET_fullPageConfig', {
+    store.commit('SET_fullPageConfig', {
       type: 'video',
       params: {
         video: stickerVideoUrls[key].video,

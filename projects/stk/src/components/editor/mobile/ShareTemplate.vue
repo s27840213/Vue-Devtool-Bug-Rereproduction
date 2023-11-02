@@ -123,7 +123,7 @@ export default defineComponent({
       pagesState: 'getPagesState',
       pagesLength: 'getPagesLength',
       currFocusPageIndex: 'getCurrFocusPageIndex',
-      fullPageType: 'vivisticker/getFullPageType',
+      fullPageType: 'getFullPageType',
       editorBg: 'vivisticker/getEditorBg',
     }),
     config(): IPage {

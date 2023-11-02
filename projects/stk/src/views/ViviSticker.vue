@@ -183,7 +183,7 @@ export default defineComponent({
       isInTemplateShare: 'vivisticker/getIsInTemplateShare',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       showTutorial: 'vivisticker/getShowTutorial',
-      fullPageType: 'vivisticker/getFullPageType',
+      fullPageType: 'getFullPageType',
       userInfo: 'vivisticker/getUserInfo',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
@@ -237,7 +237,7 @@ export default defineComponent({
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
-      setFullPageConfig: 'vivisticker/SET_fullPageConfig',
+      setFullPageConfig: 'SET_fullPageConfig',
       setDebugMode: 'vivisticker/SET_debugMode'
     }),
     headerStyles() {

@@ -2,14 +2,14 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-  IFrame,
-  IGroup,
-  IImage,
-  IImageStyle,
-  IParagraph,
-  IShape,
-  IText,
-  ITmp,
+IFrame,
+IGroup,
+IImage,
+IImageStyle,
+IParagraph,
+IShape,
+IText,
+ITmp,
 } from '@/interfaces/layer'
 import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
@@ -46,12 +46,13 @@ import brushPasteResized from '@img/svg/brush-paste-resized.svg'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import {
-  FunctionPanelType,
-  IEditorState,
-  ISpecLayerData,
-  LayerType,
-  SidebarPanelType,
+FunctionPanelType,
+IEditorState,
+ISpecLayerData,
+LayerType,
+SidebarPanelType,
 } from './types'
+import { IFullPageConfig } from '@/interfaces/fullPage'
 
 const getDefaultState = (): IEditorState => ({
   sessionId: generalUtils.generateRandomString(12),
@@ -153,6 +154,10 @@ const getDefaultState = (): IEditorState => ({
   showGlobalErrorModal: false,
   newTemplateShownMode: true,
   modalInfo: {},
+  fullPageConfig: {
+    type: 'none',
+    params: {}
+  },
 })
 
 const state = getDefaultState()
@@ -379,6 +384,15 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getModalInfo(state: IEditorState): { [key: string]: string } {
     return state.modalInfo
+  },
+  getFullPageConfig(state: IEditorState): IFullPageConfig {
+    return state.fullPageConfig
+  },
+  getFullPageType(state: IEditorState): IFullPageConfig['type'] {
+    return state.fullPageConfig.type
+  },
+  getFullPageParams(state: IEditorState): IFullPageConfig['params'] {
+    return state.fullPageConfig.params
   },
 }
 
@@ -1564,6 +1578,21 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_modalInfo(state: IEditorState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
+  },
+  SET_fullPageType(state: IEditorState, fullPageType: IFullPageConfig['type']) {
+  state.fullPageConfig.type = fullPageType
+  },
+  SET_fullPageParams(state: IEditorState, fullPageParams: IFullPageConfig['params']) {
+    state.fullPageConfig.params = fullPageParams
+  },
+  SET_fullPageConfig(state: IEditorState, data: IFullPageConfig) {
+    state.fullPageConfig = data
+  },
+  UPDATE_clearFullPageConfig(state: IEditorState) {
+    state.fullPageConfig = {
+      type: 'none',
+      params: {}
+    }
   },
 }
 window.addEventListener(

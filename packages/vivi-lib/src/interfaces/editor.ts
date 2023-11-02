@@ -1,5 +1,5 @@
-import { IViviStickerProFeatures } from '@/utils/stkWVUtils'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IViviStickerProFeatures } from './vivisticker'
 
 export interface ICurrSelectedInfo {
   pageIndex: number,

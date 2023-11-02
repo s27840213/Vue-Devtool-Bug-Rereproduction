@@ -22,12 +22,12 @@ div(ref="main" class="full-page relative")
 </template>
 
 <script lang="ts">
-import { IFullPageConfig } from '@/interfaces/vivisticker'
+import Payment from '@/components/fullPage/Payment.vue'
+import Welcome from '@/components/fullPage/Welcome.vue'
+import { IFullPageConfig } from '@/interfaces/fullPage'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import Payment from '@/components/fullPage/Payment.vue'
-import Welcome from '@/components/fullPage/Welcome.vue'
 
 export default defineComponent({
   components: {
@@ -52,14 +52,14 @@ export default defineComponent({
   },
   computed: {
     ...(mapGetters({
-      fullPageConfig: 'vivisticker/getFullPageConfig',
+      fullPageConfig: 'getFullPageConfig',
     }) as {
       fullPageConfig: () => IFullPageConfig
     })
   },
   methods: {
     ...mapMutations({
-      clearFullPageConfig: 'vivisticker/UPDATE_clearFullPageConfig'
+      clearFullPageConfig: 'UPDATE_clearFullPageConfig'
     }),
     initialize() {
       this.showCloseButton = false

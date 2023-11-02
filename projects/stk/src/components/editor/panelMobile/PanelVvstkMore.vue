@@ -239,7 +239,7 @@ export default defineComponent({
     ...mapMutations({
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setSlideType: 'vivisticker/SET_slideType',
-      setFullPageConfig: 'vivisticker/SET_fullPageConfig',
+      setFullPageConfig: 'SET_fullPageConfig',
       setDebugMode: 'vivisticker/SET_debugMode',
       setUserState: 'user/SET_STATE'
     }),
