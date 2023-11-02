@@ -57,7 +57,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="isEditing && !showGenResult"
+      v-if="isEditing && !showGenResult && !showSelectionOptions"
       class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
@@ -107,7 +107,7 @@ const pageState = computed(() => store.getters.getPagesState)
 const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
 
 // #region Stores
-const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
+const { isEditing, atEditor, showAspectRatioSelector, showSelectionOptions } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
 const { pageSize, editorState, currActiveFeature, generatedResult, showGenResult } =
