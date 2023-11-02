@@ -38,6 +38,7 @@ const chooseSelectionOption = (icon: string) => {
       assetUtils.addImage(src, photoAspectRatio, {
         styles: {
           opacity: 30,
+          ctrlrPadding: 6
         },
         hideResizer: true,
         ctrlUnmountCb: (pageIndex: number, layerIndex: number, config?: AllLayerTypes ) => {

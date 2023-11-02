@@ -122,7 +122,7 @@ div(ref="page-wrapper" :id="`nu-page-wrapper_${pageIndex}`"
               page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils" :noBg="noBg")
               div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
               dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
-            div(v-if="imgControlPageIdx !== pageIndex" class="page-control" :style="controlStyles('control')")
+            div(v-if="imgControlPageIdx !== pageIndex" class="page-control" :style="controlStyles()")
               nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
                 :key="`controller-${currLayer.id}`"
                 :layerIndex="currSelectedIndex"
@@ -454,7 +454,7 @@ export default defineComponent({
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex',
       updateSnapUtilsIndex: 'UPDATE_snapUtilsIndex'
     }),
-    controlStyles(type: string): Record<string, string> {
+    controlStyles(): Record<string, string> {
       const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       return {
         ...this.sizeStyles,
