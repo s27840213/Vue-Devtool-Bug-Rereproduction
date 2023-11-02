@@ -1,6 +1,6 @@
+import useUploadUtils from '@/composable/useUploadUtils'
 import { useUserStore } from '@/stores/user'
 import cmWVUtils from '@/utils/cmWVUtils'
-import uploadUtilsCm from '@/utils/uploadUtilsCm'
 import HomeView from '@/views/HomeView.vue'
 import { generalUtils } from '@nu/shared-lib'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -66,7 +66,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const { setUserId } = useUserStore()
   setUserId(generalUtils.generateRandomString(20))
-  uploadUtilsCm.getUrlMap()
+  useUploadUtils().getUrlMap()
   cmWVUtils.setupAPIInterface()
   cmWVUtils.detectIfInApp()
   cmWVUtils.getUserInfo()
