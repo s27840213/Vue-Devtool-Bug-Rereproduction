@@ -35,6 +35,7 @@ export interface IStyle {
   opacity: number,
   horizontalFlip: boolean,
   verticalFlip: boolean,
+  ctrlrPadding?: number
 }
 
 export interface IImageStyle extends IStyle {
