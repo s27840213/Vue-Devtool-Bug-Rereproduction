@@ -25,6 +25,9 @@ export default class PinchControlUtils {
     size: ISize,
     img?: { imgWidth: number, imgHeight: number, imgX: number, imgY: number },
     rotate: number
+    shape?: {
+      initCorRadPercentage: number
+    }
   }
 
   private id = generalUtils.generateRandomString(4)
@@ -79,23 +82,39 @@ export default class PinchControlUtils {
       scale: this.config.styles.scale,
       rotate: this.config.styles.rotate,
     }
-    if (this.config.type === 'image') {
-      this.init.img = {
-        imgWidth: (this.config as IImage).styles.imgWidth,
-        imgHeight: (this.config as IImage).styles.imgHeight,
-        imgX: (this.config as IImage).styles.imgX,
-        imgY: (this.config as IImage).styles.imgY,
+    switch (this.config.type) {
+      case 'image':
+        this.init.img = {
+          imgWidth: (this.config as IImage).styles.imgWidth,
+          imgHeight: (this.config as IImage).styles.imgHeight,
+          imgX: (this.config as IImage).styles.imgX,
+          imgY: (this.config as IImage).styles.imgY,
+        }
+        break
+      case 'frame': {
+        if (frameUtils.isImageFrame(this.config as IFrame)) {
+          this.init.img = {
+            imgWidth: (this.config as IFrame).clips[0].styles.imgWidth,
+            imgHeight: (this.config as IFrame).clips[0].styles.imgHeight,
+            imgX: (this.config as IFrame).clips[0].styles.imgX,
+            imgY: (this.config as IFrame).clips[0].styles.imgY,
+          }
+        }
+        break
       }
-    } else if (this.config.type === 'frame' && frameUtils.isImageFrame(this.config as IFrame)) {
-      this.init.img = {
-        imgWidth: (this.config as IFrame).clips[0].styles.imgWidth,
-        imgHeight: (this.config as IFrame).clips[0].styles.imgHeight,
-        imgX: (this.config as IFrame).clips[0].styles.imgX,
-        imgY: (this.config as IFrame).clips[0].styles.imgY,
+      case 'shape': {
+        if (this.config.category === 'D') {
+          const { angle } = shapeUtils.lineDimension((this.config as any).point)
+          this.init.rotate = angle / Math.PI * 180
+        } else if (this.config.category === 'E') {
+          const shape = this.config as IShape
+          this.init.shape = {
+            initCorRadPercentage: controlUtils.getCorRadPercentage(shape.vSize, shape.size as number[], shape.shapeType as string)
+          }
+          console.log('controlUtils.getCorRadPercentage(shape.vSize, shape.size as number[], shape.shapeType as string)', controlUtils.getCorRadPercentage(shape.vSize, shape.size as number[], shape.shapeType as string), this.init)
+        }
+        break
       }
-    } else if (this.config.type === 'shape' && this.config.category === 'D') {
-      const { angle } = shapeUtils.lineDimension((this.config as any).point)
-      this.init.rotate = angle / Math.PI * 180
     }
     return this.init
   }
@@ -157,7 +176,6 @@ export default class PinchControlUtils {
         styles.imgX = imgX
         styles.imgY = imgY
       } else if (frameUtils.isImageFrame(this.config as IFrame)) {
-        console.warn('is frame image')
         frameUtils.updateFrameLayerStyles(this.layerInfo.pageIndex, this.layerInfo.layerIndex, 0, {
           width: newSize.width,
           height: newSize.height,
@@ -167,14 +185,20 @@ export default class PinchControlUtils {
           imgY
         })
       }
-    } else if (this.config.type === 'shape' && this.config.category === 'D') {
+    } else if (this.config.type === 'shape') {
       const shape = this.config as IShape
-      const { point, dx, dy } = shapeUtils.lineCenterRotate(shape.point as number[], rotate, shape.size?.[0] ?? 1, false)
-      styles = {
-        x: this.config.styles.x + e.deltaX + dx,
-        y: this.config.styles.y + e.deltaY + dy
+      if (this.config.category === 'D') {
+        const { point, dx, dy } = shapeUtils.lineCenterRotate(shape.point as number[], rotate, shape.size?.[0] ?? 1, false)
+        styles = {
+          x: this.config.styles.x + e.deltaX + dx,
+          y: this.config.styles.y + e.deltaY + dy
+        }
+        controlUtils.updateShapeLinePoint(this.layerInfo.pageIndex, this.layerInfo.layerIndex, point)
+      } else if (this.config.category === 'E') {
+        // controlUtils.updateShapeVSize(this.layerInfo.pageIndex, this.layerInfo.layerIndex, [styles.width, styles.height])
+        // const corRad = controlUtils.getCorRadValue([styles.width, styles.height], this.init?.shape?.initCorRadPercentage as number, this.config.shapeType as string)
+        // controlUtils.updateShapeCorRad(this.layerInfo.pageIndex, this.layerInfo.layerIndex, (this.config as IShape).size as number[], corRad)
       }
-      controlUtils.updateShapeLinePoint(this.layerInfo.pageIndex, this.layerInfo.layerIndex, point)
     }
 
     if (this.layerInfo.pageIndex !== -1 && this.layerInfo.layerIndex !== -1) {
@@ -186,8 +210,9 @@ export default class PinchControlUtils {
 
   end(e: AnyTouchEvent) {
     console.warn('pinch end', store.getters.getControlState.id, this.id)
-    this.init = null
     this.endLayerHandle()
+
+    this.init = null
 
     if (store.getters.getControlState.id === this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })
@@ -201,20 +226,32 @@ export default class PinchControlUtils {
   }
 
   endLayerHandle() {
-    if (this.config.type === 'text') {
-      const config = this.config as IText
-      if (config.styles.writingMode.includes('vertical')) {
-        const textHW = textUtils.getTextHW(this.config as IText, this.config.styles.height)
-        this.config.styles.width = textHW.width
-        controlUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { widthLimit: this.config.styles.height, spanDataList: textHW.spanDataList })
-      } else {
-        const textHW = textUtils.getTextHW(this.config as IText, this.config.styles.width)
-        this.config.styles.height = textHW.height
-        controlUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { widthLimit: this.config.styles.width, spanDataList: textHW.spanDataList })
+    switch (this.config.type) {
+      case 'text': {
+        const config = this.config as IText
+        if (config.styles.writingMode.includes('vertical')) {
+          const textHW = textUtils.getTextHW(this.config as IText, this.config.styles.height)
+          this.config.styles.width = textHW.width
+          controlUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { widthLimit: this.config.styles.height, spanDataList: textHW.spanDataList })
+        } else {
+          const textHW = textUtils.getTextHW(this.config as IText, this.config.styles.width)
+          this.config.styles.height = textHW.height
+          controlUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { widthLimit: this.config.styles.width, spanDataList: textHW.spanDataList })
+        }
+        const textInitWidth = this.config.styles.width / this.config.styles.scale
+        const textInitHeight = this.config.styles.height / this.config.styles.scale
+        controlUtils.updateLayerInitSize(this.layerInfo.pageIndex, this.layerInfo.layerIndex, textInitWidth, textInitHeight)
+        break
       }
-      const textInitWidth = this.config.styles.width / this.config.styles.scale
-      const textInitHeight = this.config.styles.height / this.config.styles.scale
-      controlUtils.updateLayerInitSize(this.layerInfo.pageIndex, this.layerInfo.layerIndex, textInitWidth, textInitHeight)
+      case 'shape': {
+        if (this.config.category === 'E') {
+          controlUtils.updateShapeVSize(this.layerInfo.pageIndex, this.layerInfo.layerIndex, [this.config.styles.width, this.config.styles.height])
+          console.log('this.init?.shape?.initCorRadPercentage', this.init)
+          const corRad = controlUtils.getCorRadValue([this.config.styles.width, this.config.styles.height], this.init?.shape?.initCorRadPercentage as number, this.config.shapeType as string)
+          controlUtils.updateShapeCorRad(this.layerInfo.pageIndex, this.layerInfo.layerIndex, (this.config as IShape).size as number[], corRad)
+          layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { scale: 1 })
+        }
+      }
     }
   }
 }

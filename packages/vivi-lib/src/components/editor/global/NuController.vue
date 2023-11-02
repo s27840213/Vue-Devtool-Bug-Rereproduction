@@ -958,6 +958,7 @@ export default defineComponent({
             scale = 1
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [width, height])
             const corRad = ControlUtils.getCorRadValue([width, height], this.initCorRadPercentage, this.config.shapeType)
+            console.log('this.initCorRadPercentage this.initCorRadPercentage', this.initCorRadPercentage)
             ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, corRad)
           }
           break
