@@ -176,5 +176,3 @@ export interface ILoadingOverlay {
   show: boolean,
   msgs: string[]
 }
-
-export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template' | 'bg-remove'

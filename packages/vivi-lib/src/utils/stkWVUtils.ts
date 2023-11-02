@@ -3,10 +3,12 @@ import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'
+import { IFullPageVideoConfigParams } from '@/interfaces/fullPage'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, IViviStickerProFeatures, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
+import { IStkProFeatures } from '@/interfaces/payment'
+import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -32,7 +34,6 @@ import textPropUtils from './textPropUtils'
 import textUtils, { SYSTEM_FONTS } from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
-import { IFullPageVideoConfigParams } from '@/interfaces/fullPage'
 
 declare let window: CustomWindow
 
@@ -1446,7 +1447,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     await this.setState('tutorialFlags', this.tutorialFlags)
   }
 
-  openPayment(target?: IViviStickerProFeatures) {
+  openPayment(target?: IStkProFeatures) {
     if (this.isPaymentDisabled) {
       this.showUpdateModal()
       return
@@ -1454,7 +1455,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     store.commit('SET_fullPageConfig', { type: 'payment', params: { target } })
   }
 
-  checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
+  checkPro(item: { plan?: number }, target?: IStkProFeatures) {
     const isPro = store.getters['vivisticker/getPayment'].subscribe
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)

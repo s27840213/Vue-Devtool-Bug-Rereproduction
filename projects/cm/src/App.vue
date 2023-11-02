@@ -42,6 +42,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     @click.stop="closeModal")
   transition(name="bottom-up")
     img-selector(v-if="showImgSelector" class="absolute top-0 left-0 w-full h-full z-img-selector")
+  transition(name="bottom-up")
+    full-page(v-if="fullPageType !== 'none'" class="full-page")
   notifications(
     group="copy"
     position="top center"
@@ -71,6 +73,8 @@ import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useStateInfo from './composable/useStateInfo'
 import { useEditorStore } from './stores/editor'
 import { useModalStore } from './stores/modal'
+import { useStore } from 'vuex'
+import FullPage from '@nu/vivi-lib/components/fullPage/FullPage.vue'
 
 // #region route info
 const stateInfo = useStateInfo()
@@ -123,7 +127,10 @@ const headerbarStyles = computed(() => {
 })
 
 const editorStore = useEditorStore()
-const {showGenResult } = storeToRefs(editorStore)
+const { showGenResult } = storeToRefs(editorStore)
+
+const store = useStore()
+const fullPageType = computed(() => store.getters.getFullPageType)
 </script>
 
 <style lang="scss">

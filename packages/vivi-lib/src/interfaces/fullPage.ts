@@ -1,4 +1,4 @@
-import { IViviStickerProFeatures } from "./vivisticker"
+import { IStkProFeatures } from "./payment"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IFullPageNoneConfigParams { }
@@ -21,7 +21,7 @@ export interface IFullPageVideoConfig {
 }
 
 export interface IFullPagePaymentConfigParams {
-  target?: IViviStickerProFeatures
+  target?: IStkProFeatures
 }
 
 export interface IFullPagePaymentConfig {

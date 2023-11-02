@@ -23,7 +23,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         theme="primary"
         :hasIcon="true"
         iconName="crown"
-        :full="true") {{ $t('CM0032') }}
+        :full="true"
+        @clickBtn="handleProBtnClick") {{ $t('CM0032') }}
     div(class="flex flex-col")
       div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
         div(class="w-full py-4 border-b-[1px] border-primary-white")
@@ -285,6 +286,12 @@ const handleDebugMode = () => {
     debugModeCounter.value = 0
     debugModeTimer.value = -1
   }, 1000)
+}
+// #endregion
+
+// #region pro
+const handleProBtnClick = () => {
+  cmWVUtils.openPayment()
 }
 // #endregion
 </script>

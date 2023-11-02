@@ -176,3 +176,7 @@ export const _IPaymentPayingView = [
 export type IPaymentPayingView = typeof _IPaymentPayingView[number]
 
 export type IPaymentView = IPaymentWarningView | IPaymentPayingView
+
+// for vivisticker & charmix
+export type IStkProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template' | 'bg-remove'
+export type ICmProFeatures = ''
