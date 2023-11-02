@@ -73,6 +73,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
 <script setup lang="ts">
 import { useGlobalStore } from '@/stores/global'
 import cmWVUtils from '@/utils/cmWVUtils'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { storeToRefs } from 'pinia'
 
 const scrollContainer = ref<HTMLElement | null>(null)

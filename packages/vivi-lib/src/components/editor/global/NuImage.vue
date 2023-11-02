@@ -23,6 +23,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
     div(class='nu-image__picture'
       :style="imgStyles()")
       img(v-if="finalSrc" ref="img"
+        :data-nu-image="`nu-image-${config.id}`"
         :style="flipStyles"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"

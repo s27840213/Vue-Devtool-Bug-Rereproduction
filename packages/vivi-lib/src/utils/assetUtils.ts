@@ -778,8 +778,9 @@ class AssetUtils {
     attrs: IAssetProps = {},
     categoryType = -1,
   ) {
+
     store.commit('SET_mobileSidebarPanelOpen', false)
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc, hideResizer, ctrlUnmountCb } = attrs
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
     const resizeRatio =
       attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_IMAGE
@@ -790,7 +791,7 @@ class AssetUtils {
       initWidth: 0,
       initHeight: 0,
       imgWidth: 0,
-      imgHeight: 0,
+      imgHeight: 0
     } as {
       width: number
       height: number
@@ -823,7 +824,7 @@ class AssetUtils {
         imgWidth = photoWidth,
         imgHeight = photoHeight,
         imgX = 0,
-        imgY = 0,
+        imgY = 0
       } = styles as IImageStyle
 
       const scaleRatio = photoWidth / boundingWidth
@@ -836,7 +837,7 @@ class AssetUtils {
         imgWidth: imgWidth * scaleRatio,
         imgHeight: imgHeight * scaleRatio,
         imgX: imgX * scaleRatio,
-        imgY: imgY * scaleRatio,
+        imgY: imgY * scaleRatio
       }
     } else {
       const photoWidth =
@@ -901,6 +902,8 @@ class AssetUtils {
       ...((categoryType === 14 || categoryType === 15) && { categoryType }),
       srcObj,
       previewSrc,
+      ...(hideResizer && { hideResizer}),
+      ...(ctrlUnmountCb && { ctrlUnmountCb}),
       styles: {
         ...styles,
         x,
@@ -908,6 +911,8 @@ class AssetUtils {
         ...newStyles,
       },
     }
+
+    console.log(generalUtils.deepCopy(config))
     const index =
       layerUtils.getObjectInsertionLayerIndex(this.getPage(targetPageIndex).layers, config) + 1
     GroupUtils.deselect()

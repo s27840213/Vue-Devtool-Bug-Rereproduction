@@ -556,6 +556,9 @@ importers:
       svg-sprite-loader:
         specifier: ^6.0.2
         version: 6.0.11
+      vite-plugin-transform:
+        specifier: ~2.0.1
+        version: 2.0.1
       vue-cli-plugin-i18n:
         specifier: ~2.3.1
         version: 2.3.2
@@ -577,9 +580,6 @@ importers:
       '@nu/shared-lib':
         specifier: workspace:^0.0.1
         version: link:../../packages/shared-lib
-      '@nu/vivi-lib':
-        specifier: workspace:^0.0.0
-        version: link:../../packages/vivi-lib
       pinia:
         specifier: ^2.1.4
         version: 2.1.6(typescript@5.2.2)(vue@3.3.4)
@@ -611,6 +611,9 @@ importers:
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
+      vite-plugin-transform:
+        specifier: ~2.0.1
+        version: 2.0.1
       vue-tsc:
         specifier: ^1.8.6
         version: 1.8.8(typescript@5.2.2)
@@ -20932,6 +20935,10 @@ packages:
       vite: 4.4.9(@types/node@18.17.4)(sass@1.65.1)
     transitivePeerDependencies:
       - supports-color
+
+  /vite-plugin-transform@2.0.1:
+    resolution: {integrity: sha512-sI9SzcuFbCj04YHEmhw9C14kNnVq3QFLWq7eofjNnDWnw/p+i+6pnSvVZSx1GDVpW1ciZglrv794XEU/lGGvyA==}
+    dev: true
 
   /vite@2.9.16(sass@1.65.1):
     resolution: {integrity: sha512-X+6q8KPyeuBvTQV8AVSnKDvXoBMnTx8zxh54sOwmmuOdxkjMmEJXH2UEchA+vTMps1xw9vL64uwJOWryULg7nA==}

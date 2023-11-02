@@ -15,6 +15,7 @@ import { useEditorStore } from '@/stores/editor';
 import { useImgSelectorStore } from '@/stores/imgSelector';
 import { useModalStore } from '@/stores/modal';
 import { storeToRefs } from 'pinia';
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 
 /**
  * @Note - how to use this component?

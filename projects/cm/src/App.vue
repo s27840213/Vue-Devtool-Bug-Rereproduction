@@ -42,6 +42,22 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     @click.stop="closeModal")
   transition(name="bottom-up")
     img-selector(v-if="showImgSelector" class="absolute top-0 left-0 w-full h-full z-img-selector")
+  notifications(
+    group="copy"
+    position="top center"
+    width="300px"
+    :max="2"
+    :duration="2000")
+    template(v-slot:body="{ item }")
+      div(class="notification copy" v-html="item.text")
+  notifications(
+    group="error"
+    position="top center"
+    width="300px"
+    :max="1"
+    :duration="5000")
+    template(v-slot:body="{ item }")
+      div(class="notification error" v-html="item.text")
 </template>
 
 <script setup lang="ts">
@@ -51,6 +67,7 @@ import EditingOptions from './components/panel-content/EditingOptions.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
+import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useStateInfo from './composable/useStateInfo'
 import { useEditorStore } from './stores/editor'
 import { useModalStore } from './stores/modal'
@@ -62,6 +79,7 @@ const {
   showHomeTabs,
   isEditing,
   showBrushOptions,
+  showSelectionOptions,
   atMyDesign,
   atSettings,
   atMainPage,
@@ -83,6 +101,8 @@ const bottomPanelComponent = computed(() => {
       return AspectRatioSelector
     case showBrushOptions.value:
       return EditingOptions
+    case showSelectionOptions.value:
+      return SelectionOptions
     case isEditing.value:
       return PromptArea
     default:
@@ -120,5 +140,19 @@ const {showGenResult } = storeToRefs(editorStore)
   transition:
     height 0.25s,
     opacity 0.25s;
+}
+
+.notification {
+  padding: 5px;
+  text-align: center;
+  color: setColor(white);
+  margin: 5px 5px 0 0;
+  border-radius: 5px;
+  &.copy {
+    background-color: setColor(blue-2);
+  }
+  &.error {
+    background-color: setColor(red-2);
+  }
 }
 </style>

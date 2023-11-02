@@ -91,19 +91,20 @@ div(:layer-index="`${layerIndex}`"
                 :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
                 @pointerdown.stop="lineEndMoveStart"
                 @touchstart="disableTouchEvent")
-        div(v-for="(resizer, index) in getResizer(controlPoints)"
-            v-show="!isMoving"
-            :key="index"
-            class="control-point__resize-bar-wrapper")
-          div(class="control-point"
-              :key="`resizer-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-          div(class="control-point"
-              :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+        template(v-if="!config.hideResizer")
+          div(v-for="(resizer, index) in getResizer(controlPoints)"
+              v-show="!isMoving"
+              :key="index"
+              class="control-point__resize-bar-wrapper")
+            div(class="control-point"
+                :key="`resizer-${index}`"
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+                @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+            div(class="control-point"
+                :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+                @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
         template(v-if="$isTouchDevice()" )
           div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
               v-show="!isMoving"
@@ -534,6 +535,10 @@ export default defineComponent({
     this.setMoving(false)
 
     popupUtils.closePopup()
+
+    if (this.config && this.config.ctrlUnmountCb) {
+      this.config.ctrlUnmountCb(this.pageIndex, this.layerIndex,this.config);
+    }
   },
   methods: {
     ...mapMutations({
@@ -1068,7 +1073,7 @@ export default defineComponent({
       this.snapUtils.event.emit('clearSnapLines')
     },
     resizeStart(event: MouseEvent, type: string) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.config.hideResizer) {
         return
       }
       if (eventUtils.checkIsMultiTouch(event)) {

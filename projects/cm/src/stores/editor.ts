@@ -1,4 +1,4 @@
-import type { EditorFeature, EditorState, EditorType, PowerfulFillCanvasMode } from '@/types/editor'
+import type { EditorFeature, EditorType, PowerfulFillCanvasMode, PowerfulfillStates } from '@/types/editor'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { defineStore } from 'pinia'
 import { useCanvasStore } from './canvas'
@@ -10,11 +10,10 @@ export interface IPage {
 
 interface IEditorStore {
   imgAspectRatio: number
-  editorState: EditorState
+  editorState: PowerfulfillStates
   currActiveFeature: EditorFeature
   editorType: EditorType
   canvasMode: PowerfulFillCanvasMode
-  isAdjustingBottomPanel: boolean
   maskCanvas: HTMLCanvasElement
   maskDataUrl: string,
   isGenerating: boolean,
@@ -29,7 +28,6 @@ export const useEditorStore = defineStore('editor', {
     currActiveFeature: 'none',
     editorType: 'powerful-fill',
     canvasMode: 'brush',
-    isAdjustingBottomPanel: true,
     maskCanvas: document.createElement('canvas'),
     maskDataUrl: '',
     isGenerating: false,
@@ -46,6 +44,15 @@ export const useEditorStore = defineStore('editor', {
     pageScaleRatio(): number{
       return pageUtils.scaleRatio / 100
     },
+    showBrushOptions(): boolean {
+      return this.currActiveFeature === 'brush'
+    },
+    showSelectionOptions(): boolean {
+      return this.currActiveFeature === 'selection'
+    },
+    isEditing(): boolean {
+      return this.editorState === 'editing'
+    }
   },
   actions: {
     setPageSize(width: number, height: number) {
@@ -56,20 +63,19 @@ export const useEditorStore = defineStore('editor', {
 
       pageUtils.setPageSize(0, width, height)
     },
-
     createNewPage(width: number, height: number) {
-      pageUtils.setPages([pageUtils.newPage({ width, height })])
+      pageUtils.setPages([pageUtils.newPage({ width, height }), pageUtils.newPage({ width, height })])
     },
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
     },
-    setEditorState(state: EditorState) {
+    setEditorState(state: PowerfulfillStates) {
       this.editorState = state
     },
     setCurrActiveFeature(feature: EditorFeature) {
       this.currActiveFeature = feature
     },
-    setEditorType(state: EditorState) {
+    setEditorType(state: PowerfulfillStates) {
       this.editorState = state
     },
     setCanvasMode(mode: PowerfulFillCanvasMode) {

@@ -26,6 +26,7 @@ div(class="flex flex-col justify-center items-center w-full px-24 gap-16")
 import useGenImageUtils from '@/composable/useGenImageUtils';
 import { useEditorStore } from '@/stores/editor';
 import tutorialUtils from '@/utils/tutorialUtils';
+import { notify } from '@kyvg/vue3-notification';
 import logUtils from '@nu/vivi-lib/utils/logUtils';
 
 const editorStore = useEditorStore()
@@ -45,10 +46,13 @@ const handleGenerate = () => {
     setGeneratedResult(url)
     setShowGenResult(true)
     setIsGenerating(false)
-    console.log(url)
   }).catch(error => {
     logUtils.setLogForError(error as Error)
     setIsGenerating(false)
+    notify({
+      group: 'error',
+      text: `Generate Failed`
+    })
   })
 }
 const clearPromt = () => {
