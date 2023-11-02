@@ -14,13 +14,13 @@ div(class="panel-bg__item"
 </template>
 
 <script lang="ts">
+import { notify } from '@kyvg/vue3-notification'
 import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import i18n from '@nu/vivi-lib/i18n'
-import { IAsset } from '@/interfaces/module'
+import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 

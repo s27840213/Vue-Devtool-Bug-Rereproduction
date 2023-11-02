@@ -13,7 +13,7 @@ div(class="category-template-item")
 
 <script lang="ts">
 import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
-import { IAsset } from '@/interfaces/module'
+import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import DragUtils from '@nu/vivi-lib/utils/dragUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'

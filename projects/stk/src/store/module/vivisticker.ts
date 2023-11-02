@@ -1,6 +1,6 @@
-import { IAsset } from '@/interfaces/module'
-import constantData from '@nu/vivi-lib/utils/constantData'
+import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
+import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import _ from 'lodash'
