@@ -141,7 +141,7 @@ div(class="popup-window")
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
 import { INubtnThemes } from '@nu/vivi-lib/components/global/Nubtn.vue'
-import Carousel from '@/components/global/Carousel.vue'
+import Carousel from '@nu/vivi-lib/components/global/Carousel.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
 import CouponInput from '@/components/payment/CouponInput.vue'
