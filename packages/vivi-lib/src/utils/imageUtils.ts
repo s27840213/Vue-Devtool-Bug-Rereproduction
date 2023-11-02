@@ -191,11 +191,6 @@ class ImageUtils {
         res = ''
         break
       }
-      /**
-       * @TODO need to ask Daniel what is this
-       */
-      case 'local':
-        return assetId as string
       case 'svg':
         res = `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']
           }`
@@ -208,7 +203,6 @@ class ImageUtils {
         }
         break
       case 'local-img': {
-        console.log(`local-img: ${assetId}`)
         return assetId as string
       }
       default:
@@ -267,7 +261,7 @@ class ImageUtils {
       return src.includes('logo') ? 'logo-private' : 'private'
     }
     if (src.startsWith('data:image')) return ''
-    if(src.includes('src/assets/img')) return 'local-img'
+    if(src.includes(window.location.hostname)) return 'local-img'
     throw Error(`Unexpected getSrcType result for src '${src}'.`)
   }
 

@@ -912,7 +912,6 @@ class AssetUtils {
       },
     }
 
-    console.log(generalUtils.deepCopy(config))
     const index =
       layerUtils.getObjectInsertionLayerIndex(this.getPage(targetPageIndex).layers, config) + 1
     GroupUtils.deselect()
