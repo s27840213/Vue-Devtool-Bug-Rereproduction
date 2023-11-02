@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import cmWVUtils from './cmWVUtils'
+import cmWVUtils, { ISaveAssetFromUrlResponse } from './cmWVUtils'
 const ENABLE_RECORDING = true
 const RECORD_START_DELAY = 2000
 const IMG2_EXAMPLE =
@@ -332,12 +332,12 @@ class CanvasRecorder {
     video.src = url
 
     this.blobToBase64(new Blob(this.chunks, { type: 'video/mp4' })).then((base64: string) => {
-      cmWVUtils.saveAssetFromUrl('png', 'https://template.vivipic.com/template/WZ3xxkwKHSnwOUcHhDsJ/prev_4x?ver=8')
+      // cmWVUtils.saveAssetFromUrl('png', 'https://template.vivipic.com/template/WZ3xxkwKHSnwOUcHhDsJ/prev_4x?ver=8')
       // webViewUtils.saveAssetFromUrl('mp4', 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4')
-      // cmWVUtils.saveAssetFromUrl('mp4', base64)
-      //   .then((data: ISaveAssetFromUrlResponse) => {
-      //     console.log('save asset from url', data)
-      //   })
+      cmWVUtils.saveAssetFromUrl('mp4', base64)
+        .then((data: ISaveAssetFromUrlResponse) => {
+          console.log('save asset from url', data)
+        })
     })
   }
 }
