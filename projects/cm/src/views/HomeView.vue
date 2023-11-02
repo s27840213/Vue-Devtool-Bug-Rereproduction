@@ -73,7 +73,8 @@ const goToEditor = () => {
   router.push('/editor')
 }
 
-const openImgSelecotr = () => {
+const openImgSelecotr = () => { 
+
   setShowImgSelector(true)
   /**
    * @Note below codes is used to test in the browser

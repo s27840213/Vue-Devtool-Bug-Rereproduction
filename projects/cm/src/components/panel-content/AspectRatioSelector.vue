@@ -70,7 +70,6 @@ const selectAspectRatio = (type: string) => {
 }
 
 const updateLayerStyleToFitPage = () => {
-  console.log(imgAspectRatio.value, pageAspectRatio.value)
   if(imgAspectRatio.value > pageAspectRatio.value) {
     layerUtils.updateLayerStyles(0,0, {
       width: pageSize.value.width,

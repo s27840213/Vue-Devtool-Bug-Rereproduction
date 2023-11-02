@@ -191,8 +191,6 @@ class ImageUtils {
         res = ''
         break
       }
-      case 'local':
-        return assetId as string
       case 'svg':
         res = `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']
           }`
@@ -204,6 +202,9 @@ class ImageUtils {
           res = `vvstk://${assetId}`
         }
         break
+      case 'local-img': {
+        return assetId as string
+      }
       default:
         res = ''
     }
@@ -259,7 +260,8 @@ class ImageUtils {
     if (src.includes('asset.vivipic')) {
       return src.includes('logo') ? 'logo-private' : 'private'
     }
-    if (src.startsWith('data:image') || src.includes('localhost')) return ''
+    if (src.startsWith('data:image')) return ''
+    if(src.includes(window.location.hostname)) return 'local-img'
     throw Error(`Unexpected getSrcType result for src '${src}'.`)
   }
 
@@ -301,8 +303,10 @@ class ImageUtils {
         // "chmix://cameraroll/AFB61F5C-424F-491B-8A09-D342DE7F3797/L0/001?appver=v7576", "chmix", "cameraroll/AFB61F5C-424F-491B-8A09-D342DE7F3797/L0/001?appver=v7576"]
         return src.match(/(vvstk|chmix):\/\/(.+)/)?.[2] ?? ''
       }
+      case 'local-img':
+        return src
       default:
-        if (type === '' && (src.startsWith('data:image') || src.includes('localhost'))) return ''
+        if (type === '' && (src.startsWith('data:image'))) return ''
         throw Error(`Unexpected getAssetId type '${type}' for src '${src}'.`)
     }
   }

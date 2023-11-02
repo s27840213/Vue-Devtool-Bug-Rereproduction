@@ -2,8 +2,8 @@ import jp from '@i18n/jp.json'
 import pt from '@i18n/pt.json'
 import tw from '@i18n/tw.json'
 import us from '@i18n/us.json'
-import type { LocaleName as _LocaleName } from '@nu/vivi-lib/i18n/index'
-import i18n from '@nu/vivi-lib/i18n/index'
+import type { LocaleName as _LocaleName } from '@nu/vivi-lib/i18n'
+import i18n from '@nu/vivi-lib/i18n'
 
 i18n.global.setLocaleMessage('us', us)
 i18n.global.setLocaleMessage('tw', tw)

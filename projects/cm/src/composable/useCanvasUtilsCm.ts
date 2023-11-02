@@ -26,8 +26,10 @@ const useCanvasUtils = (
   const { canvasMode, maskCanvas, maskDataUrl, currActiveFeature } = storeToRefs(editorStore)
   // #endregion
 
+  // #region Vuex
   const store = useStore()
   const pageScaleRatio = computed(() => store.getters.getPageScaleRatio / 100)
+  // #endregion
 
   // #region canvasStore
   const canvasStore = useCanvasStore()
@@ -140,6 +142,10 @@ const useCanvasUtils = (
     }
   }
 
+  let clearDrawStart = () => {}
+  let clearDrawing = () => {}
+  let clearDrawEnd = () => {}
+
   const drawStart = (e: PointerEvent) => {
     if (
       isManupulatingCanvas.value &&
@@ -159,8 +165,8 @@ const useCanvasUtils = (
       showBrush.value = true
       setBrushPos(e)
 
-      useEventListener(editorContainerRef, 'pointermove', drawing)
-      useEventListener(editorContainerRef, 'pointerup', drawEnd)
+      clearDrawing = useEventListener(editorContainerRef, 'pointermove', drawing)
+      clearDrawEnd = useEventListener(editorContainerRef, 'pointerup', drawEnd)
     }
   }
   const drawing = (e: PointerEvent) => {
@@ -187,6 +193,8 @@ const useCanvasUtils = (
     }
   }
   const drawEnd = () => {
+    clearDrawing()
+    clearDrawEnd()
     // pushStep()
     isDrawing.value = false
     showBrush.value = false
@@ -216,6 +224,32 @@ const useCanvasUtils = (
     drawLine(e)
   }
 
+  const drawImageToCtx = (img: HTMLImageElement,  options: {
+    x?: number,
+    y?: number,
+    width?: number,
+    height?: number,
+    rotate?: number,
+  } = {})  => {
+    if(canvasCtx && canvasCtx.value && img) {
+      setCompositeOperationMode('source-over')
+      const {x =  0, y =  0, width =  canvasWidth.value, height =  canvasHeight.value, rotate = 0} = options
+
+      canvasCtx.value.save()
+      canvasCtx.value.translate(x + width/2, y + height/2);
+      canvasCtx.value.rotate(rotate * Math.PI / 180)
+      canvasCtx.value.translate(-(x + width/2), -(y + height/2));
+      canvasCtx.value.drawImage(img, x, y, width, height)
+      canvasCtx.value.restore()
+      // canvasCtx.value.rotate(-rotate * Math.PI / 180)
+      if (isEraseMode.value) {
+        setCompositeOperationMode('destination-out')
+      } else {
+        setCompositeOperationMode('source-over')
+      }
+    }
+  }
+
   onMounted(() => {
     /**
      * if we didnt pass argument, means we just want to use some utility like reverseSelection
@@ -229,7 +263,7 @@ const useCanvasUtils = (
       editorContainerRef.value
     ) {
       createInitCanvas(canvasWidth.value, canvasHeight.value)
-      useEventListener(editorContainerRef, 'pointerdown', drawStart)
+      clearDrawStart = useEventListener(editorContainerRef, 'pointerdown', drawStart)
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
       useEventListener(editorContainerRef, 'touchstart', disableTouchEvent)
       if (canvasCtx && canvasCtx.value) {
@@ -335,6 +369,7 @@ const useCanvasUtils = (
     brushStyle,
     showBrush,
     isBrushMode,
+    drawImageToCtx,
     resultCanvas,
     currStep,
     inCanvasMode,

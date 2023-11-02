@@ -25,13 +25,12 @@ div(class="editing-options w-full")
       span(class="typo-body-sm transition-colors duration-300" :class="`text-${tabColor(tab)}`") {{ tab.text }}
 </template>
 <script setup lang="ts">
-import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import useTapTransition from '@/composable/useTapTransition'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import type { ColorSlip } from '@/types/color'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
 /**
  * @TODO - tidy up the codes
  */
@@ -47,7 +46,6 @@ const editorStore = useEditorStore()
 const { setCanvasMode } = editorStore
 const { canvasMode } = storeToRefs(editorStore)
 
-const { reverseSelection } = useCanvasUtilsCm()
 const canvasStore = useCanvasStore()
 const { setCanvasStoreState } = canvasStore
 const { brushSize } = storeToRefs(canvasStore)
@@ -112,9 +110,6 @@ const handleTabAction = (tab: IFeatureTab) => {
       setCanvasMode(tab.icon)
       return
     }
-    case 'reverse':
-      reverseSelection()
-      break
     default:
       break
   }
@@ -130,5 +125,6 @@ watchEffect(() => {
   })
 })
 // #endregion
+
 </script>
 <style lang="scss"></style>

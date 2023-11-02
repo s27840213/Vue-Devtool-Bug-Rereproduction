@@ -103,7 +103,6 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 
 <script lang="ts">
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
-import { IAsset } from '@/interfaces/module'
 import { notify } from '@kyvg/vue3-notification'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
@@ -112,6 +111,7 @@ import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.
 import MobileSlider from '@nu/vivi-lib/components/editor/mobile/MobileSlider.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'

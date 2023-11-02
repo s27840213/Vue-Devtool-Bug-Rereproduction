@@ -31,7 +31,9 @@
       ],
       "@nu/shared-lib": [
         "../shared-lib/src/index"
-      ]
+      ],
+      "@img/*": ["./src/assets/img/*"],
+      "@json/*": ["./src/assets/json/*"]
     },
     "types": [
       "vite/client"

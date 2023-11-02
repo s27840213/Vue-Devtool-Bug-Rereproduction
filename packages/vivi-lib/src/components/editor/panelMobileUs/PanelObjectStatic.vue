@@ -96,11 +96,11 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
+import { CCategoryList } from '@/components/category/CategoryList.vue'
 import PanelObjectStatic from '@/components/editor/panelMobile/PanelObjectStatic.vue'
 import CategoryObjectCard from '@/components/editor/panelMobileUs/CategoryObjectCard.vue'
-import { IAsset, ITagExtend, isITag } from '@/interfaces/module'
-import { CCategoryList } from '@/components/category/CategoryList.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IAsset, ITagExtend, isITag } from '@/interfaces/module'
 import generalUtils from '@/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'

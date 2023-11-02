@@ -72,6 +72,7 @@ const useMouseUtils = () => {
     target: HTMLElement,
   ): { x: number; y: number; xPercentage: number; yPercentage: number } => {
     const mouseRelPos = getMouseRelPoint(e, target)
+    
     return {
       x: mouseRelPos.x / pageScaleRatio.value,
       y: mouseRelPos.y / pageScaleRatio.value,
