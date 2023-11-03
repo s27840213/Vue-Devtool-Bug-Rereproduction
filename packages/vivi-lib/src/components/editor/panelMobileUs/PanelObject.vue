@@ -46,13 +46,13 @@ div(class="panel-objects")
 </template>
 
 <script lang="ts">
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import SearchBar from '@/components/SearchBar.vue'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import PanelObject from '@/components/editor/panelMobile/PanelObject.vue'
-import PanelObjectGifsUs from '@/components/us/PanelObjectGifs.vue'
-import PanelObjectStaticUs from '@/components/us/PanelObjectStatic.vue'
+import PanelObjectGifsUs from '@/components/editor/panelMobileUs/PanelObjectGifs.vue'
+import PanelObjectStaticUs from '@/components/editor/panelMobileUs/PanelObjectStatic.vue'
 
 export default defineComponent({
   name: 'panel-object-us',

@@ -15,13 +15,13 @@ div(class="category-object-item" v-touch)
 </template>
 
 <script lang="ts">
-import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import { IGif } from '@/interfaces/giphy'
 import { IAsset } from '@/interfaces/module'
-import assetUtils from '@nu/vivi-lib/utils/assetUtils'
-import doubleTapUtils from '@nu/vivi-lib/utils/doubleTapUtils'
-import editorUtils from '@nu/vivi-lib/utils/editorUtils'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import assetUtils from '@/utils/assetUtils'
+import doubleTapUtils from '@/utils/doubleTapUtils'
+import editorUtils from '@/utils/editorUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 

@@ -73,6 +73,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
 <script setup lang="ts">
 import { useGlobalStore } from '@/stores/global';
 import cmWVUtils from '@/utils/cmWVUtils';
+import useI18n from '@nu/vivi-lib/i18n/useI18n';
 import { storeToRefs } from 'pinia';
 
 const scrollContainer = ref<HTMLElement | null>(null)
@@ -107,10 +108,10 @@ const domainOptions = computed((): OptionConfig[] => {
     //   },
     // },
     {
-      title: 'rd(nuphoto.co)',
+      title: 'rd',
       iconName: 'global',
       action: () => {
-        cmWVUtils.switchDomain('https://nuphoto.co')
+        cmWVUtils.switchDomain('https://cmrd.vivipic.com')
       },
     },
     {
@@ -118,6 +119,20 @@ const domainOptions = computed((): OptionConfig[] => {
       iconName: 'global',
       action: () => {
         cmWVUtils.switchDomain('localhost:8080')
+      },
+    },
+    {
+      title: 'localhost:8081',
+      iconName: 'global',
+      action: () => {
+        cmWVUtils.switchDomain('localhost:8081')
+      },
+    },
+    {
+      title: 'localhost:8082',
+      iconName: 'global',
+      action: () => {
+        cmWVUtils.switchDomain('localhost:8082')
       },
     },
     ...Array(6)

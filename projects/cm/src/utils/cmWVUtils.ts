@@ -48,11 +48,24 @@ export interface IAlbumContentResponse {
   nextPage?: number
 }
 
+export interface IGetStateResponse {
+  flag: number
+  key: string
+  value: string
+}
+
 export interface IIosResponse<T> {
   errorMsg: string
   eventId: string
   hasInternalError: boolean
   output: T
+}
+
+export interface ISaveAssetFromUrlResponse {
+  type: 'gif' | 'jpg' | 'png' | 'mp4',
+  flag: string,
+  msg?: string,
+  imageId?: string
 }
 
 class WebViewUtils extends nativeAPIUtils<IUserInfo> {
@@ -68,6 +81,8 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   }
 
   CALLBACK_MAPS = {}
+
+  tutorialFlags = {} as { [key: string]: boolean }
 
   getUserInfoFromStore(): IUserInfo {
     return this.STANDALONE_USER_INFO
@@ -93,7 +108,7 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
 
   setDuringCopy(bool: boolean) {
     const { setDuringCopy } = useWebViewStore()
-    setDuringCopy(bool) 
+    setDuringCopy(bool)
   }
 
   detectIfInApp() {
@@ -127,6 +142,10 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     })
 
     return albumList as IAlbumContentResponse
+  }
+
+  async saveAssetFromUrl(type: 'gif' | 'jpg' | 'png' | 'mp4', url: string, options?: { key?: string, subPath?: string, name?: string }): Promise<ISaveAssetFromUrlResponse> {
+    return this.callIOSAsAPI('SAVE_FILE_FROM_URL', { type, url, ...options }) as Promise<ISaveAssetFromUrlResponse>
   }
 
   async switchDomain(url: string): Promise<void> {
@@ -220,6 +239,26 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
       y = defaultDimensions.y
     }
     return { x, y, width, height }
+  }
+
+  async getState(key: string): Promise<IGetStateResponse | undefined> {
+    if (this.isStandaloneMode) return
+    return await this.callIOSAsAPI('GET_STATE', { key }) as IGetStateResponse
+  }
+
+  async setState(key: string, value: any) {
+    if (this.isStandaloneMode) return
+    await this.callIOSAsAPI('SET_STATE', { key, value })
+  }
+
+  async fetchTutorialFlags() {
+    const res = await this.getState('tutorialFlags')
+    this.tutorialFlags = res && res.value ? JSON.parse(res.value) : {}
+  }
+
+  async updateTutorialFlags(updateItem: { [key: string]: boolean }) {
+    Object.assign(this.tutorialFlags, updateItem)
+    await this.setState('tutorialFlags', this.tutorialFlags)
   }
 }
 

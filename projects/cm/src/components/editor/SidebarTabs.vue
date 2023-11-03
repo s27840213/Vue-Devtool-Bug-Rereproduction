@@ -1,12 +1,14 @@
 <template lang="pug">
-div(class="sidebar-tabs flex flex-col items-center gap-4 z-50 h-[350px] overflow-scroll scrollbar-hide mr-4")
+div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide mr-4")
   div(
     v-for="(tab, index) in defaultEditorTabs"
     :key="`${tab.icon}-${index}`"
-    class="w-44")
+    class="w-44"
+    :class="{'tutorial-powerful-fill-1--highlight': [t('CM0052'), t('CM0017'), t('CM0051')].includes(tab.text ?? ''), 'tutorial-powerful-fill-2--highlight tutorial-powerful-fill-2--clickable': tab.text === t('CM0052')}")
     div(
       class="sidebar__tab flex flex-col items-center justify-center gap-2 p-4"
-      @click.stop="handleTabAction(tab)")
+      @click.stop="handleTabAction(tab)"
+      @pointerdown.stop)
       cm-svg-icon(
         class="pointer-events-none"
         :style="tab.styles"
@@ -35,6 +37,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 z-50 h-[350px] overflow
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
 import { useEditorStore } from '@/stores/editor';
+import useI18n from '@nu/vivi-lib/i18n/useI18n';
 import groupUtils from '@nu/vivi-lib/utils/groupUtils';
 import { storeToRefs } from 'pinia';
 const emits = defineEmits(['downloadMask'])
@@ -100,8 +103,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'selection',
       text: t('CM0051'),
       panelType: '',
-      hidden: false,
-      disabled: true,
+      hidden: false
     },
     {
       icon: 'brush',
@@ -170,8 +172,6 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'canvas': {
-      console.log('download mask')
-      emits('downloadMask')
     }
   }
 }

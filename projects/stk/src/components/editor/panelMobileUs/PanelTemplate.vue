@@ -34,7 +34,7 @@ div(class="panel-template rwd-container")
 
 <script lang="ts">
 import PanelTemplate from '@/components/editor/panelMobile/PanelTemplate.vue'
-import PanelTemplateContentUs from '@/components/us/PanelTemplateContent.vue'
+import PanelTemplateContentUs from '@/components/editor/panelMobileUs/PanelTemplateContent.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'

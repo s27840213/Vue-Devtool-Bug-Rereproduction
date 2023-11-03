@@ -1,4 +1,4 @@
-import { IAsset } from '@/interfaces/module'
+import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'

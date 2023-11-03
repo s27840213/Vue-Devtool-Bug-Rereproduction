@@ -23,13 +23,16 @@ declare module 'vue' {
     LazyLoad: typeof import('./components/global/LazyLoad.vue')['default']
     ModalTemplate: typeof import('./components/panel-content/ModalTemplate.vue')['default']
     ObserverSentinel: typeof import('./components/global/ObserverSentinel.vue')['default']
+    PowerfulFillTutorial: typeof import('./components/tutorial/PowerfulFillTutorial.vue')['default']
     PromptArea: typeof import('./components/panel-content/PromptArea.vue')['default']
     PropsSlider: typeof import('./components/global/PropsSlider.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScrollableContainer: typeof import('./components/global/ScrollableContainer.vue')['default']
+    SelectionOptions: typeof import('./components/panel-content/SelectionOptions.vue')['default']
     SidebarTabs: typeof import('./components/editor/SidebarTabs.vue')['default']
     SvgIconTest: typeof import('./components/global/SvgIconTest.vue')['default']
+    Tutorial: typeof import('./components/tutorial/Tutorial.vue')['default']
     UseTapTransition: typeof import('./components/global/UseTapTransition.vue')['default']
   }
 }

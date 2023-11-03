@@ -56,15 +56,15 @@ div(class="overflow-container full-size rwd-container")
 </template>
 
 <script lang="ts">
+import { CCategoryList } from '@/components/category/CategoryList.vue'
 import PanelText from '@/components/editor/panelMobile/PanelText.vue'
-import CategoryTextPreview from '@/components/us/CategoryTextPreview.vue'
-import { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
-import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
-import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
-import AssetUtils from '@nu/vivi-lib/utils/assetUtils'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
+import CategoryTextPreview from '@/components/editor/panelMobileUs/CategoryTextPreview.vue'
+import ProItem from '@/components/payment/ProItem.vue'
+import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import AssetUtils from '@/utils/assetUtils'
+import generalUtils from '@/utils/generalUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 

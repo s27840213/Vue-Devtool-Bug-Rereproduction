@@ -31,7 +31,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       @click.self="handleOuterClick")
       div(
         id="screenshot-target"
-        class="wrapper relative"
+        class="wrapper relative tutorial-powerful-fill-3--highlight"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         //- div(
@@ -39,15 +39,16 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         //-   class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
         //-   :style="pageStyles")
           //- img(class="h-full object-contain" src="@/assets/img/test.jpg")
-        nu-page(v-show="!showGenResult"
-          class="z-100"
+        nu-page(
+          v-show="!showGenResult"
           :pageIndex="0"
           :pageState="pageState[0]"
-          :overflowContainer="editorContainerRef")
+          :overflowContainer="editorContainerRef"
+          :noBg="isDuringCopy")
         canvas-section(
           v-if="isEditing"
           class="absolute top-0 left-0 w-full h-full"
-          :class="isManipulatingCanvas ? '' : 'pointer-events-none' "
+          :class="isManipulatingCanvas ? '' : 'pointer-events-none'"
           :containerDOM="editorContainerRef"
           :wrapperDOM="editorWrapperRef"
           ref="canvasRef")
@@ -56,18 +57,22 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="isEditing && !showGenResult"
-      class="absolute top-1/2 right-0 z-10 -translate-y-1/2"
+      v-if="isEditing && !showGenResult && !showSelectionOptions"
+      class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
-    div(v-if="showGenResult" class="absolute top-0 left-0 z-100 flex justify-center items-center w-full h-full bg-app-bg")
-        img(:src="generatedResult" class="w-240")
+    div(
+      v-if="showGenResult"
+      class="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-app-bg")
+      img(:src="generatedResult" class="w-240")
 </template>
 <script setup lang="ts">
 import useImageUtils from '@/composable/useImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import { useWebViewStore } from '@/stores/webView'
+import tutorialUtils from '@/utils/tutorialUtils'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -102,15 +107,17 @@ const pageState = computed(() => store.getters.getPagesState)
 const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
 
 // #region Stores
-const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
+const { isEditing, atEditor, showAspectRatioSelector, showSelectionOptions } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
-const { pageSize, editorState, currActiveFeature, generatedResult, showGenResult } = storeToRefs(editorStore)
+const { pageSize, editorState, currActiveFeature, generatedResult, showGenResult } =
+  storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
 
 const handleNextAction = function () {
   if (editorState.value === 'aspectRatio') {
     setEditorState('editing')
+    tutorialUtils.runTutorial('powerful-fill')
   } else if (editorState.value === 'editing') {
     setEditorState('prompt')
   }
@@ -204,6 +211,11 @@ watch(
   //   setPageScaleRatio(newVal)
   // }, 300),
 )
+
+// #region WebView feature section
+const webViewStore = useWebViewStore()
+const { isDuringCopy } = storeToRefs(webViewStore)
+// #endregion
 </script>
 <style lang="scss">
 .demo-brush {

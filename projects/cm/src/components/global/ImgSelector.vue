@@ -1,38 +1,44 @@
 <template lang="pug">
-div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
-  div(class="bg-app-bg px-24 py-8 flex justify-between items-center")
-    div
-      back-btn
+div(class="image-selector bg-app-bg text-app-tab-default h-full w-full grid grid-rows-[auto,auto,minmax(0,1fr)] grid-cols-1")
+  //- Top bar
+  div(class="px-24 py-8 flex justify-between items-center")
+    back-btn
+    span(class="text-app-btn-primary-text") {{ $tc('CM0058', 1, { num: 1 }) }}
+    div(class="w-24")
+  //- Tabs for photo & stock
+  tabs(
+    class="bg-app-tab-bg min-h-[52px] rounded-t-[24px]"
+    :tabs="[$t('STK0067'), $t('STK0069')]"
+    v-model="tabIndex")
+  //- Photo
   div(
-    class="bg-app-tab-bg w-full h-full rounded-t-[24px] pt-16 box-border grid grid-rows-[auto,auto,minmax(0,1fr)] grid-cols-1")
-    div(class="tabs flex justify-around pb-8")
-      span(class="text-app-tab-active typo-btn-lg") Photos
-      span(class="text-app-tab-disable typo-btn-lg") Stocks
-    div(class="flex justify-between items-center px-12 py-8")
-      div(class="flex items-center gap-8" @click="toggleAlbum")
-        span(class="text-app-tab-default typo-btn-lg") {{ currAlbumName }}
+    v-if="inPhoto"
+    class="bg-app-tab-bg w-full h-full box-border grid grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
+    //- Album bar
+    div(class="flex justify-between items-center px-12 py-8 h-60")
+      div(class="flex items-center gap-10" @click="toggleAlbum")
+        span(class="typo-btn-lg") {{ currAlbumName }}
         div(
           class="transition-transform duration-300"
           :style="{ transform: isAlbumOpened ? 'rotate(180deg)' : 'rotate(0deg)' }")
           cm-svg-icon(
-            class="text-app-tab-default"
             :iconName="'chevron-up'"
             :iconWidth="'12px'")
-    div(v-if="isAlbumOpened" class="img-selector__img-grid bg-app-bg overflow-scroll")
-      div(class="grid grid-cols-3 grid-flow-row content-start gap-4")
-        div(class="aspect-square flex flex-col items-center justify-center")
-          cm-svg-icon(class="text-app-tab-default mb-10" :iconName="'camera'")
-          span(class="text-app-tab-default") Camera
-        div(
-          v-for="id in currAlbumContent"
-          :key="id"
-          class="aspect-square"
-          @click="selectImage(id, 'cameraroll')")
-          lazy-load(
-            class="lazy-load w-full h-full"
-            target=".img-selector__img-grid"
-            :rootMargin="'1000px 0px 1000px 0px'")
-            img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${id}?ssize=200`")
+    //- Photo selector
+    div(v-if="isAlbumOpened" class="img-selector__img-grid bg-app-bg overflow-scroll grid grid-cols-3 grid-flow-row gap-2")
+      div(class="aspect-square flex flex-col items-center justify-center")
+        cm-svg-icon(class="mb-10" iconName="camera")
+        span {{ $t('CM0060') }}
+      div(
+        v-for="id in currAlbumContent"
+        :key="id"
+        class="aspect-square"
+        @click="selectImage(id, 'cameraroll')")
+        lazy-load(
+          class="lazy-load w-full h-full"
+          target=".img-selector__img-grid"
+          :rootMargin="'1000px 0px 1000px 0px'")
+          img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${id}?ssize=200`")
       observer-sentinel(
         class="flex justify-center py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
@@ -40,49 +46,60 @@ div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid
         :rootMargin="'1000px 0px 1000px 0px'"
         @callback="handleLoadMore")
         cm-svg-icon(
-          class="text-app-tab-default mb-10"
+          class="mb-10"
           :iconName="'loading'"
           iconColor="app-text-secondary")
-    div(v-else class="flex flex-col gap-8")
+    //- Album selector
+    div(v-else class="flex flex-col gap-8 mx-10")
       div(
-        v-for="album in smartAlbum"
+        v-for="album in albums"
         :key="album.albumId"
-        class="display flex gap-12"
+        class="display flex gap-8"
         @click="selectAlbum(album)")
-        img(
-          class="object-cover aspect-square w-80"
-          :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
-        div(class="flex flex-col items-start justify-evenly")
-          span(class="text-app-tab-default") {{ album.title }}
-          span(class="text-app-tab-default") {{ album.albumSize }}
-      template(v-if="myAlbum.length > 0")
-        div(class="text-left text-app-tab-default") Ｍy Albums
-        div(
-          v-for="album in myAlbum"
-          :key="album.albumId"
-          class="display flex gap-12"
-          @click="selectAlbum(album)")
+        div(v-if="album.albumId === 'myAlbum'" class="text-left") {{ $t('CM0059') }}
+        template(v-else)
           img(
             class="object-cover aspect-square w-80"
             :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
-          div(class="flex flex-col items-start justify-evenly")
-            span(class="text-app-tab-default") {{ album.title }}
-            span(class="text-app-tab-default") {{ album.albumSize }}
+          div(class="flex flex-col items-start justify-center gap-4")
+            span {{ album.title }}
+            span {{ album.albumSize }}
+  //- Stock
+  div(v-else-if="inStock") stock??
+    //- Search bar
+    //- Stock selector
 </template>
 <script lang="ts" setup>
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import type { IAlbum } from '@/utils/cmWVUtils'
 import cmWVUtils from '@/utils/cmWVUtils'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const router = useRouter()
 
+// #region tabs
+const tabIndex = ref(0)
+const inPhoto = computed(() => tabIndex.value === 0)
+const inStock = computed(() => tabIndex.value === 1)
+// #endregion
+
 // #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
 const myAlbum = reactive<IAlbum[]>([])
+const albums = computed(() => [
+  ...smartAlbum,
+  ...myAlbum.length > 0 ? [{ // 'My album' text
+    albumId: 'myAlbum',
+    albumSize: 0,
+    title: 'myAlbum',
+    thumbId: 'myAlbum',
+  }] : [],
+  ...myAlbum,
+])
 const currAlbumContent = reactive<string[]>([])
 const currAlbum = reactive<IAlbum>({
   albumId: '',

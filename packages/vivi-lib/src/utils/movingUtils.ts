@@ -25,9 +25,11 @@ export class MovingUtils {
   private _config = { config: null as unknown as ILayer }
   private initialPos = { x: 0, y: 0 } as ICoordinate | null
   // this flag used to indicate the real initial position of at the beginning of moveStart
-  private _initPos = { x: 0, y: 0 }
+  private _initMousePos = { x: 0, y: 0 }
   private initTranslate = { x: 0, y: 0 }
   private pointerId = 0
+  private initMousePos = { x: 0, y: 0 } as ICoordinate | null
+  private initLayerPos = { x: 0, y: 0 }
   // private initPageTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
   private isDoingGestureAction = false
@@ -118,10 +120,11 @@ export class MovingUtils {
 
     this.removeListener()
     if (e.type === 'pinch') {
-      this.initialPos = null
+      this.initMousePos = null
     } else {
-      this.initialPos = mouseUtils.getMouseAbsPoint(e)
+      this.initMousePos = mouseUtils.getMouseAbsPoint(e)
     }
+    this._initMousePos = mouseUtils.getMouseAbsPoint(e)
     this._moving = this.pageMoving.bind(this)
     this._moveEnd = this.pageMoveEnd.bind(this)
     eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -205,8 +208,8 @@ export class MovingUtils {
   lockedLayerMoveEnd(e: PointerEvent) {
     this.removeListener()
     const posDiff = {
-      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initPos.x),
-      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initPos.y)
+      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initMousePos.x),
+      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initMousePos.y)
     }
     const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     if (!hasActualMove) {
@@ -218,7 +221,6 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent, params?: { pointerId?: number, isFollowByPinch?: boolean }) {
-    console.warn('move start')
     const { pointerId, isFollowByPinch = false } = params || {}
     const eventType = eventUtils.getEventType(event)
     if (eventType === 'pointer') {
@@ -243,9 +245,9 @@ export class MovingUtils {
     }
 
     this.isFollowByPinch = isFollowByPinch
-    this.initTranslate.x = this.getLayerPos.x
-    this.initTranslate.y = this.getLayerPos.y
-    this._initPos = mouseUtils.getMouseAbsPoint(event)
+    this.initLayerPos.x = this.getLayerPos.x
+    this.initLayerPos.y = this.getLayerPos.y
+    this._initMousePos = mouseUtils.getMouseAbsPoint(event)
     this.initPageTranslate.x = pageUtils.getCurrPage.x
     this.initPageTranslate.y = pageUtils.getCurrPage.y
     const currLayerIndex = layerUtils.layerIndex
@@ -302,7 +304,7 @@ export class MovingUtils {
      */
     if (this.isTouchDevice && !this.isControllerShown && !this.isLocked && !this.inMultiSelectionMode) {
       this.eventTarget.addEventListener('touchstart', this.disableTouchEvent)
-      this.initialPos = mouseUtils.getMouseAbsPoint(event)
+      this.initMousePos = mouseUtils.getMouseAbsPoint(event)
       this._moving = this.moving.bind(this)
       this._moveEnd = this.moveEnd.bind(this)
       eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -346,7 +348,7 @@ export class MovingUtils {
           }
           if (!this.config.locked) {
             this.isControlling = true
-            this.initialPos = mouseUtils.getMouseAbsPoint(event)
+            this.initMousePos = mouseUtils.getMouseAbsPoint(event)
             this._moving = this.moving.bind(this)
             this._moveEnd = this.moveEnd.bind(this)
             eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -374,7 +376,7 @@ export class MovingUtils {
      * @Note InMultiSelection mode should still can move the layer
      */
     if (!this.config.locked && !inSelectionMode) {
-      this.initialPos = mouseUtils.getMouseAbsPoint(event)
+      this.initMousePos = mouseUtils.getMouseAbsPoint(event)
       this._moving = this.moving.bind(this)
       this._moveEnd = this.moveEnd.bind(this)
       eventUtils.addPointerEvent('pointerup', this._moveEnd)
@@ -419,7 +421,7 @@ export class MovingUtils {
     const isStartedPointer = isPointer && this.pointerId === (e as PointerEvent).pointerId
     const isSinglePointer = pointerEvtUtils.pointers.length <= 1
     if (layerUtils.getCurrLayer.locked) return
-    if ((!isPointer || !isStartedPointer) || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type === 'pinch' || this.initialPos === null) {
+    if ((!isPointer || !isStartedPointer) || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type === 'pinch' || this.initMousePos === null) {
       if (store.getters.getControlState.type === 'pinch') {
         // if the pinch is started, the moving logic should be turn off
         this.removeListener()
@@ -456,8 +458,8 @@ export class MovingUtils {
         this.isHandleMovingHandler = true
       }
       const posDiff = {
-        x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initPos.x),
-        y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initPos.y)
+        x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initMousePos.x),
+        y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initMousePos.y)
       }
       const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
       if (hasActualMove) {
@@ -472,8 +474,8 @@ export class MovingUtils {
     } else {
       // this condition will only happen in Mobile
       const posDiff = {
-        x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initPos.x),
-        y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initPos.y)
+        x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initMousePos.x),
+        y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initMousePos.y)
       }
       if (this.isTouchDevice && !this.isLocked) {
         if (posDiff.x > 1 || posDiff.y > 1) {
@@ -507,7 +509,7 @@ export class MovingUtils {
   }
 
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (this.initialPos === null) return
+    if (this.initMousePos === null) return
 
     // target overlay means the current layer is overlaying above the target layer.
     const isTargetOverlay = this.layerIndex === layerUtils.layerIndex
@@ -524,7 +526,7 @@ export class MovingUtils {
     if (!this.config.moved) {
       layerUtils.updateLayerProps(this.pageIndex, targetLayerIdx, { moved: true })
     }
-    const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
+    const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
     let offsetRatio = 100 / store.getters.getPageScaleRatio
     if (generalUtils.isTouchDevice()) {
       offsetRatio *= 1 / store.getters.getContentScaleRatio
@@ -548,8 +550,8 @@ export class MovingUtils {
       x: offsetPos.x + (offsetSnap.x / offsetRatio),
       y: offsetPos.y + (offsetSnap.y / offsetRatio)
     }
-    this.initialPos.x += totalOffset.x
-    this.initialPos.y += totalOffset.y
+    this.initMousePos.x += totalOffset.x
+    this.initMousePos.y += totalOffset.y
 
     if (offsetSnap.x || offsetSnap.y) {
       this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
@@ -570,8 +572,8 @@ export class MovingUtils {
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
       return
     }
-    if (this.initialPos === null) {
-      this.initialPos = mouseUtils.getMouseAbsPoint(e)
+    if (this.initMousePos === null) {
+      this.initMousePos = mouseUtils.getMouseAbsPoint(e)
       return
     }
     const { getCurrPage: page } = pageUtils
@@ -581,7 +583,7 @@ export class MovingUtils {
       x: (editorUtils.mobileSize.width - page.width * contentScaleRatio) * 0.5,
       y: (editorUtils.mobileSize.height - page.height * contentScaleRatio) * 0.5
     }
-    const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
+    const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
     const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
     const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
@@ -604,10 +606,10 @@ export class MovingUtils {
     pageUtils.updatePagePos(this.pageIndex, { x, y })
 
     if (!isReachLeftEdge && !isReachRightEdge) {
-      this.initialPos.x += offsetPos.x
+      this.initMousePos.x += offsetPos.x
     }
     if (!isReachBottomEdge && !isReachTopEdge) {
-      this.initialPos.y += offsetPos.y
+      this.initMousePos.y += offsetPos.y
     }
   }
 
@@ -621,28 +623,36 @@ export class MovingUtils {
     }
 
     const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
-    if (pointerEvtUtils.pointerIds.length > 1 || !isLayerExist) {
+    if (pointerEvtUtils.pointerIds.length > 1 || !isLayerExist ||
+      eventUtils.checkIsMultiTouch(e) || this.initMousePos === null) {
       this.isControlling = false
       return this.removeListener()
     }
+
     this.isControlling = false
     this.removeListener()
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
 
-    const posDiff = {
-      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initPos.x),
-      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initPos.y)
+    const currMousePos = mouseUtils.getMouseAbsPoint(e)
+    const mousePosDiff = {
+      x: Math.abs(currMousePos.x - this._initMousePos.x),
+      y: Math.abs(currMousePos.y - this._initMousePos.y)
+    }
+    const layerPosDiff = {
+      x: Math.abs(this.getLayerPos.x - this.initLayerPos.x),
+      y: Math.abs(this.getLayerPos.y - this.initLayerPos.y)
     }
     const pagePosDiff = {
       x: Math.abs(pageUtils.getCurrPage.x - this.initPageTranslate.x),
       y: Math.abs(pageUtils.getCurrPage.y - this.initPageTranslate.y)
     }
-    const hasActualMove = posDiff.x > 1 || posDiff.y > 1
+    const hasActualLayerMove = layerPosDiff.x > 1 || layerPosDiff.y > 1
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
+    const hasActualMouseMove = Math.round(mousePosDiff.x) !== 0 || Math.round(mousePosDiff.y) !== 0
 
     if (this.isControllerShown) {
-      if (hasActualMove) {
+      if (hasActualLayerMove) {
         shortcutUtils.offsetCount = 0
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex === -1) {
           layerUtils.deleteSelectedLayer()
@@ -732,12 +742,10 @@ export class MovingUtils {
       }
       this.isControlling = false
       this.setCursorStyle(e, '')
-    }
-
-    if (!this.isControllerShown) {
-      if (hasActualPageMove) {
+    } else {
+      if (hasActualPageMove || hasActualMouseMove) {
         return
-      } else if (!this.isDoingGestureAction && !this.isControllerShown && !hasActualMove) {
+      } else if (!this.isDoingGestureAction  && !hasActualLayerMove) {
         this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
         if (!this.inMultiSelectionMode) {
           groupUtils.deselect()

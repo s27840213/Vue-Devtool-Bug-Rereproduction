@@ -1,11 +1,11 @@
-// eslint-disable-next-line
 import * as PIXI from 'pixi.js'
+import cmWVUtils, { ISaveAssetFromUrlResponse } from './cmWVUtils'
 const ENABLE_RECORDING = true
 const RECORD_START_DELAY = 2000
 const IMG2_EXAMPLE =
-  'https://images.unsplash.com/photo-1563473213013-de2a0133c100?cs=tinysrgb&q=80&w=766&origin=true&appver=v7174'
+  'https://images.unsplash.com/photo-1490349368154-73de9c9bc37c?cs=tinysrgb&q=80&w=766&origin=true&appver=v7576'
 const IMG1_EXAMPLE =
-  'https://images.unsplash.com/photo-1495379572396-5f27a279ee91?cs=tinysrgb&q=80&w=766&origin=true&appver=v7174'
+  'https://images.unsplash.com/photo-1547327132-5d20850c62b5?cs=tinysrgb&q=80&w=766&origin=true&appver=v7576'
 
 const fragment_opacity = `
   varying vec2 vTextureCoord;
@@ -186,7 +186,6 @@ export default class PixiRecorder {
 
     this.filter = new PIXI.Filter(undefined, fragment3, this.uniforms)
     this.sprite1.filters = [this.filter]
-    console.log(this.filter)
     this._animate = (delta) => {
       if (this.time / 300 >= Math.PI * 0.5) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
@@ -205,7 +204,6 @@ export default class PixiRecorder {
     this.uniforms.nextImage = this.texture2
     this.filter = new PIXI.Filter(undefined, fragment_slide, this.uniforms)
     this.sprite1.filters = [this.filter]
-    console.log('addSlideFilter')
     this._animate = (delta) => {
       if (this.time >= 200) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
@@ -297,11 +295,34 @@ class CanvasRecorder {
     }
   }
 
+  blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(
+        (reader.result as string)
+          .replace('data:', '')
+          .replace(/^.+,/, '')
+      )
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  }
+
   onRecordStop() {
     console.warn('recorder stopped', this.chunks.length)
     const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
+    // webViewUtils.saveAssetFromUrl('mp4', url)
+    //   .then((data: ISaveAssetFromUrlResponse) => {
+    //     console.log('isave asset from url', data)
+    //   })
     const video = document.createElement('video')
     document.body.appendChild(video)
+    video.addEventListener('ended', () => {
+      console.log('vedio paly end')
+      setTimeout(() => {
+        document.body.removeChild(video)
+      }, 2000)
+    })
     video.setAttribute('controls', 'controls')
     video.style.position = 'absolute'
     video.style.top = '0'
@@ -309,5 +330,14 @@ class CanvasRecorder {
     video.style.width = this.canvas.width.toString()
     video.style.height = this.canvas.height.toString()
     video.src = url
+
+    this.blobToBase64(new Blob(this.chunks, { type: 'video/mp4' })).then((base64: string) => {
+      // cmWVUtils.saveAssetFromUrl('png', 'https://template.vivipic.com/template/WZ3xxkwKHSnwOUcHhDsJ/prev_4x?ver=8')
+      // webViewUtils.saveAssetFromUrl('mp4', 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4')
+      cmWVUtils.saveAssetFromUrl('mp4', base64)
+        .then((data: ISaveAssetFromUrlResponse) => {
+          console.log('save asset from url', data)
+        })
+    })
   }
 }
