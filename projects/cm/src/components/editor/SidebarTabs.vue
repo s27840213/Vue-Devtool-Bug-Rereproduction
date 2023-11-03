@@ -179,11 +179,11 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'objects': {
-      setAssetPanelType('panel-object')
+      setAssetPanelType('object')
       break
     }
     case 'text': {
-      setAssetPanelType('panel-text')
+      setAssetPanelType('text')
       break
     }
   }

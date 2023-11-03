@@ -428,14 +428,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return res
   }
 
-  setIsInCategory(tab: string, bool: boolean) {
-    store.commit('vivisticker/SET_isInCategory', { tab, bool })
-  }
-
-  setShowAllRecently(tab: string, bool: boolean) {
-    store.commit('vivisticker/SET_showAllRecently', { tab, bool })
-  }
-
   getAssetInitiator(asset: IAsset, ...args: any[]): () => Promise<any> {
     return async () => {
       if (asset.type === 15) {

@@ -47,12 +47,12 @@ div(class="panel-objects")
 
 <script lang="ts">
 import SearchBar from '@/components/SearchBar.vue'
-import stkWVUtils from '@/utils/stkWVUtils'
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
 import PanelObject from '@/components/editor/panelMobile/PanelObject.vue'
 import PanelObjectGifsUs from '@/components/editor/panelMobileUs/PanelObjectGifs.vue'
 import PanelObjectStaticUs from '@/components/editor/panelMobileUs/PanelObjectStatic.vue'
+import assetPanelUtils from '@/utils/assetPanelUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'panel-object-us',
@@ -131,8 +131,8 @@ export default defineComponent({
       }
     },
     handleRecent() {
-      stkWVUtils.setShowAllRecently('object', true)
-      stkWVUtils.setIsInCategory('object', true)
+      assetPanelUtils.setShowAllRecently('object', true)
+      assetPanelUtils.setIsInCategory('object', true)
     },
     handleCancel() {
       this.isShowSearchBar = false

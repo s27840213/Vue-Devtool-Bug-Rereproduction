@@ -43,7 +43,8 @@ div(class="overflow-container full-size rwd-container")
           template(v-slot:preview="{ item }")
             category-text-item(class="panel-text__item"
               :item="item"
-              :itemWidth="itemWidth")
+              :itemWidth="itemWidth"
+              @addText="$emit('addText')")
       template(v-slot:category-text-item="{ list, title }")
         div(v-if="title" class="panel-text__header") {{ title }}
         div(class="panel-text__items" :style="itemsStyles")
@@ -52,7 +53,8 @@ div(class="overflow-container full-size rwd-container")
             :key="item.id"
             :item="item"
             :itemWidth="itemWidth"
-            :style="{margin: isTablet ? 0 : '0 auto'}")
+            :style="{margin: isTablet ? 0 : '0 auto'}"
+            @addText="$emit('addText')")
     btn-add(v-if="!keyword && !showAllRecently" class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
 </template>
 
@@ -66,6 +68,7 @@ import BtnAdd from '@/components/global/BtnAdd.vue'
 import Tags, { ITag } from '@/components/global/Tags.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import assetPanelUtils from '@/utils/assetPanelUtils'
 import AssetUtils from '@/utils/assetUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -105,22 +108,16 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getLayersNum: 'getLayersNum',
-      isInEditor: 'vivisticker/getIsInEditor',
-      isTabInCategory: 'vivisticker/getIsInCategory',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
-      editorBg: 'vivisticker/getEditorBg',
       pending: 'textStock/pending',
-      tagsBar: 'textStock/tagsBar'
+      tagsBar: 'textStock/tagsBar',
+      isTabInCategory: 'assetPanel/getIsInCategory',
+      isTabShowAllRecently: 'assetPanel/getShowAllRecently',
     }),
     ...vuexUtils.mapGetters('stk', {
-      isInEditor: false,
-      isTabInCategory: (tab: string) => false as boolean,
-      isTabShowAllRecently: (tab: string) => false as boolean,
+      isInEditor: true,
       editorBg: '#F4F5F7',
     }, {
       isInEditor: 'vivisticker/getIsInEditor',
-      isTabInCategory: 'vivisticker/getIsInCategory',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
       editorBg: 'vivisticker/getEditorBg',
     }),
     ...mapState({
@@ -313,11 +310,11 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          stkWVUtils.setShowAllRecently('text', true)
+          assetPanelUtils.setShowAllRecently('text', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        stkWVUtils.setIsInCategory('text', true)
+        assetPanelUtils.setIsInCategory('text', true)
       }
     },
     handleLoadMore() {
@@ -339,6 +336,7 @@ export default defineComponent({
     },
     handleAddText() {
       if (this.isInEditor) {
+        this.$emit('addText')
         this.addStandardText()
       } else {
         stkWVUtils.startEditing(

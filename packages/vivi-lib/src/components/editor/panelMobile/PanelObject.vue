@@ -65,7 +65,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabInCategory: 'assetPanel/getIsInCategory',
       isInEditor: 'vivisticker/getIsInEditor',
       currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
     }),

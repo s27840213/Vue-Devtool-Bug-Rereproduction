@@ -16,6 +16,7 @@ import { useImgSelectorStore } from '@/stores/imgSelector';
 import { useModalStore } from '@/stores/modal';
 import useI18n from '@nu/vivi-lib/i18n/useI18n';
 import { storeToRefs } from 'pinia';
+import { useStore } from 'vuex';
 
 /**
  * @Note - how to use this component?
@@ -32,7 +33,7 @@ const { toTarget, customCallback } = withDefaults(
     toTarget: '/',
   },
 )
-const { isEditing, atSettings, showAssetPanel, setAssetPanelType } = useStateInfo()
+const { isEditing, atSettings, showAssetPanel, setAssetPanelType, assetPanelType } = useStateInfo()
 
 // #region modal
 const modalStore = useModalStore()
@@ -45,9 +46,13 @@ const { setShowImgSelector } = imgSelectorStore
 const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #endregion
 
+// #region editor
 const editorStore = useEditorStore()
 const {setShowGenResult} = editorStore
 const { showGenResult } = storeToRefs(editorStore)
+// #endregion
+
+const store = useStore()
 
 const { t } = useI18n()
 
@@ -68,6 +73,10 @@ const handleBackAction = (navagate: () => void) => {
   }
 
   if (showAssetPanel.value) {
+    if (store.getters['assetPanel/getIsInCategory'](assetPanelType.value)) {
+      store.commit('assetPanel/SET_isInCategory', { tab: assetPanelType.value, bool: false })
+      return
+    }
     setAssetPanelType('none')
     return
   }

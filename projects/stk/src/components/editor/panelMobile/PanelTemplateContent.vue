@@ -65,13 +65,14 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
 <script lang="ts">
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
-import BtnAdd from '@nu/vivi-lib/components/global/BtnAdd.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
+import BtnAdd from '@nu/vivi-lib/components/global/BtnAdd.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IContentTemplate } from '@nu/vivi-lib/interfaces/template'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -170,9 +171,9 @@ export default defineComponent({
     ...mapState('user', ['userId']),
     ...mapGetters({
       editorThemes: 'getEditThemes',
-      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabInCategory: 'assetPanel/getIsInCategory',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
+      isTabShowAllRecently: 'assetPanel/getShowAllRecently',
       isInEditor: 'vivisticker/getIsInEditor',
       editorType: 'vivisticker/getEditorType',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
@@ -345,13 +346,13 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          stkWVUtils.setShowAllRecently('template', true)
+          assetPanelUtils.setShowAllRecently('template', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        stkWVUtils.setIsInCategory('template', true)
+        assetPanelUtils.setIsInCategory('template', true)
       } else {
-        stkWVUtils.setShowAllRecently('template', false)
+        assetPanelUtils.setShowAllRecently('template', false)
       }
     },
     handleLoadMore() {

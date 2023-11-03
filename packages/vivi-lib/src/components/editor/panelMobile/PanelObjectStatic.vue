@@ -83,8 +83,8 @@ import Tags, { ITag } from '@/components/global/Tags.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IAsset, ICategoryExtend, ITagExtend, isICategory, isITag } from '@/interfaces/module'
+import assetPanelUtils from '@/utils/assetPanelUtils'
 import generalUtils from '@/utils/generalUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
@@ -122,8 +122,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isTabInCategory: 'vivisticker/getIsInCategory',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently'
+      isTabInCategory: 'assetPanel/getIsInCategory',
+      isTabShowAllRecently: 'assetPanel/getShowAllRecently'
     }),
     ...mapState({
       isTablet: 'isTablet'
@@ -380,22 +380,22 @@ export default defineComponent({
       else {
         this.resetSearch()
         if (!keyword) {
-          stkWVUtils.setShowAllRecently('object', false)
+          assetPanelUtils.setShowAllRecently('object', false)
           return
         }
 
         const isRecent = keyword === `${this.$t('NN0024')}`
         if (!isRecent) this.getContent({ keyword, locale })
-        stkWVUtils.setShowAllRecently('object', isRecent)
+        assetPanelUtils.setShowAllRecently('object', isRecent)
       }
-      stkWVUtils.setIsInCategory('object', true)
+      assetPanelUtils.setIsInCategory('object', true)
     },
     handleLoadMore() {
       this.getMoreContent()
     },
     click4in1(target: unknown) {
       this.searchFavorites(target)
-      stkWVUtils.setIsInCategory('object', true)
+      assetPanelUtils.setIsInCategory('object', true)
     },
     toggleFavorites4in1(target: ITagExtend | ICategoryExtend) {
       if (isITag(target)) {

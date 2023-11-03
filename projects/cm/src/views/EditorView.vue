@@ -40,7 +40,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         //-   class="page bg-primary-white origin-top-left overflow-hidden flex items-center justify-center"
         //-   :style="pageStyles")
           //- img(class="h-full object-contain" src="@/assets/img/test.jpg")
-        nu-page(
+        nu-page(class="z-page"
           v-show="!showGenResult"
           :pageIndex="0"
           :pageState="pageState[0]"
@@ -70,7 +70,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     component(v-if="showAssetPanel && isEditing"
               :is="assetPanelComponent"
               class="bg-app-bg absolute left-0 w-full z-asset-panel"
-              :style="assetPanelStyles")
+              :style="assetPanelStyles"
+              @addText="handleAssetAdded")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
@@ -83,6 +84,9 @@ import tutorialUtils from '@/utils/tutorialUtils'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
+import PanelObjectUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelObject.vue'
+import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
@@ -117,7 +121,7 @@ const pageState = computed(() => store.getters.getPagesState)
 const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
 
 // #region Stores
-const { isEditing, atEditor, showAspectRatioSelector, assetPanelType, showAssetPanel } = useStateInfo()
+const { isEditing, atEditor, showAspectRatioSelector, assetPanelType, showAssetPanel, setAssetPanelType } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
 const { pageSize, editorState, currActiveFeature, generatedResult, showGenResult } =
@@ -228,6 +232,7 @@ const { isDuringCopy } = storeToRefs(webViewStore)
 // #endregion
 
 // #region asset panel
+const i18n = useI18n()
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const assetPanelTop = ref(0)
 let topSetterTimer = -1
@@ -241,6 +246,10 @@ const setAssetPanelTop = () => {
   assetPanelTop.value = headerbarRef.value.headerbarRef.getBoundingClientRect().height
 }
 setAssetPanelTop()
+
+const handleAssetAdded = () => {
+  setAssetPanelType('none')
+}
 
 textUtils.loadDefaultFonts()
 
@@ -257,10 +266,10 @@ const assetPanelStyles = computed(() => {
 
 const assetPanelComponent = computed(() => {
   switch (assetPanelType.value) {
-    case 'panel-text':
-      return PanelText
-    case 'panel-object':
-      return PanelObject
+    case 'text':
+      return i18n.locale === 'us' ? PanelTextUs : PanelText
+    case 'object':
+      return i18n.locale === 'us' ? PanelObjectUs : PanelObject
     default:
       return PanelText
   }
@@ -268,9 +277,9 @@ const assetPanelComponent = computed(() => {
 
 const panelTitle = computed(() => {
   switch (assetPanelType.value) {
-    case 'panel-text':
+    case 'text':
       return 'Add text'
-    case 'panel-object':
+    case 'object':
       return 'Choose 1 sticker'
     default:
       return ''

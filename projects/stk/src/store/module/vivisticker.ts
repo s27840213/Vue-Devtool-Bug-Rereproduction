@@ -13,8 +13,6 @@ interface IViviStickerState {
   currActiveTab: string,
   currActiveObjectFavTab: string,
   currActiveBackgroundTab: string,
-  isInCategoryDict: { [key: string]: boolean },
-  showAllRecentlyDict: { [key: string]: boolean },
   isInBgShare: boolean,
   isInMultiPageShare: boolean,
   isInGroupTemplate: boolean,
@@ -55,16 +53,6 @@ const EDITOR_BGS = [
   '#F4F5F7'
 ]
 
-const tabs = ['object', 'background', 'text', 'template']
-
-function getDefaultDict<T>(defaultValue: T): { [key: string]: T } {
-  const res = {} as { [key: string]: T }
-  for (const tab of tabs) {
-    res[tab] = defaultValue
-  }
-  return res
-} // T will be auto inferred from defaultValue without specifying in <T> when calling
-
 const getDefaultState = (): IViviStickerState => ({
   appLoadedTimeout: -1,
   userInfo: stkWVUtils.getDefaultUserInfo(),
@@ -72,8 +60,6 @@ const getDefaultState = (): IViviStickerState => ({
   currActiveTab: 'object',
   currActiveObjectFavTab: '',
   currActiveBackgroundTab: '',
-  isInCategoryDict: getDefaultDict(false),
-  showAllRecentlyDict: getDefaultDict(false),
   isInBgShare: false,
   isInMultiPageShare: false,
   isInGroupTemplate: false,
@@ -173,12 +159,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getEditorTypeTemplate(state: IViviStickerState): boolean {
     return ['story', 'post'].includes(state.editorType)
-  },
-  getIsInCategory(state: IViviStickerState): (tab: string) => boolean {
-    return (tab: string): boolean => state.isInCategoryDict[tab] ?? false
-  },
-  getShowAllRecently(state: IViviStickerState): (tab: string) => boolean {
-    return (tab: string): boolean => state.showAllRecentlyDict[tab] ?? false
   },
   getIsInBgShare(state: IViviStickerState): boolean {
     return state.isInBgShare
@@ -325,12 +305,6 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_currActiveBackgroundTab(state: IViviStickerState, tab: string) {
     state.currActiveBackgroundTab = tab
-  },
-  SET_isInCategory(state: IViviStickerState, updateInfo: { tab: string, bool: boolean }) {
-    state.isInCategoryDict[updateInfo.tab] = updateInfo.bool
-  },
-  SET_showAllRecently(state: IViviStickerState, updateInfo: { tab: string, bool: boolean }) {
-    state.showAllRecentlyDict[updateInfo.tab] = updateInfo.bool
   },
   SET_isInBgShare(state: IViviStickerState, bool: boolean) {
     state.isInBgShare = bool

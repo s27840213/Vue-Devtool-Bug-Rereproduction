@@ -14,6 +14,7 @@ import {
 import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
+import assetPanel from '@/store/module/assetPanel'
 import background from '@/store/module/background'
 import bgRemove from '@/store/module/bgRemove'
 import color from '@/store/module/color'
@@ -1597,6 +1598,7 @@ const store = createStore({
   getters,
   mutations,
   modules: {
+    assetPanel,
     user,
     text,
     font,

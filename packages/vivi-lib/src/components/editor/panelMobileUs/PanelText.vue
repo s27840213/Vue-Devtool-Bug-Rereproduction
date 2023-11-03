@@ -51,7 +51,7 @@ div(class="overflow-container full-size rwd-container")
                 iconWidth="24px")
               div(class="overline-SM") RECENTLY USED
             CategoryTextPreview(v-else :item="item" @click="addText(item)")
-            pro-item(v-if="item.plan" draggable="false" :style="{top: '1px', left: '4px'}")
+            pro-item(v-if="item.plan && $isStk" draggable="false" :style="{top: '1px', left: '4px'}")
     btn-add(class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
 </template>
 
@@ -80,8 +80,8 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
-        await this.getCategories({ writeBack: false, key: 'textStock' })
-        await this.getRecently({ writeBack: true, key: 'textStock' })
+        await this.getCategories({ writeBack: false, key: this.$isStk ? 'textStock' : undefined })
+        await this.getRecently({ writeBack: true, key: this.$isStk ? 'textStock' : undefined })
         await this.getContent()
       })
     this.toggleTransitions(false)
@@ -176,8 +176,9 @@ export default defineComponent({
       }
     },
     addText(item: any) {
-      if (!stkWVUtils.checkPro(item, 'text')) return
+      if (this.$isStk && !stkWVUtils.checkPro(item, 'text')) return
       if (this.isInEditor) {
+        this.$emit('addText')
         AssetUtils.addAsset(item).then(() => {
           textPropUtils.updateTextPropsState()
         })
