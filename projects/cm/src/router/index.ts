@@ -66,7 +66,8 @@ router.addRoute({
     render() { return h(resolveComponent('router-view')) }
   },
   async beforeEnter(to, from, next) {
-    useI18n().locale = 'tw'
+    useI18n() // prevent import being removed
+    // useI18n().locale = 'tw'
     cmWVUtils.setupAPIInterface()
     cmWVUtils.detectIfInApp()
     cmWVUtils.getUserInfo()
