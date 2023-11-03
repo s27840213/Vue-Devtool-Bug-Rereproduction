@@ -39,7 +39,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         preserveAspectRatio="none"
         role="image")
         defs
-          filter(:id="filterId"
+          filter(v-if="!isCurrLayerPinched" :id="filterId"
             color-interpolation-filters="sRGB")
             component(v-for="(elm, idx) in svgFilterElms()"
               :key="`${filterId + idx}`"
@@ -50,7 +50,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :is="child.tag"
                 v-bind="child.attrs")
         image(v-if="finalSrc" ref="adjust-img"
-          :filter="`url(#${!isCurrLayerPinched ? filterId : ''})`"
+          :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
@@ -394,6 +394,7 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing',
       isShowPagePreview: 'page/getIsShowPagePreview',
+      controlState: 'getControlState'
     }),
     ...vuexUtils.mapState('stk', {
       isDuringCopy: false,
@@ -415,7 +416,7 @@ export default defineComponent({
       return true
     },
     isCurrLayerPinched(): boolean {
-      const controlState = this.$store.getters.getControlState
+      const { controlState } = this
       if (controlState.layerInfo) {
         return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
       } else return false

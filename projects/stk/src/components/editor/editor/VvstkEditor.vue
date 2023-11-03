@@ -298,7 +298,6 @@ export default defineComponent({
     },
     onPinch(e: AnyTouchEvent) {
       if (e.phase === 'end' && this.isPinchInit) {
-        // console.log('onPinch this.$store.getters.getControlState', this.$store.getters.getControlState.type, e.phase, pointerEvtUtils.pointerIds.length)
         // pinch end handling
         this.pinchHandler(e)
         this.isPinchInit = false
@@ -309,7 +308,6 @@ export default defineComponent({
         if (!this.isPinchInit) {
           // first pinch initialization
           this.isPinchInit = true
-          // console.warn('init pinch')
           return this.pinchStart(e)
         } else {
           // pinch move handling
