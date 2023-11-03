@@ -31,6 +31,5 @@ declare module 'vue' {
     SidebarTabs: typeof import('./components/editor/SidebarTabs.vue')['default']
     SvgIconTest: typeof import('./components/global/SvgIconTest.vue')['default']
     Tutorial: typeof import('./components/tutorial/Tutorial.vue')['default']
-    UseTapTransition: typeof import('./components/global/UseTapTransition.vue')['default']
   }
 }

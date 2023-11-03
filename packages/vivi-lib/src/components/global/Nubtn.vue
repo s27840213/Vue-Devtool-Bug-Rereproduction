@@ -10,7 +10,7 @@ div(:class="`nubtn ${proj} ${theme} ${sizeClass} ${status} ${device}`"
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, ref } from 'vue'
 import useTapTransition from '@/composable/useTapTransition'
 
 declare module '@vue/runtime-core' {
