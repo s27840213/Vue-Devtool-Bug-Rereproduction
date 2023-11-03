@@ -41,7 +41,10 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     ref="maskRef"
     @click.stop="closeModal")
   transition(name="bottom-up")
-    img-selector(v-if="showImgSelector" class="absolute top-0 left-0 w-full h-full z-img-selector")
+    img-selector(
+      v-if="showImgSelector"
+      class="absolute top-0 left-0 w-full h-full z-img-selector"
+      :requireNum="2")
   notifications(
     group="copy"
     position="top center"

@@ -40,10 +40,16 @@ export interface IAlbumListResponse {
   myAlbum: IAlbum[]
 }
 
+export interface IAlbumContent {
+  id: string
+  width: number
+  height: number
+}
+
 export interface IAlbumContentResponse {
   flag: number
   msg?: string
-  content: string[]
+  content: IAlbumContent[]
   pageIndex: number
   nextPage?: number
 }
