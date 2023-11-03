@@ -5,12 +5,16 @@ export default new (class AssetPanelUtils{
     return store.getters['assetPanel/getCurrActiveTab']
   }
 
+  get showActiveTab(): boolean {
+    return store.getters['assetPanel/getShowActiveTab']
+  }
+
   get currIsInCategory(): boolean {
-    return store.getters['assetPanel/getCurrIsInCategory']
+    return store.getters['assetPanel/getIsInCategory'](this.currActiveTab)
   }
 
   get currShowAllRecently(): boolean {
-    return store.getters['assetPanel/getCurrShowAllRecently']
+    return store.getters['assetPanel/getShowAllRecently'](this.currActiveTab)
   }
 
   setCurrActiveTab(tab: string) {

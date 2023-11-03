@@ -4,6 +4,7 @@ import cmWVUtils from '@/utils/cmWVUtils'
 import HomeView from '@/views/HomeView.vue'
 import store from '@/vuex'
 import { generalUtils } from '@nu/shared-lib'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import router from '@nu/vivi-lib/router'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
@@ -65,6 +66,7 @@ router.addRoute({
     render() { return h(resolveComponent('router-view')) }
   },
   async beforeEnter(to, from, next) {
+    useI18n().locale = 'tw'
     cmWVUtils.setupAPIInterface()
     cmWVUtils.detectIfInApp()
     cmWVUtils.getUserInfo()

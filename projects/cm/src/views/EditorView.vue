@@ -7,7 +7,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       v-if="isEditing"
       #middle)
       div(class="text-white typo-h5 whitespace-nowrap")
-        link-or-text(v-if="showAssetPanel" :title="centerTitle" :url="centerUrl")
+        link-or-text(v-if="showActiveTab" :title="centerTitle" :url="centerUrl")
       //- cm-svg-icon(
       //-   iconName="undo"
       //-   :iconColor="'app-btn-primary-text'"
@@ -68,7 +68,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       class="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-app-bg")
       img(:src="generatedResult" class="w-240")
   transition(name="bottom-up")
-    component(v-if="showAssetPanel && isEditing"
+    component(v-if="showActiveTab && isEditing"
               :is="assetPanelComponent"
               class="bg-app-bg absolute left-0 w-full z-asset-panel"
               :style="assetPanelStyles"
@@ -237,7 +237,10 @@ const { isDuringCopy } = storeToRefs(webViewStore)
 // #endregion
 
 // #region asset panel
-const showAssetPanel = computed(() => store.getters['assetPanel/getShowActiveTab'])
+const currActiveTab = computed(() => assetPanelUtils.currActiveTab)
+const showActiveTab = computed(() => assetPanelUtils.showActiveTab)
+const currIsInCategory = computed(() => assetPanelUtils.currIsInCategory)
+const currShowAllRecently = computed(() => assetPanelUtils.currShowAllRecently)
 const assetPanelTop = ref(0)
 let topSetterTimer = -1
 
@@ -257,7 +260,7 @@ const handleAssetAdded = () => {
 
 textUtils.loadDefaultFonts()
 
-watch(() => assetPanelUtils.currActiveTab, () => {
+watch(currActiveTab, () => {
   setAssetPanelTop()
 })
 
@@ -269,7 +272,7 @@ const assetPanelStyles = computed(() => {
 })
 
 const assetPanelComponent = computed(() => {
-  switch (assetPanelUtils.currActiveTab) {
+  switch (currActiveTab.value) {
     case 'text':
       return i18n.locale === 'us' ? PanelTextUs : PanelText
     case 'object':
@@ -283,7 +286,7 @@ const titleInfo = computed(() => {
   const staticHeaderTab = store.getters['objects/headerTab']
   const giphyKeyword = store.getters['giphy/keyword']
   const textHeaderTab = store.getters['textStock/headerTab']
-  switch (assetPanelUtils.currActiveTab) {
+  switch (currActiveTab.value) {
     case 'object':
       return {
         title: staticHeaderTab.title || giphyKeyword,
@@ -299,18 +302,18 @@ const titleInfo = computed(() => {
 })
 
 const centerUrl = computed(() => {
-  return assetPanelUtils.currIsInCategory ? titleInfo.value.url : ''
+  return currIsInCategory.value ? titleInfo.value.url : ''
 })
 
 const centerTitle = computed(() => {
-  if (assetPanelUtils.currIsInCategory) {
-    if (assetPanelUtils.currShowAllRecently) {
+  if (currIsInCategory.value) {
+    if (currShowAllRecently.value) {
       return `${i18n.t('NN0024')}`
     } else {
       return titleInfo.value.title
     }
   }
-  switch (assetPanelUtils.currActiveTab) {
+  switch (currActiveTab.value) {
     case 'text':
       return i18n.t('CM0063')
     case 'object':
