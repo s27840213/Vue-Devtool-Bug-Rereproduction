@@ -1,5 +1,4 @@
-import { useTutorialStore } from "@/stores/tutorial";
-import cmWVUtils from '@/utils/cmWVUtils'
+import { useTutorialStore } from "@/stores/tutorial"
 
 type ITutorialName = 'powerful-fill'
 
@@ -10,7 +9,7 @@ export default new (class TutorialUtils {
   }
 
   runTutorial(tutorialName: ITutorialName) {
-    if (cmWVUtils.tutorialFlags['powerful-fill']) return
+    // if (cmWVUtils.tutorialFlags['powerful-fill']) return
     useTutorialStore().showTutorial(tutorialName)
   }
 
